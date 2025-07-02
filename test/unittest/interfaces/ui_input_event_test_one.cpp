@@ -14,6 +14,7 @@
  */
 
 #include "ui_input_event_test.h"
+#include "interfaces/native/node/node_model.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -99,6 +100,98 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_AxisEvent_GetScrollStep, TestSize.Level1)
     event.eventTypeId = C_HOVER_EVENT_ID;
     step = OH_ArkUI_AxisEvent_GetScrollStep(&event);
     EXPECT_EQ(step, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_CreateClonedEvent
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_CreateClonedEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_CreateClonedEvent, TestSize.Level1)
+{
+    int32_t step = OH_ArkUI_PointerEvent_CreateClonedEvent(nullptr, nullptr);
+    EXPECT_EQ(step, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ArkUI_UIInputEvent event;
+    step = OH_ArkUI_PointerEvent_CreateClonedEvent(&event, nullptr);
+    EXPECT_EQ(step, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ArkUITouchEvent touchEvent;
+    ArkUI_UIInputEvent** clonedEvent = nullptr;
+    touchEvent.touchPointSize = 0;
+    ArkUITouchPoint touchPointes[2];
+    touchPointes[1].id = 0;
+    touchPointes[1].nodeY = 2.0f;
+    touchEvent.touchPointes = touchPointes;
+    event.inputEvent = &touchEvent;
+    step = OH_ArkUI_PointerEvent_CreateClonedEvent(&event, clonedEvent);
+    OH_ArkUI_PointerEvent_DestroyClonedEvent(*clonedEvent);
+    EXPECT_EQ(step, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_DestroyClonedEvent
+ * @tc.desc: Test function OH_ArkUI_PointerEvent_DestroyClonedEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_DestroyClonedEvent, TestSize.Level1)
+{
+    int32_t step = OH_ArkUI_PointerEvent_DestroyClonedEvent(nullptr);
+    EXPECT_EQ(step, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ArkUI_UIInputEvent event;
+    event.isCloned = false;
+    step = OH_ArkUI_PointerEvent_DestroyClonedEvent(&event);
+    EXPECT_EQ(step, ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT);
+
+    ArkUITouchEvent touchEvent;
+    ArkUI_UIInputEvent** clonedEvent = nullptr;
+    touchEvent.touchPointSize = 0;
+    ArkUITouchPoint touchPointes[2];
+    touchPointes[1].id = 0;
+    touchPointes[1].nodeY = 2.0f;
+    touchEvent.touchPointes = touchPointes;
+    event.inputEvent = &touchEvent;
+    step = OH_ArkUI_PointerEvent_DestroyClonedEvent(&event);
+    OH_ArkUI_PointerEvent_DestroyClonedEvent(*clonedEvent);
+    EXPECT_EQ(step, ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_PostClonedEvent
+ * @tc.desc: Test OH_ArkUI_PointerEvent_PostClonedEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_PostClonedEvent, TestSize.Level1)
+{
+    ArkUI_UIInputEvent event;
+    ArkUI_NodeHandle nodeHandle = new ArkUI_Node();
+    auto ret = OH_ArkUI_PointerEvent_PostClonedEvent(nullptr, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    event.isCloned = false;
+    ret = OH_ArkUI_PointerEvent_PostClonedEvent(nullptr, &event);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL);
+
+    event.inputEvent = nullptr;
+    ret = OH_ArkUI_PointerEvent_PostClonedEvent(nodeHandle, &event);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT);
+
+    event.isCloned = true;
+    ret = OH_ArkUI_PointerEvent_PostClonedEvent(nodeHandle, &event);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ArkUITouchEvent touchEvent;
+    touchEvent.touchPointSize = 0;
+    ArkUITouchPoint touchPointes[2];
+    touchPointes[1].id = 0;
+    touchPointes[1].nodeY = 2.0f;
+    touchEvent.touchPointes = touchPointes;
+    event.inputEvent = &touchEvent;
+    ret = OH_ArkUI_PointerEvent_PostClonedEvent(nodeHandle, &event);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL);
+    delete nodeHandle;
+    nodeHandle = nullptr;
 }
 
 /**
@@ -1659,6 +1752,35 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetGlobalDisplayX002, TestSize.
 }
 
 /**
+ * @tc.name: OH_ArkUI_PointerEvent_GetGlobalDisplayX003
+ * @tc.desc: Test OH_ArkUI_PointerEvent_GetGlobalDisplayX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetGlobalDisplayX003, TestSize.Level1)
+{
+    ArkUI_UIInputEvent event;
+    event.eventTypeId = C_CLICK_EVENT_ID;
+    ArkUIClickEvent clickEvent;
+    clickEvent.globalDisplayX = 300.3f;
+    event.inputEvent = nullptr;
+    auto ret = OH_ArkUI_PointerEvent_GetGlobalDisplayX(&event);
+    EXPECT_EQ(ret, 0.0f);
+    event.inputEvent = &clickEvent;
+    ret = OH_ArkUI_PointerEvent_GetGlobalDisplayX(&event);
+    EXPECT_EQ(ret, 300.3f);
+
+    event.eventTypeId = C_HOVER_EVENT_ID;
+    ArkUIHoverEvent hoverEvent;
+    hoverEvent.globalDisplayX = 400.4f;
+    event.inputEvent = nullptr;
+    ret = OH_ArkUI_PointerEvent_GetGlobalDisplayX(&event);
+    EXPECT_EQ(ret, 0.0f);
+    event.inputEvent = &hoverEvent;
+    ret = OH_ArkUI_PointerEvent_GetGlobalDisplayX(&event);
+    EXPECT_EQ(ret, 400.4f);
+}
+
+/**
  * @tc.name: OH_ArkUI_PointerEvent_GetGlobalDisplayY001
  * @tc.desc: Test OH_ArkUI_PointerEvent_GetGlobalDisplayY
  * @tc.type: FUNC
@@ -1731,6 +1853,35 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetGlobalDisplayY002, TestSize.
     event.inputEvent = &aceAxisEvent;
     ret = OH_ArkUI_PointerEvent_GetGlobalDisplayY(&event);
     EXPECT_EQ(ret, 500.5f);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetGlobalDisplayY003
+ * @tc.desc: Test OH_ArkUI_PointerEvent_GetGlobalDisplayY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetGlobalDisplayY003, TestSize.Level1)
+{
+    ArkUI_UIInputEvent event;
+    event.eventTypeId = C_CLICK_EVENT_ID;
+    ArkUIClickEvent clickEvent;
+    clickEvent.globalDisplayY = 300.3f;
+    event.inputEvent = nullptr;
+    auto ret = OH_ArkUI_PointerEvent_GetGlobalDisplayY(&event);
+    EXPECT_EQ(ret, 0.0f);
+    event.inputEvent = &clickEvent;
+    ret = OH_ArkUI_PointerEvent_GetGlobalDisplayY(&event);
+    EXPECT_EQ(ret, 300.3f);
+
+    event.eventTypeId = C_HOVER_EVENT_ID;
+    ArkUIHoverEvent hoverEvent;
+    hoverEvent.globalDisplayY = 400.4f;
+    event.inputEvent = nullptr;
+    ret = OH_ArkUI_PointerEvent_GetGlobalDisplayY(&event);
+    EXPECT_EQ(ret, 0.0f);
+    event.inputEvent = &hoverEvent;
+    ret = OH_ArkUI_PointerEvent_GetGlobalDisplayY(&event);
+    EXPECT_EQ(ret, 400.4f);
 }
 
 /**

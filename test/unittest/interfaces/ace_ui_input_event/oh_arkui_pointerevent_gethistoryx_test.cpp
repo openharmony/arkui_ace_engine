@@ -28,8 +28,8 @@ constexpr float ARKUI_X = 1234.0f;
 constexpr int32_t EVENT_SIZE = 2;
 constexpr int32_t POINT_SIZE = 2;
 
-struct HisoryTestInputType {
-    HisoryTestInputType(const ArkUI_UIInputEvent event, uint32_t pointerIndex, uint32_t historyIndex,
+struct HistoryTestInputType {
+    HistoryTestInputType(const ArkUI_UIInputEvent event, uint32_t pointerIndex, uint32_t historyIndex,
         ArkUIHistoryTouchEvent* events = nullptr, uint32_t historySize = 0)
         : event(event), pointerIndex(pointerIndex), historyIndex(historyIndex), historyEvents(events),
           historySize(historySize) {};
@@ -54,34 +54,34 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryX_002, TestSize.Level
     int32_t historyIndex = 1;
     ArkUIAxisEvent axisEvent;
     ArkUINodeEvent nodeEvent;
-    std::vector<std::pair<HisoryTestInputType, float>> testCases = {
-        { HisoryTestInputType(ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, AXIS_EVENT_ID, &axisEvent },
+    std::vector<std::pair<HistoryTestInputType, float>> testCases = {
+        { HistoryTestInputType(ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, AXIS_EVENT_ID, &axisEvent },
               pointerIndex, historyIndex),
             HISTORY_X_ERROR },
-        { HisoryTestInputType(ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, TOUCH_EVENT_ID, &touchEvent },
+        { HistoryTestInputType(ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, TOUCH_EVENT_ID, &touchEvent },
               pointerIndex, historyIndex),
             HISTORY_X_ERROR },
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_MOUSE_EVENT_ID, &nodeEvent.mouseEvent },
               pointerIndex, historyIndex),
             HISTORY_X_ERROR },
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_AXIS_EVENT_ID, &nodeEvent.axisEvent },
               pointerIndex, historyIndex),
             HISTORY_X_ERROR },
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_KEY_EVENT_ID, &nodeEvent.keyEvent }, pointerIndex,
               historyIndex),
             HISTORY_X_ERROR },
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_FOCUS_AXIS_EVENT_ID, &nodeEvent.focusAxisEvent },
               pointerIndex, historyIndex),
             HISTORY_X_ERROR },
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_CLICK_EVENT_ID, &nodeEvent.clickEvent },
               pointerIndex, historyIndex),
             HISTORY_X_ERROR },
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_HOVER_EVENT_ID, &nodeEvent.hoverEvent },
               pointerIndex, historyIndex),
             HISTORY_X_ERROR },
@@ -110,87 +110,85 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryX_003, TestSize.Level
     events[1].touchPointes = pointes;
     emptyEvents[0].touchPointSize = POINT_SIZE;
     emptyEvents[1].touchPointSize = POINT_SIZE;
-
     ArkUINodeEvent nodeEvent;
-
-    std::vector<std::pair<HisoryTestInputType, float>> testCases = {
-        { HisoryTestInputType(ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, nullptr }, 0, 0),
+    std::vector<std::pair<HistoryTestInputType, float>> testCases = {
+        { HistoryTestInputType(ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, nullptr }, 0, 0),
             HISTORY_X_ERROR }, // test when touchEvent is nullptr
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, -1, 0),
             HISTORY_X_ERROR }, // test when historyIndex < 0
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 10, 0),
             HISTORY_X_ERROR }, // test when historyIndex > touchEvent->historySize
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 2, 0),
             HISTORY_X_ERROR }, // test when historyIndex = touchEvent->historySize
 
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 1, 0),
             HISTORY_X_ERROR }, // test when touchEvent->historyEvents = nullptr
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 1, -1,
               emptyEvents, EVENT_SIZE),
             HISTORY_X_ERROR }, // test when pointerIndex < 0
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 1, 10,
               emptyEvents, EVENT_SIZE),
             HISTORY_X_ERROR }, // test when pointerIndex > touchEvent->historyEvents[historyIndex].touchPointSize
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 1, 2,
               emptyEvents, EVENT_SIZE),
             HISTORY_X_ERROR }, // test when pointerIndex = touchEvent->historyEvents[historyIndex].touchPointSize
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 1, 1,
               emptyEvents, EVENT_SIZE),
             HISTORY_X_ERROR }, // test when (touchEvent->historyEvents[historyIndex].touchPointes) = nullptr
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 1, 1,
               events, EVENT_SIZE),
             ARKUI_X }, // test when valid input with pointerIndex valid
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 1, 0,
               emptyEvents, EVENT_SIZE),
             HISTORY_X_ERROR }, // test when pointerIndex = Lower boundary,
                                // (touchEvent->historyEvents[historyIndex].touchPointes) = nullptr
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 1, 0,
               events, EVENT_SIZE),
             ARKUI_X }, // test when valid input with pointerIndex = Lower boundary
 
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 0, 0),
             HISTORY_X_ERROR }, // test when historyIndex = Lower boundary, touchEvent->historyEvents = nullptr
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 0, -1,
               emptyEvents, EVENT_SIZE),
             HISTORY_X_ERROR }, // test when historyIndex = Lower boundary, pointerIndex < 0
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 0, 10,
               emptyEvents, EVENT_SIZE),
             HISTORY_X_ERROR }, // test when historyIndex = Lower boundary, pointerIndex >
                                // touchEvent->historyEvents[historyIndex].touchPointSize
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 0, 2,
               emptyEvents, EVENT_SIZE),
             HISTORY_X_ERROR }, // test when historyIndex = Lower boundary, pointerIndex =
                                // touchEvent->historyEvents[historyIndex].touchPointSize
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 0, 1,
               emptyEvents, EVENT_SIZE),
             HISTORY_X_ERROR }, // test when historyIndex = Lower boundary,
                                // (touchEvent->historyEvents[historyIndex].touchPointes) = nullptr
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 0, 1,
               events, EVENT_SIZE),
             ARKUI_X }, // test when historyIndex = Lower boundary, input valid
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 0, 0,
               emptyEvents, EVENT_SIZE),
             HISTORY_X_ERROR }, // test when historyIndex = Lower boundary, pointerIndex = Lower boundary,
                                // (touchEvent->historyEvents[historyIndex].touchPointes) = nullptr
-        { HisoryTestInputType(
+        { HistoryTestInputType(
               ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &nodeEvent.touchEvent }, 0, 0,
               events, EVENT_SIZE),
             ARKUI_X }, // test when historyIndex = Lower boundary, pointerIndex = Lower boundary, input valid

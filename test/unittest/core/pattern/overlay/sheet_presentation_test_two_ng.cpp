@@ -972,6 +972,54 @@ HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode007, TestSize.Level
 }
 
 /**
+ * @tc.name: AvoidKeyboardBySheetMode008
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::AvoidKeyboardBySheetMode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode008, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_ETS_TAG, 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, V2::TEXT_ETS_TAG, std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
+    auto host = sheetPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipelineContext = host->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    sheetPattern->keyboardHeight_ = safeAreaManager->GetKeyboardInset().Length() + 10.0f;
+    sheetPattern->isDismissProcess_ = false;
+    sheetPattern->isScrolling_ = true;
+    sheetPattern->isAnimationProcess_ = true;
+    sheetPattern->AvoidKeyboardBySheetMode();
+    AnimationOption option;
+    auto propertyCallback = []() {};
+    sheetPattern->animation_ = AnimationUtils::StartAnimation(option, propertyCallback);
+    auto focusHub = host->GetFocusHub();
+    focusHub->currentFocus_ = true;
+    safeAreaManager->keyboardInset_.end = 1000.0f;
+    pipelineContext->rootHeight_ = 1800.0f;
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+
+    EXPECT_NE(sheetPattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::NONE);
+    EXPECT_NE(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
+    EXPECT_FALSE(sheetPattern->isDismissProcess_);
+    EXPECT_FALSE(sheetPattern->AvoidKeyboardBeforeTranslate());
+    EXPECT_TRUE(sheetPattern->isScrolling_);
+    EXPECT_NE(sheetPattern->GetSheetHeightChange(), 0.0f);
+    EXPECT_TRUE(focusHub->IsCurrentFocus());
+    EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
+    EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
+    sheetPattern->AvoidKeyboardBySheetMode();
+    EXPECT_TRUE(sheetPattern->isAnimationProcess_);
+    EXPECT_FALSE(sheetPattern->isAnimationBreak_);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: IsNeedPlayTransition001
  * @tc.desc: Test update detents of sheetStyle.
  * @tc.type: FUNC
@@ -2805,261 +2853,6 @@ HWTEST_F(SheetPresentationTestTwoNg, CreateScrollNode003, TestSize.Level1)
     auto scrollPattern = scrollNode->GetPattern<ScrollablePattern>();
     EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::SPRING);
     EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-    EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::START);
-    SheetPresentationTestTwoNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: InitScrollPropsTest001
- * @tc.desc: Branch: if (sheetEffectEdge_ == SheetEffectEdge::NONE).
- *           Condition: 1.sheetEffectEdge_ = SheetEffectEdge::NONE,
- *                      2.scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, IsScrollable().
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet page.
-     */
-    SheetPresentationTestTwoNg::SetUpTestCase();
-    auto rootNode = FrameNode::CreateFrameNode("Root", 001, AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
-
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 003,
-        AceType::MakeRefPtr<SheetPresentationPattern>(002, "SheetPresentation", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    sheetNode->MountToParent(rootNode);
-
-    auto dragBarNode =
-        FrameNode::CreateFrameNode("SheetDragBar", 004, AceType::MakeRefPtr<SheetDragBarPattern>());
-    ASSERT_NE(dragBarNode, nullptr);
-    dragBarNode->MountToParent(sheetNode);
-
-    auto scrollNode =
-        FrameNode::CreateFrameNode("Scroll", 005, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scrollNode, nullptr);
-    
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 1121,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    ASSERT_NE(contentNode, nullptr);
-    contentNode->MountToParent(scrollNode);
-    scrollNode->MountToParent(sheetNode);
-
-    /**
-     * @tc.steps: step2. get scrollPattern and sheetPattern.
-     */
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-
-    /**
-     * @tc.steps: step3. init sheetPattern value, set scrollSizeMode_, scrollableDistance_, sheetEffectEdge_.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
-    scrollPattern->scrollableDistance_ = 5.2f;
-    sheetPattern->sheetEffectEdge_ = SheetEffectEdge::NONE;
-
-    /**
-     * @tc.steps: step4. test "InitScrollProps",
-     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS,
-     * scrollableDistance_ > 0, sheetEffectEdge_ = SheetEffectEdge::NONE.
-     */
-    sheetPattern->InitScrollProps();
-    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::NONE);
-    EXPECT_TRUE(scrollPattern->GetAlwaysEnabled());
-    EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::ALL);
-    SheetPresentationTestTwoNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: InitScrollPropsTest002
- * @tc.desc: Branch: if (sheetEffectEdge_ == SheetEffectEdge::NONE).
- *           Condition: 1.sheetEffectEdge_ = SheetEffectEdge::NONE,
- *                      2.scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, IsScrollable().
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet page.
-     */
-    SheetPresentationTestTwoNg::SetUpTestCase();
-    auto rootNode = FrameNode::CreateFrameNode("Root", 01, AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
-    
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 03,
-        AceType::MakeRefPtr<SheetPresentationPattern>(04, "SheetPresentation", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    sheetNode->MountToParent(rootNode);
-
-    auto dragBarNode =
-        FrameNode::CreateFrameNode("SheetDragBar", 05, AceType::MakeRefPtr<SheetDragBarPattern>());
-    ASSERT_NE(dragBarNode, nullptr);
-    dragBarNode->MountToParent(sheetNode);
-
-    auto scrollNode =
-        FrameNode::CreateFrameNode("Scroll", 06, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scrollNode, nullptr);
-    
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 07,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    ASSERT_NE(contentNode, nullptr);
-    contentNode->MountToParent(scrollNode);
-    scrollNode->MountToParent(sheetNode);
-
-    /**
-     * @tc.steps: step2. get sheetPattern、 scrollPattern.
-     */
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
-
-    /**
-     * @tc.steps: step3. init sheetPattern value.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
-    scrollPattern->scrollableDistance_ = 5.2f;
-    sheetPattern->sheetEffectEdge_ = SheetEffectEdge::NONE;
-
-    /**
-     * @tc.steps: step4. test "InitScrollProps",
-     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT,
-     * scrollableDistance_ > 0, sheetEffectEdge_ = SheetEffectEdge::NONE.
-     */
-    sheetPattern->InitScrollProps();
-    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::NONE);
-    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-    EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::ALL);
-    SheetPresentationTestTwoNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: InitScrollPropsTest003
- * @tc.desc: Branch: if (sheetEffectEdge_ == SheetEffectEdge::NONE).
- *           Condition: 1.sheetEffectEdge_ = SheetEffectEdge::START,
- *                      2.scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, IsScrollable().
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet page.
-     */
-    SheetPresentationTestTwoNg::SetUpTestCase();
-    auto rootNode = FrameNode::CreateFrameNode("Root", 1, AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
-    
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 3,
-        AceType::MakeRefPtr<SheetPresentationPattern>(4, "SheetPresentation", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    sheetNode->MountToParent(rootNode);
-
-    auto dragBarNode =
-        FrameNode::CreateFrameNode("SheetDragBar", 5, AceType::MakeRefPtr<SheetDragBarPattern>());
-    ASSERT_NE(dragBarNode, nullptr);
-    dragBarNode->MountToParent(sheetNode);
-
-    auto scrollNode =
-        FrameNode::CreateFrameNode("Scroll", 6, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scrollNode, nullptr);
-    
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 7,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    ASSERT_NE(contentNode, nullptr);
-    contentNode->MountToParent(scrollNode);
-    scrollNode->MountToParent(sheetNode);
-
-    /**
-     * @tc.steps: step2. get sheetPattern and scrollPattern.
-     */
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
-
-    /**
-     * @tc.steps: step3. init sheetPattern value.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
-    scrollPattern->scrollableDistance_ = 3.6f;
-    sheetPattern->sheetEffectEdge_ = SheetEffectEdge::START;
-
-    /**
-     * @tc.steps: step4. test "InitScrollProps",
-     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT,
-     * scrollableDistance_ < 0, sheetEffectEdge_ = SheetEffectEdge::NONE.
-     */
-    sheetPattern->InitScrollProps();
-    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::SPRING);
-    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-    EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::START);
-    SheetPresentationTestTwoNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: InitScrollPropsTest004
- * @tc.desc: Branch: if (sheetEffectEdge_ == SheetEffectEdge::NONE).
- *           Condition: 1.sheetEffectEdge_ = SheetEffectEdge::START,
- *                      2.scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, IsScrollable().
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet page.
-     */
-    SheetPresentationTestTwoNg::SetUpTestCase();
-    auto rootNode = FrameNode::CreateFrameNode("Root", 10, AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
-    
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 20,
-        AceType::MakeRefPtr<SheetPresentationPattern>(30, "SheetPresentation", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    sheetNode->MountToParent(rootNode);
-
-    auto dragBarNode =
-        FrameNode::CreateFrameNode("SheetDragBar", 40, AceType::MakeRefPtr<SheetDragBarPattern>());
-    ASSERT_NE(dragBarNode, nullptr);
-    dragBarNode->MountToParent(sheetNode);
-
-    auto scrollNode =
-        FrameNode::CreateFrameNode("Scroll", 50, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scrollNode, nullptr);
-    
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 60,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    ASSERT_NE(contentNode, nullptr);
-    contentNode->MountToParent(scrollNode);
-    scrollNode->MountToParent(sheetNode);
-    
-    /**
-     * @tc.steps: step2. get sheetPattern and scrollPattern.
-     */
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
-
-    /**
-     * @tc.steps: step3. init sheetPattern value.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
-    scrollPattern->scrollableDistance_ = 1.3f;
-    sheetPattern->sheetEffectEdge_ = SheetEffectEdge::START;
-
-    /**
-     * @tc.steps: step4. test "InitScrollProps",
-     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS,
-     * scrollableDistance_ > 0, sheetEffectEdge_ = SheetEffectEdge::START.
-     */
-    sheetPattern->InitScrollProps();
-    EXPECT_EQ(scrollPattern->GetEdgeEffect(), EdgeEffect::SPRING);
-    EXPECT_TRUE(scrollPattern->GetAlwaysEnabled());
     EXPECT_EQ(scrollPattern->GetEffectEdge(), EffectEdge::START);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }

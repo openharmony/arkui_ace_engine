@@ -160,7 +160,7 @@ export struct TipsDialog {
   primaryButton?: ButtonOptions | null = null;
   secondaryButton?: ButtonOptions | null = null;
   buttons?: ButtonOptions[] | undefined = undefined;
-  @State textAlignment: TextAlign = TextAlign.Start;
+  @State textAlignment: TextAlign = TextAlign.Center;
   marginOffset: number = 0;
   // the controller of content area scroll
   contentScroller: Scroller = new Scroller();
@@ -169,11 +169,6 @@ export struct TipsDialog {
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State fontSizeScale: number = 1;
   @State minContentHeight: number = 160;
-  updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
-    if (this.content) {
-      this.textAlignment = getTextAlign(maxWidth, this.content, `${BODY_L * this.fontSizeScale}vp`);
-    }
-  }
   imageIndex: number = 0;
   textIndex: number = 1;
   checkBoxIndex: number = 2;
@@ -199,8 +194,7 @@ export struct TipsDialog {
       title: this.title,
       content: this.content,
       checkTips: this.checkTips,
-      minContentHeight: this.minContentHeight,
-      updateTextAlign: this.updateTextAlign,
+      minContentHeight: this.minContentHeight
     }) {
       ForEach([this.imageIndex, this.textIndex, this.checkBoxIndex], (index: number) => {
         if (index === this.imageIndex) {
@@ -378,8 +372,6 @@ struct TipsDialogContentLayout {
   title?: ResourceStr | null = null;
   content?: ResourceStr | null = null;
   checkTips?: ResourceStr | null = null;
-  updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
-  };
   @Link minContentHeight: number;
   @BuilderParam dialogBuilder: () => void = this.doNothingBuilder;
   imageIndex: number = 0;
@@ -433,7 +425,6 @@ struct TipsDialogContentLayout {
 
     if (this.title !== null || this.content !== null) {
       let textChild: Measurable = children[this.textIndex];
-      this.updateTextAlign(sizeResult.width);
       let contentMaxHeight: number = Number(constraint.maxHeight) - imageMeasureResult.height - checkBoxHeight;
       let contentConstraint: ConstraintSizeOptions =
         {
@@ -891,7 +882,7 @@ export struct AlertDialog {
   primaryButton?: ButtonOptions | null = null;
   secondaryButton?: ButtonOptions | null = null;
   buttons?: ButtonOptions[] | undefined = undefined;
-  @State textAlign: TextAlign = TextAlign.Start;
+  @State textAlign: TextAlign = TextAlign.Center;
   // the controller of content area
   contentScroller: Scroller = new Scroller();
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
@@ -932,9 +923,6 @@ export struct AlertDialog {
           .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
           .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
           .textAlign(this.textAlign)
-          .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-            this.updateTextAlign(Number(newValue.width));
-          })
           .onKeyEvent((event: KeyEvent) => {
             if (event) {
               resolveKeyEvent(event, this.contentScroller);
@@ -952,10 +940,6 @@ export struct AlertDialog {
     this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
     this.theme.colors.fontPrimary : $r('sys.color.font_primary');
     this.initButtons();
-  }
-
-  private updateTextAlign(maxWidth: number): void {
-    this.textAlign = getTextAlign(maxWidth, this.content, `${BODY_L * this.fontSizeScale}vp`);
   }
 
   private initButtons(): void {
@@ -1113,10 +1097,8 @@ struct CustomDialogContentComponent {
   @State customStyle: boolean | undefined = undefined;
   @State buttonMaxFontSize: Length = `${BODY_L}fp`;
   @State buttonMinFontSize: Length = 9;
-  @State primaryTitleMaxFontSize: Length = `${TITLE_S}fp`;
-  @State primaryTitleMinFontSize: Length = `${BODY_L}fp`;
-  @State secondaryTitleMaxFontSize: Length = `${SUBTITLE_SIZE()}fp`;
-  @State secondaryTitleMinFontSize: Length = `${BODY_S}fp`;
+  @State primaryTitleFontSize: Length = `${TITLE_S}fp`;
+  @State secondaryTitleFontSize: Length = `${SUBTITLE_SIZE()}fp`;
   @State primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
   @State titleTextAlign: TextAlign = TextAlign.Center;
@@ -1327,11 +1309,10 @@ struct CustomDialogContentComponent {
           .fontWeight(TITLE_FONT_WEIGHT())
           .fontColor(this.primaryTitleFontColorWithTheme)
           .textAlign(this.titleTextAlign)
-          .maxFontSize(this.primaryTitleMaxFontSize)
-          .minFontSize(this.primaryTitleMinFontSize)
+          .fontSize(this.primaryTitleFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
-          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
+          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
       }
@@ -1347,11 +1328,10 @@ struct CustomDialogContentComponent {
           .fontWeight(FontWeight.Regular)
           .fontColor(this.secondaryTitleFontColorWithTheme)
           .textAlign(this.titleTextAlign)
-          .maxFontSize(this.secondaryTitleMaxFontSize)
-          .minFontSize(this.secondaryTitleMinFontSize)
+          .fontSize(this.secondaryTitleFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
-          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
+          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
       }

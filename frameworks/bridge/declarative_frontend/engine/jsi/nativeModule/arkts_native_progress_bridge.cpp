@@ -165,7 +165,8 @@ ArkUINativeModuleValue ProgressBridge::SetProgressColor(ArkUIRuntimeCallInfo* ru
     RefPtr<ResourceObject> colorResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
         nodeModifiers->getProgressModifier()->setProgressColorPtr(nativeNode, color.GetValue(), colorRawPtr);
     } else if (ConvertProgressResourceColor(vm, colorArg, gradient)) {
@@ -343,12 +344,13 @@ void ParseStrokeRadius(
 }
 
 void ParseBorderColor(
-    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index,
+    const NodeInfo& nodeInfo)
 {
     Local<JSValueRef> borderColorArg = runtimeCallInfo->GetCallArgRef(index);
     Color borderColor = DEFAULT_BORDER_COLOR;
     RefPtr<ResourceObject> resObj;
-    if (borderColorArg->IsNull() || !ArkTSUtils::ParseJsColorAlpha(vm, borderColorArg, borderColor, resObj)) {
+    if (borderColorArg->IsNull() || !ArkTSUtils::ParseJsColorAlpha(vm, borderColorArg, borderColor, resObj, nodeInfo)) {
         borderColor = DEFAULT_BORDER_COLOR;
     }
 
@@ -361,13 +363,14 @@ void ParseBorderColor(
 }
 
 void ParseFontColor(
-    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index,
+    const NodeInfo& nodeInfo)
 {
     Local<JSValueRef> fontColorArg = runtimeCallInfo->GetCallArgRef(index);
     Color fontColor = DEFAULT_FONT_COLOR;
 
     RefPtr<ResourceObject> colorResObj;
-    if (fontColorArg->IsNull() || !ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, fontColor, colorResObj)) {
+    if (fontColorArg->IsNull() || !ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, fontColor, colorResObj, nodeInfo)) {
         fontColor = DEFAULT_FONT_COLOR;
     }
     if (colorResObj) {
@@ -531,11 +534,11 @@ void ParseRingStyle(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, Ark
 }
 
 void ParseCapsuleStyle(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle,
-    std::vector<std::string>& fontFamilies, std::unique_ptr<const char*[]>& families)
+    std::vector<std::string>& fontFamilies, std::unique_ptr<const char*[]>& families, const NodeInfo& nodeInfo)
 {
-    ParseBorderColor(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_BORDER_COLOR);
+    ParseBorderColor(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_BORDER_COLOR, nodeInfo);
     ParseBorderWidth(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_BORDER_WIDTH);
-    ParseFontColor(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_FONT_COLOR);
+    ParseFontColor(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_FONT_COLOR, nodeInfo);
     ParseCapsuleFontSize(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_FONT_SIZE);
     ParseCapsuleFontWeight(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_FONT_WEIGHT);
     ParseCapsuleFontStyle(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_FONT_STYLE);
@@ -605,7 +608,8 @@ ArkUINativeModuleValue ProgressBridge::SetProgressStyle(ArkUIRuntimeCallInfo* ru
     } else if (progresstype == ProgressType::RING) {
         ParseRingStyle(vm, runtimeCallInfo, progressStyle);
     } else if (progresstype == ProgressType::CAPSULE) {
-        ParseCapsuleStyle(vm, runtimeCallInfo, progressStyle, fontFamilies, families);
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        ParseCapsuleStyle(vm, runtimeCallInfo, progressStyle, fontFamilies, families, nodeInfo);
         progressStyle.content = (contentArg->IsString(vm) || contentArg->IsObject(vm)) ? content.c_str() : nullptr;
     } else {
         ParseProgressStyle(vm, runtimeCallInfo, progressStyle);
@@ -628,7 +632,8 @@ ArkUINativeModuleValue ProgressBridge::SetProgressBackgroundColor(ArkUIRuntimeCa
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     RefPtr<ResourceObject> resObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resObj, nodeInfo)) {
         nodeModifiers->getProgressModifier()->resetProgressBackgroundColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(resObj);

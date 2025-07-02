@@ -79,7 +79,7 @@ void DividerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(theme);
     auto paintProperty = host->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (paintProperty->GetDividerColorSetByTheme().value_or(true)) {
+    if (!paintProperty->GetDividerColorSetByUser().value_or(false)) {
         paintProperty->UpdateDividerColorByTheme(theme->GetColor());
     }
 }

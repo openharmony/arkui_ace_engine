@@ -610,11 +610,6 @@ public:
         isSubContainer_ = isSubContainer;
     }
 
-    void SetIsFormRender(bool isFormRender) override
-    {
-        isFormRender_ = isFormRender;
-    }
-
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
 
@@ -913,6 +908,7 @@ public:
         const std::function<void()>&& loadPageCallback);
 
     UIContentErrorCode RunIntentPage();
+    void SetIsFormRender(bool isFormRender) override;
 
 private:
     virtual bool MaybeRelease() override;
@@ -956,6 +952,8 @@ private:
         std::optional<bool> enable, std::optional<bool> animation);
 
     void FlushReloadTask(bool needReloadTransition, const ConfigurationChange& configurationChange);
+
+    void UpdateSubContainerDensity(ResourceConfiguration& resConfig);
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;

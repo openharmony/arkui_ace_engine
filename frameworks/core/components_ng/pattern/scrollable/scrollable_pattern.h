@@ -435,6 +435,14 @@ public:
     {
         return canStayOverScroll_;
     }
+    void ChangeCanStayOverScroll()
+    {
+        if (GetIsOverScroll()) {
+            if (!IsOutOfBoundary()) {
+                SetIsOverScroll(false);
+            }
+        }
+    }
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
     void UpdateMouseStart(float offset);

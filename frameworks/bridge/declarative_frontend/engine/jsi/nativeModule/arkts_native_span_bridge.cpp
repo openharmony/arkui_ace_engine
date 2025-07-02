@@ -321,7 +321,8 @@ ArkUINativeModuleValue SpanBridge::SetDecoration(ArkUIRuntimeCallInfo *runtimeCa
         textDecoration = secondArg->Int32Value(vm);
     }
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, resourceObject, nodeInfo)) {
         color = DEFAULT_DECORATION_COLOR;
     }
     if (fourthArg->IsInt()) {
@@ -361,7 +362,8 @@ ArkUINativeModuleValue SpanBridge::SetFontColor(ArkUIRuntimeCallInfo *runtimeCal
 
     Color textColor = theme->GetTextStyle().GetTextColor();
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, textColor, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, textColor, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontColor(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -532,7 +534,8 @@ ArkUINativeModuleValue SpanBridge::SetTextBackgroundStyle(ArkUIRuntimeCallInfo* 
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::shared_ptr<TextBackgroundStyle> style = std::make_shared<TextBackgroundStyle>();
     RefPtr<ResourceObject> colorResObj;
-    if (!(ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj))) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!(ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo))) {
         color = Color::TRANSPARENT;
     }
     ArkTSUtils::ParseOuterBorderRadius(runtimeCallInfo, vm, radiusArray, valueUnits, NUM_2, style);

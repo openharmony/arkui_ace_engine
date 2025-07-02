@@ -190,8 +190,6 @@ public:
     {
         return true;
     }
-    void UpdateCheckBoxGroupComponentColor(const Color& color, const CheckBoxGroupColorType checkBoxGroupColorType);
-
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

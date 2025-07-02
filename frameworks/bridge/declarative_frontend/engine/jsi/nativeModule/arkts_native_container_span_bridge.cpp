@@ -34,7 +34,8 @@ ArkUINativeModuleValue ContainerSpanBridge::SetTextBackgroundStyle(ArkUIRuntimeC
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::shared_ptr<TextBackgroundStyle> style = std::make_shared<TextBackgroundStyle>();
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getContainerSpanModifier()->resetContainerSpanTextBackgroundStyle(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }

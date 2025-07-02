@@ -1506,6 +1506,9 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   onInterceptRequest(callback: (event?: { request: WebResourceRequest; } | undefined) => WebResourceResponse): this {
     throw new Error('Method not implemented.');
   }
+  onOverrideErrorPage(callback: (event?: { webResourceRequest: WebResourceRequest; error: WebResourceError; } | undefined) => string): this {
+    throw new Error('Method not implemented.');
+  }
   onPermissionRequest(callback: (event?: { request: PermissionRequest; } | undefined) => void): this {
     modifierWithKey(this._modifiersWithKeys, WebOnPermissionRequestModifier.identity, WebOnPermissionRequestModifier, callback);
     return this;

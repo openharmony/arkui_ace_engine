@@ -1365,7 +1365,7 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessBadgeValue, TestSize.Level1)
      */
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
-    badgeParameters.badgeValue = VALUE;
+    badgeParameters.badgeValue = "";
     badgeParameters.badgeCount = COUNT;
     badge.Create(badgeParameters);
     GetInstance();
@@ -1442,8 +1442,10 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessBadgePositionX, TestSize.Level1)
      * @tc.steps: step3. check the key value.
      * @tc.expected: it should be Dimension(1).
      */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
     Dimension positionX = layoutProperty_->GetBadgePositionXValue();
-    EXPECT_EQ(positionX.Value(), 0);
+    EXPECT_EQ(positionX.Value(), 1);
 }
 
 /**
@@ -1474,8 +1476,10 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessBadgePositionY, TestSize.Level1)
      * @tc.steps: step3. check the key value.
      * @tc.expected: it should be Dimension(1).
      */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
     Dimension positionY = layoutProperty_->GetBadgePositionYValue();
-    EXPECT_EQ(positionY.Value(), 0);
+    EXPECT_EQ(positionY.Value(), 1);
 }
 
 /**
@@ -1498,15 +1502,22 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessBorderWidth, TestSize.Level1)
     /**
      * @tc.steps: step2. call to ProcessBorderWidth.
      */
-    badgeParameters.resourceBorderWidthObject = AceType::MakeRefPtr<ResourceObject>();
+    badgeParameters.resourceBorderWidthObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     badge.ProcessBorderWidth(pattern_, badgeParameters.resourceBorderWidthObject);
 
     /**
      * @tc.steps: step3. check the key value.
      * @tc.expected: it should be 0.0.
      */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
+    auto frameNode = pattern_->GetHost();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isSystemColorChange_ = true;
     Dimension borderWidth = layoutProperty_->GetBadgeBorderWidthValue();
-    EXPECT_EQ(borderWidth.Value(), 0.0f);
+    EXPECT_EQ(borderWidth.Value(), BADGE_BORDER_WIDTH.Value());
 }
 
 /**
@@ -1529,15 +1540,24 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessFontSize, TestSize.Level1)
     /**
      * @tc.steps: step2. call to ProcessFontSize.
      */
-    badgeParameters.resourceFontSizeObject = AceType::MakeRefPtr<ResourceObject>();
+    badgeParameters.resourceFontSizeObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     badge.ProcessFontSize(pattern_, badgeParameters.resourceFontSizeObject);
 
     /**
      * @tc.steps: step3. check the key value.
      * @tc.expected: it should be 0.0f.
      */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
+    auto frameNode = pattern_->GetHost();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isSystemColorChange_ = true;
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
     Dimension FontSize = layoutProperty_->GetBadgeFontSizeValue();
-    EXPECT_EQ(FontSize.Value(), 0.0f);
+    EXPECT_EQ(FontSize, badgeTheme->GetBadgeFontSize());
 }
 
 /**
@@ -1567,6 +1587,8 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessFontWeight, TestSize.Level1)
      * @tc.steps: step3. check the key value.
      * @tc.expected: it should be NORMAL.
      */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
     auto fontWeight = layoutProperty_->GetBadgeFontWeightValue();
     EXPECT_EQ(fontWeight, FontWeight::NORMAL);
 }
@@ -1591,15 +1613,22 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessBorderColor, TestSize.Level1)
     /**
      * @tc.steps: step2. call to ProcessBorderColor.
      */
-    badgeParameters.resourceBorderColorObject = AceType::MakeRefPtr<ResourceObject>();
+    badgeParameters.resourceBorderColorObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     badge.ProcessBorderColor(pattern_, badgeParameters.resourceBorderColorObject);
 
     /**
      * @tc.steps: step3. check the key value.
      * @tc.expected: it should be FF000000.
      */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
+    auto pipeline = frameNode_->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isSystemColorChange_ = true;
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    ASSERT_NE(badgeTheme, nullptr);
     auto borderColor = layoutProperty_->GetBadgeBorderColorValue();
-    EXPECT_EQ(borderColor.ColorToString(), "#FF000000");
+    EXPECT_EQ(borderColor, badgeTheme->GetBadgeBorderColor());
 }
 
 /**
@@ -1629,6 +1658,8 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessBadgeColor, TestSize.Level1)
      * @tc.steps: step3. check the key value.
      * @tc.expected: it should be FF000000.
      */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern_->OnColorModeChange(colorMode);
     auto badgeColor = layoutProperty_->GetBadgeBorderColorValue();
     EXPECT_EQ(badgeColor.ColorToString(), "#FF000000");
 }

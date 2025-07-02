@@ -1089,4 +1089,26 @@ HWTEST_F(AppBarTestNg, TestOnBackPressedCallback032, TestSize.Level1)
      */
     EXPECT_FALSE(pattern->onBackPressedConsumed_.has_value());
 }
+
+/**
+ * @tc.name: TestCreateServicePanel033
+ * @tc.desc: Test CreateServicePanel with bundleName
+ * @tc.type: FUNC
+ */
+ HWTEST_F(AppBarTestNg, TestCreateServicePanel033, TestSize.Level1)
+{
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    std::string bundleName = "com.hmos.asde";
+    std::string abilityName = "PanelAbility";
+    std::map<std::string, std::string> params = {
+        {"bundleName", "com.hmos.asde"},
+        {"abilityName", "MainAbility"},
+        {"module", "entry"},
+        {"pageName", "DETAIL"},
+        {"ability.want.params.uiExtensionType", "sysDialog/atomicServicePanel"},
+        {"TopNavPathInfo", ""},
+    };
+    appBar->CreateServicePanel(bundleName, abilityName, params);
+    EXPECT_EQ(appBar->sessionId_, 0);
+}
 } // namespace OHOS::Ace::NG

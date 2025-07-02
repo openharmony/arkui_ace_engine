@@ -502,36 +502,32 @@ void ViewAbstract::SetIsBuilderBackground(bool val)
     ACE_UPDATE_RENDER_CONTEXT(BuilderBackgroundFlag, val);
 }
 
-void ViewAbstract::SetCustomBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj)
+void ViewAbstract::SetCustomBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    SetCustomBackgroundColor(color);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
+    if (!resObj) {
+        pattern->RemoveResObj("customBackgroundColor");
+        return;
+    }
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        CHECK_NULL_VOID(resObj);
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern<Pattern>();
         CHECK_NULL_VOID(pattern);
-        std::string backgroundColorStr = pattern->GetResCacheMapByKey("customBackgroundColor");
-        Color backgroundColor;
-        if (backgroundColorStr.empty()) {
-            ResourceParseUtils::ParseResColor(resObj, backgroundColor);
-            pattern->AddResCache("customBackgroundColor", backgroundColor.ColorToString());
-        } else {
-            Color::ParseColorString(backgroundColorStr, backgroundColor);
-        }
+        Color backgroundColor = Color::TRANSPARENT;
+        ResourceParseUtils::ParseResColor(resObj, backgroundColor);
         ACE_UPDATE_NODE_RENDER_CONTEXT(CustomBackgroundColor, backgroundColor, frameNode);
     };
     pattern->AddResObj("customBackgroundColor", resObj, std::move(updateFunc));
-
-    Color backgroundColor;
-    ResourceParseUtils::ParseResColor(resObj, backgroundColor);
-    SetCustomBackgroundColor(backgroundColor);
 }
 
 void ViewAbstract::RequestFrame()
@@ -1083,6 +1079,165 @@ void ViewAbstract::SetDisplayIndex(int32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, DisplayIndex, value);
 }
 
+void ViewAbstract::CheckLocalizedPadding(PaddingProperty& value, const TextDirection& direction)
+{
+    PaddingProperty padding = value;
+    if (padding.start.has_value()) {
+        value.start = padding.start;
+        if (direction == TextDirection::RTL) {
+            value.right = padding.start;
+        } else {
+            value.left = padding.start;
+        }
+    }
+    if (padding.end.has_value()) {
+        value.end = padding.end;
+        if (direction == TextDirection::RTL) {
+            value.left = padding.end;
+        } else {
+            value.right = padding.end;
+        }
+    }
+    if (padding.top.has_value()) {
+        value.top = padding.top;
+    }
+    if (padding.bottom.has_value()) {
+        value.bottom = padding.bottom;
+    }
+    if (value.left.has_value() && !value.right.has_value()) {
+        value.right = std::optional<CalcLength>(CalcLength(0));
+    }
+    if (!value.left.has_value() && value.right.has_value()) {
+        value.left = std::optional<CalcLength>(CalcLength(0));
+    }
+}
+
+void ViewAbstract::CheckLocalizedMargin(MarginProperty& value, const TextDirection& direction)
+{
+    MarginProperty margin = value;
+    if (margin.start.has_value()) {
+        value.start = margin.start;
+        if (direction == TextDirection::RTL) {
+            value.right = margin.start;
+        } else {
+            value.left = margin.start;
+        }
+    }
+    if (margin.end.has_value()) {
+        value.end = margin.end;
+        if (direction == TextDirection::RTL) {
+            value.left = margin.end;
+        } else {
+            value.right = margin.end;
+        }
+    }
+    if (margin.top.has_value()) {
+        value.top = margin.top;
+    }
+    if (margin.bottom.has_value()) {
+        value.bottom = margin.bottom;
+    }
+    if (value.left.has_value() && !value.right.has_value()) {
+        value.right = std::optional<CalcLength>(CalcLength(0));
+    }
+    if (!value.left.has_value() && value.right.has_value()) {
+        value.left = std::optional<CalcLength>(CalcLength(0));
+    }
+}
+
+void ViewAbstract::CheckLocalizedSafeAreaPadding(PaddingProperty& value, const TextDirection& direction)
+{
+    PaddingProperty safeAreaPadding = value;
+    if (safeAreaPadding.start.has_value()) {
+        value.start = safeAreaPadding.start;
+        if (direction == TextDirection::RTL) {
+            value.right = safeAreaPadding.start;
+        } else {
+            value.left = safeAreaPadding.start;
+        }
+    }
+    if (safeAreaPadding.end.has_value()) {
+        value.end = safeAreaPadding.end;
+        if (direction == TextDirection::RTL) {
+            value.left = safeAreaPadding.end;
+        } else {
+            value.right = safeAreaPadding.end;
+        }
+    }
+    if (safeAreaPadding.top.has_value()) {
+        value.top = safeAreaPadding.top;
+    }
+    if (safeAreaPadding.bottom.has_value()) {
+        value.bottom = safeAreaPadding.bottom;
+    }
+    if (value.left.has_value() && !value.right.has_value()) {
+        value.right = std::optional<CalcLength>(CalcLength(0));
+    }
+    if (!value.left.has_value() && value.right.has_value()) {
+        value.left = std::optional<CalcLength>(CalcLength(0));
+    }
+}
+
+void ViewAbstract::CheckPositionLocalizedEdges(EdgesParam& value, TextDirection layoutDirection)
+{
+    EdgesParam edges = value;
+    if (!edges.start.has_value() && !edges.end.has_value()) {
+        return;
+    }
+    if (edges.top.has_value()) {
+        value.SetTop(edges.top.value_or(Dimension(0.0)));
+    }
+    if (edges.bottom.has_value()) {
+        value.SetBottom(edges.bottom.value_or(Dimension(0.0)));
+    }
+    if (edges.start.has_value()) {
+        value.start = edges.start.value();
+        if (layoutDirection == TextDirection::RTL) {
+            value.SetRight(edges.start.value_or(Dimension(0.0)));
+        } else {
+            value.SetLeft(edges.start.value_or(Dimension(0.0)));
+        }
+    }
+    if (edges.end.has_value()) {
+        value.end = edges.end.value();
+        if (layoutDirection == TextDirection::RTL) {
+            value.SetLeft(edges.end.value_or(Dimension(0.0)));
+        } else {
+            value.SetRight(edges.end.value_or(Dimension(0.0)));
+        }
+    }
+}
+
+void ViewAbstract::CheckOffsetLocalizedEdges(EdgesParam& value, TextDirection layoutDirection)
+{
+    EdgesParam edges = value;
+    if (!edges.start.has_value() && !edges.end.has_value()) {
+        return;
+    }
+    if (edges.top.has_value()) {
+        value.SetTop(edges.top.value_or(Dimension(0.0)));
+    }
+    if (edges.bottom.has_value()) {
+        value.SetBottom(edges.bottom.value_or(Dimension(0.0)));
+    }
+    if (edges.start.has_value()) {
+        value.start = edges.start.value();
+        if (layoutDirection == TextDirection::RTL) {
+            value.SetRight(edges.start.value_or(Dimension(0.0)));
+        } else {
+            value.SetLeft(edges.start.value_or(Dimension(0.0)));
+        }
+    }
+    if (edges.end.has_value()) {
+        value.end = edges.end.value();
+        if (layoutDirection == TextDirection::RTL) {
+            value.SetLeft(edges.end.value_or(Dimension(0.0)));
+        } else {
+            value.SetRight(edges.end.value_or(Dimension(0.0)));
+        }
+    }
+}
+
 void ViewAbstract::SetPadding(const CalcLength& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1109,6 +1264,10 @@ void ViewAbstract::SetPadding(const PaddingProperty& value)
             CHECK_NULL_VOID(frameNode);
             PaddingProperty &padding = const_cast<PaddingProperty &>(value);
             padding.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedPadding(padding, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding, frameNode);
             if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG || frameNode->GetTag() ==V2::TEXTINPUT_ETS_TAG) {
                 ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, padding, frameNode);
@@ -1189,6 +1348,10 @@ void ViewAbstract::SetSafeAreaPadding(const PaddingProperty& value)
             CHECK_NULL_VOID(frameNode);
             PaddingProperty &padding = const_cast<PaddingProperty &>(value);
             padding.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedSafeAreaPadding(padding, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding, frameNode);
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
@@ -1226,6 +1389,10 @@ void ViewAbstract::SetSafeAreaPadding(FrameNode* frameNode, const PaddingPropert
             CHECK_NULL_VOID(frameNode);
             PaddingProperty &padding = const_cast<PaddingProperty &>(value);
             padding.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedSafeAreaPadding(padding, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding, frameNode);
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
@@ -1267,6 +1434,10 @@ void ViewAbstract::SetMargin(const MarginProperty& value)
             CHECK_NULL_VOID(frameNode);
             MarginProperty &margin = const_cast<MarginProperty &>(value);
             margin.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedMargin(margin, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin, frameNode);
             auto pattern = frameNode->GetPattern<Pattern>();
             CHECK_NULL_VOID(pattern);
@@ -1344,6 +1515,10 @@ void ViewAbstract::SetBorderRadius(const BorderRadiusProperty& value)
             CHECK_NULL_VOID(frameNode);
             BorderRadiusProperty &borderRadius = const_cast<BorderRadiusProperty &>(value);
             borderRadius.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedBorderRadiuses(borderRadius, layoutDirection);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadius, frameNode);
             auto pattern = frameNode->GetPattern<Pattern>();
             CHECK_NULL_VOID(pattern);
@@ -1412,6 +1587,10 @@ void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
             CHECK_NULL_VOID(frameNode);
             BorderColorProperty &borderColor = const_cast<BorderColorProperty &>(value);
             borderColor.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedOuterBorderColor(borderColor, layoutDirection);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
             auto pattern = frameNode->GetPattern<Pattern>();
             CHECK_NULL_VOID(pattern);
@@ -1485,6 +1664,10 @@ void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
             CHECK_NULL_VOID(frameNode);
             BorderWidthProperty &borderWidth = const_cast<BorderWidthProperty &>(value);
             borderWidth.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedEdgeWidths(borderWidth, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
             auto pattern = frameNode->GetPattern<Pattern>();
@@ -1599,6 +1782,10 @@ void ViewAbstract::SetDashGap(const BorderWidthProperty& value)
             CHECK_NULL_VOID(frameNode);
             BorderWidthProperty &dashGap = const_cast<BorderWidthProperty &>(value);
             dashGap.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedEdgeWidths(dashGap, layoutDirection);
             ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, dashGap, frameNode);
         };
         pattern->AddResObj("border.dashGap", resObj, std::move(updateFunc));
@@ -1618,6 +1805,10 @@ void ViewAbstract::SetDashGap(FrameNode *frameNode, const BorderWidthProperty& v
             CHECK_NULL_VOID(frameNode);
             BorderWidthProperty &dashGap = const_cast<BorderWidthProperty &>(value);
             dashGap.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedEdgeWidths(dashGap, layoutDirection);
             ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, dashGap, frameNode);
         };
         pattern->AddResObj("border.dashGap", resObj, std::move(updateFunc));
@@ -1660,6 +1851,10 @@ void ViewAbstract::SetDashWidth(const BorderWidthProperty& value)
             CHECK_NULL_VOID(frameNode);
             BorderWidthProperty &dashWidth = const_cast<BorderWidthProperty &>(value);
             dashWidth.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedEdgeWidths(dashWidth, layoutDirection);
             ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, dashWidth, frameNode);
         };
         pattern->AddResObj("border.dashWidth", resObj, std::move(updateFunc));
@@ -1679,6 +1874,10 @@ void ViewAbstract::SetDashWidth(FrameNode *frameNode, const BorderWidthProperty&
             CHECK_NULL_VOID(frameNode);
             BorderWidthProperty &dashWidth = const_cast<BorderWidthProperty &>(value);
             dashWidth.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedEdgeWidths(dashWidth, layoutDirection);
             ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, dashWidth, frameNode);
         };
         pattern->AddResObj("border.dashWidth", resObj, std::move(updateFunc));
@@ -2473,11 +2672,36 @@ void ViewAbstract::ResetNextFocus()
     focusHub->ResetNextFocus();
 }
 
+void SetFocusBoxUpdateFunc(FrameNode* frameNode, const NG::FocusBoxStyle& style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), style](const RefPtr<ResourceObject>& resObj) {
+        CHECK_NULL_VOID(resObj);
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        NG::FocusBoxStyle focusBoxStyle = style;
+        focusBoxStyle.ReloadResources();
+        focusHub->GetFocusBox().SetStyle(focusBoxStyle);
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    pattern->AddResObj("focusBox", resObj, std::move(updateFunc));
+}
+
 void ViewAbstract::SetFocusBoxStyle(const NG::FocusBoxStyle& style)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->GetFocusBox().SetStyle(style);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        SetFocusBoxUpdateFunc(frameNode, style);
+    }
 }
 
 void ViewAbstract::SetClickDistance(FrameNode* frameNode, double clickDistance)
@@ -3073,6 +3297,10 @@ void ViewAbstract::SetPositionEdges(const EdgesParam& value)
             CHECK_NULL_VOID(frameNode);
             EdgesParam &edges = const_cast<EdgesParam &>(value);
             edges.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckPositionLocalizedEdges(edges, layoutDirection);
             auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
             CHECK_NULL_VOID(parentNode);
             if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
@@ -3214,16 +3442,10 @@ void ViewAbstract::SetOffsetEdges(const EdgesParam& value)
             CHECK_NULL_VOID(frameNode);
             EdgesParam &edges = const_cast<EdgesParam &>(value);
             edges.ReloadResources();
-            auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
-            CHECK_NULL_VOID(parentNode);
-            if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
-                parentNode->GetTag() == V2::FLEX_ETS_TAG) {
-                auto renderContext = frameNode->GetRenderContext();
-                CHECK_NULL_VOID(renderContext);
-                if (!renderContext->HasPositionEdges() && !renderContext->HasPosition()) {
-                    parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-                }
-            }
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckOffsetLocalizedEdges(edges, layoutDirection);
             ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Offset, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(OffsetEdges, edges, frameNode);
         };
@@ -3459,16 +3681,16 @@ void ViewAbstract::UpdatePopupParamResource(const RefPtr<PopupParam>& param, con
         auto arrowWidthResourceObject = param->GetArrowWidthResourceObject();
         optionsType = POPUP_OPTIONTYPE_ARROWWIDTH;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, arrowWidthResourceObject, optionsType);
-        auto arrowHeightResourceObject = param->GeArrowHeightResourceObject();
+        auto arrowHeightResourceObject = param->GetArrowHeightResourceObject();
         optionsType = POPUP_OPTIONTYPE_ARROWHEIGHT;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, arrowHeightResourceObject, optionsType);
-        auto radiusResourceObject = param->GeRadiusResourceObject();
+        auto radiusResourceObject = param->GetRadiusResourceObject();
         optionsType = POPUP_OPTIONTYPE_RADIUS;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, radiusResourceObject, optionsType);
-        auto outLineResourceObject = param->GeOutlineWidthResourceObject();
+        auto outLineResourceObject = param->GetOutlineWidthResourceObject();
         optionsType = POPUP_OPTIONTYPE_OUTLINEWIDTH;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, outLineResourceObject, optionsType);
-        auto borderResourceObject = param->GeBorderWidthResourceObject();
+        auto borderResourceObject = param->GetBorderWidthResourceObject();
         optionsType = POPUP_OPTIONTYPE_BORDERWIDTH;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, borderResourceObject, optionsType);
     }
@@ -5613,6 +5835,10 @@ void ViewAbstract::SetBorderRadius(FrameNode *frameNode, const BorderRadiusPrope
             CHECK_NULL_VOID(frameNode);
             BorderRadiusProperty &borderRadius = const_cast<BorderRadiusProperty &>(value);
             borderRadius.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedBorderRadiuses(borderRadius, layoutDirection);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadius, frameNode);
         };
         pattern->AddResObj("borderRadius", resObj, std::move(updateFunc));
@@ -5640,6 +5866,10 @@ void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const BorderWidthPropert
             CHECK_NULL_VOID(frameNode);
             BorderWidthProperty &borderWidth = const_cast<BorderWidthProperty &>(value);
             borderWidth.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedEdgeWidths(borderWidth, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
@@ -5675,6 +5905,10 @@ void ViewAbstract::SetBorderColor(FrameNode* frameNode, const BorderColorPropert
             CHECK_NULL_VOID(frameNode);
             BorderColorProperty &borderColor = const_cast<BorderColorProperty &>(value);
             borderColor.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedOuterBorderColor(borderColor, layoutDirection);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
             frameNode->MarkModifyDone();
         };
@@ -5934,6 +6168,10 @@ void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& valu
         CHECK_NULL_VOID(frameNode);
         EdgesParam &edges = const_cast<EdgesParam &>(value);
         edges.ReloadResources();
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+        CheckPositionLocalizedEdges(edges, layoutDirection);
         auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parentNode);
         if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
@@ -6646,11 +6884,10 @@ void ViewAbstract::SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& val
     ACE_UPDATE_NODE_RENDER_CONTEXT(Offset, value, frameNode);
 }
 
-void ViewAbstract::SetOffset(FrameNode* frameNode, const Dimension& x, const Dimension& y,
+void ViewAbstract::SetOffset(FrameNode* frameNode, OffsetT<Dimension>& value,
     const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj)
 {
     CHECK_NULL_VOID(frameNode);
-    OffsetT<Dimension> value = { x, y };
     SetOffsetX(frameNode, value, xresObj);
     SetOffsetY(frameNode, value, yresObj);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, OffsetEdges, frameNode);
@@ -6673,6 +6910,10 @@ void ViewAbstract::SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value)
         CHECK_NULL_VOID(frameNode);
         EdgesParam &edges = const_cast<EdgesParam &>(value);
         edges.ReloadResources();
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+        CheckOffsetLocalizedEdges(edges, layoutDirection);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Offset, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(OffsetEdges, edges, frameNode);
     };
@@ -6694,11 +6935,15 @@ void ViewAbstract::MarkAnchorX(
             std::string xString = pattern->GetResCacheMapByKey("markAnchor.x");
             OffsetT<Dimension> &offset = const_cast<OffsetT<Dimension> &>(value);
             CalcDimension x;
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             if (xString.empty()) {
                 ResourceParseUtils::ParseResDimensionVpNG(resObj, x);
                 pattern->AddResCache("markAnchor.x", x.ToString());
             } else {
-                x = StringUtils::StringToCalcDimension(xString);
+                x = layoutDirection == TextDirection::RTL ? -StringUtils::StringToCalcDimension(xString)
+                                    : StringUtils::StringToCalcDimension(xString);
             }
             const auto& renderContext = frameNode->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
@@ -6726,11 +6971,15 @@ void ViewAbstract::MarkAnchorY(
             std::string yString = pattern->GetResCacheMapByKey("markAnchor.y");
             OffsetT<Dimension> &offset = const_cast<OffsetT<Dimension> &>(value);
             CalcDimension y;
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             if (yString.empty()) {
                 ResourceParseUtils::ParseResDimensionVpNG(resObj, y);
                 pattern->AddResCache("markAnchor.y", y.ToString());
             } else {
-                y = StringUtils::StringToCalcDimension(yString);
+                y = layoutDirection == TextDirection::RTL ? -StringUtils::StringToCalcDimension(yString)
+                                    : StringUtils::StringToCalcDimension(yString);
             }
             const auto& renderContext = frameNode->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
@@ -6740,6 +6989,105 @@ void ViewAbstract::MarkAnchorY(
             ACE_UPDATE_NODE_RENDER_CONTEXT(Anchor, offset, frameNode);
         };
         pattern->AddResObj("markAnchor.y", yresObj, std::move(updateFunc));
+    }
+}
+
+void ViewAbstract::CheckLocalizedEdgeWidths(BorderWidthProperty& value, const TextDirection& direction)
+{
+    BorderWidthProperty borderWidth = value;
+    if (borderWidth.startDimen.has_value()) {
+        value.startDimen = borderWidth.startDimen;
+        if (direction == TextDirection::RTL) {
+            value.rightDimen = borderWidth.startDimen;
+        } else {
+            value.leftDimen = borderWidth.startDimen;
+        }
+    }
+    if (borderWidth.endDimen.has_value()) {
+        value.endDimen = borderWidth.endDimen;
+        if (direction == TextDirection::RTL) {
+            value.leftDimen = borderWidth.endDimen;
+        } else {
+            value.rightDimen = borderWidth.endDimen;
+        }
+    }
+    if (borderWidth.topDimen.has_value()) {
+        value.topDimen = borderWidth.topDimen;
+    }
+    if (borderWidth.bottomDimen.has_value()) {
+        value.bottomDimen = borderWidth.bottomDimen;
+    }
+    if (value.leftDimen.has_value() && !value.rightDimen.has_value()) {
+        value.rightDimen = std::optional<Dimension>(Dimension(0));
+    }
+    if (!value.leftDimen.has_value() && value.rightDimen.has_value()) {
+        value.leftDimen = std::optional<Dimension>(Dimension(0));
+    }
+    value.multiValued = true;
+}
+
+void ViewAbstract::CheckLocalizedOuterBorderColor(NG::BorderColorProperty& value, const TextDirection& direction)
+{
+    NG::BorderColorProperty borderColors = value;
+    borderColors.multiValued = true;
+    if (borderColors.startColor.has_value()) {
+        value.startColor = borderColors.startColor;
+        if (direction == TextDirection::RTL) {
+            value.rightColor = borderColors.startColor;
+        } else {
+            value.leftColor = borderColors.startColor;
+        }
+    }
+    if (borderColors.endColor.has_value()) {
+        value.endColor = borderColors.endColor;
+        if (direction == TextDirection::RTL) {
+            value.leftColor = borderColors.endColor;
+        } else {
+            value.rightColor = borderColors.endColor;
+        }
+    }
+    if (borderColors.topColor.has_value()) {
+        value.topColor = borderColors.topColor;
+    }
+    if (borderColors.bottomColor.has_value()) {
+        value.bottomColor = borderColors.bottomColor;
+    }
+}
+
+void ViewAbstract::CheckLocalizedBorderRadiuses(BorderRadiusProperty& value, const TextDirection& direction)
+{
+    BorderRadiusProperty borderRadius = value;
+    if (borderRadius.radiusTopStart.has_value()) {
+        value.radiusTopStart = borderRadius.radiusTopStart;
+        if (direction == TextDirection::RTL) {
+            value.radiusTopRight = borderRadius.radiusTopStart;
+        } else {
+            value.radiusTopLeft = borderRadius.radiusTopStart;
+        }
+    }
+    if (borderRadius.radiusTopEnd.has_value()) {
+        value.radiusTopEnd = borderRadius.radiusTopEnd;
+        if (direction == TextDirection::RTL) {
+            value.radiusTopLeft = borderRadius.radiusTopEnd;
+        } else {
+            value.radiusTopRight = borderRadius.radiusTopEnd;
+        }
+    }
+    if (borderRadius.radiusBottomStart.has_value()) {
+        value.radiusBottomStart = borderRadius.radiusBottomStart;
+        if (direction == TextDirection::RTL) {
+            value.radiusBottomRight = borderRadius.radiusBottomStart;
+        } else {
+            value.radiusBottomLeft = borderRadius.radiusBottomStart;
+        }
+    }
+    if (borderRadius.radiusBottomEnd.has_value()) {
+        value.radiusBottomEnd = borderRadius.radiusBottomEnd;
+        if (direction == TextDirection::RTL) {
+            value.radiusBottomLeft = borderRadius.radiusBottomEnd;
+        } else {
+            value.radiusBottomRight = borderRadius.radiusBottomEnd;
+        }
     }
 }
 
@@ -6790,8 +7138,12 @@ void ViewAbstract::SetPadding(FrameNode* frameNode, const PaddingProperty& value
         auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
-            PaddingProperty &padding = const_cast<PaddingProperty &>(value);
+            PaddingProperty& padding = const_cast<PaddingProperty&>(value);
             padding.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedPadding(padding, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding, frameNode);
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
@@ -6820,6 +7172,10 @@ void ViewAbstract::SetMargin(FrameNode* frameNode, const PaddingProperty& value)
             CHECK_NULL_VOID(frameNode);
             MarginProperty &margin = const_cast<MarginProperty &>(value);
             margin.ReloadResources();
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+            CheckLocalizedMargin(margin, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin, frameNode);
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
@@ -8549,12 +8905,50 @@ void ViewAbstract::ResetNextFocus(FrameNode* frameNode)
     focusHub->ResetNextFocus();
 }
 
-void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style)
+void ViewAbstract::SetFocusBoxStyleUpdateFunc(
+    NG::FocusBoxStyle& style, const RefPtr<ResourceObject>& resObj, const std::string& property)
+{
+    if (property.empty()) {
+        return;
+    }
+    if (!resObj) {
+        style.RemoveResource(property);
+        return;
+    }
+    auto&& updateFunc = [property](const RefPtr<ResourceObject>& resObj, NG::FocusBoxStyle& style) {
+        if (property == "focusBoxStyleColor") {
+            Color strokeColor;
+            ResourceParseUtils::ParseResColor(resObj, strokeColor);
+            style.strokeColor = strokeColor;
+        } else if (property == "focusBoxStyleMargin") {
+            CalcDimension margin;
+            ResourceParseUtils::ParseResDimensionFpNG(resObj, margin, false);
+            style.margin = margin;
+        } else if (property == "focusBoxStyleWidth") {
+            CalcDimension strokeWidth;
+            ResourceParseUtils::ParseResDimensionFpNG(resObj, strokeWidth, false);
+            style.strokeWidth = strokeWidth;
+        }
+    };
+    style.AddResource(property, resObj, std::move(updateFunc));
+}
+
+void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style, bool isReset)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->GetFocusBox().SetStyle(style);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        if (isReset) {
+            auto pattern = frameNode->GetPattern();
+            CHECK_NULL_VOID(pattern);
+            pattern->RemoveResObj("focusBox");
+        } else {
+            SetFocusBoxUpdateFunc(frameNode, style);
+        }
+    }
 }
 
 void ViewAbstract::SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled)

@@ -18,9 +18,14 @@
 
 #include <bitset>
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "advanced_text_style.h"
+#include "ui/base/referenced.h"
+#include "ui/base/utils/utils.h"
 
 #include "base/geometry/dimension.h"
 #include "base/utils/linear_map.h"
@@ -30,8 +35,8 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/pipeline/base/render_component.h"
-#include "frameworks/core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "frameworks/core/components/common/properties/decoration.h"
+#include "frameworks/core/components_ng/pattern/symbol/symbol_effect_options.h"
 
 namespace OHOS::Ace {
 // The normal weight is W400, the larger the number after W, the thicker the font will be.
@@ -702,6 +707,36 @@ public:                                                                         
 private:                                                                          \
     type prop##name##_ = value;
 
+#define ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE(name, type)                     \
+public:                                                                              \
+    std::optional<type> Get##name() const                                            \
+    {                                                                                \
+        CHECK_NULL_RETURN(advancedTextStyle_, std::nullopt);                         \
+        return advancedTextStyle_->Get##name();                                      \
+    }                                                                                \
+    void Set##name(const type& newValue)                                             \
+    {                                                                                \
+        if (!advancedTextStyle_) {                                                   \
+            advancedTextStyle_ = AceType::MakeRefPtr<AdvancedTextStyle>();           \
+        }                                                                            \
+        CHECK_NULL_VOID(advancedTextStyle_);                                         \
+        advancedTextStyle_->Set##name(newValue);                                     \
+    }                                                                                \
+    void Set##name(const std::optional<type> newValue)                               \
+    {                                                                                \
+        if (!advancedTextStyle_ && !newValue.has_value()) {                          \
+            return;                                                                  \
+        }                                                                            \
+        if (!advancedTextStyle_) {                                                   \
+            advancedTextStyle_ = AceType::MakeRefPtr<AdvancedTextStyle>();           \
+        }                                                                            \
+        CHECK_NULL_VOID(advancedTextStyle_);                                         \
+        if (!advancedTextStyle_->Get##name().has_value() && !newValue.has_value()) { \
+            return;                                                                  \
+        }                                                                            \
+        advancedTextStyle_->Set##name(newValue);                                     \
+    }
+
 class ACE_EXPORT TextStyle final {
 public:
     TextStyle() = default;
@@ -787,7 +822,7 @@ public:
     ACE_DEFINE_TEXT_STYLE(StrokeColor, Color, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE(ColorShaderStyle, std::optional<Color>, TextStyleAttribute::FOREGROUND_BRUSH);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
-        Superscript, SuperscriptStyle, SuperscriptStyle::NORMAL, TextStyleAttribute::RE_CREATE);    
+        Superscript, SuperscriptStyle, SuperscriptStyle::NORMAL, TextStyleAttribute::RE_CREATE);
 
     // used for gradiant color
     ACE_DEFINE_PARAGRAPH_STYLE(FontForegroudGradiantColor, FontForegroudGradiantColor,
@@ -801,6 +836,7 @@ public:
     ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(EffectStrategy, int32_t, 0, SymbolStyleAttribute::EFFECT_STRATEGY);
     ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(
         SymbolType, SymbolType, SymbolType::SYSTEM, SymbolStyleAttribute::RE_CREATE);
+    ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE(Gradient, Gradient);
 
 public:
     void SetFontSize(const Dimension& fontSize)
@@ -1156,19 +1192,9 @@ public:
         return propGradientColorProp_;
     }
 
-    void SetGradient(const std::optional<Gradient>& gradient)
-    {
-        gradient_ = gradient;
-    }
-
     void SetForeGroundBrushBitMap()
     {
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FOREGROUND_BRUSH));
-    }
-
-    const std::optional<Gradient>& GetGradient() const
-    {
-        return gradient_;
     }
 
 private:
@@ -1181,7 +1207,6 @@ private:
     std::list<std::pair<std::string, int32_t>> fontFeatures_;
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
-    std::optional<Gradient> gradient_;
     // use 14px for normal font size.
     DimensionWithActual fontSize_ { Dimension(14, DimensionUnit::PX), 14.0f };
     FontWeight fontWeight_ { FontWeight::NORMAL };
@@ -1196,6 +1221,8 @@ private:
     bool adaptHeight_ = false; // whether adjust text size with height.
     // for Symbol
     std::optional<NG::SymbolEffectOptions> symbolEffectOptions_;
+
+    RefPtr<AdvancedTextStyle> advancedTextStyle_;
 };
 
 namespace StringUtils {

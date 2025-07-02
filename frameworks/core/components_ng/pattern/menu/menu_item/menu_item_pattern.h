@@ -92,6 +92,11 @@ public:
         return true;
     }
 
+    bool IsContentNoEnabledFixed() override
+    {
+        return true;
+    }
+
     inline RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<MenuItemEventHub>();
@@ -184,6 +189,7 @@ public:
     void SetChange()
     {
         isSelected_ = !isSelected_;
+        UpdateDividerSelectedStatus(isSelected_);
     }
 
     bool IsChange() const

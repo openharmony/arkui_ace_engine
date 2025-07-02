@@ -633,8 +633,8 @@ class BorderStyleModifier extends ModifierWithKey<BorderStyle | EdgeStyles> {
   }
 }
 
-class ShadowModifier extends ModifierWithKey<ShadowOptions | ShadowStyle> {
-  constructor(value: ShadowOptions | ShadowStyle) {
+class ShadowModifier extends ModifierWithKey<ShadowOptions | ArkShadowStyle> {
+  constructor(value: ShadowOptions | ArkShadowStyle) {
     super(value);
   }
   static identity: Symbol = Symbol('shadow');
@@ -642,8 +642,8 @@ class ShadowModifier extends ModifierWithKey<ShadowOptions | ShadowStyle> {
     if (reset) {
       getUINativeModule().common.resetShadow(node);
     } else {
-      if (isNumber(this.value)) {
-        getUINativeModule().common.setShadow(node, this.value, undefined, undefined, undefined, undefined, undefined, undefined);
+      if (isNumber(this.value.shadowStyle)) {
+        getUINativeModule().common.setShadow(node, this.value.shadowStyle, undefined, undefined, undefined, undefined, undefined, undefined);
       } else {
         getUINativeModule().common.setShadow(node, undefined,
           (this.value as ShadowOptions).radius,
@@ -657,6 +657,9 @@ class ShadowModifier extends ModifierWithKey<ShadowOptions | ShadowStyle> {
   }
 
   checkObjectDiff(): boolean {
+    if (isNumber(this.value.shadowStyle)) {
+      return true;
+    }
     return !((this.stageValue as ShadowOptions).radius === (this.value as ShadowOptions).radius &&
       (this.stageValue as ShadowOptions).type === (this.value as ShadowOptions).type &&
       (this.stageValue as ShadowOptions).color === (this.value as ShadowOptions).color &&
@@ -1323,10 +1326,19 @@ class OutlineModifier extends ModifierWithKey<OutlineOptions> {
           topColor = this.value.color;
           bottomColor = this.value.color;
         } else {
-          leftColor = (this.value.color as EdgeColors).left;
-          rightColor = (this.value.color as EdgeColors).right;
-          topColor = (this.value.color as EdgeColors).top;
-          bottomColor = (this.value.color as EdgeColors).bottom;
+          const localizedEdgeColors = this.value.color as LocalizedEdgeColors);
+          if (localizedEdgeColors.start || localizedEdgeColors.end) {
+            leftColor = localizedEdgeColors.start;
+            rightColor = localizedEdgeColors.end;
+            topColor = localizedEdgeColors.top;
+            bottomColor = localizedEdgeColors.bottom;
+          } else {
+            const edgeColors = this.value.color as EdgeColors;
+            leftColor = edgeColors.left;
+            rightColor = edgeColors.right;
+            topColor = edgeColors.top;
+            bottomColor = edgeColors.bottom;
+          }
         }
       }
       let topLeft;
@@ -3094,6 +3106,12 @@ class DragPreviewModifier extends ModifierWithKey<ArkDragPreview> {
 
   checkObjectDiff(): boolean {
     return !this.value.isEqual(this.stageValue);
+  }
+}
+
+class ArkShadowStyle {
+  constructor() {
+    this.shadowStyle = undefined;
   }
 }
 
@@ -5363,6 +5381,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   shadow(value: ShadowOptions | ShadowStyle): this {
+    if (typeof value === 'number') {
+      let arkShadowStyle = new ArkShadowStyle();
+      arkShadowStyle.shadowStyle = value;
+      modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, arkShadowStyle);
+      return this;
+    }
     modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
     return this;
   }

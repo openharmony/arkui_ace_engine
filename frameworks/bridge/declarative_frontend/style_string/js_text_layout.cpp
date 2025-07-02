@@ -40,11 +40,13 @@
 
 
 namespace OHOS::Ace::Framework {
-#if !defined(PREVIEW)
 namespace {
+constexpr int32_t CONST_NUM_SIX = 6;
+constexpr int32_t CONST_NUM_MINUS_TWO = -2;
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 constexpr int32_t CONST_NUM_TWO = 2;
-}
 #endif
+} // namespace
 
 CalcDimension JSTextLayout::ParseLengthMetrics(const JSRef<JSObject>& obj)
 {
@@ -57,7 +59,10 @@ CalcDimension JSTextLayout::ParseLengthMetrics(const JSRef<JSObject>& obj)
     auto unit = DimensionUnit::VP;
     auto unitObj = obj->GetProperty("unit");
     if (!unitObj->IsNull() && unitObj->IsNumber()) {
-        unit = static_cast<DimensionUnit>(unitObj->ToNumber<int32_t>());
+        auto unitNum = unitObj->ToNumber<int32_t>();
+        if (unitNum >= CONST_NUM_MINUS_TWO && unitNum <= CONST_NUM_SIX) {
+            unit = static_cast<DimensionUnit>(unitNum);
+        }
     }
     if (value >= 0 && unit != DimensionUnit::PERCENT) {
         size = CalcDimension(value, unit);
@@ -101,6 +106,9 @@ void JSTextLayout::GetParagraphs(const JSCallbackInfo& info)
     uint32_t idx = 0;
     for (auto para : paraVec) {
         auto paragraph = AceType::DynamicCast<NG::TxtParagraph>(para);
+        if (!paragraph) {
+            continue;
+        }
         auto jsParagraph = OHOS::Rosen::JsParagraph::CreateJsTypography(env,
             paragraph->GetParagraphUniquePtr());
         JsiRef<JsiValue> jsParagraphVal = JsConverter::ConvertNapiValueToJsVal(jsParagraph);

@@ -736,4 +736,19 @@ HWTEST_F(RichEditorParagraphMgrTestNg, GetParagraphInfo001, TestSize.Level1)
     EXPECT_NE(size, richEditorPattern->GetParagraphInfo(start, end).size());
 }
 
+/**
+ * @tc.name: GetParagraphLength001
+ * @tc.desc: test RichEditorPattern GetParagraphLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphMgrTestNg, GetParagraphLength001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    std::list<RefPtr<UINode>> spans;
+    int32_t ret = richEditorPattern->GetParagraphLength(spans);
+    ASSERT_EQ(ret, 0);
+}
+
 } // namespace OHOS::Ace::NG

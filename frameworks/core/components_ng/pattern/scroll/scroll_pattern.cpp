@@ -149,6 +149,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (scrollEdgeType_ != ScrollEdgeType::SCROLL_NONE && AnimateStoped()) {
         scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;
     }
+    ChangeCanStayOverScroll();
     return paintProperty->GetFadingEdge().value_or(false);
 }
 

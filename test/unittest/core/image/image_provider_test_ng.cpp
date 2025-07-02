@@ -2106,4 +2106,28 @@ HWTEST_F(ImageProviderTestNg, StaticImageMakeCanvasImage001, TestSize.Level1)
     pixmapObj->MakeCanvasImage(ctx, size, true, false);
     EXPECT_NE(ctx->canvasImage_, nullptr);
 }
+
+/**
+ * @tc.name: ImageFileSizeTest001
+ * @tc.desc: Test ImageFileSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageFileSizeTest001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+    auto size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(-1, -1));
+
+    ctx->imageObj_ =
+        AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_128, LENGTH_128), nullptr);
+    size = ctx->GetImageSize();
+    EXPECT_EQ(size, SizeF(LENGTH_128, LENGTH_128));
+    auto imageObj = ctx->imageObj_;
+    EXPECT_NE(imageObj, nullptr);
+    imageObj->SetImageFileSize(100);
+    EXPECT_EQ(imageObj->GetImageFileSize(), 100);
+    EXPECT_EQ(imageObj->GetImageDataSize(), 0);
+}
 } // namespace OHOS::Ace::NG

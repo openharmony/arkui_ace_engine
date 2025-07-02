@@ -877,6 +877,9 @@ HWTEST_F(NavigationManagerTestNg, AddNavigationTest002, TestSize.Level1)
  */
 HWTEST_F(NavigationManagerTestNg, GetNavigationByInspectorIdTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create navigationManager and mock properties.
+     */
     auto navigationManager = GetNavigationManager();
     ASSERT_TRUE(navigationManager->navigationMap_.empty());
     const int32_t routerPageId = 1;
@@ -886,6 +889,9 @@ HWTEST_F(NavigationManagerTestNg, GetNavigationByInspectorIdTest001, TestSize.Le
     navigationGroupNode->curId_ = navigationInspectorId;
     ASSERT_EQ(navigationGroupNode->GetCurId(), navigationInspectorId);
     navigationManager->AddNavigation(routerPageId, navigationGroupNode);
+    /**
+     * @tc.steps: step2. do verify, reset properties and verify again.
+     */
     ASSERT_FALSE(navigationManager->navigationMap_.empty());
     ASSERT_EQ(navigationManager->GetNavigationByInspectorId(navigationInspectorId), navigationGroupNode);
     navigationManager->navigationMap_.clear();
@@ -898,6 +904,9 @@ HWTEST_F(NavigationManagerTestNg, GetNavigationByInspectorIdTest001, TestSize.Le
  */
 HWTEST_F(NavigationManagerTestNg, GetNavigationByInspectorIdTest002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create navigationManager and mock properties.
+     */
     auto navigationManager = GetNavigationManager();
     ASSERT_TRUE(navigationManager->navigationMap_.empty());
     const int32_t routerPageId = 1;
@@ -907,6 +916,9 @@ HWTEST_F(NavigationManagerTestNg, GetNavigationByInspectorIdTest002, TestSize.Le
     navigationGroupNode->curId_ = navigationInspectorId;
     ASSERT_EQ(navigationGroupNode->GetCurId(), navigationInspectorId);
     navigationManager->AddNavigation(routerPageId, navigationGroupNode);
+    /**
+     * @tc.steps: step2. do verify, reset properties and verify again.
+     */
     ASSERT_FALSE(navigationManager->navigationMap_.empty());
     const std::string wrongNavigationId = "wrongId";
     ASSERT_NE(navigationManager->GetNavigationByInspectorId(wrongNavigationId), navigationGroupNode);

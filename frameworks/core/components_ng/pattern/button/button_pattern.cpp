@@ -1263,6 +1263,10 @@ void ButtonPattern::OnColorConfigurationUpdate()
         auto color = buttonTheme->GetBgColor(buttonStyle, buttonRole);
         renderContext->UpdateBackgroundColor(color);
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        themeBgColor_ = buttonTheme->GetBgColor(buttonStyle, buttonRole);
+        themeTextColor_ = buttonTheme->GetTextColor(buttonStyle, buttonRole);
+    }
     auto textNode = DynamicCast<FrameNode>(node->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();

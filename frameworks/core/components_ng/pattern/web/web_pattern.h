@@ -193,6 +193,7 @@ public:
         POPUP,
         DELETABLE,
         FOCUS,
+        NODE_TAG,
     };
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -723,7 +724,7 @@ public:
     }
     std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
-    void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
+    void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId, bool needFilter = true);
     void OnAccessibilityHoverEvent(
         const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time);
     std::string GetSurfaceIdByHtmlElementId(const std::string& htmlElementId);
@@ -820,6 +821,16 @@ public:
 
     void InitRotationEventCallback();
     void UninitRotationEventCallback();
+
+    std::queue<MouseInfo>& GetMouseInfoQueue()
+    {
+        return mouseInfoQueue_;
+    }
+
+    MouseInfo GetMouseInfo()
+    {
+        return mouseInfo_;
+    }
 
     // Data Detector funcs
     RefPtr<WebDataDetectorAdapter> GetDataDetectorAdapter();
@@ -1093,6 +1104,7 @@ private:
     void CheckAndSetWebNestedScrollExisted();
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
+    bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void UpdateTooltipContentColor(const RefPtr<FrameNode>& textNode);
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
@@ -1132,8 +1144,8 @@ private:
         WebAccessibilityType key, std::string value);
     void WebNodeInfoToJsonValue(std::shared_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
                                 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> webNodeInfo,
-                                std::string& nodeTag);
-    void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
+                                std::string& nodeTag, bool isArray = false);
+    void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId, bool needFilter = true);
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
     void InitMagnifier();
@@ -1273,6 +1285,7 @@ private:
     bool isParentReachEdge_ = false;
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
+    std::queue<MouseInfo> mouseInfoQueue_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
     std::list<KeyEvent> webKeyEvent_ {};
     double startPinchScale_ = -1.0;
@@ -1337,6 +1350,8 @@ private:
     std::vector<uint32_t> pipController_;
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
     bool isRegisterJsObject_ = false;
+
+    MouseInfo mouseInfo_;
 
     // properties for AI data detector
     bool isAILinkMenuShow_ = false;

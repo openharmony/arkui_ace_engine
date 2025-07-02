@@ -56,6 +56,7 @@ public:
     /* interfaces to get properties */
     SizeF GetImageSize() const;
     SizeF GetOriginImageSize() const;
+    std::string GetImageSizeInfo() const;
     const RectF& GetDstRect() const;
     const RectF& GetSrcRect() const;
     ImageFit GetImageFit() const;

@@ -1448,4 +1448,258 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0049, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_DragEvent_GetVelocityY(nullptr), 0.0f);
     EXPECT_EQ(OH_ArkUI_DragEvent_GetVelocity(nullptr), 0.0f);
 }
+
+/**
+ * @tc.name: DragAndDropTest0050
+ * @tc.desc: Test OH_ArkUI_DragEvent_GetUdmfData.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0050, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create DragEvent, related function is called.
+     */
+    ArkUIDragEvent dragEvent;
+    dragEvent.key = "key_string";
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+    ASSERT_NE(drag_Event, nullptr);
+    OH_UdmfData* data = OH_UdmfData_Create();
+    ASSERT_NE(data, nullptr);
+
+    /**
+     * @tc.steps: step2.set params null.
+     */
+    int32_t ret = OH_ArkUI_DragEvent_GetUdmfData(nullptr, data);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ret = OH_ArkUI_DragEvent_GetUdmfData(drag_Event, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step2.set params not null, related function is called.
+     */
+    ret = OH_ArkUI_DragEvent_GetUdmfData(drag_Event, data);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DragAndDropTest0051
+ * @tc.desc: Test OH_ArkUI_DragAction_SetPixelMaps.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0051, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create params.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto rootFrameNode = reinterpret_cast<ArkUI_Node*>(rootNode);
+    ASSERT_NE(rootFrameNode, nullptr);
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(rootFrameNode->uiNodeHandle);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = NG::MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(context);
+    auto* dragAction = OH_ArkUI_CreateDragActionWithNode(rootNode);
+    ASSERT_NE(dragAction, nullptr);
+    OH_PixelmapNative* pixelmapArray[2];
+    int32_t size = 2;
+
+    /**
+     * @tc.steps: step2.set params null, related function is called.
+     */
+    int32_t ret = OH_ArkUI_DragAction_SetPixelMaps(nullptr, nullptr, 0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ret = OH_ArkUI_DragAction_SetPixelMaps(dragAction, nullptr, 0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ret = OH_ArkUI_DragAction_SetPixelMaps(dragAction, pixelmapArray, 0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step2.set params not null, related function is called.
+     */
+    ret = OH_ArkUI_DragAction_SetPixelMaps(dragAction, pixelmapArray, size);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DragAndDropTest0052
+ * @tc.desc: Test OH_ArkUI_DragAction_SetData.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0052, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create DragEvent, related function is called.
+     */
+    auto uiContext = new ArkUI_Context({ .id = 1 });
+    auto dragAction = OH_ArkUI_CreateDragActionWithContext(uiContext);
+    EXPECT_NE(dragAction, nullptr);
+    OH_UdmfData* data = OH_UdmfData_Create();
+    ASSERT_NE(data, nullptr);
+
+    /**
+     * @tc.steps: step2.set params null.
+     */
+    int32_t ret = OH_ArkUI_DragAction_SetData(nullptr, data);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ret = OH_ArkUI_DragAction_SetData(dragAction, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step2.set params not null, related function is called.
+     */
+    ret = OH_ArkUI_DragAction_SetData(dragAction, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DragAndDropTest0053
+ * @tc.desc: Test OH_ArkUI_DragEvent_StartDataLoading.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0053, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create params.
+     */
+    char key[] = "key_string1";
+    OH_UdmfGetDataParams* options = OH_UdmfGetDataParams_Create();
+    unsigned int keyLen = 11;
+    ArkUIDragEvent dragEvent;
+    dragEvent.key = "key_string";
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+    ASSERT_NE(drag_Event, nullptr);
+
+    /**
+     * @tc.steps: step2.set params null, related function is called.
+     */
+    int32_t ret = OH_ArkUI_DragEvent_StartDataLoading(nullptr, nullptr, nullptr, 0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ret = OH_ArkUI_DragEvent_StartDataLoading(drag_Event, nullptr, nullptr, 0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ret = OH_ArkUI_DragEvent_StartDataLoading(drag_Event, options, nullptr, 0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ret = OH_ArkUI_DragEvent_StartDataLoading(drag_Event, options, key, 0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step2.set params not null, related function is called.
+     */
+    ret = OH_ArkUI_DragEvent_StartDataLoading(drag_Event, options, key, keyLen);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DragAndDropTest0054
+ * @tc.desc: Test OH_ArkUI_DragEvent_RequestDragEndPending.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0054, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create DragEvent, related function is called.
+     */
+    int32_t requestIdentify = 1;
+    ArkUIDragEvent dragEvent;
+    dragEvent.key = "key_string";
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+    ASSERT_NE(drag_Event, nullptr);
+
+    /**
+     * @tc.steps: step2.set params null.
+     */
+    int32_t ret = OH_ArkUI_DragEvent_RequestDragEndPending(drag_Event, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED);
+
+    /**
+     * @tc.steps: step2.set params not null, related function is called.
+     */
+    ret = OH_ArkUI_DragEvent_RequestDragEndPending(drag_Event, &requestIdentify);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED);
+}
+
+/**
+ * @tc.name: DragAndDropTest0055
+ * @tc.desc: Test OH_ArkUI_NotifyDragResult.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0055, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create DragEvent, related function is called.
+     */
+    int32_t requestIdentify = 1;
+    ArkUI_DragResult result = ARKUI_DRAG_RESULT_SUCCESSFUL;
+
+    /**
+     * @tc.steps: step2.set params null.
+     */
+    int32_t ret = OH_ArkUI_NotifyDragResult(0, result);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED);
+
+    /**
+     * @tc.steps: step2.set params not null, related function is called.
+     */
+    ret = OH_ArkUI_NotifyDragResult(requestIdentify, result);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED);
+}
+
+/**
+ * @tc.name: DragAndDropTest0056
+ * @tc.desc: Test OH_ArkUI_NotifyDragEndPendingDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0056, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create DragEvent, related function is called.
+     */
+    int32_t requestIdentify = 1;
+
+    /**
+     * @tc.steps: step2.set params null.
+     */
+    int32_t ret = OH_ArkUI_NotifyDragEndPendingDone(0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED);
+
+    /**
+     * @tc.steps: step2.set params not null, related function is called.
+     */
+    ret = OH_ArkUI_NotifyDragEndPendingDone(requestIdentify);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED);
+}
+
+/**
+ * @tc.name: DragAndDropTest0057
+ * @tc.desc: Test OH_ArkUI_EnableDropDisallowedBadge.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0057, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create DragEvent, related function is called.
+     */
+    int32_t requestIdentify = 1;
+    auto uiContext = new ArkUI_Context({ .id = 1 });
+
+    /**
+     * @tc.steps: step2.set params null.
+     */
+    int32_t ret = OH_ArkUI_EnableDropDisallowedBadge(nullptr, requestIdentify);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step2.set params not null, related function is called.
+     */
+    ret = OH_ArkUI_EnableDropDisallowedBadge(uiContext, requestIdentify);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
 } // namespace OHOS::Ace

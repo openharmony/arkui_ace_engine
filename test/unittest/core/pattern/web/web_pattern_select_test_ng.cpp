@@ -21,14 +21,19 @@
 #define private public
 #define protected public
 #include "core/components/web/resource/web_delegate.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
-#undef protected
-#undef private
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
+#undef protected
+#undef private
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
@@ -1571,6 +1576,98 @@ HWTEST_F(WebPatternSelectTestNg, CreateSnapshotImageFrameNode_001, TestSize.Leve
     webPattern->RemoveSnapshotFrameNode();
     webPattern->RemoveSnapshotFrameNode();
     ASSERT_NE(webPattern, nullptr);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: GetShadowFromTheme_001
+ * @tc.desc: GetShadowFromTheme when get type none.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, GetShadowFromTheme_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+   auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    MockPipelineContext::SetUp();
+    Shadow shadow;
+    EXPECT_EQ(webPattern->GetShadowFromTheme(ShadowStyle::None, shadow), true);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: GetShadowFromTheme_002
+ * @tc.desc: GetShadowFromTheme when get type default.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, GetShadowFromTheme_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<ShadowTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    std::string src = "web_test";
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    stack->Push(frameNode);
+
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnModifyDone();
+
+    Shadow shadow;
+    EXPECT_EQ(webPattern->GetShadowFromTheme(ShadowStyle::OuterDefaultSM, shadow), true);
+
+    MockContainer::TearDown();
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: GetShadowFromTheme_003
+ * @tc.desc: GetShadowFromTheme when manager is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, GetShadowFromTheme_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    std::string src = "web_test";
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    stack->Push(frameNode);
+
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnModifyDone();
+
+    Shadow shadow;
+    EXPECT_EQ(webPattern->GetShadowFromTheme(ShadowStyle::OuterDefaultSM, shadow), false);
+
+    MockContainer::TearDown();
     MockPipelineContext::TearDown();
 #endif
 }

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/unittest/core/pattern/relative_container/relative_container_base_test_ng.h"
 using namespace std;
 namespace OHOS::Ace::NG {
@@ -249,5 +250,30 @@ HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest2, TestSize.Level1)
     RelativeContainerModelNG::SetGuideline(frameNode, guidelineInfos);
     auto layoutProperty = frameNode->GetLayoutProperty<RelativeContainerLayoutProperty>();
     EXPECT_EQ(layoutProperty->HasGuideline(), true);
+}
+
+/**
+ * @tc.name: ResObjGuidelineTest3
+ * @tc.desc: Test ResObjGuidelineTest3 of Relative_Container
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest3, TestSize.Level1)
+{
+    g_isConfigChangePerform = false;
+    SystemProperties::ConfigChangePerform();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    RelativeContainerModelNG::ResetResObj(frameNode, "");
+    auto layoutProperty1 = frameNode->GetLayoutProperty<RelativeContainerLayoutProperty>();
+    EXPECT_EQ(layoutProperty1->HasGuideline(), true);
+    g_isConfigChangePerform = true;
+    SystemProperties::ConfigChangePerform();
+    RelativeContainerModelNG::ResetResObj(frameNode, "");
+    auto layoutProperty2 = frameNode->GetLayoutProperty<RelativeContainerLayoutProperty>();
+    g_isConfigChangePerform = false;
+    EXPECT_EQ(layoutProperty2->HasGuideline(), true);
 }
 } // namespace OHOS::Ace::NG

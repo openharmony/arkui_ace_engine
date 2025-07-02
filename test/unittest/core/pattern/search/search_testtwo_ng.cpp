@@ -21,6 +21,9 @@
 
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
@@ -3135,5 +3138,183 @@ HWTEST_F(SearchTestTwoNg, searchLayoutCancelButtonTest, TestSize.Level1)
     layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+}
+
+/**
+ * @tc.name: searchMeasureTest01
+ * @tc.desc: Test search Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchMeasureTest01, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    */
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto searchPattern = AceType::DynamicCast<SearchPattern>(frameNode->GetPattern());
+    ASSERT_NE(searchPattern, nullptr);
+    auto searchLayoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(searchPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(searchLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(searchLayoutAlgorithm));
+
+    // textField Wrapper
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    RefPtr<GeometryNode> textFieldNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> textFieldNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        textFieldFrameNode, textFieldNodeGeometryNode, textFieldFrameNode->GetLayoutProperty());
+    ASSERT_NE(textFieldNodeLayoutWrapper, nullptr);
+    layoutWrapper->AppendChild(textFieldNodeLayoutWrapper);
+
+    // image Wrapper
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
+    ASSERT_NE(imageFrameNode, nullptr);
+    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    RefPtr<GeometryNode> imageNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> imageNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        imageFrameNode, imageNodeGeometryNode, imageFrameNode->GetLayoutProperty());
+    ASSERT_NE(imageNodeLayoutWrapper, nullptr);
+    layoutWrapper->AppendChild(imageNodeLayoutWrapper);
+
+    // cancelImage Wrapper
+    auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    ASSERT_NE(cancelImageFrameNode, nullptr);
+    auto cancelImageLayoutProperty = cancelImageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    RefPtr<GeometryNode> cancelImageNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> cancelImageNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        cancelImageFrameNode, cancelImageNodeGeometryNode, cancelImageFrameNode->GetLayoutProperty());
+    ASSERT_NE(cancelImageNodeLayoutWrapper, nullptr);
+    layoutWrapper->AppendChild(cancelImageNodeLayoutWrapper);
+
+    // cancelButton Wrapper
+    auto cancelButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+    ASSERT_NE(cancelButtonFrameNode, nullptr);
+    auto cancelButtonLayoutProperty = cancelButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    RefPtr<GeometryNode> cancelButtonNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> cancelButtonNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        cancelButtonFrameNode, cancelButtonNodeGeometryNode, cancelButtonFrameNode->GetLayoutProperty());
+    ASSERT_NE(cancelButtonNodeLayoutWrapper, nullptr);
+    layoutWrapper->AppendChild(cancelButtonNodeLayoutWrapper);
+
+    // button Wrapper
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    RefPtr<GeometryNode> buttonNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> buttonNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        buttonFrameNode, buttonNodeGeometryNode, buttonFrameNode->GetLayoutProperty());
+    ASSERT_NE(buttonNodeLayoutWrapper, nullptr);
+    layoutWrapper->AppendChild(buttonNodeLayoutWrapper);
+
+    // divider Wrapper
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(DIVIDER_INDEX));
+    ASSERT_NE(dividerFrameNode, nullptr);
+    auto dividerLayoutProperty = dividerFrameNode->GetLayoutProperty<DividerLayoutProperty>();
+    RefPtr<GeometryNode> dividerNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> dividerNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        dividerFrameNode, dividerNodeGeometryNode, dividerFrameNode->GetLayoutProperty());
+    ASSERT_NE(dividerNodeLayoutWrapper, nullptr);
+    layoutWrapper->AppendChild(dividerNodeLayoutWrapper);
+
+    LayoutConstraintF LayoutConstraintValidSize;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintValidSize);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(searchPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    auto layoutWrapperPtr = AccessibilityManager::RawPtr(layoutWrapper);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutAlgorithm->TextFieldMeasure(layoutWrapperPtr);
+    layoutAlgorithm->SelfMeasure(layoutWrapperPtr);
+    EXPECT_EQ(TextBase::GetLayoutCalPolicy(layoutWrapperPtr, true), LayoutCalPolicy::NO_MATCH);
+
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    layoutAlgorithm->TextFieldMeasure(layoutWrapperPtr);
+    layoutAlgorithm->SelfMeasure(layoutWrapperPtr);
+    EXPECT_EQ(TextBase::GetLayoutCalPolicy(layoutWrapperPtr, true), LayoutCalPolicy::MATCH_PARENT);
+
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+    layoutAlgorithm->TextFieldMeasure(layoutWrapperPtr);
+    layoutAlgorithm->SelfMeasure(layoutWrapperPtr);
+    EXPECT_EQ(TextBase::GetLayoutCalPolicy(layoutWrapperPtr, true), LayoutCalPolicy::WRAP_CONTENT);
+
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    layoutAlgorithm->TextFieldMeasure(layoutWrapperPtr);
+    layoutAlgorithm->SelfMeasure(layoutWrapperPtr);
+    EXPECT_EQ(TextBase::GetLayoutCalPolicy(layoutWrapperPtr, true), LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
+
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    layoutAlgorithm->SelfMeasure(layoutWrapperPtr);
+    EXPECT_EQ(TextBase::GetLayoutCalPolicy(layoutWrapperPtr, false), LayoutCalPolicy::NO_MATCH);
+
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    layoutAlgorithm->SelfMeasure(layoutWrapperPtr);
+    EXPECT_EQ(TextBase::GetLayoutCalPolicy(layoutWrapperPtr, false), LayoutCalPolicy::MATCH_PARENT);
+
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+    layoutAlgorithm->SelfMeasure(layoutWrapperPtr);
+    EXPECT_EQ(TextBase::GetLayoutCalPolicy(layoutWrapperPtr, false), LayoutCalPolicy::WRAP_CONTENT);
+
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    layoutAlgorithm->SelfMeasure(layoutWrapperPtr);
+    EXPECT_EQ(TextBase::GetLayoutCalPolicy(layoutWrapperPtr, false), LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
+
+    layoutProperty->ResetStrokeWidth();
+    layoutProperty->ResetStrokeColor();
+    textFieldLayoutProperty->ResetTextColor();
+    layoutAlgorithm->UpdateFontFeature(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutProperty->HasStrokeWidth(), false);
+
+    layoutProperty->UpdateStrokeWidth(CalcDimension(10.0f, DimensionUnit::VP));
+    layoutProperty->UpdateStrokeColor(Color::RED);
+    textFieldLayoutProperty->UpdateTextColor(Color::BLACK);
+    layoutAlgorithm->UpdateFontFeature(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutProperty->HasStrokeWidth(), true);
+
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+
+    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize.SetWidth(30);
+    textFieldLayoutProperty->UpdateLineHeight(1.0_vp);
+    layoutAlgorithm->SetTextFieldLayoutConstraintHeight(
+        childLayoutConstraint, 50, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(textFieldLayoutProperty->HasLineHeight(), true);
+
+    layoutProperty->UpdateSearchButton("search");
+    frameNode->MarkModifyDone();
+    frameNode->SetActive();
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    MockPipelineContext::GetCurrent()->FlushUITasks();
+    layoutAlgorithm->DividerMeasure(layoutWrapperPtr);
+
+    auto buttonWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
+    ASSERT_NE(buttonWrapper, nullptr);
+    buttonWrapper->RemoveAllChildInRenderTree();
+    pipeline->SetFontScale(1.0f);
+    layoutAlgorithm->SearchButtonMeasure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(pipeline->GetFontScale(), 0.5f);
+
+    pipeline->SetFontScale(3.0f);
+    layoutAlgorithm->SearchButtonMeasure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(pipeline->GetFontScale(), 0.5f);
 }
 } // namespace OHOS::Ace::NG

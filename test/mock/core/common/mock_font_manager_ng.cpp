@@ -21,6 +21,7 @@
 namespace OHOS::Ace {
 
 std::string FontManager::appCustomFont_ = "";
+bool FontManager::isDefaultFontChanged_ = false;
 const std::vector<std::string>& FontManager::GetFontNames() const
 {
     return {};
@@ -34,7 +35,7 @@ bool FontManager::RegisterCallbackNG(
 
 bool FontManager::IsDefaultFontChanged()
 {
-    return false;
+    return isDefaultFontChanged_;
 }
 
 void FontManager::UnRegisterCallbackNG(const WeakPtr<NG::UINode>& node) {}

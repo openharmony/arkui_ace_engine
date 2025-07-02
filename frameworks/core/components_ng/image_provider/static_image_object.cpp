@@ -76,6 +76,7 @@ RefPtr<ImageObject> StaticImageObject::Clone()
 {
     auto object = MakeRefPtr<StaticImageObject>(src_, imageSize_, data_);
     object->SetOrientation(orientation_);
+    object->SetImageFileSize(GetImageFileSize());
     return object;
 }
 } // namespace OHOS::Ace::NG

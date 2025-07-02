@@ -118,6 +118,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/interfaces/mock_content_modifier.cpp",
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
     "mock_input_method_manager.cpp",
+    "mock_rosen_render_context.cpp",
     "pipeline_context_test_ng.cpp",
     "pipeline_context_test_ng_new.cpp",
     "pipeline_context_test_ng_two.cpp",

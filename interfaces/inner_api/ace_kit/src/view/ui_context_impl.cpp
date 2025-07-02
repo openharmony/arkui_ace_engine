@@ -151,4 +151,14 @@ void UIContextImpl::UnregisterArkUIObjectLifecycleCallback()
     CHECK_NULL_VOID(context_);
     context_->UnregisterArkUIObjectLifecycleCallback();
 }
+
+NG::OffsetF UIContextImpl::GetContainerModalButtonsOffset()
+{
+    Ace::NG::RectF buttonsRect;
+    CHECK_NULL_RETURN(context_, buttonsRect.GetOffset());
+    Ace::NG::RectF containerModal;
+    context_->GetContainerModalButtonsRect(containerModal, buttonsRect);
+    return buttonsRect.GetOffset();
+}
+
 } // namespace OHOS::Ace::Kit

@@ -1415,4 +1415,70 @@ HWTEST_F(RichEditorSpanTest, ToTextShadowSpan001, TestSize.Level1)
     EXPECT_NE(spanString->ToTextShadowSpan(spanItem, start, end), nullptr);
 }
 
+/**
+ * @tc.name: CreateImageSourceInfo001
+ * @tc.desc: test CreateImageSourceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanTest, CreateImageSourceInfo001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateEventHub();
+    ImageSpanOptions options;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(pixelMap, nullptr);
+    options.imagePixelMap = pixelMap;
+    richEditorPattern->CreateImageSourceInfo(options);
+    EXPECT_EQ(options.imagePixelMap.has_value(), true);
+}
+
+/**
+ * @tc.name: InsertSpanByBackData001
+ * @tc.desc: test InsertSpanByBackData
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanTest, InsertSpanByBackData001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"");
+    richEditorPattern->textSelector_ = TextSelector(0, 6);
+    EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
+    richEditorPattern->InsertSpanByBackData(spanString);
+    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
+    richEditorPattern->ClearOperationRecords();
+
+    richEditorPattern->placeholderSpansMap_[u"![id1]"] = AceType::MakeRefPtr<SpanItem>();
+    spanString = AceType::MakeRefPtr<SpanString>(u"test![id1]");
+    auto start = richEditorPattern->operationRecords_.size();
+    richEditorPattern->InsertSpanByBackData(spanString);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
+    richEditorPattern->ClearOperationRecords();
+}
+
+/**
+ * @tc.name: AddTextSpan001
+ * @tc.desc: test AddTextSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanTest, AddTextSpan001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TextSpanOptions options;
+    richEditorPattern->previewTextRecord_.previewContent = u"123";
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    EXPECT_EQ(richEditorPattern->previewTextRecord_.IsValid(), true);
+    int32_t res = richEditorPattern->AddTextSpan(options, TextChangeReason::UNKNOWN, true, 0);
+    EXPECT_EQ(res, 0);
+}
+
 } // namespace OHOS::Ace::NG

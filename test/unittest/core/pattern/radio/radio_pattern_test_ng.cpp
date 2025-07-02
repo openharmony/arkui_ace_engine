@@ -17,6 +17,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -1902,5 +1903,122 @@ HWTEST_F(RadioPatternTestNg, InitDefaultMarginTest001, TestSize.Level1)
     pattern->SetBuilderFunc(nullptr);
     pattern->InitDefaultMargin();
     EXPECT_NE(layoutProperty->GetMarginProperty(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateRadioComponentColor
+ * @tc.desc: Test UpdateRadioComponentColor for all RadioColorType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, UpdateRadioComponentColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create radio frame node and initialize components.
+     * @tc.expected: step1. Frame node and pattern are created successfully.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Update checked background color and verify.
+     * @tc.expected: step2. Checked background color is updated to RED.
+     */
+    pattern->UpdateRadioComponentColor(Color::RED, RadioColorType::CHECKED_BACKGROUND_COLOR);
+    auto color1 = paintProperty->GetRadioCheckedBackgroundColor();
+    ASSERT_TRUE(color1.has_value());
+    EXPECT_EQ(color1.value(), Color::RED);
+
+    /**
+     * @tc.steps: step3. Update unchecked border color and verify.
+     * @tc.expected: step3. Unchecked border color is updated to BLUE.
+     */
+    pattern->UpdateRadioComponentColor(Color::BLUE, RadioColorType::UNCHECKED_BORDER_COLOR);
+    auto color2 = paintProperty->GetRadioUncheckedBorderColor();
+    ASSERT_TRUE(color2.has_value());
+    EXPECT_EQ(color2.value(), Color::BLUE);
+
+    /**
+     * @tc.steps: step4. Update indicator color and verify.
+     * @tc.expected: step4. Indicator color is updated to GREEN.
+     */
+    pattern->UpdateRadioComponentColor(Color::GREEN, RadioColorType::INDICATOR_COLOR);
+    auto color3 = paintProperty->GetRadioIndicatorColor();
+    ASSERT_TRUE(color3.has_value());
+    EXPECT_EQ(color3.value(), Color::GREEN);
+
+    EXPECT_EQ(pattern->preTypeIsBuilder_, false);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate
+ * @tc.desc: Test OnColorConfigurationUpdate updates paint properties correctly when user has not set colors.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, OnColorConfigurationUpdate, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API version and create radio frame node.
+     * @tc.expected: step1. API version is set and frame node is created.
+     */
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    ASSERT_NE(radioTheme, nullptr);
+    pattern->OnColorConfigurationUpdate();
+
+    /**
+     * @tc.steps: step2. Set theme colors and update with user color flags.
+     * @tc.expected: step2. Checked background color is updated to theme's active color (BLACK).
+     */
+    g_isConfigChangePerform = true;
+    radioTheme->activeColor_ = Color::BLACK;
+    radioTheme->inactiveColor_ = Color::BLACK;
+    radioTheme->pointColor_ = Color::BLACK;
+    paintProperty->UpdateRadioCheckedBackgroundColorSetByUser(false);
+    paintProperty->UpdateRadioUncheckedBorderColorSetByUser(true);
+    paintProperty->UpdateRadioIndicatorColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetRadioCheckedBackgroundColorValue(), Color::BLACK);
+
+    /**
+     * @tc.steps: step3. Reverse user color flags and verify unchecked border color.
+     * @tc.expected: step3. Unchecked border color is updated to theme's inactive color (BLACK).
+     */
+    paintProperty->UpdateRadioCheckedBackgroundColorSetByUser(true);
+    paintProperty->UpdateRadioUncheckedBorderColorSetByUser(false);
+    paintProperty->UpdateRadioIndicatorColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetRadioUncheckedBorderColorValue(), Color::BLACK);
+
+    /**
+     * @tc.steps: step4. Reverse user color flags again and verify indicator color.
+     * @tc.expected: step4. Indicator color is updated to theme's point color (BLACK).
+     */
+    paintProperty->UpdateRadioCheckedBackgroundColorSetByUser(true);
+    paintProperty->UpdateRadioUncheckedBorderColorSetByUser(true);
+    paintProperty->UpdateRadioIndicatorColorSetByUser(false);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetRadioIndicatorColorValue(), Color::BLACK);
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

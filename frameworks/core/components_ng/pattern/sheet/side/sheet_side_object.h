@@ -69,6 +69,16 @@ public:
         return resizeDecreasedHeight_;
     }
 
+    bool CheckIfUpdateObject(SheetType newType) override
+    {
+        return newType != SheetType::SHEET_SIDE;
+    }
+
+    bool IsSheetObjectBase() const override
+    {
+        return false;
+    }
+
 private:
     void UpdateSidePosition();
     void UpdateDragBarStatus();

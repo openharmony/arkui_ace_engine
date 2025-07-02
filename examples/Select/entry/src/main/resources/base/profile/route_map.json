@@ -101,6 +101,21 @@
       "buildFunction": "SelectLevel4Builder"
     },
     {
+      "name": "SelectLevel5",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel5.ets",
+      "buildFunction": "SelectLevel5Builder"
+    },
+    {
+      "name": "SelectLevel6",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel6.ets",
+      "buildFunction": "SelectLevel6Builder"
+    },
+    {
+      "name": "SelectLevel7",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel7.ets",
+      "buildFunction": "SelectLevel7Builder"
+    },
+    {
       "name": "ButtonIndex",
       "pageSourceFile": "src/main/ets/pages/components/button/Index.ets",
       "buildFunction": "ButtonIndexBuilder"
@@ -386,6 +401,21 @@
       "buildFunction": "RatingCustomBuilder"
     },
     {
+      "name": "RatingLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/rating/ratingLevel0.ets",
+      "buildFunction": "RatingLevel0Builder"
+    },
+    {
+      "name": "RatingLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/rating/ratingLevel1.ets",
+      "buildFunction": "RatingLevel1Builder"
+    },
+    {
+      "name": "RatingLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/rating/ratingLevel2.ets",
+      "buildFunction": "RatingLevel2Builder"
+    },
+    {
       "name": "SliderIndex",
       "pageSourceFile": "src/main/ets/pages/components/slider/Index.ets",
       "buildFunction": "SliderIndexBuilder"
@@ -489,6 +519,21 @@
       "name": "RadioLevel1",
       "pageSourceFile": "src/main/ets/pages/components/radio/radioLevel1.ets",
       "buildFunction": "RadioLevel1Builder"
+    },
+    {
+      "name": "RadioLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioLevel2.ets",
+      "buildFunction": "RadioLevel2Builder"
+    },
+    {
+      "name": "RadioLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioLevel3.ets",
+      "buildFunction": "RadioLevel3Builder"
+    },
+    {
+      "name": "RadioLevel4",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioLevel4.ets",
+      "buildFunction": "RadioLevel4Builder"
     },
     {
       "name": "FormIndex",

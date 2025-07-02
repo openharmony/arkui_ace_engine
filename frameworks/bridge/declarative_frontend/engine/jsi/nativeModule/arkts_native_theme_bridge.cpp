@@ -83,7 +83,8 @@ bool ThemeBridge::HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>
         Color color;
         auto colorParams = panda::ArrayRef::GetValueAt(vm, colorsArg, i);
         RefPtr<ResourceObject> resObj;
-        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color, resObj)) {
+        NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color, resObj, nodeInfo)) {
             color = basisTheme->Colors()->GetByIndex(i);
         }
         resObjs.push_back(resObj);

@@ -37,6 +37,7 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
+    bool isEnableChildrenMatchParent = pattern->IsEnableChildrenMatchParent();
     if (buttonLayoutProperty->HasType() && buttonLayoutProperty->GetType() == ButtonType::CIRCLE &&
         !pattern->GetHasCustomPadding()) {
         NG::PaddingProperty paddings;
@@ -71,10 +72,35 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         // If the button has not label, measure the child directly.
         for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+            auto childLayoutProperty = child->GetLayoutProperty();
+            CHECK_NULL_CONTINUE(childLayoutProperty);
+            if (isEnableChildrenMatchParent &&
+                ProcessLayoutPolicyIsNotNoMatch(childLayoutProperty->GetLayoutPolicyProperty())) {
+                layoutPolicyChildren_.emplace_back(child);
+                continue;
+            }
             child->Measure(layoutConstraint);
         }
     }
     PerformMeasureSelf(layoutWrapper);
+    if (isEnableChildrenMatchParent) {
+        auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+        MeasureAdaptiveLayoutChildren(layoutWrapper, frameSize);
+    }
+}
+
+bool ButtonLayoutAlgorithm::ProcessLayoutPolicyIsNotNoMatch(std::optional<NG::LayoutPolicyProperty> layoutPolicy)
+{
+    if (layoutPolicy.has_value()) {
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
+        if (widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH) != LayoutCalPolicy::NO_MATCH ||
+            heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH) != LayoutCalPolicy::NO_MATCH) {
+            return true;
+        }
+        return false;
+    }
+    return false;
 }
 
 void ButtonLayoutAlgorithm::HandleChildLayoutConstraint(
@@ -238,6 +264,14 @@ void IsMatchParentWidthOrHeight(LayoutConstraintF& layoutConstraint,
     }
 }
 
+void UpdateHeightIfMatchPolicy(std::optional<NG::LayoutPolicyProperty> layoutPolicy, SizeF& frameSize,
+    float matchParentHeight)
+{
+    if (layoutPolicy.has_value() && layoutPolicy->IsHeightMatch()) {
+        frameSize.SetHeight(matchParentHeight);
+    }
+}
+
 // Called to perform measure current render node.
 void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
 {
@@ -245,6 +279,7 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(buttonLayoutProperty);
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto matchParentHeight = frameSize.Height();
     if (NeedAgingMeasure(layoutWrapper)) {
         return;
     }
@@ -268,8 +303,7 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
             IsMatchParentWidthOrHeight(layoutConstraint, layoutPolicy, layoutWrapper);
             HandleLabelCircleButtonFrameSize(layoutConstraint, frameSize, defaultHeight);
         } else {
-            if (selfLayoutConstraint && !selfLayoutConstraint->selfIdealSize.Height().has_value()
-                && !layoutPolicy->IsHeightMatch()) {
+            if (selfLayoutConstraint && !selfLayoutConstraint->selfIdealSize.Height().has_value()) {
                 auto layoutContraint = buttonLayoutProperty->GetLayoutConstraint();
                 CHECK_NULL_VOID(layoutContraint);
                 auto maxHeight = layoutContraint->maxSize.Height();
@@ -278,6 +312,7 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
                 actualHeight = std::min(actualHeight, maxHeight);
                 actualHeight = std::max(actualHeight, minHeight);
                 frameSize.SetHeight(maxHeight > defaultHeight ? std::max(defaultHeight, actualHeight) : maxHeight);
+                UpdateHeightIfMatchPolicy(layoutPolicy, frameSize, matchParentHeight);
             }
         }
         // Determine if the button needs to fit the font size.

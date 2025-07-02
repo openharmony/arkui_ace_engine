@@ -1028,6 +1028,7 @@ HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg025, TestSize.Level1)
     FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
 
     swiperParameters.colorVal = Color::RED;
+    swiperParameters.parametersByUser.insert("colorVal");
     model.SetDotIndicatorStyle(frameNode, swiperParameters);
     model.SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
     indicatorPattern_->OnColorModeChange(static_cast<uint32_t>(ColorMode::DARK));

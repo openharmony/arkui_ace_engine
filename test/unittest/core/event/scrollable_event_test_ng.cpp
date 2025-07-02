@@ -364,4 +364,34 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest006, Test
         result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
     EXPECT_FALSE(results);
 }
+
+/**
+ * @tc.name: ScrollableEventOnCollectTouchTargetTest007
+ * @tc.desc: Create ScrollableEvent and test CollectTouchTarget
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest007, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto scrollableActuator =
+        AceType::MakeRefPtr<ScrollableActuator>((AceType::WeakClaim(AceType::RawPtr(gestureEventHub))));
+    auto scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(SCROLLABLE_EVENT_AXIS);
+    auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    scrollableEvent->SetScrollable(scrollable);
+    scrollableActuator->AddScrollableEvent(scrollableEvent);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+    scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
+        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    scrollableActuator->clickRecognizer_->targetComponent_ = targetComponent;
+    EXPECT_EQ(scrollableActuator->clickRecognizer_->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+    scrollable->isTouching_ = true;
+    scrollable->currentVelocity_ = HTMBLOCK_VELOCITY + 1.0f;
+    scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
+        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
+    EXPECT_EQ(scrollableActuator->clickRecognizer_->TriggerGestureJudgeCallback(), GestureJudgeResult::CONTINUE);
+}
 } // namespace OHOS::Ace::NG

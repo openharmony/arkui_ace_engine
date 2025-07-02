@@ -57,8 +57,9 @@ public:
         }
     }
 
-    static void UpdateTextStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle)
+    static void UpdateTextStyle(RefPtr<SpanNode>& spanNode, const struct UpdateSpanStyle& updateSpanStyle)
     {
+        CHECK_NULL_VOID(spanNode);
         auto spanItem = spanNode->GetSpanItem();
         CHECK_NULL_VOID(spanItem);
         spanNode->UpdateTextColor(updateSpanStyle.updateTextColor);
@@ -120,7 +121,7 @@ public:
 
     void UpdateTextStyleByTypingStyle(RefPtr<SpanItem>& spanItem)
     {
-        CHECK_NULL_VOID(spanItem);
+        CHECK_NULL_VOID(spanItem && typingFontStyle_.has_value());
         auto spanNode = AceType::MakeRefPtr<SpanNode>(0);
         spanNode->SetSpanItem(spanItem);
         UpdateTextStyleByTypingStyle(spanNode);
@@ -224,8 +225,8 @@ public:
     bool NeedTypingParagraphStyle(const std::list<RefPtr<SpanItem>>& spans, int32_t caretPosition)
     {
         // empty
-        if (spans.empty()) return true;
-        
+        CHECK_NULL_RETURN(!spans.empty(), true);
+
         // insert in last new Line
         auto contentLength = spans.back()->position;
         if (caretPosition == contentLength && spans.back()->content.back() == u'\n') {
@@ -263,6 +264,7 @@ public:
 
     void HandleStyledStringByTypingTextStyle(int length, std::vector<RefPtr<SpanBase>>& spans)
     {
+        CHECK_NULL_VOID(typingTextStyle_.has_value() && typingFontStyle_.has_value());
         auto& textStyle = typingTextStyle_.value();
         auto& updateSpanStyle = typingFontStyle_.value();
         spans.push_back(CreateFontSpanByTextStyle(updateSpanStyle, textStyle, length));

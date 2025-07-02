@@ -57,6 +57,8 @@ public:
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
+    void UpdateBoundsRect(const RectF& frameRect, bool clip);
+
     void UpdateDividerList(const DividerInfo& dividerInfo, bool clip);
 
     ListDivider HandleDividerList(int32_t index, bool lastIsGroup, int32_t laneIdx, const DividerInfo& dividerInfo);

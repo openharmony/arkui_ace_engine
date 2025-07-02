@@ -248,7 +248,7 @@ void JSTextTimer::SetTextShadow(const JSCallbackInfo& info)
     }
     std::vector<Shadow> shadows;
     ParseTextShadowFromShadowObject(info[0], shadows);
-    if (!shadows.empty()) {
+    if (!shadows.empty() || SystemProperties::ConfigChangePerform()) {
         TextTimerModel::GetInstance()->SetTextShadow(shadows);
     }
 }

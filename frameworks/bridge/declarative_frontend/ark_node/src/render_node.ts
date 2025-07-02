@@ -202,14 +202,16 @@ class ColorMetrics {
   private alpha_: number;
   private resourceId_: number;
   private colorSpace_: ColorSpace;
+  private res_: Resource | undefined;
   private static clamp(value: number): number {
     return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
   }
-  private constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE) {
+  private constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE, res?: Resource) {
     this.red_ = ColorMetrics.clamp(red);
     this.green_ = ColorMetrics.clamp(green);
     this.blue_ = ColorMetrics.clamp(blue);
     this.alpha_ = ColorMetrics.clamp(alpha);
+    this.res_ = res === undefined ? undefined : res;
   }
   private toNumeric(): number {
     return (this.alpha_ << 24) + (this.red_ << 16) + (this.green_ << 8) + this.blue_;
@@ -227,7 +229,7 @@ class ColorMetrics {
   static rgba(red: number, green: number, blue: number, alpha: number = MAX_ALPHA_VALUE): ColorMetrics {
     return new ColorMetrics(red, green, blue, alpha * MAX_CHANNEL_VALUE);
   }
-  static colorWithSpace(colorSpace: ColorSpace, red: number, green: number, blue: number, alpha?: number): ColorMetrics {
+  static colorWithSpace(colorSpace: ColorSpace, red: number, green: number, blue: number, alpha: number = MAX_ALPHA_VALUE): ColorMetrics {
     let redInt = Math.round(red * MAX_CHANNEL_VALUE);
     let greenInt = Math.round(green * MAX_CHANNEL_VALUE);
     let blueInt = Math.round(blue * MAX_CHANNEL_VALUE);
@@ -276,7 +278,7 @@ class ColorMetrics {
       const blue = chanels[2];
       const alpha = chanels[3];
       const resourceId = chanels[4];
-      const colorMetrics = new ColorMetrics(red, green, blue, alpha);
+      const colorMetrics = new ColorMetrics(red, green, blue, alpha, color);
       colorMetrics.setResourceId(resourceId);
       return colorMetrics;
     } else if (typeof color === 'number') {
@@ -363,7 +365,9 @@ class ColorMetrics {
     return this.resourceId_;
   }
   setColorSpace(colorSpace: ColorSpace): void {
-    this.colorSpace_ = colorSpace;
+    if (ColorSpace.DISPLAY_P3 == colorSpace || ColorSpace.SRGB == colorSpace) {
+      this.colorSpace_ = colorSpace;
+    }
   }
   getColorSpace(): ColorSpace {
     return this.colorSpace_;

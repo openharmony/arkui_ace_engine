@@ -492,8 +492,8 @@ class ShadowModifier extends ModifierWithKey {
       getUINativeModule().common.resetShadow(node);
     }
     else {
-      if (isNumber(this.value)) {
-        getUINativeModule().common.setShadow(node, this.value, undefined, undefined, undefined, undefined, undefined, undefined);
+      if (isNumber(this.value.shadowStyle)) {
+        getUINativeModule().common.setShadow(node, this.value.shadowStyle, undefined, undefined, undefined, undefined, undefined, undefined);
       }
       else {
         getUINativeModule().common.setShadow(node, undefined, this.value.radius,
@@ -503,6 +503,9 @@ class ShadowModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
+    if (isNumber(this.value.shadowStyle)) {
+      return true;
+    }
     return !(this.stageValue.radius === this.value.radius &&
       this.stageValue.type === this.value.type &&
       this.stageValue.color === this.value.color &&
@@ -1006,10 +1009,16 @@ class OutlineColorModifier extends ModifierWithKey {
   }
   checkObjectDiff() {
     if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !(this.stageValue.left === this.value.left &&
-        this.stageValue.right === this.value.right &&
-        this.stageValue.top === this.value.top &&
-        this.stageValue.bottom === this.value.bottom);
+      if ((isResource(this.stageValue.left) || isResource(this.stageValue.right) ||
+        isResource(this.stageValue.top) || isResource(this.stageValue.bottom)) &&
+        (isResource(this.value.left) || isResource(this.value.right) || isResource(this.value.top) || isResource(this.value.bottom))) {
+        return true;
+      } else {
+        return !(this.stageValue.left === this.value.left &&
+          this.stageValue.right === this.value.right &&
+          this.stageValue.top === this.value.top &&
+          this.stageValue.bottom === this.value.bottom);
+      }
     }
     else {
       return true;
@@ -1142,10 +1151,17 @@ class OutlineModifier extends ModifierWithKey {
           bottomColor = this.value.color;
         }
         else {
-          leftColor = this.value.color.left;
-          rightColor = this.value.color.right;
-          topColor = this.value.color.top;
-          bottomColor = this.value.color.bottom;
+          if (this.value.color.start || this.value.color.end) {
+            leftColor = this.value.color.start;
+            rightColor = this.value.color.end;
+            topColor = this.value.color.top;
+            bottomColor = this.value.color.bottom;
+          } else {
+            leftColor = this.value.color.left;
+            rightColor = this.value.color.right;
+            topColor = this.value.color.top;
+            bottomColor = this.value.color.bottom;
+          }
         }
       }
       let topLeft;
@@ -4957,6 +4973,12 @@ class ArkComponent {
     return this;
   }
   shadow(value) {
+    if (typeof value === 'number') {
+      let arkShadowStyle = new ArkShadowStyle();
+      arkShadowStyle.shadowStyle = value;
+      modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, arkShadowStyle);
+      return this;
+    }
     modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
     return this;
   }
@@ -18911,6 +18933,32 @@ class ArkOnVisibleAreaChange {
     return this.ratios === another.ratios && this.event === another.event;
   }
 }
+class ArkSliderStepOptions {
+  constructor(value, options) {
+    this.showSteps = value;
+    this.stepOptions = options;
+  }
+  isEqual(another) {
+    let isShowStepsEqual = this.showSteps === another.showSteps;
+    let isStepOptionsEqual = true;
+    if ((this.stepOptions === null) || (this.stepOptions === undefined)) {
+      isStepOptionsEqual = (another.stepOptions === null) || (another.stepOptions === undefined);
+    } else if ((another.stepOptions === null) || (another.stepOptions === undefined)) {
+      isStepOptionsEqual = false;
+    } else if (this.stepOptions.stepsAccessibility.size !== another.stepOptions.stepsAccessibility.size) {
+      isStepOptionsEqual = false;
+    } else {
+      for (const [key, val] of this.stepOptions.stepsAccessibility) {
+        if (!another.stepOptions.stepsAccessibility.has(key)) {
+          isStepOptionsEqual = false;
+        } else if (!isBaseOrResourceEqual(another.stepOptions.stepsAccessibility.get(key), val)) {
+          isStepOptionsEqual = false;
+        }
+      }
+    }
+    return isShowStepsEqual && isStepOptionsEqual;
+  }
+}
 class ArkSliderTips {
   constructor(value, content) {
     this.showTip = value;
@@ -19806,6 +19854,12 @@ class ArkDragPreview {
       this.pixelMap === another.pixelMap &&
       this.extraInfo === another.extraInfo
     );
+  }
+}
+
+class ArkShadowStyle {
+  constructor() {
+    this.shadowStyle = undefined;
   }
 }
 
@@ -23625,8 +23679,9 @@ class ArkSliderComponent extends ArkComponent {
   maxLabel(value) {
     throw new Error('Method not implemented.');
   }
-  showSteps(value) {
-    modifierWithKey(this._modifiersWithKeys, ShowStepsModifier.identity, ShowStepsModifier, value);
+  showSteps(value, options) {
+    let stepOptions = new ArkSliderStepOptions(value, options);
+    modifierWithKey(this._modifiersWithKeys, ShowStepsModifier.identity, ShowStepsModifier, stepOptions);
     return this;
   }
   showTips(value, content) {
@@ -23953,11 +24008,29 @@ class ShowStepsModifier extends ModifierWithKey {
       getUINativeModule().slider.resetShowSteps(node);
     }
     else {
-      getUINativeModule().slider.setShowSteps(node, this.value);
+      getUINativeModule().slider.setShowSteps(node, this.value.showSteps, (_a = this.value) === null || _a === void 0 ? void 0 : _a.stepOptions);
     }
   }
   checkObjectDiff() {
-    return this.stageValue !== this.value;
+    let isShowStepsDiff = this.stageValue.showSteps !== this.value.showSteps;
+    let isStepOptionsDiff = false;
+    if ((this.stageValue.stepOptions === null) || (this.stageValue.stepOptions === undefined)) {
+      isStepOptionsDiff = (this.value.stepOptions !== null) && (this.value.stepOptions !== undefined);
+    } else if ((this.value.stepOptions === null) || (this.value.stepOptions === undefined)) {
+      isStepOptionsDiff = true;
+    } else if (this.stageValue.stepOptions.stepsAccessibility.size !==
+      this.value.stepOptions.stepsAccessibility.size) {
+      isStepOptionsDiff = true;
+    } else {
+      for (const [key, val] of this.stageValue.stepOptions.stepsAccessibility) {
+        if (!this.value.stepOptions.stepsAccessibility.has(key)) {
+          isStepOptionsDiff = true;
+        } else if (!isBaseOrResourceEqual(this.value.stepOptions.stepsAccessibility.get(key), val)) {
+          isStepOptionsDiff = true;
+        }
+      }
+    }
+    return isShowStepsDiff || isStepOptionsDiff;
   }
 }
 ShowStepsModifier.identity = Symbol('sliderShowSteps');
@@ -30704,6 +30777,9 @@ class ArkWebComponent extends ArkComponent {
   onInterceptRequest(callback) {
     throw new Error('Method not implemented.');
   }
+  onOverrideErrorPage(callback) {
+    throw new Error('Method not implemented.');
+  }
   onPermissionRequest(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnPermissionRequestModifier.identity, WebOnPermissionRequestModifier, callback);
     return this;
@@ -34770,6 +34846,10 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperMaintainVisibleContentPositionModifier.identity, SwiperMaintainVisibleContentPositionModifier, value);
     return this;
   }
+  onScrollStateChanged(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnScrollStateChangedModifier.identity, SwiperOnScrollStateChangedModifier, value);
+    return this;
+  }
 }
 class SwiperInitializeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -35445,6 +35525,22 @@ class SwiperMaintainVisibleContentPositionModifier extends ModifierWithKey {
   }
 }
 SwiperMaintainVisibleContentPositionModifier.identity = Symbol('swiperMaintainVisibleContentPosition');
+class SwiperOnScrollStateChangedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnScrollStateChanged(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnScrollStateChanged(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperOnScrollStateChangedModifier.identity = Symbol('swiperOnScrollStateChanged');
 // @ts-ignore
 if (globalThis.Swiper !== undefined) {
   globalThis.Swiper.attributeModifier = function (modifier) {

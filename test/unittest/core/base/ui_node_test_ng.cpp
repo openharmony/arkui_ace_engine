@@ -1320,6 +1320,27 @@ HWTEST_F(UINodeTestNg, GetFilePath001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetFilePath002
+ * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetFilePath002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = FrameNode::CreateFrameNode("filePathNode", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    node->tag_ = V2::COMMON_VIEW_ETS_TAG;
+
+    node->SetFilePath("a/b/c");
+    EXPECT_EQ(node->GetFilePath(), "");
+    node->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    node->SetFilePath("a/b/c");
+    EXPECT_EQ(node->GetFilePath(), "a/b/c");
+}
+
+/**
  * @tc.name: GetPerformanceCheckData001
  * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
  * @tc.type: FUNC

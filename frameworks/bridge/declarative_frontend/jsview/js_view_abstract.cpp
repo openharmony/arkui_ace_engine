@@ -4568,6 +4568,7 @@ void JSViewAbstract::ParseDashGap(const JSRef<JSVal>& args)
         if (ParseCommonEdgeWidthsForDashParams(obj, commonCalcDimension)) {
             ViewAbstractModel::GetInstance()->SetDashGap(commonCalcDimension.left,
                 commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
+            return;
         }
         if (SystemProperties::ConfigChangePerform()) {
             NG::BorderWidthProperty dashGap;
@@ -4597,6 +4598,7 @@ void JSViewAbstract::ParseDashWidth(const JSRef<JSVal>& args)
         if (ParseCommonEdgeWidthsForDashParams(obj, commonCalcDimension)) {
             ViewAbstractModel::GetInstance()->SetDashWidth(commonCalcDimension.left,
                 commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
+            return;
         }
         if (SystemProperties::ConfigChangePerform()) {
             NG::BorderWidthProperty dashWidth;
@@ -6509,12 +6511,25 @@ bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimensi
 
 bool JSViewAbstract::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result)
 {
+    RefPtr<ResourceObject> resObj;
+    return ParseColorMetricsToColor(jsValue, result, resObj);
+}
+
+bool JSViewAbstract::ParseColorMetricsToColor(
+    const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj)
+{
     if (!jsValue->IsObject()) {
         return false;
     }
     auto colorObj = JSRef<JSObject>::Cast(jsValue);
     auto toNumericProp = colorObj->GetProperty("toNumeric");
     auto colorSpaceProp = colorObj->GetProperty("getColorSpace");
+    auto jsRes = colorObj->GetProperty("res_");
+    if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() && !jsRes->IsNull() && jsRes->IsObject()) {
+        JSRef<JSObject> jsResObj = JSRef<JSObject>::Cast(jsRes);
+        JSViewAbstract::CompleteResourceObject(jsResObj);
+        resObj = JSViewAbstract::GetResourceObject(jsResObj);
+    }
     if (toNumericProp->IsFunction() && colorSpaceProp->IsFunction()) {
         auto colorVal = JSRef<JSFunc>::Cast(toNumericProp)->Call(colorObj, 0, nullptr);
         result.SetValue(colorVal->ToNumber<uint32_t>());
@@ -6540,6 +6555,13 @@ bool JSViewAbstract::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color
 
 bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
+    RefPtr<ResourceObject> resObj;
+    return ParseLengthMetricsToDimension(jsValue, result, resObj);
+}
+
+bool JSViewAbstract::ParseLengthMetricsToDimension(
+    const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resourceObj)
+{
     if (jsValue->IsNumber()) {
         result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::FP);
         return true;
@@ -6557,6 +6579,13 @@ bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, 
         double value = valObj->ToNumber<double>();
         auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
         result = CalcDimension(value, unit);
+        auto jsRes = jsObj->GetProperty("res");
+        if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
+            !jsRes->IsNull() && jsRes->IsObject()) {
+            JSRef<JSObject> resObj = JSRef<JSObject>::Cast(jsRes);
+            JSViewAbstract::CompleteResourceObject(resObj);
+            resourceObj = JSViewAbstract::GetResourceObject(resObj);
+        }
         return true;
     }
     return false;
@@ -6565,6 +6594,12 @@ bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, 
 bool JSViewAbstract::ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
     return ParseLengthMetricsToDimension(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) : false;
+}
+
+bool JSViewAbstract::ParseLengthMetricsToPositiveDimension(
+    const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj)
+{
+    return ParseLengthMetricsToDimension(jsValue, result, resObj) ? GreatOrEqual(result.Value(), 0.0f) : false;
 }
 
 bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result,
@@ -6781,20 +6816,61 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
     return false;
 }
 
+bool JSViewAbstract::CheckDarkResource(const RefPtr<ResourceObject>& resObj)
+{
+    if (!SystemProperties::GetResourceDecoupling() || !resObj) {
+        return false;
+    }
+    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
+    CHECK_NULL_RETURN(resourceAdapter, false);
+
+    int32_t resId = resObj->GetId();
+    bool hasDarkRes = false;
+    auto params = resObj->GetParams();
+    if (resId == -1 && (params.size() > 0)) {
+        hasDarkRes = resourceAdapter->ExistDarkResByName(params[params.size() - 1].value.value(),
+            std::to_string(resObj->GetType()));
+    } else {
+        hasDarkRes = resourceAdapter->ExistDarkResById(std::to_string(resId));
+    }
+    return hasDarkRes;
+}
+
 void JSViewAbstract::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
-    const Color& color, bool state)
+    Color& color, bool state)
 {
     if (!state || !SystemProperties::ConfigChangePerform()) {
         return;
     }
+
+    auto node = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(node);
+
+    auto instanceId = Container::CurrentIdSafely();
+    auto nodeTag = node->GetTag();
+    auto invertFunc = ColorInverter::GetInstance().GetInvertFunc(instanceId, nodeTag);
+    CHECK_NULL_VOID(invertFunc);
+
+    auto localColorMode = node->GetLocalColorMode();
+    if (localColorMode == ColorMode::LIGHT) {
+        resObj = nullptr;
+        return;
+    }
+
+    auto colorMode = Container::CurrentColorMode();
+    bool hasDarkRes = CheckDarkResource(resObj);
+    if ((colorMode == ColorMode::DARK || localColorMode == ColorMode::DARK) && (!resObj || !hasDarkRes)) {
+        color = Color(invertFunc(color.GetValue()));
+    }
     if (!resObj) {
         resObj = AceType::MakeRefPtr<ResourceObject>();
         resObj->SetIsResource(false);
-        resObj->SetInstanceId(Container::CurrentIdSafely());
+        resObj->SetInstanceId(instanceId);
     }
-    auto node = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+    resObj->SetNodeTag(nodeTag);
+    resObj->SetColorMode(colorMode);
+    resObj->SetHasDarkRes(hasDarkRes);
     resObj->SetColor(color);
-    resObj->SetNodeTag(node ? node->GetTag() : "");
 }
 
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
@@ -6818,7 +6894,7 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
         return state;
     }
     if (jsValue->IsObject()) {
-        if (ParseColorMetricsToColor(jsValue, result)) {
+        if (ParseColorMetricsToColor(jsValue, result, resObj)) {
             CompleteResourceObjectFromColor(resObj, result, true);
             return true;
         }
@@ -6953,7 +7029,8 @@ bool JSViewAbstract::ParseJsSymbolId(
     auto resourceObject = GetResourceObject(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     symbolResourceObject = resourceObject;
-    if (CheckCustomSymbolId(resourceWrapper, resId, symbolId)) {
+    int32_t type = jsObj->GetPropertyValue<int32_t>(static_cast<int32_t>(ArkUIIndex::TYPE), UNKNOWN_RESOURCE_TYPE);
+    if (type == static_cast<int32_t>(ResourceType::STRING) && CheckCustomSymbolId(resourceWrapper, resId, symbolId)) {
         return true;
     }
     if (!CheckResource(resourceObject, resourceWrapper)) {
@@ -8845,15 +8922,21 @@ void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
     NG::FocusBoxStyle style;
 
     CalcDimension margin;
-    if (ParseLengthMetricsToDimension(obj->GetProperty("margin"), margin)) {
+    RefPtr<ResourceObject> resObjMargin;
+    if (ParseLengthMetricsToDimension(obj->GetProperty("margin"), margin, resObjMargin)) {
+        ViewAbstractModel::GetInstance()->SetFocusBoxStyleUpdateFunc(style, resObjMargin, "focusBoxStyleMargin");
         style.margin = margin;
     }
     CalcDimension strokeWidth;
-    if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), strokeWidth)) {
+    RefPtr<ResourceObject> resObjWidth;
+    if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), strokeWidth, resObjWidth)) {
+        ViewAbstractModel::GetInstance()->SetFocusBoxStyleUpdateFunc(style, resObjWidth, "focusBoxStyleWidth");
         style.strokeWidth = strokeWidth;
     }
     Color strokeColor;
-    if (ParseColorMetricsToColor(obj->GetProperty("strokeColor"), strokeColor)) {
+    RefPtr<ResourceObject> resObjColor;
+    if (ParseColorMetricsToColor(obj->GetProperty("strokeColor"), strokeColor, resObjColor)) {
+        ViewAbstractModel::GetInstance()->SetFocusBoxStyleUpdateFunc(style, resObjColor, "focusBoxStyleColor");
         style.strokeColor = strokeColor;
     }
 
@@ -9660,13 +9743,26 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
 
 void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY) && !info[0]->IsObject()) {
         return;
     }
 
     auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
     bool IsSupportDrawModifier = frameNode && frameNode->IsSupportDrawModifier();
     if (!IsSupportDrawModifier) {
+        return;
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) && !info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetDrawModifier(nullptr);
+        if (frameNode) {
+            const auto& extensionHandler = frameNode->GetExtensionHandler();
+            if (extensionHandler) {
+                extensionHandler->InvalidateRender();
+                extensionHandler->ForegroundRender();
+            } else {
+                frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+            }
+        }
         return;
     }
     auto jsDrawModifier = JSRef<JSObject>::Cast(info[0]);
@@ -10525,7 +10621,7 @@ void JSViewAbstract::NewParseSweepGradientColor(NG::Gradient& gradient, RefPtr<R
     auto&& updateFunc = [gradientColor, indx](const RefPtr<ResourceObject>& resObj,
         NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t index = 0; index < colorLength; index++) {
             NG::GradientColor gradColor = colorVector[index];
@@ -10547,7 +10643,7 @@ void JSViewAbstract::NewParseRadialGradientColor(NG::Gradient& gradient, RefPtr<
     auto&& updateFunc = [gradientColor, indx](const RefPtr<ResourceObject>& resObj,
         NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t index = 0; index < colorLength; index++) {
             NG::GradientColor gradColor = colorVector[index];
@@ -10569,7 +10665,7 @@ void JSViewAbstract::NewParseGradientColor(NG::Gradient& gradient, RefPtr<Resour
     auto&& updateFunc = [gradientColor, indx](const RefPtr<ResourceObject>& resObj,
         NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t index = 0; index < colorLength; index++) {
             NG::GradientColor gradColor = colorVector[index];
@@ -10623,7 +10719,7 @@ void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JS
         gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
         gradient.AddColor(gradientColor);
         if (SystemProperties::ConfigChangePerform() && resObj) {
-            int32_t indx = i - nullNum;
+            int32_t indx = static_cast<int32_t>(i) - nullNum;
             if (mapIdx == NUM_1) {
                 NewParseSweepGradientColor(gradient, resObj, gradientColor, indx);
             } else if (mapIdx == NUM_2) {
@@ -12514,6 +12610,7 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     std::function<void()> builderFunc;
     BackgroundType backgroundType = BackgroundType::COLOR;
     if (!ParseJsColor(info[0], color, backgroundColorResObj)) {
+        ViewAbstractModel::GetInstance()->ClearResObj("customBackgroundColor");
         if (ParseBackgroundBuilder(info, info[0], builderFunc)) {
             backgroundType = BackgroundType::CUSTOM_BUILDER;
         } else {
@@ -12551,8 +12648,8 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackground(std::move(builderFunc));
     ViewAbstractModel::GetInstance()->SetBackgroundIgnoresLayoutSafeAreaEdges(ignoreLayoutSafeAreaEdges);
     ViewAbstractModel::GetInstance()->SetBackgroundAlign(alignment);
-    if (SystemProperties::ConfigChangePerform() && backgroundColorResObj) {
-        ViewAbstractModel::GetInstance()->SetCustomBackgroundColorWithResourceObj(backgroundColorResObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        ViewAbstractModel::GetInstance()->SetCustomBackgroundColorWithResourceObj(color, backgroundColorResObj);
     } else {
         ViewAbstractModel::GetInstance()->SetCustomBackgroundColor(color);
     }

@@ -49,6 +49,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2201,5 +2202,146 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupEventTest003, TestSize.Level1)
         std::vector<std::string> {}, int(CheckBoxGroupPaintProperty::SelectStatus::ALL));
     eventHub->UpdateChangeEvent(&groupResult);
     EXPECT_EQ(isSelected, true);
+}
+
+/**
+ * @tc.name: ColorTypeToString
+ * @tc.desc: test ColorTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, ColorTypeToString, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test color type to string conversion.
+     * @tc.expected: step1. Conversion returns correct string values.
+     */
+    std::vector<std::pair<CheckBoxGroupColorType, std::string>> types = {
+        { CheckBoxGroupColorType::SELECTED_COLOR, "SelectedColor" },
+        { CheckBoxGroupColorType::UN_SELECTED_COLOR, "UnSelectedColor" },
+        { static_cast<CheckBoxGroupColorType>(2), "Unknown" } };
+    for (const auto& [type, val] : types) {
+        auto ret = CheckBoxGroupModelNG::ColorTypeToString(type);
+        EXPECT_EQ(val, ret);
+    }
+}
+
+/**
+ * @tc.name: CreateWithColorResourceObj
+ * @tc.desc: Test CreateWithColorResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CreateWithColorResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBoxGroup frame node.
+     * @tc.expected: step1. Frame node is not null.
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create color resource object and verify resource manager.
+     * @tc.expected: step2. Resource is added to manager.
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    checkBoxGroupModelNG.CreateWithColorResourceObj(resObj, CheckBoxGroupColorType::SELECTED_COLOR);
+
+    std::string key = "checkboxgroup" + CheckBoxGroupModelNG::ColorTypeToString(CheckBoxGroupColorType::SELECTED_COLOR);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    auto count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+    pattern->OnColorModeChange(1);
+
+    /**
+     * @tc.steps: step3. Create another color resource object with parameters.
+     * @tc.expected: step3. Resource is added to manager.
+     */
+    ResourceObjectParams params { .value = "", .type = ResourceObjectParamType::NONE };
+    RefPtr<ResourceObject> resObjWithParams =
+        AceType::MakeRefPtr<ResourceObject>(1, 10001, std::vector<ResourceObjectParams> { params }, "", "", 100000);
+    checkBoxGroupModelNG.CreateWithColorResourceObj(resObjWithParams, CheckBoxGroupColorType::UN_SELECTED_COLOR);
+    key = "checkboxgroup" + CheckBoxGroupModelNG::ColorTypeToString(CheckBoxGroupColorType::UN_SELECTED_COLOR);
+    count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+    pattern->OnColorModeChange(1);
+}
+
+/**
+ * @tc.name: UpdateComponentColor
+ * @tc.desc: Test UpdateComponentColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, UpdateComponentColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBoxGroup frame node and get necessary properties.
+     * @tc.expected: step1. Frame node and properties are not null.
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Update component color with different types.
+     * @tc.expected: step2. Color properties are updated correctly.
+     */
+    checkBoxGroupModelNG.UpdateComponentColor(frameNode, static_cast<CheckBoxGroupColorType>(2), Color::RED);
+    auto ret = paintProperty->GetCheckBoxGroupSelectedColor();
+    EXPECT_FALSE(ret.has_value());
+    checkBoxGroupModelNG.UpdateComponentColor(frameNode, CheckBoxGroupColorType::SELECTED_COLOR, Color::RED);
+    ret = paintProperty->GetCheckBoxGroupSelectedColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+    checkBoxGroupModelNG.UpdateComponentColor(frameNode, CheckBoxGroupColorType::UN_SELECTED_COLOR, Color::RED);
+    ret = paintProperty->GetCheckBoxGroupUnSelectedColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+}
+
+/**
+ * @tc.name: ResetComponentColor
+ * @tc.desc: Test ResetComponentColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, ResetComponentColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBoxGroup frame node and get necessary properties.
+     * @tc.expected: step1. Frame node and properties are not null.
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pipelineContext = frameNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    /**
+     * @tc.steps: step2. Reset component color with different types.
+     * @tc.expected: step2. Color properties are reset to theme values.
+     */
+    checkBoxGroupModelNG.ResetComponentColor(frameNode, static_cast<CheckBoxGroupColorType>(2));
+    auto ret = paintProperty->GetCheckBoxGroupSelectedColor();
+    EXPECT_FALSE(ret.has_value());
+    checkBoxGroupModelNG.ResetComponentColor(frameNode, CheckBoxGroupColorType::SELECTED_COLOR);
+    ret = paintProperty->GetCheckBoxGroupSelectedColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), theme->GetActiveColor());
+    checkBoxGroupModelNG.ResetComponentColor(frameNode, CheckBoxGroupColorType::UN_SELECTED_COLOR);
+    ret = paintProperty->GetCheckBoxGroupUnSelectedColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), theme->GetInactiveColor());
 }
 } // namespace OHOS::Ace::NG

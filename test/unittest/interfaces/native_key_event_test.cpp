@@ -722,4 +722,49 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0017, TestSize.Level1)
     EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
+
+/**
+* @tc.name: NativeKeyEventTest0018
+* @tc.desc: Test OH_ArkUI_KeyEvent_IsScrollLockOn function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0018, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create node.
+    */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.keyEvent.stopPropagation = true;
+    uiInputEvent.inputEvent = &event.keyEvent;
+    uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = nullptr;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+
+    /**
+    * @tc.steps: step2.related function is called, flag is false.
+    */
+    bool flag = false;
+    nodeAPI->registerNodeEvent(node, NODE_DISPATCH_KEY_EVENT, 0, &flag);
+    NodeModel::AddNodeEventReceiver(node, [](ArkUI_NodeEvent* event) {
+        auto userData = reinterpret_cast<bool*>(event->userData);
+        *userData = true;
+    });
+    ArkUI_ErrorCode ret = OH_ArkUI_KeyEvent_IsScrollLockOn(inputEvent, &flag);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+    * @tc.steps: step3.related function is called, flag is true.
+    */
+    flag = true;
+    uiInputEvent.inputEvent = nullptr;
+    nodeEvent.origin = &uiInputEvent;
+    inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    ret = OH_ArkUI_KeyEvent_IsScrollLockOn(inputEvent, &flag);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
 } // namespace OHOS::Ace

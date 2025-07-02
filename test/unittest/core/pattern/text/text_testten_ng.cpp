@@ -2612,4 +2612,43 @@ HWTEST_F(TextFieldTenPatternNg, LeftMouseRelease, TestSize.Level1)
     EXPECT_EQ(start, -1);
     EXPECT_EQ(end, -1);
 }
+
+/**
+ * @tc.name: GetVisibleDragViewHandles
+ * @tc.desc: test TextSelectOverlay::GetVisibleDragViewHandles
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, GetVisibleDragViewHandles, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, pattern);
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    pattern->selectOverlay_->OnBind(manager);
+
+    RectF firstRect;
+    RectF secondRect;
+    pattern->selectOverlay_->GetVisibleDragViewHandles(firstRect, secondRect);
+    EXPECT_EQ(firstRect, RectF());
+    EXPECT_EQ(secondRect, RectF());
+
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    manager->shareOverlayInfo_ = std::move(shareOverlayInfo);
+    ASSERT_NE(manager->shareOverlayInfo_, nullptr);
+    manager->shareOverlayInfo_->firstHandle.paintRect = RectF(10.0f, 10.0f, 5.0f, 10.0f);
+    manager->shareOverlayInfo_->secondHandle.paintRect = RectF(20.0f, 20.0f, 5.0f, 10.0f);
+    manager->shareOverlayInfo_->handleLevelMode = HandleLevelMode::OVERLAY;
+    manager->shareOverlayInfo_->firstHandle.isShow = false;
+    manager->shareOverlayInfo_->secondHandle.isShow = false;
+    pattern->selectOverlay_->GetVisibleDragViewHandles(firstRect, secondRect);
+    EXPECT_EQ(firstRect, RectF());
+    EXPECT_EQ(secondRect, RectF());
+
+    manager->shareOverlayInfo_->firstHandle.isShow = true;
+    manager->shareOverlayInfo_->secondHandle.isShow = true;
+    pattern->selectOverlay_->GetVisibleDragViewHandles(firstRect, secondRect);
+    EXPECT_EQ(firstRect, RectF(10.0f, 10.0f, 5.0f, 10.0f));
+    EXPECT_EQ(secondRect, RectF(20.0f, 20.0f, 5.0f, 10.0f));
+}
 } // namespace OHOS::Ace::NG

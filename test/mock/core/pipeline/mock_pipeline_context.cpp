@@ -779,6 +779,8 @@ bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo
 
 void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode) {}
 
+void PipelineContext::SetFlushTSUpdates(std::function<bool(int32_t)>&& flushTSUpdates) {}
+
 void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
@@ -914,6 +916,8 @@ std::string PipelineContext::GetResponseRegion(const RefPtr<NG::FrameNode>& root
 }
 
 void PipelineContext::NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
+
+void PipelineContext::DisableNotifyResponseRegionChanged() {};
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
 

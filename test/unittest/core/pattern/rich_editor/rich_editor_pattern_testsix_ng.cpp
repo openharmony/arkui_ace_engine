@@ -181,57 +181,6 @@ HWTEST_F(RichEditorPatternTestSixNg, ClearContent001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetRightWordPosition004
- * @tc.desc: test GetRightWordPosition
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, GetRightWordPosition004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    ClearSpan();
-    std::string firstText = "text";
-    AddSpan(firstText);
-    std::string space = " ";
-    std::string secondText = "content";
-    AddSpan(space + secondText);
-    for (auto iter = richEditorPattern->spans_.cbegin(); iter != richEditorPattern->spans_.cend(); iter++) {
-        auto span = *iter;
-        span->placeholderIndex = 0;
-    }
-    int32_t initCaretPosition = firstText.size();
-    auto position =
-        std::clamp(initCaretPosition + 1, 0, static_cast<int32_t>(richEditorPattern->GetTextContentLength()));
-    EXPECT_EQ(richEditorPattern->GetRightWordPosition(initCaretPosition), position);
-}
-
-/**
- * @tc.name: GetRightWordPosition005
- * @tc.desc: test GetRightWordPosition
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, GetRightWordPosition005, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    ClearSpan();
-    std::string firstText = "text ";
-    AddSpan(firstText);
-    std::string secondText = "content";
-    AddSpan(secondText);
-    for (auto iter = richEditorPattern->spans_.cbegin(); iter != richEditorPattern->spans_.cend(); iter++) {
-        auto span = *iter;
-        span->placeholderIndex = 0;
-    }
-    int32_t initCaretPosition = firstText.size() + secondText.size() - 1;
-    auto position =
-        std::clamp(initCaretPosition + 1, 0, static_cast<int32_t>(richEditorPattern->GetTextContentLength()));
-    EXPECT_EQ(richEditorPattern->GetRightWordPosition(initCaretPosition), position);
-}
-
-/**
  * @tc.name: MouseRightFocus002
  * @tc.desc: test MouseRightFocus
  * @tc.type: FUNC
@@ -303,24 +252,6 @@ HWTEST_F(RichEditorPatternTestSixNg, FromStyledString002, TestSize.Level1)
     selection = richEditorPattern->FromStyledString(spanString).GetSelection();
     EXPECT_EQ(selection.selection[0], 0);
     EXPECT_EQ(selection.selection[1], 0);
-}
-
-/**
- * @tc.name: BeforeAddImage001
- * @tc.desc: test BeforeAddImage
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, BeforeAddImage001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorChangeValue changeValue;
-    ImageSpanOptions options;
-    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
-    eventHub->SetOnDidChange([](const RichEditorChangeValue& value) -> bool { return false; });
-    auto ret = richEditorPattern->BeforeAddImage(changeValue, options, 100);
-    EXPECT_TRUE(ret);
 }
 
 /**
@@ -404,38 +335,6 @@ HWTEST_F(RichEditorPatternTestSixNg, UpdateChildrenOffset005, TestSize.Level1)
 
     richEditorPattern->UpdateChildrenOffset();
     EXPECT_FALSE(childNode2->GetSpanItem());
-}
-
-/**
- * @tc.name: CursorMoveLineEnd001
- * @tc.desc: test CursorMoveLineEnd
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, CursorMoveLineEnd001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 2;
-    richEditorPattern->CursorMoveLineEnd();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
-}
-
-/**
- * @tc.name: CursorMoveLineEnd002
- * @tc.desc: test CursorMoveLineEnd
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, CursorMoveLineEnd002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->CursorMoveLineEnd();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
 
 /**

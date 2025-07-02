@@ -278,7 +278,10 @@ void HandleStrokeWidthResource(const RefPtr<ResourceObject>& resObj, const RefPt
     const std::string key = "gauge.strokeWidth";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         CalcDimension result;
         if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, result) || result.Unit() == DimensionUnit::PERCENT) {
             result = CalcDimension(0);
@@ -293,12 +296,13 @@ void HandleIndicatorIconResource(const RefPtr<ResourceObject>& resObj, const Ref
     const std::string key = "gauge.indicator.icon";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         std::string result;
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<GaugePattern>();
-        CHECK_NULL_VOID(pattern);
         auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         if (ResourceParseUtils::ParseResMedia(resObj, result)) {
@@ -317,7 +321,10 @@ void HandleIndicatorSpaceResource(const RefPtr<ResourceObject>& resObj, const Re
     const std::string key = "gauge.indicator.space";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         CalcDimension result;
         if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, result, false)) {
             result = NG::INDICATOR_DISTANCE_TO_TOP;

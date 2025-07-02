@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,7 +116,7 @@ ArkUINativeModuleValue GridRowBridge::SetBreakpoints(ArkUIRuntimeCallInfo* runti
     int32_t size = 0;
     if (!secondArg->IsArray(vm)) {
         GetArkUINodeModifiers()->getGridRowModifier()->setBreakpoints(
-            nativeNode, reference, pointValues.data(), pointStr.data(), size);
+            nativeNode, reference, pointValues.data(), pointStr.data(), -1);
         return panda::JSValueRef::Undefined(vm);
     }
     auto arrayVal = panda::Local<panda::ArrayRef>(secondArg);
@@ -126,17 +126,19 @@ ArkUINativeModuleValue GridRowBridge::SetBreakpoints(ArkUIRuntimeCallInfo* runti
             nativeNode, reference, pointValues.data(), pointStr.data(), size);
         return panda::JSValueRef::Undefined(vm);
     }
+    std::vector<std::string> calcStrings;
     for (uint32_t index = 0; index < length; index++) {
         CalcDimension calvalue;
-        std::string calcStr;
         auto item = panda::ArrayRef::GetValueAt(vm, arrayVal, index);
-        calcStr = item->ToString(vm)->ToString(vm);
+        calcStrings.emplace_back(item->ToString(vm)->ToString(vm));
         if (!ArkTSUtils::ParseJsDimensionVp(vm, item, calvalue, false)) {
             calvalue = CalcDimension(0, DimensionUnit::VP);
         }
         pointValues.push_back(calvalue.Value());
-        pointStr.push_back(calcStr.c_str());
         size++;
+    }
+    for (auto &calStr : calcStrings) {
+        pointStr.push_back(calStr.c_str());
     }
     GetArkUINodeModifiers()->getGridRowModifier()->setBreakpoints(nativeNode, reference, pointValues.data(),
         pointStr.data(), size);

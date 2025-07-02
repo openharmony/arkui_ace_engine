@@ -489,6 +489,7 @@ public:
     void GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
     void AddRsNodeForCapture();
     static bool initDrawNodeChangeCallback_;
+    static bool initPropertyNodeChangeCallback_;
 
     void FreezeCanvasNode(bool freezeFlag = false);
     void RemoveCanvasNode();
@@ -920,6 +921,7 @@ protected:
 
 private:
     void ModifyCustomBackground();
+    bool ShouldSkipAffineTransformation(std::shared_ptr<RSNode> rsNode);
 };
 } // namespace OHOS::Ace::NG
 

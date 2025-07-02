@@ -415,11 +415,6 @@ public:
         return jsTextEditableController_.Upgrade();
     }
 
-    void SetTextEditController(const RefPtr<TextEditController>& textEditController)
-    {
-        textEditingController_ = textEditController;
-    }
-
     std::string GetTextValue() const
     {
         return contentController_->GetTextValue();
@@ -2077,7 +2072,6 @@ private:
 
     RefPtr<TextFieldController> textFieldController_;
     WeakPtr<Referenced> jsTextEditableController_;
-    RefPtr<TextEditController> textEditingController_;
     TextEditingValueNG textEditingValue_;
     // controls redraw of overlay modifier, update when need to redraw
     bool changeSelectedRects_ = false;

@@ -86,6 +86,7 @@ struct OptionParam {
     bool isPasteOption = false;
 
     bool isAIMenuOption = false;
+    bool isAskCeliaOption = false;
 
     OptionParam() = default;
     OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)
@@ -205,6 +206,15 @@ public:
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption &option);
     static void SetLightUpEffect(double radio);
+    static void CheckLocalizedPadding(PaddingProperty& value, const TextDirection& direction);
+    static void CheckLocalizedMargin(MarginProperty& value, const TextDirection& direction);
+    static void CheckLocalizedSafeAreaPadding(PaddingProperty& value, const TextDirection& direction);
+    static void CheckPositionLocalizedEdges(EdgesParam& value, TextDirection layoutDirection);
+    static void CheckOffsetLocalizedEdges(EdgesParam& value, TextDirection layoutDirection);
+    static void CheckLocalizedEdgeWidths(BorderWidthProperty& value, const TextDirection& direction);
+    static void CheckLocalizedBorderRadiuses(BorderRadiusProperty& value, const TextDirection& direction);
+    static void CheckLocalizedOuterBorderColor(NG::BorderColorProperty& value, const TextDirection& direction);
+
     static void SetPadding(const CalcLength &value);
     static void SetPadding(const PaddingProperty &value);
     static void SetPadding(const RefPtr<ResourceObject>& resObj);
@@ -268,7 +278,7 @@ public:
     // customBackground
     static void SetBackgroundAlign(const Alignment &align);
     static void SetCustomBackgroundColor(const Color& color);
-    static void SetCustomBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj);
+    static void SetCustomBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj);
     static void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t layoutSafeAreaEdges);
     static void SetIsTransitionBackground(bool val);
     static void SetIsBuilderBackground(bool val);
@@ -399,6 +409,8 @@ public:
     static void SetNextFocus(FocusIntension key, const std::string& nextFocus);
     static void ResetNextFocus();
     static void SetFocusBoxStyle(const NG::FocusBoxStyle& style);
+    static void SetFocusBoxStyleUpdateFunc(
+        NG::FocusBoxStyle& style, const RefPtr<ResourceObject>& resObj, const std::string& property);
     static void SetOnAppear(std::function<void()> &&onAppear);
     static void SetOnDisappear(std::function<void()> &&onDisappear);
     static void SetOnAttach(std::function<void()> &&onAttach);
@@ -744,7 +756,7 @@ public:
     static void SetDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
     static void SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value);
-    static void SetOffset(FrameNode* frameNode, const Dimension& x, const Dimension& y,
+    static void SetOffset(FrameNode* frameNode, OffsetT<Dimension>& value,
         const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj);
     static void SetOffsetX(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj);
     static void SetOffsetY(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& yresObj);
@@ -870,7 +882,7 @@ public:
     static void SetNextFocus(
         FrameNode* frameNode, FocusIntension key, const std::variant<WeakPtr<AceType>, std::string> nextFocus);
     static void ResetNextFocus(FrameNode* frameNode);
-    static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
+    static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style, bool isReset = false);
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
     static void SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback);
 #ifdef SUPPORT_DIGITAL_CROWN

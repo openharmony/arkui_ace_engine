@@ -1106,15 +1106,18 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest007, TestSize.Level1)
     shadow.SetColor(Color(Color::RED));
     shadow.SetShadowType(ShadowType::COLOR);
     std::vector<Shadow> setShadows;
+    textTimerModel.SetTextShadow(setShadows);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetTextShadow().has_value());
+
     setShadows.emplace_back(shadow);
     textTimerModel.SetTextShadow(setShadows);
     g_isConfigChangePerform = true;
     textTimerModel.SetTextShadow(setShadows);
 
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetTextShadow(), setShadows);
 }
 

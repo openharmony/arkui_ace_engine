@@ -47,7 +47,7 @@ void DividerModelNG::DividerColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, value);
     if (SystemProperties::ConfigChangePerform()) {
-        ACE_UPDATE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByTheme, false);
+        ACE_UPDATE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByUser, true);
     }
 }
 
@@ -84,7 +84,7 @@ void DividerModelNG::DividerColor(const RefPtr<ResourceObject>& resObj)
             result = Color::ColorFromString(dividerColor);
         }
         ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, result, frameNode);
-        ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByTheme, false, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByUser, true, frameNode);
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     };
     updateFunc(resObj);
@@ -127,7 +127,7 @@ void DividerModelNG::SetDividerColor(FrameNode* frameNode, std::optional<Color> 
         ACE_RESET_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, frameNode);
     }
     if (SystemProperties::ConfigChangePerform()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByTheme, isSetByTheme, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByUser, isSetByTheme, frameNode);
     }
 }
 
@@ -154,7 +154,7 @@ void DividerModelNG::SetDividerColor(FrameNode* frameNode, const RefPtr<Resource
     };
     updateFunc(resObj);
     dividerPattern->AddResObj("divider.color", resObj, std::move(updateFunc));
-    ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByTheme, isSetByTheme, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByUser, isSetByTheme, frameNode);
 }
 
 void DividerModelNG::ResetResObj(FrameNode* frameNode, const std::string& key)
@@ -176,7 +176,7 @@ void DividerModelNG::SetVertical(FrameNode* frameNode, const bool& value)
 void DividerModelNG::ResetDividerColor()
 {
     if (SystemProperties::ConfigChangePerform()) {
-        ACE_UPDATE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByTheme, true);
+        ACE_UPDATE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByUser, false);
     }
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(DividerRenderProperty, DividerColor, PROPERTY_UPDATE_RENDER);
 }

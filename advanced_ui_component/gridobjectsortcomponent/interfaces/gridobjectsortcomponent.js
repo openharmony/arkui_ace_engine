@@ -14,7 +14,8 @@
  */
 
 if (!('finalizeConstruction' in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
+    });
 }
 const vibrator = requireNativeModule('ohos.vibrator');
 const curves = requireNativeModule('ohos.curves');
@@ -87,11 +88,13 @@ const NO = 'no';
 const ADD = 'add';
 const EDIT = 'edit';
 const DELETE = 'delete';
+
 export var GridObjectSortComponentType;
 (function (w107) {
     w107['IMAGE_TEXT'] = 'image_text';
     w107['TEXT'] = 'text';
 })(GridObjectSortComponentType || (GridObjectSortComponentType = {}));
+
 export class GridObjectSortComponent extends ViewPU {
     constructor(n107, o107, p107, q107 = -1, r107 = undefined, s107) {
         super(n107, p107, q107, s107);
@@ -158,13 +161,32 @@ export class GridObjectSortComponent extends ViewPU {
         this.__editGridHeight = new ObservedPropertySimplePU(0, this, 'editGridHeight');
         this.__addGridHeight = new ObservedPropertySimplePU(0, this, 'addGridHeight');
         this.__subTitleHeight = new ObservedPropertySimplePU(0, this, 'subTitleHeight');
-        this.__isOpenAccessibility = new ObservedPropertySimplePU(accessibility.isScreenReaderOpenSync(), this, 'isOpenAccessibility');
+        this.__isOpenAccessibility =
+            new ObservedPropertySimplePU(accessibility.isScreenReaderOpenSync(), this, 'isOpenAccessibility');
         this.callbackId = undefined;
         this.colNum = COL_IMAGE_TEXT;
         this.vibrationDone = false;
-        this.touchDown = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.touchBorderRadius = { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.hoverBackgroundColor = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.touchDown = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_click_effect'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
+        this.touchBorderRadius = {
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.ohos_id_corner_radius_clicked'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
+        this.hoverBackgroundColor = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_hover'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
         this.imageText = false;
         this.onSave = undefined;
         this.onCancel = undefined;
@@ -174,8 +196,10 @@ export class GridObjectSortComponent extends ViewPU {
         this.__readFlag = new ObservedPropertySimplePU(true, this, 'readFlag');
         this.__readIndex4AddArea = new ObservedPropertySimplePU(-1, this, 'readIndex4AddArea');
         this.__readIndex4EditArea = new ObservedPropertySimplePU(-1, this, 'readIndex4EditArea');
-        this.__isPointToAddTitleBarEditButton = new ObservedPropertySimplePU(false, this, 'isPointToAddTitleBarEditButton');
-        this.__isPointToEditTitleBarSaveButton = new ObservedPropertySimplePU(false, this, 'isPointToEditTitleBarSaveButton');
+        this.__isPointToAddTitleBarEditButton =
+            new ObservedPropertySimplePU(false, this, 'isPointToAddTitleBarEditButton');
+        this.__isPointToEditTitleBarSaveButton =
+            new ObservedPropertySimplePU(false, this, 'isPointToEditTitleBarSaveButton');
         this.preTextAnnouncedForAccessibility = '';
         this.textAnnouncedForAccessibility = '';
         this.envCallback = {
@@ -184,13 +208,15 @@ export class GridObjectSortComponent extends ViewPU {
                 this.fontSizeScale = this.decideFontScale(v107);
                 this.fontWeightScale = u107.fontWeightScale;
             },
-            onMemoryLevel: (t107) => { }
+            onMemoryLevel: (t107) => {
+            }
         };
         this.setInitiallyProvidedValue(o107);
         this.declareWatch('gridComState', this.onGridComStateChange);
         this.declareWatch('fontSizeScale', this.calcAreaInfo);
         this.finalizeConstruction();
     }
+
     setInitiallyProvidedValue(m107) {
         if (m107.options === undefined) {
             this.__options.set({});
@@ -406,9 +432,11 @@ export class GridObjectSortComponent extends ViewPU {
             this.envCallback = m107.envCallback;
         }
     }
+
     updateStateVars(l107) {
         this.__options.reset(l107.options);
     }
+
     purgeVariableDependenciesOnElmtId(k107) {
         this.__options.purgeDependencyOnElmtId(k107);
         this.__selected.purgeDependencyOnElmtId(k107);
@@ -466,6 +494,7 @@ export class GridObjectSortComponent extends ViewPU {
         this.__isPointToAddTitleBarEditButton.purgeDependencyOnElmtId(k107);
         this.__isPointToEditTitleBarSaveButton.purgeDependencyOnElmtId(k107);
     }
+
     aboutToBeDeleted() {
         this.__options.aboutToBeDeleted();
         this.__selected.aboutToBeDeleted();
@@ -525,340 +554,453 @@ export class GridObjectSortComponent extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
+
     get options() {
         return this.__options.get();
     }
+
     set options(j107) {
         this.__options.set(j107);
     }
+
     get selected() {
         return this.__selected.get();
     }
+
     set selected(i107) {
         this.__selected.set(i107);
     }
+
     get unSelected() {
         return this.__unSelected.get();
     }
+
     set unSelected(h107) {
         this.__unSelected.set(h107);
     }
+
     get copySelected() {
         return this.__copySelected.get();
     }
+
     set copySelected(g107) {
         this.__copySelected.set(g107);
     }
+
     get copyUnSelected() {
         return this.__copyUnSelected.get();
     }
+
     set copyUnSelected(f107) {
         this.__copyUnSelected.set(f107);
     }
+
     get content() {
         return this.__content.get();
     }
+
     set content(e107) {
         this.__content.set(e107);
     }
+
     get dragContent() {
         return this.__dragContent.get();
     }
+
     set dragContent(d107) {
         this.__dragContent.set(d107);
     }
+
     get dragContentIndex() {
         return this.__dragContentIndex.get();
     }
+
     set dragContentIndex(c107) {
         this.__dragContentIndex.set(c107);
     }
+
     get hoverId() {
         return this.__hoverId.get();
     }
+
     set hoverId(b107) {
         this.__hoverId.set(b107);
     }
+
     get gridComState() {
         return this.__gridComState.get();
     }
+
     set gridComState(a107) {
         this.__gridComState.set(a107);
     }
+
     get menuSwitch() {
         return this.__menuSwitch.get();
     }
+
     set menuSwitch(z106) {
         this.__menuSwitch.set(z106);
     }
+
     get areaWidth() {
         return this.__areaWidth.get();
     }
+
     set areaWidth(y106) {
         this.__areaWidth.set(y106);
     }
+
     get blockWidth() {
         return this.__blockWidth.get();
     }
+
     set blockWidth(x106) {
         this.__blockWidth.set(x106);
     }
+
     get blockHeight() {
         return this.__blockHeight.get();
     }
+
     set blockHeight(w106) {
         this.__blockHeight.set(w106);
     }
+
     get longScaleOnePointTwo() {
         return this.__longScaleOnePointTwo.get();
     }
+
     set longScaleOnePointTwo(v106) {
         this.__longScaleOnePointTwo.set(v106);
     }
+
     get scaleGridItemNinetyPercent() {
         return this.__scaleGridItemNinetyPercent.get();
     }
+
     set scaleGridItemNinetyPercent(u106) {
         this.__scaleGridItemNinetyPercent.set(u106);
     }
+
     get reboundSize() {
         return this.__reboundSize.get();
     }
+
     set reboundSize(t106) {
         this.__reboundSize.set(t106);
     }
+
     get scaleIcon() {
         return this.__scaleIcon.get();
     }
+
     set scaleIcon(s106) {
         this.__scaleIcon.set(s106);
     }
+
     get addIconShow() {
         return this.__addIconShow.get();
     }
+
     set addIconShow(r106) {
         this.__addIconShow.set(r106);
     }
+
     get scaleAddIcon() {
         return this.__scaleAddIcon.get();
     }
+
     set scaleAddIcon(q106) {
         this.__scaleAddIcon.set(q106);
     }
+
     get isStartDrag() {
         return this.__isStartDrag.get();
     }
+
     set isStartDrag(p106) {
         this.__isStartDrag.set(p106);
     }
+
     get insertIndex() {
         return this.__insertIndex.get();
     }
+
     set insertIndex(o106) {
         this.__insertIndex.set(o106);
     }
+
     get itemIndex() {
         return this.__itemIndex.get();
     }
+
     set itemIndex(n106) {
         this.__itemIndex.set(n106);
     }
+
     get editGridDataLength() {
         return this.__editGridDataLength.get();
     }
+
     set editGridDataLength(m106) {
         this.__editGridDataLength.set(m106);
     }
+
     get isTouchDown() {
         return this.__isTouchDown.get();
     }
+
     set isTouchDown(l106) {
         this.__isTouchDown.set(l106);
     }
+
     get addItemMoveX() {
         return this.__addItemMoveX.get();
     }
+
     set addItemMoveX(k106) {
         this.__addItemMoveX.set(k106);
     }
+
     get addItemMoveY() {
         return this.__addItemMoveY.get();
     }
+
     set addItemMoveY(j106) {
         this.__addItemMoveY.set(j106);
     }
+
     get editItemMoveX() {
         return this.__editItemMoveX.get();
     }
+
     set editItemMoveX(i106) {
         this.__editItemMoveX.set(i106);
     }
+
     get editItemMoveY() {
         return this.__editItemMoveY.get();
     }
+
     set editItemMoveY(h106) {
         this.__editItemMoveY.set(h106);
     }
+
     get unSelectedIndex() {
         return this.__unSelectedIndex.get();
     }
+
     set unSelectedIndex(g106) {
         this.__unSelectedIndex.set(g106);
     }
+
     get clickAddBtn() {
         return this.__clickAddBtn.get();
     }
+
     set clickAddBtn(f106) {
         this.__clickAddBtn.set(f106);
     }
+
     get selectedIndex() {
         return this.__selectedIndex.get();
     }
+
     set selectedIndex(e106) {
         this.__selectedIndex.set(e106);
     }
+
     get clickRemoveBtn() {
         return this.__clickRemoveBtn.get();
     }
+
     set clickRemoveBtn(d106) {
         this.__clickRemoveBtn.set(d106);
     }
+
     get addAreaLongPressGesture() {
         return this.__addAreaLongPressGesture.get();
     }
+
     set addAreaLongPressGesture(c106) {
         this.__addAreaLongPressGesture.set(c106);
     }
+
     get arraySelectIsChange() {
         return this.__arraySelectIsChange.get();
     }
+
     set arraySelectIsChange(b106) {
         this.__arraySelectIsChange.set(b106);
     }
+
     get arrayUnSelectIsChange() {
         return this.__arrayUnSelectIsChange.get();
     }
+
     set arrayUnSelectIsChange(a106) {
         this.__arrayUnSelectIsChange.set(a106);
     }
+
     get textItemEditWidth() {
         return this.__textItemEditWidth.get();
     }
+
     set textItemEditWidth(z105) {
         this.__textItemEditWidth.set(z105);
     }
+
     get textItemEditHeight() {
         return this.__textItemEditHeight.get();
     }
+
     set textItemEditHeight(y105) {
         this.__textItemEditHeight.set(y105);
     }
+
     get imageItemWidth() {
         return this.__imageItemWidth.get();
     }
+
     set imageItemWidth(x105) {
         this.__imageItemWidth.set(x105);
     }
+
     get saveClick() {
         return this.__saveClick.get();
     }
+
     set saveClick(w105) {
         this.__saveClick.set(w105);
     }
+
     get imageTextAddIconShow() {
         return this.__imageTextAddIconShow.get();
     }
+
     set imageTextAddIconShow(v105) {
         this.__imageTextAddIconShow.set(v105);
     }
+
     get imageTextRemoveIconShow() {
         return this.__imageTextRemoveIconShow.get();
     }
+
     set imageTextRemoveIconShow(u105) {
         this.__imageTextRemoveIconShow.set(u105);
     }
+
     get firstIn() {
         return this.__firstIn.get();
     }
+
     set firstIn(t105) {
         this.__firstIn.set(t105);
     }
+
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
+
     set fontSizeScale(s105) {
         this.__fontSizeScale.set(s105);
     }
+
     get fontWeightScale() {
         return this.__fontWeightScale.get();
     }
+
     set fontWeightScale(r105) {
         this.__fontWeightScale.set(r105);
     }
+
     get customColumns() {
         return this.__customColumns.get();
     }
+
     set customColumns(q105) {
         this.__customColumns.set(q105);
     }
+
     get editGridHeight() {
         return this.__editGridHeight.get();
     }
+
     set editGridHeight(p105) {
         this.__editGridHeight.set(p105);
     }
+
     get addGridHeight() {
         return this.__addGridHeight.get();
     }
+
     set addGridHeight(o105) {
         this.__addGridHeight.set(o105);
     }
+
     get subTitleHeight() {
         return this.__subTitleHeight.get();
     }
+
     set subTitleHeight(n105) {
         this.__subTitleHeight.set(n105);
     }
+
     get isOpenAccessibility() {
         return this.__isOpenAccessibility.get();
     }
+
     set isOpenAccessibility(m105) {
         this.__isOpenAccessibility.set(m105);
     }
+
     get readFlag() {
         return this.__readFlag.get();
     }
+
     set readFlag(l105) {
         this.__readFlag.set(l105);
     }
+
     get readIndex4AddArea() {
         return this.__readIndex4AddArea.get();
     }
+
     set readIndex4AddArea(k105) {
         this.__readIndex4AddArea.set(k105);
     }
+
     get readIndex4EditArea() {
         return this.__readIndex4EditArea.get();
     }
+
     set readIndex4EditArea(j105) {
         this.__readIndex4EditArea.set(j105);
     }
+
     get isPointToAddTitleBarEditButton() {
         return this.__isPointToAddTitleBarEditButton.get();
     }
+
     set isPointToAddTitleBarEditButton(i105) {
         this.__isPointToAddTitleBarEditButton.set(i105);
     }
+
     get isPointToEditTitleBarSaveButton() {
         return this.__isPointToEditTitleBarSaveButton.get();
     }
+
     set isPointToEditTitleBarSaveButton(h105) {
         this.__isPointToEditTitleBarSaveButton.set(h105);
     }
+
     aboutToAppear() {
         this.dataList.length = 50;
-        this.selected = this.dataList && this.deduplicate(this.dataList).filter(g105 => g105.selected).sort(this.sortBy());
-        this.unSelected = this.dataList && this.deduplicate(this.dataList).filter(f105 => !f105.selected).sort(this.sortBy());
+        this.selected =
+            this.dataList && this.deduplicate(this.dataList).filter(g105 => g105.selected).sort(this.sortBy());
+        this.unSelected =
+            this.dataList && this.deduplicate(this.dataList).filter(f105 =>!f105.selected).sort(this.sortBy());
         this.copySelected = this.selected.slice();
         this.copyUnSelected = this.unSelected.slice();
         this.editGridDataLength = this.selected.length;
@@ -870,19 +1012,19 @@ export class GridObjectSortComponent extends ViewPU {
             this.fontSizeScale = this.decideFontScale(e105);
             this.fontWeightScale =
                 e105.getHostContext()?.config?.fontWeightScale ?? DEFAULT_FONT_WEIGHT_SCALE;
-        }
-        catch (b105) {
+        } catch (b105) {
             let c105 = b105.code;
             let d105 = b105.message;
-            hilog.error(0x3900, 'Ace', `GridObjectSortComponent Faild to init fontsizescale info, code:${c105}, message: ${d105}`);
+            hilog.error(0x3900, 'Ace',
+                `GridObjectSortComponent Faild to init fontsizescale info, code:${c105}, message: ${d105}`);
         }
         try {
             this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
-        }
-        catch (y104) {
+        } catch (y104) {
             let z104 = y104?.code;
             let a105 = y104?.message;
-            hilog.error(0x3900, 'Ace', `GridObjectSortComponent Faild to get environment param error: ${z104}, ${a105}`);
+            hilog.error(0x3900, 'Ace',
+                `GridObjectSortComponent Faild to get environment param error: ${z104}, ${a105}`);
         }
         this.calcGridHeight();
         setTimeout(() => {
@@ -893,6 +1035,7 @@ export class GridObjectSortComponent extends ViewPU {
             this.isOpenAccessibility = x104;
         });
     }
+
     getAdaptiveSymbolFontSize() {
         let w104 = this.fontSizeScale;
         if (!this.isFollowingSystemFontScale || w104 === undefined) {
@@ -902,6 +1045,7 @@ export class GridObjectSortComponent extends ViewPU {
         w104 = Math.max(w104, MIN_FONT_SCALE);
         return (w104 * SYMBOL_SIZE_12FP).toString() + 'vp';
     }
+
     getSymbolFontSizeFrom(v104) {
         if (v104 === undefined) {
             return SYMBOL_DEFAULT;
@@ -911,10 +1055,17 @@ export class GridObjectSortComponent extends ViewPU {
         }
         return v104;
     }
+
     calcTextItemEditHeight() {
         let u104 = MeasureText.measureTextSize({
             textContent: this.dataList[0]?.text ?? '',
-            fontSize: `${(LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })?.value ??
+            fontSize: `${(LengthMetrics.resource({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_button3'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            })?.value ??
                 DEFAULT_TEXT_SIZE) * (this.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE)}vp`,
             overflow: TextOverflow.Ellipsis,
             maxLines: TEXT_MAX_LINES
@@ -923,6 +1074,7 @@ export class GridObjectSortComponent extends ViewPU {
             GRID_ITEM_HEIGHT_TEXT : px2vp(u104.height);
         this.textItemEditHeight = this.textItemEditHeight + PADDING_EIGHT * 2;
     }
+
     decideFontScale(s104) {
         if (!this.isFollowingSystemFontScale) {
             return 1;
@@ -930,16 +1082,17 @@ export class GridObjectSortComponent extends ViewPU {
         let t104 = s104.getHostContext()?.config?.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE;
         return Math.min(t104, this.maxAppFontScale, MAX_FONT_SCALE);
     }
+
     calcColNum() {
         if (this.imageText || (this.fontSizeScale && this.fontSizeScale > DEFAULT_FONT_SIZE_SCALE)) {
             this.customColumns = GRID_COL_3;
             this.colNum = COL_IMAGE_TEXT;
-        }
-        else {
+        } else {
             this.customColumns = GRID_COL_4;
             this.colNum = COL_TEXT;
         }
     }
+
     aboutToDisappear() {
         Context.animateTo({
             duration: ENTER_EXIT_ICON_DURATION,
@@ -958,6 +1111,7 @@ export class GridObjectSortComponent extends ViewPU {
             this.callbackId = void (0);
         }
     }
+
     deduplicate(o104) {
         const p104 = [];
         o104.forEach(q104 => {
@@ -967,6 +1121,7 @@ export class GridObjectSortComponent extends ViewPU {
         });
         return p104;
     }
+
     onGridComStateChange() {
         this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
         if (!this.imageText) {
@@ -975,11 +1130,13 @@ export class GridObjectSortComponent extends ViewPU {
                 this.textItemEditHeight + DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN;
         }
     }
+
     sortBy() {
         return (m104, n104) => {
             return m104.order - n104.order;
         };
     }
+
     cancelEdit() {
         if (this.isStartDrag || this.clickAddBtn || this.clickRemoveBtn) {
             return;
@@ -1004,6 +1161,7 @@ export class GridObjectSortComponent extends ViewPU {
         this.isPointToAddTitleBarEditButton = true;
         this.onCancel && this.onCancel();
     }
+
     goEdit() {
         Context.animateTo({
             duration: ENTER_EXIT_ICON_DURATION,
@@ -1015,6 +1173,7 @@ export class GridObjectSortComponent extends ViewPU {
         this.isPointToEditTitleBarSaveButton = true;
         this.calcGridHeight();
     }
+
     pointToEditTitleBarSaveButton() {
         if (this.isPointToEditTitleBarSaveButton) {
             let k104 = this.getUIContext().getFrameNodeById(EDIT_TITLE_BAR_ID)?.getFirstChild()?.getUniqueId();
@@ -1033,6 +1192,7 @@ export class GridObjectSortComponent extends ViewPU {
             }, SEND_EVENT_DURATION);
         }
     }
+
     onSaveEdit() {
         if (this.isStartDrag) {
             return;
@@ -1064,6 +1224,7 @@ export class GridObjectSortComponent extends ViewPU {
         this.menuSwitch = false;
         this.isPointToAddTitleBarEditButton = true;
     }
+
     pointToAddTitleBarEditButton() {
         if (this.isPointToAddTitleBarEditButton) {
             let g104 = this.getUIContext()?.getFrameNodeById(ADD_TITLE_BAR_ID)?.getFirstChild()?.getUniqueId();
@@ -1080,6 +1241,7 @@ export class GridObjectSortComponent extends ViewPU {
             });
         }
     }
+
     onDragMoveEvent(c104, d104, e104) {
         if (!this.gridComState || (c104.x < this.blockWidth / 3 && c104.y < this.blockHeight / 3)) {
             return;
@@ -1087,9 +1249,9 @@ export class GridObjectSortComponent extends ViewPU {
         let f104 = e104;
         if (f104 < 0) {
             f104 = this.selected.length - 1;
-        }
-        else {
-            this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_MOVING, Math.floor(e104 / this.colNum) + 1, e104 % this.colNum + 1);
+        } else {
+            this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_MOVING,
+                Math.floor(e104 / this.colNum) + 1, e104 % this.colNum + 1);
         }
         if (this.dragContent.visibility !== Visibility.Hidden) {
             this.dragContent.visibility = Visibility.Hidden;
@@ -1099,6 +1261,7 @@ export class GridObjectSortComponent extends ViewPU {
         }
         this.insertIndex = e104;
     }
+
     sendAccessibility() {
         if (this.preTextAnnouncedForAccessibility !== this.textAnnouncedForAccessibility) {
             let b104 = ({
@@ -1111,6 +1274,7 @@ export class GridObjectSortComponent extends ViewPU {
             this.preTextAnnouncedForAccessibility = this.textAnnouncedForAccessibility;
         }
     }
+
     handleDeleteClick(x103) {
         if (this.clickAddBtn || this.clickRemoveBtn) {
             return;
@@ -1122,25 +1286,29 @@ export class GridObjectSortComponent extends ViewPU {
         this.content = x103;
         this.selectedIndex = y103;
         this.calcGridHeight();
-        Context.animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
-            this.scaleIcon = 1;
-            this.selected.splice(y103, 1);
-            this.unSelected.unshift(x103);
-            this.calcGridHeight();
-            this.editGridDataLength = this.editGridDataLength - 1;
-            this.editItemMoveX = 0;
-            this.editItemMoveY = 0;
-            this.arraySelectIsChange = 2;
-            this.clickRemoveBtn = false;
-            this.readFlag = false;
-            this.readIndex4AddArea = 0;
-            this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_DELETED, this.getAccessibilityText(this.content?.text ?? ' '));
-        } }, () => {
+        Context.animateTo({
+            curve: REMOVE_ADD_SPRING, onFinish: () => {
+                this.scaleIcon = 1;
+                this.selected.splice(y103, 1);
+                this.unSelected.unshift(x103);
+                this.calcGridHeight();
+                this.editGridDataLength = this.editGridDataLength - 1;
+                this.editItemMoveX = 0;
+                this.editItemMoveY = 0;
+                this.arraySelectIsChange = 2;
+                this.clickRemoveBtn = false;
+                this.readFlag = false;
+                this.readIndex4AddArea = 0;
+                this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_DELETED,
+                    this.getAccessibilityText(this.content?.text ?? ' '));
+            }
+        }, () => {
             let z103 = this.getAddItemGridPosition();
             this.editItemMoveX = z103.x;
             this.editItemMoveY = z103.y;
         });
     }
+
     pointToAddArea() {
         let w103 = ({
             type: 'requestFocusForAccessibility',
@@ -1155,6 +1323,7 @@ export class GridObjectSortComponent extends ViewPU {
             }, ENTER_EXIT_ICON_DURATION);
         });
     }
+
     getNewData(r103, s103, t103) {
         return r103.map((u103, v103) => {
             u103.selected = s103;
@@ -1163,14 +1332,17 @@ export class GridObjectSortComponent extends ViewPU {
             return u103;
         });
     }
+
     getBlockWidth() {
         const q103 = (this.areaWidth - 32) / this.colNum;
         return q103;
     }
+
     calcGridHeight() {
         this.editGridHeight = this.getGridHeight(this.selected, EDIT);
         this.addGridHeight = this.getGridHeight(this.unSelected);
     }
+
     getGridHeight(i103, j103) {
         let k103 = 0;
         let l103 = i103.length;
@@ -1183,14 +1355,11 @@ export class GridObjectSortComponent extends ViewPU {
         let n103 = l103 % this.colNum === 0;
         if (this.clickAddBtn && n103) {
             m103 = 1;
-        }
-        else if (this.isStartDrag && n103 && j103) {
+        } else if (this.isStartDrag && n103 && j103) {
             m103 = 1;
-        }
-        else if (this.clickRemoveBtn && n103 && !j103) {
+        } else if (this.clickRemoveBtn && n103 && !j103) {
             m103 = 1;
-        }
-        else {
+        } else {
             m103 = 0;
         }
         let o103 = Math.ceil(l103 / this.colNum) + m103;
@@ -1200,21 +1369,49 @@ export class GridObjectSortComponent extends ViewPU {
         }
         return k103;
     }
+
     imageTextRemoveIcon(f103) {
         const g103 = this.clickRemoveBtn && this.content.id === f103.id;
-        const h103 = g103 ? { 'id': -1, 'type': 40000, params: ['sys.symbol.plus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 40000, params: ['sys.symbol.minus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        const h103 = g103 ? {
+            'id': -1,
+            'type': 40000,
+            params: ['sys.symbol.plus_circle_fill'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        } : {
+            'id': -1,
+            'type': 40000,
+            params: ['sys.symbol.minus_circle_fill'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
         return h103;
     }
+
     imageTextAddIcon(c103) {
         const d103 = this.clickAddBtn && this.content.id === c103.id && this.gridComState;
-        const e103 = d103 ? { 'id': -1, 'type': 40000, params: ['sys.symbol.minus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 40000, params: ['sys.symbol.plus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        const e103 = d103 ? {
+            'id': -1,
+            'type': 40000,
+            params: ['sys.symbol.minus_circle_fill'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        } : {
+            'id': -1,
+            'type': 40000,
+            params: ['sys.symbol.plus_circle_fill'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
         return e103;
     }
+
     imageTextAddIconVisible(z102) {
         const a103 = this.clickAddBtn && this.content.id === z102.id && !this.gridComState;
         const b103 = a103 ? Visibility.Hidden : Visibility.Visible;
         return b103;
     }
+
     getCoodXY(u102) {
         let v102 = 0;
         let w102 = 0;
@@ -1225,19 +1422,16 @@ export class GridObjectSortComponent extends ViewPU {
                 if (y102 === 0) {
                     v102 = v102 + this.blockWidth * (x102 - 1);
                     w102 = w102 - this.blockHeight;
-                }
-                else {
+                } else {
                     v102 = v102 - this.blockWidth;
                 }
             }
-        }
-        else {
+        } else {
             if (u102 >= this.insertIndex) {
                 if (y102 === x102 - 1) {
                     v102 = v102 - this.blockWidth * (x102 - 1);
                     w102 = w102 + this.blockHeight;
-                }
-                else {
+                } else {
                     v102 = v102 + this.blockWidth;
                 }
             }
@@ -1248,6 +1442,7 @@ export class GridObjectSortComponent extends ViewPU {
         }
         return { x: v102, y: w102 };
     }
+
     getAddItemGridPosition() {
         const i102 = this.selected.length;
         const j102 = this.colNum;
@@ -1258,8 +1453,7 @@ export class GridObjectSortComponent extends ViewPU {
         let o102 = 0;
         if (k102 === 0) {
             o102 = n102 || (this.fontSizeScale && this.fontSizeScale > 1) ? -this.blockWidth * 2 : -this.blockWidth * 3;
-        }
-        else {
+        } else {
             o102 = -this.blockWidth * (k102 - 1);
         }
         let p102 = SUBTITLE_HEIGHT;
@@ -1276,6 +1470,7 @@ export class GridObjectSortComponent extends ViewPU {
             y: q102
         };
     }
+
     getCoveringGridPosition(f102) {
         let g102 = 0;
         let h102 = 0;
@@ -1288,6 +1483,7 @@ export class GridObjectSortComponent extends ViewPU {
             y: h102
         };
     }
+
     getEditItemGridPosition(t101, u101) {
         const v101 = t101.length;
         const w101 = this.colNum;
@@ -1296,11 +1492,9 @@ export class GridObjectSortComponent extends ViewPU {
         let z101 = Math.abs(x101 - y101) * this.blockWidth;
         if (x101 < y101) {
             z101 = -z101;
-        }
-        else if (x101 > y101) {
+        } else if (x101 > y101) {
             z101 = z101;
-        }
-        else {
+        } else {
             z101 = 0;
         }
         let a102 = 0;
@@ -1310,8 +1504,7 @@ export class GridObjectSortComponent extends ViewPU {
         const e102 = !this.imageText && this.gridComState && u101 > 3;
         if (e102) {
             b102 = (c102 + 1) * (this.blockHeight - 8) + 8;
-        }
-        else {
+        } else {
             b102 = (c102 + 1) * this.blockHeight;
         }
         if (this.fontSizeScale && this.fontSizeScale > 1) {
@@ -1323,6 +1516,7 @@ export class GridObjectSortComponent extends ViewPU {
             y: a102
         };
     }
+
     getCoveringGridPositionBottom(o101) {
         let p101 = 0;
         let q101 = 0;
@@ -1337,6 +1531,7 @@ export class GridObjectSortComponent extends ViewPU {
             y: q101
         };
     }
+
     getAddItemRightMove(k101) {
         let l101 = this.blockWidth;
         let m101 = 0;
@@ -1347,6 +1542,7 @@ export class GridObjectSortComponent extends ViewPU {
         }
         return { x: l101, y: m101 };
     }
+
     getShowAreaItemTranslate(h101) {
         if (this.isStartDrag) {
             let j101 = this.getCoodXY(h101);
@@ -1370,6 +1566,7 @@ export class GridObjectSortComponent extends ViewPU {
         }
         return { x: 0, y: 0 };
     }
+
     getAddAreaItemTranslate(e101) {
         if (this.clickRemoveBtn) {
             let g101 = this.getAddItemRightMove(e101);
@@ -1393,6 +1590,7 @@ export class GridObjectSortComponent extends ViewPU {
         }
         return { x: 0, y: 0 };
     }
+
     PixelMapBuilder(d100, e100, f100 = null) {
         this.observeComponentCreation2((c101, d101) => {
             Stack.create({ alignContent: Alignment.Center });
@@ -1427,8 +1625,7 @@ export class GridObjectSortComponent extends ViewPU {
                                     SymbolGlyph.fontSize(this.getSymbolFontSizeFrom(this.options.imageSize));
                                 }, SymbolGlyph);
                             });
-                        }
-                        else if (d100 instanceof SymbolGlyphModifier) {
+                        } else if (d100 instanceof SymbolGlyphModifier) {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((w100, x100) => {
                                     SymbolGlyph.create();
@@ -1440,8 +1637,7 @@ export class GridObjectSortComponent extends ViewPU {
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                 }, SymbolGlyph);
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(2, () => {
                                 this.observeComponentCreation2((u100, v100) => {
                                     Image.create(d100);
@@ -1456,7 +1652,13 @@ export class GridObjectSortComponent extends ViewPU {
                     this.observeComponentCreation2((q100, r100) => {
                         Text.create(e100);
                         Text.textAlign(TextAlign.Center);
-                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.fontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.ohos_id_text_size_button3'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        });
                         Text.margin({ top: 2 });
                         Text.maxLines(TEXT_MAX_LINES);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
@@ -1465,11 +1667,23 @@ export class GridObjectSortComponent extends ViewPU {
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((o100, p100) => {
-                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.minus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        SymbolGlyph.create({
+                            'id': -1,
+                            'type': 40000,
+                            params: ['sys.symbol.minus_circle_fill'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        });
                         SymbolGlyph.fontSize(SYMBOL_SIZE_24VP);
                         SymbolGlyph.fontWeight(SYMBOL_WEIGHT);
                         SymbolGlyph.draggable(false);
-                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                        SymbolGlyph.fontColor([{
+                            'id': -1,
+                            'type': 10001,
+                            params: ['sys.color.ohos_id_color_secondary'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        }]);
                         SymbolGlyph.width(ICON_SIZE);
                         SymbolGlyph.height(ICON_SIZE);
                         SymbolGlyph.position({
@@ -1479,8 +1693,7 @@ export class GridObjectSortComponent extends ViewPU {
                     }, SymbolGlyph);
                     Column.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((m100, n100) => {
                         Row.create();
@@ -1492,14 +1705,32 @@ export class GridObjectSortComponent extends ViewPU {
                         Row.scale({ x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo });
                         Row.alignItems(VerticalAlign.Center);
                         Row.justifyContent(FlexAlign.Center);
-                        Row.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_button_normal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Row.backgroundColor({
+                            'id': -1,
+                            'type': 10001,
+                            params: ['sys.color.ohos_id_color_button_normal'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        });
                         Row.width(this.textItemEditWidth);
                         Row.height(this.textItemEditHeight);
                     }, Row);
                     this.observeComponentCreation2((k100, l100) => {
                         Text.create(e100);
-                        Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.fontColor({
+                            'id': -1,
+                            'type': 10001,
+                            params: ['sys.color.ohos_id_color_text_primary'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        });
+                        Text.fontSize({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.ohos_id_text_size_button3'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        });
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.textAlign(TextAlign.Center);
                         Text.maxLines(TEXT_MAX_LINES);
@@ -1508,11 +1739,23 @@ export class GridObjectSortComponent extends ViewPU {
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((i100, j100) => {
-                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.minus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        SymbolGlyph.create({
+                            'id': -1,
+                            'type': 40000,
+                            params: ['sys.symbol.minus_circle_fill'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        });
                         SymbolGlyph.fontSize(SYMBOL_SIZE_24VP);
                         SymbolGlyph.fontWeight(SYMBOL_WEIGHT);
                         SymbolGlyph.draggable(false);
-                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                        SymbolGlyph.fontColor([{
+                            'id': -1,
+                            'type': 10001,
+                            params: ['sys.color.ohos_id_color_secondary'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        }]);
                         SymbolGlyph.width(ICON_SIZE);
                         SymbolGlyph.height(ICON_SIZE);
                         SymbolGlyph.position({
@@ -1527,6 +1770,7 @@ export class GridObjectSortComponent extends ViewPU {
         If.pop();
         Stack.pop();
     }
+
     HeaderTitleBuilder(l99 = null) {
         this.observeComponentCreation2((y99, z99) => {
             __Common__.create();
@@ -1535,8 +1779,7 @@ export class GridObjectSortComponent extends ViewPU {
             __Common__.onVisibleAreaChange([0.0, 1.0], (a100, b100) => {
                 if (a100) {
                     this.pointToAddTitleBarEditButton();
-                }
-                else {
+                } else {
                     if (this.isPointToEditTitleBarSaveButton) {
                         try {
                             let c100 = ({
@@ -1561,28 +1804,89 @@ export class GridObjectSortComponent extends ViewPU {
             this.observeComponentCreation2((u99, v99) => {
                 if (v99) {
                     let w99 = new ComposeTitleBar(this, {
-                        title: this.options.normalTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_title_chanel'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                        title: this.options.normalTitle || {
+                            'id': -1,
+                            'type': 10003,
+                            params: ['sys.string.ohos_grid_edit_title_chanel'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        },
                         menuItems: [{
-                            value: { 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_public_edit'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                            symbolStyle: (new SymbolGlyphModifier({ 'id': -1, 'type': 40000, params: ['sys.symbol.square_and_pencil'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })),
+                            value: {
+                                'id': -1,
+                                'type': 20000,
+                                params: ['sys.media.ohos_ic_public_edit'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
+                            symbolStyle: (new SymbolGlyphModifier({
+                                'id': -1,
+                                'type': 40000,
+                                params: ['sys.symbol.square_and_pencil'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            })),
                             isEnabled: true,
-                            label: { 'id': -1, 'type': 10003, params: ['sys.string.gridobjectsortcomponent_accessibility_header_edit_button'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                            accessibilityText: { 'id': -1, 'type': 10003, params: ['sys.string.gridobjectsortcomponent_accessibility_header_edit_button'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            label: {
+                                'id': -1,
+                                'type': 10003,
+                                params: ['sys.string.gridobjectsortcomponent_accessibility_header_edit_button'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
+                            accessibilityText: {
+                                'id': -1,
+                                'type': 10003,
+                                params: ['sys.string.gridobjectsortcomponent_accessibility_header_edit_button'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
                             action: () => {
                                 this.goEdit();
                             }
                         }]
-                    }, undefined, u99, () => { }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 948, col: 5 });
+                    }, undefined, u99, () => {
+                    }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 948, col: 5 });
                     ViewPU.create(w99);
                     let x99 = () => {
                         return {
-                            title: this.options.normalTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_title_chanel'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            title: this.options.normalTitle || {
+                                'id': -1,
+                                'type': 10003,
+                                params: ['sys.string.ohos_grid_edit_title_chanel'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
                             menuItems: [{
-                                value: { 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_public_edit'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                                symbolStyle: (new SymbolGlyphModifier({ 'id': -1, 'type': 40000, params: ['sys.symbol.square_and_pencil'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })),
+                                value: {
+                                    'id': -1,
+                                    'type': 20000,
+                                    params: ['sys.media.ohos_ic_public_edit'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__',
+                                },
+                                symbolStyle: (new SymbolGlyphModifier({
+                                    'id': -1,
+                                    'type': 40000,
+                                    params: ['sys.symbol.square_and_pencil'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__',
+                                })),
                                 isEnabled: true,
-                                label: { 'id': -1, 'type': 10003, params: ['sys.string.gridobjectsortcomponent_accessibility_header_edit_button'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                                accessibilityText: { 'id': -1, 'type': 10003, params: ['sys.string.gridobjectsortcomponent_accessibility_header_edit_button'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                label: {
+                                    'id': -1,
+                                    'type': 10003,
+                                    params: ['sys.string.gridobjectsortcomponent_accessibility_header_edit_button'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__',
+                                },
+                                accessibilityText: {
+                                    'id': -1,
+                                    'type': 10003,
+                                    params: ['sys.string.gridobjectsortcomponent_accessibility_header_edit_button'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__',
+                                },
                                 action: () => {
                                     this.goEdit();
                                 }
@@ -1590,8 +1894,7 @@ export class GridObjectSortComponent extends ViewPU {
                         };
                     };
                     w99.paramsGenerator_ = x99;
-                }
-                else {
+                } else {
                     this.updateStateVarsOfChildByElmtId(u99, {});
                 }
             }, { name: 'ComposeTitleBar' });
@@ -1614,48 +1917,97 @@ export class GridObjectSortComponent extends ViewPU {
                         leftIconStyle: EditableLeftIconType.Cancel,
                         isSaveIconRequired: false,
                         menuItems: [{
-                            value: { 'id': -1, 'type': 40000, params: ['sys.symbol.checkmark'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                            label: { 'id': -1, 'type': 10003, params: ['sys.string.gridobjectsortcomponent_accessibility_complete_button'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                            accessibilityText: { 'id': -1, 'type': 10003, params: ['sys.string.gridobjectsortcomponent_accessibility_complete_button'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            value: {
+                                'id': -1,
+                                'type': 40000,
+                                params: ['sys.symbol.checkmark'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
+                            label: {
+                                'id': -1,
+                                'type': 10003,
+                                params: ['sys.string.gridobjectsortcomponent_accessibility_complete_button'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
+                            accessibilityText: {
+                                'id': -1,
+                                'type': 10003,
+                                params: ['sys.string.gridobjectsortcomponent_accessibility_complete_button'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
                             action: () => {
                                 this.saveClick = true;
                                 this.onSaveEdit();
                             }
                         }],
-                        title: this.options.editTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_title_edit'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                        title: this.options.editTitle || {
+                            'id': -1,
+                            'type': 10003,
+                            params: ['sys.string.ohos_grid_edit_title_edit'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        },
                         onCancel: () => {
                             this.cancelEdit();
                         },
-                    }, undefined, m99, () => { }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 979, col: 5 });
+                    }, undefined, m99, () => {
+                    }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 979, col: 5 });
                     ViewPU.create(o99);
                     let p99 = () => {
                         return {
                             leftIconStyle: EditableLeftIconType.Cancel,
                             isSaveIconRequired: false,
                             menuItems: [{
-                                value: { 'id': -1, 'type': 40000, params: ['sys.symbol.checkmark'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                                label: { 'id': -1, 'type': 10003, params: ['sys.string.gridobjectsortcomponent_accessibility_complete_button'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                                accessibilityText: { 'id': -1, 'type': 10003, params: ['sys.string.gridobjectsortcomponent_accessibility_complete_button'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                value: {
+                                    'id': -1,
+                                    'type': 40000,
+                                    params: ['sys.symbol.checkmark'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__',
+                                },
+                                label: {
+                                    'id': -1,
+                                    'type': 10003,
+                                    params: ['sys.string.gridobjectsortcomponent_accessibility_complete_button'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__',
+                                },
+                                accessibilityText: {
+                                    'id': -1,
+                                    'type': 10003,
+                                    params: ['sys.string.gridobjectsortcomponent_accessibility_complete_button'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__',
+                                },
                                 action: () => {
                                     this.saveClick = true;
                                     this.onSaveEdit();
                                 }
                             }],
-                            title: this.options.editTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_title_edit'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            title: this.options.editTitle || {
+                                'id': -1,
+                                'type': 10003,
+                                params: ['sys.string.ohos_grid_edit_title_edit'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
                             onCancel: () => {
                                 this.cancelEdit();
                             }
                         };
                     };
                     o99.paramsGenerator_ = p99;
-                }
-                else {
+                } else {
                     this.updateStateVarsOfChildByElmtId(m99, {});
                 }
             }, { name: 'EditableTitleBar' });
         }
         __Common__.pop();
     }
+
     ImageTextBuilder(o98, p98, q98 = null) {
         this.observeComponentCreation2((j99, k99) => {
             Column.create();
@@ -1673,7 +2025,8 @@ export class GridObjectSortComponent extends ViewPU {
                 o98.id === this.hoverId ? this.touchBorderRadius : 0);
             Column.backgroundColor(this.isTouchDown && o98.id === this.content.id
                 ? this.touchDown : o98.id === this.hoverId ? this.hoverBackgroundColor : '');
-            Column.scale(o98.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
+            Column.scale(o98.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } :
+                {});
         }, Column);
         this.observeComponentCreation2((x98, y98) => {
             If.create();
@@ -1687,8 +2040,7 @@ export class GridObjectSortComponent extends ViewPU {
                         SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                     }, SymbolGlyph);
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((z98, a99) => {
                         If.create();
@@ -1700,8 +2052,7 @@ export class GridObjectSortComponent extends ViewPU {
                                     SymbolGlyph.fontSize(this.getSymbolFontSizeFrom(this.options.imageSize));
                                 }, SymbolGlyph);
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((b99, c99) => {
                                     Image.create(o98.url);
@@ -1720,7 +2071,13 @@ export class GridObjectSortComponent extends ViewPU {
         this.observeComponentCreation2((v98, w98) => {
             Text.create(o98.text);
             Text.textAlign(TextAlign.Center);
-            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.fontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_button3'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            });
             Text.margin({ top: 2 });
             Text.maxLines(TEXT_MAX_LINES);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
@@ -1738,7 +2095,13 @@ export class GridObjectSortComponent extends ViewPU {
             SymbolGlyph.fontWeight(SYMBOL_WEIGHT);
             SymbolGlyph.draggable(false);
             SymbolGlyph.visibility(p98 === 'add' ? this.imageTextAddIconVisible(o98) : Visibility.Hidden);
-            SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+            SymbolGlyph.fontColor([{
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            }]);
             SymbolGlyph.width(ICON_SIZE);
             SymbolGlyph.height(ICON_SIZE);
             SymbolGlyph.position({
@@ -1747,14 +2110,21 @@ export class GridObjectSortComponent extends ViewPU {
             });
             SymbolGlyph.onClick(() => this.handleAddIconClick(o98));
             SymbolGlyph.accessibilityLevel(YES);
-            SymbolGlyph.accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_BUTTON, this.getAccessibilityText(o98.text)));
+            SymbolGlyph.accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_BUTTON,
+                this.getAccessibilityText(o98.text)));
         }, SymbolGlyph);
         this.observeComponentCreation2((r98, s98) => {
             SymbolGlyph.create(this.imageTextRemoveIcon(o98));
             SymbolGlyph.fontSize(SYMBOL_SIZE_24VP);
             SymbolGlyph.fontWeight(SYMBOL_WEIGHT);
             SymbolGlyph.draggable(false);
-            SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+            SymbolGlyph.fontColor([{
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            }]);
             SymbolGlyph.visibility(p98 === 'delete' && this.gridComState ? Visibility.Visible :
             Visibility.Hidden);
             SymbolGlyph.width(ICON_SIZE);
@@ -1765,11 +2135,13 @@ export class GridObjectSortComponent extends ViewPU {
             });
             SymbolGlyph.onClick(() => this.handleDeleteClick(o98));
             SymbolGlyph.accessibilityLevel(YES);
-            SymbolGlyph.accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DELETE, this.getAccessibilityText(o98.text)));
+            SymbolGlyph.accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DELETE,
+                this.getAccessibilityText(o98.text)));
         }, SymbolGlyph);
         Column.pop();
         Column.pop();
     }
+
     handleAddIconClick(j98) {
         if (this.clickAddBtn || this.clickRemoveBtn) {
             return;
@@ -1806,12 +2178,16 @@ export class GridObjectSortComponent extends ViewPU {
         });
         this.readFlag = false;
         this.readIndex4EditArea = this.editGridDataLength - 1;
-        this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_ITEM_ADD, this.getAccessibilityText(this.content?.text ?? ''), Math.floor(this.readIndex4EditArea / this.colNum) + 1, this.readIndex4EditArea % this.colNum + 1);
+        this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_ITEM_ADD,
+            this.getAccessibilityText(this.content?.text ?? ''), Math.floor(this.readIndex4EditArea / this.colNum) + 1,
+            this.readIndex4EditArea % this.colNum + 1);
     }
+
     TextBlockBuilder(v97, w97 = null) {
         this.observeComponentCreation2((h98, i98) => {
             Stack.create();
-            Stack.scale(v97.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
+            Stack.scale(v97.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } :
+                {});
             Stack.padding({
                 left: MARGIN_EIGHT,
                 right: MARGIN_EIGHT
@@ -1831,7 +2207,13 @@ export class GridObjectSortComponent extends ViewPU {
                 v97.id === this.content.id ? { x: 0 } : { x: -4 } : { x: 0 });
             Row.height('100%');
             Context.animation(null);
-            Row.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_button_normal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Row.backgroundColor({
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_button_normal'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            });
         }, Row);
         Row.pop();
         this.observeComponentCreation2((d98, e98) => {
@@ -1856,23 +2238,48 @@ export class GridObjectSortComponent extends ViewPU {
             Context.animation(null);
         }, Flex);
         this.observeComponentCreation2((b98, c98) => {
-            SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.plus'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            SymbolGlyph.create({
+                'id': -1,
+                'type': 40000,
+                params: ['sys.symbol.plus'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            });
             Context.animation({
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: COMMON_BEZIER
             });
             SymbolGlyph.fontSize(this.getAdaptiveSymbolFontSize());
             SymbolGlyph.draggable(false);
-            SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
-            SymbolGlyph.visibility(this.clickRemoveBtn && v97.id === this.content.id ? Visibility.Visible : Visibility.None);
+            SymbolGlyph.fontColor([{
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_text_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            }]);
+            SymbolGlyph.visibility(this.clickRemoveBtn && v97.id === this.content.id ? Visibility.Visible :
+            Visibility.None);
             SymbolGlyph.transition({ type: TransitionType.All, scale: { x: 0, y: 0, } });
             SymbolGlyph.margin({ right: 4 });
             Context.animation(null);
         }, SymbolGlyph);
         this.observeComponentCreation2((z97, a98) => {
             Text.create(v97.text);
-            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.fontColor({
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_text_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            });
+            Text.fontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_button3'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.textAlign(TextAlign.Center);
             Text.maxLines(TEXT_MAX_LINES);
@@ -1881,7 +2288,13 @@ export class GridObjectSortComponent extends ViewPU {
         }, Text);
         Text.pop();
         this.observeComponentCreation2((x97, y97) => {
-            SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.minus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            SymbolGlyph.create({
+                'id': -1,
+                'type': 40000,
+                params: ['sys.symbol.minus_circle_fill'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            });
             Context.animation({
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: COMMON_BEZIER,
@@ -1889,7 +2302,13 @@ export class GridObjectSortComponent extends ViewPU {
             SymbolGlyph.fontSize(SYMBOL_SIZE_24VP);
             SymbolGlyph.fontWeight(SYMBOL_WEIGHT);
             SymbolGlyph.draggable(false);
-            SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+            SymbolGlyph.fontColor([{
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            }]);
             SymbolGlyph.width(ICON_SIZE);
             SymbolGlyph.transition({ type: TransitionType.All, scale: { x: 0, y: 0, centerX: '50%' } });
             SymbolGlyph.scale(v97.id === this.content.id ? { x: this.scaleIcon, y: this.scaleIcon } : {});
@@ -1901,15 +2320,18 @@ export class GridObjectSortComponent extends ViewPU {
             Context.animation(null);
             SymbolGlyph.onClick(() => this.handleDeleteClick(v97));
             SymbolGlyph.accessibilityLevel(YES);
-            SymbolGlyph.accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DELETE, this.getAccessibilityText(v97.text)));
+            SymbolGlyph.accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DELETE,
+                this.getAccessibilityText(v97.text)));
         }, SymbolGlyph);
         Flex.pop();
         Stack.pop();
     }
+
     TextBlockAddItemBuilder(f97, g97 = null) {
         this.observeComponentCreation2((t97, u97) => {
             Stack.create();
-            Stack.scale(f97.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
+            Stack.scale(f97.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } :
+                {});
             Stack.padding({
                 left: MARGIN_EIGHT,
                 right: MARGIN_EIGHT
@@ -1927,7 +2349,13 @@ export class GridObjectSortComponent extends ViewPU {
             Row.width(this.addIconShow && f97.id === this.content.id ? this.textItemEditWidth : '100%');
             Row.translate(this.addIconShow && f97.id === this.content.id && this.gridComState ? { x: -4 } : { x: 0 });
             Context.animation(null);
-            Row.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_button_normal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Row.backgroundColor({
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_button_normal'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            });
         }, Row);
         Row.pop();
         this.observeComponentCreation2((p97, q97) => {
@@ -1949,22 +2377,41 @@ export class GridObjectSortComponent extends ViewPU {
             Flex.height('100%');
         }, Flex);
         this.observeComponentCreation2((n97, o97) => {
-            SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.plus'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            SymbolGlyph.create({
+                'id': -1,
+                'type': 40000,
+                params: ['sys.symbol.plus'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            });
             Context.animation({
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: COMMON_BEZIER
             });
             SymbolGlyph.fontSize(this.getAdaptiveSymbolFontSize());
             SymbolGlyph.draggable(false);
-            SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
-            SymbolGlyph.visibility(this.addIconShow && f97.id === this.content.id ? Visibility.None : Visibility.Visible);
+            SymbolGlyph.fontColor([{
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_text_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            }]);
+            SymbolGlyph.visibility(this.addIconShow && f97.id === this.content.id ? Visibility.None :
+            Visibility.Visible);
             SymbolGlyph.transition({ type: TransitionType.All, scale: { x: 0, y: 0 } });
             SymbolGlyph.margin({ right: 4 });
             Context.animation(null);
         }, SymbolGlyph);
         this.observeComponentCreation2((l97, m97) => {
             Text.create(f97.text);
-            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.fontSize({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_text_size_button3'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.textAlign(TextAlign.Start);
             Text.maxLines(TEXT_MAX_LINES);
@@ -1977,12 +2424,24 @@ export class GridObjectSortComponent extends ViewPU {
             if (this.gridComState && this.addIconShow && f97.id === this.content.id) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((j97, k97) => {
-                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.minus_circle_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        SymbolGlyph.create({
+                            'id': -1,
+                            'type': 40000,
+                            params: ['sys.symbol.minus_circle_fill'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        });
                         SymbolGlyph.fontSize(SYMBOL_SIZE_24VP);
                         SymbolGlyph.fontWeight(SYMBOL_WEIGHT);
                         SymbolGlyph.draggable(false);
                         SymbolGlyph.transition({ type: TransitionType.All, scale: { x: 0, y: 0 } });
-                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                        SymbolGlyph.fontColor([{
+                            'id': -1,
+                            'type': 10001,
+                            params: ['sys.color.ohos_id_color_secondary'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        }]);
                         SymbolGlyph.width(ICON_SIZE);
                         SymbolGlyph.translate(this.gridComState ? { x: -MARGIN_EIGHT } : {});
                         SymbolGlyph.position({
@@ -1991,8 +2450,7 @@ export class GridObjectSortComponent extends ViewPU {
                         });
                     }, SymbolGlyph);
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -2001,6 +2459,7 @@ export class GridObjectSortComponent extends ViewPU {
         Flex.pop();
         Stack.pop();
     }
+
     onAddTagLongPressEnd() {
         this.addAreaLongPressGesture = false;
         Context.animateTo({
@@ -2010,6 +2469,7 @@ export class GridObjectSortComponent extends ViewPU {
             this.longScaleOnePointTwo = 1;
         });
     }
+
     AddTagBuilder(k96 = null) {
         this.observeComponentCreation2((d97, e97) => {
             Grid.create();
@@ -2017,7 +2477,8 @@ export class GridObjectSortComponent extends ViewPU {
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER,
             });
-            Grid.translate(this.clickRemoveBtn && this.selected.length % this.colNum === 1 ? { y: -this.blockHeight } : {});
+            Grid.translate(this.clickRemoveBtn && this.selected.length % this.colNum === 1 ? { y: -this.blockHeight } :
+                {});
             Context.animation(null);
             Grid.columnsTemplate(this.customColumns);
             Grid.padding({
@@ -2034,9 +2495,11 @@ export class GridObjectSortComponent extends ViewPU {
                 const r96 = p96;
                 {
                     const s96 = (b97, c97) => {
-                        GridItem.create(() => { }, false);
+                        GridItem.create(() => {
+                        }, false);
                         Context.animation({
-                            curve: this.clickRemoveBtn ? DRAG_SPRING : q96 === this.unSelectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING
+                            curve: this.clickRemoveBtn ? DRAG_SPRING :
+                                q96 === this.unSelectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING
                         });
                         GridItem.clip(false);
                         GridItem.translate(this.getAddAreaItemTranslate(q96));
@@ -2049,8 +2512,7 @@ export class GridObjectSortComponent extends ViewPU {
                             Stack.onHover((a97) => {
                                 if (a97) {
                                     this.hoverId = r96.id;
-                                }
-                                else {
+                                } else {
                                     this.hoverId = '';
                                 }
                             });
@@ -2077,8 +2539,7 @@ export class GridObjectSortComponent extends ViewPU {
                                     setTimeout(() => {
                                         this.pointToRepeat(ADD);
                                     }, ENTER_EXIT_ICON_DURATION);
-                                }
-                                else {
+                                } else {
                                     Context.animateTo({
                                         duration: ENTER_EXIT_ICON_DURATION,
                                         curve: LONG_TOUCH_SCALE
@@ -2105,8 +2566,10 @@ export class GridObjectSortComponent extends ViewPU {
                             Stack.accessibilityGroup(true);
                             Stack.accessibilityLevel(YES);
                             Stack.accessibilityText(this.readFlag ?
-                            this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_ITEM, this.getAccessibilityText(r96.text ?? '')) : this.textAnnouncedForAccessibility);
-                            Stack.accessibilityDescription(this.readFlag ? this.getAddTagGridItemAccessibilityDesc() : ' ');
+                            this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_ITEM,
+                                this.getAccessibilityText(r96.text ?? '')) : this.textAnnouncedForAccessibility);
+                            Stack.accessibilityDescription(this.readFlag ? this.getAddTagGridItemAccessibilityDesc() :
+                                ' ');
                         }, Stack);
                         this.observeComponentCreation2((u96, v96) => {
                             If.create();
@@ -2114,8 +2577,7 @@ export class GridObjectSortComponent extends ViewPU {
                                 this.ifElseBranchUpdateFunction(0, () => {
                                     this.ImageTextBuilder.bind(this)(r96, ADD);
                                 });
-                            }
-                            else {
+                            } else {
                                 this.ifElseBranchUpdateFunction(1, () => {
                                     this.TextBlockAddItemBuilder.bind(this)(r96);
                                 });
@@ -2133,12 +2595,14 @@ export class GridObjectSortComponent extends ViewPU {
         ForEach.pop();
         Grid.pop();
     }
+
     getAddTagGridItemAccessibilityDesc() {
         return this.options?.type === GridObjectSortComponentType.IMAGE_TEXT ?
             this.menuSwitch ? ' ' : this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_IMAGE_ITEM_DESC) :
             this.menuSwitch ? this.getStringByResourceToken(ACCESSIBILITY_DOUBLE_CLICK) :
             this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_TEXT_ITEM_DESC);
     }
+
     handleAddItemTouch(e96, f96) {
         if (this.clickAddBtn || this.clickRemoveBtn) {
             return;
@@ -2174,36 +2638,41 @@ export class GridObjectSortComponent extends ViewPU {
             this.clickAddBtn = true;
             this.arrayUnSelectIsChange = 1;
             this.calcGridHeight();
-            Context.animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
-                if (!this.selected.some(i96 => i96.id === f96.id)) {
-                    this.scaleIcon = 1;
-                    this.scaleAddIcon = 0;
-                    this.selected.push(f96);
-                    this.unSelected.splice(g96, 1);
-                    this.calcGridHeight();
-                    this.arrayUnSelectIsChange = 2;
-                    this.addItemMoveX = 0;
-                    this.addItemMoveY = 0;
-                    if (!this.gridComState) {
-                        this.onSaveEdit();
+            Context.animateTo({
+                curve: REMOVE_ADD_SPRING, onFinish: () => {
+                    if (!this.selected.some(i96 => i96.id === f96.id)) {
+                        this.scaleIcon = 1;
+                        this.scaleAddIcon = 0;
+                        this.selected.push(f96);
+                        this.unSelected.splice(g96, 1);
+                        this.calcGridHeight();
+                        this.arrayUnSelectIsChange = 2;
+                        this.addItemMoveX = 0;
+                        this.addItemMoveY = 0;
+                        if (!this.gridComState) {
+                            this.onSaveEdit();
+                        }
+                        Context.animateTo({
+                            duration: ENTER_EXIT_ICON_DURATION,
+                            curve: COMMON_BEZIER
+                        }, () => {
+                            this.addIconShow = false;
+                        });
+                        this.clickAddBtn = false;
                     }
-                    Context.animateTo({
-                        duration: ENTER_EXIT_ICON_DURATION,
-                        curve: COMMON_BEZIER
-                    }, () => {
-                        this.addIconShow = false;
-                    });
-                    this.clickAddBtn = false;
                 }
-            } }, () => {
+            }, () => {
                 this.addItemMoveX = h96.x;
                 this.addItemMoveY = h96.y;
             });
             this.readFlag = false;
             this.readIndex4EditArea = this.editGridDataLength - 1;
-            this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_ITEM_ADD, this.getAccessibilityText(this.content?.text ?? ''), Math.floor(this.readIndex4EditArea / this.colNum) + 1, this.readIndex4EditArea % this.colNum + 1);
+            this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_ITEM_ADD,
+                this.getAccessibilityText(this.content?.text ?? ''),
+                Math.floor(this.readIndex4EditArea / this.colNum) + 1, this.readIndex4EditArea % this.colNum + 1);
         }
     }
+
     handleAddItemClick(z95) {
         if (this.clickAddBtn || this.clickRemoveBtn) {
             return;
@@ -2261,8 +2730,11 @@ export class GridObjectSortComponent extends ViewPU {
         });
         this.readFlag = false;
         this.readIndex4EditArea = this.editGridDataLength - 1;
-        this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_ITEM_ADD, this.getAccessibilityText(this.content?.text ?? ''), Math.floor(this.readIndex4EditArea / this.colNum) + 1, this.readIndex4EditArea % this.colNum + 1);
+        this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_ITEM_ADD,
+            this.getAccessibilityText(this.content?.text ?? ''), Math.floor(this.readIndex4EditArea / this.colNum) + 1,
+            this.readIndex4EditArea % this.colNum + 1);
     }
+
     EditTagBuilder(o94 = null) {
         this.observeComponentCreation2((w95, x95) => {
             Column.create();
@@ -2299,8 +2771,7 @@ export class GridObjectSortComponent extends ViewPU {
                     setTimeout(() => {
                         this.pointToRepeat(EDIT);
                     }, ENTER_EXIT_ICON_DURATION);
-                }
-                else {
+                } else {
                     Context.animateTo({
                         duration: ENTER_EXIT_ICON_DURATION,
                         curve: LONG_TOUCH_SCALE
@@ -2318,8 +2789,7 @@ export class GridObjectSortComponent extends ViewPU {
                             }).then(() => {
                                 this.vibrationDone = true;
                             });
-                        }
-                        catch {
+                        } catch {
                             this.vibrationDone = false;
                         }
                     }
@@ -2352,11 +2822,16 @@ export class GridObjectSortComponent extends ViewPU {
                 this.insertIndex = u95;
                 this.dragContent = this.selected[u95];
                 this.dragContentIndex = u95;
-                this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_START, this.getAccessibilityText(this.dragContent?.text ?? ''));
+                this.textAnnouncedForAccessibility =
+                    this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_START,
+                        this.getAccessibilityText(this.dragContent?.text ?? ''));
                 this.sendAccessibility();
-                return { builder: () => {
-                    this.PixelMapBuilder.call(this, this.dragContent?.symbolStyle || this.dragContent?.url, this.dragContent?.text);
-                } };
+                return {
+                    builder: () => {
+                        this.PixelMapBuilder.call(this, this.dragContent?.symbolStyle || this.dragContent?.url,
+                            this.dragContent?.text);
+                    }
+                };
             });
             Grid.onItemDrop((p95, q95, r95, s95) => {
                 this.insertItem(q95, r95);
@@ -2373,9 +2848,11 @@ export class GridObjectSortComponent extends ViewPU {
                 const v94 = t94;
                 {
                     const w94 = (g95, h95) => {
-                        GridItem.create(() => { }, false);
+                        GridItem.create(() => {
+                        }, false);
                         Context.animation({
-                            curve: this.isStartDrag ? DRAG_SPRING : u94 === this.selectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING,
+                            curve: this.isStartDrag ? DRAG_SPRING :
+                                u94 === this.selectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING,
                         });
                         GridItem.clip(false);
                         GridItem.translate(this.getShowAreaItemTranslate(u94));
@@ -2389,8 +2866,7 @@ export class GridObjectSortComponent extends ViewPU {
                             Stack.onHover((f95) => {
                                 if (f95) {
                                     this.hoverId = v94.id;
-                                }
-                                else {
+                                } else {
                                     this.hoverId = '';
                                 }
                             });
@@ -2428,7 +2904,8 @@ export class GridObjectSortComponent extends ViewPU {
                             Stack.accessibilityGroup(true);
                             Stack.accessibilityLevel(YES);
                             Stack.accessibilityText(this.readFlag ?
-                            this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM, this.getAccessibilityText(v94.text)) :
+                            this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM,
+                                this.getAccessibilityText(v94.text)) :
                             this.textAnnouncedForAccessibility);
                             Stack.accessibilityDescription(this.readFlag ?
                             this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DESC) : '');
@@ -2439,8 +2916,7 @@ export class GridObjectSortComponent extends ViewPU {
                                 this.ifElseBranchUpdateFunction(0, () => {
                                     this.ImageTextBuilder.bind(this)(v94, DELETE);
                                 });
-                            }
-                            else {
+                            } else {
                                 this.ifElseBranchUpdateFunction(1, () => {
                                     this.TextBlockBuilder.bind(this)(v94);
                                 });
@@ -2459,6 +2935,7 @@ export class GridObjectSortComponent extends ViewPU {
         Grid.pop();
         Column.pop();
     }
+
     pointToRepeat(i94) {
         this.readFlag = false;
         let j94 = '';
@@ -2467,8 +2944,7 @@ export class GridObjectSortComponent extends ViewPU {
             k94 = this.unSelected.findIndex(n94 => n94.id === this.content.id);
             this.readIndex4AddArea = k94;
             j94 = `add_grid_item_${k94}`;
-        }
-        else {
+        } else {
             k94 = this.selected.findIndex(m94 => m94.id === this.content.id);
             this.readIndex4EditArea = k94;
             j94 = `edit_grid_item_${k94}`;
@@ -2490,6 +2966,7 @@ export class GridObjectSortComponent extends ViewPU {
             }, ENTER_EXIT_ICON_DURATION);
         });
     }
+
     insertItem(g94, h94) {
         if (!this.gridComState) {
             return;
@@ -2505,11 +2982,14 @@ export class GridObjectSortComponent extends ViewPU {
         if (h94 !== -1) {
             this.selected.splice(g94, 1);
             this.selected.splice(h94, 0, this.dragContent);
-            this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP, Math.floor(h94 / this.colNum) + 1, h94 % this.colNum + 1);
-        }
-        else {
+            this.textAnnouncedForAccessibility =
+                this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP, Math.floor(h94 / this.colNum) + 1,
+                    h94 % this.colNum + 1);
+        } else {
             this.insertIndex = g94;
-            this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP, Math.floor(g94 / this.colNum) + 1, g94 % this.colNum + 1);
+            this.textAnnouncedForAccessibility =
+                this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP, Math.floor(g94 / this.colNum) + 1,
+                    g94 % this.colNum + 1);
         }
         this.preTextAnnouncedForAccessibility = this.textAnnouncedForAccessibility;
         this.dragContent.visibility = Visibility.Visible;
@@ -2517,6 +2997,7 @@ export class GridObjectSortComponent extends ViewPU {
         this.readFlag = false;
         this.readIndex4EditArea = this.insertIndex;
     }
+
     pointToNextOne() {
         let f94 = ({
             type: 'requestFocusForAccessibility',
@@ -2533,6 +3014,7 @@ export class GridObjectSortComponent extends ViewPU {
             }, ENTER_EXIT_ICON_DURATION);
         });
     }
+
     calcAreaInfo() {
         this.calcColNum();
         this.blockWidth = this.getBlockWidth();
@@ -2544,6 +3026,7 @@ export class GridObjectSortComponent extends ViewPU {
             this.textItemEditHeight + DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN;
         this.calcGridHeight();
     }
+
     initialRender() {
         this.observeComponentCreation2((d94, e94) => {
             Column.create();
@@ -2571,25 +3054,43 @@ export class GridObjectSortComponent extends ViewPU {
                 if (s93) {
                     let t93 = new SubHeader(this, {
                         primaryTitle: '',
-                        secondaryTitle: this.options.showAreaTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_subtitle_sort'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                        secondaryTitle: this.options.showAreaTitle || {
+                            'id': -1,
+                            'type': 10003,
+                            params: ['sys.string.ohos_grid_edit_subtitle_sort'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        },
                         icon: '',
                         operationType: OperationType.BUTTON
-                    }, undefined, r93, () => { }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 1846, col: 11 });
+                    }, undefined, r93, () => {
+                    }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 1846, col: 11 });
                     ViewPU.create(t93);
                     let u93 = () => {
                         return {
                             primaryTitle: '',
-                            secondaryTitle: this.options.showAreaTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_subtitle_sort'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            secondaryTitle: this.options.showAreaTitle || {
+                                'id': -1,
+                                'type': 10003,
+                                params: ['sys.string.ohos_grid_edit_subtitle_sort'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
                             icon: '',
                             operationType: OperationType.BUTTON
                         };
                     };
                     t93.paramsGenerator_ = u93;
-                }
-                else {
+                } else {
                     this.updateStateVarsOfChildByElmtId(r93, {
                         primaryTitle: '',
-                        secondaryTitle: this.options.showAreaTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_subtitle_sort'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                        secondaryTitle: this.options.showAreaTitle || {
+                            'id': -1,
+                            'type': 10003,
+                            params: ['sys.string.ohos_grid_edit_subtitle_sort'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        },
                         icon: '',
                         operationType: OperationType.BUTTON
                     });
@@ -2604,7 +3105,8 @@ export class GridObjectSortComponent extends ViewPU {
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER,
             });
-            __Common__.translate(this.clickRemoveBtn && this.selected.length % this.colNum === 1 ? { y: -this.blockHeight } : {});
+            __Common__.translate(this.clickRemoveBtn && this.selected.length % this.colNum === 1 ?
+                { y: -this.blockHeight } : {});
             Context.animation(null);
             __Common__.margin({ bottom: MARGIN_EIGHT });
             __Common__.onAreaChange((p93, q93) => {
@@ -2616,25 +3118,43 @@ export class GridObjectSortComponent extends ViewPU {
                 if (k93) {
                     let l93 = new SubHeader(this, {
                         primaryTitle: '',
-                        secondaryTitle: this.options.addAreaTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_subtitle_add'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                        secondaryTitle: this.options.addAreaTitle || {
+                            'id': -1,
+                            'type': 10003,
+                            params: ['sys.string.ohos_grid_edit_subtitle_add'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        },
                         icon: '',
                         operationType: OperationType.BUTTON
-                    }, undefined, j93, () => { }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 1855, col: 11 });
+                    }, undefined, j93, () => {
+                    }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 1855, col: 11 });
                     ViewPU.create(l93);
                     let m93 = () => {
                         return {
                             primaryTitle: '',
-                            secondaryTitle: this.options.addAreaTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_subtitle_add'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            secondaryTitle: this.options.addAreaTitle || {
+                                'id': -1,
+                                'type': 10003,
+                                params: ['sys.string.ohos_grid_edit_subtitle_add'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
                             icon: '',
                             operationType: OperationType.BUTTON
                         };
                     };
                     l93.paramsGenerator_ = m93;
-                }
-                else {
+                } else {
                     this.updateStateVarsOfChildByElmtId(j93, {
                         primaryTitle: '',
-                        secondaryTitle: this.options.addAreaTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_subtitle_add'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                        secondaryTitle: this.options.addAreaTitle || {
+                            'id': -1,
+                            'type': 10003,
+                            params: ['sys.string.ohos_grid_edit_subtitle_add'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        },
                         icon: '',
                         operationType: OperationType.BUTTON
                     });
@@ -2647,40 +3167,41 @@ export class GridObjectSortComponent extends ViewPU {
         Scroll.pop();
         Column.pop();
     }
+
     getStringByResourceToken(g93, ...h93) {
         if (g93) {
             try {
                 return getContext(this).resourceManager.getStringByNameSync(g93, ...h93);
-            }
-            catch (i93) {
-                hilog.error(0x3900, 'Ace', `GridObjectSortComponent getStringByResourceToken, error: ${i93.toString()}`);
+            } catch (i93) {
+                hilog.error(0x3900, 'Ace',
+                    `GridObjectSortComponent getStringByResourceToken, error: ${i93.toString()}`);
             }
         }
         return '';
     }
+
     getAccessibilityText(b93) {
         try {
             let f93 = '';
             if (typeof b93 === 'string') {
                 f93 = b93;
-            }
-            else {
+            } else {
                 if (b93.id === -1) {
                     f93 = getContext()?.resourceManager?.getStringByNameSync(b93.params?.[0].split('.').pop());
-                }
-                else {
+                } else {
                     f93 = getContext()?.resourceManager?.getStringSync(b93);
                 }
             }
             return f93;
-        }
-        catch (c93) {
+        } catch (c93) {
             let d93 = c93.code;
             let e93 = c93.message;
-            hilog.error(0x3900, 'Ace', `GridObjectSortComponent getAccessibilityText error, code: ${d93}, message: ${e93}`);
+            hilog.error(0x3900, 'Ace',
+                `GridObjectSortComponent getAccessibilityText error, code: ${d93}, message: ${e93}`);
             return '';
         }
     }
+
     rerender() {
         this.updateDirtyElements();
     }

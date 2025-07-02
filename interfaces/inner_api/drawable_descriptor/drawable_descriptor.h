@@ -74,9 +74,9 @@ using RSImage = Rosen::Drawing::Image;
 using UniqueImageSource = std::unique_ptr<Media::ImageSource>;
 
 struct DrawableItem {
-    UINT8 data_;
+    UINT8 data_ = nullptr;
     size_t len_ = 0;
-    RState state_;
+    RState state_ = RState::INVALID_FORMAT;
 };
 
 class DRAWABLE_FORCE_EXPORT DrawableDescriptor {

@@ -1348,7 +1348,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
         secEvent.extraInfo.dataSize = dataBuffer.size();
     }
     secEvent.accessibility.timestamp =
-        static_cast<uint64_t>(event.time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
+        static_cast<int64_t>(event.time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
     secEvent.accessibility.componentId = node->GetId();
 #endif
     std::string message;

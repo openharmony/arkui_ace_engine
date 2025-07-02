@@ -4890,6 +4890,39 @@ HWTEST_F(WebSelectOverlayTest, PreProcessOverlay_002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: PreProcessOverlay_003
+ * @tc.desc: Test function PreProcessOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, PreProcessOverlay_003, TestSize.Level0)
+{
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::SetUp();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebSelectOverlay overlay(textBase);
+    OverlayRequest request;
+    request.menuIsShow = false;
+    request.hideHandle = false;
+    request.animation = false;
+    request.hideHandleLine = false;
+    request.requestCode = 0;
+    bool result = overlay.PreProcessOverlay(request);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(overlay.IsEnableContainerModal());
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+}
+
+/**
  * @tc.name: CheckHandleVisible_001
  * @tc.desc: Test function CheckHandleVisible.
  * @tc.type: FUNC
@@ -5506,11 +5539,42 @@ HWTEST_F(WebSelectOverlayTest, UpdateAIMenuTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetMenuOptionsTest001
- * @tc.desc: Test SetMenuOptions.
+ * @tc.name: OnTouchSelectionChangedTest011
+ * @tc.desc: Test OnTouchSelectionChanged.
  * @tc.type: FUNC
  */
-HWTEST_F(WebSelectOverlayTest, SetMenuOptionsTest001, TestSize.Level1)
+HWTEST_F(WebSelectOverlayTest, OnTouchSelectionChangedTest011, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WebSelectOverlay overlay(webPattern);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto insertHandle = nullptr;
+    ASSERT_EQ(insertHandle, nullptr);
+    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateBeginTestImpl>();
+    ASSERT_NE(startSelectionHandle, nullptr);
+    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateBeginTestImpl>();
+    ASSERT_NE(endSelectionHandle, nullptr);
+    overlay.isShowHandle_ = true;
+    overlay.selectOverlayDragging_ = true;
+    overlay.isSelectAll_ = true;
+    overlay.OnTouchSelectionChanged(insertHandle, startSelectionHandle, endSelectionHandle);
+    EXPECT_EQ(overlay.isSelectAll_, true);
+}
+
+/**
+ * @tc.name: OnMenuItemActionTestSelectAll
+ * @tc.desc: Test OnMenuItemAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, OnMenuItemActionTestSelectAll, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
@@ -5527,9 +5591,30 @@ HWTEST_F(WebSelectOverlayTest, SetMenuOptionsTest001, TestSize.Level1)
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
         std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
     SelectOverlayInfo selectInfo;
-    overlay.isSelectAll_ = true;
+    auto flags = g_editStateFlags;
+    g_editStateFlags = 0;
     overlay.SetMenuOptions(selectInfo, params, callback);
-    EXPECT_EQ(overlay.isSelectAll_, true);
+    overlay.isSelectAll_ = true;
+    overlay.OnMenuItemAction(OptionMenuActionId::PASTE, OptionMenuType::TOUCH_MENU);
+    ASSERT_EQ(overlay.isSelectAll_, false);
+    overlay.isSelectAll_ = true;
+    overlay.OnMenuItemAction(OptionMenuActionId::CUT, OptionMenuType::TOUCH_MENU);
+    EXPECT_EQ(overlay.isSelectAll_, false);
+    g_editStateFlags = flags;
+}
+
+/**
+ * @tc.name: UpdateSelectMenuOptionsTest002
+ * @tc.desc: Test function UpdateSelectMenuOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, UpdateSelectMenuOptionsTest002, TestSize.Level1)
+{
+    WeakPtr<TextBase> textBase = nullptr;
+    WebSelectOverlay overlay(textBase);
+    overlay.isSelectAll_ = true;
+    overlay.UpdateSelectMenuOptions();
+    EXPECT_FALSE(overlay.isSelectAll_);
 }
 
 /**

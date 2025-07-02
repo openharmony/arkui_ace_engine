@@ -120,7 +120,8 @@ ArkUINativeModuleValue PatternLockBridge::SetRegularColor(ArkUIRuntimeCallInfo* 
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> regularColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, regularColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, regularColorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockRegularColor(nativeNode);
     } else {
         auto regularColorRawPtr = AceType::RawPtr(regularColorResObj);
@@ -151,7 +152,8 @@ ArkUINativeModuleValue PatternLockBridge::SetPathColor(ArkUIRuntimeCallInfo* run
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> pathColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, pathColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, pathColorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockPathColor(nativeNode);
     } else {
         auto pathColorRawPtr = AceType::RawPtr(pathColorResObj);
@@ -182,7 +184,8 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockActiveColor(ArkUIRuntime
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> activeColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, activeColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, activeColorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveColor(nativeNode);
     } else {
         auto activeColorRawPtr = AceType::RawPtr(activeColorResObj);
@@ -245,7 +248,8 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockSelectedColor(ArkUIRunti
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> selectedColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, selectedColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, selectedColorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockSelectedColor(nativeNode);
     } else {
         auto selectedColorRawPtr = AceType::RawPtr(selectedColorResObj);
@@ -287,7 +291,8 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockActivateCircleStyle(ArkU
         auto jsEnableForeground = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enableForeground"));
         Color color;
         RefPtr<ResourceObject> colorResObj;
-        if (!ArkTSUtils::ParseJsColorAlpha(vm, jsColor, color, colorResObj)) {
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, jsColor, color, colorResObj, nodeInfo)) {
             GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveCircleColor(nativeNode);
         } else {
             auto activeCircleColorRawPtr = AceType::RawPtr(colorResObj);

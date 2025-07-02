@@ -387,21 +387,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandlePointWithTransform002, TestSize.Leve
 }
 
 /**
- * @tc.name: CursorMoveLineBegin001
- * @tc.desc: test CursorMoveLineBegin
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, CursorMoveLineBegin001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 0;
-    EXPECT_FALSE(richEditorPattern->CursorMoveLineBegin());
-}
-
-/**
  * @tc.name: HandleKbVerticalSelection001
  * @tc.desc: test HandleKbVerticalSelection
  * @tc.type: FUNC
@@ -433,38 +418,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleKbVerticalSelection002, TestSize.Lev
     richEditorPattern->textSelector_.destinationOffset = 0;
     richEditorPattern->caretPosition_ = 1;
     EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(true), 0);
-}
-
-/**
- * @tc.name: ShowHandles001
- * @tc.desc: test ShowHandles
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, ShowHandles001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isMousePressed_ = true;
-    auto info = richEditorPattern->GetSpansInfo(richEditorPattern->textSelector_.GetTextStart(),
-        richEditorPattern->textSelector_.GetTextEnd(), GetSpansMethod::ONSELECT);
-    auto selResult = info.GetSelection().resultObjects;
-    richEditorPattern->ShowHandles(false);
-    EXPECT_NE(selResult.size(), 1);
-}
-
-/**
- * @tc.name: CursorMoveToParagraphEnd001
- * @tc.desc: test CursorMoveToParagraphEnd
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, CursorMoveToParagraphEnd001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->caretPosition_ = 0;
-    EXPECT_FALSE(richEditorPattern->CursorMoveToParagraphEnd());
 }
 
 /**

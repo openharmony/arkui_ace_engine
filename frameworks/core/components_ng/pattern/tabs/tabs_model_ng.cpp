@@ -1456,13 +1456,15 @@ void TabsModelNG::HandleBarGridGutter(FrameNode* frameNode, const RefPtr<Resourc
         auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
         CHECK_NULL_VOID(tabBarNode);
         CalcDimension result;
-        BarGridColumnOptions columnOption;
-        ACE_GET_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
+        BarGridColumnOptions tempUsed;
         if (ResourceParseUtils::ParseResDimensionVp(resObj, result) && NonNegative(result.Value()) &&
             result.Unit() != DimensionUnit::PERCENT) {
-            columnOption.gutter = result;
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
+            tempUsed.gutter = result;
         }
+        BarGridColumnOptions columnOption;
+        ACE_GET_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
+        columnOption.gutter = tempUsed.gutter;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
@@ -1482,13 +1484,15 @@ void TabsModelNG::HandleBarGridMargin(FrameNode* frameNode, const RefPtr<Resourc
         auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
         CHECK_NULL_VOID(tabBarNode);
         CalcDimension result;
-        BarGridColumnOptions columnOption;
-        ACE_GET_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
+        BarGridColumnOptions tempUsed;
         if (ResourceParseUtils::ParseResDimensionVp(resObj, result) && NonNegative(result.Value()) &&
             result.Unit() != DimensionUnit::PERCENT) {
-            columnOption.margin = result;
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
+            tempUsed.margin = result;
         }
+        BarGridColumnOptions columnOption;
+        ACE_GET_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
+        columnOption.margin = tempUsed.margin;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
@@ -1545,12 +1549,14 @@ void TabsModelNG::HandleDividerColor(FrameNode* frameNode, const RefPtr<Resource
         ACE_GET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, divider, node);
         if (ResourceParseUtils::ParseResColor(resObj, result)) {
             divider.color = result;
+            TabsModelNG::SetDividerColorByUser(AceType::RawPtr(node), true);
         } else {
             auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipelineContext);
             auto tabTheme = pipelineContext->GetTheme<TabTheme>();
             CHECK_NULL_VOID(tabTheme);
             divider.color = tabTheme->GetDividerColor();
+            TabsModelNG::SetDividerColorByUser(AceType::RawPtr(node), false);
         }
         TabsModelNG::SetDivider(AceType::RawPtr(node), divider);
         tabsPattern->UpdateDividerColor();

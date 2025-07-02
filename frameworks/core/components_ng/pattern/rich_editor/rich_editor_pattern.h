@@ -76,6 +76,7 @@ struct TextConfig;
         }                                                                           \
     } while (false)
 #define CONTENT_MODIFY_LOCK(patternPtr) ContentModifyLock contentModifyLock(patternPtr)
+#define RICH_EDITOR_SCOPE(scopeFlag) RichEditorScope richEditorScope(scopeFlag)
 
 #define IF_TRUE(cond, func) \
     do {                    \
@@ -171,6 +172,20 @@ struct SysScale {
         ss << dipScale << ", " << logicScale << ", " << fontScale << ", " << fontWeightScale;
         return ss.str();
     }
+};
+
+class RichEditorScope {
+public:
+    RichEditorScope(bool& scopeFlag) : scopeFlag_(scopeFlag)
+    {
+        scopeFlag_ = true;
+    }
+    ~RichEditorScope()
+    {
+        scopeFlag_ = false;
+    }
+private:
+    bool& scopeFlag_;
 };
 
 class RichEditorPattern
@@ -1357,6 +1372,7 @@ public:
 
     float GetCaretWidth();
     void UpdateCaretStyleByTypingStyle();
+    void MarkAISpanStyleChanged() override;
 
 #if defined(IOS_PLATFORM)
     const TextEditingValue& GetInputEditingValue() const override;
@@ -1873,6 +1889,7 @@ private:
     CancelableCallback<void()> firstClickResetTask_;
     RefPtr<RichEditorContentPattern> contentPattern_;
     std::unique_ptr<StyleManager> styleManager_;
+    bool requestFocusBySingleClick_ = false;
 #if defined(IOS_PLATFORM)
     TextCompose compose_;
     bool unmarkText_;

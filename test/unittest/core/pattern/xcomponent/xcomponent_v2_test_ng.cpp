@@ -67,6 +67,7 @@ public:
     {
         g_isCreated = false;
         g_isChanged = false;
+        g_isDestroyed = false;
     }
 
 protected:
@@ -609,5 +610,256 @@ HWTEST_F(XComponentV2TestNg, CreateAndDisposeAccessibilityProviderTest, TestSize
     XComponentModelNG::DisposeAccessibilityProvider(provider);
     ASSERT_FALSE(pattern->arkuiAccessibilityProvider_);
     delete provider_invalid;
+}
+
+/**
+ * @tc.name: GetRSTransactionHandlerTest001
+ * @tc.desc: Test GetRSTransactionHandler method when multiInstanceEnabled is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, GetRSTransactionHandlerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set multiInstanceEnabled property to false
+     * @tc.expected: multiInstanceEnabled is false
+     */
+    SystemProperties::multiInstanceEnabled_ = false;
+    ASSERT_FALSE(SystemProperties::multiInstanceEnabled_);
+
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto xcomponentPattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_NE(xcomponentPattern, nullptr);
+    auto hostNode = xcomponentPattern->GetHost();
+    /**
+     * @tc.steps: step2. call GetRSTransactionHandle
+     * @tc.expected: GetRSTransactionHandle return nullptr
+     */
+    auto transactionHandler = xcomponentPattern->GetRSTransactionHandler(hostNode);
+    ASSERT_EQ(transactionHandler, nullptr);
+}
+
+/**
+ * @tc.name: GetRSTransactionHandlerTest002
+ * @tc.desc: Test GetRSTransactionHandler method when multiInstanceEnabled is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, GetRSTransactionHandlerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set multiInstanceEnabled property to true
+     * @tc.expected: multiInstanceEnabled is true
+     */
+    SystemProperties::multiInstanceEnabled_ = true;
+    ASSERT_TRUE(SystemProperties::multiInstanceEnabled_);
+    /**
+     * @tc.steps: step2. create new xcomponent node
+     * @tc.expected: create xcomponent node, do not set a RSUIContext
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto xcomponentPattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_NE(xcomponentPattern, nullptr);
+    auto hostNode = xcomponentPattern->GetHost();
+    /**
+     * @tc.steps: step3. call GetRSTransactionHandle
+     * @tc.expected: GetRSTransactionHandle return nullptr
+     */
+    auto transactionHandler = xcomponentPattern->GetRSTransactionHandler(hostNode);
+    ASSERT_EQ(transactionHandler, nullptr);
+}
+
+/**
+ * @tc.name: GetRSUIContextTest001
+ * @tc.desc: Test GetRSUIContext method when framenode is a new node
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, GetRSUIContextTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set multiInstanceEnabled property to false
+     * @tc.expected: multiInstanceEnabled is false
+     */
+    SystemProperties::multiInstanceEnabled_ = false;
+    ASSERT_FALSE(SystemProperties::multiInstanceEnabled_);
+    /**
+     * @tc.steps: step2. create xcomponent frameNode by GetOrCreateFrameNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    XComponentType type = XComponentType::COMPONENT;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::XCOMPONENT_ETS_TAG, stack->ClaimNodeId(), [type]() {
+            return AceType::MakeRefPtr<XComponentPatternV2>(type, XComponentNodeType::DECLARATIVE_NODE); });
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto xcomponentPattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_NE(xcomponentPattern, nullptr);
+    /**
+     * @tc.steps: step3. call GetRSUIContext
+     * @tc.expected: GetRSUIContext return nullptr
+     */
+    auto transactionHandler = xcomponentPattern->GetRSUIContext(frameNode);
+    ASSERT_EQ(transactionHandler, nullptr);
+}
+
+/**
+ * @tc.name: GetRSUIContextTest002
+ * @tc.desc: Test GetRSUIContext method when frameNode is host node
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, GetRSUIContextTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set multiInstanceEnabled property to false
+     * @tc.expected: multiInstanceEnabled is false
+     */
+    SystemProperties::multiInstanceEnabled_ = false;
+    ASSERT_FALSE(SystemProperties::multiInstanceEnabled_);
+    /**
+     * @tc.steps: step2. create xcomponent frameNode by XComponentModelNG
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto xcomponentPattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_NE(xcomponentPattern, nullptr);
+    auto hostNode = xcomponentPattern->GetHost();
+    /**
+     * @tc.steps: step3. call GetRSUIContext
+     * @tc.expected: GetRSUIContext return nullptr
+     */
+    auto transactionHandler = xcomponentPattern->GetRSUIContext(hostNode);
+    ASSERT_EQ(transactionHandler, nullptr);
+}
+
+/**
+ * @tc.name: GetRSUIContextTest003
+ * @tc.desc: Test GetRSUIContext method when framenode is a new node
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, GetRSUIContextTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set multiInstanceEnabled property to true
+     * @tc.expected: multiInstanceEnabled is true
+     */
+    SystemProperties::multiInstanceEnabled_ = true;
+    ASSERT_TRUE(SystemProperties::multiInstanceEnabled_);
+    /**
+     * @tc.steps: step2. create xcomponent frameNode by GetOrCreateFrameNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    XComponentType type = XComponentType::COMPONENT;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::XCOMPONENT_ETS_TAG, stack->ClaimNodeId(), [type]() {
+            return AceType::MakeRefPtr<XComponentPatternV2>(type, XComponentNodeType::DECLARATIVE_NODE); });
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto xcomponentPattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_NE(xcomponentPattern, nullptr);
+    /**
+     * @tc.steps: step3. call GetRSUIContext
+     * @tc.expected: GetRSUIContext return nullptr
+     */
+    auto transactionHandler = xcomponentPattern->GetRSUIContext(frameNode);
+    ASSERT_EQ(transactionHandler, nullptr);
+}
+
+/**
+ * @tc.name: GetRSUIContextTest004
+ * @tc.desc: Test GetRSUIContext method when frameNode is host node
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, GetRSUIContextTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set multiInstanceEnabled property to true
+     * @tc.expected: multiInstanceEnabled is true
+     */
+    SystemProperties::multiInstanceEnabled_ = true;
+    ASSERT_TRUE(SystemProperties::multiInstanceEnabled_);
+    /**
+     * @tc.steps: step2. create xcomponent frameNode by XComponentModelNG
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto xcomponentPattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_NE(xcomponentPattern, nullptr);
+    auto hostNode = xcomponentPattern->GetHost();
+    /**
+     * @tc.steps: step3. call GetRSUIContext
+     * @tc.expected: GetRSUIContext return nullptr
+     */
+    auto transactionHandler = xcomponentPattern->GetRSUIContext(hostNode);
+    ASSERT_EQ(transactionHandler, nullptr);
+}
+
+/**
+ * @tc.name: FlushImplicitTransaction001
+ * @tc.desc: Test FlushImplicitTransaction method
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, FlushImplicitTransaction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set multiInstanceEnabled property to false
+     * @tc.expected: multiInstanceEnabled is false
+     */
+    SystemProperties::multiInstanceEnabled_ = false;
+    ASSERT_FALSE(SystemProperties::multiInstanceEnabled_);
+
+    params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &params));
+
+    ASSERT_TRUE(frameNode);
+    auto xcomponentPattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_NE(xcomponentPattern, nullptr);
+    auto hostNode = xcomponentPattern->GetHost();
+    /**
+     * @tc.steps: step2. call FlushImplicitTransaction
+     * @tc.expected: FlushImplicitTransaction return nullptr
+     */
+    xcomponentPattern->FlushImplicitTransaction(hostNode);
+    EXPECT_EQ(frameNode->GetId(), nodeId);
+}
+
+/**
+ * @tc.name: FlushImplicitTransaction002
+ * @tc.desc: Test FlushImplicitTransaction method
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, FlushImplicitTransaction002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set multiInstanceEnabled property to false
+     * @tc.expected: multiInstanceEnabled is false
+     */
+    SystemProperties::multiInstanceEnabled_ = true;
+    ASSERT_TRUE(SystemProperties::multiInstanceEnabled_);
+
+    params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &params));
+
+    ASSERT_TRUE(frameNode);
+    auto xcomponentPattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_NE(xcomponentPattern, nullptr);
+    auto hostNode = xcomponentPattern->GetHost();
+    /**
+     * @tc.steps: step2. call FlushImplicitTransaction
+     * @tc.expected: FlushImplicitTransaction return nullptr
+     */
+    xcomponentPattern->FlushImplicitTransaction(hostNode);
+    EXPECT_EQ(frameNode->GetId(), nodeId);
 }
 } // namespace OHOS::Ace::NG

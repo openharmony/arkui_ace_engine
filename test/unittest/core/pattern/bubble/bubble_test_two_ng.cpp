@@ -133,6 +133,8 @@ public:
     void InitSetting(BubbleLayoutAlgorithm& algorithm);
     void InitFuncMap(BubbleLayoutAlgorithm& algorithm);
     void InitCanPlacement(BubbleLayoutAlgorithm& algorithm);
+    void InitGetRectSetting(BubbleLayoutAlgorithm& algorithm);
+    void InitCheckPositionSetting(BubbleLayoutAlgorithm& algorithm);
 
 protected:
     static RefPtr<FrameNode> CreateBubbleNode(const TestProperty& testProperty);
@@ -164,7 +166,35 @@ void BubbleTestTwoNg::InitSetting(BubbleLayoutAlgorithm& algorithm)
     algorithm.marginBottom_ = MARGIN_BOTTOM;
     algorithm.targetSpace_ = Dimension(0.0f);
     algorithm.userSetTargetSpace_ = Dimension(0.0f);
-    return;
+}
+
+void BubbleTestTwoNg::InitGetRectSetting(BubbleLayoutAlgorithm& algorithm)
+{
+    algorithm.marginStart_ = MARGIN_START;
+    algorithm.marginEnd_ = MARGIN_END;
+    algorithm.marginTop_ = MARGIN_TOP;
+    algorithm.marginBottom_ = MARGIN_BOTTOM;
+    algorithm.targetSpace_ = Dimension(0.0f);
+    algorithm.userSetTargetSpace_ = Dimension(0.0f);
+    algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
+    algorithm.wrapperRect_.SetRect(0.0f, 0.0f, SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
+    algorithm.targetOffset_ = OffsetF(POSITION_FIFTY, POSITION_FIFTY);
+    algorithm.targetSize_ = SizeF(SIZE_ONE_HUNDRED, SIZE_ONE_HUNDRED);
+}
+
+void BubbleTestTwoNg::InitCheckPositionSetting(BubbleLayoutAlgorithm& algorithm)
+{
+    algorithm.marginStart_ = MARGIN_START;
+    algorithm.marginEnd_ = MARGIN_END;
+    algorithm.marginTop_ = MARGIN_TOP;
+    algorithm.marginBottom_ = MARGIN_BOTTOM;
+    algorithm.targetSpace_ = Dimension(0.0f);
+    algorithm.userSetTargetSpace_ = Dimension(0.0f);
+    algorithm.wrapperSize_ = SizeF(SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
+    algorithm.wrapperRect_.SetRect(0.0f, 0.0f, SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
+    algorithm.targetOffset_ = OffsetF(OFFSET_TWO_HUNDRED, OFFSET_TWO_HUNDRED);
+    algorithm.targetSize_ = SizeF(SIZE_ONE_HUNDRED, SIZE_ONE_HUNDRED);
+    algorithm.isHalfFoldHover_ = false;
 }
 
 void BubbleTestTwoNg::InitFuncMap(BubbleLayoutAlgorithm& algorithm)
@@ -181,7 +211,6 @@ void BubbleTestTwoNg::InitFuncMap(BubbleLayoutAlgorithm& algorithm)
     algorithm.placementFuncMap_[Placement::RIGHT] = &BubbleLayoutAlgorithm::GetPositionWithPlacementRight;
     algorithm.placementFuncMap_[Placement::RIGHT_TOP] = &BubbleLayoutAlgorithm::GetPositionWithPlacementRightTop;
     algorithm.placementFuncMap_[Placement::RIGHT_BOTTOM] = &BubbleLayoutAlgorithm::GetPositionWithPlacementRightBottom;
-    return;
 }
 
 void BubbleTestTwoNg::InitCanPlacement(BubbleLayoutAlgorithm& algorithm)
@@ -190,7 +219,6 @@ void BubbleTestTwoNg::InitCanPlacement(BubbleLayoutAlgorithm& algorithm)
     algorithm.canPlacement_.top = true;
     algorithm.canPlacement_.right = true;
     algorithm.canPlacement_.left = true;
-    return;
 }
 
 RefPtr<FrameNode> BubbleTestTwoNg::CreateTargetNode()
@@ -768,9 +796,13 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetTopMid001, TestSize.Level1)
     SizeF childSize(SIZE_EIGHTY, SIZE_THIRTY);
     OffsetF arrowPosition(0.0f, 0.0f);
     OffsetF resultPosition(0.0f, 0.0f);
-    SizeF size;
+    SizeF size(SIZE_THIRTY, SIZE_THIRTY);
 
     EXPECT_FALSE(algorithm.AvoidToTargetTopMid(childSize, arrowPosition, resultPosition, size, false));
+    EXPECT_FLOAT_EQ(size.Width(), RESULT_THIRTY);
+    EXPECT_FLOAT_EQ(size.Height(), RESULT_THIRTY);
+    EXPECT_FLOAT_EQ(resultPosition.GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(resultPosition.GetY(), 0.0f);
 }
 
 /**
@@ -1079,12 +1111,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetLeft004, TestSize.Level1)
 HWTEST_F(BubbleTestTwoNg, CheckPositionBottom001, TestSize.Level1)
 {
     BubbleLayoutAlgorithm algorithm;
-    algorithm.wrapperSize_ = SizeF(SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
-    BubbleTestTwoNg::InitSetting(algorithm);
-    algorithm.wrapperRect_.SetRect(0.0f, 0.0f, SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
-    algorithm.targetOffset_ = OffsetF(OFFSET_TWO_HUNDRED, OFFSET_TWO_HUNDRED);
-    algorithm.targetSize_ = SizeF(SIZE_ONE_HUNDRED, SIZE_ONE_HUNDRED);
-    algorithm.isHalfFoldHover_ = false;
+    BubbleTestTwoNg::InitCheckPositionSetting(algorithm);
 
     algorithm.maxAreaSpace_ = 0.0f;
     size_t i = 0;
@@ -1119,12 +1146,7 @@ HWTEST_F(BubbleTestTwoNg, CheckPositionBottom001, TestSize.Level1)
 HWTEST_F(BubbleTestTwoNg, CheckPositionTop001, TestSize.Level1)
 {
     BubbleLayoutAlgorithm algorithm;
-    algorithm.wrapperSize_ = SizeF(SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
-    BubbleTestTwoNg::InitSetting(algorithm);
-    algorithm.wrapperRect_.SetRect(0.0f, 0.0f, SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
-    algorithm.targetOffset_ = OffsetF(OFFSET_TWO_HUNDRED, OFFSET_TWO_HUNDRED);
-    algorithm.targetSize_ = SizeF(SIZE_ONE_HUNDRED, SIZE_ONE_HUNDRED);
-    algorithm.isHalfFoldHover_ = false;
+    BubbleTestTwoNg::InitCheckPositionSetting(algorithm);
 
     algorithm.maxAreaSpace_ = 0.0f;
     size_t i = 0;
@@ -1159,12 +1181,7 @@ HWTEST_F(BubbleTestTwoNg, CheckPositionTop001, TestSize.Level1)
 HWTEST_F(BubbleTestTwoNg, CheckPositionRight001, TestSize.Level1)
 {
     BubbleLayoutAlgorithm algorithm;
-    algorithm.wrapperSize_ = SizeF(SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
-    BubbleTestTwoNg::InitSetting(algorithm);
-    algorithm.wrapperRect_.SetRect(0.0f, 0.0f, SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
-    algorithm.targetOffset_ = OffsetF(OFFSET_TWO_HUNDRED, OFFSET_TWO_HUNDRED);
-    algorithm.targetSize_ = SizeF(SIZE_ONE_HUNDRED, SIZE_ONE_HUNDRED);
-    algorithm.isHalfFoldHover_ = false;
+    BubbleTestTwoNg::InitCheckPositionSetting(algorithm);
 
     algorithm.maxAreaSpace_ = 0.0f;
     size_t i = 0;
@@ -1199,12 +1216,7 @@ HWTEST_F(BubbleTestTwoNg, CheckPositionRight001, TestSize.Level1)
 HWTEST_F(BubbleTestTwoNg, CheckPositionLeft001, TestSize.Level1)
 {
     BubbleLayoutAlgorithm algorithm;
-    algorithm.wrapperSize_ = SizeF(SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
-    BubbleTestTwoNg::InitSetting(algorithm);
-    algorithm.wrapperRect_.SetRect(0.0f, 0.0f, SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
-    algorithm.targetOffset_ = OffsetF(OFFSET_TWO_HUNDRED, OFFSET_TWO_HUNDRED);
-    algorithm.targetSize_ = SizeF(SIZE_ONE_HUNDRED, SIZE_ONE_HUNDRED);
-    algorithm.isHalfFoldHover_ = false;
+    BubbleTestTwoNg::InitCheckPositionSetting(algorithm);
 
     algorithm.maxAreaSpace_ = 0.0f;
     size_t i = 0;
@@ -1239,11 +1251,7 @@ HWTEST_F(BubbleTestTwoNg, CheckPositionLeft001, TestSize.Level1)
 HWTEST_F(BubbleTestTwoNg, GetBottomRect001, TestSize.Level1)
 {
     BubbleLayoutAlgorithm algorithm;
-    algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
-    BubbleTestTwoNg::InitSetting(algorithm);
-    algorithm.wrapperRect_.SetRect(0.0f, 0.0f, SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
-    algorithm.targetOffset_ = OffsetF(POSITION_FIFTY, POSITION_FIFTY);
-    algorithm.targetSize_ = SizeF(SIZE_ONE_HUNDRED, SIZE_ONE_HUNDRED);
+    BubbleTestTwoNg::InitGetRectSetting(algorithm);
 
     algorithm.isHalfFoldHover_ = false;
     Rect rect = algorithm.GetBottomRect();
@@ -1268,11 +1276,7 @@ HWTEST_F(BubbleTestTwoNg, GetBottomRect001, TestSize.Level1)
 HWTEST_F(BubbleTestTwoNg, GetTopRect001, TestSize.Level1)
 {
     BubbleLayoutAlgorithm algorithm;
-    algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
-    BubbleTestTwoNg::InitSetting(algorithm);
-    algorithm.wrapperRect_.SetRect(0.0f, 0.0f, SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
-    algorithm.targetOffset_ = OffsetF(POSITION_FIFTY, POSITION_FIFTY);
-    algorithm.targetSize_ = SizeF(SIZE_ONE_HUNDRED, SIZE_ONE_HUNDRED);
+    BubbleTestTwoNg::InitGetRectSetting(algorithm);
 
     algorithm.isHalfFoldHover_ = false;
     Rect rect = algorithm.GetTopRect();
@@ -1297,11 +1301,7 @@ HWTEST_F(BubbleTestTwoNg, GetTopRect001, TestSize.Level1)
 HWTEST_F(BubbleTestTwoNg, GetRightRect001, TestSize.Level1)
 {
     BubbleLayoutAlgorithm algorithm;
-    algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
-    BubbleTestTwoNg::InitSetting(algorithm);
-    algorithm.wrapperRect_.SetRect(0.0f, 0.0f, SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
-    algorithm.targetOffset_ = OffsetF(POSITION_FIFTY, POSITION_FIFTY);
-    algorithm.targetSize_ = SizeF(SIZE_ONE_HUNDRED, SIZE_ONE_HUNDRED);
+    BubbleTestTwoNg::InitGetRectSetting(algorithm);
 
     algorithm.isHalfFoldHover_ = false;
     Rect rect = algorithm.GetRightRect();
@@ -1326,11 +1326,7 @@ HWTEST_F(BubbleTestTwoNg, GetRightRect001, TestSize.Level1)
 HWTEST_F(BubbleTestTwoNg, GetLeftRect001, TestSize.Level1)
 {
     BubbleLayoutAlgorithm algorithm;
-    algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
-    BubbleTestTwoNg::InitSetting(algorithm);
-    algorithm.wrapperRect_.SetRect(0.0f, 0.0f, SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
-    algorithm.targetOffset_ = OffsetF(POSITION_FIFTY, POSITION_FIFTY);
-    algorithm.targetSize_ = SizeF(SIZE_ONE_HUNDRED, SIZE_ONE_HUNDRED);
+    BubbleTestTwoNg::InitGetRectSetting(algorithm);
 
     algorithm.isHalfFoldHover_ = false;
     Rect rect = algorithm.GetLeftRect();

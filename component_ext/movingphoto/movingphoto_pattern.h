@@ -258,7 +258,7 @@ private:
     void RestartVideo();
     void SetEnableTransition(bool enabled);
     bool GetEnableTransition();
-    void SetPlaybackPeriod(int64_t startTime, int64_t endTime);
+    bool SetPlaybackPeriod(int64_t startTime, int64_t endTime);
     void EnableAutoPlay(bool enabled);
     void SetStartPlaybackImpl(const SingleTaskExecutor& uiTaskExecutor);
     void SetStopPlaybackImpl(const SingleTaskExecutor& uiTaskExecutor);

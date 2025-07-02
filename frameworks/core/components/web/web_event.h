@@ -1221,6 +1221,29 @@ private:
     RefPtr<WebRequest> request_;
 };
 
+class ACE_EXPORT OnOverrideErrorPageEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(OnOverrideErrorPageEvent, BaseEventInfo);
+
+public:
+    OnOverrideErrorPageEvent(const RefPtr<WebRequest>& webResourceRequest, const RefPtr<WebError>& error)
+        : BaseEventInfo("OnOverrideErrorPageEvent"), webResourceRequest_(webResourceRequest), error_(error) {}
+    ~OnOverrideErrorPageEvent() = default;
+
+    const RefPtr<WebRequest>& GetWebResourceRequest() const
+    {
+        return webResourceRequest_;
+    }
+
+    const RefPtr<WebError>& GetError() const
+    {
+        return error_;
+    }
+
+private:
+    RefPtr<WebRequest> webResourceRequest_;
+    RefPtr<WebError> error_;
+};
+
 class ACE_EXPORT LoadWebRequestFocusEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebRequestFocusEvent, BaseEventInfo);
 

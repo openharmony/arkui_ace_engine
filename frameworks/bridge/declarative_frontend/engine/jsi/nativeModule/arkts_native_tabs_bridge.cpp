@@ -297,7 +297,8 @@ ArkUINativeModuleValue TabsBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
         dividerStrokeWidth.Reset();
     }
     Color colorObj;
-    if (isColorArgInvalid || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (isColorArgInvalid || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, colorResObj, nodeInfo)) {
         color = tabTheme->GetDividerColor().GetValue();
         GetArkUINodeModifiers()->getTabsModifier()->setDividerColorByUser(nativeNode, false);
     } else {
@@ -421,7 +422,8 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundColor(ArkUIRuntimeCallInfo* r
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> backgroundColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, backgroundColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, backgroundColorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getTabsModifier()->resetBarBackgroundColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTabsModifier()->setBarBackgroundColor(nativeNode, color.GetValue());
@@ -457,14 +459,15 @@ bool ParseJsInt32(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &res
 }
 
 RefPtr<ResourceObject> SetBarBackgroundBlurStyleParam(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Bool& isValidColor,
-    Color& inactiveColor, ArkUI_Int32& policy, ArkUI_Int32& blurType)
+    Color& inactiveColor, ArkUI_Int32& policy, ArkUI_Int32& blurType, ArkUINodeHandle nativeNode)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> policyArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_6);
     Local<JSValueRef> inactiveColorArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_7);
     Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_8);
     RefPtr<ResourceObject> inactiveColorResObj;
-    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor, inactiveColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor, inactiveColorResObj, nodeInfo)) {
         isValidColor = true;
     }
     ParseJsInt32(vm, policyArg, policy);
@@ -523,7 +526,7 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundBlurStyle(ArkUIRuntimeCallInf
     }
     Color inactiveColor = Color::TRANSPARENT;
     auto inactiveColorResObj = SetBarBackgroundBlurStyleParam(runtimeCallInfo, styleOption.isValidColor, inactiveColor,
-        styleOption.policy, styleOption.blurType);
+        styleOption.policy, styleOption.blurType, nativeNode);
     styleOption.inactiveColor = inactiveColor.GetValue();
     GetArkUINodeModifiers()->getTabsModifier()->setBarBackgroundBlurStyle(nativeNode, &styleOption);
     GetArkUINodeModifiers()->getTabsModifier()->createBarBackgroundBlurStyleWithResourceObj(nativeNode,
@@ -543,7 +546,7 @@ ArkUINativeModuleValue TabsBridge::ResetBarBackgroundBlurStyle(ArkUIRuntimeCallI
 }
 
 RefPtr<ResourceObject> SetBarBackgroundEffectParam(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32& policy,
-    ArkUI_Int32& blurType, Color& inactiveColor, ArkUI_Bool& isValidColor)
+    ArkUI_Int32& blurType, Color& inactiveColor, ArkUI_Bool& isValidColor, ArkUINodeHandle nativeNode)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> policyArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_7);
@@ -560,7 +563,8 @@ RefPtr<ResourceObject> SetBarBackgroundEffectParam(ArkUIRuntimeCallInfo* runtime
         blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
     }
     RefPtr<ResourceObject> inactiveColorResObj;
-    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor, inactiveColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor, inactiveColorResObj, nodeInfo)) {
         isValidColor = true;
     }
     return inactiveColorResObj;
@@ -631,7 +635,8 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundEffect(ArkUIRuntimeCallInfo* 
     SetSaturationAndBrightnessEffectOptionParam(vm, saturationArg, brightnessArg, effectOption);
     RefPtr<ResourceObject> colorResObj;
     Color color = Color::TRANSPARENT;
-    if (!ArkTSUtils::ParseJsColor(vm, colorArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColor(vm, colorArg, color, colorResObj, nodeInfo)) {
         color.SetValue(Color::TRANSPARENT.GetValue());
     }
     effectOption.color = color.GetValue();
@@ -642,7 +647,7 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundEffect(ArkUIRuntimeCallInfo* 
     effectOption.blurValuesSize = static_cast<ArkUI_Int32>(blurOption.grayscale.size());
     Color inactiveColor = Color::TRANSPARENT;
     auto inactiveColorResObj = SetBarBackgroundEffectParam(runtimeCallInfo, effectOption.policy, effectOption.blurType,
-        inactiveColor, effectOption.isValidColor);
+        inactiveColor, effectOption.isValidColor, nativeNode);
     effectOption.inactiveColor = inactiveColor.GetValue();
     GetArkUINodeModifiers()->getTabsModifier()->setBarBackgroundEffect(nativeNode, &effectOption);
     GetArkUINodeModifiers()->getTabsModifier()->createBarBackgroundEffectWithResourceObj(nativeNode,

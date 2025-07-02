@@ -416,6 +416,9 @@ public:
     void FlushDirtyNodeUpdate();
     void FlushSafeAreaPaddingProcess();
 
+    void FlushTSUpdates();
+    void SetFlushTSUpdates(std::function<bool(int32_t)>&& flushTSUpdates) override;
+
     void SetRootRect(double width, double height, double offset) override;
 
     void SetWindowSceneConsumed(bool isConsumed);
@@ -1015,6 +1018,8 @@ public:
 
     void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) override;
 
+    void DisableNotifyResponseRegionChanged() override;
+
     void SetLocalColorMode(ColorMode colorMode)
     {
         auto localColorModeValue = static_cast<int32_t>(colorMode);
@@ -1254,6 +1259,11 @@ public:
     void RegisterArkUIObjectLifecycleCallback(Kit::ArkUIObjectLifecycleCallback&& callback);
     void UnregisterArkUIObjectLifecycleCallback();
     void FireArkUIObjectLifecycleCallback(void* data);
+
+    inline void SetNeedCallbackAreaChange(bool needChange)
+    {
+        isNeedCallbackAreaChange_ = needChange;
+    }
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1512,6 +1522,7 @@ private:
     bool isWindowSizeDragging_ = false;
     KeyBoardAvoidMode prevKeyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     bool isFreezeFlushMessage_ = false;
+    bool isNeedCallbackAreaChange_ = true;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
@@ -1519,6 +1530,7 @@ private:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)> sizeChangeByRotateCallback_;
     std::function<void(const std::string&)> linkJumpCallback_ = nullptr;
     std::function<void()> dragWindowVisibleCallback_;
+    std::function<bool(int32_t)> flushTSUpdatesCb_;
 
     std::optional<bool> needSoftKeyboard_;
     std::optional<bool> windowFocus_;

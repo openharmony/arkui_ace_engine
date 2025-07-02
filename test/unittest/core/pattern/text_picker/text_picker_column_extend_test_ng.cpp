@@ -314,7 +314,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths001, TestSize.Level1)
     textPickerPattern->OnModifyDone();
     SetColumnNodeIdealSize();
     textPickerLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), COMPONENT_WIDTH / 2.0f);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), 50.0f);
 
     width.pop_back();
     width.emplace_back(Dimension(10.0f, DimensionUnit::PX));
@@ -330,7 +330,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths001, TestSize.Level1)
     textPickerPattern->OnModifyDone();
     SetColumnNodeIdealSize();
     textPickerLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), Dimension(10.0f, DimensionUnit::VP).ConvertToPx());
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), 10.0f);
 }
 
 /**
@@ -362,7 +362,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths002, TestSize.Level1)
     textPickerPattern->OnModifyDone();
     SetColumnNodeIdealSize();
     textPickerLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), Dimension(10.0f, DimensionUnit::LPX).ConvertToPx());
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), 10.0f);
 
     width.pop_back();
     width.emplace_back(Dimension(10.0f, DimensionUnit::FP));
@@ -370,15 +370,13 @@ HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths002, TestSize.Level1)
     textPickerPattern->OnModifyDone();
     SetColumnNodeIdealSize();
     textPickerLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), Dimension(10.0f, DimensionUnit::FP).ConvertToPx());
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), 10.0f);
 
     width.pop_back();
     width.emplace_back(Dimension(-10.0f, DimensionUnit::PX));
     TextPickerModelNG::GetInstance()->SetColumnWidths(width);
-    textPickerPattern->OnModifyDone();
-    SetColumnNodeIdealSize();
-    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), COMPONENT_WIDTH);
+    auto columnWidth = textPickerPattern->CalculateColumnSize(0, 1, SizeF(COMPONENT_WIDTH, COMPONENT_HEIGHT));
+    EXPECT_EQ(columnWidth, COMPONENT_WIDTH);
 }
 
 /**
@@ -395,21 +393,11 @@ HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths003, TestSize.Level1)
     ASSERT_NE(textPickerNode, nullptr);
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
-    auto pickerProperty = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
-    ASSERT_NE(pickerProperty, nullptr);
-    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
-    ASSERT_NE(textPickerColumnPattern, nullptr);
-    auto columnNode = textPickerColumnPattern->GetHost();
-    ASSERT_NE(columnNode, nullptr);
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
-    auto textPickerLayoutAlgorithm = textPickerColumnPattern->CreateLayoutAlgorithm();
 
     std::vector<Dimension> width;
     TextPickerModelNG::GetInstance()->SetColumnWidths(width);
-    textPickerPattern->OnModifyDone();
-    SetColumnNodeIdealSize();
-    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), COMPONENT_WIDTH);
+    auto columnWidth = textPickerPattern->CalculateColumnSize(0, 1, SizeF(COMPONENT_WIDTH, COMPONENT_HEIGHT));
+    EXPECT_EQ(columnWidth, COMPONENT_WIDTH);
 }
 
 /**

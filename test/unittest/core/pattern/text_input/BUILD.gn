@@ -37,6 +37,7 @@ ace_unittest("TextInputTest") {
     "text_field_pattern_testnine.cpp",
     "text_field_pattern_testseven.cpp",
     "text_field_pattern_testsix.cpp",
+    "text_field_pattern_testten.cpp",
     "text_field_pattern_testthree.cpp",
     "text_field_pattern_testtwo.cpp",
     "text_input_area_model_test.cpp",
@@ -53,6 +54,7 @@ ace_unittest("TextInputTest") {
     "text_input_test.cpp",
     "text_input_update_test.cpp",
     "text_input_wordbreak_test.cpp",
+    "text_select_controller_test.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager.cpp",
   ]
   cflags = [ "-fno-access-control" ]

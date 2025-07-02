@@ -83,9 +83,8 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkU
 
 int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(ArkUI_NodeHandle node, ArkUI_IntOffset* offset)
 {
-    if (node == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(offset, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     ArkUI_Float32 tempOffset[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getGlobalPositionOnDisplay(

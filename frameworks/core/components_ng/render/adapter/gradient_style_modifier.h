@@ -110,7 +110,7 @@ private:
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> sizeF_;
     // No animatable
     std::shared_ptr<Rosen::RSProperty<Gradient>> gradient_;
-    ColorSpace colorSpace_;
+    ColorSpace colorSpace_ = ColorSpace::SRGB;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_GRADIENT_STYLE_MODIFIER_H

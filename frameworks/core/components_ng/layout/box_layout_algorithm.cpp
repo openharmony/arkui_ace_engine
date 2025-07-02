@@ -91,13 +91,16 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
     auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
     bool isChildComponentContent = false;
     bool isChildColumnLayout = false;
+    bool isContentNoEnabledFixed = false;
     if (layoutPolicy.has_value()) {
         widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
         heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        isChildComponentContent = layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetPattern() &&
-                                  layoutWrapper->GetHostNode()->GetPattern()->IsChildComponentContent();
-        isChildColumnLayout = layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetPattern() &&
-                              layoutWrapper->GetHostNode()->GetPattern()->IsChildColumnLayout();
+        if (layoutPolicy.value().IsAdaptive()) {
+            isChildComponentContent = layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetPattern() &&
+                                      layoutWrapper->GetHostNode()->GetPattern()->IsChildComponentContent();
+            isChildColumnLayout = layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetPattern() &&
+                                  layoutWrapper->GetHostNode()->GetPattern()->IsChildColumnLayout();
+        }
     }
     do {
         // Use idea size first if it is valid.
@@ -121,6 +124,10 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
             auto contentSize = content->GetRect().GetSize();
             AddPaddingToSize(padding, contentSize);
             frameSize.UpdateIllegalSizeWithCheck(contentSize);
+            if (layoutPolicy.has_value() && layoutPolicy.value().IsFix()) {
+                isContentNoEnabledFixed = layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetPattern() &&
+                                          layoutWrapper->GetHostNode()->GetPattern()->IsContentNoEnabledFixed();
+            }
         } else {
             // use the max child size.
             auto childFrame = SizeF();
@@ -160,7 +167,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
         } else {
             frameSize.Constrain(minSize, maxSize, version10OrLarger);
         }
-        if (isEnableFix) {
+        if (isEnableFix && !isContentNoEnabledFixed) {
             if (widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
                 frameSize.SetWidth(fixIdealSize.Width());
             }
@@ -180,7 +187,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
         CHECK_NULL_VOID(pattern);
         bool isEqualWidthAndHeight = pattern->isEqualWidthAndHeight();
         if (isEqualWidthAndHeight && (layoutPolicySize.Width() != layoutPolicySize.Height())) {
-            layoutPolicySize.SetHeight(std::max(layoutPolicySize.Width(), layoutPolicySize.Height()));
+            layoutPolicySize.SetHeight(std::min(layoutPolicySize.Width(), layoutPolicySize.Height()));
             layoutPolicySize.SetWidth(layoutPolicySize.Height());
         }
         frameSize.UpdateSizeWithCheck(layoutPolicySize);

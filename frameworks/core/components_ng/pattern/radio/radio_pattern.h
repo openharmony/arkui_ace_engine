@@ -196,7 +196,22 @@ public:
     }
     void UpdateRadioComponentColor(const Color& color, const RadioColorType radioColorType);
     void OnColorConfigurationUpdate() override;
-
+    void SetUncheckedBorderColorByJSRadioTheme(bool flag)
+    {
+        borderColorByJSRadioTheme_ = flag;
+    }
+    void SetIndicatorColorByJSRadioTheme(bool flag)
+    {
+        indicatorColorByJSRadioTheme_ = flag;
+    }
+    bool GetUncheckedBorderColorByJSRadioTheme()
+    {
+        return borderColorByJSRadioTheme_;
+    }
+    bool GetIndicatorColorByJSRadioTheme()
+    {
+        return indicatorColorByJSRadioTheme_;
+    }
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -285,6 +300,8 @@ private:
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
     bool isUserSetUncheckBorderColor_ = false;
+    bool borderColorByJSRadioTheme_ = true;
+    bool indicatorColorByJSRadioTheme_ = true;
 };
 } // namespace OHOS::Ace::NG
 

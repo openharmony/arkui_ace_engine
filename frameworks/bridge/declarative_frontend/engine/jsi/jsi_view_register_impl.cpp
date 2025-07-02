@@ -551,6 +551,23 @@ static const std::unordered_set<std::string> unsupportedTargetsInCustomEnv = {
     "UIExtensionProxy",
     "FormLink",
     "AbilityController",
+    "Navigation",
+    "Navigator",
+    "NavRouter",
+    "NavDestination",
+    "XComponent",
+    "XComponentController",
+    "EffectComponent",
+    "RichText",
+    "WebController",
+    "Web",
+    "LocationButton",
+    "PasteButton",
+    "SaveButton",
+    "WithTheme",
+    "Camera",
+    "Piece",
+    "Rating",
 };
 
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
@@ -1054,19 +1071,6 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     }
 }
 
-void JsUpdateDirty2ForAnimateTo(BindingTarget globalObj)
-{
-    const auto globalObject = JSRef<JSObject>::Make(globalObj);
-    const JSRef<JSVal> updateDirty2ForAnimateToFunc = globalObject->GetProperty("updateDirty2ForAnimateTo");
-    if (updateDirty2ForAnimateToFunc->IsFunction()) {
-        const auto globalFunc = JSRef<JSFunc>::Cast(updateDirty2ForAnimateToFunc);
-        const auto callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
-        };
-        ElementRegister::GetInstance()->RegisterJSUpdateDirty2ForAnimateTo(callback);
-    }
-}
-
 void JsRegisterModules(BindingTarget globalObj, std::string modules, void* nativeEngine)
 {
     std::stringstream input(modules);
@@ -1075,7 +1079,6 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules, void* nativ
         RegisterModuleByName(globalObj, moduleName);
     }
     JsUINodeRegisterCleanUp(globalObj);
-    JsUpdateDirty2ForAnimateTo(globalObj);
 
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);

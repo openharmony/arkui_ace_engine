@@ -16,6 +16,7 @@
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 
 
@@ -1745,6 +1746,42 @@ HWTEST_F(ViewAbstractTestNg, BackgroundResourceTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CustomBackgroundResourceTest001
+ * @tc.desc: Test set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CustomBackgroundResourceTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Test customBackgroundColor.
+     */
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    auto instance = ViewStackProcessor::GetInstance();
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+    auto frameNode = instance->GetMainFrameNode();
+    EXPECT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    EXPECT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    EXPECT_TRUE(pattern->resourceMgr_);
+    auto resMap = pattern->resourceMgr_->resMap_;
+    ViewAbstract::SetCustomBackgroundColorWithResourceObj(BLUE, resourceObject);
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::pipeline_ = nullptr;
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::SetUp();
+    ViewAbstract::SetCustomBackgroundColorWithResourceObj(BLUE, nullptr);
+    EXPECT_TRUE(resMap.find("customBackgroundColor") == resMap.end());
+    ViewAbstract::SetCustomBackgroundColor(BLUE);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+}
+
+/**
  * @tc.name: ViewAbstractClearJSFrameNodeOnClickTest001
  * @tc.desc: Test ClearJsFrameNodeOnClick.
  * @tc.type: FUNC
@@ -1773,5 +1810,51 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractClearJSFrameNodeOnClickTest001, TestSiz
     ViewAbstract::ClearJSFrameNodeOnClick(AceType::RawPtr(frameNode));
     currentInfo = uiNode->GetInteractionEventBindingInfo();
     EXPECT_EQ(currentInfo.nodeEventRegistered, false);
+}
+
+/**
+ * @tc.name: FocusBoxTest001
+ * @tc.desc: Test SetFocusBoxStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, FocusBoxTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Test SetFocusBoxStyle.
+     */
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    auto instance = ViewStackProcessor::GetInstance();
+    ASSERT_NE(instance, nullptr);
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+    auto frameNode = instance->GetMainFrameNode();
+    EXPECT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    EXPECT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    EXPECT_TRUE(pattern->resourceMgr_);
+    auto resMap = pattern->resourceMgr_->resMap_;
+    NG::FocusBoxStyle style;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetFocusBoxStyle(style);
+    pattern->resourceMgr_->ReloadResources();
+    EXPECT_TRUE(resMap.find("focusBox") == resMap.end());
+
+    ViewAbstract::SetFocusBoxStyle(frameNode, style, false);
+    ViewAbstract::SetFocusBoxStyle(frameNode, style, true);
+    EXPECT_TRUE(resMap.find("focusBox") == resMap.end());
+
+    /**
+     * @tc.steps: step2.Test SetFocusBoxStyleUpdateFunc.
+     */
+    ViewAbstract::SetFocusBoxStyleUpdateFunc(style, resourceObject, "");
+    ViewAbstract::SetFocusBoxStyleUpdateFunc(style, resourceObject, "focusBoxStyleColor");
+    ViewAbstract::SetFocusBoxStyleUpdateFunc(style, resourceObject, "focusBoxStyleMargin");
+    ViewAbstract::SetFocusBoxStyleUpdateFunc(style, resourceObject, "focusBoxStyleWidth");
+    style.ReloadResources();
+    ViewAbstract::SetFocusBoxStyleUpdateFunc(style, nullptr, "focusBoxStyleColor");
+    ViewAbstract::SetFocusBoxStyleUpdateFunc(style, nullptr, "focusBoxStyleMargin");
+    ViewAbstract::SetFocusBoxStyleUpdateFunc(style, nullptr, "focusBoxStyleWidth");
+    EXPECT_TRUE(resMap.find("focusBox") == resMap.end());
 }
 } // namespace OHOS::Ace::NG

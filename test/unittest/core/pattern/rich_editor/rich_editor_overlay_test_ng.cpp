@@ -774,4 +774,175 @@ HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg010, TestSize.Level1)
     richEditorPattern->selectOverlay_->OnAncestorNodeChanged(flag);
     EXPECT_EQ(richEditorPattern->selectOverlay_->IsAncestorNodeGeometryChange(flag), true);
 }
+
+/**
+ * @tc.name: CreateHandles001
+ * @tc.desc: test CreateHandles
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, CreateHandles001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->textForDisplay_ = u"testShowHandles";
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = 1;
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 3;
+
+    richEditorPattern->CreateHandles();
+    auto offsetF = OffsetF(0.0f, 0.0f);
+    EXPECT_EQ(richEditorPattern->textSelector_.selectionBaseOffset, offsetF);
+
+    richEditorPattern->ShowHandles(false);
+    EXPECT_NE(richEditorPattern->showSelect_, false);
+
+    richEditorPattern->ShowHandles(true);
+    EXPECT_EQ(richEditorPattern->showSelect_, true);
+
+    Offset textOffset = {1, 3};
+    EXPECT_NE(richEditorPattern->BetweenSelection(textOffset), true);
+
+    richEditorPattern->CloseHandleAndSelect();
+    EXPECT_EQ(richEditorPattern->showSelect_, false);
+}
+
+/**
+ * @tc.name: ShowHandles001
+ * @tc.desc: test ShowHandles
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, ShowHandles001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->CreateHandles();
+    auto offsetF = OffsetF(0.0f, 0.0f);
+    EXPECT_EQ(richEditorPattern->textSelector_.selectionBaseOffset, offsetF);
+
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+
+    AddImageSpan();
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+    richEditorPattern->ShowHandles(false);
+    EXPECT_EQ(richEditorPattern->showSelect_, true);
+
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->isSpanStringMode_ = true;
+    auto pasteStr = richEditorPattern->GetPasteStr();
+    richEditorPattern->InsertValueByPaste(pasteStr);
+    EXPECT_EQ(richEditorPattern->caretVisible_, true);
+
+    richEditorPattern->GetThumbnailCallback();
+    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
+}
+
+/**
+ * @tc.name: ShowHandles002
+ * @tc.desc: test ShowHandles
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, ShowHandles002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isMousePressed_ = true;
+    auto info = richEditorPattern->GetSpansInfo(richEditorPattern->textSelector_.GetTextStart(),
+        richEditorPattern->textSelector_.GetTextEnd(), GetSpansMethod::ONSELECT);
+    auto selResult = info.GetSelection().resultObjects;
+    richEditorPattern->ShowHandles(false);
+    EXPECT_NE(selResult.size(), 1);
+}
+
+/**
+ * @tc.name: ShowHandles003
+ * @tc.desc: test RichEditorPattern ShowHandles
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, ShowHandles003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    /**
+     * @tc.steps: step2. initalize span properties
+     */
+    TextSpanOptions options2;
+    options2.value = INIT_VALUE_1;
+
+    /**
+     * @tc.steps: step3. test add span
+     */
+    richEditorController->AddTextSpan(options2);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->ShowHandles(true);
+    richEditorPattern->ShowHandles(false);
+    ASSERT_EQ(richEditorPattern->HasFocus(), true);
+}
+
+/**
+ * @tc.name: CreateAndShowSingleHandle001
+ * @tc.desc: test CreateAndShowSingleHandle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, CreateAndShowSingleHandle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = -1;
+
+    /**
+     * @tc.steps: step2. Construct GestureEvent data and call CreatAndShowSingleHandle
+     */
+    ASSERT_NE(richEditorPattern->selectOverlay_, nullptr);
+    richEditorPattern->previewTextRecord_.previewContent = u"abc";
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->CreateAndShowSingleHandle();
+    EXPECT_FALSE(richEditorPattern->selectOverlay_->IsSingleHandle());
+}
+
+/**
+ * @tc.name: DumpInfo001
+ * @tc.desc: test DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, DumpInfo001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    richEditorOverlay->caretHeight_->Set(0.0f);
+    richEditorPattern->DumpInfo();
+    richEditorOverlay->caretHeight_->Set(1.0f);
+    richEditorPattern->DumpInfo();
+    EXPECT_NE(richEditorPattern->selectOverlay_->HasRenderTransform(), true);
+}
+
 } // namespace OHOS::Ace::NG

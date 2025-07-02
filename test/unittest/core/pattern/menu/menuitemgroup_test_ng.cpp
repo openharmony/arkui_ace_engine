@@ -538,7 +538,7 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupLayoutAlgorithmTestNg007, TestSize.Le
     props->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
     SizeF frameSize(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT);
     auto isUpdate = algorithm->UpdateLayoutSizeBasedOnPolicy(layoutWrapper, frameSize);
-    EXPECT_NE(isUpdate, true);
+    EXPECT_TRUE(isUpdate);
     props->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
     props->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
     isUpdate = algorithm->UpdateLayoutSizeBasedOnPolicy(layoutWrapper, frameSize);
@@ -1358,5 +1358,59 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupSetFooterContentTest001, TestSize.Lev
     ASSERT_NE(textLayoutProperty, nullptr);
 
     EXPECT_EQ(textLayoutProperty->GetContentValue(), UtfUtils::Str8DebugToStr16(testText));
+}
+
+/**
+ * @tc.name: AttachBottomDivider001
+ * @tc.desc: Testing the AttachBottomDivider method without a parent container.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, AttachBottomDivider001, TestSize.Level1)
+{
+    MenuItemGroupPattern menuItemGroupPattern;
+    menuItemGroupPattern.bottomDivider_ =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    auto dividerParent =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(dividerParent, nullptr);
+    menuItemGroupPattern.bottomDivider_->parent_ = std::move(dividerParent);
+    auto node = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(node, nullptr);
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, 3, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    node->parent_ = std::move(menuItemNode);
+    menuItemGroupPattern.frameNode_ = std::move(node);
+    auto host = menuItemGroupPattern.GetHost();
+    ASSERT_NE(host, nullptr);
+    auto parent = host->GetParent();
+    ASSERT_NE(parent, nullptr);
+    menuItemGroupPattern.AttachBottomDivider();
+    EXPECT_EQ(parent->GetChildIndex(node), -1);
+}
+
+/**
+ * @tc.name: AttachBottomDivider002
+ * @tc.desc: Testing the AttachBottomDivider method has a parent container.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, AttachBottomDivider002, TestSize.Level1)
+{
+    MenuItemGroupPattern menuItemGroupPattern;
+    menuItemGroupPattern.bottomDivider_ =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    auto node = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(node, nullptr);
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, 3, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemGroupPattern.frameNode_ = std::move(node);
+    auto host = menuItemGroupPattern.GetHost();
+    ASSERT_NE(host, nullptr);
+    host->MountToParent(menuItemNode);
+    auto parent = host->GetParent();
+    ASSERT_NE(parent, nullptr);
+    menuItemGroupPattern.AttachBottomDivider();
+    EXPECT_EQ(parent->GetChildIndex(node), 0);
 }
 } // namespace OHOS::Ace::NG

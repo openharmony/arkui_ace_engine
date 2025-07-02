@@ -1206,4 +1206,5 @@ HWTEST_F(RichEditorMouseTest, AdjustMouseLocalOffset, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 3);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
 }
+
 }

@@ -90,56 +90,56 @@ class SubHeaderTheme {
             'type': 10001,
             params: ['sys.color.font_primary'],
             'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            'moduleName': '__harDefaultModuleName__',
         };
         this.fontSecondaryColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.font_secondary'],
             'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            'moduleName': '__harDefaultModuleName__',
         };
         this.fontButtonColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.font_emphasize'],
             'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            'moduleName': '__harDefaultModuleName__',
         };
         this.iconArrowColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.icon_tertiary'],
             'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            'moduleName': '__harDefaultModuleName__',
         };
         this.textArrowHoverBgColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.interactive_hover'],
             'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            'moduleName': '__harDefaultModuleName__',
         };
         this.borderFocusColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.interactive_focus'],
             'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            'moduleName': '__harDefaultModuleName__',
         };
         this.leftIconColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.icon_secondary'],
             'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            'moduleName': '__harDefaultModuleName__',
         };
         this.rightIconColor = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.icon_primary'],
             'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            'moduleName': '__harDefaultModuleName__',
         };
     }
 }
@@ -151,7 +151,7 @@ function __Text__secondaryTitleStyles(k16) {
         'type': 10001,
         params: ['sys.color.font_secondary'],
         'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__'
+        'moduleName': '__harDefaultModuleName__',
     });
     Text.fontWeight(k16?.fontWeight);
     Text.maxLines(k16?.maxLines);
@@ -166,7 +166,7 @@ function __Text__primaryTitleStyles(j16) {
         'type': 10001,
         params: ['sys.color.font_primary'],
         'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__'
+        'moduleName': '__harDefaultModuleName__',
     });
     Text.fontWeight(j16?.fontWeight);
     Text.maxLines(j16?.maxLines);
@@ -233,14 +233,14 @@ export class SubHeader extends ViewPU {
             'type': 10001,
             params: ['sys.color.ohos_id_color_sub_background_transparent'],
             'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            'moduleName': '__harDefaultModuleName__',
         }, this, 'textArrowBgColor');
         this.__buttonBgColor = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_sub_background_transparent'],
             'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            'moduleName': '__harDefaultModuleName__',
         }, this, 'buttonBgColor');
         this.__selectedIndex = new ObservedPropertyObjectPU(-1, this, 'selectedIndex');
         this.__selectValue = new ObservedPropertyObjectPU('', this, 'selectValue');
@@ -728,7 +728,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.interactive_pressed'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                                 if (this.operationType === OperationType.BUTTON) {
@@ -737,7 +737,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.interactive_pressed'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                             }
@@ -748,7 +748,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_sub_background_transparent'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                                 if (this.operationType === OperationType.BUTTON) {
@@ -757,7 +757,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_sub_background_transparent'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                             }
@@ -780,7 +780,7 @@ export class SubHeader extends ViewPU {
                             'type': 10001,
                             params: ['sys.color.ohos_id_color_sub_background_transparent'],
                             'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__'
+                            'moduleName': '__harDefaultModuleName__',
                         });
                         Button.hoverEffect(HoverEffect.None);
                         Button.accessibilityGroup(true);
@@ -826,7 +826,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.interactive_pressed'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                                 if (this.operationType === OperationType.BUTTON) {
@@ -835,7 +835,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.interactive_pressed'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                             }
@@ -846,7 +846,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_sub_background_transparent'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                                 if (this.operationType === OperationType.BUTTON) {
@@ -855,7 +855,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_sub_background_transparent'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                             }
@@ -926,7 +926,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.interactive_pressed'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                                 if (this.operationType === OperationType.BUTTON) {
@@ -935,7 +935,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.interactive_pressed'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                             }
@@ -946,7 +946,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_sub_background_transparent'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                                 if (this.operationType === OperationType.BUTTON) {
@@ -955,7 +955,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_sub_background_transparent'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                             }
@@ -975,7 +975,7 @@ export class SubHeader extends ViewPU {
                             'type': 10001,
                             params: ['sys.color.ohos_id_color_sub_background_transparent'],
                             'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__'
+                            'moduleName': '__harDefaultModuleName__',
                         });
                         Button.accessibilityGroup(true);
                         Button.accessibilityText(this.getRightAreaAccessibilityText());
@@ -1021,7 +1021,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.interactive_pressed'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                                 if (this.operationType === OperationType.BUTTON) {
@@ -1030,7 +1030,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.interactive_pressed'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                             }
@@ -1041,7 +1041,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_sub_background_transparent'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                                 if (this.operationType === OperationType.BUTTON) {
@@ -1050,7 +1050,7 @@ export class SubHeader extends ViewPU {
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_sub_background_transparent'],
                                         'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
+                                        'moduleName': '__harDefaultModuleName__',
                                     };
                                 }
                             }
@@ -1477,7 +1477,7 @@ export class SubHeader extends ViewPU {
                                     'type': 10001,
                                     params: ['sys.color.ohos_id_color_sub_background_transparent'],
                                     'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
+                                    'moduleName': '__harDefaultModuleName__',
                                 };
                             }
                         });
@@ -1489,7 +1489,7 @@ export class SubHeader extends ViewPU {
                             'type': 10001,
                             params: ['sys.color.interactive_pressed'],
                             'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__'
+                            'moduleName': '__harDefaultModuleName__',
                         });
                         ViewStackProcessor.visualState();
                     }, Button);
@@ -1582,7 +1582,7 @@ export class SubHeader extends ViewPU {
                 'type': 40000,
                 params: ['sys.symbol.chevron_right'],
                 'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                'moduleName': '__harDefaultModuleName__',
             });
             SymbolGlyph.fontSize(RIGHT_SINGLE_ICON_SIZE);
             SymbolGlyph.fontColor([this.subHeaderTheme.iconArrowColor]);
@@ -1632,7 +1632,7 @@ export class SubHeader extends ViewPU {
                             'type': 10001,
                             params: ['sys.color.interactive_pressed'],
                             'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__'
+                            'moduleName': '__harDefaultModuleName__',
                         });
                         ViewStackProcessor.visualState();
                         Button.onHover((d7) => {
@@ -1644,7 +1644,7 @@ export class SubHeader extends ViewPU {
                                     'type': 10001,
                                     params: ['sys.color.ohos_id_color_sub_background_transparent'],
                                     'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
+                                    'moduleName': '__harDefaultModuleName__',
                                 };
                             }
                         });
@@ -1742,7 +1742,7 @@ export class SubHeader extends ViewPU {
                             'type': 10001,
                             params: ['sys.color.interactive_pressed'],
                             'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__'
+                            'moduleName': '__harDefaultModuleName__',
                         });
                         ViewStackProcessor.visualState();
                         Button.onHover((p5) => {
@@ -1754,7 +1754,7 @@ export class SubHeader extends ViewPU {
                                     'type': 10001,
                                     params: ['sys.color.ohos_id_color_sub_background_transparent'],
                                     'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
+                                    'moduleName': '__harDefaultModuleName__',
                                 };
                             }
                         });
@@ -1772,7 +1772,7 @@ export class SubHeader extends ViewPU {
                             'type': 40000,
                             params: ['sys.symbol.chevron_right'],
                             'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__'
+                            'moduleName': '__harDefaultModuleName__',
                         });
                         SymbolGlyph.fontSize(RIGHT_SINGLE_ICON_SIZE);
                         SymbolGlyph.fontColor([this.subHeaderTheme.iconArrowColor]);
@@ -1895,7 +1895,7 @@ export class SubHeader extends ViewPU {
                 'type': 10001,
                 params: ['sys.color.icon_secondary'],
                 'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                'moduleName': '__harDefaultModuleName__',
             });
         }, LoadingProgress);
         Row.pop();
@@ -1924,7 +1924,7 @@ class SingleIconStyle extends ViewPU {
             'type': 10001,
             params: ['sys.color.ohos_id_color_sub_background_transparent'],
             'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            'moduleName': '__harDefaultModuleName__',
         }, this, 'bgColor');
         this.__isFocus = new ObservedPropertySimplePU(false, this, 'isFocus');
         this.item = null;
@@ -2041,7 +2041,7 @@ class SingleIconStyle extends ViewPU {
                             'type': 10001,
                             params: ['sys.color.interactive_pressed'],
                             'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__'
+                            'moduleName': '__harDefaultModuleName__',
                         });
                         ViewStackProcessor.visualState();
                         Button.onTouch((a3) => {
@@ -2051,7 +2051,7 @@ class SingleIconStyle extends ViewPU {
                                     'type': 10001,
                                     params: ['sys.color.interactive_pressed'],
                                     'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
+                                    'moduleName': '__harDefaultModuleName__',
                                 };
                             }
                             if (a3.type === TouchType.Up) {
@@ -2060,7 +2060,7 @@ class SingleIconStyle extends ViewPU {
                                     'type': 10001,
                                     params: ['sys.color.ohos_id_color_sub_background_transparent'],
                                     'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
+                                    'moduleName': '__harDefaultModuleName__',
                                 };
                             }
                         });
@@ -2071,7 +2071,7 @@ class SingleIconStyle extends ViewPU {
                                     'type': 10001,
                                     params: ['sys.color.interactive_hover'],
                                     'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
+                                    'moduleName': '__harDefaultModuleName__',
                                 };
                             } else {
                                 this.bgColor = {
@@ -2079,7 +2079,7 @@ class SingleIconStyle extends ViewPU {
                                     'type': 10001,
                                     params: ['sys.color.ohos_id_color_sub_background_transparent'],
                                     'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
+                                    'moduleName': '__harDefaultModuleName__',
                                 };
                             }
                         });

@@ -217,6 +217,7 @@ SelectOverlayInfo SelectContentOverlayManager::BuildSelectOverlayInfo(int32_t re
     overlayInfo.menuCallback.onDisappear = MakeMenuCallback(OptionMenuActionId::DISAPPEAR, overlayInfo);
     overlayInfo.menuCallback.onAIMenuOption =
         MakeMenuCallbackWithInfo(OptionMenuActionId::AI_MENU_OPTION, overlayInfo);
+    overlayInfo.menuCallback.onAskCelia = MakeMenuCallback(OptionMenuActionId::ASK_CELIA, overlayInfo);
     overlayInfo.isUseOverlayNG = true;
     RegisterTouchCallback(overlayInfo);
     RegisterHandleCallback(overlayInfo);
@@ -485,7 +486,8 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
             menuPattern->UpdateSelectMenuInfo(menuInfo);
         } else if (
             (dirty & DIRTY_COPY_ALL_ITEM) == DIRTY_COPY_ALL_ITEM ||
-            (dirty & DIRTY_AI_MENU_ITEM) == DIRTY_AI_MENU_ITEM) { // Diff specified flags
+            (dirty & DIRTY_AI_MENU_ITEM) == DIRTY_AI_MENU_ITEM ||
+            (dirty & DIRTY_ASK_CELIA) == DIRTY_ASK_CELIA) {
             auto localReplacedMenuInfo = menuPattern->GetSelectMenuInfo();
             SelectMenuInfo menuInfo;
             selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
@@ -495,6 +497,9 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
             }
             if ((dirty & DIRTY_AI_MENU_ITEM) == DIRTY_AI_MENU_ITEM) {
                 localReplacedMenuInfo.aiMenuOptionType = menuInfo.aiMenuOptionType;
+            }
+            if ((dirty & DIRTY_ASK_CELIA) == DIRTY_ASK_CELIA) {
+                localReplacedMenuInfo.isAskCeliaEnabled = menuInfo.isAskCeliaEnabled;
             }
             localReplacedMenuInfo.hasOnPrepareMenuCallback = menuInfo.hasOnPrepareMenuCallback;
             TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update select all menu: %{public}s - %{public}s",
@@ -927,6 +932,11 @@ void SelectContentOverlayManager::ToggleOptionMenu()
     CHECK_NULL_VOID(shareOverlayInfo_);
     auto pattern = GetSelectMenuPattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
+    SelectMenuInfo menuInfo;
+    selectOverlayHolder_->IsAIMenuOptionChanged(menuInfo);
+    shareOverlayInfo_->menuInfo.isShowAIMenuOptionChanged = menuInfo.isShowAIMenuOptionChanged;
+    shareOverlayInfo_->menuInfo.aiMenuOptionType = menuInfo.aiMenuOptionType;
+    shareOverlayInfo_->menuInfo.isAskCeliaEnabled = menuInfo.isAskCeliaEnabled;
     pattern->UpdateMenuIsShow(!shareOverlayInfo_->menuInfo.menuIsShow);
 }
 

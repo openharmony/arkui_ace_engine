@@ -125,7 +125,10 @@ void QRCodeModelNG::SetContentOpacity(FrameNode* frameNode, const double opacity
 void HandleCreateResource(const RefPtr<QRCodePattern>& pattern, const RefPtr<ResourceObject>& resObj)
 {
     std::string createKey = "qrcode.create";
-    auto&& updateCreateFunc = [pattern](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateCreateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                                  const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         std::string value;
         ResourceParseUtils::ParseResString(resObj, value);
         pattern->UpdateQRCodeCreate(value);
@@ -138,7 +141,10 @@ void HandleColorResource(const RefPtr<QRCodePattern>& pattern, const RefPtr<Reso
     std::string colorKey = "qrcode.color";
     pattern->RemoveResObj(colorKey);
     CHECK_NULL_VOID(resObj);
-    auto&& updateColorFunc = [pattern](const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+    auto&& updateColorFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                                 const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
             auto pipeline = PipelineBase::GetCurrentContext();
@@ -157,7 +163,10 @@ void HandleBackgroundColorResource(const RefPtr<QRCodePattern>& pattern, const R
     std::string backgroundColorKey = "qrcode.background_color";
     pattern->RemoveResObj(backgroundColorKey);
     CHECK_NULL_VOID(resObj);
-    auto&& updateBackgroundColorFunc = [pattern](const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+    auto&& updateBackgroundColorFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                                           const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
             auto pipeline = PipelineBase::GetCurrentContext();
@@ -176,7 +185,10 @@ void HandleContentOpacityResource(const RefPtr<QRCodePattern>& pattern, const Re
     std::string opacityKey = "qrcode.content_opacity";
     pattern->RemoveResObj(opacityKey);
     CHECK_NULL_VOID(resObj);
-    auto&& updateOpacityFunc = [pattern](const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+    auto&& updateOpacityFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                                   const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         double result = DEFAULT_OPACITY;
         if (!ResourceParseUtils::ParseResDouble(resObj, result)) {
             result = DEFAULT_OPACITY;

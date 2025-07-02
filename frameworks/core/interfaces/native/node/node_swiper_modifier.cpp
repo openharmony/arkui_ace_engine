@@ -604,7 +604,7 @@ void SetSwiperNextMarginRAw(ArkUINodeHandle node, ArkUI_Float32 nextMarginValue,
     if (SystemProperties::ConfigChangePerform()) {
         auto* nextMargin = reinterpret_cast<ResourceObject*>(nextMarginRawPtr);
         auto nextMarginResObj = AceType::Claim(nextMargin);
-        SwiperModel::GetInstance()->ProcessNextMarginwithResourceObj(nextMarginResObj);
+        SwiperModel::GetInstance()->ProcessNextMarginWithResourceObj(nextMarginResObj);
     }
 }
 
@@ -616,7 +616,7 @@ void ResetSwiperNextMargin(ArkUINodeHandle node)
     SwiperModelNG::SetNextMargin(frameNode, value);
     if (SystemProperties::ConfigChangePerform()) {
         auto nextMarginResObj = AceType::MakeRefPtr<ResourceObject>();
-        SwiperModel::GetInstance()->ProcessNextMarginwithResourceObj(nextMarginResObj);
+        SwiperModel::GetInstance()->ProcessNextMarginWithResourceObj(nextMarginResObj);
     }
 }
 
@@ -654,7 +654,7 @@ void SetSwiperPrevMarginRaw(ArkUINodeHandle node, ArkUI_Float32 prevMarginValue,
     if (SystemProperties::ConfigChangePerform()) {
         auto* prevMargin = reinterpret_cast<ResourceObject*>(prevMarginRawPtr);
         auto prevMarginResObj = AceType::Claim(prevMargin);
-        SwiperModel::GetInstance()->ProcessPreviousMarginwithResourceObj(prevMarginResObj);
+        SwiperModel::GetInstance()->ProcessPreviousMarginWithResourceObj(prevMarginResObj);
     }
 }
 
@@ -666,7 +666,7 @@ void ResetSwiperPrevMargin(ArkUINodeHandle node)
     SwiperModelNG::SetPreviousMargin(frameNode, value);
     if (SystemProperties::ConfigChangePerform()) {
         auto prevMarginResObj = AceType::MakeRefPtr<ResourceObject>();
-        SwiperModel::GetInstance()->ProcessPreviousMarginwithResourceObj(prevMarginResObj);
+        SwiperModel::GetInstance()->ProcessPreviousMarginWithResourceObj(prevMarginResObj);
     }
 }
 
@@ -1761,6 +1761,25 @@ ArkUI_Int32 GetMaintainVisibleContentPosition(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     return SwiperModelNG::GetMaintainVisibleContentPosition(frameNode);
 }
+
+void SetSwiperOnScrollStateChanged(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        SwiperModelNG::SetOnScrollStateChanged(frameNode, std::move(*onEvent));
+    } else {
+        SwiperModelNG::SetOnScrollStateChanged(frameNode, nullptr);
+    }
+}
+
+void ResetSwiperOnScrollStateChanged(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnScrollStateChanged(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1876,6 +1895,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setMaintainVisibleContentPosition = SetMaintainVisibleContentPosition,
         .resetMaintainVisibleContentPosition = ResetMaintainVisibleContentPosition,
         .getMaintainVisibleContentPosition = GetMaintainVisibleContentPosition,
+        .setSwiperOnScrollStateChanged = SetSwiperOnScrollStateChanged,
+        .resetSwiperOnScrollStateChanged = ResetSwiperOnScrollStateChanged,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2132,6 +2153,27 @@ void SetSwiperContentWillScroll(ArkUINodeHandle node, void* extraParam)
         return true;
     };
     SwiperModelNG::SetOnContentWillScroll(frameNode, std::move(onEvent));
+}
+
+void SetSwiperScrollStateChanged(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const BaseEventInfo* info) {
+        const auto* scrollStateInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!scrollStateInfo) {
+            LOGE("Swiper OnScrollStateChanged callback execute failed.");
+            return;
+        }
+        int32_t index = scrollStateInfo->GetIndex();
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SWIPER_SCROLL_STATE_CHANGED;
+        event.componentAsyncEvent.data[NUM_0].i32 = index;
+        SendArkUISyncEvent(&event);
+    };
+    SwiperModelNG::SetOnScrollStateChanged(frameNode, std::move(onEvent));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
