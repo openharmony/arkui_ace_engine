@@ -469,7 +469,7 @@ OffsetF ScrollPattern::FreeModeFireOnWillScroll(const OffsetF& delta, ScrollStat
     return { -context->NormalizeToPx(res.xOffset), -context->NormalizeToPx(res.yOffset) };
 }
 
-void ScrollPattern::FreeModeFireOnDidScroll(const OffsetF& delta, ScrollState state)
+void ScrollPattern::FreeModeFireOnDidScroll(const OffsetF& delta, ScrollState state) const
 {
     auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1585,5 +1585,13 @@ void ScrollPattern::TriggerScrollBarDisplay()
     CHECK_NULL_VOID(scrollBar);
     scrollBar->PlayScrollBarAppearAnimation();
     scrollBar->ScheduleDisappearDelayTask();
+}
+Offset ScrollPattern::GetFreeScrollOffset() const
+{
+    if (freeScroll_) {
+        auto res = freeScroll_->GetOffset();
+        return { Dimension(res.GetX()).ConvertToVp(), Dimension(res.GetY()).ConvertToVp() };
+    }
+    return {};
 }
 } // namespace OHOS::Ace::NG

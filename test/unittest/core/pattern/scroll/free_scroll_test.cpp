@@ -461,4 +461,26 @@ TEST_F(FreeScrollTest, Event001)
 
     MockAnimationManager::GetInstance().Reset();
 }
+
+/**
+ * @tc.name: Controller001
+ * @tc.desc: Test scroll controller
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Controller001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    auto scroller = AceType::MakeRefPtr<ScrollableController>();
+    scroller->SetScrollPattern(pattern_);
+
+    const auto& controller = pattern_->freeScroll_;
+    ASSERT_TRUE(controller && controller->offset_);
+    controller->offset_->Set(OffsetF { X, Y });
+
+    EXPECT_EQ(scroller->GetCurrentOffset(), Offset(X, Y));
+}
 } // namespace OHOS::Ace::NG
