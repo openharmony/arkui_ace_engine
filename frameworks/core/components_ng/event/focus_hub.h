@@ -892,6 +892,12 @@ public:
     {
         FocusState::SetNextFocus(static_cast<int32_t>(key), nextFocus);
     }
+
+    // multi thread function start
+    void RemoveSelfMultiThread(BlurReason reason);
+    void RemoveSelfExecuteFunction(BlurReason reason);
+    // multi thread function end
+
 protected:
     bool RequestNextFocusOfKeyTab(const FocusEvent& event);
     bool RequestNextFocusOfKeyEnter();
