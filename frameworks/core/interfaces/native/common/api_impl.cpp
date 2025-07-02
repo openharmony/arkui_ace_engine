@@ -20,7 +20,6 @@
 #include "base/error/error_code.h"
 #include "core/common/card_scope.h"
 #include "core/components_ng/base/group_node.h"
-#include "core/components_ng/base/interop/view_stack_processor_interop.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
@@ -32,27 +31,6 @@
 
 namespace OHOS::Ace::NG {
 namespace GeneratedApiImpl {
-Ark_NodeHandle CreateViewStackProcessor()
-{
-    auto pointer = Referenced::MakeRefPtr<OHOS::Ace::NG::InteropViewStackProcessor>();
-    auto raw = AceType::RawPtr(pointer);
-    raw->IncRefCount();
-    return reinterpret_cast<Ark_NodeHandle>(raw);
-}
-
-Ark_NodeHandle PopViewStackProcessor()
-{
-    auto node = OHOS::Ace::NG::ViewStackProcessor::GetInstance()->Finish();
-    auto pointer = AceType::RawPtr(node);
-    pointer->IncRefCount();
-    return reinterpret_cast<Ark_NodeHandle>(pointer);
-}
-
-void DeleteViewStackProcessor(Ark_NodeHandle pointer)
-{
-    reinterpret_cast<OHOS::Ace::NG::InteropViewStackProcessor*>(pointer)->DecRefCount();
-}
-
 void ShowCrash(Ark_CharPtr message)
 {
     TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Arkoala crash: %{public}s", message);

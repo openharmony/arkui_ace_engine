@@ -41,6 +41,7 @@ ohos_shared_library("arkoala_native_ani") {
     "utils/convert_utils.cpp",
     "water_flow/waterFlowSection_module.cpp",
     "web/web_module_methods.cpp",
+    "interop/interop_module.cpp",
     "video/video_module_methods.cpp",
     "shape/shape_module_methods.cpp",
     "xcomponent/xcomponent_module_methods.cpp",

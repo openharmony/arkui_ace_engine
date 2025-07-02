@@ -29,6 +29,7 @@
 #include "log/log.h"
 #include "utils/convert_utils.h"
 #include "water_flow/waterFlowSection_module.h"
+#include "interop/interop_module.h"
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
 #include "shape/shape_module_methods.h"
@@ -212,6 +213,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Animation_SetOrCreateAnimatableProperty",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetOrCreateAnimatableProperty)
+        },
+        ani_native_function {
+            "_CreateViewStackProcessor",
+            ":J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateViewStackProcessor)
+        },
+        ani_native_function {
+            "_PopViewStackProcessor",
+            ":J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PopViewStackProcessor)
+        },
+        ani_native_function {
+            "_DeleteViewStackProcessor",
+            "J:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DeleteViewStackProcessor)
         },
         ani_native_function {
             "_BackgroundImage_PixelMap",

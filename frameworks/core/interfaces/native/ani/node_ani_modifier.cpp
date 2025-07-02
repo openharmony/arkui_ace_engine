@@ -23,6 +23,7 @@
 #include "custom_node_ani_modifier.h"
 #include "waterflow_ani_modifier.h"
 #include "drag_ani_modifier.h"
+#include "interop_ani_modifier.h"
 #include "drag_controller_ani_modifier.h"
 #include "video_ani_modifier.h"
 #include "shape_ani_modifier.h"
@@ -43,6 +44,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniWaterFlowModifier = OHOS::Ace::NG::GetArkUIAniWaterFlowModifier,
         .getComponentSnapshotAniModifier = OHOS::Ace::NG::GetComponentSnapshotAniModifier,
         .getAnimationAniModifier = OHOS::Ace::NG::GetAnimationAniModifier,
+        .getInteropAniModifier = OHOS::Ace::NG::GetInteropAniModifier,
         .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
         .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
         .getArkUIAniVideoModifier = OHOS::Ace::NG::GetVideoAniModifier,

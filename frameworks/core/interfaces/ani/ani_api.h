@@ -129,6 +129,11 @@ struct ArkUIAniAnimationModifier {
     void (*createAnimatableProperty)(
         ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property, ani_fn_object callback);
 };
+struct ArkUIAniInteropModifier {
+    ani_long (*createViewStackProcessor)();
+    ani_long (*popViewStackProcessor)();
+    void (*deleteViewStackProcessor)(ani_long ptr);
+};
 struct ArkUIAniDragControllerModifier {
     ani_object (*aniExecuteDragWithCallback)(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object custom,
         ani_long builderObj, ani_object destroyCallbackObj, ani_object dragInfo, ani_object callback);
@@ -176,6 +181,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
+    const ArkUIAniInteropModifier* (*getInteropAniModifier)();
     const ArkUIAniDragControllerModifier* (*getDragControllerAniModifier)();
     const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
     const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
