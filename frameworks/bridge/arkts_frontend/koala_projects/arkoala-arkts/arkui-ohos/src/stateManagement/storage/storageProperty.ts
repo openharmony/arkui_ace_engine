@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { IStorageProperty } from "./storageBase";
-import { DecoratedV1VariableBase } from "../decoratorImpl/decoratorBase";
+import { IStorageProperty } from './storageBase';
+import { DecoratedV1VariableBase } from '../decoratorImpl/decoratorBase';
 import { WatchFunc } from '../decoratorImpl/decoratorWatch';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
@@ -34,7 +34,7 @@ export class AbstractProperty<T> extends DecoratedV1VariableBase<T>
     private readonly set_: SetType<T>;
 
     constructor(key: string, ttype: Type, get: GetType<T>, set: SetType<T>) {
-        super("AbstractProperty", null, key);
+        super('AbstractProperty', null, key);
         StateMgmtConsole.log(`create new AbstractProperty for key '${key}' `)
 
         this.key_ = key;
@@ -75,13 +75,12 @@ export class AbstractProperty<T> extends DecoratedV1VariableBase<T>
             this._watchFuncs.clear();
         }
         if (typeof onChangeCbFunc === 'function') {
-            const watchFunc = (propName: string) => {
+            const watchFunc = (propName: string): void => {
                 (onChangeCbFunc as OnChangeType<T>)(propName, this.get());
             };
             const watchFuncObj = new WatchFunc(watchFunc);
             this._watchFuncs.set(watchFuncObj.id(), watchFuncObj);
         }
-
     }
 }
 
@@ -94,5 +93,5 @@ export class SubscribedAbstractProperty<T> extends AbstractProperty<T> {
         super(key, ttype, get, set);
     }
 
-    public aboutTODeleted() {};
+    public aboutTODeleted(): void {};
 }

@@ -43,6 +43,7 @@ ohos_shared_library("arkoala_native_ani") {
     "web/web_module_methods.cpp",
     "video/video_module_methods.cpp",
     "shape/shape_module_methods.cpp",
+    "stateMgmt/stateMgmt_module.cpp",
   ]
 
   external_deps = [

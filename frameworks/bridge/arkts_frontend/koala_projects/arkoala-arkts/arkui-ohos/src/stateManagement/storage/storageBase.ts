@@ -41,8 +41,8 @@ export class StorageProperty<T> extends StateDecoratedVariable<T>
 
     public mkRef(propertyNameInAppStorage: string, ttype: Type): AbstractProperty<T> {
         StateMgmtConsole.log(`mkRef('${propertyNameInAppStorage}')`);
-        const get = () => { return this.get() as T };
-        const set = (newValue: T) => { this.set(newValue); }
+        const get = (): T => { return this.get() as T };
+        const set = (newValue: T): void => { this.set(newValue); }
         return new AbstractProperty<T>(propertyNameInAppStorage, ttype, get, set);
     }
 
@@ -50,8 +50,8 @@ export class StorageProperty<T> extends StateDecoratedVariable<T>
         watchFunc?: WatchFuncType): StorageLinkDecoratedVariable<T> {
 
         StateMgmtConsole.log(`makeStorageLink('${propertyNameInAppStorage} ${varName}')`);
-        const get = () => { return this.get() as T };
-        const set = (newValue: T) => { this.set(newValue); }
+        const get = (): T => { return this.get() as T };
+        const set = (newValue: T): void => { this.set(newValue); }
         return new StorageLinkDecoratedVariable<T>(owner, propertyNameInAppStorage, varName, get, set, watchFunc);
     }
 

@@ -26,6 +26,7 @@
 #include "drag_controller_ani_modifier.h"
 #include "video_ani_modifier.h"
 #include "shape_ani_modifier.h"
+#include "stateMgmt_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -46,6 +47,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
         .getArkUIAniVideoModifier = OHOS::Ace::NG::GetVideoAniModifier,
         .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,
+        .getStateMgmtAniModifier = OHOS::Ace::NG::GetStateMgmtAniModifier,
     };
     return &impl;
 }

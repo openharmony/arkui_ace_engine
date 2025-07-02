@@ -155,6 +155,19 @@ struct ArkUIAniVideoModifier {
 struct ArkUIAniShapeModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
 };
+struct ArkUIAniStateMgmtModifier {
+    std::string (*persistentStorageGet)(std::string key);
+    void (*persistentStorageSet)(std::string key, std::string value);
+    void (*persistentStorageHas)(std::string key);
+    void (*persistentStorageDelete)(std::string key);
+    void (*persistentStorageClear)();
+    int32_t (*getColorMode)();
+    float (*getFontWeightScale)();
+    float (*getFontScale)();
+    int32_t (*getAccessibilityEnabled)();
+    int32_t (*getLayoutDirection)();
+    int32_t (*getLanguageCode)();
+};
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -171,6 +184,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
     const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
     const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();
+    const ArkUIAniStateMgmtModifier* (*getStateMgmtAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

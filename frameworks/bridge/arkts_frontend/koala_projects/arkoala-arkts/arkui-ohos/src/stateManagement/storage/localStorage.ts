@@ -48,7 +48,9 @@ export class LocalStorage {
      * @since 20
      */
     public constructor(initializingProperties?: Record<string, IStorageProperties>) {
-        if (!initializingProperties) return;
+        if (!initializingProperties) {
+            return;
+        }
         const initializingObj = initializingProperties as Record<string, IStorageProperties>;
         for (const propName: string of initializingObj.keys()) {
             const propValue = initializingObj[propName];
@@ -75,8 +77,8 @@ export class LocalStorage {
      */
     public has(key: string, ttype?: Type): boolean {
         const ttypeOpt: Type | undefined = this.store_.getType(key);
-        return (ttypeOpt !== undefined)
-            && (ttype === undefined || ttype!.equals(ttypeOpt!));
+        return (ttypeOpt !== undefined) &&
+            (ttype === undefined || ttype!.equals(ttypeOpt!));
     }
 
     /**
