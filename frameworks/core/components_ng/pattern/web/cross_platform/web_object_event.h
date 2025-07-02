@@ -183,7 +183,6 @@ class WebObjectEventManager : public Singleton<WebObjectEventManager> {
 public:
     using EventObJectCallback = std::function<void(const std::string&, void *object)>;
     using EventObjectWithBoolReturnCallback = std::function<bool(const std::string&, void *object)>;
-    using EventObjectWithStringReturnCallback = std::function<std::string(const std::string&, void *object)>;
     using EventObjectWithResponseReturnCallback = std::function<RefPtr<WebResponse>(const std::string&, void *object)>;
 
     void RegisterObjectEvent(const std::string& eventId, const EventObJectCallback&& eventCallback)
@@ -196,13 +195,6 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_WEB, "RegisterObjectEventWithBoolReturn %{public}s", eventId.c_str());
         eventObjectWithBoolReturnMap_[eventId] = std::move(eventCallback);
-    }
-
-    void RegisterObjectEventWithStringReturn(
-        const std::string& eventId, const EventObjectWithStringReturnCallback&& eventCallback)
-    {
-        TAG_LOGI(AceLogTag::ACE_WEB, "RegisterObjectEventWithStringReturn %{public}s", eventId.c_str());
-        eventObjectWithStringReturnMap_[eventId] = std::move(eventCallback);
     }
 
     void RegisterObjectEventWithResponseReturn(
@@ -428,7 +420,6 @@ private:
     RefPtr<WebFullScreenEnterObject> fullScreenEnterObject_;
     RefPtr<WebFullScreenExitObject> fullScreenExitObject_;
     std::unordered_map<std::string, EventObjectWithBoolReturnCallback> eventObjectWithBoolReturnMap_;
-    std::unordered_map<std::string, EventObjectWithStringReturnCallback> eventObjectWithStringReturnMap_;
     std::unordered_map<std::string, EventObjectWithResponseReturnCallback> eventObjectWithResponseReturnMap_;
 };
 inline WebObjectEventManager::WebObjectEventManager() = default;
