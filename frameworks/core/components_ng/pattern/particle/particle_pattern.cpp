@@ -67,15 +67,15 @@ std::unique_ptr<JsonValue> ParticlePattern::ParseAnnulusRegionJson(const Particl
 {
     auto emitterOptionOpt = particleOption.GetEmitterOption();
     auto objectAnnulusRegionJson = JsonUtil::Create(true);
-    auto center = annulusRegion.center_;
+    auto center = annulusRegion.GetCenter();
     auto centerObj = JsonUtil::Create(true);
     centerObj->Put("x", center.first.ToString().c_str());
     centerObj->Put("y", center.second.ToString().c_str());
     objectAnnulusRegionJson->Put("center", centerObj);
-    objectAnnulusRegionJson->Put("innerRadius", std::to_string(annulusRegion.innerRadius_.ConvertToPx()).c_str());
-    objectAnnulusRegionJson->Put("outerRadius", std::to_string(annulusRegion.outerRadius_.ConvertToPx()).c_str());
-    objectAnnulusRegionJson->Put("startAngle", std::to_string(annulusRegion.startAngle_).c_str());
-    objectAnnulusRegionJson->Put("endAngle", std::to_string(annulusRegion.endAngle_).c_str());
+    objectAnnulusRegionJson->Put("innerRadius", std::to_string(annulusRegion.GetInnerRadius().ConvertToPx()).c_str());
+    objectAnnulusRegionJson->Put("outerRadius", std::to_string(annulusRegion.GetOuterRadius().ConvertToPx()).c_str());
+    objectAnnulusRegionJson->Put("startAngle", std::to_string(annulusRegion.GetStartAngle()).c_str());
+    objectAnnulusRegionJson->Put("endAngle", std::to_string(annulusRegion.GetEndAngle()).c_str());
     return objectAnnulusRegionJson;
 }
 

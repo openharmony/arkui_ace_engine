@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -80,5 +81,32 @@ void ModalPresentationPattern::BeforeCreateLayoutWrapper()
     }
     modalNodeLayoutProperty->ResetSafeAreaPadding();
     ContentRootPattern::BeforeCreateLayoutWrapper();
+}
+
+void ModalPresentationPattern::RegisterModalBgColorResFunc(
+    const RefPtr<NG::FrameNode>& modalNode, NG::ModalStyle& modalStyle)
+{
+    CHECK_NULL_VOID(modalNode);
+    auto pattern = modalNode->GetPattern<ModalPresentationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto resObj = modalStyle.GetBackgroundColorResObj();
+    if (resObj) {
+        auto modalWK = AceType::WeakClaim(AceType::RawPtr(modalNode));
+        auto&& updateFunc = [modalWK](const RefPtr<ResourceObject>& resObj) {
+            auto modalNode = modalWK.Upgrade();
+            CHECK_NULL_VOID(modalNode);
+            Color backgroundColor;
+
+            // Reparse modal background color and update it.
+            bool result = ResourceParseUtils::ParseResColor(resObj, backgroundColor);
+            CHECK_NULL_VOID(result);
+            auto renderContext = modalNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateBackgroundColor(backgroundColor);
+        };
+        pattern->AddResObj("modalPage.backgroundColor", resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("modalPage.backgroundColor");
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -1961,8 +1961,17 @@ void JSViewAbstract::ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalS
         }
     }
     Color color;
-    if (ParseJsColor(backgroundColor, color)) {
-        modalStyle.backgroundColor = color;
+    if (SystemProperties::ConfigChangePerform()) {
+        // When the switch is turned on, the modal background color and its resource are parsed together.
+        RefPtr<ResourceObject> resObj;
+        if (ParseJsColor(backgroundColor, color, resObj)) {
+            modalStyle.SetBackgroundColorResObj(resObj);
+            modalStyle.backgroundColor = color;
+        }
+    } else {
+        if (ParseJsColor(backgroundColor, color)) {
+            modalStyle.backgroundColor = color;
+        }
     }
 }
 
@@ -2110,7 +2119,7 @@ void JSViewAbstract::ParseSheetStyle(
     }
 
     std::vector<NG::SheetHeight> detents;
-    if (ParseSheetDetents(sheetDetents, detents)) {
+    if (ParseSheetDetents(sheetDetents, detents, sheetStyle)) {
         sheetStyle.detents = detents;
     }
     BlurStyleOption styleOption;
@@ -2118,10 +2127,21 @@ void JSViewAbstract::ParseSheetStyle(
         sheetStyle.backgroundBlurStyle = styleOption;
     }
     bool showClose = true;
-    if (ParseJsBool(showCloseIcon, showClose)) {
-        sheetStyle.showCloseIcon = showClose;
-    } else if (!isPartialUpdate) {
-        sheetStyle.showCloseIcon = true;
+    if (SystemProperties::ConfigChangePerform()) {
+        // When the switch is turned on, the sheet closeIcon and its resource are parsed together.
+        RefPtr<ResourceObject> resObj;
+        if (ParseJsBool(showCloseIcon, showClose, resObj)) {
+            sheetStyle.showCloseIcon = showClose;
+            sheetStyle.SetShowCloseResObj(resObj);
+        } else if (!isPartialUpdate) {
+            sheetStyle.showCloseIcon = true;
+        }
+    } else {
+        if (ParseJsBool(showCloseIcon, showClose)) {
+            sheetStyle.showCloseIcon = showClose;
+        } else if (!isPartialUpdate) {
+            sheetStyle.showCloseIcon = true;
+        }
     }
 
     bool isInteractive = false;
@@ -2193,37 +2213,88 @@ void JSViewAbstract::ParseSheetStyle(
     }
 
     Color color;
-    if (ParseJsColor(backgroundColor, color)) {
-        sheetStyle.backgroundColor = color;
+    if (SystemProperties::ConfigChangePerform()) {
+        // When the switch is turned on, the sheet background color and its resource are parsed together.
+        RefPtr<ResourceObject> resObj;
+        if (ParseJsColor(backgroundColor, color, resObj)) {
+            sheetStyle.backgroundColor = color;
+            sheetStyle.SetBackgroundColorResObj(resObj);
+        }
+    } else {
+        if (ParseJsColor(backgroundColor, color)) {
+            sheetStyle.backgroundColor = color;
+        }
     }
     // parse maskColor
     Color parseMaskColor;
-    if (!maskColor->IsNull() && !maskColor->IsUndefined() && JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
-        sheetStyle.maskColor = std::move(parseMaskColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        // When the switch is turned on, the sheet maskColor and its resource are parsed together.
+        RefPtr<ResourceObject> resObj;
+        if (!maskColor->IsNull() && !maskColor->IsUndefined() &&
+            JSViewAbstract::ParseJsColor(maskColor, parseMaskColor, resObj)) {
+            sheetStyle.maskColor = std::move(parseMaskColor);
+            sheetStyle.SetMaskColorResObj(resObj);
+        }
+    } else {
+        if (!maskColor->IsNull() && !maskColor->IsUndefined() &&
+            JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
+            sheetStyle.maskColor = std::move(parseMaskColor);
+        }
     }
 
     // Parse border width
     auto borderWidthValue = paramObj->GetProperty("borderWidth");
     NG::BorderWidthProperty borderWidth;
-    if (ParseBorderWidthProps(borderWidthValue, borderWidth)) {
-        sheetStyle.borderWidth = borderWidth;
-        // Parse border color
-        auto colorValue = paramObj->GetProperty("borderColor");
-        NG::BorderColorProperty borderColor;
-        if (ParseBorderColorProps(colorValue, borderColor)) {
-            sheetStyle.borderColor = borderColor;
-        } else {
-            sheetStyle.borderColor =
-                NG::BorderColorProperty({ Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK });
+    if (SystemProperties::ConfigChangePerform()) {
+        // When the switch is turned on, the sheet borderWidth and its resource are parsed together.
+        RefPtr<ResourceObject> borderWidthResObj;
+        if (ParseBorderWidthProps(borderWidthValue, borderWidth, borderWidthResObj)) {
+            sheetStyle.borderWidth = borderWidth;
+            sheetStyle.SetBorderWidthResObj(borderWidthResObj);
+
+            // When the switch is turned on, the sheet borderColor and its resource are parsed together,
+            // when borderWidth and borderColor are set at the same time.
+            auto colorValue = paramObj->GetProperty("borderColor");
+            NG::BorderColorProperty borderColor;
+            RefPtr<ResourceObject> borderColorResObj;
+            if (ParseBorderColorProps(colorValue, borderColor, borderColorResObj)) {
+                sheetStyle.borderColor = borderColor;
+            } else {
+                sheetStyle.borderColor =
+                    NG::BorderColorProperty({ Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK });
+            }
+            sheetStyle.SetBorderColorResObj(borderColorResObj);
+            // Parse border style
+            auto styleValue = paramObj->GetProperty("borderStyle");
+            NG::BorderStyleProperty borderStyle;
+            if (ParseBorderStyleProps(styleValue, borderStyle)) {
+                sheetStyle.borderStyle = borderStyle;
+            } else {
+                sheetStyle.borderStyle = NG::BorderStyleProperty(
+                    { BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID });
+            }
         }
-        // Parse border style
-        auto styleValue = paramObj->GetProperty("borderStyle");
-        NG::BorderStyleProperty borderStyle;
-        if (ParseBorderStyleProps(styleValue, borderStyle)) {
-            sheetStyle.borderStyle = borderStyle;
-        } else {
-            sheetStyle.borderStyle = NG::BorderStyleProperty(
-                { BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID });
+    } else {
+        if (ParseBorderWidthProps(borderWidthValue, borderWidth)) {
+            sheetStyle.borderWidth = borderWidth;
+            // Parse border color
+            auto colorValue = paramObj->GetProperty("borderColor");
+            NG::BorderColorProperty borderColor;
+            if (ParseBorderColorProps(colorValue, borderColor)) {
+                sheetStyle.borderColor = borderColor;
+            } else {
+                sheetStyle.borderColor =
+                    NG::BorderColorProperty({ Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK });
+            }
+            // Parse border style
+            auto styleValue = paramObj->GetProperty("borderStyle");
+            NG::BorderStyleProperty borderStyle;
+            if (ParseBorderStyleProps(styleValue, borderStyle)) {
+                sheetStyle.borderStyle = borderStyle;
+            } else {
+                sheetStyle.borderStyle = NG::BorderStyleProperty(
+                    { BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID });
+            }
         }
     }
     if (isPartialUpdate) {
@@ -2268,17 +2339,41 @@ void JSViewAbstract::ParseSheetStyle(
 
     auto widthValue = paramObj->GetProperty("width");
     CalcDimension width;
-    if (ParseJsDimensionVpNG(widthValue, width, true)) {
-        sheetStyle.width = width;
+    if (SystemProperties::ConfigChangePerform()) {
+        // When the switch is turned on, the sheet width and its resource are parsed together.
+        RefPtr<ResourceObject> resObj;
+        if (ParseJsDimensionVpNG(widthValue, width, resObj, true)) {
+            sheetStyle.SetSheetWidthResObj(resObj);
+            sheetStyle.width = width;
+        }
+    } else {
+        if (ParseJsDimensionVpNG(widthValue, width, true)) {
+            sheetStyle.width = width;
+        }
     }
 
     auto radiusValue = paramObj->GetProperty("radius");
-    JSViewAbstract::ParseBindSheetBorderRadius(radiusValue, sheetStyle);
+    if (SystemProperties::ConfigChangePerform()) {
+        // When the switch is turned on, the sheet radius and its resource are parsed together.
+        RefPtr<ResourceObject> resObj;
+        JSViewAbstract::ParseBindSheetBorderRadius(radiusValue, sheetStyle, resObj);
+        sheetStyle.SetRadiusResObj(resObj);
+    } else {
+        JSViewAbstract::ParseBindSheetBorderRadius(radiusValue, sheetStyle);
+    }
 
     ParseDetentSelection(paramObj, sheetStyle);
 
     NG::SheetHeight sheetStruct;
-    bool parseResult = ParseSheetHeight(height, sheetStruct, isPartialUpdate);
+    bool parseResult;
+    if (SystemProperties::ConfigChangePerform()) {
+        // When the switch is turned on, the sheet height and its resource are parsed together.
+        RefPtr<ResourceObject> heightResObj;
+        parseResult = ParseSheetHeight(height, sheetStruct, isPartialUpdate, heightResObj);
+        sheetStyle.SetSheetHeightResObj(heightResObj);
+    } else {
+        parseResult = ParseSheetHeight(height, sheetStruct, isPartialUpdate);
+    }
     if (!parseResult) {
         TAG_LOGD(AceLogTag::ACE_SHEET, "parse sheet height in unnormal condition");
     }
@@ -2309,7 +2404,15 @@ void JSViewAbstract::ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::S
 {
     auto detentSelection = paramObj->GetProperty("detentSelection");
     NG::SheetHeight sheetStruct;
-    bool parseResult = ParseSheetHeight(detentSelection, sheetStruct, true);
+    bool parseResult;
+    if (SystemProperties::ConfigChangePerform()) {
+        // When the switch is turned on, the sheet detentSelection and its resource are parsed together.
+        RefPtr<ResourceObject> resObj;
+        parseResult = ParseSheetHeight(detentSelection, sheetStruct, true, resObj);
+        sheetStyle.SetDetentSelectionResObj(resObj);
+    } else {
+        parseResult = ParseSheetHeight(detentSelection, sheetStruct, true);
+    }
     if (!parseResult) {
         sheetStruct.height.reset();
         sheetStruct.sheetMode.reset();
@@ -2317,16 +2420,26 @@ void JSViewAbstract::ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::S
     }
     sheetStyle.detentSelection = sheetStruct;
 }
-
-bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents)
+ 
+bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args,
+    std::vector<NG::SheetHeight>& sheetDetents, NG::SheetStyle& sheetStyle)
 {
     if (!args->IsArray()) {
         return false;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(args);
     NG::SheetHeight sheetDetent;
+    std::vector<RefPtr<ResourceObject>> detentsResObj;
     for (size_t i = 0; i < array->Length(); i++) {
-        bool parseResult = ParseSheetHeight(array->GetValueAt(i), sheetDetent, false);
+        bool parseResult;
+        if (SystemProperties::ConfigChangePerform()) {
+            // When the switch is turned on, the sheet detents and its resource are parsed together.
+            RefPtr<ResourceObject> resObj;
+            parseResult = ParseSheetHeight(array->GetValueAt(i), sheetDetent, false, resObj);
+            detentsResObj.push_back(resObj);
+        } else {
+            parseResult = ParseSheetHeight(array->GetValueAt(i), sheetDetent, false);
+        }
         if (!parseResult) {
             TAG_LOGD(AceLogTag::ACE_SHEET, "parse sheet detent in unnormal condition");
         }
@@ -2336,6 +2449,9 @@ bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG:
         sheetDetents.emplace_back(sheetDetent);
         sheetDetent.height.reset();
         sheetDetent.sheetMode.reset();
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        sheetStyle.SetDetentsResObjs(std::move(detentsResObj));
     }
     return true;
 }
@@ -2481,11 +2597,28 @@ void JSViewAbstract::ParseSheetTitle(
         sheetStyle.isTitleBuilder = false;
         auto sheetTitle = obj->GetProperty("title");
         auto sheetSubtitle = obj->GetProperty("subtitle");
-        if (ParseJsString(sheetTitle, mainTitle)) {
-            sheetStyle.sheetTitle = mainTitle;
-        }
-        if (ParseJsString(sheetSubtitle, subtitle)) {
-            sheetStyle.sheetSubtitle = subtitle;
+        if (SystemProperties::ConfigChangePerform()) {
+            // When the switch is turned on, the sheet title and its resource are parsed together.
+            RefPtr<ResourceObject> mainTitleResObj;
+            if (ParseJsString(sheetTitle, mainTitle, mainTitleResObj)) {
+                sheetStyle.sheetTitle = mainTitle;
+                sheetStyle.SetMainTitleResObj(mainTitleResObj);
+            }
+
+            // When the switch is turned on, the sheet subtitle and its resource are parsed together,
+            // when title and subtitle are set at the same time.
+            RefPtr<ResourceObject> subTitleResObj;
+            if (ParseJsString(sheetSubtitle, subtitle, subTitleResObj)) {
+                sheetStyle.sheetSubtitle = subtitle;
+                sheetStyle.SetSubTitleResObj(subTitleResObj);
+            }
+        } else {
+            if (ParseJsString(sheetTitle, mainTitle)) {
+                sheetStyle.sheetTitle = mainTitle;
+            }
+            if (ParseJsString(sheetSubtitle, subtitle)) {
+                sheetStyle.sheetSubtitle = subtitle;
+            }
         }
     }
 }
@@ -2529,6 +2662,13 @@ bool JSViewAbstract::ParseSheetMode(const std::string heightStr, NG::SheetHeight
 bool JSViewAbstract::ParseSheetHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent,
     bool isReset)
 {
+    RefPtr<ResourceObject> resObj;
+    return ParseSheetHeight(args, detent, isReset, resObj);
+}
+
+bool JSViewAbstract::ParseSheetHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent,
+    bool isReset, RefPtr<ResourceObject>& resObj)
+{
     detent.height.reset();
     detent.sheetMode.reset();
     CalcDimension sheetHeight;
@@ -2551,7 +2691,7 @@ bool JSViewAbstract::ParseSheetHeight(const JSRef<JSVal>& args, NG::SheetHeight&
             return false;
         }
     }
-    if (!ParseJsDimensionVpNG(args, sheetHeight)) {
+    if (!ParseJsDimensionVpNG(args, sheetHeight, resObj)) {
         if (!isReset) {
             auto sheetTheme = GetTheme<OHOS::Ace::NG::SheetTheme>();
             detent.sheetMode = sheetTheme != nullptr
