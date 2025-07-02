@@ -2125,16 +2125,6 @@ struct CJUIWebModifier {
     void (*resetOnDataResubmitted)(ArkUINodeHandle node);
     void (*setGestureFocusMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetGestureFocusMode)(ArkUINodeHandle node);
-    void (*setOnSslErrorEventReceive)(ArkUINodeHandle node, void* callback);
-    void (*resetOnSslErrorEventReceive)(ArkUINodeHandle node);
-    void (*setOnClientAuthenticationRequest)(ArkUINodeHandle node, void* callback);
-    void (*resetOnClientAuthenticationRequest)(ArkUINodeHandle node);
-    void (*setOnInterceptRequest)(ArkUINodeHandle node, void* callback);
-    void (*resetOnInterceptRequest)(ArkUINodeHandle node);
-    void (*setOnFaviconReceived)(ArkUINodeHandle node, void* callback);
-    void (*resetOnFaviconReceived)(ArkUINodeHandle node);
-    void (*setOnBeforeUnload)(ArkUINodeHandle node, void* callback);
-    void (*resetOnBeforeUnload)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {
