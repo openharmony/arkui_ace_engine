@@ -1080,8 +1080,8 @@ public:
         const WeakPtr<FrameNode>& sheetNodeWK, const WeakPtr<OverlayManager>& overlayWk);
     void RegisterDetentsRes(const RefPtr<FrameNode>& sheetNode,
         std::vector<RefPtr<ResourceObject>>& sheetHeightResObj);
-    void RegisterBkgColorRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& colorResObj);
-    void UpdateBkgColor(const RefPtr<ResourceObject>& resObj, const WeakPtr<FrameNode>& sheetNodeWK);
+    void RegisterBgColorRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& colorResObj);
+    void UpdateBgColor(const RefPtr<ResourceObject>& resObj, const WeakPtr<FrameNode>& sheetNodeWK);
     void RegisterTitleRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& mainTitleResObj);
     void RegisterDetentSelectionRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
     void RegisterShowCloseRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);

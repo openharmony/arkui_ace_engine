@@ -2365,7 +2365,7 @@ void JSViewAbstract::ParseSheetStyle(
     ParseDetentSelection(paramObj, sheetStyle);
 
     NG::SheetHeight sheetStruct;
-    bool parseResult;
+    bool parseResult = false;
     if (SystemProperties::ConfigChangePerform()) {
         // When the switch is turned on, the sheet height and its resource are parsed together.
         RefPtr<ResourceObject> heightResObj;
@@ -2404,7 +2404,7 @@ void JSViewAbstract::ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::S
 {
     auto detentSelection = paramObj->GetProperty("detentSelection");
     NG::SheetHeight sheetStruct;
-    bool parseResult;
+    bool parseResult = false;
     if (SystemProperties::ConfigChangePerform()) {
         // When the switch is turned on, the sheet detentSelection and its resource are parsed together.
         RefPtr<ResourceObject> resObj;
@@ -2431,7 +2431,7 @@ bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args,
     NG::SheetHeight sheetDetent;
     std::vector<RefPtr<ResourceObject>> detentsResObj;
     for (size_t i = 0; i < array->Length(); i++) {
-        bool parseResult;
+        bool parseResult = false;
         if (SystemProperties::ConfigChangePerform()) {
             // When the switch is turned on, the sheet detents and its resource are parsed together.
             RefPtr<ResourceObject> resObj;

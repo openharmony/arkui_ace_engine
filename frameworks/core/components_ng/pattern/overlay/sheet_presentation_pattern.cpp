@@ -3909,7 +3909,7 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType type)
     AvoidAiBar();
 }
 
-void SheetPresentationPattern::UpdateBkgColor(const RefPtr<ResourceObject>& resObj,
+void SheetPresentationPattern::UpdateBgColor(const RefPtr<ResourceObject>& resObj,
     const WeakPtr<FrameNode>& sheetNodeWK)
 {
     auto sheetNode = sheetNodeWK.Upgrade();
@@ -3938,7 +3938,7 @@ void SheetPresentationPattern::UpdateBkgColor(const RefPtr<ResourceObject>& resO
     sheetNode->MarkModifyDone();
 }
 
-void SheetPresentationPattern::RegisterBkgColorRes(
+void SheetPresentationPattern::RegisterBgColorRes(
     const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& colorResObj)
 {
     CHECK_NULL_VOID(sheetNode);
@@ -3949,7 +3949,7 @@ void SheetPresentationPattern::RegisterBkgColorRes(
             (const RefPtr<ResourceObject>& colorResObj) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->UpdateBkgColor(colorResObj, sheetNodeWK);
+            pattern->UpdateBgColor(colorResObj, sheetNodeWK);
         };
         pattern->AddResObj("sheetPage.backgroundColor", colorResObj, std::move(updateFunc));
     } else {
@@ -4438,7 +4438,7 @@ void SheetPresentationPattern::UpdateSheetParamResource(const RefPtr<FrameNode>&
     }
     if (sheetStyle.backgroundColor.has_value()) {
         auto resObj = sheetStyle.GetBackgroundColorResObj();
-        RegisterBkgColorRes(sheetNode, resObj);
+        RegisterBgColorRes(sheetNode, resObj);
     }
     if (sheetStyle.borderWidth.has_value()) {
         auto resObjWidth = sheetStyle.GetBorderWidthResObj();
