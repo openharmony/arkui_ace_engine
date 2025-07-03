@@ -145,7 +145,7 @@ void StrTrim(std::string& str)
 
 void EventReport::SendEvent(const EventInfo& eventInfo)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     if (packageName.size() > MAX_PACKAGE_NAME_LENGTH) {
         StrTrim(packageName);
     }
@@ -228,7 +228,7 @@ void EventReport::AddFrameRateDuration(int32_t frameRate, int64_t duration)
 
 void EventReport::SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     std::string eventName = "FRC_SCENE_INFO";
     if (packageName.size() > MAX_PACKAGE_NAME_LENGTH) {
         StrTrim(packageName);
@@ -350,7 +350,7 @@ void EventReport::SendAccessibilityException(AccessibilityExcepType type)
 
 void EventReport::ReportAccessibilityFailEvent(const std::string& actionName)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
     auto processName = AceApplicationInfo::GetInstance().GetProcessName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, ACCESSIBILITY_FAIL,
@@ -374,7 +374,7 @@ void EventReport::SendFormException(FormExcepType type)
 #ifdef VSYNC_TIMEOUT_CHECK
 void EventReport::SendVsyncException(VsyncExcepType type, uint32_t windowId, int32_t instanceId, uint64_t timeStamp)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, UI_VSYNC_TIMEOUT,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
@@ -451,7 +451,7 @@ void EventReport::JankFrameReport(int64_t startTime, int64_t duration, const std
     std::string eventName = "JANK_STATS_APP";
     auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
     auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
@@ -468,7 +468,7 @@ void EventReport::JankFrameReport(int64_t startTime, int64_t duration, const std
 
 void EventReport::SendEventInner(const EventInfo& eventInfo)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventInfo.eventType,
             OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
@@ -494,7 +494,7 @@ void EventReport::ReportDragInfo(const DragInfo& dragInfo)
 
 void EventReport::ReportRichEditorInfo(const RichEditorInfo& richEditorInfo)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     auto appVersionCode = AceApplicationInfo::GetInstance().GetAppVersionCode();
     auto appVersionName = AceApplicationInfo::GetInstance().GetAppVersionName();
     StrTrim(packageName);
@@ -513,7 +513,7 @@ void EventReport::ReportRichEditorInfo(const RichEditorInfo& richEditorInfo)
 
 void EventReport::ReportDoubleClickTitle(int32_t stateChange)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
     HiSysEventWrite(SCENE_BOARD_UE_DOMAIN, DOUBLE_CLICK_TITLE,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
@@ -523,7 +523,7 @@ void EventReport::ReportDoubleClickTitle(int32_t stateChange)
 
 void EventReport::ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
     HiSysEventWrite(SCENE_BOARD_UE_DOMAIN, CLICK_TITLE_MAXIMIZE_MENU,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
@@ -534,7 +534,7 @@ void EventReport::ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stat
 
 void EventReport::ReportPageNodeOverflow(const std::string& pageUrl, int32_t nodeCount, int32_t threshold)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, PAGE_NODE_OVERFLOW,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
@@ -546,7 +546,7 @@ void EventReport::ReportPageNodeOverflow(const std::string& pageUrl, int32_t nod
 
 void EventReport::ReportPageDepthOverflow(const std::string& pageUrl, int32_t depth, int32_t threshold)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, PAGE_DEPTH_OVERFLOW,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
@@ -558,7 +558,7 @@ void EventReport::ReportPageDepthOverflow(const std::string& pageUrl, int32_t de
 
 void EventReport::ReportFunctionTimeout(const std::string& functionName, int64_t time, int32_t threshold)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     StrTrim(packageName);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, UI_LIFECIRCLE_FUNCTION_TIMEOUT,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
@@ -571,7 +571,7 @@ void EventReport::ReportFunctionTimeout(const std::string& functionName, int64_t
 void EventReport::ReportHoverStatusChange(
     int32_t foldStatus, int32_t time, bool isHoverMode, int32_t appRotation, int32_t windowMode)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_NOTIFY_HOVER_STATUS_CHANGE,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
@@ -613,7 +613,7 @@ void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl, 
 void EventReport::ReportScrollableErrorEvent(
     const std::string& nodeType, ScrollableErrorType errorType, const std::string& subErrorType)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
     auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
     auto target_api_version = AceApplicationInfo::GetInstance().GetApiTargetVersion();
@@ -632,7 +632,7 @@ void EventReport::ReportScrollableErrorEvent(
 
 void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_TEXTFIELD_ERROR,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, packageName, EVENT_KEY_FRAME_NODE_ID,
         frameNodeId, EVENT_KEY_PAGE_DEPTH, depth, EVENT_KEY_TEXTFIELD_ERROR_TYPE, errorType);
@@ -640,7 +640,7 @@ void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, 
 
 void EventReport::ReportClipboardFailEvent(const std::string& errorType)
 {
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto packageName = Container::CurrentBundleName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_CLIPBOARD_FAIL,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, packageName,
         EVENT_KEY_CLIPBOARD_FAIL_TYPE, errorType);

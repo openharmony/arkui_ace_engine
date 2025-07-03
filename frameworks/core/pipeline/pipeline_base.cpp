@@ -546,8 +546,8 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
         return true;
     }
     if (params[0] == "-jscrash") {
-        EventReport::JsErrReport(
-            AceApplicationInfo::GetInstance().GetPackageName(), "js crash reason", "js crash summary");
+        ContainerScope scope(instanceId_);
+        EventReport::JsErrReport(Container::CurrentBundleName(), "js crash reason", "js crash summary");
         return true;
     }
     // hiview report dump will provide three params .

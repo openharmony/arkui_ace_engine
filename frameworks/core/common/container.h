@@ -352,6 +352,7 @@ public:
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
     static void UpdateCurrent(int32_t id);
     static ColorMode CurrentColorMode();
+    static std::string CurrentBundleName();
 
     void SetUseNewPipeline()
     {

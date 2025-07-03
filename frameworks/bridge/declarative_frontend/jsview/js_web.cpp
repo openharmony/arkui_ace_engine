@@ -2597,8 +2597,7 @@ void JSWeb::ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     if ((!bundleName.empty() && !moduleName.empty()) &&
-        (bundleName != AceApplicationInfo::GetInstance().GetPackageName() ||
-        moduleName != container->GetModuleName())) {
+        (bundleName != container->GetBundleName() || moduleName != container->GetModuleName())) {
         webSrc = RAWFILE_PREFIX + BUNDLE_NAME_PREFIX + bundleName + "/" + MODULE_NAME_PREFIX + moduleName + "/" +
             webSrc.substr(RAWFILE_PREFIX.size());
     }
