@@ -489,7 +489,7 @@ thread_local bool isWorker_ = false;
 
 thread_local bool isDynamicModulePreloaded_ = false;
 
-thread_local std::unordered_set<void*> validEnvs_;
+thread_local std::unordered_map<void*, shared_ptr<JsRuntime>> validCustomRuntime_;
 
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
@@ -822,7 +822,10 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
     if (vm == nullptr) {
         return;
     }
-    validEnvs_.insert(runtime);
+    if (validCustomRuntime_.find(runtime) != validCustomRuntime_.end()) {
+        // already preloaded
+        return;
+    }
 
     if (!arkRuntime->InitializeFromExistVM(vm)) {
         return;
@@ -890,13 +893,14 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
     }
-    localRuntime_ = arkRuntime;
+
+    validCustomRuntime_.emplace(runtime, arkRuntime);
 #endif
 }
 
 void JsiDeclarativeEngineInstance::RemoveInvalidEnv(void* env)
 {
-    validEnvs_.erase(env);
+    validCustomRuntime_.erase(env);
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()

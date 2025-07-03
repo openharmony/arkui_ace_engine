@@ -183,6 +183,8 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
         }
         return false;
     };
+    // This function is guaranteed to be called only from a single thread,
+    // so there is no need for synchronization or thread-safety mechanisms.
     static std::once_flag set_callback_flag;
     static napi_status ret = napi_ok;
     std::call_once(set_callback_flag, [callback]() {
