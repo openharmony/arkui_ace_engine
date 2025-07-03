@@ -41,7 +41,7 @@ import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
 import { ComponentContent } from 'arkui/ComponentContent'
 import overlayManager from '@ohos/overlayManager'
-import promptAction from '@ohos/promptAction';
+import promptAction, { LevelOrder } from '@ohos/promptAction'
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
 import { AsyncCallback, CustomBuilder, DragItemInfo } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
@@ -272,7 +272,7 @@ export class OverlayManager {
         throw Error("addComponentContent not implemented in OverlayManager!")
     }
 
-    addComponentContentWithOrder(content: ComponentContent, levelOrder?: number): void {
+    addComponentContentWithOrder(content: ComponentContent, levelOrder?: LevelOrder): void {
         throw Error("addComponentContentWithOrder not implemented in OverlayManager!")
     }
 
