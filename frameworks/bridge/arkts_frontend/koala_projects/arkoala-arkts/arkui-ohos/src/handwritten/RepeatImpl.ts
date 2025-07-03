@@ -80,6 +80,7 @@ class RepeatDataSource<T> implements IDataSource<T> {
     private arr_: RepeatArray<T>;
     private listener_?: InternalListener;
     private total_: number;
+    private onLazyLoading_?: (index: number) => void;
 
     constructor(arr: RepeatArray<T>) {
         this.arr_ = arr;
@@ -112,10 +113,21 @@ class RepeatDataSource<T> implements IDataSource<T> {
     }
 
     getData(index: number): T {
-        if (index < 0 || index >= this.arr_.length) {
+        if (index < 0 || index >= this.total_) {
             throw new Error('index out of range. Application error!');
         }
+        if (index >= this.arr_.length && index < this.total_) {
+            try {
+                this.onLazyLoading_?.(index);
+            } catch (error) {
+                console.error(`onLazyLoading function execute error: ${error}`);
+            }
+        }
         return this.arr_[index];
+    }
+
+    setOnLazyLoading(onLazyLoading?: (index: number) => void): void {
+        this.onLazyLoading_ = onLazyLoading;
     }
 
     registerDataChangeListener(listener: DataChangeListener): void {
@@ -137,9 +149,12 @@ const RepeatEachFuncType: string = '';
 export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     itemGenFuncs_: Map<string, RepeatItemBuilder<T>> = new Map<string, RepeatItemBuilder<T>>();
     keyGenFunc_?: (item: T, index: number) => string;
-    userDefinedTotal_?: number;
-    templateCacheSize_: Map<string, number> = new Map<string, number>();
+    templateCacheSize_: Map<string, number> = new Map<string, number>(); // size of spare nodes for each template
     ttypeGenFunc_: TemplateTypedFunc<T> = () => RepeatEachFuncType;
+
+    userDefinedTotal_?: number; // if totalCount is specified
+    onLazyLoading_?: (index: number) => void;
+
     reusable_: boolean = false;
     disableVirtualScroll_: boolean = false;
 
@@ -160,6 +175,7 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     virtualScroll(options?: VirtualScrollOptions): RepeatAttributeImpl<T> {
         this.userDefinedTotal_ = options?.onTotalCount?.() ?? options?.totalCount;
         this.reusable_ = options?.reusable !== false;
+        this.onLazyLoading_ = options?.onLazyLoading;
 
         this.disableVirtualScroll_ = options?.disableVirtualScroll ?? false;
         return this;
@@ -192,6 +208,11 @@ function virtualRender<T>(
 ): void {
     let dataSource = remember(() => new RepeatDataSource<T>(arr));
     dataSource.updateData(arr, attributes.userDefinedTotal_ ?? arr.length);
+    if (!attributes.onLazyLoading_ && dataSource.totalCount() > arr.length) {
+        console.error(`(${repeatId}) totalCount must not exceed the array length without onLazyLoading callback.`);
+    }
+    dataSource.setOnLazyLoading(attributes.onLazyLoading_);
+
     /** @memo */
     const itemGen = (item: T, index: number): void => {
         const ri = new RepeatItemImpl<T>(item, index);

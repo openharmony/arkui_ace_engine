@@ -33,6 +33,7 @@ export type TemplateTypedFunc<T> = (item: T, index: number) => string;
 export interface VirtualScrollOptions {
     totalCount?: number;
     reusable?: boolean;
+    onLazyLoading?: (index: number) => void;
     onTotalCount?: () => number;
     disableVirtualScroll?: boolean;
 }
