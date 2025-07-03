@@ -171,4 +171,21 @@ ani_int IsDebugMode([[maybe_unused]] ani_env* env, ani_object obj, ani_int id)
     }
     return modifier->getCommonAniModifier()->isDebugMode(id);
 }
+void OnMeasureInnerMeasure(ani_env* env, ani_object obj, ani_long ptr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->onMeasureInnerMeasure(env, ptr);
+}
+
+void OnLayoutInnerLayout(ani_env* env, ani_object obj, ani_long ptr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->onLayoutInnerLayout(env, ptr);
+}
 } // namespace OHOS::Ace::Ani

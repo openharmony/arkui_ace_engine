@@ -832,8 +832,8 @@ void SetMeasuredSizeImpl(Ark_FrameNode peer, const Ark_Size* size)
     CHECK_NULL_VOID(size);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(peerNode);
-    auto widthValue = Converter::Convert<float>(size->width);
-    auto heightValue = Converter::Convert<float>(size->height);
+    auto widthValue = Converter::Convert<int32_t>(size->width);
+    auto heightValue = Converter::Convert<int32_t>(size->height);
     peerNode->GetGeometryNode()->SetFrameWidth(widthValue);
     peerNode->GetGeometryNode()->SetFrameHeight(heightValue);
 }

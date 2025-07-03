@@ -338,7 +338,17 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_IsDebugMode",
             "I:I",
             reinterpret_cast<void*>(OHOS::Ace::Ani::IsDebugMode)
-        }
+        },
+        ani_native_function {
+            "_OnMeasure_InnerMeasure",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::OnMeasureInnerMeasure)
+        },
+        ani_native_function {
+            "_OnLayout_InnerLayout",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::OnLayoutInnerLayout)
+        },
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
