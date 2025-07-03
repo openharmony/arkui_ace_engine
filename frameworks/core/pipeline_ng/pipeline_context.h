@@ -442,6 +442,8 @@ public:
 
     float GetPageAvoidOffset() override;
 
+    bool CheckSourceTypeChange(SourceType currentSourceType);
+
     bool CheckNeedAvoidInSubWindow() override;
 
     void CheckAndUpdateKeyboardInset(float keyboardHeight) override;
