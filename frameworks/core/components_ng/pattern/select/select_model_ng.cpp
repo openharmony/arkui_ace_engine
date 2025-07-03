@@ -1217,6 +1217,14 @@ void SelectModelNG::SetShowInSubWindow(FrameNode* frameNode, bool isShowInSubWin
     selectPattern->SetShowInSubWindow(isShowInSubWindow);
 }
 
+void SelectModelNG::SetArrowColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(selectPattern);
+    selectPattern->SetArrowColor(color);
+}
+
 void SelectModelNG::SetShowDefaultSelectedIcon(FrameNode* frameNode, bool show)
 {
     CHECK_NULL_VOID(frameNode);

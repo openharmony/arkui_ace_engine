@@ -2343,6 +2343,18 @@ void SelectPattern::SetArrowModifierApply(const std::function<void(WeakPtr<NG::F
     }
 }
 
+void SelectPattern::SetArrowColor(const Color& color)
+{
+    CHECK_NULL_VOID(spinner_);
+    if (spinner_->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        symbolLayoutProperty->UpdateSymbolColorList({color});
+        spinner_->MarkModifyDone();
+        spinner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
 std::function<void(WeakPtr<NG::FrameNode>)>& SelectPattern::GetTextModifier()
 {
     return textApply_;

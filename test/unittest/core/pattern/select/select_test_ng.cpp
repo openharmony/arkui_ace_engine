@@ -2279,7 +2279,6 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
     auto pattern = select->GetPattern<SelectPattern>();
     EXPECT_TRUE(pattern);
-
     auto options = pattern->GetOptions();
     EXPECT_EQ(options.size(), params.size());
     RefPtr<FrameNode> row =
