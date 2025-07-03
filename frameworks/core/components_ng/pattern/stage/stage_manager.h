@@ -77,7 +77,7 @@ public:
         stageInTrasition_ = stageInTrasition;
     }
 
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage);
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool ignoreOrientation = false);
 
     bool GetForceSplitEnable() const
     {
@@ -87,6 +87,11 @@ public:
     std::string GetHomePageConfig() const
     {
         return homePageConfig_;
+    }
+
+    bool GetIgnoreOrientation() const
+    {
+        return ignoreOrientation_;
     }
 
     bool GetDetectPrimaryPageEnable() const
@@ -181,6 +186,7 @@ private:
     bool isForceSplit_ = false;
     std::string homePageConfig_;
     bool isDetectPrimaryPage_ = false;
+    bool ignoreOrientation_ = false;
 };
 } // namespace OHOS::Ace::NG
 
