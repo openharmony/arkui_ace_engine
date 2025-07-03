@@ -95,8 +95,8 @@ private:
     bool SheetInSplitWindow() const;
     LayoutConstraintF CreateSheetChildConstraint(
         RefPtr<SheetPresentationProperty> layoutprop, LayoutWrapper* layoutWrapper);
-    void UpdateMaxSizeWithPlacement(float& maxWidth, float& maxHeight);
-    void UpdateTranslateOffsetWithPlacement(OffsetF& translate);
+    void UpdateMaxSizeWithPlacement(float& maxWidth, float& maxHeight, LayoutWrapper* layoutWrapper);
+    void UpdateTranslateOffsetWithPlacement(OffsetF& translate, LayoutWrapper* layoutWrapper);
     void AddArrowHeightToSheetSize();
     void RemeasureForPopup(const RefPtr<LayoutWrapper>& layoutWrapper);
     void MinusSubwindowDistance(const RefPtr<FrameNode>& sheetWrapper);

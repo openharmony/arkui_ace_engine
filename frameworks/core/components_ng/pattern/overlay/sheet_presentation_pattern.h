@@ -80,6 +80,11 @@ public:
         overlayManager_ = overlayManager;
     }
 
+    WeakPtr<OverlayManager> GetOverlay()
+    {
+        return overlayManager_;
+    }
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -1076,6 +1081,26 @@ public:
     void CreatePropertyCallback();
     void HandleDragEndAccessibilityEvent();
     void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
+
+    // Create Dark Light Resource Method.
+    void UpdateSheetParamResource(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle);
+    void RegisterWidthRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
+    void RegisterHeightRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& sheetHeightResObj);
+    void UpdateSheetDetents(const RefPtr<ResourceObject>& resObj,
+        const WeakPtr<FrameNode>& sheetNodeWK, const WeakPtr<OverlayManager>& overlayWk);
+    void RegisterDetentsRes(const RefPtr<FrameNode>& sheetNode,
+        std::vector<RefPtr<ResourceObject>>& sheetHeightResObj);
+    void RegisterBgColorRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& colorResObj);
+    void UpdateBgColor(const RefPtr<ResourceObject>& resObj, const WeakPtr<FrameNode>& sheetNodeWK);
+    void RegisterTitleRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& mainTitleResObj);
+    void RegisterDetentSelectionRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
+    void RegisterShowCloseRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
+    void RegisterRadiusRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
+    void RegisterShadowRes(const RefPtr<FrameNode>& sheetNode);
+    void UpdateBorderWidthOrColor(const RefPtr<ResourceObject>& resObj,
+        const WeakPtr<FrameNode>& sheetNodeWK);
+    void RegisterBorderWidthOrColorRes(const RefPtr<FrameNode>& sheetNode,
+        RefPtr<ResourceObject>& resObjWidth);
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;

@@ -1358,8 +1358,8 @@ void RosenRenderContext::OnEmitterPropertyUpdate()
             continue;
         }
         const auto& annulusRegion = prop.annulusRegion.value();
-        if (annulusRegion.center_.first.Unit() == DimensionUnit::PERCENT ||
-            annulusRegion.center_.second.Unit() == DimensionUnit::PERCENT) {
+        if (annulusRegion.GetCenter().first.Unit() == DimensionUnit::PERCENT ||
+            annulusRegion.GetCenter().second.Unit() == DimensionUnit::PERCENT) {
             particlePattern->updateEmitterPosition(property);
             return;
         }
@@ -1522,21 +1522,21 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
     auto annulusRegionOpt = emitterOption.GetAnnulusRegion();
     if (annulusRegionOpt.has_value() && shapeInt == static_cast<int32_t>(ParticleEmitterShape::ANNULUS)) {
         auto annulusRegion = annulusRegionOpt.value();
-        auto center = annulusRegion.center_;
+        auto center = annulusRegion.GetCenter();
         auto rsCenter = OHOS::Rosen::Vector2f(center.first.ConvertToPxWithSize(rect.Width()),
             center.second.ConvertToPxWithSize(rect.Height()));
-        auto innerRadius = annulusRegion.innerRadius_;
+        auto innerRadius = annulusRegion.GetInnerRadius();
         auto rsInnerRadius =
             (LessOrEqual(innerRadius.ConvertToPx(), 0.0) || innerRadius.Unit() == DimensionUnit::PERCENT)
             ? 0.0
             : innerRadius.ConvertToPx();
-        auto outerRadius = annulusRegion.outerRadius_;
+        auto outerRadius = annulusRegion.GetOuterRadius();
         auto rsOuterRadius =
             (LessOrEqual(outerRadius.ConvertToPx(), 0.0) || outerRadius.Unit() == DimensionUnit::PERCENT)
             ? 0.0
             : outerRadius.ConvertToPx();
         rsAnnulusRegion = std::make_shared<Rosen::AnnulusRegion>(rsCenter, rsInnerRadius,
-            rsOuterRadius, annulusRegion.startAngle_, annulusRegion.endAngle_);
+            rsOuterRadius, annulusRegion.GetStartAngle(), annulusRegion.GetEndAngle());
     }
     if (particleType == ParticleType::IMAGE) {
         auto imageParameter = particleConfig.GetImageParticleParameter();

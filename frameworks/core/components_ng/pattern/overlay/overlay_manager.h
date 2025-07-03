@@ -748,6 +748,8 @@ public:
         return overlayInfo_;
     }
 
+    void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle);
+
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
     BorderRadiusProperty GetPrepareDragFrameNodeBorderRadius() const;

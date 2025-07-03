@@ -468,8 +468,6 @@ void SheetPresentationLayoutAlgorithm::LayoutDragBar(const NG::OffsetF& translat
 void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    const auto& pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / DOUBLE_SIZE;
     if (sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE) {
         sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / DOUBLE_SIZE;
@@ -493,7 +491,7 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     geometryNode->SetMarginFrameOffset(positionOffset);
     OffsetF translate(0.0f, 0.0f);
     if (sheetType_ == SheetType::SHEET_POPUP) {
-        UpdateTranslateOffsetWithPlacement(translate);
+        UpdateTranslateOffsetWithPlacement(translate, layoutWrapper);
     }
     LayoutCloseIcon(translate, layoutWrapper);
     LayoutDragBar(translate, layoutWrapper);
@@ -501,9 +499,12 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     LayoutScrollNode(translate, layoutWrapper);
 }
 
-void SheetPresentationLayoutAlgorithm::UpdateTranslateOffsetWithPlacement(OffsetF& translate)
+void SheetPresentationLayoutAlgorithm::UpdateTranslateOffsetWithPlacement(OffsetF& translate,
+    LayoutWrapper* layoutWrapper)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         translate += OffsetF(0, SHEET_ARROW_HEIGHT.ConvertToPx());
         return;
     }
@@ -700,7 +701,9 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
     RefPtr<SheetPresentationProperty> layoutprop, LayoutWrapper* layoutWrapper)
 {
     auto childConstraint = layoutprop->CreateChildConstraint();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, childConstraint);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, childConstraint);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, childConstraint);
@@ -709,8 +712,6 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
     auto maxHeight = sheetHeight_;
     if ((sheetStyle_.isTitleBuilder.has_value()) &&
         ((sheetType_ == SheetType::SHEET_CENTER) || (sheetType_ == SheetType::SHEET_POPUP))) {
-        auto host = layoutWrapper->GetHostNode();
-        CHECK_NULL_RETURN(host, childConstraint);
         auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_RETURN(sheetPattern, childConstraint);
         auto operationNode = sheetPattern->GetTitleBuilderNode();
@@ -722,7 +723,7 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
     }
     auto maxWidth = sheetWidth_;
     if (sheetType_ == SheetType::SHEET_POPUP) {
-        UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+        UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     }
     if (sheetPopupInfo_.finalPlacement != Placement::NONE) {
         childConstraint.maxSize.SetWidth(maxWidth);
@@ -733,9 +734,12 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
     return childConstraint;
 }
 
-void SheetPresentationLayoutAlgorithm::UpdateMaxSizeWithPlacement(float& maxWidth, float& maxHeight)
+void SheetPresentationLayoutAlgorithm::UpdateMaxSizeWithPlacement(float& maxWidth, float& maxHeight,
+    LayoutWrapper* layoutWrapper)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         maxHeight -= SHEET_ARROW_HEIGHT.ConvertToPx();
         return;
     }
@@ -783,7 +787,9 @@ bool SheetPresentationLayoutAlgorithm::SheetInSplitWindow() const
 {
     //whether window in up and down split mode
     auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
     auto windowManager = pipelineContext->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, false);
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     int32_t deviceHeight = SystemProperties::GetDeviceHeight();
     if (sheetType_ == SheetType::SHEET_CENTER && windowManager && windowGlobalRect.Height() < deviceHeight &&
@@ -803,7 +809,9 @@ void SheetPresentationLayoutAlgorithm::UpdatePopupInfoAndRemeasure(LayoutWrapper
     sheetPopupInfo_ = sheetPopupInfo;
     sheetOffsetX_ = sheetPopupInfo.sheetOffsetX;
     sheetOffsetY_ = sheetPopupInfo.sheetOffsetY;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     sheetWidth_ = sheetWidth;

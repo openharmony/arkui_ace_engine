@@ -162,6 +162,14 @@ struct BorderRadiusPropertyT<Dimension> {
         }
     }
 
+    void RemoveResource(const std::string& key)
+    {
+        auto iter = resMap_.find(key);
+        if (iter != resMap_.end()) {
+            resMap_.erase(iter);
+        }
+    }
+
     void ClearResources()
     {
         resMap_.clear();
@@ -276,6 +284,14 @@ struct BorderColorProperty {
     {
         for (const auto& [key, resourceUpdater] : resMap_) {
             resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
+
+    void RemoveResource(const std::string& key)
+    {
+        auto iter = resMap_.find(key);
+        if (iter != resMap_.end()) {
+            resMap_.erase(iter);
         }
     }
 };

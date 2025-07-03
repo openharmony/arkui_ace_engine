@@ -67,6 +67,7 @@ public:
     std::function<RefPtr<UINode>()> builderFunc_;
     std::function<RefPtr<UINode>()> titleBuilderFunc_;
     static void SetSheetTheme(RefPtr<SheetTheme> sheetTheme);
+    static void SetApiVersion(int32_t apiTargetVersion);
     // Before each TEST_F, the scope is a single test case
     void SetUp() override;
     // After each TEST_F, the scope is a single test case
@@ -203,6 +204,13 @@ RefPtr<FrameNode> SheetShowInSubwindowTestNg::InitTargetNodeEnv(RefPtr<FrameNode
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
     return targetNode;
+}
+
+void SheetShowInSubwindowTestNg::SetApiVersion(int32_t apiTargetVersion)
+{
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(apiTargetVersion);
 }
 
 HWTEST_F(SheetShowInSubwindowTestNg, RemoveSheet001, TestSize.Level1)
@@ -551,7 +559,7 @@ HWTEST_F(SheetShowInSubwindowTestNg, InitSheetWrapperAction004, TestSize.Level1)
  */
 HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber1, TestSize.Level1)
 {
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    SheetShowInSubwindowTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
     /**
      * @tc.steps: step1. create sheet page, get sheet pattern.
      */
@@ -609,8 +617,7 @@ HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber1, TestSize.Level1)
  */
 HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber2, TestSize.Level1)
 {
-    MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion(
-        static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    SheetShowInSubwindowTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
     /**
      * @tc.steps: step1. create sheet page, get sheet pattern.
      */
@@ -673,7 +680,7 @@ HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber2, TestSize.Level1)
  */
 HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber3, TestSize.Level1)
 {
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    SheetShowInSubwindowTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
 
     /**
      * @tc.steps: step1. create sheet page, get sheet pattern.
@@ -859,7 +866,7 @@ HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber5, TestSize.Level1)
  */
 HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber6, TestSize.Level1)
 {
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+    SheetShowInSubwindowTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
     /**
      * @tc.steps: step1. create sheet page, get sheet pattern.
      */
@@ -1122,8 +1129,8 @@ HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm5, TestSize.Level1)
     Dimension titleTextMargin = 2.0_vp;
     auto pipelineContext = MockPipelineContext::GetCurrentContext();
     ASSERT_NE(pipelineContext, nullptr);
-    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
     pipelineContext->SetDisplayWindowRectInfo({ 0, 0, 1000, 1600 });
+    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     sheetTheme->closeIconButtonWidth_ = closeIconButtonWidth;
     sheetTheme->titleTextMargin_ = titleTextMargin;

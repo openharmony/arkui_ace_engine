@@ -16,8 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_SHEET_WRAPPER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_SHEET_WRAPPER_PATTERN_H
 
-#include "core/common/ace_engine.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
@@ -164,6 +165,12 @@ public:
     {
         return subWindowId_;
     }
+
+    void RegisterSheetMaskColorRes(const RefPtr<FrameNode>& maskNode,
+        const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
+
+    void UpdateSheetMaskResource(const RefPtr<FrameNode>& maskNode,
+        const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle);
 
 protected:
     bool AvoidKeyboard() const override

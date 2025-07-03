@@ -50,6 +50,7 @@ public:
     static void SetSheetTheme(RefPtr<SheetTheme> sheetTheme);
     static void SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType);
     static void TearDownTestCase();
+    static void SetApiVersion(int32_t apiTargetVersion);
 };
 
 void SheetPresentationTestNg::SetUpTestCase()
@@ -87,7 +88,6 @@ void SheetPresentationTestNg::SetSheetTheme(RefPtr<SheetTheme> sheetTheme)
 
 void SheetPresentationTestNg::SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType)
 {
-    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
@@ -103,6 +103,13 @@ void SheetPresentationTestNg::SetSheetType(RefPtr<SheetPresentationPattern> shee
     sheetTheme->sheetType_ = "popup";
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+}
+
+void SheetPresentationTestNg::SetApiVersion(int32_t apiTargetVersion)
+{
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(apiTargetVersion);
 }
 
 void SheetPresentationTestNg::TearDownTestCase()
@@ -204,6 +211,7 @@ HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet001, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet002, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -230,6 +238,7 @@ HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet002, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -334,6 +343,7 @@ HWTEST_F(SheetPresentationTestNg, CheckBuilderChange001, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, OnAttachToFrameNode001, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -514,9 +524,7 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto001, TestSize.Level1)
     /**
      * @tc.steps: step1. set API14.
      */
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
 
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
@@ -570,9 +578,7 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto002, TestSize.Level1)
     /**
      * @tc.steps: step1. set API14.
      */
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
 
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
@@ -939,6 +945,7 @@ HWTEST_F(SheetPresentationTestNg, GetOverlayManager001, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, OnWindowSizeChanged001, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
         AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
@@ -1010,6 +1017,7 @@ HWTEST_F(SheetPresentationTestNg, HandleFitContontChange001, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, DismissTransition001, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
         AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
@@ -1373,6 +1381,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth001, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1413,6 +1422,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth002, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1449,6 +1459,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth003, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1487,6 +1498,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth004, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1523,6 +1535,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth005, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));

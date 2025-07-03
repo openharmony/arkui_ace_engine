@@ -201,7 +201,7 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
     sheetPopupInfo_.placementOnTarget = sheetStyle.placementOnTarget.value_or(true);
     windowGlobalRect_ = pipeline->GetDisplayWindowRectInfo();
     windowEdgeWidth_ = WINDOW_EDGE_SPACE.ConvertToPx();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         // global rect need to reduce the top and bottom safe area
         windowGlobalRect_ = pipeline->GetCurrentWindowRect();
         auto safeArea = pipeline->GetSafeArea();
@@ -250,7 +250,7 @@ void SheetWrapperLayoutAlgorithm::GetSheetPageSize(LayoutWrapper* layoutWrapper)
 
 void SheetWrapperLayoutAlgorithm::DecreaseArrowHeightWhenArrowIsShown(const RefPtr<FrameNode>& sheetNode)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (sheetNode->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
 
@@ -306,7 +306,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetPopupStyleSheetOffset(LayoutWrapper* lay
     auto geometryNode = targetNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, OffsetF());
     auto targetSize = geometryNode->GetFrameSize();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         targetSize = targetNode->GetPaintRectWithTransform().GetSize();
     }
     auto targetOffset = targetNode->GetPaintRectOffset();
@@ -332,7 +332,9 @@ OffsetF SheetWrapperLayoutAlgorithm::GetPopupStyleSheetOffset(LayoutWrapper* lay
 OffsetF SheetWrapperLayoutAlgorithm::GetOffsetInAvoidanceRule(
     LayoutWrapper* layoutWrapper, const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, OffsetF());
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         sheetPopupInfo_.finalPlacement = AvoidanceRuleOfPlacement(layoutWrapper, targetSize, targetOffset);
     } else {
         // before api 16, only placement bottom is used
