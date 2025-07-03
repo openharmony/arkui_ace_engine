@@ -218,20 +218,14 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if ((sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP ||
             (sheetType_ == SheetType::SHEET_BOTTOM_OFFSET))
             && (sheetStyle_.sheetHeight.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO)) {
-            auto&& children = layoutWrapper->GetAllChildrenWithBuild();
             auto secondChild = AceType::DynamicCast<LayoutWrapper>(scrollNode);
             CHECK_NULL_VOID(secondChild);
             auto&& scrollChild = secondChild->GetAllChildrenWithBuild();
             auto builder = scrollChild.front();
             CHECK_NULL_VOID(builder);
-            auto operatoration = children.front();
-            CHECK_NULL_VOID(operatoration);
-            auto operatorGeometryNode = operatoration->GetGeometryNode();
-            CHECK_NULL_VOID(operatorGeometryNode);
             auto builderGeometryNode = builder->GetGeometryNode();
             CHECK_NULL_VOID(builderGeometryNode);
-            sheetHeight_ =
-                operatorGeometryNode->GetFrameSize().Height() + builderGeometryNode->GetFrameSize().Height();
+            sheetHeight_ = sheetPattern->GetTitleBuilderHeight() + builderGeometryNode->GetFrameSize().Height();
             float sheetMaxHeight = sheetMaxHeight_;
             if (SheetInSplitWindow()) {
                 auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -713,12 +707,7 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
         CHECK_NULL_RETURN(host, childConstraint);
         auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_RETURN(sheetPattern, childConstraint);
-        auto operationNode = sheetPattern->GetTitleBuilderNode();
-        CHECK_NULL_RETURN(operationNode, childConstraint);
-        auto titleGeometryNode = operationNode->GetGeometryNode();
-        CHECK_NULL_RETURN(titleGeometryNode, childConstraint);
-        auto titleHeiht = titleGeometryNode->GetFrameSize().Height();
-        maxHeight -= titleHeiht;
+        maxHeight -= sheetPattern->GetTitleBuilderHeight();
     }
     auto maxWidth = sheetWidth_;
     if (sheetType_ == SheetType::SHEET_POPUP) {
