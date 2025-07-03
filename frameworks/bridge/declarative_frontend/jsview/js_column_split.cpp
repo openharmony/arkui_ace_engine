@@ -36,11 +36,11 @@ void JSColumnSplit::JsResizable(bool resizable)
 
 void JSColumnSplit::JsDivider(const JSCallbackInfo& args)
 {
+    LinearSplitModel::GetInstance()->ResetResObj("columnSplit.divider");
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }
 
-    LinearSplitModel::GetInstance()->ResetResObj("columnSplit.divider");
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     NG::ColumnSplitDivider divider;
     RefPtr<ResourceObject> startResObj;
