@@ -15,6 +15,7 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #define private public
 #define protected public
@@ -2157,6 +2158,24 @@ HWTEST_F(RosenRenderContextTest, RemoveFromTreeTest002, TestSize.Level1)
     EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
     EXPECT_EQ(rosenRenderContext->rsNode_->isOnTheTreeInit_, true);
     EXPECT_EQ(rosenRenderContext->rsNode_->isOnTheTree_, false);
+}
+
+class MockRosenRenderContext : public RosenRenderContext {
+public:
+    MOCK_METHOD1(SetNeedUseCmdlistDrawRegion, void(bool needUseCmdlistDrawRegion));
+};
+
+/**
+ * @tc.name: SetNeedUseCmdlistDrawRegion001
+ * @tc.desc: Test RosenRenderContext SetNeedUseCmdlistDrawRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, SetNeedUseCmdlistDrawRegion001, TestSize.Level1)
+{
+    auto mockRosenRenderContext = AceType::MakeRefPtr<MockRosenRenderContext>();
+    EXPECT_CALL(*mockRosenRenderContext, SetNeedUseCmdlistDrawRegion(_)).Times(2);
+    mockRosenRenderContext->SetNeedUseCmdlistDrawRegion(true);
+    mockRosenRenderContext->SetNeedUseCmdlistDrawRegion(false);
 }
 
 /**

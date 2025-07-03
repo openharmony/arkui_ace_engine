@@ -99,6 +99,7 @@ void CanvasPattern::OnAttachToFrameNode()
     renderCtx->SetClipToBounds(false);
     renderCtx->SetUsingContentRectForRenderFrame(true);
     renderCtx->SetFrameGravity(Rosen::Gravity::RESIZE_ASPECT_FILL);
+    renderCtx->SetNeedUseCmdlistDrawRegion(true);
     if (!contentModifier_) {
         contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
     }

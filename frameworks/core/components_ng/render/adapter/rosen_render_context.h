@@ -535,6 +535,8 @@ public:
     void SyncRSPropertyToRenderContext(AnimationPropertyType property) override;
     void RemoveFromTree() override;
 
+    void SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion) override;
+
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
