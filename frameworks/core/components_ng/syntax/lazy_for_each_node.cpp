@@ -357,15 +357,11 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
         child.second->SetJSViewActive(false, true);
         return child.second->GetFrameChildByIndex(0, needBuild);
     }
-    if (addToRenderTree) {
-        child.second->SetActive(true);
-        auto frameNode = AceType::DynamicCast<FrameNode>(child.second->GetFrameChildByIndex(0, true));
-        if (frameNode && !frameNode->IsActive()) {
-            frameNode->SetActive(true);
-        }
-    }
     if (isActive_) {
         child.second->SetJSViewActive(true, true);
+    }
+    if (addToRenderTree) {
+        child.second->SetActive(true);
     }
     if (child.second->GetDepth() != GetDepth() + 1) {
         child.second->SetDepth(GetDepth() + 1);

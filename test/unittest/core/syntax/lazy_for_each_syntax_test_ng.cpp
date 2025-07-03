@@ -1117,57 +1117,6 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxGetFrameChildByIndexTest001, Test
 }
 
 /**
- * @tc.name: ForEachSyntaxGetFrameChildByIndexTest002
- * @tc.desc: Create LazyForEach, update its Items and invoke :GetFrameChildByIndex function.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxGetFrameChildByIndexTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create Text and push it to view stack processor.
-     * @tc.expected: Make Text as LazyForEach parent.
-     */
-    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
-
-    /**
-     * @tc.steps: step2. Invoke lazyForEach Create function.
-     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
-     */
-    LazyForEachModelNG lazyForEach;
-    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
-        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
-    lazyForEach.Create(mockLazyForEachActuator);
-    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
-    auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
-    EXPECT_TRUE(lazyForEachNode != nullptr && lazyForEachNode->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG);
-
-    UpdateItems(lazyForEachNode, mockLazyForEachActuator);
-    lazyForEachNode->needPredict_ = false;
-
-    /**
-     * @tc.steps: step3. Invoke GetFrameChildByIndex with addToRenderTree is false.
-     * @tc.expected: The corresponding child FrameNode is inactive.
-     */
-    auto result = lazyForEachNode->GetFrameChildByIndex(0, true, false, false);
-    EXPECT_NE(result, nullptr);
-    auto node = lazyForEachBuilder->GetChildByIndex(0, true, false).second;
-    EXPECT_NE(node, nullptr);
-    auto frameChild = AceType::DynamicCast<FrameNode>(node->GetFrameChildByIndex(0, true));
-    EXPECT_FALSE(frameChild->IsActive());
-
-    /**
-     * @tc.steps: step4. Invoke GetFrameChildByIndex with addToRenderTree is true.
-     * @tc.expected: The corresponding child FrameNode is active.
-     */
-    result = lazyForEachNode->GetFrameChildByIndex(0, true, false, true);
-    EXPECT_NE(result, nullptr);
-    node = lazyForEachBuilder->GetChildByIndex(0, true, false).second;
-    EXPECT_NE(node, nullptr);
-    frameChild = AceType::DynamicCast<FrameNode>(node->GetFrameChildByIndex(0, true));
-    EXPECT_TRUE(frameChild->IsActive());
-}
-
-/**
  * @tc.name: ForEachSyntaxGetIndexByUINodeTest001
  * @tc.desc: Create LazyForEach, update its Items and invoke :GetIndexByUINode function.
  * @tc.type: FUNC
