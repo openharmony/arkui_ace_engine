@@ -95,7 +95,12 @@ public:
     static void SetShowPasswordIcon(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetShowUnderline(FrameNode* frameNode, const std::optional<bool>& showUnderLine);
     static void SetSelectAllValue(FrameNode* frameNode, const std::optional<bool>& isSelectAllValue);
+    static void SetDefaultCancelIcon(FrameNode* frameNode);
 
+    static void SetWidthAuto(FrameNode* frameNode, bool val);
+    static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& newPadding, bool tmp);
+    static void SetMargin(FrameNode* frameNode);
+    static void SetBackBorder(FrameNode* frameNode);
 private:
 
 };

@@ -42,7 +42,6 @@ import { TransformationMatrix } from "./arkui-common"
 import { UniformDataType } from "./arkui-uniformtypedescriptor"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup, GestureGroupHandler } from "./gesture"
 import { PixelMap } from "./arkui-pixelmap"
-import { BlendMode } from "./arkui-drawing"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
 import { memo, NodeAttach, remember } from "@koalaui/runtime"
@@ -7784,6 +7783,37 @@ export type Callback_Literal_Boolean_isVisible_Void = (event: Literal_Boolean_is
 export interface Literal_ResourceColor_color {
     color: ResourceColor;
 }
+export enum BlendMode {
+    CLEAR = 0,
+    SRC = 1,
+    DST = 2,
+    SRC_OVER = 3,
+    DST_OVER = 4,
+    SRC_IN = 5,
+    DST_IN = 6,
+    SRC_OUT = 7,
+    DST_OUT = 8,
+    SRC_ATOP = 9,
+    DST_ATOP = 10,
+    XOR = 11,
+    PLUS = 12,
+    MODULATE = 13,
+    SCREEN = 14,
+    OVERLAY = 15,
+    DARKEN = 16,
+    LIGHTEN = 17,
+    COLOR_DODGE = 18,
+    COLOR_BURN = 19,
+    HARD_LIGHT = 20,
+    SOFT_LIGHT = 21,
+    DIFFERENCE = 22,
+    EXCLUSION = 23,
+    MULTIPLY = 24,
+    HUE = 25,
+    SATURATION = 26,
+    COLOR = 27,
+    LUMINOSITY = 28
+}
 export interface PopupOptions {
     message: string;
     placement?: Placement;
@@ -7969,6 +7999,12 @@ export interface InvertOptions {
     high: number;
     threshold: number;
     thresholdRange: number;
+}
+export interface DividerStyle {
+    strokeWidth: Length;
+    color?: ResourceColor;
+    startMargin?: Length;
+    endMargin?: Length;
 }
 export type TipsMessageType = ResourceStr | StyledString;
 export interface BackgroundImageOptions {
@@ -11760,9 +11796,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
             const style_type = runtimeType(style)
             const options_type = runtimeType(options)
             const sysOptions_type = runtimeType(sysOptions)
-            if ((RuntimeType.OBJECT == style_type) || (RuntimeType.OBJECT == style_type)) {
+            if (((RuntimeType.NUMBER == style_type) || (RuntimeType.UNDEFINED == style_type))) {
                 const value_casted = style as (BlurStyle | undefined)
-                const options_casted = options as (BackgroundBlurStyleOptions)
+                const options_casted = options as (BackgroundBlurStyleOptions | undefined)
                 this.getPeer()?.backgroundBlurStyle0Attribute(value_casted, options_casted)
                 return this
             }
@@ -11783,9 +11819,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
             const style_type = runtimeType(style)
             const options_type = runtimeType(options)
             const sysOptions_type = runtimeType(sysOptions)
-            if ((RuntimeType.OBJECT == style_type) || (RuntimeType.OBJECT == style_type)) {
+            if (((RuntimeType.NUMBER == style_type) || (RuntimeType.UNDEFINED == style_type))) {
                 const value_casted = style as (BlurStyle | undefined)
-                const options_casted = options as (ForegroundBlurStyleOptions)
+                const options_casted = options as (ForegroundBlurStyleOptions | undefined)
                 this.getPeer()?.foregroundBlurStyle0Attribute(value_casted, options_casted)
                 return this
             }
@@ -11880,13 +11916,13 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
             const sysOptions_type = runtimeType(sysOptions)
             if ((RuntimeType.NUMBER == blurRadius_type) || (RuntimeType.UNDEFINED == blurRadius_type)) {
                 const value_casted = blurRadius as (number | undefined)
-                const options_casted = options as (BlurOptions)
+                const options_casted = options as (BlurOptions | undefined)
                 this.getPeer()?.blur0Attribute(value_casted, options_casted)
                 return this
             }
             if ((RuntimeType.NUMBER == blurRadius_type) || (RuntimeType.UNDEFINED == blurRadius_type)) {
                 const blurRadius_casted = blurRadius as (number | undefined)
-                const options_casted = options as (BlurOptions)
+                const options_casted = options as (BlurOptions | undefined)
                 const sysOptions_casted = sysOptions as (SystemAdaptiveOptions)
                 this.getPeer()?.blur1Attribute(blurRadius_casted, options_casted, sysOptions_casted)
                 return this
@@ -11932,7 +11968,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
             const sysOptions_type = runtimeType(sysOptions)
             if ((RuntimeType.NUMBER == radius_type) || (RuntimeType.UNDEFINED == radius_type)) {
                 const value_casted = radius as (number | undefined)
-                const options_casted = options as (BlurOptions)
+                const options_casted = options as (BlurOptions| undefined)
                 this.getPeer()?.backdropBlur0Attribute(value_casted, options_casted)
                 return this
             }

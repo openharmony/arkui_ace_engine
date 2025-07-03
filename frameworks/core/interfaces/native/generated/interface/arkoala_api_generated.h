@@ -1587,6 +1587,8 @@ typedef struct OnWillScrollCallback OnWillScrollCallback;
 typedef struct Opt_OnWillScrollCallback Opt_OnWillScrollCallback;
 typedef struct SearchSubmitCallback SearchSubmitCallback;
 typedef struct Opt_SearchSubmitCallback Opt_SearchSubmitCallback;
+typedef struct SearchValueCallback SearchValueCallback;
+typedef struct Opt_SearchValueCallback Opt_SearchValueCallback;
 typedef struct SelectedCallback SelectedCallback;
 typedef struct Opt_SelectedCallback Opt_SelectedCallback;
 typedef struct ShouldBuiltInRecognizerParallelWithCallback ShouldBuiltInRecognizerParallelWithCallback;
@@ -1595,6 +1597,8 @@ typedef struct SizeChangeCallback SizeChangeCallback;
 typedef struct Opt_SizeChangeCallback Opt_SizeChangeCallback;
 typedef struct SliderTriggerChangeCallback SliderTriggerChangeCallback;
 typedef struct Opt_SliderTriggerChangeCallback Opt_SliderTriggerChangeCallback;
+typedef struct StepperIndexCallback StepperIndexCallback;
+typedef struct Opt_StepperIndexCallback Opt_StepperIndexCallback;
 typedef struct StyledStringMarshallCallback StyledStringMarshallCallback;
 typedef struct Opt_StyledStringMarshallCallback Opt_StyledStringMarshallCallback;
 typedef struct StyledStringUnmarshallCallback StyledStringUnmarshallCallback;
@@ -1605,6 +1609,8 @@ typedef struct TabsCustomContentTransitionCallback TabsCustomContentTransitionCa
 typedef struct Opt_TabsCustomContentTransitionCallback Opt_TabsCustomContentTransitionCallback;
 typedef struct TextAreaSubmitCallback TextAreaSubmitCallback;
 typedef struct Opt_TextAreaSubmitCallback Opt_TextAreaSubmitCallback;
+typedef struct TextFieldValueCallback TextFieldValueCallback;
+typedef struct Opt_TextFieldValueCallback Opt_TextFieldValueCallback;
 typedef struct TextPickerEnterSelectedAreaCallback TextPickerEnterSelectedAreaCallback;
 typedef struct Opt_TextPickerEnterSelectedAreaCallback Opt_TextPickerEnterSelectedAreaCallback;
 typedef struct TextPickerScrollStopCallback TextPickerScrollStopCallback;
@@ -4236,7 +4242,6 @@ typedef enum Ark_FormDimension {
     ARK_FORM_DIMENSION_DIMENSION_6_4 = 7,
     ARK_FORM_DIMENSION_DIMENSION_2_3 = 8,
     ARK_FORM_DIMENSION_DIMENSION_3_3 = 9,
-    ARK_FORM_DIMENSION_DIMENSION_3_4 = 10,
 } Ark_FormDimension;
 typedef struct Opt_FormDimension {
     Ark_Tag tag;
@@ -11372,6 +11377,15 @@ typedef struct Opt_SearchSubmitCallback {
     Ark_Tag tag;
     SearchSubmitCallback value;
 } Opt_SearchSubmitCallback;
+typedef struct SearchValueCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String value);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_String value);
+} SearchValueCallback;
+typedef struct Opt_SearchValueCallback {
+    Ark_Tag tag;
+    SearchValueCallback value;
+} Opt_SearchValueCallback;
 typedef struct SelectedCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Boolean selected);
@@ -11408,6 +11422,15 @@ typedef struct Opt_SliderTriggerChangeCallback {
     Ark_Tag tag;
     SliderTriggerChangeCallback value;
 } Opt_SliderTriggerChangeCallback;
+typedef struct StepperIndexCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number stepperIndex);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number stepperIndex);
+} StepperIndexCallback;
+typedef struct Opt_StepperIndexCallback {
+    Ark_Tag tag;
+    StepperIndexCallback value;
+} Opt_StepperIndexCallback;
 typedef struct StyledStringMarshallCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_UserDataSpan marshallableVal, const Callback_Buffer_Void continuation);
@@ -11453,6 +11476,15 @@ typedef struct Opt_TextAreaSubmitCallback {
     Ark_Tag tag;
     TextAreaSubmitCallback value;
 } Opt_TextAreaSubmitCallback;
+typedef struct TextFieldValueCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_ResourceStr value);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ResourceStr value);
+} TextFieldValueCallback;
+typedef struct Opt_TextFieldValueCallback {
+    Ark_Tag tag;
+    TextFieldValueCallback value;
+} Opt_TextFieldValueCallback;
 typedef struct TextPickerEnterSelectedAreaCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_Number_Array_Number index);
@@ -24191,12 +24223,50 @@ typedef struct GENERATED_ArkUINavExtenderAccessor {
                             Ark_Boolean animated);
 } GENERATED_ArkUINavExtenderAccessor;
 
+typedef struct GENERATED_ArkUIStepperOpsAccessor {
+    Ark_NativePointer (*registerStepperIndexCallback)(Ark_NativePointer node,
+                                                      const Ark_Number* value,
+                                                      const StepperIndexCallback* callback);
+} GENERATED_ArkUIStepperOpsAccessor;
+
+typedef struct GENERATED_ArkUISearchOpsAccessor {
+    Ark_NativePointer (*registerSearchValueCallback)(Ark_NativePointer node,
+                                                     const Ark_String* value,
+                                                     const SearchValueCallback* callback);
+} GENERATED_ArkUISearchOpsAccessor;
+
 typedef struct GENERATED_ArkUIEventEmulatorAccessor {
     void (*emitClickEvent)(Ark_NativePointer node,
                            Ark_ClickEvent event);
     void (*emitTextInputEvent)(Ark_NativePointer node,
                                const Ark_String* text);
 } GENERATED_ArkUIEventEmulatorAccessor;
+
+typedef struct GENERATED_ArkUITextFieldOpsAccessor {
+    Ark_NativePointer (*registerTextFieldValueCallback)(Ark_NativePointer node,
+                                                        const Ark_ResourceStr* value,
+                                                        const TextFieldValueCallback* callback);
+    Ark_NativePointer (*textFieldOpsSetWidth)(Ark_NativePointer node,
+                                              const Opt_Union_Length_LayoutPolicy* value);
+    Ark_NativePointer (*textFieldOpsSetHeight)(Ark_NativePointer node,
+                                               const Opt_Union_Length_LayoutPolicy* value);
+    Ark_NativePointer (*textFieldOpsSetPadding)(Ark_NativePointer node,
+                                                const Opt_Union_Padding_Length_LocalizedPadding* value);
+    Ark_NativePointer (*textFieldOpsSetMargin)(Ark_NativePointer node,
+                                               const Opt_Union_Padding_Length_LocalizedPadding* value);
+    Ark_NativePointer (*textFieldOpsSetBorder)(Ark_NativePointer node,
+                                               const Opt_BorderOptions* value);
+    Ark_NativePointer (*textFieldOpsSetBorderWidth)(Ark_NativePointer node,
+                                                    const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value);
+    Ark_NativePointer (*textFieldOpsSetBorderColor)(Ark_NativePointer node,
+                                                    const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value);
+    Ark_NativePointer (*textFieldOpsSetBorderStyle)(Ark_NativePointer node,
+                                                    const Opt_Union_BorderStyle_EdgeStyles* value);
+    Ark_NativePointer (*textFieldOpsSetBorderRadius)(Ark_NativePointer node,
+                                                     const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value);
+    Ark_NativePointer (*textFieldOpsSetBackgroundColor)(Ark_NativePointer node,
+                                                            const Opt_ResourceColor* value);
+} GENERATED_ArkUITextFieldOpsAccessor;
 
 typedef struct GENERATED_ArkUIActionSheetAccessor {
     void (*show)(const Ark_ActionSheetOptions* value);
@@ -26919,7 +26989,10 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIFilterAccessor* (*getFilterAccessor)();
     const GENERATED_ArkUIVisualEffectAccessor* (*getVisualEffectAccessor)();
     const GENERATED_ArkUINavExtenderAccessor* (*getNavExtenderAccessor)();
+    const GENERATED_ArkUIStepperOpsAccessor* (*getStepperOpsAccessor)();
+    const GENERATED_ArkUISearchOpsAccessor* (*getSearchOpsAccessor)();
     const GENERATED_ArkUIEventEmulatorAccessor* (*getEventEmulatorAccessor)();
+    const GENERATED_ArkUITextFieldOpsAccessor* (*getTextFieldOpsAccessor)();
     const GENERATED_ArkUIActionSheetAccessor* (*getActionSheetAccessor)();
     const GENERATED_ArkUIAlertDialogAccessor* (*getAlertDialogAccessor)();
     const GENERATED_ArkUISpringPropAccessor* (*getSpringPropAccessor)();
