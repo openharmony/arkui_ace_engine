@@ -3212,7 +3212,7 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     action_ = GetTextInputActionValue(GetDefaultTextInputAction());
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (needToResetKeyboard && HasFocus()) {
-        if (isCustomKeyboardAttached_) {
+        if (isCustomKeyboardAttached_ || keyboard_ == TextInputType::ONE_TIME_CODE) {
             RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::RESET_KEYBOARD);
             return;
         }
