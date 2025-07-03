@@ -921,6 +921,7 @@ protected:
     void FireObserverOnScrollStop();
     void FireObserverOnDidScroll(float finalOffset);
     void FireObserverOnScrollerAreaChange(float finalOffset);
+    float FireObserverOnWillScroll(float offset);
 
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
     void FireOnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);

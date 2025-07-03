@@ -34,12 +34,6 @@ constexpr float DEFAULT_SCROLL_TO_VELOCITY = 7.0f;
 // for add item and scrollEdge(Edge.Bottom) in one layout
 constexpr int32_t LAST_ITEM = -1;
 
-enum class ScrollState {
-    IDLE = 0,
-    SCROLL,
-    FLING,
-};
-
 enum class NestedScrollMode {
     SELF_ONLY = 0,
     SELF_FIRST,
@@ -107,15 +101,6 @@ struct ScrollFrameInfo {
     bool operator==(const ScrollFrameInfo& scrollInfo) const
     {
         return offset == scrollInfo.offset && state == scrollInfo.state;
-    }
-};
-
-struct ScrollFrameResult {
-    Dimension offset;
-
-    bool operator==(const ScrollFrameResult& scrollRes) const
-    {
-        return offset == scrollRes.offset;
     }
 };
 
@@ -504,6 +489,7 @@ using ScrollEndCallback = std::function<void()>;
 using StartSnapAnimationCallback = std::function<bool(SnapAnimationOptions)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using ScrollPageCallback = std::function<void(bool, bool smooth)>;
+using OnWillScrollEventEx = std::function<void(ScrollFrameResult&, ScrollState, ScrollSource)>;
 
 struct ScrollerObserver {
     RefPtr<NG::TouchEventImpl> onTouchEvent;
@@ -513,6 +499,7 @@ struct ScrollerObserver {
     OnScrollStopEvent onScrollStopEvent;
     OnDidScrollEvent onDidScrollEvent;
     OnScrollerAreaChangeEvent onScrollerAreaChangeEvent;
+    OnWillScrollEventEx onWillScrollEventEx;
 };
 } // namespace OHOS::Ace
 

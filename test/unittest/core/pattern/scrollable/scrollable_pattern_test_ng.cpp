@@ -1963,4 +1963,28 @@ HWTEST_F(ScrollablePatternTestNg, HandleOnDidScrollEvent, TestSize.Level1)
     manager->HandleOnDidScrollEvent(Dimension(2.0), ScrollSource::SCROLLER_ANIMATION, true, false);
     EXPECT_EQ(scrollCount, 2);
 }
+
+/**
+ * @tc.name: HandleOnWillScrollEventEx
+ * @tc.desc: Test ScrollerObserverManager HandleOnWillScrollEventEx
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, HandleOnWillScrollEventEx, TestSize.Level1)
+{
+    RefPtr<ScrollerObserverManager> manager = AceType::MakeRefPtr<ScrollerObserverManager>();
+    ScrollFrameResult result = { .offset = Dimension(0.0) };
+    manager->observers_.clear();
+    ScrollerObserver observer;
+    observer.onWillScrollEventEx = nullptr;
+    manager->AddObserver(observer, 1);
+    manager->HandleOnWillScrollEventEx(result, ScrollState::SCROLL, ScrollSource::DRAG);
+    EXPECT_NE(result.offset.Value(), 1.0);
+    manager->observers_.clear();
+    observer.onWillScrollEventEx = [](ScrollFrameResult& result, ScrollState state, ScrollSource source) {
+        result.offset = Dimension(1.0);
+    };
+    manager->AddObserver(observer, 1);
+    manager->HandleOnWillScrollEventEx(result, ScrollState::SCROLL, ScrollSource::DRAG);
+    EXPECT_EQ(result.offset.Value(), 1.0);
+}
 } // namespace OHOS::Ace::NG
