@@ -28,7 +28,6 @@ const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
 constexpr int32_t DEFAULT_RADIO_ANIMATION_DURATION = 200;
 constexpr int32_t DEFAULT_RADIO_ANIMATION_DURATION_CIRCLE = 150;
-constexpr float DEFAULT_CUSTOM_SCALE = 0.7F;
 constexpr float INDICATOR_MIN_SCALE = 0.8F;
 constexpr float INDICATOR_MAX_SCALE = 1.0F;
 constexpr float INDICATOR_MIN_OPACITY = 0.0F;
@@ -773,17 +772,17 @@ CalcSize RadioPattern::GetChildContentSize()
     if (layoutConstraint && layoutConstraint->selfIdealSize) {
         auto selfIdealSize = layoutConstraint->selfIdealSize;
         if (selfIdealSize->IsValid()) {
-            auto height = selfIdealSize->Height()->GetDimension() * DEFAULT_CUSTOM_SCALE;
-            auto width = selfIdealSize->Width()->GetDimension() * DEFAULT_CUSTOM_SCALE;
+            auto height = selfIdealSize->Height()->GetDimension() * DEFAULT_RADIO_IMAGE_SCALE;
+            auto width = selfIdealSize->Width()->GetDimension() * DEFAULT_RADIO_IMAGE_SCALE;
             auto length = std::min(width, height);
             return CalcSize(NG::CalcLength(length), NG::CalcLength(length));
         }
         if (selfIdealSize->Width().has_value()) {
-            auto width = selfIdealSize->Width()->GetDimension() * DEFAULT_CUSTOM_SCALE;
+            auto width = selfIdealSize->Width()->GetDimension() * DEFAULT_RADIO_IMAGE_SCALE;
             return CalcSize(NG::CalcLength(width), NG::CalcLength(width));
         }
         if (selfIdealSize->Height().has_value()) {
-            auto height = selfIdealSize->Height()->GetDimension() * DEFAULT_CUSTOM_SCALE;
+            auto height = selfIdealSize->Height()->GetDimension() * DEFAULT_RADIO_IMAGE_SCALE;
             return CalcSize(NG::CalcLength(height), NG::CalcLength(height));
         }
     }
@@ -792,8 +791,8 @@ CalcSize RadioPattern::GetChildContentSize()
     Dimension horizontalPadding;
     Dimension verticalPadding;
     InitializeParam(defaultWidth, defaultHeight, horizontalPadding, verticalPadding);
-    auto width = (defaultWidth - horizontalPadding * RADIO_PADDING_COUNT) * DEFAULT_CUSTOM_SCALE;
-    auto height = (defaultHeight - verticalPadding * RADIO_PADDING_COUNT) * DEFAULT_CUSTOM_SCALE;
+    auto width = (defaultWidth - horizontalPadding * RADIO_PADDING_COUNT) * DEFAULT_RADIO_IMAGE_SCALE;
+    auto height = (defaultHeight - verticalPadding * RADIO_PADDING_COUNT) * DEFAULT_RADIO_IMAGE_SCALE;
     return CalcSize(NG::CalcLength(width), NG::CalcLength(height));
 }
 
