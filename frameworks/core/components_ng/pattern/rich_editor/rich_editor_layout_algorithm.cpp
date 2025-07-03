@@ -41,7 +41,7 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
     while (it != spans.end()) {
         auto span = *it;
         // only checking the last char
-        if (span->content.back() == u'\n') {
+        if (!span->content.empty() && span->content.back() == u'\n') {
             span->SetNeedRemoveNewLine(true);
             std::list<RefPtr<SpanItem>> newGroup;
             newGroup.splice(newGroup.begin(), spans, spans.begin(), std::next(it));
