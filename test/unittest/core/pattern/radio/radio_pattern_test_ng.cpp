@@ -1862,4 +1862,49 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest119, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->OnAfterModifyDone();
 }
+
+/**
+ * @tc.name: RadioPatternTest120
+ * @tc.desc: Test Radio OnDetachFromFrameNodeMultiThread.
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest120, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnDetachFromFrameNodeMultiThread();
+}
+
+/**
+ * @tc.name: RadioPatternTest121
+ * @tc.desc: Test Radio OnDetachFromMainTree.
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest121, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnDetachFromMainTree();
+}
+
+/**
+ * @tc.name: RadioPatternTest122
+ * @tc.desc: Test Radio OnDetachFromMainTreeMultiThread.
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest122, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnDetachFromMainTreeMultiThread(frameNode);
+}
 } // namespace OHOS::Ace::NG
