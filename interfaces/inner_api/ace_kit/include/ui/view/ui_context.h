@@ -38,6 +38,7 @@ public:
     // task schedule
     virtual void RunScopeUITaskSync(Task&& task, const std::string& name) = 0;
     virtual void RunScopeUITask(Task&& task, const std::string& name) = 0;
+    virtual void RunScopeUIDelayedTask(Task&& task, const std::string& name, uint32_t delayTime) = 0;
 
     // page operation
     virtual void OnBackPressed() = 0;
