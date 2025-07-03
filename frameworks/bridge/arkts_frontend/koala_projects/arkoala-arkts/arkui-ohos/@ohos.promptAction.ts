@@ -182,13 +182,13 @@ declare namespace promptAction {
 
     export function showActionMenu(options: ActionMenuOptions): Promise<ActionMenuSuccessResponse>;
 
-    export function openCustomDialog1(contentNode: KPointer, options?: BaseDialogOptions): Promise<void>;
+    export function openCustomDialog1(content: KPointer, options?: BaseDialogOptions): Promise<void>;
 
-    export function openCustomDialog(options: CustomDialogOptions): Promise<number>;
+    export function openCustomDialog(builder: KPointer, options: CustomDialogOptions): Promise<number>;
 
-    export function updateCustomDialog(contentNode: KPointer, options: BaseDialogOptions): Promise<void>;
+    export function updateCustomDialog(content: KPointer, options: BaseDialogOptions): Promise<void>;
 
-    export function closeCustomDialog1(contentNode: KPointer): Promise<void>;
+    export function closeCustomDialog1(content: KPointer): Promise<void>;
 
     export function closeCustomDialog(dialogId: number): void;
 }

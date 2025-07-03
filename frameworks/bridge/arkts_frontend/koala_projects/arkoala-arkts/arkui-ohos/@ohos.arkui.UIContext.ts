@@ -310,28 +310,34 @@ export class PromptAction {
         throw Error("closeToast not implemented in PromptAction!")
     }
 
-    showDialog1(options: promptAction.ShowDialogOptions,
+    //@ts-ignore
+    showDialog(options: promptAction.ShowDialogOptions,
         callback?: AsyncCallback<promptAction.ShowDialogSuccessResponse>): void {
         throw Error("showDialog1 not implemented in PromptAction!")
     }
 
+    //@ts-ignore
     showDialog(options: promptAction.ShowDialogOptions): Promise<promptAction.ShowDialogSuccessResponse> {
         throw Error("showDialog not implemented in PromptAction!")
     }
 
-    showActionMenu1(options: promptAction.ActionMenuOptions,
+    //@ts-ignore
+    showActionMenu(options: promptAction.ActionMenuOptions,
         callback?: AsyncCallback<promptAction.ActionMenuSuccessResponse>): void {
         throw Error("showActionMenu1 not implemented in PromptAction!")
     }
 
+    //@ts-ignore
     showActionMenu(options: promptAction.ActionMenuOptions): Promise<promptAction.ActionMenuSuccessResponse> {
         throw Error("showActionMenu not implemented in PromptAction!")
     }
 
-    openCustomDialog1(content: ComponentContent, options?: promptAction.BaseDialogOptions): Promise<void> {
+    //@ts-ignore
+    openCustomDialog(content: ComponentContent, options?: promptAction.BaseDialogOptions): Promise<void> {
         throw Error("openCustomDialog1 not implemented in PromptAction!")
     }
 
+    //@ts-ignore
     openCustomDialog(options: promptAction.CustomDialogOptions): Promise<number> {
         throw Error("openCustomDialog not implemented in PromptAction!")
     }
@@ -340,10 +346,12 @@ export class PromptAction {
         throw Error("updateCustomDialog not implemented in PromptAction!")
     }
 
-    closeCustomDialog1(content: ComponentContent): Promise<void> {
+    //@ts-ignore
+    closeCustomDialog(content: ComponentContent): Promise<void> {
         throw Error("closeCustomDialog1 not implemented in PromptAction!")
     }
 
+    //@ts-ignore
     closeCustomDialog(dialogId: number): void {
         throw Error("closeCustomDialog not implemented in PromptAction!")
     }

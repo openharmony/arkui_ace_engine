@@ -650,13 +650,15 @@ export class PromptActionImpl extends PromptAction {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
-    showDialog1(options: promptAction.ShowDialogOptions,
+    //@ts-ignore
+    showDialog(options: promptAction.ShowDialogOptions,
         callback?: AsyncCallback<promptAction.ShowDialogSuccessResponse>): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         promptAction.showDialog1(options, callback);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
+    //@ts-ignore
     showDialog(options: promptAction.ShowDialogOptions): Promise<promptAction.ShowDialogSuccessResponse> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const retval = promptAction.showDialog(options);
@@ -664,13 +666,15 @@ export class PromptActionImpl extends PromptAction {
         return retval;
     }
 
-    showActionMenu1(options: promptAction.ActionMenuOptions,
+    //@ts-ignore
+    showActionMenu(options: promptAction.ActionMenuOptions,
         callback?: AsyncCallback<promptAction.ActionMenuSuccessResponse>): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         promptAction.showActionMenu1(options, callback);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
+    //@ts-ignore
     showActionMenu(options: promptAction.ActionMenuOptions): Promise<promptAction.ActionMenuSuccessResponse> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const retval = promptAction.showActionMenu(options);
@@ -678,46 +682,54 @@ export class PromptActionImpl extends PromptAction {
         return retval;
     }
 
-    openCustomDialog1(content: ComponentContent, options?: promptAction.BaseDialogOptions): Promise<void> {
+    //@ts-ignore
+    openCustomDialog(content: ComponentContent, options?: promptAction.BaseDialogOptions): Promise<void> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let ptr: KPointer = 0
+        let contentPtr: KPointer = 0
         if (content.getNodePtr() !== undefined) {
-            ptr = content.getNodePtr() as (KPointer)
+            contentPtr = content.getNodePtr() as (KPointer)
         }
-        const retval = promptAction.openCustomDialog1(ptr, options);
+        const retval = promptAction.openCustomDialog1(contentPtr, options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
     }
 
+    //@ts-ignore
     openCustomDialog(options: promptAction.CustomDialogOptions): Promise<number> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        const retval = promptAction.openCustomDialog(options);
+        const peerNode = createUiDetachedRoot((): PeerNode => {
+            return ArkComponentRootPeer.create(undefined);
+        }, options.builder, this.instanceId_);
+        let builderPtr = peerNode.peer.ptr;
+        const retval = promptAction.openCustomDialog(builderPtr, options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
     }
 
     updateCustomDialog(content: ComponentContent, options: promptAction.BaseDialogOptions): Promise<void> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let ptr: KPointer = 0
+        let contentPtr: KPointer = 0
         if (content.getNodePtr() !== undefined) {
-            ptr = content.getNodePtr() as (KPointer)
+            contentPtr = content.getNodePtr() as (KPointer)
         }
-        const retval = promptAction.updateCustomDialog(ptr, options);
+        const retval = promptAction.updateCustomDialog(contentPtr, options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
     }
 
-    closeCustomDialog1(content: ComponentContent): Promise<void> {
+    //@ts-ignore
+    closeCustomDialog(content: ComponentContent): Promise<void> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let ptr: KPointer = 0
+        let contentPtr: KPointer = 0
         if (content.getNodePtr() !== undefined) {
-            ptr = content.getNodePtr() as (KPointer)
+            contentPtr = content.getNodePtr() as (KPointer)
         }
-        const retval = promptAction.closeCustomDialog1(ptr);
+        const retval = promptAction.closeCustomDialog1(contentPtr);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
     }
 
+    //@ts-ignore
     closeCustomDialog(dialogId: number): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         promptAction.closeCustomDialog(dialogId);
