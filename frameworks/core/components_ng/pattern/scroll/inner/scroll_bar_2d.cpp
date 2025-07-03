@@ -189,6 +189,9 @@ void ScrollBar2D::Update(const std::unique_ptr<ScrollBarProperty>& props)
 
 void ScrollBar2D::SyncLayout(const OffsetF& offset, const SizeF& viewSize, const SizeF& content)
 {
+    const auto scrollableSize = content - viewSize;
+    vertical_.SetScrollable(Positive(scrollableSize.Height()));
+    horizontal_.SetScrollable(Positive(scrollableSize.Width()));
     vertical_.SetOutBoundary(GetOverScroll(offset.GetY(), content.Height() - viewSize.Height()));
     horizontal_.SetOutBoundary(GetOverScroll(offset.GetX(), content.Width() - viewSize.Width()));
 

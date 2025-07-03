@@ -37,6 +37,7 @@ void Update(ScrollBarOverlayModifier& painter, const ScrollBar& bar)
         bar.GetHoverAnimationType(), bar.GetOpacityAnimationType(), bar.GetNeedAdaptAnimation(), bar.GetActiveRect());
     painter.SetRect(bar.GetActiveRect());
     painter.SetOpacity(bar.GetDisplayMode() == DisplayMode::OFF ? 0 : UINT8_MAX);
+    painter.SetScrollable(bar.IsScrollable());
 }
 } // namespace
 

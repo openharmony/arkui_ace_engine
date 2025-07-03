@@ -46,17 +46,12 @@ void ScrollPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = host->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
-    if (axis != GetAxis()) {
+    const auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
+    const bool axisChanged = axis != GetAxis();
+    if (axisChanged) {
         SetAxis(axis);
         ResetPosition();
-        if (axis == Axis::FREE) {
-            freeScroll_ = MakeRefPtr<FreeScrollController>(*this);
-            scrollBar2d_ = MakeRefPtr<ScrollBar2D>(*this);
-        } else {
-            freeScroll_.Reset();
-            scrollBar2d_.Reset();
-        }
+        freeScroll_ = axis == Axis::FREE ? MakeRefPtr<FreeScrollController>(*this) : nullptr;
     }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
@@ -65,7 +60,10 @@ void ScrollPattern::OnModifyDone()
 #endif
     }
     SetEdgeEffect();
-    if (axis == Axis::FREE && scrollBar2d_) {
+    if (axisChanged) {
+        scrollBar2d_ = axis == Axis::FREE ? MakeRefPtr<ScrollBar2D>(*this) : nullptr;
+    }
+    if (scrollBar2d_) {
         scrollBar2d_->Update(paintProperty->GetScrollBarProperty());
     } else {
         SetScrollBar(paintProperty->GetScrollBarProperty());
