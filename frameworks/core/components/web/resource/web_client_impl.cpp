@@ -97,12 +97,13 @@ bool OnJsCommonDialog(
     const std::string &url,
     const std::string &message,
     const std::string &value = "",
-    RefPtr<TaskExecutor> task = nullptr)
+    RefPtr<TaskExecutor> task = nullptr,
+    bool isReload = false)
 {
     CHECK_NULL_RETURN(task, false);
     bool jsResult = false;
     auto param = std::make_shared<WebDialogEvent>(url, message, value, dialogEventType,
-        AceType::MakeRefPtr<ResultOhos>(result));
+        AceType::MakeRefPtr<ResultOhos>(result), isReload);
     task->PostSyncTask(
         [&webClientImpl, dialogEventType, &param, &jsResult] {
             if (webClientImpl == nullptr) {
@@ -1486,5 +1487,15 @@ void WebClientImpl::OnRemoveBlanklessFrame(int delayTime)
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     delegate->RemoveSnapshotFrameNode(delayTime);
+}
+
+bool WebClientImpl::OnBeforeUnloadByJSV2(
+    const std::string& url, const std::string& message, bool isReload, std::shared_ptr<NWeb::NWebJSDialogResult> result)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD, result, url, message, "",
+        delegate->GetTaskExecutor(), isReload);
 }
 } // namespace OHOS::Ace
