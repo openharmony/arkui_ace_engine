@@ -20,24 +20,31 @@
 namespace OHOS::Ace::NG {
 ScrollBar2DPainter::ScrollBar2DPainter()
 {
+    // Enables use of WeakPtr captures in lambdas.
+    // No need for DecRefCount in destructor since data is not dynamically allocated.
+    horizontal_.IncRefCount();
+    vertical_.IncRefCount();
+
     horizontal_.SetPositionMode(PositionMode::BOTTOM);
     vertical_.SetPositionMode(PositionMode::RIGHT);
 }
 
 namespace {
-void Update(ScrollBarOverlayModifier& painter, const ScrollBar& scrollBar)
+void Update(ScrollBarOverlayModifier& painter, const ScrollBar& bar)
 {
-    painter.SetBarColor(scrollBar.GetForegroundColor());
-    painter.StartBarAnimation(scrollBar.GetHoverAnimationType(), scrollBar.GetOpacityAnimationType(),
-        scrollBar.GetNeedAdaptAnimation(), scrollBar.GetActiveRect());
-    painter.SetRect(scrollBar.GetActiveRect());
+    painter.SetBarColor(bar.GetForegroundColor());
+    painter.StartBarAnimation(
+        bar.GetHoverAnimationType(), bar.GetOpacityAnimationType(), bar.GetNeedAdaptAnimation(), bar.GetActiveRect());
+    painter.SetRect(bar.GetActiveRect());
+    painter.SetOpacity(bar.GetDisplayMode() == DisplayMode::OFF ? 0 : UINT8_MAX);
 }
 } // namespace
 
-void ScrollBar2DPainter::UpdateFrom(const ScrollBar2D& scrollBar)
+void ScrollBar2DPainter::UpdateFrom(const ScrollBar2D& bar)
 {
-    Update(vertical_, scrollBar.GetVerticalBar());
-    Update(horizontal_, scrollBar.GetHorizontalBar());
+    Update(vertical_, bar.GetVerticalBar());
+    vertical_.SetPositionMode(bar.GetVerticalBar().GetPositionMode());
+    Update(horizontal_, bar.GetHorizontalBar());
 }
 
 void ScrollBar2DPainter::onDraw(DrawingContext& drawingContext)

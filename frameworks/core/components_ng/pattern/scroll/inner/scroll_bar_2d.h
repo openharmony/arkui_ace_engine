@@ -29,7 +29,7 @@ class ScrollBar2D final : public AceType {
 
 public:
     explicit ScrollBar2D(ScrollPattern& pattern);
-    ~ScrollBar2D() final = default;
+    ~ScrollBar2D() final;
 
     const RefPtr<ScrollBar2DPainter>& GetPainter() const
     {
@@ -53,8 +53,8 @@ public:
     void SyncLayout(const OffsetF& offset, const SizeF& viewSize, const SizeF& content);
 
 private:
-    void SetDisplayMode(ScrollBar& scrollBar, DisplayMode mode);
-    void InitGestures(ScrollBar& scrollBar, Axis axis);
+    void InitGestures(ScrollBar& bar, Axis axis);
+    void RemoveGestures(ScrollBar& bar);
 
     ScrollPattern& pattern_;
 

@@ -23,6 +23,7 @@ class ScrollBar2DPainter : public OverlayModifier {
     DECLARE_ACE_TYPE(ScrollBar2DPainter, OverlayModifier)
 public:
     ScrollBar2DPainter();
+    ~ScrollBar2DPainter() override = default;
 
     void onDraw(DrawingContext& drawingContext) override;
 
@@ -40,7 +41,7 @@ public:
     /**
      * @brief update properties and trigger related animations
      */
-    void UpdateFrom(const ScrollBar2D& scrollBar);
+    void UpdateFrom(const ScrollBar2D& bar);
 
 private:
     ScrollBarOverlayModifier vertical_;

@@ -593,4 +593,26 @@ TEST_F(FreeScrollTest, ScrollBar002)
     FlushUITasks(frameNode_);
     EXPECT_EQ(scrollBar->painter_->horizontal_.GetBarColor()->Get(), Color::BLUE);
 }
+
+/**
+ * @tc.name: ScrollBar002
+ * @tc.desc: Test scrollBar display mode
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollBar003)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->scrollBar2d_->painter_->vertical_.GetOpacity(), UINT8_MAX);
+
+    ScrollModelNG::SetScrollBar(frameNode_.GetRawPtr(), DisplayMode::OFF);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->scrollBar2d_->vertical_.GetDisplayMode(), DisplayMode::OFF);
+    EXPECT_EQ(pattern_->scrollBar2d_->horizontal_.GetDisplayMode(), DisplayMode::OFF);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(pattern_->scrollBar2d_->painter_->horizontal_.GetOpacity(), 0);
+}
 } // namespace OHOS::Ace::NG

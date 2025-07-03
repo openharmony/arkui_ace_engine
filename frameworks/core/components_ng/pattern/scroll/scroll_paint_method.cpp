@@ -85,7 +85,7 @@ void ScrollPaintMethod::UpdateOverlayModifier2d(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
     const auto scrollBar = scrollBar2d_.Upgrade();
-    const auto& overlay = scrollBar->GetPainter();
+    auto&& overlay = scrollBar->GetPainter();
     CHECK_NULL_VOID(overlay && scrollBar);
     overlay->UpdateFrom(*scrollBar);
 }

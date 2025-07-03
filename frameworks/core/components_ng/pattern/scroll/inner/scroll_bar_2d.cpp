@@ -17,33 +17,48 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 namespace OHOS::Ace::NG {
-namespace {
-void ConfigureScrollBar(const std::unique_ptr<ScrollBarProperty>& property, ScrollBar& scrollBar)
+void ScrollBar2D::InitGestures(ScrollBar& bar, Axis axis)
 {
-    const auto& barWidth = property->GetScrollBarWidth();
-    if (barWidth) {
-        scrollBar.SetActiveWidth(*barWidth);
-        scrollBar.SetTouchWidth(*barWidth);
-        scrollBar.SetInactiveWidth(*barWidth);
-        scrollBar.SetNormalWidth(*barWidth);
-        scrollBar.SetIsUserNormalWidth(true);
-    } else {
-        scrollBar.SetIsUserNormalWidth(false);
-    }
-    const auto& barColor = property->GetScrollBarColor();
-    if (barColor) {
-        scrollBar.SetForegroundColor(*barColor, false);
-    }
-    const auto& margin = property->GetScrollBarMargin();
-    if (margin && scrollBar.GetScrollBarMargin() != margin) {
-        scrollBar.SetScrollBarMargin(*margin);
-        scrollBar.FlushBarWidth();
-    }
+    bar.SetAxis(axis);
+    bar.SetMarkNeedRenderFunc([weak = WeakPtr(pattern_.GetHost())]() {
+        auto node = weak.Upgrade();
+        if (node) {
+            node->MarkNeedRenderOnly();
+        }
+    });
+    auto scrollCallback = [weak = WeakClaim(&pattern_), axis](double offset, int32_t source, bool isMouseWheelScroll) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        pattern->FreeScrollBy(axis == Axis::VERTICAL ? OffsetF { 0.0f, offset } : OffsetF { offset, 0.0f });
+        return true;
+    };
+    bar.SetScrollPositionCallback(std::move(scrollCallback));
+    auto scrollEnd = [weak = WeakClaim(&pattern_)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnScrollEndCallback();
+    };
+    bar.SetScrollEndCallback(std::move(scrollEnd));
+
+    auto gestureHub = pattern_.GetGestureHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto inputHub = pattern_.GetInputHub();
+    CHECK_NULL_VOID(inputHub);
+    bar.SetGestureEvent();
+    bar.SetMouseEvent();
+    bar.SetHoverEvent();
+    gestureHub->AddTouchEvent(bar.GetTouchEvent());
+    inputHub->AddOnMouseEvent(bar.GetMouseEvent());
+    inputHub->AddOnHoverEvent(bar.GetHoverEvent());
 }
-} // namespace
 
 ScrollBar2D::ScrollBar2D(ScrollPattern& pattern) : pattern_(pattern)
 {
+    // Enables use of WeakPtr captures in lambdas.
+    // No need for DecRefCount in destructor since data is not dynamically allocated.
+    vertical_.IncRefCount();
+    horizontal_.IncRefCount();
+
     vertical_.SetAxis(Axis::VERTICAL);
     horizontal_.SetAxis(Axis::HORIZONTAL);
     horizontal_.SetPositionMode(PositionMode::BOTTOM);
@@ -93,72 +108,62 @@ ScrollBar2D::ScrollBar2D(ScrollPattern& pattern) : pattern_(pattern)
         });
 }
 
-void ScrollBar2D::InitGestures(ScrollBar& scrollBar, Axis axis)
+void ScrollBar2D::RemoveGestures(ScrollBar& bar)
 {
-    scrollBar.SetAxis(axis);
-    scrollBar.SetMarkNeedRenderFunc([weak = WeakPtr(pattern_.GetHost())]() {
-        auto node = weak.Upgrade();
-        if (node) {
-            node->MarkNeedRenderOnly();
-        }
-    });
-    auto scrollCallback = [weak = WeakClaim(&pattern_), axis](double offset, int32_t source, bool isMouseWheelScroll) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
-        pattern->FreeScrollBy(axis == Axis::VERTICAL ? OffsetF { 0.0f, offset } : OffsetF { offset, 0.0f });
-        return true;
-    };
-    scrollBar.SetScrollPositionCallback(std::move(scrollCallback));
-    auto scrollEnd = [weak = WeakClaim(&pattern_)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnScrollEndCallback();
-    };
-    scrollBar.SetScrollEndCallback(std::move(scrollEnd));
-
     auto gestureHub = pattern_.GetGestureHub();
     CHECK_NULL_VOID(gestureHub);
     auto inputHub = pattern_.GetInputHub();
     CHECK_NULL_VOID(inputHub);
-    scrollBar.SetGestureEvent();
-    scrollBar.SetMouseEvent();
-    scrollBar.SetHoverEvent();
-    gestureHub->AddTouchEvent(scrollBar.GetTouchEvent());
-    inputHub->AddOnMouseEvent(scrollBar.GetMouseEvent());
-    inputHub->AddOnHoverEvent(scrollBar.GetHoverEvent());
+    gestureHub->RemoveTouchEvent(bar.GetTouchEvent());
+    inputHub->RemoveOnMouseEvent(bar.GetMouseEvent());
+    inputHub->RemoveOnHoverEvent(bar.GetHoverEvent());
 }
 
-void ScrollBar2D::SetDisplayMode(ScrollBar& scrollBar, DisplayMode mode)
+ScrollBar2D::~ScrollBar2D()
 {
-    if (mode == DisplayMode::OFF) {
-        auto gestureHub = pattern_.GetGestureHub();
-        if (gestureHub) {
-            gestureHub->RemoveTouchEvent(scrollBar.GetTouchEvent());
-        }
-        if (painter_) {
-            painter_->SetOpacity(0);
-        }
-        return;
-    }
-
-    const auto oldDisplayMode = scrollBar.GetDisplayMode();
-    if (oldDisplayMode != mode) {
-        scrollBar.SetDisplayMode(mode);
-        if (painter_ && scrollBar.IsScrollable()) {
-            painter_->SetOpacity(UINT8_MAX);
-        }
-        scrollBar.ScheduleDisappearDelayTask();
-    }
+    RemoveGestures(vertical_);
+    RemoveGestures(horizontal_);
 }
 
 namespace {
-void UpdateBorderRadius(ScrollBar& scrollBar, const RenderContext* ctx)
+void ConfigureScrollBar(const std::unique_ptr<ScrollBarProperty>& property, ScrollBar& bar)
+{
+    const auto mode = property->GetScrollBarMode().value_or(DisplayMode::AUTO);
+    if (mode != bar.GetDisplayMode()) {
+        bar.SetDisplayMode(mode);
+        if (mode != DisplayMode::OFF) {
+            bar.ScheduleDisappearDelayTask();
+        }
+    }
+
+    const auto& barWidth = property->GetScrollBarWidth();
+    if (barWidth) {
+        bar.SetActiveWidth(*barWidth);
+        bar.SetTouchWidth(*barWidth);
+        bar.SetInactiveWidth(*barWidth);
+        bar.SetNormalWidth(*barWidth);
+        bar.SetIsUserNormalWidth(true);
+    } else {
+        bar.SetIsUserNormalWidth(false);
+    }
+    const auto& barColor = property->GetScrollBarColor();
+    if (barColor) {
+        bar.SetForegroundColor(*barColor, false);
+    }
+    const auto& margin = property->GetScrollBarMargin();
+    if (margin && bar.GetScrollBarMargin() != margin) {
+        bar.SetScrollBarMargin(*margin);
+        bar.FlushBarWidth();
+    }
+}
+
+void UpdateBorderRadius(ScrollBar& bar, const RenderContext* ctx)
 {
     CHECK_NULL_VOID(ctx);
     const auto radius = ctx->GetBorderRadius();
-    if (radius && radius != scrollBar.GetHostBorderRadius()) {
-        scrollBar.SetHostBorderRadius(*radius);
-        scrollBar.CalcReservedHeight();
+    if (radius && radius != bar.GetHostBorderRadius()) {
+        bar.SetHostBorderRadius(*radius);
+        bar.CalcReservedHeight();
     }
 }
 
@@ -170,13 +175,8 @@ inline float GetOverScroll(float offset, float scrollableDistance)
 
 void ScrollBar2D::Update(const std::unique_ptr<ScrollBarProperty>& props)
 {
-    const auto displayMode = props->GetScrollBarMode().value_or(DisplayMode::AUTO);
-    SetDisplayMode(vertical_, displayMode);
-    SetDisplayMode(horizontal_, displayMode);
-    if (displayMode != DisplayMode::OFF) {
-        ConfigureScrollBar(props, vertical_);
-        ConfigureScrollBar(props, horizontal_);
-    }
+    ConfigureScrollBar(props, vertical_);
+    ConfigureScrollBar(props, horizontal_);
 
     const PositionMode verticalMode = pattern_.IsRTL() ? PositionMode::LEFT : PositionMode::RIGHT;
     vertical_.SetPositionMode(verticalMode);
