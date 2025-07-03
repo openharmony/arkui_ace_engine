@@ -102,6 +102,9 @@ void ScrollableController::ScrollBy(double pixelX, double pixelY, bool /* smooth
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("ScrollBy, offset:%f, id:%d, tag:%s", static_cast<float>(-offset),
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    if (pattern->GetAxis() == Axis::FREE) {
+        pattern->FreeScrollBy(OffsetF { pixelX, pixelY });
+    }
     pattern->SetIsOverScroll(false);
     pattern->UpdateCurrentOffset(static_cast<float>(-offset), SCROLL_FROM_JUMP);
 }
@@ -186,9 +189,9 @@ Rect ScrollableController::GetItemRect(int32_t index) const
     auto pxRect = pattern->GetItemRect(index);
     auto pxOffset = pxRect.GetOffset();
     return Rect(Dimension(pxOffset.GetX(), DimensionUnit::PX).ConvertToVp(),
-                Dimension(pxOffset.GetY(), DimensionUnit::PX).ConvertToVp(),
-                Dimension(pxRect.Width(), DimensionUnit::PX).ConvertToVp(),
-                Dimension(pxRect.Height(), DimensionUnit::PX).ConvertToVp());
+        Dimension(pxOffset.GetY(), DimensionUnit::PX).ConvertToVp(),
+        Dimension(pxRect.Width(), DimensionUnit::PX).ConvertToVp(),
+        Dimension(pxRect.Height(), DimensionUnit::PX).ConvertToVp());
 }
 
 int32_t ScrollableController::GetItemIndex(double x, double y) const

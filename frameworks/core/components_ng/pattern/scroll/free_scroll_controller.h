@@ -44,6 +44,7 @@ public:
 
     /**
      * @brief Allow other modules to modify offset. Calling this function automatically stops scroll animations.
+     * @attention doesn't allow over-scroll
      */
     void UpdateOffset(const OffsetF& delta);
 
@@ -72,7 +73,7 @@ private:
     /**
      * @brief clamp position to be within the scrollable area.
      */
-    void ClampFinalPosition(OffsetF& finalPos) const;
+    void ClampPosition(OffsetF& finalPos) const;
 
     ScrollPattern& pattern_;
     RefPtr<NodeAnimatablePropertyOffsetF> offset_;

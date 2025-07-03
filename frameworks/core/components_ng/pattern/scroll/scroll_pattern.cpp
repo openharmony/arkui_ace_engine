@@ -1607,7 +1607,7 @@ Offset ScrollPattern::GetFreeScrollOffset() const
 {
     if (freeScroll_) {
         auto res = freeScroll_->GetOffset();
-        return { Dimension(res.GetX()).ConvertToVp(), Dimension(res.GetY()).ConvertToVp() };
+        return { Dimension(-res.GetX()).ConvertToVp(), Dimension(-res.GetY()).ConvertToVp() };
     }
     return {};
 }
@@ -1617,5 +1617,11 @@ RefPtr<NGGestureRecognizer> ScrollPattern::GetOverrideRecognizer() const
         return freeScroll_->GetFreePanGesture();
     }
     return nullptr;
+}
+void ScrollPattern::FreeScrollBy(const OffsetF& delta)
+{
+    if (freeScroll_) {
+        freeScroll_->UpdateOffset(delta);
+    }
 }
 } // namespace OHOS::Ace::NG

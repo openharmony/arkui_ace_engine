@@ -150,7 +150,7 @@ void FreeScrollController::TryScrollAnimation(const OffsetF& velocity)
     option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
 
     OffsetF finalPos = offset_->Get() + velocity / friction_;
-    ClampFinalPosition(finalPos);
+    ClampPosition(finalPos);
 
     if (finalPos == offset_->Get()) {
         // No movement, no need to animate.
@@ -165,7 +165,7 @@ void FreeScrollController::TryScrollAnimation(const OffsetF& velocity)
     });
 }
 
-void FreeScrollController::ClampFinalPosition(OffsetF& finalPos) const
+void FreeScrollController::ClampPosition(OffsetF& finalPos) const
 {
     finalPos.SetX(std::clamp(finalPos.GetX(), std::min(-pattern_.GetScrollableDistance(), 0.0f), 0.0f));
 
@@ -248,11 +248,16 @@ void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset, const
     }
 }
 
-void FreeScrollController::UpdateOffset(const OffsetF& delta) {
+void FreeScrollController::UpdateOffset(const OffsetF& delta)
+{
     if (state_ == ScrollState::FLING) {
         StopScrollAnimation();
     }
-    offset_->Set(offset_->Get() + delta);
-    pattern_.MarkDirty();
+    auto newOffset = offset_->Get() + delta;
+    ClampPosition(newOffset); // overScroll not allowed
+    offset_->Set(newOffset);
+    if (newOffset != offset_->Get()) {
+        pattern_.MarkDirty();
+    }
 }
 } // namespace OHOS::Ace::NG

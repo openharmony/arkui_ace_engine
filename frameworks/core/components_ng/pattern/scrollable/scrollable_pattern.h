@@ -394,10 +394,15 @@ public:
     {
         return 0.0f;
     }
+    
+    /* ============================= Free Scroll Enhancements ============================= */
     virtual Offset GetFreeScrollOffset() const
     {
         return {};
     }
+    virtual void FreeScrollBy(const OffsetF& delta) {}
+    /* ============================================================================== */
+
     virtual float GetContentStartOffset() const
     {
         return 0.0f;

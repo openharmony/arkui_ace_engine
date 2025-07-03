@@ -105,9 +105,7 @@ void ScrollBar2D::InitGestures(ScrollBar& scrollBar, Axis axis)
     auto scrollCallback = [weak = WeakClaim(&pattern_), axis](double offset, int32_t source, bool isMouseWheelScroll) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        const auto& controller = pattern->GetFreeScrollController();
-        CHECK_NULL_RETURN(controller, false);
-        controller->UpdateOffset(axis == Axis::VERTICAL ? OffsetF { 0.0f, offset } : OffsetF { offset, 0.0f });
+        pattern->FreeScrollBy(axis == Axis::VERTICAL ? OffsetF { 0.0f, offset } : OffsetF { offset, 0.0f });
         return true;
     };
     scrollBar.SetScrollPositionCallback(std::move(scrollCallback));
@@ -153,6 +151,18 @@ void ScrollBar2D::SetDisplayMode(ScrollBar& scrollBar, DisplayMode mode)
     }
 }
 
+namespace {
+void UpdateBorderRadius(ScrollBar& scrollBar, const RenderContext* ctx)
+{
+    CHECK_NULL_VOID(ctx);
+    const auto radius = ctx->GetBorderRadius();
+    if (radius && radius != scrollBar.GetHostBorderRadius()) {
+        scrollBar.SetHostBorderRadius(*radius);
+        scrollBar.CalcReservedHeight();
+    }
+}
+} // namespace
+
 void ScrollBar2D::Update(const std::unique_ptr<ScrollBarProperty>& props)
 {
     const auto displayMode = props->GetScrollBarMode().value_or(DisplayMode::AUTO);
@@ -164,5 +174,9 @@ void ScrollBar2D::Update(const std::unique_ptr<ScrollBarProperty>& props)
     }
 
     vertical_.SetPositionMode(pattern_.GetPositionMode()); // considers RTL
+
+    const auto* renderContext = pattern_.GetRenderContext();
+    UpdateBorderRadius(vertical_, renderContext);
+    UpdateBorderRadius(horizontal_, renderContext);
 }
 } // namespace OHOS::Ace::NG

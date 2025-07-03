@@ -447,23 +447,23 @@ private:
 
     /* ============================= Free Scroll Enhancements ============================= */
 public:
-    const RefPtr<FreeScrollController>& GetFreeScrollController() const
-    {
-        return freeScroll_;
-    }
+    // const RefPtr<FreeScrollController>& GetFreeScrollController() const
+    // {
+    //     return freeScroll_;
+    // }
     /**
      * @return Pan gesture recognizer configured for Axis::FREE mode
      */
     RefPtr<NGGestureRecognizer> GetOverrideRecognizer() const;
 
     Offset GetFreeScrollOffset() const final;
+    void FreeScrollBy(const OffsetF& delta) override;
 
     /**
      * @brief triggers onWillScroll user callback
      * @return user-modified delta
      */
     OffsetF FreeModeFireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const;
-
     void FreeModeFireOnDidScroll(const OffsetF& delta, ScrollState state) const;
 
 private:

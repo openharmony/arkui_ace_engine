@@ -519,6 +519,15 @@ TEST_F(FreeScrollTest, Scroller001)
     ASSERT_TRUE(controller && controller->offset_);
     controller->offset_->Set(OffsetF { X, Y });
 
-    EXPECT_EQ(scroller->GetCurrentOffset(), Offset(X, Y));
+    EXPECT_EQ(scroller->GetCurrentOffset(), Offset(-X, -Y));
+
+    scroller->ScrollBy(DELTA_X, DELTA_X, false);
+    EXPECT_EQ(scroller->GetCurrentOffset().ToString(), Offset(CONTENT_W - WIDTH, CONTENT_H - HEIGHT).ToString()); // clamped
+    FlushUITasks();
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-CONTENT_W + WIDTH, -CONTENT_H + HEIGHT));
+
+    scroller->ScrollBy(DELTA_X, DELTA_Y, false);
+    FlushUITasks();
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-CONTENT_W + WIDTH + DELTA_X, -CONTENT_H + HEIGHT + DELTA_Y));
 }
 } // namespace OHOS::Ace::NG
