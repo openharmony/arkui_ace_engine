@@ -4312,7 +4312,6 @@ typedef enum Ark_FormDimension {
     ARK_FORM_DIMENSION_DIMENSION_6_4 = 7,
     ARK_FORM_DIMENSION_DIMENSION_2_3 = 8,
     ARK_FORM_DIMENSION_DIMENSION_3_3 = 9,
-    ARK_FORM_DIMENSION_DIMENSION_3_4 = 10,
 } Ark_FormDimension;
 typedef struct Opt_FormDimension {
     Ark_Tag tag;
