@@ -402,6 +402,7 @@ export class DragControllerImpl extends DragController {
         dragInfo: dragController.DragInfo): dragController.DragAction {
         let rootNodeArray: Array<KPointer> = [];
         let peerNodeArray: Array<PeerNode> = [];
+        let dragItemInfoArray: Array<DragItemInfo> = [];
         customArray.forEach((customBuilder) => {
             const builder = customBuilder as CustomBuilder;
             const peerNode = createUiDetachedRoot((): PeerNode => {
@@ -416,7 +417,6 @@ export class DragControllerImpl extends DragController {
                 destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
             });
         };
-        let dragItemInfoArray: Array<DragItemInfo> = [];
         return ArkUIAniModule._DragController_createDragAction(dragItemInfoArray, rootNodeArray,
             destroyCallback, dragInfo);
     }
@@ -429,24 +429,25 @@ export class DragControllerImpl extends DragController {
         let destroyCallback = (): void => { };
         customArray.forEach(item => {
             if (item instanceof DragItemInfo) {
-                dragItemInfoArray.push(item);
-            } else {
-                const builder = item as CustomBuilder;
-                const peerNode = createUiDetachedRoot((): PeerNode => {
-                    return ArkComponentRootPeer.create(undefined);
-                }, builder);
-                const rootNode = peerNode.peer.ptr;
-                rootNodeArray.push(rootNode);
-                peerNodeArray.push(peerNode);
-                destroyCallback = (): void => {
-                    peerNodeArray.forEach((peerNode) => {
-                        destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
-                    });
-                    rootNodeArray.length = 0;
-                    peerNodeArray.length = 0;
-                };
+                if (item.pixelMap !== undefined) {
+                    dragItemInfoArray.push(item);
+                } else {
+                    const peerNode = createUiDetachedRoot((): PeerNode => {
+                        return ArkComponentRootPeer.create(undefined);
+                    }, item.builder as CustomBuilder);
+                    const rootNode = peerNode.peer.ptr;
+                    rootNodeArray.push(rootNode);
+                    peerNodeArray.push(peerNode);
+                }
             }
         });
+        destroyCallback = (): void => {
+            peerNodeArray.forEach((peerNode) => {
+                destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
+            });
+            rootNodeArray.length = 0;
+            peerNodeArray.length = 0;
+        };
         return ArkUIAniModule._DragController_createDragAction(dragItemInfoArray, rootNodeArray,
             destroyCallback, dragInfo);
     }
