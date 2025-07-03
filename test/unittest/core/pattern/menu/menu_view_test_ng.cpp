@@ -20,12 +20,14 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -68,6 +70,10 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string TEXT_TAG = "text";
 constexpr int32_t TARGET_ID = 100;
+constexpr float ONE = 1.0f;
+constexpr float TWO = 2.0f;
+constexpr float FIVE = 5.0f;
+constexpr float TEN = 10.0f;
 
 } // namespace
 class MenuViewTestNg : public testing::Test {
@@ -291,5 +297,27 @@ HWTEST_F(MenuViewTestNg, SkipMenuTest002, TestSize.Level1)
     overlayManger->ResumeMenuShow(TARGET_ID);
     ASSERT_TRUE(overlayManger->skipTargetIds_.empty());
     EXPECT_FALSE(overlayManger->CheckSkipMenuShow(TARGET_ID));
+}
+
+/**
+ * @tc.name: ResetLayoutConstraintMinWidth001
+ * @tc.desc: Verify ResetLayoutConstraintMinWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ResetLayoutConstraintMinWidth001, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    LayoutConstraintF layoutConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    EXPECT_EQ(algorithm->ResetLayoutConstraintMinWidth(layoutWrapper, layoutConstraint).selfIdealSize.width_, ONE);
 }
 } // namespace OHOS::Ace::NG
