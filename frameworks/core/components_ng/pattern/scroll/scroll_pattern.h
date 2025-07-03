@@ -447,10 +447,6 @@ private:
 
     /* ============================= Free Scroll Enhancements ============================= */
 public:
-    // const RefPtr<FreeScrollController>& GetFreeScrollController() const
-    // {
-    //     return freeScroll_;
-    // }
     /**
      * @return Pan gesture recognizer configured for Axis::FREE mode
      */
