@@ -1467,6 +1467,37 @@ HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodPaintFade004, TestSize.
 }
 
 /**
+ * @tc.name: SwiperPaintMethodPaintFade005
+ * @tc.desc: PaintFade
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodPaintFade005, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<PaintProperty>();
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(1);
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(1);
+    paintWrapper.paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
+
+    /**
+     * @tc.steps: step2. call PaintFade to count the number of calling ClipRect.
+     * @tc.expected: Related function is called.
+     */
+    swiperPaintMethod1.needPaintFade_ = true;
+    swiperPaintMethod1.mainDelta_ = 1.0f;
+    swiperPaintMethod1.PaintFade(canvas, &paintWrapper);
+}
+
+/**
  * @tc.name: GetContentDrawFunction001
  * @tc.desc: PaintFade
  * @tc.type: FUNC
