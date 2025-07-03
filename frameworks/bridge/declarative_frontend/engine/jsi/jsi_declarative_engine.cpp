@@ -2106,9 +2106,9 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& routeNameOrU
             moduleName = routeNameOrUrl.substr(moduleStartPos, moduleEndPos - moduleStartPos);
             url = routeNameOrUrl.substr(moduleEndPos + strlen("/ets/"));
         } else {
-            bundleName = AceApplicationInfo::GetInstance().GetPackageName();
-            auto container = Container::Current();
+            auto container = Container::GetContainer(instanceId_);
             CHECK_NULL_RETURN(container, false);
+            bundleName = container->GetBundleName();
             moduleName = container->GetModuleName();
         }
 #else
