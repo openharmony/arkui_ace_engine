@@ -449,6 +449,15 @@ public:
     int64_t CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node);
     void ChooseDumpEvent(const std::vector<std::string>& params,
         DumpInfoArgument& argument, uint32_t windowId, bool hasJson);
+    void SetIsIgnoreAllAction(bool isIgnoreAllAction)
+    {
+        isIgnoreAllAction_ = isIgnoreAllAction;
+    }
+
+    bool GetIsIgnoreAllAction() const
+    {
+        return isIgnoreAllAction_;
+    }
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
     void DumpHandleEvent(const std::vector<std::string>& params) override;
@@ -852,6 +861,8 @@ private:
     AccessibilityParentRectInfo uecRectInfo_;
     NG::PageEventController pageController_;
     NG::HoverTransparentCallbackController hoverTransparentCallbackController_;
+
+    bool isIgnoreAllAction_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

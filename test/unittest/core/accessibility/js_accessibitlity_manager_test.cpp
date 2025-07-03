@@ -3213,4 +3213,48 @@ HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTreeId001, TestSize.Level1
     EXPECT_NE(std::find(childIds.begin(), childIds.end(), childId1), childIds.end());
     EXPECT_NE(std::find(childIds.begin(), childIds.end(), childId2), childIds.end());
 }
+
+/**
+ * @tc.name: ExecuteActionNG001
+ * @tc.desc: Test func ExecuteActionNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ExecuteActionNG001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    MockPipelineContext::SetUp();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+    root->focusHub_ = nullptr;
+    root->accessibilityProperty_ = nullptr;
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    jsAccessibilityManager->SetWindowId(1);
+
+    /**
+     * @tc.steps: step2. test func ExecuteActionNG
+     */
+    const std::map<std::string, std::string> actionArguments {};
+    auto lhs = jsAccessibilityManager->ExecuteActionNG(
+        root->GetAccessibilityId(), actionArguments, ActionType::ACCESSIBILITY_ACTION_CLICK, nullptr, -1);
+    EXPECT_FALSE(lhs);
+    jsAccessibilityManager->SetIsIgnoreAllAction(true);
+    lhs = jsAccessibilityManager->ExecuteActionNG(
+        root->GetAccessibilityId(), actionArguments, ActionType::ACCESSIBILITY_ACTION_CLICK, context, -1);
+    EXPECT_FALSE(lhs);
+    lhs = jsAccessibilityManager->ExecuteActionNG(
+        root->GetAccessibilityId(), actionArguments, ActionType::ACCESSIBILITY_ACTION_FOCUS, context, -1);
+    lhs = jsAccessibilityManager->ExecuteActionNG(
+        root->GetAccessibilityId(), actionArguments, ActionType::ACCESSIBILITY_ACTION_CLEAR_FOCUS, context, -1);
+    MockPipelineContext::TearDown();
+}
 } // namespace OHOS::Ace::NG

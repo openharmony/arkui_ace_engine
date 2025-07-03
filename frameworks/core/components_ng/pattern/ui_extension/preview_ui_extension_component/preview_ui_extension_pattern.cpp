@@ -37,7 +37,7 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
-#include "core/components_ng/pattern/ui_extension/preview_ui_extension_adapter.h"
+#include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_adapter.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
 #include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
@@ -51,10 +51,11 @@
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
  
-namespace OHOS::Ace::NG {
 namespace {
-constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
+    constexpr char PID_FLAG[] = "pidflag";
+    constexpr char NO_EXTRA_UIE_DUMP[] = "-nouie";
 }
+namespace OHOS::Ace::NG {
  
 PreviewUIExtensionPattern::PreviewUIExtensionPattern(): SecurityUIExtensionPattern::SecurityUIExtensionPattern()
 {
@@ -81,87 +82,6 @@ void PreviewUIExtensionPattern::Initialize(const NG::UIExtensionConfig& config)
     accessibilitySessionAdapter_ =
         AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(sessionWrapper_);
 }
- 
-void PreviewUIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
-{
-    if (!wantWrap) {
-        PLATFORM_LOGW("wantWrap is nullptr");
-        return;
-    }
-    auto wantWrapOhos = AceType::DynamicCast<WantWrapOhos>(wantWrap);
-    if (!wantWrapOhos) {
-        PLATFORM_LOGW("DynamicCast failed, wantWrapOhos is nullptr");
-        return;
-    }
-    auto want = wantWrapOhos->GetWant();
-    UpdateWant(want);
-}
- 
-void PreviewUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
-{
-    uiExtensionType_ = want.GetStringParam(UI_EXTENSION_TYPE_KEY);
-    if (!CheckConstraint()) {
-        PLATFORM_LOGE("PreviewUIExtension Check constraint failed.");
-        return;
-    }
- 
-    CHECK_NULL_VOID(sessionWrapper_);
-    PLATFORM_LOGI("PreviewUIExtension The current state is '%{public}s' when UpdateWant.", ToString(state_));
-    bool isBackground = state_ == AbilityState::BACKGROUND;
-    // Prohibit rebuilding the session unless the Want is updated.
-    if (sessionWrapper_->IsSessionValid()) {
-        auto sessionWant = sessionWrapper_->GetWant();
-        if (sessionWant == nullptr) {
-            PLATFORM_LOGW("PreviewUIExtension The sessionWrapper want is nulllptr.");
-            return;
-        }
-        if (sessionWant->IsEquals(want)) {
-            return;
-        }
-        PLATFORM_LOGI("PreviewUIExtension The old want bundle = %{public}s, ability = %{public}s",
-            sessionWant->GetElement().GetBundleName().c_str(), sessionWant->GetElement().GetAbilityName().c_str());
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->RemoveChild(contentNode_);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        NotifyDestroy();
-        // reset callback, in order to register childtree call back again when onConnect to new ability
-        ResetAccessibilityChildTreeCallback();
-    }
- 
-    MountPlaceholderNode();
-    SessionConfig config;
-    config.uiExtensionUsage = UIExtensionUsage::PREVIEW_EMBEDDED;
-    sessionWrapper_->CreateSession(want, config);
-    if (isBackground) {
-        PLATFORM_LOGW("PreviewUIExtension Unable to StartUiextensionAbility while in the background.");
-        return;
-    }
-    NotifyForeground();
-}
-
-void PreviewUIExtensionPattern::OnAttachContext(PipelineContext *context)
-{
-    CHECK_NULL_VOID(context);
-    auto newInstanceId = context->GetInstanceId();
-    PLATFORM_LOGI("OnAttachContext newInstanceId: %{public}d, oldInstanceId: %{public}d",
-        newInstanceId, instanceId_);
-    if (newInstanceId != instanceId_) {
-        instanceId_ = newInstanceId;
-        UpdateSessionInstanceId(newInstanceId);
-    }
-}
-
-void PreviewUIExtensionPattern::UpdateSessionInstanceId(int32_t instanceId)
-{
-    auto sessionWrapperImpl = AceType::DynamicCast<PreviewSessionWrapperImpl>(sessionWrapper_);
-    if (!sessionWrapperImpl) {
-        PLATFORM_LOGW("DynamicCast failed, PreviewSessionWrapperImpl is nullptr");
-        return;
-    }
-    sessionWrapperImpl->UpdateInstanceId(instanceId);
-}
- 
 void PreviewUIExtensionPattern::OnConnect()
 {
     CHECK_RUN_ON(UI);
@@ -288,17 +208,36 @@ void PreviewUIExtensionPattern::FireOnRemoteReadyCallback()
         MakeRefPtr<NG::SecurityUIExtensionProxy>(sessionWrapper_, suec));
 }
 
+void PreviewUIExtensionPattern::FireOnErrorCallback(
+    int32_t code, const std::string& name, const std::string& message)
+{
+    state_ = AbilityState::NONE;
+    PlatformPattern::FireOnErrorCallback(code, name, message);
+    SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        if (!IsShowPlaceholder()) {
+            auto host = GetHost();
+            if (host) {
+                host->RemoveChildAtIndex(0);
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+        }
+        sessionWrapper_->NotifyDestroy(false);
+        sessionWrapper_->DestroySession();
+    }
+}
+
 void PreviewUIExtensionPattern::RegisterVisibleAreaChange()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto uiExtension = weak.Upgrade();
         CHECK_NULL_VOID(uiExtension);
         uiExtension->OnVisibleChange(visible);
     };
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     std::vector<double> ratioList = { 0.0 };
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
@@ -324,6 +263,8 @@ void PreviewUIExtensionPattern::InitializeAccessibility()
         WeakClaim(this), accessibilityId);
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
     auto realHostWindowId = ngPipeline->GetRealHostWindowId();
+    realHostWindowId_ = realHostWindowId;
+    focusWindowId_ = ngPipeline->GetFocusWindowId();
     if (accessibilityManager->IsRegister()) {
         accessibilityChildTreeCallback_->OnRegister(
             realHostWindowId, accessibilityManager->GetTreeId());
@@ -332,5 +273,85 @@ void PreviewUIExtensionPattern::InitializeAccessibility()
         " register child tree, realHostWindowId: %{public}u",
         accessibilityId, realHostWindowId);
     accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
+}
+
+void PreviewUIExtensionPattern::DumpInfo()
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    PLATFORM_LOGI("Dump PreviewUIE Info In String Format");
+    DumpLog::GetInstance().AddDesc(std::string("focusWindowId: ").append(std::to_string(focusWindowId_)));
+    DumpLog::GetInstance().AddDesc(std::string("realHostWindowId: ").append(std::to_string(realHostWindowId_)));
+    DumpLog::GetInstance().AddDesc(std::string("displayArea: ").append(displayArea_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("reason: ").append(std::to_string(sessionWrapper_->GetReasonDump())));
+    DumpLog::GetInstance().AddDesc(std::string("abilityState: ").append(ToString(state_)));
+    std::string eventProxyStr = "[]";
+    if (platformEventProxy_) {
+        eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
+    }
+    DumpLog::GetInstance().AddDesc(std::string("eventProxy: ").append(eventProxyStr));
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params = container->GetUieParams();
+    // Use -nouie to choose not dump extra preview uie info
+    if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
+        PLATFORM_LOGI("Not Support Dump Extra Preview UIE Info");
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto dumpNodeIter = std::find(params.begin(), params.end(), std::to_string(host->GetId()));
+    if (dumpNodeIter != params.end()) {
+        params.erase(dumpNodeIter);
+    }
+    if (!container->IsUIExtensionWindow()) {
+        params.push_back(PID_FLAG);
+    }
+    params.push_back(std::to_string(getpid()));
+    std::vector<std::string> dumpInfo;
+    sessionWrapper_->NotifyUieDump(params, dumpInfo);
+    for (const std::string& info : dumpInfo) {
+        DumpLog::GetInstance().AddDesc(std::string("Preview UI Extension info: ").append(info));
+    }
+}
+
+void PreviewUIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    PLATFORM_LOGI("Dump Preview UIE Info In Json Format");
+    json->Put("focusWindowId: ", std::to_string(focusWindowId_).c_str());
+    json->Put("realHostWindowId: ", std::to_string(realHostWindowId_).c_str());
+    json->Put("displayArea: ", displayArea_.ToString().c_str());
+    json->Put("reason: ", std::to_string(sessionWrapper_->GetReasonDump()).c_str());
+    json->Put("abilityState: ", ToString(state_));
+    std::string eventProxyStr = "[]";
+    if (platformEventProxy_) {
+        eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
+    }
+    json->Put("eventProxy: ", eventProxyStr.c_str());
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params = container->GetUieParams();
+    // Use -nouie to choose not dump extra preview uie info
+    if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
+        PLATFORM_LOGI("Not Support Dump Extra Preview UIE Info");
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto dumpNodeIter = std::find(params.begin(), params.end(), std::to_string(host->GetId()));
+    if (dumpNodeIter != params.end()) {
+        params.erase(dumpNodeIter);
+    }
+    if (!container->IsUIExtensionWindow()) {
+        params.push_back(PID_FLAG);
+    }
+    params.push_back(std::to_string(getpid()));
+    std::vector<std::string> dumpInfo;
+    sessionWrapper_->NotifyUieDump(params, dumpInfo);
+    for (const std::string& info : dumpInfo) {
+        json->Put("Preview UI Extension info: ", info.c_str());
+    }
 }
 } // namespace OHOS::Ace::NG
