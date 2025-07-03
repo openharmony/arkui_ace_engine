@@ -30,12 +30,12 @@ constexpr WebCacheMode DEFAULT_CACHE_MODE = WebCacheMode::DEFAULT;
 constexpr WebDarkMode DEFAULT_DARK_MODE = WebDarkMode::Off;
 constexpr int32_t DEFAULT_MULTIWINDOW_ACCESS_ENABLED = false;
 constexpr int32_t DEFAULT_ALLOW_WINDOWOPEN_METHOD = false;
-constexpr WebKeyboardAvoidMode DEFAULT_KEYBOAED_AVIOD_MODE = WebKeyboardAvoidMode::RESIZE_CONTENT;
-constexpr bool DEFAULT_VERTICALSCROLL_BAR_ACCESS_ENABLED = true;
-constexpr bool DEFAULT_HORIZONTALSCROLL_BAR_ACCESS_ENABLED = true;
+constexpr WebKeyboardAvoidMode DEFAULT_KEYBOARD_AVOID_MODE = WebKeyboardAvoidMode::RESIZE_VISUAL;
+constexpr bool DEFAULT_VERTICAL_SCROLL_BAR_ACCESS_ENABLED = false;
+constexpr bool DEFAULT_HORIZONTAL_SCROLL_BAR_ACCESS_ENABLED = false;
 constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
 constexpr float DEFAULT_INITIAL_SCALE = 100.0f;
-constexpr bool DEFAULT_GEOLOCATION_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_GEOLOCATION_ACCESS_ENABLED = false;
 constexpr bool DEFAULT_DATABASE_ACCESS_ENABLED = false;
 constexpr bool DEFAULT_OVERVIEWMODE_ACCESS_ENABLED = true;
 constexpr bool DEFAULT_FORCEDARK_ACCESS_ENABLED = false;
@@ -55,8 +55,8 @@ constexpr char DEFAULT_WEBFANTASY_FONT[] = "fantasy";
 constexpr char DEFAULT_WEBCURSIVE_FONT[] = "cursive";
 constexpr WebLayoutMode DEFAULT_LAYOUT_MODE = WebLayoutMode::NONE;
 constexpr bool DEFAULT_NATIVE_EMBED_OPTIONS = false;
-constexpr bool DEFAULT_IMAGE_ACCESS_ENABLED = true;
-constexpr bool DEFAULT_ONLINEIMAGE_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_IMAGE_ACCESS_ENABLED = false;
+constexpr bool DEFAULT_ONLINE_IMAGE_ACCESS_ENABLED = false;
 constexpr bool MEDIA_PLAY_GESTURE_ACCESS_ENABLED = true;
 constexpr bool DEFAULT_MEDIA_OPTIONS_ENABLED = true;
 constexpr int32_t DEFAULT_RESUMEINTERVAL = 0;
@@ -215,7 +215,7 @@ void ResetKeyboardAvoidMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetKeyboardAvoidMode(frameNode, DEFAULT_KEYBOAED_AVIOD_MODE);
+    WebModelNG::SetKeyboardAvoidMode(frameNode, DEFAULT_KEYBOARD_AVOID_MODE);
 }
 
 void SetOnControllerAttached(ArkUINodeHandle node, void* extraParam)
@@ -248,7 +248,7 @@ void ResetVerticalScrollBarAccessEnabled(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetVerticalScrollBarAccessEnabled(frameNode, DEFAULT_VERTICALSCROLL_BAR_ACCESS_ENABLED);
+    WebModelNG::SetVerticalScrollBarAccessEnabled(frameNode, DEFAULT_VERTICAL_SCROLL_BAR_ACCESS_ENABLED);
 }
 
 void SetHorizontalScrollBarAccessEnabled(ArkUINodeHandle node, ArkUI_Bool value)
@@ -262,7 +262,7 @@ void ResetHorizontalScrollBarAccessEnabled(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetHorizontalScrollBarAccessEnabled(frameNode, DEFAULT_HORIZONTALSCROLL_BAR_ACCESS_ENABLED);
+    WebModelNG::SetHorizontalScrollBarAccessEnabled(frameNode, DEFAULT_HORIZONTAL_SCROLL_BAR_ACCESS_ENABLED);
 }
 
 void SetTextZoomRatio(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -886,7 +886,7 @@ void ResetOnlineImageAccess(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetOnLineImageAccessEnabled(frameNode, DEFAULT_ONLINEIMAGE_ACCESS_ENABLED);
+    WebModelNG::SetOnLineImageAccessEnabled(frameNode, DEFAULT_ONLINE_IMAGE_ACCESS_ENABLED);
 }
 
 void SetMediaPlayGestureAccess(ArkUINodeHandle node, ArkUI_Bool value)
