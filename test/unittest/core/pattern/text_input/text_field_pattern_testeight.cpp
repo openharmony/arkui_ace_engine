@@ -784,6 +784,18 @@ HWTEST_F(TextFieldPatternTestEight, CreateTextDragInfo001, TestSize.Level0)
     manager1->shareOverlayInfo_->secondHandle.isShow = false;
     info = pattern_->CreateTextDragInfo();
     EXPECT_EQ(info.maxSelectedWidth, 0);
+
+    manager1->shareOverlayInfo_->firstHandle.isShow = false;
+    manager1->shareOverlayInfo_->secondHandle.isShow = true;
+    info = pattern_->CreateTextDragInfo();
+    EXPECT_TRUE(info.isFirstHandleAnimation);
+    EXPECT_FALSE(info.isSecondHandleAnimation);
+
+    manager1->shareOverlayInfo_->firstHandle.isShow = true;
+    manager1->shareOverlayInfo_->secondHandle.isShow = false;
+    info = pattern_->CreateTextDragInfo();
+    EXPECT_FALSE(info.isFirstHandleAnimation);
+    EXPECT_TRUE(info.isSecondHandleAnimation);
 }
 
 /**

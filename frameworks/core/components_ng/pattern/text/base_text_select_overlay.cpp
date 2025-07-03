@@ -1245,6 +1245,10 @@ void BaseTextSelectOverlay::MarkOverlayDirty()
 
 void BaseTextSelectOverlay::ApplySelectAreaWithKeyboard(RectF& selectArea)
 {
+    if (Negative(selectArea.Top())) {
+        selectArea.SetHeight(selectArea.Height() + selectArea.Top());
+        selectArea.SetTop(0.0f);
+    }
     auto host = GetOwner();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
