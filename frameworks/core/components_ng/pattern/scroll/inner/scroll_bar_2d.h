@@ -40,6 +40,7 @@ public:
 
 private:
     void SetDisplayMode(ScrollBar& scrollBar, DisplayMode mode);
+    void InitGestures(ScrollBar& scrollBar, Axis axis);
 
     ScrollPattern& pattern_;
 

@@ -447,16 +447,14 @@ private:
 
     /* ============================= Free Scroll Enhancements ============================= */
 public:
+    const RefPtr<FreeScrollController>& GetFreeScrollController() const
+    {
+        return freeScroll_;
+    }
     /**
      * @return Pan gesture recognizer configured for Axis::FREE mode
      */
-    RefPtr<NGGestureRecognizer> GetOverrideRecognizer() const
-    {
-        if (freeScroll_) {
-            return freeScroll_->GetFreePanGesture();
-        }
-        return nullptr;
-    }
+    RefPtr<NGGestureRecognizer> GetOverrideRecognizer() const;
 
     Offset GetFreeScrollOffset() const final;
 

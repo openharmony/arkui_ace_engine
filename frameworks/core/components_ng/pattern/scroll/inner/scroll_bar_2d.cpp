@@ -18,7 +18,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 namespace OHOS::Ace::NG {
 namespace {
-
 void ConfigureScrollBar(const std::unique_ptr<ScrollBarProperty>& property, ScrollBar& scrollBar)
 {
     const auto& barWidth = property->GetScrollBarWidth();
@@ -42,6 +41,94 @@ void ConfigureScrollBar(const std::unique_ptr<ScrollBarProperty>& property, Scro
     }
 }
 } // namespace
+
+ScrollBar2D::ScrollBar2D(ScrollPattern& pattern) : pattern_(pattern)
+{
+    vertical_.SetAxis(Axis::VERTICAL);
+    horizontal_.SetAxis(Axis::HORIZONTAL);
+    horizontal_.SetPositionMode(PositionMode::BOTTOM);
+    vertical_.SetPositionMode(PositionMode::RIGHT);
+
+    InitGestures(vertical_, Axis::VERTICAL);
+    InitGestures(horizontal_, Axis::HORIZONTAL);
+
+    auto scrollableEvent = pattern_.GetScrollableEvent();
+    CHECK_NULL_VOID(scrollableEvent);
+    scrollableEvent->SetInBarRegionCallback([weak = WeakClaim(this)](const PointF& point, SourceType source) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_RETURN(self, false);
+        const Point pointDouble { point.GetX(), point.GetY() };
+        if (source == SourceType::MOUSE) {
+            return self->vertical_.InBarHoverRegion(pointDouble) || self->horizontal_.InBarHoverRegion(pointDouble);
+        }
+        return self->vertical_.InBarTouchRegion(pointDouble) || self->horizontal_.InBarTouchRegion(pointDouble);
+    });
+    scrollableEvent->SetBarCollectTouchTargetCallback(
+        [weak = WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+            TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+            ResponseLinkResult& responseLinkResult) {
+            auto self = weak.Upgrade();
+            CHECK_NULL_VOID(self);
+            self->vertical_.OnCollectTouchTarget(
+                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+            self->horizontal_.OnCollectTouchTarget(
+                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+        });
+    scrollableEvent->SetBarCollectClickAndLongPressTargetCallback(
+        [weak = WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+            TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+            ResponseLinkResult& responseLinkResult) {
+            auto self = weak.Upgrade();
+            CHECK_NULL_VOID(self);
+            self->vertical_.OnCollectLongPressTarget(
+                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+            self->horizontal_.OnCollectLongPressTarget(
+                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+        });
+    scrollableEvent->SetInBarRectRegionCallback([weak = WeakClaim(this)](const PointF& point, SourceType source) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_RETURN(self, false);
+        const Point pointDouble { point.GetX(), point.GetY() };
+        return self->vertical_.InBarRectRegion(pointDouble) || self->horizontal_.InBarRectRegion(pointDouble);
+    });
+}
+
+void ScrollBar2D::InitGestures(ScrollBar& scrollBar, Axis axis)
+{
+    scrollBar.SetAxis(axis);
+    scrollBar.SetMarkNeedRenderFunc([weak = WeakPtr(pattern_.GetHost())]() {
+        auto node = weak.Upgrade();
+        if (node) {
+            node->MarkNeedRenderOnly();
+        }
+    });
+    auto scrollCallback = [weak = WeakClaim(&pattern_), axis](double offset, int32_t source, bool isMouseWheelScroll) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        const auto& controller = pattern->GetFreeScrollController();
+        CHECK_NULL_RETURN(controller, false);
+        controller->UpdateOffset(axis == Axis::VERTICAL ? OffsetF { 0.0f, offset } : OffsetF { offset, 0.0f });
+        return true;
+    };
+    scrollBar.SetScrollPositionCallback(std::move(scrollCallback));
+    auto scrollEnd = [weak = WeakClaim(&pattern_)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnScrollEndCallback();
+    };
+    scrollBar.SetScrollEndCallback(std::move(scrollEnd));
+
+    auto gestureHub = pattern_.GetGestureHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto inputHub = pattern_.GetInputHub();
+    CHECK_NULL_VOID(inputHub);
+    scrollBar.SetGestureEvent();
+    scrollBar.SetMouseEvent();
+    scrollBar.SetHoverEvent();
+    gestureHub->AddTouchEvent(scrollBar.GetTouchEvent());
+    inputHub->AddOnMouseEvent(scrollBar.GetMouseEvent());
+    inputHub->AddOnHoverEvent(scrollBar.GetHoverEvent());
+}
 
 void ScrollBar2D::SetDisplayMode(ScrollBar& scrollBar, DisplayMode mode)
 {
@@ -68,22 +155,14 @@ void ScrollBar2D::SetDisplayMode(ScrollBar& scrollBar, DisplayMode mode)
 
 void ScrollBar2D::Update(const std::unique_ptr<ScrollBarProperty>& props)
 {
-    ConfigureScrollBar(props, vertical_);
-    ConfigureScrollBar(props, horizontal_);
     const auto displayMode = props->GetScrollBarMode().value_or(DisplayMode::AUTO);
     SetDisplayMode(vertical_, displayMode);
     SetDisplayMode(horizontal_, displayMode);
+    if (displayMode != DisplayMode::OFF) {
+        ConfigureScrollBar(props, vertical_);
+        ConfigureScrollBar(props, horizontal_);
+    }
 
     vertical_.SetPositionMode(pattern_.GetPositionMode()); // considers RTL
-}
-
-ScrollBar2D::ScrollBar2D(ScrollPattern& pattern) : pattern_(pattern)
-{
-    vertical_.SetAxis(Axis::VERTICAL);
-    horizontal_.SetAxis(Axis::HORIZONTAL);
-    horizontal_.SetPositionMode(PositionMode::BOTTOM);
-    vertical_.SetPositionMode(PositionMode::RIGHT);
-
-    // init gesture events
 }
 } // namespace OHOS::Ace::NG

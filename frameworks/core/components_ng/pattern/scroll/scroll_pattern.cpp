@@ -1602,6 +1602,7 @@ void ScrollPattern::TriggerScrollBarDisplay()
     scrollBar->PlayScrollBarAppearAnimation();
     scrollBar->ScheduleDisappearDelayTask();
 }
+
 Offset ScrollPattern::GetFreeScrollOffset() const
 {
     if (freeScroll_) {
@@ -1609,5 +1610,12 @@ Offset ScrollPattern::GetFreeScrollOffset() const
         return { Dimension(res.GetX()).ConvertToVp(), Dimension(res.GetY()).ConvertToVp() };
     }
     return {};
+}
+RefPtr<NGGestureRecognizer> ScrollPattern::GetOverrideRecognizer() const
+{
+    if (freeScroll_) {
+        return freeScroll_->GetFreePanGesture();
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

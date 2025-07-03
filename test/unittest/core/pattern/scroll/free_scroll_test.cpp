@@ -364,17 +364,23 @@ TEST_F(FreeScrollTest, Animation001)
 
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 
+    auto controller = pattern_->freeScroll_;
+    ASSERT_TRUE(controller);
+    EXPECT_EQ(controller->state_, ScrollState::IDLE);
     PanStart({});
     PanUpdate({ -DELTA_X, DELTA_Y });
+    EXPECT_EQ(controller->state_, ScrollState::SCROLL);
     FlushUITasks(frameNode_);
     PanEnd({ -DELTA_X, DELTA_Y }, { -VELOCITY_X, VELOCITY_Y });
     EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
+    EXPECT_EQ(controller->state_, ScrollState::FLING);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     ASSERT_TRUE(pattern_->freeScroll_);
     EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X - VELOCITY_X / pattern_->freeScroll_->friction_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+    EXPECT_EQ(controller->state_, ScrollState::IDLE);
 }
 
 /**
@@ -403,14 +409,21 @@ TEST_F(FreeScrollTest, Animation002)
     EXPECT_GT(GetChildX(frameNode_, 0), VELOCITY_X);
     EXPECT_GT(GetChildY(frameNode_, 0), VELOCITY_Y);
 
+    auto controller = pattern_->freeScroll_;
+    ASSERT_TRUE(controller);
+    EXPECT_EQ(controller->state_, ScrollState::FLING);
+
     TouchDown();
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+    EXPECT_EQ(controller->state_, ScrollState::IDLE);
     TouchUp();
+    EXPECT_EQ(controller->state_, ScrollState::FLING);
     EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, 0));
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+    EXPECT_EQ(controller->state_, ScrollState::IDLE);
 }
 
 /**
@@ -488,11 +501,11 @@ TEST_F(FreeScrollTest, Event001)
 }
 
 /**
- * @tc.name: Controller001
- * @tc.desc: Test scroll controller
+ * @tc.name: Scroller001
+ * @tc.desc: Test scroller interface
  * @tc.type: FUNC
  */
-TEST_F(FreeScrollTest, Controller001)
+TEST_F(FreeScrollTest, Scroller001)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);

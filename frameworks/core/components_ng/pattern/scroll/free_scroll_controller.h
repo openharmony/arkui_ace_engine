@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 class ScrollPattern;
@@ -41,6 +42,11 @@ public:
         return freePanGesture_;
     }
 
+    /**
+     * @brief Allow other modules to modify offset. Calling this function automatically stops scroll animations.
+     */
+    void UpdateOffset(const OffsetF& delta);
+
     void OnLayoutFinished(const OffsetF& adjustedOffset, const SizeF& scrollableArea);
 
     OffsetF GetOffset() const;
@@ -61,6 +67,8 @@ private:
      */
     void TryScrollAnimation(const OffsetF& velocity);
 
+    void StopScrollAnimation();
+
     /**
      * @brief clamp position to be within the scrollable area.
      */
@@ -72,7 +80,7 @@ private:
     RefPtr<PanRecognizer> freePanGesture_;
     RefPtr<TouchEventImpl> freeTouch_;
     float friction_ = 0.0f;
-    bool duringPan_ = false;
+    ScrollState state_ = ScrollState::IDLE;
     bool enableScroll_ = true;
 };
 
