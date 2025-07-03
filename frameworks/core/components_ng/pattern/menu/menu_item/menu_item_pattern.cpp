@@ -167,6 +167,7 @@ void MenuItemPattern::OnMountToParentDone()
 
 void MenuItemPattern::AttachBottomDivider()
 {
+    CreateBottomDivider();
     CHECK_NULL_VOID(bottomDivider_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -196,7 +197,6 @@ void MenuItemPattern::OnAttachToFrameNode()
     RegisterOnTouch();
     RegisterOnPress();
     RegisterOnHover();
-    CreateBottomDivider();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     MenuView::RegisterAccessibilityChildActionNotify(host);
@@ -207,7 +207,6 @@ void CustomMenuItemPattern::OnAttachToFrameNode()
     InitFocusPadding();
     RegisterOnKeyEvent();
     RegisterOnTouch();
-    CreateBottomDivider();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     MenuView::RegisterAccessibilityChildActionNotify(host);
@@ -215,6 +214,9 @@ void CustomMenuItemPattern::OnAttachToFrameNode()
 
 void MenuItemPattern::CreateBottomDivider()
 {
+    if (bottomDivider_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     bottomDivider_ = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
