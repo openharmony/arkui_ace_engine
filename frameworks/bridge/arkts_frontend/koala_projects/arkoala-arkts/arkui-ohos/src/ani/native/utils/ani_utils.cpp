@@ -85,7 +85,7 @@ bool AniUtils::GetBoolOrUndefined(ani_env *env, ani_object param, const char *na
     return res;
 }
 
-std::string AniUtils::ANIStringToStdString(ani_env *env, ani_string ani_str)
+std::string AniUtils::ANIStringToStdString(ani_env* env, ani_string ani_str)
 {
     ani_size strSize;
     env->String_GetUTF8Size(ani_str, &strSize);
@@ -101,7 +101,7 @@ std::string AniUtils::ANIStringToStdString(ani_env *env, ani_string ani_str)
     return content;
 }
 
-bool AniUtils::IsString(ani_env *env, ani_object obj)
+bool AniUtils::IsString(ani_env* env, ani_object obj)
 {
     ani_class stringClass;
     env->FindClass("Lstd/core/String;", &stringClass);
@@ -111,7 +111,7 @@ bool AniUtils::IsString(ani_env *env, ani_object obj)
     return isString;
 }
 
-bool AniUtils::IsNumber(ani_env *env, ani_object obj)
+bool AniUtils::IsNumber(ani_env* env, ani_object obj)
 {
     ani_class numberClass;
     env->FindClass("Lstd/core/Double;", &numberClass);
@@ -121,14 +121,14 @@ bool AniUtils::IsNumber(ani_env *env, ani_object obj)
     return isNumber;
 }
 
-bool AniUtils::IsUndefined(ani_env *env, ani_object obj)
+bool AniUtils::IsUndefined(ani_env* env, ani_object obj)
 {
     ani_boolean isUndefined;
     env->Reference_IsUndefined(obj, &isUndefined);
     return isUndefined;
 }
 
-ani_object AniUtils::GetUndefined(ani_env *env)
+ani_object AniUtils::GetUndefined(ani_env* env)
 {
     ani_ref undefinedRef = nullptr;
     if (ANI_OK != env->GetUndefined(&undefinedRef)) {

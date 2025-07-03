@@ -20,15 +20,17 @@
 #include <memory>
 #include "ani.h"
 
-#include "./../log/log.h"
+#include "log/log.h"
+#include "utils/ani_utils.h"
+#include "base/memory/ace_type.h"
+#include "base/geometry/dimension.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_param.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "base/memory/ace_type.h"
-#include "base/geometry/dimension.h"
 #include "core/components_ng/base/geometry_node.h"
 
 namespace OHOS::Ace::Ani {
@@ -62,8 +64,8 @@ public:
 
 };
 
-    bool ParseJsDimensionVp(ani_env* env, ani_object obj, CalcDimension& result);
-    bool ParseJsDimension(ani_env* env, ani_object obj, CalcDimension& result, DimensionUnit defaultUnit);
+bool ParseAniDimensionVp(ani_env* env, ani_object obj, CalcDimension& result);
+bool ParseAniDimension(ani_env* env, ani_object obj, CalcDimension& result, DimensionUnit defaultUnit);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_CUSTOM_ANI_MEASURE_LAYOUT

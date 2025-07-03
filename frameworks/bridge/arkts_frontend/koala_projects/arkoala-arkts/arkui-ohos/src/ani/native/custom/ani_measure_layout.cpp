@@ -13,15 +13,13 @@
 * limitations under the License.
 */
 
-#include "./ani_measure_layout.h"
-#include "../utils/ani_utils.h"
-
+#include "ani_measure_layout.h"
 namespace OHOS::Ace::Ani {
 
 void Wrap(ani_env* env, ani_object object, OHOS::Ace::NG::MeasureLayoutChild* child)
 {
     if (ANI_OK != env->Object_SetFieldByName_Long(object, "measureLayoutChild", reinterpret_cast<ani_long>(child))) {
-        return ;
+        return;
     }
 }
 
@@ -32,6 +30,32 @@ OHOS::Ace::NG::MeasureLayoutChild* Unwrap(ani_env* env, ani_object object)
         return nullptr;
     }
     return reinterpret_cast<OHOS::Ace::NG::MeasureLayoutChild*>(nativeAddr);
+}
+
+bool ParseAniDimension(ani_env* env, ani_object obj, CalcDimension& result, DimensionUnit defaultUnit)
+{
+    if (AniUtils::IsUndefined(env, obj)) {
+        return false;
+    }
+    if (AniUtils::IsNumber(env, obj)) {
+        ani_double param_value;
+        env->Object_CallMethodByName_Double(obj, "unboxed", ":D", &param_value);
+
+        result = CalcDimension(param_value, defaultUnit);
+        return true;
+    }
+    if (AniUtils::IsString(env, obj)) {
+        auto stringContent = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(obj));
+        result = StringUtils::StringToCalcDimension(stringContent, false, defaultUnit);
+        return true;
+    }
+    return false;
+}
+
+bool ParseAniDimensionVp(ani_env* env, ani_object obj, CalcDimension& result)
+{
+    // 'vp' -> the value varies with pixel density of device.
+    return ParseAniDimension(env, obj, result, DimensionUnit::VP);
 }
 
 ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentConstraint)
@@ -70,6 +94,7 @@ ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentCons
     maxWidth = AniUtils::CreateDouble(env, maxSize.Width() / pipeline->GetDipScale());
     maxHeight = AniUtils::CreateDouble(env, maxSize.Height() / pipeline->GetDipScale());
     if (ANI_OK != env->Object_New(cls, ctor, &constraint_obj, minWidth, minHeight, maxWidth, maxHeight)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenConstraintNG failed.");
         return nullptr;
     }
     return constraint_obj;
@@ -114,6 +139,7 @@ ani_object GenPlaceChildrenConstraintNG(ani_env* env, const NG::SizeF& size, Ref
     if (parentNode && parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
         layoutProperty = parentNode->GetLayoutProperty();
     }
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
     const std::unique_ptr<NG::PaddingProperty>& padding =  layoutProperty->GetPaddingProperty();
     const std::unique_ptr<NG::BorderWidthProperty>& borderWidth =  layoutProperty->GetBorderWidthProperty();
     auto topPadding = padding ? padding->top->GetDimension().ConvertToVp() : 0.0f;
@@ -130,6 +156,7 @@ ani_object GenPlaceChildrenConstraintNG(ani_env* env, const NG::SizeF& size, Ref
     maxHeight =AniUtils::CreateDouble(env, size.Height() / pipeline->GetDipScale() - topPadding - bottomPadding -
         topBorder - bottomBorder);
     if (ANI_OK != env->Object_New(cls, ctor, &constraint_obj, minWidth, minHeight, maxWidth, maxHeight)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenPlaceChildrenConstraintNG failed.");
         return nullptr;
     }
     return constraint_obj;
@@ -157,6 +184,7 @@ ani_object GenPadding(ani_env* env,  const std::unique_ptr<NG::PaddingProperty>&
     bottom = AniUtils::CreateDouble(env, paddingNative->bottom->GetDimension().ConvertToVp());
     left = AniUtils::CreateDouble(env, paddingNative->left->GetDimension().ConvertToVp());
     if (ANI_OK != env->Object_New(cls, ctor, &padding_obj, top, right, bottom, left)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenPadding failed.");
         return nullptr;
     }
     return padding_obj;
@@ -185,6 +213,7 @@ ani_object GenMargin(ani_env* env,  const std::unique_ptr<NG::MarginProperty>& m
     bottom = AniUtils::CreateDouble(env, marginNative->bottom->GetDimension().ConvertToVp());
     left = AniUtils::CreateDouble(env, marginNative->left->GetDimension().ConvertToVp());
     if (ANI_OK != env->Object_New(cls, ctor, &margin_obj, top, right, bottom, left)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenMargin failed.");
         return nullptr;
     }
     return margin_obj;
@@ -213,6 +242,7 @@ ani_object GenEdgeWidths(ani_env* env,  const std::unique_ptr<NG::BorderWidthPro
     bottom = AniUtils::CreateDouble(env, edgeWidthsNative->bottomDimen->ConvertToVp());
     left = AniUtils::CreateDouble(env, edgeWidthsNative->leftDimen->ConvertToVp());
     if (ANI_OK != env->Object_New(cls, ctor, &edgeWidths_obj, top, right, bottom, left)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenEdgeWidths failed.");
         return nullptr;
     }
     return edgeWidths_obj;
@@ -251,6 +281,7 @@ ani_object GenEdgesGlobalized(ani_env* env, const NG::PaddingPropertyT<float>& e
     }
 
     if (ANI_OK != env->Object_New(cls, ctor, &edges_obj, top, bottom, start, end)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenEdgesGlobalized failed.");
         return nullptr;
     }
     return edges_obj;
@@ -290,6 +321,7 @@ ani_object GenBorderWidthGlobalized(ani_env* env, const NG::BorderWidthPropertyT
     }
 
     if (ANI_OK != env->Object_New(cls, ctor, &edges_obj, top, bottom, start, end)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenBorderWidthGlobalized failed.");
         return nullptr;
     }
     return edges_obj;
@@ -310,6 +342,7 @@ ani_object GenSelfLayoutInfo(ani_env* env, RefPtr<NG::LayoutProperty> layoutProp
     }
 
     if (ANI_OK != env->Object_New(cls, ctor, &selfLayoutInfo_obj)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenSelfLayoutInfo failed.");
         return nullptr;
     }
 
@@ -325,9 +358,11 @@ ani_object GenSelfLayoutInfo(ani_env* env, RefPtr<NG::LayoutProperty> layoutProp
         env->Object_SetPropertyByName_Double(selfLayoutInfo_obj, "height", (ani_double)0.0f);
         return selfLayoutInfo_obj;
     }
+    CHECK_NULL_RETURN(layoutProperty->GetHost(), nullptr);
     auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutProperty->GetHost()->GetParent());
     if (parentNode && parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
         layoutProperty = parentNode->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProperty, nullptr);
     }
     auto host = layoutProperty->GetHost();
     NG::RectF originGeoRect;
@@ -409,6 +444,7 @@ ani_object GenMeasureResult(ani_env* env, const NG::SizeF& size)
     width = measureWidth.ConvertToVp();
     height = measureHeight.ConvertToVp();
     if (ANI_OK != env->Object_New(cls, ctor, &measureResult_obj, width, height)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenMeasureResult failed.");
         return nullptr;
     }
 
@@ -419,8 +455,9 @@ JSMeasureLayoutParamNG::JSMeasureLayoutParamNG(NG::LayoutWrapper* layoutWrapper,
     : MeasureLayoutParam(layoutWrapper)
 {
     ani_vm* vm = nullptr;
-    env->GetVM(&vm);
-
+    if (ANI_OK != env->GetVM(&vm)) {
+        LOGE("GetVM failed");
+    }
     deleter_ = [vm](ani_array_ref ref) {
             if (ref != nullptr) {
                 ani_env* env = nullptr;
@@ -444,7 +481,7 @@ void JSMeasureLayoutParamNG::Init(ani_env* env)
     if (ANI_OK != env->GetUndefined(&undefinedRef)) {
         return;
     }
-    
+
     ani_array_ref array;
     if (ANI_OK != env->Array_New_Ref(childCls, count, undefinedRef, &array)) {
         return;
@@ -472,6 +509,7 @@ ani_object GenMeasurable(ani_env* env,  NG::MeasureLayoutChild* child)
 
         ani_object measurable;
         if (ANI_OK != env->Object_New(cls, ctor, &measurable)) {
+            TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenMeasurable failed.");
             return nullptr;
         }
 
@@ -494,7 +532,7 @@ void JSMeasureLayoutParamNG::GenChildArray(ani_env* env, int32_t start, int32_t 
         }
 
         if (ANI_OK != env->Array_Set_Ref(childArray_.get(), index, info)) {
-            return ;
+            return;
         }
     }
 }
@@ -568,7 +606,7 @@ void JSMeasureLayoutParamNG::Update(ani_env* env,  NG::LayoutWrapper* layoutWrap
                 }
             }
             if (ANI_OK != env->Array_Set_Ref(array, index, info)) {
-                return ;
+                return;
             }
         }
         ani_ref temp;
@@ -614,32 +652,6 @@ ani_object ANIGetBorderWidth(ani_env* env, [[maybe_unused]] ani_object object)
     return GenBorderWidthGlobalized(env, layoutProperty->CreateBorder(), direction);
 }
 
-bool ParseJsDimension(ani_env* env, ani_object obj, CalcDimension& result, DimensionUnit defaultUnit)
-{
-    if (AniUtils::IsUndefined(env, obj)) {
-        return false;
-    }
-    if (AniUtils::IsNumber(env, obj)) {
-        ani_double param_value;
-        env->Object_CallMethodByName_Double(obj, "unboxed", ":D", &param_value);
-
-        result = CalcDimension(param_value, defaultUnit);
-        return true;
-    }
-    if (AniUtils::IsString(env, obj)) {
-        auto stringContent = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(obj));
-        HILOGE("sqf: ParseJsDimension number %{public}s", stringContent.c_str());
-        result = StringUtils::StringToCalcDimension(stringContent, false, defaultUnit);
-        return true;
-    }
-    return false;
-}
-bool ParseJsDimensionVp(ani_env* env, ani_object obj, CalcDimension& result)
-{
-    // 'vp' -> the value varies with pixel density of device.
-    return ParseJsDimension(env, obj, result, DimensionUnit::VP);
-}
-
 ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, aniClass));
@@ -662,7 +674,7 @@ ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
     }
     ani_object minWidth_obj = static_cast<ani_object>(minWidth_ref);
 
-    if (ParseJsDimensionVp(env, minWidth_obj, minWidth)) {
+    if (ParseAniDimensionVp(env, minWidth_obj, minWidth)) {
         if (layoutProperty) {
             layoutProperty->UpdateCalcMinSize(NG::CalcSize(NG::CalcLength(minWidth), std::nullopt));
         } else {
@@ -680,7 +692,7 @@ ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
         return nullptr;
     }
     ani_object maxWidth_obj = static_cast<ani_object>(maxWidth_ref);
-    if (ParseJsDimensionVp(env, maxWidth_obj, maxWidth)) {
+    if (ParseAniDimensionVp(env, maxWidth_obj, maxWidth)) {
         if (layoutProperty) {
             layoutProperty->UpdateCalcMaxSize(NG::CalcSize(NG::CalcLength(maxWidth), std::nullopt));
         } else {
@@ -698,7 +710,7 @@ ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
         return nullptr;
     }
     ani_object minHeight_obj = static_cast<ani_object>(minHeight_ref);
-    if (ParseJsDimensionVp(env, minHeight_obj, minHeight)) {
+    if (ParseAniDimensionVp(env, minHeight_obj, minHeight)) {
         if (layoutProperty) {
             layoutProperty->UpdateCalcMinSize(NG::CalcSize(std::nullopt, NG::CalcLength(minHeight)));
         } else {
@@ -716,7 +728,7 @@ ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
         return nullptr;
     }
     ani_object maxHeight_obj = static_cast<ani_object>(maxHeight_ref);
-    if (ParseJsDimensionVp(env, maxHeight_obj, maxHeight)) {
+    if (ParseAniDimensionVp(env, maxHeight_obj, maxHeight)) {
         if (layoutProperty) {
             layoutProperty->UpdateCalcMaxSize(NG::CalcSize(std::nullopt, NG::CalcLength(maxHeight)));
         } else {
@@ -756,7 +768,7 @@ ani_object ANIPlaceChildren(ani_env* env, ani_object aniClass, ani_object positi
         return nullptr;
     }
     ani_object dimenX_obj = static_cast<ani_object>(dimenX_ref);
-    auto xResult = ParseJsDimensionVp(env, dimenX_obj, dimenX);
+    auto xResult = ParseAniDimensionVp(env, dimenX_obj, dimenX);
 
     CalcDimension dimenY;
     ani_ref dimenY_ref;
@@ -764,7 +776,7 @@ ani_object ANIPlaceChildren(ani_env* env, ani_object aniClass, ani_object positi
         return nullptr;
     }
     ani_object dimenY_obj = static_cast<ani_object>(dimenY_ref);
-    auto yResult = ParseJsDimensionVp(env, dimenY_obj, dimenY);
+    auto yResult = ParseAniDimensionVp(env, dimenY_obj, dimenY);
     if (!(xResult || yResult)) {
         LOGE("the position prop is illegal");
     } else {

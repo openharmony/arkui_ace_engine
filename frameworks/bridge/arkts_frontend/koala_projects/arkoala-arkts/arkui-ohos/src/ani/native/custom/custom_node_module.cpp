@@ -15,14 +15,12 @@
 
 #include <memory>
 #include "custom_node_module.h"
-#include "./../log/log.h"
-#include "./../load.h"
-#include "core/components_ng/layout/layout_wrapper.h"
+#include "load.h"
 #include "ani_measure_layout.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_param.h"
 #include "core/components_ng/pattern/custom/custom_node_static.h"
-#include "../utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
 
@@ -78,11 +76,11 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
     auto&& onMeasureSize = [vm, weakRef, onMeasureSizeMethod](OHOS::Ace::NG::LayoutWrapper* layoutWrapper) {
         ani_env* env = nullptr;
         if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-            return ;
+            return;
         }
 
         if (layoutWrapper == nullptr) {
-            return ;
+            return;
         }
 
         auto jsParam = JSMeasureLayoutParamNG::GetInstance(layoutWrapper, env);
@@ -99,14 +97,14 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
         ani_ref localRef;
         
         if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef)) {
-            return ;
+            return;
         }
         ani_ref result_obj = nullptr;
 
         if (!released) {
             if (ANI_OK != env->Object_CallMethod_Ref(static_cast<ani_object>(localRef), onMeasureSizeMethod,
                 &result_obj, selfLayoutInfo, childArray, constraint)) {
-                return ;
+                return;
             }
         }
         if (AniUtils::IsUndefined(env, static_cast<ani_object>(result_obj))||!result_obj) {
@@ -130,10 +128,10 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
         }
         ani_object height_obj = static_cast<ani_object>(height_ref);
 
-        if (!OHOS::Ace::Ani::ParseJsDimensionVp(env, width_obj, measureWidth)) {
+        if (!OHOS::Ace::Ani::ParseAniDimensionVp(env, width_obj, measureWidth)) {
             measureWidth = { -1.0f };
         }
-        if (!OHOS::Ace::Ani::ParseJsDimensionVp(env, height_obj, measureHeight)) {
+        if (!OHOS::Ace::Ani::ParseAniDimensionVp(env, height_obj, measureHeight)) {
             measureWidth = { -1.0f };
         }
 
@@ -150,11 +148,11 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
     auto&& onPlaceChildren = [vm, weakRef, onPlaceChildrenMethod](OHOS::Ace::NG::LayoutWrapper* layoutWrapper) {
         ani_env* env = nullptr;
         if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-            return ;
+            return;
         }
 
         if (layoutWrapper == nullptr) {
-            return ;
+            return;
         }
 
         auto jsParam = JSMeasureLayoutParamNG::GetInstance(layoutWrapper, env);
@@ -167,13 +165,13 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
         ani_ref localRef;
 
         if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef)) {
-            return ;
+            return;
         }
 
         if (!released) {
             if (ANI_OK != env->Object_CallMethod_Void(static_cast<ani_object>(localRef), onPlaceChildrenMethod,
                 selfLayoutInfo, childArray, constraint)) {
-                return ;
+                return;
             }
         }
     };
