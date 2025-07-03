@@ -21,6 +21,8 @@
 #include "core/components_ng/token_theme/token_theme_storage.h"
 
 namespace OHOS::Ace::NG {
+const std::string DEFAULT_THEME_TAG = "ThemeTag";
+
 ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -83,7 +85,7 @@ bool ThemeBridge::HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>
         Color color;
         auto colorParams = panda::ArrayRef::GetValueAt(vm, colorsArg, i);
         RefPtr<ResourceObject> resObj;
-        NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
+        NodeInfo nodeInfo = { DEFAULT_THEME_TAG, ColorMode::COLOR_MODE_UNDEFINED };
         if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color, resObj, nodeInfo)) {
             color = basisTheme->Colors()->GetByIndex(i);
         }
