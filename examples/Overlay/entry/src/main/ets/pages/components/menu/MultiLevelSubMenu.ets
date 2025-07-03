@@ -13,30 +13,37 @@
  * limitations under the License.
  */
 
+@Builder
+export function MultiLevelSubMenuBuilder(name: string, param: Object) {
+  MultiLevelSubMenuExample()
+}
+
 @Entry
 @Component
-struct MultiLevelSubMenu {
+struct MultiLevelSubMenuExample {
+  pathStack: NavPathStack = new NavPathStack()
+
   private menuItemMargin(): Length | undefined {
     return 4;
   }
+
   private menuItemPadding(): Length | undefined {
     return 12;
   }
 
-
   @Builder
   SubMenuBuilder() {
     Menu() {
-      MenuItem({content:' aa', builder: this.SubMenuBuilder()})
-      MenuItem({content:' bb', builder: this.SubMenuBuilder()})
+      MenuItem({ content: ' aa', builder: this.SubMenuBuilder() })
+      MenuItem({ content: ' bb', builder: this.SubMenuBuilder() })
     }.width(20)
   }
 
   @Builder
   MenuBuilder() {
-    Menu(){
+    Menu() {
       MenuItem({
-        content:'AAAAAAAAA'.repeat(2),
+        content: 'AAAAAAAAA'.repeat(2),
         labelInfo: 'A',
         builder: this.SubMenuBuilder()
       })
@@ -49,17 +56,17 @@ struct MultiLevelSubMenu {
           right: this.menuItemPadding(),
         })
       MenuItem({
-        content:'AAAAAAAAA'.repeat(2),
+        content: 'AAAAAAAAA'.repeat(2),
         labelInfo: 'B',
         builder: this.SubMenuBuilder()
       })
       MenuItem({
-        content:'AAAAAAAAA'.repeat(2),
+        content: 'AAAAAAAAA'.repeat(2),
         labelInfo: 'C',
         builder: this.SubMenuBuilder()
       })
       MenuItem({
-        content:'AAAAAAAAA'.repeat(2),
+        content: 'AAAAAAAAA'.repeat(2),
         labelInfo: 'D',
         builder: this.SubMenuBuilder()
       })
@@ -71,15 +78,24 @@ struct MultiLevelSubMenu {
   }
 
   build() {
-    Row() {
-      Button('bindMenu: 菜单')
-        .key('bindMenu: 菜单')
-        .backgroundColor(Color.Orange)
-        .borderRadius(0)
-        .bindMenu(this.MenuBuilder())
+    NavDestination() {
+      Row() {
+        Button('bindMenu: 菜单')
+          .key('bindMenu: 菜单')
+          .backgroundColor(Color.Orange)
+          .borderRadius(0)
+          .bindMenu(this.MenuBuilder())
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.End)
     }
-    .width('100%')
-    .justifyContent(FlexAlign.End)
-
+    .title('MultiLevelSubMenu')
+    .onBackPressed(() => {
+      this.pathStack.pop()
+      return true
+    })
+    .onReady((context: NavDestinationContext) => {
+      this.pathStack = context.pathStack;
+    })
   }
 }

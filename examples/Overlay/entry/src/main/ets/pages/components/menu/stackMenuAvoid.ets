@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-import { ComponentContent } from '@kit.ArkUI';
-import { BusinessError } from '@kit.BasicServicesKit';
+@Builder
+export function stackMenuAvoidBuilder(name: string, param: Object) {
+  stackMenuAvoidExample()
+}
 
 @Extend(Column)
 function columnStyle() {
@@ -23,9 +25,11 @@ function columnStyle() {
   .width('100%')
   .backgroundColor(Color.Pink)
 }
+
 @CustomDialog
 struct CustomDialogExampleTwo {
   controllerTwo?: CustomDialogController;
+
   build() {
     Column() {
       Text('我是第二个弹窗')
@@ -41,6 +45,7 @@ struct CustomDialogExampleTwo {
     }
   }
 }
+
 class Params {
   public text: string = '';
 
@@ -48,6 +53,7 @@ class Params {
     this.text = text;
   }
 }
+
 @Builder
 function buildText(params: Params) {
   Column() {
@@ -113,6 +119,7 @@ struct CustomDialogExample {
     }
     .subMenuExpandingMode(SubMenuExpandingMode.STACK_EXPAND)
   }
+
   @Builder
   SubMenu_Short() {
     Menu() {
@@ -124,13 +131,14 @@ struct CustomDialogExample {
 
     }
   }
+
   @Link textValue: string;
   @Link inputValue: string;
   @State placement: Placement = Placement.BottomLeft;
   dialogControllerTwo: CustomDialogController | null = new CustomDialogController({
     builder: CustomDialogExampleTwo(),
     alignment: DialogAlignment.Bottom,
-    onWillDismiss:(dismissDialogAction: DismissDialogAction)=> {
+    onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
       console.info('reason=' + JSON.stringify(dismissDialogAction.reason));
       console.log('dialog onWillDismiss');
       if (dismissDialogAction.reason == DismissReason.PRESS_BACK) {
@@ -140,7 +148,8 @@ struct CustomDialogExample {
         dismissDialogAction.dismiss();
       }
     },
-    offset: { dx: 0, dy: -25 } })
+    offset: { dx: 0, dy: -25 }
+  })
   controller?: CustomDialogController;
   // 若尝试在CustomDialog中传入多个其他的Controller，以实现在CustomDialog中打开另一个或另一些CustomDialog，那么此处需要将指向自己的controller放在所有controller的后面
   cancel: () => void = () => {
@@ -219,9 +228,11 @@ struct CustomDialogExample {
     }
   }
 }
+
 @Entry
 @Component
-struct StackSubMenuAvoidDemo {
+struct stackMenuAvoidExample {
+  pathStack: NavPathStack = new NavPathStack()
   @State message: string = 'hello';
   @State placement: Placement = Placement.BottomLeft;
   @State showInSubWindow: boolean = true;
@@ -229,14 +240,18 @@ struct StackSubMenuAvoidDemo {
   @State inputValue: string = 'click me'
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: CustomDialogExample({
-      cancel: ()=> { this.onCancel(); },
-      confirm: ()=> { this.onAccept(); },
+      cancel: () => {
+        this.onCancel();
+      },
+      confirm: () => {
+        this.onAccept();
+      },
       textValue: this.textValue,
       inputValue: this.inputValue
     }),
     cancel: this.exitApp,
     autoCancel: true,
-    onWillDismiss:(dismissDialogAction: DismissDialogAction)=> {
+    onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
       console.info('reason=' + JSON.stringify(dismissDialogAction.reason));
       console.log('dialog onWillDismiss');
       if (dismissDialogAction.reason == DismissReason.PRESS_BACK) {
@@ -252,6 +267,7 @@ struct StackSubMenuAvoidDemo {
     customStyle: false,
     cornerRadius: 10,
   })
+
   aboutToDisappear() {
     this.dialogController = null; // 将dialogController置空
   }
@@ -267,262 +283,299 @@ struct StackSubMenuAvoidDemo {
   exitApp() {
     console.info('Click the callback in the blank area');
   }
+
   build() {
-    Scroll(){
-    Column() {
-      Row() {
-
-        Text('showInSubWindow: ')
-        Select([{ value: 'true' }, { value: 'false' }])
-          .onSelect((index: number, text?: string | undefined) => {
-            switch (text) {
-              case 'false':
-                this.showInSubWindow = false;
-                break
-              case 'true':
-                this.showInSubWindow = true;
-                break
-            }
-          })
-        Blank()
-      }
-      Row(){
-        Text('一级菜单placement: ')
-        Select([{ value: 'BottomLeft' }, { value: 'Bottom' }, { value: 'BottomRight' },
-          { value: 'Left' }, { value: 'LeftTop' }, { value: 'LeftBottom' },
-          { value: 'Right' }, { value: 'RightTop' }, { value: 'RightBottom' },
-          { value: 'Top' }, { value: 'TopLeft' }, { value: 'TopRight' }])
-          .onSelect((index: number, text?: string | undefined) => {
-            switch (text) {
-              case 'BottomLeft':
-                this.placement = Placement.BottomLeft;
-                break
-              case 'Bottom':
-                this.placement = Placement.Bottom;
-                break
-              case 'BottomRight':
-                this.placement = Placement.BottomRight;
-                break
-              case 'Left':
-                this.placement = Placement.Left;
-                break
-              case 'LeftTop':
-                this.placement = Placement.LeftTop;
-                break
-              case 'LeftBottom':
-                this.placement = Placement.LeftBottom;
-                break
-              case 'Right':
-                this.placement = Placement.Right;
-                break
-              case 'RightTop':
-                this.placement = Placement.RightTop;
-                break
-              case 'RightBottom':
-                this.placement = Placement.RightBottom;
-                break
-              case 'Top':
-                this.placement = Placement.Top;
-                break
-              case 'TopLeft':
-                this.placement = Placement.TopLeft;
-                break
-              case 'TopRight':
-                this.placement = Placement.TopRight;
-                break
-            }
-          })
-
-      }
-      Row(){
+    NavDestination() {
+      Scroll() {
         Column() {
-          Button(this.inputValue)
-            .onClick(() => {
-              if (this.dialogController != null) {
-                this.dialogController.open();
-              }
-            }).backgroundColor(0x317aff)
-        }.width('100%').margin({ top: 5 })
-      }
-      Row() {
-        Button('无预览-短菜单')
-          .bindMenu(this.FirstMenu_Short(), {
-            placement: this.placement,
-            showInSubWindow: this.showInSubWindow
-          })
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.Center)
-      Row() {
-        Button('无预览-短菜单（right）')
-          .bindMenu(this.FirstMenu_Short(), {
-            placement: this.placement,
-            showInSubWindow: this.showInSubWindow
-          })
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.Start)
-      Row(){
-        Button('无预览-短菜单(left)')
-          .bindMenu(this.FirstMenu_Medium(), {
-            placement: this.placement,
-            showInSubWindow: this.showInSubWindow
-          })
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.End)
-      Row() {
-        Button('无预览-中菜单')
-          .bindMenu(this.FirstMenu_Medium(), {
-            placement: this.placement,
-            showInSubWindow: this.showInSubWindow
-          })
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.Center)
-      Row(){
-        Button('无预览-中菜单(left)')
-          .bindMenu(this.FirstMenu_Medium(), {
-            placement: this.placement,
-            showInSubWindow: this.showInSubWindow
-          })
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.End)
-      Row(){
-        Button('无预览-中菜单（right）')
-          .bindMenu(this.FirstMenu_Short(), {
-            placement: this.placement,
-            showInSubWindow: this.showInSubWindow
-          })
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.Start)
-      Row() {
-        Button('无预览-长菜单')
-          .bindMenu(this.FirstMenu_Long(), {
-            placement: this.placement,
-            showInSubWindow: this.showInSubWindow
-          })
-      }    .justifyContent(FlexAlign.Center)
-      .width('100%')
-      Row(){
-        Button('无预览-长菜单(left)')
-          .bindMenu(this.FirstMenu_Long(), {
-            placement: this.placement,
-            showInSubWindow: this.showInSubWindow
-          })
-      }
-      .justifyContent(FlexAlign.End)
-      .width('100%')
-      Row(){
-        Button('无预览-长菜单(reight)')
-          .bindMenu(this.FirstMenu_Long(), {
-            placement: this.placement,
-            showInSubWindow: this.showInSubWindow
-          })
-      }
-      .justifyContent(FlexAlign.Start)
-      .width('100%')
+          Row() {
 
-      Row() {
-        Button('有预览-短菜单').bindContextMenu(this.FirstMenu_Short(), ResponseType.LongPress, {
-          placement: this.placement,
-          preview: MenuPreviewMode.IMAGE
-        })
-      }    .justifyContent(FlexAlign.Center)
-      .width('100%')
+            Text('showInSubWindow: ')
+            Select([{ value: 'true' }, { value: 'false' }])
+              .onSelect((index: number, text?: string | undefined) => {
+                switch (text) {
+                  case 'false':
+                    this.showInSubWindow = false;
+                    break
+                  case 'true':
+                    this.showInSubWindow = true;
+                    break
+                }
+              })
+            Blank()
+          }
 
-      Row() {
-        Button('有预览-短菜单left').bindContextMenu(this.FirstMenu_Short(), ResponseType.LongPress, {
-          placement: this.placement,
-          preview: MenuPreviewMode.IMAGE
-        })
-      }    .justifyContent(FlexAlign.Start)
-      .width('100%')
-      Row() {
-        Button('有预览-短菜单right').bindContextMenu(this.FirstMenu_Short(), ResponseType.LongPress, {
-          placement: this.placement,
-          preview: MenuPreviewMode.IMAGE
-        })
-      }    .justifyContent(FlexAlign.End)
-      .width('100%')
-      Row() {
-        Button('有预览-中菜单').bindContextMenu(this.FirstMenu_Medium(), ResponseType.LongPress, {
-          placement: this.placement,
-          preview: MenuPreviewMode.IMAGE
-        })
-      }
-      .justifyContent(FlexAlign.Center)
-      .width('100%')
-      Row() {
-        Button('有预览-中菜单left').bindContextMenu(this.FirstMenu_Medium(), ResponseType.LongPress, {
-          placement: this.placement,
-          preview: MenuPreviewMode.IMAGE
-        })
-      } .justifyContent(FlexAlign.Start)
-      .width('100%')
-      Row() {
-        Button('有预览-中菜单right').bindContextMenu(this.FirstMenu_Medium(), ResponseType.LongPress, {
-          placement: this.placement,
-          preview: MenuPreviewMode.IMAGE
-        })
-      } .justifyContent(FlexAlign.End)
-      .width('100%')
-        Row(){
+          Row() {
+            Text('一级菜单placement: ')
+            Select([{ value: 'BottomLeft' }, { value: 'Bottom' }, { value: 'BottomRight' },
+              { value: 'Left' }, { value: 'LeftTop' }, { value: 'LeftBottom' },
+              { value: 'Right' }, { value: 'RightTop' }, { value: 'RightBottom' },
+              { value: 'Top' }, { value: 'TopLeft' }, { value: 'TopRight' }])
+              .onSelect((index: number, text?: string | undefined) => {
+                switch (text) {
+                  case 'BottomLeft':
+                    this.placement = Placement.BottomLeft;
+                    break
+                  case 'Bottom':
+                    this.placement = Placement.Bottom;
+                    break
+                  case 'BottomRight':
+                    this.placement = Placement.BottomRight;
+                    break
+                  case 'Left':
+                    this.placement = Placement.Left;
+                    break
+                  case 'LeftTop':
+                    this.placement = Placement.LeftTop;
+                    break
+                  case 'LeftBottom':
+                    this.placement = Placement.LeftBottom;
+                    break
+                  case 'Right':
+                    this.placement = Placement.Right;
+                    break
+                  case 'RightTop':
+                    this.placement = Placement.RightTop;
+                    break
+                  case 'RightBottom':
+                    this.placement = Placement.RightBottom;
+                    break
+                  case 'Top':
+                    this.placement = Placement.Top;
+                    break
+                  case 'TopLeft':
+                    this.placement = Placement.TopLeft;
+                    break
+                  case 'TopRight':
+                    this.placement = Placement.TopRight;
+                    break
+                }
+              })
 
-        Button('有预览-长菜单').bindContextMenu(this.FirstMenu_Long(), ResponseType.LongPress, {
-          placement: this.placement,
-          preview: MenuPreviewMode.IMAGE
-        })
-      }
-      .justifyContent(FlexAlign.Center)
-      .width('100%')
-      Row(){
+          }
 
-        Button('有预览-长菜单-left').bindContextMenu(this.FirstMenu_Long(), ResponseType.LongPress, {
-          placement: this.placement,
-          preview: MenuPreviewMode.IMAGE
-        })
-      }
-      .justifyContent(FlexAlign.Start)
-      .width('100%')
-      Row(){
+          Row() {
+            Column() {
+              Button(this.inputValue)
+                .onClick(() => {
+                  if (this.dialogController != null) {
+                    this.dialogController.open();
+                  }
+                }).backgroundColor(0x317aff)
+            }.width('100%').margin({ top: 5 })
+          }
 
-        Button('有预览-长菜单-button').bindContextMenu(this.FirstMenu_Long(), ResponseType.LongPress, {
-          placement: this.placement,
-          preview: MenuPreviewMode.IMAGE
-        })
+          Row() {
+            Button('无预览-短菜单')
+              .bindMenu(this.FirstMenu_Short(), {
+                placement: this.placement,
+                showInSubWindow: this.showInSubWindow
+              })
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.Center)
+
+          Row() {
+            Button('无预览-短菜单（right）')
+              .bindMenu(this.FirstMenu_Short(), {
+                placement: this.placement,
+                showInSubWindow: this.showInSubWindow
+              })
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.Start)
+
+          Row() {
+            Button('无预览-短菜单(left)')
+              .bindMenu(this.FirstMenu_Medium(), {
+                placement: this.placement,
+                showInSubWindow: this.showInSubWindow
+              })
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.End)
+
+          Row() {
+            Button('无预览-中菜单')
+              .bindMenu(this.FirstMenu_Medium(), {
+                placement: this.placement,
+                showInSubWindow: this.showInSubWindow
+              })
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.Center)
+
+          Row() {
+            Button('无预览-中菜单(left)')
+              .bindMenu(this.FirstMenu_Medium(), {
+                placement: this.placement,
+                showInSubWindow: this.showInSubWindow
+              })
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.End)
+
+          Row() {
+            Button('无预览-中菜单（right）')
+              .bindMenu(this.FirstMenu_Short(), {
+                placement: this.placement,
+                showInSubWindow: this.showInSubWindow
+              })
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.Start)
+
+          Row() {
+            Button('无预览-长菜单')
+              .bindMenu(this.FirstMenu_Long(), {
+                placement: this.placement,
+                showInSubWindow: this.showInSubWindow
+              })
+          }.justifyContent(FlexAlign.Center)
+          .width('100%')
+
+          Row() {
+            Button('无预览-长菜单(left)')
+              .bindMenu(this.FirstMenu_Long(), {
+                placement: this.placement,
+                showInSubWindow: this.showInSubWindow
+              })
+          }
+          .justifyContent(FlexAlign.End)
+          .width('100%')
+
+          Row() {
+            Button('无预览-长菜单(reight)')
+              .bindMenu(this.FirstMenu_Long(), {
+                placement: this.placement,
+                showInSubWindow: this.showInSubWindow
+              })
+          }
+          .justifyContent(FlexAlign.Start)
+          .width('100%')
+
+          Row() {
+            Button('有预览-短菜单').bindContextMenu(this.FirstMenu_Short(), ResponseType.LongPress, {
+              placement: this.placement,
+              preview: MenuPreviewMode.IMAGE
+            })
+          }.justifyContent(FlexAlign.Center)
+          .width('100%')
+
+          Row() {
+            Button('有预览-短菜单left').bindContextMenu(this.FirstMenu_Short(), ResponseType.LongPress, {
+              placement: this.placement,
+              preview: MenuPreviewMode.IMAGE
+            })
+          }.justifyContent(FlexAlign.Start)
+          .width('100%')
+
+          Row() {
+            Button('有预览-短菜单right').bindContextMenu(this.FirstMenu_Short(), ResponseType.LongPress, {
+              placement: this.placement,
+              preview: MenuPreviewMode.IMAGE
+            })
+          }.justifyContent(FlexAlign.End)
+          .width('100%')
+
+          Row() {
+            Button('有预览-中菜单').bindContextMenu(this.FirstMenu_Medium(), ResponseType.LongPress, {
+              placement: this.placement,
+              preview: MenuPreviewMode.IMAGE
+            })
+          }
+          .justifyContent(FlexAlign.Center)
+          .width('100%')
+
+          Row() {
+            Button('有预览-中菜单left').bindContextMenu(this.FirstMenu_Medium(), ResponseType.LongPress, {
+              placement: this.placement,
+              preview: MenuPreviewMode.IMAGE
+            })
+          }.justifyContent(FlexAlign.Start)
+          .width('100%')
+
+          Row() {
+            Button('有预览-中菜单right').bindContextMenu(this.FirstMenu_Medium(), ResponseType.LongPress, {
+              placement: this.placement,
+              preview: MenuPreviewMode.IMAGE
+            })
+          }.justifyContent(FlexAlign.End)
+          .width('100%')
+
+          Row() {
+
+            Button('有预览-长菜单').bindContextMenu(this.FirstMenu_Long(), ResponseType.LongPress, {
+              placement: this.placement,
+              preview: MenuPreviewMode.IMAGE
+            })
+          }
+          .justifyContent(FlexAlign.Center)
+          .width('100%')
+
+          Row() {
+
+            Button('有预览-长菜单-left').bindContextMenu(this.FirstMenu_Long(), ResponseType.LongPress, {
+              placement: this.placement,
+              preview: MenuPreviewMode.IMAGE
+            })
+          }
+          .justifyContent(FlexAlign.Start)
+          .width('100%')
+
+          Row() {
+
+            Button('有预览-长菜单-button').bindContextMenu(this.FirstMenu_Long(), ResponseType.LongPress, {
+              placement: this.placement,
+              preview: MenuPreviewMode.IMAGE
+            })
+          }
+          .justifyContent(FlexAlign.End)
+          .width('100%')
+
+          Row() {
+            Text('______________')
+          }
+
+          Row() {
+            Text('______________')
+          }
+
+          Row() {
+            Text('______________')
+          }
+
+          Row() {
+            Text('______________').width('10')
+          }
+
+          Row() {
+            Text('______________').width('10')
+          }
+
+          Row() {
+            Text('______________').width('10')
+          }
+
+          Row() {
+            Text('______________').width('10')
+          }
+        }
+        .justifyContent(FlexAlign.Center)
+        .alignItems(HorizontalAlign.Start)
+        .width('100%')
       }
-      .justifyContent(FlexAlign.End)
-      .width('100%')
-      Row(){
-        Text('______________')
-      }
-      Row(){
-        Text('______________')
-      }
-      Row(){
-        Text('______________')
-      }
-      Row(){
-        Text('______________').width('10')
-      }
-      Row(){
-        Text('______________').width('10')
-      }
-      Row(){
-        Text('______________').width('10')
-      }
-      Row(){
-        Text('______________').width('10')
-      }
+      .height('100%')
+      .border({ width: 1, color: Color.Red })
     }
-    .justifyContent(FlexAlign.Center)
-    .alignItems(HorizontalAlign.Start)
-    .width('100%')
-    // .height('100%')
-      }.height('100%').border({width:1, color:Color.Red})
+    .title('stackMenuAvoid')
+    .onBackPressed(() => {
+      this.pathStack.pop()
+      return true
+    })
+    .onReady((context: NavDestinationContext) => {
+      this.pathStack = context.pathStack;
+    })
   }
 
   @Builder
