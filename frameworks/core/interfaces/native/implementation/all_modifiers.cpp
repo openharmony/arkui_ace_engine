@@ -257,7 +257,9 @@ const GENERATED_ArkUIFilterAccessor* GetFilterAccessor();
 const GENERATED_ArkUIVisualEffectAccessor* GetVisualEffectAccessor();
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor();
 const GENERATED_ArkUIStepperOpsAccessor* GetStepperOpsAccessor();
+const GENERATED_ArkUISearchOpsAccessor* GetSearchOpsAccessor();
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor();
+const GENERATED_ArkUITextFieldOpsAccessor* GetTextFieldOpsAccessor();
 const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor();
 const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor();
 const GENERATED_ArkUISpringPropAccessor* GetSpringPropAccessor();
@@ -592,7 +594,9 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetVisualEffectAccessor,
         GetNavExtenderAccessor,
         GetStepperOpsAccessor,
+        GetSearchOpsAccessor,
         GetEventEmulatorAccessor,
+        GetTextFieldOpsAccessor,
         GetActionSheetAccessor,
         GetAlertDialogAccessor,
         GetSpringPropAccessor,

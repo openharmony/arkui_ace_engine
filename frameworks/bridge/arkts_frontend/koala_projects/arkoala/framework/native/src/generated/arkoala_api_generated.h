@@ -1587,6 +1587,8 @@ typedef struct OnWillScrollCallback OnWillScrollCallback;
 typedef struct Opt_OnWillScrollCallback Opt_OnWillScrollCallback;
 typedef struct SearchSubmitCallback SearchSubmitCallback;
 typedef struct Opt_SearchSubmitCallback Opt_SearchSubmitCallback;
+typedef struct SearchValueCallback SearchValueCallback;
+typedef struct Opt_SearchValueCallback Opt_SearchValueCallback;
 typedef struct SelectedCallback SelectedCallback;
 typedef struct Opt_SelectedCallback Opt_SelectedCallback;
 typedef struct ShouldBuiltInRecognizerParallelWithCallback ShouldBuiltInRecognizerParallelWithCallback;
@@ -11373,6 +11375,15 @@ typedef struct Opt_SearchSubmitCallback {
     Ark_Tag tag;
     SearchSubmitCallback value;
 } Opt_SearchSubmitCallback;
+typedef struct SearchValueCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String value);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_String value);
+} SearchValueCallback;
+typedef struct Opt_SearchValueCallback {
+    Ark_Tag tag;
+    SearchValueCallback value;
+} Opt_SearchValueCallback;
 typedef struct SelectedCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Boolean selected);
@@ -11463,6 +11474,15 @@ typedef struct Opt_TextAreaSubmitCallback {
     Ark_Tag tag;
     TextAreaSubmitCallback value;
 } Opt_TextAreaSubmitCallback;
+typedef struct TextFieldValueCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_ResourceStr value);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ResourceStr value);
+} TextFieldValueCallback;
+typedef struct Opt_TextFieldValueCallback {
+    Ark_Tag tag;
+    TextFieldValueCallback value;
+} Opt_TextFieldValueCallback;
 typedef struct TextPickerEnterSelectedAreaCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value, const Ark_Union_Number_Array_Number index);
@@ -24207,12 +24227,44 @@ typedef struct GENERATED_ArkUIStepperOpsAccessor {
                                                       const StepperIndexCallback* callback);
 } GENERATED_ArkUIStepperOpsAccessor;
 
+typedef struct GENERATED_ArkUISearchOpsAccessor {
+    Ark_NativePointer (*registerSearchValueCallback)(Ark_NativePointer node,
+                                                     const Ark_String* value,
+                                                      const SearchValueCallback* callback);
+} GENERATED_ArkUISearchOpsAccessor;
+
 typedef struct GENERATED_ArkUIEventEmulatorAccessor {
     void (*emitClickEvent)(Ark_NativePointer node,
                            Ark_ClickEvent event);
     void (*emitTextInputEvent)(Ark_NativePointer node,
                                const Ark_String* text);
 } GENERATED_ArkUIEventEmulatorAccessor;
+
+typedef struct GENERATED_ArkUITextFieldOpsAccessor {
+    Ark_NativePointer (*registerTextFieldValueCallback)(Ark_NativePointer node,
+                                                        const Ark_ResourceStr* value,
+                                                        const TextFieldValueCallback* callback);
+    Ark_NativePointer (*textFieldOpsSetWidth)(Ark_NativePointer node,
+                                              const Opt_Union_Length_LayoutPolicy* value);
+    Ark_NativePointer (*textFieldOpsSetHeight)(Ark_NativePointer node,
+                                               const Opt_Union_Length_LayoutPolicy* value);
+    Ark_NativePointer (*textFieldOpsSetPadding)(Ark_NativePointer node,
+                                                const Opt_Union_Padding_Length_LocalizedPadding* value);
+    Ark_NativePointer (*textFieldOpsSetMargin)(Ark_NativePointer node,
+                                               const Opt_Union_Padding_Length_LocalizedPadding* value);
+    Ark_NativePointer (*textFieldOpsSetBorder)(Ark_NativePointer node,
+                                               const Opt_BorderOptions* value);
+    Ark_NativePointer (*textFieldOpsSetBorderWidth)(Ark_NativePointer node,
+                                                    const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value);
+    Ark_NativePointer (*textFieldOpsSetBorderColor)(Ark_NativePointer node,
+                                                    const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value);
+    Ark_NativePointer (*textFieldOpsSetBorderStyle)(Ark_NativePointer node,
+                                                    const Opt_Union_BorderStyle_EdgeStyles* value);
+    Ark_NativePointer (*textFieldOpsSetBorderRadius)(Ark_NativePointer node,
+                                                     const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value);
+    Ark_NativePointer (*textFieldOpsSetBackgroundColor)(Ark_NativePointer node,
+                                                        const Opt_ResourceColor* value);
+} GENERATED_ArkUITextFieldOpsAccessor;
 
 typedef struct GENERATED_ArkUIActionSheetAccessor {
     void (*show)(const Ark_ActionSheetOptions* value);
@@ -26935,7 +26987,9 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIVisualEffectAccessor* (*getVisualEffectAccessor)();
     const GENERATED_ArkUINavExtenderAccessor* (*getNavExtenderAccessor)();
     const GENERATED_ArkUIStepperOpsAccessor* (*getStepperOpsAccessor)();
+    const GENERATED_ArkUISearchOpsAccessor* (*getSearchOpsAccessor)();
     const GENERATED_ArkUIEventEmulatorAccessor* (*getEventEmulatorAccessor)();
+    const GENERATED_ArkUITextFieldOpsAccessor* (*getTextFieldOpsAccessor)();
     const GENERATED_ArkUIActionSheetAccessor* (*getActionSheetAccessor)();
     const GENERATED_ArkUIAlertDialogAccessor* (*getAlertDialogAccessor)();
     const GENERATED_ArkUISpringPropAccessor* (*getSpringPropAccessor)();
