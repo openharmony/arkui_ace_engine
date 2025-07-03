@@ -17,11 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_PAINT_METHOD_H
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_2d.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_2d_painter.h"
 #include "core/components_ng/pattern/scroll/scroll_content_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
-#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
-#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -57,8 +57,8 @@ public:
 
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
     {
-        if (auto scrollBarPainter2d = overlay2d_.Upgrade()) {
-            return scrollBarPainter2d;
+        if (auto scrollBar2d = scrollBar2d_.Upgrade()) {
+            return scrollBar2d->GetPainter();
         }
         return scrollBarOverlayModifier_.Upgrade();
     }
@@ -87,14 +87,15 @@ private:
 
     /* ============================= Free Scroll Enhancements ============================= */
 public:
-    void SetOverlay2DPainter(const WeakPtr<ScrollBar2DPainter>& overlay2d)
+    void Set2DPainter(const WeakPtr<ScrollBar2D>& scrollBar)
     {
-        overlay2d_ = overlay2d;
+        scrollBar2d_ = scrollBar;
     }
-private:
-    void UpdateOverlayModifier2d(PaintWrapper* paintWrapper) {}
 
-    WeakPtr<ScrollBar2DPainter> overlay2d_;
+private:
+    void UpdateOverlayModifier2d(PaintWrapper* paintWrapper);
+
+    WeakPtr<ScrollBar2D> scrollBar2d_;
     /* ============================================================================== */
 };
 } // namespace OHOS::Ace::NG

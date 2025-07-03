@@ -161,6 +161,11 @@ void UpdateBorderRadius(ScrollBar& scrollBar, const RenderContext* ctx)
         scrollBar.CalcReservedHeight();
     }
 }
+
+inline float GetOverScroll(float offset, float scrollableDistance)
+{
+    return Positive(offset) ? offset : std::max(-(scrollableDistance + offset), 0.0f);
+}
 } // namespace
 
 void ScrollBar2D::Update(const std::unique_ptr<ScrollBarProperty>& props)
@@ -182,13 +187,6 @@ void ScrollBar2D::Update(const std::unique_ptr<ScrollBarProperty>& props)
     UpdateBorderRadius(horizontal_, renderContext);
 }
 
-namespace {
-inline float GetOverScroll(float offset, float scrollableDistance)
-{
-    return Positive(offset) ? offset : std::max(-(scrollableDistance + offset), 0.0f);
-}
-} // namespace
-
 void ScrollBar2D::SyncLayout(const OffsetF& offset, const SizeF& viewSize, const SizeF& content)
 {
     vertical_.SetOutBoundary(GetOverScroll(offset.GetY(), content.Height() - viewSize.Height()));
@@ -202,5 +200,13 @@ void ScrollBar2D::SyncLayout(const OffsetF& offset, const SizeF& viewSize, const
 
     CHECK_NULL_VOID(painter_);
     painter_->SetRect(vertical_.GetActiveRect(), horizontal_.GetActiveRect());
+}
+
+void ScrollBar2D::ResetAnimationSignals()
+{
+    vertical_.SetHoverAnimationType(HoverAnimationType::NONE);
+    vertical_.SetOpacityAnimationType(OpacityAnimationType::NONE);
+    horizontal_.SetHoverAnimationType(HoverAnimationType::NONE);
+    horizontal_.SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 } // namespace OHOS::Ace::NG

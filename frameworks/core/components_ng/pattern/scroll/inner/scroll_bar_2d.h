@@ -31,10 +31,19 @@ public:
     explicit ScrollBar2D(ScrollPattern& pattern);
     ~ScrollBar2D() final = default;
 
-    RefPtr<ScrollBar2DPainter> GetPainter() const
+    const RefPtr<ScrollBar2DPainter>& GetPainter() const
     {
         return painter_;
     }
+    const ScrollBar& GetVerticalBar() const
+    {
+        return vertical_;
+    }
+    const ScrollBar& GetHorizontalBar() const
+    {
+        return horizontal_;
+    }
+    void ResetAnimationSignals();
 
     void Update(const std::unique_ptr<ScrollBarProperty>& props);
 

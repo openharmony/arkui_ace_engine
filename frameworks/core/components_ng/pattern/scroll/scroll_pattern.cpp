@@ -99,7 +99,7 @@ RefPtr<NodePaintMethod> ScrollPattern::CreateNodePaintMethod()
     auto drawDirection = (layoutDirection == TextDirection::RTL);
     auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
     if (scrollBar2d_) {
-        paint->SetOverlay2DPainter(scrollBar2d_->GetPainter());
+        paint->Set2DPainter(scrollBar2d_);
     } else {
         paint->SetScrollBar(GetScrollBar());
         paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());

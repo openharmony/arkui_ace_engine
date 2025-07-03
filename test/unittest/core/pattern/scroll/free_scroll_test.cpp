@@ -526,8 +526,67 @@ TEST_F(FreeScrollTest, Scroller001)
     FlushUITasks();
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-CONTENT_W + WIDTH, -CONTENT_H + HEIGHT));
 
-    scroller->ScrollBy(DELTA_X, DELTA_Y, false);
+    scroller->ScrollBy(-DELTA_X, -DELTA_Y, false);
     FlushUITasks();
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-CONTENT_W + WIDTH + DELTA_X, -CONTENT_H + HEIGHT + DELTA_Y));
+}
+
+/**
+ * @tc.name: ScrollBar001
+ * @tc.desc: Test scrollBar 2D
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollBar001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+
+    const Dimension NORMAL_BAR_WIDTH = 4.0_vp;
+    const auto scrollBar = pattern_->scrollBar2d_;
+    ASSERT_TRUE(scrollBar);
+    EXPECT_EQ(scrollBar->vertical_.GetActiveRect().ToString(), "Rect (236.00, 0.00) - [4.00 x 80.00]");
+    EXPECT_EQ(scrollBar->horizontal_.GetActiveRect().ToString(), "Rect (0.00, 396.00) - [28.80 x 4.00]");
+    EXPECT_EQ(scrollBar->vertical_.GetActiveWidth(), NORMAL_BAR_WIDTH * 2);
+    EXPECT_EQ(scrollBar->horizontal_.GetActiveWidth(), NORMAL_BAR_WIDTH * 2);
+    EXPECT_EQ(scrollBar->vertical_.GetTouchRegion().ToString(), "Rect (208.00, 0.00) - [32.00 x 80.00]");
+    EXPECT_EQ(scrollBar->vertical_.GetNormalWidth(), NORMAL_BAR_WIDTH);
+
+    const Dimension NEW_BAR_WIDTH = 10.0_vp;
+    ScrollModelNG::SetScrollBarWidth(frameNode_.GetRawPtr(), NEW_BAR_WIDTH);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(scrollBar->vertical_.GetNormalWidth(), NEW_BAR_WIDTH);
+
+    ASSERT_TRUE(scrollBar->painter_);
+    EXPECT_EQ(scrollBar->painter_->vertical_.GetHoverAnimatingType(), HoverAnimationType::NONE);
+    EXPECT_EQ(scrollBar->painter_->horizontal_.GetBarColor()->Get().ToString(), "#66182431");
+}
+
+/**
+ * @tc.name: ScrollBar002
+ * @tc.desc: Test scrollBar 2D
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollBar002)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+
+    pattern_->FreeScrollBy({-DELTA_X, -DELTA_Y});
+    FlushUITasks(frameNode_);
+    const auto scrollBar = pattern_->scrollBar2d_;
+    ASSERT_TRUE(scrollBar);
+    EXPECT_EQ(scrollBar->vertical_.GetActiveRect().ToString(), "Rect (236.00, 0.00) - [4.00 x 80.00]");
+    EXPECT_EQ(scrollBar->horizontal_.GetActiveRect().ToString(), "Rect (0.00, 396.00) - [28.80 x 4.00]");
+
+    ScrollModelNG::SetScrollBarColor(frameNode_.GetRawPtr(), Color::BLUE);
+    pattern_->OnModifyDone();
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(scrollBar->painter_->horizontal_.GetBarColor()->Get(), Color::BLUE);
 }
 } // namespace OHOS::Ace::NG

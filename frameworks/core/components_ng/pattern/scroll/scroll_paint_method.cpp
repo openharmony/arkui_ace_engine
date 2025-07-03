@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/scroll/scroll_paint_method.h"
 
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+
 namespace OHOS::Ace::NG {
 
 CanvasDrawFunction ScrollPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
@@ -46,7 +49,7 @@ void ScrollPaintMethod::PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintW
 
 void ScrollPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
-    if (overlay2d_.Upgrade()) {
+    if (scrollBar2d_.Upgrade()) {
         UpdateOverlayModifier2d(paintWrapper);
         return;
     }
@@ -76,5 +79,14 @@ void ScrollPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     }
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
+}
+
+void ScrollPaintMethod::UpdateOverlayModifier2d(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    const auto scrollBar = scrollBar2d_.Upgrade();
+    const auto& overlay = scrollBar->GetPainter();
+    CHECK_NULL_VOID(overlay && scrollBar);
+    overlay->UpdateFrom(*scrollBar);
 }
 } // namespace OHOS::Ace::NG

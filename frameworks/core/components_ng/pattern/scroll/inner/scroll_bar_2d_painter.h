@@ -18,19 +18,13 @@
 #include "scroll_bar_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
+class ScrollBar2D;
 class ScrollBar2DPainter : public OverlayModifier {
     DECLARE_ACE_TYPE(ScrollBar2DPainter, OverlayModifier)
 public:
-    ScrollBar2DPainter()
-    {
-        horizontal_.SetPositionMode(PositionMode::BOTTOM);
-        vertical_.SetPositionMode(PositionMode::RIGHT);
-    }
-    void onDraw(DrawingContext& drawingContext) override
-    {
-        vertical_.onDraw(drawingContext);
-        horizontal_.onDraw(drawingContext);
-    }
+    ScrollBar2DPainter();
+
+    void onDraw(DrawingContext& drawingContext) override;
 
     void SetOpacity(uint8_t opacity)
     {
@@ -48,6 +42,11 @@ public:
         vertical_.SetRect(vertical);
         horizontal_.SetRect(horizontal);
     }
+
+    /**
+     * @brief update properties and trigger related animations
+     */
+    void UpdateFrom(const ScrollBar2D& scrollBar);
 
 private:
     ScrollBarOverlayModifier vertical_;
