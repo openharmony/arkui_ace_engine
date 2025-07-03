@@ -1137,7 +1137,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
     }
     public setSearchOptions(options?: SearchOptions): this {
         if (this.checkPriority("setSearchOptions")) {
-            hookSetSearchOptions(this.getPeer(), options)
+            hookSetSearchOptions(this, options)
             return this
         }
         return this
