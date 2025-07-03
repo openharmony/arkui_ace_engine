@@ -36,6 +36,7 @@ struct RectOptions {
     std::optional<Dimension> radiusHeight;
     std::vector<RectRadius> cornerRadius;
 };
+const Dimension DEFAULT_RADIUS(0.0);
 } // OHOS::Ace::NG
 namespace {
     constexpr int32_t MAX_RADIUS_ITEM_COUNT = 4;
@@ -173,8 +174,7 @@ void RadiusWidthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto radiusWidth = Converter::OptConvert<Dimension>(*value);
-    CHECK_NULL_VOID(radiusWidth);
-    RectModelNG::SetRadiusWidth(frameNode, radiusWidth.value());
+    RectModelNG::SetRadiusWidth(frameNode, radiusWidth.value_or(DEFAULT_RADIUS));
 }
 void RadiusHeightImpl(Ark_NativePointer node,
                       const Opt_Union_Number_String* value)
@@ -182,8 +182,7 @@ void RadiusHeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto radiusHeight = Converter::OptConvert<Dimension>(*value);
-    CHECK_NULL_VOID(radiusHeight);
-    RectModelNG::SetRadiusHeight(frameNode, radiusHeight.value());
+    RectModelNG::SetRadiusHeight(frameNode, radiusHeight.value_or(DEFAULT_RADIUS));
 }
 void RadiusImpl(Ark_NativePointer node,
                 const Opt_Union_Number_String_Array_Union_Number_String* value)
@@ -191,11 +190,12 @@ void RadiusImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto radius = Converter::OptConvert<RectRadius>(*value);
-    CHECK_NULL_VOID(radius);
-    CHECK_NULL_VOID(radius->radiusHeight);
-    CHECK_NULL_VOID(radius->radiusWidth);
-    RectModelNG::SetRadiusWidth(frameNode, radius->radiusWidth.value());
-    RectModelNG::SetRadiusHeight(frameNode, radius->radiusHeight.value());
+    if (!radius) {
+        RectModelNG::SetRadiusWidth(frameNode, DEFAULT_RADIUS);
+        RectModelNG::SetRadiusHeight(frameNode, DEFAULT_RADIUS);
+    }
+    RectModelNG::SetRadiusWidth(frameNode, radius->radiusWidth.value_or(DEFAULT_RADIUS));
+    RectModelNG::SetRadiusHeight(frameNode, radius->radiusHeight.value_or(DEFAULT_RADIUS));
 }
 } // RectAttributeModifier
 const GENERATED_ArkUIRectModifier* GetRectModifier()

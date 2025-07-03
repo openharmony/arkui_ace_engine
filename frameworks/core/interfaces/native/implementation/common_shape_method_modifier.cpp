@@ -123,7 +123,7 @@ void AntiAliasImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        ShapeModelNG::SetAntiAlias(frameNode, false);
         return;
     }
     ShapeModelNG::SetAntiAlias(frameNode, *convValue);
@@ -135,7 +135,8 @@ void StrokeDashArrayImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto dashArray = Converter::OptConvert<std::vector<Dimension>>(*value);
     if (!dashArray) {
-        // TODO: Reset value
+        std::vector<Dimension> defaultDashArray;
+        ShapeModelNG::SetStrokeDashArray(frameNode, defaultDashArray);
         return;
     }
     // if odd,add twice
