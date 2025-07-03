@@ -439,7 +439,10 @@ double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper
     CHECK_NULL_RETURN(searchButtonEvent, true);
     auto searchButtonHeight = searchButtonSizeMeasure_.Height() + 2 *
         searchTheme->GetSearchButtonSpace().ConvertToPxDistribute(minFontScale_, maxFontScale_);
-    searchButtonHeight = (!searchButtonEvent->IsEnabled()) ? 0.0f : searchButtonHeight;
+    auto searchButtonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(searchButtonLayoutProperty, true);
+    auto needToDisable = searchButtonLayoutProperty->GetAutoDisable().value_or(false);
+    searchButtonHeight = (!searchButtonEvent->IsEnabled() && !needToDisable) ? 0.0f : searchButtonHeight;
     // search icon height
     auto searchIconFrameHight = searchIconSizeMeasure_.Height();
     auto searchIconHeight = layoutProperty->GetSearchIconUDSizeValue(
