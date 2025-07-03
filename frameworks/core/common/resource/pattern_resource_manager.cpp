@@ -85,34 +85,39 @@ bool PatternResourceManager::Empty()
 void PatternResourceManager::ParsePropertyValue(
     const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> valueBase)
 {
-    if (auto castdVal = AceType::DynamicCast<PropertyValue<std::string>>(valueBase)) {
+    if (valueBase->GetValueType() == ValueType::STRING) {
         std::string value;
-        ResourceParseUtils::ParseResString(resObj, value);
-        castdVal->SetValue(value);
-    } else if (auto castdVal = AceType::DynamicCast<PropertyValue<std::u16string>>(valueBase)) {
+        if (ResourceParseUtils::ParseResString(resObj, value)) {
+            valueBase->SetValue(value);
+        } else {
+            ResourceParseUtils::ParseResMedia(resObj, value);
+            valueBase->SetValue(value);
+            valueBase->SetValueType(ValueType::MEDIA);
+        }
+    } else if (valueBase->GetValueType() == ValueType::U16STRING) {
         std::u16string value;
         ResourceParseUtils::ParseResString(resObj, value);
-        castdVal->SetValue(value);
-    } else if (auto castdVal = AceType::DynamicCast<PropertyValue<Color>>(valueBase)) {
+        valueBase->SetValue(value);
+    } else if (valueBase->GetValueType() == ValueType::COLOR) {
         Color value;
         ResourceParseUtils::ParseResColor(resObj, value);
-        castdVal->SetValue(value);
-    } else if (auto castdVal = AceType::DynamicCast<PropertyValue<double>>(valueBase)) {
+        valueBase->SetValue(value);
+    } else if (valueBase->GetValueType() == ValueType::DOUBLE) {
         double value;
         ResourceParseUtils::ParseResDouble(resObj, value);
-        castdVal->SetValue(value);
-    } else if (auto castdVal = AceType::DynamicCast<PropertyValue<CalcDimension>>(valueBase)) {
+        valueBase->SetValue(value);
+    } else if (valueBase->GetValueType() == ValueType::CALDIMENSION) {
         CalcDimension value;
         ResourceParseUtils::ParseResDimensionFpNG(resObj, value);
-        castdVal->SetValue(value);
-    } else if (auto castdVal = AceType::DynamicCast<PropertyValue<float>>(valueBase)) {
+        valueBase->SetValue(value);
+    } else if (valueBase->GetValueType() == ValueType::FLOAT) {
         double value;
         ResourceParseUtils::ParseResDouble(resObj, value);
-        castdVal->SetValue(static_cast<float>(value));
-    } else if (auto castdVal = AceType::DynamicCast<PropertyValue<std::vector<std::string>>>(valueBase)) {
+        valueBase->SetValue(static_cast<float>(value));
+    } else if (valueBase->GetValueType() == ValueType::VECTOR_STRING) {
         std::vector<std::string> value;
         ResourceParseUtils::ParseResFontFamilies(resObj, value);
-        castdVal->SetValue(value);
+        valueBase->SetValue(value);
     }
 }
 }
