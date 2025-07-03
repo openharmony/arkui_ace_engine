@@ -20,6 +20,8 @@ export * from "./Router"
 export * from "./ForeignFunctions"
 export * from "./GridItemOpsHandWritten"
 export * from "./StepperOpsHandWritten"
+export * from "./SearchOpsHandWritten"
+export * from "./TextFieldOpsHandWritten"
 export * from "./TabsOpsHandWritten"
 
 // export interface PageTransitionExitInterface { }
