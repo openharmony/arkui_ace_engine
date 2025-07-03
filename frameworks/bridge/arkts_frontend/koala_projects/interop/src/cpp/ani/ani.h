@@ -2150,70 +2150,6 @@ struct __ani_interaction_api {
                                          ani_static_method *result);
 
     /**
-     * @brief Finds a setter method from by its name.
-     *
-     * This function locates a setter method based on its name and stores it in the result parameter.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class to query.
-     * @param[in] name The name of the property whose setter is to be found.
-     * @param[out] result A pointer to the method to be populated.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Class_FindSetter)(ani_env *env, ani_class cls, const char *name, ani_method *result);
-
-    /**
-     * @brief Finds a getter method from by its name.
-     *
-     * This function locates a getter method based on its name and stores it in the result parameter.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class to query.
-     * @param[in] name The name of the property whose getter is to be found.
-     * @param[out] result A pointer to the method to be populated.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Class_FindGetter)(ani_env *env, ani_class cls, const char *name, ani_method *result);
-
-    /**
-     * @brief Finds an indexable getter method from by its signature.
-     *
-     * This function locates an indexable getter method based on its signature and stores it in the result parameter.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class to query.
-     * @param[in] signature The signature of the indexable getter to find.
-     * @param[out] result A pointer to the method to be populated.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Class_FindIndexableGetter)(ani_env *env, ani_class cls, const char *signature, ani_method *result);
-
-    /**
-     * @brief Finds an indexable setter method from by its signature.
-     *
-     * This function locates an indexable setter method based on its signature and stores it in the result parameter.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class to query.
-     * @param[in] signature The signature of the indexable setter to find.
-     * @param[out] result A pointer to the method to be populated.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Class_FindIndexableSetter)(ani_env *env, ani_class cls, const char *signature, ani_method *result);
-
-    /**
-     * @brief Finds an iterator method.
-     *
-     * This function locates an iterator method
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class to query.
-     * @param[out] result A pointer to the method to be populated.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Class_FindIterator)(ani_env *env, ani_class cls, ani_method *result);
-
-    /**
      * @brief Retrieves a boolean value from a static field of a class.
      *
      * This function retrieves the boolean value of the specified static field from the given class.
@@ -6374,26 +6310,6 @@ struct __ani_env {
     ani_status Class_FindStaticMethod(ani_class cls, const char *name, const char *signature, ani_static_method *result)
     {
         return c_api->Class_FindStaticMethod(this, cls, name, signature, result);
-    }
-    ani_status Class_FindSetter(ani_class cls, const char *name, ani_method *result)
-    {
-        return c_api->Class_FindSetter(this, cls, name, result);
-    }
-    ani_status Class_FindGetter(ani_class cls, const char *name, ani_method *result)
-    {
-        return c_api->Class_FindGetter(this, cls, name, result);
-    }
-    ani_status Class_FindIndexableGetter(ani_class cls, const char *signature, ani_method *result)
-    {
-        return c_api->Class_FindIndexableGetter(this, cls, signature, result);
-    }
-    ani_status Class_FindIndexableSetter(ani_class cls, const char *signature, ani_method *result)
-    {
-        return c_api->Class_FindIndexableSetter(this, cls, signature, result);
-    }
-    ani_status Class_FindIterator(ani_class cls, ani_method *result)
-    {
-        return c_api->Class_FindIterator(this, cls, result);
     }
     ani_status Class_GetStaticField_Boolean(ani_class cls, ani_static_field field, ani_boolean *result)
     {
