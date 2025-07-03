@@ -85,14 +85,14 @@ void ButtonModelStatic::SetButtonSize(FrameNode* frameNode, const std::optional<
         defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
             CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding, frameNode);
 }
 
 void ButtonModelStatic::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize)
 {
     CHECK_NULL_VOID(frameNode);
     if (controlSize.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ControlSize, controlSize.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ControlSize, controlSize.value(), frameNode);
         auto context = frameNode->GetContext();
         CHECK_NULL_VOID(context);
         auto buttonTheme = context->GetTheme<ButtonTheme>();
