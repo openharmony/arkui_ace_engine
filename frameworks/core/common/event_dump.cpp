@@ -353,9 +353,6 @@ void EventTreeRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList,
         }
         ++index;
     }
-    for (auto& item : dumpList) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
-    }
 }
 
 void FrameNodeSnapshot::Dump(std::unique_ptr<JsonValue>& json) const

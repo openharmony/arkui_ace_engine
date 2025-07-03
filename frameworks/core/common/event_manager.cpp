@@ -28,7 +28,7 @@
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
-constexpr int32_t DUMP_START_NUMBER = 4;
+constexpr int32_t DUMP_START_NUMBER = 3;
 constexpr int32_t DUMP_LIMIT_SIZE = 500;
 constexpr int64_t EVENT_CLEAR_DURATION = 2000;
 constexpr int64_t TRANSLATE_NS_TO_MS = 1000000;
@@ -205,7 +205,7 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureReferee is not ready, force clean gestureReferee.");
 #ifndef IS_RELEASE_VERSION
         std::list<std::pair<int32_t, std::string>> dumpList;
-        eventTree_.Dump(dumpList, 0);
+        eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
         for (auto& item : dumpList) {
             TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: " SEC_PLD(%{public}s) ".",
                 SEC_PARAM(item.second.c_str()));
@@ -1995,7 +1995,7 @@ void EventManager::DumpEvent(NG::EventTreeType type, bool hasJson)
         DumpLog::GetInstance().PrintJson(json->ToString());
     } else {
         std::list<std::pair<int32_t, std::string>> dumpList;
-        eventTree.Dump(dumpList, 0);
+        eventTree.Dump(dumpList, 0, DUMP_START_NUMBER);
         for (auto& item : dumpList) {
             DumpLog::GetInstance().Print(item.first, item.second);
         }
