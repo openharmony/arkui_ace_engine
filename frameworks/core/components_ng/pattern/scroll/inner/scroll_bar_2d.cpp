@@ -193,13 +193,10 @@ void ScrollBar2D::SyncLayout(const OffsetF& offset, const SizeF& viewSize, const
     horizontal_.SetOutBoundary(GetOverScroll(offset.GetX(), content.Width() - viewSize.Width()));
 
     const Size sizeDouble { viewSize.Width(), viewSize.Height() };
-    vertical_.UpdateScrollBarRegion({}, sizeDouble, { 0.0, offset.GetY() }, content.Height(), 0);
-    horizontal_.UpdateScrollBarRegion({}, sizeDouble, { offset.GetX(), 0.0 }, content.Width(), 0);
+    vertical_.UpdateScrollBarRegion({}, sizeDouble, { 0.0, -offset.GetY() }, content.Height(), 0);
+    horizontal_.UpdateScrollBarRegion({}, sizeDouble, { -offset.GetX(), 0.0 }, content.Width(), 0);
     vertical_.MarkNeedRender();
     horizontal_.MarkNeedRender();
-
-    CHECK_NULL_VOID(painter_);
-    painter_->SetRect(vertical_.GetActiveRect(), horizontal_.GetActiveRect());
 }
 
 void ScrollBar2D::ResetAnimationSignals()

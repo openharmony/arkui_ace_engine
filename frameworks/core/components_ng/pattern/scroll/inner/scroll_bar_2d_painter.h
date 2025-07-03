@@ -37,12 +37,6 @@ public:
         vertical_.SetPositionMode(mode);
     }
 
-    void SetRect(const Rect& vertical, const Rect& horizontal)
-    {
-        vertical_.SetRect(vertical);
-        horizontal_.SetRect(horizontal);
-    }
-
     /**
      * @brief update properties and trigger related animations
      */

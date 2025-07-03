@@ -522,7 +522,8 @@ TEST_F(FreeScrollTest, Scroller001)
     EXPECT_EQ(scroller->GetCurrentOffset(), Offset(-X, -Y));
 
     scroller->ScrollBy(DELTA_X, DELTA_X, false);
-    EXPECT_EQ(scroller->GetCurrentOffset().ToString(), Offset(CONTENT_W - WIDTH, CONTENT_H - HEIGHT).ToString()); // clamped
+    EXPECT_EQ(
+        scroller->GetCurrentOffset().ToString(), Offset(CONTENT_W - WIDTH, CONTENT_H - HEIGHT).ToString()); // clamped
     FlushUITasks();
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-CONTENT_W + WIDTH, -CONTENT_H + HEIGHT));
 
@@ -530,6 +531,10 @@ TEST_F(FreeScrollTest, Scroller001)
     FlushUITasks();
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-CONTENT_W + WIDTH + DELTA_X, -CONTENT_H + HEIGHT + DELTA_Y));
 }
+
+namespace {
+const Dimension NORMAL_BAR_WIDTH = 4.0_vp;
+} // namespace
 
 /**
  * @tc.name: ScrollBar001
@@ -544,7 +549,6 @@ TEST_F(FreeScrollTest, ScrollBar001)
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
 
-    const Dimension NORMAL_BAR_WIDTH = 4.0_vp;
     const auto scrollBar = pattern_->scrollBar2d_;
     ASSERT_TRUE(scrollBar);
     EXPECT_EQ(scrollBar->vertical_.GetActiveRect().ToString(), "Rect (236.00, 0.00) - [4.00 x 80.00]");
@@ -577,12 +581,12 @@ TEST_F(FreeScrollTest, ScrollBar002)
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
 
-    pattern_->FreeScrollBy({-DELTA_X, -DELTA_Y});
+    pattern_->FreeScrollBy({ -LARGE_DELTA_X, -LARGE_DELTA_Y });
     FlushUITasks(frameNode_);
     const auto scrollBar = pattern_->scrollBar2d_;
     ASSERT_TRUE(scrollBar);
-    EXPECT_EQ(scrollBar->vertical_.GetActiveRect().ToString(), "Rect (236.00, 0.00) - [4.00 x 80.00]");
-    EXPECT_EQ(scrollBar->horizontal_.GetActiveRect().ToString(), "Rect (0.00, 396.00) - [28.80 x 4.00]");
+    EXPECT_EQ(scrollBar->vertical_.GetActiveRect().ToString(), "Rect (236.00, 320.00) - [4.00 x 80.00]");
+    EXPECT_EQ(scrollBar->horizontal_.GetActiveRect().ToString(), "Rect (211.20, 396.00) - [28.80 x 4.00]");
 
     ScrollModelNG::SetScrollBarColor(frameNode_.GetRawPtr(), Color::BLUE);
     pattern_->OnModifyDone();
