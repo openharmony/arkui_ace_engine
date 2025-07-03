@@ -49,7 +49,6 @@ import { IndexAccessibilityTest } from './IndexAccessibilityTest'
 import { InspectorTest } from './InspectorTest'
 import { Image001Test } from './Image001Test'
 import { Image002Test } from './Image002Test'
-import { Image003Test } from './Image003Test'
 import { ButtonTest } from './ButtonTest'
 import { CheckboxTest } from './CheckboxTest'
 import { CheckboxGroupTest } from './CheckboxGroupTest'
@@ -146,7 +145,7 @@ struct MyStateSample {
     } else if (name === 'Image支持网络图片图片') {
       Image002Test()
     } else if (name === 'Image支持BASE64字符串图片') {
-      Image003Test()
+      
     } else if (name == 'Button基础功能测试') {
       ButtonTest()
     } else if (name == 'checkbox基础功能测试') {
