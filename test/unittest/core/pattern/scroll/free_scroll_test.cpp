@@ -652,5 +652,14 @@ TEST_F(FreeScrollTest, ScrollBar004)
         frameNode_, nullptr, responseLinkResult);
     EXPECT_EQ(responseLinkResult.size(), 3);
     EXPECT_EQ(*std::next(responseLinkResult.begin()), pattern_->scrollBar2d_->horizontal_.GetPanRecognizer());
+
+    TouchRestrict restrict;
+    restrict.sourceType = SourceType::MOUSE;
+    result.clear();
+    responseLinkResult.clear();
+    actuator->CollectTouchTarget({}, {}, {}, result, localPoint,
+        frameNode_, nullptr, responseLinkResult);
+    EXPECT_EQ(responseLinkResult.size(), 3);
+    EXPECT_EQ(*std::next(responseLinkResult.begin()), pattern_->scrollBar2d_->horizontal_.GetPanRecognizer());
 }
 } // namespace OHOS::Ace::NG
