@@ -18,7 +18,7 @@ import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { ObserveSingleton } from './observeSingleton';
 import { FactoryInternal } from './iFactoryInternal';
 import { ObserveWrappedBase } from './observeWrappedBase';
-
+import { UIUtils } from '../utils';
 final class CONSTANT {
     public static readonly OB_ARRAY_ANY_KEY = '__OB_ANY_INDEX';
     public static readonly OB_LENGTH = '__OB_LENGTH';
@@ -103,7 +103,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
             this.meta_.addRef(CONSTANT.OB_LENGTH);
             this.meta_.addRef(String(idx as Object | undefined | null));
         }
-        return this.store_[idx];
+        return UIUtils.makeObserved(this.store_[idx]);
     }
 
     // [] operator

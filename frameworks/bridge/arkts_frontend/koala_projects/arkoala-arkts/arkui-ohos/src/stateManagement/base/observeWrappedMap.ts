@@ -18,7 +18,7 @@ import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { FactoryInternal } from './iFactoryInternal';
 import { ObserveSingleton } from './observeSingleton';
 import { ObserveWrappedBase } from './observeWrappedBase';
-
+import { UIUtils } from '../utils';
 final class CONSTANT {
     public static readonly OB_MAP_ANY_PROPERTY = '__OB_SET_ANY_PROPERTY';
     public static readonly OB_LENGTH = '__OB_LENGTH';
@@ -167,7 +167,7 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, Obse
                 this.meta_.addRef(CONSTANT.OB_LENGTH);
             }
         }
-        return this.store_.get(key);
+        return UIUtils.makeObserved(this.store_.get(key));
     }
 
     /**
