@@ -4483,9 +4483,12 @@ bool JSViewAbstract::ParseCommonMarginOrPaddingCorner(
 
 void JSViewAbstract::JsOutline(const JSCallbackInfo& info)
 {
-    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderWidth");
+    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderWidthRes");
     ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderColorRes");
     ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderRadiusRes");
+    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderWidth");
+    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderColor");
+    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderRadius");
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsOutline", jsVal, checkList)) {
@@ -4521,6 +4524,7 @@ void JSViewAbstract::JsOutline(const JSCallbackInfo& info)
 void JSViewAbstract::JsOutlineWidth(const JSCallbackInfo& info)
 {
     ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderWidth");
+    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderWidthRes");
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
@@ -4534,12 +4538,14 @@ void JSViewAbstract::JsOutlineWidth(const JSCallbackInfo& info)
 void JSViewAbstract::JsOutlineColor(const JSCallbackInfo& info)
 {
     ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderColorRes");
+    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderColor");
     ParseOuterBorderColor(info[0]);
 }
 
 void JSViewAbstract::JsOutlineRadius(const JSCallbackInfo& info)
 {
     ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderRadius");
+    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderRadiusRes");
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
@@ -11478,6 +11484,7 @@ void JSViewAbstract::JsOnChildTouchTest(const JSCallbackInfo& info)
 void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
 {
     ViewAbstractModel::GetInstance()->RemoveResObj("foregroundColor");
+    ViewAbstractModel::GetInstance()->RemoveResObj("foregroundColorStrategy");
     Color foregroundColor = Color::TRANSPARENT;
     ForegroundColorStrategy strategy;
     if (ParseJsColorStrategy(info[0], strategy)) {
