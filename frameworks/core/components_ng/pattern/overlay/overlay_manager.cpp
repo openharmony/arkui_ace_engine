@@ -6385,7 +6385,7 @@ void OverlayManager::ComputeDetentsSheetOffset(const NG::SheetStyle& sheetStyle,
         }
     }
 }
-void OverlayManager::OnMainWindowSizeChange(int32_t subWindowId)
+void OverlayManager::OnMainWindowSizeChange(int32_t subWindowId, WindowSizeChangeReason reason)
 {
     for (auto iter = sheetMap_.begin(); iter != sheetMap_.end(); iter++) {
         auto sheetNode = (*iter).second.Upgrade();
@@ -6397,7 +6397,10 @@ void OverlayManager::OnMainWindowSizeChange(int32_t subWindowId)
             auto sheetWrapperPattern = sheetParent->GetPattern<SheetWrapperPattern>();
             CHECK_NULL_VOID(sheetWrapperPattern);
             sheetWrapperPattern->InitMainWindowRect(subWindowId);
-            sheetParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            if (!(reason == WindowSizeChangeReason::DRAG_START || reason == WindowSizeChangeReason::DRAG_END ||
+                    reason == WindowSizeChangeReason::DRAG_MOVE)) {
+                sheetParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
         }
     }
 }

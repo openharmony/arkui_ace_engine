@@ -128,6 +128,7 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset002, TestSize.Lev
     auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
     ASSERT_NE(sheetWrapperPattern, nullptr);
     sheetWrapperPattern->subWindowId_ = 1;
+    sheetWrapperPattern->isShowInUEC_ = true;
     SubwindowManager::GetInstance()->parentContainerMap_.try_emplace(1, 1);
     AceEngine::Get().containerMap_.clear();
     AceEngine::Get().containerMap_.emplace(1, MockContainer::Current());
@@ -170,6 +171,7 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset003, TestSize.Lev
     auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
     ASSERT_NE(sheetWrapperPattern, nullptr);
     sheetWrapperPattern->subWindowId_ = 1;
+    sheetWrapperPattern->isShowInUEC_ = true;
     SubwindowManager::GetInstance()->parentContainerMap_.try_emplace(1, 1);
     auto container = MockContainer::Current();
     AceEngine::Get().containerMap_.clear();
@@ -217,6 +219,7 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset004, TestSize.Lev
     auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
     ASSERT_NE(sheetWrapperPattern, nullptr);
     sheetWrapperPattern->subWindowId_ = 1;
+    sheetWrapperPattern->isShowInUEC_ = true;
     SubwindowManager::GetInstance()->parentContainerMap_.try_emplace(1, 1);
     auto container = MockContainer::Current();
     AceEngine::Get().containerMap_.clear();
@@ -263,6 +266,7 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset005, TestSize.Lev
     auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
     ASSERT_NE(sheetWrapperPattern, nullptr);
     sheetWrapperPattern->subWindowId_ = 1;
+    sheetWrapperPattern->isShowInUEC_ = true;
     SubwindowManager::GetInstance()->parentContainerMap_.try_emplace(1, 1);
     auto container = MockContainer::Current();
     AceEngine::Get().containerMap_.clear();
@@ -280,6 +284,54 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset005, TestSize.Lev
     sheetLayoutAlgorithm->ComputeCenterStyleOffset(Referenced::RawPtr(layoutWrapper));
     EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, 0.0f);
     EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, 0.0f);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ComputeCenterStyleOffset006
+ * @tc.desc: Branch: if (!showInSubWindow) = false
+ *           Branch: ShowInUEC = false
+ *           Branch: if (mainWindowContext && GetContainerModalButtonsRect()) = true
+ *           Condition: mainWindowContext = true, GetContainerModalButtonsRect() = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset006, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(ElementRegister::GetInstance()->MakeUniqueId(),
+        V2::TEXT_ETS_TAG, std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
+    sheetLayoutAlgorithm->sheetStyle_.showInSubWindow = true;
+    auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetWrapperPattern>());
+    auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
+    ASSERT_NE(sheetWrapperPattern, nullptr);
+    sheetWrapperPattern->subWindowId_ = 1;
+    SubwindowManager::GetInstance()->parentContainerMap_.try_emplace(1, 1);
+    auto container = MockContainer::Current();
+    AceEngine::Get().containerMap_.clear();
+    AceEngine::Get().containerMap_.emplace(1, container);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    auto rootGeometryNode = pipelineContext->rootNode_->GetGeometryNode();
+    rootGeometryNode->SetFrameSize(SizeF(1800.0f, 1020.0f));
+    container->pipelineContext_ = pipelineContext;
+    sheetNode->MountToParent(sheetWrapperNode);
+    sheetWrapperPattern->mainWindowRect_ = RectF(0.0f, 0.0f, 1800.0f, 1020.0f);
+    auto sheetGeometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(sheetGeometryNode, nullptr);
+    sheetGeometryNode->frame_.rect_ = RectF(0.0f, 0.0f, 500.0f, 500.0f);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetGeometryNode, sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->ComputeCenterStyleOffset(Referenced::RawPtr(layoutWrapper));
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, (1800.0f - 500.0f) / 2);
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, (1020.0f - 500.0f) / 2);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 

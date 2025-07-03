@@ -234,6 +234,8 @@ public:
     {
         return nodeId_;
     }
+    void SetWindowAnchorInfo(const NG::OffsetF& offset, SubwindowType type, int32_t nodeId) override;
+    Rosen::WindowAnchorInfo WindowAnchorInfoConverter(const NG::OffsetF& offset, SubwindowType type);
 
 private:
     RefPtr<StackElement> GetStack();

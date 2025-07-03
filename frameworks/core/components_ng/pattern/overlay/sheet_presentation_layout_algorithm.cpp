@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
+#include "ui/base/referenced.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
@@ -275,12 +276,39 @@ void SheetPresentationLayoutAlgorithm::ComputeCenterStyleOffset(LayoutWrapper* l
     CHECK_NULL_VOID(sheetWrapper);
     auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
     CHECK_NULL_VOID(sheetWrapperPattern);
-    auto mainWindowRect = sheetWrapperPattern->GetMainWindowRect();
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto sheetFrameSize = geometryNode->GetFrameSize();
 
-    // compute sheet offset when show in subwindow
+    if (sheetWrapperPattern->ShowInUEC()) {
+        ComputeCenterOffsetForUECSubwindow(layoutWrapper);
+    } else {
+        ComputeCenterOffsetForNotUECSubwindow(layoutWrapper);
+    }
+
+    std::vector<Rect> rects;
+    auto rect = Rect(sheetOffsetX_, sheetOffsetY_,
+        sheetFrameSize.Width(), sheetFrameSize.Height());
+    rects.emplace_back(rect);
+    SubwindowManager::GetInstance()->SetHotAreas(rects, SubwindowType::TYPE_SHEET,
+        host->GetId(), sheetWrapperPattern->GetSubWindowId());
+}
+
+void SheetPresentationLayoutAlgorithm::ComputeCenterOffsetForUECSubwindow(
+    LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(sheetWrapper);
+    auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
+    auto mainWindowRect = sheetWrapperPattern->GetMainWindowRect();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto sheetFrameSize = geometryNode->GetFrameSize();
+    // compute sheet offset when show in subwindow with UEC mainWindow
     RectF containerModal;
     RectF buttonsRect;
     auto hostWindowId = SubwindowManager::GetInstance()->GetParentContainerId(sheetWrapperPattern->GetSubWindowId());
@@ -298,12 +326,53 @@ void SheetPresentationLayoutAlgorithm::ComputeCenterStyleOffset(LayoutWrapper* l
     }
     sheetOffsetX_ = mainWindowRect.GetX() + (mainWindowRect.Width()  - sheetFrameSize.Width()) / DOUBLE_SIZE;
     MinusSubwindowDistance(sheetWrapper);
-    std::vector<Rect> rects;
-    auto rect = Rect(sheetOffsetX_, sheetOffsetY_,
-        sheetFrameSize.Width(), sheetFrameSize.Height());
-    rects.emplace_back(rect);
-    SubwindowManager::GetInstance()->SetHotAreas(rects, SubwindowType::TYPE_SHEET,
-        host->GetId(), sheetWrapperPattern->GetSubWindowId());
+}
+
+void SheetPresentationLayoutAlgorithm::ComputeCenterOffsetForNotUECSubwindow(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(sheetWrapper);
+    auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
+    auto mainWindowRect = sheetWrapperPattern->GetMainWindowRect();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto sheetFrameSize = geometryNode->GetFrameSize();
+    auto hostWindowId = SubwindowManager::GetInstance()->GetParentContainerId(sheetWrapperPattern->GetSubWindowId());
+    ContainerScope scope(hostWindowId);
+    auto container = AceEngine::Get().GetContainer(hostWindowId);
+    CHECK_NULL_VOID(container);
+    auto mainWindowContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+
+    auto subContainer = AceEngine::Get().GetContainer(sheetWrapperPattern->GetSubWindowId());
+    CHECK_NULL_VOID(subContainer);
+    auto subWindowContext = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
+    CHECK_NULL_VOID(subWindowContext);
+    auto subwindowRootRect = subWindowContext->GetRootRect();
+    sheetOffsetY_ = (subwindowRootRect.Height() - sheetFrameSize.Height()) / DOUBLE_SIZE;
+    sheetOffsetX_ = (subwindowRootRect.Width()  - sheetFrameSize.Width()) / DOUBLE_SIZE;
+
+    OffsetF windowAnchoroffset;
+    auto sheetTheme = mainWindowContext->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto bigWindowMinHeight = sheetTheme->GetBigWindowMinHeight();
+    RectF containerModal;
+    RectF buttonsRect;
+    // By default, subWindow and mainWindow are aligned based on center anchor.
+    // When mainwindow is reduced to a certain extent, centerSheet will stick to the title bar of the mainWindow layout.
+    // At this time, the anchor point of subWindow and mainWindow need to be moved down at a distance.
+    // The distance is equal to a half of the reduced height.
+    if (mainWindowContext && mainWindowContext->GetContainerModalButtonsRect(containerModal, buttonsRect)) {
+        auto maxMainWindowHeight = bigWindowMinHeight.ConvertToPx() +
+            DOUBLE_SIZE * (buttonsRect.Height() + SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
+        windowAnchoroffset.SetY(mainWindowRect.Height() > maxMainWindowHeight ? 0.0f :
+            (maxMainWindowHeight - mainWindowRect.Height()) / DOUBLE_SIZE);
+    }
+    SubwindowManager::GetInstance()->SetWindowAnchorInfo(
+        windowAnchoroffset, SubwindowType::TYPE_SHEET, host->GetId(), sheetWrapperPattern->GetSubWindowId());
 }
 
 void SheetPresentationLayoutAlgorithm::ComputePopupStyleOffset(LayoutWrapper* layoutWrapper)
@@ -683,6 +752,7 @@ float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle(const float parent
         auto bigWindowMinHeight = sheetTheme->GetBigWindowMinHeight();
         maxHeight = SheetInSplitWindow()
             ? maxHeight : std::max(maxHeight, static_cast<float>(bigWindowMinHeight.ConvertToPx()));
+        // The minimum value of maxHeight is 320
         if (LessNotEqual(height, 0.0f)) {
             height = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
         } else if (LessOrEqual(height, bigWindowMinHeight.ConvertToPx()) && !SheetInSplitWindow()) {

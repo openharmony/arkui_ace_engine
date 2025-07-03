@@ -256,6 +256,35 @@ void SubwindowOhos::InitWindowRSUIDirector(const RefPtr<Platform::AceContainer>&
 #endif
 }
 
+void SubwindowOhos::SetWindowAnchorInfo(const NG::OffsetF &offset, SubwindowType type, int32_t nodeId)
+{
+    CHECK_NULL_VOID(window_);
+    auto windowAnchorInfo = WindowAnchorInfoConverter(offset, type);
+    window_->SetWindowAnchorInfo(windowAnchorInfo);
+}
+
+Rosen::WindowAnchorInfo SubwindowOhos::WindowAnchorInfoConverter(const NG::OffsetF& offset, SubwindowType type)
+{
+    Rosen::WindowAnchorInfo windowAnchorInfo(true);
+    switch (type) {
+        case SubwindowType::TYPE_SYSTEM_TOP_MOST_TOAST:
+        case SubwindowType::TYPE_TOP_MOST_TOAST:
+        case SubwindowType::TYPE_MENU:
+        case SubwindowType::TYPE_POPUP:
+        case SubwindowType::TYPE_DIALOG:
+        case SubwindowType::TYPE_SELECT_MENU:
+        case SubwindowType::TYPE_TIPS:
+        case SubwindowType::SUB_WINDOW_TYPE_COUNT:
+            break;
+        case SubwindowType::TYPE_SHEET:
+        default:
+            windowAnchorInfo.windowAnchor_ = Rosen::WindowAnchor::CENTER;
+    }
+    windowAnchorInfo.offsetX_ = offset.GetX();
+    windowAnchorInfo.offsetY_ = offset.GetY();
+    return windowAnchorInfo;
+}
+
 void SubwindowOhos::InitContainer()
 {
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);

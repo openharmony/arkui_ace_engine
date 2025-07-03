@@ -567,7 +567,7 @@ public:
         std::optional<double> levelOrder = std::nullopt);
     void MountToParentWithOrder(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node,
         std::optional<double> levelOrder = std::nullopt);
-    void OnMainWindowSizeChange(int32_t instanceId);
+    void OnMainWindowSizeChange(int32_t instanceId, WindowSizeChangeReason reason);
 
     void CleanSheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey);
 

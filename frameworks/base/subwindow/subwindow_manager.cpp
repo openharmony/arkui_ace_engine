@@ -600,6 +600,24 @@ void SubwindowManager::ClearMenu()
     }
 }
 
+void SubwindowManager::SetWindowAnchorInfo(
+    const NG::OffsetF& offset, SubwindowType type, int32_t nodeId, int32_t instanceId)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set windowAnchorInfo enter");
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindowByNodeId(instanceId, type, nodeId);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to get the subwindow which overlay node in, so get the current one.");
+        subwindow = GetCurrentWindow();
+    }
+
+    if (subwindow) {
+        subwindow->SetWindowAnchorInfo(offset, type, nodeId);
+    }
+}
+
 void SubwindowManager::SetHotAreas(
     const std::vector<Rect>& rects, SubwindowType type, int32_t nodeId, int32_t instanceId)
 {
@@ -680,7 +698,7 @@ void SubwindowManager::OnHostWindowSizeChanged(int32_t containerId, Rect windowR
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->OnMainWindowSizeChange(subContinerId);
+    overlayManager->OnMainWindowSizeChange(subContinerId, reason);
 }
 
 void SubwindowManager::HideSheetSubWindow(int32_t containerId)
