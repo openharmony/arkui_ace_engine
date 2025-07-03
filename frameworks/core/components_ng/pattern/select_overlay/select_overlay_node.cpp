@@ -753,6 +753,7 @@ RefPtr<FrameNode> BuildMoreOrBackButton(const std::shared_ptr<SelectOverlayInfo>
                                     padding.Top().ConvertToPx() - padding.Bottom().ConvertToPx());
         buttonLayoutProperty->UpdateUserDefinedIdealSize({ sideWidth, sideWidth });
         accessibilityProperty->SetAccessibilityText(textOverlayTheme->GetMoreAccessibilityText());
+        SetMoreOrBackButtonResponse(button);
     } else {
         auto sideWidth = CalcLength(textOverlayTheme->GetMenuToolbarHeight().ConvertToPx());
         UpdateBackButtonPadding(button, sideWidth, padding, overlayId);
@@ -762,7 +763,6 @@ RefPtr<FrameNode> BuildMoreOrBackButton(const std::shared_ptr<SelectOverlayInfo>
     PrepareMoreOrBackButtonNode(button, overlayId, isMoreButton, textOverlayTheme);
 
     button->MarkModifyDone();
-    SetMoreOrBackButtonResponse(button);
     return button;
 }
 
