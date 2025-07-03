@@ -1835,13 +1835,13 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .hoverModeArea = hoverModeArea,
         .onLanguageChange = onLanguageChange,
         .levelOrder = GetLevelOrderParam(asyncContext->env, asyncContext),
-        .dialogLevelMode = dialogLevelMode,
-        .dialogLevelUniqueId = dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogImmersiveMode,
         .onDidAppear = lifeCycleAttr.onDidAppear,
         .onDidDisappear = lifeCycleAttr.onDidDisappear,
         .onWillAppear = lifeCycleAttr.onWillAppear,
         .onWillDisappear = lifeCycleAttr.onWillDisappear,
+        .dialogLevelMode = dialogLevelMode,
+        .dialogLevelUniqueId = dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogImmersiveMode,
     };
 
 #ifdef OHOS_STANDARD_SYSTEM
