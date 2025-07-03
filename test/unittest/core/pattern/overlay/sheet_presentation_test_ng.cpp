@@ -2799,4 +2799,35 @@ HWTEST_F(SheetPresentationTestNg, UpdateTitleTextColor002, TestSize.Level1)
 
     SheetPresentationTestNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: UpdateSheetObject001
+ * @tc.desc: Test UpdateSheetObject Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, UpdateSheetObject001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node and pattern.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    /**
+     * @tc.steps: step2. set sheetType_ is SheetType::SHEET_BOTTOM, create sheetObject.
+     */
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+    sheetPattern->InitSheetObject();
+    auto sheetObject = sheetPattern->GetSheetObject();
+    /**
+     * @tc.steps: step3. set newType is SheetType::SHEET_CENTER, UpdateSheetObject.
+     * @tc.expected: sheetType_ = SheetType::SHEET_CENTER.
+     */
+    sheetPattern->UpdateSheetObject(SheetType::SHEET_CENTER);
+    EXPECT_EQ(sheetObject->sheetType_, SheetType::SHEET_CENTER);
+    SheetPresentationTestNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG

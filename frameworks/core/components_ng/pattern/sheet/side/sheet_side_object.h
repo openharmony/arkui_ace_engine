@@ -89,6 +89,8 @@ public:
         return false;
     }
 
+    void FireHeightDidChange() override;
+
 private:
     void UpdateSidePosition();
     void UpdateDragBarStatus();

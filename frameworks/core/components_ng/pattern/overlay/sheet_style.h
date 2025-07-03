@@ -273,6 +273,7 @@ struct SheetStyle {
         placement = sheetStyle.placement.has_value() ? sheetStyle.placement : placement;
         placementOnTarget = sheetStyle.placementOnTarget.has_value() ?
             sheetStyle.placementOnTarget : placementOnTarget;
+        modalTransition = sheetStyle.modalTransition.has_value() ? sheetStyle.modalTransition : modalTransition;
     }
 
     // Register the set/get method of the resource.

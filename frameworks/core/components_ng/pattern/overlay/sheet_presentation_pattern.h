@@ -714,6 +714,11 @@ public:
         property_ = property;
     }
 
+    float GetPreDidHeight() const
+    {
+        return preDidHeight_;
+    }
+
     void SetPreDidHeight(float height)
     {
         preDidHeight_ = height;
