@@ -2250,35 +2250,27 @@ HWTEST_F(JsAccessibilityManagerTest, AddHoverTransparentCallbackTest001, TestSiz
      * @tc.steps: step2. create frameNode and add to list.
      */
     auto frameNode = FrameNode::CreateFrameNode("framenode1", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = AceType::MakeRefPtr<NG::PipelineContext>();
+    ASSERT_NE(context, nullptr);
+    context->instanceId_ = 1;
+    frameNode->AttachContext(AceType::RawPtr(context), false);
+
+    /**
+     * @tc.steps: step3. test CheckHoverTransparentCallbackListEmpty return true.
+     */
+    EXPECT_TRUE(mockJsManger.CheckHoverTransparentCallbackListEmpty(1));
+
+    /**
+     * @tc.steps: step4. test CheckHoverTransparentCallbackListEmpty return false.
+     */
     mockJsManger.AddHoverTransparentCallback(frameNode);
+    EXPECT_FALSE(mockJsManger.CheckHoverTransparentCallbackListEmpty(1));
 
     /**
-     * @tc.steps: step3. test IsInHoverTransparentCallbackList return true.
+     * @tc.steps: step5. test CheckHoverTransparentCallbackListEmpty return true.
      */
-    EXPECT_TRUE(mockJsManger.IsInHoverTransparentCallbackList(frameNode));
-}
-
-/**
-* @tc.name: IsInHoverTransparentCallbackListTest001
-* @tc.desc: IsInHoverTransparentCallbackList
-* @tc.type: FUNC
-*/
-HWTEST_F(JsAccessibilityManagerTest, IsInHoverTransparentCallbackListTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create jsAccessibilityManager.
-     */
-    MockJsAccessibilityManager mockJsManger;
-
-    /**
-     * @tc.steps: step2. create frameNode.
-     */
-    auto frameNode = FrameNode::CreateFrameNode("framenode2", 1, AceType::MakeRefPtr<Pattern>(), true);
-
-    /**
-     * @tc.steps: step3. test IsInHoverTransparentCallbackList return false.
-     */
-    EXPECT_FALSE(mockJsManger.IsInHoverTransparentCallbackList(frameNode));
+    frameNode = nullptr;
+    EXPECT_TRUE(mockJsManger.CheckHoverTransparentCallbackListEmpty(1));
 }
 
 /**

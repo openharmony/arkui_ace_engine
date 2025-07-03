@@ -3738,9 +3738,9 @@ void JsAccessibilityManager::AddHoverTransparentCallback(const RefPtr<NG::FrameN
     hoverTransparentCallbackController_.AddToHoverTransparentCallbackList(node);
 }
 
-bool JsAccessibilityManager::IsInHoverTransparentCallbackList(const RefPtr<NG::FrameNode>& node)
+bool JsAccessibilityManager::CheckHoverTransparentCallbackListEmpty(int32_t containerId)
 {
-    return hoverTransparentCallbackController_.IsInHoverTransparentCallbackList(node);
+    return hoverTransparentCallbackController_.CheckHoverTransparentCallbackListEmpty(containerId);
 }
 
 int64_t JsAccessibilityManager::CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node)

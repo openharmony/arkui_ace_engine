@@ -277,14 +277,15 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
     HandleAccessibilityHoverEventInner(root, param, touchEvent);
 }
 
-bool HasTransparentCallback(const RefPtr<NG::FrameNode>& node)
+bool IsHoverTransparentCallbackListEmpty(const RefPtr<NG::FrameNode>& node)
 {
-    CHECK_NULL_RETURN(node, false);
-    auto pipeline = node->GetContext();
-    CHECK_NULL_RETURN(pipeline, false);
+    CHECK_NULL_RETURN(node, true);
+    auto pipeline = node->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, true);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
-    CHECK_NULL_RETURN(accessibilityManager, false);
-    return accessibilityManager->IsInHoverTransparentCallbackList(node);
+    CHECK_NULL_RETURN(accessibilityManager, true);
+    auto containerId = pipeline->GetInstanceId();
+    return accessibilityManager->CheckHoverTransparentCallbackListEmpty(containerId);
 }
 
 bool AccessibilityManagerNG::ExecuteChildNodeHoverTransparentCallback(const RefPtr<FrameNode>& root,
@@ -334,7 +335,8 @@ bool AccessibilityManagerNG::HandleAccessibilityHoverTransparentCallback(bool tr
     if (transformed) {
         return false;
     }
-    if ((param.currentHoveringId == INVALID_NODE_ID) && (param.lastHoveringId == INVALID_NODE_ID)) {
+    if ((param.currentHoveringId == INVALID_NODE_ID) && (param.lastHoveringId == INVALID_NODE_ID)
+        && !IsHoverTransparentCallbackListEmpty(root)) {
         return ExecuteChildNodeHoverTransparentCallback(root, point, event);
     }
     return false;
