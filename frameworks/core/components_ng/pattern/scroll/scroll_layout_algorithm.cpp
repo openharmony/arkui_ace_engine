@@ -137,7 +137,10 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     viewSize_ = size;
     MinusPaddingToSize(padding, size);
     viewPort_ = size;
-    auto childSize = childGeometryNode->GetMarginFrameSize();
+    auto scroll = DynamicCast<ScrollPattern>(scrollNode->GetPattern());
+    CHECK_NULL_VOID(scroll);
+    float zoomScale = scroll->GetZoomScale();
+    auto childSize = childGeometryNode->GetMarginFrameSize() * zoomScale;
     auto contentEndOffset = layoutProperty->GetScrollContentEndOffsetValue(.0f);
     if (axis == Axis::FREE) { // horizontal is the main axis in Free mode
         scrollableDistance_ = childSize.Width() - viewPort_.Width() + contentEndOffset;
@@ -145,8 +148,6 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(viewPort_, axis) + contentEndOffset;
     }
     if (axis == Axis::FREE) {
-        auto scroll = DynamicCast<ScrollPattern>(scrollNode->GetPattern());
-        CHECK_NULL_VOID(scroll);
         auto effect = scroll->GetEdgeEffect();
         const float verticalSpace = childSize.Height() - viewPort_.Height();
         crossOffset_ = AdjustOffsetInFreeMode(crossOffset_, verticalSpace, effect, EffectEdge::ALL);
@@ -177,7 +178,14 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         axis == Axis::VERTICAL) {
         alignmentPosition.SetX(size.Width() - viewPortExtent_.Width());
     }
-    childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
+    if (zoomScale != 1.0) {
+        auto allOffset = padding.Offset() + currentOffset + alignmentPosition;
+        auto sizeDelta = childSize - childGeometryNode->GetMarginFrameSize();
+        allOffset += OffsetF(sizeDelta.Width() / 2, sizeDelta.Height() / 2); /* 2:half */
+        childGeometryNode->SetMarginFrameOffset(allOffset);
+    } else {
+        childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
+    }
     childWrapper->Layout();
     UpdateOverlay(layoutWrapper);
     if (scrollNode && scrollNode->GetSuggestOpIncActivatedOnce()) {

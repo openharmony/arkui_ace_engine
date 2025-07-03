@@ -3860,6 +3860,17 @@ struct ArkUIScrollModifier {
     void (*getScrollContentSize)(ArkUINodeHandle node, ArkUI_Float32 (*values)[2]);
     void (*createWithResourceObjFriction)(ArkUINodeHandle node, void* resObj);
     void (*createWithResourceObjSnapPaginations)(ArkUINodeHandle node, void* resObjs);
+    void (*setMaxZoomScale)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*resetMaxZoomScale)(ArkUINodeHandle node);
+    void (*setMinZoomScale)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*resetMinZoomScale)(ArkUINodeHandle node);
+    void (*setZoomScale)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*resetZoomScale)(ArkUINodeHandle node);
+    void (*setEnableBouncesZoom)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableBouncesZoom)(ArkUINodeHandle node);
+    void (*setScrollOnDidZoom)(ArkUINodeHandle node, void* callback);
+    void (*setScrollOnZoomStart)(ArkUINodeHandle node, void* callback);
+    void (*setScrollOnZoomStop)(ArkUINodeHandle node, void* callback);
 };
 
 struct ArkUIListItemModifier {

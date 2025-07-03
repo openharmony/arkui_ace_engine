@@ -32,6 +32,7 @@ ace_unittest("scroll_test_ng") {
     "scroll_pattern_test_ng.cpp",
     "scroll_pattern_test_ng_two.cpp",
     "scroll_test_ng.cpp",
+    "scroll_zoom_test.cpp",
   ]
 
   sources += [ "generated_scroll_test_ng.cpp" ]

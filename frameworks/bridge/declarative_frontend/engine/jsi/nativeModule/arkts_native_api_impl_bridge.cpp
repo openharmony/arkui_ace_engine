@@ -5634,6 +5634,34 @@ void ArkUINativeModule::RegisterScrollAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnScrollFrameBegin));
     scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnScrollFrameBegin"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnScrollFrameBegin));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxZoomScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetMaxZoomScale));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxZoomScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetMaxZoomScale));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinZoomScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetMinZoomScale));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinZoomScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetMinZoomScale));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setZoomScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetZoomScale));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetZoomScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetZoomScale));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableBouncesZoom"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetEnableBouncesZoom));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableBouncesZoom"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetEnableBouncesZoom));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollOnDidZoom"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnDidZoom));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnDidZoom"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnDidZoom));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollOnZoomStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnZoomStart));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnZoomStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnZoomStart));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollOnZoomStop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnZoomStop));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnZoomStop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnZoomStop));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "scroll"), scroll);
 }
 

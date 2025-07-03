@@ -56,6 +56,7 @@ void ScrollPattern::OnModifyDone()
             freeScroll_.Reset();
         }
     }
+    UpdatePinchGesture();
     if (!GetScrollableEvent()) {
         AddScrollEvent();
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -190,6 +191,7 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
         CaleSnapOffsets();
         scrollSnapUpdate_ = false;
     }
+    ProcessZoomScale();
     return true;
 }
 
@@ -1566,6 +1568,86 @@ void ScrollPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
         infochildren->Put(child);
     }
     json->Put("scrollMeasureInfos", infochildren);
+}
+
+void ScrollPattern::ProcessZoomScale()
+{
+    if (childScale_ != zoomScale_) {
+        if (childScale_.value_or(1.0f) != zoomScale_.value_or(1.0f)) {
+            auto hub = GetOrCreateEventHub<ScrollEventHub>();
+            if (hub) {
+                hub->FireOnDidZoom(zoomScale_.value_or(1.0f));
+            }
+        }
+        childScale_ = zoomScale_;
+        SetChildScale(childScale_);
+    }
+}
+
+void ScrollPattern::SetMaxZoomScale(float scale)
+{
+    if (scale > 0) {
+        maxZoomScale_ = scale;
+    } else {
+        maxZoomScale_ = 1.0f;
+    }
+}
+
+void ScrollPattern::SetMinZoomScale(float scale)
+{
+    if (scale > 0) {
+        minZoomScale_ = scale;
+    } else {
+        minZoomScale_ = 1.0f;
+    }
+}
+
+void ScrollPattern::SetZoomScale(std::optional<float> scale)
+{
+    if (scale != zoomScale_) {
+        zoomScale_ = scale;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto prop = host->GetLayoutProperty();
+        CHECK_NULL_VOID(prop);
+        prop->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void ScrollPattern::UpdateZoomScale(float scale)
+{
+    if (scale <= 0.f) {
+        scale = 1.f;
+    }
+    if (!zoomScale_.has_value() || scale != zoomScale_.value()) {
+        zoomScale_ = scale;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void ScrollPattern::SetChildScale(std::optional<float> scale)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto child = AceType::DynamicCast<FrameNode>(host->GetChildByIndex(0));
+    CHECK_NULL_VOID(child);
+    auto renderContext = child->GetRenderContext();
+    if (scale.has_value()) {
+        renderContext->SetScrollScale(scale.value());
+    } else {
+        renderContext->ResetScrollScale();
+    }
+}
+
+void ScrollPattern::UpdatePinchGesture()
+{
+    if (!zoomCtrl_ && (maxZoomScale_ != 1.0f || minZoomScale_ != 1.0f)) {
+        zoomCtrl_ = MakeRefPtr<ZoomController>(*this);
+    } else if (zoomCtrl_ && maxZoomScale_ == 1.0f && minZoomScale_ == 1.0f) {
+        zoomCtrl_.Reset();
+    }
 }
 
 SizeF ScrollPattern::GetChildrenExpandedSize()

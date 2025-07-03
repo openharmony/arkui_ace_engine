@@ -6983,6 +6983,24 @@ void RosenRenderContext::SetScale(float scaleX, float scaleY)
     NotifyHostTransformUpdated();
 }
 
+void RosenRenderContext::SetScrollScale(float scale)
+{
+    CHECK_NULL_VOID(rsNode_);
+#if defined(MODIFIER_NG)
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
+        Rosen::Vector2f>(scrollScaleModifier_, { scale, scale });
+#else
+    SetAnimatableProperty<Rosen::RSScaleModifier, Rosen::Vector2f>(scrollScaleModifier_, { scale, scale });
+#endif
+}
+
+void RosenRenderContext::ResetScrollScale()
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->RemoveModifier(scrollScaleModifier_);
+    scrollScaleModifier_.reset();
+}
+
 void RosenRenderContext::SetBackgroundColor(uint32_t colorValue)
 {
     CHECK_NULL_VOID(rsNode_);

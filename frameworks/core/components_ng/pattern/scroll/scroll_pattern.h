@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_paint_method.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scroll/zoom_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
@@ -443,6 +444,33 @@ private:
     SizeF viewSize_;
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
+
+    /* ============================= zoom Enhancements ============================= */
+public:
+    void SetMaxZoomScale(float scale);
+    void SetMinZoomScale(float scale);
+    void SetZoomScale(std::optional<float> scale);
+    float GetZoomScale() const
+    {
+        return zoomScale_.value_or(1.0f);
+    }
+    void UpdateZoomScale(float scale);
+    void SetEnableBouncesZoom(bool enable)
+    {
+        enableBouncesZoom_ = enable;
+    }
+    void ProcessZoomScale();
+    void SetChildScale(std::optional<float> scale);
+private:
+    void UpdatePinchGesture();
+    friend class ZoomController;
+    RefPtr<ZoomController> zoomCtrl_;
+    float maxZoomScale_ = 1.0f;
+    float minZoomScale_ = 1.0f;
+    std::optional<float> zoomScale_;
+    std::optional<float> childScale_;
+    float enableBouncesZoom_ = true;
+    /* ============================================================================== */
 
     /* ============================= Free Scroll Enhancements ============================= */
 public:
