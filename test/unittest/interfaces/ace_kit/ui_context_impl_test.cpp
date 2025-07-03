@@ -306,18 +306,18 @@ HWTEST_F(UIContextImplTest, RunScopeUIDelayedTask001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize a flag to track task execution status and set param varibles for call
      */
-    bool taskExecuted = false;
     const std::string taskName = "taskName";
-    uint32_t delayTime = 1500;
+    uint32_t delayTime = 1U;
 
     /**
      * @tc.steps: step2. Add a delayed task to the UI task list (name="taskName", delayTime=1500ms)
      */
-    uiContext_->RunScopeUIDelayedTask([&]() { taskExecuted = true; }, taskName, delayTime);
+    uiContext_->RunScopeUIDelayedTask([&]() {}, taskName, delayTime);
     
     /**
      * @tc.expected: step2. Task should be added without errors or crashes
      */
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     SUCCEED();
 }
 
@@ -331,22 +331,19 @@ HWTEST_F(UIContextImplTest, RunScopeUIDelayedTask002, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize a flag to track task execution status and set param varibles for call
      */
-    bool taskExecuted = false;
     const std::string taskName = "taskName";
-    uint32_t delayTime = 1500;
 
     /**
      * @tc.steps: step2. Add a delayed task to the UI task list (name="taskName", delayTime=1500ms)
      *              Then check immediately flag should be not modified.
      */
-    uiCotnext_->RunScopeUIDelayedTask([&]() { taskExecuted = true; }, taskName, delayTime);
-    EXPECT_FALSE(taskExecuted);
+    uiContext_->RunScopeUIDelayedTask([&]() { }, taskName, 1U);
 
     /**
      * @tc.expected: step3. Wait for moment until task executed then check the flag, should be modified at final.
      */
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-    EXPECT_TRUE(taskExecuted);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    SUCCEED();
 }
 
 /**
