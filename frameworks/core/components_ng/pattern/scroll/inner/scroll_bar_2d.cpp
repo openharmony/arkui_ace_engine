@@ -63,6 +63,12 @@ ScrollBar2D::ScrollBar2D(ScrollPattern& pattern) : pattern_(pattern)
         }
         return self->vertical_.InBarTouchRegion(pointDouble) || self->horizontal_.InBarTouchRegion(pointDouble);
     });
+    scrollableEvent->SetInBarRectRegionCallback([weak = WeakClaim(this)](const PointF& point, SourceType source) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_RETURN(self, false);
+        const Point pointDouble { point.GetX(), point.GetY() };
+        return self->vertical_.InBarRectRegion(pointDouble) || self->horizontal_.InBarRectRegion(pointDouble);
+    });
     scrollableEvent->SetBarCollectTouchTargetCallback(
         [weak = WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
             TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
@@ -85,12 +91,6 @@ ScrollBar2D::ScrollBar2D(ScrollPattern& pattern) : pattern_(pattern)
             self->horizontal_.OnCollectLongPressTarget(
                 coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
         });
-    scrollableEvent->SetInBarRectRegionCallback([weak = WeakClaim(this)](const PointF& point, SourceType source) {
-        auto self = weak.Upgrade();
-        CHECK_NULL_RETURN(self, false);
-        const Point pointDouble { point.GetX(), point.GetY() };
-        return self->vertical_.InBarRectRegion(pointDouble) || self->horizontal_.InBarRectRegion(pointDouble);
-    });
 }
 
 void ScrollBar2D::InitGestures(ScrollBar& scrollBar, Axis axis)
@@ -173,10 +173,34 @@ void ScrollBar2D::Update(const std::unique_ptr<ScrollBarProperty>& props)
         ConfigureScrollBar(props, horizontal_);
     }
 
-    vertical_.SetPositionMode(pattern_.GetPositionMode()); // considers RTL
+    const PositionMode verticalMode = pattern_.IsRTL() ? PositionMode::LEFT : PositionMode::RIGHT;
+    vertical_.SetPositionMode(verticalMode);
+    painter_->UpdateVerticalBarPosition(verticalMode);
 
     const auto* renderContext = pattern_.GetRenderContext();
     UpdateBorderRadius(vertical_, renderContext);
     UpdateBorderRadius(horizontal_, renderContext);
+}
+
+namespace {
+inline float GetOverScroll(float offset, float scrollableDistance)
+{
+    return Positive(offset) ? offset : std::max(-(scrollableDistance + offset), 0.0f);
+}
+} // namespace
+
+void ScrollBar2D::SyncLayout(const OffsetF& offset, const SizeF& viewSize, const SizeF& content)
+{
+    vertical_.SetOutBoundary(GetOverScroll(offset.GetY(), content.Height() - viewSize.Height()));
+    horizontal_.SetOutBoundary(GetOverScroll(offset.GetX(), content.Width() - viewSize.Width()));
+
+    const Size sizeDouble { viewSize.Width(), viewSize.Height() };
+    vertical_.UpdateScrollBarRegion({}, sizeDouble, { 0.0, offset.GetY() }, content.Height(), 0);
+    horizontal_.UpdateScrollBarRegion({}, sizeDouble, { offset.GetX(), 0.0 }, content.Width(), 0);
+    vertical_.MarkNeedRender();
+    horizontal_.MarkNeedRender();
+
+    CHECK_NULL_VOID(painter_);
+    painter_->SetRect(vertical_.GetActiveRect(), horizontal_.GetActiveRect());
 }
 } // namespace OHOS::Ace::NG

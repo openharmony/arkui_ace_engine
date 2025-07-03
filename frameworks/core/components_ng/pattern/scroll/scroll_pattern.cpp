@@ -66,7 +66,6 @@ void ScrollPattern::OnModifyDone()
     }
     SetEdgeEffect();
     if (axis == Axis::FREE && scrollBar2d_) {
-        // update 2d scroll bar
         scrollBar2d_->Update(paintProperty->GetScrollBarProperty());
     } else {
         SetScrollBar(paintProperty->GetScrollBarProperty());
@@ -836,8 +835,9 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
 
 void ScrollPattern::UpdateScrollBarOffset()
 {
-    if (freeScroll_) {
+    if (scrollBar2d_ && freeScroll_) {
         // update 2d scroll bar
+        scrollBar2d_->SyncLayout(freeScroll_->GetOffset(), GetViewSize(), GetViewPortExtent());
         return;
     }
     CheckScrollBarOff();

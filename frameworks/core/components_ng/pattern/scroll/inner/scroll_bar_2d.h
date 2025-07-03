@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_INNER_SCROLL_BAR_2D_H
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_2d_painter.h"
 
 namespace OHOS::Ace::NG {
 class ScrollPattern;
@@ -37,6 +37,11 @@ public:
     }
 
     void Update(const std::unique_ptr<ScrollBarProperty>& props);
+
+    /**
+     * @brief Synchronize layout states of the scroll bars from Scroll component.
+     */
+    void SyncLayout(const OffsetF& offset, const SizeF& viewSize, const SizeF& content);
 
 private:
     void SetDisplayMode(ScrollBar& scrollBar, DisplayMode mode);
