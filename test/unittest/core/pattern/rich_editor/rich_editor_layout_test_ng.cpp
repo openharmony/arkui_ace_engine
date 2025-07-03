@@ -462,6 +462,14 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateConstraintByLayoutPolicy, TestSize.Level1
     layoutAlgorithm->UpdateConstraintByLayoutPolicy(contentSize, parentLayoutConstraint,
         AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(parentLayoutConstraint.maxSize.Height(), CONTAINER_HEIGHT);
+
+    CalcSize maxSize{ CalcLength(1.0), CalcLength(1.0) };
+    MeasureProperty constraint;
+    constraint.maxSize = maxSize;
+    layoutProperty->UpdateCalcLayoutProperty(constraint);
+    layoutAlgorithm->UpdateConstraintByLayoutPolicy(contentSize, parentLayoutConstraint,
+        AceType::RawPtr(layoutWrapper));
+    EXPECT_NE(parentLayoutConstraint.maxSize.Height(), CONTAINER_HEIGHT);
 }
 
 /**
