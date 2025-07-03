@@ -186,6 +186,27 @@ private:
     bool isScrollable_ = true;
     bool isNavDestinationShow_ = true;
 };
+
+class ScrollBar2DPainter : public OverlayModifier {
+    DECLARE_ACE_TYPE(ScrollBar2DPainter, OverlayModifier)
+public:
+    ScrollBar2DPainter() = default;
+    void onDraw(DrawingContext& drawingContext) override
+    {
+        vertical_.onDraw(drawingContext);
+        horizontal_.onDraw(drawingContext);
+    }
+
+    void SetOpacity(uint8_t opacity)
+    {
+        vertical_.SetOpacity(opacity);
+        horizontal_.SetOpacity(opacity);
+    }
+
+private:
+    ScrollBarOverlayModifier vertical_;
+    ScrollBarOverlayModifier horizontal_;
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_OVERLAY_MODIFIER_H

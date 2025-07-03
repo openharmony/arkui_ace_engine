@@ -46,6 +46,10 @@ void ScrollPaintMethod::PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintW
 
 void ScrollPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
+    if (overlay2d_.Upgrade()) {
+        UpdateOverlayModifier2d(paintWrapper);
+        return;
+    }
     CHECK_NULL_VOID(paintWrapper);
     auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
     CHECK_NULL_VOID(scrollBarOverlayModifier);

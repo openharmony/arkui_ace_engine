@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/pattern/scroll/free_scroll_controller.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_2d.h"
 #include "core/components_ng/pattern/scroll/scroll_accessibility_property.h"
 #include "core/components_ng/pattern/scroll/scroll_content_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
@@ -469,6 +470,7 @@ public:
 
 private:
     RefPtr<FreeScrollController> freeScroll_;
+    RefPtr<ScrollBar2D> scrollBar2d_;
     /* ============================================================================== */
 
     // scrollSnap

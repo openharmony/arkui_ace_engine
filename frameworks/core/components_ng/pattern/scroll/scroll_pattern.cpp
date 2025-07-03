@@ -52,8 +52,10 @@ void ScrollPattern::OnModifyDone()
         ResetPosition();
         if (axis == Axis::FREE) {
             freeScroll_ = MakeRefPtr<FreeScrollController>(*this);
+            scrollBar2d_ = MakeRefPtr<ScrollBar2D>(*this);
         } else {
             freeScroll_.Reset();
+            scrollBar2d_.Reset();
         }
     }
     if (!GetScrollableEvent()) {
@@ -63,7 +65,12 @@ void ScrollPattern::OnModifyDone()
 #endif
     }
     SetEdgeEffect();
-    SetScrollBar(paintProperty->GetScrollBarProperty());
+    if (axis == Axis::FREE && scrollBar2d_) {
+        // update 2d scroll bar
+        scrollBar2d_->Update(paintProperty->GetScrollBarProperty());
+    } else {
+        SetScrollBar(paintProperty->GetScrollBarProperty());
+    }
     SetAccessibilityAction();
     if (scrollSnapUpdate_) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -92,8 +99,12 @@ RefPtr<NodePaintMethod> ScrollPattern::CreateNodePaintMethod()
     auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
     auto drawDirection = (layoutDirection == TextDirection::RTL);
     auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
-    paint->SetScrollBar(GetScrollBar());
-    paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
+    if (scrollBar2d_) {
+        paint->SetOverlay2DPainter(scrollBar2d_->GetPainter());
+    } else {
+        paint->SetScrollBar(GetScrollBar());
+        paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
+    }
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
@@ -825,6 +836,10 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
 
 void ScrollPattern::UpdateScrollBarOffset()
 {
+    if (freeScroll_) {
+        // update 2d scroll bar
+        return;
+    }
     CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;

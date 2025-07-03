@@ -57,6 +57,9 @@ public:
 
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
     {
+        if (auto scrollBarPainter2d = overlay2d_.Upgrade()) {
+            return scrollBarPainter2d;
+        }
         return scrollBarOverlayModifier_.Upgrade();
     }
 
@@ -81,6 +84,18 @@ private:
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
     WeakPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
+
+    /* ============================= Free Scroll Enhancements ============================= */
+public:
+    void SetOverlay2DPainter(const WeakPtr<ScrollBar2DPainter>& overlay2d)
+    {
+        overlay2d_ = overlay2d;
+    }
+private:
+    void UpdateOverlayModifier2d(PaintWrapper* paintWrapper) {}
+
+    WeakPtr<ScrollBar2DPainter> overlay2d_;
+    /* ============================================================================== */
 };
 } // namespace OHOS::Ace::NG
 
