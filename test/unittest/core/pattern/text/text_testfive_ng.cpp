@@ -2685,6 +2685,25 @@ HWTEST_F(TextTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateRectForSymbolShadow001
+ * @tc.desc: test text_pattern.cpp UpdateRectForSymbolShadow function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateRectForSymbolShadow001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    RectF rectsForPlaceholders(0, 0, 10, 10);
+    pattern->UpdateRectForSymbolShadow(rectsForPlaceholders, 0, 0, 0.0);
+    auto shadow = textLayoutProperty->GetTextShadow().value();
+    EXPECT_TRUE(shadow.empty());
+}
+
+/**
  * @tc.name: UpdateContainerChildren001
  * @tc.desc: test text_pattern.cpp UpdateContainerChildren function
  * @tc.type: FUNC

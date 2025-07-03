@@ -60,11 +60,6 @@ enum class SymbolGradientType {
     LINEAR_GRADIENT,
 };
 
-struct Point2F {
-    float x{0.0f};
-    float y{0.0f};
-};
-
 enum class SDKGradientDirection {
     Left,
     Top,
@@ -91,25 +86,26 @@ static const std::unordered_map<SDKGradientDirection, float> GRADIENT_DIRECTION_
 
 struct SymbolGradient {
     SymbolGradientType type = SymbolGradientType::COLOR_SHADER;
-    Point2F center;
     std::vector<Color> symbolColor;
     std::vector<float> symbolOpacities;
     bool repeating = false;
     std::optional<float> angle;
-    float radius = 0.0f;
+    std::optional<Dimension> radius;
+    std::optional<Dimension> radialCenterX;
+    std::optional<Dimension> radialCenterY;
 
     bool operator==(const SymbolGradient& other) const
     {
     return type == other.type &&
-           NearZero(center.x - other.center.x) &&
-           NearZero(center.y - other.center.y) &&
+           radialCenterX == other.radialCenterX &&
+           radialCenterY == other.radialCenterY &&
            symbolColor == other.symbolColor &&
            symbolOpacities.size() == other.symbolOpacities.size() &&
            std::equal(symbolOpacities.begin(), symbolOpacities.end(), other.symbolOpacities.begin(),
                      [](float a, float b) { return NearZero(a - b); }) &&
            repeating == other.repeating &&
            ((!angle && !other.angle) || (angle && other.angle && NearZero(*angle - *other.angle))) &&
-           NearZero(radius - other.radius);
+           radius == other.radius;
     }
 };
 

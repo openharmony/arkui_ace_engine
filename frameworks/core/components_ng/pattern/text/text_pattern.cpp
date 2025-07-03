@@ -5265,9 +5265,39 @@ OffsetF TextPattern::GetDragUpperLeftCoordinates()
     return GetParentGlobalOffset() + offset;
 }
 
+void TextPattern::UpdateRectForSymbolShadow(RectF& rect, float offsetX, float offsetY, float blurRadius) const
+{
+    float blur = blurRadius * 2.0f;
+    float leftOffsetX = 0.0f;
+    float rightOffsetX = 0.0f;
+    float upOffsetY = 0.0f;
+    float downOffsetY = 0.0f;
+    if (LessNotEqual(offsetX - blurRadius, leftOffsetX)) {
+        leftOffsetX = offsetX - blur;
+    }
+    if (GreatNotEqual(offsetX + blur, rightOffsetX)) {
+        rightOffsetX = offsetX + blur;
+    }
+    if (GreatNotEqual(offsetY - blur, upOffsetY)) {
+        upOffsetY = offsetY - blur;
+    }
+    if (GreatNotEqual(offsetY + blur, downOffsetY)) {
+        downOffsetY = offsetY + blur;
+    }
+
+    rect.SetRect(
+        leftOffsetX, upOffsetY, rect.Width() + rightOffsetX - leftOffsetX, rect.Height() + downOffsetY - upOffsetY);
+}
+
 void TextPattern::ProcessBoundRectByTextShadow(RectF& rect)
 {
     auto property = GetHost()->GetLayoutProperty<TextLayoutProperty>();
+    auto shadowOpt  = property->GetSymbolShadow();
+    if (shadowOpt.has_value()) {
+        const auto& symbolShadow = shadowOpt.value();
+        UpdateRectForSymbolShadow(rect, symbolShadow.offset.first, symbolShadow.offset.second, symbolShadow.radius);
+        return;
+    }
     auto shadows = property->GetTextShadow();
     if (!shadows.has_value()) {
         return;
