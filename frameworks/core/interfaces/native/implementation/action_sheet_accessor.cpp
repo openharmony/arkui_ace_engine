@@ -45,10 +45,12 @@ ActionSheetInfo Convert(const Ark_SheetInfo& src)
     }
 
     auto action = Converter::OptConvert<VoidCallback>(src.action);
-    auto onClick = [callback = CallbackHelper(*action)](GestureEvent& info) {
-        callback.Invoke();
-    };
-    info.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(onClick));
+    if (action.has_value()) {
+        auto onClick = [callback = CallbackHelper(*action)](GestureEvent& gestureInfo) { callback.Invoke(); };
+        info.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(onClick));
+    } else {
+        info.action = nullptr;
+    }
     return info;
 }
 } // namespace OHOS::Ace::NG::Converter
@@ -136,9 +138,9 @@ void ShowImpl(const Ark_ActionSheetOptions* value)
         auto cancelFunc = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
         dialogProps.onCancel = cancelFunc;
     }
-    dialogProps.onLanguageChange = [value, updateDialogProperties = UpdateDynamicDialogProperties](
+    dialogProps.onLanguageChange = [actionSheetValue = *value, updateDialogProperties = UpdateDynamicDialogProperties](
         DialogProperties& dialogProps) {
-        updateDialogProperties(dialogProps, *value);
+        updateDialogProperties(dialogProps, actionSheetValue);
     };
     OHOS::Ace::NG::ActionSheetModelNG sheetModel;
     sheetModel.ShowActionSheet(dialogProps);

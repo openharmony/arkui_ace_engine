@@ -74,7 +74,6 @@ void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<RatingPattern>();
     CHECK_NULL_VOID(pattern);
-
     if (pattern->UseContentModifier()) {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             host->GetGeometryNode()->ResetContent();
@@ -97,10 +96,12 @@ void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_EQUAL_VOID(stars, 0);
     float singleWidth = ratingSize.Width() / static_cast<float>(stars);
     SizeF singleStarSize(singleWidth, ratingSize.Height());
-
     // step2: make 3 images canvas and set its dst size as single star size.
+    CHECK_NULL_VOID(foregroundLoadingCtx_);
     foregroundLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
+    CHECK_NULL_VOID(secondaryLoadingCtx_);
     secondaryLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
+    CHECK_NULL_VOID(backgroundLoadingCtx_);
     backgroundLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
     if (pattern->IsNeedFocusStyle()) {
         backgroundFocusLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
