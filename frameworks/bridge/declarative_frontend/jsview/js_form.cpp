@@ -68,6 +68,7 @@ void JSForm::Create(const JSCallbackInfo& info)
     JSRef<JSVal> wantValue = obj->GetProperty("want");
     JSRef<JSVal> renderingMode = obj->GetProperty("renderingMode");
     JSRef<JSVal> shape = obj->GetProperty("shape");
+    JSRef<JSVal> exemptAppLock = obj->GetProperty("exemptAppLock");
     RequestFormInfo formInfo;
     if (id->IsString()) {
         if (!StringUtils::IsNumber(id->ToString())) {
@@ -88,6 +89,7 @@ void JSForm::Create(const JSCallbackInfo& info)
     formInfo.bundleName = bundle->ToString();
     formInfo.abilityName = ability->ToString();
     formInfo.moduleName = module->ToString();
+    formInfo.exemptAppLock = exemptAppLock->ToBoolean();
     if (!dimension->IsNull() && !dimension->IsEmpty()) {
         formInfo.dimension = dimension->ToNumber<int32_t>();
     }

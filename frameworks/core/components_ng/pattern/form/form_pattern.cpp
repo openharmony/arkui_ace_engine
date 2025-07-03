@@ -801,7 +801,7 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
         return;
     }
     bool isFormProtected = IsFormBundleProtected(info.bundleName, info.id);
-    if (isFormProtected || isFormBundleForbidden)  {
+    if (!info.exemptAppLock && (isFormProtected || isFormBundleForbidden))  {
         auto newFormSpecialStyle = formSpecialStyle_;
         newFormSpecialStyle.SetIsLockedByAppLock(isFormProtected);
         newFormSpecialStyle.SetIsForbiddenByParentControl(isFormBundleForbidden);
@@ -2699,6 +2699,10 @@ bool FormPattern::IsFormBundleProtected(const std::string& bundleName, int64_t f
 
 void FormPattern::HandleLockEvent(bool isLock)
 {
+    if (cardInfo_.exemptAppLock) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "Is funInteraction form, no need continue.");
+        return;
+    }
     auto newFormSpecialStyle = formSpecialStyle_;
     newFormSpecialStyle.SetIsLockedByAppLock(isLock);
     HandleFormStyleOperation(newFormSpecialStyle);
