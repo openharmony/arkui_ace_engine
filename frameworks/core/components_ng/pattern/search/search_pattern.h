@@ -179,7 +179,7 @@ public:
     void CreateCancelIcon();
     const Dimension ConvertImageIconSizeValue(const Dimension& fontSizeValue);
     void UpdateDisable(const std::u16string& textValue);
-    void UpdateEnable(bool needToenable);
+    void UpdateEnable(bool needToEnable);
     float GetMaxFontScale();
     float GetMinFontScale();
     void SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& config);

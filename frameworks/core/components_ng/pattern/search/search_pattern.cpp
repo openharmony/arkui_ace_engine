@@ -189,7 +189,7 @@ void SearchPattern::UpdateDisable(const std::u16string& textValue)
     }
 }
 
-void SearchPattern::UpdateEnable(bool needToenable)
+void SearchPattern::UpdateEnable(bool needToEnable)
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -197,14 +197,13 @@ void SearchPattern::UpdateEnable(bool needToenable)
     CHECK_NULL_VOID(searchButtonFrameNode);
     auto buttonEventHub = searchButtonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
-    if (needToenable) {
+    if (needToEnable) {
         buttonEventHub->SetEnabled(true);
     } else {
         buttonEventHub->SetEnabled(false);
     }
     isSearchButtonEnabled_ = buttonEventHub->IsEnabled();
     searchButtonFrameNode->MarkModifyDone();
-    searchButtonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 bool SearchPattern::IsEventEnabled(const std::u16string& textValue, int16_t style)
