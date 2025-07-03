@@ -9781,6 +9781,8 @@ void SetOnClickInfo(ArkUINodeEvent& event, GestureEvent& info, bool usePx)
     event.clickEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
     // deviceid
     event.clickEvent.deviceId = info.GetDeviceId();
+    // targetDisplayId
+    event.clickEvent.targetDisplayId = info.GetTargetDisplayId();
     // modifierkeystates
     event.clickEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
     if (!info.GetFingerList().empty()) {
@@ -10369,6 +10371,8 @@ void TriggerOnHoverEvent(void* extraParam, int32_t nodeId, bool isHover, HoverIn
     // globalDisplayX globalDisplayY
     event.hoverEvent.globalDisplayX = info.GetGlobalDisplayLocation().GetX();
     event.hoverEvent.globalDisplayY = info.GetGlobalDisplayLocation().GetY();
+    // targetDisplayId
+    event.hoverEvent.targetDisplayId = info.GetTargetDisplayId();
     SendArkUISyncEvent(&event);
     info.SetStopPropagation(event.hoverEvent.stopPropagation);
 }
