@@ -1269,7 +1269,7 @@ void JSTextPicker::SetSelectedInternal(
         if (selectedValues.size() > 0 && selectedValues.size() < i + 1) {
             selectedValues.emplace_back(0);
         } else {
-            if (selectedValues[i] >= options[i].rangeResult.size()) {
+            if (selectedValues.size() > 0 && options.size() > 0 && selectedValues[i] >= options[i].rangeResult.size()) {
                 selectedValues[i] = 0;
             }
         }
