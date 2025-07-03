@@ -99,6 +99,8 @@ bool GetBoolParam(ani_env* env, ani_object object, bool& result);
 bool GetBoolParam(ani_env* env, ani_object object, const char *name, bool& result);
 bool GetInt32Param(ani_env* env, ani_object object, int32_t& result);
 bool GetInt32Param(ani_env* env, ani_object object, const char *name, int32_t& result);
+bool GetLongParam(ani_env* env, ani_object object, long& result);
+bool GetLongParam(ani_env* env, ani_object object, const char *name, long& result);
 bool GetDoubleParam(ani_env* env, ani_object object, double& result);
 bool GetDoubleParam(ani_env* env, ani_object object, const char *name, double& result);
 bool GetFloatParam(ani_env* env, ani_object object, float& result);

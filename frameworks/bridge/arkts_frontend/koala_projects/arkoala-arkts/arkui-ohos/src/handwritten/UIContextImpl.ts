@@ -689,7 +689,20 @@ export class PromptActionImpl extends PromptAction {
         if (content.getNodePtr() !== undefined) {
             contentPtr = content.getNodePtr() as (KPointer)
         }
-        const retval = promptAction.openCustomDialog1(contentPtr, options);
+
+        let optionsInternal: promptAction.DialogOptionsInternal = {};
+        if (options != undefined) {
+            if (options.transition !== undefined && options.transition!.getPeer() !== undefined) {
+                optionsInternal.transition = options.transition!.getPeer()!.ptr;
+            }
+            if (options.dialogTransition !== undefined && options.dialogTransition!.getPeer() !== undefined) {
+                optionsInternal.dialogTransition = options.dialogTransition!.getPeer()!.ptr;
+            }
+            if (options.maskTransition !== undefined && options.maskTransition!.getPeer() !== undefined) {
+                optionsInternal.maskTransition = options.maskTransition!.getPeer()!.ptr;
+            }
+        }
+        const retval = promptAction.openCustomDialog1(contentPtr, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
     }
@@ -701,7 +714,20 @@ export class PromptActionImpl extends PromptAction {
             return ArkComponentRootPeer.create(undefined);
         }, options.builder, this.instanceId_);
         let builderPtr = peerNode.peer.ptr;
-        const retval = promptAction.openCustomDialog(builderPtr, options);
+
+        let optionsInternal: promptAction.DialogOptionsInternal = {};
+        if (options != undefined) {
+            if (options.transition !== undefined && options.transition!.getPeer() !== undefined) {
+                optionsInternal.transition = options.transition!.getPeer()!.ptr;
+            }
+            if (options.dialogTransition !== undefined && options.dialogTransition!.getPeer() !== undefined) {
+                optionsInternal.dialogTransition = options.dialogTransition!.getPeer()!.ptr;
+            }
+            if (options.maskTransition !== undefined && options.maskTransition!.getPeer() !== undefined) {
+                optionsInternal.maskTransition = options.maskTransition!.getPeer()!.ptr;
+            }
+        }
+        const retval = promptAction.openCustomDialog(builderPtr, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
     }

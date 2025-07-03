@@ -62,6 +62,9 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuPromise(
 bool GetKeyboardAvoidMode(ani_env* env, ani_object object, OHOS::Ace::KeyboardAvoidMode& result);
 bool GetKeyboardAvoidDistance(ani_env *env, ani_object object, std::optional<OHOS::Ace::Dimension>& result);
 bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
+bool GetTransitionEffectParam(ani_env* env, ani_object object, const char *name,
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::ChainedTransitionEffect>& result);
+bool GetDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
 std::function<void()> GetCustomBuilder(ani_env *env, ani_long builder);
 bool GetCornerRadius(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG::BorderRadiusProperty>& result);
 bool GetBorderWidth(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG::BorderWidthProperty>& result);
