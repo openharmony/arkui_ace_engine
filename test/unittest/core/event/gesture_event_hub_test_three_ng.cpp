@@ -1415,4 +1415,58 @@ HWTEST_F(GestureEventHubTestNg, UpdateMenuNode002, TestSize.Level1)
     EXPECT_EQ(data.menuPositionRight, 0.0f);
     EXPECT_EQ(data.menuPositionBottom, 0.0f);
 }
+
+/**
+ * @tc.name: MinRecognizerGroupLoopSizeTest001
+ * @tc.desc: Test ProcessTouchTestHit
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, MinRecognizerGroupLoopSizeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    OffsetF coordinateOffset;
+    TouchRestrict touchRestrict;
+    TouchTestResult innerTargets;
+    TouchTestResult finalResult;
+    ResponseLinkResult responseLinkResult;
+    PointF localPoint;
+
+    /**
+     * @tc.steps: step2. create userRecognizer and set to gestureHierarchy_.
+     */
+    auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(1, 1, false);
+    gestureEventHub->gestureHierarchy_.emplace_back(longPressRecognizer);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0.0);
+    panRecognizer->SetPriority(GesturePriority::Parallel);
+    gestureEventHub->gestureHierarchy_.emplace_back(panRecognizer);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
+
+    auto otherFrameNode = FrameNode::CreateFrameNode("otherButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto otherClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    otherClickRecognizer->AttachFrameNode(otherFrameNode);
+    std::vector<RefPtr<NGGestureRecognizer>> exclusiveRecognizerGroup;
+    exclusiveRecognizerGroup.push_back(otherClickRecognizer);
+    auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(exclusiveRecognizerGroup);
+    gestureEventHub->externalExclusiveRecognizer_.push_back(exclusiveRecognizer);
+
+    /**
+     * @tc.steps: step3. call ProcessTouchTestHit , recognizer is not instance of recognizer group
+     * @tc.expected: result is false
+     */
+    auto result = gestureEventHub->ProcessTouchTestHit(
+        coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, nullptr, responseLinkResult);
+    auto sizeOfResponseLinkResult = static_cast<int32_t>(responseLinkResult.size());
+    EXPECT_FALSE(result);
+    EXPECT_EQ(sizeOfResponseLinkResult, 3);
+}
 } // namespace OHOS::Ace::NG
