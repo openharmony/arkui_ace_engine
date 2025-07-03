@@ -1359,4 +1359,39 @@ HWTEST_F(WaterFlowSegmentCommonTest, CustomNode001, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, -1);
     EXPECT_EQ(pattern_->layoutInfo_->childrenCount_, 10);
 }
+
+/**
+ * @tc.name: ClearCacheAfterIndexTest001
+ * @tc.desc: Test ClearCacheAfterIndex behavior for negative, normal, boundary, out-of-bounds, and zero indices.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, ClearCacheAfterIndexTest001, TestSize.Level1)
+{
+    WaterFlowLayoutInfo info;
+    info.itemInfos_.resize(10);
+    EXPECT_EQ(info.itemInfos_.size(), 10u);
+
+    // Case 1: Negative index – should clear all (newIndex = 0)
+    info.ClearCacheAfterIndex(-1);
+    EXPECT_EQ(info.itemInfos_.size(), 0u);
+
+    // Case 2: Normal index – resize to currentIndex + 1 = 6
+    info.itemInfos_.resize(10);
+    info.ClearCacheAfterIndex(5);
+    EXPECT_EQ(info.itemInfos_.size(), 6u);
+
+    // Case 3: Exact-boundary index – newSize == current size, should not resize
+    info.itemInfos_.resize(6);
+    info.ClearCacheAfterIndex(5);
+    EXPECT_EQ(info.itemInfos_.size(), 6u);
+
+    // Case 4: Out-of-bounds index – newSize > current size, should not resize
+    info.ClearCacheAfterIndex(10);
+    EXPECT_EQ(info.itemInfos_.size(), 6u);
+
+    // Case 5: Zero index – resize to 1
+    info.itemInfos_.resize(5);
+    info.ClearCacheAfterIndex(0);
+    EXPECT_EQ(info.itemInfos_.size(), 1u);
+}
 } // namespace OHOS::Ace::NG
