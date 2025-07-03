@@ -182,7 +182,8 @@ ArkUINativeModuleValue NavDestinationBridge::SetBackgroundColor(ArkUIRuntimeCall
     Color color;
     RefPtr<ResourceObject> backgroundColorResObj;
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, backgroundColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, backgroundColorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationBackgroundColor(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
