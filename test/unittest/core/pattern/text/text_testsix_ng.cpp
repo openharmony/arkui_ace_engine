@@ -398,7 +398,7 @@ HWTEST_F(TextTestSixNg, ResetTextEffectBeforeLayoutTest001, TestSize.Level1)
 
     layoutProperty->UpdateTextEffectStrategy(TextEffectStrategy::FLIP);
 
-    result = pattern->ResetTextEffectBeforeLayout();
+    result = pattern->ResetTextEffectBeforeLayout(false);
     EXPECT_FALSE(result);
 }
 
