@@ -166,9 +166,6 @@ class BuilderNode extends Disposable {
     inheritFreezeOptions(enable) {
         this._JSBuilderNode.inheritFreezeOptions(enable);
     }
-    enableConsume() {
-        this._JSBuilderNode.enableConsume();
-    }
 }
 class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {
@@ -182,9 +179,6 @@ class JSBuilderNode extends BaseNode {
         this.parentallowFreeze = false;
         this.isFreeze = false;
         this.__parentViewOfBuildNode = undefined;
-    }
-    enableConsume() {
-        this.__enableBuilderNodeConsume__ = true;
     }
     findProvidePU__(providePropName) {
         if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {
@@ -290,6 +284,7 @@ class JSBuilderNode extends BaseNode {
         this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
         const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
         this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
+        this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing) ? (options?.enableProvideConsumeCrossing) : false;
         this.params_ = params;
         if (options?.localStorage instanceof LocalStorage) {
             this.setShareLocalStorage(options.localStorage);
@@ -311,7 +306,7 @@ class JSBuilderNode extends BaseNode {
         this.frameNode_.setBaseNode(this);
         this.frameNode_.setBuilderNode(this);
         let id = this.frameNode_.getUniqueId();
-        if (this.id_ && this.id_ != id) {
+        if (this.id_ && this.id_ !== id) {
             this.__parentViewOfBuildNode?.removeChildBuilderNode(this.id_);
         }
         this.id_ = id;
@@ -2464,7 +2459,7 @@ class ColorMetrics {
         return this.resourceId_;
     }
     setColorSpace(colorSpace) {
-        if (ColorSpace.DISPLAY_P3 == colorSpace || ColorSpace.SRGB == colorSpace) {
+        if (ColorSpace.DISPLAY_P3 === colorSpace || ColorSpace.SRGB === colorSpace) {
             this.colorSpace_ = colorSpace;
         }
     }
@@ -3251,6 +3246,9 @@ class NodeContent extends Content {
  * limitations under the License.
  */
 function __establishConnection__(allow, parentView, builderIds) {
+    if (!parentView) {
+        return false;
+    }
     builderIds.forEach((builderId, indx) => {
         let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(builderId);
         let builderNode = builderNodePtr?.deref()?.getBuilderNode();
@@ -3262,11 +3260,14 @@ function __establishConnection__(allow, parentView, builderIds) {
             builderNode.setAllowFreezeWhenInactive(allow);
         }
         builderNode.__parentViewOfBuildNode = parentView;
-        parentView.addChildBuilderNode(builderNode);
+        parentView?.addChildBuilderNode(builderNode);
     });
     return true;
 }
 function __disconnectConnection__(parentView, builderIds) {
+    if (!parentView) {
+        return false;
+    }
     builderIds.forEach((builderId, indx) => {
         let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(builderId);
         let builderNode = builderNodePtr?.deref()?.getBuilderNode();
@@ -3279,7 +3280,7 @@ function __disconnectConnection__(parentView, builderIds) {
             builderNode.setActiveInternal(true);
         }
         builderNode.__parentViewOfBuildNode = undefined;
-        parentView.removeChildBuilderNode(builderId);
+        parentView?.removeChildBuilderNode(builderId);
     });
     return true;
 }
@@ -3304,6 +3305,7 @@ globalThis.__addBuilderNodeToBuilder__ = function __addBuilderNodeToBuilder__(id
 globalThis.__deleteBuilderNodeFromBuilder__ = function __deleteBuilderNodeFromBuilder__(id, builderIds) {
     return __disconnectConnection__(UINodeRegisterProxy.GetViewBuildNodeBase(id), builderIds);
 };
+
 
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,

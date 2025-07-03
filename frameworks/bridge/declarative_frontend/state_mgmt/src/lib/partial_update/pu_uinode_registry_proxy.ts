@@ -148,9 +148,11 @@ class UINodeRegisterProxy {
      */
     public static GetViewBuildNodeBase(elmtId: number): ViewBuildNodeBase | undefined {
         const viewWeakRef = this.ElementIdToOwningViewPU_.get(elmtId);
-        if (viewWeakRef) {
+        if (viewWeakRef && 'deref' in viewWeakRef) {
             const view = viewWeakRef.deref();
-            return view;
+            if (view) {
+                return view;
+            }
         }
         stateMgmtConsole.warn(`fail to get view for elmtIds ${elmtId}`);
         return undefined;

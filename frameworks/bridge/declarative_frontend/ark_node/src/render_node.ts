@@ -365,7 +365,7 @@ class ColorMetrics {
     return this.resourceId_;
   }
   setColorSpace(colorSpace: ColorSpace): void {
-    if (ColorSpace.DISPLAY_P3 == colorSpace || ColorSpace.SRGB == colorSpace) {
+    if (ColorSpace.DISPLAY_P3 === colorSpace || ColorSpace.SRGB === colorSpace) {
       this.colorSpace_ = colorSpace;
     }
   }

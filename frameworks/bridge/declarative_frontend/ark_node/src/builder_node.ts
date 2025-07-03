@@ -81,9 +81,6 @@ class BuilderNode extends Disposable {
   public inheritFreezeOptions(enable: boolean): void {
     this._JSBuilderNode.inheritFreezeOptions(enable);
   }
-  public enableConsume(): void {
-    this._JSBuilderNode.enableConsume();
-  }
 }
 
 class JSBuilderNode extends BaseNode implements IDisposable {
@@ -111,9 +108,6 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.parentallowFreeze = false;
     this.isFreeze = false;
     this.__parentViewOfBuildNode = undefined;
-  }
-  public enableConsume(): void {
-    this.__enableBuilderNodeConsume__ = true;
   }
   public findProvidePU__(providePropName: string): ObservedPropertyAbstractPU<any> | undefined {
     if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {
@@ -219,6 +213,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
     const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
     this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
+    this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing)? (options?.enableProvideConsumeCrossing) : false; 
     this.params_ = params;
     if (options?.localStorage instanceof LocalStorage) {
       this.setShareLocalStorage(options.localStorage);
@@ -240,7 +235,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.frameNode_.setBaseNode(this);
     this.frameNode_.setBuilderNode(this);
     let id = this.frameNode_.getUniqueId();
-    if (this.id_ && this.id_ != id) {
+    if (this.id_ && this.id_ !== id) {
       this.__parentViewOfBuildNode?.removeChildBuilderNode(this.id_);
     }
     this.id_ = id;
