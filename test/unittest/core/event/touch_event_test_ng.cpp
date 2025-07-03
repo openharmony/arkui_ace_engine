@@ -608,7 +608,6 @@ HWTEST_F(TouchEventTestNg, TouchEventTest006, TestSize.Level1)
  * @tc.name: TouchEventOriginalIdTest001
  * @tc.desc: TriggerTouchCallBack.
  * @tc.type: FUNC
-
  */
 HWTEST_F(TouchEventTestNg, TouchEventOriginalIdTest001, TestSize.Level1)
 {
@@ -633,7 +632,6 @@ HWTEST_F(TouchEventTestNg, TouchEventOriginalIdTest001, TestSize.Level1)
  * @tc.name: TouchEventOriginalIdTest002
  * @tc.desc: TriggerTouchCallBack.
  * @tc.type: FUNC
-
  */
 HWTEST_F(TouchEventTestNg, TouchEventOriginalIdTest002, TestSize.Level1)
 {
