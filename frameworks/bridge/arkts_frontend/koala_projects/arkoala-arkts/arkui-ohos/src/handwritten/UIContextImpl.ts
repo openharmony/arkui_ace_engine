@@ -36,7 +36,7 @@ import { ActionSheet, ActionSheetOptions } from "arkui/component/actionSheet"
 import inspector from "@ohos/arkui/inspector"
 import { ComponentContent } from 'arkui/ComponentContent'
 import overlayManager from '@ohos/overlayManager'
-import promptAction from '@ohos/promptAction'
+import promptAction, { LevelOrder } from '@ohos/promptAction'
 import { ContextMenu } from 'arkui/component/contextMenu'
 import { ArkUIAniModule } from "arkui.ani"
 import { FontOptions, FontInfo } from "@ohos/font"
@@ -567,13 +567,13 @@ export class OverlayManagerImpl extends OverlayManager {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
-    addComponentContentWithOrder(content: ComponentContent, levelOrder?: number): void {
+    addComponentContentWithOrder(content: ComponentContent, levelOrder?: LevelOrder): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let ptr: KPointer = 0
         if (content.getNodePtr() !== undefined) {
             ptr = content.getNodePtr() as (KPointer)
         }
-        let order: number = 0
+        let order: LevelOrder = LevelOrder.clamp(0)
         if (levelOrder !== undefined) {
             order = levelOrder
         }

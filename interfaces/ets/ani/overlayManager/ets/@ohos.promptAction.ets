@@ -12,12 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export interface OverlayManagerOptions {
-    renderRootOverlay?: boolean;
-    enableBackPressedEvent?: boolean;
-}
-
-class OverlayManagerOptionsInner implements OverlayManagerOptions {
-    renderRootOverlay?: boolean = true;
-    enableBackPressedEvent?: boolean = false;
+export declare class LevelOrder {
+    static clamp(order: number): LevelOrder;
+    getOrder(): number;
 }

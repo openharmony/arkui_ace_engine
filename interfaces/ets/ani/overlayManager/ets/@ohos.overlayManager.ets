@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import { OverlayManagerOptions } from "./@ohos.arkui.UIContext"
+import { LevelOrder } from "./@ohos.promptAction"
 
 export default namespace overlayManager {
     loadLibrary("overlayManager_ani");
@@ -23,7 +24,7 @@ export default namespace overlayManager {
 
     export native function addComponentContent(contentNode: long, index: number): void;
 
-    export native function addComponentContentWithOrder(contentNode: long, levelOrder: number): void;
+    export native function addComponentContentWithOrder(contentNode: long, levelOrder: LevelOrder): void;
 
     export native function removeComponentContent(contentNode: long): void;
 
