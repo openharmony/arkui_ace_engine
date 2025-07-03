@@ -522,6 +522,13 @@ void FontManager::OnPreviewMenuOptionClick(TextDataDetectType type, const std::s
     }
 }
 
+void FontManager::StartAbilityOnCalendar(const std::map<std::string, std::string>& params) const
+{
+    if (startAbilityOnCalendarHandler_) {
+        startAbilityOnCalendarHandler_(params);
+    }
+}
+
 #ifdef ACE_ENABLE_VK
 void FontManager::AddHybridRenderNode(const WeakPtr<NG::UINode>& node)
 {

@@ -279,7 +279,7 @@ void TextPattern::InitAiSelection(const Offset& globalOffset)
 {
     ResetAISelected(AIResetSelectionReason::INIT_SELECTION);
     CHECK_NULL_VOID(dataDetectorAdapter_ && dataDetectorAdapter_->enablePreviewMenu_ && NeedShowAIDetect() &&
-                    pManager_ && selectOverlay_);
+                    pManager_ && selectOverlay_ && IsShowHandle());
     int32_t extend = 0;
     auto host = GetHost();
     CHECK_NULL_VOID(host);

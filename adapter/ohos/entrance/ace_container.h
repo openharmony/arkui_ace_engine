@@ -67,6 +67,7 @@ class HighContrastObserver;
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AbilityOnQueryCallback = std::function<void(const std::string& queryWord)>;
+using AbilityOnCalendarCallback = std::function<void(const std::map<std::string, std::string>& params)>;
 using DataHandlerErr = OHOS::Rosen::DataHandlerErr;
 using SubSystemId = OHOS::Rosen::SubSystemId;
 using DataConsumeCallback = OHOS::Rosen::DataConsumeCallback;
@@ -413,6 +414,13 @@ public:
         }
     }
 
+    void OnStartAbilityOnCalendar(const std::map<std::string, std::string>& params)
+    {
+        if (abilityOnCalendar_) {
+            abilityOnCalendar_(params);
+        }
+    }
+
     int32_t GeneratePageId()
     {
         return pageId_++;
@@ -519,7 +527,12 @@ public:
 
     void SetOpenLinkOnMapSearch(AbilityOnQueryCallback&& callback)
     {
-        linkOnMapSearch_ = callback;
+        linkOnMapSearch_ = std::move(callback);
+    }
+
+    void SetAbilityOnCalendar(AbilityOnCalendarCallback&& callback)
+    {
+        abilityOnCalendar_ = std::move(callback);
     }
 
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
@@ -1020,6 +1033,7 @@ private:
     AbilityOnQueryCallback abilityOnInstallAppInStore_ = nullptr;
     AbilityOnQueryCallback abilityOnJumpBrowser_ = nullptr;
     AbilityOnQueryCallback linkOnMapSearch_ = nullptr;
+    AbilityOnCalendarCallback abilityOnCalendar_ = nullptr;
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 

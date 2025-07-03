@@ -121,7 +121,7 @@ bool DataDetectorAdapter::GetAiEntityMenuOptions(const AISpan& aiSpan, const Ref
 std::function<void()> DataDetectorAdapter::GetPreviewMenuOptionCallback(
     TextDataDetectType type, const std::string& content)
 {
-    return [weak = WeakClaim(this), content, type, mainId = Container::CurrentIdSafelyWithCheck()]() {
+    return [content, type, mainId = Container::CurrentIdSafelyWithCheck()]() {
         ContainerScope scope(mainId);
         auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
@@ -474,6 +474,7 @@ void DataDetectorAdapter::ParseAIJson(
         auto charOffset = item->GetInt("charOffset");
         auto oriText = item->GetString("oriText");
         auto wOriText = UtfUtils::Str8ToStr16(oriText);
+        auto startTimestamp = item->GetInt64("startTimestamp", -1);
         int32_t end = startPos + charOffset + static_cast<int32_t>(wOriText.length());
         if (charOffset < 0 || startPos + charOffset >= static_cast<int32_t>(textForAI_.length()) ||
             end >= startPos + AI_TEXT_MAX_LENGTH || oriText.empty()) {
@@ -504,6 +505,9 @@ void DataDetectorAdapter::ParseAIJson(
         aiSpan.end = end;
         aiSpan.content = oriText;
         aiSpan.type = type;
+        if (startTimestamp != -1) {
+            aiSpan.params["startTimestamp"] = std::to_string(startTimestamp);
+        }
         aiSpanMap_[aiSpan.start] = aiSpan;
     }
 }

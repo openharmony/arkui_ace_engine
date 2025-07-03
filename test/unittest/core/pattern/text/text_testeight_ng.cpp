@@ -1430,6 +1430,11 @@ HWTEST_F(TextTestEightNg, InitAiSelection001, TestSize.Level1)
     pattern->contentRect_.SetOffset(OffsetF(10.0f, 10.0f));
     pattern->baselineOffset_ = 0.0f;
 
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+
     // 5. 调用被测函数
     pattern->InitAiSelection(globalOffset);
 
