@@ -365,11 +365,11 @@ public:
     }
     static Local<panda::ArrayRef> ChoosePointToJSValue(const EcmaVM* vm, std::vector<int> input);
     static NodeInfo MakeNativeNodeInfo(ArkUINodeHandle node);
+    static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
+        Color& color, bool state, const NodeInfo& nodeInfo);
 
 private:
     static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
-    static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
-        Color& color, bool state, const NodeInfo& nodeInfo);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

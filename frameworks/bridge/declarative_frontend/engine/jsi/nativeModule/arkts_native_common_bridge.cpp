@@ -10335,6 +10335,8 @@ ArkUINativeModuleValue CommonBridge::SetFocusBox(ArkUIRuntimeCallInfo* runtimeCa
     if (!colorArg->IsUndefined() && !colorArg->IsNull() &&
         ArkTSUtils::ParseColorMetricsToColor(vm, colorArg, strokeColor, resObjColor)) {
         hasValue += 1;
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        ArkTSUtils::CompleteResourceObjectFromColor(resObjColor, strokeColor, true, nodeInfo);
     }
     focusBoxResObjs.push_back(resObjColor);
     GetArkUINodeModifiers()->getCommonModifier()->setFocusBoxStyle(nativeNode, margin.Value(),
