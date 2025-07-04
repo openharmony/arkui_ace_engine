@@ -1232,7 +1232,8 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
             auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
             if (mode == TextSelectableMode::UNSELECTABLE ||
                 textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
-                textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+                textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE ||
+                textPattern->GetTextEffect()) {
                 return;
             }
             if (!textPattern->IsSetObscured() && eventHub->IsEnabled()) {
@@ -2974,7 +2975,7 @@ bool TextPattern::IsSelectableAndCopy()
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, false);
     auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
-    return mode != TextSelectableMode::UNSELECTABLE && copyOption_ != CopyOptions::None;
+    return mode != TextSelectableMode::UNSELECTABLE && copyOption_ != CopyOptions::None && !textEffect_;
 }
 
 bool TextPattern::IsDraggable(const Offset& offset)
@@ -4372,6 +4373,10 @@ RefPtr<TextEffect> TextPattern::GetOrCreateTextEffect(const std::u16string& cont
         auto host = GetHost();
         CHECK_NULL_RETURN(host, textEffect_);
         textEffect_ = TextEffect::CreateTextEffect();
+        if (textSelector_.IsValid()) {
+            CloseSelectOverlay();
+            ResetSelection();
+        }
         TAG_LOGI(AceLogTag::ACE_TEXT, "TextPattern::GetOrCreateTextEffect create textEffeect [id:%{public}d]",
             host->GetId());
     } else {
