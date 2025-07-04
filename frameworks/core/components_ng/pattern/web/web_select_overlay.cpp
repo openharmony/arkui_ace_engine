@@ -822,12 +822,14 @@ bool WebSelectOverlay::IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchH
 
 void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnMenuItemAction menu option id %{public}d", id);
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
     if (id != OptionMenuActionId::SELECT_ALL && id != OptionMenuActionId::COPY) {
         isSelectAll_ = false;
     }
     if (!quickMenuCallback_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "OnMenuItemAction failed callback is null");
         pattern->CloseSelectOverlay();
         return;
     }
@@ -856,12 +858,12 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
             HandleOnTranslate();
             pattern->CloseSelectOverlay();
             SelectCancel();
-            return;
+            break;
         case OptionMenuActionId::SEARCH:
             HandleOnSearch();
             pattern->CloseSelectOverlay();
             SelectCancel();
-            return;
+            break;
         case OptionMenuActionId::DISAPPEAR:
             pattern->CloseSelectOverlay();
             SelectCancel();
@@ -874,7 +876,6 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
             SelectCancel();
             break;
         default:
-            TAG_LOGI(AceLogTag::ACE_WEB, "Unsupported menu option id %{public}d", id);
             break;
     }
 }
