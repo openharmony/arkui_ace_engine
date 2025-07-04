@@ -449,4 +449,27 @@ HWTEST_F(RichEditorPatternTestFiveNg, DumpInfo001, TestSize.Level1)
     EXPECT_FALSE(richEditorPattern->selectOverlay_->HasRenderTransform());
 }
 
+
+/**
+ * @tc.name: TriggerAvoidOnCaretChange
+ * @tc.desc: test rich_editor_pattern.cpp TriggerAvoidOnCaretChange function
+ * @tc.type: FUNC
+ */
+ HWTEST_F(RichEditorPatternTestFiveNg, TriggerAvoidOnCaretChange, TestSize.Level1)
+ {
+     ASSERT_NE(richEditorNode_, nullptr);
+     auto pattern_ = richEditorNode_->GetPattern<RichEditorPattern>();
+     ASSERT_NE(pattern_, nullptr);
+     auto focusHub = pattern_->GetFocusHub();
+     CHECK_NULL_VOID(focusHub);
+     focusHub->currentFocus_ = true;
+     pattern_->HandleFocusEvent();
+     auto host = pattern_->GetHost();
+     CHECK_NULL_VOID(host);
+     auto context = host->GetContext();
+     CHECK_NULL_VOID(context);
+     context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
+     pattern_->TriggerAvoidOnCaretChange();
+     EXPECT_EQ(pattern_->GetLastCaretPos(), std::nullopt);
+}
 } // namespace OHOS::Ace::NG
