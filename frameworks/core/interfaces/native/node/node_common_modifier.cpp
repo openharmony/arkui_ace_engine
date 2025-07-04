@@ -148,7 +148,7 @@ const std::vector<AnimationDirection> DIRECTION_LIST = {
 };
 
 constexpr int32_t DEFAULT_DURATION = 1000;
-std::string g_strValue;
+thread_local std::string g_strValue;
 
 BorderStyle ConvertBorderStyle(int32_t value)
 {
