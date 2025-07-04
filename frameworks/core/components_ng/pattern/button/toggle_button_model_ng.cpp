@@ -79,6 +79,12 @@ void ToggleButtonModelNG::SetSelectedColor(FrameNode* frameNode, const Color& se
     ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColorSetByUser, true, frameNode);
 }
 
+void ToggleButtonModelNG::SetSelectedColorSetByUser(FrameNode* frameNode, const bool isByUser)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColorSetByUser, isByUser, frameNode);
+}
+
 void ToggleButtonModelNG::ResetSelectedColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(

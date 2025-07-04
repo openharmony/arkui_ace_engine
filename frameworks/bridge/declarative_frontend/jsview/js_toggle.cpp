@@ -282,14 +282,12 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
     Color color;
     RefPtr<ResourceObject> resObj;
     std::optional<Color> switchPointColor;
-    bool isValidValue = false;
     if (ParseJsColor(info[0], color, resObj)) {
         switchPointColor = color;
-        isValidValue = true;
+        ToggleModel::GetInstance()->SetSwitchPointColorSetByUser(true);
     }
     CreateWithColorResourceObj(resObj, static_cast<int32_t>(ToggleColorType::SWITCH_POINT_COLOR));
     ToggleModel::GetInstance()->SetSwitchPointColor(switchPointColor);
-    ToggleModel::GetInstance()->SetSwitchPointColorSetByUser(isValidValue);
 }
 
 void JSToggle::JsPadding(const JSCallbackInfo& info)

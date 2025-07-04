@@ -766,6 +766,8 @@ void ToggleButtonPattern::OnColorConfigurationUpdate()
             Color color = theme->GetCheckedColor();
             pops->UpdateSelectedColor(color);
         }
+        host->MarkModifyDone();
+        host->MarkDirtyNode();
     }
 }
 

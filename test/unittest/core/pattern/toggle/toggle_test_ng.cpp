@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -1971,5 +1972,115 @@ HWTEST_F(ToggleTestNg, ToggleModelTest013, TestSize.Level1)
     EXPECT_TRUE(ret);
     isChecked = pattern->IsChecked();
     EXPECT_EQ(isChecked, !IS_ON);
+}
+
+/**
+ * @tc.name: SetSelectedColor001
+ * @tc.desc: Test SetSelectedColor() for CheckBox.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, SetSelectedColor001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
+    /**
+     * @tc.steps: step1. Create checkbox and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<CheckBoxPattern>(frameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<CheckBoxPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    std::optional<Color> emptySelectedColor = std::optional<Color>();
+
+    /**
+     * @tc.steps: step2. Set valid selected color.
+     * @tc.expected: The selected color flag should be true.
+     */
+    toggleModelNG.SetSelectedColor(frameNode, SELECTED_COLOR);
+    EXPECT_TRUE(paintProperty->GetCheckBoxSelectedColorFlagByUserValue(false));
+
+    /**
+     * @tc.steps: step3. Set empty selected color.
+     * @tc.expected: The selected color flag should still be true.
+     */
+    toggleModelNG.SetSelectedColor(frameNode, emptySelectedColor);
+    EXPECT_TRUE(paintProperty->GetCheckBoxSelectedColorFlagByUserValue(false));
+
+    /**
+     * @tc.steps: step4. Set valid selected color with configuration change.
+     * @tc.expected: The selected color flag should be true.
+     */
+    g_isConfigChangePerform = true;
+    toggleModelNG.SetSelectedColor(frameNode, SELECTED_COLOR);
+    EXPECT_TRUE(paintProperty->GetCheckBoxSelectedColorFlagByUserValue(false));
+
+    /**
+     * @tc.steps: step5. Set empty selected color with configuration change.
+     * @tc.expected: The selected color flag should be false.
+     */
+    toggleModelNG.SetSelectedColor(frameNode, emptySelectedColor);
+    EXPECT_FALSE(paintProperty->GetCheckBoxSelectedColorFlagByUserValue(true));
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetSelectedColor002
+ * @tc.desc: Test SetSelectedColor() for Button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, SetSelectedColor002, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    /**
+     * @tc.steps: step1. Create button and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<ToggleButtonPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    std::optional<Color> emptySelectedColor = std::optional<Color>();
+
+    /**
+     * @tc.steps: step2. Set valid selected color.
+     * @tc.expected: The selected color flag should be true.
+     */
+    toggleModelNG.SetSelectedColor(frameNode, SELECTED_COLOR);
+    EXPECT_TRUE(paintProperty->GetSelectedColorSetByUserValue(false));
+
+    /**
+     * @tc.steps: step3. Set empty selected color.
+     * @tc.expected: The selected color flag should still be true.
+     */
+    toggleModelNG.SetSelectedColor(frameNode, emptySelectedColor);
+    EXPECT_TRUE(paintProperty->GetSelectedColorSetByUserValue(false));
+
+    /**
+     * @tc.steps: step4. Set valid selected color with configuration change.
+     * @tc.expected: The selected color flag should be true.
+     */
+    g_isConfigChangePerform = true;
+    toggleModelNG.SetSelectedColor(frameNode, SELECTED_COLOR);
+    EXPECT_TRUE(paintProperty->GetSelectedColorSetByUserValue(false));
+
+    /**
+     * @tc.steps: step5. Set empty selected color with configuration change.
+     * @tc.expected: The selected color flag should be false.
+     */
+    toggleModelNG.SetSelectedColor(frameNode, emptySelectedColor);
+    EXPECT_FALSE(paintProperty->GetSelectedColorSetByUserValue(true));
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

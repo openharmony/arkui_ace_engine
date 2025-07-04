@@ -486,6 +486,12 @@ struct ArkUIButtonSizeStruct {
     ArkUI_VoidPtr maxFontSize;
 };
 
+struct ArkUIRatingStyleStruct {
+    ArkUI_VoidPtr backgroundResObj;
+    ArkUI_VoidPtr foregroundResObj;
+    ArkUI_VoidPtr secondaryResObj;
+};
+
 struct ArkUIFontWithOptionsStruct {
     ArkUI_Float32 fontSizeNumber;
     ArkUI_Int32 fontSizeUnit;
@@ -5656,6 +5662,8 @@ struct ArkUIRatingModifier {
     void (*resetStarStyle)(ArkUINodeHandle node);
     void (*setRatingOptions)(ArkUINodeHandle node, ArkUI_Float64 rating, ArkUI_Bool indicator);
     void (*resetOnChange)(ArkUINodeHandle node);
+    void (*setStarStylePtr)(ArkUINodeHandle node, ArkUI_CharPtr backgroundUri,
+        ArkUI_CharPtr foregroundUri, ArkUI_CharPtr secondaryUri, const ArkUIRatingStyleStruct& resObj);
 };
 
 struct ArkUIRowSplitModifier {
