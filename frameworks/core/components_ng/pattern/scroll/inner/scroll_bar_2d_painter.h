@@ -21,6 +21,7 @@ namespace OHOS::Ace::NG {
 class ScrollBar2D;
 class ScrollBar2DPainter : public OverlayModifier {
     DECLARE_ACE_TYPE(ScrollBar2DPainter, OverlayModifier);
+    ACE_DISALLOW_COPY_AND_MOVE(ScrollBar2DPainter);
 public:
     ScrollBar2DPainter();
     ~ScrollBar2DPainter() override = default;

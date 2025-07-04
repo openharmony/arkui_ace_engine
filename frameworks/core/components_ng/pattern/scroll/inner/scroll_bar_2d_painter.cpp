@@ -27,6 +27,12 @@ ScrollBar2DPainter::ScrollBar2DPainter()
 
     horizontal_.SetPositionMode(PositionMode::BOTTOM);
     vertical_.SetPositionMode(PositionMode::RIGHT);
+    for (auto&& prop : horizontal_.GetAttachedProperties()) {
+        AttachProperty(prop);
+    }
+    for (auto&& prop : vertical_.GetAttachedProperties()) {
+        AttachProperty(prop);
+    }
 }
 
 namespace {

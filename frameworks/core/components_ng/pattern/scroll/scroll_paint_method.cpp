@@ -88,5 +88,6 @@ void ScrollPaintMethod::UpdateOverlayModifier2d(PaintWrapper* paintWrapper)
     auto&& overlay = scrollBar->GetPainter();
     CHECK_NULL_VOID(overlay && scrollBar);
     overlay->UpdateFrom(*scrollBar);
+    scrollBar->ResetAnimationSignals();
 }
 } // namespace OHOS::Ace::NG
