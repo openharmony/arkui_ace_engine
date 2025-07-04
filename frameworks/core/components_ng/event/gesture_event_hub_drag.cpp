@@ -1639,16 +1639,13 @@ void GestureEventHub::UpdateMenuNode(
     auto menuGeometryNode = scrollNode->GetGeometryNode();
     CHECK_NULL_VOID(menuGeometryNode);
     auto menuNodeSize = menuGeometryNode->GetFrameRect();
-    RefPtr<FrameNode> imageNode;
+    RefPtr<FrameNode> imageNode = menuWrapperPattern->GetPreview();
     RectF imageNodeSize;
-    if (data.menuPreviewNode) {
-        imageNode = data.menuPreviewNode;
-        CHECK_NULL_VOID(imageNode);
-        imageNodeSize = data.originPreviewRect;
+    if (imageNode) {
+        imageNodeSize = DragDropFuncWrapper::GetPaintRectToScreen(imageNode);
         data.frameNodeRect = imageNodeSize;
     } else {
         imageNode = frameNode;
-        CHECK_NULL_VOID(imageNode);
         auto imageGeometryNode = imageNode->GetGeometryNode();
         CHECK_NULL_VOID(imageGeometryNode);
         imageNodeSize = imageGeometryNode->GetFrameRect();
