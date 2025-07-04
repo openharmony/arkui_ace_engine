@@ -564,10 +564,7 @@ void ViewAbstract::SetBackgroundColorWithResourceObj(const Color& color, const R
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
-    if (!resObj) {
-        pattern->RemoveResObj("backgroundColor");
-        return;
-    }
+    pattern->RemoveResObj("backgroundColor");
     auto &&updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject> &resObj) {
         CHECK_NULL_VOID(resObj);
         auto frameNode = weak.Upgrade();
