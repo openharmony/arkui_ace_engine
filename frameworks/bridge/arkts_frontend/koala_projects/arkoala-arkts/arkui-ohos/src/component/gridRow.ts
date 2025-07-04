@@ -138,30 +138,6 @@ export class ArkGridRowStyle extends ArkCommonMethodStyle implements GridRowAttr
         }
 }
 export class ArkGridRowComponent extends ArkCommonMethodComponent implements GridRowAttribute {
-    protected _modifierHost: ArkGridRowNode | undefined;
-    setModifierHost(value: ArkGridRowNode): void {
-        this._modifierHost = value;
-    }
-    getModifierHost(): ArkGridRowNode {
-        if (this._modifierHost === undefined || this._modifierHost === null) {
-            this._modifierHost = new ArkGridRowNode()
-            this._modifierHost!.setPeer(this.getPeer());
-        }
-        return this._modifierHost!;
-    }
-    getAttributeSet(): ArkGridRowAttributeSet  {
-        return this.getPeer()._attributeSet as ArkGridRowAttributeSet;
-    }
-    
-    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
-        let isCommonModifier: boolean = modifier instanceof GridRowModifier;
-        if (isCommonModifier) {
-            let commonModifier = modifier as object as GridRowModifier;
-            this.getPeer()._attributeSet = commonModifier.attributeSet;
-        } else if (this.getPeer()._attributeSet == null) {
-            this.getPeer()._attributeSet = new ArkGridRowAttributeSet();
-        }
-    }
     getPeer(): ArkGridRowPeer {
         return (this.peer as ArkGridRowPeer)
     }

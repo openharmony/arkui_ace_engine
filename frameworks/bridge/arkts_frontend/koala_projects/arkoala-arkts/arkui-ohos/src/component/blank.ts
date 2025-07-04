@@ -110,29 +110,6 @@ export class ArkBlankStyle extends ArkCommonMethodStyle implements BlankAttribut
     }
 }
 export class ArkBlankComponent extends ArkCommonMethodComponent implements BlankAttribute {
-    protected _modifierHost: ArkBlankNode | undefined;
-    setModifierHost(value: ArkBlankNode): void {
-        this._modifierHost = value;
-    }
-    getModifierHost(): ArkBlankNode {
-        if (this._modifierHost === undefined || this._modifierHost === null) {
-            this._modifierHost = new ArkBlankNode();
-            this._modifierHost!.setPeer(this.getPeer());
-        }
-        return this._modifierHost!;
-    }
-    getAttributeSet(): ArkBlankAttributeSet {
-        return this.getPeer()._attributeSet as ArkBlankAttributeSet;
-    }
-    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
-        let isCommonModifier: boolean = modifier instanceof BlankModifier;
-        if (isCommonModifier) {
-            let commonModifier = modifier as object as BlankModifier;
-            this.getPeer()._attributeSet = commonModifier.attributeSet;
-        } else if (this.getPeer()._attributeSet == null) {
-            this.getPeer()._attributeSet = new ArkBlankAttributeSet();
-        }
-    }
     getPeer(): ArkBlankPeer {
         return (this.peer as ArkBlankPeer)
     }
