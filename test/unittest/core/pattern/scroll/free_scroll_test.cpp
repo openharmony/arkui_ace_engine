@@ -15,6 +15,7 @@
 
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/unittest/core/pattern/scroll/scroll_test_ng.h"
+#include "ui/base/geometry/dimension.h"
 
 #include "core/components_ng/pattern/scroll/free_scroll_controller.h"
 #include "core/event/touch_event.h"
@@ -138,6 +139,15 @@ TEST_F(FreeScrollTest, RecognizerOverride001)
     EXPECT_EQ(*link.begin(), controller->freePanGesture_);
     EXPECT_EQ(*res.begin(), controller->freePanGesture_);
     ASSERT_TRUE(controller->freePanGesture_->onActionUpdate_);
+
+    ScrollModelNG::SetScrollEnabled(frameNode_.GetRawPtr(), false);
+    FlushUITasks(frameNode_);
+    res.clear();
+    link.clear();
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link);
+    EXPECT_EQ(link.size(), 1);
+    EXPECT_NE(*link.begin(), controller->freePanGesture_);
+    EXPECT_NE(*res.begin(), controller->freePanGesture_);
 }
 
 /**
@@ -153,11 +163,11 @@ TEST_F(FreeScrollTest, FreeScroll001)
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
 
-    PanUpdate({ -100, -100 });
+    PanUpdate({ -DELTA_X, -DELTA_Y });
 
     FlushUITasks(frameNode_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), -100.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -100.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -DELTA_Y);
 }
 
 /**
@@ -170,12 +180,18 @@ TEST_F(FreeScrollTest, InitialOffset001)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
-    model.SetInitialOffset({ CalcDimension(0.5, DimensionUnit::PERCENT), CalcDimension(DELTA_X) });
+    model.SetInitialOffset({ CalcDimension(0.5, DimensionUnit::PERCENT), CalcDimension(DELTA_Y) });
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
 
     EXPECT_EQ(GetChildX(frameNode_, 0), -WIDTH / 2);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -DELTA_X);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -DELTA_Y);
+
+    PanUpdate({ -DELTA_X, -DELTA_Y });
+
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -WIDTH / 2 - DELTA_X);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -DELTA_Y * 2);
 }
 
 /**
@@ -359,18 +375,6 @@ TEST_F(FreeScrollTest, Animation001)
     EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X - VELOCITY_X / pattern_->freeScroll_->friction_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
-
-    PanStart({});
-    PanUpdate({ -LARGE_DELTA_X, -LARGE_DELTA_Y });
-    FlushUITasks(frameNode_);
-    PanEnd({ -LARGE_DELTA_X, -LARGE_DELTA_Y }, { -VELOCITY_X, -VELOCITY_Y });
-    EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks(frameNode_);
-    ASSERT_TRUE(pattern_->freeScroll_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), WIDTH - CONTENT_W);
-    EXPECT_EQ(GetChildY(frameNode_, 0), HEIGHT - CONTENT_H);
-    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 }
 
 /**
@@ -407,5 +411,101 @@ TEST_F(FreeScrollTest, Animation002)
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, 0));
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+}
+
+/**
+ * @tc.name: Animation003
+ * @tc.desc: Test animation with end overScroll
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Animation003)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    model.SetInitialOffset({ CalcDimension(CONTENT_W), CalcDimension(CONTENT_H) });
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    EXPECT_EQ(GetChildX(frameNode_, 0), -CONTENT_W);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -CONTENT_H);
+    PanStart({});
+    PanUpdate({ -LARGE_DELTA_X, -LARGE_DELTA_Y });
+    FlushUITasks(frameNode_);
+    EXPECT_LT(GetChildX(frameNode_, 0), -CONTENT_W);
+    EXPECT_LT(GetChildY(frameNode_, 0), -CONTENT_H);
+    EXPECT_GT(GetChildX(frameNode_, 0), -CONTENT_W - LARGE_DELTA_X);
+    EXPECT_GT(GetChildY(frameNode_, 0), -CONTENT_H - LARGE_DELTA_Y);
+    PanEnd({ -LARGE_DELTA_X, -LARGE_DELTA_Y }, { -VELOCITY_X, -VELOCITY_Y });
+    EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    ASSERT_TRUE(pattern_->freeScroll_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), WIDTH - CONTENT_W);
+    EXPECT_EQ(GetChildY(frameNode_, 0), HEIGHT - CONTENT_H);
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+}
+
+/**
+ * @tc.name: Events001
+ * @tc.desc: Test scroll events
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Event001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    static bool scrollBegun = false;
+    model.SetOnScrollStart([]() { scrollBegun = true; });
+    model.SetOnWillScroll(
+        [](const Dimension& xOffset, const Dimension& yOffset, ScrollState state, ScrollSource source) {
+            EXPECT_EQ(xOffset.Unit(), DimensionUnit::VP);
+            EXPECT_EQ(yOffset.Unit(), DimensionUnit::VP);
+            EXPECT_EQ(xOffset.Value(), DELTA_X);
+            EXPECT_EQ(yOffset.Value(), DELTA_Y);
+            EXPECT_EQ(state, ScrollState::SCROLL);
+            EXPECT_EQ(source, ScrollSource::DRAG);
+            return TwoDimensionScrollResult { .xOffset = Dimension(DELTA_X), .yOffset = 0.0_vp };
+        });
+    static int32_t didScroll = 0;
+    model.SetOnDidScroll([](const Dimension& xOffset, const Dimension& yOffset, ScrollState state) {
+        EXPECT_EQ(xOffset.Value(), DELTA_X);
+        EXPECT_EQ(yOffset.Value(), 0.0f);
+        EXPECT_EQ(state, ScrollState::SCROLL);
+        ++didScroll;
+    });
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    PanStart({});
+    EXPECT_TRUE(scrollBegun);
+    PanUpdate({ -DELTA_X, -DELTA_Y });
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(didScroll, 1);
+
+    MockAnimationManager::GetInstance().Reset();
+}
+
+/**
+ * @tc.name: Controller001
+ * @tc.desc: Test scroll controller
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Controller001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    auto scroller = AceType::MakeRefPtr<ScrollableController>();
+    scroller->SetScrollPattern(pattern_);
+
+    const auto& controller = pattern_->freeScroll_;
+    ASSERT_TRUE(controller && controller->offset_);
+    controller->offset_->Set(OffsetF { X, Y });
+
+    EXPECT_EQ(scroller->GetCurrentOffset(), Offset(X, Y));
 }
 } // namespace OHOS::Ace::NG

@@ -77,6 +77,9 @@ Offset ScrollableController::GetCurrentOffset() const
     if (axis == Axis::NONE) {
         return Offset::Zero();
     }
+    if (axis == Axis::FREE) {
+        return pattern->GetFreeScrollOffset();
+    }
     auto pxOffset = pattern->GetTotalOffset();
     auto vpOffset = Dimension(pxOffset, DimensionUnit::PX).ConvertToVp();
     return (axis == Axis::HORIZONTAL) ? Offset(vpOffset, 0) : Offset(0, vpOffset);

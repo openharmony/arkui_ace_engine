@@ -112,9 +112,9 @@ public:
     Offset GetCurrentOffset() const
     {
         if (GetAxis() == Axis::HORIZONTAL) {
-            return Offset{currentOffset_, 0};
+            return Offset { currentOffset_, 0 };
         }
-        return Offset{0, currentOffset_};
+        return Offset { 0, currentOffset_ };
     }
 
     float GetScrollableDistance() const
@@ -129,7 +129,7 @@ public:
 
     bool IsColReverse() const
     {
-        return  direction_ == FlexDirection::COLUMN_REVERSE;
+        return direction_ == FlexDirection::COLUMN_REVERSE;
     }
 
     RefPtr<ScrollableController> GetScrollPositionController() const
@@ -323,7 +323,7 @@ public:
 
     void SetEnablePaging(ScrollPagingStatus status)
     {
-        enablePagingStatus_ =  status;
+        enablePagingStatus_ = status;
     }
 
     ScrollPagingStatus GetEnablePaging()
@@ -457,6 +457,16 @@ public:
         return nullptr;
     }
 
+    Offset GetFreeScrollOffset() const final;
+
+    /**
+     * @brief triggers onWillScroll user callback
+     * @return user-modified delta
+     */
+    OffsetF FreeModeFireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const;
+
+    void FreeModeFireOnDidScroll(const OffsetF& delta, ScrollState state) const;
+
 private:
     RefPtr<FreeScrollController> freeScroll_;
     /* ============================================================================== */
@@ -476,15 +486,15 @@ private:
     // enablePaging
     ScrollPagingStatus enablePagingStatus_ = ScrollPagingStatus::NONE;
     float lastPageLength_ = 0.0f;
-    float GetPagingOffset(float delta, float dragDistance, float velocity)  const;
+    float GetPagingOffset(float delta, float dragDistance, float velocity) const;
     float GetPagingDelta(float dragDistance, float velocity, float pageLength) const;
 
     RefPtr<ScrollContentModifier> scrollContentModifier_;
 
-    //initialOffset
+    // initialOffset
     std::optional<OffsetT<CalcDimension>> initialOffset_;
 
-    //scrollToEdge
+    // scrollToEdge
     ScrollEdgeType scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;
 
     // dump info

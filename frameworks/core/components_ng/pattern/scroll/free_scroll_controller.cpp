@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 FreeScrollController::FreeScrollController(ScrollPattern& pattern) : pattern_(pattern)
@@ -34,6 +35,7 @@ FreeScrollController::FreeScrollController(ScrollPattern& pattern) : pattern_(pa
     InitializePanRecognizer();
     InitializeTouchEvent();
 }
+
 FreeScrollController::~FreeScrollController()
 {
     if (offset_) {
@@ -65,7 +67,7 @@ void FreeScrollController::InitializePanRecognizer()
     freePanGesture_->SetOnActionStart([weak = WeakClaim(this)](const GestureEvent& event) {
         auto controller = weak.Upgrade();
         if (controller) {
-            controller->duringPan_ = true;
+            controller->HandlePanStart(event);
         }
     });
     freePanGesture_->SetOnActionUpdate([weak = WeakClaim(this)](const GestureEvent& event) {
@@ -92,22 +94,28 @@ void FreeScrollController::InitializePanRecognizer()
 
 namespace {
 /**
- * @return ratio (non-negative) between overScroll and contentLength.
+ * @return ratio (non-negative) between overScroll and viewport length.
  */
-float GetGamma(float offset, float contentLength)
+float GetGamma(float offset, float scrollableDistance, float viewLength)
 {
-    if (NearZero(contentLength)) {
+    if (NearZero(viewLength)) {
         return 1.0f;
     }
     if (Positive(offset)) {
-        return offset / contentLength;
+        return offset / viewLength;
     }
-    if (LessNotEqual(offset, -contentLength)) {
-        return (contentLength + offset) / contentLength;
+    if (LessNotEqual(offset, -scrollableDistance)) {
+        return -(scrollableDistance + offset) / viewLength;
     }
     return 0.0f;
 }
 } // namespace
+
+void FreeScrollController::HandlePanStart(const GestureEvent& event)
+{
+    duringPan_ = true;
+    pattern_.FireOnScrollStart();
+}
 
 void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
 {
@@ -115,13 +123,14 @@ void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
     const auto dy = static_cast<float>(event.GetDelta().GetY());
     const float newX = offset_->Get().GetX() + dx;
     const float newY = offset_->Get().GetY() + dy;
-    const auto& viewSize = pattern_.GetViewSize();
+    const auto scrollableArea = pattern_.GetViewPortExtent() - pattern_.GetViewSize();
 
-    const float gammaX = GetGamma(newX, viewSize.Width());
-    const float gammaY = GetGamma(newY, viewSize.Height());
+    const float gammaX = GetGamma(newX, scrollableArea.Width(), pattern_.GetViewSize().Width());
+    const float gammaY = GetGamma(newY, scrollableArea.Height(), pattern_.GetViewSize().Height());
     // apply friction if overScrolling
     OffsetF deltaF { NearZero(gammaX) ? dx : dx * pattern_.CalculateFriction(gammaX),
         NearZero(gammaY) ? dy : dy * pattern_.CalculateFriction(gammaY) };
+    deltaF = pattern_.FreeModeFireOnWillScroll(deltaF, ScrollState::SCROLL, ScrollSource::DRAG);
     offset_->Set(offset_->Get() + deltaF);
     pattern_.MarkDirty();
 }
@@ -207,5 +216,24 @@ OffsetF FreeScrollController::GetOffset() const
         return offset_->Get();
     }
     return {};
+}
+
+void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset, const SizeF& scrollableArea)
+{
+    if (offset_ && offset_->Get() != adjustedOffset) {
+        offset_->Set(adjustedOffset);
+    }
+    if (adjustedOffset != prevOffset_) {
+        // Fire onDidScroll only if the offset has changed.
+        pattern_.FreeModeFireOnDidScroll(adjustedOffset - prevOffset_, duringPan_ ? ScrollState::SCROLL : ScrollState::FLING);
+        prevOffset_ = adjustedOffset;
+    }
+    auto props = pattern_.GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    if (scrollableArea.IsNonNegative()) {
+        enableScroll_ = props->GetScrollEnabled().value_or(true);
+    } else {
+        enableScroll_ = props->GetScrollEnabled().value_or(true) && pattern_.GetAlwaysEnabled();
+    }
 }
 } // namespace OHOS::Ace::NG

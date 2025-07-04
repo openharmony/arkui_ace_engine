@@ -162,7 +162,7 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
     if (freeScroll_) {
-        freeScroll_->UpdateOffset(layoutAlgorithm->GetFreeOffset());
+        freeScroll_->OnLayoutFinished(layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetScrollableArea());
     }
     auto oldScrollableDistance = scrollableDistance_;
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
@@ -445,8 +445,47 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
     }
 }
 
+namespace {
+Dimension ToVp(float value)
+{
+    return Dimension { Dimension(value).ConvertToVp(), DimensionUnit::VP };
+}
+} // namespace
+
+OffsetF ScrollPattern::FreeModeFireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const
+{
+    auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_RETURN(eventHub, delta);
+    auto onScroll = eventHub->GetOnWillScrollEvent();
+    if (!onScroll) {
+        onScroll = eventHub->GetJSFrameNodeOnScrollWillScroll();
+    }
+    CHECK_NULL_RETURN(onScroll, delta);
+
+    // delta sign is reversed in user space
+    const auto res = onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state, source);
+    auto* context = GetContext();
+    CHECK_NULL_RETURN(context, delta);
+    return { -context->NormalizeToPx(res.xOffset), -context->NormalizeToPx(res.yOffset) };
+}
+
+void ScrollPattern::FreeModeFireOnDidScroll(const OffsetF& delta, ScrollState state) const
+{
+    auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onScroll = eventHub->GetOnDidScrollEvent();
+    if (!onScroll) {
+        onScroll = eventHub->GetJSFrameNodeOnScrollDidScroll();
+    }
+    CHECK_NULL_VOID(onScroll);
+    onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state);
+}
+
 void ScrollPattern::FireOnDidScroll(float scroll)
 {
+    if (freeScroll_) {
+        return; // using FreeModeFireOnDidScroll
+    }
     FireObserverOnDidScroll(scroll);
     FireObserverOnScrollerAreaChange(scroll);
     auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
@@ -1546,5 +1585,13 @@ void ScrollPattern::TriggerScrollBarDisplay()
     CHECK_NULL_VOID(scrollBar);
     scrollBar->PlayScrollBarAppearAnimation();
     scrollBar->ScheduleDisappearDelayTask();
+}
+Offset ScrollPattern::GetFreeScrollOffset() const
+{
+    if (freeScroll_) {
+        auto res = freeScroll_->GetOffset();
+        return { Dimension(res.GetX()).ConvertToVp(), Dimension(res.GetY()).ConvertToVp() };
+    }
+    return {};
 }
 } // namespace OHOS::Ace::NG

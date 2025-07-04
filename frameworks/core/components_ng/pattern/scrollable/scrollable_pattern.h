@@ -394,6 +394,10 @@ public:
     {
         return 0.0f;
     }
+    virtual Offset GetFreeScrollOffset() const
+    {
+        return {};
+    }
     virtual float GetContentStartOffset() const
     {
         return 0.0f;

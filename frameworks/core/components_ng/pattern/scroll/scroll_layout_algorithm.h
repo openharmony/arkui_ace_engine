@@ -55,6 +55,14 @@ public:
         return scrollableDistance_;
     }
 
+    /**
+     * @return 2D scrollable distance for free mode.
+     */
+    SizeF GetScrollableArea() const
+    {
+        return { scrollableDistance_, viewPortExtent_.Height() - viewPort_.Height() };
+    }
+
     float GetViewPortLength() const
     {
         return viewPortLength_;
