@@ -121,6 +121,13 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTreeAsync(
     }
 }
 
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ExecuteCommandAsync(const UICommandParams& params, UICommandResult&& callback)
+{
+    auto inspector = std::make_shared<NG::SimplifiedInspector>(0, params);
+    auto collector = std::make_shared<Recorder::InspectorTreeCollector>(std::move(callback), false);
+    inspector->ExecuteUICommand(collector);
+}
+
 namespace Recorder {
 constexpr char HA_CLIENT_SO_PATH[] = "libha_ace_engine.z.so";
 

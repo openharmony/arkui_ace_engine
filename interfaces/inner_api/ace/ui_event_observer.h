@@ -25,6 +25,7 @@
 
 namespace OHOS::Ace {
 using OnInspectorTreeResult = std::function<void(const std::shared_ptr<std::string>)>;
+using UICommandResult = std::function<void(const std::shared_ptr<std::string>)>;
 
 enum class InspectorInfoType: int32_t {
     CONTENT = 0,
@@ -36,6 +37,10 @@ enum class InspectorInfoType: int32_t {
 enum class InspectorPageType: int32_t {
     FOCUS = 0,
     FOREGROUND,
+};
+
+struct ACE_FORCE_EXPORT UICommandParams {
+    std::string params;
 };
 
 struct ACE_FORCE_EXPORT TreeParams {
