@@ -65,4 +65,21 @@ void ImageConstructDrawableDescriptor(
     }
     modifier->getImageAniModifier()->setDrawableDescriptor(arkNode, drawable, static_cast<int>(drawableType));
 }
+
+void ImageDrawingColorFilter(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object colorFilterAni)
+{
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !arkNode) {
+        return;
+    }
+    ani_long nativeObj = 0;
+    env->Object_GetPropertyByName_Long(colorFilterAni, "nativeObj", &nativeObj);
+    auto* colorFilter = reinterpret_cast<void*>(nativeObj);
+    if (colorFilter == nullptr) {
+        HILOGE("image colorFilter options is null");
+        return;
+    }
+    modifier->getImageAniModifier()->setDrawingColorFilter(arkNode, colorFilter);
+}
 } // namespace OHOS::Ace::Ani

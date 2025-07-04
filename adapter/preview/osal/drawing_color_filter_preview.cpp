@@ -42,6 +42,11 @@ RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilterFromNativ
     return AceType::MakeRefPtr<DrawingColorFilterPreview>(*colorFilter);
 }
 
+RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilterFromAni(void* aniAddr)
+{
+    return nullptr;
+}
+
 void* DrawingColorFilterPreview::GetDrawingColorFilterSptrAddr()
 {
     return static_cast<void*>(&colorFilter_);

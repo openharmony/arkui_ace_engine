@@ -44,6 +44,7 @@ public:
     static void SetOrientation(FrameNode* frameNode, const std::optional<ImageRotateOrientation>& orientation);
     static void SetEnhancedImageQuality(FrameNode* frameNode, const std::optional<AIImageQuality>& imageQuality);
     static void SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice);
+    static void SetDrawingColorFilter(FrameNode* frameNode, const RefPtr<DrawingColorFilter>& colorFilter);
 
 private:
     // temporary animation

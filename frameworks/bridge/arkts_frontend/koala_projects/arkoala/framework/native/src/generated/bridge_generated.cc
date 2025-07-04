@@ -12046,10 +12046,6 @@ void impl_ImageAttribute_colorFilter(Ark_NativePointer thisPtr, KSerializerBuffe
                 value_value_buf_.selector = 0;
                 value_value_buf_.value0 = static_cast<Ark_ColorFilter>(thisDeserializer.readColorFilter());
             }
-            else if (value_value_buf__selector == 1) {
-                value_value_buf_.selector = 1;
-                value_value_buf_.value1 = static_cast<Ark_DrawingColorFilter>(thisDeserializer.readDrawingColorFilter());
-            }
             else {
                 INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
             }
@@ -12520,10 +12516,6 @@ void impl_ImageSpanAttribute_colorFilter(Ark_NativePointer thisPtr, KSerializerB
             if (value_value_buf__selector == 0) {
                 value_value_buf_.selector = 0;
                 value_value_buf_.value0 = static_cast<Ark_ColorFilter>(thisDeserializer.readColorFilter());
-            }
-            else if (value_value_buf__selector == 1) {
-                value_value_buf_.selector = 1;
-                value_value_buf_.value1 = static_cast<Ark_DrawingColorFilter>(thisDeserializer.readDrawingColorFilter());
             }
             else {
                 INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
@@ -44935,11 +44927,6 @@ KInteropReturnBuffer impl_ImageAttachment_getColorFilter(Ark_NativePointer thisP
                 _retSerializer.writeInt8(0);
                 const auto retValue_value_0 = retValue_value.value0;
                 _retSerializer.writeColorFilter(retValue_value_0);
-            }
-            else if (retValue_value_type == 1) {
-                _retSerializer.writeInt8(1);
-                const auto retValue_value_1 = retValue_value.value1;
-                _retSerializer.writeDrawingColorFilter(retValue_value_1);
             }
         }
         return _retSerializer.toReturnBuffer();

@@ -153,3 +153,26 @@ function hookSetImageOptions(component: ArkImageComponent, src: PixelMap | Resou
     SetImageAIOptions(component, imageAIOptions)
     thisSerializer.release()
 }
+
+function hookSetColorFilter(component: ArkImageComponent, value: ColorFilter | drawing.ColorFilter | undefined) {
+    if (value !== undefined && value instanceof drawing.ColorFilter) {
+        ArkUIAniModule._Image_DrawingColorFilter(component.getPeer().getPeerPtr(), value as drawing.ColorFilter)
+        return
+    }
+    const thisSerializer : Serializer = Serializer.hold()
+    let value_type : int32 = RuntimeType.UNDEFINED
+    value_type = runtimeType(value)
+    thisSerializer.writeInt8(value_type as int32)
+    if ((RuntimeType.UNDEFINED) != (value_type)) {
+        const value_value  = value!
+        let value_value_type : int32 = RuntimeType.UNDEFINED
+        value_value_type = runtimeType(value_value)
+        if (TypeChecker.isColorFilter(value_value)) {
+            thisSerializer.writeInt8(0 as int32)
+            const value_value_0  = value_value as ColorFilter
+            thisSerializer.writeColorFilter(value_value_0)
+        }
+    }
+    ArkUIGeneratedNativeModule._ImageAttribute_colorFilter(component.getPeer().getPeerPtr(), thisSerializer.asBuffer(), thisSerializer.length())
+    thisSerializer.release()
+}
