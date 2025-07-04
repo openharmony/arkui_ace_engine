@@ -725,7 +725,22 @@ RefPtr<FrameNode> ComponentSnapshot::GetRangeIDNode(const NodeIdentity& ID)
     if (!ID.first.empty()) {
         return Inspector::GetFrameNodeByKey(ID.first);
     }
-    return AceType::DynamicCast<FrameNode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(ID.second));
+
+    auto node = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(ID.second);
+    if (!node) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Node with id %{public}d not found", ID.second);
+        return nullptr;
+    }
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    if (!frameNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Node with id %{public}d is not a FrameNode (actual type: %{public}s)",
+            ID.second, AceType::TypeName(node));
+        return nullptr;
+    }
+
+    return frameNode;
 }
 
 std::string ComponentSnapshot::GetRangeIDStr(const NodeIdentity& ID)
@@ -739,11 +754,17 @@ void ComponentSnapshot::GetWithRange(const NodeIdentity& startID, const NodeIden
     CHECK_RUN_ON(UI);
     auto startNode = GetRangeIDNode(startID);
     auto endNode = GetRangeIDNode(endID);
-    if (!startNode || !endNode) {
+    if (!startNode) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "Can't find a component that startId or endId are " SEC_PLD(%{public}s) " and " SEC_PLD(%{public}s)
-            ", please check your parameters are correct",
-            SEC_PARAM(GetRangeIDStr(startID).c_str()), SEC_PARAM(GetRangeIDStr(endID).c_str()));
+            "Node not found that startld is " SEC_PLD(%{public}s),
+            SEC_PARAM(GetRangeIDStr(startID).c_str()));
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        return;
+    }
+    if (!endNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Node not found that endld is " SEC_PLD(%{public}s),
+            SEC_PARAM(GetRangeIDStr(endID).c_str()));
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
@@ -764,7 +785,7 @@ void ComponentSnapshot::GetWithRange(const NodeIdentity& startID, const NodeIden
         options.scale, options.scale, options.waitUntilRenderFinished);
     if (!isSystem) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "No system permissions to take screenshot, please grant the permission to take screenshot");
+            "No system permissions to take screenshot");
         callback(nullptr, ERROR_CODE_PERMISSION_DENIED, nullptr);
     }
 }
