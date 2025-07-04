@@ -25,6 +25,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "ui/resource/resource_info.h"
 
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
@@ -45,6 +46,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/components_ng/pattern/select/select_paint_property.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -2321,5 +2323,293 @@ HWTEST_F(SelectTestNg, SelectMenuOutline001, TestSize.Level1)
     auto renderContext = menu->GetRenderContext();
     EXPECT_EQ(renderContext->GetOuterBorderColor(), menuParam.outlineColor);
     EXPECT_EQ(renderContext->GetOuterBorderWidth(), menuParam.outlineWidth);
+}
+
+/**
+ * @tc.name: GetSelectTheme001
+ * @tc.desc: Test GetSelectTheme with valid frameNode and valid context, expect correct SelectTheme returned.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, GetSelectTheme001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode with SelectPattern and MockPipelineContext.
+     * @tc.expected: step1. FrameNode and context are created successfully.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SELECT_ETS_TAG, 1, AceType::MakeRefPtr<SelectPattern>());
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    pipelineContext->SetThemeManager(themeManager);
+    
+    /**
+     * @tc.steps: step2. Prepare SelectTheme and mock themeManager to return it.
+     * @tc.expected: step2. Mocked themeManager returns the prepared SelectTheme.
+     */
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
+    frameNode->DetachContext(pipelineContext);
+    
+    /**
+     * @tc.steps: step3. Call GetSelectTheme and verify the result.
+     * @tc.expected: step3. The returned SelectTheme matches the prepared one.
+     */
+    auto result = SelectModelNG::GetSelectTheme(frameNode.GetRawPtr());
+    EXPECT_EQ(result, selectTheme);
+}
+
+/**
+ * @tc.name: ResetComponentColor001
+ * @tc.desc: Test ResetSelectComponentColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ResetComponentColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SelectModelNG and initialize frameNode with SelectPattern.
+     * @tc.expected: step1. Model and frameNode are created successfully.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Setup MockThemeManager and SelectTheme.
+     * @tc.expected: step2. ThemeManager and theme are initialized.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetThemeManager(themeManager);
+    
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
+    
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    
+    /**
+     * @tc.steps: step3. Set theme colors and pattern font color, then reset colors for different types.
+     * @tc.expected: step3. All component colors are reset to theme's RED value.
+     */
+    selectTheme->fontColor_ = Color::RED;
+    selectTheme->backgroundColor_ = Color::RED;
+    selectTheme->selectedColor_ = Color::RED;
+    selectTheme->selectedColorText_ = Color::RED;
+    selectTheme->menuFontColor_ = Color::RED;
+    pattern->SetOptionFontColor(Color::RED);
+    
+    std::vector<SelectColorType> colorTypes = { SelectColorType::FONT_COLOR, SelectColorType::BACKGROUND_COLOR,
+        SelectColorType::SELECTED_OPTION_BG_COLOR, SelectColorType::SELECTED_OPTION_FONT_COLOR,
+        SelectColorType::OPTION_BG_COLOR, SelectColorType::OPTION_FONT_COLOR, static_cast<SelectColorType>(999) };
+    for (const auto& type : colorTypes) {
+        SelectModelNG::ResetComponentColor(frameNode, type);
+    }
+    
+    /**
+     * @tc.steps: step4. Verify reset colors match the theme's RED value.
+     * @tc.expected: step4. All verified colors are RED.
+     */
+    EXPECT_EQ(pattern->selectedBgColor_, Color::RED);
+    EXPECT_EQ(pattern->selectedFont_.FontColor, Color::RED);
+    EXPECT_EQ(pattern->optionFont_.FontColor, Color::RED);
+}
+
+/**
+ * @tc.name: CreateWithValueIconResourceObj
+ * @tc.desc: Test CreateWithValueIconResourceObj with null and valid ResourceObject.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, CreateWithValueIconResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SelectModelNG and initialize frameNode with SelectPattern.
+     * @tc.expected: step1. Model and frameNode are created successfully.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Test with null ResourceObject params.
+     * @tc.expected: step2. No exception thrown when null params are passed.
+     */
+    SelectResObjParam nullObjParam;
+    nullObjParam.valueResObj = nullptr;
+    nullObjParam.iconResObj = nullptr;
+    selectModelNG.CreateWithValueIconResourceObj({ nullObjParam });
+    
+    /**
+     * @tc.steps: step3. Create valid value and icon ResourceObjects.
+     * @tc.expected: step3. ResourceObjects are created with valid parameters.
+     */
+    ResourceObjectParams valueParam;
+    valueParam.type = ResourceObjectParamType::STRING;
+    valueParam.value = "TEXT";
+    auto valueResObj = AceType::MakeRefPtr<ResourceObject>(1001, static_cast<int32_t>(Kit::ResourceType::STRING),
+        std::vector<ResourceObjectParams> { valueParam }, "bundle", "module", 0);
+
+    ResourceObjectParams iconParam;
+    iconParam.type = ResourceObjectParamType::STRING;
+    iconParam.value = "ICON.svg";
+    auto iconResObj = AceType::MakeRefPtr<ResourceObject>(1002, static_cast<int32_t>(Kit::ResourceType::MEDIA),
+        std::vector<ResourceObjectParams> { iconParam }, "bundle", "module", 0);
+    
+    /**
+     * @tc.steps: step4. Test with valid params and verify menu pattern state.
+     * @tc.expected: step4. MenuPattern's isSelectMenu_ is set to true after valid resource creation.
+     */
+    SelectResObjParam validObjParam;
+    validObjParam.valueResObj = valueResObj;
+    validObjParam.iconResObj = iconResObj;
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    selectModelNG.CreateWithValueIconResourceObj({ validObjParam });
+    EXPECT_TRUE(menuPattern->isSelectMenu_);
+}
+
+/**
+ * @tc.name: CreateWithIntegerResourceObj
+ * @tc.desc: Test CreateWithIntegerResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, CreateWithIntegerResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SelectModelNG and initialize frameNode with SelectPattern.
+     * @tc.expected: step1. Model and frameNode are created successfully.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Test with null ResourceObject and verify selected value is not zero.
+     * @tc.expected: step2. GetSelected() does not return zero when null resource is passed.
+     */
+    selectModelNG.CreateWithIntegerResourceObj(nullptr);
+    EXPECT_NE(pattern->GetSelected(), 0);
+    
+    /**
+     * @tc.steps: step3. Create valid integer ResourceObject and test selected value.
+     * @tc.expected: step3. GetSelected() returns -1 when valid resource with "-1" is passed.
+     */
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::INT;
+    param.value = "-1";
+    int32_t resourceType = static_cast<int32_t>(Kit::ResourceType::INTEGER);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        1001, resourceType, std::vector<ResourceObjectParams> { param }, "testBundle", "testModule", 0);
+    selectModelNG.CreateWithIntegerResourceObj(resObj);
+    EXPECT_EQ(pattern->GetSelected(), -1);
+    
+    /**
+     * @tc.steps: step4. Add resource to cache and reload, verifying resource manager interaction.
+     * @tc.expected: step4. Resource is added to cache and resource manager is accessed.
+     */
+    std::string key = "selectSelected";
+    pattern->AddResCache(key, param.value.value());
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+}
+
+/**
+ * @tc.name: CreateWithStringResourceObj
+ * @tc.desc: Test CreateWithStringResourceObj function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, CreateWithStringResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SelectModelNG and initialize frameNode with SelectPattern.
+     * @tc.expected: step1. Model and frameNode are created successfully.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Test with null ResourceObject (no assertion, just function call).
+     * @tc.expected: step2. No exception thrown when null resource is passed.
+     */
+    selectModelNG.CreateWithStringResourceObj(nullptr);
+    
+    /**
+     * @tc.steps: step3. Create valid string ResourceObject and test resource assignment.
+     * @tc.expected: step3. Resource is accepted without error.
+     */
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "string";
+    int32_t resourceType = static_cast<int32_t>(Kit::ResourceType::STRING);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        1001, resourceType, std::vector<ResourceObjectParams> { param }, "testBundle", "testModule", 0);
+
+    selectModelNG.CreateWithStringResourceObj(resObj);
+    
+    /**
+     * @tc.steps: step4. Add resource to cache and reload, verifying resource manager interaction.
+     * @tc.expected: step4. Resource is added to cache and resource manager is accessed.
+     */
+    std::string key = "selectValue";
+    pattern->AddResCache(key, param.value.value());
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+}
+
+/**
+ * @tc.name: ModifierColorTypeToString
+ * @tc.desc: Test ModifierColorTypeToString function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ModifierColorTypeToString, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Define test cases with color type and expected string.
+     * @tc.expected: step1. Test cases cover all relevant color types and an unknown type.
+     */
+    std::vector<std::pair<SelectColorType, std::string>> types = { { SelectColorType::FONT_COLOR, "FontColor" },
+        { SelectColorType::BACKGROUND_COLOR, "BackgroundColor" },
+        { SelectColorType::SELECTED_OPTION_BG_COLOR, "SelectedOptionBgColor" },
+        { SelectColorType::SELECTED_OPTION_FONT_COLOR, "SelectedOptionFontColor" },
+        { SelectColorType::OPTION_BG_COLOR, "OptionBgColor" },
+        { SelectColorType::OPTION_FONT_COLOR, "OptionFontColor" },
+        { SelectColorType::MENU_BACKGROUND_COLOR, "MenuBackgroundColor" },
+        { static_cast<SelectColorType>(999), "Unknown" } };
+    
+    /**
+     * @tc.steps: step2. Loop through test cases and verify string conversion.
+     * @tc.expected: step2. Each color type converts to the expected string, including unknown type.
+     */
+    for (const auto& [type, expected] : types) {
+        auto result = SelectModelNG::ModifierColorTypeToString(type);
+        EXPECT_EQ(result, expected);
+    }
 }
 } // namespace OHOS::Ace::NG

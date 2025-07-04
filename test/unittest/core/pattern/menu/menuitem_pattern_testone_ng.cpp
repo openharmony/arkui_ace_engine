@@ -20,6 +20,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -1936,5 +1937,324 @@ HWTEST_F(MenuItemPatternTestOneNg, OnHover002, TestSize.Level1)
     auto menuWrapper = menuItemPattern->GetMenuWrapper();
     ASSERT_NE(menuWrapper, nullptr);
     ASSERT_EQ(menuWrapper->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate() g_isConfigChangePerform = true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Set up theme manager mock
+     * @tc.expected: Theme manager returns select theme
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+        return selectTheme;
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    /**
+     * @tc.steps2: Create frame nodes and patterns
+     * @tc.expected: Nodes and patterns created and mounted
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto itemProperty = menuItemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    /**
+     * @tc.steps3: Create content and label nodes
+     * @tc.expected: Nodes assigned to menu item pattern
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto labelNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    menuItemPattern->content_ = contentNode;
+    menuItemPattern->label_ = labelNode;
+
+    /**
+     * @tc.steps4: Get menu node and properties
+     * @tc.expected: Menu node and properties obtained
+     */
+    auto menuNode = menuItemPattern->GetMenu();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+
+    /**
+     * @tc.steps5: Enable config change and set theme colors
+     * @tc.expected: Config change is enabled
+     */
+    g_isConfigChangePerform = true;
+    ASSERT_NE(SystemProperties::ConfigChangePerform(), false);
+    Color menuFontColor = Color::RED;
+    Color secondaryFontColor = Color::BLUE;
+    selectTheme->menuFontColor_ = menuFontColor;
+    selectTheme->secondaryFontColor_ = secondaryFontColor;
+
+    /**
+     * @tc.steps6: Call OnColorConfigurationUpdate and verify results
+     * @tc.expected: Text colors updated to theme values
+     */
+    menuItemPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(itemProperty->GetLabelFontColor().value(), secondaryFontColor);
+    EXPECT_EQ(itemProperty->GetFontColor().has_value(), false);
+    EXPECT_EQ(menuProperty->GetFontColor().has_value(), false);
+    auto textProperty = menuItemPattern->content_->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(textProperty->GetTextColor().value(), menuFontColor);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate002
+ * @tc.desc: Test OnColorConfigurationUpdate() g_isConfigChangePerform = false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, OnColorConfigurationUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Set up theme manager mock
+     * @tc.expected: Theme manager returns select theme
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+        return selectTheme;
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    /**
+     * @tc.steps2: Create frame nodes and patterns
+     * @tc.expected: Nodes and patterns created and mounted
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto itemProperty = menuItemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    /**
+     * @tc.steps3: Create content and label nodes
+     * @tc.expected: Nodes assigned to menu item pattern
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto labelNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    menuItemPattern->content_ = contentNode;
+    menuItemPattern->label_ = labelNode;
+
+    /**
+     * @tc.steps4: Get menu node and properties
+     * @tc.expected: Menu node and properties obtained
+     */
+    auto menuNode = menuItemPattern->GetMenu();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+
+    /**
+     * @tc.steps5: Disable config change and set theme colors
+     * @tc.expected: Config change is disabled
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_EQ(SystemProperties::ConfigChangePerform(), false);
+    Color menuFontColor = Color::RED;
+    Color secondaryFontColor = Color::BLUE;
+    selectTheme->menuFontColor_ = menuFontColor;
+    selectTheme->secondaryFontColor_ = secondaryFontColor;
+
+    /**
+     * @tc.steps6: Call OnColorConfigurationUpdate and verify results
+     * @tc.expected: Text colors not updated
+     */
+    menuItemPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(itemProperty->GetLabelFontColor().has_value(), false);
+    EXPECT_EQ(itemProperty->GetFontColor().has_value(), false);
+    EXPECT_EQ(menuProperty->GetFontColor().has_value(), false);
+    auto textProperty = menuItemPattern->content_->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(textProperty->GetTextColor().has_value(), false);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate003
+ * @tc.desc: Test OnColorConfigurationUpdate() label_ = nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, OnColorConfigurationUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Set up theme manager mock
+     * @tc.expected: Theme manager returns select theme
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+        return selectTheme;
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    /**
+     * @tc.steps2: Create frame nodes and patterns
+     * @tc.expected: Nodes and patterns created and mounted
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto itemProperty = menuItemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    /**
+     * @tc.steps3: Create content node (label is nullptr)
+     * @tc.expected: Content node assigned, label remains nullptr
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    menuItemPattern->content_ = contentNode;
+
+    /**
+     * @tc.steps4: Get menu node and properties
+     * @tc.expected: Menu node and properties obtained
+     */
+    auto menuNode = menuItemPattern->GetMenu();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+
+    /**
+     * @tc.steps5: Enable config change and set theme colors
+     * @tc.expected: Config change is enabled
+     */
+    g_isConfigChangePerform = true;
+    ASSERT_NE(SystemProperties::ConfigChangePerform(), false);
+    Color menuFontColor = Color::RED;
+    Color secondaryFontColor = Color::BLUE;
+    selectTheme->menuFontColor_ = menuFontColor;
+    selectTheme->secondaryFontColor_ = secondaryFontColor;
+
+    /**
+     * @tc.steps6: Call OnColorConfigurationUpdate and verify results
+     * @tc.expected: Label color not updated, content color updated
+     */
+    menuItemPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(itemProperty->GetLabelFontColor().has_value(), false);
+    EXPECT_EQ(itemProperty->GetFontColor().has_value(), false);
+    EXPECT_EQ(menuProperty->GetFontColor().has_value(), false);
+    auto textProperty = menuItemPattern->content_->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(textProperty->GetTextColor().value(), menuFontColor);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate004
+ * @tc.desc: Test OnColorConfigurationUpdate() content_ = nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, OnColorConfigurationUpdate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Set up theme manager mock
+     * @tc.expected: Theme manager returns select theme
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+        return selectTheme;
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    /**
+     * @tc.steps2: Create frame nodes and patterns
+     * @tc.expected: Nodes and patterns created and mounted
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto itemProperty = menuItemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    /**
+     * @tc.steps3: Create label node (content is nullptr)
+     * @tc.expected: Label node assigned, content remains nullptr
+     */
+    auto labelNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    menuItemPattern->label_ = labelNode;
+
+    /**
+     * @tc.steps4: Get menu node and properties
+     * @tc.expected: Menu node and properties obtained
+     */
+    auto menuNode = menuItemPattern->GetMenu();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+
+    /**
+     * @tc.steps5: Enable config change and set theme colors
+     * @tc.expected: Config change is enabled
+     */
+    g_isConfigChangePerform = true;
+    ASSERT_NE(SystemProperties::ConfigChangePerform(), false);
+    Color menuFontColor = Color::RED;
+    Color secondaryFontColor = Color::BLUE;
+    selectTheme->menuFontColor_ = menuFontColor;
+    selectTheme->secondaryFontColor_ = secondaryFontColor;
+
+    /**
+     * @tc.steps6: Call OnColorConfigurationUpdate and verify results
+     * @tc.expected: Content color not updated, label color updated
+     */
+    menuItemPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(itemProperty->GetLabelFontColor().value(), secondaryFontColor);
+    EXPECT_EQ(itemProperty->GetFontColor().has_value(), false);
+    EXPECT_EQ(menuProperty->GetFontColor().has_value(), false);
+    auto textProperty =
+        menuItemPattern->content_ ? menuItemPattern->content_->GetLayoutProperty<TextLayoutProperty>() : nullptr;
+    EXPECT_EQ(textProperty, nullptr);
 }
 } // namespace OHOS::Ace::NG
