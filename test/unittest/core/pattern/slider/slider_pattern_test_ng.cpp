@@ -499,6 +499,9 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest005, TestSize.Level1)
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
     sliderLayoutAlgorithm->trackThickness_ = SLIDER_INSET_TRACK_THICKNRESS.Value();
     sliderLayoutAlgorithm->blockSize_ = SizeF(SLIDER_INSET_BLOCK_SIZE.Value(), SLIDER_INSET_BLOCK_SIZE.Value());
+    sliderLayoutAlgorithm->blockHotSize_ = SizeF(SLIDER_INSET_BLOCK_SIZE.Value(), SLIDER_INSET_BLOCK_SIZE.Value());
+    sliderPattern->UpdateSliderParams(sliderLayoutAlgorithm->trackThickness_, sliderLayoutAlgorithm->blockSize_,
+        sliderLayoutAlgorithm->blockHotSize_);
     EXPECT_TRUE(sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false));
     EXPECT_EQ(sliderPattern->borderBlank_, SLIDER_INSET_TRACK_THICKNRESS.Value() * HALF + HOT_BLOCK_SHADOW_WIDTH);
 
@@ -509,6 +512,9 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest005, TestSize.Level1)
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::OUTSET);
     sliderLayoutAlgorithm->trackThickness_ = SLIDER_OUTSET_TRACK_THICKNRESS.Value();
     sliderLayoutAlgorithm->blockSize_ = SizeF(SLIDER_OUTSET_BLOCK_SIZE.Value(), SLIDER_OUTSET_BLOCK_SIZE.Value());
+    sliderLayoutAlgorithm->blockHotSize_ = SizeF(SLIDER_OUTSET_BLOCK_SIZE.Value(), SLIDER_OUTSET_BLOCK_SIZE.Value());
+    sliderPattern->UpdateSliderParams(sliderLayoutAlgorithm->trackThickness_, sliderLayoutAlgorithm->blockSize_,
+        sliderLayoutAlgorithm->blockHotSize_);
     EXPECT_TRUE(sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false));
     EXPECT_EQ(sliderPattern->borderBlank_,
         std::max(SLIDER_OUTSET_BLOCK_SIZE.Value(), SLIDER_OUTSET_TRACK_THICKNRESS.Value()) * HALF +
@@ -519,6 +525,10 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest005, TestSize.Level1)
      */
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::NONE);
     sliderLayoutAlgorithm->trackThickness_ = SLIDER_NONE_TRACK_THICKNRESS.Value();
+    sliderLayoutAlgorithm->blockSize_ = SizeF(SLIDER_OUTSET_BLOCK_SIZE.Value(), SLIDER_OUTSET_BLOCK_SIZE.Value());
+    sliderLayoutAlgorithm->blockHotSize_ = SizeF(SLIDER_OUTSET_BLOCK_SIZE.Value(), SLIDER_OUTSET_BLOCK_SIZE.Value());
+    sliderPattern->UpdateSliderParams(sliderLayoutAlgorithm->trackThickness_, sliderLayoutAlgorithm->blockSize_,
+        sliderLayoutAlgorithm->blockHotSize_);
     EXPECT_TRUE(sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false));
     EXPECT_EQ(sliderPattern->borderBlank_, 0);
 }
