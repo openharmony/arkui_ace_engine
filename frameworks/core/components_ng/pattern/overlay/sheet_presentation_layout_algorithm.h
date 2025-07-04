@@ -86,6 +86,8 @@ private:
     float GetWidthByScreenSizeType(const float maxWidth, LayoutWrapper* layoutWrapper) const;
     float GetHeightByScreenSizeType(const float maxHeight, const float maxWidth, LayoutWrapper* layoutWrapper) const;
     void ComputeCenterStyleOffset(LayoutWrapper* layoutWrapper);
+    void ComputeCenterOffsetForUECSubwindow(LayoutWrapper* layoutWrapper);
+    void ComputeCenterOffsetForNotUECSubwindow(LayoutWrapper* layoutWrapper);
     void ComputePopupStyleOffset(LayoutWrapper* layoutWrapper);
     void ComputeWidthAndHeight(LayoutWrapper* layoutWrapper);
     float ComputeMaxHeight(const float parentConstraintHeight, const float parentConstraintWidth,

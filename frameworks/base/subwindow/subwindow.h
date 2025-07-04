@@ -261,6 +261,7 @@ public:
     virtual void RemoveFollowParentWindowLayoutNode(int32_t nodeId) = 0;
     virtual void SetNodeId(int32_t nodeId) = 0;
     virtual int32_t GetNodeId() const = 0;
+    virtual void SetWindowAnchorInfo(const NG::OffsetF& offset, SubwindowType type, int32_t nodeId) = 0;
 
 private:
     int32_t subwindowId_ = 0;
