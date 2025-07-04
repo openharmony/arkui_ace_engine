@@ -2842,8 +2842,7 @@ void WebPattern::KeyboardReDispatch(
         }
     }
     if (keyEvent == webKeyEvent_.rend()) {
-        TAG_LOGW(AceLogTag::ACE_WEB,
-            "KeyEvent is not find keycode:%{public}d, action:%{public}d", event->GetKeyCode(), event->GetAction());
+        TAG_LOGW(AceLogTag::ACE_WEB, "KeyEvent is not find keycode");
         return;
     }
     if (!isUsed) {
@@ -2851,14 +2850,12 @@ void WebPattern::KeyboardReDispatch(
             event = *keyEvent] () {
             auto pipelineContext = context.Upgrade();
             CHECK_NULL_VOID(pipelineContext);
-            TAG_LOGD(AceLogTag::ACE_WEB,
-                "WebPattern::KeyboardReDispatch key:%{public}s", event.ToString().c_str());
+            TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::KeyboardReDispatch");
             pipelineContext->ReDispatch(const_cast<KeyEvent&>(event));
             },
             TaskExecutor::TaskType::UI, "ArkUIWebKeyboardReDispatch");
     }
-    TAG_LOGD(AceLogTag::ACE_WEB,
-        "WebPattern::KeyboardReDispatch erase key:%{public}s", keyEvent->ToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::KeyboardReDispatch erase key");
     webKeyEvent_.erase((++keyEvent).base());
 }
 
