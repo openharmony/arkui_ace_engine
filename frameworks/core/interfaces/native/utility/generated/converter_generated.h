@@ -3497,7 +3497,7 @@ ASSIGN_OPT(Opt_Callback_RotationGesture)
 ASSIGN_OPT(Opt_Callback_RotationGesture_Void)
 ASSIGN_OPT(Opt_Callback_SheetDismiss_Void)
 ASSIGN_OPT(Opt_Callback_SheetType_Void)
-ASSIGN_OPT(Opt_Callback_Size_Void)
+ASSIGN_OPT(Opt_Callback_SizeResult_Void)
 ASSIGN_OPT(Opt_Callback_SpringBackAction_Void)
 ASSIGN_OPT(Opt_Callback_StateStylesChange)
 ASSIGN_OPT(Opt_Callback_String_PasteEvent_Void)
@@ -4297,8 +4297,7 @@ ASSIGN_OPT(Opt_SpanStyle)
 ASSIGN_OPT(Opt_Union_RichEditorImageSpanResult_RichEditorTextSpanResult)
 ASSIGN_OPT(Opt_Union_RichEditorTextSpanResult_RichEditorImageSpanResult)
 ASSIGN_OPT(Opt_RichEditorSpan)
-ASSIGN_OPT(Opt_PopupButton)
-ASSIGN_OPT(Opt_PopupOptions)
+ASSIGN_OPT(Opt_Union_ImageAttachmentInterface_Opt_AttachmentType)
 #undef ASSIGN_OPT
 }
 
