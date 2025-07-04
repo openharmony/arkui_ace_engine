@@ -27,6 +27,7 @@ import { WaterFlowOptions,WaterFlowSections, XComponentControllerCallbackInterna
 import { HookDragInfo } from "arkui/handwritten"
 import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
+import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 
 export class ArkUIAniModule {
     static {
@@ -34,6 +35,8 @@ export class ArkUIAniModule {
     }
 
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
+    native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
+    native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
     native static _Web_SetWebOptions(ptr: KPointer, webviewController: webview.WebviewController): void
     native static _Web_SetWebController_ControllerHandler(ptr: KPointer, webviewController: webview.WebviewController): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer

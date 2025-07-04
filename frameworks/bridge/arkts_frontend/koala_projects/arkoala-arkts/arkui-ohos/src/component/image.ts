@@ -24,7 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { Resource } from "global.resource"
-import { PixelMap } from "#external"
+import { PixelMap, PixelMapDrawableDescriptor, AnimatedDrawableDescriptor, LayeredDrawableDescriptor } from "#external"
 import { ResourceColor, ColorFilter, ResourceStr, EdgeWidths } from "./units"
 import { ImageFit, ImageRepeat, CopyOptions, Color } from "./enums"
 import { Matrix4Transit } from "./arkui-matrix4"
@@ -771,25 +771,8 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
 
     public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setImageOptions")) {
-            const src_type = runtimeType(src)
-            const imageAIOptions_type = runtimeType(imageAIOptions)
-            if ((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src))) {
-                const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor)
-                this.getPeer()?.setImageOptions0Attribute(src_casted)
-                return this
-            }
-            if ((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src))) {
-                const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor)
-                const imageAIOptions_casted = imageAIOptions as (ImageAIOptions)
-                this.getPeer()?.setImageOptions2Attribute(src_casted, imageAIOptions_casted)
-                return this
-            }
-            if ((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src)) || (TypeChecker.isImageContent(src))) {
-                const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor | ImageContent)
-                this.getPeer()?.setImageOptions1Attribute(src_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookSetImageOptions(this, src, imageAIOptions)
+            return this
         }
         return this
     }
