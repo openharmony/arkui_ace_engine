@@ -582,7 +582,7 @@ class ObserveV2 {
       if (this.monitorFuncsToRun_.size) {
         const monitorFuncs = this.monitorFuncsToRun_;
         this.monitorFuncsToRun_ = new Set<number>();
-        this.updateDirtyMonitors(monitorFuncs);
+        this.runMonitorFunctionsForAddMonitor(monitorFuncs);
       }
     }
 
@@ -899,18 +899,11 @@ class ObserveV2 {
     aceDebugTrace.begin(`ObservedV2.runMonitorFunctionsForAddMonitor: ${monitors.size}`);
 
     let monitor: MonitorV2 | undefined;
-    let monitorTarget: Object;
 
     monitors.forEach((watchId) => {
       monitor = this.id2Others_[watchId]?.deref();
       if (monitor instanceof MonitorV2) {
-        monitorTarget = monitor.getTarget();
-        if (monitorTarget instanceof ViewV2 && !monitorTarget.isViewActive()) {
-          // monitor notifyChange delayed if target is a View that is not active
-          monitorTarget.addDelayedMonitorIdsForAddMonitor(watchId);
-        } else {
-          monitor.runMonitorFunction();
-        }
+        monitor.runMonitorFunction();
       }
     });
     aceDebugTrace.end();
@@ -925,9 +918,14 @@ class ObserveV2 {
     monitors.forEach((watchId) => {
       const monitor = this.id2Others_[watchId]?.deref();
       if (monitor instanceof MonitorV2) {
-        // find the path MonitorValue and record dependency again
-        // get path owning MonitorV2 id
-        ret = monitor.notifyChangeForEachPath(watchId);
+        const monitorTarget = monitor.getTarget();
+        if (monitorTarget instanceof ViewV2 && !monitorTarget.isViewActive()) {
+          monitorTarget.addDelayedMonitorIds(watchId)
+        } else {
+          // find the path MonitorValue and record dependency again
+          // get path owning MonitorV2 id
+          ret = monitor.notifyChangeForEachPath(watchId);
+        }
       }
 
       // Collect AddMonitor functions that need to be executed later

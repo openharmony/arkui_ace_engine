@@ -33,6 +33,7 @@ class MonitorValueV2<T> {
   public id: number;
   private dirty: boolean;
   // indicate the value is accessible or not
+  // only used for AddMonitor
   private isAccessible: boolean;
 
   constructor(path: string, id?: number) {
@@ -55,18 +56,24 @@ class MonitorValueV2<T> {
 
     if (this.id < MonitorV2.MIN_WATCH_FROM_API_ID) {
       // @Monitor
+      // @Monitor does not care if the property is accessible or not, so ignore to set isAccessible
       this.dirty = this.before !== this.now;
     } else {
       // AddMonitor
       // consider value dirty if it wasn't accessible before setting the new value
       this.dirty = (!this.isAccessible) || (this.before !== this.now);
+      this.isAccessible = true;
     }
     return this.dirty;
   }
 
-  setNotFound(): void {
+  setNotFound(isInit: boolean): boolean {
+    if (!isInit && this.isAccessible) {
+      this.dirty = true;
+    }
     this.isAccessible = false;
     this.now = undefined;
+    return this.dirty;
   }
 
   // mv newValue to oldValue, set dirty to false
@@ -227,7 +234,7 @@ class MonitorV2 {
       ObserveV2.getObserve().stopRecordDependencies();
       if (!success) {
         stateMgmtConsole.debug(`AddMonitor input path no longer valid.`);
-        item.setNotFound();
+        item.setNotFound(true);
         return;
       }
       item.setValue(true, value);
@@ -282,7 +289,7 @@ public notifyChangeForEachPath(pathId: number): number {
     ObserveV2.getObserve().stopRecordDependencies();
     if (!success) {
       stateMgmtConsole.debug(`AddMonitor input path no longer valid.`);
-      return false;
+      return monitoredValue.setNotFound(false);
     }
     return monitoredValue.setValue(false, value); // dirty?
   }
