@@ -95,6 +95,7 @@ config("arkoala_native_config") {
     "koala_projects/arkoala/framework/native/src/generated",
     "koala_projects/interop/src",
     "koala_projects/interop/src/cpp",
+    "koala_projects/interop/src/cpp/ani",
     "koala_projects/interop/src/cpp/ets",
     "koala_projects/interop/src/cpp/types",
     "koala_projects/interop/src/cpp/ohos",
@@ -105,7 +106,7 @@ ohos_shared_library("ArkoalaNative_ark") {
   defines = [
     "KOALA_OHOS",
     "__MUSL__",
-    "KOALA_ETS_NAPI",
+    "KOALA_ANI",
     "KOALA_USE_PANDA_VM",
   ]
 
@@ -123,7 +124,7 @@ ohos_shared_library("ArkoalaNative_ark") {
   sources += [
     "koala_projects/interop/src/cpp/callback-resource.cc",
     "koala_projects/interop/src/cpp/common-interop.cc",
-    "koala_projects/interop/src/cpp/ets/convertors-ets.cc",
+    "koala_projects/interop/src/cpp/ani/convertors-ani.cc",
     "koala_projects/interop/src/cpp/interop-logging.cc",
     "koala_projects/interop/src/cpp/types/signatures.cc",
   ]
@@ -137,6 +138,7 @@ ohos_shared_library("ArkoalaNative_ark") {
   external_deps = [
     "hilog:hilog_ndk",
     "hilog:libhilog",
+    "runtime_core:ani",
   ]
 
   subsystem_name = ace_engine_subsystem
