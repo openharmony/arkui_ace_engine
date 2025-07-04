@@ -27,17 +27,6 @@ public:
 
     void onDraw(DrawingContext& drawingContext) override;
 
-    void SetOpacity(uint8_t opacity)
-    {
-        vertical_.SetOpacity(opacity);
-        horizontal_.SetOpacity(opacity);
-    }
-
-    void UpdateVerticalBarPosition(PositionMode mode)
-    {
-        vertical_.SetPositionMode(mode);
-    }
-
     /**
      * @brief update properties and trigger related animations
      */
