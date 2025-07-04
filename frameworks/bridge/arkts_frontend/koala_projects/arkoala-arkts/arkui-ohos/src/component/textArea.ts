@@ -1359,7 +1359,7 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
     }
     public setTextAreaOptions(value?: TextAreaOptions): this {
         if (this.checkPriority("setTextAreaOptions")) {
-            hookSetTextAreaOptions(this.getPeer(), value)
+            hookSetTextAreaOptions(this, value)
             return this
         }
         return this
