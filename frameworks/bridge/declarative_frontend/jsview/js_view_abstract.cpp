@@ -2737,6 +2737,10 @@ void JSViewAbstract::JsSize(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
 {
+    ViewAbstractModel::GetInstance()->ResetResObj("constraintSize.minWidth");
+    ViewAbstractModel::GetInstance()->ResetResObj("constraintSize.maxWidth");
+    ViewAbstractModel::GetInstance()->ResetResObj("constraintSize.minHeight");
+    ViewAbstractModel::GetInstance()->ResetResObj("constraintSize.maxHeight");
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsConstraintSize", jsVal, checkList)) {
