@@ -19,7 +19,7 @@ import { IBindingSource } from './mutableStateMeta';
 import { TypeChecker } from '#components';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { NullableObject } from './types';
-import { GlobalStateManager } from '@koalaui/runtime';
+import { StateManagerImpl } from '@koalaui/runtime';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
 export class ObserveSingleton implements IObserve {
@@ -39,7 +39,8 @@ export class ObserveSingleton implements IObserve {
     }
 
     get renderingId(): RenderIdType | undefined {
-        const id = GlobalStateManager.getCurrentScopeId() ?? ObserveSingleton.InvalidRenderId;
+        const id =
+            (StateMgmtTool.getGlobalStateManager() as StateManagerImpl).current?.id ?? ObserveSingleton.InvalidRenderId;
         return id;
     }
     set renderingId(value: RenderIdType | undefined) {

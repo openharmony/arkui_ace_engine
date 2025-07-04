@@ -14,12 +14,12 @@
  */
 
 import { int32 } from '@koalaui/common';
-import { MutableState, mutableState, GlobalStateManager } from '@koalaui/runtime';
+import { MutableState } from '@koalaui/runtime';
 import { IMutableStateMeta, IMutableKeyedStateMeta } from '../decorator';
 import { RenderIdType } from '../decorator';
 import { ObserveSingleton } from './observeSingleton';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
-
+import { StateMgmtTool } from '#stateMgmtTool';
 class MutableStateMetaBase {
     public readonly info_: string;
 
@@ -45,7 +45,7 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
 
     constructor(info: string, metaDependency?: MutableState<int32>) {
         super(info);
-        this.__metaDependency = metaDependency ?? mutableState<int32>(0);
+        this.__metaDependency = metaDependency ?? StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
     }
 
     public addRef(): void {
@@ -79,7 +79,10 @@ export class MutableKeyedStateMeta extends MutableStateMetaBase implements IMuta
         let metaDependency: MutableStateMeta | undefined = this.__metaDependencies.get(key);
         if (!metaDependency) {
             // incremental engine does not allow create mutableState while building tree
-            metaDependency = new MutableStateMeta(key, GlobalStateManager.instance.mutableState<int32>(0, true));
+            metaDependency = new MutableStateMeta(
+                key,
+                StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true)
+            );
             this.__metaDependencies.set(key, metaDependency);
         }
         metaDependency.addRef();
