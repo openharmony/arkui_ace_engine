@@ -100,6 +100,7 @@ public:
     virtual const Color& GetButtonBgColor() const = 0;
     virtual const Color& GetButtonPressColor() const = 0;
     virtual bool CanMove(bool isDown) const = 0;
+    virtual bool GetCanLoopFromLayoutProperty() const = 0;
     virtual std::string GetCurrentOption() const = 0;
 
     virtual uint32_t GetShowCount() const
@@ -196,16 +197,6 @@ public:
     virtual void SetEventCallback(EventCallback&& value)
     {
         EventCallback_ = value;
-    }
-
-    virtual bool GetWheelModeEnabled() const
-    {
-        return wheelModeEnabled_;
-    }
-
-    virtual void SetWheelModeEnabled(bool value)
-    {
-        wheelModeEnabled_ = value;
     }
 
     virtual bool GetTouchBreakStatus() const
@@ -354,7 +345,6 @@ protected:
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
     bool isHapticPlayOnce_ = true;
-    bool wheelModeEnabled_ = true;
     bool isTossPlaying_ = false;
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
     RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
