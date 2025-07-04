@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 
 #include "bridge/declarative_frontend/engine/bindings.h"
+#include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/models/view_stack_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -193,7 +194,9 @@ void JSViewStackProcessor::JSScheduleUpdateOnNextVSync(const JSCallbackInfo& inf
     }
 
     if (info[0]->IsFunction()) {
-        auto flushTSFunc = [func = JSRef<JSFunc>::Cast(info[0])](int32_t containerId = -1) -> bool {
+        auto flushTSFunc = [execCtx = info.GetExecutionContext(),
+            func = JSRef<JSFunc>::Cast(info[0])](int32_t containerId) -> bool {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
             JSRef<JSVal> jsId = JSRef<JSVal>::Make(ToJSValue(containerId));
             JSRef<JSVal> retVal = func->Call(JSRef<JSObject>(), 1, &jsId);
             if (!retVal->IsBoolean()) {
