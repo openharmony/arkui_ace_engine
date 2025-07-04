@@ -3981,7 +3981,7 @@ void ScrollablePattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     // call OnAttachToMainTreeMultiThread by multi thread
-    FREE_NODE_CHECK(host, OnAttachToMainTree);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
     CHECK_NULL_VOID(host);
     auto scrollBarProxy = scrollBarProxy_;
     CHECK_NULL_VOID(scrollBarProxy);
