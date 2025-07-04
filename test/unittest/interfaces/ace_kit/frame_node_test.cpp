@@ -14,6 +14,10 @@
  */
 
 #include "gtest/gtest.h"
+
+#define private public
+#define protected public
+
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "test/unittest/interfaces/ace_kit/mock/mock_ace_kit_pattern.h"
 #include "test/unittest/interfaces/ace_kit/mock/mock_ace_kit_property.h"
@@ -29,6 +33,19 @@ using namespace testing::ext;
 using namespace OHOS::Ace::Kit;
 namespace OHOS::Ace {
 class FrameNodeTest : public testing::Test {};
+
+class TestAICaller : public AICallerHelper {
+public:
+    TestAICaller() = default;
+    ~TestAICaller() override = default;
+    bool onAIFunctionCaller(const std::string& funcName, const std::string& params) override
+    {
+        if (funcName.compare("Success") == 0) {
+            return true;
+        }
+        return false;
+    }
+};
 
 /**
  * @tc.name: FrameNodeTestTest001
@@ -717,5 +734,50 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest114, TestSize.Level1)
      */
     node->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 1, 1);
     EXPECT_EQ(flag, 3);
+}
+
+/**
+ * @tc.name: FrameNodeTestTest114
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest115, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    constexpr char tag[] = "TEST115";
+    const int32_t id = 115;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+    auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
+    ASSERT_TRUE(frameNodeImpl);
+
+    /**
+     * @tc.steps2: create AI helper
+     */
+    auto myAICaller = std::make_shared<TestAICaller>();
+    /**
+     * @tc.steps3: call ai function without set
+     * @tc.excepted: step3 return 1 means AI helper not setted.
+     */
+    EXPECT_EQ(frameNodeImpl->frameNode_->CallAIFunction("Success", ""), 1);
+    /**
+     * @tc.steps4: set ai helper instance.
+     * @tc.excepted: step4 AI helper not null and setted success.
+     */
+    frameNodeImpl->SetAICallerHelper(myAICaller);
+    EXPECT_EQ(frameNodeImpl->frameNode_->aiCallerHelper_, myAICaller);
+    /**
+     * @tc.steps5: call ai function success after set.
+     * @tc.excepted: step5 ai function called success.
+     */
+    EXPECT_EQ(frameNodeImpl->frameNode_->CallAIFunction("Success", "params1: 1"), 0);
+    /**
+     * @tc.steps6: call invalid function after set.
+     * @tc.excepted: step6 ai function noy found and return 2.
+     */
+    EXPECT_EQ(frameNodeImpl->frameNode_->CallAIFunction("OTHERFunction", "params1: 1"), 2);
 }
 } // namespace OHOS::Ace

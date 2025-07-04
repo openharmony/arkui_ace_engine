@@ -81,6 +81,8 @@ public:
     int32_t GetMeasureHeight() override;
     NodeHandle GetParentHandle() override;
 
+    void SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper) override;
+
 private:
     void PushAceNode(const RefPtr<AceNode>& node);
     RefPtr<AceNode> PopAceNode();

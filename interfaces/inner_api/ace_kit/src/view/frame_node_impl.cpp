@@ -260,6 +260,12 @@ int32_t FrameNodeImpl::GetId() const
     return frameNode_->GetId();
 }
 
+void FrameNodeImpl::SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper)
+{
+    CHECK_NULL_VOID(frameNode_);
+    frameNode_->SetAICallerHelper(aiCallerHelper);
+}
+
 void FrameNodeImpl::SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& measureCallback)
 {
     CHECK_NULL_VOID(frameNode_);
