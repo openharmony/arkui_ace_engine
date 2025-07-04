@@ -193,14 +193,18 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
         needPostJsTask = !(setting.usePlatformAsUIThread && setting.useUIAsJSThread);
     }
 
+    auto hybridType = Framework::JsEngineHybridType::NONE;
     if (type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
         needPostJsTask = false;
-        jsEngine_->UpdateHybridType(Framework::JsEngineHybridType::STATIC_HYBRID_DYNAMIC);
+        hybridType = Framework::JsEngineHybridType::STATIC_HYBRID_DYNAMIC;
     } else if (type_ == FrontendType::DYNAMIC_HYBRID_STATIC) {
         needPostJsTask = false;
-        jsEngine_->UpdateHybridType(Framework::JsEngineHybridType::DYNAMIC_HYBRID_STATIC);
+        hybridType = Framework::JsEngineHybridType::DYNAMIC_HYBRID_STATIC;
     } else {
-        jsEngine_->UpdateHybridType(Framework::JsEngineHybridType::NONE);
+        hybridType = Framework::JsEngineHybridType::NONE;
+    }
+    if (jsEngine_) {
+        jsEngine_->UpdateHybridType(hybridType);
     }
 
 #if defined(PREVIEW)
