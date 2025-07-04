@@ -156,30 +156,6 @@ export class ArkRowStyle extends ArkCommonMethodStyle implements RowAttribute {
         }
 }
 export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttribute {
-    protected _modifierHost: ArkRowNode | undefined;
-    setModifierHost(value: ArkRowNode): void {
-        this._modifierHost = value;
-    }
-    getModifierHost(): ArkRowNode {
-        if (this._modifierHost === undefined || this._modifierHost === null) {
-            this._modifierHost = new ArkRowNode()
-            this._modifierHost!.setPeer(this.getPeer());
-        }
-        return this._modifierHost!;
-    }
-    getAttributeSet(): ArkRowAttributeSet  {
-        return this.getPeer()._attributeSet as ArkRowAttributeSet;
-    }
- 
-    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
-        let isCommonModifier: boolean = modifier instanceof RowModifier;
-        if (isCommonModifier) {
-            let commonModifier = modifier as object as RowModifier;
-            this.getPeer()._attributeSet = commonModifier.attributeSet;
-        } else if (this.getPeer()._attributeSet == null) {
-            this.getPeer()._attributeSet = new ArkRowAttributeSet();
-        }
-    }
     getPeer(): ArkRowPeer {
         return (this.peer as ArkRowPeer)
     }

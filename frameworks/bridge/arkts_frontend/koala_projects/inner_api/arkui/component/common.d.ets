@@ -427,7 +427,6 @@ export interface CommonMethod {
         keys: Array<ModifierKey> | undefined,
         action?: () => void
     ): this;
-    attributeModifier<T>(value: AttributeModifier<T>): this;
 }
 
 export declare class ArkCommonMethodPeer extends PeerNode {
@@ -1002,7 +1001,6 @@ export declare class ArkCommonMethodComponent extends ComponentBase implements C
         keys: Array<ModifierKey> | undefined,
         action?: () => void
     ): this;
-    public attributeModifier<T>(modifier: AttributeModifier<T>): this;
     public applyModifierByState<T>(isAttributeUpdater: boolean, modifier: AttributeModifier<T>): void;
     public applyAttributesFinish(): void;
 }
@@ -1396,5 +1394,4 @@ export declare class ArkCommonMethodStyle implements CommonMethod {
         keys: Array<ModifierKey> | undefined,
         action?: () => void
     ): this;
-    public attributeModifier<T>(value: AttributeModifier<T>): this;
 }

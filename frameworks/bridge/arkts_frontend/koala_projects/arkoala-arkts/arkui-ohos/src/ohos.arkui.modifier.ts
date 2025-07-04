@@ -37,6 +37,8 @@ export { ColumnModifier } from './ColumnModifier';
 
 export { ColumnSplitModifier } from './ColumnSplitModifier';
 
+export { ButtonModifier } from './ButtonModifier';
+
 // export { TextModifier } from './handwritten/modifiers/ArkTextModifier'
 
 // export { SymbolGlyphModifier } from "./handwritten/modifiers/ArkSymbolGlyphModifier"
