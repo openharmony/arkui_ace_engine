@@ -264,6 +264,11 @@ HWTEST_F(RichEditorPatternTestNg, OnBackPressed001, TestSize.Level1)
 
     EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
 
+    richEditorPattern->textSelector_.Update(0, 1);
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
     RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
     richEditorPattern->CreateHandles();
     richEditorPattern->textSelector_.Update(0, testNumber5);

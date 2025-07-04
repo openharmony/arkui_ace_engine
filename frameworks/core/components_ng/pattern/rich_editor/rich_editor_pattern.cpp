@@ -8937,7 +8937,11 @@ void RichEditorPattern::CreateHandles()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CalculateHandleOffsetAndShowOverlay();
-    selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
+    bool isCurrentMenuVisibile = selectOverlay_->IsCurrentMenuVisibile();
+    selectOverlay_->UpdateMenuOffset();
+    if (!isCurrentMenuVisibile) {
+        selectOverlay_->HideMenu();
+    }
 }
 
 void RichEditorPattern::ShowHandles(const bool isNeedShowHandles)
