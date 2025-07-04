@@ -64,8 +64,6 @@ export class ArkUIAniModule {
 
     native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void
 
-    native static _DragEvent_ConvertFromPixelMapToAniPointer(pixelMap: image.PixelMap) : KPointer
-
     native static _Drag_Set_AllowDrop_Null(ptr: KLong) : void
 
     native static _Drag_Set_AllowDrop(ptr: KPointer, thisArray: Array<string>, thisLength: KInt): void
