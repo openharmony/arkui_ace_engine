@@ -14,8 +14,9 @@
  */
 
 #include "grid_test_ng.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-
+#include "core/components_ng/pattern/grid/grid_layout_options.h"
 namespace OHOS::Ace::NG {
 class GridSyncLoadTestNg : public GridTestNg {
 public:
@@ -162,12 +163,102 @@ HWTEST_F(GridSyncLoadTestNg, SyncLoad003, TestSize.Level1)
 
     /**
      * @tc.steps: step3. scroll page without animation
-     * @tc.expected: jump to next page, and only layout items in response time.
+     * @tc.expected: fill next page
      */
     pattern_->ScrollPage(false);
     MockPipelineContext::GetCurrent()->SetResponseTime(1);
     MockPipelineContext::GetCurrent()->FlushUITaskWithSingleDirtyNode(frameNode_);
-    EXPECT_EQ(pattern_->info_.endIndex_, 17);
-    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 8);
+    EXPECT_EQ(pattern_->info_.endIndex_, 23);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 11);
+}
+
+/**
+ * @tc.name: SyncLoad004
+ * @tc.desc: Test Grid sync load with cachedCount show
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridSyncLoadTestNg, SyncLoad004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Grid
+     * @tc.expected: Fill current page
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetSyncLoad(false);
+    model.SetCachedCount(0, false);
+    CreateGridItems(100);
+    CreateDone();
+    EXPECT_EQ(pattern_->info_.endIndex_, 7);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
+
+    /**
+     * @tc.steps: step2. set cache shown and limit layout time
+     * @tc.expected: layout cached items by limited count
+     */
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, 2, frameNode_);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ShowCachedItems, true, frameNode_);
+    MockPipelineContext::GetCurrent()->SetResponseTime(1);
+    MockPipelineContext::GetCurrent()->FlushUITaskWithSingleDirtyNode(frameNode_);
+    EXPECT_EQ(pattern_->info_.gridMatrix_.size(), 5);
+    EXPECT_EQ(pattern_->info_.gridMatrix_.rbegin()->second.size(), 1);
+
+    /**
+     * @tc.steps: step3. flush next layout
+     * @tc.expected: fill current cached line and start the second
+     */
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    MockPipelineContext::GetCurrent()->FlushUITaskWithSingleDirtyNode(frameNode_);
+    EXPECT_EQ(pattern_->info_.gridMatrix_.size(), 6);
+    EXPECT_EQ(pattern_->info_.gridMatrix_.rbegin()->second.size(), 1);
+}
+
+/**
+ * @tc.name: SyncLoad005
+ * @tc.desc: Test Grid sync load during scrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridSyncLoadTestNg, SyncLoad005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Grid
+     * @tc.expected: Fill current page
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    GridLayoutOptions options;
+    model.SetLayoutOptions(options);
+    model.SetSyncLoad(false);
+    model.SetCachedCount(0, false);
+    CreateGridItems(100);
+    CreateDone();
+    EXPECT_EQ(pattern_->info_.endIndex_, 7);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
+
+    /**
+     * @tc.steps: step2. scroll to index without animation
+     * @tc.expected: layout items by limited count
+     */
+    MockPipelineContext::GetCurrent()->SetResponseTime(1);
+    int32_t targetIndex = 30;
+    ScrollAlign align = ScrollAlign::START;
+    ScrollToIndex(targetIndex, false, align);
+    EXPECT_EQ(pattern_->info_.startIndex_, 30);
+    EXPECT_EQ(pattern_->info_.endIndex_, 32);
+
+    /**
+     * @tc.steps: step3. scroll to index with animation
+     * @tc.expected: layout all items
+     */
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    targetIndex = 80;
+    align = ScrollAlign::START;
+    ScrollToIndex(targetIndex, true, align);
+    if (!MockAnimationManager::GetInstance().AllFinished()) {
+        MockAnimationManager::GetInstance().Tick();
+        FlushUITasks();
+    }
+    EXPECT_EQ(pattern_->info_.startIndex_, targetIndex);
+    EXPECT_EQ(pattern_->info_.endIndex_, targetIndex + 7);
 }
 } // namespace OHOS::Ace::NG

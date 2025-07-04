@@ -3137,7 +3137,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest033, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = new ArkUI_Node({ARKUI_NODE_WATER_FLOW, nullptr, true});
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_WATER_FLOW);
+    ASSERT_NE(rootNode, nullptr);
     float distance = 10.0f;
     uint32_t color = 0xFFFF0000;
     ArkUI_NumberValue value[] = {{.f32 = distance}};
@@ -3168,7 +3169,26 @@ HWTEST_F(NativeNodeTest, NativeNodeTest033, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_SCROLL_ENABLE_SCROLL_INTERACTION, &item);
     nodeAPI->setAttribute(rootNode, NODE_WATER_FLOW_CACHED_COUNT, &item);
     nodeAPI->setAttribute(rootNode, NODE_WATER_FLOW_SCROLL_TO_INDEX, &item);
+    
+    // test default value of syncLoad
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD), nullptr);
+    auto result = nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    // set and reset syncLoad
+    value[0].i32 = 0;
     nodeAPI->setAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD, &item);
+    result = nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 0);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD), ARKUI_ERROR_CODE_NO_ERROR);
+    result = nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    // set invalid value to syncLoad
+    value[0].i32 = -1;
+    nodeAPI->setAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD, &item);
+    result = nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 1);
 
     item.string = "test";
     nodeAPI->setAttribute(rootNode, NODE_WATER_FLOW_COLUMN_TEMPLATE, &item);
@@ -3194,7 +3214,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest033, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_SECTION_OPTION), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_NODE_ADAPTER), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_CACHED_COUNT), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_FOOTER), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SCROLL_FRICTION), ARKUI_ERROR_CODE_NO_ERROR);
@@ -3212,7 +3231,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest033, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_ROW_GAP), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_NODE_ADAPTER), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_CACHED_COUNT), nullptr);
-    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SCROLL_FRICTION), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SCROLL_BAR_DISPLAY_MODE), nullptr);
@@ -3244,14 +3262,33 @@ HWTEST_F(NativeNodeTest, NativeNodeTest034, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_GRID_ROW_GAP, &item);
     value[0].i32 = 1;
     nodeAPI->setAttribute(rootNode, NODE_GRID_CACHED_COUNT, &item);
+
+    // test default value of syncLoad
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_GRID_SYNC_LOAD), nullptr);
+    auto result = nodeAPI->getAttribute(rootNode, NODE_GRID_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    // set and reset syncLoad
+    value[0].i32 = 0;
     nodeAPI->setAttribute(rootNode, NODE_GRID_SYNC_LOAD, &item);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 0);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_SYNC_LOAD), ARKUI_ERROR_CODE_NO_ERROR);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    // set invalid value to syncLoad
+    value[0].i32 = -1;
+    nodeAPI->setAttribute(rootNode, NODE_GRID_SYNC_LOAD, &item);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 1);
+
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_COLUMN_TEMPLATE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_ROW_TEMPLATE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_COLUMN_GAP), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_ROW_GAP), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_NODE_ADAPTER), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_CACHED_COUNT), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_SYNC_LOAD), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_GRID_COLUMN_TEMPLATE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_GRID_ROW_TEMPLATE), nullptr);
@@ -3259,7 +3296,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest034, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_GRID_ROW_GAP), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_GRID_NODE_ADAPTER), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_GRID_CACHED_COUNT), nullptr);
-    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_GRID_SYNC_LOAD), nullptr);
+    
     nodeAPI->disposeNode(rootNode);
 }
 

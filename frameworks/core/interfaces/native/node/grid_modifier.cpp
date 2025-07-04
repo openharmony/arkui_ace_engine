@@ -405,13 +405,13 @@ void ResetGridSyncLoad(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetSyncLoad(frameNode, false);
+    GridModelNG::SetSyncLoad(frameNode, true);
 }
 
 ArkUI_Bool GetGridSyncLoad(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, 0);
+    CHECK_NULL_RETURN(frameNode, 1);
     return GridModelNG::GetSyncLoad(frameNode);
 }
 
