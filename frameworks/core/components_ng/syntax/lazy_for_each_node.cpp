@@ -496,9 +496,19 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
     }
 }
 
-const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector() const
+const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector(bool needCacheNode) const
 {
-    return children_;
+    if (needCacheNode) {
+        std::vector<UINode*> childList;
+        builder_->GetAllItems(childList);
+        childrenWithCache_.clear();
+        for (const auto& uiNode : childList) {
+            childrenWithCache_.emplace_back(Claim(uiNode));
+        }
+        return childrenWithCache_;
+    } else {
+        return children_;
+    }
 }
 
 void LazyForEachNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
