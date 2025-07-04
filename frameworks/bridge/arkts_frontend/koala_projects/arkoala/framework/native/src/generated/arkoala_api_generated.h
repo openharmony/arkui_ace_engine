@@ -946,6 +946,8 @@ typedef struct Array_ImageAnalyzerType Array_ImageAnalyzerType;
 typedef struct Opt_Array_ImageAnalyzerType Opt_Array_ImageAnalyzerType;
 typedef struct Array_ImageFrameInfo Array_ImageFrameInfo;
 typedef struct Opt_Array_ImageFrameInfo Opt_Array_ImageFrameInfo;
+typedef struct Array_Ark_KeyframeState Array_Ark_KeyframeState;
+typedef struct Opt_Array_Ark_KeyframeState Opt_Array_Ark_KeyframeState;
 typedef struct Array_LayoutSafeAreaEdge Array_LayoutSafeAreaEdge;
 typedef struct Opt_Array_LayoutSafeAreaEdge Opt_Array_LayoutSafeAreaEdge;
 typedef struct Array_LayoutSafeAreaType Array_LayoutSafeAreaType;
@@ -2743,6 +2745,8 @@ typedef struct Ark_ImageFrameInfo Ark_ImageFrameInfo;
 typedef struct Opt_ImageFrameInfo Opt_ImageFrameInfo;
 typedef struct Ark_IndicatorStyle Ark_IndicatorStyle;
 typedef struct Opt_IndicatorStyle Opt_IndicatorStyle;
+typedef struct Ark_KeyframeState Ark_KeyframeState;
+typedef struct Opt_KeyframeState Opt_KeyframeState;
 typedef struct Ark_SubTabBarIndicatorStyle Ark_SubTabBarIndicatorStyle;
 typedef struct Opt_SubTabBarIndicatorStyle Opt_SubTabBarIndicatorStyle;
 typedef struct Ark_JavaScriptProxy Ark_JavaScriptProxy;
@@ -9089,6 +9093,14 @@ typedef struct Opt_Array_WebHeader {
     Ark_Tag tag;
     Array_WebHeader value;
 } Opt_Array_WebHeader;
+typedef struct Array_Ark_KeyframeState {
+    Ark_KeyframeState* array;
+    Ark_Int32 length;
+}Array_Ark_KeyframeState;
+typedef struct Opt_Array_Ark_KeyframeState {
+    Ark_Tag tag;
+    Array_Ark_KeyframeState value;
+}Opt_Array_Ark_KeyframeState;
 typedef struct AsyncCallback_Array_TextMenuItem_Array_TextMenuItem {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Array_TextMenuItem menuItems, const Callback_Array_TextMenuItem_Void continuation);
@@ -16239,6 +16251,24 @@ typedef struct Opt_AnimateParam {
     Ark_Tag tag;
     Ark_AnimateParam value;
 } Opt_AnimateParam;
+typedef struct Ark_KeyFrameAnimateParam {
+    Opt_Number delay;
+    Opt_Number iterations;
+    Opt_Callback_Void onFinish;
+} Ark_KeyFrameAnimateParam;
+typedef struct Opt_KeyFrameAnimateParam {
+    Ark_Tag tag;
+    Ark_KeyFrameAnimateParam value;
+} Opt_KeyFrameAnimateParam;
+typedef struct Ark_KeyframeState{
+    Opt_Number duration;
+    Opt_Union_Curve_String_ICurve curve;
+    Opt_Callback_Void event;
+}Ark_KeyframeState;
+typedef struct Opt_KeyframeState {
+    Ark_Tag tag;
+    Ark_KeyFrameAnimateParam value;
+} Opt_KeyframeState;
 typedef struct Ark_Area {
     Ark_Length width;
     Ark_Length height;
@@ -23626,6 +23656,7 @@ typedef struct GENERATED_ArkUIAnimationExtenderAccessor {
                         Ark_Float32 y,
                         Ark_Float32 width,
                         Ark_Float32 height);
+    void (*KeyFrameAnimationImpl)(const Ark_KeyFrameAnimateParam* param, const Array_Ark_KeyframeState* Keyframes);
     void (*OpenImplicitAnimation)(const Ark_AnimateParam* param);
     void (*CloseImplicitAnimation)();
     void (*StartDoubleAnimation)(Ark_NativePointer node,

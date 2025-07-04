@@ -18,7 +18,7 @@ import { ArkUIGeneratedNativeModule } from "#components"
 import { int32, int64 } from "@koalaui/common"
 import { nullptr, KPointer, KSerializerBuffer, toPeerPtr } from "@koalaui/interop"
 import { _animateTo } from "arkui/handwritten/ArkAnimation"
-import { AnimateParam } from 'arkui/component'
+import { AnimateParam, AnimationExtender, KeyframeAnimateParam, KeyframeState } from 'arkui/component'
 import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from "@ohos/animator"
 import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
@@ -1018,6 +1018,12 @@ export class UIContextImpl extends UIContext {
             this.router_ = new RouterImpl()
         }
         this.router_.setRouter(router);
+    }
+
+    public keyframeAnimateTo(param: KeyframeAnimateParam, keyframes: Array<KeyframeState>): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        AnimationExtender.KeyframeAnimationImpl(param, keyframes);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public animateTo(param: AnimateParam, event: (() => void)): void {
