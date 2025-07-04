@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureGroupInterfaceAccessor {
 void DestroyPeerImpl(Ark_GestureGroupInterface peer)
 {
-    auto peerImpl = reinterpret_cast<GestureGroupInterfacePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_GestureGroupInterface ConstructImpl(Ark_GestureMode mode,
                                         const Array_GestureType* gesture)
@@ -52,7 +48,4 @@ const GENERATED_ArkUIGestureGroupInterfaceAccessor* GetGestureGroupInterfaceAcce
     return &GestureGroupInterfaceAccessorImpl;
 }
 
-struct GestureGroupInterfacePeer {
-    virtual ~GestureGroupInterfacePeer() = default;
-};
 }

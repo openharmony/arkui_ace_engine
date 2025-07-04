@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LinearGradientAccessor {
 void DestroyPeerImpl(Ark_LinearGradient peer)
 {
-    auto peerImpl = reinterpret_cast<LinearGradientPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_LinearGradient ConstructImpl(const Array_ColorStop* colorStops)
 {
@@ -45,7 +41,4 @@ const GENERATED_ArkUILinearGradientAccessor* GetLinearGradientAccessor()
     return &LinearGradientAccessorImpl;
 }
 
-struct LinearGradientPeer {
-    virtual ~LinearGradientPeer() = default;
-};
 }

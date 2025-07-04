@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace KeyEventAccessor {
 void DestroyPeerImpl(Ark_KeyEvent peer)
 {
-    auto peerImpl = reinterpret_cast<KeyEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_KeyEvent ConstructImpl()
 {
@@ -155,7 +151,4 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
     return &KeyEventAccessorImpl;
 }
 
-struct KeyEventPeer {
-    virtual ~KeyEventPeer() = default;
-};
 }

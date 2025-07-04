@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ProgressMaskAccessor {
 void DestroyPeerImpl(Ark_ProgressMask peer)
 {
-    auto peerImpl = reinterpret_cast<ProgressMaskPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ProgressMask ConstructImpl(const Ark_Number* value,
                                const Ark_Number* total,
@@ -62,7 +58,4 @@ const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor()
     return &ProgressMaskAccessorImpl;
 }
 
-struct ProgressMaskPeer {
-    virtual ~ProgressMaskPeer() = default;
-};
 }

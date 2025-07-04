@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DatePickerDialogAccessor {
 void DestroyPeerImpl(Ark_DatePickerDialog peer)
 {
-    auto peerImpl = reinterpret_cast<DatePickerDialogPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_DatePickerDialog ConstructImpl()
 {
@@ -45,7 +41,4 @@ const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor()
     return &DatePickerDialogAccessorImpl;
 }
 
-struct DatePickerDialogPeer {
-    virtual ~DatePickerDialogPeer() = default;
-};
 }

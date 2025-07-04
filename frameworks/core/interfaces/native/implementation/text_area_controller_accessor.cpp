@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextAreaControllerAccessor {
 void DestroyPeerImpl(Ark_TextAreaController peer)
 {
-    auto peerImpl = reinterpret_cast<TextAreaControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TextAreaController ConstructImpl()
 {
@@ -61,7 +57,4 @@ const GENERATED_ArkUITextAreaControllerAccessor* GetTextAreaControllerAccessor()
     return &TextAreaControllerAccessorImpl;
 }
 
-struct TextAreaControllerPeer {
-    virtual ~TextAreaControllerPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BackgroundColorStyleAccessor {
 void DestroyPeerImpl(Ark_BackgroundColorStyle peer)
 {
-    auto peerImpl = reinterpret_cast<BackgroundColorStylePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_BackgroundColorStyle ConstructImpl(const Ark_TextBackgroundStyle* textBackgroundStyle)
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccess
     return &BackgroundColorStyleAccessorImpl;
 }
 
-struct BackgroundColorStylePeer {
-    virtual ~BackgroundColorStylePeer() = default;
-};
 }

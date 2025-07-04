@@ -48,10 +48,6 @@ void SetCommandsImpl(Ark_NativePointer node,
 namespace drawing_PathAccessor {
 void DestroyPeerImpl(Ark_drawing_Path peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_PathPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_Path Construct0Impl()
 {
@@ -300,7 +296,4 @@ const GENERATED_ArkUIDrawing_PathAccessor* GetDrawing_PathAccessor()
     return &Drawing_PathAccessorImpl;
 }
 
-struct Drawing_PathPeer {
-    virtual ~Drawing_PathPeer() = default;
-};
 }

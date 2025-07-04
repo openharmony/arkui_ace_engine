@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_PathEffectAccessor {
 void DestroyPeerImpl(Ark_drawing_PathEffect peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_PathEffectPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_PathEffect ConstructImpl()
 {
@@ -56,7 +52,4 @@ const GENERATED_ArkUIDrawing_PathEffectAccessor* GetDrawing_PathEffectAccessor()
     return &Drawing_PathEffectAccessorImpl;
 }
 
-struct Drawing_PathEffectPeer {
-    virtual ~Drawing_PathEffectPeer() = default;
-};
 }

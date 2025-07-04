@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextMenuItemIdAccessor {
 void DestroyPeerImpl(Ark_TextMenuItemId peer)
 {
-    auto peerImpl = reinterpret_cast<TextMenuItemIdPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TextMenuItemId ConstructImpl()
 {
@@ -106,7 +102,4 @@ const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
     return &TextMenuItemIdAccessorImpl;
 }
 
-struct TextMenuItemIdPeer {
-    virtual ~TextMenuItemIdPeer() = default;
-};
 }

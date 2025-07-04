@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FocusAxisEventAccessor {
 void DestroyPeerImpl(Ark_FocusAxisEvent peer)
 {
-    auto peerImpl = reinterpret_cast<FocusAxisEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_FocusAxisEvent ConstructImpl()
 {
@@ -65,7 +61,4 @@ const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor()
     return &FocusAxisEventAccessorImpl;
 }
 
-struct FocusAxisEventPeer {
-    virtual ~FocusAxisEventPeer() = default;
-};
 }

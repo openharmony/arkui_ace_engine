@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextBaseControllerAccessor {
 void DestroyPeerImpl(Ark_TextBaseController peer)
 {
-    auto peerImpl = reinterpret_cast<TextBaseControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TextBaseController ConstructImpl()
 {
@@ -61,7 +57,4 @@ const GENERATED_ArkUITextBaseControllerAccessor* GetTextBaseControllerAccessor()
     return &TextBaseControllerAccessorImpl;
 }
 
-struct TextBaseControllerPeer {
-    virtual ~TextBaseControllerPeer() = default;
-};
 }

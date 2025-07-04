@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavPathStackAccessor {
 void DestroyPeerImpl(Ark_NavPathStack peer)
 {
-    auto peerImpl = reinterpret_cast<NavPathStackPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_NavPathStack ConstructImpl()
 {
@@ -270,7 +266,4 @@ const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor()
     return &NavPathStackAccessorImpl;
 }
 
-struct NavPathStackPeer {
-    virtual ~NavPathStackPeer() = default;
-};
 }

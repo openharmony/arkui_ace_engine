@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HoverEventAccessor {
 void DestroyPeerImpl(Ark_HoverEvent peer)
 {
-    auto peerImpl = reinterpret_cast<HoverEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_HoverEvent ConstructImpl()
 {
@@ -115,7 +111,4 @@ const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
     return &HoverEventAccessorImpl;
 }
 
-struct HoverEventPeer {
-    virtual ~HoverEventPeer() = default;
-};
 }

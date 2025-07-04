@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextMenuControllerAccessor {
 void DestroyPeerImpl(Ark_TextMenuController peer)
 {
-    auto peerImpl = reinterpret_cast<TextMenuControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TextMenuController ConstructImpl()
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUITextMenuControllerAccessor* GetTextMenuControllerAccessor()
     return &TextMenuControllerAccessorImpl;
 }
 
-struct TextMenuControllerPeer {
-    virtual ~TextMenuControllerPeer() = default;
-};
 }

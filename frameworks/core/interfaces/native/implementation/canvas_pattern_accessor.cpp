@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPatternAccessor {
 void DestroyPeerImpl(Ark_CanvasPattern peer)
 {
-    auto peerImpl = reinterpret_cast<CanvasPatternPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_CanvasPattern ConstructImpl()
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor()
     return &CanvasPatternAccessorImpl;
 }
 
-struct CanvasPatternPeer {
-    virtual ~CanvasPatternPeer() = default;
-};
 }

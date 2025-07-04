@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SceneAccessor {
 void DestroyPeerImpl(Ark_Scene peer)
 {
-    auto peerImpl = reinterpret_cast<ScenePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_Scene ConstructImpl()
 {
@@ -56,7 +52,4 @@ const GENERATED_ArkUISceneAccessor* GetSceneAccessor()
     return &SceneAccessorImpl;
 }
 
-struct ScenePeer {
-    virtual ~ScenePeer() = default;
-};
 }

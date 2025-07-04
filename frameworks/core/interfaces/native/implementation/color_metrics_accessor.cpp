@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColorMetricsAccessor {
 void DestroyPeerImpl(Ark_ColorMetrics peer)
 {
-    auto peerImpl = reinterpret_cast<ColorMetricsPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ColorMetrics ConstructImpl()
 {
@@ -94,7 +90,4 @@ const GENERATED_ArkUIColorMetricsAccessor* GetColorMetricsAccessor()
     return &ColorMetricsAccessorImpl;
 }
 
-struct ColorMetricsPeer {
-    virtual ~ColorMetricsPeer() = default;
-};
 }

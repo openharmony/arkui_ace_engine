@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColorFilterAccessor {
 void DestroyPeerImpl(Ark_ColorFilter peer)
 {
-    auto peerImpl = reinterpret_cast<ColorFilterPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ColorFilter ConstructImpl(const Array_Number* value)
 {
@@ -38,10 +34,6 @@ Ark_NativePointer GetFinalizerImpl()
 namespace drawing_ColorFilterAccessor {
 void DestroyPeerImpl(Ark_drawing_ColorFilter peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_ColorFilterPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_ColorFilter ConstructImpl()
 {
@@ -93,9 +85,6 @@ const GENERATED_ArkUIColorFilterAccessor* GetColorFilterAccessor()
     return &ColorFilterAccessorImpl;
 }
 
-struct ColorFilterPeer {
-    virtual ~ColorFilterPeer() = default;
-};
 const GENERATED_ArkUIDrawing_ColorFilterAccessor* GetDrawing_ColorFilterAccessor()
 {
     static const GENERATED_ArkUIDrawing_ColorFilterAccessor Drawing_ColorFilterAccessorImpl {
@@ -113,7 +102,4 @@ const GENERATED_ArkUIDrawing_ColorFilterAccessor* GetDrawing_ColorFilterAccessor
     return &Drawing_ColorFilterAccessorImpl;
 }
 
-struct Drawing_ColorFilterPeer {
-    virtual ~Drawing_ColorFilterPeer() = default;
-};
 }

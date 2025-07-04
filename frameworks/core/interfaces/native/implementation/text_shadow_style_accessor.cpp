@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextShadowStyleAccessor {
 void DestroyPeerImpl(Ark_TextShadowStyle peer)
 {
-    auto peerImpl = reinterpret_cast<TextShadowStylePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TextShadowStyle ConstructImpl(const Ark_Union_ShadowOptions_Array_ShadowOptions* value)
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
     return &TextShadowStyleAccessorImpl;
 }
 
-struct TextShadowStylePeer {
-    virtual ~TextShadowStylePeer() = default;
-};
 }

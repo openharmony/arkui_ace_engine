@@ -33,9 +33,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
-struct GestureOpsPeer {
-    virtual ~GestureOpsPeer() = default;
-};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {

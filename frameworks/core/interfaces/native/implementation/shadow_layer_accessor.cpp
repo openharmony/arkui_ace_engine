@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_ShadowLayerAccessor {
 void DestroyPeerImpl(Ark_drawing_ShadowLayer peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_ShadowLayerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_ShadowLayer ConstructImpl()
 {
@@ -61,7 +57,4 @@ const GENERATED_ArkUIDrawing_ShadowLayerAccessor* GetDrawing_ShadowLayerAccessor
     return &Drawing_ShadowLayerAccessorImpl;
 }
 
-struct Drawing_ShadowLayerPeer {
-    virtual ~Drawing_ShadowLayerPeer() = default;
-};
 }

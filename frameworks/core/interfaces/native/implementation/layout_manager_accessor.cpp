@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LayoutManagerAccessor {
 void DestroyPeerImpl(Ark_LayoutManager peer)
 {
-    auto peerImpl = reinterpret_cast<LayoutManagerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_LayoutManager ConstructImpl()
 {
@@ -57,7 +53,4 @@ const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
     return &LayoutManagerAccessorImpl;
 }
 
-struct LayoutManagerPeer {
-    virtual ~LayoutManagerPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ShapeClipAccessor {
 void DestroyPeerImpl(Ark_ShapeClip peer)
 {
-    auto peerImpl = reinterpret_cast<ShapeClipPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ShapeClip ConstructImpl()
 {
@@ -70,7 +66,4 @@ const GENERATED_ArkUIShapeClipAccessor* GetShapeClipAccessor()
     return &ShapeClipAccessorImpl;
 }
 
-struct ShapeClipPeer {
-    virtual ~ShapeClipPeer() = default;
-};
 }

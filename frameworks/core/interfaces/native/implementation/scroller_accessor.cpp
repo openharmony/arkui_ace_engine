@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollerAccessor {
 void DestroyPeerImpl(Ark_Scroller peer)
 {
-    auto peerImpl = reinterpret_cast<ScrollerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_Scroller ConstructImpl()
 {
@@ -103,7 +99,4 @@ const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
     return &ScrollerAccessorImpl;
 }
 
-struct ScrollerPeer {
-    virtual ~ScrollerPeer() = default;
-};
 }

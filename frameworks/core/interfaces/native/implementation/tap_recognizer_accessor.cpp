@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TapRecognizerAccessor {
 void DestroyPeerImpl(Ark_TapRecognizer peer)
 {
-    auto peerImpl = reinterpret_cast<TapRecognizerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TapRecognizer ConstructImpl()
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUITapRecognizerAccessor* GetTapRecognizerAccessor()
     return &TapRecognizerAccessorImpl;
 }
 
-struct TapRecognizerPeer {
-    virtual ~TapRecognizerPeer() = default;
-};
 }

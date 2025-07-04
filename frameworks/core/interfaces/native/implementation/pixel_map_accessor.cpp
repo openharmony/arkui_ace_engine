@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace image_PixelMapAccessor {
 void DestroyPeerImpl(Ark_image_PixelMap peer)
 {
-    auto peerImpl = reinterpret_cast<image_PixelMapPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_image_PixelMap ConstructImpl()
 {
@@ -65,7 +61,4 @@ const GENERATED_ArkUIImage_PixelMapAccessor* GetImage_PixelMapAccessor()
     return &Image_PixelMapAccessorImpl;
 }
 
-struct Image_PixelMapPeer {
-    virtual ~Image_PixelMapPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanGestureInterfaceAccessor {
 void DestroyPeerImpl(Ark_PanGestureInterface peer)
 {
-    auto peerImpl = reinterpret_cast<PanGestureInterfacePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_PanGestureInterface ConstructImpl(const Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions* value)
 {
@@ -75,7 +71,4 @@ const GENERATED_ArkUIPanGestureInterfaceAccessor* GetPanGestureInterfaceAccessor
     return &PanGestureInterfaceAccessorImpl;
 }
 
-struct PanGestureInterfacePeer {
-    virtual ~PanGestureInterfacePeer() = default;
-};
 }

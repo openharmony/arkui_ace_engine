@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextClockControllerAccessor {
 void DestroyPeerImpl(Ark_TextClockController peer)
 {
-    auto peerImpl = reinterpret_cast<TextClockControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TextClockController ConstructImpl()
 {
@@ -53,7 +49,4 @@ const GENERATED_ArkUITextClockControllerAccessor* GetTextClockControllerAccessor
     return &TextClockControllerAccessorImpl;
 }
 
-struct TextClockControllerPeer {
-    virtual ~TextClockControllerPeer() = default;
-};
 }

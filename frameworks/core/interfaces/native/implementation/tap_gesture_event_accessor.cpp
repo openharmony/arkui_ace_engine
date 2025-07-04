@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TapGestureEventAccessor {
 void DestroyPeerImpl(Ark_TapGestureEvent peer)
 {
-    auto peerImpl = reinterpret_cast<TapGestureEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TapGestureEvent ConstructImpl()
 {
@@ -45,7 +41,4 @@ const GENERATED_ArkUITapGestureEventAccessor* GetTapGestureEventAccessor()
     return &TapGestureEventAccessorImpl;
 }
 
-struct TapGestureEventPeer {
-    virtual ~TapGestureEventPeer() = default;
-};
 }

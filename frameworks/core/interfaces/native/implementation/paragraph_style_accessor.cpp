@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ParagraphStyleAccessor {
 void DestroyPeerImpl(Ark_ParagraphStyle peer)
 {
-    auto peerImpl = reinterpret_cast<ParagraphStylePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ParagraphStyle ConstructImpl(const Opt_ParagraphStyleInterface* value)
 {
@@ -80,7 +76,4 @@ const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()
     return &ParagraphStyleAccessorImpl;
 }
 
-struct ParagraphStylePeer {
-    virtual ~ParagraphStylePeer() = default;
-};
 }

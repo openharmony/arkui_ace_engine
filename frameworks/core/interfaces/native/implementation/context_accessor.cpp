@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace common_ContextAccessor {
 void DestroyPeerImpl(Ark_common_Context peer)
 {
-    auto peerImpl = reinterpret_cast<common_ContextPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_common_Context ConstructImpl()
 {
@@ -142,10 +138,6 @@ void SetCloudFileDirImpl(Ark_common_Context peer,
 namespace ContextAccessor {
 void DestroyPeerImpl(Ark_Context peer)
 {
-    auto peerImpl = reinterpret_cast<ContextPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_Context ConstructImpl()
 {
@@ -189,9 +181,6 @@ const GENERATED_ArkUICommon_ContextAccessor* GetCommon_ContextAccessor()
     return &Common_ContextAccessorImpl;
 }
 
-struct Common_ContextPeer {
-    virtual ~Common_ContextPeer() = default;
-};
 const GENERATED_ArkUIContextAccessor* GetContextAccessor()
 {
     static const GENERATED_ArkUIContextAccessor ContextAccessorImpl {
@@ -202,7 +191,4 @@ const GENERATED_ArkUIContextAccessor* GetContextAccessor()
     return &ContextAccessorImpl;
 }
 
-struct ContextPeer {
-    virtual ~ContextPeer() = default;
-};
 }

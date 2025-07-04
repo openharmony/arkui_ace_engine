@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PromptActionAccessor {
 void DestroyPeerImpl(Ark_PromptAction peer)
 {
-    auto peerImpl = reinterpret_cast<PromptActionPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_PromptAction ConstructImpl()
 {
@@ -101,7 +97,4 @@ const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor()
     return &PromptActionAccessorImpl;
 }
 
-struct PromptActionPeer {
-    virtual ~PromptActionPeer() = default;
-};
 }

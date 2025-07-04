@@ -155,7 +155,4 @@ const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
     return &GlobalScopeAccessorImpl;
 }
 
-struct GlobalScopePeer {
-    virtual ~GlobalScopePeer() = default;
-};
 }

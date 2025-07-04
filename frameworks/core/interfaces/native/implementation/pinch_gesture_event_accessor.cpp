@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PinchGestureEventAccessor {
 void DestroyPeerImpl(Ark_PinchGestureEvent peer)
 {
-    auto peerImpl = reinterpret_cast<PinchGestureEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_PinchGestureEvent ConstructImpl()
 {
@@ -75,7 +71,4 @@ const GENERATED_ArkUIPinchGestureEventAccessor* GetPinchGestureEventAccessor()
     return &PinchGestureEventAccessorImpl;
 }
 
-struct PinchGestureEventPeer {
-    virtual ~PinchGestureEventPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawModifierAccessor {
 void DestroyPeerImpl(Ark_DrawModifier peer)
 {
-    auto peerImpl = reinterpret_cast<DrawModifierPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_DrawModifier ConstructImpl()
 {
@@ -79,7 +75,4 @@ const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()
     return &DrawModifierAccessorImpl;
 }
 
-struct DrawModifierPeer {
-    virtual ~DrawModifierPeer() = default;
-};
 }

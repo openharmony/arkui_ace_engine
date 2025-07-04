@@ -18,17 +18,8 @@
 namespace {
 constexpr double DEFAULT_DURATION = 1000.0;
 
-struct ScrollEdgeOptions {
-    std::optional<float> velocity;
-};
 
-struct ScrollToIndexOptions {
-    std::optional<float> extraOffset;
-};
 
-struct ScrollAnimationOptions {
-    std::optional<double> duration;
-    std::optional<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> curve;
     std::optional<bool> canOverScroll;
 };
 
@@ -36,9 +27,6 @@ using ScrollAnimationParam = std::variant<
     ScrollAnimationOptions, bool
 >;
 
-struct ScrollOptions {
-    OHOS::Ace::Dimension xOffset;
-    OHOS::Ace::Dimension yOffset;
     std::optional<ScrollAnimationParam> animation;
 };
 }

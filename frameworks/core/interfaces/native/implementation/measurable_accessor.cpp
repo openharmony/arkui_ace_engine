@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MeasurableAccessor {
 void DestroyPeerImpl(Ark_Measurable peer)
 {
-    auto peerImpl = reinterpret_cast<MeasurablePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_Measurable ConstructImpl()
 {
@@ -76,7 +72,4 @@ const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor()
     return &MeasurableAccessorImpl;
 }
 
-struct MeasurablePeer {
-    virtual ~MeasurablePeer() = default;
-};
 }

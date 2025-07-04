@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ThemeControlAccessor {
 void DestroyPeerImpl(Ark_ThemeControl peer)
 {
-    auto peerImpl = reinterpret_cast<ThemeControlPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ThemeControl ConstructImpl()
 {
@@ -49,7 +45,4 @@ const GENERATED_ArkUIThemeControlAccessor* GetThemeControlAccessor()
     return &ThemeControlAccessorImpl;
 }
 
-struct ThemeControlPeer {
-    virtual ~ThemeControlPeer() = default;
-};
 }

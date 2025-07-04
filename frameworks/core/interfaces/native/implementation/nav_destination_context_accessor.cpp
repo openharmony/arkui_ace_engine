@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavDestinationContextAccessor {
 void DestroyPeerImpl(Ark_NavDestinationContext peer)
 {
-    auto peerImpl = reinterpret_cast<NavDestinationContextPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_NavDestinationContext ConstructImpl()
 {
@@ -80,7 +76,4 @@ const GENERATED_ArkUINavDestinationContextAccessor* GetNavDestinationContextAcce
     return &NavDestinationContextAccessorImpl;
 }
 
-struct NavDestinationContextPeer {
-    virtual ~NavDestinationContextPeer() = default;
-};
 }

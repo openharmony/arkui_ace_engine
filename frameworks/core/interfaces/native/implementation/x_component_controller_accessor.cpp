@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace XComponentControllerAccessor {
 void DestroyPeerImpl(Ark_XComponentController peer)
 {
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_XComponentController ConstructImpl()
 {
@@ -117,7 +113,4 @@ const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccess
     return &XComponentControllerAccessorImpl;
 }
 
-struct XComponentControllerPeer {
-    virtual ~XComponentControllerPeer() = default;
-};
 }

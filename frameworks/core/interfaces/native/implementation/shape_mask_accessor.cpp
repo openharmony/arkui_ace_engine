@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ShapeMaskAccessor {
 void DestroyPeerImpl(Ark_ShapeMask peer)
 {
-    auto peerImpl = reinterpret_cast<ShapeMaskPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ShapeMask ConstructImpl()
 {
@@ -100,7 +96,4 @@ const GENERATED_ArkUIShapeMaskAccessor* GetShapeMaskAccessor()
     return &ShapeMaskAccessorImpl;
 }
 
-struct ShapeMaskPeer {
-    virtual ~ShapeMaskPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperControllerAccessor {
 void DestroyPeerImpl(Ark_SwiperController peer)
 {
-    auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_SwiperController ConstructImpl()
 {
@@ -72,7 +68,4 @@ const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
     return &SwiperControllerAccessorImpl;
 }
 
-struct SwiperControllerPeer {
-    virtual ~SwiperControllerPeer() = default;
-};
 }

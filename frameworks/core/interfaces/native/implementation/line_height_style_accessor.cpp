@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LineHeightStyleAccessor {
 void DestroyPeerImpl(Ark_LineHeightStyle peer)
 {
-    auto peerImpl = reinterpret_cast<LineHeightStylePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_LineHeightStyle ConstructImpl(Ark_LengthMetrics lineHeight)
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUILineHeightStyleAccessor* GetLineHeightStyleAccessor()
     return &LineHeightStyleAccessorImpl;
 }
 
-struct LineHeightStylePeer {
-    virtual ~LineHeightStylePeer() = default;
-};
 }

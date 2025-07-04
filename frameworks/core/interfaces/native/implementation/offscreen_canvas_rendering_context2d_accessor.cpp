@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace OffscreenCanvasRenderingContext2DAccessor {
 void DestroyPeerImpl(Ark_OffscreenCanvasRenderingContext2D peer)
 {
-    auto peerImpl = reinterpret_cast<OffscreenCanvasRenderingContext2DPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_OffscreenCanvasRenderingContext2D ConstructImpl(const Ark_Number* width,
                                                     const Ark_Number* height,
@@ -60,7 +56,4 @@ const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* GetOffscreenCanv
     return &OffscreenCanvasRenderingContext2DAccessorImpl;
 }
 
-struct OffscreenCanvasRenderingContext2DPeer {
-    virtual ~OffscreenCanvasRenderingContext2DPeer() = default;
-};
 }

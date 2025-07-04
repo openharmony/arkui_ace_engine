@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_SamplingOptionsAccessor {
 void DestroyPeerImpl(Ark_drawing_SamplingOptions peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_SamplingOptionsPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_SamplingOptions Construct0Impl()
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUIDrawing_SamplingOptionsAccessor* GetDrawing_SamplingOptions
     return &Drawing_SamplingOptionsAccessorImpl;
 }
 
-struct Drawing_SamplingOptionsPeer {
-    virtual ~Drawing_SamplingOptionsPeer() = default;
-};
 }

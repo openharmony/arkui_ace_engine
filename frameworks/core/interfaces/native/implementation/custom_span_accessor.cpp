@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CustomSpanAccessor {
 void DestroyPeerImpl(Ark_CustomSpan peer)
 {
-    auto peerImpl = reinterpret_cast<CustomSpanPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_CustomSpan ConstructImpl()
 {
@@ -69,7 +65,4 @@ const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor()
     return &CustomSpanAccessorImpl;
 }
 
-struct CustomSpanPeer {
-    virtual ~CustomSpanPeer() = default;
-};
 }

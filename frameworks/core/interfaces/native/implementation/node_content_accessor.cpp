@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NodeContentAccessor {
 void DestroyPeerImpl(Ark_NodeContent peer)
 {
-    auto peerImpl = reinterpret_cast<NodeContentPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_NodeContent ConstructImpl()
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUINodeContentAccessor* GetNodeContentAccessor()
     return &NodeContentAccessorImpl;
 }
 
-struct NodeContentPeer {
-    virtual ~NodeContentPeer() = default;
-};
 }

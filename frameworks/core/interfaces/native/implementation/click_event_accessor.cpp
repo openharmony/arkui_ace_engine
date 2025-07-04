@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClickEventAccessor {
 void DestroyPeerImpl(Ark_ClickEvent peer)
 {
-    auto peerImpl = reinterpret_cast<ClickEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ClickEvent ConstructImpl()
 {
@@ -125,7 +121,4 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
     return &ClickEventAccessorImpl;
 }
 
-struct ClickEventPeer {
-    virtual ~ClickEventPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LayoutableAccessor {
 void DestroyPeerImpl(Ark_Layoutable peer)
 {
-    auto peerImpl = reinterpret_cast<LayoutablePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_Layoutable ConstructImpl()
 {
@@ -85,7 +81,4 @@ const GENERATED_ArkUILayoutableAccessor* GetLayoutableAccessor()
     return &LayoutableAccessorImpl;
 }
 
-struct LayoutablePeer {
-    virtual ~LayoutablePeer() = default;
-};
 }

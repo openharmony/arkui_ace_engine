@@ -66,10 +66,6 @@ void SetEnableAnalyzerImpl(Ark_NativePointer node,
 namespace drawing_CanvasAccessor {
 void DestroyPeerImpl(Ark_drawing_Canvas peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_CanvasPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_Canvas ConstructImpl(Ark_image_PixelMap pixelmap)
 {
@@ -418,7 +414,4 @@ const GENERATED_ArkUIDrawing_CanvasAccessor* GetDrawing_CanvasAccessor()
     return &Drawing_CanvasAccessorImpl;
 }
 
-struct Drawing_CanvasPeer {
-    virtual ~Drawing_CanvasPeer() = default;
-};
 }

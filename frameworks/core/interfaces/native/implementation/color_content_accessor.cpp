@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColorContentAccessor {
 void DestroyPeerImpl(Ark_ColorContent peer)
 {
-    auto peerImpl = reinterpret_cast<ColorContentPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ColorContent ConstructImpl()
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUIColorContentAccessor* GetColorContentAccessor()
     return &ColorContentAccessorImpl;
 }
 
-struct ColorContentPeer {
-    virtual ~ColorContentPeer() = default;
-};
 }

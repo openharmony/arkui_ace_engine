@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DisappearSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_DisappearSymbolEffect peer)
 {
-    auto peerImpl = reinterpret_cast<DisappearSymbolEffectPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_DisappearSymbolEffect ConstructImpl(const Opt_EffectScope* scope)
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAcce
     return &DisappearSymbolEffectAccessorImpl;
 }
 
-struct DisappearSymbolEffectPeer {
-    virtual ~DisappearSymbolEffectPeer() = default;
-};
 }

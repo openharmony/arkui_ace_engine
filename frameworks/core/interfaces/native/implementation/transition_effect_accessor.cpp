@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TransitionEffectAccessor {
 void DestroyPeerImpl(Ark_TransitionEffect peer)
 {
-    auto peerImpl = reinterpret_cast<TransitionEffectPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TransitionEffect Construct0Impl(const Ark_String* type)
 {
@@ -138,7 +134,4 @@ const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
     return &TransitionEffectAccessorImpl;
 }
 
-struct TransitionEffectPeer {
-    virtual ~TransitionEffectPeer() = default;
-};
 }

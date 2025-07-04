@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace text_ParagraphAccessor {
 void DestroyPeerImpl(Ark_text_Paragraph peer)
 {
-    auto peerImpl = reinterpret_cast<text_ParagraphPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_text_Paragraph ConstructImpl()
 {
@@ -184,7 +180,4 @@ const GENERATED_ArkUIText_ParagraphAccessor* GetText_ParagraphAccessor()
     return &Text_ParagraphAccessorImpl;
 }
 
-struct Text_ParagraphPeer {
-    virtual ~Text_ParagraphPeer() = default;
-};
 }

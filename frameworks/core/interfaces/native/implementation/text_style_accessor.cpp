@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextStyleAccessor {
 void DestroyPeerImpl(Ark_TextStyle peer)
 {
-    auto peerImpl = reinterpret_cast<TextStylePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TextStyle ConstructImpl(const Opt_TextStyleInterface* value)
 {
@@ -70,7 +66,4 @@ const GENERATED_ArkUITextStyleAccessor* GetTextStyleAccessor()
     return &TextStyleAccessorImpl;
 }
 
-struct TextStylePeer {
-    virtual ~TextStylePeer() = default;
-};
 }

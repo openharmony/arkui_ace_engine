@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollableTargetInfoAccessor {
 void DestroyPeerImpl(Ark_ScrollableTargetInfo peer)
 {
-    auto peerImpl = reinterpret_cast<ScrollableTargetInfoPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ScrollableTargetInfo ConstructImpl()
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccess
     return &ScrollableTargetInfoAccessorImpl;
 }
 
-struct ScrollableTargetInfoPeer {
-    virtual ~ScrollableTargetInfoPeer() = default;
-};
 }

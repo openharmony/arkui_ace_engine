@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DecorationStyleAccessor {
 void DestroyPeerImpl(Ark_DecorationStyle peer)
 {
-    auto peerImpl = reinterpret_cast<DecorationStylePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_DecorationStyle ConstructImpl(const Ark_DecorationStyleInterface* value)
 {
@@ -60,7 +56,4 @@ const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor()
     return &DecorationStyleAccessorImpl;
 }
 
-struct DecorationStylePeer {
-    virtual ~DecorationStylePeer() = default;
-};
 }

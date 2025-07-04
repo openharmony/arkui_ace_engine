@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LongPressRecognizerAccessor {
 void DestroyPeerImpl(Ark_LongPressRecognizer peer)
 {
-    auto peerImpl = reinterpret_cast<LongPressRecognizerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_LongPressRecognizer ConstructImpl()
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor
     return &LongPressRecognizerAccessorImpl;
 }
 
-struct LongPressRecognizerPeer {
-    virtual ~LongPressRecognizerPeer() = default;
-};
 }

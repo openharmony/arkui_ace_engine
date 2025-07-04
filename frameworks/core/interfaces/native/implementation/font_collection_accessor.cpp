@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace text_FontCollectionAccessor {
 void DestroyPeerImpl(Ark_text_FontCollection peer)
 {
-    auto peerImpl = reinterpret_cast<text_FontCollectionPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_text_FontCollection ConstructImpl()
 {
@@ -69,7 +65,4 @@ const GENERATED_ArkUIText_FontCollectionAccessor* GetText_FontCollectionAccessor
     return &Text_FontCollectionAccessorImpl;
 }
 
-struct Text_FontCollectionPeer {
-    virtual ~Text_FontCollectionPeer() = default;
-};
 }

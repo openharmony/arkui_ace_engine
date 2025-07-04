@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LevelOrderAccessor {
 void DestroyPeerImpl(Ark_LevelOrder peer)
 {
-    auto peerImpl = reinterpret_cast<LevelOrderPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_LevelOrder ConstructImpl()
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUILevelOrderAccessor* GetLevelOrderAccessor()
     return &LevelOrderAccessorImpl;
 }
 
-struct LevelOrderPeer {
-    virtual ~LevelOrderPeer() = default;
-};
 }

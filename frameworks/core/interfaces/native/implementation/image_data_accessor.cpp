@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageDataAccessor {
 void DestroyPeerImpl(Ark_ImageData peer)
 {
-    auto peerImpl = reinterpret_cast<ImageDataPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ImageData ConstructImpl(const Ark_Number* width,
                             const Ark_Number* height,
@@ -78,7 +74,4 @@ const GENERATED_ArkUIImageDataAccessor* GetImageDataAccessor()
     return &ImageDataAccessorImpl;
 }
 
-struct ImageDataPeer {
-    virtual ~ImageDataPeer() = default;
-};
 }

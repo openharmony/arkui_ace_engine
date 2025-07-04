@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextPickerDialogAccessor {
 void DestroyPeerImpl(Ark_TextPickerDialog peer)
 {
-    auto peerImpl = reinterpret_cast<TextPickerDialogPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TextPickerDialog ConstructImpl()
 {
@@ -45,7 +41,4 @@ const GENERATED_ArkUITextPickerDialogAccessor* GetTextPickerDialogAccessor()
     return &TextPickerDialogAccessorImpl;
 }
 
-struct TextPickerDialogPeer {
-    virtual ~TextPickerDialogPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasRenderingContext2DAccessor {
 void DestroyPeerImpl(Ark_CanvasRenderingContext2D peer)
 {
-    auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_CanvasRenderingContext2D ConstructImpl(const Opt_RenderingContextSettings* settings,
                                            const Opt_LengthMetricsUnit* unit)
@@ -117,7 +113,4 @@ const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext
     return &CanvasRenderingContext2DAccessorImpl;
 }
 
-struct CanvasRenderingContext2DPeer {
-    virtual ~CanvasRenderingContext2DPeer() = default;
-};
 }

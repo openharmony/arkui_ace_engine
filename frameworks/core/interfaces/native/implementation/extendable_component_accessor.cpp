@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ExtendableComponentAccessor {
 void DestroyPeerImpl(Ark_ExtendableComponent peer)
 {
-    auto peerImpl = reinterpret_cast<ExtendableComponentPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ExtendableComponent ConstructImpl()
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUIExtendableComponentAccessor* GetExtendableComponentAccessor
     return &ExtendableComponentAccessorImpl;
 }
 
-struct ExtendableComponentPeer {
-    virtual ~ExtendableComponentPeer() = default;
-};
 }

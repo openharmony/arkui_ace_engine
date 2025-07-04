@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CommonShapeAccessor {
 void DestroyPeerImpl(Ark_CommonShape peer)
 {
-    auto peerImpl = reinterpret_cast<CommonShapePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_CommonShape ConstructImpl()
 {
@@ -63,7 +59,4 @@ const GENERATED_ArkUICommonShapeAccessor* GetCommonShapeAccessor()
     return &CommonShapeAccessorImpl;
 }
 
-struct CommonShapePeer {
-    virtual ~CommonShapePeer() = default;
-};
 }

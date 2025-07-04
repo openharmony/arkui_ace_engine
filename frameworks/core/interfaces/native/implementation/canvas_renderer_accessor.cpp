@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasRendererAccessor {
 void DestroyPeerImpl(Ark_CanvasRenderer peer)
 {
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_CanvasRenderer ConstructImpl()
 {
@@ -536,7 +532,4 @@ const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
     return &CanvasRendererAccessorImpl;
 }
 
-struct CanvasRendererPeer {
-    virtual ~CanvasRendererPeer() = default;
-};
 }

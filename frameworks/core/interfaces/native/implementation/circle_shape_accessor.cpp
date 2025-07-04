@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CircleShapeAccessor {
 void DestroyPeerImpl(Ark_CircleShape peer)
 {
-    auto peerImpl = reinterpret_cast<CircleShapePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_CircleShape ConstructImpl(const Opt_ShapeSize* options)
 {
@@ -81,7 +77,4 @@ const GENERATED_ArkUICircleShapeAccessor* GetCircleShapeAccessor()
     return &CircleShapeAccessorImpl;
 }
 
-struct CircleShapePeer {
-    virtual ~CircleShapePeer() = default;
-};
 }

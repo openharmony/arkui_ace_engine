@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UICommonEventAccessor {
 void DestroyPeerImpl(Ark_UICommonEvent peer)
 {
-    auto peerImpl = reinterpret_cast<UICommonEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_UICommonEvent ConstructImpl()
 {
@@ -101,7 +97,4 @@ const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor()
     return &UICommonEventAccessorImpl;
 }
 
-struct UICommonEventPeer {
-    virtual ~UICommonEventPeer() = default;
-};
 }

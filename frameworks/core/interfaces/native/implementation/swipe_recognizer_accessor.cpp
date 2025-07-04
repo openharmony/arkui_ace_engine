@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwipeRecognizerAccessor {
 void DestroyPeerImpl(Ark_SwipeRecognizer peer)
 {
-    auto peerImpl = reinterpret_cast<SwipeRecognizerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_SwipeRecognizer ConstructImpl()
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUISwipeRecognizerAccessor* GetSwipeRecognizerAccessor()
     return &SwipeRecognizerAccessorImpl;
 }
 
-struct SwipeRecognizerPeer {
-    virtual ~SwipeRecognizerPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextEditControllerExAccessor {
 void DestroyPeerImpl(Ark_TextEditControllerEx peer)
 {
-    auto peerImpl = reinterpret_cast<TextEditControllerExPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TextEditControllerEx ConstructImpl()
 {
@@ -70,7 +66,4 @@ const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccess
     return &TextEditControllerExAccessorImpl;
 }
 
-struct TextEditControllerExPeer {
-    virtual ~TextEditControllerExPeer() = default;
-};
 }

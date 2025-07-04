@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RenderingContextSettingsAccessor {
 void DestroyPeerImpl(Ark_RenderingContextSettings peer)
 {
-    auto peerImpl = reinterpret_cast<RenderingContextSettingsPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_RenderingContextSettings ConstructImpl(const Opt_Boolean* antialias)
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUIRenderingContextSettingsAccessor* GetRenderingContextSettin
     return &RenderingContextSettingsAccessorImpl;
 }
 
-struct RenderingContextSettingsPeer {
-    virtual ~RenderingContextSettingsPeer() = default;
-};
 }

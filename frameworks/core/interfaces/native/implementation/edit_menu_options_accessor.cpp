@@ -17,16 +17,9 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct EditMenuOptionsPeer {};
-
-namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EditMenuOptionsAccessor {
 void DestroyPeerImpl(Ark_EditMenuOptions peer)
 {
-}
-Ark_EditMenuOptions CtorImpl()
-{
-    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -56,7 +49,4 @@ const GENERATED_ArkUIEditMenuOptionsAccessor* GetEditMenuOptionsAccessor()
     return &EditMenuOptionsAccessorImpl;
 }
 
-struct EditMenuOptionsPeer {
-    virtual ~EditMenuOptionsPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureStyleAccessor {
 void DestroyPeerImpl(Ark_GestureStyle peer)
 {
-    auto peerImpl = reinterpret_cast<GestureStylePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_GestureStyle ConstructImpl(const Opt_GestureStyleInterface* value)
 {
@@ -45,7 +41,4 @@ const GENERATED_ArkUIGestureStyleAccessor* GetGestureStyleAccessor()
     return &GestureStyleAccessorImpl;
 }
 
-struct GestureStylePeer {
-    virtual ~GestureStylePeer() = default;
-};
 }

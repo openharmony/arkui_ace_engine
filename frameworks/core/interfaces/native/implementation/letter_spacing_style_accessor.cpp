@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LetterSpacingStyleAccessor {
 void DestroyPeerImpl(Ark_LetterSpacingStyle peer)
 {
-    auto peerImpl = reinterpret_cast<LetterSpacingStylePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_LetterSpacingStyle ConstructImpl(Ark_LengthMetrics value)
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor()
     return &LetterSpacingStyleAccessorImpl;
 }
 
-struct LetterSpacingStylePeer {
-    virtual ~LetterSpacingStylePeer() = default;
-};
 }

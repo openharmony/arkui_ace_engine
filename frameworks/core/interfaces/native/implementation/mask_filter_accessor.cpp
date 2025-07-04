@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_MaskFilterAccessor {
 void DestroyPeerImpl(Ark_drawing_MaskFilter peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_MaskFilterPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_MaskFilter ConstructImpl()
 {
@@ -51,7 +47,4 @@ const GENERATED_ArkUIDrawing_MaskFilterAccessor* GetDrawing_MaskFilterAccessor()
     return &Drawing_MaskFilterAccessorImpl;
 }
 
-struct Drawing_MaskFilterPeer {
-    virtual ~Drawing_MaskFilterPeer() = default;
-};
 }

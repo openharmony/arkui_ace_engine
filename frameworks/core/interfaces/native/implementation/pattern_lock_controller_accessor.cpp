@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PatternLockControllerAccessor {
 void DestroyPeerImpl(Ark_PatternLockController peer)
 {
-    auto peerImpl = reinterpret_cast<PatternLockControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_PatternLockController ConstructImpl()
 {
@@ -54,7 +50,4 @@ const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAcce
     return &PatternLockControllerAccessorImpl;
 }
 
-struct PatternLockControllerPeer {
-    virtual ~PatternLockControllerPeer() = default;
-};
 }

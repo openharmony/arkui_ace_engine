@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_MatrixAccessor {
 void DestroyPeerImpl(Ark_drawing_Matrix peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_MatrixPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_Matrix ConstructImpl()
 {
@@ -179,7 +175,4 @@ const GENERATED_ArkUIDrawing_MatrixAccessor* GetDrawing_MatrixAccessor()
     return &Drawing_MatrixAccessorImpl;
 }
 
-struct Drawing_MatrixPeer {
-    virtual ~Drawing_MatrixPeer() = default;
-};
 }

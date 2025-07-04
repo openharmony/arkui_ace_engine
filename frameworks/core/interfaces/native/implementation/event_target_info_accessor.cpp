@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventTargetInfoAccessor {
 void DestroyPeerImpl(Ark_EventTargetInfo peer)
 {
-    auto peerImpl = reinterpret_cast<EventTargetInfoPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_EventTargetInfo ConstructImpl()
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()
     return &EventTargetInfoAccessorImpl;
 }
 
-struct EventTargetInfoPeer {
-    virtual ~EventTargetInfoPeer() = default;
-};
 }

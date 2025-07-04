@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RestrictedWorkerAccessor {
 void DestroyPeerImpl(Ark_RestrictedWorker peer)
 {
-    auto peerImpl = reinterpret_cast<RestrictedWorkerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_RestrictedWorker ConstructImpl(const Ark_String* scriptURL,
                                    const Opt_WorkerOptions* options)
@@ -172,7 +168,4 @@ const GENERATED_ArkUIRestrictedWorkerAccessor* GetRestrictedWorkerAccessor()
     return &RestrictedWorkerAccessorImpl;
 }
 
-struct RestrictedWorkerPeer {
-    virtual ~RestrictedWorkerPeer() = default;
-};
 }

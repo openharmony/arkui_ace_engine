@@ -24,9 +24,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-struct PathOptions {
-    std::optional<Dimension> width;
-    std::optional<Dimension> height;
     std::optional<std::string> commands;
 };
 }

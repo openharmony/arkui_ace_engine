@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIContextAccessor {
 void DestroyPeerImpl(Ark_UIContext peer)
 {
-    auto peerImpl = reinterpret_cast<UIContextPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_UIContext ConstructImpl()
 {
@@ -211,7 +207,4 @@ const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor()
     return &UIContextAccessorImpl;
 }
 
-struct UIContextPeer {
-    virtual ~UIContextPeer() = default;
-};
 }

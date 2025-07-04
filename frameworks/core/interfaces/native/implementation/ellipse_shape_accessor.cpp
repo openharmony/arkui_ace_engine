@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EllipseShapeAccessor {
 void DestroyPeerImpl(Ark_EllipseShape peer)
 {
-    auto peerImpl = reinterpret_cast<EllipseShapePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_EllipseShape ConstructImpl(const Opt_ShapeSize* options)
 {
@@ -81,7 +77,4 @@ const GENERATED_ArkUIEllipseShapeAccessor* GetEllipseShapeAccessor()
     return &EllipseShapeAccessorImpl;
 }
 
-struct EllipseShapePeer {
-    virtual ~EllipseShapePeer() = default;
-};
 }

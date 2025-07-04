@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MutableStyledStringAccessor {
 void DestroyPeerImpl(Ark_MutableStyledString peer)
 {
-    auto peerImpl = reinterpret_cast<MutableStyledStringPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_MutableStyledString ConstructImpl()
 {
@@ -109,7 +105,4 @@ const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor
     return &MutableStyledStringAccessorImpl;
 }
 
-struct MutableStyledStringPeer {
-    virtual ~MutableStyledStringPeer() = default;
-};
 }

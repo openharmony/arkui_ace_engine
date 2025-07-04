@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace matrix4_Matrix4TransitAccessor {
 void DestroyPeerImpl(Ark_matrix4_Matrix4Transit peer)
 {
-    auto peerImpl = reinterpret_cast<matrix4_Matrix4TransitPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_matrix4_Matrix4Transit ConstructImpl()
 {
@@ -98,7 +94,4 @@ const GENERATED_ArkUIMatrix4_Matrix4TransitAccessor* GetMatrix4_Matrix4TransitAc
     return &Matrix4_Matrix4TransitAccessorImpl;
 }
 
-struct Matrix4_Matrix4TransitPeer {
-    virtual ~Matrix4_Matrix4TransitPeer() = default;
-};
 }

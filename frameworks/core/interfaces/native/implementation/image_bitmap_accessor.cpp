@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageBitmapAccessor {
 void DestroyPeerImpl(Ark_ImageBitmap peer)
 {
-    auto peerImpl = reinterpret_cast<ImageBitmapPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ImageBitmap ConstructImpl(const Ark_Union_PixelMap_String* src,
                               const Opt_LengthMetricsUnit* unit)
@@ -70,7 +66,4 @@ const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()
     return &ImageBitmapAccessorImpl;
 }
 
-struct ImageBitmapPeer {
-    virtual ~ImageBitmapPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_ImageFilterAccessor {
 void DestroyPeerImpl(Ark_drawing_ImageFilter peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_ImageFilterPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_ImageFilter ConstructImpl()
 {
@@ -59,7 +55,4 @@ const GENERATED_ArkUIDrawing_ImageFilterAccessor* GetDrawing_ImageFilterAccessor
     return &Drawing_ImageFilterAccessorImpl;
 }
 
-struct Drawing_ImageFilterPeer {
-    virtual ~Drawing_ImageFilterPeer() = default;
-};
 }

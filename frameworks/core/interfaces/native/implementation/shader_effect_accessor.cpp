@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_ShaderEffectAccessor {
 void DestroyPeerImpl(Ark_drawing_ShaderEffect peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_ShaderEffectPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_ShaderEffect ConstructImpl()
 {
@@ -93,7 +89,4 @@ const GENERATED_ArkUIDrawing_ShaderEffectAccessor* GetDrawing_ShaderEffectAccess
     return &Drawing_ShaderEffectAccessorImpl;
 }
 
-struct Drawing_ShaderEffectPeer {
-    virtual ~Drawing_ShaderEffectPeer() = default;
-};
 }

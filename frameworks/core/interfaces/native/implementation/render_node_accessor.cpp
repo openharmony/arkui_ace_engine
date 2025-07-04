@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RenderNodeAccessor {
 void DestroyPeerImpl(Ark_RenderNode peer)
 {
-    auto peerImpl = reinterpret_cast<RenderNodePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_RenderNode ConstructImpl()
 {
@@ -349,7 +345,4 @@ const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor()
     return &RenderNodeAccessorImpl;
 }
 
-struct RenderNodePeer {
-    virtual ~RenderNodePeer() = default;
-};
 }

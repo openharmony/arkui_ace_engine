@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabBarSymbolAccessor {
 void DestroyPeerImpl(Ark_TabBarSymbol peer)
 {
-    auto peerImpl = reinterpret_cast<TabBarSymbolPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TabBarSymbol ConstructImpl()
 {
@@ -65,7 +61,4 @@ const GENERATED_ArkUITabBarSymbolAccessor* GetTabBarSymbolAccessor()
     return &TabBarSymbolAccessorImpl;
 }
 
-struct TabBarSymbolPeer {
-    virtual ~TabBarSymbolPeer() = default;
-};
 }

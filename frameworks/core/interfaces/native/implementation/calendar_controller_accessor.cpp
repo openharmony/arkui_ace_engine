@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarControllerAccessor {
 void DestroyPeerImpl(Ark_CalendarController peer)
 {
-    auto peerImpl = reinterpret_cast<CalendarControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_CalendarController ConstructImpl()
 {
@@ -54,7 +50,4 @@ const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor()
     return &CalendarControllerAccessorImpl;
 }
 
-struct CalendarControllerPeer {
-    virtual ~CalendarControllerPeer() = default;
-};
 }

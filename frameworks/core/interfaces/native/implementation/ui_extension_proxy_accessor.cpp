@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIExtensionProxyAccessor {
 void DestroyPeerImpl(Ark_UIExtensionProxy peer)
 {
-    auto peerImpl = reinterpret_cast<UIExtensionProxyPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_UIExtensionProxy ConstructImpl()
 {
@@ -76,7 +72,4 @@ const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor()
     return &UIExtensionProxyAccessorImpl;
 }
 
-struct UIExtensionProxyPeer {
-    virtual ~UIExtensionProxyPeer() = default;
-};
 }

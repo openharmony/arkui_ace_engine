@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_PenAccessor {
 void DestroyPeerImpl(Ark_drawing_Pen peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_PenPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_Pen Construct0Impl()
 {
@@ -194,7 +190,4 @@ const GENERATED_ArkUIDrawing_PenAccessor* GetDrawing_PenAccessor()
     return &Drawing_PenAccessorImpl;
 }
 
-struct Drawing_PenPeer {
-    virtual ~Drawing_PenPeer() = default;
-};
 }

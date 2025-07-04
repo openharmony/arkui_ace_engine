@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_RoundRectAccessor {
 void DestroyPeerImpl(Ark_drawing_RoundRect peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_RoundRectPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_RoundRect ConstructImpl(const Ark_common2D_Rect* rect,
                                     const Ark_Number* xRadii,
@@ -66,7 +62,4 @@ const GENERATED_ArkUIDrawing_RoundRectAccessor* GetDrawing_RoundRectAccessor()
     return &Drawing_RoundRectAccessorImpl;
 }
 
-struct Drawing_RoundRectPeer {
-    virtual ~Drawing_RoundRectPeer() = default;
-};
 }

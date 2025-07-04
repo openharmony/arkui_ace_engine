@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace text_LineTypesetAccessor {
 void DestroyPeerImpl(Ark_text_LineTypeset peer)
 {
-    auto peerImpl = reinterpret_cast<text_LineTypesetPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_text_LineTypeset ConstructImpl()
 {
@@ -59,7 +55,4 @@ const GENERATED_ArkUIText_LineTypesetAccessor* GetText_LineTypesetAccessor()
     return &Text_LineTypesetAccessorImpl;
 }
 
-struct Text_LineTypesetPeer {
-    virtual ~Text_LineTypesetPeer() = default;
-};
 }

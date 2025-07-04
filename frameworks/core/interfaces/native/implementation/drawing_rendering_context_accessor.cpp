@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawingRenderingContextAccessor {
 void DestroyPeerImpl(Ark_DrawingRenderingContext peer)
 {
-    auto peerImpl = reinterpret_cast<DrawingRenderingContextPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_DrawingRenderingContext ConstructImpl(const Opt_LengthMetricsUnit* unit)
 {
@@ -59,7 +55,4 @@ const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContext
     return &DrawingRenderingContextAccessorImpl;
 }
 
-struct DrawingRenderingContextPeer {
-    virtual ~DrawingRenderingContextPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_TextBlobAccessor {
 void DestroyPeerImpl(Ark_drawing_TextBlob peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_TextBlobPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_TextBlob ConstructImpl()
 {
@@ -77,7 +73,4 @@ const GENERATED_ArkUIDrawing_TextBlobAccessor* GetDrawing_TextBlobAccessor()
     return &Drawing_TextBlobAccessorImpl;
 }
 
-struct Drawing_TextBlobPeer {
-    virtual ~Drawing_TextBlobPeer() = default;
-};
 }

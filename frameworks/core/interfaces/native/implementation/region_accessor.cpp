@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_RegionAccessor {
 void DestroyPeerImpl(Ark_drawing_Region peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_RegionPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_Region ConstructImpl()
 {
@@ -90,7 +86,4 @@ const GENERATED_ArkUIDrawing_RegionAccessor* GetDrawing_RegionAccessor()
     return &Drawing_RegionAccessorImpl;
 }
 
-struct Drawing_RegionPeer {
-    virtual ~Drawing_RegionPeer() = default;
-};
 }

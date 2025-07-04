@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HierarchicalSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_HierarchicalSymbolEffect peer)
 {
-    auto peerImpl = reinterpret_cast<HierarchicalSymbolEffectPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_HierarchicalSymbolEffect ConstructImpl(const Opt_EffectFillStyle* fillStyle)
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffe
     return &HierarchicalSymbolEffectAccessorImpl;
 }
 
-struct HierarchicalSymbolEffectPeer {
-    virtual ~HierarchicalSymbolEffectPeer() = default;
-};
 }

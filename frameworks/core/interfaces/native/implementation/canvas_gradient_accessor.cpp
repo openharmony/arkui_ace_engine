@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasGradientAccessor {
 void DestroyPeerImpl(Ark_CanvasGradient peer)
 {
-    auto peerImpl = reinterpret_cast<CanvasGradientPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_CanvasGradient ConstructImpl()
 {
@@ -51,7 +47,4 @@ const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor()
     return &CanvasGradientAccessorImpl;
 }
 
-struct CanvasGradientPeer {
-    virtual ~CanvasGradientPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace text_TextLineAccessor {
 void DestroyPeerImpl(Ark_text_TextLine peer)
 {
-    auto peerImpl = reinterpret_cast<text_TextLinePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_text_TextLine ConstructImpl()
 {
@@ -114,7 +110,4 @@ const GENERATED_ArkUIText_TextLineAccessor* GetText_TextLineAccessor()
     return &Text_TextLineAccessorImpl;
 }
 
-struct Text_TextLinePeer {
-    virtual ~Text_TextLinePeer() = default;
-};
 }

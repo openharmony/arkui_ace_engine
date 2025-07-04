@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RotationGestureEventAccessor {
 void DestroyPeerImpl(Ark_RotationGestureEvent peer)
 {
-    auto peerImpl = reinterpret_cast<RotationGestureEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_RotationGestureEvent ConstructImpl()
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUIRotationGestureEventAccessor* GetRotationGestureEventAccess
     return &RotationGestureEventAccessorImpl;
 }
 
-struct RotationGestureEventPeer {
-    virtual ~RotationGestureEventPeer() = default;
-};
 }

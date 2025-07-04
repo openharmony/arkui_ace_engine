@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaselineOffsetStyleAccessor {
 void DestroyPeerImpl(Ark_BaselineOffsetStyle peer)
 {
-    auto peerImpl = reinterpret_cast<BaselineOffsetStylePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_BaselineOffsetStyle ConstructImpl(Ark_LengthMetrics value)
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUIBaselineOffsetStyleAccessor* GetBaselineOffsetStyleAccessor
     return &BaselineOffsetStyleAccessorImpl;
 }
 
-struct BaselineOffsetStylePeer {
-    virtual ~BaselineOffsetStylePeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CustomDialogControllerAccessor {
 void DestroyPeerImpl(Ark_CustomDialogController peer)
 {
-    auto peerImpl = reinterpret_cast<CustomDialogControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_CustomDialogController ConstructImpl(const Ark_CustomDialogControllerOptions* value)
 {
@@ -53,7 +49,4 @@ const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAc
     return &CustomDialogControllerAccessorImpl;
 }
 
-struct CustomDialogControllerPeer {
-    virtual ~CustomDialogControllerPeer() = default;
-};
 }

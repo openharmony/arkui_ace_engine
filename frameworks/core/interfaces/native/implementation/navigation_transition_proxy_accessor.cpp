@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavigationTransitionProxyAccessor {
 void DestroyPeerImpl(Ark_NavigationTransitionProxy peer)
 {
-    auto peerImpl = reinterpret_cast<NavigationTransitionProxyPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_NavigationTransitionProxy ConstructImpl()
 {
@@ -99,7 +95,4 @@ const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionP
     return &NavigationTransitionProxyAccessorImpl;
 }
 
-struct NavigationTransitionProxyPeer {
-    virtual ~NavigationTransitionProxyPeer() = default;
-};
 }

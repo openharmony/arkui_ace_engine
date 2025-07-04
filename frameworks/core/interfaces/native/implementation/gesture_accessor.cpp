@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureAccessor {
 void DestroyPeerImpl(Ark_Gesture peer)
 {
-    auto peerImpl = reinterpret_cast<GesturePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_Gesture ConstructImpl()
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUIGestureAccessor* GetGestureAccessor()
     return &GestureAccessorImpl;
 }
 
-struct GesturePeer {
-    virtual ~GesturePeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WaterFlowSectionsAccessor {
 void DestroyPeerImpl(Ark_WaterFlowSections peer)
 {
-    auto peerImpl = reinterpret_cast<WaterFlowSectionsPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_WaterFlowSections ConstructImpl()
 {
@@ -76,7 +72,4 @@ const GENERATED_ArkUIWaterFlowSectionsAccessor* GetWaterFlowSectionsAccessor()
     return &WaterFlowSectionsAccessorImpl;
 }
 
-struct WaterFlowSectionsPeer {
-    virtual ~WaterFlowSectionsPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace unifiedDataChannel_UnifiedDataAccessor {
 void DestroyPeerImpl(Ark_unifiedDataChannel_UnifiedData peer)
 {
-    auto peerImpl = reinterpret_cast<unifiedDataChannel_UnifiedDataPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_unifiedDataChannel_UnifiedData ConstructImpl()
 {
@@ -56,7 +52,4 @@ const GENERATED_ArkUIUnifiedDataChannel_UnifiedDataAccessor* GetUnifiedDataChann
     return &UnifiedDataChannel_UnifiedDataAccessorImpl;
 }
 
-struct UnifiedDataChannel_UnifiedDataPeer {
-    virtual ~UnifiedDataChannel_UnifiedDataPeer() = default;
-};
 }

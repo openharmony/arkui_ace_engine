@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_FontAccessor {
 void DestroyPeerImpl(Ark_drawing_Font peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_FontPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_Font ConstructImpl()
 {
@@ -223,7 +219,4 @@ const GENERATED_ArkUIDrawing_FontAccessor* GetDrawing_FontAccessor()
     return &Drawing_FontAccessorImpl;
 }
 
-struct Drawing_FontPeer {
-    virtual ~Drawing_FontPeer() = default;
-};
 }

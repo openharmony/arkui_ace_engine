@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RotationRecognizerAccessor {
 void DestroyPeerImpl(Ark_RotationRecognizer peer)
 {
-    auto peerImpl = reinterpret_cast<RotationRecognizerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_RotationRecognizer ConstructImpl()
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUIRotationRecognizerAccessor* GetRotationRecognizerAccessor()
     return &RotationRecognizerAccessorImpl;
 }
 
-struct RotationRecognizerPeer {
-    virtual ~RotationRecognizerPeer() = default;
-};
 }

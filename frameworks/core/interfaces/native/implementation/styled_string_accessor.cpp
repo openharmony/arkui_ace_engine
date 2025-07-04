@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StyledStringAccessor {
 void DestroyPeerImpl(Ark_StyledString peer)
 {
-    auto peerImpl = reinterpret_cast<StyledStringPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_StyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
                                const Opt_Array_StyleOptions* styles)
@@ -115,7 +111,4 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
     return &StyledStringAccessorImpl;
 }
 
-struct StyledStringPeer {
-    virtual ~StyledStringPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ReplaceSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_ReplaceSymbolEffect peer)
 {
-    auto peerImpl = reinterpret_cast<ReplaceSymbolEffectPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ReplaceSymbolEffect ConstructImpl(const Opt_EffectScope* scope)
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor
     return &ReplaceSymbolEffectAccessorImpl;
 }
 
-struct ReplaceSymbolEffectPeer {
-    virtual ~ReplaceSymbolEffectPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPathAccessor {
 void DestroyPeerImpl(Ark_CanvasPath peer)
 {
-    auto peerImpl = reinterpret_cast<CanvasPathPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_CanvasPath ConstructImpl()
 {
@@ -118,7 +114,4 @@ const GENERATED_ArkUICanvasPathAccessor* GetCanvasPathAccessor()
     return &CanvasPathAccessorImpl;
 }
 
-struct CanvasPathPeer {
-    virtual ~CanvasPathPeer() = default;
-};
 }

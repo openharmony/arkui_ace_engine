@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabsControllerAccessor {
 void DestroyPeerImpl(Ark_TabsController peer)
 {
-    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TabsController ConstructImpl()
 {
@@ -68,7 +64,4 @@ const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor()
     return &TabsControllerAccessorImpl;
 }
 
-struct TabsControllerPeer {
-    virtual ~TabsControllerPeer() = default;
-};
 }

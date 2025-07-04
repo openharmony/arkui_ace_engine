@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PulseSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_PulseSymbolEffect peer)
 {
-    auto peerImpl = reinterpret_cast<PulseSymbolEffectPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_PulseSymbolEffect ConstructImpl()
 {
@@ -45,7 +41,4 @@ const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor()
     return &PulseSymbolEffectAccessorImpl;
 }
 
-struct PulseSymbolEffectPeer {
-    virtual ~PulseSymbolEffectPeer() = default;
-};
 }

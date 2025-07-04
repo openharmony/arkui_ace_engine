@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AccessibilityHoverEventAccessor {
 void DestroyPeerImpl(Ark_AccessibilityHoverEvent peer)
 {
-    auto peerImpl = reinterpret_cast<AccessibilityHoverEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_AccessibilityHoverEvent ConstructImpl()
 {
@@ -115,7 +111,4 @@ const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEvent
     return &AccessibilityHoverEventAccessorImpl;
 }
 
-struct AccessibilityHoverEventPeer {
-    virtual ~AccessibilityHoverEventPeer() = default;
-};
 }

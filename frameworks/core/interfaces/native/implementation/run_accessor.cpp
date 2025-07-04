@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace text_RunAccessor {
 void DestroyPeerImpl(Ark_text_Run peer)
 {
-    auto peerImpl = reinterpret_cast<text_RunPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_text_Run ConstructImpl()
 {
@@ -110,7 +106,4 @@ const GENERATED_ArkUIText_RunAccessor* GetText_RunAccessor()
     return &Text_RunAccessorImpl;
 }
 
-struct Text_RunPeer {
-    virtual ~Text_RunPeer() = default;
-};
 }

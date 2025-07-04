@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabContentTransitionProxyAccessor {
 void DestroyPeerImpl(Ark_TabContentTransitionProxy peer)
 {
-    auto peerImpl = reinterpret_cast<TabContentTransitionProxyPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TabContentTransitionProxy ConstructImpl()
 {
@@ -69,7 +65,4 @@ const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionP
     return &TabContentTransitionProxyAccessorImpl;
 }
 
-struct TabContentTransitionProxyPeer {
-    virtual ~TabContentTransitionProxyPeer() = default;
-};
 }

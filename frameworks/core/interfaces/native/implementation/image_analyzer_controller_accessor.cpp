@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAnalyzerControllerAccessor {
 void DestroyPeerImpl(Ark_ImageAnalyzerController peer)
 {
-    auto peerImpl = reinterpret_cast<ImageAnalyzerControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ImageAnalyzerController ConstructImpl()
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerController
     return &ImageAnalyzerControllerAccessorImpl;
 }
 
-struct ImageAnalyzerControllerPeer {
-    virtual ~ImageAnalyzerControllerPeer() = default;
-};
 }

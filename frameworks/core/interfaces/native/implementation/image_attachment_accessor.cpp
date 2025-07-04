@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAttachmentAccessor {
 void DestroyPeerImpl(Ark_ImageAttachment peer)
 {
-    auto peerImpl = reinterpret_cast<ImageAttachmentPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ImageAttachment ConstructImpl(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value)
 {
@@ -75,7 +71,4 @@ const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor()
     return &ImageAttachmentAccessorImpl;
 }
 
-struct ImageAttachmentPeer {
-    virtual ~ImageAttachmentPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace uiEffect_VisualEffectAccessor {
 void DestroyPeerImpl(Ark_uiEffect_VisualEffect peer)
 {
-    auto peerImpl = reinterpret_cast<uiEffect_VisualEffectPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_uiEffect_VisualEffect ConstructImpl()
 {
@@ -51,7 +47,4 @@ const GENERATED_ArkUIUiEffect_VisualEffectAccessor* GetUiEffect_VisualEffectAcce
     return &UiEffect_VisualEffectAccessorImpl;
 }
 
-struct UiEffect_VisualEffectPeer {
-    virtual ~UiEffect_VisualEffectPeer() = default;
-};
 }

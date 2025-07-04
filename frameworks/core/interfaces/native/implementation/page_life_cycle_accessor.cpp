@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PageLifeCycleAccessor {
 void DestroyPeerImpl(Ark_PageLifeCycle peer)
 {
-    auto peerImpl = reinterpret_cast<PageLifeCyclePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_PageLifeCycle ConstructImpl()
 {
@@ -67,7 +63,4 @@ const GENERATED_ArkUIPageLifeCycleAccessor* GetPageLifeCycleAccessor()
     return &PageLifeCycleAccessorImpl;
 }
 
-struct PageLifeCyclePeer {
-    virtual ~PageLifeCyclePeer() = default;
-};
 }

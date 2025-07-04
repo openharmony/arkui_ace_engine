@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LengthMetricsAccessor {
 void DestroyPeerImpl(Ark_LengthMetrics peer)
 {
-    auto peerImpl = reinterpret_cast<LengthMetricsPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_LengthMetrics ConstructImpl(const Ark_Number* value,
                                 Ark_LengthUnit unit)
@@ -96,7 +92,4 @@ const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor()
     return &LengthMetricsAccessorImpl;
 }
 
-struct LengthMetricsPeer {
-    virtual ~LengthMetricsPeer() = default;
-};
 }

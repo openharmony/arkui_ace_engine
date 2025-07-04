@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DragEventAccessor {
 void DestroyPeerImpl(Ark_DragEvent peer)
 {
-    auto peerImpl = reinterpret_cast<DragEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_DragEvent ConstructImpl()
 {
@@ -145,7 +141,4 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
     return &DragEventAccessorImpl;
 }
 
-struct DragEventPeer {
-    virtual ~DragEventPeer() = default;
-};
 }

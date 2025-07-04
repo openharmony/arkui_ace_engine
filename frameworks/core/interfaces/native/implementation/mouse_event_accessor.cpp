@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MouseEventAccessor {
 void DestroyPeerImpl(Ark_MouseEvent peer)
 {
-    auto peerImpl = reinterpret_cast<MouseEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_MouseEvent ConstructImpl()
 {
@@ -165,7 +161,4 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
     return &MouseEventAccessorImpl;
 }
 
-struct MouseEventPeer {
-    virtual ~MouseEventPeer() = default;
-};
 }

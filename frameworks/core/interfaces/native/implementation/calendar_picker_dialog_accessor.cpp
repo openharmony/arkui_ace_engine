@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarPickerDialogAccessor {
 void DestroyPeerImpl(Ark_CalendarPickerDialog peer)
 {
-    auto peerImpl = reinterpret_cast<CalendarPickerDialogPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_CalendarPickerDialog ConstructImpl()
 {
@@ -49,7 +45,4 @@ const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccess
     return &CalendarPickerDialogAccessorImpl;
 }
 
-struct CalendarPickerDialogPeer {
-    virtual ~CalendarPickerDialogPeer() = default;
-};
 }

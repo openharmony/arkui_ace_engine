@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawContextAccessor {
 void DestroyPeerImpl(Ark_DrawContext peer)
 {
-    auto peerImpl = reinterpret_cast<DrawContextPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_DrawContext ConstructImpl()
 {
@@ -60,7 +56,4 @@ const GENERATED_ArkUIDrawContextAccessor* GetDrawContextAccessor()
     return &DrawContextAccessorImpl;
 }
 
-struct DrawContextPeer {
-    virtual ~DrawContextPeer() = default;
-};
 }

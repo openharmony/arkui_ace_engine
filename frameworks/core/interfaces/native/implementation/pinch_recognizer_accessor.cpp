@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PinchRecognizerAccessor {
 void DestroyPeerImpl(Ark_PinchRecognizer peer)
 {
-    auto peerImpl = reinterpret_cast<PinchRecognizerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_PinchRecognizer ConstructImpl()
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor()
     return &PinchRecognizerAccessorImpl;
 }
 
-struct PinchRecognizerPeer {
-    virtual ~PinchRecognizerPeer() = default;
-};
 }

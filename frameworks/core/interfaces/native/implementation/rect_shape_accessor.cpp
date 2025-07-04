@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RectShapeAccessor {
 void DestroyPeerImpl(Ark_RectShape peer)
 {
-    auto peerImpl = reinterpret_cast<RectShapePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_RectShape ConstructImpl(const Opt_Union_RectShapeOptions_RoundRectShapeOptions* options)
 {
@@ -99,7 +95,4 @@ const GENERATED_ArkUIRectShapeAccessor* GetRectShapeAccessor()
     return &RectShapeAccessorImpl;
 }
 
-struct RectShapePeer {
-    virtual ~RectShapePeer() = default;
-};
 }

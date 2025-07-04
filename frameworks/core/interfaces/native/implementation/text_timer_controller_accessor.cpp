@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextTimerControllerAccessor {
 void DestroyPeerImpl(Ark_TextTimerController peer)
 {
-    auto peerImpl = reinterpret_cast<TextTimerControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TextTimerController ConstructImpl()
 {
@@ -57,7 +53,4 @@ const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor
     return &TextTimerControllerAccessorImpl;
 }
 
-struct TextTimerControllerPeer {
-    virtual ~TextTimerControllerPeer() = default;
-};
 }

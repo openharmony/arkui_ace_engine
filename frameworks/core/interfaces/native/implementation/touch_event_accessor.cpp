@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TouchEventAccessor {
 void DestroyPeerImpl(Ark_TouchEvent peer)
 {
-    auto peerImpl = reinterpret_cast<TouchEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_TouchEvent ConstructImpl()
 {
@@ -100,7 +96,4 @@ const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
     return &TouchEventAccessorImpl;
 }
 
-struct TouchEventPeer {
-    virtual ~TouchEventPeer() = default;
-};
 }

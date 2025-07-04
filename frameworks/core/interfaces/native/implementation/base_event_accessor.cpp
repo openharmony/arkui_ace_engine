@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseEventAccessor {
 void DestroyPeerImpl(Ark_BaseEvent peer)
 {
-    auto peerImpl = reinterpret_cast<BaseEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_BaseEvent ConstructImpl()
 {
@@ -175,7 +171,4 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
     return &BaseEventAccessorImpl;
 }
 
-struct BaseEventPeer {
-    virtual ~BaseEventPeer() = default;
-};
 }

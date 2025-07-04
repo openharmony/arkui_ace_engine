@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorBaseControllerAccessor {
 void DestroyPeerImpl(Ark_RichEditorBaseController peer)
 {
-    auto peerImpl = reinterpret_cast<RichEditorBaseControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_RichEditorBaseController ConstructImpl()
 {
@@ -101,7 +97,4 @@ const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControll
     return &RichEditorBaseControllerAccessorImpl;
 }
 
-struct RichEditorBaseControllerPeer {
-    virtual ~RichEditorBaseControllerPeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace IndicatorComponentControllerAccessor {
 void DestroyPeerImpl(Ark_IndicatorComponentController peer)
 {
-    auto peerImpl = reinterpret_cast<IndicatorComponentControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_IndicatorComponentController ConstructImpl()
 {
@@ -59,7 +55,4 @@ const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponent
     return &IndicatorComponentControllerAccessorImpl;
 }
 
-struct IndicatorComponentControllerPeer {
-    virtual ~IndicatorComponentControllerPeer() = default;
-};
 }

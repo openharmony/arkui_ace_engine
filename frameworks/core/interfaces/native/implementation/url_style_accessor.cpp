@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UrlStyleAccessor {
 void DestroyPeerImpl(Ark_UrlStyle peer)
 {
-    auto peerImpl = reinterpret_cast<UrlStylePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_UrlStyle ConstructImpl(const Ark_String* url)
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor()
     return &UrlStyleAccessorImpl;
 }
 
-struct UrlStylePeer {
-    virtual ~UrlStylePeer() = default;
-};
 }

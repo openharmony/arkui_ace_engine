@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_LatticeAccessor {
 void DestroyPeerImpl(Ark_drawing_Lattice peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_LatticePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_Lattice ConstructImpl()
 {
@@ -56,7 +52,4 @@ const GENERATED_ArkUIDrawing_LatticeAccessor* GetDrawing_LatticeAccessor()
     return &Drawing_LatticeAccessorImpl;
 }
 
-struct Drawing_LatticePeer {
-    virtual ~Drawing_LatticePeer() = default;
-};
 }

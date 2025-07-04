@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LongPressGestureEventAccessor {
 void DestroyPeerImpl(Ark_LongPressGestureEvent peer)
 {
-    auto peerImpl = reinterpret_cast<LongPressGestureEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_LongPressGestureEvent ConstructImpl()
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUILongPressGestureEventAccessor* GetLongPressGestureEventAcce
     return &LongPressGestureEventAccessorImpl;
 }
 
-struct LongPressGestureEventPeer {
-    virtual ~LongPressGestureEventPeer() = default;
-};
 }

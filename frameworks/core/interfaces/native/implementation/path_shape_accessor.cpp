@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PathShapeAccessor {
 void DestroyPeerImpl(Ark_PathShape peer)
 {
-    auto peerImpl = reinterpret_cast<PathShapePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_PathShape ConstructImpl(const Opt_PathShapeOptions* options)
 {
@@ -69,7 +65,4 @@ const GENERATED_ArkUIPathShapeAccessor* GetPathShapeAccessor()
     return &PathShapeAccessorImpl;
 }
 
-struct PathShapePeer {
-    virtual ~PathShapePeer() = default;
-};
 }

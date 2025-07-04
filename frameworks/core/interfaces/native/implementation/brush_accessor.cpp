@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_BrushAccessor {
 void DestroyPeerImpl(Ark_drawing_Brush peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_BrushPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_Brush Construct0Impl()
 {
@@ -137,7 +133,4 @@ const GENERATED_ArkUIDrawing_BrushAccessor* GetDrawing_BrushAccessor()
     return &Drawing_BrushAccessorImpl;
 }
 
-struct Drawing_BrushPeer {
-    virtual ~Drawing_BrushPeer() = default;
-};
 }

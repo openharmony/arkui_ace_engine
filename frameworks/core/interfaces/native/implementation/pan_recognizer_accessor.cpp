@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanRecognizerAccessor {
 void DestroyPeerImpl(Ark_PanRecognizer peer)
 {
-    auto peerImpl = reinterpret_cast<PanRecognizerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_PanRecognizer ConstructImpl()
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor()
     return &PanRecognizerAccessorImpl;
 }
 
-struct PanRecognizerPeer {
-    virtual ~PanRecognizerPeer() = default;
-};
 }

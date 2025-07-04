@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FrameNodeAccessor {
 void DestroyPeerImpl(Ark_FrameNode peer)
 {
-    auto peerImpl = reinterpret_cast<FrameNodePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_FrameNode ConstructImpl(Ark_UIContext uiContext)
 {
@@ -253,7 +249,4 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
     return &FrameNodeAccessorImpl;
 }
 
-struct FrameNodePeer {
-    virtual ~FrameNodePeer() = default;
-};
 }

@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Matrix2DAccessor {
 void DestroyPeerImpl(Ark_Matrix2D peer)
 {
-    auto peerImpl = reinterpret_cast<Matrix2DPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_Matrix2D Construct0Impl()
 {
@@ -142,7 +138,4 @@ const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor()
     return &Matrix2DAccessorImpl;
 }
 
-struct Matrix2DPeer {
-    virtual ~Matrix2DPeer() = default;
-};
 }

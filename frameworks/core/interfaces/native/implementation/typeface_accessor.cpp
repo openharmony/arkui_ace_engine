@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace drawing_TypefaceAccessor {
 void DestroyPeerImpl(Ark_drawing_Typeface peer)
 {
-    auto peerImpl = reinterpret_cast<drawing_TypefacePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_drawing_Typeface ConstructImpl()
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUIDrawing_TypefaceAccessor* GetDrawing_TypefaceAccessor()
     return &Drawing_TypefaceAccessorImpl;
 }
 
-struct Drawing_TypefacePeer {
-    virtual ~Drawing_TypefacePeer() = default;
-};
 }

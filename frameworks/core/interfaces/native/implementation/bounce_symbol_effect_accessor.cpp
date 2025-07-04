@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BounceSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_BounceSymbolEffect peer)
 {
-    auto peerImpl = reinterpret_cast<BounceSymbolEffectPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_BounceSymbolEffect ConstructImpl(const Opt_EffectScope* scope,
                                      const Opt_EffectDirection* direction)
@@ -66,7 +62,4 @@ const GENERATED_ArkUIBounceSymbolEffectAccessor* GetBounceSymbolEffectAccessor()
     return &BounceSymbolEffectAccessorImpl;
 }
 
-struct BounceSymbolEffectPeer {
-    virtual ~BounceSymbolEffectPeer() = default;
-};
 }

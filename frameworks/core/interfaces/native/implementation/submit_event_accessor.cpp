@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SubmitEventAccessor {
 void DestroyPeerImpl(Ark_SubmitEvent peer)
 {
-    auto peerImpl = reinterpret_cast<SubmitEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_SubmitEvent ConstructImpl()
 {
@@ -59,7 +55,4 @@ const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor()
     return &SubmitEventAccessorImpl;
 }
 
-struct SubmitEventPeer {
-    virtual ~SubmitEventPeer() = default;
-};
 }

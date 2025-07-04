@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperContentTransitionProxyAccessor {
 void DestroyPeerImpl(Ark_SwiperContentTransitionProxy peer)
 {
-    auto peerImpl = reinterpret_cast<SwiperContentTransitionProxyPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_SwiperContentTransitionProxy ConstructImpl()
 {
@@ -89,7 +85,4 @@ const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTrans
     return &SwiperContentTransitionProxyAccessorImpl;
 }
 
-struct SwiperContentTransitionProxyPeer {
-    virtual ~SwiperContentTransitionProxyPeer() = default;
-};
 }

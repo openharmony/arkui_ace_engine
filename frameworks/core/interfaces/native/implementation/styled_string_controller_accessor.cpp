@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StyledStringControllerAccessor {
 void DestroyPeerImpl(Ark_StyledStringController peer)
 {
-    auto peerImpl = reinterpret_cast<StyledStringControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_StyledStringController ConstructImpl()
 {
@@ -55,7 +51,4 @@ const GENERATED_ArkUIStyledStringControllerAccessor* GetStyledStringControllerAc
     return &StyledStringControllerAccessorImpl;
 }
 
-struct StyledStringControllerPeer {
-    virtual ~StyledStringControllerPeer() = default;
-};
 }

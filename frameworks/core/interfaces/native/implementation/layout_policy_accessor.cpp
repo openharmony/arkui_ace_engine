@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LayoutPolicyAccessor {
 void DestroyPeerImpl(Ark_LayoutPolicy peer)
 {
-    auto peerImpl = reinterpret_cast<LayoutPolicyPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_LayoutPolicy ConstructImpl()
 {
@@ -50,7 +46,4 @@ const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor()
     return &LayoutPolicyAccessorImpl;
 }
 
-struct LayoutPolicyPeer {
-    virtual ~LayoutPolicyPeer() = default;
-};
 }

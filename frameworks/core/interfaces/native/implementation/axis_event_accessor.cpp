@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AxisEventAccessor {
 void DestroyPeerImpl(Ark_AxisEvent peer)
 {
-    auto peerImpl = reinterpret_cast<AxisEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_AxisEvent ConstructImpl()
 {
@@ -145,7 +141,4 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
     return &AxisEventAccessorImpl;
 }
 
-struct AxisEventPeer {
-    virtual ~AxisEventPeer() = default;
-};
 }

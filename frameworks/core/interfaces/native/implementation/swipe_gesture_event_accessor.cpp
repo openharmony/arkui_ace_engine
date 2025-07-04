@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwipeGestureEventAccessor {
 void DestroyPeerImpl(Ark_SwipeGestureEvent peer)
 {
-    auto peerImpl = reinterpret_cast<SwipeGestureEventPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_SwipeGestureEvent ConstructImpl()
 {
@@ -65,7 +61,4 @@ const GENERATED_ArkUISwipeGestureEventAccessor* GetSwipeGestureEventAccessor()
     return &SwipeGestureEventAccessorImpl;
 }
 
-struct SwipeGestureEventPeer {
-    virtual ~SwipeGestureEventPeer() = default;
-};
 }

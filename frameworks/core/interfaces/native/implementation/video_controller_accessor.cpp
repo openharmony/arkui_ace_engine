@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace VideoControllerAccessor {
 void DestroyPeerImpl(Ark_VideoController peer)
 {
-    auto peerImpl = reinterpret_cast<VideoControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_VideoController ConstructImpl()
 {
@@ -81,7 +77,4 @@ const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor()
     return &VideoControllerAccessorImpl;
 }
 
-struct VideoControllerPeer {
-    virtual ~VideoControllerPeer() = default;
-};
 }

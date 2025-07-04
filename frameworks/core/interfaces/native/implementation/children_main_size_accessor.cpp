@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ChildrenMainSizeAccessor {
 void DestroyPeerImpl(Ark_ChildrenMainSize peer)
 {
-    auto peerImpl = reinterpret_cast<ChildrenMainSizePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ChildrenMainSize ConstructImpl(const Ark_Number* childDefaultSize)
 {
@@ -68,7 +64,4 @@ const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()
     return &ChildrenMainSizeAccessorImpl;
 }
 
-struct ChildrenMainSizePeer {
-    virtual ~ChildrenMainSizePeer() = default;
-};
 }

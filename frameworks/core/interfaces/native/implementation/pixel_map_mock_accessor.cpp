@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PixelMapMockAccessor {
 void DestroyPeerImpl(Ark_PixelMapMock peer)
 {
-    auto peerImpl = reinterpret_cast<PixelMapMockPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_PixelMapMock ConstructImpl()
 {
@@ -49,7 +45,4 @@ const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor()
     return &PixelMapMockAccessorImpl;
 }
 
-struct PixelMapMockPeer {
-    virtual ~PixelMapMockPeer() = default;
-};
 }

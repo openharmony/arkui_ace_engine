@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScaleSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_ScaleSymbolEffect peer)
 {
-    auto peerImpl = reinterpret_cast<ScaleSymbolEffectPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ScaleSymbolEffect ConstructImpl(const Opt_EffectScope* scope,
                                     const Opt_EffectDirection* direction)
@@ -66,7 +62,4 @@ const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor()
     return &ScaleSymbolEffectAccessorImpl;
 }
 
-struct ScaleSymbolEffectPeer {
-    virtual ~ScaleSymbolEffectPeer() = default;
-};
 }

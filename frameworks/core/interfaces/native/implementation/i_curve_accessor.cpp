@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ICurveAccessor {
 void DestroyPeerImpl(Ark_ICurve peer)
 {
-    auto peerImpl = reinterpret_cast<ICurvePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_ICurve ConstructImpl()
 {
@@ -51,7 +47,4 @@ const GENERATED_ArkUIICurveAccessor* GetICurveAccessor()
     return &ICurveAccessorImpl;
 }
 
-struct ICurvePeer {
-    virtual ~ICurvePeer() = default;
-};
 }

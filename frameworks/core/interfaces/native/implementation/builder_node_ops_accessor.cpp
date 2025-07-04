@@ -21,10 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BuilderNodeOpsAccessor {
 void DestroyPeerImpl(Ark_BuilderNodeOps peer)
 {
-    auto peerImpl = reinterpret_cast<BuilderNodeOpsPeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
-    }
 }
 Ark_BuilderNodeOps ConstructImpl()
 {
@@ -76,7 +72,4 @@ const GENERATED_ArkUIBuilderNodeOpsAccessor* GetBuilderNodeOpsAccessor()
     return &BuilderNodeOpsAccessorImpl;
 }
 
-struct BuilderNodeOpsPeer {
-    virtual ~BuilderNodeOpsPeer() = default;
-};
 }
