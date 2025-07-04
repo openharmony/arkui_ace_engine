@@ -743,4 +743,9 @@ GestureActionPhase NGGestureRecognizer::GetActionPhase(
             return GestureActionPhase::UNKNOWN;
     }
 }
+
+void NGGestureRecognizer::ResetResponseLinkRecognizer()
+{
+    responseLinkRecognizer_.clear();
+}
 } // namespace OHOS::Ace::NG
