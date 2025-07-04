@@ -1280,6 +1280,8 @@ void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& c
     auto frameSize = geometryNode->GetMarginFrameSize();
     if (isPreviewNode || isFlexNode) {
         CheckPreviewConstraint(hostNode, menuWindowRect);
+    } else if (isImageNode && previewScaleMode_.value_or(PreviewScaleMode::AUTO) == PreviewScaleMode::CONSTANT) {
+        CheckPreviewConstraintForConstant(geometryNode);
     } else {
         geometryNode->SetFrameSize(frameSize);
     }

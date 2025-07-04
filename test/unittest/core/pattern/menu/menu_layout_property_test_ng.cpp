@@ -1249,4 +1249,40 @@ HWTEST_F(MenuLayoutPropertyTestNg, CheckLayoutConstraint002, TestSize.Level1)
     menuPreviewLayoutAlgorithm.CheckLayoutConstraint(layoutWrapper, menuParam, menuPattern);
     EXPECT_EQ(layoutProperty->contentConstraint_->percentReference.width_, 0);
 }
+
+/**
+ * @tc.name: GetPreviewNodeTotalSize001
+ * @tc.desc: Verify GetPreviewNodeTotalSize in different PreviewScaleMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutPropertyTestNg, GetPreviewNodeTotalSize001, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 2, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageNode, nullptr);
+    auto imageLayoutWrapper = imageNode->CreateLayoutWrapper();
+    ASSERT_NE(imageLayoutWrapper, nullptr);
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, "test", MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuLayoutWrapper = menuNode->CreateLayoutWrapper();
+    ASSERT_NE(menuLayoutWrapper, nullptr);
+    imageNode->MountToParent(wrapperNode);
+    menuNode->MountToParent(wrapperNode);
+    
+    MenuLayoutAlgorithm menuLayoutAlgorithm;
+    SizeF size;
+    Rect menuWindowRect(TARGET_SIZE_WIDTH, TARGET_SIZE_WIDTH, TARGET_SIZE_WIDTH, TARGET_SIZE_WIDTH);
+    RefPtr<LayoutWrapper> previewLayoutWrapper;
+    menuLayoutAlgorithm.GetPreviewNodeTotalSize(
+        imageLayoutWrapper, menuWindowRect, previewLayoutWrapper, size, menuLayoutWrapper);
+    EXPECT_NE(previewLayoutWrapper, nullptr);
+    previewLayoutWrapper = nullptr;
+    menuLayoutAlgorithm.previewScaleMode_ = PreviewScaleMode::CONSTANT;
+    menuLayoutAlgorithm.GetPreviewNodeTotalSize(
+        imageLayoutWrapper, menuWindowRect, previewLayoutWrapper, size, menuLayoutWrapper);
+    EXPECT_NE(previewLayoutWrapper, nullptr);
+}
 } // namespace OHOS::Ace::NG
