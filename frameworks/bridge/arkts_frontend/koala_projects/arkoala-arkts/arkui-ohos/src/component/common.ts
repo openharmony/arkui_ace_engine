@@ -9119,7 +9119,12 @@ export interface GeometryInfo extends SizeResult {
     padding: Padding;
 }
 export interface Layoutable {
-    stub: string;
+    measureResult: MeasureResult;
+    uniqueId?: number | undefined;
+    layout(position: Position): void;
+    getMargin(): DirectionalEdgesT<number>;
+    getPadding(): DirectionalEdgesT<number>;
+    getBorderWidth(): DirectionalEdgesT<number>;
 }
 export interface SizeResult {
     width: number;

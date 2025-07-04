@@ -22,7 +22,7 @@ import { PeerNode, RootPeerType } from "./../PeerNode"
 import { ArkCustomComponent } from "./../ArkCustomComponent"
 
 import { ArkUIGeneratedNativeModule } from "#components"
-import { ArkUIAniModule } from "arkui.ani"
+import { ArkUIAniModule, ArkUIAniCustomNodeModule } from "arkui.ani"
 
 import { int32, int64, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
@@ -56,14 +56,24 @@ export class ArkCustomComponentRootPeer extends PeerNode {
         super(peerPtr, id, name, flags, RootPeerType)
     }  
     public static create(component: ArkCustomComponent, flags: int32 = 0): ArkCustomComponentRootPeer {
-        const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIAniModule._CustomNode_Construct(peerId, component)
-        if (!_peerPtr) {
-            throw new Error("create CustomComponent fail"); 
-        }
-        const _peer  = new ArkCustomComponentRootPeer(_peerPtr, peerId, "CustomComponent", flags)
-        component.setPeer(_peer);
-        return _peer
+        const peerId  = PeerNode.nextId();
+        if (component.isCustomLayout) {
+            const _peerPtr = ArkUIAniCustomNodeModule._CustomNode_Construct(peerId, component);
+            if (!_peerPtr) {
+                throw new Error("create CustomComponent fail"); 
+            }
+            const _peer  = new ArkCustomComponentRootPeer(_peerPtr, peerId, "CustomComponent", flags);
+            component.setPeer(_peer);
+            return _peer;
+        } else {
+            const _peerPtr = ArkUIAniModule._CustomNode_Construct(peerId, component);
+            if (!_peerPtr) {
+                throw new Error("create CustomComponent fail"); 
+            }
+            const _peer  = new ArkCustomComponentRootPeer(_peerPtr, peerId, "CustomComponent", flags);
+            component.setPeer(_peer);
+            return _peer;
+         }
     }
 }
 export interface Root {

@@ -51,6 +51,10 @@ class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.instance.setDelegate(this);
     }
 
+    get isCustomLayout(): boolean {
+        return this.instance instanceof LayoutCallback;
+    }
+
     aboutToAppear(): void {
         this.instance.aboutToAppear();
     }
