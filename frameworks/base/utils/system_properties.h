@@ -49,6 +49,11 @@ enum class FoldScreenType: int32_t {
 
 constexpr int32_t MCC_UNDEFINED = 0;
 constexpr int32_t MNC_UNDEFINED = 0;
+constexpr int32_t BREAKPOINT0 = 0;
+constexpr int32_t BREAKPOINT1 = 1;
+constexpr int32_t BREAKPOINT2 = 2;
+constexpr int32_t BREAKPOINT3 = 3;
+constexpr int32_t BREAKPOINT4 = 4;
 extern const char ENABLE_DEBUG_BOUNDARY_KEY[];
 extern const char ENABLE_TRACE_LAYOUT_KEY[];
 extern const char ENABLE_TRACE_INPUTEVENT_KEY[];
@@ -86,9 +91,40 @@ struct WidthLayoutBreakPoint {
     double widthVPSM_ = 600.0;
     double widthVPMD_ = 840.0;
     double widthVPLG_ = 1440.0;
+    double widthVPXL_ = -1.0;  // 默认不生效
     WidthLayoutBreakPoint() = default;
-    WidthLayoutBreakPoint(double widthVPXS, double widthVPSM, double widthVPMD, double widthVPLG)
-        : widthVPXS_(widthVPXS), widthVPSM_(widthVPSM), widthVPMD_(widthVPMD), widthVPLG_(widthVPLG) {}
+    WidthLayoutBreakPoint(
+        double widthVPXS, double widthVPSM, double widthVPMD, double widthVPLG, double widthVPXL = -1.0)
+        : widthVPXS_(widthVPXS), widthVPSM_(widthVPSM), widthVPMD_(widthVPMD), widthVPLG_(widthVPLG),
+          widthVPXL_(widthVPXL)
+    {}
+    WidthLayoutBreakPoint(std::vector<double> breakPoints)
+        : widthVPXS_(breakPoints.size() > BREAKPOINT0 ? breakPoints[BREAKPOINT0] : -1.0),
+          widthVPSM_(breakPoints.size() > BREAKPOINT1 ? breakPoints[BREAKPOINT1] : -1.0),
+          widthVPMD_(breakPoints.size() > BREAKPOINT2 ? breakPoints[BREAKPOINT2] : -1.0),
+          widthVPLG_(breakPoints.size() > BREAKPOINT3 ? breakPoints[BREAKPOINT3] : -1.0),
+          widthVPXL_(breakPoints.size() > BREAKPOINT4 ? breakPoints[BREAKPOINT4] : -1.0)
+    {}
+    bool operator==(WidthLayoutBreakPoint &v)
+    {
+        return widthVPXS_ == v.widthVPXS_ && widthVPSM_ == v.widthVPSM_ && widthVPMD_ == v.widthVPMD_ &&
+               widthVPLG_ == v.widthVPLG_ && widthVPXL_ == v.widthVPXL_;
+    }
+    bool operator==(const WidthLayoutBreakPoint &v)
+    {
+        return widthVPXS_ == v.widthVPXS_ && widthVPSM_ == v.widthVPSM_ && widthVPMD_ == v.widthVPMD_ &&
+               widthVPLG_ == v.widthVPLG_ && widthVPXL_ == v.widthVPXL_;
+    }
+    bool operator!=(WidthLayoutBreakPoint &v)
+    {
+        return widthVPXS_ != v.widthVPXS_ || widthVPSM_ != v.widthVPSM_ || widthVPMD_ != v.widthVPMD_ ||
+               widthVPLG_ != v.widthVPLG_ || widthVPXL_ != v.widthVPXL_;
+    }
+    bool operator!=(const WidthLayoutBreakPoint &v)
+    {
+        return widthVPXS_ != v.widthVPXS_ || widthVPSM_ != v.widthVPSM_ || widthVPMD_ != v.widthVPMD_ ||
+               widthVPLG_ != v.widthVPLG_ || widthVPXL_ != v.widthVPXL_;
+    }
 };
 
 struct HeightLayoutBreakPoint {

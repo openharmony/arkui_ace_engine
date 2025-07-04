@@ -14,7 +14,6 @@
  */
 
 #include "core/components/common/layout/screen_system_manager.h"
-
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -49,15 +48,18 @@ ScreenSizeType ScreenSystemManager::GetSize(double width) const
     ScreenSizeType size = ScreenSizeType::UNDEFINED;
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, size);
-    auto dipScale = context->GetDipScale();
-    if (width < MAX_SCREEN_WIDTH_SM.Value() * dipScale) {
+    double density = context->GetCurrentDensity();
+    auto finalBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
+    if (finalBreakpoints.widthVPXS_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXS_ * density, width)) {
         size = ScreenSizeType::XS;
-    } else if (width < MAX_SCREEN_WIDTH_MD.Value() * dipScale) {
+    } else if (finalBreakpoints.widthVPSM_ < 0 || GreatNotEqual(finalBreakpoints.widthVPSM_ * density, width)) {
         size = ScreenSizeType::SM;
-    } else if (width < MAX_SCREEN_WIDTH_LG.Value() * dipScale) {
+    } else if (finalBreakpoints.widthVPMD_ < 0 || GreatNotEqual(finalBreakpoints.widthVPMD_ * density, width)) {
         size = ScreenSizeType::MD;
-    } else if (width < MAX_SCREEN_WIDTH_XL.Value() * dipScale) {
+    } else if (finalBreakpoints.widthVPLG_ < 0 || GreatNotEqual(finalBreakpoints.widthVPLG_ * density, width)) {
         size = ScreenSizeType::LG;
+    } else if (finalBreakpoints.widthVPXL_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXL_ * density, width)) {
+        size = ScreenSizeType::XL;
     } else {
         size = ScreenSizeType::XL;
     }

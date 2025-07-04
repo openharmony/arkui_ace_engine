@@ -36,7 +36,7 @@ namespace NG {
 class FrameNode;
 } // namespace NG
 
-enum class WidthBreakpoint {WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL};
+enum class WidthBreakpoint {WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL, WIDTH_XXL, UNDEFINED};
 enum class HeightBreakpoint {HEIGHT_SM, HEIGHT_MD, HEIGHT_LG};
 
 class ACE_EXPORT Window : public std::enable_shared_from_this<Window> {

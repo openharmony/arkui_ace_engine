@@ -102,29 +102,31 @@ int64_t Window::GetDeadlineByFrameCount(int64_t deadline, int64_t ts, int64_t fr
     return deadline;
 }
 
-WidthBreakpoint Window::GetWidthBreakpoint(const WidthLayoutBreakPoint& layoutBreakpoints) const
+WidthBreakpoint GetCalcWidthBreakpoint(
+    const OHOS::Ace::WidthLayoutBreakPoint &finalBreakpoints, double density, double width)
 {
-    double density = PipelineBase::GetCurrentDensity();
-    double width = 0.0;
-    if (NearZero(density)) {
-        width = GetCurrentWindowRect().Width();
-    } else {
-        width = GetCurrentWindowRect().Width() / density;
-    }
-
     WidthBreakpoint breakpoint;
-    if (width < layoutBreakpoints.widthVPXS_) {
+    if (finalBreakpoints.widthVPXS_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXS_ * density, width)) {
         breakpoint = WidthBreakpoint::WIDTH_XS;
-    } else if (width < layoutBreakpoints.widthVPSM_) {
+    } else if (finalBreakpoints.widthVPSM_ < 0 || GreatNotEqual(finalBreakpoints.widthVPSM_ * density, width)) {
         breakpoint = WidthBreakpoint::WIDTH_SM;
-    } else if (width < layoutBreakpoints.widthVPMD_) {
+    } else if (finalBreakpoints.widthVPMD_ < 0 || GreatNotEqual(finalBreakpoints.widthVPMD_ * density, width)) {
         breakpoint = WidthBreakpoint::WIDTH_MD;
-    } else if (width < layoutBreakpoints.widthVPLG_) {
+    } else if (finalBreakpoints.widthVPLG_ < 0 || GreatNotEqual(finalBreakpoints.widthVPLG_ * density, width)) {
         breakpoint = WidthBreakpoint::WIDTH_LG;
-    } else {
+    } else if (finalBreakpoints.widthVPXL_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXL_ * density, width)) {
         breakpoint = WidthBreakpoint::WIDTH_XL;
+    } else {
+        breakpoint = WidthBreakpoint::WIDTH_XXL;
     }
     return breakpoint;
+}
+
+WidthBreakpoint Window::GetWidthBreakpoint(const WidthLayoutBreakPoint &layoutBreakpoints) const
+{
+    auto width = GetCurrentWindowRect().Width();
+    double density = PipelineBase::GetCurrentDensity();
+    return GetCalcWidthBreakpoint(layoutBreakpoints, density, width);
 }
 
 HeightBreakpoint Window::GetHeightBreakpoint(const HeightLayoutBreakPoint& layoutBreakpoints) const
