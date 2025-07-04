@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,7 @@
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
+#include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
@@ -3371,6 +3372,9 @@ void PipelineContext::DumpData(
     if (paramSize == used_id_flag && !node->DumpTreeById(depth, params[PARAM_NUM], hasJson)) {
         DumpLog::GetInstance().Print(
             "There is no id matching the ID in the parameter, please check whether the id is correct.");
+    }
+    if (paramSize > used_id_flag) {
+        SimplifiedInspector::TestScrollToTarget(params, stageManager_->GetLastPage());
     }
 }
 

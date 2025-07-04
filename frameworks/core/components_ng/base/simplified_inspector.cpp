@@ -159,6 +159,21 @@ int32_t ScrollToTarget(const ScrollCommand& command, const RefPtr<NG::FrameNode>
 }
 } // namespace
 
+void SimplifiedInspector::TestScrollToTarget(
+    const std::vector<std::string>& params, const RefPtr<FrameNode>& pageRootNode)
+{
+    CHECK_NULL_VOID(pageRootNode);
+    // -element -lastpage ${nodeid} ${offset} ${align}
+    const int32_t PARAM_NODE_ID = 2;
+    const int32_t PARAM_OFFSET = 3;
+    const int32_t PARAM_ALIGN = 4;
+    auto id = std::stoi(params[PARAM_NODE_ID]);
+    auto offset = std::stof(params[PARAM_OFFSET]);
+    auto align = std::stoi(params[PARAM_ALIGN]);
+    ScrollCommand command { TargetType::NODE, id, offset, static_cast<ScrollAlign>(align) };
+    ScrollToTarget(command, pageRootNode);
+}
+
 SimplifiedInspector::SimplifiedInspector(int32_t containerId, const TreeParams& params)
     : containerId_(containerId), params_(params), inspectorCfg_({ params.isContentOnly, !params.enableBackground }),
       isBackground_(params.enableBackground)
