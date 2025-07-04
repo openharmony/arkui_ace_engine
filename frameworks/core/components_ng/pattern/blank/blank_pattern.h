@@ -66,6 +66,11 @@ public:
         return true;
     }
 
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
 private:
     RefPtr<FrameNode> GetParentFrameNode(RefPtr<FrameNode> node);
 };

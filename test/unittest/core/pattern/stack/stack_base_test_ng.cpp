@@ -35,16 +35,4 @@ void StackBaseTestNG::SetUp()
 
 void StackBaseTestNG::TearDown() {}
 
-RefPtr<FrameNode> StackBaseTestNG::CreateStack(const std::function<void(StackModelNG)>& callback)
-{
-    StackModelNG model;
-    model.Create();
-    if (callback) {
-        callback(model);
-    }
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    ViewStackProcessor::GetInstance()->PopContainer();
-    return AceType::DynamicCast<FrameNode>(element);
-}
-
 } // namespace OHOS::Ace::NG

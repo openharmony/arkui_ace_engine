@@ -616,10 +616,13 @@ bool FlexLayoutAlgorithm::HandleBlankFirstTimeMeasure(
             Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN))) {
         return false;
     }
-
+    auto blankLayoutProperty = childLayoutWrapper->GetLayoutProperty();
     // if constainer is self adaptive, secondaryMeasure won't happen, blank can call Measure directly
     if (selfAdaptive_ || isInfiniteLayout_) {
         childLayoutWrapper->Measure(child.layoutConstraint);
+        if (CheckBlankIllegality(blankLayoutProperty)) {
+            childLayoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(0.0f, 0.0f));
+        }
         UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
         CheckSizeValidity(childLayoutWrapper);
         if (!isInfiniteLayout_) {
@@ -632,7 +635,6 @@ bool FlexLayoutAlgorithm::HandleBlankFirstTimeMeasure(
     // min size should not participate in the first measure of blank
     auto mainAxisSize = 0.0f;
     auto crossAxisSize = 0.0f;
-    auto blankLayoutProperty = childLayoutWrapper->GetLayoutProperty();
     childLayoutWrapper->GetHostNode()->GetPattern()->BeforeCreateLayoutWrapper();
     if (blankLayoutProperty) {
         const auto& calcConstraint = blankLayoutProperty->GetCalcLayoutConstraint();
@@ -641,6 +643,10 @@ bool FlexLayoutAlgorithm::HandleBlankFirstTimeMeasure(
                 child.layoutConstraint.percentReference);
             mainAxisSize = std::max(IsHorizontal(direction_) ? size.Width() : size.Height(), 0.0f);
             crossAxisSize = std::max(IsHorizontal(direction_) ? size.Height() : size.Width(), 0.0f);
+        }
+        if (CheckBlankIllegality(blankLayoutProperty)) {
+            mainAxisSize = 0.0f;
+            crossAxisSize = 0.0f;
         }
     }
     childLayoutWrapper->GetGeometryNode()->SetFrameSize(
@@ -680,6 +686,12 @@ void FlexLayoutAlgorithm::SecondMeasureInGrowOrShrink()
             continue;
         }
         childLayoutWrapper->Measure(child.layoutConstraint);
+        if (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG) {
+            auto blankLayoutProperty = childLayoutWrapper->GetLayoutProperty();
+            if (CheckBlankIllegality(blankLayoutProperty)) {
+                childLayoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(0.0f, 0.0f));
+            }
+        }
         crossAxisSize_ = std::max(crossAxisSize_, GetChildCrossAxisSize(childLayoutWrapper));
         CheckBaselineProperties(child.layoutWrapper);
         ++iter;
@@ -699,6 +711,13 @@ void FlexLayoutAlgorithm::SecondMeasureInGrowOrShrink()
             crossAxisSize_ = childMaxHeight;
         }
     }
+}
+
+bool FlexLayoutAlgorithm::CheckBlankIllegality(const RefPtr<LayoutProperty>& blankLayoutProperty)
+{
+    CHECK_NULL_RETURN(blankLayoutProperty, false);
+    auto layoutPolicy = blankLayoutProperty->GetLayoutPolicyProperty();
+    return layoutPolicy.has_value() && (layoutPolicy.value().IsWrap() || layoutPolicy.value().IsFix());
 }
 
 void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
