@@ -2651,4 +2651,28 @@ HWTEST_F(TextFieldTenPatternNg, GetVisibleDragViewHandles, TestSize.Level1)
     EXPECT_EQ(firstRect, RectF(10.0f, 10.0f, 5.0f, 10.0f));
     EXPECT_EQ(secondRect, RectF(20.0f, 20.0f, 5.0f, 10.0f));
 }
+
+/**
+ * @tc.name: ApplySelectAreaWithKeyboard
+ * @tc.desc: test ApplySelectAreaWithKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, ApplySelectAreaWithKeyboard, TestSize.Level1)
+{
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    RefPtr<TextPattern> pattern = textNode->GetPattern<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    WeakPtr<MockTextBase> textBase = mockBase;
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textNode);
+    pattern->selectOverlay_->OnBind(manager);
+    pattern->AttachToFrameNode(frameNode);
+
+    RectF area = RectF(0.0f, -10, 10, 20);
+    pattern->selectOverlay_->ApplySelectAreaWithKeyboard(area);
+    EXPECT_EQ(area.Top(), 0.0f);
+    EXPECT_EQ(area.Height(), 10.0f);
+}
 } // namespace OHOS::Ace::NG

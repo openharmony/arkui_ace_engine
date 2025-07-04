@@ -2296,20 +2296,17 @@ TextDragInfo TextFieldPattern::CreateTextDragInfo() const
     auto selectedBackgroundColor = textFieldTheme->GetSelectedColor();
     auto firstIndex = selectController_->GetFirstHandleIndex();
     auto secondIndex = selectController_->GetSecondHandleIndex();
-    if (firstIndex > secondIndex) {
-        selectOverlay_->GetDragViewHandleRects(info.secondHandle, info.firstHandle);
-    } else {
-        selectOverlay_->GetDragViewHandleRects(info.firstHandle, info.secondHandle);
-    }
     auto firstIsShow = selectOverlayInfo->firstHandle.isShow;
     auto secondIsShow = selectOverlayInfo->secondHandle.isShow;
-    if (!firstIsShow) {
+    if (firstIndex > secondIndex) {
+        selectOverlay_->GetDragViewHandleRects(info.secondHandle, info.firstHandle);
+        info.isFirstHandleAnimation = secondIsShow;
+        info.isSecondHandleAnimation = firstIsShow;
+    } else {
+        selectOverlay_->GetDragViewHandleRects(info.firstHandle, info.secondHandle);
         info.isFirstHandleAnimation = firstIsShow;
-    }
-    if (!secondIsShow) {
         info.isSecondHandleAnimation = secondIsShow;
     }
-
     info.selectedBackgroundColor = selectedBackgroundColor;
     info.handleColor = handleColor;
     return info;
