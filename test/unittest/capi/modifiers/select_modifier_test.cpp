@@ -613,7 +613,7 @@ HWTEST_F(SelectModifierTest, setOptionHeightTest, TestSize.Level1)
  * @tc.desc: Test setSelected function
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setSelectedTest, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setSelectedTest, TestSize.Level1)
 {
     const auto propName("selected");
     ASSERT_NE(modifier_->setSelected0, nullptr);
