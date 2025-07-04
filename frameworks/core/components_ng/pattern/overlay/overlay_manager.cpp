@@ -8628,6 +8628,7 @@ void OverlayManager::RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode, const
         } else {
             CallMenuDisappearOnlyNewLifeCycle(node);
         }
+        EraseMenuInfoFromWrapper(node);
         rootNode->RemoveChild(node);
     }
     CHECK_EQUAL_VOID(idsNeedClean.empty(), true);
@@ -8945,5 +8946,13 @@ bool OverlayManager::IsSceneBoardWindow()
         }
     }
     return container->IsSceneBoardWindow();
+}
+
+void OverlayManager::EraseMenuInfoFromWrapper(const RefPtr<FrameNode>& menuWrapperNode)
+{
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    EraseMenuInfo(pattern->GetTargetId());
 }
 } // namespace OHOS::Ace::NG
