@@ -1712,4 +1712,34 @@ HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateMaskColorTest001, TestSize.Level1)
 
     EXPECT_EQ(popupPaintProp->GetMaskColor().value(), testColor);
 }
+
+/**
+ * @tc.name: InitTargetSizeAndPosition002
+ * @tc.desc: Test InitTargetSizeAndPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, InitTargetSizeAndPosition002, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto id = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(bubbleLayoutProperty, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    bool showInSubwindow = true;
+    layoutAlgorithm->expandDisplay_ = true;
+    layoutAlgorithm->InitTargetSizeAndPosition(showInSubwindow, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutAlgorithm->targetOffset_, OffsetF(0.0f, 0.0f));
+}
 } // namespace OHOS::Ace::NG
