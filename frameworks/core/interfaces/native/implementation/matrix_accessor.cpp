@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_MatrixAccessor {
+namespace drawing_MatrixAccessor {
 void DestroyPeerImpl(Ark_drawing_Matrix peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_MatrixPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_Matrix CtorImpl()
+Ark_drawing_Matrix ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -143,36 +147,39 @@ Ark_Boolean SetPolyToPolyImpl(Ark_drawing_Matrix peer,
 {
     return {};
 }
-} // Drawing_MatrixAccessor
+} // drawing_MatrixAccessor
 const GENERATED_ArkUIDrawing_MatrixAccessor* GetDrawing_MatrixAccessor()
 {
     static const GENERATED_ArkUIDrawing_MatrixAccessor Drawing_MatrixAccessorImpl {
-        Drawing_MatrixAccessor::DestroyPeerImpl,
-        Drawing_MatrixAccessor::CtorImpl,
-        Drawing_MatrixAccessor::GetFinalizerImpl,
-        Drawing_MatrixAccessor::SetRotationImpl,
-        Drawing_MatrixAccessor::SetScaleImpl,
-        Drawing_MatrixAccessor::SetTranslationImpl,
-        Drawing_MatrixAccessor::SetMatrixImpl,
-        Drawing_MatrixAccessor::PreConcatImpl,
-        Drawing_MatrixAccessor::IsEqualImpl,
-        Drawing_MatrixAccessor::InvertImpl,
-        Drawing_MatrixAccessor::IsIdentityImpl,
-        Drawing_MatrixAccessor::GetValueImpl,
-        Drawing_MatrixAccessor::PostRotateImpl,
-        Drawing_MatrixAccessor::PostScaleImpl,
-        Drawing_MatrixAccessor::PostTranslateImpl,
-        Drawing_MatrixAccessor::PreRotateImpl,
-        Drawing_MatrixAccessor::PreScaleImpl,
-        Drawing_MatrixAccessor::PreTranslateImpl,
-        Drawing_MatrixAccessor::ResetImpl,
-        Drawing_MatrixAccessor::MapPointsImpl,
-        Drawing_MatrixAccessor::GetAllImpl,
-        Drawing_MatrixAccessor::MapRectImpl,
-        Drawing_MatrixAccessor::SetRectToRectImpl,
-        Drawing_MatrixAccessor::SetPolyToPolyImpl,
+        drawing_MatrixAccessor::DestroyPeerImpl,
+        drawing_MatrixAccessor::ConstructImpl,
+        drawing_MatrixAccessor::GetFinalizerImpl,
+        drawing_MatrixAccessor::SetRotationImpl,
+        drawing_MatrixAccessor::SetScaleImpl,
+        drawing_MatrixAccessor::SetTranslationImpl,
+        drawing_MatrixAccessor::SetMatrixImpl,
+        drawing_MatrixAccessor::PreConcatImpl,
+        drawing_MatrixAccessor::IsEqualImpl,
+        drawing_MatrixAccessor::InvertImpl,
+        drawing_MatrixAccessor::IsIdentityImpl,
+        drawing_MatrixAccessor::GetValueImpl,
+        drawing_MatrixAccessor::PostRotateImpl,
+        drawing_MatrixAccessor::PostScaleImpl,
+        drawing_MatrixAccessor::PostTranslateImpl,
+        drawing_MatrixAccessor::PreRotateImpl,
+        drawing_MatrixAccessor::PreScaleImpl,
+        drawing_MatrixAccessor::PreTranslateImpl,
+        drawing_MatrixAccessor::ResetImpl,
+        drawing_MatrixAccessor::MapPointsImpl,
+        drawing_MatrixAccessor::GetAllImpl,
+        drawing_MatrixAccessor::MapRectImpl,
+        drawing_MatrixAccessor::SetRectToRectImpl,
+        drawing_MatrixAccessor::SetPolyToPolyImpl,
     };
     return &Drawing_MatrixAccessorImpl;
 }
 
+struct Drawing_MatrixPeer {
+    virtual ~Drawing_MatrixPeer() = default;
+};
 }

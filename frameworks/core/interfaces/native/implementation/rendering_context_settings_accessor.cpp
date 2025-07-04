@@ -15,20 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-#include "rendering_context_settings_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RenderingContextSettingsAccessor {
 void DestroyPeerImpl(Ark_RenderingContextSettings peer)
 {
-    RenderingContextSettingsPeer::Destroy(peer);
+    auto peerImpl = reinterpret_cast<RenderingContextSettingsPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_RenderingContextSettings CtorImpl(const Opt_Boolean* antialias)
+Ark_RenderingContextSettings ConstructImpl(const Opt_Boolean* antialias)
 {
-    auto value = Converter::OptConvertPtr<bool>(antialias);
-    return RenderingContextSettingsPeer::Create(value);
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -36,23 +36,18 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Opt_Boolean GetAntialiasImpl(Ark_RenderingContextSettings peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Boolean>();
-    CHECK_NULL_RETURN(peer, invalid);
-    return Converter::ArkValue<Opt_Boolean>(peer->antialias);
+    return {};
 }
 void SetAntialiasImpl(Ark_RenderingContextSettings peer,
                       const Opt_Boolean* antialias)
 {
-    CHECK_NULL_VOID(peer);
-    auto value = Converter::OptConvertPtr<bool>(antialias);
-    peer->antialias = value;
 }
 } // RenderingContextSettingsAccessor
 const GENERATED_ArkUIRenderingContextSettingsAccessor* GetRenderingContextSettingsAccessor()
 {
     static const GENERATED_ArkUIRenderingContextSettingsAccessor RenderingContextSettingsAccessorImpl {
         RenderingContextSettingsAccessor::DestroyPeerImpl,
-        RenderingContextSettingsAccessor::CtorImpl,
+        RenderingContextSettingsAccessor::ConstructImpl,
         RenderingContextSettingsAccessor::GetFinalizerImpl,
         RenderingContextSettingsAccessor::GetAntialiasImpl,
         RenderingContextSettingsAccessor::SetAntialiasImpl,
@@ -60,4 +55,7 @@ const GENERATED_ArkUIRenderingContextSettingsAccessor* GetRenderingContextSettin
     return &RenderingContextSettingsAccessorImpl;
 }
 
+struct RenderingContextSettingsPeer {
+    virtual ~RenderingContextSettingsPeer() = default;
+};
 }

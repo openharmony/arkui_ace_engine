@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Text_FontCollectionAccessor {
+namespace text_FontCollectionAccessor {
 void DestroyPeerImpl(Ark_text_FontCollection peer)
 {
+    auto peerImpl = reinterpret_cast<text_FontCollectionPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_text_FontCollection CtorImpl()
+Ark_text_FontCollection ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -50,19 +54,22 @@ void LoadFontImpl(Ark_VMContext vmContext,
 void ClearCachesImpl(Ark_text_FontCollection peer)
 {
 }
-} // Text_FontCollectionAccessor
+} // text_FontCollectionAccessor
 const GENERATED_ArkUIText_FontCollectionAccessor* GetText_FontCollectionAccessor()
 {
     static const GENERATED_ArkUIText_FontCollectionAccessor Text_FontCollectionAccessorImpl {
-        Text_FontCollectionAccessor::DestroyPeerImpl,
-        Text_FontCollectionAccessor::CtorImpl,
-        Text_FontCollectionAccessor::GetFinalizerImpl,
-        Text_FontCollectionAccessor::GetGlobalInstanceImpl,
-        Text_FontCollectionAccessor::LoadFontSyncImpl,
-        Text_FontCollectionAccessor::LoadFontImpl,
-        Text_FontCollectionAccessor::ClearCachesImpl,
+        text_FontCollectionAccessor::DestroyPeerImpl,
+        text_FontCollectionAccessor::ConstructImpl,
+        text_FontCollectionAccessor::GetFinalizerImpl,
+        text_FontCollectionAccessor::GetGlobalInstanceImpl,
+        text_FontCollectionAccessor::LoadFontSyncImpl,
+        text_FontCollectionAccessor::LoadFontImpl,
+        text_FontCollectionAccessor::ClearCachesImpl,
     };
     return &Text_FontCollectionAccessorImpl;
 }
 
+struct Text_FontCollectionPeer {
+    virtual ~Text_FontCollectionPeer() = default;
+};
 }

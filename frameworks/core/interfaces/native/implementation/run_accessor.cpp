@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Text_RunAccessor {
+namespace text_RunAccessor {
 void DestroyPeerImpl(Ark_text_Run peer)
 {
+    auto peerImpl = reinterpret_cast<text_RunPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_text_Run CtorImpl()
+Ark_text_Run ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -83,27 +87,30 @@ Ark_common2D_Rect GetImageBoundsImpl(Ark_text_Run peer)
 {
     return {};
 }
-} // Text_RunAccessor
+} // text_RunAccessor
 const GENERATED_ArkUIText_RunAccessor* GetText_RunAccessor()
 {
     static const GENERATED_ArkUIText_RunAccessor Text_RunAccessorImpl {
-        Text_RunAccessor::DestroyPeerImpl,
-        Text_RunAccessor::CtorImpl,
-        Text_RunAccessor::GetFinalizerImpl,
-        Text_RunAccessor::GetGlyphCountImpl,
-        Text_RunAccessor::GetGlyphs0Impl,
-        Text_RunAccessor::GetGlyphs1Impl,
-        Text_RunAccessor::GetPositions0Impl,
-        Text_RunAccessor::GetPositions1Impl,
-        Text_RunAccessor::GetOffsetsImpl,
-        Text_RunAccessor::GetFontImpl,
-        Text_RunAccessor::PaintImpl,
-        Text_RunAccessor::GetStringIndicesImpl,
-        Text_RunAccessor::GetStringRangeImpl,
-        Text_RunAccessor::GetTypographicBoundsImpl,
-        Text_RunAccessor::GetImageBoundsImpl,
+        text_RunAccessor::DestroyPeerImpl,
+        text_RunAccessor::ConstructImpl,
+        text_RunAccessor::GetFinalizerImpl,
+        text_RunAccessor::GetGlyphCountImpl,
+        text_RunAccessor::GetGlyphs0Impl,
+        text_RunAccessor::GetGlyphs1Impl,
+        text_RunAccessor::GetPositions0Impl,
+        text_RunAccessor::GetPositions1Impl,
+        text_RunAccessor::GetOffsetsImpl,
+        text_RunAccessor::GetFontImpl,
+        text_RunAccessor::PaintImpl,
+        text_RunAccessor::GetStringIndicesImpl,
+        text_RunAccessor::GetStringRangeImpl,
+        text_RunAccessor::GetTypographicBoundsImpl,
+        text_RunAccessor::GetImageBoundsImpl,
     };
     return &Text_RunAccessorImpl;
 }
 
+struct Text_RunPeer {
+    virtual ~Text_RunPeer() = default;
+};
 }

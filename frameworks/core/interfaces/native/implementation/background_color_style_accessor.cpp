@@ -15,24 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-#include "background_color_style_peer.h"
 
-namespace OHOS::Ace::NG {
-namespace GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BackgroundColorStyleAccessor {
 void DestroyPeerImpl(Ark_BackgroundColorStyle peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<BackgroundColorStylePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_BackgroundColorStyle CtorImpl(const Ark_TextBackgroundStyle* textBackgroundStyle)
+Ark_BackgroundColorStyle ConstructImpl(const Ark_TextBackgroundStyle* textBackgroundStyle)
 {
-    auto peer = PeerUtils::CreatePeer<BackgroundColorStylePeer>();
-    TextBackgroundStyle style = textBackgroundStyle
-        ? Converter::Convert<TextBackgroundStyle>(*textBackgroundStyle) : TextBackgroundStyle {};
-    peer->span = AceType::MakeRefPtr<OHOS::Ace::BackgroundColorSpan>(style);
-    return peer;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -40,23 +36,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_TextBackgroundStyle GetTextBackgroundStyleImpl(Ark_BackgroundColorStyle peer)
 {
-    auto textBgStyleInvalid = TextBackgroundStyle();
-    Ark_TextBackgroundStyle invalidValue =
-        Converter::ArkValue<Ark_TextBackgroundStyle>(textBgStyleInvalid, Converter::FC);
-    CHECK_NULL_RETURN(peer && peer->span, invalidValue);
-    auto textBgStyle = peer->span->GetBackgroundColor();
-    return Converter::ArkValue<Ark_TextBackgroundStyle>(textBgStyle, Converter::FC);
+    return {};
 }
 } // BackgroundColorStyleAccessor
 const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccessor()
 {
     static const GENERATED_ArkUIBackgroundColorStyleAccessor BackgroundColorStyleAccessorImpl {
         BackgroundColorStyleAccessor::DestroyPeerImpl,
-        BackgroundColorStyleAccessor::CtorImpl,
+        BackgroundColorStyleAccessor::ConstructImpl,
         BackgroundColorStyleAccessor::GetFinalizerImpl,
         BackgroundColorStyleAccessor::GetTextBackgroundStyleImpl,
     };
     return &BackgroundColorStyleAccessorImpl;
 }
-}
+
+struct BackgroundColorStylePeer {
+    virtual ~BackgroundColorStylePeer() = default;
+};
 }

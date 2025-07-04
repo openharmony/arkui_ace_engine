@@ -15,20 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/implementation/text_timer_controller_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextTimerControllerAccessor {
 void DestroyPeerImpl(Ark_TextTimerController peer)
 {
-    if (peer) {
-        delete peer;
+    auto peerImpl = reinterpret_cast<TextTimerControllerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
     }
 }
-Ark_TextTimerController CtorImpl()
+Ark_TextTimerController ConstructImpl()
 {
-    return new TextTimerControllerPeer();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -36,28 +36,19 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void StartImpl(Ark_TextTimerController peer)
 {
-    auto peerImpl = reinterpret_cast<TextTimerControllerPeer*>(peer);
-    CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
-    peerImpl->GetController()->Start();
 }
 void PauseImpl(Ark_TextTimerController peer)
 {
-    auto peerImpl = reinterpret_cast<TextTimerControllerPeer*>(peer);
-    CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
-    peerImpl->GetController()->Pause();
 }
 void ResetImpl(Ark_TextTimerController peer)
 {
-    auto peerImpl = reinterpret_cast<TextTimerControllerPeer*>(peer);
-    CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
-    peerImpl->GetController()->Reset();
 }
 } // TextTimerControllerAccessor
 const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor()
 {
     static const GENERATED_ArkUITextTimerControllerAccessor TextTimerControllerAccessorImpl {
         TextTimerControllerAccessor::DestroyPeerImpl,
-        TextTimerControllerAccessor::CtorImpl,
+        TextTimerControllerAccessor::ConstructImpl,
         TextTimerControllerAccessor::GetFinalizerImpl,
         TextTimerControllerAccessor::StartImpl,
         TextTimerControllerAccessor::PauseImpl,
@@ -66,4 +57,7 @@ const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor
     return &TextTimerControllerAccessorImpl;
 }
 
+struct TextTimerControllerPeer {
+    virtual ~TextTimerControllerPeer() = default;
+};
 }

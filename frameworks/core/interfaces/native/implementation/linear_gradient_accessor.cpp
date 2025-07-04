@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/linear_gradient_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -22,12 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LinearGradientAccessor {
 void DestroyPeerImpl(Ark_LinearGradient peer)
 {
+    auto peerImpl = reinterpret_cast<LinearGradientPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_LinearGradient CtorImpl(const Array_ColorStop* colorStops)
+Ark_LinearGradient ConstructImpl(const Array_ColorStop* colorStops)
 {
-    CHECK_NULL_RETURN(colorStops, nullptr);
-    auto colors = Converter::Convert<std::vector<std::pair<std::optional<Color>, Dimension>>>(*colorStops);
-    return new LinearGradientPeer{colors};
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -38,10 +39,13 @@ const GENERATED_ArkUILinearGradientAccessor* GetLinearGradientAccessor()
 {
     static const GENERATED_ArkUILinearGradientAccessor LinearGradientAccessorImpl {
         LinearGradientAccessor::DestroyPeerImpl,
-        LinearGradientAccessor::CtorImpl,
+        LinearGradientAccessor::ConstructImpl,
         LinearGradientAccessor::GetFinalizerImpl,
     };
     return &LinearGradientAccessorImpl;
 }
 
+struct LinearGradientPeer {
+    virtual ~LinearGradientPeer() = default;
+};
 }

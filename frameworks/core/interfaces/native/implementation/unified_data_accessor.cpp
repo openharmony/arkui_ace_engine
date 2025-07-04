@@ -16,17 +16,19 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "unified_data_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace UnifiedDataChannel_UnifiedDataAccessor {
+namespace unifiedDataChannel_UnifiedDataAccessor {
 void DestroyPeerImpl(Ark_unifiedDataChannel_UnifiedData peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<unifiedDataChannel_UnifiedDataPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_unifiedDataChannel_UnifiedData CtorImpl()
+Ark_unifiedDataChannel_UnifiedData ConstructImpl()
 {
-    return PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -41,17 +43,20 @@ Array_String GetTypesImpl(Ark_unifiedDataChannel_UnifiedData peer)
 {
     return {};
 }
-} // UnifiedDataChannel_UnifiedDataAccessor
+} // unifiedDataChannel_UnifiedDataAccessor
 const GENERATED_ArkUIUnifiedDataChannel_UnifiedDataAccessor* GetUnifiedDataChannel_UnifiedDataAccessor()
 {
     static const GENERATED_ArkUIUnifiedDataChannel_UnifiedDataAccessor UnifiedDataChannel_UnifiedDataAccessorImpl {
-        UnifiedDataChannel_UnifiedDataAccessor::DestroyPeerImpl,
-        UnifiedDataChannel_UnifiedDataAccessor::CtorImpl,
-        UnifiedDataChannel_UnifiedDataAccessor::GetFinalizerImpl,
-        UnifiedDataChannel_UnifiedDataAccessor::HasTypeImpl,
-        UnifiedDataChannel_UnifiedDataAccessor::GetTypesImpl,
+        unifiedDataChannel_UnifiedDataAccessor::DestroyPeerImpl,
+        unifiedDataChannel_UnifiedDataAccessor::ConstructImpl,
+        unifiedDataChannel_UnifiedDataAccessor::GetFinalizerImpl,
+        unifiedDataChannel_UnifiedDataAccessor::HasTypeImpl,
+        unifiedDataChannel_UnifiedDataAccessor::GetTypesImpl,
     };
     return &UnifiedDataChannel_UnifiedDataAccessorImpl;
 }
 
+struct UnifiedDataChannel_UnifiedDataPeer {
+    virtual ~UnifiedDataChannel_UnifiedDataPeer() = default;
+};
 }

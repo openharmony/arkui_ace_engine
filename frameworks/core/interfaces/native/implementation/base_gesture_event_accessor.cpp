@@ -15,18 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/implementation/base_gesture_event_peer.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseGestureEventAccessor {
 void DestroyPeerImpl(Ark_BaseGestureEvent peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<BaseGestureEventPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_BaseGestureEvent CtorImpl()
+Ark_BaseGestureEvent ConstructImpl()
 {
-    return PeerUtils::CreatePeer<BaseGestureEventPeerImpl>();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -34,28 +36,18 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Array_FingerInfo GetFingerListImpl(Ark_BaseGestureEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    auto info = peer->GetBaseGestureInfo();
-    CHECK_NULL_RETURN(info, {});
-    const std::list<FingerInfo>& fingerList = info->GetFingerList();
-    return Converter::ArkValue<Array_FingerInfo>(fingerList, Converter::FC);
+    return {};
 }
 void SetFingerListImpl(Ark_BaseGestureEvent peer,
                        const Array_FingerInfo* fingerList)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(fingerList);
-    auto eventInfo = peer->GetBaseGestureInfo();
-    CHECK_NULL_VOID(eventInfo);
-    std::list<FingerInfo> list = Converter::Convert<std::list<FingerInfo>>(*fingerList);
-    eventInfo->SetFingerList(list);
 }
 } // BaseGestureEventAccessor
 const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()
 {
     static const GENERATED_ArkUIBaseGestureEventAccessor BaseGestureEventAccessorImpl {
         BaseGestureEventAccessor::DestroyPeerImpl,
-        BaseGestureEventAccessor::CtorImpl,
+        BaseGestureEventAccessor::ConstructImpl,
         BaseGestureEventAccessor::GetFinalizerImpl,
         BaseGestureEventAccessor::GetFingerListImpl,
         BaseGestureEventAccessor::SetFingerListImpl,
@@ -63,4 +55,7 @@ const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()
     return &BaseGestureEventAccessorImpl;
 }
 
+struct BaseGestureEventPeer {
+    virtual ~BaseGestureEventPeer() = default;
+};
 }

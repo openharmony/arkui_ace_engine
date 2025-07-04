@@ -14,43 +14,21 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/pinch_gesture_interface_peer.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/peer_utils.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PinchGestureInterfaceAccessor {
-namespace {
-constexpr int32_t DEFAULT_PINCH_FINGER = 2;
-constexpr int32_t DEFAULT_MAX_PINCH_FINGER = 5;
-constexpr double DEFAULT_PINCH_DISTANCE = 5.0;
-}
-
 void DestroyPeerImpl(Ark_PinchGestureInterface peer)
 {
-    PeerUtils::DestroyPeer(peer);
-}
-Ark_PinchGestureInterface CtorImpl(const Ark_PinchGestureInterface_Invoke_Literal* value)
-{
-    auto peer = PeerUtils::CreatePeer<PinchGestureInterfacePeer>();
-    auto fingers = DEFAULT_PINCH_FINGER;
-    auto distance = DEFAULT_PINCH_DISTANCE;
-    auto params = value;
-    if (params) {
-        fingers = Converter::OptConvert<int32_t>(params->fingers).value_or(DEFAULT_PINCH_FINGER);
-        fingers = fingers <= DEFAULT_PINCH_FINGER ? DEFAULT_PINCH_FINGER : fingers;
-        fingers = fingers > DEFAULT_MAX_PINCH_FINGER ? DEFAULT_PINCH_FINGER : fingers;
-        auto distanceOpt = Converter::OptConvert<float>(params->distance);
-        if (distanceOpt.has_value()) {
-            distance = static_cast<double>(distanceOpt.value());
-        }
-        distance = LessNotEqual(distance, 0.0) ? DEFAULT_PINCH_DISTANCE : distance;
+    auto peerImpl = reinterpret_cast<PinchGestureInterfacePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
     }
-    peer->gesture = AceType::MakeRefPtr<PinchGesture>(fingers, distance);
-    return peer;
+}
+Ark_PinchGestureInterface ConstructImpl(const Ark_PinchGestureInterface_Invoke_Literal* value)
+{
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -59,63 +37,34 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_PinchGestureInterface OnActionStartImpl(Ark_PinchGestureInterface peer,
                                             const Callback_GestureEvent_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto callback = [arkCallback = CallbackHelper(*event)](GestureEvent& info) {
-        auto arkEvent = Converter::ArkGestureEventSync(info);
-        arkCallback.InvokeSync(arkEvent.ArkValue());
-    };
-    peer->gesture->SetOnActionStartId(std::move(callback));
-    return peer;
+    return {};
 }
 Ark_PinchGestureInterface OnActionUpdateImpl(Ark_PinchGestureInterface peer,
                                              const Callback_GestureEvent_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto callback = [arkCallback = CallbackHelper(*event)](GestureEvent& info) {
-        auto arkEvent = Converter::ArkGestureEventSync(info);
-        arkCallback.InvokeSync(arkEvent.ArkValue());
-    };
-    peer->gesture->SetOnActionUpdateId(std::move(callback));
-    return peer;
+    return {};
 }
 Ark_PinchGestureInterface OnActionEndImpl(Ark_PinchGestureInterface peer,
                                           const Callback_GestureEvent_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto callback = [arkCallback = CallbackHelper(*event)](GestureEvent& info) {
-        auto arkEvent = Converter::ArkGestureEventSync(info);
-        arkCallback.InvokeSync(arkEvent.ArkValue());
-    };
-    peer->gesture->SetOnActionEndId(std::move(callback));
-    return peer;
+    return {};
 }
 Ark_PinchGestureInterface OnActionCancel0Impl(Ark_PinchGestureInterface peer,
                                               const Callback_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto callback = [arkCallback = CallbackHelper(*event)](GestureEvent& info) {
-        arkCallback.Invoke();
-    };
-    peer->gesture->SetOnActionCancelId(std::move(callback));
-    return peer;
+    return {};
 }
 Ark_PinchGestureInterface OnActionCancel1Impl(Ark_PinchGestureInterface peer,
                                               const Callback_GestureEvent_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto callback = [arkCallback = CallbackHelper(*event)](GestureEvent& info) {
-        auto arkEvent = Converter::ArkGestureEventSync(info);
-        arkCallback.InvokeSync(arkEvent.ArkValue());
-    };
-    peer->gesture->SetOnActionCancelId(std::move(callback));
-    return peer;
+    return {};
 }
 } // PinchGestureInterfaceAccessor
 const GENERATED_ArkUIPinchGestureInterfaceAccessor* GetPinchGestureInterfaceAccessor()
 {
     static const GENERATED_ArkUIPinchGestureInterfaceAccessor PinchGestureInterfaceAccessorImpl {
         PinchGestureInterfaceAccessor::DestroyPeerImpl,
-        PinchGestureInterfaceAccessor::CtorImpl,
+        PinchGestureInterfaceAccessor::ConstructImpl,
         PinchGestureInterfaceAccessor::GetFinalizerImpl,
         PinchGestureInterfaceAccessor::OnActionStartImpl,
         PinchGestureInterfaceAccessor::OnActionUpdateImpl,
@@ -125,4 +74,8 @@ const GENERATED_ArkUIPinchGestureInterfaceAccessor* GetPinchGestureInterfaceAcce
     };
     return &PinchGestureInterfaceAccessorImpl;
 }
+
+struct PinchGestureInterfacePeer {
+    virtual ~PinchGestureInterfacePeer() = default;
+};
 }

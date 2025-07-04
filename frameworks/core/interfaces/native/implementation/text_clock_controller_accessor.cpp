@@ -15,20 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/implementation/text_clock_controller_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextClockControllerAccessor {
 void DestroyPeerImpl(Ark_TextClockController peer)
 {
-    if (peer) {
-        delete peer;
+    auto peerImpl = reinterpret_cast<TextClockControllerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
     }
 }
-Ark_TextClockController CtorImpl()
+Ark_TextClockController ConstructImpl()
 {
-    return new TextClockControllerPeer();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -36,20 +36,16 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void StartImpl(Ark_TextClockController peer)
 {
-    CHECK_NULL_VOID(peer && peer->controller);
-    peer->controller->Start();
 }
 void StopImpl(Ark_TextClockController peer)
 {
-    CHECK_NULL_VOID(peer && peer->controller);
-    peer->controller->Stop();
 }
 } // TextClockControllerAccessor
 const GENERATED_ArkUITextClockControllerAccessor* GetTextClockControllerAccessor()
 {
     static const GENERATED_ArkUITextClockControllerAccessor TextClockControllerAccessorImpl {
         TextClockControllerAccessor::DestroyPeerImpl,
-        TextClockControllerAccessor::CtorImpl,
+        TextClockControllerAccessor::ConstructImpl,
         TextClockControllerAccessor::GetFinalizerImpl,
         TextClockControllerAccessor::StartImpl,
         TextClockControllerAccessor::StopImpl,
@@ -57,4 +53,7 @@ const GENERATED_ArkUITextClockControllerAccessor* GetTextClockControllerAccessor
     return &TextClockControllerAccessorImpl;
 }
 
+struct TextClockControllerPeer {
+    virtual ~TextClockControllerPeer() = default;
+};
 }

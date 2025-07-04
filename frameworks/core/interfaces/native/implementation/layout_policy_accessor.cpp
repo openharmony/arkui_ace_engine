@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LayoutPolicyAccessor {
 void DestroyPeerImpl(Ark_LayoutPolicy peer)
 {
+    auto peerImpl = reinterpret_cast<LayoutPolicyPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_LayoutPolicy CtorImpl()
+Ark_LayoutPolicy ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,11 +43,14 @@ const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor()
 {
     static const GENERATED_ArkUILayoutPolicyAccessor LayoutPolicyAccessorImpl {
         LayoutPolicyAccessor::DestroyPeerImpl,
-        LayoutPolicyAccessor::CtorImpl,
+        LayoutPolicyAccessor::ConstructImpl,
         LayoutPolicyAccessor::GetFinalizerImpl,
         LayoutPolicyAccessor::GetMatchParentImpl,
     };
     return &LayoutPolicyAccessorImpl;
 }
 
+struct LayoutPolicyPeer {
+    virtual ~LayoutPolicyPeer() = default;
+};
 }

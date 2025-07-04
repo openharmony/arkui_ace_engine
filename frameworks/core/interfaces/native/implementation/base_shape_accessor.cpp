@@ -21,8 +21,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseShapeAccessor {
 void DestroyPeerImpl(Ark_BaseShape peer)
 {
+    auto peerImpl = reinterpret_cast<BaseShapePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_BaseShape CtorImpl()
+Ark_BaseShape ConstructImpl()
 {
     return {};
 }
@@ -50,7 +54,7 @@ const GENERATED_ArkUIBaseShapeAccessor* GetBaseShapeAccessor()
 {
     static const GENERATED_ArkUIBaseShapeAccessor BaseShapeAccessorImpl {
         BaseShapeAccessor::DestroyPeerImpl,
-        BaseShapeAccessor::CtorImpl,
+        BaseShapeAccessor::ConstructImpl,
         BaseShapeAccessor::GetFinalizerImpl,
         BaseShapeAccessor::WidthImpl,
         BaseShapeAccessor::HeightImpl,
@@ -59,4 +63,7 @@ const GENERATED_ArkUIBaseShapeAccessor* GetBaseShapeAccessor()
     return &BaseShapeAccessorImpl;
 }
 
+struct BaseShapePeer {
+    virtual ~BaseShapePeer() = default;
+};
 }

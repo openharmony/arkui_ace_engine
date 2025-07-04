@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LayoutableAccessor {
 void DestroyPeerImpl(Ark_Layoutable peer)
 {
+    auto peerImpl = reinterpret_cast<LayoutablePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_Layoutable CtorImpl()
+Ark_Layoutable ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -59,7 +63,7 @@ Opt_Number GetUniqueIdImpl(Ark_Layoutable peer)
     return {};
 }
 void SetUniqueIdImpl(Ark_Layoutable peer,
-                     const Ark_Number* uniqueId)
+                     const Opt_Number* uniqueId)
 {
 }
 } // LayoutableAccessor
@@ -67,7 +71,7 @@ const GENERATED_ArkUILayoutableAccessor* GetLayoutableAccessor()
 {
     static const GENERATED_ArkUILayoutableAccessor LayoutableAccessorImpl {
         LayoutableAccessor::DestroyPeerImpl,
-        LayoutableAccessor::CtorImpl,
+        LayoutableAccessor::ConstructImpl,
         LayoutableAccessor::GetFinalizerImpl,
         LayoutableAccessor::LayoutImpl,
         LayoutableAccessor::GetMarginImpl,
@@ -81,4 +85,7 @@ const GENERATED_ArkUILayoutableAccessor* GetLayoutableAccessor()
     return &LayoutableAccessorImpl;
 }
 
+struct LayoutablePeer {
+    virtual ~LayoutablePeer() = default;
+};
 }

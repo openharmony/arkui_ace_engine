@@ -16,43 +16,19 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "frameworks/core/components_ng/pattern/text/span/span_object.h"
-#include "frameworks/core/interfaces/native/utility/callback_helper.h"
-#include "frameworks/core/interfaces/native/utility/reverse_converter.h"
-#include "gesture_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureStyleAccessor {
 void DestroyPeerImpl(Ark_GestureStyle peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<GestureStylePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_GestureStyle CtorImpl(const Opt_GestureStyleInterface* value)
+Ark_GestureStyle ConstructImpl(const Opt_GestureStyleInterface* value)
 {
-    auto peer = PeerUtils::CreatePeer<GestureStylePeer>();
-    CHECK_NULL_RETURN(value, peer);
-
-    auto onClickOpt = Converter::OptConvert<Callback_ClickEvent_Void>(value->value.onClick);
-    auto onLongClickOpt = Converter::OptConvert<Callback_GestureEvent_Void>(value->value.onLongPress);
-    GestureStyle gestureInfo {};
-    if (onClickOpt) {
-        auto onClick = [arkCallback = CallbackHelper(*onClickOpt)](GestureEvent& info) -> void {
-            const auto event = Converter::ArkClickEventSync(info);
-            arkCallback.Invoke(event.ArkValue());
-        };
-        gestureInfo.onClick = std::move(onClick);
-    }
-
-    if (onLongClickOpt) {
-        auto onLongClick = [arkCallback = CallbackHelper(*onLongClickOpt)](GestureEvent& info) -> void {
-            const auto event = Converter::ArkGestureEventSync(info);
-            arkCallback.Invoke(event.ArkValue());
-        };
-        gestureInfo.onLongPress = std::move(onLongClick);
-    }
-
-    peer->span = AceType::MakeRefPtr<GestureSpan>(gestureInfo);
-    return peer;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -63,10 +39,13 @@ const GENERATED_ArkUIGestureStyleAccessor* GetGestureStyleAccessor()
 {
     static const GENERATED_ArkUIGestureStyleAccessor GestureStyleAccessorImpl {
         GestureStyleAccessor::DestroyPeerImpl,
-        GestureStyleAccessor::CtorImpl,
+        GestureStyleAccessor::ConstructImpl,
         GestureStyleAccessor::GetFinalizerImpl,
     };
     return &GestureStyleAccessorImpl;
 }
 
+struct GestureStylePeer {
+    virtual ~GestureStylePeer() = default;
+};
 }

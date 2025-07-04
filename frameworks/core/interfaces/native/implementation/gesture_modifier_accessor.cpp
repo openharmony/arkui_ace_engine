@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureModifierAccessor {
 void DestroyPeerImpl(Ark_GestureModifier peer)
 {
+    auto peerImpl = reinterpret_cast<GestureModifierPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_GestureModifier CtorImpl()
+Ark_GestureModifier ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,11 +43,14 @@ const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor()
 {
     static const GENERATED_ArkUIGestureModifierAccessor GestureModifierAccessorImpl {
         GestureModifierAccessor::DestroyPeerImpl,
-        GestureModifierAccessor::CtorImpl,
+        GestureModifierAccessor::ConstructImpl,
         GestureModifierAccessor::GetFinalizerImpl,
         GestureModifierAccessor::ApplyGestureImpl,
     };
     return &GestureModifierAccessorImpl;
 }
 
+struct GestureModifierPeer {
+    virtual ~GestureModifierPeer() = default;
+};
 }

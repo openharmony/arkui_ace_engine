@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_PathEffectAccessor {
+namespace drawing_PathEffectAccessor {
 void DestroyPeerImpl(Ark_drawing_PathEffect peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_PathEffectPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_PathEffect CtorImpl()
+Ark_drawing_PathEffect ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,17 +43,20 @@ Ark_drawing_PathEffect CreateCornerPathEffectImpl(const Ark_Number* radius)
 {
     return {};
 }
-} // Drawing_PathEffectAccessor
+} // drawing_PathEffectAccessor
 const GENERATED_ArkUIDrawing_PathEffectAccessor* GetDrawing_PathEffectAccessor()
 {
     static const GENERATED_ArkUIDrawing_PathEffectAccessor Drawing_PathEffectAccessorImpl {
-        Drawing_PathEffectAccessor::DestroyPeerImpl,
-        Drawing_PathEffectAccessor::CtorImpl,
-        Drawing_PathEffectAccessor::GetFinalizerImpl,
-        Drawing_PathEffectAccessor::CreateDashPathEffectImpl,
-        Drawing_PathEffectAccessor::CreateCornerPathEffectImpl,
+        drawing_PathEffectAccessor::DestroyPeerImpl,
+        drawing_PathEffectAccessor::ConstructImpl,
+        drawing_PathEffectAccessor::GetFinalizerImpl,
+        drawing_PathEffectAccessor::CreateDashPathEffectImpl,
+        drawing_PathEffectAccessor::CreateCornerPathEffectImpl,
     };
     return &Drawing_PathEffectAccessorImpl;
 }
 
+struct Drawing_PathEffectPeer {
+    virtual ~Drawing_PathEffectPeer() = default;
+};
 }

@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_ShaderEffectAccessor {
+namespace drawing_ShaderEffectAccessor {
 void DestroyPeerImpl(Ark_drawing_ShaderEffect peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_ShaderEffectPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_ShaderEffect CtorImpl()
+Ark_drawing_ShaderEffect ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -73,20 +77,23 @@ Ark_drawing_ShaderEffect CreateConicalGradientImpl(const Ark_common2D_Point* sta
 {
     return {};
 }
-} // Drawing_ShaderEffectAccessor
+} // drawing_ShaderEffectAccessor
 const GENERATED_ArkUIDrawing_ShaderEffectAccessor* GetDrawing_ShaderEffectAccessor()
 {
     static const GENERATED_ArkUIDrawing_ShaderEffectAccessor Drawing_ShaderEffectAccessorImpl {
-        Drawing_ShaderEffectAccessor::DestroyPeerImpl,
-        Drawing_ShaderEffectAccessor::CtorImpl,
-        Drawing_ShaderEffectAccessor::GetFinalizerImpl,
-        Drawing_ShaderEffectAccessor::CreateColorShaderImpl,
-        Drawing_ShaderEffectAccessor::CreateLinearGradientImpl,
-        Drawing_ShaderEffectAccessor::CreateRadialGradientImpl,
-        Drawing_ShaderEffectAccessor::CreateSweepGradientImpl,
-        Drawing_ShaderEffectAccessor::CreateConicalGradientImpl,
+        drawing_ShaderEffectAccessor::DestroyPeerImpl,
+        drawing_ShaderEffectAccessor::ConstructImpl,
+        drawing_ShaderEffectAccessor::GetFinalizerImpl,
+        drawing_ShaderEffectAccessor::CreateColorShaderImpl,
+        drawing_ShaderEffectAccessor::CreateLinearGradientImpl,
+        drawing_ShaderEffectAccessor::CreateRadialGradientImpl,
+        drawing_ShaderEffectAccessor::CreateSweepGradientImpl,
+        drawing_ShaderEffectAccessor::CreateConicalGradientImpl,
     };
     return &Drawing_ShaderEffectAccessorImpl;
 }
 
+struct Drawing_ShaderEffectPeer {
+    virtual ~Drawing_ShaderEffectPeer() = default;
+};
 }

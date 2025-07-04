@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextMenuControllerAccessor {
 void DestroyPeerImpl(Ark_TextMenuController peer)
 {
+    auto peerImpl = reinterpret_cast<TextMenuControllerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_TextMenuController CtorImpl()
+Ark_TextMenuController ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,11 +43,14 @@ const GENERATED_ArkUITextMenuControllerAccessor* GetTextMenuControllerAccessor()
 {
     static const GENERATED_ArkUITextMenuControllerAccessor TextMenuControllerAccessorImpl {
         TextMenuControllerAccessor::DestroyPeerImpl,
-        TextMenuControllerAccessor::CtorImpl,
+        TextMenuControllerAccessor::ConstructImpl,
         TextMenuControllerAccessor::GetFinalizerImpl,
         TextMenuControllerAccessor::SetMenuOptionsImpl,
     };
     return &TextMenuControllerAccessorImpl;
 }
 
+struct TextMenuControllerPeer {
+    virtual ~TextMenuControllerPeer() = default;
+};
 }

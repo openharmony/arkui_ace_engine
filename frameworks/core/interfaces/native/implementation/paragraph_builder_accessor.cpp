@@ -18,14 +18,18 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Text_ParagraphBuilderAccessor {
+namespace text_ParagraphBuilderAccessor {
 void DestroyPeerImpl(Ark_text_ParagraphBuilder peer)
 {
+    auto peerImpl = reinterpret_cast<text_ParagraphBuilderPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_text_ParagraphBuilder CtorImpl(const Ark_text_ParagraphStyle* paragraphStyle,
-                                   Ark_text_FontCollection fontCollection)
+Ark_text_ParagraphBuilder ConstructImpl(const Ark_text_ParagraphStyle* paragraphStyle,
+                                        Ark_text_FontCollection fontCollection)
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -58,22 +62,25 @@ void AddSymbolImpl(Ark_text_ParagraphBuilder peer,
                    const Ark_Number* symbolId)
 {
 }
-} // Text_ParagraphBuilderAccessor
+} // text_ParagraphBuilderAccessor
 const GENERATED_ArkUIText_ParagraphBuilderAccessor* GetText_ParagraphBuilderAccessor()
 {
     static const GENERATED_ArkUIText_ParagraphBuilderAccessor Text_ParagraphBuilderAccessorImpl {
-        Text_ParagraphBuilderAccessor::DestroyPeerImpl,
-        Text_ParagraphBuilderAccessor::CtorImpl,
-        Text_ParagraphBuilderAccessor::GetFinalizerImpl,
-        Text_ParagraphBuilderAccessor::PushStyleImpl,
-        Text_ParagraphBuilderAccessor::PopStyleImpl,
-        Text_ParagraphBuilderAccessor::AddTextImpl,
-        Text_ParagraphBuilderAccessor::AddPlaceholderImpl,
-        Text_ParagraphBuilderAccessor::BuildImpl,
-        Text_ParagraphBuilderAccessor::BuildLineTypesetImpl,
-        Text_ParagraphBuilderAccessor::AddSymbolImpl,
+        text_ParagraphBuilderAccessor::DestroyPeerImpl,
+        text_ParagraphBuilderAccessor::ConstructImpl,
+        text_ParagraphBuilderAccessor::GetFinalizerImpl,
+        text_ParagraphBuilderAccessor::PushStyleImpl,
+        text_ParagraphBuilderAccessor::PopStyleImpl,
+        text_ParagraphBuilderAccessor::AddTextImpl,
+        text_ParagraphBuilderAccessor::AddPlaceholderImpl,
+        text_ParagraphBuilderAccessor::BuildImpl,
+        text_ParagraphBuilderAccessor::BuildLineTypesetImpl,
+        text_ParagraphBuilderAccessor::AddSymbolImpl,
     };
     return &Text_ParagraphBuilderAccessorImpl;
 }
 
+struct Text_ParagraphBuilderPeer {
+    virtual ~Text_ParagraphBuilderPeer() = default;
+};
 }

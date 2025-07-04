@@ -15,58 +15,14 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
-#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
-#include "core/components_ng/pattern/grid_col/grid_col_model_ng_static.h"
 
-int g_defaultValue = 0;
-
-namespace OHOS::Ace::NG {
-namespace Converter {
-    template<>
-    V2::GridContainerSize Convert(const Ark_GridColColumnOption& value)
-    {
-        V2::GridContainerSize toValue;
-        auto optVal = Converter::OptConvert<int32_t>(value.xs);
-        toValue.xs = optVal.has_value() ? optVal.value() : g_defaultValue;
-        optVal = Converter::OptConvert<int32_t>(value.sm);
-        toValue.sm = optVal.has_value() ? optVal.value() : g_defaultValue;
-        optVal = Converter::OptConvert<int32_t>(value.md);
-        toValue.md = optVal.has_value() ? optVal.value() : g_defaultValue;
-        optVal = Converter::OptConvert<int32_t>(value.lg);
-        toValue.lg = optVal.has_value() ? optVal.value() : g_defaultValue;
-        optVal = Converter::OptConvert<int32_t>(value.xl);
-        toValue.xl = optVal.has_value() ? optVal.value() : g_defaultValue;
-        optVal = Converter::OptConvert<int32_t>(value.xxl);
-        toValue.xxl = optVal.has_value() ? optVal.value() : g_defaultValue;
-        return toValue;
-    }
-    template<>
-    V2::GridContainerSize Convert(const Ark_Number& value)
-    {
-        V2::GridContainerSize toValue;
-        int32_t iValue = Converter::Convert<int32_t>(value);
-        toValue.lg = iValue;
-        toValue.md = iValue;
-        toValue.sm = iValue;
-        toValue.xl = iValue;
-        toValue.xs = iValue;
-        toValue.xxl = iValue;
-        return toValue;
-    }
-} // namespace Converter
-} // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GridColModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = GridColModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // GridColModifier
 namespace GridColInterfaceModifier {
@@ -75,59 +31,34 @@ void SetGridColOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optGridColOptions = Converter::OptConvertPtr<Ark_GridColOptions>(option);
-    if (optGridColOptions) {
-        auto arkGridColOptions = *optGridColOptions;
-        g_defaultValue = 1;
-        auto gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.span);
-        Validator::ValidateNonNegative(gcSizeValue);
-        GridColModelNGStatic::SetSpan(frameNode, gcSizeValue);
-        g_defaultValue = 0;
-        gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.offset);
-        Validator::ValidateNonNegative(gcSizeValue);
-        GridColModelNGStatic::SetOffset(frameNode, gcSizeValue);
-        g_defaultValue = 0;
-        gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.order);
-        Validator::ValidateNonNegative(gcSizeValue);
-        GridColModelNGStatic::SetOrder(frameNode, gcSizeValue);
-    } else {
-        GridColModelNGStatic::SetSpan(frameNode, std::nullopt);
-        GridColModelNGStatic::SetOffset(frameNode, std::nullopt);
-        GridColModelNGStatic::SetOrder(frameNode, std::nullopt);
-    }
+    //auto convValue = option ? Converter::OptConvert<type>(*option) : std::nullopt;
+    //GridColModelNG::SetSetGridColOptions(frameNode, convValue);
 }
 } // GridColInterfaceModifier
 namespace GridColAttributeModifier {
-void SpanImpl(Ark_NativePointer node,
-              const Opt_Union_Number_GridColColumnOption* value)
+void SetSpanImpl(Ark_NativePointer node,
+                 const Opt_Union_Number_GridColColumnOption* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<V2::GridContainerSize> gcSizeValue {std::nullopt};
-    g_defaultValue = 1;
-    gcSizeValue = Converter::OptConvertPtr<V2::GridContainerSize>(value);
-    Validator::ValidateNonNegative(gcSizeValue);
-    GridColModelNGStatic::SetSpan(frameNode, gcSizeValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GridColModelNG::SetSetSpan(frameNode, convValue);
 }
-void GridColOffsetImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_GridColColumnOption* value)
+void SetGridColOffsetImpl(Ark_NativePointer node,
+                          const Opt_Union_Number_GridColColumnOption* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    g_defaultValue = 0;
-    auto gcSizeValue = Converter::OptConvertPtr<V2::GridContainerSize>(value);
-    Validator::ValidateNonNegative(gcSizeValue);
-    GridColModelNGStatic::SetOffset(frameNode, gcSizeValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GridColModelNG::SetSetGridColOffset(frameNode, convValue);
 }
-void OrderImpl(Ark_NativePointer node,
-               const Opt_Union_Number_GridColColumnOption* value)
+void SetOrderImpl(Ark_NativePointer node,
+                  const Opt_Union_Number_GridColColumnOption* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    g_defaultValue = 0;
-    auto gcSizeValue = Converter::OptConvertPtr<V2::GridContainerSize>(value);
-    Validator::ValidateNonNegative(gcSizeValue);
-    GridColModelNGStatic::SetOrder(frameNode, gcSizeValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GridColModelNG::SetSetOrder(frameNode, convValue);
 }
 } // GridColAttributeModifier
 const GENERATED_ArkUIGridColModifier* GetGridColModifier()
@@ -135,9 +66,9 @@ const GENERATED_ArkUIGridColModifier* GetGridColModifier()
     static const GENERATED_ArkUIGridColModifier ArkUIGridColModifierImpl {
         GridColModifier::ConstructImpl,
         GridColInterfaceModifier::SetGridColOptionsImpl,
-        GridColAttributeModifier::SpanImpl,
-        GridColAttributeModifier::GridColOffsetImpl,
-        GridColAttributeModifier::OrderImpl,
+        GridColAttributeModifier::SetSpanImpl,
+        GridColAttributeModifier::SetGridColOffsetImpl,
+        GridColAttributeModifier::SetOrderImpl,
     };
     return &ArkUIGridColModifierImpl;
 }

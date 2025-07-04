@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_ImageFilterAccessor {
+namespace drawing_ImageFilterAccessor {
 void DestroyPeerImpl(Ark_drawing_ImageFilter peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_ImageFilterPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_ImageFilter CtorImpl()
+Ark_drawing_ImageFilter ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -42,17 +46,20 @@ Ark_drawing_ImageFilter CreateFromColorFilterImpl(Ark_drawing_ColorFilter colorF
 {
     return {};
 }
-} // Drawing_ImageFilterAccessor
+} // drawing_ImageFilterAccessor
 const GENERATED_ArkUIDrawing_ImageFilterAccessor* GetDrawing_ImageFilterAccessor()
 {
     static const GENERATED_ArkUIDrawing_ImageFilterAccessor Drawing_ImageFilterAccessorImpl {
-        Drawing_ImageFilterAccessor::DestroyPeerImpl,
-        Drawing_ImageFilterAccessor::CtorImpl,
-        Drawing_ImageFilterAccessor::GetFinalizerImpl,
-        Drawing_ImageFilterAccessor::CreateBlurImageFilterImpl,
-        Drawing_ImageFilterAccessor::CreateFromColorFilterImpl,
+        drawing_ImageFilterAccessor::DestroyPeerImpl,
+        drawing_ImageFilterAccessor::ConstructImpl,
+        drawing_ImageFilterAccessor::GetFinalizerImpl,
+        drawing_ImageFilterAccessor::CreateBlurImageFilterImpl,
+        drawing_ImageFilterAccessor::CreateFromColorFilterImpl,
     };
     return &Drawing_ImageFilterAccessorImpl;
 }
 
+struct Drawing_ImageFilterPeer {
+    virtual ~Drawing_ImageFilterPeer() = default;
+};
 }

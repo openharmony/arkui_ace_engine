@@ -14,8 +14,6 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
-#include "core/components_ng/pattern/hyperlink/hyperlink_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -24,10 +22,7 @@ namespace HyperlinkModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = HyperlinkModelStatic::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // HyperlinkModifier
 namespace HyperlinkInterfaceModifier {
@@ -37,22 +32,19 @@ void SetHyperlinkOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(address);
-    auto convAddress = Converter::OptConvert<std::string>(*address);
-    auto convContent = Converter::OptConvertPtr<std::string>(content);
-    if (convAddress.has_value()) {
-        HyperlinkModelStatic::SetTextStyle(frameNode, convAddress.value(), convContent);
-    }
+    //auto convValue = Converter::Convert<type>(address);
+    //auto convValue = Converter::OptConvert<type>(address); // for enums
+    //HyperlinkModelNG::SetSetHyperlinkOptions(frameNode, convValue);
 }
 } // HyperlinkInterfaceModifier
 namespace HyperlinkAttributeModifier {
-void ColorImpl(Ark_NativePointer node,
-               const Opt_Union_Color_Number_String_Resource* value)
+void SetColorImpl(Ark_NativePointer node,
+                  const Opt_Union_Color_Number_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Color>(value);
-    HyperlinkModelStatic::SetColor(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //HyperlinkModelNG::SetSetColor(frameNode, convValue);
 }
 } // HyperlinkAttributeModifier
 const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()
@@ -60,7 +52,7 @@ const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()
     static const GENERATED_ArkUIHyperlinkModifier ArkUIHyperlinkModifierImpl {
         HyperlinkModifier::ConstructImpl,
         HyperlinkInterfaceModifier::SetHyperlinkOptionsImpl,
-        HyperlinkAttributeModifier::ColorImpl,
+        HyperlinkAttributeModifier::SetColorImpl,
     };
     return &ArkUIHyperlinkModifierImpl;
 }

@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Text_ParagraphAccessor {
+namespace text_ParagraphAccessor {
 void DestroyPeerImpl(Ark_text_Paragraph peer)
 {
+    auto peerImpl = reinterpret_cast<text_ParagraphPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_text_Paragraph CtorImpl()
+Ark_text_Paragraph ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -145,39 +149,42 @@ Opt_text_LineMetrics GetLineMetrics1Impl(Ark_text_Paragraph peer,
 {
     return {};
 }
-} // Text_ParagraphAccessor
+} // text_ParagraphAccessor
 const GENERATED_ArkUIText_ParagraphAccessor* GetText_ParagraphAccessor()
 {
     static const GENERATED_ArkUIText_ParagraphAccessor Text_ParagraphAccessorImpl {
-        Text_ParagraphAccessor::DestroyPeerImpl,
-        Text_ParagraphAccessor::CtorImpl,
-        Text_ParagraphAccessor::GetFinalizerImpl,
-        Text_ParagraphAccessor::LayoutSyncImpl,
-        Text_ParagraphAccessor::LayoutImpl,
-        Text_ParagraphAccessor::PaintImpl,
-        Text_ParagraphAccessor::PaintOnPathImpl,
-        Text_ParagraphAccessor::GetMaxWidthImpl,
-        Text_ParagraphAccessor::GetHeightImpl,
-        Text_ParagraphAccessor::GetLongestLineImpl,
-        Text_ParagraphAccessor::GetLongestLineWithIndentImpl,
-        Text_ParagraphAccessor::GetMinIntrinsicWidthImpl,
-        Text_ParagraphAccessor::GetMaxIntrinsicWidthImpl,
-        Text_ParagraphAccessor::GetAlphabeticBaselineImpl,
-        Text_ParagraphAccessor::GetIdeographicBaselineImpl,
-        Text_ParagraphAccessor::GetRectsForRangeImpl,
-        Text_ParagraphAccessor::GetRectsForPlaceholdersImpl,
-        Text_ParagraphAccessor::GetGlyphPositionAtCoordinateImpl,
-        Text_ParagraphAccessor::GetWordBoundaryImpl,
-        Text_ParagraphAccessor::GetLineCountImpl,
-        Text_ParagraphAccessor::GetLineHeightImpl,
-        Text_ParagraphAccessor::GetLineWidthImpl,
-        Text_ParagraphAccessor::DidExceedMaxLinesImpl,
-        Text_ParagraphAccessor::GetTextLinesImpl,
-        Text_ParagraphAccessor::GetActualTextRangeImpl,
-        Text_ParagraphAccessor::GetLineMetrics0Impl,
-        Text_ParagraphAccessor::GetLineMetrics1Impl,
+        text_ParagraphAccessor::DestroyPeerImpl,
+        text_ParagraphAccessor::ConstructImpl,
+        text_ParagraphAccessor::GetFinalizerImpl,
+        text_ParagraphAccessor::LayoutSyncImpl,
+        text_ParagraphAccessor::LayoutImpl,
+        text_ParagraphAccessor::PaintImpl,
+        text_ParagraphAccessor::PaintOnPathImpl,
+        text_ParagraphAccessor::GetMaxWidthImpl,
+        text_ParagraphAccessor::GetHeightImpl,
+        text_ParagraphAccessor::GetLongestLineImpl,
+        text_ParagraphAccessor::GetLongestLineWithIndentImpl,
+        text_ParagraphAccessor::GetMinIntrinsicWidthImpl,
+        text_ParagraphAccessor::GetMaxIntrinsicWidthImpl,
+        text_ParagraphAccessor::GetAlphabeticBaselineImpl,
+        text_ParagraphAccessor::GetIdeographicBaselineImpl,
+        text_ParagraphAccessor::GetRectsForRangeImpl,
+        text_ParagraphAccessor::GetRectsForPlaceholdersImpl,
+        text_ParagraphAccessor::GetGlyphPositionAtCoordinateImpl,
+        text_ParagraphAccessor::GetWordBoundaryImpl,
+        text_ParagraphAccessor::GetLineCountImpl,
+        text_ParagraphAccessor::GetLineHeightImpl,
+        text_ParagraphAccessor::GetLineWidthImpl,
+        text_ParagraphAccessor::DidExceedMaxLinesImpl,
+        text_ParagraphAccessor::GetTextLinesImpl,
+        text_ParagraphAccessor::GetActualTextRangeImpl,
+        text_ParagraphAccessor::GetLineMetrics0Impl,
+        text_ParagraphAccessor::GetLineMetrics1Impl,
     };
     return &Text_ParagraphAccessorImpl;
 }
 
+struct Text_ParagraphPeer {
+    virtual ~Text_ParagraphPeer() = default;
+};
 }

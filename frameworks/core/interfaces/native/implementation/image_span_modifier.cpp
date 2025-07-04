@@ -13,23 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/image/image_source_info.h"
-#include "core/components_ng/pattern/text/image_span_view.h"
-#include "core/components_ng/pattern/text/image_span_view_static.h"
-#include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "pixel_map_peer.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto imageSpanNode = ImageSpanView::CreateFrameNode(id);
-    CHECK_NULL_RETURN(imageSpanNode, nullptr);
-    imageSpanNode->IncRefCount();
-    return AceType::RawPtr(imageSpanNode);
+    return {};
 }
 } // ImageSpanModifier
 namespace ImageSpanInterfaceModifier {
@@ -39,75 +32,50 @@ void SetImageSpanOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto imageSource = Converter::OptConvert<ImageSourceInfo>(*value);
-    if (imageSource) {
-        ImageSpanViewStatic::SetImageSpanSrc(frameNode, *imageSource);
-    }
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ImageSpanModelNG::SetSetImageSpanOptions(frameNode, convValue);
 }
 } // ImageSpanInterfaceModifier
 namespace ImageSpanAttributeModifier {
-void VerticalAlignImpl(Ark_NativePointer node,
-                       const Opt_ImageSpanAlignment* value)
+void SetVerticalAlignImpl(Ark_NativePointer node,
+                          const Opt_ImageSpanAlignment* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<VerticalAlign>(value);
-    ImageSpanViewStatic::SetVerticalAlign(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ImageSpanModelNG::SetSetVerticalAlign(frameNode, convValue);
 }
-void ObjectFitImpl(Ark_NativePointer node,
-                   const Opt_ImageFit* value)
+void SetObjectFitImpl(Ark_NativePointer node,
+                      const Opt_ImageFit* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<ImageFit>(value);
-    ImageSpanViewStatic::SetObjectFit(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ImageSpanModelNG::SetSetObjectFit(frameNode, convValue);
 }
-void OnCompleteImpl(Ark_NativePointer node,
-                    const Opt_ImageCompleteCallback* value)
+void SetOnCompleteImpl(Ark_NativePointer node,
+                       const Opt_ImageCompleteCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onComplete = [arkCallback = CallbackHelper(*optValue)](const LoadImageSuccessEvent& info) {
-        Ark_ImageLoadResult result = Converter::ArkValue<Ark_ImageLoadResult>(info);
-        arkCallback.Invoke(result);
-    };
-    ImageSpanView::SetOnComplete(frameNode, std::move(onComplete));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ImageSpanModelNG::SetSetOnComplete(frameNode, convValue);
 }
-void OnErrorImpl(Ark_NativePointer node,
-                 const Opt_ImageErrorCallback* value)
+void SetOnErrorImpl(Ark_NativePointer node,
+                    const Opt_ImageErrorCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onError = [arkCallback = CallbackHelper(*optValue)](const LoadImageFailEvent& info) {
-        Ark_ImageError result = Converter::ArkValue<Ark_ImageError>(info);
-        arkCallback.Invoke(result);
-    };
-    ImageSpanView::SetOnError(frameNode, std::move(onError));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ImageSpanModelNG::SetSetOnError(frameNode, convValue);
 }
-void AltImpl(Ark_NativePointer node,
-             const Opt_image_PixelMap* value)
+void SetAltImpl(Ark_NativePointer node,
+                const Opt_image_PixelMap* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto pixelMapPeer = *optValue;
-    if (pixelMapPeer) {
-        ImageModelNG::SetAlt(frameNode, ImageSourceInfo(pixelMapPeer->pixelMap));
-    }
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ImageSpanModelNG::SetSetAlt(frameNode, convValue);
 }
 } // ImageSpanAttributeModifier
 const GENERATED_ArkUIImageSpanModifier* GetImageSpanModifier()
@@ -115,11 +83,11 @@ const GENERATED_ArkUIImageSpanModifier* GetImageSpanModifier()
     static const GENERATED_ArkUIImageSpanModifier ArkUIImageSpanModifierImpl {
         ImageSpanModifier::ConstructImpl,
         ImageSpanInterfaceModifier::SetImageSpanOptionsImpl,
-        ImageSpanAttributeModifier::VerticalAlignImpl,
-        ImageSpanAttributeModifier::ObjectFitImpl,
-        ImageSpanAttributeModifier::OnCompleteImpl,
-        ImageSpanAttributeModifier::OnErrorImpl,
-        ImageSpanAttributeModifier::AltImpl,
+        ImageSpanAttributeModifier::SetVerticalAlignImpl,
+        ImageSpanAttributeModifier::SetObjectFitImpl,
+        ImageSpanAttributeModifier::SetOnCompleteImpl,
+        ImageSpanAttributeModifier::SetOnErrorImpl,
+        ImageSpanAttributeModifier::SetAltImpl,
     };
     return &ArkUIImageSpanModifierImpl;
 }

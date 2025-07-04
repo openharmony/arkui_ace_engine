@@ -16,21 +16,19 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/calendar_controller_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarControllerAccessor {
 void DestroyPeerImpl(Ark_CalendarController peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->controller = nullptr;
-    delete peer;
+    auto peerImpl = reinterpret_cast<CalendarControllerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_CalendarController CtorImpl()
+Ark_CalendarController ConstructImpl()
 {
-    return new CalendarControllerPeer {
-        .controller = Referenced::MakeRefPtr<CalendarControllerNg>()
-    };
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -38,27 +36,17 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void BackToTodayImpl(Ark_CalendarController peer)
 {
-    CHECK_NULL_VOID(peer && peer->controller);
-    peer->controller->BackToToday();
 }
 void GoToImpl(Ark_CalendarController peer,
               const Ark_CalendarSelectedDate* date)
 {
-    CHECK_NULL_VOID(peer && peer->controller);
-    auto value = date;
-    CHECK_NULL_VOID(value);
-    peer->controller->GoTo(
-        Converter::Convert<int32_t>(value->year),
-        Converter::Convert<int32_t>(value->month),
-        Converter::Convert<int32_t>(value->day)
-    );
 }
 } // CalendarControllerAccessor
 const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor()
 {
     static const GENERATED_ArkUICalendarControllerAccessor CalendarControllerAccessorImpl {
         CalendarControllerAccessor::DestroyPeerImpl,
-        CalendarControllerAccessor::CtorImpl,
+        CalendarControllerAccessor::ConstructImpl,
         CalendarControllerAccessor::GetFinalizerImpl,
         CalendarControllerAccessor::BackToTodayImpl,
         CalendarControllerAccessor::GoToImpl,
@@ -66,4 +54,7 @@ const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor()
     return &CalendarControllerAccessorImpl;
 }
 
+struct CalendarControllerPeer {
+    virtual ~CalendarControllerPeer() = default;
+};
 }

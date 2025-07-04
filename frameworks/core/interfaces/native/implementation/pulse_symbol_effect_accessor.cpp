@@ -16,17 +16,19 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PulseSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_PulseSymbolEffect peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<PulseSymbolEffectPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_PulseSymbolEffect CtorImpl()
+Ark_PulseSymbolEffect ConstructImpl()
 {
-    return PeerUtils::CreatePeer<PulseSymbolEffectPeer>();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -37,10 +39,13 @@ const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor()
 {
     static const GENERATED_ArkUIPulseSymbolEffectAccessor PulseSymbolEffectAccessorImpl {
         PulseSymbolEffectAccessor::DestroyPeerImpl,
-        PulseSymbolEffectAccessor::CtorImpl,
+        PulseSymbolEffectAccessor::ConstructImpl,
         PulseSymbolEffectAccessor::GetFinalizerImpl,
     };
     return &PulseSymbolEffectAccessorImpl;
 }
 
+struct PulseSymbolEffectPeer {
+    virtual ~PulseSymbolEffectPeer() = default;
+};
 }

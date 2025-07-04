@@ -15,19 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/rotation_recognizer_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RotationRecognizerAccessor {
 void DestroyPeerImpl(Ark_RotationRecognizer peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<RotationRecognizerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_RotationRecognizer CtorImpl()
+Ark_RotationRecognizer ConstructImpl()
 {
-    return PeerUtils::CreatePeer<RotationRecognizerPeer>();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -35,20 +36,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetAngleImpl(Ark_RotationRecognizer peer)
 {
-    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_ANGLE);
-    CHECK_NULL_RETURN(peer, errorValue);
-    return Converter::ArkValue<Ark_Number>(peer->GetAngle());
+    return {};
 }
 } // RotationRecognizerAccessor
 const GENERATED_ArkUIRotationRecognizerAccessor* GetRotationRecognizerAccessor()
 {
     static const GENERATED_ArkUIRotationRecognizerAccessor RotationRecognizerAccessorImpl {
         RotationRecognizerAccessor::DestroyPeerImpl,
-        RotationRecognizerAccessor::CtorImpl,
+        RotationRecognizerAccessor::ConstructImpl,
         RotationRecognizerAccessor::GetFinalizerImpl,
         RotationRecognizerAccessor::GetAngleImpl,
     };
     return &RotationRecognizerAccessorImpl;
 }
 
+struct RotationRecognizerPeer {
+    virtual ~RotationRecognizerPeer() = default;
+};
 }

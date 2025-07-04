@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_ShadowLayerAccessor {
+namespace drawing_ShadowLayerAccessor {
 void DestroyPeerImpl(Ark_drawing_ShadowLayer peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_ShadowLayerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_ShadowLayer CtorImpl()
+Ark_drawing_ShadowLayer ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -44,17 +48,20 @@ Ark_drawing_ShadowLayer Create1Impl(const Ark_Number* blurRadius,
 {
     return {};
 }
-} // Drawing_ShadowLayerAccessor
+} // drawing_ShadowLayerAccessor
 const GENERATED_ArkUIDrawing_ShadowLayerAccessor* GetDrawing_ShadowLayerAccessor()
 {
     static const GENERATED_ArkUIDrawing_ShadowLayerAccessor Drawing_ShadowLayerAccessorImpl {
-        Drawing_ShadowLayerAccessor::DestroyPeerImpl,
-        Drawing_ShadowLayerAccessor::CtorImpl,
-        Drawing_ShadowLayerAccessor::GetFinalizerImpl,
-        Drawing_ShadowLayerAccessor::Create0Impl,
-        Drawing_ShadowLayerAccessor::Create1Impl,
+        drawing_ShadowLayerAccessor::DestroyPeerImpl,
+        drawing_ShadowLayerAccessor::ConstructImpl,
+        drawing_ShadowLayerAccessor::GetFinalizerImpl,
+        drawing_ShadowLayerAccessor::Create0Impl,
+        drawing_ShadowLayerAccessor::Create1Impl,
     };
     return &Drawing_ShadowLayerAccessorImpl;
 }
 
+struct Drawing_ShadowLayerPeer {
+    virtual ~Drawing_ShadowLayerPeer() = default;
+};
 }

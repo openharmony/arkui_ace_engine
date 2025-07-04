@@ -15,41 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-#include "text_shadow_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextShadowStyleAccessor {
 void DestroyPeerImpl(Ark_TextShadowStyle peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<TextShadowStylePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_TextShadowStyle CtorImpl(const Ark_Union_ShadowOptions_Array_ShadowOptions* value)
+Ark_TextShadowStyle ConstructImpl(const Ark_Union_ShadowOptions_Array_ShadowOptions* value)
 {
-    auto peer = PeerUtils::CreatePeer<TextShadowStylePeer>();
-    if (value) {
-        Converter::VisitUnion(*value,
-            [peer](const Array_ShadowOptions& array) {
-                auto shadowsOpt = Converter::OptConvert<std::vector<Shadow>>(array);
-                if (shadowsOpt) {
-                    peer->span = AceType::MakeRefPtr<OHOS::Ace::TextShadowSpan>(shadowsOpt.value());
-                }
-            },
-            [peer](const Ark_ShadowOptions& arkValue) {
-                auto shadowOpt = Converter::OptConvert<Shadow>(arkValue);
-                std::vector<Shadow> shadows;
-                if (shadowOpt) {
-                    shadows.push_back(shadowOpt.value());
-                }
-                peer->span = AceType::MakeRefPtr<OHOS::Ace::TextShadowSpan>(shadows);
-            },
-            []() {});
-    }
-    if (!peer->span) {
-        peer->span = AceType::MakeRefPtr<OHOS::Ace::TextShadowSpan>();
-    }
-    return peer;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -57,18 +36,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Array_ShadowOptions GetTextShadowImpl(Ark_TextShadowStyle peer)
 {
-    CHECK_NULL_RETURN(peer && peer->span, {});
-    return Converter::ArkValue<Array_ShadowOptions>(peer->span->GetTextShadow(), Converter::FC);
+    return {};
 }
 } // TextShadowStyleAccessor
 const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
 {
     static const GENERATED_ArkUITextShadowStyleAccessor TextShadowStyleAccessorImpl {
         TextShadowStyleAccessor::DestroyPeerImpl,
-        TextShadowStyleAccessor::CtorImpl,
+        TextShadowStyleAccessor::ConstructImpl,
         TextShadowStyleAccessor::GetFinalizerImpl,
         TextShadowStyleAccessor::GetTextShadowImpl,
     };
     return &TextShadowStyleAccessorImpl;
 }
+
+struct TextShadowStylePeer {
+    virtual ~TextShadowStylePeer() = default;
+};
 }

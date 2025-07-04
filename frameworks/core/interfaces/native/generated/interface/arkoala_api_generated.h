@@ -39,7 +39,12 @@
 #ifndef _INTEROP_TYPES_H_
 #define _INTEROP_TYPES_H_
 
-#include <stdint.h>
+#ifdef __cplusplus
+  #include <cstdint>
+#else
+  #include <stdint.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" [[noreturn]]
 #endif
@@ -194,7 +199,7 @@ typedef struct InteropObject {
 // The only include allowed in this file! Do not add anything else ever.
 #include <stdint.h>
 
-#define GENERATED_ARKUI_FULL_API_VERSION 130
+#define GENERATED_ARKUI_FULL_API_VERSION 9999
 #define GENERATED_ARKUI_NODE_API_VERSION GENERATED_ARKUI_FULL_API_VERSION
 
 #define GENERATED_ARKUI_BASIC_NODE_API_VERSION 1
@@ -289,6 +294,9 @@ typedef struct BaseShapePeer* Ark_BaseShape;
 typedef struct Opt_BaseShape Opt_BaseShape;
 typedef struct Opt_Boolean Opt_Boolean;
 typedef struct Opt_Buffer Opt_Buffer;
+typedef struct BuilderNodeOpsPeer BuilderNodeOpsPeer;
+typedef struct BuilderNodeOpsPeer* Ark_BuilderNodeOps;
+typedef struct Opt_BuilderNodeOps Opt_BuilderNodeOps;
 typedef struct CalendarControllerPeer CalendarControllerPeer;
 typedef struct CalendarControllerPeer* Ark_CalendarController;
 typedef struct Opt_CalendarController Opt_CalendarController;
@@ -457,7 +465,8 @@ typedef struct Opt_LayoutManager Opt_LayoutManager;
 typedef struct LayoutPolicyPeer LayoutPolicyPeer;
 typedef struct LayoutPolicyPeer* Ark_LayoutPolicy;
 typedef struct Opt_LayoutPolicy Opt_LayoutPolicy;
-typedef struct Ark_LevelOrder Ark_LevelOrder;
+typedef struct LevelOrderPeer LevelOrderPeer;
+typedef struct LevelOrderPeer* Ark_LevelOrder;
 typedef struct Opt_LevelOrder Opt_LevelOrder;
 typedef struct LifeCyclePeer LifeCyclePeer;
 typedef struct LifeCyclePeer* Ark_LifeCycle;
@@ -549,6 +558,9 @@ typedef struct Opt_ProgressConfiguration Opt_ProgressConfiguration;
 typedef struct ProgressMaskPeer ProgressMaskPeer;
 typedef struct ProgressMaskPeer* Ark_ProgressMask;
 typedef struct Opt_ProgressMask Opt_ProgressMask;
+typedef struct PromptActionPeer PromptActionPeer;
+typedef struct PromptActionPeer* Ark_PromptAction;
+typedef struct Opt_PromptAction Opt_PromptAction;
 typedef struct PulseSymbolEffectPeer PulseSymbolEffectPeer;
 typedef struct PulseSymbolEffectPeer* Ark_PulseSymbolEffect;
 typedef struct Opt_PulseSymbolEffect Opt_PulseSymbolEffect;
@@ -913,8 +925,6 @@ typedef struct Array_Length Array_Length;
 typedef struct Opt_Array_Length Opt_Array_Length;
 typedef struct Array_LengthMetrics Array_LengthMetrics;
 typedef struct Opt_Array_LengthMetrics Opt_Array_LengthMetrics;
-typedef struct Array_LocalizedBarrierStyle Array_LocalizedBarrierStyle;
-typedef struct Opt_Array_LocalizedBarrierStyle Opt_Array_LocalizedBarrierStyle;
 typedef struct Array_Measurable Array_Measurable;
 typedef struct Opt_Array_Measurable Opt_Array_Measurable;
 typedef struct Array_MenuElement Array_MenuElement;
@@ -1554,6 +1564,8 @@ typedef struct BounceSymbolEffectPeer* Ark_BounceSymbolEffect;
 typedef struct Opt_BounceSymbolEffect Opt_BounceSymbolEffect;
 typedef struct Ark_BreakPoints Ark_BreakPoints;
 typedef struct Opt_BreakPoints Opt_BreakPoints;
+typedef struct Ark_BuilderNodeOptions Ark_BuilderNodeOptions;
+typedef struct Opt_BuilderNodeOptions Opt_BuilderNodeOptions;
 typedef struct Ark_BusinessError Ark_BusinessError;
 typedef struct Opt_BusinessError Opt_BusinessError;
 typedef struct Ark_ButtonConfiguration Ark_ButtonConfiguration;
@@ -1773,6 +1785,8 @@ typedef struct Opt_KeyboardOptions Opt_KeyboardOptions;
 typedef struct KeyEventPeer KeyEventPeer;
 typedef struct KeyEventPeer* Ark_KeyEvent;
 typedef struct Opt_KeyEvent Opt_KeyEvent;
+typedef struct Ark_LayoutConstraint Ark_LayoutConstraint;
+typedef struct Opt_LayoutConstraint Opt_LayoutConstraint;
 typedef struct LengthMetricsPeer LengthMetricsPeer;
 typedef struct LengthMetricsPeer* Ark_LengthMetrics;
 typedef struct Opt_LengthMetrics Opt_LengthMetrics;
@@ -1796,8 +1810,6 @@ typedef struct Ark_ListItemOptions Ark_ListItemOptions;
 typedef struct Opt_ListItemOptions Opt_ListItemOptions;
 typedef struct Ark_ListOptions Ark_ListOptions;
 typedef struct Opt_ListOptions Opt_ListOptions;
-typedef struct Ark_LocalizedBarrierStyle Ark_LocalizedBarrierStyle;
-typedef struct Opt_LocalizedBarrierStyle Opt_LocalizedBarrierStyle;
 typedef struct Ark_LocalizedHorizontalAlignParam Ark_LocalizedHorizontalAlignParam;
 typedef struct Opt_LocalizedHorizontalAlignParam Opt_LocalizedHorizontalAlignParam;
 typedef struct Ark_LocalizedVerticalAlignParam Ark_LocalizedVerticalAlignParam;
@@ -2002,6 +2014,8 @@ typedef struct Ark_TabsOptions Ark_TabsOptions;
 typedef struct Opt_TabsOptions Opt_TabsOptions;
 typedef struct Ark_TapGestureParameters Ark_TapGestureParameters;
 typedef struct Opt_TapGestureParameters Opt_TapGestureParameters;
+typedef struct Ark_TargetInfo Ark_TargetInfo;
+typedef struct Opt_TargetInfo Opt_TargetInfo;
 typedef struct Ark_text_FontDescriptor Ark_text_FontDescriptor;
 typedef struct Opt_text_FontDescriptor Opt_text_FontDescriptor;
 typedef struct Ark_text_LineMetrics Ark_text_LineMetrics;
@@ -2759,6 +2773,8 @@ typedef struct PinchGestureEventPeer* Ark_PinchGestureEvent;
 typedef struct Opt_PinchGestureEvent Opt_PinchGestureEvent;
 typedef struct Ark_PlaceholderStyle Ark_PlaceholderStyle;
 typedef struct Opt_PlaceholderStyle Opt_PlaceholderStyle;
+typedef struct Ark_PopupCommonOptions Ark_PopupCommonOptions;
+typedef struct Opt_PopupCommonOptions Opt_PopupCommonOptions;
 typedef struct Ark_PopupMessageOptions Ark_PopupMessageOptions;
 typedef struct Opt_PopupMessageOptions Opt_PopupMessageOptions;
 typedef struct Ark_ResizableOptions Ark_ResizableOptions;
@@ -4447,7 +4463,8 @@ typedef struct Opt_ImageSpanAlignment {
     Ark_ImageSpanAlignment value;
 } Opt_ImageSpanAlignment;
 typedef enum Ark_ImmersiveMode {
-    ARK_IMMERSIVE_MODE_A = 0,
+    ARK_IMMERSIVE_MODE_DEFAULT = 0,
+    ARK_IMMERSIVE_MODE_EXTEND = 1,
 } Ark_ImmersiveMode;
 typedef struct Opt_ImmersiveMode {
     Ark_Tag tag;
@@ -4646,7 +4663,8 @@ typedef struct Opt_LengthUnit {
     Ark_LengthUnit value;
 } Opt_LengthUnit;
 typedef enum Ark_LevelMode {
-    ARK_LEVEL_MODE_A = 0,
+    ARK_LEVEL_MODE_OVERLAY = 0,
+    ARK_LEVEL_MODE_EMBEDDED = 1,
 } Ark_LevelMode;
 typedef struct Opt_LevelMode {
     Ark_Tag tag;
@@ -6447,6 +6465,10 @@ typedef struct Opt_Buffer {
     Ark_Tag tag;
     Ark_Buffer value;
 } Opt_Buffer;
+typedef struct Opt_BuilderNodeOps {
+    Ark_Tag tag;
+    Ark_BuilderNodeOps value;
+} Opt_BuilderNodeOps;
 typedef struct Opt_CalendarController {
     Ark_Tag tag;
     Ark_CalendarController value;
@@ -6707,10 +6729,6 @@ typedef struct Opt_LayoutPolicy {
     Ark_Tag tag;
     Ark_LayoutPolicy value;
 } Opt_LayoutPolicy;
-typedef struct Ark_LevelOrder {
-    /* kind: Interface */
-    void *handle;
-} Ark_LevelOrder;
 typedef struct Opt_LevelOrder {
     Ark_Tag tag;
     Ark_LevelOrder value;
@@ -6915,6 +6933,10 @@ typedef struct Opt_ProgressMask {
     Ark_Tag tag;
     Ark_ProgressMask value;
 } Opt_ProgressMask;
+typedef struct Opt_PromptAction {
+    Ark_Tag tag;
+    Ark_PromptAction value;
+} Opt_PromptAction;
 typedef struct Opt_PulseSymbolEffect {
     Ark_Tag tag;
     Ark_PulseSymbolEffect value;
@@ -8118,15 +8140,6 @@ typedef struct Opt_Array_LengthMetrics {
     Ark_Tag tag;
     Array_LengthMetrics value;
 } Opt_Array_LengthMetrics;
-typedef struct Array_LocalizedBarrierStyle {
-    /* kind: ContainerType */
-    Ark_LocalizedBarrierStyle* array;
-    Ark_Int32 length;
-} Array_LocalizedBarrierStyle;
-typedef struct Opt_Array_LocalizedBarrierStyle {
-    Ark_Tag tag;
-    Array_LocalizedBarrierStyle value;
-} Opt_Array_LocalizedBarrierStyle;
 typedef struct Array_Measurable {
     /* kind: ContainerType */
     Ark_Measurable* array;
@@ -9347,8 +9360,8 @@ typedef struct Opt_Callback_Number_Tuple_Number_Number_Number_Number {
 typedef struct Callback_Number_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number value);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number value0);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value0);
 } Callback_Number_Void;
 typedef struct Opt_Callback_Number_Void {
     Ark_Tag tag;
@@ -11219,6 +11232,16 @@ typedef struct Opt_BreakPoints {
     Ark_Tag tag;
     Ark_BreakPoints value;
 } Opt_BreakPoints;
+typedef struct Ark_BuilderNodeOptions {
+    /* kind: Interface */
+    Opt_Size selfIdealSize;
+    Opt_Number type;
+    Opt_String surfaceId;
+} Ark_BuilderNodeOptions;
+typedef struct Opt_BuilderNodeOptions {
+    Ark_Tag tag;
+    Ark_BuilderNodeOptions value;
+} Opt_BuilderNodeOptions;
 typedef struct Ark_BusinessError {
     /* kind: Interface */
     Ark_String name;
@@ -12247,6 +12270,16 @@ typedef struct Opt_KeyEvent {
     Ark_Tag tag;
     Ark_KeyEvent value;
 } Opt_KeyEvent;
+typedef struct Ark_LayoutConstraint {
+    /* kind: Interface */
+    Ark_Size maxSize;
+    Ark_Size minSize;
+    Ark_Size percentReference;
+} Ark_LayoutConstraint;
+typedef struct Opt_LayoutConstraint {
+    Ark_Tag tag;
+    Ark_LayoutConstraint value;
+} Opt_LayoutConstraint;
 typedef struct Opt_LengthMetrics {
     Ark_Tag tag;
     Ark_LengthMetrics value;
@@ -12328,16 +12361,6 @@ typedef struct Opt_ListOptions {
     Ark_Tag tag;
     Ark_ListOptions value;
 } Opt_ListOptions;
-typedef struct Ark_LocalizedBarrierStyle {
-    /* kind: Interface */
-    Ark_String id;
-    Ark_LocalizedBarrierDirection localizedDirection;
-    Array_String referencedId;
-} Ark_LocalizedBarrierStyle;
-typedef struct Opt_LocalizedBarrierStyle {
-    Ark_Tag tag;
-    Ark_LocalizedBarrierStyle value;
-} Opt_LocalizedBarrierStyle;
 typedef struct Ark_LocalizedHorizontalAlignParam {
     /* kind: Interface */
     Ark_String anchor;
@@ -13296,6 +13319,15 @@ typedef struct Opt_TapGestureParameters {
     Ark_Tag tag;
     Ark_TapGestureParameters value;
 } Opt_TapGestureParameters;
+typedef struct Ark_TargetInfo {
+    /* kind: Interface */
+    Ark_Union_String_Number id;
+    Opt_Number componentId;
+} Ark_TargetInfo;
+typedef struct Opt_TargetInfo {
+    Ark_Tag tag;
+    Ark_TargetInfo value;
+} Opt_TargetInfo;
 typedef struct Ark_text_FontDescriptor {
     /* kind: Interface */
     Opt_String path;
@@ -17563,6 +17595,35 @@ typedef struct Opt_PlaceholderStyle {
     Ark_Tag tag;
     Ark_PlaceholderStyle value;
 } Opt_PlaceholderStyle;
+typedef struct Ark_PopupCommonOptions {
+    /* kind: Interface */
+    Opt_Placement placement;
+    Opt_ResourceColor popupColor;
+    Opt_Boolean enableArrow;
+    Opt_Boolean autoCancel;
+    Opt_PopupStateChangeCallback onStateChange;
+    Opt_Length arrowOffset;
+    Opt_Boolean showInSubWindow;
+    Opt_Union_Boolean_PopupMaskType mask;
+    Opt_Length targetSpace;
+    Opt_Position offset;
+    Opt_Dimension width;
+    Opt_ArrowPointPosition arrowPointPosition;
+    Opt_Dimension arrowWidth;
+    Opt_Dimension arrowHeight;
+    Opt_Dimension radius;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_Boolean focusable;
+    Opt_TransitionEffect transition;
+    Opt_Union_Boolean_Callback_DismissPopupAction_Void onWillDismiss;
+    Opt_Boolean enableHoverMode;
+    Opt_Boolean followTransformOfTarget;
+} Ark_PopupCommonOptions;
+typedef struct Opt_PopupCommonOptions {
+    Ark_Tag tag;
+    Ark_PopupCommonOptions value;
+} Opt_PopupCommonOptions;
 typedef struct Ark_PopupMessageOptions {
     /* kind: Interface */
     Opt_ResourceColor textColor;
@@ -18662,9 +18723,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                        const Opt_Union_Position_Alignment* value);
     void (*setBackgroundEffect0)(Ark_NativePointer node,
                                  const Opt_BackgroundEffectOptions* value);
-    void (*setBackgroundEffect1)(Ark_NativePointer node,
-                                 const Opt_BackgroundEffectOptions* options,
-                                 const Opt_SystemAdaptiveOptions* sysOptions);
     void (*setBackgroundImageResizable)(Ark_NativePointer node,
                                         const Opt_ResizableOptions* value);
     void (*setForegroundEffect)(Ark_NativePointer node,
@@ -18705,9 +18763,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                const Opt_Union_ResourceColor_ColoringStrategy* value);
     void (*setOnClick0)(Ark_NativePointer node,
                         const Opt_Callback_ClickEvent_Void* value);
-    void (*setOnClick1)(Ark_NativePointer node,
-                        const Opt_Callback_ClickEvent_Void* event,
-                        const Opt_Number* distanceThreshold);
     void (*setOnHover)(Ark_NativePointer node,
                        const Opt_Callback_Boolean_HoverEvent_Void* value);
     void (*setOnHoverMove)(Ark_NativePointer node,
@@ -18720,10 +18775,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                        const Opt_Callback_MouseEvent_Void* value);
     void (*setOnTouch)(Ark_NativePointer node,
                        const Opt_Callback_TouchEvent_Void* value);
-    void (*setOnKeyEvent0)(Ark_NativePointer node,
-                           const Opt_Callback_KeyEvent_Void* value);
-    void (*setOnKeyEvent1)(Ark_NativePointer node,
-                           const Opt_Callback_KeyEvent_Boolean* value);
+    void (*setOnKeyEvent)(Ark_NativePointer node,
+                          const Opt_Callback_KeyEvent_Void* value);
     void (*setOnDigitalCrown)(Ark_NativePointer node,
                               const Opt_Callback_CrownEvent_Void* value);
     void (*setOnKeyPreIme)(Ark_NativePointer node,
@@ -18758,9 +18811,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                          const Opt_AnimateParam* value);
     void (*setTransition0)(Ark_NativePointer node,
                            const Opt_TransitionEffect* value);
-    void (*setTransition1)(Ark_NativePointer node,
-                           const Opt_TransitionEffect* effect,
-                           const Opt_TransitionFinishCallback* onFinish);
     void (*setMotionBlur)(Ark_NativePointer node,
                           const Opt_MotionBlurOptions* value);
     void (*setBrightness)(Ark_NativePointer node,
@@ -18783,9 +18833,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                  const Opt_Boolean* value);
     void (*setUseEffect0)(Ark_NativePointer node,
                           const Opt_Boolean* value);
-    void (*setUseEffect1)(Ark_NativePointer node,
-                          const Opt_Boolean* useEffect,
-                          const Opt_EffectType* effectType);
     void (*setRenderGroup)(Ark_NativePointer node,
                            const Opt_Boolean* value);
     void (*setFreeze)(Ark_NativePointer node,
@@ -18852,9 +18899,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                            const Opt_Callback_DragEvent_Opt_String_Void* value);
     void (*setOnDrop0)(Ark_NativePointer node,
                        const Opt_Callback_DragEvent_Opt_String_Void* value);
-    void (*setOnDrop1)(Ark_NativePointer node,
-                       const Opt_OnDragEventCallback* eventCallback,
-                       const Opt_DropOptions* dropOptions);
     void (*setOnDragEnd)(Ark_NativePointer node,
                          const Opt_Callback_DragEvent_Opt_String_Void* value);
     void (*setAllowDrop)(Ark_NativePointer node,
@@ -18863,9 +18907,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                          const Opt_Boolean* value);
     void (*setDragPreview0)(Ark_NativePointer node,
                             const Opt_Union_CustomBuilder_DragItemInfo_String* value);
-    void (*setDragPreview1)(Ark_NativePointer node,
-                            const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
-                            const Opt_PreviewConfiguration* config);
     void (*setOnPreDrag)(Ark_NativePointer node,
                          const Opt_Callback_PreDragStatus_Void* value);
     void (*setLinearGradient)(Ark_NativePointer node,
@@ -18892,9 +18933,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                   const Opt_String* value);
     void (*setGeometryTransition0)(Ark_NativePointer node,
                                    const Opt_String* value);
-    void (*setGeometryTransition1)(Ark_NativePointer node,
-                                   const Opt_String* id,
-                                   const Opt_GeometryTransitionOptions* options);
     void (*setStateStyles)(Ark_NativePointer node,
                            const Opt_StateStyles* value);
     void (*setRestoreId)(Ark_NativePointer node,
@@ -18907,13 +18945,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                   const Opt_PixelStretchEffectOptions* value);
     void (*setAccessibilityGroup0)(Ark_NativePointer node,
                                    const Opt_Boolean* value);
-    void (*setAccessibilityGroup1)(Ark_NativePointer node,
-                                   const Opt_Boolean* isGroup,
-                                   const Opt_AccessibilityOptions* accessibilityOptions);
     void (*setAccessibilityText0)(Ark_NativePointer node,
                                   const Opt_String* value);
-    void (*setAccessibilityText1)(Ark_NativePointer node,
-                                  const Opt_Resource* value);
     void (*setAccessibilityNextFocusId)(Ark_NativePointer node,
                                         const Opt_String* value);
     void (*setAccessibilityDefaultFocus)(Ark_NativePointer node,
@@ -18922,6 +18955,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                         const Opt_AccessibilitySamePageMode* value);
     void (*setAccessibilityScrollTriggerable)(Ark_NativePointer node,
                                               const Opt_Boolean* value);
+    void (*setAccessibilityText1)(Ark_NativePointer node,
+                                  const Opt_Resource* value);
     void (*setAccessibilityRole)(Ark_NativePointer node,
                                  const Opt_AccessibilityRoleType* value);
     void (*setOnAccessibilityFocus)(Ark_NativePointer node,
@@ -18956,9 +18991,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                    const Opt_Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult* value);
     void (*setOnGestureRecognizerJudgeBegin0)(Ark_NativePointer node,
                                               const Opt_GestureRecognizerJudgeBeginCallback* value);
-    void (*setOnGestureRecognizerJudgeBegin1)(Ark_NativePointer node,
-                                              const Opt_GestureRecognizerJudgeBeginCallback* callback_,
-                                              const Opt_Boolean* exposeInnerGesture);
     void (*setShouldBuiltInRecognizerParallelWith)(Ark_NativePointer node,
                                                    const Opt_ShouldBuiltInRecognizerParallelWithCallback* value);
     void (*setMonopolizeEvents)(Ark_NativePointer node,
@@ -18988,10 +19020,16 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                    const Opt_BlurStyle* style,
                                    const Opt_BackgroundBlurStyleOptions* options,
                                    const Opt_SystemAdaptiveOptions* sysOptions);
+    void (*setBackgroundEffect1)(Ark_NativePointer node,
+                                 const Opt_BackgroundEffectOptions* options,
+                                 const Opt_SystemAdaptiveOptions* sysOptions);
     void (*setForegroundBlurStyle)(Ark_NativePointer node,
                                    const Opt_BlurStyle* style,
                                    const Opt_ForegroundBlurStyleOptions* options,
                                    const Opt_SystemAdaptiveOptions* sysOptions);
+    void (*setOnClick1)(Ark_NativePointer node,
+                        const Opt_Callback_ClickEvent_Void* event,
+                        const Opt_Number* distanceThreshold);
     void (*setFocusScopeId)(Ark_NativePointer node,
                             const Opt_String* id,
                             const Opt_Boolean* isGroup,
@@ -18999,6 +19037,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setFocusScopePriority)(Ark_NativePointer node,
                                   const Opt_String* scopeId,
                                   const Opt_FocusPriority* priority);
+    void (*setTransition1)(Ark_NativePointer node,
+                           const Opt_TransitionEffect* effect,
+                           const Opt_TransitionFinishCallback* onFinish);
     void (*setGesture)(Ark_NativePointer node,
                        const Opt_GestureType* gesture,
                        const Opt_GestureMask* mask);
@@ -19016,6 +19057,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                   const Opt_Number* value,
                                   const Opt_LinearGradientBlurOptions* options);
     void (*setSystemBarEffect)(Ark_NativePointer node);
+    void (*setUseEffect1)(Ark_NativePointer node,
+                          const Opt_Boolean* useEffect,
+                          const Opt_EffectType* effectType);
     void (*setBackdropBlur)(Ark_NativePointer node,
                             const Opt_Number* radius,
                             const Opt_BlurOptions* options,
@@ -19026,6 +19070,12 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setChainMode)(Ark_NativePointer node,
                          const Opt_Axis* direction,
                          const Opt_ChainStyle* style);
+    void (*setOnDrop1)(Ark_NativePointer node,
+                       const Opt_OnDragEventCallback* eventCallback,
+                       const Opt_DropOptions* dropOptions);
+    void (*setDragPreview1)(Ark_NativePointer node,
+                            const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
+                            const Opt_PreviewConfiguration* config);
     void (*setDragPreviewOptions)(Ark_NativePointer node,
                                   const Opt_DragPreviewOptions* value,
                                   const Opt_DragInteractionOptions* options);
@@ -19038,6 +19088,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setAdvancedBlendMode)(Ark_NativePointer node,
                                  const Opt_Union_BlendMode_Blender* effect,
                                  const Opt_BlendApplyType* type);
+    void (*setGeometryTransition1)(Ark_NativePointer node,
+                                   const Opt_String* id,
+                                   const Opt_GeometryTransitionOptions* options);
     void (*setBindTips)(Ark_NativePointer node,
                         const Opt_TipsMessageType* message,
                         const Opt_TipsOptions* options);
@@ -19081,6 +19134,12 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                 const Opt_Union_String_FunctionKey* value,
                                 const Opt_Array_ModifierKey* keys,
                                 const Opt_Callback_Void* action);
+    void (*setAccessibilityGroup1)(Ark_NativePointer node,
+                                   const Opt_Boolean* isGroup,
+                                   const Opt_AccessibilityOptions* accessibilityOptions);
+    void (*setOnGestureRecognizerJudgeBegin1)(Ark_NativePointer node,
+                                              const Opt_GestureRecognizerJudgeBeginCallback* callback_,
+                                              const Opt_Boolean* exposeInnerGesture);
 } GENERATED_ArkUICommonMethodModifier;
 
 typedef struct GENERATED_ArkUICommonShapeMethodModifier {
@@ -19338,9 +19397,6 @@ typedef struct GENERATED_ArkUIGridModifier {
                              const Opt_Callback_Number_Number_Void* value);
     void (*setCachedCount0)(Ark_NativePointer node,
                             const Opt_Number* value);
-    void (*setCachedCount1)(Ark_NativePointer node,
-                            const Opt_Number* count,
-                            const Opt_Boolean* show);
     void (*setEditMode)(Ark_NativePointer node,
                         const Opt_Boolean* value);
     void (*setMultiSelectable)(Ark_NativePointer node,
@@ -19373,6 +19429,9 @@ typedef struct GENERATED_ArkUIGridModifier {
                             const Opt_OnWillScrollCallback* value);
     void (*setOnDidScroll)(Ark_NativePointer node,
                            const Opt_OnScrollCallback* value);
+    void (*setCachedCount1)(Ark_NativePointer node,
+                            const Opt_Number* count,
+                            const Opt_Boolean* show);
 } GENERATED_ArkUIGridModifier;
 
 typedef struct GENERATED_ArkUIGridColModifier {
@@ -19606,9 +19665,6 @@ typedef struct GENERATED_ArkUIListModifier {
                                const Opt_Boolean* value);
     void (*setCachedCount0)(Ark_NativePointer node,
                             const Opt_Number* value);
-    void (*setCachedCount1)(Ark_NativePointer node,
-                            const Opt_Number* count,
-                            const Opt_Boolean* show);
     void (*setChainAnimation)(Ark_NativePointer node,
                               const Opt_Boolean* value);
     void (*setChainAnimationOptions)(Ark_NativePointer node,
@@ -19648,6 +19704,9 @@ typedef struct GENERATED_ArkUIListModifier {
     void (*setLanes)(Ark_NativePointer node,
                      const Opt_Union_Number_LengthConstrain* value,
                      const Opt_Dimension* gutter);
+    void (*setCachedCount1)(Ark_NativePointer node,
+                            const Opt_Number* count,
+                            const Opt_Boolean* show);
 } GENERATED_ArkUIListModifier;
 
 typedef struct GENERATED_ArkUIListItemModifier {
@@ -19772,9 +19831,6 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
     void (*setNavDestinationOptions)(Ark_NativePointer node);
     void (*setHideTitleBar0)(Ark_NativePointer node,
                              const Opt_Boolean* value);
-    void (*setHideTitleBar1)(Ark_NativePointer node,
-                             const Opt_Boolean* hide,
-                             const Opt_Boolean* animated);
     void (*setHideBackButton)(Ark_NativePointer node,
                               const Opt_Boolean* value);
     void (*setOnShown)(Ark_NativePointer node,
@@ -19787,14 +19843,8 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
                     const Opt_NavDestinationMode* value);
     void (*setBackButtonIcon0)(Ark_NativePointer node,
                                const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* value);
-    void (*setBackButtonIcon1)(Ark_NativePointer node,
-                               const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* icon,
-                               const Opt_ResourceStr* accessibilityText);
     void (*setMenus0)(Ark_NativePointer node,
                       const Opt_Union_Array_NavigationMenuItem_CustomBuilder* value);
-    void (*setMenus1)(Ark_NativePointer node,
-                      const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
-                      const Opt_NavigationMenuOptions* options);
     void (*setOnReady)(Ark_NativePointer node,
                        const Opt_Callback_NavDestinationContext_Void* value);
     void (*setOnWillAppear)(Ark_NativePointer node,
@@ -19830,6 +19880,15 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
     void (*setTitle)(Ark_NativePointer node,
                      const Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
                      const Opt_NavigationTitleOptions* options);
+    void (*setHideTitleBar1)(Ark_NativePointer node,
+                             const Opt_Boolean* hide,
+                             const Opt_Boolean* animated);
+    void (*setBackButtonIcon1)(Ark_NativePointer node,
+                               const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* icon,
+                               const Opt_ResourceStr* accessibilityText);
+    void (*setMenus1)(Ark_NativePointer node,
+                      const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
+                      const Opt_NavigationMenuOptions* options);
     void (*setToolbarConfiguration)(Ark_NativePointer node,
                                     const Opt_Union_Array_ToolbarItem_CustomBuilder* toolbarParam,
                                     const Opt_NavigationToolbarOptions* options);
@@ -19862,30 +19921,18 @@ typedef struct GENERATED_ArkUINavigationModifier {
                     const Opt_NavigationMode* value);
     void (*setBackButtonIcon0)(Ark_NativePointer node,
                                const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* value);
-    void (*setBackButtonIcon1)(Ark_NativePointer node,
-                               const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* icon,
-                               const Opt_ResourceStr* accessibilityText);
     void (*setHideNavBar)(Ark_NativePointer node,
                           const Opt_Boolean* value);
     void (*setHideTitleBar0)(Ark_NativePointer node,
                              const Opt_Boolean* value);
-    void (*setHideTitleBar1)(Ark_NativePointer node,
-                             const Opt_Boolean* hide,
-                             const Opt_Boolean* animated);
     void (*setHideBackButton)(Ark_NativePointer node,
                               const Opt_Boolean* value);
     void (*setTitleMode)(Ark_NativePointer node,
                          const Opt_NavigationTitleMode* value);
     void (*setMenus0)(Ark_NativePointer node,
                       const Opt_Union_Array_NavigationMenuItem_CustomBuilder* value);
-    void (*setMenus1)(Ark_NativePointer node,
-                      const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
-                      const Opt_NavigationMenuOptions* options);
     void (*setHideToolBar0)(Ark_NativePointer node,
                             const Opt_Boolean* value);
-    void (*setHideToolBar1)(Ark_NativePointer node,
-                            const Opt_Boolean* hide,
-                            const Opt_Boolean* animated);
     void (*setEnableToolBarAdaptation)(Ark_NativePointer node,
                                        const Opt_Boolean* value);
     void (*setOnTitleModeChange)(Ark_NativePointer node,
@@ -19906,12 +19953,24 @@ typedef struct GENERATED_ArkUINavigationModifier {
                              const Opt_Boolean* value);
     void (*setEnableModeChangeAnimation)(Ark_NativePointer node,
                                          const Opt_Boolean* value);
+    void (*setBackButtonIcon1)(Ark_NativePointer node,
+                               const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* icon,
+                               const Opt_ResourceStr* accessibilityText);
     void (*setTitle)(Ark_NativePointer node,
                      const Opt_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle* value,
                      const Opt_NavigationTitleOptions* options);
+    void (*setHideTitleBar1)(Ark_NativePointer node,
+                             const Opt_Boolean* hide,
+                             const Opt_Boolean* animated);
+    void (*setMenus1)(Ark_NativePointer node,
+                      const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
+                      const Opt_NavigationMenuOptions* options);
     void (*setToolbarConfiguration)(Ark_NativePointer node,
                                     const Opt_Union_Array_ToolbarItem_CustomBuilder* value,
                                     const Opt_NavigationToolbarOptions* options);
+    void (*setHideToolBar1)(Ark_NativePointer node,
+                            const Opt_Boolean* hide,
+                            const Opt_Boolean* animated);
     void (*setIgnoreLayoutSafeArea)(Ark_NativePointer node,
                                     const Opt_Array_LayoutSafeAreaType* types,
                                     const Opt_Array_LayoutSafeAreaEdge* edges);
@@ -20105,10 +20164,8 @@ typedef struct GENERATED_ArkUIRelativeContainerModifier {
     void (*setRelativeContainerOptions)(Ark_NativePointer node);
     void (*setGuideLine)(Ark_NativePointer node,
                          const Opt_Array_GuideLineStyle* value);
-    void (*setBarrier0)(Ark_NativePointer node,
-                        const Opt_Array_BarrierStyle* value);
-    void (*setBarrier1)(Ark_NativePointer node,
-                        const Opt_Array_LocalizedBarrierStyle* value);
+    void (*setBarrier)(Ark_NativePointer node,
+                       const Opt_Array_BarrierStyle* value);
 } GENERATED_ArkUIRelativeContainerModifier;
 
 typedef struct GENERATED_ArkUIRemoteWindowModifier {
@@ -20645,14 +20702,14 @@ typedef struct GENERATED_ArkUISideBarContainerModifier {
                         const Opt_Callback_Boolean_Void* value);
     void (*setSideBarWidth0)(Ark_NativePointer node,
                              const Opt_Number* value);
-    void (*setSideBarWidth1)(Ark_NativePointer node,
-                             const Opt_Length* value);
     void (*setMinSideBarWidth0)(Ark_NativePointer node,
                                 const Opt_Number* value);
-    void (*setMinSideBarWidth1)(Ark_NativePointer node,
-                                const Opt_Length* value);
     void (*setMaxSideBarWidth0)(Ark_NativePointer node,
                                 const Opt_Number* value);
+    void (*setSideBarWidth1)(Ark_NativePointer node,
+                             const Opt_Length* value);
+    void (*setMinSideBarWidth1)(Ark_NativePointer node,
+                                const Opt_Length* value);
     void (*setMaxSideBarWidth1)(Ark_NativePointer node,
                                 const Opt_Length* value);
     void (*setAutoHide)(Ark_NativePointer node,
@@ -20807,9 +20864,6 @@ typedef struct GENERATED_ArkUISwiperModifier {
                            const Opt_SwiperDisplayMode* value);
     void (*setCachedCount0)(Ark_NativePointer node,
                             const Opt_Number* value);
-    void (*setCachedCount1)(Ark_NativePointer node,
-                            const Opt_Number* count,
-                            const Opt_Boolean* isShown);
     void (*setEffectMode)(Ark_NativePointer node,
                           const Opt_EdgeEffect* value);
     void (*setDisableSwipe)(Ark_NativePointer node,
@@ -20846,6 +20900,9 @@ typedef struct GENERATED_ArkUISwiperModifier {
     void (*setDisplayArrow)(Ark_NativePointer node,
                             const Opt_Union_ArrowStyle_Boolean* value,
                             const Opt_Boolean* isHoverShow);
+    void (*setCachedCount1)(Ark_NativePointer node,
+                            const Opt_Number* count,
+                            const Opt_Boolean* isShown);
     void (*setDisplayCount)(Ark_NativePointer node,
                             const Opt_Union_Number_String_SwiperAutoFill* value,
                             const Opt_Boolean* swipeByGroup);
@@ -20959,9 +21016,6 @@ typedef struct GENERATED_ArkUITabsModifier {
                                        const Opt_TabsCustomContentTransitionCallback* value);
     void (*setBarBackgroundBlurStyle0)(Ark_NativePointer node,
                                        const Opt_BlurStyle* value);
-    void (*setBarBackgroundBlurStyle1)(Ark_NativePointer node,
-                                       const Opt_BlurStyle* style,
-                                       const Opt_BackgroundBlurStyleOptions* options);
     void (*setBarBackgroundEffect)(Ark_NativePointer node,
                                    const Opt_BackgroundEffectOptions* value);
     void (*setPageFlipMode)(Ark_NativePointer node,
@@ -20971,6 +21025,9 @@ typedef struct GENERATED_ArkUITabsModifier {
     void (*setBarMode)(Ark_NativePointer node,
                        const Opt_BarMode* value,
                        const Opt_ScrollableBarModeOptions* options);
+    void (*setBarBackgroundBlurStyle1)(Ark_NativePointer node,
+                                       const Opt_BlurStyle* style,
+                                       const Opt_BackgroundBlurStyleOptions* options);
     void (*setCachedMaxCount)(Ark_NativePointer node,
                               const Opt_Number* count,
                               const Opt_TabsCacheMode* mode);
@@ -21575,9 +21632,6 @@ typedef struct GENERATED_ArkUIWaterFlowModifier {
                                const Opt_FlexDirection* value);
     void (*setCachedCount0)(Ark_NativePointer node,
                             const Opt_Number* value);
-    void (*setCachedCount1)(Ark_NativePointer node,
-                            const Opt_Number* count,
-                            const Opt_Boolean* show);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
                                   const Opt_OnScrollFrameBeginCallback* value);
     void (*setOnScrollIndex)(Ark_NativePointer node,
@@ -21586,6 +21640,9 @@ typedef struct GENERATED_ArkUIWaterFlowModifier {
                             const Opt_OnWillScrollCallback* value);
     void (*setOnDidScroll)(Ark_NativePointer node,
                            const Opt_OnScrollCallback* value);
+    void (*setCachedCount1)(Ark_NativePointer node,
+                            const Opt_Number* count,
+                            const Opt_Boolean* show);
 } GENERATED_ArkUIWaterFlowModifier;
 
 typedef struct GENERATED_ArkUIWindowSceneModifier {
@@ -21625,7 +21682,7 @@ typedef struct GENERATED_ArkUIXComponentModifier {
 
 typedef struct GENERATED_ArkUIAccessibilityHoverEventAccessor {
     void (*destroyPeer)(Ark_AccessibilityHoverEvent peer);
-    Ark_AccessibilityHoverEvent (*ctor)();
+    Ark_AccessibilityHoverEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_AccessibilityHoverType (*getType)(Ark_AccessibilityHoverEvent peer);
     void (*setType)(Ark_AccessibilityHoverEvent peer,
@@ -21666,7 +21723,7 @@ typedef struct GENERATED_ArkUIAnimationExtenderAccessor {
 
 typedef struct GENERATED_ArkUIAppearSymbolEffectAccessor {
     void (*destroyPeer)(Ark_AppearSymbolEffect peer);
-    Ark_AppearSymbolEffect (*ctor)(const Opt_EffectScope* scope);
+    Ark_AppearSymbolEffect (*construct)(const Opt_EffectScope* scope);
     Ark_NativePointer (*getFinalizer)();
     Opt_EffectScope (*getScope)(Ark_AppearSymbolEffect peer);
     void (*setScope)(Ark_AppearSymbolEffect peer,
@@ -21675,7 +21732,7 @@ typedef struct GENERATED_ArkUIAppearSymbolEffectAccessor {
 
 typedef struct GENERATED_ArkUIAxisEventAccessor {
     void (*destroyPeer)(Ark_AxisEvent peer);
-    Ark_AxisEvent (*ctor)();
+    Ark_AxisEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getHorizontalAxisValue)(Ark_AxisEvent peer);
     Ark_Number (*getVerticalAxisValue)(Ark_AxisEvent peer);
@@ -21702,7 +21759,7 @@ typedef struct GENERATED_ArkUIAxisEventAccessor {
                  const Ark_Number* y);
     Opt_Number (*getScrollStep)(Ark_AxisEvent peer);
     void (*setScrollStep)(Ark_AxisEvent peer,
-                          const Ark_Number* scrollStep);
+                          const Opt_Number* scrollStep);
     Callback_Void (*getPropagation)(Ark_AxisEvent peer);
     void (*setPropagation)(Ark_AxisEvent peer,
                            const Callback_Void* propagation);
@@ -21710,20 +21767,20 @@ typedef struct GENERATED_ArkUIAxisEventAccessor {
 
 typedef struct GENERATED_ArkUIBackgroundColorStyleAccessor {
     void (*destroyPeer)(Ark_BackgroundColorStyle peer);
-    Ark_BackgroundColorStyle (*ctor)(const Ark_TextBackgroundStyle* textBackgroundStyle);
+    Ark_BackgroundColorStyle (*construct)(const Ark_TextBackgroundStyle* textBackgroundStyle);
     Ark_NativePointer (*getFinalizer)();
     Ark_TextBackgroundStyle (*getTextBackgroundStyle)(Ark_BackgroundColorStyle peer);
 } GENERATED_ArkUIBackgroundColorStyleAccessor;
 
 typedef struct GENERATED_ArkUIBaseContextAccessor {
     void (*destroyPeer)(Ark_BaseContext peer);
-    Ark_BaseContext (*ctor)();
+    Ark_BaseContext (*construct)();
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUIBaseContextAccessor;
 
 typedef struct GENERATED_ArkUIBaseEventAccessor {
     void (*destroyPeer)(Ark_BaseEvent peer);
-    Ark_BaseEvent (*ctor)();
+    Ark_BaseEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_EventTarget (*getTarget)(Ark_BaseEvent peer);
     void (*setTarget)(Ark_BaseEvent peer,
@@ -21736,10 +21793,10 @@ typedef struct GENERATED_ArkUIBaseEventAccessor {
                       Ark_SourceType source);
     Opt_Number (*getAxisHorizontal)(Ark_BaseEvent peer);
     void (*setAxisHorizontal)(Ark_BaseEvent peer,
-                              const Ark_Number* axisHorizontal);
+                              const Opt_Number* axisHorizontal);
     Opt_Number (*getAxisVertical)(Ark_BaseEvent peer);
     void (*setAxisVertical)(Ark_BaseEvent peer,
-                            const Ark_Number* axisVertical);
+                            const Opt_Number* axisVertical);
     Ark_Number (*getPressure)(Ark_BaseEvent peer);
     void (*setPressure)(Ark_BaseEvent peer,
                         const Ark_Number* pressure);
@@ -21751,24 +21808,24 @@ typedef struct GENERATED_ArkUIBaseEventAccessor {
                      const Ark_Number* tiltY);
     Opt_Number (*getRollAngle)(Ark_BaseEvent peer);
     void (*setRollAngle)(Ark_BaseEvent peer,
-                         const Ark_Number* rollAngle);
+                         const Opt_Number* rollAngle);
     Ark_SourceTool (*getSourceTool)(Ark_BaseEvent peer);
     void (*setSourceTool)(Ark_BaseEvent peer,
                           Ark_SourceTool sourceTool);
     Opt_ModifierKeyStateGetter (*getGetModifierKeyState)(Ark_BaseEvent peer);
     void (*setGetModifierKeyState)(Ark_BaseEvent peer,
-                                   const ModifierKeyStateGetter* getModifierKeyState);
+                                   const Opt_ModifierKeyStateGetter* getModifierKeyState);
     Opt_Number (*getDeviceId)(Ark_BaseEvent peer);
     void (*setDeviceId)(Ark_BaseEvent peer,
-                        const Ark_Number* deviceId);
+                        const Opt_Number* deviceId);
     Opt_Number (*getTargetDisplayId)(Ark_BaseEvent peer);
     void (*setTargetDisplayId)(Ark_BaseEvent peer,
-                               const Ark_Number* targetDisplayId);
+                               const Opt_Number* targetDisplayId);
 } GENERATED_ArkUIBaseEventAccessor;
 
 typedef struct GENERATED_ArkUIBaseGestureEventAccessor {
     void (*destroyPeer)(Ark_BaseGestureEvent peer);
-    Ark_BaseGestureEvent (*ctor)();
+    Ark_BaseGestureEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Array_FingerInfo (*getFingerList)(Ark_BaseGestureEvent peer);
     void (*setFingerList)(Ark_BaseGestureEvent peer,
@@ -21777,14 +21834,14 @@ typedef struct GENERATED_ArkUIBaseGestureEventAccessor {
 
 typedef struct GENERATED_ArkUIBaselineOffsetStyleAccessor {
     void (*destroyPeer)(Ark_BaselineOffsetStyle peer);
-    Ark_BaselineOffsetStyle (*ctor)(Ark_LengthMetrics value);
+    Ark_BaselineOffsetStyle (*construct)(Ark_LengthMetrics value);
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getBaselineOffset)(Ark_BaselineOffsetStyle peer);
 } GENERATED_ArkUIBaselineOffsetStyleAccessor;
 
 typedef struct GENERATED_ArkUIBaseShapeAccessor {
     void (*destroyPeer)(Ark_BaseShape peer);
-    Ark_BaseShape (*ctor)();
+    Ark_BaseShape (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_BaseShape (*width)(Ark_BaseShape peer,
                            const Ark_Length* width);
@@ -21796,8 +21853,8 @@ typedef struct GENERATED_ArkUIBaseShapeAccessor {
 
 typedef struct GENERATED_ArkUIBounceSymbolEffectAccessor {
     void (*destroyPeer)(Ark_BounceSymbolEffect peer);
-    Ark_BounceSymbolEffect (*ctor)(const Opt_EffectScope* scope,
-                                   const Opt_EffectDirection* direction);
+    Ark_BounceSymbolEffect (*construct)(const Opt_EffectScope* scope,
+                                        const Opt_EffectDirection* direction);
     Ark_NativePointer (*getFinalizer)();
     Opt_EffectScope (*getScope)(Ark_BounceSymbolEffect peer);
     void (*setScope)(Ark_BounceSymbolEffect peer,
@@ -21807,9 +21864,26 @@ typedef struct GENERATED_ArkUIBounceSymbolEffectAccessor {
                          const Opt_EffectDirection* direction);
 } GENERATED_ArkUIBounceSymbolEffectAccessor;
 
+typedef struct GENERATED_ArkUIBuilderNodeOpsAccessor {
+    void (*destroyPeer)(Ark_BuilderNodeOps peer);
+    Ark_BuilderNodeOps (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*create)(Ark_BuilderNodeOps peer,
+                   const Callback_Void* buildFunc);
+    void (*disposeNode)(Ark_BuilderNodeOps peer);
+    void (*setUpdateConfigurationCallback)(Ark_BuilderNodeOps peer,
+                                           const Callback_Void* configurationUpdateFunc);
+    void (*setOptions)(Ark_BuilderNodeOps peer,
+                       const Ark_BuilderNodeOptions* options);
+    Ark_Boolean (*postTouchEvent)(Ark_BuilderNodeOps peer,
+                                  Ark_TouchEvent event);
+    Ark_NativePointer (*setRootFrameNodeInBuilderNode)(Ark_BuilderNodeOps peer,
+                                                       Ark_NativePointer node);
+} GENERATED_ArkUIBuilderNodeOpsAccessor;
+
 typedef struct GENERATED_ArkUICalendarControllerAccessor {
     void (*destroyPeer)(Ark_CalendarController peer);
-    Ark_CalendarController (*ctor)();
+    Ark_CalendarController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*backToToday)(Ark_CalendarController peer);
     void (*goTo)(Ark_CalendarController peer,
@@ -21818,14 +21892,14 @@ typedef struct GENERATED_ArkUICalendarControllerAccessor {
 
 typedef struct GENERATED_ArkUICalendarPickerDialogAccessor {
     void (*destroyPeer)(Ark_CalendarPickerDialog peer);
-    Ark_CalendarPickerDialog (*ctor)();
+    Ark_CalendarPickerDialog (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*show)(const Opt_CalendarDialogOptions* options);
 } GENERATED_ArkUICalendarPickerDialogAccessor;
 
 typedef struct GENERATED_ArkUICanvasGradientAccessor {
     void (*destroyPeer)(Ark_CanvasGradient peer);
-    Ark_CanvasGradient (*ctor)();
+    Ark_CanvasGradient (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*addColorStop)(Ark_CanvasGradient peer,
                          const Ark_Number* offset,
@@ -21834,7 +21908,7 @@ typedef struct GENERATED_ArkUICanvasGradientAccessor {
 
 typedef struct GENERATED_ArkUICanvasPathAccessor {
     void (*destroyPeer)(Ark_CanvasPath peer);
-    Ark_CanvasPath (*ctor)();
+    Ark_CanvasPath (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*arc)(Ark_CanvasPath peer,
                 const Ark_Number* x,
@@ -21886,7 +21960,7 @@ typedef struct GENERATED_ArkUICanvasPathAccessor {
 
 typedef struct GENERATED_ArkUICanvasPatternAccessor {
     void (*destroyPeer)(Ark_CanvasPattern peer);
-    Ark_CanvasPattern (*ctor)();
+    Ark_CanvasPattern (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*setTransform)(Ark_CanvasPattern peer,
                          const Opt_Matrix2D* transform);
@@ -21894,7 +21968,7 @@ typedef struct GENERATED_ArkUICanvasPatternAccessor {
 
 typedef struct GENERATED_ArkUICanvasRendererAccessor {
     void (*destroyPeer)(Ark_CanvasRenderer peer);
-    Ark_CanvasRenderer (*ctor)();
+    Ark_CanvasRenderer (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*drawImage0)(Ark_CanvasRenderer peer,
                        const Ark_Union_ImageBitmap_PixelMap* image,
@@ -22107,8 +22181,8 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
 
 typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
     void (*destroyPeer)(Ark_CanvasRenderingContext2D peer);
-    Ark_CanvasRenderingContext2D (*ctor)(const Opt_RenderingContextSettings* settings,
-                                         const Opt_LengthMetricsUnit* unit);
+    Ark_CanvasRenderingContext2D (*construct)(const Opt_RenderingContextSettings* settings,
+                                              const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*toDataURL)(Ark_CanvasRenderingContext2D peer,
                             const Opt_String* type,
@@ -22142,7 +22216,7 @@ typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
 
 typedef struct GENERATED_ArkUIChildrenMainSizeAccessor {
     void (*destroyPeer)(Ark_ChildrenMainSize peer);
-    Ark_ChildrenMainSize (*ctor)(const Ark_Number* childDefaultSize);
+    Ark_ChildrenMainSize (*construct)(const Ark_Number* childDefaultSize);
     Ark_NativePointer (*getFinalizer)();
     void (*splice)(Ark_ChildrenMainSize peer,
                    const Ark_Number* start,
@@ -22158,7 +22232,7 @@ typedef struct GENERATED_ArkUIChildrenMainSizeAccessor {
 
 typedef struct GENERATED_ArkUICircleShapeAccessor {
     void (*destroyPeer)(Ark_CircleShape peer);
-    Ark_CircleShape (*ctor)(const Opt_ShapeSize* options);
+    Ark_CircleShape (*construct)(const Opt_ShapeSize* options);
     Ark_NativePointer (*getFinalizer)();
     Ark_CircleShape (*offset)(Ark_CircleShape peer,
                               const Ark_Position* offset);
@@ -22176,7 +22250,7 @@ typedef struct GENERATED_ArkUICircleShapeAccessor {
 
 typedef struct GENERATED_ArkUIClickEventAccessor {
     void (*destroyPeer)(Ark_ClickEvent peer);
-    Ark_ClickEvent (*ctor)();
+    Ark_ClickEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getDisplayX)(Ark_ClickEvent peer);
     void (*setDisplayX)(Ark_ClickEvent peer,
@@ -22198,7 +22272,7 @@ typedef struct GENERATED_ArkUIClickEventAccessor {
                  const Ark_Number* y);
     Opt_InteractionHand (*getHand)(Ark_ClickEvent peer);
     void (*setHand)(Ark_ClickEvent peer,
-                    Ark_InteractionHand hand);
+                    const Opt_InteractionHand* hand);
     Callback_Void (*getPreventDefault)(Ark_ClickEvent peer);
     void (*setPreventDefault)(Ark_ClickEvent peer,
                               const Callback_Void* preventDefault);
@@ -22206,20 +22280,20 @@ typedef struct GENERATED_ArkUIClickEventAccessor {
 
 typedef struct GENERATED_ArkUIColorContentAccessor {
     void (*destroyPeer)(Ark_ColorContent peer);
-    Ark_ColorContent (*ctor)();
+    Ark_ColorContent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_ColorContent (*getORIGIN)();
 } GENERATED_ArkUIColorContentAccessor;
 
 typedef struct GENERATED_ArkUIColorFilterAccessor {
     void (*destroyPeer)(Ark_ColorFilter peer);
-    Ark_ColorFilter (*ctor)(const Array_Number* value);
+    Ark_ColorFilter (*construct)(const Array_Number* value);
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUIColorFilterAccessor;
 
 typedef struct GENERATED_ArkUIColorMetricsAccessor {
     void (*destroyPeer)(Ark_ColorMetrics peer);
-    Ark_ColorMetrics (*ctor)();
+    Ark_ColorMetrics (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_ColorMetrics (*numeric)(const Ark_Number* value);
     Ark_ColorMetrics (*rgba)(const Ark_Number* red,
@@ -22238,7 +22312,7 @@ typedef struct GENERATED_ArkUIColorMetricsAccessor {
 
 typedef struct GENERATED_ArkUICommon_ContextAccessor {
     void (*destroyPeer)(Ark_common_Context peer);
-    Ark_common_Context (*ctor)();
+    Ark_common_Context (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_common_Context (*createBundleContext)(Ark_VMContext vmContext,
                                               Ark_common_Context peer,
@@ -22290,7 +22364,7 @@ typedef struct GENERATED_ArkUICommon_ContextAccessor {
 
 typedef struct GENERATED_ArkUICommonShapeAccessor {
     void (*destroyPeer)(Ark_CommonShape peer);
-    Ark_CommonShape (*ctor)();
+    Ark_CommonShape (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_CommonShape (*offset)(Ark_CommonShape peer,
                               const Ark_Position* offset);
@@ -22302,7 +22376,7 @@ typedef struct GENERATED_ArkUICommonShapeAccessor {
 
 typedef struct GENERATED_ArkUIComponentContentAccessor {
     void (*destroyPeer)(Ark_ComponentContent peer);
-    Ark_ComponentContent (*ctor)();
+    Ark_ComponentContent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*update)(Ark_ComponentContent peer,
                    const Ark_Object* args);
@@ -22357,13 +22431,13 @@ typedef struct GENERATED_ArkUIContentModifierHelperAccessor {
 
 typedef struct GENERATED_ArkUIContextAccessor {
     void (*destroyPeer)(Ark_Context peer);
-    Ark_Context (*ctor)();
+    Ark_Context (*construct)();
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUIContextAccessor;
 
 typedef struct GENERATED_ArkUICustomDialogControllerAccessor {
     void (*destroyPeer)(Ark_CustomDialogController peer);
-    Ark_CustomDialogController (*ctor)(const Ark_CustomDialogControllerOptions* value);
+    Ark_CustomDialogController (*construct)(const Ark_CustomDialogControllerOptions* value);
     Ark_NativePointer (*getFinalizer)();
     void (*open)(Ark_CustomDialogController peer);
     void (*close)(Ark_CustomDialogController peer);
@@ -22371,7 +22445,7 @@ typedef struct GENERATED_ArkUICustomDialogControllerAccessor {
 
 typedef struct GENERATED_ArkUICustomSpanAccessor {
     void (*destroyPeer)(Ark_CustomSpan peer);
-    Ark_CustomSpan (*ctor)();
+    Ark_CustomSpan (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*invalidate)(Ark_CustomSpan peer);
     Callback_CustomSpanMeasureInfo_CustomSpanMetrics (*getOnMeasure)(Ark_CustomSpan peer);
@@ -22384,13 +22458,13 @@ typedef struct GENERATED_ArkUICustomSpanAccessor {
 
 typedef struct GENERATED_ArkUIDatePickerDialogAccessor {
     void (*destroyPeer)(Ark_DatePickerDialog peer);
-    Ark_DatePickerDialog (*ctor)();
+    Ark_DatePickerDialog (*construct)();
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUIDatePickerDialogAccessor;
 
 typedef struct GENERATED_ArkUIDecorationStyleAccessor {
     void (*destroyPeer)(Ark_DecorationStyle peer);
-    Ark_DecorationStyle (*ctor)(const Ark_DecorationStyleInterface* value);
+    Ark_DecorationStyle (*construct)(const Ark_DecorationStyleInterface* value);
     Ark_NativePointer (*getFinalizer)();
     Ark_TextDecorationType (*getType)(Ark_DecorationStyle peer);
     Opt_ResourceColor (*getColor)(Ark_DecorationStyle peer);
@@ -22399,7 +22473,7 @@ typedef struct GENERATED_ArkUIDecorationStyleAccessor {
 
 typedef struct GENERATED_ArkUIDisappearSymbolEffectAccessor {
     void (*destroyPeer)(Ark_DisappearSymbolEffect peer);
-    Ark_DisappearSymbolEffect (*ctor)(const Opt_EffectScope* scope);
+    Ark_DisappearSymbolEffect (*construct)(const Opt_EffectScope* scope);
     Ark_NativePointer (*getFinalizer)();
     Opt_EffectScope (*getScope)(Ark_DisappearSymbolEffect peer);
     void (*setScope)(Ark_DisappearSymbolEffect peer,
@@ -22408,7 +22482,7 @@ typedef struct GENERATED_ArkUIDisappearSymbolEffectAccessor {
 
 typedef struct GENERATED_ArkUIDragEventAccessor {
     void (*destroyPeer)(Ark_DragEvent peer);
-    Ark_DragEvent (*ctor)();
+    Ark_DragEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getDisplayX)(Ark_DragEvent peer);
     Ark_Number (*getDisplayY)(Ark_DragEvent peer);
@@ -22435,19 +22509,19 @@ typedef struct GENERATED_ArkUIDragEventAccessor {
                                       Ark_Boolean useCustomDropAnimation);
     Opt_ModifierKeyStateGetter (*getGetModifierKeyState)(Ark_DragEvent peer);
     void (*setGetModifierKeyState)(Ark_DragEvent peer,
-                                   const ModifierKeyStateGetter* getModifierKeyState);
+                                   const Opt_ModifierKeyStateGetter* getModifierKeyState);
 } GENERATED_ArkUIDragEventAccessor;
 
 typedef struct GENERATED_ArkUIDrawableDescriptorAccessor {
     void (*destroyPeer)(Ark_DrawableDescriptor peer);
-    Ark_DrawableDescriptor (*ctor)();
+    Ark_DrawableDescriptor (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_image_PixelMap (*getPixelMap)(Ark_DrawableDescriptor peer);
 } GENERATED_ArkUIDrawableDescriptorAccessor;
 
 typedef struct GENERATED_ArkUIDrawContextAccessor {
     void (*destroyPeer)(Ark_DrawContext peer);
-    Ark_DrawContext (*ctor)();
+    Ark_DrawContext (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Size (*size)(Ark_DrawContext peer);
     Ark_Size (*sizeInPixel)(Ark_DrawContext peer);
@@ -22456,8 +22530,8 @@ typedef struct GENERATED_ArkUIDrawContextAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_BrushAccessor {
     void (*destroyPeer)(Ark_drawing_Brush peer);
-    Ark_drawing_Brush (*ctor0)();
-    Ark_drawing_Brush (*ctor1)(Ark_drawing_Brush brush);
+    Ark_drawing_Brush (*construct0)();
+    Ark_drawing_Brush (*construct1)(Ark_drawing_Brush brush);
     Ark_NativePointer (*getFinalizer)();
     void (*setColor0)(Ark_drawing_Brush peer,
                       const Ark_common2D_Color* color);
@@ -22494,7 +22568,7 @@ typedef struct GENERATED_ArkUIDrawing_BrushAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_CanvasAccessor {
     void (*destroyPeer)(Ark_drawing_Canvas peer);
-    Ark_drawing_Canvas (*ctor)(Ark_image_PixelMap pixelmap);
+    Ark_drawing_Canvas (*construct)(Ark_image_PixelMap pixelmap);
     Ark_NativePointer (*getFinalizer)();
     void (*drawRect0)(Ark_drawing_Canvas peer,
                       const Ark_common2D_Rect* rect);
@@ -22655,7 +22729,7 @@ typedef struct GENERATED_ArkUIDrawing_CanvasAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_ColorFilterAccessor {
     void (*destroyPeer)(Ark_drawing_ColorFilter peer);
-    Ark_drawing_ColorFilter (*ctor)();
+    Ark_drawing_ColorFilter (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_drawing_ColorFilter (*createBlendModeColorFilter0)(const Ark_common2D_Color* color,
                                                            Ark_drawing_BlendMode mode);
@@ -22671,7 +22745,7 @@ typedef struct GENERATED_ArkUIDrawing_ColorFilterAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_FontAccessor {
     void (*destroyPeer)(Ark_drawing_Font peer);
-    Ark_drawing_Font (*ctor)();
+    Ark_drawing_Font (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*enableSubpixel)(Ark_drawing_Font peer,
                            Ark_Boolean isSubpixel);
@@ -22735,7 +22809,7 @@ typedef struct GENERATED_ArkUIDrawing_FontAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_ImageFilterAccessor {
     void (*destroyPeer)(Ark_drawing_ImageFilter peer);
-    Ark_drawing_ImageFilter (*ctor)();
+    Ark_drawing_ImageFilter (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_drawing_ImageFilter (*createBlurImageFilter)(const Ark_Number* sigmaX,
                                                      const Ark_Number* sigmaY,
@@ -22747,7 +22821,7 @@ typedef struct GENERATED_ArkUIDrawing_ImageFilterAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_LatticeAccessor {
     void (*destroyPeer)(Ark_drawing_Lattice peer);
-    Ark_drawing_Lattice (*ctor)();
+    Ark_drawing_Lattice (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_drawing_Lattice (*createImageLattice)(const Array_Number* xDivs,
                                               const Array_Number* yDivs,
@@ -22760,7 +22834,7 @@ typedef struct GENERATED_ArkUIDrawing_LatticeAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_MaskFilterAccessor {
     void (*destroyPeer)(Ark_drawing_MaskFilter peer);
-    Ark_drawing_MaskFilter (*ctor)();
+    Ark_drawing_MaskFilter (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_drawing_MaskFilter (*createBlurMaskFilter)(Ark_drawing_BlurType blurType,
                                                    const Ark_Number* sigma);
@@ -22768,7 +22842,7 @@ typedef struct GENERATED_ArkUIDrawing_MaskFilterAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_MatrixAccessor {
     void (*destroyPeer)(Ark_drawing_Matrix peer);
-    Ark_drawing_Matrix (*ctor)();
+    Ark_drawing_Matrix (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*setRotation)(Ark_drawing_Matrix peer,
                         const Ark_Number* degree,
@@ -22836,8 +22910,8 @@ typedef struct GENERATED_ArkUIDrawing_MatrixAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_PathAccessor {
     void (*destroyPeer)(Ark_drawing_Path peer);
-    Ark_drawing_Path (*ctor0)();
-    Ark_drawing_Path (*ctor1)(Ark_drawing_Path path);
+    Ark_drawing_Path (*construct0)();
+    Ark_drawing_Path (*construct1)(Ark_drawing_Path path);
     Ark_NativePointer (*getFinalizer)();
     void (*moveTo)(Ark_drawing_Path peer,
                    const Ark_Number* x,
@@ -22954,7 +23028,7 @@ typedef struct GENERATED_ArkUIDrawing_PathAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_PathEffectAccessor {
     void (*destroyPeer)(Ark_drawing_PathEffect peer);
-    Ark_drawing_PathEffect (*ctor)();
+    Ark_drawing_PathEffect (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_drawing_PathEffect (*createDashPathEffect)(const Array_Number* intervals,
                                                    const Ark_Number* phase);
@@ -22963,8 +23037,8 @@ typedef struct GENERATED_ArkUIDrawing_PathEffectAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_PenAccessor {
     void (*destroyPeer)(Ark_drawing_Pen peer);
-    Ark_drawing_Pen (*ctor0)();
-    Ark_drawing_Pen (*ctor1)(Ark_drawing_Pen pen);
+    Ark_drawing_Pen (*construct0)();
+    Ark_drawing_Pen (*construct1)(Ark_drawing_Pen pen);
     Ark_NativePointer (*getFinalizer)();
     void (*setMiterLimit)(Ark_drawing_Pen peer,
                           const Ark_Number* miter);
@@ -23020,7 +23094,7 @@ typedef struct GENERATED_ArkUIDrawing_PenAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_RegionAccessor {
     void (*destroyPeer)(Ark_drawing_Region peer);
-    Ark_drawing_Region (*ctor)();
+    Ark_drawing_Region (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Boolean (*isPointContained)(Ark_drawing_Region peer,
                                     const Ark_Number* x,
@@ -23047,9 +23121,9 @@ typedef struct GENERATED_ArkUIDrawing_RegionAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_RoundRectAccessor {
     void (*destroyPeer)(Ark_drawing_RoundRect peer);
-    Ark_drawing_RoundRect (*ctor)(const Ark_common2D_Rect* rect,
-                                  const Ark_Number* xRadii,
-                                  const Ark_Number* yRadii);
+    Ark_drawing_RoundRect (*construct)(const Ark_common2D_Rect* rect,
+                                       const Ark_Number* xRadii,
+                                       const Ark_Number* yRadii);
     Ark_NativePointer (*getFinalizer)();
     void (*setCorner)(Ark_drawing_RoundRect peer,
                       Ark_drawing_CornerPos pos,
@@ -23064,14 +23138,14 @@ typedef struct GENERATED_ArkUIDrawing_RoundRectAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_SamplingOptionsAccessor {
     void (*destroyPeer)(Ark_drawing_SamplingOptions peer);
-    Ark_drawing_SamplingOptions (*ctor0)();
-    Ark_drawing_SamplingOptions (*ctor1)(Ark_drawing_FilterMode filterMode);
+    Ark_drawing_SamplingOptions (*construct0)();
+    Ark_drawing_SamplingOptions (*construct1)(Ark_drawing_FilterMode filterMode);
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUIDrawing_SamplingOptionsAccessor;
 
 typedef struct GENERATED_ArkUIDrawing_ShaderEffectAccessor {
     void (*destroyPeer)(Ark_drawing_ShaderEffect peer);
-    Ark_drawing_ShaderEffect (*ctor)();
+    Ark_drawing_ShaderEffect (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_drawing_ShaderEffect (*createColorShader)(const Ark_Number* color);
     Ark_drawing_ShaderEffect (*createLinearGradient)(const Ark_common2D_Point* startPt,
@@ -23105,7 +23179,7 @@ typedef struct GENERATED_ArkUIDrawing_ShaderEffectAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_ShadowLayerAccessor {
     void (*destroyPeer)(Ark_drawing_ShadowLayer peer);
-    Ark_drawing_ShadowLayer (*ctor)();
+    Ark_drawing_ShadowLayer (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_drawing_ShadowLayer (*create0)(const Ark_Number* blurRadius,
                                        const Ark_Number* x,
@@ -23119,7 +23193,7 @@ typedef struct GENERATED_ArkUIDrawing_ShadowLayerAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_TextBlobAccessor {
     void (*destroyPeer)(Ark_drawing_TextBlob peer);
-    Ark_drawing_TextBlob (*ctor)();
+    Ark_drawing_TextBlob (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_drawing_TextBlob (*makeFromString)(const Ark_String* text,
                                            Ark_drawing_Font font,
@@ -23137,7 +23211,7 @@ typedef struct GENERATED_ArkUIDrawing_TextBlobAccessor {
 
 typedef struct GENERATED_ArkUIDrawing_TypefaceAccessor {
     void (*destroyPeer)(Ark_drawing_Typeface peer);
-    Ark_drawing_Typeface (*ctor)();
+    Ark_drawing_Typeface (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getFamilyName)(Ark_drawing_Typeface peer);
     Ark_drawing_Typeface (*makeFromFile)(const Ark_String* filePath);
@@ -23145,7 +23219,7 @@ typedef struct GENERATED_ArkUIDrawing_TypefaceAccessor {
 
 typedef struct GENERATED_ArkUIDrawingRenderingContextAccessor {
     void (*destroyPeer)(Ark_DrawingRenderingContext peer);
-    Ark_DrawingRenderingContext (*ctor)(const Opt_LengthMetricsUnit* unit);
+    Ark_DrawingRenderingContext (*construct)(const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     void (*invalidate)(Ark_DrawingRenderingContext peer);
     Ark_Size (*getSize)(Ark_DrawingRenderingContext peer);
@@ -23155,7 +23229,7 @@ typedef struct GENERATED_ArkUIDrawingRenderingContextAccessor {
 
 typedef struct GENERATED_ArkUIDrawModifierAccessor {
     void (*destroyPeer)(Ark_DrawModifier peer);
-    Ark_DrawModifier (*ctor)();
+    Ark_DrawModifier (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*invalidate)(Ark_DrawModifier peer);
     Callback_DrawContext_Void (*getDrawBehind_callback)(Ark_DrawModifier peer);
@@ -23171,7 +23245,7 @@ typedef struct GENERATED_ArkUIDrawModifierAccessor {
 
 typedef struct GENERATED_ArkUIEllipseShapeAccessor {
     void (*destroyPeer)(Ark_EllipseShape peer);
-    Ark_EllipseShape (*ctor)(const Opt_ShapeSize* options);
+    Ark_EllipseShape (*construct)(const Opt_ShapeSize* options);
     Ark_NativePointer (*getFinalizer)();
     Ark_EllipseShape (*offset)(Ark_EllipseShape peer,
                                const Ark_Position* offset);
@@ -23196,14 +23270,14 @@ typedef struct GENERATED_ArkUIEventEmulatorAccessor {
 
 typedef struct GENERATED_ArkUIEventTargetInfoAccessor {
     void (*destroyPeer)(Ark_EventTargetInfo peer);
-    Ark_EventTargetInfo (*ctor)();
+    Ark_EventTargetInfo (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getId)(Ark_EventTargetInfo peer);
 } GENERATED_ArkUIEventTargetInfoAccessor;
 
 typedef struct GENERATED_ArkUIExtendableComponentAccessor {
     void (*destroyPeer)(Ark_ExtendableComponent peer);
-    Ark_ExtendableComponent (*ctor)();
+    Ark_ExtendableComponent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_UIContext (*getUIContext)(Ark_ExtendableComponent peer);
     Ark_Int32 (*getUniqueId)(Ark_ExtendableComponent peer);
@@ -23211,7 +23285,7 @@ typedef struct GENERATED_ArkUIExtendableComponentAccessor {
 
 typedef struct GENERATED_ArkUIFocusAxisEventAccessor {
     void (*destroyPeer)(Ark_FocusAxisEvent peer);
-    Ark_FocusAxisEvent (*ctor)();
+    Ark_FocusAxisEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Map_AxisModel_Number (*getAxisMap)(Ark_FocusAxisEvent peer);
     void (*setAxisMap)(Ark_FocusAxisEvent peer,
@@ -23227,7 +23301,7 @@ typedef struct GENERATED_ArkUIFocusControllerAccessor {
 
 typedef struct GENERATED_ArkUIFrameNodeAccessor {
     void (*destroyPeer)(Ark_FrameNode peer);
-    Ark_FrameNode (*ctor)(Ark_UIContext uiContext);
+    Ark_FrameNode (*construct)(Ark_UIContext uiContext);
     Ark_NativePointer (*getFinalizer)();
     Ark_Boolean (*isModifiable)(Ark_FrameNode peer);
     void (*appendChild)(Ark_FrameNode peer,
@@ -23249,6 +23323,7 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     void (*dispose)(Ark_FrameNode peer);
     Ark_String (*getId)(Ark_FrameNode peer);
     Ark_Number (*getUniqueId)(Ark_FrameNode peer);
+    Ark_String (*getNodeType)(Ark_FrameNode peer);
     Ark_Number (*getOpacity)(Ark_FrameNode peer);
     Ark_Boolean (*isVisible)(Ark_FrameNode peer);
     Ark_Boolean (*isClipToFrame)(Ark_FrameNode peer);
@@ -23259,6 +23334,15 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     void (*setCrossLanguageOptions)(Ark_FrameNode peer,
                                     const Ark_CrossLanguageOptions* options);
     Ark_CrossLanguageOptions (*getCrossLanguageOptions)(Ark_FrameNode peer);
+    void (*setMeasuredSize)(Ark_FrameNode peer,
+                            const Ark_Size* size);
+    void (*setLayoutPosition)(Ark_FrameNode peer,
+                              const Ark_Position* position);
+    void (*measure)(Ark_FrameNode peer,
+                    const Ark_LayoutConstraint* constraint);
+    void (*layout)(Ark_FrameNode peer,
+                   const Ark_Position* position);
+    void (*setNeedsLayout)(Ark_FrameNode peer);
     Ark_Position (*getPositionToWindowWithTransform)(Ark_FrameNode peer);
     Ark_FrameNode (*getFrameNodeByKey)(const Ark_String* name);
     Ark_Number (*getIdByFrameNode)(Ark_FrameNode peer,
@@ -23274,19 +23358,20 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     void (*reuse)(Ark_FrameNode peer);
     void (*recycle)(Ark_FrameNode peer);
     Ark_NativePointer (*getFrameNodePtr)(Ark_FrameNode node);
+    Ark_FrameNode (*createTypedFrameNode)(const Ark_String* type);
 } GENERATED_ArkUIFrameNodeAccessor;
 
 typedef struct GENERATED_ArkUIFrictionMotionAccessor {
     void (*destroyPeer)(Ark_FrictionMotion peer);
-    Ark_FrictionMotion (*ctor)(const Ark_Number* friction,
-                               const Ark_Number* position,
-                               const Ark_Number* velocity);
+    Ark_FrictionMotion (*construct)(const Ark_Number* friction,
+                                    const Ark_Number* position,
+                                    const Ark_Number* velocity);
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUIFrictionMotionAccessor;
 
 typedef struct GENERATED_ArkUIGestureAccessor {
     void (*destroyPeer)(Ark_Gesture peer);
-    Ark_Gesture (*ctor)();
+    Ark_Gesture (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*tag)(Ark_Gesture peer,
                 const Ark_String* tag);
@@ -23296,7 +23381,7 @@ typedef struct GENERATED_ArkUIGestureAccessor {
 
 typedef struct GENERATED_ArkUIGestureEventAccessor {
     void (*destroyPeer)(Ark_GestureEvent peer);
-    Ark_GestureEvent (*ctor)();
+    Ark_GestureEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Boolean (*getRepeat)(Ark_GestureEvent peer);
     void (*setRepeat)(Ark_GestureEvent peer,
@@ -23338,8 +23423,8 @@ typedef struct GENERATED_ArkUIGestureEventAccessor {
 
 typedef struct GENERATED_ArkUIGestureGroupInterfaceAccessor {
     void (*destroyPeer)(Ark_GestureGroupInterface peer);
-    Ark_GestureGroupInterface (*ctor)(Ark_GestureMode mode,
-                                      const Array_GestureType* gesture);
+    Ark_GestureGroupInterface (*construct)(Ark_GestureMode mode,
+                                           const Array_GestureType* gesture);
     Ark_NativePointer (*getFinalizer)();
     Ark_GestureGroupInterface (*onCancel)(Ark_GestureGroupInterface peer,
                                           const Callback_Void* event);
@@ -23347,7 +23432,7 @@ typedef struct GENERATED_ArkUIGestureGroupInterfaceAccessor {
 
 typedef struct GENERATED_ArkUIGestureModifierAccessor {
     void (*destroyPeer)(Ark_GestureModifier peer);
-    Ark_GestureModifier (*ctor)();
+    Ark_GestureModifier (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*applyGesture)(Ark_GestureModifier peer,
                          const Ark_UIGestureEvent* event);
@@ -23355,7 +23440,7 @@ typedef struct GENERATED_ArkUIGestureModifierAccessor {
 
 typedef struct GENERATED_ArkUIGestureRecognizerAccessor {
     void (*destroyPeer)(Ark_GestureRecognizer peer);
-    Ark_GestureRecognizer (*ctor)();
+    Ark_GestureRecognizer (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getTag)(Ark_GestureRecognizer peer);
     Ark_GestureControl_GestureType (*getType)(Ark_GestureRecognizer peer);
@@ -23372,7 +23457,7 @@ typedef struct GENERATED_ArkUIGestureRecognizerAccessor {
 
 typedef struct GENERATED_ArkUIGestureStyleAccessor {
     void (*destroyPeer)(Ark_GestureStyle peer);
-    Ark_GestureStyle (*ctor)(const Opt_GestureStyleInterface* value);
+    Ark_GestureStyle (*construct)(const Opt_GestureStyleInterface* value);
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUIGestureStyleAccessor;
 
@@ -23405,7 +23490,7 @@ typedef struct GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor {
 
 typedef struct GENERATED_ArkUIHierarchicalSymbolEffectAccessor {
     void (*destroyPeer)(Ark_HierarchicalSymbolEffect peer);
-    Ark_HierarchicalSymbolEffect (*ctor)(const Opt_EffectFillStyle* fillStyle);
+    Ark_HierarchicalSymbolEffect (*construct)(const Opt_EffectFillStyle* fillStyle);
     Ark_NativePointer (*getFinalizer)();
     Opt_EffectFillStyle (*getFillStyle)(Ark_HierarchicalSymbolEffect peer);
     void (*setFillStyle)(Ark_HierarchicalSymbolEffect peer,
@@ -23414,26 +23499,26 @@ typedef struct GENERATED_ArkUIHierarchicalSymbolEffectAccessor {
 
 typedef struct GENERATED_ArkUIHoverEventAccessor {
     void (*destroyPeer)(Ark_HoverEvent peer);
-    Ark_HoverEvent (*ctor)();
+    Ark_HoverEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Opt_Number (*getX)(Ark_HoverEvent peer);
     void (*setX)(Ark_HoverEvent peer,
-                 const Ark_Number* x);
+                 const Opt_Number* x);
     Opt_Number (*getY)(Ark_HoverEvent peer);
     void (*setY)(Ark_HoverEvent peer,
-                 const Ark_Number* y);
+                 const Opt_Number* y);
     Opt_Number (*getWindowX)(Ark_HoverEvent peer);
     void (*setWindowX)(Ark_HoverEvent peer,
-                       const Ark_Number* windowX);
+                       const Opt_Number* windowX);
     Opt_Number (*getWindowY)(Ark_HoverEvent peer);
     void (*setWindowY)(Ark_HoverEvent peer,
-                       const Ark_Number* windowY);
+                       const Opt_Number* windowY);
     Opt_Number (*getDisplayX)(Ark_HoverEvent peer);
     void (*setDisplayX)(Ark_HoverEvent peer,
-                        const Ark_Number* displayX);
+                        const Opt_Number* displayX);
     Opt_Number (*getDisplayY)(Ark_HoverEvent peer);
     void (*setDisplayY)(Ark_HoverEvent peer,
-                        const Ark_Number* displayY);
+                        const Opt_Number* displayY);
     Callback_Void (*getStopPropagation)(Ark_HoverEvent peer);
     void (*setStopPropagation)(Ark_HoverEvent peer,
                                const Callback_Void* stopPropagation);
@@ -23441,7 +23526,7 @@ typedef struct GENERATED_ArkUIHoverEventAccessor {
 
 typedef struct GENERATED_ArkUIICurveAccessor {
     void (*destroyPeer)(Ark_ICurve peer);
-    Ark_ICurve (*ctor)();
+    Ark_ICurve (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*interpolate)(Ark_ICurve peer,
                               const Ark_Number* fraction);
@@ -23449,7 +23534,7 @@ typedef struct GENERATED_ArkUIICurveAccessor {
 
 typedef struct GENERATED_ArkUIImage_PixelMapAccessor {
     void (*destroyPeer)(Ark_image_PixelMap peer);
-    Ark_image_PixelMap (*ctor)();
+    Ark_image_PixelMap (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*readPixelsToBufferSync)(Ark_image_PixelMap peer,
                                    const Ark_Buffer* dst);
@@ -23461,14 +23546,14 @@ typedef struct GENERATED_ArkUIImage_PixelMapAccessor {
 
 typedef struct GENERATED_ArkUIImageAnalyzerControllerAccessor {
     void (*destroyPeer)(Ark_ImageAnalyzerController peer);
-    Ark_ImageAnalyzerController (*ctor)();
+    Ark_ImageAnalyzerController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Array_ImageAnalyzerType (*getImageAnalyzerSupportTypes)(Ark_ImageAnalyzerController peer);
 } GENERATED_ArkUIImageAnalyzerControllerAccessor;
 
 typedef struct GENERATED_ArkUIImageAttachmentAccessor {
     void (*destroyPeer)(Ark_ImageAttachment peer);
-    Ark_ImageAttachment (*ctor)(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value);
+    Ark_ImageAttachment (*construct)(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value);
     Ark_NativePointer (*getFinalizer)();
     Ark_image_PixelMap (*getValue)(Ark_ImageAttachment peer);
     Opt_SizeOptions (*getSize)(Ark_ImageAttachment peer);
@@ -23480,8 +23565,8 @@ typedef struct GENERATED_ArkUIImageAttachmentAccessor {
 
 typedef struct GENERATED_ArkUIImageBitmapAccessor {
     void (*destroyPeer)(Ark_ImageBitmap peer);
-    Ark_ImageBitmap (*ctor)(const Ark_Union_PixelMap_String* src,
-                            const Opt_LengthMetricsUnit* unit);
+    Ark_ImageBitmap (*construct)(const Ark_Union_PixelMap_String* src,
+                                 const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     void (*close)(Ark_ImageBitmap peer);
     Ark_Number (*getHeight)(Ark_ImageBitmap peer);
@@ -23494,10 +23579,10 @@ typedef struct GENERATED_ArkUIImageBitmapAccessor {
 
 typedef struct GENERATED_ArkUIImageDataAccessor {
     void (*destroyPeer)(Ark_ImageData peer);
-    Ark_ImageData (*ctor)(const Ark_Number* width,
-                          const Ark_Number* height,
-                          const Opt_Buffer* data,
-                          const Opt_LengthMetricsUnit* unit);
+    Ark_ImageData (*construct)(const Ark_Number* width,
+                               const Ark_Number* height,
+                               const Opt_Buffer* data,
+                               const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     Ark_Buffer (*getData)(Ark_ImageData peer);
     void (*setData)(Ark_ImageData peer,
@@ -23512,7 +23597,7 @@ typedef struct GENERATED_ArkUIImageDataAccessor {
 
 typedef struct GENERATED_ArkUIIndicatorComponentControllerAccessor {
     void (*destroyPeer)(Ark_IndicatorComponentController peer);
-    Ark_IndicatorComponentController (*ctor)();
+    Ark_IndicatorComponentController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*showNext)(Ark_IndicatorComponentController peer);
     void (*showPrevious)(Ark_IndicatorComponentController peer);
@@ -23530,7 +23615,7 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
 
 typedef struct GENERATED_ArkUIKeyEventAccessor {
     void (*destroyPeer)(Ark_KeyEvent peer);
-    Ark_KeyEvent (*ctor)();
+    Ark_KeyEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_KeyType (*getType)(Ark_KeyEvent peer);
     void (*setType)(Ark_KeyEvent peer,
@@ -23561,15 +23646,15 @@ typedef struct GENERATED_ArkUIKeyEventAccessor {
                              Ark_IntentionCode intentionCode);
     Opt_ModifierKeyStateGetter (*getGetModifierKeyState)(Ark_KeyEvent peer);
     void (*setGetModifierKeyState)(Ark_KeyEvent peer,
-                                   const ModifierKeyStateGetter* getModifierKeyState);
+                                   const Opt_ModifierKeyStateGetter* getModifierKeyState);
     Opt_Number (*getUnicode)(Ark_KeyEvent peer);
     void (*setUnicode)(Ark_KeyEvent peer,
-                       const Ark_Number* unicode);
+                       const Opt_Number* unicode);
 } GENERATED_ArkUIKeyEventAccessor;
 
 typedef struct GENERATED_ArkUILayoutableAccessor {
     void (*destroyPeer)(Ark_Layoutable peer);
-    Ark_Layoutable (*ctor)();
+    Ark_Layoutable (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*layout)(Ark_Layoutable peer,
                    const Ark_Position* position);
@@ -23581,12 +23666,12 @@ typedef struct GENERATED_ArkUILayoutableAccessor {
                              const Ark_MeasureResult* measureResult);
     Opt_Number (*getUniqueId)(Ark_Layoutable peer);
     void (*setUniqueId)(Ark_Layoutable peer,
-                        const Ark_Number* uniqueId);
+                        const Opt_Number* uniqueId);
 } GENERATED_ArkUILayoutableAccessor;
 
 typedef struct GENERATED_ArkUILayoutCallbackAccessor {
     void (*destroyPeer)(Ark_LayoutCallback peer);
-    Ark_LayoutCallback (*ctor)();
+    Ark_LayoutCallback (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*onPlaceChildren)(Ark_LayoutCallback peer,
                             const Ark_GeometryInfo* selfLayoutInfo,
@@ -23600,7 +23685,7 @@ typedef struct GENERATED_ArkUILayoutCallbackAccessor {
 
 typedef struct GENERATED_ArkUILayoutChildAccessor {
     void (*destroyPeer)(Ark_LayoutChild peer);
-    Ark_LayoutChild (*ctor)();
+    Ark_LayoutChild (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*measure)(Ark_LayoutChild peer,
                     const Ark_ConstraintSizeOptions* childConstraint);
@@ -23617,7 +23702,7 @@ typedef struct GENERATED_ArkUILayoutChildAccessor {
 
 typedef struct GENERATED_ArkUILayoutManagerAccessor {
     void (*destroyPeer)(Ark_LayoutManager peer);
-    Ark_LayoutManager (*ctor)();
+    Ark_LayoutManager (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getLineCount)(Ark_LayoutManager peer);
     Ark_PositionWithAffinity (*getGlyphPositionAtCoordinate)(Ark_LayoutManager peer,
@@ -23627,7 +23712,7 @@ typedef struct GENERATED_ArkUILayoutManagerAccessor {
 
 typedef struct GENERATED_ArkUILayoutPolicyAccessor {
     void (*destroyPeer)(Ark_LayoutPolicy peer);
-    Ark_LayoutPolicy (*ctor)();
+    Ark_LayoutPolicy (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_LayoutPolicy (*getMatchParent)();
 } GENERATED_ArkUILayoutPolicyAccessor;
@@ -23641,8 +23726,8 @@ typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
 
 typedef struct GENERATED_ArkUILengthMetricsAccessor {
     void (*destroyPeer)(Ark_LengthMetrics peer);
-    Ark_LengthMetrics (*ctor)(const Ark_Number* value,
-                              Ark_LengthUnit unit);
+    Ark_LengthMetrics (*construct)(const Ark_Number* value,
+                                   Ark_LengthUnit unit);
     Ark_NativePointer (*getFinalizer)();
     Ark_LengthMetrics (*px)(const Ark_Number* value);
     Ark_LengthMetrics (*vp)(const Ark_Number* value);
@@ -23660,14 +23745,22 @@ typedef struct GENERATED_ArkUILengthMetricsAccessor {
 
 typedef struct GENERATED_ArkUILetterSpacingStyleAccessor {
     void (*destroyPeer)(Ark_LetterSpacingStyle peer);
-    Ark_LetterSpacingStyle (*ctor)(Ark_LengthMetrics value);
+    Ark_LetterSpacingStyle (*construct)(Ark_LengthMetrics value);
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getLetterSpacing)(Ark_LetterSpacingStyle peer);
 } GENERATED_ArkUILetterSpacingStyleAccessor;
 
+typedef struct GENERATED_ArkUILevelOrderAccessor {
+    void (*destroyPeer)(Ark_LevelOrder peer);
+    Ark_LevelOrder (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_LevelOrder (*clamp)(const Ark_Number* order);
+    Ark_Number (*getOrder)(Ark_LevelOrder peer);
+} GENERATED_ArkUILevelOrderAccessor;
+
 typedef struct GENERATED_ArkUILifeCycleAccessor {
     void (*destroyPeer)(Ark_LifeCycle peer);
-    Ark_LifeCycle (*ctor)();
+    Ark_LifeCycle (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*aboutToAppear)(Ark_LifeCycle peer);
     void (*aboutToDisappear)(Ark_LifeCycle peer);
@@ -23677,13 +23770,13 @@ typedef struct GENERATED_ArkUILifeCycleAccessor {
 
 typedef struct GENERATED_ArkUILinearGradientAccessor {
     void (*destroyPeer)(Ark_LinearGradient peer);
-    Ark_LinearGradient (*ctor)(const Array_ColorStop* colorStops);
+    Ark_LinearGradient (*construct)(const Array_ColorStop* colorStops);
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUILinearGradientAccessor;
 
 typedef struct GENERATED_ArkUILinearIndicatorControllerAccessor {
     void (*destroyPeer)(Ark_LinearIndicatorController peer);
-    Ark_LinearIndicatorController (*ctor)();
+    Ark_LinearIndicatorController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*setProgress)(Ark_LinearIndicatorController peer,
                         const Ark_Number* index,
@@ -23696,14 +23789,14 @@ typedef struct GENERATED_ArkUILinearIndicatorControllerAccessor {
 
 typedef struct GENERATED_ArkUILineHeightStyleAccessor {
     void (*destroyPeer)(Ark_LineHeightStyle peer);
-    Ark_LineHeightStyle (*ctor)(Ark_LengthMetrics lineHeight);
+    Ark_LineHeightStyle (*construct)(Ark_LengthMetrics lineHeight);
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getLineHeight)(Ark_LineHeightStyle peer);
 } GENERATED_ArkUILineHeightStyleAccessor;
 
 typedef struct GENERATED_ArkUIListScrollerAccessor {
     void (*destroyPeer)(Ark_ListScroller peer);
-    Ark_ListScroller (*ctor)();
+    Ark_ListScroller (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_RectResult (*getItemRectInGroup)(Ark_ListScroller peer,
                                          const Ark_Number* index,
@@ -23722,7 +23815,7 @@ typedef struct GENERATED_ArkUIListScrollerAccessor {
 
 typedef struct GENERATED_ArkUILongPressGestureEventAccessor {
     void (*destroyPeer)(Ark_LongPressGestureEvent peer);
-    Ark_LongPressGestureEvent (*ctor)();
+    Ark_LongPressGestureEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Boolean (*getRepeat)(Ark_LongPressGestureEvent peer);
     void (*setRepeat)(Ark_LongPressGestureEvent peer,
@@ -23731,7 +23824,7 @@ typedef struct GENERATED_ArkUILongPressGestureEventAccessor {
 
 typedef struct GENERATED_ArkUILongPressGestureInterfaceAccessor {
     void (*destroyPeer)(Ark_LongPressGestureInterface peer);
-    Ark_LongPressGestureInterface (*ctor)(const Ark_LongPressGestureInterface_Invoke_Literal* value);
+    Ark_LongPressGestureInterface (*construct)(const Ark_LongPressGestureInterface_Invoke_Literal* value);
     Ark_NativePointer (*getFinalizer)();
     Ark_LongPressGestureInterface (*onAction)(Ark_LongPressGestureInterface peer,
                                               const Callback_GestureEvent_Void* event);
@@ -23745,7 +23838,7 @@ typedef struct GENERATED_ArkUILongPressGestureInterfaceAccessor {
 
 typedef struct GENERATED_ArkUILongPressRecognizerAccessor {
     void (*destroyPeer)(Ark_LongPressRecognizer peer);
-    Ark_LongPressRecognizer (*ctor)();
+    Ark_LongPressRecognizer (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Boolean (*isRepeat)(Ark_LongPressRecognizer peer);
     Ark_Number (*getDuration)(Ark_LongPressRecognizer peer);
@@ -23753,8 +23846,8 @@ typedef struct GENERATED_ArkUILongPressRecognizerAccessor {
 
 typedef struct GENERATED_ArkUIMatrix2DAccessor {
     void (*destroyPeer)(Ark_Matrix2D peer);
-    Ark_Matrix2D (*ctor0)();
-    Ark_Matrix2D (*ctor1)(Ark_LengthMetricsUnit unit);
+    Ark_Matrix2D (*construct0)();
+    Ark_Matrix2D (*construct1)(Ark_LengthMetricsUnit unit);
     Ark_NativePointer (*getFinalizer)();
     Ark_Matrix2D (*identity)(Ark_Matrix2D peer);
     Ark_Matrix2D (*invert)(Ark_Matrix2D peer);
@@ -23790,7 +23883,7 @@ typedef struct GENERATED_ArkUIMatrix2DAccessor {
 
 typedef struct GENERATED_ArkUIMatrix4_Matrix4TransitAccessor {
     void (*destroyPeer)(Ark_matrix4_Matrix4Transit peer);
-    Ark_matrix4_Matrix4Transit (*ctor)();
+    Ark_matrix4_Matrix4Transit (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_matrix4_Matrix4Transit (*copy)(Ark_matrix4_Matrix4Transit peer);
     Ark_matrix4_Matrix4Transit (*invert)(Ark_matrix4_Matrix4Transit peer);
@@ -23813,7 +23906,7 @@ typedef struct GENERATED_ArkUIMatrix4_Matrix4TransitAccessor {
 
 typedef struct GENERATED_ArkUIMeasurableAccessor {
     void (*destroyPeer)(Ark_Measurable peer);
-    Ark_Measurable (*ctor)();
+    Ark_Measurable (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_MeasureResult (*measure)(Ark_Measurable peer,
                                  const Ark_ConstraintSizeOptions* constraint);
@@ -23822,12 +23915,12 @@ typedef struct GENERATED_ArkUIMeasurableAccessor {
     Ark_DirectionalEdgesT (*getBorderWidth)(Ark_Measurable peer);
     Opt_Number (*getUniqueId)(Ark_Measurable peer);
     void (*setUniqueId)(Ark_Measurable peer,
-                        const Ark_Number* uniqueId);
+                        const Opt_Number* uniqueId);
 } GENERATED_ArkUIMeasurableAccessor;
 
 typedef struct GENERATED_ArkUIMouseEventAccessor {
     void (*destroyPeer)(Ark_MouseEvent peer);
-    Ark_MouseEvent (*ctor)();
+    Ark_MouseEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_MouseButton (*getButton)(Ark_MouseEvent peer);
     void (*setButton)(Ark_MouseEvent peer,
@@ -23858,18 +23951,18 @@ typedef struct GENERATED_ArkUIMouseEventAccessor {
                                const Callback_Void* stopPropagation);
     Opt_Number (*getRawDeltaX)(Ark_MouseEvent peer);
     void (*setRawDeltaX)(Ark_MouseEvent peer,
-                         const Ark_Number* rawDeltaX);
+                         const Opt_Number* rawDeltaX);
     Opt_Number (*getRawDeltaY)(Ark_MouseEvent peer);
     void (*setRawDeltaY)(Ark_MouseEvent peer,
-                         const Ark_Number* rawDeltaY);
+                         const Opt_Number* rawDeltaY);
     Opt_Array_MouseButton (*getPressedButtons)(Ark_MouseEvent peer);
     void (*setPressedButtons)(Ark_MouseEvent peer,
-                              const Array_MouseButton* pressedButtons);
+                              const Opt_Array_MouseButton* pressedButtons);
 } GENERATED_ArkUIMouseEventAccessor;
 
 typedef struct GENERATED_ArkUIMutableStyledStringAccessor {
     void (*destroyPeer)(Ark_MutableStyledString peer);
-    Ark_MutableStyledString (*ctor)();
+    Ark_MutableStyledString (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*replaceString)(Ark_MutableStyledString peer,
                           const Ark_Number* start,
@@ -23906,7 +23999,7 @@ typedef struct GENERATED_ArkUIMutableStyledStringAccessor {
 
 typedef struct GENERATED_ArkUINavDestinationContextAccessor {
     void (*destroyPeer)(Ark_NavDestinationContext peer);
-    Ark_NavDestinationContext (*ctor)();
+    Ark_NavDestinationContext (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Opt_RouteMapConfig (*getConfigInRouteMap)(Ark_NavDestinationContext peer);
     Ark_NavPathInfo (*getPathInfo)(Ark_NavDestinationContext peer);
@@ -23917,7 +24010,7 @@ typedef struct GENERATED_ArkUINavDestinationContextAccessor {
                          Ark_NavPathStack pathStack);
     Opt_String (*getNavDestinationId)(Ark_NavDestinationContext peer);
     void (*setNavDestinationId)(Ark_NavDestinationContext peer,
-                                const Ark_String* navDestinationId);
+                                const Opt_String* navDestinationId);
 } GENERATED_ArkUINavDestinationContextAccessor;
 
 typedef struct GENERATED_ArkUINavExtenderAccessor {
@@ -23955,7 +24048,7 @@ typedef struct GENERATED_ArkUINavExtenderAccessor {
 
 typedef struct GENERATED_ArkUINavigationTransitionProxyAccessor {
     void (*destroyPeer)(Ark_NavigationTransitionProxy peer);
-    Ark_NavigationTransitionProxy (*ctor)();
+    Ark_NavigationTransitionProxy (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*finishTransition)(Ark_NavigationTransitionProxy peer);
     Ark_NavContentInfo (*getFrom)(Ark_NavigationTransitionProxy peer);
@@ -23966,21 +24059,21 @@ typedef struct GENERATED_ArkUINavigationTransitionProxyAccessor {
                   const Ark_NavContentInfo* to);
     Opt_Boolean (*getIsInteractive)(Ark_NavigationTransitionProxy peer);
     void (*setIsInteractive)(Ark_NavigationTransitionProxy peer,
-                             Ark_Boolean isInteractive);
+                             const Opt_Boolean* isInteractive);
     Opt_VoidCallback (*getCancelTransition)(Ark_NavigationTransitionProxy peer);
     void (*setCancelTransition)(Ark_NavigationTransitionProxy peer,
-                                const VoidCallback* cancelTransition);
+                                const Opt_VoidCallback* cancelTransition);
     Opt_UpdateTransitionCallback (*getUpdateTransition)(Ark_NavigationTransitionProxy peer);
     void (*setUpdateTransition)(Ark_NavigationTransitionProxy peer,
-                                const UpdateTransitionCallback* updateTransition);
+                                const Opt_UpdateTransitionCallback* updateTransition);
 } GENERATED_ArkUINavigationTransitionProxyAccessor;
 
 typedef struct GENERATED_ArkUINavPathInfoAccessor {
     void (*destroyPeer)(Ark_NavPathInfo peer);
-    Ark_NavPathInfo (*ctor)(const Ark_String* name,
-                            const Opt_Object* param,
-                            const Opt_Callback_PopInfo_Void* onPop,
-                            const Opt_Boolean* isEntry);
+    Ark_NavPathInfo (*construct)(const Ark_String* name,
+                                 const Opt_Object* param,
+                                 const Opt_Callback_PopInfo_Void* onPop,
+                                 const Opt_Boolean* isEntry);
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getName)(Ark_NavPathInfo peer);
     void (*setName)(Ark_NavPathInfo peer,
@@ -24001,7 +24094,7 @@ typedef struct GENERATED_ArkUINavPathInfoAccessor {
 
 typedef struct GENERATED_ArkUINavPathStackAccessor {
     void (*destroyPeer)(Ark_NavPathStack peer);
-    Ark_NavPathStack (*ctor)();
+    Ark_NavPathStack (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*pushPath0)(Ark_NavPathStack peer,
                       Ark_NavPathInfo info,
@@ -24115,7 +24208,7 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
 
 typedef struct GENERATED_ArkUINodeContentAccessor {
     void (*destroyPeer)(Ark_NodeContent peer);
-    Ark_NodeContent (*ctor)();
+    Ark_NodeContent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*addFrameNode)(Ark_NodeContent peer,
                          Ark_FrameNode node);
@@ -24125,9 +24218,9 @@ typedef struct GENERATED_ArkUINodeContentAccessor {
 
 typedef struct GENERATED_ArkUIOffscreenCanvasAccessor {
     void (*destroyPeer)(Ark_OffscreenCanvas peer);
-    Ark_OffscreenCanvas (*ctor)(const Ark_Number* width,
-                                const Ark_Number* height,
-                                const Opt_LengthMetricsUnit* unit);
+    Ark_OffscreenCanvas (*construct)(const Ark_Number* width,
+                                     const Ark_Number* height,
+                                     const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     Ark_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvas peer);
     Ark_OffscreenCanvasRenderingContext2D (*getContext2d)(Ark_OffscreenCanvas peer,
@@ -24142,10 +24235,10 @@ typedef struct GENERATED_ArkUIOffscreenCanvasAccessor {
 
 typedef struct GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor {
     void (*destroyPeer)(Ark_OffscreenCanvasRenderingContext2D peer);
-    Ark_OffscreenCanvasRenderingContext2D (*ctor)(const Ark_Number* width,
-                                                  const Ark_Number* height,
-                                                  const Opt_RenderingContextSettings* settings,
-                                                  const Opt_LengthMetricsUnit* unit);
+    Ark_OffscreenCanvasRenderingContext2D (*construct)(const Ark_Number* width,
+                                                       const Ark_Number* height,
+                                                       const Opt_RenderingContextSettings* settings,
+                                                       const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*toDataURL)(Ark_OffscreenCanvasRenderingContext2D peer,
                             const Opt_String* type,
@@ -24155,7 +24248,7 @@ typedef struct GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor {
 
 typedef struct GENERATED_ArkUIPageLifeCycleAccessor {
     void (*destroyPeer)(Ark_PageLifeCycle peer);
-    Ark_PageLifeCycle (*ctor)();
+    Ark_PageLifeCycle (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*onPageShow)(Ark_PageLifeCycle peer);
     void (*onPageHide)(Ark_PageLifeCycle peer);
@@ -24167,7 +24260,7 @@ typedef struct GENERATED_ArkUIPageLifeCycleAccessor {
 
 typedef struct GENERATED_ArkUIPanGestureEventAccessor {
     void (*destroyPeer)(Ark_PanGestureEvent peer);
-    Ark_PanGestureEvent (*ctor)();
+    Ark_PanGestureEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getOffsetX)(Ark_PanGestureEvent peer);
     void (*setOffsetX)(Ark_PanGestureEvent peer,
@@ -24188,7 +24281,7 @@ typedef struct GENERATED_ArkUIPanGestureEventAccessor {
 
 typedef struct GENERATED_ArkUIPanGestureInterfaceAccessor {
     void (*destroyPeer)(Ark_PanGestureInterface peer);
-    Ark_PanGestureInterface (*ctor)(const Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions* value);
+    Ark_PanGestureInterface (*construct)(const Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions* value);
     Ark_NativePointer (*getFinalizer)();
     Ark_PanGestureInterface (*onActionStart)(Ark_PanGestureInterface peer,
                                              const Callback_GestureEvent_Void* event);
@@ -24204,7 +24297,7 @@ typedef struct GENERATED_ArkUIPanGestureInterfaceAccessor {
 
 typedef struct GENERATED_ArkUIPanGestureOptionsAccessor {
     void (*destroyPeer)(Ark_PanGestureOptions peer);
-    Ark_PanGestureOptions (*ctor)(const Opt_PanGestureHandlerOptions* value);
+    Ark_PanGestureOptions (*construct)(const Opt_PanGestureHandlerOptions* value);
     Ark_NativePointer (*getFinalizer)();
     void (*setDirection)(Ark_PanGestureOptions peer,
                          Ark_PanDirection value);
@@ -24218,14 +24311,14 @@ typedef struct GENERATED_ArkUIPanGestureOptionsAccessor {
 
 typedef struct GENERATED_ArkUIPanRecognizerAccessor {
     void (*destroyPeer)(Ark_PanRecognizer peer);
-    Ark_PanRecognizer (*ctor)();
+    Ark_PanRecognizer (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_PanGestureOptions (*getPanGestureOptions)(Ark_PanRecognizer peer);
 } GENERATED_ArkUIPanRecognizerAccessor;
 
 typedef struct GENERATED_ArkUIParagraphStyleAccessor {
     void (*destroyPeer)(Ark_ParagraphStyle peer);
-    Ark_ParagraphStyle (*ctor)(const Opt_ParagraphStyleInterface* value);
+    Ark_ParagraphStyle (*construct)(const Opt_ParagraphStyleInterface* value);
     Ark_NativePointer (*getFinalizer)();
     Opt_TextAlign (*getTextAlign)(Ark_ParagraphStyle peer);
     Opt_Number (*getTextIndent)(Ark_ParagraphStyle peer);
@@ -24238,14 +24331,14 @@ typedef struct GENERATED_ArkUIParagraphStyleAccessor {
 
 typedef struct GENERATED_ArkUIPath2DAccessor {
     void (*destroyPeer)(Ark_Path2D peer);
-    Ark_Path2D (*ctor0)();
-    Ark_Path2D (*ctor1)(Ark_LengthMetricsUnit unit);
-    Ark_Path2D (*ctor2)(Ark_Path2D path);
-    Ark_Path2D (*ctor3)(Ark_Path2D path,
-                        Ark_LengthMetricsUnit unit);
-    Ark_Path2D (*ctor4)(const Ark_String* d);
-    Ark_Path2D (*ctor5)(const Ark_String* description,
-                        Ark_LengthMetricsUnit unit);
+    Ark_Path2D (*construct0)();
+    Ark_Path2D (*construct1)(Ark_LengthMetricsUnit unit);
+    Ark_Path2D (*construct2)(Ark_Path2D path);
+    Ark_Path2D (*construct3)(Ark_Path2D path,
+                             Ark_LengthMetricsUnit unit);
+    Ark_Path2D (*construct4)(const Ark_String* d);
+    Ark_Path2D (*construct5)(const Ark_String* description,
+                             Ark_LengthMetricsUnit unit);
     Ark_NativePointer (*getFinalizer)();
     void (*addPath)(Ark_Path2D peer,
                     Ark_Path2D path,
@@ -24254,7 +24347,7 @@ typedef struct GENERATED_ArkUIPath2DAccessor {
 
 typedef struct GENERATED_ArkUIPathShapeAccessor {
     void (*destroyPeer)(Ark_PathShape peer);
-    Ark_PathShape (*ctor)(const Opt_PathShapeOptions* options);
+    Ark_PathShape (*construct)(const Opt_PathShapeOptions* options);
     Ark_NativePointer (*getFinalizer)();
     Ark_PathShape (*offset)(Ark_PathShape peer,
                             const Ark_Position* offset);
@@ -24268,7 +24361,7 @@ typedef struct GENERATED_ArkUIPathShapeAccessor {
 
 typedef struct GENERATED_ArkUIPatternLockControllerAccessor {
     void (*destroyPeer)(Ark_PatternLockController peer);
-    Ark_PatternLockController (*ctor)();
+    Ark_PatternLockController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*reset)(Ark_PatternLockController peer);
     void (*setChallengeResult)(Ark_PatternLockController peer,
@@ -24277,7 +24370,7 @@ typedef struct GENERATED_ArkUIPatternLockControllerAccessor {
 
 typedef struct GENERATED_ArkUIPinchGestureEventAccessor {
     void (*destroyPeer)(Ark_PinchGestureEvent peer);
-    Ark_PinchGestureEvent (*ctor)();
+    Ark_PinchGestureEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getScale)(Ark_PinchGestureEvent peer);
     void (*setScale)(Ark_PinchGestureEvent peer,
@@ -24292,7 +24385,7 @@ typedef struct GENERATED_ArkUIPinchGestureEventAccessor {
 
 typedef struct GENERATED_ArkUIPinchGestureInterfaceAccessor {
     void (*destroyPeer)(Ark_PinchGestureInterface peer);
-    Ark_PinchGestureInterface (*ctor)(const Ark_PinchGestureInterface_Invoke_Literal* value);
+    Ark_PinchGestureInterface (*construct)(const Ark_PinchGestureInterface_Invoke_Literal* value);
     Ark_NativePointer (*getFinalizer)();
     Ark_PinchGestureInterface (*onActionStart)(Ark_PinchGestureInterface peer,
                                                const Callback_GestureEvent_Void* event);
@@ -24308,23 +24401,23 @@ typedef struct GENERATED_ArkUIPinchGestureInterfaceAccessor {
 
 typedef struct GENERATED_ArkUIPinchRecognizerAccessor {
     void (*destroyPeer)(Ark_PinchRecognizer peer);
-    Ark_PinchRecognizer (*ctor)();
+    Ark_PinchRecognizer (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getDistance)(Ark_PinchRecognizer peer);
 } GENERATED_ArkUIPinchRecognizerAccessor;
 
 typedef struct GENERATED_ArkUIPixelMapMockAccessor {
     void (*destroyPeer)(Ark_PixelMapMock peer);
-    Ark_PixelMapMock (*ctor)();
+    Ark_PixelMapMock (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*release)(Ark_PixelMapMock peer);
 } GENERATED_ArkUIPixelMapMockAccessor;
 
 typedef struct GENERATED_ArkUIProgressMaskAccessor {
     void (*destroyPeer)(Ark_ProgressMask peer);
-    Ark_ProgressMask (*ctor)(const Ark_Number* value,
-                             const Ark_Number* total,
-                             const Ark_ResourceColor* color);
+    Ark_ProgressMask (*construct)(const Ark_Number* value,
+                                  const Ark_Number* total,
+                                  const Ark_ResourceColor* color);
     Ark_NativePointer (*getFinalizer)();
     void (*updateProgress)(Ark_ProgressMask peer,
                            const Ark_Number* value);
@@ -24334,15 +24427,59 @@ typedef struct GENERATED_ArkUIProgressMaskAccessor {
                                      Ark_Boolean value);
 } GENERATED_ArkUIProgressMaskAccessor;
 
+typedef struct GENERATED_ArkUIPromptActionAccessor {
+    void (*destroyPeer)(Ark_PromptAction peer);
+    Ark_PromptAction (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*openPopup)(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_PromptAction peer,
+                      Ark_ComponentContent content,
+                      const Ark_TargetInfo* target,
+                      const Opt_PopupCommonOptions* options,
+                      const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*upatePopup)(Ark_VMContext vmContext,
+                       Ark_AsyncWorkerPtr asyncWorker,
+                       Ark_PromptAction peer,
+                       Ark_ComponentContent content,
+                       const Ark_PopupCommonOptions* options,
+                       const Opt_Boolean* partialUpdate,
+                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*closePopup)(Ark_VMContext vmContext,
+                       Ark_AsyncWorkerPtr asyncWorker,
+                       Ark_PromptAction peer,
+                       Ark_ComponentContent content,
+                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*openMenu)(Ark_VMContext vmContext,
+                     Ark_AsyncWorkerPtr asyncWorker,
+                     Ark_PromptAction peer,
+                     Ark_ComponentContent content,
+                     const Ark_TargetInfo* target,
+                     const Opt_MenuOptions* options,
+                     const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*updateMenu)(Ark_VMContext vmContext,
+                       Ark_AsyncWorkerPtr asyncWorker,
+                       Ark_PromptAction peer,
+                       Ark_ComponentContent content,
+                       const Ark_MenuOptions* options,
+                       const Opt_Boolean* partialUpdate,
+                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*closeMenu)(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_PromptAction peer,
+                      Ark_ComponentContent content,
+                      const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+} GENERATED_ArkUIPromptActionAccessor;
+
 typedef struct GENERATED_ArkUIPulseSymbolEffectAccessor {
     void (*destroyPeer)(Ark_PulseSymbolEffect peer);
-    Ark_PulseSymbolEffect (*ctor)();
+    Ark_PulseSymbolEffect (*construct)();
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUIPulseSymbolEffectAccessor;
 
 typedef struct GENERATED_ArkUIRectShapeAccessor {
     void (*destroyPeer)(Ark_RectShape peer);
-    Ark_RectShape (*ctor)(const Opt_Union_RectShapeOptions_RoundRectShapeOptions* options);
+    Ark_RectShape (*construct)(const Opt_Union_RectShapeOptions_RoundRectShapeOptions* options);
     Ark_NativePointer (*getFinalizer)();
     Ark_RectShape (*offset)(Ark_RectShape peer,
                             const Ark_Position* offset);
@@ -24366,7 +24503,7 @@ typedef struct GENERATED_ArkUIRectShapeAccessor {
 
 typedef struct GENERATED_ArkUIRenderingContextSettingsAccessor {
     void (*destroyPeer)(Ark_RenderingContextSettings peer);
-    Ark_RenderingContextSettings (*ctor)(const Opt_Boolean* antialias);
+    Ark_RenderingContextSettings (*construct)(const Opt_Boolean* antialias);
     Ark_NativePointer (*getFinalizer)();
     Opt_Boolean (*getAntialias)(Ark_RenderingContextSettings peer);
     void (*setAntialias)(Ark_RenderingContextSettings peer,
@@ -24375,7 +24512,7 @@ typedef struct GENERATED_ArkUIRenderingContextSettingsAccessor {
 
 typedef struct GENERATED_ArkUIRenderNodeAccessor {
     void (*destroyPeer)(Ark_RenderNode peer);
-    Ark_RenderNode (*ctor)();
+    Ark_RenderNode (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*appendChild)(Ark_RenderNode peer,
                         Ark_RenderNode node);
@@ -24471,9 +24608,13 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
                                  Ark_LengthMetricsUnit lengthMetricsUnit);
 } GENERATED_ArkUIRenderNodeAccessor;
 
+typedef struct GENERATED_ArkUIRenderServiceNodeAccessor {
+    Ark_Int32 (*getNodeId)(const Ark_String* nodeId);
+} GENERATED_ArkUIRenderServiceNodeAccessor;
+
 typedef struct GENERATED_ArkUIReplaceSymbolEffectAccessor {
     void (*destroyPeer)(Ark_ReplaceSymbolEffect peer);
-    Ark_ReplaceSymbolEffect (*ctor)(const Opt_EffectScope* scope);
+    Ark_ReplaceSymbolEffect (*construct)(const Opt_EffectScope* scope);
     Ark_NativePointer (*getFinalizer)();
     Opt_EffectScope (*getScope)(Ark_ReplaceSymbolEffect peer);
     void (*setScope)(Ark_ReplaceSymbolEffect peer,
@@ -24482,8 +24623,8 @@ typedef struct GENERATED_ArkUIReplaceSymbolEffectAccessor {
 
 typedef struct GENERATED_ArkUIRestrictedWorkerAccessor {
     void (*destroyPeer)(Ark_RestrictedWorker peer);
-    Ark_RestrictedWorker (*ctor)(const Ark_String* scriptURL,
-                                 const Opt_WorkerOptions* options);
+    Ark_RestrictedWorker (*construct)(const Ark_String* scriptURL,
+                                      const Opt_WorkerOptions* options);
     Ark_NativePointer (*getFinalizer)();
     void (*postMessage0)(Ark_VMContext vmContext,
                          Ark_RestrictedWorker peer,
@@ -24533,21 +24674,21 @@ typedef struct GENERATED_ArkUIRestrictedWorkerAccessor {
                                        const Opt_String* instanceName);
     Opt_RestrictedWorker_onexit_Callback (*getOnexit)(Ark_RestrictedWorker peer);
     void (*setOnexit)(Ark_RestrictedWorker peer,
-                      const RestrictedWorker_onexit_Callback* onexit);
+                      const Opt_RestrictedWorker_onexit_Callback* onexit);
     Opt_RestrictedWorker_onerror_Callback (*getOnerror)(Ark_RestrictedWorker peer);
     void (*setOnerror)(Ark_RestrictedWorker peer,
-                       const RestrictedWorker_onerror_Callback* onerror);
+                       const Opt_RestrictedWorker_onerror_Callback* onerror);
     Opt_RestrictedWorker_onmessage_Callback (*getOnmessage)(Ark_RestrictedWorker peer);
     void (*setOnmessage)(Ark_RestrictedWorker peer,
-                         const RestrictedWorker_onmessage_Callback* onmessage);
+                         const Opt_RestrictedWorker_onmessage_Callback* onmessage);
     Opt_RestrictedWorker_onmessage_Callback (*getOnmessageerror)(Ark_RestrictedWorker peer);
     void (*setOnmessageerror)(Ark_RestrictedWorker peer,
-                              const RestrictedWorker_onmessage_Callback* onmessageerror);
+                              const Opt_RestrictedWorker_onmessage_Callback* onmessageerror);
 } GENERATED_ArkUIRestrictedWorkerAccessor;
 
 typedef struct GENERATED_ArkUIRichEditorBaseControllerAccessor {
     void (*destroyPeer)(Ark_RichEditorBaseController peer);
-    Ark_RichEditorBaseController (*ctor)();
+    Ark_RichEditorBaseController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getCaretOffset)(Ark_RichEditorBaseController peer);
     Ark_Boolean (*setCaretOffset)(Ark_RichEditorBaseController peer,
@@ -24569,7 +24710,7 @@ typedef struct GENERATED_ArkUIRichEditorBaseControllerAccessor {
 
 typedef struct GENERATED_ArkUIRichEditorControllerAccessor {
     void (*destroyPeer)(Ark_RichEditorController peer);
-    Ark_RichEditorController (*ctor)();
+    Ark_RichEditorController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*addTextSpan)(Ark_RichEditorController peer,
                               const Ark_String* value,
@@ -24602,7 +24743,7 @@ typedef struct GENERATED_ArkUIRichEditorControllerAccessor {
 
 typedef struct GENERATED_ArkUIRichEditorStyledStringControllerAccessor {
     void (*destroyPeer)(Ark_RichEditorStyledStringController peer);
-    Ark_RichEditorStyledStringController (*ctor)();
+    Ark_RichEditorStyledStringController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*setStyledString)(Ark_RichEditorStyledStringController peer,
                             Ark_StyledString styledString);
@@ -24614,7 +24755,7 @@ typedef struct GENERATED_ArkUIRichEditorStyledStringControllerAccessor {
 
 typedef struct GENERATED_ArkUIRotationGestureAccessor {
     void (*destroyPeer)(Ark_RotationGesture peer);
-    Ark_RotationGesture (*ctor)();
+    Ark_RotationGesture (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_RotationGesture (*$_instantiate)(const Callback_RotationGesture* factory,
                                          const Opt_RotationGestureHandlerOptions* value);
@@ -24630,7 +24771,7 @@ typedef struct GENERATED_ArkUIRotationGestureAccessor {
 
 typedef struct GENERATED_ArkUIRotationGestureEventAccessor {
     void (*destroyPeer)(Ark_RotationGestureEvent peer);
-    Ark_RotationGestureEvent (*ctor)();
+    Ark_RotationGestureEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getAngle)(Ark_RotationGestureEvent peer);
     void (*setAngle)(Ark_RotationGestureEvent peer,
@@ -24639,15 +24780,15 @@ typedef struct GENERATED_ArkUIRotationGestureEventAccessor {
 
 typedef struct GENERATED_ArkUIRotationRecognizerAccessor {
     void (*destroyPeer)(Ark_RotationRecognizer peer);
-    Ark_RotationRecognizer (*ctor)();
+    Ark_RotationRecognizer (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getAngle)(Ark_RotationRecognizer peer);
 } GENERATED_ArkUIRotationRecognizerAccessor;
 
 typedef struct GENERATED_ArkUIScaleSymbolEffectAccessor {
     void (*destroyPeer)(Ark_ScaleSymbolEffect peer);
-    Ark_ScaleSymbolEffect (*ctor)(const Opt_EffectScope* scope,
-                                  const Opt_EffectDirection* direction);
+    Ark_ScaleSymbolEffect (*construct)(const Opt_EffectScope* scope,
+                                       const Opt_EffectDirection* direction);
     Ark_NativePointer (*getFinalizer)();
     Opt_EffectScope (*getScope)(Ark_ScaleSymbolEffect peer);
     void (*setScope)(Ark_ScaleSymbolEffect peer,
@@ -24659,7 +24800,7 @@ typedef struct GENERATED_ArkUIScaleSymbolEffectAccessor {
 
 typedef struct GENERATED_ArkUISceneAccessor {
     void (*destroyPeer)(Ark_Scene peer);
-    Ark_Scene (*ctor)();
+    Ark_Scene (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*load)(Ark_VMContext vmContext,
                  Ark_AsyncWorkerPtr asyncWorker,
@@ -24670,7 +24811,7 @@ typedef struct GENERATED_ArkUISceneAccessor {
 
 typedef struct GENERATED_ArkUIScrollableTargetInfoAccessor {
     void (*destroyPeer)(Ark_ScrollableTargetInfo peer);
-    Ark_ScrollableTargetInfo (*ctor)();
+    Ark_ScrollableTargetInfo (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Boolean (*isBegin)(Ark_ScrollableTargetInfo peer);
     Ark_Boolean (*isEnd)(Ark_ScrollableTargetInfo peer);
@@ -24678,7 +24819,7 @@ typedef struct GENERATED_ArkUIScrollableTargetInfoAccessor {
 
 typedef struct GENERATED_ArkUIScrollerAccessor {
     void (*destroyPeer)(Ark_Scroller peer);
-    Ark_Scroller (*ctor)();
+    Ark_Scroller (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*scrollTo)(Ark_Scroller peer,
                      const Ark_ScrollOptions* options);
@@ -24708,17 +24849,17 @@ typedef struct GENERATED_ArkUIScrollerAccessor {
 
 typedef struct GENERATED_ArkUIScrollMotionAccessor {
     void (*destroyPeer)(Ark_ScrollMotion peer);
-    Ark_ScrollMotion (*ctor)(const Ark_Number* position,
-                             const Ark_Number* velocity,
-                             const Ark_Number* min,
-                             const Ark_Number* max,
-                             Ark_SpringProp prop);
+    Ark_ScrollMotion (*construct)(const Ark_Number* position,
+                                  const Ark_Number* velocity,
+                                  const Ark_Number* min,
+                                  const Ark_Number* max,
+                                  Ark_SpringProp prop);
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUIScrollMotionAccessor;
 
 typedef struct GENERATED_ArkUIScrollResultAccessor {
     void (*destroyPeer)(Ark_ScrollResult peer);
-    Ark_ScrollResult (*ctor)();
+    Ark_ScrollResult (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getOffsetRemain)(Ark_ScrollResult peer);
     void (*setOffsetRemain)(Ark_ScrollResult peer,
@@ -24727,7 +24868,7 @@ typedef struct GENERATED_ArkUIScrollResultAccessor {
 
 typedef struct GENERATED_ArkUISearchControllerAccessor {
     void (*destroyPeer)(Ark_SearchController peer);
-    Ark_SearchController (*ctor)();
+    Ark_SearchController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*caretPosition)(Ark_SearchController peer,
                           const Ark_Number* value);
@@ -24746,7 +24887,7 @@ typedef struct GENERATED_ArkUISearchOpsAccessor {
 
 typedef struct GENERATED_ArkUIShapeClipAccessor {
     void (*destroyPeer)(Ark_ShapeClip peer);
-    Ark_ShapeClip (*ctor)();
+    Ark_ShapeClip (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*setRectShape)(Ark_ShapeClip peer,
                          const Ark_common2D_Rect* rect);
@@ -24762,7 +24903,7 @@ typedef struct GENERATED_ArkUIShapeClipAccessor {
 
 typedef struct GENERATED_ArkUIShapeMaskAccessor {
     void (*destroyPeer)(Ark_ShapeMask peer);
-    Ark_ShapeMask (*ctor)();
+    Ark_ShapeMask (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*setRectShape)(Ark_ShapeMask peer,
                          const Ark_common2D_Rect* rect);
@@ -24787,18 +24928,18 @@ typedef struct GENERATED_ArkUIShapeMaskAccessor {
 
 typedef struct GENERATED_ArkUISpringMotionAccessor {
     void (*destroyPeer)(Ark_SpringMotion peer);
-    Ark_SpringMotion (*ctor)(const Ark_Number* start,
-                             const Ark_Number* end,
-                             const Ark_Number* velocity,
-                             Ark_SpringProp prop);
+    Ark_SpringMotion (*construct)(const Ark_Number* start,
+                                  const Ark_Number* end,
+                                  const Ark_Number* velocity,
+                                  Ark_SpringProp prop);
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUISpringMotionAccessor;
 
 typedef struct GENERATED_ArkUISpringPropAccessor {
     void (*destroyPeer)(Ark_SpringProp peer);
-    Ark_SpringProp (*ctor)(const Ark_Number* mass,
-                           const Ark_Number* stiffness,
-                           const Ark_Number* damping);
+    Ark_SpringProp (*construct)(const Ark_Number* mass,
+                                const Ark_Number* stiffness,
+                                const Ark_Number* damping);
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUISpringPropAccessor;
 
@@ -24809,8 +24950,8 @@ typedef struct GENERATED_ArkUIStateStylesOpsAccessor {
 
 typedef struct GENERATED_ArkUIStyledStringAccessor {
     void (*destroyPeer)(Ark_StyledString peer);
-    Ark_StyledString (*ctor)(const Ark_Union_String_ImageAttachment_CustomSpan* value,
-                             const Opt_Array_StyleOptions* styles);
+    Ark_StyledString (*construct)(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+                                  const Opt_Array_StyleOptions* styles);
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getString)(Ark_StyledString peer);
     Array_SpanStyle (*getStyles)(Ark_StyledString peer,
@@ -24844,7 +24985,7 @@ typedef struct GENERATED_ArkUIStyledStringAccessor {
 
 typedef struct GENERATED_ArkUIStyledStringControllerAccessor {
     void (*destroyPeer)(Ark_StyledStringController peer);
-    Ark_StyledStringController (*ctor)();
+    Ark_StyledStringController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*setStyledString)(Ark_StyledStringController peer,
                             Ark_StyledString styledString);
@@ -24853,7 +24994,7 @@ typedef struct GENERATED_ArkUIStyledStringControllerAccessor {
 
 typedef struct GENERATED_ArkUISubmitEventAccessor {
     void (*destroyPeer)(Ark_SubmitEvent peer);
-    Ark_SubmitEvent (*ctor)();
+    Ark_SubmitEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*keepEditableState)(Ark_SubmitEvent peer);
     Ark_String (*getText)(Ark_SubmitEvent peer);
@@ -24863,7 +25004,7 @@ typedef struct GENERATED_ArkUISubmitEventAccessor {
 
 typedef struct GENERATED_ArkUISwipeGestureAccessor {
     void (*destroyPeer)(Ark_SwipeGesture peer);
-    Ark_SwipeGesture (*ctor)();
+    Ark_SwipeGesture (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_SwipeGesture (*$_instantiate)(const Callback_SwipeGesture* factory,
                                       const Opt_SwipeGestureHandlerOptions* value);
@@ -24873,7 +25014,7 @@ typedef struct GENERATED_ArkUISwipeGestureAccessor {
 
 typedef struct GENERATED_ArkUISwipeGestureEventAccessor {
     void (*destroyPeer)(Ark_SwipeGestureEvent peer);
-    Ark_SwipeGestureEvent (*ctor)();
+    Ark_SwipeGestureEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getAngle)(Ark_SwipeGestureEvent peer);
     void (*setAngle)(Ark_SwipeGestureEvent peer,
@@ -24885,7 +25026,7 @@ typedef struct GENERATED_ArkUISwipeGestureEventAccessor {
 
 typedef struct GENERATED_ArkUISwiperContentTransitionProxyAccessor {
     void (*destroyPeer)(Ark_SwiperContentTransitionProxy peer);
-    Ark_SwiperContentTransitionProxy (*ctor)();
+    Ark_SwiperContentTransitionProxy (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*finishTransition)(Ark_SwiperContentTransitionProxy peer);
     Ark_Number (*getSelectedIndex)(Ark_SwiperContentTransitionProxy peer);
@@ -24904,7 +25045,7 @@ typedef struct GENERATED_ArkUISwiperContentTransitionProxyAccessor {
 
 typedef struct GENERATED_ArkUISwiperControllerAccessor {
     void (*destroyPeer)(Ark_SwiperController peer);
-    Ark_SwiperController (*ctor)();
+    Ark_SwiperController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*showNext)(Ark_SwiperController peer);
     void (*showPrevious)(Ark_SwiperController peer);
@@ -24922,7 +25063,7 @@ typedef struct GENERATED_ArkUISwiperControllerAccessor {
 
 typedef struct GENERATED_ArkUISwipeRecognizerAccessor {
     void (*destroyPeer)(Ark_SwipeRecognizer peer);
-    Ark_SwipeRecognizer (*ctor)();
+    Ark_SwipeRecognizer (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getVelocityThreshold)(Ark_SwipeRecognizer peer);
     Ark_SwipeDirection (*getDirection)(Ark_SwipeRecognizer peer);
@@ -24930,7 +25071,7 @@ typedef struct GENERATED_ArkUISwipeRecognizerAccessor {
 
 typedef struct GENERATED_ArkUISymbolEffectAccessor {
     void (*destroyPeer)(Ark_SymbolEffect peer);
-    Ark_SymbolEffect (*ctor)();
+    Ark_SymbolEffect (*construct)();
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUISymbolEffectAccessor;
 
@@ -24946,11 +25087,12 @@ typedef struct GENERATED_ArkUISystemOpsAccessor {
     void (*setFrameCallback)(const Callback_Number_Void* onFrameCallback,
                              const Callback_Number_Void* onIdleCallback,
                              const Ark_Number* delayTime);
+    Array_Number (*colorMetricsResourceColor)(const Ark_Resource* color);
 } GENERATED_ArkUISystemOpsAccessor;
 
 typedef struct GENERATED_ArkUITabBarSymbolAccessor {
     void (*destroyPeer)(Ark_TabBarSymbol peer);
-    Ark_TabBarSymbol (*ctor)();
+    Ark_TabBarSymbol (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_SymbolGlyphModifier (*getNormal)(Ark_TabBarSymbol peer);
     void (*setNormal)(Ark_TabBarSymbol peer,
@@ -24962,7 +25104,7 @@ typedef struct GENERATED_ArkUITabBarSymbolAccessor {
 
 typedef struct GENERATED_ArkUITabContentTransitionProxyAccessor {
     void (*destroyPeer)(Ark_TabContentTransitionProxy peer);
-    Ark_TabContentTransitionProxy (*ctor)();
+    Ark_TabContentTransitionProxy (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*finishTransition)(Ark_TabContentTransitionProxy peer);
     Ark_Number (*getFrom)(Ark_TabContentTransitionProxy peer);
@@ -24975,7 +25117,7 @@ typedef struct GENERATED_ArkUITabContentTransitionProxyAccessor {
 
 typedef struct GENERATED_ArkUITabsControllerAccessor {
     void (*destroyPeer)(Ark_TabsController peer);
-    Ark_TabsController (*ctor)();
+    Ark_TabsController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*changeIndex)(Ark_TabsController peer,
                         const Ark_Number* value);
@@ -24992,13 +25134,13 @@ typedef struct GENERATED_ArkUITabsControllerAccessor {
 
 typedef struct GENERATED_ArkUITapGestureEventAccessor {
     void (*destroyPeer)(Ark_TapGestureEvent peer);
-    Ark_TapGestureEvent (*ctor)();
+    Ark_TapGestureEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUITapGestureEventAccessor;
 
 typedef struct GENERATED_ArkUITapGestureInterfaceAccessor {
     void (*destroyPeer)(Ark_TapGestureInterface peer);
-    Ark_TapGestureInterface (*ctor)(const Ark_TapGestureParameters* value);
+    Ark_TapGestureInterface (*construct)(const Ark_TapGestureParameters* value);
     Ark_NativePointer (*getFinalizer)();
     Ark_TapGestureInterface (*onAction)(Ark_TapGestureInterface peer,
                                         const Callback_GestureEvent_Void* event);
@@ -25006,14 +25148,14 @@ typedef struct GENERATED_ArkUITapGestureInterfaceAccessor {
 
 typedef struct GENERATED_ArkUITapRecognizerAccessor {
     void (*destroyPeer)(Ark_TapRecognizer peer);
-    Ark_TapRecognizer (*ctor)();
+    Ark_TapRecognizer (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getTapCount)(Ark_TapRecognizer peer);
 } GENERATED_ArkUITapRecognizerAccessor;
 
 typedef struct GENERATED_ArkUIText_FontCollectionAccessor {
     void (*destroyPeer)(Ark_text_FontCollection peer);
-    Ark_text_FontCollection (*ctor)();
+    Ark_text_FontCollection (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_text_FontCollection (*getGlobalInstance)();
     void (*loadFontSync)(Ark_text_FontCollection peer,
@@ -25030,7 +25172,7 @@ typedef struct GENERATED_ArkUIText_FontCollectionAccessor {
 
 typedef struct GENERATED_ArkUIText_LineTypesetAccessor {
     void (*destroyPeer)(Ark_text_LineTypeset peer);
-    Ark_text_LineTypeset (*ctor)();
+    Ark_text_LineTypeset (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getLineBreak)(Ark_text_LineTypeset peer,
                                const Ark_Number* startIndex,
@@ -25042,7 +25184,7 @@ typedef struct GENERATED_ArkUIText_LineTypesetAccessor {
 
 typedef struct GENERATED_ArkUIText_ParagraphAccessor {
     void (*destroyPeer)(Ark_text_Paragraph peer);
-    Ark_text_Paragraph (*ctor)();
+    Ark_text_Paragraph (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*layoutSync)(Ark_text_Paragraph peer,
                        const Ark_Number* width);
@@ -25095,8 +25237,8 @@ typedef struct GENERATED_ArkUIText_ParagraphAccessor {
 
 typedef struct GENERATED_ArkUIText_ParagraphBuilderAccessor {
     void (*destroyPeer)(Ark_text_ParagraphBuilder peer);
-    Ark_text_ParagraphBuilder (*ctor)(const Ark_text_ParagraphStyle* paragraphStyle,
-                                      Ark_text_FontCollection fontCollection);
+    Ark_text_ParagraphBuilder (*construct)(const Ark_text_ParagraphStyle* paragraphStyle,
+                                           Ark_text_FontCollection fontCollection);
     Ark_NativePointer (*getFinalizer)();
     void (*pushStyle)(Ark_text_ParagraphBuilder peer,
                       const Ark_text_TextStyle* textStyle);
@@ -25113,7 +25255,7 @@ typedef struct GENERATED_ArkUIText_ParagraphBuilderAccessor {
 
 typedef struct GENERATED_ArkUIText_RunAccessor {
     void (*destroyPeer)(Ark_text_Run peer);
-    Ark_text_Run (*ctor)();
+    Ark_text_Run (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getGlyphCount)(Ark_text_Run peer);
     Array_Number (*getGlyphs0)(Ark_text_Run peer);
@@ -25137,7 +25279,7 @@ typedef struct GENERATED_ArkUIText_RunAccessor {
 
 typedef struct GENERATED_ArkUIText_TextLineAccessor {
     void (*destroyPeer)(Ark_text_TextLine peer);
-    Ark_text_TextLine (*ctor)();
+    Ark_text_TextLine (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getGlyphCount)(Ark_text_TextLine peer);
     Ark_text_Range (*getTextRange)(Ark_text_TextLine peer);
@@ -25166,7 +25308,7 @@ typedef struct GENERATED_ArkUIText_TextLineAccessor {
 
 typedef struct GENERATED_ArkUITextAreaControllerAccessor {
     void (*destroyPeer)(Ark_TextAreaController peer);
-    Ark_TextAreaController (*ctor)();
+    Ark_TextAreaController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*caretPosition)(Ark_TextAreaController peer,
                           const Ark_Number* value);
@@ -25179,7 +25321,7 @@ typedef struct GENERATED_ArkUITextAreaControllerAccessor {
 
 typedef struct GENERATED_ArkUITextBaseControllerAccessor {
     void (*destroyPeer)(Ark_TextBaseController peer);
-    Ark_TextBaseController (*ctor)();
+    Ark_TextBaseController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*setSelection)(Ark_TextBaseController peer,
                          const Ark_Number* selectionStart,
@@ -25191,7 +25333,7 @@ typedef struct GENERATED_ArkUITextBaseControllerAccessor {
 
 typedef struct GENERATED_ArkUITextClockControllerAccessor {
     void (*destroyPeer)(Ark_TextClockController peer);
-    Ark_TextClockController (*ctor)();
+    Ark_TextClockController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*start)(Ark_TextClockController peer);
     void (*stop)(Ark_TextClockController peer);
@@ -25199,7 +25341,7 @@ typedef struct GENERATED_ArkUITextClockControllerAccessor {
 
 typedef struct GENERATED_ArkUITextContentControllerBaseAccessor {
     void (*destroyPeer)(Ark_TextContentControllerBase peer);
-    Ark_TextContentControllerBase (*ctor)();
+    Ark_TextContentControllerBase (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_CaretOffset (*getCaretOffset)(Ark_TextContentControllerBase peer);
     Ark_RectResult (*getTextContentRect)(Ark_TextContentControllerBase peer);
@@ -25217,7 +25359,7 @@ typedef struct GENERATED_ArkUITextContentControllerBaseAccessor {
 
 typedef struct GENERATED_ArkUITextControllerAccessor {
     void (*destroyPeer)(Ark_TextController peer);
-    Ark_TextController (*ctor)();
+    Ark_TextController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*closeSelectionMenu)(Ark_TextController peer);
     void (*setStyledString)(Ark_TextController peer,
@@ -25227,7 +25369,7 @@ typedef struct GENERATED_ArkUITextControllerAccessor {
 
 typedef struct GENERATED_ArkUITextEditControllerExAccessor {
     void (*destroyPeer)(Ark_TextEditControllerEx peer);
-    Ark_TextEditControllerEx (*ctor)();
+    Ark_TextEditControllerEx (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Boolean (*isEditing)(Ark_TextEditControllerEx peer);
     void (*stopEditing)(Ark_TextEditControllerEx peer);
@@ -25241,11 +25383,31 @@ typedef struct GENERATED_ArkUITextFieldOpsAccessor {
     Ark_NativePointer (*registerTextFieldValueCallback)(Ark_NativePointer node,
                                                         const Ark_ResourceStr* value,
                                                         const TextFieldValueCallback* callback);
+    Ark_NativePointer (*textFieldOpsSetWidth)(Ark_NativePointer node,
+                                              const Opt_Union_Length_LayoutPolicy* value);
+    Ark_NativePointer (*textFieldOpsSetHeight)(Ark_NativePointer node,
+                                               const Opt_Union_Length_LayoutPolicy* value);
+    Ark_NativePointer (*textFieldOpsSetPadding)(Ark_NativePointer node,
+                                                const Opt_Union_Padding_Length_LocalizedPadding* value);
+    Ark_NativePointer (*textFieldOpsSetMargin)(Ark_NativePointer node,
+                                               const Opt_Union_Padding_Length_LocalizedPadding* value);
+    Ark_NativePointer (*textFieldOpsSetBorder)(Ark_NativePointer node,
+                                               const Opt_BorderOptions* value);
+    Ark_NativePointer (*textFieldOpsSetBorderWidth)(Ark_NativePointer node,
+                                                    const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value);
+    Ark_NativePointer (*textFieldOpsSetBorderColor)(Ark_NativePointer node,
+                                                    const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value);
+    Ark_NativePointer (*textFieldOpsSetBorderStyle)(Ark_NativePointer node,
+                                                    const Opt_Union_BorderStyle_EdgeStyles* value);
+    Ark_NativePointer (*textFieldOpsSetBorderRadius)(Ark_NativePointer node,
+                                                     const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value);
+    Ark_NativePointer (*textFieldOpsSetBackgroundColor)(Ark_NativePointer node,
+                                                        const Opt_ResourceColor* value);
 } GENERATED_ArkUITextFieldOpsAccessor;
 
 typedef struct GENERATED_ArkUITextInputControllerAccessor {
     void (*destroyPeer)(Ark_TextInputController peer);
-    Ark_TextInputController (*ctor)();
+    Ark_TextInputController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*caretPosition)(Ark_TextInputController peer,
                           const Ark_Number* value);
@@ -25258,7 +25420,7 @@ typedef struct GENERATED_ArkUITextInputControllerAccessor {
 
 typedef struct GENERATED_ArkUITextMenuControllerAccessor {
     void (*destroyPeer)(Ark_TextMenuController peer);
-    Ark_TextMenuController (*ctor)();
+    Ark_TextMenuController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*setMenuOptions)(Ark_TextMenuController peer,
                            const Ark_TextMenuOptions* options);
@@ -25266,7 +25428,7 @@ typedef struct GENERATED_ArkUITextMenuControllerAccessor {
 
 typedef struct GENERATED_ArkUITextMenuItemIdAccessor {
     void (*destroyPeer)(Ark_TextMenuItemId peer);
-    Ark_TextMenuItemId (*ctor)();
+    Ark_TextMenuItemId (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_TextMenuItemId (*of)(const Ark_ResourceStr* id);
     Ark_Boolean (*equals)(Ark_TextMenuItemId peer,
@@ -25285,20 +25447,20 @@ typedef struct GENERATED_ArkUITextMenuItemIdAccessor {
 
 typedef struct GENERATED_ArkUITextPickerDialogAccessor {
     void (*destroyPeer)(Ark_TextPickerDialog peer);
-    Ark_TextPickerDialog (*ctor)();
+    Ark_TextPickerDialog (*construct)();
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUITextPickerDialogAccessor;
 
 typedef struct GENERATED_ArkUITextShadowStyleAccessor {
     void (*destroyPeer)(Ark_TextShadowStyle peer);
-    Ark_TextShadowStyle (*ctor)(const Ark_Union_ShadowOptions_Array_ShadowOptions* value);
+    Ark_TextShadowStyle (*construct)(const Ark_Union_ShadowOptions_Array_ShadowOptions* value);
     Ark_NativePointer (*getFinalizer)();
     Array_ShadowOptions (*getTextShadow)(Ark_TextShadowStyle peer);
 } GENERATED_ArkUITextShadowStyleAccessor;
 
 typedef struct GENERATED_ArkUITextStyleAccessor {
     void (*destroyPeer)(Ark_TextStyle peer);
-    Ark_TextStyle (*ctor)(const Opt_TextStyleInterface* value);
+    Ark_TextStyle (*construct)(const Opt_TextStyleInterface* value);
     Ark_NativePointer (*getFinalizer)();
     Opt_ResourceColor (*getFontColor)(Ark_TextStyle peer);
     Opt_String (*getFontFamily)(Ark_TextStyle peer);
@@ -25309,7 +25471,7 @@ typedef struct GENERATED_ArkUITextStyleAccessor {
 
 typedef struct GENERATED_ArkUITextTimerControllerAccessor {
     void (*destroyPeer)(Ark_TextTimerController peer);
-    Ark_TextTimerController (*ctor)();
+    Ark_TextTimerController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*start)(Ark_TextTimerController peer);
     void (*pause)(Ark_TextTimerController peer);
@@ -25318,20 +25480,20 @@ typedef struct GENERATED_ArkUITextTimerControllerAccessor {
 
 typedef struct GENERATED_ArkUIThemeControlAccessor {
     void (*destroyPeer)(Ark_ThemeControl peer);
-    Ark_ThemeControl (*ctor)();
+    Ark_ThemeControl (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*setDefaultTheme)(const Ark_CustomTheme* theme);
 } GENERATED_ArkUIThemeControlAccessor;
 
 typedef struct GENERATED_ArkUITimePickerDialogAccessor {
     void (*destroyPeer)(Ark_TimePickerDialog peer);
-    Ark_TimePickerDialog (*ctor)();
+    Ark_TimePickerDialog (*construct)();
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUITimePickerDialogAccessor;
 
 typedef struct GENERATED_ArkUITouchEventAccessor {
     void (*destroyPeer)(Ark_TouchEvent peer);
-    Ark_TouchEvent (*ctor)();
+    Ark_TouchEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Array_HistoricalPoint (*getHistoricalPoints)(Ark_TouchEvent peer);
     Ark_TouchType (*getType)(Ark_TouchEvent peer);
@@ -25353,13 +25515,13 @@ typedef struct GENERATED_ArkUITouchEventAccessor {
 
 typedef struct GENERATED_ArkUITransitionEffectAccessor {
     void (*destroyPeer)(Ark_TransitionEffect peer);
-    Ark_TransitionEffect (*ctor0)(const Ark_String* type);
-    Ark_TransitionEffect (*ctor1)(const Ark_Number* effect);
-    Ark_TransitionEffect (*ctor2)(Ark_TransitionEdge effect);
-    Ark_TransitionEffect (*ctor3)(const Ark_TranslateOptions* effect);
-    Ark_TransitionEffect (*ctor4)(const Ark_RotateOptions* effect);
-    Ark_TransitionEffect (*ctor5)(const Ark_ScaleOptions* effect);
-    Ark_TransitionEffect (*ctor6)(const Ark_AsymmetricTransitionOption* effect);
+    Ark_TransitionEffect (*construct0)(const Ark_String* type);
+    Ark_TransitionEffect (*construct1)(const Ark_Number* effect);
+    Ark_TransitionEffect (*construct2)(Ark_TransitionEdge effect);
+    Ark_TransitionEffect (*construct3)(const Ark_TranslateOptions* effect);
+    Ark_TransitionEffect (*construct4)(const Ark_RotateOptions* effect);
+    Ark_TransitionEffect (*construct5)(const Ark_ScaleOptions* effect);
+    Ark_TransitionEffect (*construct6)(const Ark_AsymmetricTransitionOption* effect);
     Ark_NativePointer (*getFinalizer)();
     Ark_TransitionEffect (*translate)(const Ark_TranslateOptions* options);
     Ark_TransitionEffect (*rotate)(const Ark_RotateOptions* options);
@@ -25380,7 +25542,7 @@ typedef struct GENERATED_ArkUITransitionEffectAccessor {
 
 typedef struct GENERATED_ArkUIUICommonEventAccessor {
     void (*destroyPeer)(Ark_UICommonEvent peer);
-    Ark_UICommonEvent (*ctor)();
+    Ark_UICommonEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*setOnClick)(Ark_UICommonEvent peer,
                        const Opt_Callback_ClickEvent_Void* callback_);
@@ -25409,7 +25571,7 @@ typedef struct GENERATED_ArkUIUICommonEventAccessor {
 
 typedef struct GENERATED_ArkUIUIContextAccessor {
     void (*destroyPeer)(Ark_UIContext peer);
-    Ark_UIContext (*ctor)();
+    Ark_UIContext (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_drawing_Font (*getFont)(Ark_UIContext peer);
     Ark_String (*getFilteredInspectorTree)(Ark_VMContext vmContext,
@@ -25486,7 +25648,7 @@ typedef struct GENERATED_ArkUIUIContextAtomicServiceBarAccessor {
 
 typedef struct GENERATED_ArkUIUiEffect_VisualEffectAccessor {
     void (*destroyPeer)(Ark_uiEffect_VisualEffect peer);
-    Ark_uiEffect_VisualEffect (*ctor)();
+    Ark_uiEffect_VisualEffect (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_uiEffect_VisualEffect (*backgroundColorBlender)(Ark_uiEffect_VisualEffect peer,
                                                         const Ark_uiEffect_BrightnessBlender* blender);
@@ -25494,7 +25656,7 @@ typedef struct GENERATED_ArkUIUiEffect_VisualEffectAccessor {
 
 typedef struct GENERATED_ArkUIUIExtensionProxyAccessor {
     void (*destroyPeer)(Ark_UIExtensionProxy peer);
-    Ark_UIExtensionProxy (*ctor)();
+    Ark_UIExtensionProxy (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*send)(Ark_UIExtensionProxy peer,
                  const Map_String_Object* data);
@@ -25512,7 +25674,7 @@ typedef struct GENERATED_ArkUIUIExtensionProxyAccessor {
 
 typedef struct GENERATED_ArkUIUnifiedDataChannel_UnifiedDataAccessor {
     void (*destroyPeer)(Ark_unifiedDataChannel_UnifiedData peer);
-    Ark_unifiedDataChannel_UnifiedData (*ctor)();
+    Ark_unifiedDataChannel_UnifiedData (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Boolean (*hasType)(Ark_unifiedDataChannel_UnifiedData peer,
                            const Ark_String* UnifiedData_type);
@@ -25521,20 +25683,20 @@ typedef struct GENERATED_ArkUIUnifiedDataChannel_UnifiedDataAccessor {
 
 typedef struct GENERATED_ArkUIUrlStyleAccessor {
     void (*destroyPeer)(Ark_UrlStyle peer);
-    Ark_UrlStyle (*ctor)(const Ark_String* url);
+    Ark_UrlStyle (*construct)(const Ark_String* url);
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getUrl)(Ark_UrlStyle peer);
 } GENERATED_ArkUIUrlStyleAccessor;
 
 typedef struct GENERATED_ArkUIUserDataSpanAccessor {
     void (*destroyPeer)(Ark_UserDataSpan peer);
-    Ark_UserDataSpan (*ctor)();
+    Ark_UserDataSpan (*construct)();
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUIUserDataSpanAccessor;
 
 typedef struct GENERATED_ArkUIVideoControllerAccessor {
     void (*destroyPeer)(Ark_VideoController peer);
-    Ark_VideoController (*ctor)();
+    Ark_VideoController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*start)(Ark_VideoController peer);
     void (*pause)(Ark_VideoController peer);
@@ -25552,7 +25714,7 @@ typedef struct GENERATED_ArkUIVideoControllerAccessor {
 
 typedef struct GENERATED_ArkUIWaterFlowSectionsAccessor {
     void (*destroyPeer)(Ark_WaterFlowSections peer);
-    Ark_WaterFlowSections (*ctor)();
+    Ark_WaterFlowSections (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Boolean (*splice)(Ark_WaterFlowSections peer,
                           const Ark_Number* start,
@@ -25569,7 +25731,7 @@ typedef struct GENERATED_ArkUIWaterFlowSectionsAccessor {
 
 typedef struct GENERATED_ArkUIWebCookieAccessor {
     void (*destroyPeer)(Ark_WebCookie peer);
-    Ark_WebCookie (*ctor)();
+    Ark_WebCookie (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*setCookie)(Ark_WebCookie peer);
     void (*saveCookie)(Ark_WebCookie peer);
@@ -25577,7 +25739,7 @@ typedef struct GENERATED_ArkUIWebCookieAccessor {
 
 typedef struct GENERATED_ArkUIXComponentControllerAccessor {
     void (*destroyPeer)(Ark_XComponentController peer);
-    Ark_XComponentController (*ctor)();
+    Ark_XComponentController (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getXComponentSurfaceId)(Ark_XComponentController peer);
     Ark_Object (*getXComponentContext)(Ark_XComponentController peer);
@@ -25776,6 +25938,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIBaselineOffsetStyleAccessor* (*getBaselineOffsetStyleAccessor)();
     const GENERATED_ArkUIBaseShapeAccessor* (*getBaseShapeAccessor)();
     const GENERATED_ArkUIBounceSymbolEffectAccessor* (*getBounceSymbolEffectAccessor)();
+    const GENERATED_ArkUIBuilderNodeOpsAccessor* (*getBuilderNodeOpsAccessor)();
     const GENERATED_ArkUICalendarControllerAccessor* (*getCalendarControllerAccessor)();
     const GENERATED_ArkUICalendarPickerDialogAccessor* (*getCalendarPickerDialogAccessor)();
     const GENERATED_ArkUICanvasGradientAccessor* (*getCanvasGradientAccessor)();
@@ -25859,6 +26022,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILazyForEachOpsAccessor* (*getLazyForEachOpsAccessor)();
     const GENERATED_ArkUILengthMetricsAccessor* (*getLengthMetricsAccessor)();
     const GENERATED_ArkUILetterSpacingStyleAccessor* (*getLetterSpacingStyleAccessor)();
+    const GENERATED_ArkUILevelOrderAccessor* (*getLevelOrderAccessor)();
     const GENERATED_ArkUILifeCycleAccessor* (*getLifeCycleAccessor)();
     const GENERATED_ArkUILinearGradientAccessor* (*getLinearGradientAccessor)();
     const GENERATED_ArkUILinearIndicatorControllerAccessor* (*getLinearIndicatorControllerAccessor)();
@@ -25894,10 +26058,12 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIPinchRecognizerAccessor* (*getPinchRecognizerAccessor)();
     const GENERATED_ArkUIPixelMapMockAccessor* (*getPixelMapMockAccessor)();
     const GENERATED_ArkUIProgressMaskAccessor* (*getProgressMaskAccessor)();
+    const GENERATED_ArkUIPromptActionAccessor* (*getPromptActionAccessor)();
     const GENERATED_ArkUIPulseSymbolEffectAccessor* (*getPulseSymbolEffectAccessor)();
     const GENERATED_ArkUIRectShapeAccessor* (*getRectShapeAccessor)();
     const GENERATED_ArkUIRenderingContextSettingsAccessor* (*getRenderingContextSettingsAccessor)();
     const GENERATED_ArkUIRenderNodeAccessor* (*getRenderNodeAccessor)();
+    const GENERATED_ArkUIRenderServiceNodeAccessor* (*getRenderServiceNodeAccessor)();
     const GENERATED_ArkUIReplaceSymbolEffectAccessor* (*getReplaceSymbolEffectAccessor)();
     const GENERATED_ArkUIRestrictedWorkerAccessor* (*getRestrictedWorkerAccessor)();
     const GENERATED_ArkUIRichEditorBaseControllerAccessor* (*getRichEditorBaseControllerAccessor)();
@@ -26263,7 +26429,7 @@ typedef struct GenericServiceAPI {
 #ifndef GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANY_API_H
 #define GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANY_API_H
 #include <stdint.h>
-// todo remove after migration to OH_AnyAPI to be consistent between arkoala and ohos apis
+// todo remove after migration to OH_AnyAPI to be consistant between arkoala and ohos apis
 struct Ark_AnyAPI {
     int32_t version;
 };

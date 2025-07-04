@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RotationGestureAccessor {
 void DestroyPeerImpl(Ark_RotationGesture peer)
 {
+    auto peerImpl = reinterpret_cast<RotationGesturePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_RotationGesture CtorImpl()
+Ark_RotationGesture ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -56,7 +60,7 @@ const GENERATED_ArkUIRotationGestureAccessor* GetRotationGestureAccessor()
 {
     static const GENERATED_ArkUIRotationGestureAccessor RotationGestureAccessorImpl {
         RotationGestureAccessor::DestroyPeerImpl,
-        RotationGestureAccessor::CtorImpl,
+        RotationGestureAccessor::ConstructImpl,
         RotationGestureAccessor::GetFinalizerImpl,
         RotationGestureAccessor::$_instantiateImpl,
         RotationGestureAccessor::OnActionStartImpl,
@@ -67,4 +71,7 @@ const GENERATED_ArkUIRotationGestureAccessor* GetRotationGestureAccessor()
     return &RotationGestureAccessorImpl;
 }
 
+struct RotationGesturePeer {
+    virtual ~RotationGesturePeer() = default;
+};
 }

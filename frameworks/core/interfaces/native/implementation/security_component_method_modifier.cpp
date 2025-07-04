@@ -14,431 +14,338 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/security_component/security_component_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::Converter {
-template<>
-void AssignCast(std::optional<SecurityComponentLayoutDirection>& dst, const Ark_SecurityComponentLayoutDirection& src)
-{
-    switch (src) {
-        case ARK_SECURITY_COMPONENT_LAYOUT_DIRECTION_HORIZONTAL:
-            dst = SecurityComponentLayoutDirection::HORIZONTAL;
-            break;
-        case ARK_SECURITY_COMPONENT_LAYOUT_DIRECTION_VERTICAL:
-            dst = SecurityComponentLayoutDirection::VERTICAL;
-            break;
-        default:
-            LOGE("Unexpected enum value in Ark_SecurityComponentLayoutDirection: %{public}d", src);
-    }
-}
-template<>
-OffsetT<Dimension> Convert(const Ark_Position& src)
-{
-    OffsetT<Dimension> offset;
-    auto x = Converter::OptConvert<Dimension>(src.x);
-    auto y = Converter::OptConvert<Dimension>(src.y);
-    if (x.has_value()) {
-        offset.SetX(x.value());
-    }
-    if (y.has_value()) {
-        offset.SetY(y.value());
-    }
-    return offset;
-}
-template<>
-PaddingPropertyT<Dimension> Convert(const Ark_Padding& src)
-{
-    PaddingPropertyT<Dimension> padding;
-    padding.left = Converter::OptConvert<Dimension>(src.left);
-    padding.top = Converter::OptConvert<Dimension>(src.top);
-    padding.right = Converter::OptConvert<Dimension>(src.right);
-    padding.bottom = Converter::OptConvert<Dimension>(src.bottom);
-    return padding;
-}
-static PaddingPropertyT<Dimension> PaddingPropertyFromDimension(const std::optional<Dimension>& value)
-{
-    PaddingPropertyT<Dimension> padding;
-    padding.left = value;
-    padding.top = value;
-    padding.right = value;
-    padding.bottom = value;
-    return padding;
-}
-template<>
-PaddingPropertyT<Dimension> Convert(const Ark_Number& src)
-{
-    return PaddingPropertyFromDimension(OptConvert<Dimension>(src));
-}
-template<>
-PaddingPropertyT<Dimension> Convert(const Ark_String& src)
-{
-    return PaddingPropertyFromDimension(OptConvert<Dimension>(src));
-}
-template<>
-PaddingPropertyT<Dimension> Convert(const Ark_Resource& src)
-{
-    return PaddingPropertyFromDimension(OptConvert<Dimension>(src));
-}
-} //namespace OHOS::Ace::NG::Converter
-
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace CommonMethodModifier {
-void SetWidth(FrameNode *frameNode, std::optional<CalcDimension> value);
-void SetHeight(FrameNode *frameNode, std::optional<CalcDimension> value);
-void SizeImpl(Ark_NativePointer node,
-    const Opt_SizeOptions* value);
-void ConstraintSizeImpl(Ark_NativePointer node,
-    const Opt_ConstraintSizeOptions* value);
-void OffsetImpl(Ark_NativePointer node,
-    const Opt_Union_Position_Edges_LocalizedEdges* value);
-void IdImpl(Ark_NativePointer node,
-    const Opt_String* value);
-void AlignRules0Impl(Ark_NativePointer node,
-    const Opt_AlignRuleOption* value);
-void AlignRules1Impl(Ark_NativePointer node,
-    const Opt_LocalizedAlignRuleOptions* value);
-void EnabledImpl(Ark_NativePointer node,
-    const Opt_Boolean *value);
-void ChainModeImpl(Ark_NativePointer node,
-    const Opt_Axis *direction,
-    const Opt_ChainStyle *style);
-} // namespace CommonMethodModifier
 namespace SecurityComponentMethodModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
     return {};
 }
-void IconSizeImpl(Ark_NativePointer node,
-                  const Opt_Dimension* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto valueOpt = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(valueOpt);
-    SecurityComponentModelNG::SetIconSize(frameNode, valueOpt);
-}
-void LayoutDirectionImpl(Ark_NativePointer node,
-                         const Opt_SecurityComponentLayoutDirection* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto layoutDirection = Converter::OptConvertPtr<SecurityComponentLayoutDirection>(value);
-    SecurityComponentModelNG::SetTextIconLayoutDirection(frameNode, layoutDirection);
-}
-void PositionImpl(Ark_NativePointer node,
-                  const Opt_Position* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<OffsetT<Dimension>>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    // ViewAbstract::SetPosition(frameNode, *convValue);
-}
-void MarkAnchorImpl(Ark_NativePointer node,
-                    const Opt_Position* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::MarkAnchor(frameNode, Converter::OptConvert<OffsetT<Dimension>>(*value));
-}
-void OffsetImpl(Ark_NativePointer node,
-                const Opt_Union_Position_Edges_LocalizedEdges* value)
-{
-    CommonMethodModifier::OffsetImpl(node, value);
-}
-void FontSizeImpl(Ark_NativePointer node,
-                  const Opt_Dimension* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidatePositive(fontSize);
-    Validator::ValidateNonPercent(fontSize);
-    SecurityComponentModelNG::SetFontSize(frameNode, fontSize);
-}
-void FontStyleImpl(Ark_NativePointer node,
-                   const Opt_FontStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    SecurityComponentModelNG::SetFontStyle(frameNode, Converter::OptConvertPtr<Ace::FontStyle>(value));
-}
-void FontWeightImpl(Ark_NativePointer node,
-                    const Opt_Union_I32_FontWeight_String* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    SecurityComponentModelNG::SetFontWeight(frameNode, Converter::OptConvertPtr<FontWeight>(value));
-}
-void FontFamilyImpl(Ark_NativePointer node,
-                    const Opt_Union_String_Resource* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::optional<StringArray> families;
-    if (auto fontfamiliesOpt = Converter::OptConvertPtr<Converter::FontFamilies>(value); fontfamiliesOpt) {
-        families = fontfamiliesOpt->families;
-    }
-    Validator::ValidateNonEmpty(families);
-    SecurityComponentModelNG::SetFontFamily(frameNode, families);
-}
-void FontColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto fontColor = Converter::OptConvertPtr<Color>(value);
-    SecurityComponentModelNG::SetFontColor(frameNode, fontColor);
-}
-void IconColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto iconColor = Converter::OptConvertPtr<Color>(value);
-    SecurityComponentModelNG::SetIconColor(frameNode, iconColor);
-}
-void BackgroundColorImpl(Ark_NativePointer node,
-                         const Opt_ResourceColor* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto сolor = Converter::OptConvertPtr<Color>(value);
-    SecurityComponentModelNG::SetBackgroundColor(frameNode, сolor);
-}
-void BorderStyleImpl(Ark_NativePointer node,
-                     const Opt_BorderStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::OptConvertPtr<BorderStyle>(value);
-    SecurityComponentModelNG::SetBackgroundBorderStyle(frameNode, optValue);
-}
-void BorderWidthImpl(Ark_NativePointer node,
+void SetIconSizeImpl(Ark_NativePointer node,
                      const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(convValue);
-    SecurityComponentModelNG::SetBackgroundBorderWidth(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetIconSize(frameNode, convValue);
 }
-void BorderColorImpl(Ark_NativePointer node,
-                     const Opt_ResourceColor* value)
+void SetLayoutDirectionImpl(Ark_NativePointer node,
+                            const Opt_SecurityComponentLayoutDirection* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto color = Converter::OptConvertPtr<Color>(value);
-    SecurityComponentModelNG::SetBackgroundBorderColor(frameNode, color);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetLayoutDirection(frameNode, convValue);
 }
-void BorderRadiusImpl(Ark_NativePointer node,
-                      const Opt_Dimension* value)
+void SetPositionImpl(Ark_NativePointer node,
+                     const Opt_Position* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(convValue);
-    SecurityComponentModelNG::SetBackgroundBorderRadius(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetPosition(frameNode, convValue);
 }
-void PaddingImpl(Ark_NativePointer node,
-                 const Opt_Union_Padding_Dimension* value)
+void SetMarkAnchorImpl(Ark_NativePointer node,
+                       const Opt_Position* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto padding = Converter::OptConvert<PaddingPropertyT<Dimension>>(*value);
-    if (padding) {
-        SecurityComponentModelNG::SetBackgroundPadding(frameNode, padding->left, padding->right, padding->top,
-            padding->bottom);
-    } else {
-        SecurityComponentModelNG::SetBackgroundPadding(frameNode, std::nullopt, std::nullopt, std::nullopt,
-            std::nullopt);
-    }
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetMarkAnchor(frameNode, convValue);
 }
-void TextIconSpaceImpl(Ark_NativePointer node,
-                       const Opt_Dimension* value)
+void SetOffsetImpl(Ark_NativePointer node,
+                   const Opt_Union_Position_Edges_LocalizedEdges* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto valueOpt = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(valueOpt);
-    SecurityComponentModelNG::SetTextIconSpace(frameNode, valueOpt);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetOffset(frameNode, convValue);
 }
-void KeyImpl(Ark_NativePointer node,
-             const Opt_String* value)
+void SetFontSizeImpl(Ark_NativePointer node,
+                     const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<std::string>(value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    // ViewAbstract::SetInspectorId(frameNode, *convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetFontSize(frameNode, convValue);
 }
-void WidthImpl(Ark_NativePointer node,
-               const Opt_Length* value)
+void SetFontStyleImpl(Ark_NativePointer node,
+                      const Opt_FontStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CommonMethodModifier::SetWidth(frameNode, Converter::OptConvertPtr<CalcDimension>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetFontStyle(frameNode, convValue);
 }
-void HeightImpl(Ark_NativePointer node,
-                const Opt_Length* value)
+void SetFontWeightImpl(Ark_NativePointer node,
+                       const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CommonMethodModifier::SetHeight(frameNode, Converter::OptConvertPtr<CalcDimension>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetFontWeight(frameNode, convValue);
 }
-void SizeImpl(Ark_NativePointer node,
-              const Opt_SizeOptions* value)
-{
-    CommonMethodModifier::SizeImpl(node, value);
-}
-void ConstraintSizeImpl(Ark_NativePointer node,
-                        const Opt_ConstraintSizeOptions* value)
-{
-    CommonMethodModifier::ConstraintSizeImpl(node, value);
-}
-void AlignImpl(Ark_NativePointer node,
-               const Opt_Alignment* value)
+void SetFontFamilyImpl(Ark_NativePointer node,
+                       const Opt_Union_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Alignment>(value);
-    SecurityComponentModelNG::SetAlign(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetFontFamily(frameNode, convValue);
 }
-void AlignRules0Impl(Ark_NativePointer node,
-                     const Opt_AlignRuleOption* value)
-{
-    CommonMethodModifier::AlignRules0Impl(node, value);
-}
-void AlignRules1Impl(Ark_NativePointer node,
-                     const Opt_LocalizedAlignRuleOptions* value)
-{
-    CommonMethodModifier::AlignRules1Impl(node, value);
-}
-void IdImpl(Ark_NativePointer node,
-            const Opt_String* value)
-{
-    CommonMethodModifier::IdImpl(node, value);
-}
-void ChainModeImpl(Ark_NativePointer node,
-                   const Opt_Axis* direction,
-                   const Opt_ChainStyle* style)
-{
-    CommonMethodModifier::ChainModeImpl(node, direction, style);
-}
-void MinFontScaleImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_Resource* value)
+void SetFontColorImpl(Ark_NativePointer node,
+                      const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto minFontScale = Converter::OptConvertPtr<float>(value);
-    Validator::ValidatePositive(minFontScale);
-    const auto maxValue = 1.f;
-    Validator::ValidateLessOrEqual(minFontScale, maxValue);
-    SecurityComponentModelNG::SetMinFontScale(frameNode, minFontScale);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetFontColor(frameNode, convValue);
 }
-void MaxFontScaleImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_Resource* value)
+void SetIconColorImpl(Ark_NativePointer node,
+                      const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto maxFontScale = Converter::OptConvertPtr<float>(value);
-    const auto minValue = 1.f;
-    Validator::ValidateGreatOrEqual(maxFontScale, minValue);
-    SecurityComponentModelNG::SetMaxFontScale(frameNode, maxFontScale);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetIconColor(frameNode, convValue);
 }
-void MaxLinesImpl(Ark_NativePointer node,
-                  const Opt_Number* value)
+void SetBackgroundColorImpl(Ark_NativePointer node,
+                            const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto maxLines = Converter::OptConvertPtr<int32_t>(value);
-    Validator::ValidateNonNegative(maxLines);
-    SecurityComponentModelNG::SetMaxLines(frameNode, maxLines);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetBackgroundColor(frameNode, convValue);
 }
-void MinFontSizeImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_String_Resource* value)
+void SetBorderStyleImpl(Ark_NativePointer node,
+                        const Opt_BorderStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(fontSize);
-    Validator::ValidateNonPercent(fontSize);
-    SecurityComponentModelNG::SetAdaptMinFontSize(frameNode, fontSize);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetBorderStyle(frameNode, convValue);
 }
-void MaxFontSizeImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_String_Resource* value)
+void SetBorderWidthImpl(Ark_NativePointer node,
+                        const Opt_Dimension* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(fontSize);
-    Validator::ValidateNonPercent(fontSize);
-    SecurityComponentModelNG::SetAdaptMaxFontSize(frameNode, fontSize);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetBorderWidth(frameNode, convValue);
 }
-void HeightAdaptivePolicyImpl(Ark_NativePointer node,
-                              const Opt_TextHeightAdaptivePolicy* value)
+void SetBorderColorImpl(Ark_NativePointer node,
+                        const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<TextHeightAdaptivePolicy>(value);
-    SecurityComponentModelNG::SetHeightAdaptivePolicy(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetBorderColor(frameNode, convValue);
 }
-void EnabledImpl(Ark_NativePointer node,
-                 const Opt_Boolean* value)
+void SetBorderRadiusImpl(Ark_NativePointer node,
+                         const Opt_Dimension* value)
 {
-    CommonMethodModifier::EnabledImpl(node, value);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetBorderRadius(frameNode, convValue);
+}
+void SetPaddingImpl(Ark_NativePointer node,
+                    const Opt_Union_Padding_Dimension* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetPadding(frameNode, convValue);
+}
+void SetTextIconSpaceImpl(Ark_NativePointer node,
+                          const Opt_Dimension* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetTextIconSpace(frameNode, convValue);
+}
+void SetKeyImpl(Ark_NativePointer node,
+                const Opt_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetKey(frameNode, convValue);
+}
+void SetWidthImpl(Ark_NativePointer node,
+                  const Opt_Length* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetWidth(frameNode, convValue);
+}
+void SetHeightImpl(Ark_NativePointer node,
+                   const Opt_Length* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetHeight(frameNode, convValue);
+}
+void SetSizeImpl(Ark_NativePointer node,
+                 const Opt_SizeOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetSize(frameNode, convValue);
+}
+void SetConstraintSizeImpl(Ark_NativePointer node,
+                           const Opt_ConstraintSizeOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetConstraintSize(frameNode, convValue);
+}
+void SetAlignImpl(Ark_NativePointer node,
+                  const Opt_Alignment* alignType)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = alignType ? Converter::OptConvert<type>(*alignType) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetAlign(frameNode, convValue);
+}
+void SetAlignRules0Impl(Ark_NativePointer node,
+                        const Opt_AlignRuleOption* alignRule)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = alignRule ? Converter::OptConvert<type>(*alignRule) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetAlignRules0(frameNode, convValue);
+}
+void SetAlignRules1Impl(Ark_NativePointer node,
+                        const Opt_LocalizedAlignRuleOptions* alignRule)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = alignRule ? Converter::OptConvert<type>(*alignRule) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetAlignRules1(frameNode, convValue);
+}
+void SetIdImpl(Ark_NativePointer node,
+               const Opt_String* description)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = description ? Converter::OptConvert<type>(*description) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetId(frameNode, convValue);
+}
+void SetChainModeImpl(Ark_NativePointer node,
+                      const Opt_Axis* direction,
+                      const Opt_ChainStyle* style)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(direction);
+    //auto convValue = Converter::OptConvert<type>(direction); // for enums
+    //SecurityComponentMethodModelNG::SetSetChainMode(frameNode, convValue);
+}
+void SetMinFontScaleImpl(Ark_NativePointer node,
+                         const Opt_Union_Number_Resource* scale)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = scale ? Converter::OptConvert<type>(*scale) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetMinFontScale(frameNode, convValue);
+}
+void SetMaxFontScaleImpl(Ark_NativePointer node,
+                         const Opt_Union_Number_Resource* scale)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = scale ? Converter::OptConvert<type>(*scale) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetMaxFontScale(frameNode, convValue);
+}
+void SetMaxLinesImpl(Ark_NativePointer node,
+                     const Opt_Number* line)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = line ? Converter::OptConvert<type>(*line) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetMaxLines(frameNode, convValue);
+}
+void SetMinFontSizeImpl(Ark_NativePointer node,
+                        const Opt_Union_Number_String_Resource* minSize)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = minSize ? Converter::OptConvert<type>(*minSize) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetMinFontSize(frameNode, convValue);
+}
+void SetMaxFontSizeImpl(Ark_NativePointer node,
+                        const Opt_Union_Number_String_Resource* maxSize)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = maxSize ? Converter::OptConvert<type>(*maxSize) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetMaxFontSize(frameNode, convValue);
+}
+void SetHeightAdaptivePolicyImpl(Ark_NativePointer node,
+                                 const Opt_TextHeightAdaptivePolicy* policy)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = policy ? Converter::OptConvert<type>(*policy) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetHeightAdaptivePolicy(frameNode, convValue);
+}
+void SetEnabledImpl(Ark_NativePointer node,
+                    const Opt_Boolean* respond)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = respond ? Converter::OptConvert<type>(*respond) : std::nullopt;
+    //SecurityComponentMethodModelNG::SetSetEnabled(frameNode, convValue);
 }
 } // SecurityComponentMethodModifier
 const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethodModifier()
 {
     static const GENERATED_ArkUISecurityComponentMethodModifier ArkUISecurityComponentMethodModifierImpl {
         SecurityComponentMethodModifier::ConstructImpl,
-        SecurityComponentMethodModifier::IconSizeImpl,
-        SecurityComponentMethodModifier::LayoutDirectionImpl,
-        SecurityComponentMethodModifier::PositionImpl,
-        SecurityComponentMethodModifier::MarkAnchorImpl,
-        SecurityComponentMethodModifier::OffsetImpl,
-        SecurityComponentMethodModifier::FontSizeImpl,
-        SecurityComponentMethodModifier::FontStyleImpl,
-        SecurityComponentMethodModifier::FontWeightImpl,
-        SecurityComponentMethodModifier::FontFamilyImpl,
-        SecurityComponentMethodModifier::FontColorImpl,
-        SecurityComponentMethodModifier::IconColorImpl,
-        SecurityComponentMethodModifier::BackgroundColorImpl,
-        SecurityComponentMethodModifier::BorderStyleImpl,
-        SecurityComponentMethodModifier::BorderWidthImpl,
-        SecurityComponentMethodModifier::BorderColorImpl,
-        SecurityComponentMethodModifier::BorderRadiusImpl,
-        SecurityComponentMethodModifier::PaddingImpl,
-        SecurityComponentMethodModifier::TextIconSpaceImpl,
-        SecurityComponentMethodModifier::KeyImpl,
-        SecurityComponentMethodModifier::WidthImpl,
-        SecurityComponentMethodModifier::HeightImpl,
-        SecurityComponentMethodModifier::SizeImpl,
-        SecurityComponentMethodModifier::ConstraintSizeImpl,
-        SecurityComponentMethodModifier::AlignImpl,
-        SecurityComponentMethodModifier::AlignRules0Impl,
-        SecurityComponentMethodModifier::AlignRules1Impl,
-        SecurityComponentMethodModifier::IdImpl,
-        SecurityComponentMethodModifier::ChainModeImpl,
-        SecurityComponentMethodModifier::MinFontScaleImpl,
-        SecurityComponentMethodModifier::MaxFontScaleImpl,
-        SecurityComponentMethodModifier::MaxLinesImpl,
-        SecurityComponentMethodModifier::MinFontSizeImpl,
-        SecurityComponentMethodModifier::MaxFontSizeImpl,
-        SecurityComponentMethodModifier::HeightAdaptivePolicyImpl,
-        SecurityComponentMethodModifier::EnabledImpl,
+        SecurityComponentMethodModifier::SetIconSizeImpl,
+        SecurityComponentMethodModifier::SetLayoutDirectionImpl,
+        SecurityComponentMethodModifier::SetPositionImpl,
+        SecurityComponentMethodModifier::SetMarkAnchorImpl,
+        SecurityComponentMethodModifier::SetOffsetImpl,
+        SecurityComponentMethodModifier::SetFontSizeImpl,
+        SecurityComponentMethodModifier::SetFontStyleImpl,
+        SecurityComponentMethodModifier::SetFontWeightImpl,
+        SecurityComponentMethodModifier::SetFontFamilyImpl,
+        SecurityComponentMethodModifier::SetFontColorImpl,
+        SecurityComponentMethodModifier::SetIconColorImpl,
+        SecurityComponentMethodModifier::SetBackgroundColorImpl,
+        SecurityComponentMethodModifier::SetBorderStyleImpl,
+        SecurityComponentMethodModifier::SetBorderWidthImpl,
+        SecurityComponentMethodModifier::SetBorderColorImpl,
+        SecurityComponentMethodModifier::SetBorderRadiusImpl,
+        SecurityComponentMethodModifier::SetPaddingImpl,
+        SecurityComponentMethodModifier::SetTextIconSpaceImpl,
+        SecurityComponentMethodModifier::SetKeyImpl,
+        SecurityComponentMethodModifier::SetWidthImpl,
+        SecurityComponentMethodModifier::SetHeightImpl,
+        SecurityComponentMethodModifier::SetSizeImpl,
+        SecurityComponentMethodModifier::SetConstraintSizeImpl,
+        SecurityComponentMethodModifier::SetAlignImpl,
+        SecurityComponentMethodModifier::SetAlignRules0Impl,
+        SecurityComponentMethodModifier::SetAlignRules1Impl,
+        SecurityComponentMethodModifier::SetIdImpl,
+        SecurityComponentMethodModifier::SetChainModeImpl,
+        SecurityComponentMethodModifier::SetMinFontScaleImpl,
+        SecurityComponentMethodModifier::SetMaxFontScaleImpl,
+        SecurityComponentMethodModifier::SetMaxLinesImpl,
+        SecurityComponentMethodModifier::SetMinFontSizeImpl,
+        SecurityComponentMethodModifier::SetMaxFontSizeImpl,
+        SecurityComponentMethodModifier::SetHeightAdaptivePolicyImpl,
+        SecurityComponentMethodModifier::SetEnabledImpl,
     };
     return &ArkUISecurityComponentMethodModifierImpl;
 }

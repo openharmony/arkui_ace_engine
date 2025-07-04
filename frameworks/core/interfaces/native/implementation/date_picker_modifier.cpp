@@ -13,68 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
-#include "core/components_ng/pattern/picker/datepicker_model_static.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "frameworks/base/utils/time_util.h"
 
-namespace OHOS::Ace::NG {
-
-namespace {
-#ifdef SUPPORT_DIGITAL_CROWN
-const auto DIGITAL_CROWN_SENSITIVITY_DEFAULT = CrownSensitivity::MEDIUM;
-#endif
-const auto DEFAULT_DISAPPEAR_TEXT_STYLE = PickerTextStyle { .textColor = Color(0xFF182431),
-    .fontSize = Dimension(14, DimensionUnit::FP),
-    .fontWeight = FontWeight::REGULAR };
-const auto DEFAULT_TEXT_STYLE = PickerTextStyle { .textColor = Color(0xFF182431),
-    .fontSize = Dimension(16, DimensionUnit::FP),
-    .fontWeight = FontWeight::REGULAR };
-const auto DEFAULT_SELECTED_TEXT_STYLE = PickerTextStyle { .textColor = Color(0xFF007DFF),
-    .fontSize = Dimension(20, DimensionUnit::FP),
-    .fontWeight = FontWeight::MEDIUM };
-struct DatePickerOptions {
-    PickerDate start;
-    PickerDate end;
-    PickerDate selected;
-};
-} // namespace
-namespace Converter {
-template<>
-void AssignCast(std::optional<DatePickerOptions>& dst, const Ark_DatePickerOptions& src)
-{
-    DatePickerOptions options;
-    auto opt = Converter::OptConvert<PickerDate>(src.start);
-    if (opt) {
-        options.start = *opt;
-    }
-    opt = Converter::OptConvert<PickerDate>(src.end);
-    if (opt) {
-        options.end = *opt;
-    }
-    opt = Converter::OptConvert<PickerDate>(src.selected);
-    if (opt) {
-        options.selected = *opt;
-    }
-    dst = options;
-}
-} // namespace  OHOS::Ace:NG:Converter
-} // namespace  OHOS::Ace:NG
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DatePickerModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = DatePickerModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // DatePickerModifier
 namespace DatePickerInterfaceModifier {
@@ -83,168 +31,80 @@ void SetDatePickerOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opt = Converter::OptConvertPtr<DatePickerOptions>(options);
-    CHECK_NULL_VOID(opt);
-
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-    auto startDate = opt->start;
-    auto endDate = opt->end;
-    if (startDate.GetYear() <= 0) {
-        startDate = theme->GetDefaultStartDate();
-    }
-    if (endDate.GetYear() <= 0) {
-        endDate = theme->GetDefaultEndDate();
-    }
-    auto startDays = startDate.ToDays();
-    auto endDays = endDate.ToDays();
-    if (startDays > endDays) {
-        startDate = theme->GetDefaultStartDate();
-        endDate = theme->GetDefaultEndDate();
-    }
-
-    DatePickerModelNG::SetStartDate(frameNode, startDate);
-    DatePickerModelNG::SetEndDate(frameNode, endDate);
-    DatePickerModelNG::SetSelectedDate(frameNode, opt->selected);
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //DatePickerModelNG::SetSetDatePickerOptions(frameNode, convValue);
 }
 } // DatePickerInterfaceModifier
 namespace DatePickerAttributeModifier {
-void LunarImpl(Ark_NativePointer node,
-               const Opt_Boolean* value)
+void SetLunarImpl(Ark_NativePointer node,
+                  const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    DatePickerModelNG::SetShowLunar(frameNode, *convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //DatePickerModelNG::SetSetLunar(frameNode, convValue);
 }
-void DisappearTextStyleImpl(Ark_NativePointer node,
-                            const Opt_PickerTextStyle* value)
+void SetDisappearTextStyleImpl(Ark_NativePointer node,
+                               const Opt_PickerTextStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-
-    auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    DatePickerModelNG::SetDisappearTextStyle(frameNode, theme, *convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //DatePickerModelNG::SetSetDisappearTextStyle(frameNode, convValue);
 }
-void TextStyleImpl(Ark_NativePointer node,
-                   const Opt_PickerTextStyle* value)
+void SetTextStyleImpl(Ark_NativePointer node,
+                      const Opt_PickerTextStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-
-    auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    DatePickerModelNG::SetNormalTextStyle(frameNode, theme, *convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //DatePickerModelNG::SetSetTextStyle(frameNode, convValue);
 }
-void SelectedTextStyleImpl(Ark_NativePointer node,
-                           const Opt_PickerTextStyle* value)
+void SetSelectedTextStyleImpl(Ark_NativePointer node,
+                              const Opt_PickerTextStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-
-    auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    DatePickerModelNG::SetSelectedTextStyle(frameNode, theme, *convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //DatePickerModelNG::SetSetSelectedTextStyle(frameNode, convValue);
 }
-void OnDateChangeImpl(Ark_NativePointer node,
-                      const Opt_Callback_Date_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onChange = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* event) {
-        CHECK_NULL_VOID(event);
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
-        CHECK_NULL_VOID(eventInfo);
-        auto selectedStr = eventInfo->GetSelectedStr();
-        auto result = Converter::ArkValue<Ark_Date>(selectedStr);
-        arkCallback.Invoke(result);
-    };
-    DatePickerModelNG::SetOnDateChange(frameNode, std::move(onChange));
-}
-void DigitalCrownSensitivityImpl(Ark_NativePointer node,
-                                 const Opt_CrownSensitivity* value)
-{
-#ifdef SUPPORT_DIGITAL_CROWN
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto sensitivity = Converter::OptConvertPtr<CrownSensitivity>(value).value_or(DIGITAL_CROWN_SENSITIVITY_DEFAULT);
-    DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, static_cast<int32_t>(sensitivity));
-#endif
-}
-void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                              const Opt_Boolean* value)
+void SetOnDateChangeImpl(Ark_NativePointer node,
+                         const Opt_Callback_Date_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::OptConvertPtr<type>(value);
-    //DatePickerModelNG::SetEnableHapticFeedback(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //DatePickerModelNG::SetSetOnDateChange(frameNode, convValue);
 }
-#ifdef WRONG_GEN
-void _onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                 const Callback_Date_Void* callback)
+void SetDigitalCrownSensitivityImpl(Ark_NativePointer node,
+                                    const Opt_CrownSensitivity* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* event) {
-        CHECK_NULL_VOID(event);
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
-        CHECK_NULL_VOID(eventInfo);
-        auto selectedStr = eventInfo->GetSelectedStr();
-        auto result = Converter::ArkValue<Ark_Date>(selectedStr);
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(result);
-    };
-    DatePickerModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //DatePickerModelNG::SetSetDigitalCrownSensitivity(frameNode, convValue);
 }
-#endif
+void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //DatePickerModelNG::SetSetEnableHapticFeedback(frameNode, convValue);
+}
 } // DatePickerAttributeModifier
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()
 {
     static const GENERATED_ArkUIDatePickerModifier ArkUIDatePickerModifierImpl {
         DatePickerModifier::ConstructImpl,
         DatePickerInterfaceModifier::SetDatePickerOptionsImpl,
-        DatePickerAttributeModifier::LunarImpl,
-        DatePickerAttributeModifier::DisappearTextStyleImpl,
-        DatePickerAttributeModifier::TextStyleImpl,
-        DatePickerAttributeModifier::SelectedTextStyleImpl,
-        DatePickerAttributeModifier::OnDateChangeImpl,
-        DatePickerAttributeModifier::DigitalCrownSensitivityImpl,
-        DatePickerAttributeModifier::EnableHapticFeedbackImpl,
+        DatePickerAttributeModifier::SetLunarImpl,
+        DatePickerAttributeModifier::SetDisappearTextStyleImpl,
+        DatePickerAttributeModifier::SetTextStyleImpl,
+        DatePickerAttributeModifier::SetSelectedTextStyleImpl,
+        DatePickerAttributeModifier::SetOnDateChangeImpl,
+        DatePickerAttributeModifier::SetDigitalCrownSensitivityImpl,
+        DatePickerAttributeModifier::SetEnableHapticFeedbackImpl,
     };
     return &ArkUIDatePickerModifierImpl;
 }

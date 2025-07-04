@@ -14,32 +14,21 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-
-#include "mutable_styled_string_peer.h"
-#include "rich_editor_styled_string_controller_peer_impl.h"
-#include "styled_string_peer.h"
-
-namespace OHOS::Ace::NG {
-void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeValue& src)
-{
-    dst.replacementString = StyledStringPeer::Create(src.GetReplacementString());
-    dst.range.start = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().start);
-    dst.range.end = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().end);
-}
-} // namespace OHOS::Ace::NG
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorStyledStringControllerAccessor {
 void DestroyPeerImpl(Ark_RichEditorStyledStringController peer)
 {
-    delete peer;
+    auto peerImpl = reinterpret_cast<RichEditorStyledStringControllerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_RichEditorStyledStringController CtorImpl()
+Ark_RichEditorStyledStringController ConstructImpl()
 {
-    return new RichEditorStyledStringControllerPeer();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -48,56 +37,25 @@ Ark_NativePointer GetFinalizerImpl()
 void SetStyledStringImpl(Ark_RichEditorStyledStringController peer,
                          Ark_StyledString styledString)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(styledString);
-    peer->SetStyledString(styledString->spanString);
 }
 Ark_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController peer)
 {
-    auto mutableString = PeerUtils::CreatePeer<MutableStyledStringPeer>();
-    CHECK_NULL_RETURN(peer && mutableString, mutableString);
-    mutableString->spanString = AceType::DynamicCast<MutableSpanString>(peer->GetStyledString());
-    return mutableString;
+    return {};
 }
 Ark_RichEditorRange GetSelectionImpl(Ark_RichEditorStyledStringController peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    SelectionRangeInfo selection = peer->GetSelection();
-    return Converter::ArkValue<Ark_RichEditorRange>(selection);
+    return {};
 }
 void OnContentChangedImpl(Ark_RichEditorStyledStringController peer,
                           const Ark_StyledStringChangedListener* listener)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(listener);
-
-    auto onWillChangeArk = Converter::OptConvert<Callback_StyledStringChangeValue_Boolean>(listener->onWillChange);
-    auto onWillChangeCapture = std::make_shared<Callback_StyledStringChangeValue_Boolean>(*onWillChangeArk);
-    auto onWillChange = [onWillChangeCapture, arkCallback = CallbackHelper(*onWillChangeCapture)](
-        const StyledStringChangeValue& value) {
-        auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value);
-        Callback_Boolean_Void continuation;
-        arkCallback.Invoke(changeValue, continuation);
-        return true;
-    };
-    peer->SetOnWillChange(std::move(onWillChange));
-
-    auto onDidChangeArk = Converter::OptConvert<OnDidChangeCallback>(listener->onDidChange);
-    auto onDidChangeCapture = std::make_shared<OnDidChangeCallback>(*onDidChangeArk);
-    auto onDidChange = [onDidChangeCapture, arkCallback = CallbackHelper(*onDidChangeCapture)](
-        const StyledStringChangeValue& value) {
-        auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value);
-        arkCallback.Invoke(changeValue.range, changeValue.range);
-        LOGW("RichEditorStyledStringControllerAccessor :: before range = after, that's temporary and will be fixed");
-    };
-    peer->SetOnDidChange(std::move(onDidChange));
 }
 } // RichEditorStyledStringControllerAccessor
 const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyledStringControllerAccessor()
 {
     static const GENERATED_ArkUIRichEditorStyledStringControllerAccessor RichEditorStyledStringControllerAccessorImpl {
         RichEditorStyledStringControllerAccessor::DestroyPeerImpl,
-        RichEditorStyledStringControllerAccessor::CtorImpl,
+        RichEditorStyledStringControllerAccessor::ConstructImpl,
         RichEditorStyledStringControllerAccessor::GetFinalizerImpl,
         RichEditorStyledStringControllerAccessor::SetStyledStringImpl,
         RichEditorStyledStringControllerAccessor::GetStyledStringImpl,
@@ -106,4 +64,8 @@ const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyl
     };
     return &RichEditorStyledStringControllerAccessorImpl;
 }
+
+struct RichEditorStyledStringControllerPeer {
+    virtual ~RichEditorStyledStringControllerPeer() = default;
+};
 }

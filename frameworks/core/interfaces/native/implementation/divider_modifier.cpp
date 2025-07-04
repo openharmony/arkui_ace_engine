@@ -13,80 +13,71 @@
  * limitations under the License.
  */
 
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/divider/divider_model_ng.h"
-#include "core/components_ng/pattern/divider/divider_model_ng_static.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/validators.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DividerModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = DividerModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // DividerModifier
 namespace DividerInterfaceModifier {
 void SetDividerOptionsImpl(Ark_NativePointer node)
 {
-    // Nothing to implement
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //DividerModelNG::SetSetDividerOptions(frameNode, convValue);
 }
 } // DividerInterfaceModifier
-
 namespace DividerAttributeModifier {
-void VerticalImpl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
+void SetVerticalImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    DividerModelNG::SetVertical(frameNode, *convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //DividerModelNG::SetSetVertical(frameNode, convValue);
 }
-
-void ColorImpl(Ark_NativePointer node,
-               const Opt_ResourceColor* value)
+void SetColorImpl(Ark_NativePointer node,
+                  const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DividerModelNGStatic::SetDividerColor(frameNode, Converter::OptConvertPtr<Color>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //DividerModelNG::SetSetColor(frameNode, convValue);
 }
-
-void StrokeWidthImpl(Ark_NativePointer node,
-                     const Opt_Union_Number_String* value)
+void SetStrokeWidthImpl(Ark_NativePointer node,
+                        const Opt_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonPercent(optValue);
-    DividerModelNGStatic::StrokeWidth(frameNode, optValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //DividerModelNG::SetSetStrokeWidth(frameNode, convValue);
 }
-
-void LineCapImpl(Ark_NativePointer node,
-                 const Opt_LineCapStyle* value)
+void SetLineCapImpl(Ark_NativePointer node,
+                    const Opt_LineCapStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DividerModelNGStatic::LineCap(frameNode, Converter::OptConvertPtr<LineCap>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //DividerModelNG::SetSetLineCap(frameNode, convValue);
 }
-
 } // DividerAttributeModifier
 const GENERATED_ArkUIDividerModifier* GetDividerModifier()
 {
     static const GENERATED_ArkUIDividerModifier ArkUIDividerModifierImpl {
         DividerModifier::ConstructImpl,
         DividerInterfaceModifier::SetDividerOptionsImpl,
-        DividerAttributeModifier::VerticalImpl,
-        DividerAttributeModifier::ColorImpl,
-        DividerAttributeModifier::StrokeWidthImpl,
-        DividerAttributeModifier::LineCapImpl,
+        DividerAttributeModifier::SetVerticalImpl,
+        DividerAttributeModifier::SetColorImpl,
+        DividerAttributeModifier::SetStrokeWidthImpl,
+        DividerAttributeModifier::SetLineCapImpl,
     };
     return &ArkUIDividerModifierImpl;
 }

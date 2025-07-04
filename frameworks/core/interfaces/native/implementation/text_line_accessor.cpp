@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Text_TextLineAccessor {
+namespace text_TextLineAccessor {
 void DestroyPeerImpl(Ark_text_TextLine peer)
 {
+    auto peerImpl = reinterpret_cast<text_TextLinePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_text_TextLine CtorImpl()
+Ark_text_TextLine ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -87,27 +91,30 @@ Ark_Number GetAlignmentOffsetImpl(Ark_text_TextLine peer,
 {
     return {};
 }
-} // Text_TextLineAccessor
+} // text_TextLineAccessor
 const GENERATED_ArkUIText_TextLineAccessor* GetText_TextLineAccessor()
 {
     static const GENERATED_ArkUIText_TextLineAccessor Text_TextLineAccessorImpl {
-        Text_TextLineAccessor::DestroyPeerImpl,
-        Text_TextLineAccessor::CtorImpl,
-        Text_TextLineAccessor::GetFinalizerImpl,
-        Text_TextLineAccessor::GetGlyphCountImpl,
-        Text_TextLineAccessor::GetTextRangeImpl,
-        Text_TextLineAccessor::GetGlyphRunsImpl,
-        Text_TextLineAccessor::PaintImpl,
-        Text_TextLineAccessor::CreateTruncatedLineImpl,
-        Text_TextLineAccessor::GetTypographicBoundsImpl,
-        Text_TextLineAccessor::GetImageBoundsImpl,
-        Text_TextLineAccessor::GetTrailingSpaceWidthImpl,
-        Text_TextLineAccessor::GetStringIndexForPositionImpl,
-        Text_TextLineAccessor::GetOffsetForStringIndexImpl,
-        Text_TextLineAccessor::EnumerateCaretOffsetsImpl,
-        Text_TextLineAccessor::GetAlignmentOffsetImpl,
+        text_TextLineAccessor::DestroyPeerImpl,
+        text_TextLineAccessor::ConstructImpl,
+        text_TextLineAccessor::GetFinalizerImpl,
+        text_TextLineAccessor::GetGlyphCountImpl,
+        text_TextLineAccessor::GetTextRangeImpl,
+        text_TextLineAccessor::GetGlyphRunsImpl,
+        text_TextLineAccessor::PaintImpl,
+        text_TextLineAccessor::CreateTruncatedLineImpl,
+        text_TextLineAccessor::GetTypographicBoundsImpl,
+        text_TextLineAccessor::GetImageBoundsImpl,
+        text_TextLineAccessor::GetTrailingSpaceWidthImpl,
+        text_TextLineAccessor::GetStringIndexForPositionImpl,
+        text_TextLineAccessor::GetOffsetForStringIndexImpl,
+        text_TextLineAccessor::EnumerateCaretOffsetsImpl,
+        text_TextLineAccessor::GetAlignmentOffsetImpl,
     };
     return &Text_TextLineAccessorImpl;
 }
 
+struct Text_TextLinePeer {
+    virtual ~Text_TextLinePeer() = default;
+};
 }

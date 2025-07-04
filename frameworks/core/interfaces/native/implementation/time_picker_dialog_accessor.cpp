@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerDialogAccessor {
 void DestroyPeerImpl(Ark_TimePickerDialog peer)
 {
+    auto peerImpl = reinterpret_cast<TimePickerDialogPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_TimePickerDialog CtorImpl()
+Ark_TimePickerDialog ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -35,10 +39,13 @@ const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor()
 {
     static const GENERATED_ArkUITimePickerDialogAccessor TimePickerDialogAccessorImpl {
         TimePickerDialogAccessor::DestroyPeerImpl,
-        TimePickerDialogAccessor::CtorImpl,
+        TimePickerDialogAccessor::ConstructImpl,
         TimePickerDialogAccessor::GetFinalizerImpl,
     };
     return &TimePickerDialogAccessorImpl;
 }
 
+struct TimePickerDialogPeer {
+    virtual ~TimePickerDialogPeer() = default;
+};
 }

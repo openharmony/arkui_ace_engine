@@ -18,17 +18,21 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_PenAccessor {
+namespace drawing_PenAccessor {
 void DestroyPeerImpl(Ark_drawing_Pen peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_PenPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_Pen Ctor0Impl()
+Ark_drawing_Pen Construct0Impl()
 {
-    return nullptr;
+    return {};
 }
-Ark_drawing_Pen Ctor1Impl(Ark_drawing_Pen pen)
+Ark_drawing_Pen Construct1Impl(Ark_drawing_Pen pen)
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -150,44 +154,47 @@ Ark_Boolean GetFillPathImpl(Ark_drawing_Pen peer,
 {
     return {};
 }
-} // Drawing_PenAccessor
+} // drawing_PenAccessor
 const GENERATED_ArkUIDrawing_PenAccessor* GetDrawing_PenAccessor()
 {
     static const GENERATED_ArkUIDrawing_PenAccessor Drawing_PenAccessorImpl {
-        Drawing_PenAccessor::DestroyPeerImpl,
-        Drawing_PenAccessor::Ctor0Impl,
-        Drawing_PenAccessor::Ctor1Impl,
-        Drawing_PenAccessor::GetFinalizerImpl,
-        Drawing_PenAccessor::SetMiterLimitImpl,
-        Drawing_PenAccessor::GetMiterLimitImpl,
-        Drawing_PenAccessor::SetShaderEffectImpl,
-        Drawing_PenAccessor::SetColor0Impl,
-        Drawing_PenAccessor::SetColor1Impl,
-        Drawing_PenAccessor::SetColor2Impl,
-        Drawing_PenAccessor::GetColorImpl,
-        Drawing_PenAccessor::GetHexColorImpl,
-        Drawing_PenAccessor::SetStrokeWidthImpl,
-        Drawing_PenAccessor::GetWidthImpl,
-        Drawing_PenAccessor::SetAntiAliasImpl,
-        Drawing_PenAccessor::IsAntiAliasImpl,
-        Drawing_PenAccessor::SetAlphaImpl,
-        Drawing_PenAccessor::GetAlphaImpl,
-        Drawing_PenAccessor::SetColorFilterImpl,
-        Drawing_PenAccessor::GetColorFilterImpl,
-        Drawing_PenAccessor::SetImageFilterImpl,
-        Drawing_PenAccessor::SetMaskFilterImpl,
-        Drawing_PenAccessor::SetPathEffectImpl,
-        Drawing_PenAccessor::SetShadowLayerImpl,
-        Drawing_PenAccessor::SetBlendModeImpl,
-        Drawing_PenAccessor::SetDitherImpl,
-        Drawing_PenAccessor::SetJoinStyleImpl,
-        Drawing_PenAccessor::GetJoinStyleImpl,
-        Drawing_PenAccessor::SetCapStyleImpl,
-        Drawing_PenAccessor::GetCapStyleImpl,
-        Drawing_PenAccessor::ResetImpl,
-        Drawing_PenAccessor::GetFillPathImpl,
+        drawing_PenAccessor::DestroyPeerImpl,
+        drawing_PenAccessor::Construct0Impl,
+        drawing_PenAccessor::Construct1Impl,
+        drawing_PenAccessor::GetFinalizerImpl,
+        drawing_PenAccessor::SetMiterLimitImpl,
+        drawing_PenAccessor::GetMiterLimitImpl,
+        drawing_PenAccessor::SetShaderEffectImpl,
+        drawing_PenAccessor::SetColor0Impl,
+        drawing_PenAccessor::SetColor1Impl,
+        drawing_PenAccessor::SetColor2Impl,
+        drawing_PenAccessor::GetColorImpl,
+        drawing_PenAccessor::GetHexColorImpl,
+        drawing_PenAccessor::SetStrokeWidthImpl,
+        drawing_PenAccessor::GetWidthImpl,
+        drawing_PenAccessor::SetAntiAliasImpl,
+        drawing_PenAccessor::IsAntiAliasImpl,
+        drawing_PenAccessor::SetAlphaImpl,
+        drawing_PenAccessor::GetAlphaImpl,
+        drawing_PenAccessor::SetColorFilterImpl,
+        drawing_PenAccessor::GetColorFilterImpl,
+        drawing_PenAccessor::SetImageFilterImpl,
+        drawing_PenAccessor::SetMaskFilterImpl,
+        drawing_PenAccessor::SetPathEffectImpl,
+        drawing_PenAccessor::SetShadowLayerImpl,
+        drawing_PenAccessor::SetBlendModeImpl,
+        drawing_PenAccessor::SetDitherImpl,
+        drawing_PenAccessor::SetJoinStyleImpl,
+        drawing_PenAccessor::GetJoinStyleImpl,
+        drawing_PenAccessor::SetCapStyleImpl,
+        drawing_PenAccessor::GetCapStyleImpl,
+        drawing_PenAccessor::ResetImpl,
+        drawing_PenAccessor::GetFillPathImpl,
     };
     return &Drawing_PenAccessorImpl;
 }
 
+struct Drawing_PenPeer {
+    virtual ~Drawing_PenPeer() = default;
+};
 }

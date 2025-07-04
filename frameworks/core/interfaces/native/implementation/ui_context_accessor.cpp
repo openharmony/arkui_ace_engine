@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIContextAccessor {
 void DestroyPeerImpl(Ark_UIContext peer)
 {
+    auto peerImpl = reinterpret_cast<UIContextPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_UIContext CtorImpl()
+Ark_UIContext ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -174,7 +178,7 @@ const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor()
 {
     static const GENERATED_ArkUIUIContextAccessor UIContextAccessorImpl {
         UIContextAccessor::DestroyPeerImpl,
-        UIContextAccessor::CtorImpl,
+        UIContextAccessor::ConstructImpl,
         UIContextAccessor::GetFinalizerImpl,
         UIContextAccessor::GetFontImpl,
         UIContextAccessor::GetFilteredInspectorTreeImpl,
@@ -207,4 +211,7 @@ const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor()
     return &UIContextAccessorImpl;
 }
 
+struct UIContextPeer {
+    virtual ~UIContextPeer() = default;
+};
 }

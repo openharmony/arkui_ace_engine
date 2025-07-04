@@ -15,23 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-
-#include "core/interfaces/native/implementation/event_target_info_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventTargetInfoAccessor {
 void DestroyPeerImpl(Ark_EventTargetInfo peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->DecRefCount();
+    auto peerImpl = reinterpret_cast<EventTargetInfoPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_EventTargetInfo CtorImpl()
+Ark_EventTargetInfo ConstructImpl()
 {
-    auto peer = AceType::MakeRefPtr<EventTargetInfoPeer>();
-    peer->IncRefCount();
-    return AceType::RawPtr(peer);
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,19 +36,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetIdImpl(Ark_EventTargetInfo peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    return Converter::ArkValue<Ark_String>(peer->id, Converter::FC);
+    return {};
 }
 } // EventTargetInfoAccessor
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()
 {
     static const GENERATED_ArkUIEventTargetInfoAccessor EventTargetInfoAccessorImpl {
         EventTargetInfoAccessor::DestroyPeerImpl,
-        EventTargetInfoAccessor::CtorImpl,
+        EventTargetInfoAccessor::ConstructImpl,
         EventTargetInfoAccessor::GetFinalizerImpl,
         EventTargetInfoAccessor::GetIdImpl,
     };
     return &EventTargetInfoAccessorImpl;
 }
 
+struct EventTargetInfoPeer {
+    virtual ~EventTargetInfoPeer() = default;
+};
 }

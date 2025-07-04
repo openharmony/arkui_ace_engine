@@ -13,29 +13,23 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
-#include "node_content_peer.h"
-
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NodeContentAccessor {
 void DestroyPeerImpl(Ark_NodeContent peer)
 {
-    auto peerImpl = reinterpret_cast<NodeContentPeer*>(peer);
+    auto peerImpl = reinterpret_cast<NodeContentPeerImpl *>(peer);
     if (peerImpl) {
         delete peerImpl;
     }
 }
-Ark_NodeContent CtorImpl()
+Ark_NodeContent ConstructImpl()
 {
-    auto NodeContent = AceType::MakeRefPtr<NG::NodeContent>();
-    auto peer = NodeContentPeer::Create(NodeContent);
-    return peer;
+    return {};
 }
-
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
@@ -43,45 +37,17 @@ Ark_NativePointer GetFinalizerImpl()
 void AddFrameNodeImpl(Ark_NodeContent peer,
                       Ark_FrameNode node)
 {
-#ifdef WRONG_GEN
-    CHECK_NULL_RETURN(peer, false);
-    CHECK_NULL_RETURN(peer->content, false);
-    CHECK_NULL_RETURN(node, false);
-    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(node);
-    CHECK_NULL_RETURN(frameNode, false);
-    auto nodeContent = AceType::DynamicCast<NG::NodeContent>(peer->content);
-    CHECK_NULL_RETURN(nodeContent, false);
-    auto childNode = AceType::DynamicCast<UINode>(frameNode);
-    CHECK_NULL_RETURN(childNode, false);
-    nodeContent->AddNode(AceType::RawPtr(childNode));
-    childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-    return true;
-#endif
 }
 void RemoveFrameNodeImpl(Ark_NodeContent peer,
                          Ark_FrameNode node)
 {
-#ifdef WRONG_GEN
-    CHECK_NULL_RETURN(peer, false);
-    CHECK_NULL_RETURN(peer->content, false);
-    CHECK_NULL_RETURN(node, false);
-    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(node);
-    CHECK_NULL_RETURN(frameNode, false);
-    auto nodeContent = AceType::DynamicCast<NG::NodeContent>(peer->content);
-    CHECK_NULL_RETURN(nodeContent, false);
-    auto childNode = AceType::DynamicCast<UINode>(frameNode);
-    CHECK_NULL_RETURN(childNode, false);
-    childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-    nodeContent->RemoveNode(AceType::RawPtr(childNode));
-    return true;
-#endif
 }
 } // NodeContentAccessor
 const GENERATED_ArkUINodeContentAccessor* GetNodeContentAccessor()
 {
     static const GENERATED_ArkUINodeContentAccessor NodeContentAccessorImpl {
         NodeContentAccessor::DestroyPeerImpl,
-        NodeContentAccessor::CtorImpl,
+        NodeContentAccessor::ConstructImpl,
         NodeContentAccessor::GetFinalizerImpl,
         NodeContentAccessor::AddFrameNodeImpl,
         NodeContentAccessor::RemoveFrameNodeImpl,
@@ -89,4 +55,7 @@ const GENERATED_ArkUINodeContentAccessor* GetNodeContentAccessor()
     return &NodeContentAccessorImpl;
 }
 
+struct NodeContentPeer {
+    virtual ~NodeContentPeer() = default;
+};
 }

@@ -14,41 +14,35 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
-#include "core/components_ng/pattern/linear_split/linear_split_model_ng_static.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RowSplitModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = LinearSplitModelNGStatic::CreateFrameNode(id, NG::SplitType::ROW_SPLIT);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // RowSplitModifier
 namespace RowSplitInterfaceModifier {
 void SetRowSplitOptionsImpl(Ark_NativePointer node)
 {
-    // keep it empty because RowSplit doesn`t have any options
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //RowSplitModelNG::SetSetRowSplitOptions(frameNode, convValue);
 }
 } // RowSplitInterfaceModifier
 namespace RowSplitAttributeModifier {
-void ResizeableImpl(Ark_NativePointer node,
-                    const Opt_Boolean* value)
+void SetResizeableImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, *convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RowSplitModelNG::SetSetResizeable(frameNode, convValue);
 }
 } // RowSplitAttributeModifier
 const GENERATED_ArkUIRowSplitModifier* GetRowSplitModifier()
@@ -56,7 +50,7 @@ const GENERATED_ArkUIRowSplitModifier* GetRowSplitModifier()
     static const GENERATED_ArkUIRowSplitModifier ArkUIRowSplitModifierImpl {
         RowSplitModifier::ConstructImpl,
         RowSplitInterfaceModifier::SetRowSplitOptionsImpl,
-        RowSplitAttributeModifier::ResizeableImpl,
+        RowSplitAttributeModifier::SetResizeableImpl,
     };
     return &ArkUIRowSplitModifierImpl;
 }

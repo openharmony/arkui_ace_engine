@@ -15,33 +15,22 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-
 #include "arkoala_api_generated.h"
-#include "image_bitmap_peer_impl.h"
-#include "offscreen_canvas_peer.h"
-#include "offscreen_canvas_rendering_context2d_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace OffscreenCanvasAccessor {
-const double ERROR_VALUE = -1;
-const auto ARK_ERROR_VALUE = Converter::ArkValue<Ark_Number>(ERROR_VALUE);
-
 void DestroyPeerImpl(Ark_OffscreenCanvas peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<OffscreenCanvasPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_OffscreenCanvas CtorImpl(const Ark_Number* width,
-                             const Ark_Number* height,
-                             const Opt_LengthMetricsUnit* unit)
+Ark_OffscreenCanvas ConstructImpl(const Ark_Number* width,
+                                  const Ark_Number* height,
+                                  const Opt_LengthMetricsUnit* unit)
 {
-    CHECK_NULL_RETURN(width, {});
-    CHECK_NULL_RETURN(height, {});
-    auto cw = Converter::Convert<double>(*width);
-    auto ch = Converter::Convert<double>(*height);
-    auto peer = PeerUtils::CreatePeer<OffscreenCanvasPeer>();
-    peer->SetOptions(cw, ch);
-    return peer;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -49,54 +38,35 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_ImageBitmap TransferToImageBitmapImpl(Ark_OffscreenCanvas peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    auto bitmap = PeerUtils::CreatePeer<ImageBitmapPeer>();
-    return peer->TransferToImageBitmap(bitmap);
+    return {};
 }
 Ark_OffscreenCanvasRenderingContext2D GetContext2dImpl(Ark_OffscreenCanvas peer,
                                                        const Opt_RenderingContextSettings* options)
 {
-    CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(options, {});
-    auto offscreenContext = PeerUtils::CreatePeer<OffscreenCanvasRenderingContext2DPeer>();
-    auto offscreenSettings = Converter::GetOptPtr(options);
-    offscreenContext->SetOptions(peer->GetWidth(), peer->GetHeight(), offscreenSettings);
-    return peer->GetContext2D(offscreenContext, offscreenSettings.value_or(nullptr));
+    return {};
 }
 Ark_Number GetHeightImpl(Ark_OffscreenCanvas peer)
 {
-    CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
-    double height = peer->OnGetHeight(ERROR_VALUE);
-    return Converter::ArkValue<Ark_Number>(static_cast<float>(height));
+    return {};
 }
 void SetHeightImpl(Ark_OffscreenCanvas peer,
                    const Ark_Number* height)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(height);
-    auto ch = static_cast<double>(Converter::Convert<float>(*height));
-    peer->OnSetHeight(ch);
 }
 Ark_Number GetWidthImpl(Ark_OffscreenCanvas peer)
 {
-    CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
-    double width = peer->OnGetWidth(ERROR_VALUE);
-    return Converter::ArkValue<Ark_Number>(static_cast<float>(width));
+    return {};
 }
 void SetWidthImpl(Ark_OffscreenCanvas peer,
                   const Ark_Number* width)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(width);
-    auto cw = static_cast<double>(Converter::Convert<float>(*width));
-    peer->OnSetWidth(cw);
 }
 } // OffscreenCanvasAccessor
 const GENERATED_ArkUIOffscreenCanvasAccessor* GetOffscreenCanvasAccessor()
 {
     static const GENERATED_ArkUIOffscreenCanvasAccessor OffscreenCanvasAccessorImpl {
         OffscreenCanvasAccessor::DestroyPeerImpl,
-        OffscreenCanvasAccessor::CtorImpl,
+        OffscreenCanvasAccessor::ConstructImpl,
         OffscreenCanvasAccessor::GetFinalizerImpl,
         OffscreenCanvasAccessor::TransferToImageBitmapImpl,
         OffscreenCanvasAccessor::GetContext2dImpl,
@@ -108,4 +78,7 @@ const GENERATED_ArkUIOffscreenCanvasAccessor* GetOffscreenCanvasAccessor()
     return &OffscreenCanvasAccessorImpl;
 }
 
+struct OffscreenCanvasPeer {
+    virtual ~OffscreenCanvasPeer() = default;
+};
 }

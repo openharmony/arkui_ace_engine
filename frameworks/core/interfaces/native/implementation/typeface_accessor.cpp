@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_TypefaceAccessor {
+namespace drawing_TypefaceAccessor {
 void DestroyPeerImpl(Ark_drawing_Typeface peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_TypefacePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_Typeface CtorImpl()
+Ark_drawing_Typeface ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -38,17 +42,20 @@ Ark_drawing_Typeface MakeFromFileImpl(const Ark_String* filePath)
 {
     return {};
 }
-} // Drawing_TypefaceAccessor
+} // drawing_TypefaceAccessor
 const GENERATED_ArkUIDrawing_TypefaceAccessor* GetDrawing_TypefaceAccessor()
 {
     static const GENERATED_ArkUIDrawing_TypefaceAccessor Drawing_TypefaceAccessorImpl {
-        Drawing_TypefaceAccessor::DestroyPeerImpl,
-        Drawing_TypefaceAccessor::CtorImpl,
-        Drawing_TypefaceAccessor::GetFinalizerImpl,
-        Drawing_TypefaceAccessor::GetFamilyNameImpl,
-        Drawing_TypefaceAccessor::MakeFromFileImpl,
+        drawing_TypefaceAccessor::DestroyPeerImpl,
+        drawing_TypefaceAccessor::ConstructImpl,
+        drawing_TypefaceAccessor::GetFinalizerImpl,
+        drawing_TypefaceAccessor::GetFamilyNameImpl,
+        drawing_TypefaceAccessor::MakeFromFileImpl,
     };
     return &Drawing_TypefaceAccessorImpl;
 }
 
+struct Drawing_TypefacePeer {
+    virtual ~Drawing_TypefacePeer() = default;
+};
 }

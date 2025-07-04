@@ -18,15 +18,19 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_RoundRectAccessor {
+namespace drawing_RoundRectAccessor {
 void DestroyPeerImpl(Ark_drawing_RoundRect peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_RoundRectPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_RoundRect CtorImpl(const Ark_common2D_Rect* rect,
-                               const Ark_Number* xRadii,
-                               const Ark_Number* yRadii)
+Ark_drawing_RoundRect ConstructImpl(const Ark_common2D_Rect* rect,
+                                    const Ark_Number* xRadii,
+                                    const Ark_Number* yRadii)
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -48,18 +52,21 @@ void OffsetImpl(Ark_drawing_RoundRect peer,
                 const Ark_Number* dy)
 {
 }
-} // Drawing_RoundRectAccessor
+} // drawing_RoundRectAccessor
 const GENERATED_ArkUIDrawing_RoundRectAccessor* GetDrawing_RoundRectAccessor()
 {
     static const GENERATED_ArkUIDrawing_RoundRectAccessor Drawing_RoundRectAccessorImpl {
-        Drawing_RoundRectAccessor::DestroyPeerImpl,
-        Drawing_RoundRectAccessor::CtorImpl,
-        Drawing_RoundRectAccessor::GetFinalizerImpl,
-        Drawing_RoundRectAccessor::SetCornerImpl,
-        Drawing_RoundRectAccessor::GetCornerImpl,
-        Drawing_RoundRectAccessor::OffsetImpl,
+        drawing_RoundRectAccessor::DestroyPeerImpl,
+        drawing_RoundRectAccessor::ConstructImpl,
+        drawing_RoundRectAccessor::GetFinalizerImpl,
+        drawing_RoundRectAccessor::SetCornerImpl,
+        drawing_RoundRectAccessor::GetCornerImpl,
+        drawing_RoundRectAccessor::OffsetImpl,
     };
     return &Drawing_RoundRectAccessorImpl;
 }
 
+struct Drawing_RoundRectPeer {
+    virtual ~Drawing_RoundRectPeer() = default;
+};
 }

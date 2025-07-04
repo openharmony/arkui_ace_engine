@@ -13,26 +13,22 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/implementation/text_content_controller_base_peer.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::Converter {
-template<> void AssignCast(std::optional<int32_t>& dst, const Ark_TextContentControllerOptions& src)
-{
-    dst = Converter::OptConvert<int32_t>(src.offset);
-}
-}
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextContentControllerBaseAccessor {
 void DestroyPeerImpl(Ark_TextContentControllerBase peer)
 {
-    delete peer;
+    auto peerImpl = reinterpret_cast<TextContentControllerBasePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_TextContentControllerBase CtorImpl()
+Ark_TextContentControllerBase ConstructImpl()
 {
-    return new TextContentControllerBasePeer();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -40,84 +36,44 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_CaretOffset GetCaretOffsetImpl(Ark_TextContentControllerBase peer)
 {
-    CHECK_NULL_RETURN(peer && peer->controller_, {});
-    auto offset = peer->controller_->GetCaretPosition();
-    return Converter::ArkValue<Ark_CaretOffset>(offset);
+    return {};
 }
 Ark_RectResult GetTextContentRectImpl(Ark_TextContentControllerBase peer)
 {
-    CHECK_NULL_RETURN(peer && peer->controller_, {});
-    auto rect = peer->controller_->GetTextContentRect();
-    return Converter::ArkValue<Ark_RectResult>(rect);
+    return {};
 }
 Ark_Number GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer && peer->controller_, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->controller_->GetTextContentLinesNum());
+    return {};
 }
 Ark_Number AddTextImpl(Ark_TextContentControllerBase peer,
                        const Ark_String* text,
                        const Opt_TextContentControllerOptions* textOperationOptions)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer && peer->controller_ && text, errValue);
-    auto textConv = Converter::Convert<std::u16string>(*text);
-    auto optionsConv = Converter::OptConvertPtr<int32_t>(textOperationOptions);
-    const auto defaultOffset = -1;
-    auto retValue = peer->controller_->AddText(textConv, optionsConv.value_or(defaultOffset));
-    return Converter::ArkValue<Ark_Number>(retValue);
+    return {};
 }
 void DeleteTextImpl(Ark_TextContentControllerBase peer,
                     const Opt_TextRange* range)
 {
-    CHECK_NULL_VOID(peer && peer->controller_);
-    auto rangeConv = Converter::OptConvertPtr<TextRange>(range);
-    if (rangeConv.has_value()) {
-        peer->controller_->DeleteText(rangeConv.value().start, rangeConv.value().end);
-    }
 }
 Ark_TextRange GetSelectionImpl(Ark_TextContentControllerBase peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_TextRange>(TextRange{});
-    CHECK_NULL_RETURN(peer && peer->controller_, errValue);
-    auto retValue = peer->controller_->GetSelection();
-    return Converter::ArkValue<Ark_TextRange>(retValue);
+    return {};
 }
 void ClearPreviewTextImpl(Ark_TextContentControllerBase peer)
 {
-    CHECK_NULL_VOID(peer && peer->controller_);
-    peer->controller_->ClearPreviewText();
 }
 Ark_String GetTextImpl(Ark_TextContentControllerBase peer,
                        const Opt_TextRange* range)
 {
-    std::u16string result = u"";
-    CHECK_NULL_RETURN(peer && peer->controller_ && range, Converter::ArkValue<Ark_String>(result));
-    auto rangeConv = Converter::OptConvertPtr<TextRange>(range);
-    std::u16string content = peer->controller_->GetText();
-    int32_t startIndex = 0;
-    int32_t endIndex = content.length();
-    if (rangeConv) {
-        startIndex = rangeConv->start;
-        startIndex = startIndex < 0 ? 0 : startIndex;
-        startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(content.length()));
-        endIndex = rangeConv->end;
-        endIndex = endIndex < 0 ? content.length() : endIndex;
-        endIndex = std::clamp(endIndex, 0, static_cast<int32_t>(content.length()));
-        if (startIndex > endIndex) {
-            std::swap(startIndex, endIndex);
-        }
-    }
-    result = content.substr(startIndex, endIndex - startIndex);
-    return Converter::ArkValue<Ark_String>(result, Converter::FC);
+    return {};
 }
 } // TextContentControllerBaseAccessor
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()
 {
     static const GENERATED_ArkUITextContentControllerBaseAccessor TextContentControllerBaseAccessorImpl {
         TextContentControllerBaseAccessor::DestroyPeerImpl,
-        TextContentControllerBaseAccessor::CtorImpl,
+        TextContentControllerBaseAccessor::ConstructImpl,
         TextContentControllerBaseAccessor::GetFinalizerImpl,
         TextContentControllerBaseAccessor::GetCaretOffsetImpl,
         TextContentControllerBaseAccessor::GetTextContentRectImpl,
@@ -131,4 +87,7 @@ const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentController
     return &TextContentControllerBaseAccessorImpl;
 }
 
+struct TextContentControllerBasePeer {
+    virtual ~TextContentControllerBasePeer() = default;
+};
 }

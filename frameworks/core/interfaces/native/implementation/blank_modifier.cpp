@@ -13,21 +13,16 @@
  * limitations under the License.
  */
 
-#include "base/log/log_wrapper.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/blank/blank_model_ng.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/validators.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BlankModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = BlankModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // BlankModifier
 namespace BlankInterfaceModifier {
@@ -36,36 +31,26 @@ void SetBlankOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto minDim = Converter::OptConvertPtr<Dimension>(min);
-    Validator::ValidateNonNegative(minDim);
-    Validator::ValidateNonPercent(minDim);
-    if (minDim) {
-        BlankModelNG::SetBlankMin(frameNode, *minDim);
-    }
+    //auto convValue = min ? Converter::OptConvert<type>(*min) : std::nullopt;
+    //BlankModelNG::SetSetBlankOptions(frameNode, convValue);
 }
 } // BlankInterfaceModifier
-
 namespace BlankAttributeModifier {
-void ColorImpl(Ark_NativePointer node,
-               const Opt_ResourceColor* value)
+void SetColorImpl(Ark_NativePointer node,
+                  const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto color = Converter::OptConvertPtr<Color>(value);
-    if (color) {
-        BlankModelNG::SetColor(frameNode, color.value());
-    } else {
-        LOGI("#### BlankAttribute::ColorImpl: color is empty");
-    }
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //BlankModelNG::SetSetColor(frameNode, convValue);
 }
 } // BlankAttributeModifier
-
 const GENERATED_ArkUIBlankModifier* GetBlankModifier()
 {
     static const GENERATED_ArkUIBlankModifier ArkUIBlankModifierImpl {
         BlankModifier::ConstructImpl,
         BlankInterfaceModifier::SetBlankOptionsImpl,
-        BlankAttributeModifier::ColorImpl,
+        BlankAttributeModifier::SetColorImpl,
     };
     return &ArkUIBlankModifierImpl;
 }

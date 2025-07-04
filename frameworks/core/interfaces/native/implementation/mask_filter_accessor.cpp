@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_MaskFilterAccessor {
+namespace drawing_MaskFilterAccessor {
 void DestroyPeerImpl(Ark_drawing_MaskFilter peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_MaskFilterPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_MaskFilter CtorImpl()
+Ark_drawing_MaskFilter ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -35,16 +39,19 @@ Ark_drawing_MaskFilter CreateBlurMaskFilterImpl(Ark_drawing_BlurType blurType,
 {
     return {};
 }
-} // Drawing_MaskFilterAccessor
+} // drawing_MaskFilterAccessor
 const GENERATED_ArkUIDrawing_MaskFilterAccessor* GetDrawing_MaskFilterAccessor()
 {
     static const GENERATED_ArkUIDrawing_MaskFilterAccessor Drawing_MaskFilterAccessorImpl {
-        Drawing_MaskFilterAccessor::DestroyPeerImpl,
-        Drawing_MaskFilterAccessor::CtorImpl,
-        Drawing_MaskFilterAccessor::GetFinalizerImpl,
-        Drawing_MaskFilterAccessor::CreateBlurMaskFilterImpl,
+        drawing_MaskFilterAccessor::DestroyPeerImpl,
+        drawing_MaskFilterAccessor::ConstructImpl,
+        drawing_MaskFilterAccessor::GetFinalizerImpl,
+        drawing_MaskFilterAccessor::CreateBlurMaskFilterImpl,
     };
     return &Drawing_MaskFilterAccessorImpl;
 }
 
+struct Drawing_MaskFilterPeer {
+    virtual ~Drawing_MaskFilterPeer() = default;
+};
 }

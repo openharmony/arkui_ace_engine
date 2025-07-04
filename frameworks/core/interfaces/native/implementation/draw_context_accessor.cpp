@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawContextAccessor {
 void DestroyPeerImpl(Ark_DrawContext peer)
 {
+    auto peerImpl = reinterpret_cast<DrawContextPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_DrawContext CtorImpl()
+Ark_DrawContext ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -47,7 +51,7 @@ const GENERATED_ArkUIDrawContextAccessor* GetDrawContextAccessor()
 {
     static const GENERATED_ArkUIDrawContextAccessor DrawContextAccessorImpl {
         DrawContextAccessor::DestroyPeerImpl,
-        DrawContextAccessor::CtorImpl,
+        DrawContextAccessor::ConstructImpl,
         DrawContextAccessor::GetFinalizerImpl,
         DrawContextAccessor::SizeImpl,
         DrawContextAccessor::SizeInPixelImpl,
@@ -56,4 +60,7 @@ const GENERATED_ArkUIDrawContextAccessor* GetDrawContextAccessor()
     return &DrawContextAccessorImpl;
 }
 
+struct DrawContextPeer {
+    virtual ~DrawContextPeer() = default;
+};
 }

@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Text_LineTypesetAccessor {
+namespace text_LineTypesetAccessor {
 void DestroyPeerImpl(Ark_text_LineTypeset peer)
 {
+    auto peerImpl = reinterpret_cast<text_LineTypesetPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_text_LineTypeset CtorImpl()
+Ark_text_LineTypeset ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -42,17 +46,20 @@ Ark_text_TextLine CreateLineImpl(Ark_text_LineTypeset peer,
 {
     return {};
 }
-} // Text_LineTypesetAccessor
+} // text_LineTypesetAccessor
 const GENERATED_ArkUIText_LineTypesetAccessor* GetText_LineTypesetAccessor()
 {
     static const GENERATED_ArkUIText_LineTypesetAccessor Text_LineTypesetAccessorImpl {
-        Text_LineTypesetAccessor::DestroyPeerImpl,
-        Text_LineTypesetAccessor::CtorImpl,
-        Text_LineTypesetAccessor::GetFinalizerImpl,
-        Text_LineTypesetAccessor::GetLineBreakImpl,
-        Text_LineTypesetAccessor::CreateLineImpl,
+        text_LineTypesetAccessor::DestroyPeerImpl,
+        text_LineTypesetAccessor::ConstructImpl,
+        text_LineTypesetAccessor::GetFinalizerImpl,
+        text_LineTypesetAccessor::GetLineBreakImpl,
+        text_LineTypesetAccessor::CreateLineImpl,
     };
     return &Text_LineTypesetAccessorImpl;
 }
 
+struct Text_LineTypesetPeer {
+    virtual ~Text_LineTypesetPeer() = default;
+};
 }

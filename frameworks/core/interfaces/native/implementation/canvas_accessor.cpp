@@ -13,21 +13,67 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-
 #include "arkoala_api_generated.h"
-#include "drawing_canvas_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_CanvasAccessor {
+namespace CanvasModifier {
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
+{
+    return {};
+}
+} // CanvasModifier
+namespace CanvasInterfaceModifier {
+void SetCanvasOptions0Impl(Ark_NativePointer node,
+                           const Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext* context)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = context ? Converter::OptConvert<type>(*context) : std::nullopt;
+    //CanvasModelNG::SetSetCanvasOptions0(frameNode, convValue);
+}
+void SetCanvasOptions1Impl(Ark_NativePointer node,
+                           const Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext* context,
+                           const Ark_ImageAIOptions* imageAIOptions)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(context);
+    //auto convValue = Converter::OptConvert<type>(context); // for enums
+    //CanvasModelNG::SetSetCanvasOptions1(frameNode, convValue);
+}
+} // CanvasInterfaceModifier
+namespace CanvasAttributeModifier {
+void SetOnReadyImpl(Ark_NativePointer node,
+                    const Opt_VoidCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CanvasModelNG::SetSetOnReady(frameNode, convValue);
+}
+void SetEnableAnalyzerImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CanvasModelNG::SetSetEnableAnalyzer(frameNode, convValue);
+}
+} // CanvasAttributeModifier
+namespace drawing_CanvasAccessor {
 void DestroyPeerImpl(Ark_drawing_Canvas peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<drawing_CanvasPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_Canvas CtorImpl(Ark_image_PixelMap pixelmap)
+Ark_drawing_Canvas ConstructImpl(Ark_image_PixelMap pixelmap)
 {
-    CHECK_NULL_RETURN(pixelmap, nullptr);
-    return PeerUtils::CreatePeer<drawing_CanvasPeer>(pixelmap->pixelMap);
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -43,14 +89,6 @@ void DrawRect1Impl(Ark_drawing_Canvas peer,
                    const Ark_Number* right,
                    const Ark_Number* bottom)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(left && top && right && bottom);
-    float x = Converter::Convert<float>(*left);
-    float y = Converter::Convert<float>(*top);
-    float w = Converter::Convert<float>(*right) - x;
-    float h = Converter::Convert<float>(*bottom) - y;
-    Rect rect(x, y, w, h);
-    peer->FillRect(rect);
 }
 void DrawRoundRectImpl(Ark_drawing_Canvas peer,
                        Ark_drawing_RoundRect roundRect)
@@ -306,66 +344,81 @@ void SetMatrixImpl(Ark_drawing_Canvas peer,
 void ResetMatrixImpl(Ark_drawing_Canvas peer)
 {
 }
-} // Drawing_CanvasAccessor
+} // drawing_CanvasAccessor
+const GENERATED_ArkUICanvasModifier* GetCanvasModifier()
+{
+    static const GENERATED_ArkUICanvasModifier ArkUICanvasModifierImpl {
+        CanvasModifier::ConstructImpl,
+        CanvasInterfaceModifier::SetCanvasOptions0Impl,
+        CanvasInterfaceModifier::SetCanvasOptions1Impl,
+        CanvasAttributeModifier::SetOnReadyImpl,
+        CanvasAttributeModifier::SetEnableAnalyzerImpl,
+    };
+    return &ArkUICanvasModifierImpl;
+}
+
 const GENERATED_ArkUIDrawing_CanvasAccessor* GetDrawing_CanvasAccessor()
 {
     static const GENERATED_ArkUIDrawing_CanvasAccessor Drawing_CanvasAccessorImpl {
-        Drawing_CanvasAccessor::DestroyPeerImpl,
-        Drawing_CanvasAccessor::CtorImpl,
-        Drawing_CanvasAccessor::GetFinalizerImpl,
-        Drawing_CanvasAccessor::DrawRect0Impl,
-        Drawing_CanvasAccessor::DrawRect1Impl,
-        Drawing_CanvasAccessor::DrawRoundRectImpl,
-        Drawing_CanvasAccessor::DrawNestedRoundRectImpl,
-        Drawing_CanvasAccessor::DrawBackgroundImpl,
-        Drawing_CanvasAccessor::DrawShadow0Impl,
-        Drawing_CanvasAccessor::DrawShadow1Impl,
-        Drawing_CanvasAccessor::DrawCircleImpl,
-        Drawing_CanvasAccessor::DrawImageImpl,
-        Drawing_CanvasAccessor::DrawImageRectImpl,
-        Drawing_CanvasAccessor::DrawImageRectWithSrcImpl,
-        Drawing_CanvasAccessor::DrawColor0Impl,
-        Drawing_CanvasAccessor::DrawColor1Impl,
-        Drawing_CanvasAccessor::DrawColor2Impl,
-        Drawing_CanvasAccessor::DrawOvalImpl,
-        Drawing_CanvasAccessor::DrawArcImpl,
-        Drawing_CanvasAccessor::DrawPointImpl,
-        Drawing_CanvasAccessor::DrawPointsImpl,
-        Drawing_CanvasAccessor::DrawPathImpl,
-        Drawing_CanvasAccessor::DrawLineImpl,
-        Drawing_CanvasAccessor::DrawSingleCharacterImpl,
-        Drawing_CanvasAccessor::DrawTextBlobImpl,
-        Drawing_CanvasAccessor::DrawPixelMapMeshImpl,
-        Drawing_CanvasAccessor::DrawRegionImpl,
-        Drawing_CanvasAccessor::AttachPenImpl,
-        Drawing_CanvasAccessor::AttachBrushImpl,
-        Drawing_CanvasAccessor::DetachPenImpl,
-        Drawing_CanvasAccessor::DetachBrushImpl,
-        Drawing_CanvasAccessor::SaveImpl,
-        Drawing_CanvasAccessor::SaveLayerImpl,
-        Drawing_CanvasAccessor::Clear0Impl,
-        Drawing_CanvasAccessor::Clear1Impl,
-        Drawing_CanvasAccessor::RestoreImpl,
-        Drawing_CanvasAccessor::RestoreToCountImpl,
-        Drawing_CanvasAccessor::GetSaveCountImpl,
-        Drawing_CanvasAccessor::GetWidthImpl,
-        Drawing_CanvasAccessor::GetHeightImpl,
-        Drawing_CanvasAccessor::GetLocalClipBoundsImpl,
-        Drawing_CanvasAccessor::GetTotalMatrixImpl,
-        Drawing_CanvasAccessor::ScaleImpl,
-        Drawing_CanvasAccessor::SkewImpl,
-        Drawing_CanvasAccessor::RotateImpl,
-        Drawing_CanvasAccessor::TranslateImpl,
-        Drawing_CanvasAccessor::ClipPathImpl,
-        Drawing_CanvasAccessor::ClipRectImpl,
-        Drawing_CanvasAccessor::ConcatMatrixImpl,
-        Drawing_CanvasAccessor::ClipRegionImpl,
-        Drawing_CanvasAccessor::ClipRoundRectImpl,
-        Drawing_CanvasAccessor::IsClipEmptyImpl,
-        Drawing_CanvasAccessor::SetMatrixImpl,
-        Drawing_CanvasAccessor::ResetMatrixImpl,
+        drawing_CanvasAccessor::DestroyPeerImpl,
+        drawing_CanvasAccessor::ConstructImpl,
+        drawing_CanvasAccessor::GetFinalizerImpl,
+        drawing_CanvasAccessor::DrawRect0Impl,
+        drawing_CanvasAccessor::DrawRect1Impl,
+        drawing_CanvasAccessor::DrawRoundRectImpl,
+        drawing_CanvasAccessor::DrawNestedRoundRectImpl,
+        drawing_CanvasAccessor::DrawBackgroundImpl,
+        drawing_CanvasAccessor::DrawShadow0Impl,
+        drawing_CanvasAccessor::DrawShadow1Impl,
+        drawing_CanvasAccessor::DrawCircleImpl,
+        drawing_CanvasAccessor::DrawImageImpl,
+        drawing_CanvasAccessor::DrawImageRectImpl,
+        drawing_CanvasAccessor::DrawImageRectWithSrcImpl,
+        drawing_CanvasAccessor::DrawColor0Impl,
+        drawing_CanvasAccessor::DrawColor1Impl,
+        drawing_CanvasAccessor::DrawColor2Impl,
+        drawing_CanvasAccessor::DrawOvalImpl,
+        drawing_CanvasAccessor::DrawArcImpl,
+        drawing_CanvasAccessor::DrawPointImpl,
+        drawing_CanvasAccessor::DrawPointsImpl,
+        drawing_CanvasAccessor::DrawPathImpl,
+        drawing_CanvasAccessor::DrawLineImpl,
+        drawing_CanvasAccessor::DrawSingleCharacterImpl,
+        drawing_CanvasAccessor::DrawTextBlobImpl,
+        drawing_CanvasAccessor::DrawPixelMapMeshImpl,
+        drawing_CanvasAccessor::DrawRegionImpl,
+        drawing_CanvasAccessor::AttachPenImpl,
+        drawing_CanvasAccessor::AttachBrushImpl,
+        drawing_CanvasAccessor::DetachPenImpl,
+        drawing_CanvasAccessor::DetachBrushImpl,
+        drawing_CanvasAccessor::SaveImpl,
+        drawing_CanvasAccessor::SaveLayerImpl,
+        drawing_CanvasAccessor::Clear0Impl,
+        drawing_CanvasAccessor::Clear1Impl,
+        drawing_CanvasAccessor::RestoreImpl,
+        drawing_CanvasAccessor::RestoreToCountImpl,
+        drawing_CanvasAccessor::GetSaveCountImpl,
+        drawing_CanvasAccessor::GetWidthImpl,
+        drawing_CanvasAccessor::GetHeightImpl,
+        drawing_CanvasAccessor::GetLocalClipBoundsImpl,
+        drawing_CanvasAccessor::GetTotalMatrixImpl,
+        drawing_CanvasAccessor::ScaleImpl,
+        drawing_CanvasAccessor::SkewImpl,
+        drawing_CanvasAccessor::RotateImpl,
+        drawing_CanvasAccessor::TranslateImpl,
+        drawing_CanvasAccessor::ClipPathImpl,
+        drawing_CanvasAccessor::ClipRectImpl,
+        drawing_CanvasAccessor::ConcatMatrixImpl,
+        drawing_CanvasAccessor::ClipRegionImpl,
+        drawing_CanvasAccessor::ClipRoundRectImpl,
+        drawing_CanvasAccessor::IsClipEmptyImpl,
+        drawing_CanvasAccessor::SetMatrixImpl,
+        drawing_CanvasAccessor::ResetMatrixImpl,
     };
     return &Drawing_CanvasAccessorImpl;
 }
 
+struct Drawing_CanvasPeer {
+    virtual ~Drawing_CanvasPeer() = default;
+};
 }

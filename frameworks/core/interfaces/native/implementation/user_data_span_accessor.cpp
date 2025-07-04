@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UserDataSpanAccessor {
 void DestroyPeerImpl(Ark_UserDataSpan peer)
 {
+    auto peerImpl = reinterpret_cast<UserDataSpanPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_UserDataSpan CtorImpl()
+Ark_UserDataSpan ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -35,10 +39,13 @@ const GENERATED_ArkUIUserDataSpanAccessor* GetUserDataSpanAccessor()
 {
     static const GENERATED_ArkUIUserDataSpanAccessor UserDataSpanAccessorImpl {
         UserDataSpanAccessor::DestroyPeerImpl,
-        UserDataSpanAccessor::CtorImpl,
+        UserDataSpanAccessor::ConstructImpl,
         UserDataSpanAccessor::GetFinalizerImpl,
     };
     return &UserDataSpanAccessorImpl;
 }
 
+struct UserDataSpanPeer {
+    virtual ~UserDataSpanPeer() = default;
+};
 }

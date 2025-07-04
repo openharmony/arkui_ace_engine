@@ -13,61 +13,25 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
-#include "nav_path_info_peer_impl.h"
-
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-
-namespace Nav = OHOS::Ace::NG::GeneratedModifier::NavigationContext;
-
-namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_Object& dst, const Nav::ExternalData& src)
-{
-    if (src) {
-        dst = src->data_;
-    }
-}
-void AssignArkValue(Ark_NavPathInfo& dst, const Nav::PathInfo& src)
-{
-    auto peer = new NavPathInfoPeer();
-    CHECK_NULL_VOID(peer);
-    peer->data = src;
-}
-
-template<>
-Nav::ExternalData Convert(const Ark_Object& src)
-{
-    return Referenced::MakeRefPtr<Nav::ExternalDataKeeper>(src);
-}
-
-template<>
-Nav::PathInfo Convert(const Ark_NavPathInfo& src)
-{
-    return src ? src->data : Nav::PathInfo();
-}
-} // namespace OHOS::Ace::NG::Converter
-
-using namespace OHOS::Ace::NG::Converter;
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavPathInfoAccessor {
 void DestroyPeerImpl(Ark_NavPathInfo peer)
 {
-    delete peer;
+    auto peerImpl = reinterpret_cast<NavPathInfoPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_NavPathInfo CtorImpl(const Ark_String* name,
-                         const Opt_Object* param,
-                         const Opt_Callback_PopInfo_Void* onPop,
-                         const Opt_Boolean* isEntry)
+Ark_NavPathInfo ConstructImpl(const Ark_String* name,
+                              const Opt_Object* param,
+                              const Opt_Callback_PopInfo_Void* onPop,
+                              const Opt_Boolean* isEntry)
 {
-    CHECK_NULL_RETURN(name, nullptr);
-    auto peer = new NavPathInfoPeer();
-    CHECK_NULL_RETURN(peer, nullptr);
-    peer->data.name_ = Convert<std::string>(*name);
-    peer->data.isEntry_ = Converter::OptConvertPtr<bool>(isEntry).value_or(peer->data.isEntry_);
-    return peer;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -75,15 +39,11 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetNameImpl(Ark_NavPathInfo peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    return ArkValue<Ark_String>(peer->data.name_, Converter::FC);
+    return {};
 }
 void SetNameImpl(Ark_NavPathInfo peer,
                  const Ark_String* name)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(name);
-    peer->data.name_ = Convert<std::string>(*name);
 }
 Opt_Object GetParamImpl(Ark_NavPathInfo peer)
 {
@@ -92,60 +52,37 @@ Opt_Object GetParamImpl(Ark_NavPathInfo peer)
 void SetParamImpl(Ark_NavPathInfo peer,
                   const Opt_Object* param)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(param);
-#ifdef WRONG_GEN
-    peer->data.param_ = Convert<Nav::ExternalData>(*param);
-#endif
 }
 Opt_Callback_PopInfo_Void GetOnPopImpl(Ark_NavPathInfo peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Callback_PopInfo_Void>();
-    CHECK_NULL_RETURN(peer, invalid);
-    return Converter::ArkValue<Opt_Callback_PopInfo_Void>(peer->data.onPop_.GetCallback());
+    return {};
 }
 void SetOnPopImpl(Ark_NavPathInfo peer,
                   const Opt_Callback_PopInfo_Void* onPop)
 {
-    CHECK_NULL_VOID(peer);
-    auto optVal = Converter::GetOptPtr(onPop);
-    CHECK_NULL_VOID(optVal);
-    peer->data.onPop_ = CallbackHelper(*optVal);
 }
 Opt_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Boolean>(false);
-    CHECK_NULL_RETURN(peer, invalid);
-    return ArkValue<Opt_Boolean>(peer->data.isEntry_);
+    return {};
 }
 void SetIsEntryImpl(Ark_NavPathInfo peer,
                     const Opt_Boolean* isEntry)
 {
-    CHECK_NULL_VOID(peer);
-    auto convValue = Converter::OptConvertPtr<bool>(isEntry);
-    CHECK_NULL_VOID(convValue);
-    peer->data.isEntry_ = *convValue;
 }
 Opt_String GetNavDestinationIdImpl(Ark_NavPathInfo peer)
 {
-    auto invalidVal = Converter::ArkValue<Opt_String>("", Converter::FC);
-    CHECK_NULL_RETURN(peer, invalidVal);
-    return Converter::ArkValue<Opt_String>(peer->data.navDestinationId_, Converter::FC);
+    return {};
 }
 void SetNavDestinationIdImpl(Ark_NavPathInfo peer,
                              const Opt_String* navDestinationId)
 {
-    CHECK_NULL_VOID(peer);
-    auto id = Converter::OptConvertPtr<std::string>(navDestinationId);
-    CHECK_NULL_VOID(id);
-    peer->data.navDestinationId_ = *id;
 }
 } // NavPathInfoAccessor
 const GENERATED_ArkUINavPathInfoAccessor* GetNavPathInfoAccessor()
 {
     static const GENERATED_ArkUINavPathInfoAccessor NavPathInfoAccessorImpl {
         NavPathInfoAccessor::DestroyPeerImpl,
-        NavPathInfoAccessor::CtorImpl,
+        NavPathInfoAccessor::ConstructImpl,
         NavPathInfoAccessor::GetFinalizerImpl,
         NavPathInfoAccessor::GetNameImpl,
         NavPathInfoAccessor::SetNameImpl,
@@ -161,4 +98,7 @@ const GENERATED_ArkUINavPathInfoAccessor* GetNavPathInfoAccessor()
     return &NavPathInfoAccessorImpl;
 }
 
+struct NavPathInfoPeer {
+    virtual ~NavPathInfoPeer() = default;
+};
 }

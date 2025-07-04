@@ -15,19 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "pinch_recognizer_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PinchRecognizerAccessor {
 void DestroyPeerImpl(Ark_PinchRecognizer peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<PinchRecognizerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_PinchRecognizer CtorImpl()
+Ark_PinchRecognizer ConstructImpl()
 {
-    return PeerUtils::CreatePeer<PinchRecognizerPeer>();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -35,20 +36,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetDistanceImpl(Ark_PinchRecognizer peer)
 {
-    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_DISTANCE);
-    CHECK_NULL_RETURN(peer, errorValue);
-    return Converter::ArkValue<Ark_Number>(peer->GetDistance());
+    return {};
 }
 } // PinchRecognizerAccessor
 const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor()
 {
     static const GENERATED_ArkUIPinchRecognizerAccessor PinchRecognizerAccessorImpl {
         PinchRecognizerAccessor::DestroyPeerImpl,
-        PinchRecognizerAccessor::CtorImpl,
+        PinchRecognizerAccessor::ConstructImpl,
         PinchRecognizerAccessor::GetFinalizerImpl,
         PinchRecognizerAccessor::GetDistanceImpl,
     };
     return &PinchRecognizerAccessorImpl;
 }
 
+struct PinchRecognizerPeer {
+    virtual ~PinchRecognizerPeer() = default;
+};
 }

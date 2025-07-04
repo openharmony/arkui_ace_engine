@@ -14,23 +14,15 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
-#include "core/components_ng/pattern/checkbox/checkbox_model_static.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/converter2.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CheckboxModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = CheckBoxModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // CheckboxModifier
 namespace CheckboxInterfaceModifier {
@@ -39,137 +31,80 @@ void SetCheckboxOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    Converter::WithOptional(*options, [frameNode, node](const Ark_CheckboxOptions& options) {
-        auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
-        CHECK_NULL_VOID(eventHub);
-
-        auto name = Converter::OptConvert<std::string>(options.name);
-        if (name) {
-            eventHub->SetName(name.value());
-        }
-
-        auto group = Converter::OptConvert<std::string>(options.group);
-        if (group) {
-            eventHub->SetGroupName(group.value());
-        }
-
-        auto arkIndicatorBuilder = Converter::OptConvert<CustomNodeBuilder>(options.indicatorBuilder);
-        if (arkIndicatorBuilder) {
-            WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-            auto customBuilder = [callback = CallbackHelper(arkIndicatorBuilder.value()), node,
-                weakNode]() {
-                PipelineContext::SetCallBackNode(weakNode);
-                auto uiNode = callback.BuildSync(node);
-                ViewStackProcessor::GetInstance()->Push(uiNode);
-            };
-            CheckBoxModelStatic::SetBuilder(frameNode, std::move(customBuilder));
-        }
-    });
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //CheckboxModelNG::SetSetCheckboxOptions(frameNode, convValue);
 }
 } // CheckboxInterfaceModifier
 namespace CheckboxAttributeModifier {
-void SelectImpl(Ark_NativePointer node,
-                const Opt_Boolean* value)
+void SetSelectImpl(Ark_NativePointer node,
+                   const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxModelStatic::SetSelect(frameNode, Converter::OptConvertPtr<bool>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CheckboxModelNG::SetSetSelect(frameNode, convValue);
 }
-void SelectedColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
+void SetSelectedColorImpl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxModelStatic::SetSelectedColor(frameNode, Converter::OptConvertPtr<Color>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CheckboxModelNG::SetSetSelectedColor(frameNode, convValue);
 }
-void ShapeImpl(Ark_NativePointer node,
-               const Opt_CheckBoxShape* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CheckBoxModelStatic::SetCheckboxStyle(frameNode, Converter::OptConvertPtr<CheckBoxStyle>(value));
-}
-void UnselectedColorImpl(Ark_NativePointer node,
-                         const Opt_ResourceColor* value)
+void SetShapeImpl(Ark_NativePointer node,
+                  const Opt_CheckBoxShape* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxModelStatic::SetUnSelectedColor(frameNode, Converter::OptConvertPtr<Color>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CheckboxModelNG::SetSetShape(frameNode, convValue);
 }
-void MarkImpl(Ark_NativePointer node,
-              const Opt_MarkStyle* value)
+void SetUnselectedColorImpl(Ark_NativePointer node,
+                            const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto color = Converter::OptConvert<Color>(optValue->strokeColor);
-    if (color) {
-        CheckBoxModelStatic::SetCheckMarkColor(frameNode, color.value());
-    }
-
-    auto size = Converter::OptConvert<Dimension>(optValue->size);
-    if (size) {
-        CheckBoxModelStatic::SetCheckMarkSize(frameNode, size.value());
-    }
-
-    auto width = Converter::OptConvert<Dimension>(optValue->strokeWidth);
-    if (width) {
-        CheckBoxModelStatic::SetCheckMarkWidth(frameNode, width.value());
-    }
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CheckboxModelNG::SetSetUnselectedColor(frameNode, convValue);
 }
-void OnChangeImpl(Ark_NativePointer node,
-                  const Opt_OnCheckboxChangeCallback* value)
+void SetMarkImpl(Ark_NativePointer node,
+                 const Opt_MarkStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optCallback = Converter::GetOptPtr(value);
-    CHECK_NULL_VOID(optCallback);
-    auto onEvent = [arkCallback = CallbackHelper(*optCallback)](const bool value) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
-    };
-    CheckBoxModelNG::SetOnChange(frameNode, std::move(onEvent));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CheckboxModelNG::SetSetMark(frameNode, convValue);
 }
-void ContentModifierImpl(Ark_NativePointer node,
-                         const Opt_ContentModifier* value)
+void SetOnChangeImpl(Ark_NativePointer node,
+                     const Opt_OnCheckboxChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::OptConvertPtr<type>(value);
-    //CheckboxModelNG::SetContentModifier(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CheckboxModelNG::SetSetOnChange(frameNode, convValue);
 }
-#ifdef WRONG_GEN
-void _onChangeEvent_selectImpl(Ark_NativePointer node,
-                               const Callback_Opt_Boolean_Void* callback)
+void SetContentModifierImpl(Ark_NativePointer node,
+                            const Opt_ContentModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const bool value) {
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkValue<Opt_Boolean>(value));
-    };
-    CheckBoxModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CheckboxModelNG::SetSetContentModifier(frameNode, convValue);
 }
-#endif
 } // CheckboxAttributeModifier
 const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()
 {
     static const GENERATED_ArkUICheckboxModifier ArkUICheckboxModifierImpl {
         CheckboxModifier::ConstructImpl,
         CheckboxInterfaceModifier::SetCheckboxOptionsImpl,
-        CheckboxAttributeModifier::SelectImpl,
-        CheckboxAttributeModifier::SelectedColorImpl,
-        CheckboxAttributeModifier::ShapeImpl,
-        CheckboxAttributeModifier::UnselectedColorImpl,
-        CheckboxAttributeModifier::MarkImpl,
-        CheckboxAttributeModifier::OnChangeImpl,
-        CheckboxAttributeModifier::ContentModifierImpl,
+        CheckboxAttributeModifier::SetSelectImpl,
+        CheckboxAttributeModifier::SetSelectedColorImpl,
+        CheckboxAttributeModifier::SetShapeImpl,
+        CheckboxAttributeModifier::SetUnselectedColorImpl,
+        CheckboxAttributeModifier::SetMarkImpl,
+        CheckboxAttributeModifier::SetOnChangeImpl,
+        CheckboxAttributeModifier::SetContentModifierImpl,
     };
     return &ArkUICheckboxModifierImpl;
 }

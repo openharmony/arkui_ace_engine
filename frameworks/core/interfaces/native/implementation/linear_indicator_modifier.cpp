@@ -38,29 +38,29 @@ void SetLinearIndicatorOptionsImpl(Ark_NativePointer node,
 }
 } // LinearIndicatorInterfaceModifier
 namespace LinearIndicatorAttributeModifier {
-void IndicatorStyleImpl(Ark_NativePointer node,
-                        const Opt_LinearIndicatorStyle* value)
+void SetIndicatorStyleImpl(Ark_NativePointer node,
+                           const Opt_LinearIndicatorStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::OptConvertPtr<type>(value);
-    //LinearIndicatorModelNG::SetIndicatorStyle(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //LinearIndicatorModelNG::SetSetIndicatorStyle(frameNode, convValue);
 }
-void IndicatorLoopImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+void SetIndicatorLoopImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::OptConvertPtr<type>(value);
-    //LinearIndicatorModelNG::SetIndicatorLoop(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //LinearIndicatorModelNG::SetSetIndicatorLoop(frameNode, convValue);
 }
-void OnChangeImpl(Ark_NativePointer node,
-                  const Opt_OnLinearIndicatorChangeCallback* value)
+void SetOnChangeImpl(Ark_NativePointer node,
+                     const Opt_OnLinearIndicatorChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::OptConvertPtr<type>(value);
-    //LinearIndicatorModelNG::SetOnChange(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //LinearIndicatorModelNG::SetSetOnChange(frameNode, convValue);
 }
 } // LinearIndicatorAttributeModifier
 const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier()
@@ -68,9 +68,9 @@ const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier()
     static const GENERATED_ArkUILinearIndicatorModifier ArkUILinearIndicatorModifierImpl {
         LinearIndicatorModifier::ConstructImpl,
         LinearIndicatorInterfaceModifier::SetLinearIndicatorOptionsImpl,
-        LinearIndicatorAttributeModifier::IndicatorStyleImpl,
-        LinearIndicatorAttributeModifier::IndicatorLoopImpl,
-        LinearIndicatorAttributeModifier::OnChangeImpl,
+        LinearIndicatorAttributeModifier::SetIndicatorStyleImpl,
+        LinearIndicatorAttributeModifier::SetIndicatorLoopImpl,
+        LinearIndicatorAttributeModifier::SetOnChangeImpl,
     };
     return &ArkUILinearIndicatorModifierImpl;
 }

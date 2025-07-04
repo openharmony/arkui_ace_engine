@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_RegionAccessor {
+namespace drawing_RegionAccessor {
 void DestroyPeerImpl(Ark_drawing_Region peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_RegionPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_Region CtorImpl()
+Ark_drawing_Region ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -69,21 +73,24 @@ Ark_Boolean SetRectImpl(Ark_drawing_Region peer,
 {
     return {};
 }
-} // Drawing_RegionAccessor
+} // drawing_RegionAccessor
 const GENERATED_ArkUIDrawing_RegionAccessor* GetDrawing_RegionAccessor()
 {
     static const GENERATED_ArkUIDrawing_RegionAccessor Drawing_RegionAccessorImpl {
-        Drawing_RegionAccessor::DestroyPeerImpl,
-        Drawing_RegionAccessor::CtorImpl,
-        Drawing_RegionAccessor::GetFinalizerImpl,
-        Drawing_RegionAccessor::IsPointContainedImpl,
-        Drawing_RegionAccessor::IsRegionContainedImpl,
-        Drawing_RegionAccessor::OpImpl,
-        Drawing_RegionAccessor::QuickRejectImpl,
-        Drawing_RegionAccessor::SetPathImpl,
-        Drawing_RegionAccessor::SetRectImpl,
+        drawing_RegionAccessor::DestroyPeerImpl,
+        drawing_RegionAccessor::ConstructImpl,
+        drawing_RegionAccessor::GetFinalizerImpl,
+        drawing_RegionAccessor::IsPointContainedImpl,
+        drawing_RegionAccessor::IsRegionContainedImpl,
+        drawing_RegionAccessor::OpImpl,
+        drawing_RegionAccessor::QuickRejectImpl,
+        drawing_RegionAccessor::SetPathImpl,
+        drawing_RegionAccessor::SetRectImpl,
     };
     return &Drawing_RegionAccessorImpl;
 }
 
+struct Drawing_RegionPeer {
+    virtual ~Drawing_RegionPeer() = default;
+};
 }

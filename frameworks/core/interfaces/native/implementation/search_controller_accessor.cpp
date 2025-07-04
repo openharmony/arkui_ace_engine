@@ -13,19 +13,22 @@
  * limitations under the License.
  */
 
-#include "search_controller_accessor_peer.h"
-#include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SearchControllerAccessor {
 void DestroyPeerImpl(Ark_SearchController peer)
 {
-    delete peer;
+    auto peerImpl = reinterpret_cast<SearchControllerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_SearchController CtorImpl()
+Ark_SearchController ConstructImpl()
 {
-    return new SearchControllerPeer();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -34,32 +37,22 @@ Ark_NativePointer GetFinalizerImpl()
 void CaretPositionImpl(Ark_SearchController peer,
                        const Ark_Number* value)
 {
-    CHECK_NULL_VOID(peer && value && peer->controller_);
-    peer->controller_->CaretPosition(std::max(Converter::Convert<int32_t>(*value), 0));
 }
 void StopEditingImpl(Ark_SearchController peer)
 {
-    CHECK_NULL_VOID(peer && peer->controller_);
-    peer->controller_->StopEditing();
 }
 void SetTextSelectionImpl(Ark_SearchController peer,
                           const Ark_Number* selectionStart,
                           const Ark_Number* selectionEnd,
                           const Opt_SelectionOptions* options)
 {
-    CHECK_NULL_VOID(peer && selectionStart && selectionEnd && peer->controller_);
-    auto selectionOptions = Converter::OptConvertPtr<SelectionOptions>(options);
-    peer->controller_->SetTextSelection(
-        Converter::Convert<int32_t>(*selectionStart),
-        Converter::Convert<int32_t>(*selectionEnd),
-        selectionOptions);
 }
 } // SearchControllerAccessor
 const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor()
 {
     static const GENERATED_ArkUISearchControllerAccessor SearchControllerAccessorImpl {
         SearchControllerAccessor::DestroyPeerImpl,
-        SearchControllerAccessor::CtorImpl,
+        SearchControllerAccessor::ConstructImpl,
         SearchControllerAccessor::GetFinalizerImpl,
         SearchControllerAccessor::CaretPositionImpl,
         SearchControllerAccessor::StopEditingImpl,
@@ -68,4 +61,7 @@ const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor()
     return &SearchControllerAccessorImpl;
 }
 
+struct SearchControllerPeer {
+    virtual ~SearchControllerPeer() = default;
+};
 }

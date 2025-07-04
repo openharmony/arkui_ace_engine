@@ -18,17 +18,21 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_BrushAccessor {
+namespace drawing_BrushAccessor {
 void DestroyPeerImpl(Ark_drawing_Brush peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_BrushPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_Brush Ctor0Impl()
+Ark_drawing_Brush Construct0Impl()
 {
-    return nullptr;
+    return {};
 }
-Ark_drawing_Brush Ctor1Impl(Ark_drawing_Brush brush)
+Ark_drawing_Brush Construct1Impl(Ark_drawing_Brush brush)
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -104,33 +108,36 @@ void SetBlendModeImpl(Ark_drawing_Brush peer,
 void ResetImpl(Ark_drawing_Brush peer)
 {
 }
-} // Drawing_BrushAccessor
+} // drawing_BrushAccessor
 const GENERATED_ArkUIDrawing_BrushAccessor* GetDrawing_BrushAccessor()
 {
     static const GENERATED_ArkUIDrawing_BrushAccessor Drawing_BrushAccessorImpl {
-        Drawing_BrushAccessor::DestroyPeerImpl,
-        Drawing_BrushAccessor::Ctor0Impl,
-        Drawing_BrushAccessor::Ctor1Impl,
-        Drawing_BrushAccessor::GetFinalizerImpl,
-        Drawing_BrushAccessor::SetColor0Impl,
-        Drawing_BrushAccessor::SetColor1Impl,
-        Drawing_BrushAccessor::SetColor2Impl,
-        Drawing_BrushAccessor::GetColorImpl,
-        Drawing_BrushAccessor::GetHexColorImpl,
-        Drawing_BrushAccessor::SetAntiAliasImpl,
-        Drawing_BrushAccessor::IsAntiAliasImpl,
-        Drawing_BrushAccessor::SetAlphaImpl,
-        Drawing_BrushAccessor::GetAlphaImpl,
-        Drawing_BrushAccessor::SetColorFilterImpl,
-        Drawing_BrushAccessor::GetColorFilterImpl,
-        Drawing_BrushAccessor::SetImageFilterImpl,
-        Drawing_BrushAccessor::SetMaskFilterImpl,
-        Drawing_BrushAccessor::SetShadowLayerImpl,
-        Drawing_BrushAccessor::SetShaderEffectImpl,
-        Drawing_BrushAccessor::SetBlendModeImpl,
-        Drawing_BrushAccessor::ResetImpl,
+        drawing_BrushAccessor::DestroyPeerImpl,
+        drawing_BrushAccessor::Construct0Impl,
+        drawing_BrushAccessor::Construct1Impl,
+        drawing_BrushAccessor::GetFinalizerImpl,
+        drawing_BrushAccessor::SetColor0Impl,
+        drawing_BrushAccessor::SetColor1Impl,
+        drawing_BrushAccessor::SetColor2Impl,
+        drawing_BrushAccessor::GetColorImpl,
+        drawing_BrushAccessor::GetHexColorImpl,
+        drawing_BrushAccessor::SetAntiAliasImpl,
+        drawing_BrushAccessor::IsAntiAliasImpl,
+        drawing_BrushAccessor::SetAlphaImpl,
+        drawing_BrushAccessor::GetAlphaImpl,
+        drawing_BrushAccessor::SetColorFilterImpl,
+        drawing_BrushAccessor::GetColorFilterImpl,
+        drawing_BrushAccessor::SetImageFilterImpl,
+        drawing_BrushAccessor::SetMaskFilterImpl,
+        drawing_BrushAccessor::SetShadowLayerImpl,
+        drawing_BrushAccessor::SetShaderEffectImpl,
+        drawing_BrushAccessor::SetBlendModeImpl,
+        drawing_BrushAccessor::ResetImpl,
     };
     return &Drawing_BrushAccessorImpl;
 }
 
+struct Drawing_BrushPeer {
+    virtual ~Drawing_BrushPeer() = default;
+};
 }

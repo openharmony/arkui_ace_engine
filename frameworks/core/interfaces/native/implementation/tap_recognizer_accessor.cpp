@@ -15,19 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-#include "tap_recognizer_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TapRecognizerAccessor {
 void DestroyPeerImpl(Ark_TapRecognizer peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<TapRecognizerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_TapRecognizer CtorImpl()
+Ark_TapRecognizer ConstructImpl()
 {
-    return PeerUtils::CreatePeer<TapRecognizerPeer>();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -35,20 +36,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetTapCountImpl(Ark_TapRecognizer peer)
 {
-    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_COUNT);
-    CHECK_NULL_RETURN(peer, errorValue);
-    return Converter::ArkValue<Ark_Number>(peer->GetCount());
+    return {};
 }
 } // TapRecognizerAccessor
 const GENERATED_ArkUITapRecognizerAccessor* GetTapRecognizerAccessor()
 {
     static const GENERATED_ArkUITapRecognizerAccessor TapRecognizerAccessorImpl {
         TapRecognizerAccessor::DestroyPeerImpl,
-        TapRecognizerAccessor::CtorImpl,
+        TapRecognizerAccessor::ConstructImpl,
         TapRecognizerAccessor::GetFinalizerImpl,
         TapRecognizerAccessor::GetTapCountImpl,
     };
     return &TapRecognizerAccessorImpl;
 }
 
+struct TapRecognizerPeer {
+    virtual ~TapRecognizerPeer() = default;
+};
 }

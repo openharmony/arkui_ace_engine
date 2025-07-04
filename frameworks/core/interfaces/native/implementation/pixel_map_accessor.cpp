@@ -16,17 +16,19 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "pixel_map_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Image_PixelMapAccessor {
+namespace image_PixelMapAccessor {
 void DestroyPeerImpl(Ark_image_PixelMap peer)
 {
-    image_PixelMapPeer::Destroy(peer);
+    auto peerImpl = reinterpret_cast<image_PixelMapPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_image_PixelMap CtorImpl()
+Ark_image_PixelMap ConstructImpl()
 {
-    return image_PixelMapPeer::Create({});
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -48,19 +50,22 @@ Ark_Boolean GetIsStrideAlignmentImpl(Ark_image_PixelMap peer)
 {
     return {};
 }
-} // Image_PixelMapAccessor
+} // image_PixelMapAccessor
 const GENERATED_ArkUIImage_PixelMapAccessor* GetImage_PixelMapAccessor()
 {
     static const GENERATED_ArkUIImage_PixelMapAccessor Image_PixelMapAccessorImpl {
-        Image_PixelMapAccessor::DestroyPeerImpl,
-        Image_PixelMapAccessor::CtorImpl,
-        Image_PixelMapAccessor::GetFinalizerImpl,
-        Image_PixelMapAccessor::ReadPixelsToBufferSyncImpl,
-        Image_PixelMapAccessor::WriteBufferToPixelsImpl,
-        Image_PixelMapAccessor::GetIsEditableImpl,
-        Image_PixelMapAccessor::GetIsStrideAlignmentImpl,
+        image_PixelMapAccessor::DestroyPeerImpl,
+        image_PixelMapAccessor::ConstructImpl,
+        image_PixelMapAccessor::GetFinalizerImpl,
+        image_PixelMapAccessor::ReadPixelsToBufferSyncImpl,
+        image_PixelMapAccessor::WriteBufferToPixelsImpl,
+        image_PixelMapAccessor::GetIsEditableImpl,
+        image_PixelMapAccessor::GetIsStrideAlignmentImpl,
     };
     return &Image_PixelMapAccessorImpl;
 }
 
+struct Image_PixelMapPeer {
+    virtual ~Image_PixelMapPeer() = default;
+};
 }

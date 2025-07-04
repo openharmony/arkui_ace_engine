@@ -13,121 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/gauge/gauge_model_ng.h"
-#include "core/components_ng/pattern/gauge/gauge_model_static.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/implementation/linear_gradient_peer.h"
-
-namespace OHOS::Ace::NG {
-namespace {
-constexpr double DEFAULT_GAUGE_VALUE = 0;
-constexpr double DEFAULT_GAUGE_MIN = 0;
-constexpr double DEFAULT_GAUGE_MAX = 100;
-void SortColorStopOffset(std::vector<ColorStopArray>& colors)
-{
-    for (auto& colorStopArray : colors) {
-        std::sort(colorStopArray.begin(), colorStopArray.end(),
-            [](const std::pair<Color, Dimension>& left, const std::pair<Color, Dimension>& right) {
-                return left.second.Value() < right.second.Value();
-            });
-
-        auto iter = std::unique(colorStopArray.begin(), colorStopArray.end(),
-            [](const std::pair<Color, Dimension>& left, const std::pair<Color, Dimension>& right) {
-                return left.second.Value() == right.second.Value();
-            });
-        colorStopArray.erase(iter, colorStopArray.end());
-    }
-}
-} // namespace
-} // namespace OHOS::Ace::NG
-
-namespace OHOS::Ace::NG::Converter {
-template<>
-ColorStopArray Convert(const Ark_ResourceColor& src)
-{
-    auto colorStop = ColorStopArray();
-    const auto color = OptConvert<Color>(src);
-    if (color) {
-        colorStop.emplace_back(std::make_pair(*color, Dimension(0.0)));
-    }
-    return colorStop;
-}
-
-template<>
-ColorStopArray Convert(const Ark_LinearGradient& src)
-{
-    ColorStopArray result;
-    CHECK_NULL_RETURN(src, result);
-    result.reserve(src->colorStops.size());
-    for (const auto& color : src->colorStops) {
-        if (color.first.has_value()) {
-            result.emplace_back(std::make_pair(color.first.value(), color.second));
-        }
-    }
-    return result;
-}
-
-using ColorWithWeight = std::tuple<ColorStopArray, float>;
-template<>
-ColorWithWeight Convert(const Ark_Tuple_Union_ResourceColor_LinearGradient_Number& src)
-{
-    ColorStopArray colors;
-    Converter::VisitUnion(src.value0,
-        [&colors](const auto& value) {
-            colors = Convert<ColorStopArray>(value);
-        },
-        []() {}
-    );
-    const auto weight = Convert<float>(src.value1);
-    return {colors, weight};
-}
-
-template<>
-GaugeShadowOptions Convert(const Ark_GaugeShadowOptions& src)
-{
-    auto shadow = GaugeShadowOptions();
-    auto radius = OptConvert<float>(src.radius);
-    Validator::ValidatePositive(radius);
-    if (radius) {
-        shadow.radius = *radius;
-    }
-    const auto offsetX = OptConvert<float>(src.offsetX);
-    if (offsetX) {
-        shadow.offsetX = *offsetX;
-    }
-    const auto offsetY = OptConvert<float>(src.offsetY);
-    if (offsetY) {
-        shadow.offsetY = *offsetY;
-    }
-    return shadow;
-}
-
-struct GaugeIndicatorOptions {
-    std::optional<ImageSourceInfo> icon;
-    std::optional<Dimension> space;
-};
-
-template<>
-GaugeIndicatorOptions Convert(const Ark_GaugeIndicatorOptions& src)
-{
-    return {
-        .icon = OptConvert<ImageSourceInfo>(src.icon),
-        .space = OptConvert<Dimension>(src.space)
-    };
-}
-} // namespace OHOS::Ace::NG::Converter
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GaugeModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = GaugeModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // GaugeModifier
 namespace GaugeInterfaceModifier {
@@ -137,184 +32,90 @@ void SetGaugeOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    auto min = Converter::OptConvert<float>(options->min);
-    auto max = Converter::OptConvert<float>(options->max);
-    if (!min) {
-        min = DEFAULT_GAUGE_MIN;
-    }
-    if (!max) {
-        max = DEFAULT_GAUGE_MAX;
-    }
-    if (LessNotEqual(*max, *min)) {
-        min = DEFAULT_GAUGE_MIN;
-        max = DEFAULT_GAUGE_MAX;
-    }
-    auto value = Converter::OptConvert<float>(options->value);
-    if (!value) {
-        value = DEFAULT_GAUGE_VALUE;
-    }
-    if (LessNotEqual(*value, *min) || GreatNotEqual(*value, *max)) {
-        value = min;
-    }
-    GaugeModelStatic::SetValue(frameNode, value);
-    GaugeModelStatic::SetMin(frameNode, min);
-    GaugeModelStatic::SetMax(frameNode, max);
-    GaugeModelNG::SetIsShowLimitValue(frameNode, min || max);
+    //auto convValue = Converter::OptConvert<type_name>(*options);
+    //GaugeModelNG::SetSetGaugeOptions(frameNode, convValue);
 }
 } // GaugeInterfaceModifier
 namespace GaugeAttributeModifier {
-void ValueImpl(Ark_NativePointer node,
-               const Opt_Number* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<float>(value);
-    if (!convValue) {
-        return;
-    }
-    GaugeModelStatic::SetValue(frameNode, convValue);
-}
-void StartAngleImpl(Ark_NativePointer node,
-                    const Opt_Number* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<float>(value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    GaugeModelNG::SetStartAngle(frameNode, *convValue);
-}
-void EndAngleImpl(Ark_NativePointer node,
+void SetValueImpl(Ark_NativePointer node,
                   const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<float>(value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    GaugeModelNG::SetEndAngle(frameNode, *convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GaugeModelNG::SetSetValue(frameNode, convValue);
 }
-void ColorsImpl(Ark_NativePointer node,
-                const Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number* value)
+void SetStartAngleImpl(Ark_NativePointer node,
+                       const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    struct GaugeColors {
-        std::vector<ColorStopArray> gradient;
-        std::vector<float> weights;
-        GaugeType type;
-    };
-    std::optional<GaugeColors> gaugeColors;
-    Converter::VisitUnion(*value,
-        [&gaugeColors](const Ark_ResourceColor& color) {
-            gaugeColors = GaugeColors {
-                .gradient = std::vector<ColorStopArray> {Converter::Convert<ColorStopArray>(color)},
-                .type = GaugeType::TYPE_CIRCULAR_MONOCHROME
-            };
-        },
-        [&gaugeColors](const Ark_LinearGradient& color) {
-            gaugeColors = GaugeColors {
-                .gradient = std::vector<ColorStopArray> {Converter::Convert<ColorStopArray>(color)},
-                .type = GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT
-            };
-        },
-        [&gaugeColors](const Array_Tuple_Union_ResourceColor_LinearGradient_Number& colorsArray) {
-            gaugeColors = GaugeColors {
-                .type = GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT
-            };
-            const auto colors = Converter::Convert<std::vector<Converter::ColorWithWeight>>(colorsArray);
-            const auto colorsSize = std::min(static_cast<int32_t>(colors.size()), COLORS_MAX_COUNT);
-            gaugeColors->gradient.reserve(colorsSize);
-            gaugeColors->weights.reserve(colorsSize);
-            for (int32_t i = 0; i < colorsSize; ++i) {
-                const auto [gradient, weight] = colors[i];
-                gaugeColors->gradient.emplace_back(gradient);
-                gaugeColors->weights.emplace_back(weight);
-            }
-        },
-        []() {
-            // TODO: Reset value
-        });
-    if (gaugeColors.has_value()) {
-        SortColorStopOffset(gaugeColors->gradient);
-        GaugeModelNG::SetGradientColors(frameNode, gaugeColors->gradient, gaugeColors->weights, gaugeColors->type);
-    } else {
-        GaugeModelNG::ResetGradientColors(frameNode);
-    }
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GaugeModelNG::SetSetStartAngle(frameNode, convValue);
 }
-void StrokeWidthImpl(Ark_NativePointer node,
-                     const Opt_Length* value)
+void SetEndAngleImpl(Ark_NativePointer node,
+                     const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto strokeWidth = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(strokeWidth);
-    Validator::ValidateNonPercent(strokeWidth);
-    GaugeModelStatic::SetGaugeStrokeWidth(frameNode, strokeWidth);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GaugeModelNG::SetSetEndAngle(frameNode, convValue);
 }
-void DescriptionImpl(Ark_NativePointer node,
-                     const Opt_CustomNodeBuilder* value)
+void SetColorsImpl(Ark_NativePointer node,
+                   const Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    CallbackHelper(*optValue).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-        GaugeModelNG::SetDescription(frameNode, uiNode);
-        }, node);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GaugeModelNG::SetSetColors(frameNode, convValue);
 }
-void TrackShadowImpl(Ark_NativePointer node,
-                     const Opt_GaugeShadowOptions* value)
+void SetStrokeWidthImpl(Ark_NativePointer node,
+                        const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<GaugeShadowOptions>(value);
-    auto shadow = convValue.value_or(GaugeShadowOptions { .isShadowVisible = false });
-    GaugeModelNG::SetShadowOptions(frameNode, shadow);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GaugeModelNG::SetSetStrokeWidth(frameNode, convValue);
 }
-void IndicatorImpl(Ark_NativePointer node,
-                   const Opt_GaugeIndicatorOptions* value)
+void SetDescriptionImpl(Ark_NativePointer node,
+                        const Opt_CustomNodeBuilder* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto indicator = Converter::OptConvertPtr<Converter::GaugeIndicatorOptions>(value);
-    if (indicator) {
-        GaugeModelNG::SetIsShowIndicator(frameNode, true);
-        if (indicator->icon) {
-            GaugeModelNG::SetIndicatorIconPath(frameNode,
-                indicator->icon->GetSrc(), indicator->icon->GetBundleName(), indicator->icon->GetModuleName());
-        } else {
-            GaugeModelNG::ResetIndicatorIconPath(frameNode);
-        }
-        Validator::ValidateNonNegative(indicator->space);
-        Validator::ValidateNonPercent(indicator->space);
-        GaugeModelStatic::SetIndicatorSpace(frameNode, indicator->space);
-    } else {
-        GaugeModelNG::SetIsShowIndicator(frameNode, false);
-    }
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GaugeModelNG::SetSetDescription(frameNode, convValue);
 }
-void PrivacySensitiveImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
+void SetTrackShadowImpl(Ark_NativePointer node,
+                        const Opt_GaugeShadowOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    const auto sensitive = Converter::OptConvertPtr<bool>(value);
-    GaugeModelStatic::SetPrivacySensitive(frameNode, sensitive);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GaugeModelNG::SetSetTrackShadow(frameNode, convValue);
 }
-void ContentModifierImpl(Ark_NativePointer node,
-                         const Opt_ContentModifier* value)
+void SetIndicatorImpl(Ark_NativePointer node,
+                      const Opt_GaugeIndicatorOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::OptConvertPtr<type>(value);
-    //GaugeModelNG::SetContentModifier(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GaugeModelNG::SetSetIndicator(frameNode, convValue);
+}
+void SetPrivacySensitiveImpl(Ark_NativePointer node,
+                             const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GaugeModelNG::SetSetPrivacySensitive(frameNode, convValue);
+}
+void SetContentModifierImpl(Ark_NativePointer node,
+                            const Opt_ContentModifier* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GaugeModelNG::SetSetContentModifier(frameNode, convValue);
 }
 } // GaugeAttributeModifier
 const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()
@@ -322,16 +123,16 @@ const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()
     static const GENERATED_ArkUIGaugeModifier ArkUIGaugeModifierImpl {
         GaugeModifier::ConstructImpl,
         GaugeInterfaceModifier::SetGaugeOptionsImpl,
-        GaugeAttributeModifier::ValueImpl,
-        GaugeAttributeModifier::StartAngleImpl,
-        GaugeAttributeModifier::EndAngleImpl,
-        GaugeAttributeModifier::ColorsImpl,
-        GaugeAttributeModifier::StrokeWidthImpl,
-        GaugeAttributeModifier::DescriptionImpl,
-        GaugeAttributeModifier::TrackShadowImpl,
-        GaugeAttributeModifier::IndicatorImpl,
-        GaugeAttributeModifier::PrivacySensitiveImpl,
-        GaugeAttributeModifier::ContentModifierImpl,
+        GaugeAttributeModifier::SetValueImpl,
+        GaugeAttributeModifier::SetStartAngleImpl,
+        GaugeAttributeModifier::SetEndAngleImpl,
+        GaugeAttributeModifier::SetColorsImpl,
+        GaugeAttributeModifier::SetStrokeWidthImpl,
+        GaugeAttributeModifier::SetDescriptionImpl,
+        GaugeAttributeModifier::SetTrackShadowImpl,
+        GaugeAttributeModifier::SetIndicatorImpl,
+        GaugeAttributeModifier::SetPrivacySensitiveImpl,
+        GaugeAttributeModifier::SetContentModifierImpl,
     };
     return &ArkUIGaugeModifierImpl;
 }

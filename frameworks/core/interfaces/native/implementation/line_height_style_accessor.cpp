@@ -16,24 +16,19 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "frameworks/core/components_ng/pattern/text/span/span_object.h"
-#include "frameworks/core/interfaces/native/implementation/length_metrics_peer.h"
-#include "frameworks/core/interfaces/native/utility/callback_helper.h"
-#include "frameworks/core/interfaces/native/utility/reverse_converter.h"
-#include "line_height_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LineHeightStyleAccessor {
 void DestroyPeerImpl(Ark_LineHeightStyle peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<LineHeightStylePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_LineHeightStyle CtorImpl(Ark_LengthMetrics lineHeight)
+Ark_LineHeightStyle ConstructImpl(Ark_LengthMetrics lineHeight)
 {
-    auto peer = PeerUtils::CreatePeer<LineHeightStylePeer>();
-    Dimension height = Converter::OptConvert<Dimension>(lineHeight).value_or(Dimension());
-    peer->span = AceType::MakeRefPtr<LineHeightSpan>(height);
-    return peer;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -41,21 +36,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetLineHeightImpl(Ark_LineHeightStyle peer)
 {
-    Ark_Number ret = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, ret);
-    CHECK_NULL_RETURN(peer->span, ret);
-    return Converter::ArkValue<Ark_Number>(peer->span->GetLineHeight().ConvertToVp());
+    return {};
 }
 } // LineHeightStyleAccessor
 const GENERATED_ArkUILineHeightStyleAccessor* GetLineHeightStyleAccessor()
 {
     static const GENERATED_ArkUILineHeightStyleAccessor LineHeightStyleAccessorImpl {
         LineHeightStyleAccessor::DestroyPeerImpl,
-        LineHeightStyleAccessor::CtorImpl,
+        LineHeightStyleAccessor::ConstructImpl,
         LineHeightStyleAccessor::GetFinalizerImpl,
         LineHeightStyleAccessor::GetLineHeightImpl,
     };
     return &LineHeightStyleAccessorImpl;
 }
 
+struct LineHeightStylePeer {
+    virtual ~LineHeightStylePeer() = default;
+};
 }

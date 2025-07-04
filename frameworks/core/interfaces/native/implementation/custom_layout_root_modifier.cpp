@@ -24,31 +24,31 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 {
     return {};
 }
-void SubscribeOnMeasureSizeImpl(Ark_NativePointer node,
-                                const Callback_onMeasureSize_SizeResult* value)
+void SetSubscribeOnMeasureSizeImpl(Ark_NativePointer node,
+                                   const Callback_onMeasureSize_SizeResult* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CustomLayoutRootModelNG::SetSubscribeOnMeasureSize(frameNode, convValue);
+    //CustomLayoutRootModelNG::SetSetSubscribeOnMeasureSize(frameNode, convValue);
 }
-void SubscribeOnPlaceChildrenImpl(Ark_NativePointer node,
-                                  const Callback_onPlaceChildren_Void* value)
+void SetSubscribeOnPlaceChildrenImpl(Ark_NativePointer node,
+                                     const Callback_onPlaceChildren_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CustomLayoutRootModelNG::SetSubscribeOnPlaceChildren(frameNode, convValue);
+    //CustomLayoutRootModelNG::SetSetSubscribeOnPlaceChildren(frameNode, convValue);
 }
 } // CustomLayoutRootModifier
 const GENERATED_ArkUICustomLayoutRootModifier* GetCustomLayoutRootModifier()
 {
     static const GENERATED_ArkUICustomLayoutRootModifier ArkUICustomLayoutRootModifierImpl {
         CustomLayoutRootModifier::ConstructImpl,
-        CustomLayoutRootModifier::SubscribeOnMeasureSizeImpl,
-        CustomLayoutRootModifier::SubscribeOnPlaceChildrenImpl,
+        CustomLayoutRootModifier::SetSubscribeOnMeasureSizeImpl,
+        CustomLayoutRootModifier::SetSubscribeOnPlaceChildrenImpl,
     };
     return &ArkUICustomLayoutRootModifierImpl;
 }

@@ -18,17 +18,48 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_PathAccessor {
+namespace PathModifier {
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
+{
+    return {};
+}
+} // PathModifier
+namespace PathInterfaceModifier {
+void SetPathOptionsImpl(Ark_NativePointer node,
+                        const Opt_PathOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //PathModelNG::SetSetPathOptions(frameNode, convValue);
+}
+} // PathInterfaceModifier
+namespace PathAttributeModifier {
+void SetCommandsImpl(Ark_NativePointer node,
+                     const Opt_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //PathModelNG::SetSetCommands(frameNode, convValue);
+}
+} // PathAttributeModifier
+namespace drawing_PathAccessor {
 void DestroyPeerImpl(Ark_drawing_Path peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_PathPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_Path Ctor0Impl()
+Ark_drawing_Path Construct0Impl()
 {
-    return nullptr;
+    return {};
 }
-Ark_drawing_Path Ctor1Impl(Ark_drawing_Path path)
+Ark_drawing_Path Construct1Impl(Ark_drawing_Path path)
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -216,47 +247,60 @@ Ark_Boolean BuildFromSvgStringImpl(Ark_drawing_Path peer,
 {
     return {};
 }
-} // Drawing_PathAccessor
+} // drawing_PathAccessor
+const GENERATED_ArkUIPathModifier* GetPathModifier()
+{
+    static const GENERATED_ArkUIPathModifier ArkUIPathModifierImpl {
+        PathModifier::ConstructImpl,
+        PathInterfaceModifier::SetPathOptionsImpl,
+        PathAttributeModifier::SetCommandsImpl,
+    };
+    return &ArkUIPathModifierImpl;
+}
+
 const GENERATED_ArkUIDrawing_PathAccessor* GetDrawing_PathAccessor()
 {
     static const GENERATED_ArkUIDrawing_PathAccessor Drawing_PathAccessorImpl {
-        Drawing_PathAccessor::DestroyPeerImpl,
-        Drawing_PathAccessor::Ctor0Impl,
-        Drawing_PathAccessor::Ctor1Impl,
-        Drawing_PathAccessor::GetFinalizerImpl,
-        Drawing_PathAccessor::MoveToImpl,
-        Drawing_PathAccessor::LineToImpl,
-        Drawing_PathAccessor::ArcToImpl,
-        Drawing_PathAccessor::QuadToImpl,
-        Drawing_PathAccessor::ConicToImpl,
-        Drawing_PathAccessor::CubicToImpl,
-        Drawing_PathAccessor::RMoveToImpl,
-        Drawing_PathAccessor::RLineToImpl,
-        Drawing_PathAccessor::RQuadToImpl,
-        Drawing_PathAccessor::RConicToImpl,
-        Drawing_PathAccessor::RCubicToImpl,
-        Drawing_PathAccessor::AddPolygonImpl,
-        Drawing_PathAccessor::OpImpl,
-        Drawing_PathAccessor::AddArcImpl,
-        Drawing_PathAccessor::AddCircleImpl,
-        Drawing_PathAccessor::AddOvalImpl,
-        Drawing_PathAccessor::AddRectImpl,
-        Drawing_PathAccessor::AddRoundRectImpl,
-        Drawing_PathAccessor::AddPathImpl,
-        Drawing_PathAccessor::TransformImpl,
-        Drawing_PathAccessor::ContainsImpl,
-        Drawing_PathAccessor::SetFillTypeImpl,
-        Drawing_PathAccessor::GetBoundsImpl,
-        Drawing_PathAccessor::CloseImpl,
-        Drawing_PathAccessor::OffsetImpl,
-        Drawing_PathAccessor::ResetImpl,
-        Drawing_PathAccessor::GetLengthImpl,
-        Drawing_PathAccessor::GetPositionAndTangentImpl,
-        Drawing_PathAccessor::IsClosedImpl,
-        Drawing_PathAccessor::GetMatrixImpl,
-        Drawing_PathAccessor::BuildFromSvgStringImpl,
+        drawing_PathAccessor::DestroyPeerImpl,
+        drawing_PathAccessor::Construct0Impl,
+        drawing_PathAccessor::Construct1Impl,
+        drawing_PathAccessor::GetFinalizerImpl,
+        drawing_PathAccessor::MoveToImpl,
+        drawing_PathAccessor::LineToImpl,
+        drawing_PathAccessor::ArcToImpl,
+        drawing_PathAccessor::QuadToImpl,
+        drawing_PathAccessor::ConicToImpl,
+        drawing_PathAccessor::CubicToImpl,
+        drawing_PathAccessor::RMoveToImpl,
+        drawing_PathAccessor::RLineToImpl,
+        drawing_PathAccessor::RQuadToImpl,
+        drawing_PathAccessor::RConicToImpl,
+        drawing_PathAccessor::RCubicToImpl,
+        drawing_PathAccessor::AddPolygonImpl,
+        drawing_PathAccessor::OpImpl,
+        drawing_PathAccessor::AddArcImpl,
+        drawing_PathAccessor::AddCircleImpl,
+        drawing_PathAccessor::AddOvalImpl,
+        drawing_PathAccessor::AddRectImpl,
+        drawing_PathAccessor::AddRoundRectImpl,
+        drawing_PathAccessor::AddPathImpl,
+        drawing_PathAccessor::TransformImpl,
+        drawing_PathAccessor::ContainsImpl,
+        drawing_PathAccessor::SetFillTypeImpl,
+        drawing_PathAccessor::GetBoundsImpl,
+        drawing_PathAccessor::CloseImpl,
+        drawing_PathAccessor::OffsetImpl,
+        drawing_PathAccessor::ResetImpl,
+        drawing_PathAccessor::GetLengthImpl,
+        drawing_PathAccessor::GetPositionAndTangentImpl,
+        drawing_PathAccessor::IsClosedImpl,
+        drawing_PathAccessor::GetMatrixImpl,
+        drawing_PathAccessor::BuildFromSvgStringImpl,
     };
     return &Drawing_PathAccessorImpl;
 }
 
+struct Drawing_PathPeer {
+    virtual ~Drawing_PathPeer() = default;
+};
 }

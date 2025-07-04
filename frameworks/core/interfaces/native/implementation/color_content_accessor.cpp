@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColorContentAccessor {
 void DestroyPeerImpl(Ark_ColorContent peer)
 {
+    auto peerImpl = reinterpret_cast<ColorContentPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_ColorContent CtorImpl()
+Ark_ColorContent ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,11 +43,14 @@ const GENERATED_ArkUIColorContentAccessor* GetColorContentAccessor()
 {
     static const GENERATED_ArkUIColorContentAccessor ColorContentAccessorImpl {
         ColorContentAccessor::DestroyPeerImpl,
-        ColorContentAccessor::CtorImpl,
+        ColorContentAccessor::ConstructImpl,
         ColorContentAccessor::GetFinalizerImpl,
         ColorContentAccessor::GetORIGINImpl,
     };
     return &ColorContentAccessorImpl;
 }
 
+struct ColorContentPeer {
+    virtual ~ColorContentPeer() = default;
+};
 }

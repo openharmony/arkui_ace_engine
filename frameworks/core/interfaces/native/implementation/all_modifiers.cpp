@@ -207,6 +207,7 @@ const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor();
 const GENERATED_ArkUIBaselineOffsetStyleAccessor* GetBaselineOffsetStyleAccessor();
 const GENERATED_ArkUIBaseShapeAccessor* GetBaseShapeAccessor();
 const GENERATED_ArkUIBounceSymbolEffectAccessor* GetBounceSymbolEffectAccessor();
+const GENERATED_ArkUIBuilderNodeOpsAccessor* GetBuilderNodeOpsAccessor();
 const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor();
 const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor();
 const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor();
@@ -288,6 +289,7 @@ const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor();
 const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor();
+const GENERATED_ArkUILevelOrderAccessor* GetLevelOrderAccessor();
 const GENERATED_ArkUILifeCycleAccessor* GetLifeCycleAccessor();
 const GENERATED_ArkUILinearGradientAccessor* GetLinearGradientAccessor();
 const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorControllerAccessor();
@@ -323,10 +325,12 @@ const GENERATED_ArkUIPinchGestureInterfaceAccessor* GetPinchGestureInterfaceAcce
 const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor();
 const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor();
 const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor();
+const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor();
 const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor();
 const GENERATED_ArkUIRectShapeAccessor* GetRectShapeAccessor();
 const GENERATED_ArkUIRenderingContextSettingsAccessor* GetRenderingContextSettingsAccessor();
 const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor();
+const GENERATED_ArkUIRenderServiceNodeAccessor* GetRenderServiceNodeAccessor();
 const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor();
 const GENERATED_ArkUIRestrictedWorkerAccessor* GetRestrictedWorkerAccessor();
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor();
@@ -529,6 +533,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetBaselineOffsetStyleAccessor,
         GetBaseShapeAccessor,
         GetBounceSymbolEffectAccessor,
+        GetBuilderNodeOpsAccessor,
         GetCalendarControllerAccessor,
         GetCalendarPickerDialogAccessor,
         GetCanvasGradientAccessor,
@@ -612,6 +617,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetLazyForEachOpsAccessor,
         GetLengthMetricsAccessor,
         GetLetterSpacingStyleAccessor,
+        GetLevelOrderAccessor,
         GetLifeCycleAccessor,
         GetLinearGradientAccessor,
         GetLinearIndicatorControllerAccessor,
@@ -647,10 +653,12 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetPinchRecognizerAccessor,
         GetPixelMapMockAccessor,
         GetProgressMaskAccessor,
+        GetPromptActionAccessor,
         GetPulseSymbolEffectAccessor,
         GetRectShapeAccessor,
         GetRenderingContextSettingsAccessor,
         GetRenderNodeAccessor,
+        GetRenderServiceNodeAccessor,
         GetReplaceSymbolEffectAccessor,
         GetRestrictedWorkerAccessor,
         GetRichEditorBaseControllerAccessor,
@@ -801,6 +809,7 @@ const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI()
 }
 
 void setLogger(const ServiceLogger* logger) {
+    SetDummyLogger(reinterpret_cast<const GroupLogger*>(logger));
 }
 
 

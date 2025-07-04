@@ -14,59 +14,15 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
-
-namespace OHOS::Ace::NG {
-struct MarqueeOptions {
-    std::optional<double> step;
-    std::optional<int32_t> loop;
-    std::optional<std::string> src;
-    std::optional<bool> start;
-    std::optional<MarqueeDirection> direction;
-};
-} // OHOS::Ace::NG
-
-namespace OHOS::Ace::NG {
-namespace Converter {
-template<>
-void AssignCast(std::optional<MarqueeUpdateStrategy>& dst, const Ark_MarqueeUpdateStrategy& src)
-{
-    switch (src) {
-        case ARK_MARQUEE_UPDATE_STRATEGY_DEFAULT: dst = MarqueeUpdateStrategy::DEFAULT; break;
-        case ARK_MARQUEE_UPDATE_STRATEGY_PRESERVE_POSITION: dst = MarqueeUpdateStrategy::PRESERVE_POSITION; break;
-        default: LOGE("Unexpected enum value in Ark_MarqueeUpdateStrategy: %{public}d", src);
-    }
-}
-
-template<>
-MarqueeOptions Convert(const Ark_MarqueeOptions& src)
-{
-    MarqueeOptions options;
-    options.step = OptConvert<float>(src.step);
-    options.loop = OptConvert<int>(src.loop);
-    options.src = OptConvert<std::string>(src.src);
-    options.start = OptConvert<bool>(src.start);
-    auto fromStart = OptConvert<bool>(src.fromStart);
-    options.direction = fromStart.value_or(true) ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT;
-    return options;
-}
-
-} // namespace Converter
-} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MarqueeModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = MarqueeModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // MarqueeModifier
 namespace MarqueeInterfaceModifier {
@@ -76,135 +32,82 @@ void SetMarqueeOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    auto marqueeOptions = Converter::Convert<MarqueeOptions>(*options);
-    if (marqueeOptions.step) {
-        auto getStep = marqueeOptions.step;
-        std::optional<double> stepOpt;
-        if (getStep.has_value()) {
-            auto step = getStep.value();
-            if (GreatNotEqual(step, 0.0)) {
-                stepOpt = Dimension(step, DimensionUnit::VP).ConvertToPx();
-            }
-        }
-        MarqueeModelNG::SetScrollAmount(frameNode, stepOpt);
-    }
-    if (marqueeOptions.loop) {
-        MarqueeModelNG::SetLoop(frameNode, marqueeOptions.loop);
-    }
-    if (marqueeOptions.src) {
-        MarqueeModelNG::SetValue(frameNode, marqueeOptions.src);
-    }
-    if (marqueeOptions.start) {
-        MarqueeModelNG::SetPlayerStatus(frameNode, marqueeOptions.start);
-    }
-    if (marqueeOptions.direction) {
-        MarqueeModelNG::SetDirection(frameNode, marqueeOptions.direction);
-    }
+    //auto convValue = Converter::OptConvert<type_name>(*options);
+    //MarqueeModelNG::SetSetMarqueeOptions(frameNode, convValue);
 }
 } // MarqueeInterfaceModifier
-
 namespace MarqueeAttributeModifier {
-void FontColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
+void SetFontColorImpl(Ark_NativePointer node,
+                      const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Color>(value);
-    MarqueeModelNG::SetTextColor(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //MarqueeModelNG::SetSetFontColor(frameNode, convValue);
 }
-void FontSizeImpl(Ark_NativePointer node,
-                  const Opt_Length* value)
+void SetFontSizeImpl(Ark_NativePointer node,
+                     const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(convValue);
-    Validator::ValidateNonPercent(convValue);
-    MarqueeModelNG::SetFontSize(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //MarqueeModelNG::SetSetFontSize(frameNode, convValue);
 }
-void AllowScaleImpl(Ark_NativePointer node,
-                    const Opt_Boolean* value)
+void SetAllowScaleImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    MarqueeModelNG::SetAllowScale(frameNode, *convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //MarqueeModelNG::SetSetAllowScale(frameNode, convValue);
 }
-void FontWeightImpl(Ark_NativePointer node,
-                    const Opt_Union_Number_FontWeight_String* value)
+void SetFontWeightImpl(Ark_NativePointer node,
+                       const Opt_Union_Number_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Ace::FontWeight>(value);
-    MarqueeModelNG::SetFontWeight(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //MarqueeModelNG::SetSetFontWeight(frameNode, convValue);
 }
-void FontFamilyImpl(Ark_NativePointer node,
-                    const Opt_Union_String_Resource* value)
+void SetFontFamilyImpl(Ark_NativePointer node,
+                       const Opt_Union_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<StringArray> families;
-    if (auto fontfamiliesOpt = Converter::OptConvertPtr<Converter::FontFamilies>(value); fontfamiliesOpt) {
-        families = fontfamiliesOpt->families;
-    }
-    MarqueeModelNG::SetFontFamily(frameNode, families);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //MarqueeModelNG::SetSetFontFamily(frameNode, convValue);
 }
-void MarqueeUpdateStrategyImpl(Ark_NativePointer node,
-                               const Opt_MarqueeUpdateStrategy* value)
+void SetMarqueeUpdateStrategyImpl(Ark_NativePointer node,
+                                  const Opt_MarqueeUpdateStrategy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<MarqueeUpdateStrategy>(value);
-    MarqueeModelNG::SetMarqueeUpdateStrategy(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //MarqueeModelNG::SetSetMarqueeUpdateStrategy(frameNode, convValue);
 }
-void OnStartImpl(Ark_NativePointer node,
-                 const Opt_Callback_Void* value)
+void SetOnStartImpl(Ark_NativePointer node,
+                    const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onStart = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
-    };
-    MarqueeModelNG::SetOnStart(frameNode, std::move(onStart));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //MarqueeModelNG::SetSetOnStart(frameNode, convValue);
 }
-void OnBounceImpl(Ark_NativePointer node,
-                  const Opt_Callback_Void* value)
+void SetOnBounceImpl(Ark_NativePointer node,
+                     const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onBounce = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
-    };
-    MarqueeModelNG::SetOnBounce(frameNode, onBounce);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //MarqueeModelNG::SetSetOnBounce(frameNode, convValue);
 }
-void OnFinishImpl(Ark_NativePointer node,
-                  const Opt_Callback_Void* value)
+void SetOnFinishImpl(Ark_NativePointer node,
+                     const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onFinish = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
-    };
-    MarqueeModelNG::SetOnFinish(frameNode, onFinish);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //MarqueeModelNG::SetSetOnFinish(frameNode, convValue);
 }
 } // MarqueeAttributeModifier
 const GENERATED_ArkUIMarqueeModifier* GetMarqueeModifier()
@@ -212,15 +115,15 @@ const GENERATED_ArkUIMarqueeModifier* GetMarqueeModifier()
     static const GENERATED_ArkUIMarqueeModifier ArkUIMarqueeModifierImpl {
         MarqueeModifier::ConstructImpl,
         MarqueeInterfaceModifier::SetMarqueeOptionsImpl,
-        MarqueeAttributeModifier::FontColorImpl,
-        MarqueeAttributeModifier::FontSizeImpl,
-        MarqueeAttributeModifier::AllowScaleImpl,
-        MarqueeAttributeModifier::FontWeightImpl,
-        MarqueeAttributeModifier::FontFamilyImpl,
-        MarqueeAttributeModifier::MarqueeUpdateStrategyImpl,
-        MarqueeAttributeModifier::OnStartImpl,
-        MarqueeAttributeModifier::OnBounceImpl,
-        MarqueeAttributeModifier::OnFinishImpl,
+        MarqueeAttributeModifier::SetFontColorImpl,
+        MarqueeAttributeModifier::SetFontSizeImpl,
+        MarqueeAttributeModifier::SetAllowScaleImpl,
+        MarqueeAttributeModifier::SetFontWeightImpl,
+        MarqueeAttributeModifier::SetFontFamilyImpl,
+        MarqueeAttributeModifier::SetMarqueeUpdateStrategyImpl,
+        MarqueeAttributeModifier::SetOnStartImpl,
+        MarqueeAttributeModifier::SetOnBounceImpl,
+        MarqueeAttributeModifier::SetOnFinishImpl,
     };
     return &ArkUIMarqueeModifierImpl;
 }

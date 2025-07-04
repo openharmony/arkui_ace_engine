@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseContextAccessor {
 void DestroyPeerImpl(Ark_BaseContext peer)
 {
+    auto peerImpl = reinterpret_cast<BaseContextPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_BaseContext CtorImpl()
+Ark_BaseContext ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -35,10 +39,13 @@ const GENERATED_ArkUIBaseContextAccessor* GetBaseContextAccessor()
 {
     static const GENERATED_ArkUIBaseContextAccessor BaseContextAccessorImpl {
         BaseContextAccessor::DestroyPeerImpl,
-        BaseContextAccessor::CtorImpl,
+        BaseContextAccessor::ConstructImpl,
         BaseContextAccessor::GetFinalizerImpl,
     };
     return &BaseContextAccessorImpl;
 }
 
+struct BaseContextPeer {
+    virtual ~BaseContextPeer() = default;
+};
 }

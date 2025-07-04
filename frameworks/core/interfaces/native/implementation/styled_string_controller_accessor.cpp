@@ -18,16 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyledStringControllerAccessor();
 namespace StyledStringControllerAccessor {
 void DestroyPeerImpl(Ark_StyledStringController peer)
 {
-    LOGE("StyledStringControllerAccessor::DestroyPeerImpl is not supported, it's an interface.");
+    auto peerImpl = reinterpret_cast<StyledStringControllerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_StyledStringController CtorImpl()
+Ark_StyledStringController ConstructImpl()
 {
-    LOGE("StyledStringControllerAccessor::CtorImpl is not supported, it's an interface.");
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -36,20 +37,17 @@ Ark_NativePointer GetFinalizerImpl()
 void SetStyledStringImpl(Ark_StyledStringController peer,
                          Ark_StyledString styledString)
 {
-    auto peerRE = reinterpret_cast<RichEditorStyledStringControllerPeer*>(peer);
-    GetRichEditorStyledStringControllerAccessor()->setStyledString(peerRE, styledString);
 }
 Ark_MutableStyledString GetStyledStringImpl(Ark_StyledStringController peer)
 {
-    auto peerRE = reinterpret_cast<RichEditorStyledStringControllerPeer*>(peer);
-    return GetRichEditorStyledStringControllerAccessor()->getStyledString(peerRE);
+    return {};
 }
 } // StyledStringControllerAccessor
 const GENERATED_ArkUIStyledStringControllerAccessor* GetStyledStringControllerAccessor()
 {
     static const GENERATED_ArkUIStyledStringControllerAccessor StyledStringControllerAccessorImpl {
         StyledStringControllerAccessor::DestroyPeerImpl,
-        StyledStringControllerAccessor::CtorImpl,
+        StyledStringControllerAccessor::ConstructImpl,
         StyledStringControllerAccessor::GetFinalizerImpl,
         StyledStringControllerAccessor::SetStyledStringImpl,
         StyledStringControllerAccessor::GetStyledStringImpl,
@@ -57,4 +55,7 @@ const GENERATED_ArkUIStyledStringControllerAccessor* GetStyledStringControllerAc
     return &StyledStringControllerAccessorImpl;
 }
 
+struct StyledStringControllerPeer {
+    virtual ~StyledStringControllerPeer() = default;
+};
 }

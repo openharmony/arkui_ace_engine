@@ -13,86 +13,26 @@
  * limitations under the License.
  */
 
-#include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/button/button_model_static.h"
-#include "core/components_ng/pattern/button/button_request_data.h"
-#include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/validators.h"
-
-namespace OHOS::Ace::NG {
-struct ButtonOptions {
-    std::optional<ButtonType> type;
-    std::optional<ButtonRole> role;
-    std::optional<bool> stateEffect;
-    std::optional<ControlSize> controlSize;
-    std::optional<ButtonStyleMode> buttonStyle;
-};
-} // OHOS::Ace::NG
-
-namespace OHOS::Ace::NG::Converter {
-template<>
-ButtonOptions Convert(const Ark_ButtonOptions& src)
-{
-    ButtonOptions options;
-    options.type = OptConvert<ButtonType>(src.type);
-    options.role = OptConvert<ButtonRole>(src.role);
-    options.stateEffect = OptConvert<bool>(src.stateEffect);
-    options.controlSize = OptConvert<ControlSize>(src.controlSize);
-    options.buttonStyle = OptConvert<ButtonStyleMode>(src.buttonStyle);
-    return options;
-}
-
-template<>
-ButtonParameters Convert(const Ark_ButtonLabelStyle& src)
-{
-    ButtonParameters parameters;
-    parameters.textOverflow = Converter::OptConvert<TextOverflow>(src.overflow);
-    auto maxLines = Converter::OptConvert<int32_t>(src.maxLines);
-    if (maxLines) {
-        maxLines = std::max(maxLines.value(), 1);
-    }
-    parameters.maxLines = maxLines;
-    parameters.heightAdaptivePolicy = Converter::OptConvert<TextHeightAdaptivePolicy>(src.heightAdaptivePolicy);
-    auto minFontSize = Converter::OptConvert<Dimension>(src.minFontSize);
-    Validator::ValidateNonNegative(minFontSize);
-    Validator::ValidateNonPercent(minFontSize);
-    parameters.minFontSize = minFontSize;
-    auto maxFontSize = Converter::OptConvert<Dimension>(src.maxFontSize);
-    Validator::ValidateNonNegative(maxFontSize);
-    Validator::ValidateNonPercent(maxFontSize);
-    parameters.maxFontSize = maxFontSize;
-    auto labelFont = Converter::OptConvert<Font>(src.font);
-    if (labelFont) {
-        parameters.fontSize = labelFont->fontSize;
-        parameters.fontStyle = labelFont->fontStyle;
-        parameters.fontWeight = labelFont->fontWeight;
-        if (labelFont->fontFamilies.size() > 0) {
-            parameters.fontFamily = labelFont->fontFamilies;
-        }
-    }
-    return parameters;
-}
-}
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-constexpr float SCALE_LIMIT = 1.f;
 namespace ButtonModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = ButtonModelStatic::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // ButtonModifier
 namespace ButtonInterfaceModifier {
 void SetButtonOptions0Impl(Ark_NativePointer node)
 {
-    // safe it empty for save default values
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //ButtonModelNG::SetSetButtonOptions0(frameNode, convValue);
 }
 void SetButtonOptions1Impl(Ark_NativePointer node,
                            const Ark_ButtonOptions* options)
@@ -100,12 +40,8 @@ void SetButtonOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    auto buttonOptions = Converter::Convert<ButtonOptions>(*options);
-    ButtonModelStatic::SetType(frameNode, EnumToInt(buttonOptions.type));
-    ButtonModelStatic::SetStateEffect(frameNode, buttonOptions.stateEffect);
-    ButtonModelStatic::SetRole(frameNode, buttonOptions.role);
-    ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
-    ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
+    //auto convValue = Converter::OptConvert<type_name>(*options);
+    //ButtonModelNG::SetSetButtonOptions1(frameNode, convValue);
 }
 void SetButtonOptions2Impl(Ark_NativePointer node,
                            const Ark_ResourceStr* label,
@@ -113,131 +49,123 @@ void SetButtonOptions2Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(label);
-    if (auto buttonOptions = Converter::OptConvertPtr<Ark_ButtonOptions>(options); buttonOptions) {
-        SetButtonOptions1Impl(node, &buttonOptions.value());
-    }
-    auto labelString = Converter::OptConvert<std::string>(*label);
-    if (labelString) {
-        ButtonModelStatic::SetLabel(frameNode, labelString->c_str());
-    }
+    //auto convValue = Converter::Convert<type>(label);
+    //auto convValue = Converter::OptConvert<type>(label); // for enums
+    //ButtonModelNG::SetSetButtonOptions2(frameNode, convValue);
 }
 } // ButtonInterfaceModifier
 namespace ButtonAttributeModifier {
-void TypeImpl(Ark_NativePointer node,
-              const Opt_ButtonType* value)
+void SetTypeImpl(Ark_NativePointer node,
+                 const Opt_ButtonType* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto typeInt = EnumToInt(Converter::OptConvertPtr<ButtonType>(value));
-    ButtonModelStatic::SetType(frameNode, typeInt);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ButtonModelNG::SetSetType(frameNode, convValue);
 }
-void StateEffectImpl(Ark_NativePointer node,
-                     const Opt_Boolean* value)
+void SetStateEffectImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    ButtonModelStatic::SetStateEffect(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ButtonModelNG::SetSetStateEffect(frameNode, convValue);
 }
-void ButtonStyleImpl(Ark_NativePointer node,
-                     const Opt_ButtonStyleMode* value)
+void SetButtonStyleImpl(Ark_NativePointer node,
+                        const Opt_ButtonStyleMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelStatic::SetButtonStyle(frameNode, Converter::OptConvertPtr<ButtonStyleMode>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ButtonModelNG::SetSetButtonStyle(frameNode, convValue);
 }
-void ControlSizeImpl(Ark_NativePointer node,
-                     const Opt_ControlSize* value)
+void SetControlSizeImpl(Ark_NativePointer node,
+                        const Opt_ControlSize* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelStatic::SetControlSize(frameNode, Converter::OptConvertPtr<ControlSize>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ButtonModelNG::SetSetControlSize(frameNode, convValue);
 }
-void RoleImpl(Ark_NativePointer node,
-              const Opt_ButtonRole* value)
+void SetRoleImpl(Ark_NativePointer node,
+                 const Opt_ButtonRole* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelStatic::SetRole(frameNode, Converter::OptConvertPtr<ButtonRole>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ButtonModelNG::SetSetRole(frameNode, convValue);
 }
-void FontColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
+void SetFontColorImpl(Ark_NativePointer node,
+                      const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelStatic::SetFontColor(frameNode, Converter::OptConvertPtr<Color>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ButtonModelNG::SetSetFontColor(frameNode, convValue);
 }
-void FontSizeImpl(Ark_NativePointer node,
-                  const Opt_Length* value)
+void SetFontSizeImpl(Ark_NativePointer node,
+                     const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidatePositive(fontSize);
-    Validator::ValidateNonPercent(fontSize);
-    ButtonModelStatic::SetFontSize(frameNode, fontSize);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ButtonModelNG::SetSetFontSize(frameNode, convValue);
 }
-void FontWeightImpl(Ark_NativePointer node,
-                    const Opt_Union_Number_FontWeight_String* value)
+void SetFontWeightImpl(Ark_NativePointer node,
+                       const Opt_Union_Number_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelStatic::SetFontWeight(frameNode, Converter::OptConvertPtr<Ace::FontWeight>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ButtonModelNG::SetSetFontWeight(frameNode, convValue);
 }
-void FontStyleImpl(Ark_NativePointer node,
-                   const Opt_FontStyle* value)
+void SetFontStyleImpl(Ark_NativePointer node,
+                      const Opt_FontStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelStatic::SetFontStyle(frameNode, Converter::OptConvertPtr<Ace::FontStyle>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ButtonModelNG::SetSetFontStyle(frameNode, convValue);
 }
-void FontFamilyImpl(Ark_NativePointer node,
-                    const Opt_Union_String_Resource* value)
+void SetFontFamilyImpl(Ark_NativePointer node,
+                       const Opt_Union_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<StringArray> families;
-    if (auto fontfamiliesOpt = Converter::OptConvertPtr<Converter::FontFamilies>(value); fontfamiliesOpt) {
-        families = fontfamiliesOpt->families;
-    }
-    ButtonModelStatic::SetFontFamily(frameNode, families);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ButtonModelNG::SetSetFontFamily(frameNode, convValue);
 }
-void ContentModifierImpl(Ark_NativePointer node,
-                         const Opt_ContentModifier* value)
+void SetContentModifierImpl(Ark_NativePointer node,
+                            const Opt_ContentModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("ARKOALA ButtonAttribute::ContentModifierImpl -> Method is not "
-            "implemented.");
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ButtonModelNG::SetSetContentModifier(frameNode, convValue);
 }
-void LabelStyleImpl(Ark_NativePointer node,
-                    const Opt_ButtonLabelStyle* value)
+void SetLabelStyleImpl(Ark_NativePointer node,
+                       const Opt_ButtonLabelStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto parameters = Converter::OptConvertPtr<ButtonParameters>(value);
-    ButtonModelStatic::SetLabelStyle(frameNode, parameters);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ButtonModelNG::SetSetLabelStyle(frameNode, convValue);
 }
-void MinFontScaleImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_Resource* value)
+void SetMinFontScaleImpl(Ark_NativePointer node,
+                         const Opt_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<float>(value);
-    Validator::ValidateNonNegative(convValue);
-    Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
-    ButtonModelStatic::SetMinFontScale(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ButtonModelNG::SetSetMinFontScale(frameNode, convValue);
 }
-void MaxFontScaleImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_Resource* value)
+void SetMaxFontScaleImpl(Ark_NativePointer node,
+                         const Opt_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<float>(value);
-    Validator::ValidateNonNegative(convValue);
-    Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
-    ButtonModelStatic::SetMaxFontScale(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ButtonModelNG::SetSetMaxFontScale(frameNode, convValue);
 }
 } // ButtonAttributeModifier
 const GENERATED_ArkUIButtonModifier* GetButtonModifier()
@@ -247,20 +175,20 @@ const GENERATED_ArkUIButtonModifier* GetButtonModifier()
         ButtonInterfaceModifier::SetButtonOptions0Impl,
         ButtonInterfaceModifier::SetButtonOptions1Impl,
         ButtonInterfaceModifier::SetButtonOptions2Impl,
-        ButtonAttributeModifier::TypeImpl,
-        ButtonAttributeModifier::StateEffectImpl,
-        ButtonAttributeModifier::ButtonStyleImpl,
-        ButtonAttributeModifier::ControlSizeImpl,
-        ButtonAttributeModifier::RoleImpl,
-        ButtonAttributeModifier::FontColorImpl,
-        ButtonAttributeModifier::FontSizeImpl,
-        ButtonAttributeModifier::FontWeightImpl,
-        ButtonAttributeModifier::FontStyleImpl,
-        ButtonAttributeModifier::FontFamilyImpl,
-        ButtonAttributeModifier::ContentModifierImpl,
-        ButtonAttributeModifier::LabelStyleImpl,
-        ButtonAttributeModifier::MinFontScaleImpl,
-        ButtonAttributeModifier::MaxFontScaleImpl,
+        ButtonAttributeModifier::SetTypeImpl,
+        ButtonAttributeModifier::SetStateEffectImpl,
+        ButtonAttributeModifier::SetButtonStyleImpl,
+        ButtonAttributeModifier::SetControlSizeImpl,
+        ButtonAttributeModifier::SetRoleImpl,
+        ButtonAttributeModifier::SetFontColorImpl,
+        ButtonAttributeModifier::SetFontSizeImpl,
+        ButtonAttributeModifier::SetFontWeightImpl,
+        ButtonAttributeModifier::SetFontStyleImpl,
+        ButtonAttributeModifier::SetFontFamilyImpl,
+        ButtonAttributeModifier::SetContentModifierImpl,
+        ButtonAttributeModifier::SetLabelStyleImpl,
+        ButtonAttributeModifier::SetMinFontScaleImpl,
+        ButtonAttributeModifier::SetMaxFontScaleImpl,
     };
     return &ArkUIButtonModifierImpl;
 }

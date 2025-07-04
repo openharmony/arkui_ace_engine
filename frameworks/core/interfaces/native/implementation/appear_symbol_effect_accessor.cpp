@@ -15,20 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AppearSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_AppearSymbolEffect peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<AppearSymbolEffectPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_AppearSymbolEffect CtorImpl(const Opt_EffectScope* scope)
+Ark_AppearSymbolEffect ConstructImpl(const Opt_EffectScope* scope)
 {
-    auto optScope = Converter::OptConvertPtr<OHOS::Ace::ScopeType>(scope);
-    return PeerUtils::CreatePeer<AppearSymbolEffectPeer>(optScope);
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -36,26 +36,26 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Opt_EffectScope GetScopeImpl(Ark_AppearSymbolEffect peer)
 {
-    auto invalid = Converter::ArkValue<Opt_EffectScope>();
-    CHECK_NULL_RETURN(peer, invalid);
-    return Converter::ArkValue<Opt_EffectScope>(peer->scope);
+    return {};
 }
 void SetScopeImpl(Ark_AppearSymbolEffect peer,
                   const Opt_EffectScope* scope)
 {
-    CHECK_NULL_VOID(peer);
-    peer->scope = Converter::OptConvertPtr<OHOS::Ace::ScopeType>(scope);
 }
 } // AppearSymbolEffectAccessor
 const GENERATED_ArkUIAppearSymbolEffectAccessor* GetAppearSymbolEffectAccessor()
 {
     static const GENERATED_ArkUIAppearSymbolEffectAccessor AppearSymbolEffectAccessorImpl {
         AppearSymbolEffectAccessor::DestroyPeerImpl,
-        AppearSymbolEffectAccessor::CtorImpl,
+        AppearSymbolEffectAccessor::ConstructImpl,
         AppearSymbolEffectAccessor::GetFinalizerImpl,
         AppearSymbolEffectAccessor::GetScopeImpl,
         AppearSymbolEffectAccessor::SetScopeImpl,
     };
     return &AppearSymbolEffectAccessorImpl;
 }
+
+struct AppearSymbolEffectPeer {
+    virtual ~AppearSymbolEffectPeer() = default;
+};
 }

@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_TextBlobAccessor {
+namespace drawing_TextBlobAccessor {
 void DestroyPeerImpl(Ark_drawing_TextBlob peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_TextBlobPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_TextBlob CtorImpl()
+Ark_drawing_TextBlob ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -57,20 +61,23 @@ Ark_Number UniqueIDImpl(Ark_drawing_TextBlob peer)
 {
     return {};
 }
-} // Drawing_TextBlobAccessor
+} // drawing_TextBlobAccessor
 const GENERATED_ArkUIDrawing_TextBlobAccessor* GetDrawing_TextBlobAccessor()
 {
     static const GENERATED_ArkUIDrawing_TextBlobAccessor Drawing_TextBlobAccessorImpl {
-        Drawing_TextBlobAccessor::DestroyPeerImpl,
-        Drawing_TextBlobAccessor::CtorImpl,
-        Drawing_TextBlobAccessor::GetFinalizerImpl,
-        Drawing_TextBlobAccessor::MakeFromStringImpl,
-        Drawing_TextBlobAccessor::MakeFromPosTextImpl,
-        Drawing_TextBlobAccessor::MakeFromRunBufferImpl,
-        Drawing_TextBlobAccessor::BoundsImpl,
-        Drawing_TextBlobAccessor::UniqueIDImpl,
+        drawing_TextBlobAccessor::DestroyPeerImpl,
+        drawing_TextBlobAccessor::ConstructImpl,
+        drawing_TextBlobAccessor::GetFinalizerImpl,
+        drawing_TextBlobAccessor::MakeFromStringImpl,
+        drawing_TextBlobAccessor::MakeFromPosTextImpl,
+        drawing_TextBlobAccessor::MakeFromRunBufferImpl,
+        drawing_TextBlobAccessor::BoundsImpl,
+        drawing_TextBlobAccessor::UniqueIDImpl,
     };
     return &Drawing_TextBlobAccessorImpl;
 }
 
+struct Drawing_TextBlobPeer {
+    virtual ~Drawing_TextBlobPeer() = default;
+};
 }

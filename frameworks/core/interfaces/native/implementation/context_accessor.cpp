@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Common_ContextAccessor {
+namespace common_ContextAccessor {
 void DestroyPeerImpl(Ark_common_Context peer)
 {
+    auto peerImpl = reinterpret_cast<common_ContextPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_common_Context CtorImpl()
+Ark_common_Context ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -134,14 +138,18 @@ void SetCloudFileDirImpl(Ark_common_Context peer,
                          const Ark_String* cloudFileDir)
 {
 }
-} // Common_ContextAccessor
+} // common_ContextAccessor
 namespace ContextAccessor {
 void DestroyPeerImpl(Ark_Context peer)
 {
+    auto peerImpl = reinterpret_cast<ContextPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_Context CtorImpl()
+Ark_Context ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -151,44 +159,50 @@ Ark_NativePointer GetFinalizerImpl()
 const GENERATED_ArkUICommon_ContextAccessor* GetCommon_ContextAccessor()
 {
     static const GENERATED_ArkUICommon_ContextAccessor Common_ContextAccessorImpl {
-        Common_ContextAccessor::DestroyPeerImpl,
-        Common_ContextAccessor::CtorImpl,
-        Common_ContextAccessor::GetFinalizerImpl,
-        Common_ContextAccessor::CreateBundleContextImpl,
-        Common_ContextAccessor::CreateModuleContext0Impl,
-        Common_ContextAccessor::CreateModuleContext1Impl,
-        Common_ContextAccessor::GetGroupDir0Impl,
-        Common_ContextAccessor::GetGroupDir1Impl,
-        Common_ContextAccessor::GetCacheDirImpl,
-        Common_ContextAccessor::SetCacheDirImpl,
-        Common_ContextAccessor::GetTempDirImpl,
-        Common_ContextAccessor::SetTempDirImpl,
-        Common_ContextAccessor::GetFilesDirImpl,
-        Common_ContextAccessor::SetFilesDirImpl,
-        Common_ContextAccessor::GetDatabaseDirImpl,
-        Common_ContextAccessor::SetDatabaseDirImpl,
-        Common_ContextAccessor::GetPreferencesDirImpl,
-        Common_ContextAccessor::SetPreferencesDirImpl,
-        Common_ContextAccessor::GetBundleCodeDirImpl,
-        Common_ContextAccessor::SetBundleCodeDirImpl,
-        Common_ContextAccessor::GetDistributedFilesDirImpl,
-        Common_ContextAccessor::SetDistributedFilesDirImpl,
-        Common_ContextAccessor::GetResourceDirImpl,
-        Common_ContextAccessor::SetResourceDirImpl,
-        Common_ContextAccessor::GetCloudFileDirImpl,
-        Common_ContextAccessor::SetCloudFileDirImpl,
+        common_ContextAccessor::DestroyPeerImpl,
+        common_ContextAccessor::ConstructImpl,
+        common_ContextAccessor::GetFinalizerImpl,
+        common_ContextAccessor::CreateBundleContextImpl,
+        common_ContextAccessor::CreateModuleContext0Impl,
+        common_ContextAccessor::CreateModuleContext1Impl,
+        common_ContextAccessor::GetGroupDir0Impl,
+        common_ContextAccessor::GetGroupDir1Impl,
+        common_ContextAccessor::GetCacheDirImpl,
+        common_ContextAccessor::SetCacheDirImpl,
+        common_ContextAccessor::GetTempDirImpl,
+        common_ContextAccessor::SetTempDirImpl,
+        common_ContextAccessor::GetFilesDirImpl,
+        common_ContextAccessor::SetFilesDirImpl,
+        common_ContextAccessor::GetDatabaseDirImpl,
+        common_ContextAccessor::SetDatabaseDirImpl,
+        common_ContextAccessor::GetPreferencesDirImpl,
+        common_ContextAccessor::SetPreferencesDirImpl,
+        common_ContextAccessor::GetBundleCodeDirImpl,
+        common_ContextAccessor::SetBundleCodeDirImpl,
+        common_ContextAccessor::GetDistributedFilesDirImpl,
+        common_ContextAccessor::SetDistributedFilesDirImpl,
+        common_ContextAccessor::GetResourceDirImpl,
+        common_ContextAccessor::SetResourceDirImpl,
+        common_ContextAccessor::GetCloudFileDirImpl,
+        common_ContextAccessor::SetCloudFileDirImpl,
     };
     return &Common_ContextAccessorImpl;
 }
 
+struct Common_ContextPeer {
+    virtual ~Common_ContextPeer() = default;
+};
 const GENERATED_ArkUIContextAccessor* GetContextAccessor()
 {
     static const GENERATED_ArkUIContextAccessor ContextAccessorImpl {
         ContextAccessor::DestroyPeerImpl,
-        ContextAccessor::CtorImpl,
+        ContextAccessor::ConstructImpl,
         ContextAccessor::GetFinalizerImpl,
     };
     return &ContextAccessorImpl;
 }
 
+struct ContextPeer {
+    virtual ~ContextPeer() = default;
+};
 }

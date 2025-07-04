@@ -21,12 +21,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollMotionAccessor {
 void DestroyPeerImpl(Ark_ScrollMotion peer)
 {
+    auto peerImpl = reinterpret_cast<ScrollMotionPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_ScrollMotion CtorImpl(const Ark_Number* position,
-                          const Ark_Number* velocity,
-                          const Ark_Number* min,
-                          const Ark_Number* max,
-                          Ark_SpringProp prop)
+Ark_ScrollMotion ConstructImpl(const Ark_Number* position,
+                               const Ark_Number* velocity,
+                               const Ark_Number* min,
+                               const Ark_Number* max,
+                               Ark_SpringProp prop)
 {
     return {};
 }
@@ -39,10 +43,13 @@ const GENERATED_ArkUIScrollMotionAccessor* GetScrollMotionAccessor()
 {
     static const GENERATED_ArkUIScrollMotionAccessor ScrollMotionAccessorImpl {
         ScrollMotionAccessor::DestroyPeerImpl,
-        ScrollMotionAccessor::CtorImpl,
+        ScrollMotionAccessor::ConstructImpl,
         ScrollMotionAccessor::GetFinalizerImpl,
     };
     return &ScrollMotionAccessorImpl;
 }
 
+struct ScrollMotionPeer {
+    virtual ~ScrollMotionPeer() = default;
+};
 }

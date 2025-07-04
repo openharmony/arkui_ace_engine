@@ -16,21 +16,19 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "canvas_gradient_peer.h"
-namespace {
-    const auto DEFAULT_NEGATIVE_OFFSET = -1.0f;
-}
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasGradientAccessor {
 void DestroyPeerImpl(Ark_CanvasGradient peer)
 {
-    if (peer) {
-        delete peer;
+    auto peerImpl = reinterpret_cast<CanvasGradientPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
     }
 }
-Ark_CanvasGradient CtorImpl()
+Ark_CanvasGradient ConstructImpl()
 {
-    return new CanvasGradientPeer();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -40,25 +38,20 @@ void AddColorStopImpl(Ark_CanvasGradient peer,
                       const Ark_Number* offset,
                       const Ark_String* color)
 {
-    CHECK_NULL_VOID(peer);
-    auto opt = Converter::OptConvertPtr<Color>(color);
-    if (!offset || !opt) {
-        peer->AddColorStop(DEFAULT_NEGATIVE_OFFSET, Color::TRANSPARENT);
-        return;
-    }
-    auto value = Converter::Convert<float>(*offset);
-    peer->AddColorStop(value, *opt);
 }
 } // CanvasGradientAccessor
 const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor()
 {
     static const GENERATED_ArkUICanvasGradientAccessor CanvasGradientAccessorImpl {
         CanvasGradientAccessor::DestroyPeerImpl,
-        CanvasGradientAccessor::CtorImpl,
+        CanvasGradientAccessor::ConstructImpl,
         CanvasGradientAccessor::GetFinalizerImpl,
         CanvasGradientAccessor::AddColorStopImpl,
     };
     return &CanvasGradientAccessorImpl;
 }
 
+struct CanvasGradientPeer {
+    virtual ~CanvasGradientPeer() = default;
+};
 }

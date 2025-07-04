@@ -16,17 +16,19 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SymbolEffectAccessor {
 void DestroyPeerImpl(Ark_SymbolEffect peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<SymbolEffectPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_SymbolEffect CtorImpl()
+Ark_SymbolEffect ConstructImpl()
 {
-    return PeerUtils::CreatePeer<SymbolEffectPeer>();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -37,10 +39,13 @@ const GENERATED_ArkUISymbolEffectAccessor* GetSymbolEffectAccessor()
 {
     static const GENERATED_ArkUISymbolEffectAccessor SymbolEffectAccessorImpl {
         SymbolEffectAccessor::DestroyPeerImpl,
-        SymbolEffectAccessor::CtorImpl,
+        SymbolEffectAccessor::ConstructImpl,
         SymbolEffectAccessor::GetFinalizerImpl,
     };
     return &SymbolEffectAccessorImpl;
 }
 
+struct SymbolEffectPeer {
+    virtual ~SymbolEffectPeer() = default;
+};
 }

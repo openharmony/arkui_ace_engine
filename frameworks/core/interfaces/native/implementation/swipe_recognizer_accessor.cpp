@@ -15,18 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "swipe_recognizer_peer.h"
 #include "arkoala_api_generated.h"
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwipeRecognizerAccessor {
 void DestroyPeerImpl(Ark_SwipeRecognizer peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<SwipeRecognizerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_SwipeRecognizer CtorImpl()
+Ark_SwipeRecognizer ConstructImpl()
 {
-    return PeerUtils::CreatePeer<SwipeRecognizerPeer>();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -34,22 +36,18 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetVelocityThresholdImpl(Ark_SwipeRecognizer peer)
 {
-    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_SPEED);
-    CHECK_NULL_RETURN(peer, errorValue);
-    return Converter::ArkValue<Ark_Number>(peer->GetSpeed());
+    return {};
 }
 Ark_SwipeDirection GetDirectionImpl(Ark_SwipeRecognizer peer)
 {
-    auto errorValue = Converter::ArkValue<Ark_SwipeDirection>(DEFAULT_DIRECT);
-    CHECK_NULL_RETURN(peer, errorValue);
-    return Converter::ArkValue<Ark_SwipeDirection>(peer->GetDirection());
+    return {};
 }
 } // SwipeRecognizerAccessor
 const GENERATED_ArkUISwipeRecognizerAccessor* GetSwipeRecognizerAccessor()
 {
     static const GENERATED_ArkUISwipeRecognizerAccessor SwipeRecognizerAccessorImpl {
         SwipeRecognizerAccessor::DestroyPeerImpl,
-        SwipeRecognizerAccessor::CtorImpl,
+        SwipeRecognizerAccessor::ConstructImpl,
         SwipeRecognizerAccessor::GetFinalizerImpl,
         SwipeRecognizerAccessor::GetVelocityThresholdImpl,
         SwipeRecognizerAccessor::GetDirectionImpl,
@@ -57,4 +55,7 @@ const GENERATED_ArkUISwipeRecognizerAccessor* GetSwipeRecognizerAccessor()
     return &SwipeRecognizerAccessorImpl;
 }
 
+struct SwipeRecognizerPeer {
+    virtual ~SwipeRecognizerPeer() = default;
+};
 }

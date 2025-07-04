@@ -18,32 +18,39 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_SamplingOptionsAccessor {
+namespace drawing_SamplingOptionsAccessor {
 void DestroyPeerImpl(Ark_drawing_SamplingOptions peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_SamplingOptionsPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_SamplingOptions Ctor0Impl()
+Ark_drawing_SamplingOptions Construct0Impl()
 {
-    return nullptr;
+    return {};
 }
-Ark_drawing_SamplingOptions Ctor1Impl(Ark_drawing_FilterMode filterMode)
+Ark_drawing_SamplingOptions Construct1Impl(Ark_drawing_FilterMode filterMode)
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-} // Drawing_SamplingOptionsAccessor
+} // drawing_SamplingOptionsAccessor
 const GENERATED_ArkUIDrawing_SamplingOptionsAccessor* GetDrawing_SamplingOptionsAccessor()
 {
     static const GENERATED_ArkUIDrawing_SamplingOptionsAccessor Drawing_SamplingOptionsAccessorImpl {
-        Drawing_SamplingOptionsAccessor::DestroyPeerImpl,
-        Drawing_SamplingOptionsAccessor::Ctor0Impl,
-        Drawing_SamplingOptionsAccessor::Ctor1Impl,
-        Drawing_SamplingOptionsAccessor::GetFinalizerImpl,
+        drawing_SamplingOptionsAccessor::DestroyPeerImpl,
+        drawing_SamplingOptionsAccessor::Construct0Impl,
+        drawing_SamplingOptionsAccessor::Construct1Impl,
+        drawing_SamplingOptionsAccessor::GetFinalizerImpl,
     };
     return &Drawing_SamplingOptionsAccessorImpl;
 }
 
+struct Drawing_SamplingOptionsPeer {
+    virtual ~Drawing_SamplingOptionsPeer() = default;
+};
 }

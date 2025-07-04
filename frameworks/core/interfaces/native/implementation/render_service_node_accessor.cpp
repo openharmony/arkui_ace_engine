@@ -18,19 +18,18 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace RootModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
+namespace RenderServiceNodeAccessor {
+Ark_Int32 GetNodeIdImpl(const Ark_String* nodeId)
 {
     return {};
 }
-} // RootModifier
-const GENERATED_ArkUIRootModifier* GetRootModifier()
+} // RenderServiceNodeAccessor
+const GENERATED_ArkUIRenderServiceNodeAccessor* GetRenderServiceNodeAccessor()
 {
-    static const GENERATED_ArkUIRootModifier ArkUIRootModifierImpl {
-        RootModifier::ConstructImpl,
+    static const GENERATED_ArkUIRenderServiceNodeAccessor RenderServiceNodeAccessorImpl {
+        RenderServiceNodeAccessor::GetNodeIdImpl,
     };
-    return &ArkUIRootModifierImpl;
+    return &RenderServiceNodeAccessorImpl;
 }
 
 }

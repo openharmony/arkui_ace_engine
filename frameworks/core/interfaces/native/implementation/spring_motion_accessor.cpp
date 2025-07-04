@@ -21,11 +21,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SpringMotionAccessor {
 void DestroyPeerImpl(Ark_SpringMotion peer)
 {
+    auto peerImpl = reinterpret_cast<SpringMotionPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_SpringMotion CtorImpl(const Ark_Number* start,
-                          const Ark_Number* end,
-                          const Ark_Number* velocity,
-                          Ark_SpringProp prop)
+Ark_SpringMotion ConstructImpl(const Ark_Number* start,
+                               const Ark_Number* end,
+                               const Ark_Number* velocity,
+                               Ark_SpringProp prop)
 {
     return {};
 }
@@ -38,10 +42,13 @@ const GENERATED_ArkUISpringMotionAccessor* GetSpringMotionAccessor()
 {
     static const GENERATED_ArkUISpringMotionAccessor SpringMotionAccessorImpl {
         SpringMotionAccessor::DestroyPeerImpl,
-        SpringMotionAccessor::CtorImpl,
+        SpringMotionAccessor::ConstructImpl,
         SpringMotionAccessor::GetFinalizerImpl,
     };
     return &SpringMotionAccessorImpl;
 }
 
+struct SpringMotionPeer {
+    virtual ~SpringMotionPeer() = default;
+};
 }

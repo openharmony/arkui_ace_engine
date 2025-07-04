@@ -15,20 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HierarchicalSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_HierarchicalSymbolEffect peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<HierarchicalSymbolEffectPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_HierarchicalSymbolEffect CtorImpl(const Opt_EffectFillStyle* fillStyle)
+Ark_HierarchicalSymbolEffect ConstructImpl(const Opt_EffectFillStyle* fillStyle)
 {
-    auto optFillStyle = Converter::OptConvertPtr<OHOS::Ace::FillStyle>(fillStyle);
-    return PeerUtils::CreatePeer<HierarchicalSymbolEffectPeer>(optFillStyle);
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -36,34 +36,26 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Opt_EffectFillStyle GetFillStyleImpl(Ark_HierarchicalSymbolEffect peer)
 {
-    auto invalid = Converter::ArkValue<Opt_EffectFillStyle>();
-    CHECK_NULL_RETURN(peer, invalid);
-    CHECK_NULL_RETURN(peer->fillStyle, invalid);
-    switch (peer->fillStyle.value()) {
-        case OHOS::Ace::FillStyle::CUMULATIVE:
-            return Converter::ArkValue<Opt_EffectFillStyle>(ARK_EFFECT_FILL_STYLE_CUMULATIVE);
-        case OHOS::Ace::FillStyle::ITERATIVE:
-            return Converter::ArkValue<Opt_EffectFillStyle>(ARK_EFFECT_FILL_STYLE_ITERATIVE);
-        default:
-            return invalid;
-    }
+    return {};
 }
 void SetFillStyleImpl(Ark_HierarchicalSymbolEffect peer,
                       const Opt_EffectFillStyle* fillStyle)
 {
-    CHECK_NULL_VOID(peer);
-    peer->fillStyle = Converter::OptConvertPtr<OHOS::Ace::FillStyle>(fillStyle);
 }
 } // HierarchicalSymbolEffectAccessor
 const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor()
 {
     static const GENERATED_ArkUIHierarchicalSymbolEffectAccessor HierarchicalSymbolEffectAccessorImpl {
         HierarchicalSymbolEffectAccessor::DestroyPeerImpl,
-        HierarchicalSymbolEffectAccessor::CtorImpl,
+        HierarchicalSymbolEffectAccessor::ConstructImpl,
         HierarchicalSymbolEffectAccessor::GetFinalizerImpl,
         HierarchicalSymbolEffectAccessor::GetFillStyleImpl,
         HierarchicalSymbolEffectAccessor::SetFillStyleImpl,
     };
     return &HierarchicalSymbolEffectAccessorImpl;
 }
+
+struct HierarchicalSymbolEffectPeer {
+    virtual ~HierarchicalSymbolEffectPeer() = default;
+};
 }

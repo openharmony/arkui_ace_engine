@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/text_input_controller_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -22,11 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextInputControllerAccessor {
 void DestroyPeerImpl(Ark_TextInputController peer)
 {
-    delete peer;
+    auto peerImpl = reinterpret_cast<TextInputControllerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_TextInputController CtorImpl()
+Ark_TextInputController ConstructImpl()
 {
-    return new TextInputControllerPeer();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -35,32 +37,22 @@ Ark_NativePointer GetFinalizerImpl()
 void CaretPositionImpl(Ark_TextInputController peer,
                        const Ark_Number* value)
 {
-    CHECK_NULL_VOID(peer && value && peer->controller_);
-    peer->controller_->CaretPosition(std::max(Converter::Convert<int32_t>(*value), 0));
 }
 void SetTextSelectionImpl(Ark_TextInputController peer,
                           const Ark_Number* selectionStart,
                           const Ark_Number* selectionEnd,
                           const Opt_SelectionOptions* options)
 {
-    CHECK_NULL_VOID(peer && selectionStart && selectionEnd && peer->controller_);
-    auto selectionOptions = Converter::OptConvertPtr<SelectionOptions>(options);
-    peer->controller_->SetTextSelection(
-        Converter::Convert<int32_t>(*selectionStart),
-        Converter::Convert<int32_t>(*selectionEnd),
-        selectionOptions);
 }
 void StopEditingImpl(Ark_TextInputController peer)
 {
-    CHECK_NULL_VOID(peer && peer->controller_);
-    peer->controller_->StopEditing();
 }
 } // TextInputControllerAccessor
 const GENERATED_ArkUITextInputControllerAccessor* GetTextInputControllerAccessor()
 {
     static const GENERATED_ArkUITextInputControllerAccessor TextInputControllerAccessorImpl {
         TextInputControllerAccessor::DestroyPeerImpl,
-        TextInputControllerAccessor::CtorImpl,
+        TextInputControllerAccessor::ConstructImpl,
         TextInputControllerAccessor::GetFinalizerImpl,
         TextInputControllerAccessor::CaretPositionImpl,
         TextInputControllerAccessor::SetTextSelectionImpl,
@@ -69,4 +61,7 @@ const GENERATED_ArkUITextInputControllerAccessor* GetTextInputControllerAccessor
     return &TextInputControllerAccessorImpl;
 }
 
+struct TextInputControllerPeer {
+    virtual ~TextInputControllerPeer() = default;
+};
 }

@@ -13,45 +13,39 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components/image/image_component.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/color_filter_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-
-using namespace Converter;
 namespace ColorFilterAccessor {
 void DestroyPeerImpl(Ark_ColorFilter peer)
 {
-    if (peer) {
-        delete peer;
-        peer = nullptr;
+    auto peerImpl = reinterpret_cast<ColorFilterPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
     }
 }
-Ark_ColorFilter CtorImpl(const Array_Number* value)
+Ark_ColorFilter ConstructImpl(const Array_Number* value)
 {
-    auto peer = new ColorFilterPeer();
-    CHECK_NULL_RETURN(value, peer);
-    auto colorfiltermatrix = OptConvert<std::vector<float>>(*value);
-    if (colorfiltermatrix && colorfiltermatrix->size() == COLOR_FILTER_MATRIX_SIZE) {
-        peer->SetColorFilterMatrix(std::move(*colorfiltermatrix));
-    }
-    return peer;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 } // ColorFilterAccessor
-namespace Drawing_ColorFilterAccessor {
+namespace drawing_ColorFilterAccessor {
 void DestroyPeerImpl(Ark_drawing_ColorFilter peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_ColorFilterPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_ColorFilter CtorImpl()
+Ark_drawing_ColorFilter ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -88,32 +82,38 @@ Ark_drawing_ColorFilter CreateMatrixColorFilterImpl(const Array_Number* matrix)
 {
     return {};
 }
-} // Drawing_ColorFilterAccessor
+} // drawing_ColorFilterAccessor
 const GENERATED_ArkUIColorFilterAccessor* GetColorFilterAccessor()
 {
     static const GENERATED_ArkUIColorFilterAccessor ColorFilterAccessorImpl {
         ColorFilterAccessor::DestroyPeerImpl,
-        ColorFilterAccessor::CtorImpl,
+        ColorFilterAccessor::ConstructImpl,
         ColorFilterAccessor::GetFinalizerImpl,
     };
     return &ColorFilterAccessorImpl;
 }
 
+struct ColorFilterPeer {
+    virtual ~ColorFilterPeer() = default;
+};
 const GENERATED_ArkUIDrawing_ColorFilterAccessor* GetDrawing_ColorFilterAccessor()
 {
     static const GENERATED_ArkUIDrawing_ColorFilterAccessor Drawing_ColorFilterAccessorImpl {
-        Drawing_ColorFilterAccessor::DestroyPeerImpl,
-        Drawing_ColorFilterAccessor::CtorImpl,
-        Drawing_ColorFilterAccessor::GetFinalizerImpl,
-        Drawing_ColorFilterAccessor::CreateBlendModeColorFilter0Impl,
-        Drawing_ColorFilterAccessor::CreateBlendModeColorFilter1Impl,
-        Drawing_ColorFilterAccessor::CreateComposeColorFilterImpl,
-        Drawing_ColorFilterAccessor::CreateLinearToSRGBGammaImpl,
-        Drawing_ColorFilterAccessor::CreateSRGBGammaToLinearImpl,
-        Drawing_ColorFilterAccessor::CreateLumaColorFilterImpl,
-        Drawing_ColorFilterAccessor::CreateMatrixColorFilterImpl,
+        drawing_ColorFilterAccessor::DestroyPeerImpl,
+        drawing_ColorFilterAccessor::ConstructImpl,
+        drawing_ColorFilterAccessor::GetFinalizerImpl,
+        drawing_ColorFilterAccessor::CreateBlendModeColorFilter0Impl,
+        drawing_ColorFilterAccessor::CreateBlendModeColorFilter1Impl,
+        drawing_ColorFilterAccessor::CreateComposeColorFilterImpl,
+        drawing_ColorFilterAccessor::CreateLinearToSRGBGammaImpl,
+        drawing_ColorFilterAccessor::CreateSRGBGammaToLinearImpl,
+        drawing_ColorFilterAccessor::CreateLumaColorFilterImpl,
+        drawing_ColorFilterAccessor::CreateMatrixColorFilterImpl,
     };
     return &Drawing_ColorFilterAccessorImpl;
 }
 
+struct Drawing_ColorFilterPeer {
+    virtual ~Drawing_ColorFilterPeer() = default;
+};
 }

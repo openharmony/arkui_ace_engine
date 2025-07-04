@@ -13,31 +13,22 @@
  * limitations under the License.
  */
 
-#include <unordered_set>
-
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/implementation/click_event_peer.h"
-
-namespace {
-const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Checkbox", "CheckboxGroup",
-    "Rating", "Radio", "Toggle", "Hyperlink" };
-
-const int32_t HAND_NONE = 0;
-const int32_t HAND_LEFT = 1;
-const int32_t HAND_RIGHT = 2;
-}
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClickEventAccessor {
 void DestroyPeerImpl(Ark_ClickEvent peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<ClickEventPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_ClickEvent CtorImpl()
+Ark_ClickEvent ConstructImpl()
 {
-    return PeerUtils::CreatePeer<ClickEventPeer>();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -45,203 +36,74 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetDisplayXImpl(Ark_ClickEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, errValue);
-    const auto* info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    const auto& offset = info->GetScreenLocation();
-    const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-    return Converter::ArkValue<Ark_Number>(x);
+    return {};
 }
 void SetDisplayXImpl(Ark_ClickEvent peer,
                      const Ark_Number* displayX)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(displayX);
-    const auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    Offset offset = info->GetScreenLocation();
-    const auto animation = offset.GetXAnimationOption();
-    const auto convWindowsX = Converter::Convert<float>(*displayX);
-    const auto x = PipelineBase::Vp2PxWithCurrentDensity(convWindowsX);
-    offset.SetX(x, animation);
-    info->SetScreenLocation(offset);
 }
 Ark_Number GetDisplayYImpl(Ark_ClickEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, errValue);
-    const auto* info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    const auto& offset = info->GetScreenLocation();
-    const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
-    return Converter::ArkValue<Ark_Number>(y);
+    return {};
 }
 void SetDisplayYImpl(Ark_ClickEvent peer,
                      const Ark_Number* displayY)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(displayY);
-    const auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    Offset offset = info->GetScreenLocation();
-    const auto animation = offset.GetYAnimationOption();
-    const auto convWindowsY = Converter::Convert<float>(*displayY);
-    const auto y = PipelineBase::Vp2PxWithCurrentDensity(convWindowsY);
-    offset.SetY(y, animation);
-    info->SetScreenLocation(offset);
 }
 Ark_Number GetWindowXImpl(Ark_ClickEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, errValue);
-    const auto* info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    const auto& offset = info->GetGlobalLocation();
-    const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-    return Converter::ArkValue<Ark_Number>(x);
+    return {};
 }
 void SetWindowXImpl(Ark_ClickEvent peer,
                     const Ark_Number* windowX)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(windowX);
-    const auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    Offset offset = info->GetGlobalLocation();
-    const auto animation = offset.GetXAnimationOption();
-    const auto convWindowsX = Converter::Convert<float>(*windowX);
-    const auto x = PipelineBase::Vp2PxWithCurrentDensity(convWindowsX);
-    offset.SetX(x, animation);
-    info->SetGlobalLocation(offset);
 }
 Ark_Number GetWindowYImpl(Ark_ClickEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, errValue);
-    const auto* info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    const auto& offset = info->GetGlobalLocation();
-    const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
-    return Converter::ArkValue<Ark_Number>(y);
+    return {};
 }
 void SetWindowYImpl(Ark_ClickEvent peer,
                     const Ark_Number* windowY)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(windowY);
-    const auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    Offset offset = info->GetGlobalLocation();
-    const auto animation = offset.GetYAnimationOption();
-    const auto convWindowsY = Converter::Convert<float>(*windowY);
-    const auto y = PipelineBase::Vp2PxWithCurrentDensity(convWindowsY);
-    offset.SetY(y, animation);
-    info->SetGlobalLocation(offset);
 }
 Ark_Number GetXImpl(Ark_ClickEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, errValue);
-    const auto* info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    const auto& offset = info->GetLocalLocation();
-    const auto x = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-    return Converter::ArkValue<Ark_Number>(x);
+    return {};
 }
 void SetXImpl(Ark_ClickEvent peer,
               const Ark_Number* x)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(x);
-    const auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    Offset offset = info->GetLocalLocation();
-    const auto animation = offset.GetXAnimationOption();
-    const auto convWindowsX = Converter::Convert<float>(*x);
-    const auto newX = PipelineBase::Vp2PxWithCurrentDensity(convWindowsX);
-    offset.SetX(newX, animation);
-    info->SetLocalLocation(offset);
 }
 Ark_Number GetYImpl(Ark_ClickEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, errValue);
-    const auto* info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    const auto& offset = info->GetLocalLocation();
-    const auto y = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
-    return Converter::ArkValue<Ark_Number>(y);
+    return {};
 }
 void SetYImpl(Ark_ClickEvent peer,
               const Ark_Number* y)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(y);
-    const auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    Offset offset = info->GetLocalLocation();
-    const auto animation = offset.GetYAnimationOption();
-    const auto convWindowsY = Converter::Convert<float>(*y);
-    const auto newY = PipelineBase::Vp2PxWithCurrentDensity(convWindowsY);
-    offset.SetY(newY, animation);
-    info->SetLocalLocation(offset);
 }
 Opt_InteractionHand GetHandImpl(Ark_ClickEvent peer)
 {
-    auto errorValue = Converter::ArkValue<Opt_InteractionHand>();
-    CHECK_NULL_RETURN(peer, errorValue);
-    const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errorValue);
-
-    int32_t left = 0;
-    int32_t right = 0;
-    for (const FingerInfo& fingerInfo : info->GetFingerList()) {
-        if (fingerInfo.operatingHand_ == HAND_LEFT) {
-            ++left;
-        } else if (fingerInfo.operatingHand_ == HAND_RIGHT) {
-            ++right;
-        }
-    }
-    Ark_InteractionHand retVal = ARK_INTERACTION_HAND_NONE;
-    if (left > right) {
-        retVal = ARK_INTERACTION_HAND_LEFT;
-    } else if (right > left) {
-        retVal = ARK_INTERACTION_HAND_RIGHT;
-    }
-    return Converter::ArkValue<Opt_InteractionHand>(retVal);
+    return {};
 }
 void SetHandImpl(Ark_ClickEvent peer,
-                 Ark_InteractionHand hand)
+                 const Opt_InteractionHand* hand)
 {
-    LOGE("ClickEventAccessor::SetHandImpl we can only GET hand");
 }
 Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
-        GestureEvent* info = peer->GetEventInfo();
-        CHECK_NULL_VOID(info);
-        auto patternName = info->GetPatternName();
-        if (g_clickPreventDefPattern.find(patternName.c_str()) == g_clickPreventDefPattern.end()) {
-            LOGE("ARKOALA Component does not support prevent function.");
-            return;
-        }
-        info->SetPreventDefault(true);
-    });
-    return callback;
+    return {};
 }
 void SetPreventDefaultImpl(Ark_ClickEvent peer,
                            const Callback_Void* preventDefault)
 {
-    LOGE("ClickEventAccessor::SetPreventDefaultImpl we can only GET preventDefault callback");
 }
 } // ClickEventAccessor
 const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
 {
     static const GENERATED_ArkUIClickEventAccessor ClickEventAccessorImpl {
         ClickEventAccessor::DestroyPeerImpl,
-        ClickEventAccessor::CtorImpl,
+        ClickEventAccessor::ConstructImpl,
         ClickEventAccessor::GetFinalizerImpl,
         ClickEventAccessor::GetDisplayXImpl,
         ClickEventAccessor::SetDisplayXImpl,
@@ -263,4 +125,7 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
     return &ClickEventAccessorImpl;
 }
 
+struct ClickEventPeer {
+    virtual ~ClickEventPeer() = default;
+};
 }

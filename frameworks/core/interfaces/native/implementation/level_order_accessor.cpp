@@ -18,15 +18,15 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace TapGestureInterfaceAccessor {
-void DestroyPeerImpl(Ark_TapGestureInterface peer)
+namespace LevelOrderAccessor {
+void DestroyPeerImpl(Ark_LevelOrder peer)
 {
-    auto peerImpl = reinterpret_cast<TapGestureInterfacePeerImpl *>(peer);
+    auto peerImpl = reinterpret_cast<LevelOrderPeerImpl *>(peer);
     if (peerImpl) {
         delete peerImpl;
     }
 }
-Ark_TapGestureInterface ConstructImpl(const Ark_TapGestureParameters* value)
+Ark_LevelOrder ConstructImpl()
 {
     return {};
 }
@@ -34,24 +34,28 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_TapGestureInterface OnActionImpl(Ark_TapGestureInterface peer,
-                                     const Callback_GestureEvent_Void* event)
+Ark_LevelOrder ClampImpl(const Ark_Number* order)
 {
     return {};
 }
-} // TapGestureInterfaceAccessor
-const GENERATED_ArkUITapGestureInterfaceAccessor* GetTapGestureInterfaceAccessor()
+Ark_Number GetOrderImpl(Ark_LevelOrder peer)
 {
-    static const GENERATED_ArkUITapGestureInterfaceAccessor TapGestureInterfaceAccessorImpl {
-        TapGestureInterfaceAccessor::DestroyPeerImpl,
-        TapGestureInterfaceAccessor::ConstructImpl,
-        TapGestureInterfaceAccessor::GetFinalizerImpl,
-        TapGestureInterfaceAccessor::OnActionImpl,
+    return {};
+}
+} // LevelOrderAccessor
+const GENERATED_ArkUILevelOrderAccessor* GetLevelOrderAccessor()
+{
+    static const GENERATED_ArkUILevelOrderAccessor LevelOrderAccessorImpl {
+        LevelOrderAccessor::DestroyPeerImpl,
+        LevelOrderAccessor::ConstructImpl,
+        LevelOrderAccessor::GetFinalizerImpl,
+        LevelOrderAccessor::ClampImpl,
+        LevelOrderAccessor::GetOrderImpl,
     };
-    return &TapGestureInterfaceAccessorImpl;
+    return &LevelOrderAccessorImpl;
 }
 
-struct TapGestureInterfacePeer {
-    virtual ~TapGestureInterfacePeer() = default;
+struct LevelOrderPeer {
+    virtual ~LevelOrderPeer() = default;
 };
 }

@@ -14,26 +14,21 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-
-#include "core/interfaces/native/implementation/scrollable_target_info_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollableTargetInfoAccessor {
 void DestroyPeerImpl(Ark_ScrollableTargetInfo peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->DecRefCount();
+    auto peerImpl = reinterpret_cast<ScrollableTargetInfoPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_ScrollableTargetInfo CtorImpl()
+Ark_ScrollableTargetInfo ConstructImpl()
 {
-    auto peer = AceType::MakeRefPtr<ScrollableTargetInfoPeer>();
-    peer->IncRefCount();
-    return AceType::RawPtr(peer);
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -41,36 +36,18 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Boolean IsBeginImpl(Ark_ScrollableTargetInfo peer)
 {
-    const auto pattern = peer ? peer->GetPattern() : nullptr;
-    Ark_Boolean result;
-    if (auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern)) {
-        result = Converter::ArkValue<Ark_Boolean>(scrollablePattern->IsAtTop());
-    } else if (auto swiperPattern = AceType::DynamicCast<SwiperPattern>(pattern)) {
-        result = Converter::ArkValue<Ark_Boolean>(swiperPattern->IsAtStart());
-    } else {
-        result = Converter::ArkValue<Ark_Boolean>(false);
-    }
-    return result;
+    return {};
 }
 Ark_Boolean IsEndImpl(Ark_ScrollableTargetInfo peer)
 {
-    const auto pattern = peer ? peer->GetPattern() : nullptr;
-    Ark_Boolean result;
-    if (auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern)) {
-        result = Converter::ArkValue<Ark_Boolean>(scrollablePattern->IsAtBottom());
-    } else if (auto swiperPattern = AceType::DynamicCast<SwiperPattern>(pattern)) {
-        result = Converter::ArkValue<Ark_Boolean>(swiperPattern->IsAtEnd());
-    } else {
-        result = Converter::ArkValue<Ark_Boolean>(false);
-    }
-    return result;
+    return {};
 }
 } // ScrollableTargetInfoAccessor
 const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccessor()
 {
     static const GENERATED_ArkUIScrollableTargetInfoAccessor ScrollableTargetInfoAccessorImpl {
         ScrollableTargetInfoAccessor::DestroyPeerImpl,
-        ScrollableTargetInfoAccessor::CtorImpl,
+        ScrollableTargetInfoAccessor::ConstructImpl,
         ScrollableTargetInfoAccessor::GetFinalizerImpl,
         ScrollableTargetInfoAccessor::IsBeginImpl,
         ScrollableTargetInfoAccessor::IsEndImpl,
@@ -78,4 +55,7 @@ const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccess
     return &ScrollableTargetInfoAccessorImpl;
 }
 
+struct ScrollableTargetInfoPeer {
+    virtual ~ScrollableTargetInfoPeer() = default;
+};
 }

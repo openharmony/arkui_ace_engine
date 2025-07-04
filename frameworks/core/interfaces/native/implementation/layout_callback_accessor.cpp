@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LayoutCallbackAccessor {
 void DestroyPeerImpl(Ark_LayoutCallback peer)
 {
+    auto peerImpl = reinterpret_cast<LayoutCallbackPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_LayoutCallback CtorImpl()
+Ark_LayoutCallback ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -48,7 +52,7 @@ const GENERATED_ArkUILayoutCallbackAccessor* GetLayoutCallbackAccessor()
 {
     static const GENERATED_ArkUILayoutCallbackAccessor LayoutCallbackAccessorImpl {
         LayoutCallbackAccessor::DestroyPeerImpl,
-        LayoutCallbackAccessor::CtorImpl,
+        LayoutCallbackAccessor::ConstructImpl,
         LayoutCallbackAccessor::GetFinalizerImpl,
         LayoutCallbackAccessor::OnPlaceChildrenImpl,
         LayoutCallbackAccessor::OnMeasureSizeImpl,
@@ -56,4 +60,7 @@ const GENERATED_ArkUILayoutCallbackAccessor* GetLayoutCallbackAccessor()
     return &LayoutCallbackAccessorImpl;
 }
 
+struct LayoutCallbackPeer {
+    virtual ~LayoutCallbackPeer() = default;
+};
 }

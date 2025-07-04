@@ -15,18 +15,14 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/components_ng/pattern/scroll_bar/scroll_bar_model_static.h"
-#include "core/interfaces/native/implementation/scroller_peer_impl.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollBarModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = ScrollBarModelStatic::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // ScrollBarModifier
 namespace ScrollBarInterfaceModifier {
@@ -35,25 +31,19 @@ void SetScrollBarOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (value) {
-        auto scrollerPeer = value->scroller;
-        auto scrollProxy = ScrollBarModelStatic::SetScrollBarProxy(frameNode, scrollerPeer->GetScrollBarProxy());
-        scrollerPeer->SetScrollBarProxy(scrollProxy);
-    }
-    const auto direction = value ? Converter::OptConvert<Axis>(value->direction) : std::nullopt;
-    ScrollBarModelStatic::SetDirection(frameNode, direction);
-    const auto state = value ? Converter::OptConvert<DisplayMode>(value->state) : std::nullopt;
-    ScrollBarModelStatic::SetState(frameNode, state);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ScrollBarModelNG::SetSetScrollBarOptions(frameNode, convValue);
 }
 } // ScrollBarInterfaceModifier
 namespace ScrollBarAttributeModifier {
-void EnableNestedScrollImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
+void SetEnableNestedScrollImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    ScrollBarModelStatic::SetEnableNestedScroll(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ScrollBarModelNG::SetSetEnableNestedScroll(frameNode, convValue);
 }
 } // ScrollBarAttributeModifier
 const GENERATED_ArkUIScrollBarModifier* GetScrollBarModifier()
@@ -61,7 +51,7 @@ const GENERATED_ArkUIScrollBarModifier* GetScrollBarModifier()
     static const GENERATED_ArkUIScrollBarModifier ArkUIScrollBarModifierImpl {
         ScrollBarModifier::ConstructImpl,
         ScrollBarInterfaceModifier::SetScrollBarOptionsImpl,
-        ScrollBarAttributeModifier::EnableNestedScrollImpl,
+        ScrollBarAttributeModifier::SetEnableNestedScrollImpl,
     };
     return &ArkUIScrollBarModifierImpl;
 }

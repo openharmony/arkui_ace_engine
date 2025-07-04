@@ -13,54 +13,16 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/ace_engine_types.h"
-#include "core/common/container.h"
-#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
-#include "core/components_ng/pattern/linear_layout/column_model_ng_static.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_abstract_model_static.h"
-
-namespace OHOS::Ace::NG {
-namespace {
-struct ColumnOptions {
-    std::optional<Dimension> space;
-};
-}
-
-namespace Converter {
-template<>
-ColumnOptions Convert(const Ark_ColumnOptions& src)
-{
-    return {
-        .space = OptConvert<Dimension>(src.space),
-    };
-}
-
-template<>
-void AssignCast(std::optional<FlexAlign>& dst, const Ark_HorizontalAlign& src)
-{
-    switch (src) {
-        case ARK_HORIZONTAL_ALIGN_START: dst = FlexAlign::FLEX_START; break;
-        case ARK_HORIZONTAL_ALIGN_CENTER: dst = FlexAlign::CENTER; break;
-        case ARK_HORIZONTAL_ALIGN_END: dst = FlexAlign::FLEX_END; break;
-        default: LOGE("Unexpected enum value in Ark_HorizontalAlign: %{public}d", src);
-    }
-}
-} // namespace Converter
-} // namespace OHOS::Ace::NG
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColumnModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = ColumnModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // ColumnModifier
 namespace ColumnInterfaceModifier {
@@ -69,72 +31,42 @@ void SetColumnOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opts = Converter::OptConvertPtr<ColumnOptions>(options);
-    if (opts) {
-        ColumnModelNGStatic::SetSpace(frameNode, opts->space);
-    }
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //ColumnModelNG::SetSetColumnOptions(frameNode, convValue);
 }
 } // ColumnInterfaceModifier
 namespace ColumnAttributeModifier {
-void AlignItemsImpl(Ark_NativePointer node,
-                    const Opt_HorizontalAlign* value)
+void SetAlignItemsImpl(Ark_NativePointer node,
+                       const Opt_HorizontalAlign* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ColumnModelNGStatic::SetAlignItems(frameNode, Converter::OptConvertPtr<FlexAlign>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ColumnModelNG::SetSetAlignItems(frameNode, convValue);
 }
-void JustifyContentImpl(Ark_NativePointer node,
-                        const Opt_FlexAlign* value)
+void SetJustifyContentImpl(Ark_NativePointer node,
+                           const Opt_FlexAlign* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ColumnModelNGStatic::SetJustifyContent(frameNode, Converter::OptConvertPtr<FlexAlign>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ColumnModelNG::SetSetJustifyContent(frameNode, convValue);
 }
-void PointLightImpl(Ark_NativePointer node,
-                    const Opt_PointLightStyle* value)
+void SetPointLightImpl(Ark_NativePointer node,
+                       const Opt_PointLightStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-#ifdef POINT_LIGHT_ENABLE
-    auto pointLightStyle = Converter::OptConvertPtr<Converter::PointLightStyle>(value);
-    auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
-    auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
-    CHECK_NULL_VOID(themeConstants);
-    if (pointLightStyle) {
-        if (pointLightStyle->lightSource) {
-            ViewAbstractModelStatic::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
-                pointLightStyle->lightSource->y,
-                pointLightStyle->lightSource->z);
-            ViewAbstractModelStatic::SetLightIntensity(frameNode,
-                pointLightStyle->lightSource->intensity);
-            ViewAbstractModelStatic::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
-        } else {
-            ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
-            ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
-            ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
-        }
-        // illuminated
-        ViewAbstractModelStatic::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
-        // bloom
-        ViewAbstractModelStatic::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
-    } else {
-        ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
-        ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
-        ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
-        ViewAbstractModelStatic::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
-        ViewAbstractModelStatic::SetBloom(frameNode, std::nullopt, themeConstants);
-    }
-#endif
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ColumnModelNG::SetSetPointLight(frameNode, convValue);
 }
-void ReverseImpl(Ark_NativePointer node,
-                 const Opt_Boolean* value)
+void SetReverseImpl(Ark_NativePointer node,
+                    const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // TODO: Reset value
-    if (auto reversed = Converter::OptConvertPtr<bool>(value); reversed) {
-        ColumnModelNG::SetIsReverse(frameNode, *reversed);
-    }
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ColumnModelNG::SetSetReverse(frameNode, convValue);
 }
 } // ColumnAttributeModifier
 const GENERATED_ArkUIColumnModifier* GetColumnModifier()
@@ -142,10 +74,10 @@ const GENERATED_ArkUIColumnModifier* GetColumnModifier()
     static const GENERATED_ArkUIColumnModifier ArkUIColumnModifierImpl {
         ColumnModifier::ConstructImpl,
         ColumnInterfaceModifier::SetColumnOptionsImpl,
-        ColumnAttributeModifier::AlignItemsImpl,
-        ColumnAttributeModifier::JustifyContentImpl,
-        ColumnAttributeModifier::PointLightImpl,
-        ColumnAttributeModifier::ReverseImpl,
+        ColumnAttributeModifier::SetAlignItemsImpl,
+        ColumnAttributeModifier::SetJustifyContentImpl,
+        ColumnAttributeModifier::SetPointLightImpl,
+        ColumnAttributeModifier::SetReverseImpl,
     };
     return &ArkUIColumnModifierImpl;
 }

@@ -13,13 +13,9 @@
  * limitations under the License.
  */
 
-#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-#include "global_scope_animation_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScopeAccessor {
@@ -35,12 +31,10 @@ Ark_Resource $rawfileImpl(const Ark_String* value)
 void AnimateToImpl(const Ark_AnimateParam* value,
                    const Callback_Void* event)
 {
-    AnimateToInner(value, event, false);
 }
 void AnimateToImmediatelyImpl(const Ark_AnimateParam* value,
                               const Callback_Void* event)
 {
-    AnimateToInner(value, event, true);
 }
 void ArkUICompatibleImpl(const Callback_InteropComponent* init,
                          const Callback_Number_ESObject_Void* update)
@@ -56,26 +50,9 @@ Ark_Edges BorderStylesImpl(Ark_BorderStyle all)
 }
 void CursorControl_restoreDefaultImpl()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    if (!pipelineContext->GetTaskExecutor()) {
-        return;
-    }
-    pipelineContext->GetTaskExecutor()->PostSyncTask(
-        [pipelineContext]() { pipelineContext->RestoreDefault(); },
-        TaskExecutor::TaskType::UI, "ArkUIJsRestoreDefault");
 }
 void CursorControl_setCursorImpl(Ark_pointer_PointerStyle value)
 {
-    int32_t intValue = static_cast<int32_t>(value);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    if (!pipelineContext->GetTaskExecutor()) {
-        return;
-    }
-    pipelineContext->GetTaskExecutor()->PostSyncTask(
-        [pipelineContext, intValue]() { pipelineContext->SetCursor(intValue); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSetCursor");
 }
 Ark_Edges EdgeColorsImpl(const Ark_Number* all)
 {
@@ -87,18 +64,7 @@ Ark_Edges EdgeWidthsImpl(const Ark_Number* all)
 }
 Ark_Boolean FocusControl_requestFocusImpl(const Ark_String* value)
 {
-    bool result = false;
-    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Boolean>(result));
-    std::string inspectorKey = Converter::Convert<std::string>(*value);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, Converter::ArkValue<Ark_Boolean>(result));
-    if (!pipelineContext->GetTaskExecutor()) {
-        return Converter::ArkValue<Ark_Boolean>(result);
-    }
-    pipelineContext->GetTaskExecutor()->PostSyncTask(
-        [pipelineContext, inspectorKey, &result]() { result = pipelineContext->RequestFocus(inspectorKey); },
-        TaskExecutor::TaskType::UI, "ArkUIJsRequestFocus");
-    return Converter::ArkValue<Ark_Boolean>(result);
+    return {};
 }
 Ark_font_UIFontConfig Font_getUIFontConfigImpl()
 {
@@ -114,40 +80,16 @@ void PostCardActionImpl(const Ark_Object* component,
 }
 void Profiler_registerVsyncCallbackImpl(const Profiler_Callback_String_Void* callback_)
 {
-    CHECK_NULL_VOID(callback_);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    auto onVsyncFunc = [arkCallback = CallbackHelper(*callback_)](const std::string& value) {
-        auto arkStringValue = Converter::ArkValue<Ark_String>(value);
-        arkCallback.Invoke(arkStringValue);
-    };
-    pipelineContext->SetOnVsyncProfiler(onVsyncFunc);
 }
 void Profiler_unregisterVsyncCallbackImpl()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->ResetOnVsyncProfiler();
 }
 Ark_Number Px2vpImpl(const Ark_Number* value)
 {
-    auto invalid = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(value, invalid);
-    double pxValue = Converter::Convert<double>(*value);
-    double density = PipelineBase::GetCurrentDensity();
-    if (NearZero(density) || density == 0) {
-        return Converter::ArkValue<Ark_Number>(0);
-    }
-    double vpValue = pxValue / density;
-    return Converter::ArkValue<Ark_Number>(vpValue);
+    return {};
 }
 void SetAppBgColorImpl(const Ark_String* value)
 {
-    CHECK_NULL_VOID(value);
-    auto backgroundColorStr = Converter::Convert<std::string>(*value);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetAppBgColor(Color::ColorFromString(backgroundColorStr));
 }
 void Text_getFontDescriptorByFullNameImpl(Ark_VMContext vmContext,
                                           Ark_AsyncWorkerPtr asyncWorker,
@@ -178,12 +120,7 @@ Ark_uiEffect_VisualEffect UiEffect_createEffectImpl()
 }
 Ark_Number Vp2pxImpl(const Ark_Number* value)
 {
-    auto invalid = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(value, invalid);
-    double vpValue = Converter::Convert<double>(*value);
-    double density = PipelineBase::GetCurrentDensity();
-    double pxValue = vpValue * density;
-    return Converter::ArkValue<Ark_Number>(pxValue);
+    return {};
 }
 } // GlobalScopeAccessor
 const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
@@ -218,4 +155,7 @@ const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
     return &GlobalScopeAccessorImpl;
 }
 
+struct GlobalScopePeer {
+    virtual ~GlobalScopePeer() = default;
+};
 }

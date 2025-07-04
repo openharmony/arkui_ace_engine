@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ComponentContentAccessor {
 void DestroyPeerImpl(Ark_ComponentContent peer)
 {
+    auto peerImpl = reinterpret_cast<ComponentContentPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_ComponentContent CtorImpl()
+Ark_ComponentContent ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -52,7 +56,7 @@ const GENERATED_ArkUIComponentContentAccessor* GetComponentContentAccessor()
 {
     static const GENERATED_ArkUIComponentContentAccessor ComponentContentAccessorImpl {
         ComponentContentAccessor::DestroyPeerImpl,
-        ComponentContentAccessor::CtorImpl,
+        ComponentContentAccessor::ConstructImpl,
         ComponentContentAccessor::GetFinalizerImpl,
         ComponentContentAccessor::UpdateImpl,
         ComponentContentAccessor::ReuseImpl,
@@ -63,4 +67,7 @@ const GENERATED_ArkUIComponentContentAccessor* GetComponentContentAccessor()
     return &ComponentContentAccessorImpl;
 }
 
+struct ComponentContentPeer {
+    virtual ~ComponentContentPeer() = default;
+};
 }

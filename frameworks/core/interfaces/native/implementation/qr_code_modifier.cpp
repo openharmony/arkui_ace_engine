@@ -15,20 +15,14 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
-#include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
-#include "core/components_ng/pattern/qrcode/qrcode_model_static.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace QRCodeModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = QRCodeModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // QRCodeModifier
 namespace QRCodeInterfaceModifier {
@@ -38,46 +32,34 @@ void SetQRCodeOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<std::string>(*value);
-    if (convValue) {
-        QRCodeModelNG::SetQRCodeValue(frameNode, *convValue);
-    }
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //QRCodeModelNG::SetSetQRCodeOptions(frameNode, convValue);
 }
 } // QRCodeInterfaceModifier
 namespace QRCodeAttributeModifier {
-void ColorImpl(Ark_NativePointer node,
-               const Opt_ResourceColor* value)
+void SetColorImpl(Ark_NativePointer node,
+                  const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Color>(value);
-    if (!convValue) {
-        return;
-    }
-    QRCodeModelStatic::SetQRCodeColor(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //QRCodeModelNG::SetSetColor(frameNode, convValue);
 }
-void BackgroundColorImpl(Ark_NativePointer node,
-                         const Opt_ResourceColor* value)
+void SetBackgroundColorImpl(Ark_NativePointer node,
+                            const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Color>(value);
-    if (!convValue) {
-        return;
-    }
-    QRCodeModelStatic::SetQRBackgroundColor(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //QRCodeModelNG::SetSetBackgroundColor(frameNode, convValue);
 }
-void ContentOpacityImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_Resource* value)
+void SetContentOpacityImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<float>(value);
-    Validator::ValidateOpacity(convValue);
-    if (!convValue) {
-        return;
-    }
-    QRCodeModelStatic::SetContentOpacity(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //QRCodeModelNG::SetSetContentOpacity(frameNode, convValue);
 }
 } // QRCodeAttributeModifier
 const GENERATED_ArkUIQRCodeModifier* GetQRCodeModifier()
@@ -85,9 +67,9 @@ const GENERATED_ArkUIQRCodeModifier* GetQRCodeModifier()
     static const GENERATED_ArkUIQRCodeModifier ArkUIQRCodeModifierImpl {
         QRCodeModifier::ConstructImpl,
         QRCodeInterfaceModifier::SetQRCodeOptionsImpl,
-        QRCodeAttributeModifier::ColorImpl,
-        QRCodeAttributeModifier::BackgroundColorImpl,
-        QRCodeAttributeModifier::ContentOpacityImpl,
+        QRCodeAttributeModifier::SetColorImpl,
+        QRCodeAttributeModifier::SetBackgroundColorImpl,
+        QRCodeAttributeModifier::SetContentOpacityImpl,
     };
     return &ArkUIQRCodeModifierImpl;
 }

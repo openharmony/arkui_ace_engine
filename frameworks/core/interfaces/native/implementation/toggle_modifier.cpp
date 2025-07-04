@@ -14,58 +14,15 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/components_ng/pattern/toggle/toggle_model_static.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/converter2.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/validators.h"
-
-namespace OHOS::Ace::NG::Converter {
-struct ToggleOptions {
-    std::optional<ToggleType> type;
-    std::optional<bool> isOn;
-};
-
-template<>
-ToggleOptions Convert(const Ark_ToggleOptions& src)
-{
-    return {
-        .type = Converter::OptConvert<ToggleType>(src.type),
-        .isOn = Converter::OptConvert<bool>(src.isOn)
-    };
-}
-
-struct SwitchStyle {
-    std::optional<Dimension> pointRadius;
-    std::optional<Color> unselectedColor;
-    std::optional<Color> pointColor;
-    std::optional<Dimension> trackBorderRadius;
-};
-
-template<>
-SwitchStyle Convert(const Ark_SwitchStyle& src)
-{
-    return {
-        .pointRadius = Converter::OptConvert<Dimension>(src.pointRadius),
-        .unselectedColor = Converter::OptConvert<Color>(src.unselectedColor),
-        .pointColor = Converter::OptConvert<Color>(src.pointColor),
-        .trackBorderRadius = Converter::OptConvert<Dimension>(src.trackBorderRadius)
-    };
-}
-}
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ToggleModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(id, NG::ToggleType::SWITCH, false);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // ToggleModifier
 namespace ToggleInterfaceModifier {
@@ -75,96 +32,62 @@ void SetToggleOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    auto convValue = Converter::Convert<Converter::ToggleOptions>(*options);
-    if (convValue.isOn.has_value()) {
-        ToggleModelNG::SetToggleState(frameNode, convValue.isOn.value());
-    }
-    LOGE("ToggleModifier::SetToggleOptionsImpl. Set ToggleType is not supported!");
+    //auto convValue = Converter::OptConvert<type_name>(*options);
+    //ToggleModelNG::SetSetToggleOptions(frameNode, convValue);
 }
 } // ToggleInterfaceModifier
 namespace ToggleAttributeModifier {
-void OnChangeImpl(Ark_NativePointer node,
-                  const Opt_Callback_Boolean_Void* value)
+void SetOnChangeImpl(Ark_NativePointer node,
+                     const Opt_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onChange = [arkCallback = CallbackHelper(*optValue)](const bool isOn) {
-        auto arkValue = Converter::ArkValue<Ark_Boolean>(isOn);
-        arkCallback.Invoke(arkValue);
-    };
-    ToggleModelNG::OnChange(frameNode, std::move(onChange));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ToggleModelNG::SetSetOnChange(frameNode, convValue);
 }
-void ContentModifierImpl(Ark_NativePointer node,
-                         const Opt_ContentModifier* value)
+void SetContentModifierImpl(Ark_NativePointer node,
+                            const Opt_ContentModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::OptConvertPtr<type>(value);
-    //ToggleModelNG::SetContentModifier(frameNode, convValue);
-    LOGE("ToggleModifier::ContentModifierImpl is not implemented, Ark_CustomObject is not supported!");
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ToggleModelNG::SetSetContentModifier(frameNode, convValue);
 }
-void SelectedColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Color>(value);
-    ToggleModelNG::SetSelectedColor(frameNode, convValue);
-}
-void SwitchPointColorImpl(Ark_NativePointer node,
+void SetSelectedColorImpl(Ark_NativePointer node,
                           const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Color>(value);
-    ToggleModelNG::SetSwitchPointColor(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ToggleModelNG::SetSetSelectedColor(frameNode, convValue);
 }
-void SwitchStyleImpl(Ark_NativePointer node,
-                     const Opt_SwitchStyle* value)
+void SetSwitchPointColorImpl(Ark_NativePointer node,
+                             const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Converter::SwitchStyle>(value).value_or(Converter::SwitchStyle{});
-    Validator::ValidateNonNegative(convValue.pointRadius);
-    Validator::ValidateNonPercent(convValue.pointRadius);
-    ToggleModelStatic::SetPointRadius(frameNode, convValue.pointRadius);
-    ToggleModelStatic::SetUnselectedColor(frameNode, convValue.unselectedColor);
-    ToggleModelNG::SetSwitchPointColor(frameNode, convValue.pointColor);
-    Validator::ValidateNonNegative(convValue.trackBorderRadius);
-    Validator::ValidateNonPercent(convValue.trackBorderRadius);
-    ToggleModelStatic::SetTrackBorderRadius(frameNode, convValue.trackBorderRadius);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ToggleModelNG::SetSetSwitchPointColor(frameNode, convValue);
 }
-#ifdef WRONG_GEN
-void _onChangeEvent_isOnImpl(Ark_NativePointer node,
-                             const Callback_Boolean_Void* callback)
+void SetSwitchStyleImpl(Ark_NativePointer node,
+                        const Opt_SwitchStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](bool isOn) {
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(isOn));
-    };
-    ToggleModelStatic::OnChangeEvent(frameNode, std::move(onEvent));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ToggleModelNG::SetSetSwitchStyle(frameNode, convValue);
 }
-#endif
 } // ToggleAttributeModifier
 const GENERATED_ArkUIToggleModifier* GetToggleModifier()
 {
     static const GENERATED_ArkUIToggleModifier ArkUIToggleModifierImpl {
         ToggleModifier::ConstructImpl,
         ToggleInterfaceModifier::SetToggleOptionsImpl,
-        ToggleAttributeModifier::OnChangeImpl,
-        ToggleAttributeModifier::ContentModifierImpl,
-        ToggleAttributeModifier::SelectedColorImpl,
-        ToggleAttributeModifier::SwitchPointColorImpl,
-        ToggleAttributeModifier::SwitchStyleImpl,
+        ToggleAttributeModifier::SetOnChangeImpl,
+        ToggleAttributeModifier::SetContentModifierImpl,
+        ToggleAttributeModifier::SetSelectedColorImpl,
+        ToggleAttributeModifier::SetSwitchPointColorImpl,
+        ToggleAttributeModifier::SetSwitchStyleImpl,
     };
     return &ArkUIToggleModifierImpl;
 }

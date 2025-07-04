@@ -13,43 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/utility/ace_engine_types.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/common/container.h"
-#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/linear_layout/row_model_ng_static.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/interfaces/native/utility/validators.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_abstract_model_static.h"
-
-namespace OHOS::Ace::NG {
-namespace {
-struct RowOptions {
-    std::optional<Dimension> space;
-};
-}
-
-namespace Converter {
-template<>
-RowOptions Convert(const Ark_RowOptions& src)
-{
-    return {
-        .space = OptConvert<Dimension>(src.space),
-    };
-}
-} // namespace Converter
-} // namespace OHOS::Ace::NG
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RowModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = RowModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // RowModifier
 namespace RowInterfaceModifier {
@@ -58,71 +31,42 @@ void SetRowOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opts = Converter::OptConvertPtr<RowOptions>(options);
-    if (opts) {
-        RowModelNG::SetSpace(frameNode, opts->space);
-    }
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //RowModelNG::SetSetRowOptions(frameNode, convValue);
 }
 } // RowInterfaceModifier
 namespace RowAttributeModifier {
-void AlignItemsImpl(Ark_NativePointer node,
-                    const Opt_VerticalAlign* value)
+void SetAlignItemsImpl(Ark_NativePointer node,
+                       const Opt_VerticalAlign* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto flexAlign = Converter::OptConvertPtr<FlexAlign>(value);
-    RowModelNGStatic::SetAlignItems(frameNode, flexAlign);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RowModelNG::SetSetAlignItems(frameNode, convValue);
 }
-void JustifyContentImpl(Ark_NativePointer node,
-                        const Opt_FlexAlign* value)
+void SetJustifyContentImpl(Ark_NativePointer node,
+                           const Opt_FlexAlign* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto flexAlign = Converter::OptConvertPtr<FlexAlign>(value);
-    RowModelNGStatic::SetJustifyContent(frameNode, flexAlign);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RowModelNG::SetSetJustifyContent(frameNode, convValue);
 }
-void PointLightImpl(Ark_NativePointer node,
-                    const Opt_PointLightStyle* value)
+void SetPointLightImpl(Ark_NativePointer node,
+                       const Opt_PointLightStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-#ifdef POINT_LIGHT_ENABLE
-    auto pointLightStyle = Converter::OptConvertPtr<Converter::PointLightStyle>(value);
-    auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
-    auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
-    CHECK_NULL_VOID(themeConstants);
-    if (pointLightStyle) {
-        if (pointLightStyle->lightSource) {
-            ViewAbstractModelStatic::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
-                pointLightStyle->lightSource->y,
-                pointLightStyle->lightSource->z);
-            ViewAbstractModelStatic::SetLightIntensity(frameNode,
-                pointLightStyle->lightSource->intensity);
-            ViewAbstractModelStatic::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
-        } else {
-            ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
-            ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
-            ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
-        }
-        // illuminated
-        ViewAbstractModelStatic::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
-        // bloom
-        ViewAbstractModelStatic::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
-    } else {
-        ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
-        ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
-        ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
-        ViewAbstractModelStatic::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
-        ViewAbstractModelStatic::SetBloom(frameNode, std::nullopt, themeConstants);
-    }
-#endif
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RowModelNG::SetSetPointLight(frameNode, convValue);
 }
-void ReverseImpl(Ark_NativePointer node,
-                 const Opt_Boolean* value)
+void SetReverseImpl(Ark_NativePointer node,
+                    const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    RowModelNGStatic::SetIsReverse(frameNode, Converter::OptConvertPtr<bool>(value));
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RowModelNG::SetSetReverse(frameNode, convValue);
 }
 } // RowAttributeModifier
 const GENERATED_ArkUIRowModifier* GetRowModifier()
@@ -130,10 +74,10 @@ const GENERATED_ArkUIRowModifier* GetRowModifier()
     static const GENERATED_ArkUIRowModifier ArkUIRowModifierImpl {
         RowModifier::ConstructImpl,
         RowInterfaceModifier::SetRowOptionsImpl,
-        RowAttributeModifier::AlignItemsImpl,
-        RowAttributeModifier::JustifyContentImpl,
-        RowAttributeModifier::PointLightImpl,
-        RowAttributeModifier::ReverseImpl,
+        RowAttributeModifier::SetAlignItemsImpl,
+        RowAttributeModifier::SetJustifyContentImpl,
+        RowAttributeModifier::SetPointLightImpl,
+        RowAttributeModifier::SetReverseImpl,
     };
     return &ArkUIRowModifierImpl;
 }

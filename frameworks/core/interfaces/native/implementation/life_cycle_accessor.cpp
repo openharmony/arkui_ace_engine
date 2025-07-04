@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LifeCycleAccessor {
 void DestroyPeerImpl(Ark_LifeCycle peer)
 {
+    auto peerImpl = reinterpret_cast<LifeCyclePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_LifeCycle CtorImpl()
+Ark_LifeCycle ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -47,7 +51,7 @@ const GENERATED_ArkUILifeCycleAccessor* GetLifeCycleAccessor()
 {
     static const GENERATED_ArkUILifeCycleAccessor LifeCycleAccessorImpl {
         LifeCycleAccessor::DestroyPeerImpl,
-        LifeCycleAccessor::CtorImpl,
+        LifeCycleAccessor::ConstructImpl,
         LifeCycleAccessor::GetFinalizerImpl,
         LifeCycleAccessor::AboutToAppearImpl,
         LifeCycleAccessor::AboutToDisappearImpl,
@@ -57,4 +61,7 @@ const GENERATED_ArkUILifeCycleAccessor* GetLifeCycleAccessor()
     return &LifeCycleAccessorImpl;
 }
 
+struct LifeCyclePeer {
+    virtual ~LifeCyclePeer() = default;
+};
 }

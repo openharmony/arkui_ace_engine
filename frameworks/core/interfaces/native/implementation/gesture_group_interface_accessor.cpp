@@ -13,46 +13,23 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/peer_utils.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-
 #include "arkoala_api_generated.h"
-#include "gesture_group_interface_peer.h"
-#include "gesture_peer.h"
-
-namespace OHOS::Ace::NG::Converter {
-template<>
-RefPtr<Gesture> Convert(const Ark_CustomObject& src)
-{
-    return nullptr;
-}
-
-template<>
-RefPtr<Gesture> Convert(const Ark_Gesture& src)
-{
-    return src ? src->GetGesture() : nullptr;
-}
-}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureGroupInterfaceAccessor {
 void DestroyPeerImpl(Ark_GestureGroupInterface peer)
 {
-    PeerUtils::DestroyPeer(peer);
-}
-Ark_GestureGroupInterface CtorImpl(Ark_GestureMode mode,
-                                   const Array_GestureType* gesture)
-{
-    auto peer = PeerUtils::CreatePeer<GestureGroupInterfacePeer>();
-    auto gestureMode = (Converter::OptConvert<GestureMode>(mode)).value_or(GestureMode::Sequence);
-    std::vector<RefPtr<Gesture>> gestures;
-    if (gesture) {
-        gestures = Converter::Squash(Converter::Convert<std::vector<std::optional<RefPtr<Gesture>>>>(*gesture));
+    auto peerImpl = reinterpret_cast<GestureGroupInterfacePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
     }
-    peer->gesture = AceType::MakeRefPtr<GestureGroup>(gestureMode, gestures);
-    return peer;
+}
+Ark_GestureGroupInterface ConstructImpl(Ark_GestureMode mode,
+                                        const Array_GestureType* gesture)
+{
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -61,22 +38,21 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_GestureGroupInterface OnCancelImpl(Ark_GestureGroupInterface peer,
                                        const Callback_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto callback = [arkCallback = CallbackHelper(*event)](GestureEvent& info) {
-        arkCallback.Invoke();
-    };
-    peer->gesture->SetOnActionCancelId(std::move(callback));
-    return peer;
+    return {};
 }
 } // GestureGroupInterfaceAccessor
 const GENERATED_ArkUIGestureGroupInterfaceAccessor* GetGestureGroupInterfaceAccessor()
 {
     static const GENERATED_ArkUIGestureGroupInterfaceAccessor GestureGroupInterfaceAccessorImpl {
         GestureGroupInterfaceAccessor::DestroyPeerImpl,
-        GestureGroupInterfaceAccessor::CtorImpl,
+        GestureGroupInterfaceAccessor::ConstructImpl,
         GestureGroupInterfaceAccessor::GetFinalizerImpl,
         GestureGroupInterfaceAccessor::OnCancelImpl,
     };
     return &GestureGroupInterfaceAccessorImpl;
 }
+
+struct GestureGroupInterfacePeer {
+    virtual ~GestureGroupInterfacePeer() = default;
+};
 }

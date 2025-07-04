@@ -13,67 +13,42 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
-
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/navigation/navigation_group_node.h"
-#include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/interfaces/native/implementation/nav_path_info_peer_impl.h"
-#include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavExtenderAccessor {
 void SetNavigationOptionsImpl(Ark_NativePointer ptr,
                               Ark_NavPathStack pathStack)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(ptr);
+    //auto convValue = Converter::OptConvert<type>(ptr); // for enums
+    //undefinedModelNG::SetSetNavigationOptions(frameNode, convValue);
 }
 void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
                                 const NavExtender_OnUpdateStack* callback)
 {
-    auto stack = peer;
-    CHECK_NULL_VOID(stack);
-    auto navigationStack = stack->GetNavPathStack();
-    CHECK_NULL_VOID(navigationStack);
-    auto updater = [callback = CallbackHelper(*callback)]() {
-        callback.Invoke();
-    };
-    navigationStack->SetOnStateChangedCallback(std::move(updater));
 }
 void SyncStackImpl(Ark_NavPathStack peer)
 {
-    CHECK_NULL_VOID(peer);
-    auto stack = peer->GetNavPathStack();
-    CHECK_NULL_VOID(stack);
-    auto navigationNode = AceType::DynamicCast<FrameNode>(stack->GetNavigationNode().Upgrade());
-    CHECK_NULL_VOID(navigationNode);
-    auto pattern = navigationNode->GetPattern<NavigationPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->MarkNeedSyncWithJsStack();
-    pattern->SyncWithJsStackIfNeeded();
-    stack->ClearNodeList();
 }
 Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation,
                                 Ark_Int32 index)
 {
-    auto invalidVal = Converter::ArkValue<Ark_Boolean>(false);
-    auto navigationNode = reinterpret_cast<FrameNode*>(navigation);
-    CHECK_NULL_RETURN(navigationNode, invalidVal);
-    auto pattern = navigationNode->GetPattern<NavigationPattern>();
-    CHECK_NULL_RETURN(pattern, invalidVal);
-    auto isCreated = pattern->CheckNeedCreate(index);
-    return Converter::ArkValue<Ark_Boolean>(isCreated);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(navigation);
+    //auto convValue = Converter::OptConvert<type>(navigation); // for enums
+    //undefinedModelNG::SetCheckNeedCreate(frameNode, convValue);
+    return {};
 }
 void SetNavDestinationNodeImpl(Ark_NavPathStack peer,
                                Ark_Int32 index,
                                Ark_NativePointer node)
 {
-    CHECK_NULL_VOID(peer);
-    auto stack = peer->GetNavPathStack();
-    CHECK_NULL_VOID(stack);
-    int32_t curIndex = Converter::Convert<int32_t>(index);
-    stack->AddCustomNode(curIndex, Referenced::Claim(reinterpret_cast<UINode*>(node)));
 }
 void PushPathImpl(Ark_NavPathStack pathStack,
                   Ark_NavPathInfo info,
@@ -113,14 +88,7 @@ Ark_Number PopToNameImpl(Ark_NavPathStack pathStack,
                          const Ark_String* name,
                          Ark_Boolean animated)
 {
-    static Ark_Number invalidVal = Converter::ArkValue<Ark_Number>(-1);
-    CHECK_NULL_RETURN(pathStack, invalidVal);
-    auto navStack = pathStack->GetNavPathStack();
-    CHECK_NULL_RETURN(navStack, invalidVal);
-    auto nameVal = Converter::Convert<std::string>(*name);
-    auto animatedVal = Converter::Convert<bool>(animated);
-    auto index = navStack->NavigationContext::PathStack::PopToName(nameVal, animatedVal);
-    return Converter::ArkValue<Ark_Number>(index);
+    return {};
 }
 } // NavExtenderAccessor
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()

@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_FontAccessor {
+namespace drawing_FontAccessor {
 void DestroyPeerImpl(Ark_drawing_Font peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_FontPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_Font CtorImpl()
+Ark_drawing_Font ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -175,48 +179,51 @@ Ark_drawing_Path GetTextPathImpl(Ark_drawing_Font peer,
 {
     return {};
 }
-} // Drawing_FontAccessor
+} // drawing_FontAccessor
 const GENERATED_ArkUIDrawing_FontAccessor* GetDrawing_FontAccessor()
 {
     static const GENERATED_ArkUIDrawing_FontAccessor Drawing_FontAccessorImpl {
-        Drawing_FontAccessor::DestroyPeerImpl,
-        Drawing_FontAccessor::CtorImpl,
-        Drawing_FontAccessor::GetFinalizerImpl,
-        Drawing_FontAccessor::EnableSubpixelImpl,
-        Drawing_FontAccessor::EnableEmboldenImpl,
-        Drawing_FontAccessor::EnableLinearMetricsImpl,
-        Drawing_FontAccessor::SetSizeImpl,
-        Drawing_FontAccessor::GetSizeImpl,
-        Drawing_FontAccessor::SetTypefaceImpl,
-        Drawing_FontAccessor::GetTypefaceImpl,
-        Drawing_FontAccessor::GetMetricsImpl,
-        Drawing_FontAccessor::MeasureSingleCharacterImpl,
-        Drawing_FontAccessor::MeasureTextImpl,
-        Drawing_FontAccessor::SetScaleXImpl,
-        Drawing_FontAccessor::SetSkewXImpl,
-        Drawing_FontAccessor::SetEdgingImpl,
-        Drawing_FontAccessor::SetHintingImpl,
-        Drawing_FontAccessor::CountTextImpl,
-        Drawing_FontAccessor::SetBaselineSnapImpl,
-        Drawing_FontAccessor::IsBaselineSnapImpl,
-        Drawing_FontAccessor::SetEmbeddedBitmapsImpl,
-        Drawing_FontAccessor::IsEmbeddedBitmapsImpl,
-        Drawing_FontAccessor::SetForceAutoHintingImpl,
-        Drawing_FontAccessor::IsForceAutoHintingImpl,
-        Drawing_FontAccessor::GetWidthsImpl,
-        Drawing_FontAccessor::TextToGlyphsImpl,
-        Drawing_FontAccessor::IsSubpixelImpl,
-        Drawing_FontAccessor::IsLinearMetricsImpl,
-        Drawing_FontAccessor::GetSkewXImpl,
-        Drawing_FontAccessor::IsEmboldenImpl,
-        Drawing_FontAccessor::GetScaleXImpl,
-        Drawing_FontAccessor::GetHintingImpl,
-        Drawing_FontAccessor::GetEdgingImpl,
-        Drawing_FontAccessor::CreatePathForGlyphImpl,
-        Drawing_FontAccessor::GetBoundsImpl,
-        Drawing_FontAccessor::GetTextPathImpl,
+        drawing_FontAccessor::DestroyPeerImpl,
+        drawing_FontAccessor::ConstructImpl,
+        drawing_FontAccessor::GetFinalizerImpl,
+        drawing_FontAccessor::EnableSubpixelImpl,
+        drawing_FontAccessor::EnableEmboldenImpl,
+        drawing_FontAccessor::EnableLinearMetricsImpl,
+        drawing_FontAccessor::SetSizeImpl,
+        drawing_FontAccessor::GetSizeImpl,
+        drawing_FontAccessor::SetTypefaceImpl,
+        drawing_FontAccessor::GetTypefaceImpl,
+        drawing_FontAccessor::GetMetricsImpl,
+        drawing_FontAccessor::MeasureSingleCharacterImpl,
+        drawing_FontAccessor::MeasureTextImpl,
+        drawing_FontAccessor::SetScaleXImpl,
+        drawing_FontAccessor::SetSkewXImpl,
+        drawing_FontAccessor::SetEdgingImpl,
+        drawing_FontAccessor::SetHintingImpl,
+        drawing_FontAccessor::CountTextImpl,
+        drawing_FontAccessor::SetBaselineSnapImpl,
+        drawing_FontAccessor::IsBaselineSnapImpl,
+        drawing_FontAccessor::SetEmbeddedBitmapsImpl,
+        drawing_FontAccessor::IsEmbeddedBitmapsImpl,
+        drawing_FontAccessor::SetForceAutoHintingImpl,
+        drawing_FontAccessor::IsForceAutoHintingImpl,
+        drawing_FontAccessor::GetWidthsImpl,
+        drawing_FontAccessor::TextToGlyphsImpl,
+        drawing_FontAccessor::IsSubpixelImpl,
+        drawing_FontAccessor::IsLinearMetricsImpl,
+        drawing_FontAccessor::GetSkewXImpl,
+        drawing_FontAccessor::IsEmboldenImpl,
+        drawing_FontAccessor::GetScaleXImpl,
+        drawing_FontAccessor::GetHintingImpl,
+        drawing_FontAccessor::GetEdgingImpl,
+        drawing_FontAccessor::CreatePathForGlyphImpl,
+        drawing_FontAccessor::GetBoundsImpl,
+        drawing_FontAccessor::GetTextPathImpl,
     };
     return &Drawing_FontAccessorImpl;
 }
 
+struct Drawing_FontPeer {
+    virtual ~Drawing_FontPeer() = default;
+};
 }

@@ -15,11 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/components_ng/pattern/text/span_model_ng.h"
-#include "core/components_ng/pattern/text/span_model_static.h"
-#include "core/components_ng/pattern/text/image_span_view.h"
-#include "core/components_ng/pattern/text/image_span_view_static.h"
-#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -27,49 +22,31 @@ namespace BaseSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = SpanModelNG::CreateSpanNode(id, u"");
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
-void TextBackgroundStyleImpl(Ark_NativePointer node,
-                             const Opt_TextBackgroundStyle* value)
+void SetTextBackgroundStyleImpl(Ark_NativePointer node,
+                                const Opt_TextBackgroundStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<TextBackgroundStyle>(value);
-    if (!convValue) {
-        // TODO: Reset value
-        TextBackgroundStyle textBackgroundStyle;
-        SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, textBackgroundStyle);
-        return;
-    }
-    if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
-        SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, *convValue);
-    } else {
-        ImageSpanView::SetPlaceHolderStyle(frameNode, *convValue);
-    }
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //BaseSpanModelNG::SetSetTextBackgroundStyle(frameNode, convValue);
 }
-void BaselineOffsetImpl(Ark_NativePointer node,
-                        const Opt_LengthMetrics* value)
+void SetBaselineOffsetImpl(Ark_NativePointer node,
+                           const Opt_LengthMetrics* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonPercent(convValue);
-    if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
-        SpanModelStatic::SetBaselineOffset(frameNode, convValue);
-    } else {
-        ImageSpanViewStatic::SetBaselineOffset(frameNode, convValue);
-    }
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //BaseSpanModelNG::SetSetBaselineOffset(frameNode, convValue);
 }
 } // BaseSpanModifier
 const GENERATED_ArkUIBaseSpanModifier* GetBaseSpanModifier()
 {
     static const GENERATED_ArkUIBaseSpanModifier ArkUIBaseSpanModifierImpl {
         BaseSpanModifier::ConstructImpl,
-        BaseSpanModifier::TextBackgroundStyleImpl,
-        BaseSpanModifier::BaselineOffsetImpl,
+        BaseSpanModifier::SetTextBackgroundStyleImpl,
+        BaseSpanModifier::SetBaselineOffsetImpl,
     };
     return &ArkUIBaseSpanModifierImpl;
 }

@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebCookieAccessor {
 void DestroyPeerImpl(Ark_WebCookie peer)
 {
+    auto peerImpl = reinterpret_cast<WebCookiePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_WebCookie CtorImpl()
+Ark_WebCookie ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -41,7 +45,7 @@ const GENERATED_ArkUIWebCookieAccessor* GetWebCookieAccessor()
 {
     static const GENERATED_ArkUIWebCookieAccessor WebCookieAccessorImpl {
         WebCookieAccessor::DestroyPeerImpl,
-        WebCookieAccessor::CtorImpl,
+        WebCookieAccessor::ConstructImpl,
         WebCookieAccessor::GetFinalizerImpl,
         WebCookieAccessor::SetCookieImpl,
         WebCookieAccessor::SaveCookieImpl,
@@ -49,4 +53,7 @@ const GENERATED_ArkUIWebCookieAccessor* GetWebCookieAccessor()
     return &WebCookieAccessorImpl;
 }
 
+struct WebCookiePeer {
+    virtual ~WebCookiePeer() = default;
+};
 }

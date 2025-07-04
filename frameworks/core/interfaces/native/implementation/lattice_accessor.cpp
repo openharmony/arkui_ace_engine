@@ -18,13 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace Drawing_LatticeAccessor {
+namespace drawing_LatticeAccessor {
 void DestroyPeerImpl(Ark_drawing_Lattice peer)
 {
+    auto peerImpl = reinterpret_cast<drawing_LatticePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_drawing_Lattice CtorImpl()
+Ark_drawing_Lattice ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -40,16 +44,19 @@ Ark_drawing_Lattice CreateImageLatticeImpl(const Array_Number* xDivs,
 {
     return {};
 }
-} // Drawing_LatticeAccessor
+} // drawing_LatticeAccessor
 const GENERATED_ArkUIDrawing_LatticeAccessor* GetDrawing_LatticeAccessor()
 {
     static const GENERATED_ArkUIDrawing_LatticeAccessor Drawing_LatticeAccessorImpl {
-        Drawing_LatticeAccessor::DestroyPeerImpl,
-        Drawing_LatticeAccessor::CtorImpl,
-        Drawing_LatticeAccessor::GetFinalizerImpl,
-        Drawing_LatticeAccessor::CreateImageLatticeImpl,
+        drawing_LatticeAccessor::DestroyPeerImpl,
+        drawing_LatticeAccessor::ConstructImpl,
+        drawing_LatticeAccessor::GetFinalizerImpl,
+        drawing_LatticeAccessor::CreateImageLatticeImpl,
     };
     return &Drawing_LatticeAccessorImpl;
 }
 
+struct Drawing_LatticePeer {
+    virtual ~Drawing_LatticePeer() = default;
+};
 }

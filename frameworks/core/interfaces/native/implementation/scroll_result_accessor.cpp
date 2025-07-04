@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollResultAccessor {
 void DestroyPeerImpl(Ark_ScrollResult peer)
 {
+    auto peerImpl = reinterpret_cast<ScrollResultPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_ScrollResult CtorImpl()
+Ark_ScrollResult ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -43,7 +47,7 @@ const GENERATED_ArkUIScrollResultAccessor* GetScrollResultAccessor()
 {
     static const GENERATED_ArkUIScrollResultAccessor ScrollResultAccessorImpl {
         ScrollResultAccessor::DestroyPeerImpl,
-        ScrollResultAccessor::CtorImpl,
+        ScrollResultAccessor::ConstructImpl,
         ScrollResultAccessor::GetFinalizerImpl,
         ScrollResultAccessor::GetOffsetRemainImpl,
         ScrollResultAccessor::SetOffsetRemainImpl,
@@ -51,4 +55,7 @@ const GENERATED_ArkUIScrollResultAccessor* GetScrollResultAccessor()
     return &ScrollResultAccessorImpl;
 }
 
+struct ScrollResultPeer {
+    virtual ~ScrollResultPeer() = default;
+};
 }

@@ -13,29 +13,22 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaselineOffsetStyleAccessor {
 void DestroyPeerImpl(Ark_BaselineOffsetStyle peer)
 {
-    PeerUtils::DestroyPeer(peer);
-}
-Ark_BaselineOffsetStyle CtorImpl(Ark_LengthMetrics value)
-{
-    auto peer = PeerUtils::CreatePeer<BaselineOffsetStylePeer>();
-    std::optional<Dimension> offset;
-    Dimension defaultOffset = Dimension(0, DimensionUnit::VP);
-    if (value) {
-        offset = Converter::OptConvert<Dimension>(value);
-        Validator::ValidateNonPercent(offset);
+    auto peerImpl = reinterpret_cast<BaselineOffsetStylePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
     }
-    peer->span = AceType::MakeRefPtr<BaselineOffsetSpan>(offset.value_or(defaultOffset));
-    return peer;
+}
+Ark_BaselineOffsetStyle ConstructImpl(Ark_LengthMetrics value)
+{
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -43,21 +36,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetBaselineOffsetImpl(Ark_BaselineOffsetStyle peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(peer->span, {});
-    auto value = Converter::ArkValue<Ark_Number>(peer->span->GetBaselineOffset().ConvertToVp());
-    return value;
+    return {};
 }
 } // BaselineOffsetStyleAccessor
 const GENERATED_ArkUIBaselineOffsetStyleAccessor* GetBaselineOffsetStyleAccessor()
 {
     static const GENERATED_ArkUIBaselineOffsetStyleAccessor BaselineOffsetStyleAccessorImpl {
         BaselineOffsetStyleAccessor::DestroyPeerImpl,
-        BaselineOffsetStyleAccessor::CtorImpl,
+        BaselineOffsetStyleAccessor::ConstructImpl,
         BaselineOffsetStyleAccessor::GetFinalizerImpl,
         BaselineOffsetStyleAccessor::GetBaselineOffsetImpl,
     };
     return &BaselineOffsetStyleAccessorImpl;
 }
 
+struct BaselineOffsetStylePeer {
+    virtual ~BaselineOffsetStylePeer() = default;
+};
 }

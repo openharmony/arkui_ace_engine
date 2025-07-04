@@ -15,28 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/peer_utils.h"
-#include "drawing_canvas_peer_impl.h"
-#include "drawing_rendering_context_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawingRenderingContextAccessor {
 void DestroyPeerImpl(Ark_DrawingRenderingContext peer)
 {
-    auto peerImpl = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<DrawingRenderingContextPeerImpl *>(peer);
     if (peerImpl) {
-        peerImpl->DecRefCount();
+        delete peerImpl;
     }
 }
-Ark_DrawingRenderingContext CtorImpl(const Opt_LengthMetricsUnit* unit)
+Ark_DrawingRenderingContext ConstructImpl(const Opt_LengthMetricsUnit* unit)
 {
-    auto peerImpl = Referenced::MakeRefPtr<DrawingRenderingContextPeerImpl>();
-    peerImpl->IncRefCount();
-    auto optUnit = Converter::OptConvertPtr<Ace::CanvasUnit>(unit);
-    peerImpl->SetOptions(optUnit);
-    return reinterpret_cast<DrawingRenderingContextPeer*>(Referenced::RawPtr(peerImpl));
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -44,17 +36,10 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void InvalidateImpl(Ark_DrawingRenderingContext peer)
 {
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->SetInvalidate();
 }
 Ark_Size GetSizeImpl(Ark_DrawingRenderingContext peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-    return Converter::ArkValue<Ark_Size>(peerImpl->GetSize());
+    return {};
 }
 void SetSizeImpl(Ark_DrawingRenderingContext peer,
                  const Ark_Size* size)
@@ -65,7 +50,7 @@ const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContext
 {
     static const GENERATED_ArkUIDrawingRenderingContextAccessor DrawingRenderingContextAccessorImpl {
         DrawingRenderingContextAccessor::DestroyPeerImpl,
-        DrawingRenderingContextAccessor::CtorImpl,
+        DrawingRenderingContextAccessor::ConstructImpl,
         DrawingRenderingContextAccessor::GetFinalizerImpl,
         DrawingRenderingContextAccessor::InvalidateImpl,
         DrawingRenderingContextAccessor::GetSizeImpl,
@@ -74,4 +59,7 @@ const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContext
     return &DrawingRenderingContextAccessorImpl;
 }
 
+struct DrawingRenderingContextPeer {
+    virtual ~DrawingRenderingContextPeer() = default;
+};
 }

@@ -13,21 +13,16 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_model_static.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LoadingProgressModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = LoadingProgressModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // LoadingProgressModifier
 namespace LoadingProgressInterfaceModifier {
@@ -41,34 +36,29 @@ void SetLoadingProgressOptionsImpl(Ark_NativePointer node)
 }
 } // LoadingProgressInterfaceModifier
 namespace LoadingProgressAttributeModifier {
-void ColorImpl(Ark_NativePointer node,
-               const Opt_ResourceColor* value)
+void SetColorImpl(Ark_NativePointer node,
+                  const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto color = Converter::OptConvertPtr<Color>(value);
-    LoadingProgressModelStatic::SetColor(frameNode, color);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //LoadingProgressModelNG::SetSetColor(frameNode, convValue);
 }
-void EnableLoadingImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+void SetEnableLoadingImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    LoadingProgressModelNG::SetEnableLoading(frameNode, *convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //LoadingProgressModelNG::SetSetEnableLoading(frameNode, convValue);
 }
-void ContentModifierImpl(Ark_NativePointer node,
-                         const Opt_ContentModifier* value)
+void SetContentModifierImpl(Ark_NativePointer node,
+                            const Opt_ContentModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::OptConvertPtr<type>(value);
-    //LoadingProgressModelNG::SetContentModifier(frameNode, convValue);
-    LOGE("ARKOALA LoadingProgressAttributeModifier::ContentModifierImpl -> Method is not implemented");
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //LoadingProgressModelNG::SetSetContentModifier(frameNode, convValue);
 }
 } // LoadingProgressAttributeModifier
 const GENERATED_ArkUILoadingProgressModifier* GetLoadingProgressModifier()
@@ -76,9 +66,9 @@ const GENERATED_ArkUILoadingProgressModifier* GetLoadingProgressModifier()
     static const GENERATED_ArkUILoadingProgressModifier ArkUILoadingProgressModifierImpl {
         LoadingProgressModifier::ConstructImpl,
         LoadingProgressInterfaceModifier::SetLoadingProgressOptionsImpl,
-        LoadingProgressAttributeModifier::ColorImpl,
-        LoadingProgressAttributeModifier::EnableLoadingImpl,
-        LoadingProgressAttributeModifier::ContentModifierImpl,
+        LoadingProgressAttributeModifier::SetColorImpl,
+        LoadingProgressAttributeModifier::SetEnableLoadingImpl,
+        LoadingProgressAttributeModifier::SetContentModifierImpl,
     };
     return &ArkUILoadingProgressModifierImpl;
 }

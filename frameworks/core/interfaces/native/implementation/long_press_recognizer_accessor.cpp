@@ -15,19 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "long_press_recognizer_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LongPressRecognizerAccessor {
 void DestroyPeerImpl(Ark_LongPressRecognizer peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<LongPressRecognizerPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_LongPressRecognizer CtorImpl()
+Ark_LongPressRecognizer ConstructImpl()
 {
-    return PeerUtils::CreatePeer<LongPressRecognizerPeer>();
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -35,22 +36,18 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Boolean IsRepeatImpl(Ark_LongPressRecognizer peer)
 {
-    auto errorValue = Converter::ArkValue<Ark_Boolean>(DEFAULT_REPEAT);
-    CHECK_NULL_RETURN(peer, errorValue);
-    return Converter::ArkValue<Ark_Boolean>(peer->GetRepeat());
+    return {};
 }
 Ark_Number GetDurationImpl(Ark_LongPressRecognizer peer)
 {
-    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_DURATION);
-    CHECK_NULL_RETURN(peer, errorValue);
-    return Converter::ArkValue<Ark_Number>(peer->GetDuration());
+    return {};
 }
 } // LongPressRecognizerAccessor
 const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor()
 {
     static const GENERATED_ArkUILongPressRecognizerAccessor LongPressRecognizerAccessorImpl {
         LongPressRecognizerAccessor::DestroyPeerImpl,
-        LongPressRecognizerAccessor::CtorImpl,
+        LongPressRecognizerAccessor::ConstructImpl,
         LongPressRecognizerAccessor::GetFinalizerImpl,
         LongPressRecognizerAccessor::IsRepeatImpl,
         LongPressRecognizerAccessor::GetDurationImpl,
@@ -58,4 +55,7 @@ const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor
     return &LongPressRecognizerAccessorImpl;
 }
 
+struct LongPressRecognizerPeer {
+    virtual ~LongPressRecognizerPeer() = default;
+};
 }

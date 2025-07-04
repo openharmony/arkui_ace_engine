@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SpringPropAccessor {
 void DestroyPeerImpl(Ark_SpringProp peer)
 {
+    auto peerImpl = reinterpret_cast<SpringPropPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_SpringProp CtorImpl(const Ark_Number* mass,
-                        const Ark_Number* stiffness,
-                        const Ark_Number* damping)
+Ark_SpringProp ConstructImpl(const Ark_Number* mass,
+                             const Ark_Number* stiffness,
+                             const Ark_Number* damping)
 {
     return {};
 }
@@ -37,10 +41,13 @@ const GENERATED_ArkUISpringPropAccessor* GetSpringPropAccessor()
 {
     static const GENERATED_ArkUISpringPropAccessor SpringPropAccessorImpl {
         SpringPropAccessor::DestroyPeerImpl,
-        SpringPropAccessor::CtorImpl,
+        SpringPropAccessor::ConstructImpl,
         SpringPropAccessor::GetFinalizerImpl,
     };
     return &SpringPropAccessorImpl;
 }
 
+struct SpringPropPeer {
+    virtual ~SpringPropPeer() = default;
+};
 }

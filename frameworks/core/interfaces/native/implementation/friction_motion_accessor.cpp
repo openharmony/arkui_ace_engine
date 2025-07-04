@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FrictionMotionAccessor {
 void DestroyPeerImpl(Ark_FrictionMotion peer)
 {
+    auto peerImpl = reinterpret_cast<FrictionMotionPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_FrictionMotion CtorImpl(const Ark_Number* friction,
-                            const Ark_Number* position,
-                            const Ark_Number* velocity)
+Ark_FrictionMotion ConstructImpl(const Ark_Number* friction,
+                                 const Ark_Number* position,
+                                 const Ark_Number* velocity)
 {
     return {};
 }
@@ -37,10 +41,13 @@ const GENERATED_ArkUIFrictionMotionAccessor* GetFrictionMotionAccessor()
 {
     static const GENERATED_ArkUIFrictionMotionAccessor FrictionMotionAccessorImpl {
         FrictionMotionAccessor::DestroyPeerImpl,
-        FrictionMotionAccessor::CtorImpl,
+        FrictionMotionAccessor::ConstructImpl,
         FrictionMotionAccessor::GetFinalizerImpl,
     };
     return &FrictionMotionAccessorImpl;
 }
 
+struct FrictionMotionPeer {
+    virtual ~FrictionMotionPeer() = default;
+};
 }

@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -22,16 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawModifierAccessor {
 void DestroyPeerImpl(Ark_DrawModifier peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->frameNode = nullptr;
-    peer->drawModifier = nullptr;
-    delete peer;
+    auto peerImpl = reinterpret_cast<DrawModifierPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_DrawModifier CtorImpl()
+Ark_DrawModifier ConstructImpl()
 {
-    auto peer = new DrawModifierPeer();
-    peer->drawModifier = AceType::MakeRefPtr<DrawModifier>();
-    return peer;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,23 +36,13 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void InvalidateImpl(Ark_DrawModifier peer)
 {
-    CHECK_NULL_VOID(peer);
-    auto frameNode = peer->frameNode.Upgrade();
-    if (frameNode) {
-        const auto& extensionHandler = frameNode->GetExtensionHandler();
-        if (extensionHandler) {
-            extensionHandler->InvalidateRender();
-        } else {
-            frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
-        }
-    }
 }
 Callback_DrawContext_Void GetDrawBehind_callbackImpl(Ark_DrawModifier peer)
 {
     return {};
 }
 void SetDrawBehind_callbackImpl(Ark_DrawModifier peer,
-                                const Callback_DrawContext_Void *drawBehind_callback)
+                                const Callback_DrawContext_Void* drawBehind_callback)
 {
 }
 Callback_DrawContext_Void GetDrawContent_callbackImpl(Ark_DrawModifier peer)
@@ -63,7 +50,7 @@ Callback_DrawContext_Void GetDrawContent_callbackImpl(Ark_DrawModifier peer)
     return {};
 }
 void SetDrawContent_callbackImpl(Ark_DrawModifier peer,
-                                 const Callback_DrawContext_Void *drawContent_callbackImpl)
+                                 const Callback_DrawContext_Void* drawContent_callback)
 {
 }
 Callback_DrawContext_Void GetDrawFront_callbackImpl(Ark_DrawModifier peer)
@@ -71,7 +58,7 @@ Callback_DrawContext_Void GetDrawFront_callbackImpl(Ark_DrawModifier peer)
     return {};
 }
 void SetDrawFront_callbackImpl(Ark_DrawModifier peer,
-                               const Callback_DrawContext_Void *drawFront_callbackImpl)
+                               const Callback_DrawContext_Void* drawFront_callback)
 {
 }
 } // DrawModifierAccessor
@@ -79,7 +66,7 @@ const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()
 {
     static const GENERATED_ArkUIDrawModifierAccessor DrawModifierAccessorImpl {
         DrawModifierAccessor::DestroyPeerImpl,
-        DrawModifierAccessor::CtorImpl,
+        DrawModifierAccessor::ConstructImpl,
         DrawModifierAccessor::GetFinalizerImpl,
         DrawModifierAccessor::InvalidateImpl,
         DrawModifierAccessor::GetDrawBehind_callbackImpl,
@@ -92,4 +79,7 @@ const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()
     return &DrawModifierAccessorImpl;
 }
 
+struct DrawModifierPeer {
+    virtual ~DrawModifierPeer() = default;
+};
 }

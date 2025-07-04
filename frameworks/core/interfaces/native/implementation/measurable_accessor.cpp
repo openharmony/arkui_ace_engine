@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MeasurableAccessor {
 void DestroyPeerImpl(Ark_Measurable peer)
 {
+    auto peerImpl = reinterpret_cast<MeasurablePeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_Measurable CtorImpl()
+Ark_Measurable ConstructImpl()
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -52,7 +56,7 @@ Opt_Number GetUniqueIdImpl(Ark_Measurable peer)
     return {};
 }
 void SetUniqueIdImpl(Ark_Measurable peer,
-                     const Ark_Number* uniqueId)
+                     const Opt_Number* uniqueId)
 {
 }
 } // MeasurableAccessor
@@ -60,7 +64,7 @@ const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor()
 {
     static const GENERATED_ArkUIMeasurableAccessor MeasurableAccessorImpl {
         MeasurableAccessor::DestroyPeerImpl,
-        MeasurableAccessor::CtorImpl,
+        MeasurableAccessor::ConstructImpl,
         MeasurableAccessor::GetFinalizerImpl,
         MeasurableAccessor::MeasureImpl,
         MeasurableAccessor::GetMarginImpl,
@@ -72,4 +76,7 @@ const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor()
     return &MeasurableAccessorImpl;
 }
 
+struct MeasurablePeer {
+    virtual ~MeasurablePeer() = default;
+};
 }

@@ -15,22 +15,21 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScaleSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_ScaleSymbolEffect peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    auto peerImpl = reinterpret_cast<ScaleSymbolEffectPeerImpl *>(peer);
+    if (peerImpl) {
+        delete peerImpl;
+    }
 }
-Ark_ScaleSymbolEffect CtorImpl(const Opt_EffectScope* scope,
-                               const Opt_EffectDirection* direction)
+Ark_ScaleSymbolEffect ConstructImpl(const Opt_EffectScope* scope,
+                                    const Opt_EffectDirection* direction)
 {
-    auto optScope = Converter::OptConvertPtr<OHOS::Ace::ScopeType>(scope);
-    auto optDirection = Converter::OptConvertPtr<OHOS::Ace::CommonSubType>(direction);
-    return PeerUtils::CreatePeer<ScaleSymbolEffectPeer>(optScope, optDirection);
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -38,34 +37,26 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Opt_EffectScope GetScopeImpl(Ark_ScaleSymbolEffect peer)
 {
-    auto invalid = Converter::ArkValue<Opt_EffectScope>();
-    CHECK_NULL_RETURN(peer, invalid);
-    return Converter::ArkValue<Opt_EffectScope>(peer->scope);
+    return {};
 }
 void SetScopeImpl(Ark_ScaleSymbolEffect peer,
                   const Opt_EffectScope* scope)
 {
-    CHECK_NULL_VOID(peer);
-    peer->scope = Converter::OptConvertPtr<OHOS::Ace::ScopeType>(scope);
 }
 Opt_EffectDirection GetDirectionImpl(Ark_ScaleSymbolEffect peer)
 {
-    auto invalid = Converter::ArkValue<Opt_EffectDirection>();
-    CHECK_NULL_RETURN(peer, invalid);
-    return Converter::ArkValue<Opt_EffectDirection>(peer->direction);
+    return {};
 }
 void SetDirectionImpl(Ark_ScaleSymbolEffect peer,
                       const Opt_EffectDirection* direction)
 {
-    CHECK_NULL_VOID(peer);
-    peer->direction = Converter::OptConvertPtr<OHOS::Ace::CommonSubType>(direction);
 }
 } // ScaleSymbolEffectAccessor
 const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor()
 {
     static const GENERATED_ArkUIScaleSymbolEffectAccessor ScaleSymbolEffectAccessorImpl {
         ScaleSymbolEffectAccessor::DestroyPeerImpl,
-        ScaleSymbolEffectAccessor::CtorImpl,
+        ScaleSymbolEffectAccessor::ConstructImpl,
         ScaleSymbolEffectAccessor::GetFinalizerImpl,
         ScaleSymbolEffectAccessor::GetScopeImpl,
         ScaleSymbolEffectAccessor::SetScopeImpl,
@@ -74,4 +65,8 @@ const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor()
     };
     return &ScaleSymbolEffectAccessorImpl;
 }
+
+struct ScaleSymbolEffectPeer {
+    virtual ~ScaleSymbolEffectPeer() = default;
+};
 }
