@@ -32,6 +32,9 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string APP_NAME_MAP = "app.name";
+const std::string CALENDAR_ABILITY_NAME = "AgendaPreviewUIExtensionAbility";
+const std::string UIEXTENSION_PARAM = "ability.want.params.uiExtensionType";
+const std::string UIEXTENSION_PARAM_VALUE = "sys/commonUI";
 constexpr Dimension PADDING_SIZE = 12.0_vp;
 } // namespace
 class PreviewMenuControllerTest : public testing::Test {
@@ -232,11 +235,11 @@ HWTEST_F(PreviewMenuControllerTest, CreateContactErrorNodeTest001, TestSize.Leve
 }
 
 /**
- * @tc.name:  GetErrorCallback
+ * @tc.name:  GetErrorCallback001
  * @tc.desc: Test GetErrorCallback creates node with correct properties for different types
  * @tc.type: FUNC
  */
-HWTEST_F(PreviewMenuControllerTest, GetErrorCallbackTest, TestSize.Level1)
+HWTEST_F(PreviewMenuControllerTest, GetErrorCallbackTest001, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto previewNode = FrameNode::GetOrCreateFrameNode(
@@ -250,5 +253,61 @@ HWTEST_F(PreviewMenuControllerTest, GetErrorCallbackTest, TestSize.Level1)
     errorCallback(0, "test_error", "test_message");
     // 验证previewNode挂孩子节点
     EXPECT_FALSE(previewNode->GetChildren().empty());
+}
+
+/**
+ * @tc.name: DateTimeClickCallbackTest001
+ * @tc.desc: Test DATE_TIME click callback triggers ability correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewMenuControllerTest, DateTimeClickCallbackTest001, TestSize.Level1)
+{
+    // 执行测试
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto previewNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto pipeline = previewNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    std::map<std::string, std::string> aiParams = { { "date", "2023-01-01" } };
+    PreviewMenuController::PreviewNodeClickCallback(TextDataDetectType::DATE_TIME, previewNode, aiParams);
+
+    // 触发点击事件
+    auto gestureHub = previewNode->GetOrCreateGestureEventHub();
+    GestureEvent dummyEvent;
+    auto click = gestureHub->GetClickEvent();
+    EXPECT_NE(click, nullptr);
+}
+
+/**
+ * @tc.name: CreateWantConfigDateTimeTest001
+ * @tc.desc: Test CreateWantConfig sets correct parameters for DATE_TIME type
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewMenuControllerTest, CreateWantConfigDateTimeTest001, TestSize.Level1)
+{
+    // 1. 准备测试数据
+    TextDataDetectType type = TextDataDetectType::DATE_TIME;
+    std::string bundleName;
+    std::string abilityName;
+    std::map<std::string, std::string> params;
+    std::map<std::string, std::string> AIparams = { { "date", "2023-01-01" }, { "time", "15:30" } };
+
+    // 2. 执行测试
+    PreviewMenuController::CreateWantConfig(type, bundleName, abilityName, params, AIparams);
+
+    // 3. 验证结果
+    // 验证 abilityName
+    EXPECT_EQ(abilityName, CALENDAR_ABILITY_NAME);
+
+    // 验证基础参数
+    EXPECT_EQ(params[UIEXTENSION_PARAM], UIEXTENSION_PARAM_VALUE);
+
+    // 验证 AIparams 合并
+    EXPECT_EQ(params["date"], "2023-01-01");
+    EXPECT_EQ(params["time"], "15:30");
+
+    // 验证参数总数 = 基础参数 + AIparams
+    EXPECT_EQ(params.size(), 3);
 }
 } // namespace OHOS::Ace::NG
