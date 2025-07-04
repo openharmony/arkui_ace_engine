@@ -2288,6 +2288,15 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
         }
         return false;
     }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    CHECK_NULL_RETURN(delegate_, false);
+    auto manager = pipeline->GetDragDropManager();
+    if (!manager || manager->IsDragging() || manager->IsMSDPDragging()) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop, It's already dragging now, can't start drag task.");
+        delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
+        return false;
+    }
     isDragging_ = true;
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, false);
@@ -2295,7 +2304,6 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     CHECK_NULL_RETURN(eventHub, false);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
-    CHECK_NULL_RETURN(delegate_, false);
     if (curContextMenuResult_ && (!(isNewDragStyle_ || isAILinkMenuShow_) || !previewImageNodeId_.has_value())) {
         TAG_LOGI(AceLogTag::ACE_WEB,
             "preview menu is not displayed, and the app is notified to close the long-press menu");
