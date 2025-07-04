@@ -654,12 +654,13 @@ TEST_F(FreeScrollTest, ScrollBar004)
     EXPECT_EQ(responseLinkResult.size(), 3);
     EXPECT_EQ(responseLinkResult.front(), pattern_->scrollBar2d_->vertical_.GetPanRecognizer());
 
+    constexpr int32_t expectedRecognizerCount = 3; // 2 from scrollBars, 1 from pan recognizer
     localPoint = PointF(1, 398);
     result.clear();
     responseLinkResult.clear();
     actuator->CollectTouchTarget({}, {}, {}, result, localPoint,
         frameNode_, nullptr, responseLinkResult);
-    EXPECT_EQ(responseLinkResult.size(), 3);
+    EXPECT_EQ(responseLinkResult.size(), expectedRecognizerCount);
     EXPECT_EQ(*std::next(responseLinkResult.begin()), pattern_->scrollBar2d_->horizontal_.GetPanRecognizer());
 
     TouchRestrict restrict;
@@ -668,7 +669,7 @@ TEST_F(FreeScrollTest, ScrollBar004)
     responseLinkResult.clear();
     actuator->CollectTouchTarget({}, {}, {}, result, localPoint,
         frameNode_, nullptr, responseLinkResult);
-    EXPECT_EQ(responseLinkResult.size(), 3);
+    EXPECT_EQ(responseLinkResult.size(), expectedRecognizerCount);
     EXPECT_EQ(*std::next(responseLinkResult.begin()), pattern_->scrollBar2d_->horizontal_.GetPanRecognizer());
 }
 } // namespace OHOS::Ace::NG

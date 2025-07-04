@@ -271,8 +271,6 @@ void FreeScrollController::UpdateOffset(const OffsetF& delta)
     }
 }
 
-
-
 namespace {
 Dimension ToVp(float value)
 {
