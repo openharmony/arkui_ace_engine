@@ -41,6 +41,12 @@ export class AnimationExtender {
         AnimationExtender.OpenImplicitAnimation_serialize(param_casted)
         return
     }
+    public static AnimateToImmediatelyImpl(param: AnimateParam, event: (() => void)): void {
+        const param_casted = param as (AnimateParam)
+        const event__casted = event as (() => void)
+        AnimationExtender.OpenImplicitAnimation_serializeImmediately(param_casted, event__casted)
+        return
+    }
     public static CloseImplicitAnimation(): void {
         AnimationExtender.CloseImplicitAnimation_serialize()
         return
@@ -64,6 +70,19 @@ export class AnimationExtender {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeAnimateParam(param)
         ArkUIGeneratedNativeModule._AnimationExtender_OpenImplicitAnimation(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static OpenImplicitAnimation_serializeImmediately(param: AnimateParam, event: (() => void)): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeAnimateParam(param)
+        let callback__type : int32 = RuntimeType.UNDEFINED
+        callback__type = runtimeType(event)
+        thisSerializer.writeInt8(callback__type as int32)
+        if ((RuntimeType.UNDEFINED) != (callback__type)) {
+            const callback__value  = event!
+            thisSerializer.holdAndWriteCallback(callback__value)
+        }
+        ArkUIGeneratedNativeModule._AnimationExtender_OpenImplicitAnimationImmediately(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private static CloseImplicitAnimation_serialize(): void {

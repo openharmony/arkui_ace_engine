@@ -11779,9 +11779,6 @@ export function dollar_rawfile(value: string): Resource {
 export function animateTo(value: AnimateParam, event: (() => void)): void {
     _animateTo(value, event)
 }
-export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
-    GlobalScope.animateToImmediately(value, event)
-}
 export function vp2px(value: number): number {
     return GlobalScope.vp2px(value)
 }
