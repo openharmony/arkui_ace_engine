@@ -136,6 +136,7 @@ private:
         const RefPtr<TextPattern>& textPattern, const std::u16string& content);
     bool IsFixIdealSizeAndNoMaxSize(LayoutWrapper* layoutWrapper, bool isWidth);
     LayoutConstraintF CalcContentConstraint(const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
+    std::optional<float> GetCalcLayoutConstraintLength(LayoutWrapper* layoutWrapper, bool isMax, bool isWidth);
     RefPtr<PropertyBool> showSelect_;
     std::optional<LayoutConstraintF> cachedCalcContentConstraint_;
     bool isFixIdealSizeAndNoMaxWidth_ = false;
