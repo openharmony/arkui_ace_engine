@@ -3494,7 +3494,7 @@ HWTEST_F(WebModelTestNg, SetOnProgressChange001, TestSize.Level1)
     ASSERT_NE(webEventHub, nullptr);
     webModelNG.SetOnProgressChange(AccessibilityManager::RawPtr(frameNode),
         [&callbackCalled](const BaseEventInfo* info) { callbackCalled = true; });
-    webEventHub->FirOnProgressChangeEvent(mockEventInfo);
+    webEventHub->FireOnProgressChangeEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
 #endif
 }
