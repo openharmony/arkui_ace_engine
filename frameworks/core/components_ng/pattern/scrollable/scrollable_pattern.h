@@ -439,6 +439,12 @@ public:
     {
         return canStayOverScroll_;
     }
+    void ChangeAnimateOverScroll()
+    {
+        if (GetScrollSource() == SCROLL_FROM_JUMP) {
+            SetAnimateCanOverScroll(false);
+        }
+    }
     void ChangeCanStayOverScroll()
     {
         if (GetIsOverScroll()) {
