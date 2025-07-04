@@ -470,6 +470,7 @@ TEST_F(FreeScrollTest, Event001)
     model.SetAxis(Axis::FREE);
     static bool scrollBegun = false;
     model.SetOnScrollStart([]() { scrollBegun = true; });
+    static int32_t willScrollCalled = 0;
     model.SetOnWillScroll(
         [](const Dimension& xOffset, const Dimension& yOffset, ScrollState state, ScrollSource source) {
             EXPECT_EQ(xOffset.Unit(), DimensionUnit::VP);
@@ -478,6 +479,7 @@ TEST_F(FreeScrollTest, Event001)
             EXPECT_EQ(yOffset.Value(), DELTA_Y);
             EXPECT_EQ(state, ScrollState::SCROLL);
             EXPECT_EQ(source, ScrollSource::DRAG);
+            ++willScrollCalled;
             return TwoDimensionScrollResult { .xOffset = Dimension(DELTA_X), .yOffset = 0.0_vp };
         });
     static int32_t didScroll = 0;
@@ -496,8 +498,15 @@ TEST_F(FreeScrollTest, Event001)
     EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(didScroll, 1);
+    EXPECT_EQ(willScrollCalled, 1);
 
-    MockAnimationManager::GetInstance().Reset();
+    PanEnd({ -DELTA_X, -DELTA_Y }, { -VELOCITY_X, -VELOCITY_Y });
+    EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(willScrollCalled, 2);
+    FlushUITasks(frameNode_);
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+    EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::IDLE);
 }
 
 /**

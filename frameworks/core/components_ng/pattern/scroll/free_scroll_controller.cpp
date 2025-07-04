@@ -20,12 +20,18 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
+void FreeScrollController::HandleAnimationUpdate(const OffsetF& currentValue)
+{
+    FireOnWillScroll(currentValue - prevOffset_, ScrollState::FLING, ScrollSource::FLING);
+    pattern_.MarkDirty();
+}
+
 FreeScrollController::FreeScrollController(ScrollPattern& pattern) : pattern_(pattern)
 {
-    offset_ = MakeRefPtr<NodeAnimatablePropertyOffsetF>(OffsetF {}, [weak = WeakClaim(this)](const OffsetF& _) {
+    offset_ = MakeRefPtr<NodeAnimatablePropertyOffsetF>(OffsetF {}, [weak = WeakClaim(this)](const OffsetF& newOffset) {
         auto controller = weak.Upgrade();
         if (controller) {
-            controller->pattern_.MarkDirty();
+            controller->HandleAnimationUpdate(newOffset);
         }
     });
     auto* renderCtx = pattern_.GetRenderContext();
@@ -130,7 +136,7 @@ void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
     // apply friction if overScrolling
     OffsetF deltaF { NearZero(gammaX) ? dx : dx * pattern_.CalculateFriction(gammaX),
         NearZero(gammaY) ? dy : dy * pattern_.CalculateFriction(gammaY) };
-    deltaF = pattern_.FreeModeFireOnWillScroll(deltaF, ScrollState::SCROLL, ScrollSource::DRAG);
+    deltaF = FireOnWillScroll(deltaF, ScrollState::SCROLL, ScrollSource::DRAG);
     offset_->Set(offset_->Get() + deltaF);
     pattern_.MarkDirty();
 }
@@ -232,11 +238,15 @@ OffsetF FreeScrollController::GetOffset() const
 void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset, const SizeF& scrollableArea)
 {
     if (offset_ && offset_->Get() != adjustedOffset) {
-        offset_->Set(adjustedOffset);
+        AnimationUtils::ExecuteWithoutAnimation([weak = WeakPtr(offset_), adjustedOffset]() {
+            auto offset = weak.Upgrade();
+            CHECK_NULL_VOID(offset);
+            offset->Set(adjustedOffset);
+        });
     }
     if (adjustedOffset != prevOffset_) {
         // Fire onDidScroll only if the offset has changed.
-        pattern_.FreeModeFireOnDidScroll(adjustedOffset - prevOffset_, state_);
+        FireOnDidScroll(adjustedOffset - prevOffset_, state_);
         prevOffset_ = adjustedOffset;
     }
     auto props = pattern_.GetLayoutProperty<ScrollLayoutProperty>();
@@ -259,5 +269,43 @@ void FreeScrollController::UpdateOffset(const OffsetF& delta)
     if (newOffset != offset_->Get()) {
         pattern_.MarkDirty();
     }
+}
+
+
+
+namespace {
+Dimension ToVp(float value)
+{
+    return Dimension { Dimension(value).ConvertToVp(), DimensionUnit::VP };
+}
+} // namespace
+
+OffsetF FreeScrollController::FireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const
+{
+    auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_RETURN(eventHub, delta);
+    auto onScroll = eventHub->GetOnWillScrollEvent();
+    if (!onScroll) {
+        onScroll = eventHub->GetJSFrameNodeOnScrollWillScroll();
+    }
+    CHECK_NULL_RETURN(onScroll, delta);
+
+    // delta sign is reversed in user space
+    const auto res = onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state, source);
+    auto* context = pattern_.GetContext();
+    CHECK_NULL_RETURN(context, delta);
+    return { -context->NormalizeToPx(res.xOffset), -context->NormalizeToPx(res.yOffset) };
+}
+
+void FreeScrollController::FireOnDidScroll(const OffsetF& delta, ScrollState state) const
+{
+    auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onScroll = eventHub->GetOnDidScrollEvent();
+    if (!onScroll) {
+        onScroll = eventHub->GetJSFrameNodeOnScrollDidScroll();
+    }
+    CHECK_NULL_VOID(onScroll);
+    onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state);
 }
 } // namespace OHOS::Ace::NG

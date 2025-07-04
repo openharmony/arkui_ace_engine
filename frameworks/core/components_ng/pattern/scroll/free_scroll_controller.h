@@ -67,13 +67,20 @@ private:
      * @brief Start the scroll animation if possible with the given velocity and offset_.
      */
     void TryScrollAnimation(const OffsetF& velocity);
-
     void StopScrollAnimation();
+    void HandleAnimationUpdate(const OffsetF& currentValue);
 
     /**
      * @brief clamp position to be within the scrollable area.
      */
     void ClampPosition(OffsetF& finalPos) const;
+
+    /**
+     * @brief triggers onWillScroll user callback
+     * @return user-modified delta
+     */
+    OffsetF FireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const;
+    void FireOnDidScroll(const OffsetF& delta, ScrollState state) const;
 
     ScrollPattern& pattern_;
     RefPtr<NodeAnimatablePropertyOffsetF> offset_;

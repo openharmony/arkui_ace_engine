@@ -453,14 +453,7 @@ public:
     RefPtr<NGGestureRecognizer> GetOverrideRecognizer() const;
 
     Offset GetFreeScrollOffset() const final;
-    void FreeScrollBy(const OffsetF& delta) override;
-
-    /**
-     * @brief triggers onWillScroll user callback
-     * @return user-modified delta
-     */
-    OffsetF FreeModeFireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const;
-    void FreeModeFireOnDidScroll(const OffsetF& delta, ScrollState state) const;
+    void FreeScrollBy(const OffsetF& delta) final;
 
 private:
     RefPtr<FreeScrollController> freeScroll_;
