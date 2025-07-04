@@ -29,7 +29,7 @@ constexpr int32_t POS_2 = 2;
 constexpr int NUM_3 = 3;
 const char DEFAULT_DELIMITER = '|';
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
-std::string g_strValue;
+thread_local std::string g_strValue;
 
 void SetTimepickerSelected(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute)
 {
