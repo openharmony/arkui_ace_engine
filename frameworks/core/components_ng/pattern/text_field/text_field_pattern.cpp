@@ -11891,12 +11891,16 @@ void TextFieldPattern::UpdateMarginResource()
 
 Offset TextFieldPattern::GetCaretClickLocalOffset(const Offset& offset)
 {
+    if (!IsTextArea()) {
+        return offset;
+    }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, offset);
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     auto localOffset = offset;
     if (GreatNotEqual(localOffset.GetY(), textRect_.Bottom())) {
-        localOffset.SetX(isRTL ? textRect_.Left() : textRect_.Right());
+        localOffset.SetX(isRTL ? contentRect_.Left() : contentRect_.Right());
+        localOffset.SetY(textRect_.Bottom() - PreferredLineHeight() / 2.0f);
     } else if (GreatNotEqual(localOffset.GetY(), contentRect_.Bottom())) {
         localOffset.SetX(isRTL ? contentRect_.Left() : contentRect_.Right());
         localOffset.SetY(contentRect_.Bottom() - PreferredLineHeight() / 2.0f);
