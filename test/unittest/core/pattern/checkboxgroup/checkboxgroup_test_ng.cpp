@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,6 +97,14 @@ constexpr Dimension SHADOW_WIDTH_FORUPDATE = Dimension(6.0);
 constexpr float CHECKBOX_GROUP_LENGTH_ZERO = 0.0f;
 constexpr Dimension PADDING_SIZE = Dimension(2.0);
 const int32_t VERSION_TWELVE = 12;
+const SizeF TEST_SIZE_0 = SizeF(0.0f, 0.0f);
+const SizeF TEST_SIZE_100_200 = SizeF(100.0f, 200.0f);
+const SizeF TEST_SIZE_100 = SizeF(100.0f, 100.0f);
+const SizeF TEST_SIZE_200 = SizeF(200.0f, 200.0f);
+const SizeF TEST_SIZE_50 = SizeF(50.0f, 50.0f);
+const SizeF TEST_SIZE_60 = SizeF(60.0f, 60.0f);
+constexpr float TEST_WIDTH_50 = 50.0f;
+constexpr float TEST_HEIGHT_60 = 60.0f;
 } // namespace
 
 class CheckBoxGroupTestNG : public testing::Test {
@@ -2343,5 +2351,112 @@ HWTEST_F(CheckBoxGroupTestNG, ResetComponentColor, TestSize.Level1)
     checkBoxGroupModelNG.ResetComponentColor(frameNode, CheckBoxGroupColorType::UN_SELECTED_COLOR);
     ret = paintProperty->GetCheckBoxGroupUnSelectedColor();
     EXPECT_EQ(ret.value_or(Color::BLACK), theme->GetInactiveColor());
+}
+
+/**
+ * @tc.name: CheckBoxGroupMeasureContentTest001
+ * @tc.desc: Test CheckBoxGroup MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupMeasureContentTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBoxGroupLayoutAlgorithm.
+     * @tc.expected: Create successfully.
+     */
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+    auto checkBoxGroupLayoutAlgorithm = AceType::MakeRefPtr<CheckBoxGroupLayoutAlgorithm>();
+    ASSERT_NE(checkBoxGroupLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: ret is equal to TEST_SIZE_100.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto ret = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_100);
+}
+
+/**
+ * @tc.name: CheckBoxGroupLayoutPolicyIsMatchParentTest001
+ * @tc.desc: Test CheckBoxGroup LayoutPolicyIsMatchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupLayoutPolicyIsMatchParentTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBoxGroupLayoutAlgorithm.
+     * @tc.expected: step1. Create successfully.
+     */
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+    auto checkBoxGroupLayoutAlgorithm = AceType::MakeRefPtr<CheckBoxGroupLayoutAlgorithm>();
+    ASSERT_NE(checkBoxGroupLayoutAlgorithm, nullptr);
+    auto layoutPolicy = checkBoxGroupLayoutAlgorithm->GetLayoutPolicy(&layoutWrapper);
+
+    /**
+     * @tc.steps: step2. call LayoutPolicyIsMatchParent function.
+     * @tc.expected: step2. ret is equal to TEST_SIZE_0.
+     */
+    LayoutConstraintF contentConstraint;
+    auto ret = checkBoxGroupLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_0);
+
+    /**
+     * @tc.steps: step3. set layoutPolicy->widthLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step3. ret is equal to TEST_SIZE_100.
+     */
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_100_200);
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = checkBoxGroupLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_100);
+
+    /**
+     * @tc.steps: step4. set selfIdealSize.height_ to TEST_HEIGHT_60.
+     * @tc.expected: step4. ret is equal to TEST_SIZE_60.
+     */
+    contentConstraint.selfIdealSize.SetHeight(TEST_HEIGHT_60);
+    ret = checkBoxGroupLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_60);
+
+    /**
+     * @tc.steps: step5. set layoutPolicy->heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step5. ret is equal to TEST_SIZE_200.
+     */
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicy->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = checkBoxGroupLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step6. set selfIdealSize.width_ to TEST_WIDTH_50.
+     * @tc.expected: step6. ret is equal to TEST_SIZE_50.
+     */
+    contentConstraint.selfIdealSize.SetWidth(TEST_WIDTH_50);
+    ret = checkBoxGroupLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_50);
+
+    /**
+     * @tc.steps: step7. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step7. ret is equal to TEST_SIZE_100.
+     */
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicy->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = checkBoxGroupLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint,
+        layoutPolicy, &layoutWrapper);
+    EXPECT_EQ(ret, TEST_SIZE_100);
 }
 } // namespace OHOS::Ace::NG
