@@ -27,6 +27,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr int32_t MAX_FRAME_NODE_DEPTH = 2;
+constexpr int32_t MIN_RECOGNIZER_GROUP_LOOP_SIZE = 3;
 constexpr const char* HIT_TEST_MODE[] = {
     "HitTestMode.Default",
     "HitTestMode.Block",
@@ -351,6 +352,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
     auto userRecognizers = gestureHierarchy_;
     auto userModifierRecognizers = modifierGestureHierarchy_;
     userRecognizers.splice(userRecognizers.end(), userModifierRecognizers);
+    bool overMinRecognizerGroupLoopSize = userRecognizers.size() >= MIN_RECOGNIZER_GROUP_LOOP_SIZE;
     for (auto const& recognizer : userRecognizers) {
         if (!recognizer) {
             continue;
@@ -379,12 +381,12 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         auto checkCurrentRecognizer = false;
         auto parentRecognizer = recognizer->GetGestureGroup().Upgrade();
         if (priority == GesturePriority::Parallel) {
-            checkCurrentRecognizer = (recognizer == userRecognizers.front()) &&
+            checkCurrentRecognizer = overMinRecognizerGroupLoopSize && (recognizer == userRecognizers.front()) &&
                 CheckLastInnerRecognizerCollected(priority, parallelIndex);
             ProcessParallelPriorityGesture(
                 offset, touchId, targetComponent, host, current, recognizers, parallelIndex, checkCurrentRecognizer);
         } else {
-            checkCurrentRecognizer = (recognizer == userRecognizers.front()) &&
+            checkCurrentRecognizer = overMinRecognizerGroupLoopSize && (recognizer == userRecognizers.front()) &&
                 CheckLastInnerRecognizerCollected(priority, exclusiveIndex);
             ProcessExternalExclusiveRecognizer(offset, touchId, targetComponent,
                 host, priority, current, recognizers, exclusiveIndex, checkCurrentRecognizer);
