@@ -26,7 +26,7 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_12 = 12;
 constexpr int DATE_SIZE = 3;
 const bool DEFAULT_MARK_TODAY = false;
-std::string g_strValue;
+thread_local std::string g_strValue;
 constexpr int TEXT_STYLE_FONT_INFO_SIZE = 2;
 constexpr int TEXT_STYLE_FONT_SIZE_INDEX = 0;
 constexpr int TEXT_STYLE_FONT_WEIGHT_INDEX = 1;

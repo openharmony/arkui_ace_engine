@@ -28,7 +28,7 @@ constexpr int YEAR_1900 = 1900;
 constexpr int YEAR_1970 = 1970;
 const char DEFAULT_DELIMITER = '|';
 const int32_t ERROR_INT_CODE = -1;
-std::string g_strValue;
+thread_local std::string g_strValue;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 
 ArkUI_Bool GetPickerThemeByFrameNode(FrameNode* frameNode, RefPtr<PickerTheme>& theme)
