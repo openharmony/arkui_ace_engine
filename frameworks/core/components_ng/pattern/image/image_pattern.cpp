@@ -19,6 +19,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/network/download_manager.h"
+#include "base/utils/multi_thread.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/udmf/udmf_client.h"
@@ -1386,6 +1387,7 @@ void ImagePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     auto renderCtx = host->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
     auto pipeline = host->GetContext();
@@ -1413,6 +1415,7 @@ void ImagePattern::OnAttachToFrameNode()
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
     CloseSelectOverlay();
 
     auto id = frameNode->GetId();
@@ -1422,8 +1425,18 @@ void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveNodesToNotifyMemoryLevel(id);
 }
 
+void ImagePattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+
 void ImagePattern::OnDetachFromMainTree()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     if (isNeedReset_) {
         ResetImageAndAlt();
         isNeedReset_ = false;
