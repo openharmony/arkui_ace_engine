@@ -359,6 +359,7 @@ void impl_Free(KNativePointer data) {
 KOALA_INTEROP_DIRECT_V1(Free, KNativePointer)
 
 KInt impl_ReadByte(KNativePointer data, KLong index, KLong length) {
+    if (index >= length) INTEROP_FATAL("impl_ReadByte: index %lld is equal or greater than length %lld", (long long)index, (long long) length);
     uint8_t* ptr = reinterpret_cast<uint8_t*>(data);
     return ptr[index];
 }

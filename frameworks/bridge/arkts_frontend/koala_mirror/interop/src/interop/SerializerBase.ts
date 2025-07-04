@@ -106,25 +106,6 @@ export class SerializerBase {
     private buffer: ArrayBuffer
     private view: DataView
 
-    private static pool: SerializerBase[] = [
-        new SerializerBase(),
-        new SerializerBase(),
-        new SerializerBase(),
-        new SerializerBase(),
-        new SerializerBase(),
-        new SerializerBase(),
-        new SerializerBase(),
-        new SerializerBase(),
-    ]
-    private static poolTop = 0
-
-    static hold(): SerializerBase {
-        if (this.poolTop === this.pool.length) {
-            throw new Error("Pool empty! Release one of taken serializers")
-        }
-        return SerializerBase.pool[this.poolTop++]
-    }
-
     private static customSerializers: CustomSerializer | undefined = undefined
     static registerCustomSerializer(serializer: CustomSerializer) {
         if (SerializerBase.customSerializers == undefined) {
@@ -142,10 +123,6 @@ export class SerializerBase {
     public release() {
         this.releaseResources()
         this.position = 0
-        if (this !== SerializerBase.pool[SerializerBase.poolTop - 1]) {
-            throw new Error("Serializers should be release in LIFO order")
-        }
-        SerializerBase.poolTop -= 1;
     }
     asBuffer(): KSerializerBuffer {
         return new Uint8Array(this.buffer)

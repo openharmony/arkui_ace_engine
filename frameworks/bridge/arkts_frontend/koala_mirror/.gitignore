@@ -28,6 +28,7 @@ ui2abc/ui-plugins/lib
 incremetal-cj/runtime/ck
 .rollup.cache
 tsconfig.tsbuildinfo
+*.meta.json
 out
 sdk
 koala_build.log

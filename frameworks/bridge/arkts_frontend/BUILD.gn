@@ -16,8 +16,32 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import("./link_abc.gni")
 
 group("arkts_frontend_native_package") {
-#  deps = [ "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ace_ani_native_package" ]
+  deps = [ "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ace_ani_native_package" ]
 }
+group("arkoala_ui2abc") {
+  deps = [ "koala_projects/arkoala-arkts:arkoala" ]
+}
+
+link_abc_files("arkoala_abc") {
+  targets = [
+    "koala_projects/incremental/common:common_abc",
+    "koala_projects/incremental/compat:compat_abc",
+    "koala_projects/incremental/runtime:runtime_abc",
+    "koala_projects/interop:interop-arkts_abc",
+    "koala_projects/arkoala-arkts:components_abc"
+  ]
+
+  output_name = "arkoala"
+}
+
+ohos_prebuilt_etc("arkoala_abc_prebuild") {
+  source = "$target_out_dir/arkoala.abc"
+  deps = [ ":arkoala_abc" ]
+  module_install_dir = "framework"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 template("arkts_frontend") {
   forward_variables_from(invoker, "*")
 
@@ -26,16 +50,8 @@ template("arkts_frontend") {
     part_name = ace_engine_part
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
-    if (build_ohos_sdk) {
-        deps = [
-          "koala_mirror/ui2abc:ui2abc",
-        ]
-    } else {
-        deps = [
-          "koala_mirror/ui2abc:ui2abc_panda_sdk",
-          "koala_mirror/ui2abc:ui2abc",
-          "koala_mirror/arkoala-arkts:arkoala"
-        ]
+    if (!build_ohos_sdk) {
+      deps = [ ":ArkoalaNative_ark" ]
     }
 
     sources = [
@@ -75,13 +91,181 @@ foreach(item, ace_platforms) {
 
 config("arkoala_native_config") {
   include_dirs = [
-    "koala_mirror/arkoala-arkts/framework/native/src",
-    "koala_mirror/arkoala-arkts/framework/native/src/generated",
-    "koala_mirror/interop/src",
-    "koala_mirror/interop/src/cpp",
-    "koala_mirror/interop/src/cpp/ets",
-    "koala_mirror/interop/src/cpp/types",
-    "koala_mirror/interop/src/cpp/ohos",
+    "koala_projects/arkoala/framework/native/src",
+    "koala_projects/arkoala/framework/native/src/generated",
+    "koala_projects/interop/src",
+    "koala_projects/interop/src/cpp",
+    "koala_projects/interop/src/cpp/ets",
+    "koala_projects/interop/src/cpp/types",
+    "koala_projects/interop/src/cpp/ohos",
   ]
 }
 
+ohos_shared_library("ArkoalaNative_ark") {
+  defines = [
+    "KOALA_OHOS",
+    "__MUSL__",
+    "KOALA_ETS_NAPI",
+    "KOALA_USE_PANDA_VM",
+  ]
+
+  sources = [
+    "koala_projects/arkoala/framework/native/src/events.cc",
+    "koala_projects/arkoala/framework/native/src/generated/bridge_custom.cc",
+    "koala_projects/arkoala/framework/native/src/generated/bridge_generated.cc",
+    "koala_projects/arkoala/framework/native/src/generated/callback_deserialize_call.cc",
+    "koala_projects/arkoala/framework/native/src/generated/callback_managed_caller.cc",
+    "koala_projects/arkoala/framework/native/src/generated/library.cc",
+    "koala_projects/arkoala/framework/native/src/vsync.cc",
+  ]
+
+  # interop source
+  sources += [
+    "koala_projects/interop/src/cpp/callback-resource.cc",
+    "koala_projects/interop/src/cpp/common-interop.cc",
+    "koala_projects/interop/src/cpp/ets/convertors-ets.cc",
+    "koala_projects/interop/src/cpp/interop-logging.cc",
+    "koala_projects/interop/src/cpp/types/signatures.cc",
+  ]
+
+  deps = [
+    "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani",
+  ]
+
+  configs = [ ":arkoala_native_config" ]
+
+  external_deps = [
+    "hilog:hilog_ndk",
+    "hilog:libhilog",
+  ]
+
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+if (use_linux) {
+  loader_include_dirs = [
+    "koala_projects/arkoala/framework/native/src",
+    "koala_projects/arkoala/framework/native/src/generated",
+    "koala_projects/arkoala/node_modules/node-api-headers/include",
+    "koala_projects/interop/src",
+    "koala_projects/interop/src/cpp",
+    "koala_projects/interop/src/cpp/ets",
+    "koala_projects/interop/src/cpp/types",
+    "koala_projects/interop/src/cpp/ohos",
+    "koala_projects/interop/src/cpp/napi",
+  ]
+
+  ohos_shared_library("ArkoalaLoader") {
+    include_dirs = loader_include_dirs
+
+    defines = [
+      "INTEROP_LIBRARY_NAME=ArkoalaNative_linux_x64",
+      "KOALA_LINUX",
+      "KOALA_NAPI",
+      "KOALA_USE_NODE_VM",
+      "USE_DUMMY_IMPL",
+      "LIBACE_LINUX_X64",
+    ]
+
+    sources = [
+      "koala_projects/arkoala/framework/native/src/generated/bridge_custom.cc",
+      "koala_projects/arkoala/framework/native/src/generated/library.cc",
+      "koala_projects/arkoala/framework/native/src/vsync.cc",
+    ]
+
+    # interop source
+    sources += [
+      "koala_projects/interop/src/cpp/common-interop.cc",
+      "koala_projects/interop/src/cpp/interop-logging.cc",
+      "koala_projects/interop/src/cpp/napi/convertors-napi.cc",
+    ]
+
+    external_deps = [
+      "hilog:hilog_ndk",
+      "napi:ace_napi",
+    ]
+
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+  }
+
+  ohos_shared_library("vmloader") {
+    include_dirs = loader_include_dirs + [ "koala_projects/interop/src/cpp/ani" ]
+
+    defines = [
+      "KOALA_LINUX",
+      "KOALA_ANI",
+      "KOALA_ETS_NAPI",
+    ]
+
+    sources = [ "koala_projects/interop/src/cpp/vmloader.cc" ]
+
+    external_deps = [
+      "hilog:hilog_ndk",
+      "napi:ace_napi",
+    ]
+
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+  }
+
+  native_include_dirs = [
+    "koala_projects/arkoala/framework/native/src",
+    "koala_projects/arkoala/framework/native/src/generated",
+    "koala_projects/arkoala/node_modules/node-api-headers/include",
+    "koala_projects/interop/src/cpp",
+    "koala_projects/interop/src/cpp/napi",
+    "koala_projects/interop/src/cpp/types",
+  ]
+
+  native_sources = [
+    "koala_projects/arkoala/framework/native/src/events.cc",
+    "koala_projects/arkoala/framework/native/src/generated/bridge_custom.cc",
+    "koala_projects/arkoala/framework/native/src/generated/bridge_generated.cc",
+    "koala_projects/arkoala/framework/native/src/generated/callback_deserialize_call.cc",
+    "koala_projects/arkoala/framework/native/src/generated/callback_managed_caller.cc",
+    "koala_projects/arkoala/framework/native/src/generated/library.cc",
+    "koala_projects/arkoala/framework/native/src/vsync.cc",
+    "koala_projects/interop/src/cpp/callback-resource.cc",
+    "koala_projects/interop/src/cpp/common-interop.cc",
+    "koala_projects/interop/src/cpp/interop-logging.cc",
+    "koala_projects/interop/src/cpp/types/signatures.cc",
+  ]
+
+  native_defines = [
+    "INTEROP_LIBRARY_NAME=ArkoalaNative_linux_x64",
+    "KOALA_LINUX",
+    "KOALA_USE_PANDA_VM",
+    "KOALA_FOREIGN_NAPI",
+    "LIBACE_LINUX_X64",
+  ]
+
+  ohos_shared_library("ArkoalaNative_ani") {
+    include_dirs = native_include_dirs + [ "koala_projects/interop/src/cpp/ani" ]
+    defines = native_defines + [ "KOALA_ANI" ]
+    sources = native_sources + [ "koala_projects/interop/src/cpp/ani/convertors-ani.cc" ]
+
+    external_deps = [
+      "hilog:hilog_ndk",
+      "napi:ace_napi",
+    ]
+
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+  }
+
+  ohos_shared_library("ArkoalaNative_ets") {
+    include_dirs = native_include_dirs + [ "koala_projects/interop/src/cpp/ets" ]
+    defines = native_defines + [ "KOALA_ETS_NAPI" ]
+    sources = native_sources + [ "koala_projects/interop/src/cpp/ets/convertors-ets.cc" ]
+
+    external_deps = [
+      "hilog:hilog_ndk",
+      "napi:ace_napi",
+    ]
+
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+  }
+}

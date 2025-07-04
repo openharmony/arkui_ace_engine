@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mirror/gn/npm_util.gni")
 
 koala_root = "../.."
 libarkts_path = "."
@@ -65,7 +64,6 @@ shared_library("es2panda_lib") {
 
     deps = [
         "$ui2abc_path:ui2abc_install"
-        "$ui2abc_path:ui2abc_install"
     ]
 
     configs -= [ "//build/config/compiler:compiler" ]
@@ -110,16 +108,8 @@ action("libarkts_install") {
     ]
 }
 
-npm_cmd("libarkts_install") {
-    outputs = [
-        "$target_out_dir/libarkts_install"
-    ]
-    project_path = rebase_path(".")
-    install = true
-    install_path = rebase_path("..")
-}
-
-npm_cmd("es2panda.js") {
+action("es2panda.js") {
+    script = "../../gn/command/npm_util.py"
     outputs = [
         "$target_out_dir/es2panda.js"
     ]
@@ -128,8 +118,11 @@ npm_cmd("es2panda.js") {
         "$ui2abc_path:ui2abc_panda_sdk",
         ":libarkts_install"
     ]
-    project_path = rebase_path(".")
-    run_tasks = [ "compile:koala:interop", "compile:js" ]
+    args = [
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--npm-args", "run", "compile:gn"
+    ]
 }
 
 group("es2panda") {

@@ -259,7 +259,7 @@ struct InteropTypeConverter<KLength> {
     const static ets_class int_class = reinterpret_cast<ets_class>(env->NewGlobalRef(env->FindClass("std/core/Int")));
     const static ets_class string_class = reinterpret_cast<ets_class>(env->NewGlobalRef(env->FindClass("std/core/String")));
     const static ets_class resource_class = reinterpret_cast<ets_class>(
-      env->NewGlobalRef(env->FindClass("arkui/generated/ArkResourceInterfaces/Resource")));
+      env->NewGlobalRef(env->FindClass("@ohos/arkui/generated/resource/Resource")));
 
     if (env->IsInstanceOf(value, double_class)) {
       const static ets_method double_p = env->Getp_method(double_class, "unboxed", ":D");
@@ -1805,8 +1805,7 @@ void getKoalaEtsNapiCallbackDispatcher(ets_class* clazz, ets_method* method);
   getKoalaEtsNapiCallbackDispatcher(&clazz, &method);                                 \
   EtsEnv* etsEnv = reinterpret_cast<EtsEnv*>(vmContext);                              \
   etsEnv->PushLocalFrame(1);                                                          \
-  long long args_casted = reinterpret_cast<long long>(args);                          \
-  etsEnv->CallStaticIntMethod(clazz, method, id, args_casted, length);                \
+  etsEnv->CallStaticIntMethod(clazz, method, id, args, length);                   \
   etsEnv->PopLocalFrame(nullptr);                                                     \
 }
 
@@ -1815,10 +1814,9 @@ void getKoalaEtsNapiCallbackDispatcher(ets_class* clazz, ets_method* method);
   ets_class clazz = nullptr;                                                          \
   ets_method method = nullptr;                                                        \
   getKoalaEtsNapiCallbackDispatcher(&clazz, &method);                                 \
-  EtsEnv* etsEnv = reinterpret_cast<EtsEnv*>(venv);                                   \
-  etsEnv->PushLocalFrame(1);                                                          \
-  long long args_casted = reinterpret_cast<long long>(args);                          \
-  int32_t rv = etsEnv->CallStaticIntMethod(clazz, method, id, args_casted, length);   \
+  EtsEnv* etsEnv = reinterpret_cast<EtsEnv*>(venv);                              \
+  etsEnv->PushLocalFrame(1);                                                      \
+  int32_t rv = etsEnv->CallStaticIntMethod(clazz, method, id, args, length);      \
   etsEnv->PopLocalFrame(nullptr);                                                     \
   return rv;                                                                          \
 }

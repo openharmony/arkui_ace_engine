@@ -14,7 +14,6 @@
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mirror/gn/npm_util.gni")
 
 koala_root = ".."
 
@@ -33,29 +32,28 @@ action("incremental_install") {
     ]
 }
 
-npm_cmd("incremental_install") {
-    outputs = [
-        "$target_out_dir/incremental_install"
-    ]
-    project_path = rebase_path(".")
-    install = true
-}
-
-npm_cmd("incremental.abc") {
+action("incremental.abc") {
+    script = "../gn/command/npm_util.py"
     outputs = [
         "$target_out_dir/incremental.abc"
     ]
-    project_path = rebase_path("./runtime")
-    run_tasks = [ "build:incremental:inc:ui2abc" ]
+    args = [
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--arklink-path", rebase_path("${static_linker_build_path}"),
+        "--es2panda-path", rebase_path("${ets2abc_build_path}"),
+        "--stdlib-path", rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
+        "--npm-args", "run", "build:incremental:gn"
+    ]
 
     deps = [
-      ":incremental_install",        
       ":incremental_install",        
       "$koala_root/ui2abc:ui2abc"
     ]
 
     external_deps = ets2abc_build_deps
     external_deps += static_linker_build_deps
+
     external_deps += [
         "ets_frontend:libes2panda_public(${host_toolchain})",
     ]
@@ -63,8 +61,6 @@ npm_cmd("incremental.abc") {
 
 group("incremental") {
     deps = [
-      "../ui2abc:fast_arktsc_build",
-      ":incremental.abc"
       "../ui2abc:fast_arktsc_build",
       ":incremental.abc"
     ]

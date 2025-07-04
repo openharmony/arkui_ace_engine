@@ -25,7 +25,7 @@ action("run_arkoala_build") {
   host_arch = "${host_os}-${host_cpu}"
   args = [
     # Paths: 1 koala root folder.
-    rebase_path("../koala_mirror"),
+    rebase_path("../koala_projects"),
 
     # Paths: 2 build folder.
     rebase_path("."),

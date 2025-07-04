@@ -12,37 +12,46 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mirror/gn/npm_util.gni")
 
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
-incremental_root = "../incremental"
 incremental_root = "../incremental"
 libarkts_root = "./libarkts"
 
 build_root = "//build"
 toolchain_linux = "$build_root/toolchain/linux:clang_x64"
 
-npm_cmd("fast_arktsc_build") {
+action("fast_arktsc_build") {
+    script = "../gn/command/npm_util.py"
+
     outputs = [
         "$target_out_dir/fast_arktsc_build"
     ]
 
-    project_path = rebase_path("./fast-arktsc")
-    install = true
-    run_tasks = [ "compile" ]
+    args = [
+        "--project-path", rebase_path("./fast-arktsc"),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--install",
+        "--npm-args", "run", "compile"
+    ]
 }
 
-npm_cmd("ui2abc_install") {
+action("ui2abc_install") {
+    script = "../gn/command/npm_util.py"
     outputs = [
         "$target_out_dir/ui2abc_install"
     ]
-    project_path = rebase_path(".")
-    install = true
+    args = [
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--install"
+    ]
 }
 
-npm_cmd("ui2abc_build") {
+action("ui2abc_build") {
+    script = "../gn/command/npm_util.py"
+
     outputs = [
         "$target_out_dir/MemoTransformer.js"
     ]
@@ -54,28 +63,23 @@ npm_cmd("ui2abc_build") {
         "$libarkts_root:es2panda"
     ]
 
-    project_path = rebase_path(".")
-    run_tasks = [ "build:fast-arktsc:plugins" ]
+    args = [
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--npm-args", "run", "build:gn"
+    ]
 }
 
 action("ui2abc_panda_sdk") {
-action("ui2abc_panda_sdk") {
     script = "gn/command/gen_sdk.py"
-    inputs = [
-      "$root_out_dir/clang_x64/arkcompiler/ets_frontend/es2panda"
-    ]
+
     outputs = [
         "$target_out_dir/panda-sdk"
     ]
 
     external_deps = [
         "ets_frontend:libes2panda_public(${toolchain_linux})",
-        "sdk:ohos_ets_api",
-        "sdk:ohos_ets_arkts",
     ]
-
-    external_deps += ets2abc_build_deps
-    external_deps += static_linker_build_deps
 
     args = [
         "--config", rebase_path("gn/sdk_config.json"),
@@ -87,7 +91,6 @@ action("ui2abc_panda_sdk") {
 
 group("ui2abc") {
     deps = [
-        ":ui2abc_build"
         ":ui2abc_build"
     ]
 }

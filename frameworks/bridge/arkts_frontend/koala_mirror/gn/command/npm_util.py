@@ -31,7 +31,7 @@ parser.add_argument("--target-out-path", help="out directory of built target")
 parser.add_argument("--built-file-path", help="result of building")
 parser.add_argument("--install", action="store_true", help="request npm install")
 parser.add_argument("--install-path", help="path to install in")
-parser.add_argument("--run-tasks", nargs='+', help="npm run tasks")
+parser.add_argument("--npm-args", nargs='+', help="npm command args")
 
 args = parser.parse_args()
 
@@ -84,9 +84,8 @@ def copy_target():
 def main():
     if args.install:
         install(args.install_path)
-    if args.run_tasks:
-        for task in args.run_tasks:
-            run(["run", task])
+    if args.npm_args:
+        run(args.npm_args)
     if args.target_out_path and args.built_file_path:
         copy_target()
 

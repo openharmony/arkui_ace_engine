@@ -153,9 +153,6 @@ export class ScriptFunction extends AstNode {
     get isTrailingLambda(): boolean {
         return global.generatedEs2panda._ScriptFunctionIsTrailingLambdaConst(global.context, this.peer)
     }
-    get isTrailingLambda(): boolean {
-        return global.generatedEs2panda._ScriptFunctionIsTrailingLambdaConst(global.context, this.peer)
-    }
     get isDynamic(): boolean {
         return global.generatedEs2panda._ScriptFunctionIsDynamicConst(global.context, this.peer)
     }
