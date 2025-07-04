@@ -38,12 +38,12 @@
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -52,11 +52,9 @@
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #endif
-#include "core/components_ng/base/scroll_window_adapter.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
-#include "core/components_ng/pattern/scrollable/lazy_compose_adapter.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -2377,6 +2375,8 @@ void FrameNode::UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstrai
 
 void FrameNode::RebuildRenderContextTree()
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, RebuildRenderContextTree);
     if (!needSyncRenderTree_) {
         return;
     }
@@ -2412,8 +2412,10 @@ void FrameNode::RebuildRenderContextTree()
     needSyncRenderTree_ = false;
 }
 
-void FrameNode::MarkModifyDoneUnsafely()
+void FrameNode::MarkModifyDone()
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, MarkModifyDone);
     pattern_->OnModifyDone();
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     if (pipeline) {
@@ -2457,21 +2459,10 @@ void FrameNode::MarkModifyDoneUnsafely()
 #endif
 }
 
-void FrameNode::MarkModifyDone()
-{
-    if (!IsFreeState()) {
-        MarkModifyDoneUnsafely();
-    } else {
-        PostAfterAttachMainTreeTask([weak = WeakClaim(this)]() {
-            auto host = weak.Upgrade();
-            CHECK_NULL_VOID(host);
-            host->MarkModifyDoneUnsafely();
-        });
-    }
-}
-
 [[deprecated("using AfterMountToParent")]] void FrameNode::OnMountToParentDone()
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, OnMountToParentDone);
     pattern_->OnMountToParentDone();
 }
 
@@ -2487,8 +2478,10 @@ void FrameNode::FlushUpdateAndMarkDirty()
     MarkDirtyNode();
 }
 
-void FrameNode::MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag)
+void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, MarkDirtyNode, extraFlag);
     if (IsFreeze()) {
         // store the flag.
         layoutProperty_->UpdatePropertyChangeFlag(extraFlag);
@@ -2506,19 +2499,6 @@ void FrameNode::MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag)
         return;
     }
     MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag);
-}
-
-void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
-{
-    if (!IsFreeState()) {
-        MarkDirtyNodeUnsafely(extraFlag);
-    } else {
-        PostAfterAttachMainTreeTask([weak = WeakClaim(this), extraFlag]() {
-            auto host = weak.Upgrade();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNodeUnsafely(extraFlag);
-        });
-    }
 }
 
 void FrameNode::ProcessFreezeNode()
@@ -2604,6 +2584,8 @@ void FrameNode::MarkNeedRenderOnly()
 
 void FrameNode::MarkNeedRender(bool isRenderBoundary)
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, MarkNeedRender, isRenderBoundary);
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     // If it has dirtyLayoutBox, need to mark dirty after layout done.
@@ -4114,6 +4096,11 @@ RefPtr<NodeAnimatablePropertyBase> FrameNode::GetAnimatablePropertyFloat(const s
     return iter->second;
 }
 
+bool FrameNode::HasAnimatableProperty(const std::string& propertyName) const
+{
+    return nodeAnimatablePropertyMap_.find(propertyName) != nodeAnimatablePropertyMap_.end();
+}
+
 RefPtr<FrameNode> FrameNode::FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName)
 {
     CHECK_NULL_RETURN(parentNode, nullptr);
@@ -4847,11 +4834,8 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
-    auto* lazyItemAdapter = pattern_->GetArkoalaLazyAdapter();
-    if (lazyItemAdapter) {
-        auto node = lazyItemAdapter->GetOrCreateChild(index);
-        AddChild(node);
-        return node;
+    if (arkoalaLazyAdapter_) {
+        return ArkoalaGetOrCreateChild(index);
     }
     auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
@@ -4865,9 +4849,8 @@ RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool ad
 
 RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
 {
-    auto* lazyItemAdapter = pattern_->GetArkoalaLazyAdapter();
-    if (lazyItemAdapter) {
-        return lazyItemAdapter->GetChild(index);
+    if (arkoalaLazyAdapter_) {
+        return arkoalaLazyAdapter_->GetChild(index);
     }
     return frameProxy_->GetFrameNodeByIndex(index, false, isCache, false);
 }
@@ -4918,32 +4901,74 @@ void FrameNode::RemoveAllChildInRenderTree()
 
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
-    auto* adapter = pattern_->GetArkoalaLazyAdapter();
-    if (adapter) {
-        int32_t startIndex = showCached ? std::max(0, start - cacheStart) : start;
-        int32_t endIndex = showCached ? std::min(GetTotalChildCount() - 1, end + cacheEnd) : end;
-        std::vector<RefPtr<UINode>> toRemove;
-        for (const auto& child : GetChildren()) {
-            const int32_t index = static_cast<int32_t>(adapter->GetIndexOfChild(DynamicCast<FrameNode>(child)));
-            if (index >= startIndex && index <= endIndex) {
-                child->SetActive(true);
-            } else {
-                toRemove.push_back(child);
-            }
-        }
-        for (auto&& node : toRemove) {
-            RemoveChild(node);
-        }
-        adapter->SetActiveRange(startIndex - cacheStart, endIndex + cacheEnd);
-        return;
+    if (arkoalaLazyAdapter_) {
+        return ArkoalaUpdateActiveRange(start, end, cacheStart, cacheEnd, showCached);
     }
-    if (showCached) {
-        frameProxy_->SetActiveChildRange(
-            std::max(0, start - cacheStart), std::min(GetTotalChildCount() - 1, end + cacheEnd), 0, 0);
-    } else {
-        frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
-    }
+    frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd, showCached);
 }
+
+/* ============================== Arkoala LazyForEach adapter section START ==============================*/
+void FrameNode::ArkoalaSynchronize(
+    LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount)
+{
+    if (!arkoalaLazyAdapter_) {
+        arkoalaLazyAdapter_ = std::make_unique<LazyComposeAdapter>();
+    }
+    arkoalaLazyAdapter_->SetCallbacks(std::move(creator), std::move(updater));
+    arkoalaLazyAdapter_->SetTotalCount(totalCount);
+}
+
+void FrameNode::ArkoalaRemoveItemsOnChange(int32_t changeIndex)
+{
+    CHECK_NULL_VOID(arkoalaLazyAdapter_);
+    std::vector<RefPtr<UINode>> toRemove;
+    for (const auto& child : GetChildren()) {
+        const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
+        if (index >= changeIndex) {
+            toRemove.push_back(child);
+        }
+    }
+    for (auto&& node : toRemove) {
+        RemoveChild(node);
+    }
+    arkoalaLazyAdapter_->OnDataChange(changeIndex);
+}
+
+void FrameNode::ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
+{
+    CHECK_NULL_VOID(arkoalaLazyAdapter_);
+    const int32_t liveStart = start - cacheStart;
+    const int32_t liveEnd = end + cacheEnd;
+    const int32_t visibleStart = showCached ? liveStart : start;
+    const int32_t visibleEnd = showCached ? liveEnd : end;
+    std::vector<RefPtr<UINode>> toRemove;
+    for (const auto& child : GetChildren()) {
+        const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
+        if (index < liveStart || index > liveEnd) {
+            toRemove.push_back(child);
+            continue;
+        }
+        child->SetActive(index >= visibleStart && index <= visibleEnd);
+    }
+    for (auto&& node : toRemove) {
+        RemoveChild(node);
+    }
+    arkoalaLazyAdapter_->SetActiveRange(liveStart, liveEnd);
+}
+
+RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index)
+{
+    CHECK_NULL_RETURN(arkoalaLazyAdapter_, nullptr);
+    if (auto node = arkoalaLazyAdapter_->GetChild(index)) {
+        return node;
+    }
+    auto node = arkoalaLazyAdapter_->GetOrCreateChild(index);
+    CHECK_NULL_RETURN(node, nullptr);
+    AddChild(node);
+    node->SetActive(true);
+    return node;
+}
+/* ============================== Arkoala LazyForEach adapter section END ================================*/
 
 void FrameNode::SetActiveChildRange(
     const std::optional<ActiveChildSets>& activeChildSets, const std::optional<ActiveChildRange>& activeChildRange)
@@ -6673,16 +6698,6 @@ const char* FrameNode::GetPaintPropertyTypeName() const
 const RefPtr<Kit::FrameNode>& FrameNode::GetKitNode() const
 {
     return kitNode_;
-}
-
-ScrollWindowAdapter* FrameNode::GetScrollWindowAdapter() const
-{
-    return nullptr;
-}
-
-ScrollWindowAdapter* FrameNode::GetOrCreateScrollWindowAdapter()
-{
-    return nullptr;
 }
 
 bool FrameNode::IsDrawFocusOnTop() const

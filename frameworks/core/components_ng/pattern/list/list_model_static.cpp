@@ -303,9 +303,13 @@ void ListModelStatic::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameB
     eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
 }
 
-void ListModelStatic::SetChainAnimation(FrameNode* frameNode, bool chainAnimation)
+void ListModelStatic::SetChainAnimation(FrameNode* frameNode, const std::optional<bool>& chainAnimation)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, chainAnimation, frameNode);
+    if (chainAnimation.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, chainAnimation.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, frameNode);
+    }
 }
 
 void ListModelStatic::SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options)
@@ -316,17 +320,22 @@ void ListModelStatic::SetChainAnimationOptions(FrameNode* frameNode, const Chain
     pattern->SetChainAnimationOptions(options);
 }
 
-void ListModelStatic::SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction)
+void ListModelStatic::SetScrollEnabled(FrameNode* frameNode, const std::optional<bool>& enableScrollInteraction)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, enableScrollInteraction, frameNode);
+    if (enableScrollInteraction.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, enableScrollInteraction.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, frameNode);
+    }
 }
 
-void ListModelStatic::SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled)
+void ListModelStatic::SetListMaintainVisibleContentPosition(FrameNode* frameNode, const std::optional<bool>& enabled)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetMaintainVisibleContentPosition(enabled);
+    bool isEnabled = enabled.value_or(false);
+    pattern->SetMaintainVisibleContentPosition(isEnabled);
 }
 
 void ListModelStatic::SetOnScrollVisibleContentChange(
@@ -449,17 +458,32 @@ void ListModelStatic::SetEditMode(FrameNode* frameNode, bool editMode)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, EditMode, editMode, frameNode);
 }
 
-void ListModelStatic::SetMultiSelectable(FrameNode* frameNode, bool selectable)
+void ListModelStatic::SetMultiSelectable(FrameNode* frameNode, const std::optional<bool>& selectable)
 {
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetMultiSelectable(selectable);
+    bool isSelectable = selectable.value_or(false);
+    pattern->SetMultiSelectable(isSelectable);
 }
 
-void ListModelStatic::SetStackFromEnd(FrameNode* frameNode, const std::optional<bool>& enabled)
+void ListModelStatic::SetEdgeEffect(
+    FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
+    const std::optional<EffectEdge>& effectEdge)
 {
-    if (enabled.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, enabled.value(), frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    ScrollableModelNG::SetEdgeEffect(frameNode,
+        edgeEffect.value_or(EdgeEffect::SPRING),
+        alwaysEnabled.value_or(false),
+        effectEdge.value_or(EffectEdge::ALL)
+    );
+}
+
+void ListModelStatic::SetStackFromEnd(FrameNode* frameNode, const std::optional<bool>& isStackFromEnd)
+{
+    if (isStackFromEnd.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, isStackFromEnd.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, frameNode);
     }

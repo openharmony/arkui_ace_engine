@@ -13,28 +13,32 @@
  * limitations under the License.
  */
 
+#include "base/subwindow/subwindow_manager.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace IUIContextAccessor {
-void FreezeUINode0Impl(const Ark_String* id,
-                       Ark_Boolean isFrozen)
+namespace ContextMenuAccessor {
+void CloseImpl()
 {
+    auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
+#if defined(MULTIPLE_WINDOW_SUPPORTED)
+    if (Container::IsCurrentUseNewPipeline()) {
+        SubwindowManager::GetInstance()->HideMenuNG();
+    } else {
+        SubwindowManager::GetInstance()->CloseMenu();
+    }
+#endif
 }
-void FreezeUINode1Impl(const Ark_Number* id,
-                       Ark_Boolean isFrozen)
+} // ContextMenuAccessor
+const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor()
 {
-}
-} // IUIContextAccessor
-const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
-{
-    static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
-        IUIContextAccessor::FreezeUINode0Impl,
-        IUIContextAccessor::FreezeUINode1Impl,
+    static const GENERATED_ArkUIContextMenuAccessor ContextMenuAccessorImpl {
+        ContextMenuAccessor::CloseImpl,
     };
-    return &IUIContextAccessorImpl;
+    return &ContextMenuAccessorImpl;
 }
 
 }

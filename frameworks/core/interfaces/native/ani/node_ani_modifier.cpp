@@ -13,14 +13,21 @@
  * limitations under the License.
  */
 
+#include "animation_ani_modifier.h"
 #include "common_ani_modifier.h"
 #include "component_snapshot_ani_modifier.h"
 #include "content_slot_ani_modifier.h"
 #include "image_ani_modifier.h"
+#include "image_span_ani_modifier.h"
 #include "web_ani_modifier.h"
 #include "custom_node_ani_modifier.h"
 #include "waterflow_ani_modifier.h"
 #include "drag_ani_modifier.h"
+#include "interop_ani_modifier.h"
+#include "drag_controller_ani_modifier.h"
+#include "video_ani_modifier.h"
+#include "shape_ani_modifier.h"
+#include "xcomponent_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -36,6 +43,13 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,
         .getArkUIAniWaterFlowModifier = OHOS::Ace::NG::GetArkUIAniWaterFlowModifier,
         .getComponentSnapshotAniModifier = OHOS::Ace::NG::GetComponentSnapshotAniModifier,
+        .getAnimationAniModifier = OHOS::Ace::NG::GetAnimationAniModifier,
+        .getInteropAniModifier = OHOS::Ace::NG::GetInteropAniModifier,
+        .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
+        .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
+        .getArkUIAniVideoModifier = OHOS::Ace::NG::GetVideoAniModifier,
+        .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,
+        .getArkUIAniXComponentModifier = OHOS::Ace::NG::GetXComponentAniModifier,
     };
     return &impl;
 }

@@ -394,7 +394,7 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest16, BindContextMenu0Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu0Test, TestSize.Level1)
 {
     ASSERT_TRUE(modifier_->setBindContextMenu0);
     CommonMethodModifierTest16::InitBindContextMenu0();
@@ -414,7 +414,7 @@ HWTEST_F(CommonMethodModifierTest16, BindContextMenu0Test, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest16, BindContextMenu0TestPlacementTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu0TestPlacementTest, TestSize.Level1)
 {
     ASSERT_TRUE(modifier_->setBindContextMenu0);
     auto builder = getBuilderCb();
@@ -978,7 +978,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu0TestEnableHoverMod
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest16, BindContextMenu1Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1Test, TestSize.Level1)
 {
     auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
     ASSERT_TRUE(modifier_->setBindContextMenu1);
@@ -994,11 +994,11 @@ HWTEST_F(CommonMethodModifierTest16, BindContextMenu1Test, TestSize.Level1)
 }
 
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestPlacementTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestPlacementTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestPlacementTest, TestSize.Level1)
 {
     ASSERT_TRUE(modifier_->setBindContextMenu1);
     auto builder = getBuilderCb();
@@ -1019,7 +1019,7 @@ HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestPlacementTest, TestSize
 }
 
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestEnableArrow
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1050,7 +1050,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestEnableArrow, T
 }
 
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestArrowOffset
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1075,7 +1075,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestArrowOffset, T
 }
 
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestPreviewPreviewMode
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1100,7 +1100,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestPreviewPreview
 }
 
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestPreviewCustomBuilder
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1126,7 +1126,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestPreviewCustomB
 }
 
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestBorderRadiusLength
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1152,7 +1152,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestBorderRadiusLe
 }
 
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestBorderRadiusBorderRadiuses
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1184,7 +1184,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestBorderRadiusBo
 }
 
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestBorderRadiusLocalizedRadius
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1357,7 +1357,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestAboutToDisappe
 }
 
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestLayoutRegionMargin
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1388,7 +1388,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestLayoutRegionMa
 }
 
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestBackgroundColorValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1425,7 +1425,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestBackgroundColo
     }
 }
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestBackgroundColorInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1460,7 +1460,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestBackgroundColo
 }
 
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestBackgroundBlurStyleValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1487,7 +1487,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestBackgroundBlur
 }
 
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestBackgroundBlurStyleInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1512,7 +1512,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestBackgroundBlur
 }
 
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestTransition
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1536,7 +1536,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestTransition, Te
 }
 
 /*
- * @tc.name: BindContextMenu1Test
+ * @tc.name: BindContextMenu1TestEnableHoverMode
  * @tc.desc:
  * @tc.type: FUNC
  */

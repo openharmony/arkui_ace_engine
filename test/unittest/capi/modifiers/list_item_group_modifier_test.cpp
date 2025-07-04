@@ -266,13 +266,13 @@ HWTEST_F(ListItemGroupModifierTest, setDividerColorStringTest, TestSize.Level1)
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "");
+    EXPECT_EQ(strokeWidthCheckValue, "0.00vp");
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "");
+    EXPECT_EQ(startMarginCheckValue, "0.00vp");
     auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "");
+    EXPECT_EQ(endMarginCheckValue, "0.00vp");
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "");
+    EXPECT_EQ(colorCheckValue, "#00000000");
 }
 
 /**

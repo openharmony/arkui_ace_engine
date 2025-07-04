@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 export class ThrowStatement extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 146)
+        assertValidPeer(pointer, 148)
         super(pointer)
     }
     static createThrowStatement(argument?: Expression): ThrowStatement {

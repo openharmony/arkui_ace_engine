@@ -21,6 +21,18 @@ interop_root = ""
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
+action("interop_install") {
+    script = "../gn/command/npm_util.py"
+    outputs = [
+        "$target_out_dir/interop_install"
+    ]
+    args = [
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--install"
+    ]
+}
+
 npm_cmd("interop_install") {
     outputs = [
         "$target_out_dir/interop_install"
@@ -38,6 +50,7 @@ npm_cmd("interop.abc") {
 
     deps = [
         ":interop_install"
+        ":interop_install"
     ]
 
     external_deps = ets2abc_build_deps
@@ -46,6 +59,7 @@ npm_cmd("interop.abc") {
 
 group("interop") {
     deps = [
+      "../ui2abc:fast_arktsc_build",
       "../ui2abc:fast_arktsc_build",
       "$interop_root:interop.abc"
     ]

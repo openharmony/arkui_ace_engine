@@ -65,6 +65,7 @@ shared_library("es2panda_lib") {
 
     deps = [
         "$ui2abc_path:ui2abc_install"
+        "$ui2abc_path:ui2abc_install"
     ]
 
     configs -= [ "//build/config/compiler:compiler" ]
@@ -93,6 +94,19 @@ action("es2panda_copy_lib") {
     args = [
         "--from-path", rebase_path(root_out_dir),
         "--to-path", rebase_path(".")
+    ]
+}
+
+action("libarkts_install") {
+    script = "../../gn/command/npm_util.py"
+    outputs = [
+        "$target_out_dir/libarkts_install"
+    ]
+    args = [
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--install",
+        "--install-path", rebase_path("..")
     ]
 }
 

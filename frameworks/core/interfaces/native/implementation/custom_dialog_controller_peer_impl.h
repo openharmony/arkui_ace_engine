@@ -29,8 +29,8 @@ public:
     ~CustomDialogControllerPeerImpl() override = default;
 
     void SetOwnerView(Ark_NativePointer node);
-    void SetBuilder(CustomNodeBuilder builder, Ark_NativePointer node);
-    void SetOnCancel(Opt_Callback_Void cancel, Ark_NativePointer node);
+    void SetBuilder(CustomNodeBuilder builder, const RefPtr<CustomDialogControllerPeer>& peer);
+    void SetOnCancel(Opt_Callback_Void cancel, const RefPtr<CustomDialogControllerPeer>& peer);
     void SetAutoCancel(Opt_Boolean autoCancel);
     void SetDialogAlignment(Opt_DialogAlignment alignment);
     void SetOffset(Opt_Offset offset);
@@ -66,13 +66,17 @@ public:
         instanceId_ = id;
     }
 
+    WeakPtr<FrameNode> GetOwnerViewNode()
+    {
+        return ownerView_;
+    }
 private:
     RefPtr<UINode> GetWindowScene() const;
 
     WeakPtr<FrameNode> ownerView_;
     DialogProperties dialogProperties_;
     std::vector<WeakPtr<AceType>> dialogs_;
-    std::function<RefPtr<UINode>()> builder_;
+    std::function<void()> builder_;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier

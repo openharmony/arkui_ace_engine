@@ -74,7 +74,7 @@ void ConvContext::Clear()
 
 void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src, ConvContext *ctx)
 {
-    CHECK_NULL_VOID(src.empty());
+    CHECK_NULL_VOID(src.size());
     JsonValue jsonValue;
     for (const auto& it : src) {
         jsonValue.Put((it.first.c_str()), it.second);
@@ -177,14 +177,16 @@ void AssignArkValue(Ark_UIFontConfig& dst, const FontConfigJsonInfo& src, ConvCo
 }
 #endif
 
-void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src)
+void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvContext* ctx)
 {
     if (src.menuOptionsParam.content.has_value()) {
-        dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(src.menuOptionsParam.content.value());
+        dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(src.menuOptionsParam.content.value(), ctx);
+    } else {
+        dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_Empty>(nullptr);
     }
-    dst.icon = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.icon);
+    dst.icon = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.icon, ctx);
     dst.id = PeerUtils::CreatePeer<TextMenuItemIdPeer>(src.menuOptionsParam.id);
-    dst.labelInfo = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.labelInfo);
+    dst.labelInfo = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.labelInfo, ctx);
 }
 
 void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src)
@@ -742,12 +744,24 @@ void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
     dst.contentOffsetY = Converter::ArkValue<Ark_Number>(src.GetContentOffsetY());
 }
 
-void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src)
+void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src, ConvContext *ctx)
 {
     dst.fontSize = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(src.fontSize);
     dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(src.fontWeight);
     dst.effectStrategy.value = static_cast<Ark_SymbolEffectStrategy>(src.effectStrategy);
     dst.renderingStrategy.value = static_cast<Ark_SymbolRenderingStrategy>(src.renderingStrategy);
+    if (src.symbolColor.size()) {
+        std::vector<Ark_ResourceColor> colors;
+        std::stringstream symbolColors(src.symbolColor);
+        std::string color;
+        while (std::getline(symbolColors, color, ',')) {
+            colors.push_back(ArkUnion<Ark_ResourceColor, Ark_String>(Color::FromString(color), ctx));
+        }
+        auto fontColor = Converter::ArkValue<Array_ResourceColor>(colors, ctx);
+        dst.fontColor = Converter::ArkValue<Opt_Array_ResourceColor>(fontColor, ctx);
+    } else {
+        dst.fontColor = Converter::ArkValue<Opt_Array_ResourceColor>(Ark_Empty(), ctx);
+    }
 }
 
 void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx)

@@ -27,7 +27,8 @@ import { DrawContext } from "./../Graphics"
 import { LengthMetrics } from "../Graphics"
 import { ComponentContent, Context, ContextInternal, StateStylesOps } from "./arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
-import { IntentionCode, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
+import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
+import { CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
 import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, EdgeStyles, Edges } from "./units"
 import { Resource } from "global.resource"
@@ -38,8 +39,7 @@ import { ResizableOptions } from "./image"
 import { VisualEffect, Filter, BrightnessBlender } from "./arkui-uieffect"
 import { FocusBoxStyle, FocusPriority } from "./focus"
 import { TransformationMatrix } from "./arkui-common"
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup } from "./gesture"
-import { BlendMode } from "./arkui-drawing"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup, GestureGroupHandler } from "./gesture"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -56,11 +56,11 @@ import { CommonModifier } from "../CommonModifier"
 import { AttributeUpdater } from "../ohos.arkui.modifier"
 import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
+import { hookBackgroundImageImpl } from "../handwritten/ArkBackgroundImageImpl"
 import { rememberMutableState } from '@koalaui/runtime'
-import { hookDrawModifierInvalidateImpl, hookDrawModifierAttributeImpl } from "../handwritten/ArkDrawModifierImpl"
-import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl } from "../handwritten/ArkDragDrop"
+import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl, hookOnDrop, hookDragEventStartDataLoading } from "../handwritten/ArkDragDrop"
 import { ArkUIAniModule } from "arkui.ani"
-import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType } from "#external"
+import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType, DataSyncOptions } from "#external"
 import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl, hookCommonMethodPriorityGestureImpl } from "../handwritten/CommonHandWritten"
 export interface ICurve {
     interpolate(fraction: number): number
@@ -93,30 +93,6 @@ export class ICurveInternal implements MaterializedBase,ICurve {
         const obj : ICurveInternal = new ICurveInternal()
         obj.peer = new Finalizable(ptr, ICurveInternal.getFinalizer())
         return obj
-    }
-}
-export class DrawModifierInternal {
-    public static fromPtr(ptr: KPointer): DrawModifier {
-        const obj : DrawModifier = new DrawModifier()
-        return obj
-    }
-}
-export class DrawModifier  {
-    weakRefOfPeerNode ?: WeakRef<PeerNode>;
-    constructor() {
-    }
-    public drawBehind(drawContext: DrawContext): void {
-        return
-    }
-    public drawContent(drawContext: DrawContext): void {
-        return
-    }
-    public drawFront(drawContext: DrawContext): void {
-        return
-    }
-    public invalidate(): void {
-        hookDrawModifierInvalidateImpl(this);
-        return
     }
 }
 export class TransitionEffectInternal {
@@ -844,8 +820,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         return
     }
     public startDataLoading(options: DataSyncOptions): string {
-        const options_casted = options as (DataSyncOptions)
-        return this.startDataLoading_serialize(options_casted)
+        return hookDragEventStartDataLoading(this.peer!.ptr, options)
     }
     private getDragBehavior(): DragBehavior {
         return this.getDragBehavior_serialize()
@@ -895,8 +870,15 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         return TypeChecker.DragResult_FromNumeric(retval)
     }
     private getPreviewRect_serialize(): Rectangle {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getPreviewRect(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_getPreviewRect(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : Rectangle = retvalDeserializer.readRectangle()
         return returnResult
     }
@@ -1227,8 +1209,22 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         ArkUIGeneratedNativeModule._KeyEvent_setIntentionCode(this.peer!.ptr, TypeChecker.IntentionCode_ToNumeric(intentionCode))
     }
     private getUnicode_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getUnicode(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getUnicode(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setUnicode_serialize(unicode: number): void {
         ArkUIGeneratedNativeModule._KeyEvent_setUnicode(this.peer!.ptr, unicode)
@@ -2027,9 +2023,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         }
         ArkUIGeneratedNativeModule._CommonMethod_height1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-    }
-    drawModifierAttribute(value: DrawModifier | undefined): void {
-        hookDrawModifierAttributeImpl(this,value)
     }
     responseRegionAttribute(value: Array<Rectangle> | Rectangle | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -3438,6 +3431,10 @@ export class ArkCommonMethodPeer extends PeerNode {
         }
         ArkUIGeneratedNativeModule._CommonMethod_animation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    SetOrCreateAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        ArkUIAniModule._Animation_SetOrCreateAnimatableProperty(this.peer.ptr, functionName, value, callback);
     }
     transition0Attribute(value: TransitionOptions | TransitionEffect | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -5583,7 +5580,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_expandSafeArea(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    backgroundAttribute(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): void {
+    backgroundAttribute(builder: CustomBuilder | undefined, options?: BackgroundOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         let builder_type : int32 = RuntimeType.UNDEFINED
         builder_type = runtimeType(builder)
@@ -6995,7 +6992,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_backToTop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    edgeEffectAttribute(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): void {
+    edgeEffectAttribute(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let edgeEffect_type : int32 = RuntimeType.UNDEFINED
         edgeEffect_type = runtimeType(edgeEffect)
@@ -7050,6 +7047,10 @@ export interface ProvideOptions {
     allowOverride?: string;
 }
 export interface AnimatableArithmetic<T> {
+    plus(rhs:AnimatableArithmetic<T>): AnimatableArithmetic<T>;
+    subtract(rhs:AnimatableArithmetic<T>): AnimatableArithmetic<T>;
+    multiply(scale:number): AnimatableArithmetic<T>;
+    equals(rhs:AnimatableArithmetic<T>): boolean;
 }
 export type ReuseIdCallback = () => string;
 export interface ReuseOptions {
@@ -7603,9 +7604,7 @@ export enum DragBehavior {
     COPY = 0,
     MOVE = 1
 }
-export interface DataSyncOptions {
-    _DataSyncOptionsStub: string;
-}
+
 export enum DragResult {
     UNKNOWN = -1,
     DRAG_SUCCESSFUL = 0,
@@ -7796,6 +7795,37 @@ export interface Literal_Boolean_isVisible {
 export type Callback_Literal_Boolean_isVisible_Void = (event: Literal_Boolean_isVisible) => void;
 export interface Literal_ResourceColor_color {
     color: ResourceColor;
+}
+export enum BlendMode {
+    CLEAR = 0,
+    SRC = 1,
+    DST = 2,
+    SRC_OVER = 3,
+    DST_OVER = 4,
+    SRC_IN = 5,
+    DST_IN = 6,
+    SRC_OUT = 7,
+    DST_OUT = 8,
+    SRC_ATOP = 9,
+    DST_ATOP = 10,
+    XOR = 11,
+    PLUS = 12,
+    MODULATE = 13,
+    SCREEN = 14,
+    OVERLAY = 15,
+    DARKEN = 16,
+    LIGHTEN = 17,
+    COLOR_DODGE = 18,
+    COLOR_BURN = 19,
+    HARD_LIGHT = 20,
+    SOFT_LIGHT = 21,
+    DIFFERENCE = 22,
+    EXCLUSION = 23,
+    MULTIPLY = 24,
+    HUE = 25,
+    SATURATION = 26,
+    COLOR = 27,
+    LUMINOSITY = 28
 }
 export interface PopupOptions {
     message: string;
@@ -7996,6 +8026,12 @@ export interface InvertOptions {
     threshold: number;
     thresholdRange: number;
 }
+export interface DividerStyle {
+    strokeWidth: Length;
+    color?: ResourceColor;
+    startMargin?: Length;
+    endMargin?: Length;
+}
 export type TipsMessageType = ResourceStr | StyledString;
 export interface BackgroundImageOptions {
     syncLoad?: boolean;
@@ -8028,7 +8064,7 @@ export type Callback_DragEvent_String_Void = (event: DragEvent, extraParams?: st
 export type Callback_PreDragStatus_Void = (parameter: PreDragStatus) => void;
 export type Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult = (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult;
 export type Callback_TouchEvent_HitTestMode = (parameter: TouchEvent) => HitTestMode;
-export interface Literal_Alignment_align {
+export interface BackgroundOptions {
     align?: Alignment;
 }
 export interface CommonMethod {
@@ -8094,8 +8130,11 @@ export interface CommonMethod {
     groupDefaultFocus(value: boolean | undefined): this
     focusOnTouch(value: boolean | undefined): this
     focusBox(value: FocusBoxStyle | undefined): this
-    animationStart(value: AnimateParam | undefined): this
-    animationStop(value: AnimateParam | undefined):this
+    // when use buildSystem memo-plugin will insert animation declaration
+    // animationStart(value: AnimateParam | undefined): this
+    // animationStop(value: AnimateParam | undefined):this
+    __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void
     transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this
     motionBlur(value: MotionBlurOptions | undefined): this
     brightness(value: number | undefined): this
@@ -8194,7 +8233,7 @@ export interface CommonMethod {
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this
     customProperty(name: string | undefined, value: Object | undefined): this
     expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this
-    background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this
+    background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this
     backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this
     backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
     foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
@@ -8576,6 +8615,8 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public animationStop(value: AnimateParam | undefined): this {
         return this
     }
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {}
     public animation(value: AnimateParam | undefined): this {
         return this
     }
@@ -8873,7 +8914,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
         return this
     }
-    public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this {
+    public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         return this
     }
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
@@ -9138,7 +9179,7 @@ export interface ScrollableCommonMethod extends CommonMethod {
     clipContent(value: ContentClipMode | RectShape | undefined): this
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     backToTop(value: boolean | undefined): this
-    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
+    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this
     fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this
 }
 export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle implements ScrollableCommonMethod {
@@ -9187,7 +9228,7 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     public backToTop(value: boolean | undefined): this {
         return this
     }
-    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
         return this
     }
     public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
@@ -9351,9 +9392,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public drawModifier(value: DrawModifier | undefined): this {
         if (this.checkPriority("drawModifier")) {
-            const value_casted = value as (DrawModifier | undefined)
-            this.getPeer()?.drawModifierAttribute(value_casted)
-            return this
+            hookDrawModifier(this, value)
         }
         return this
     }
@@ -9944,6 +9983,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        const function_type = runtimeType(callback)
+        if (RuntimeType.FUNCTION === function_type) {
+            this.getPeer()?.SetOrCreateAnimatableProperty(functionName, value, callback);
+        } else {
+            throw new Error('__createOrSetAnimatableProperty format error')
+        }
+    }
     public transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
         if (this.checkPriority("transition")) {
             const effect_type = runtimeType(effect)
@@ -10502,20 +10550,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public onDrop(eventCallback: ((event: DragEvent,extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
         if (this.checkPriority("onDrop")) {
-            const eventCallback_type = runtimeType(eventCallback)
-            const dropOptions_type = runtimeType(dropOptions)
-            if ((RuntimeType.FUNCTION == eventCallback_type) || (RuntimeType.UNDEFINED == eventCallback_type)) {
-                const value_casted = eventCallback as (((event: DragEvent,extraParams?: string) => void) | undefined)
-                this.getPeer()?.onDrop0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.FUNCTION == eventCallback_type) || (RuntimeType.UNDEFINED == eventCallback_type)) {
-                const eventCallback_casted = eventCallback as (OnDragEventCallback | undefined)
-                const dropOptions_casted = dropOptions as (DropOptions)
-                this.getPeer()?.onDrop1Attribute(eventCallback_casted, dropOptions_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookOnDrop(this, eventCallback, dropOptions)
         }
         return this
     }
@@ -11101,10 +11136,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this {
+    public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         if (this.checkPriority("background")) {
             const builder_casted = builder as (CustomBuilder | undefined)
-            const options_casted = options as (Literal_Alignment_align)
+            const options_casted = options as (BackgroundOptions)
             this.getPeer()?.backgroundAttribute(builder_casted, options_casted)
             return this
         }
@@ -11112,14 +11147,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
         if (this.checkPriority("backgroundImage")) {
-            const src_type = runtimeType(src)
-            const repeat_type = runtimeType(repeat)
-            if (((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.UNDEFINED == src_type)) && ((RuntimeType.NUMBER == repeat_type) || (RuntimeType.OBJECT == repeat_type))) {
-                const src_casted = src as (ResourceStr | PixelMap | undefined)
-                const repeat_casted = repeat as (ImageRepeat)
-                this.getPeer()?.backgroundImage0Attribute(src_casted, repeat_casted)
-                return this
-            }
+            const src_casted = src as (ResourceStr | PixelMap | undefined)
+            const repeat_casted = repeat as (ImageRepeat | undefined)
+            hookBackgroundImageImpl(this.getPeer(), src_casted, repeat_casted)
         }
         return this
     }
@@ -11319,21 +11349,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
         if (this.checkPriority("blendMode")) {
-            const value_type = runtimeType(value)
-            const type_type = runtimeType(type)
-            if (((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.OBJECT == type_type))) {
-                const value_casted = value as (BlendMode | undefined)
-                const type_casted = type as (BlendApplyType)
-                this.getPeer()?.blendMode0Attribute(value_casted, type_casted)
-                return this
-            }
-            if (((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.OBJECT == type_type))) {
-                const mode_casted = value as (BlendMode | undefined)
-                const type_casted = type as (BlendApplyType)
-                this.getPeer()?.blendMode1Attribute(mode_casted, type_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (BlendMode | undefined)
+            const type_casted = type as (BlendApplyType)
+            this.getPeer()?.blendMode0Attribute(value_casted, type_casted)
+            return this
         }
         return this
     }
@@ -11722,10 +11741,10 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
         if (this.checkPriority("edgeEffect")) {
             const edgeEffect_casted = edgeEffect as (EdgeEffect | undefined)
-            const options_casted = options as (EdgeEffectOptions)
+            const options_casted = options as (EdgeEffectOptions | undefined)
             this.getPeer()?.edgeEffectAttribute(edgeEffect_casted, options_casted)
             return this
         }

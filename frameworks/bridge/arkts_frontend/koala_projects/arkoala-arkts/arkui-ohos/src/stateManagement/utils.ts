@@ -19,4 +19,7 @@ export class UIUtils {
     static makeObserved<T>(source: T): T {
         return uiUtils.makeObserved(source) as T;
     }
+    static getTarget<T>(source: T): T {
+        return uiUtils.getTarget(source) as T;
+    }
 }

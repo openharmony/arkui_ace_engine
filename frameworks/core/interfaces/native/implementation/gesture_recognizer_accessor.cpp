@@ -56,7 +56,30 @@ Ark_GestureRecognizerState GetStateImpl(Ark_GestureRecognizer peer)
 }
 Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_GestureRecognizer peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto recognizer = peer->GetRecognizer().Upgrade();
+    CHECK_NULL_RETURN(recognizer, nullptr);
+    auto attachNode = recognizer->GetAttachedNode().Upgrade();
+    CHECK_NULL_RETURN(attachNode, GetEventTargetInfoAccessor()->ctor());
+    RefPtr<Pattern> pattern;
+    if (auto swiperPattern = attachNode->GetPattern<SwiperPattern>()) {
+        pattern = swiperPattern;
+    } else if (auto scrollablePattern = attachNode->GetPattern<ScrollablePattern>()) {
+        pattern = scrollablePattern;
+    }
+    Ark_EventTargetInfo result{};
+    if (pattern) {
+        auto scrollableTargetInfoPeer = GetScrollableTargetInfoAccessor()->ctor();
+        scrollableTargetInfoPeer->SetPattern(pattern);
+        scrollableTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
+        result = scrollableTargetInfoPeer;
+    } else {
+        auto eventTargetInfoPeer = GetEventTargetInfoAccessor()->ctor();
+        eventTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
+        eventTargetInfoPeer->isScrollableComponent_ = false;
+        result = eventTargetInfoPeer;
+    }
+    return result;
 }
 Ark_Boolean IsValidImpl(Ark_GestureRecognizer peer)
 {

@@ -32,8 +32,13 @@ void SetAlphabetIndexerOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    //auto convValue = Converter::OptConvert<type_name>(*options);
-    //AlphabetIndexerModelNG::SetSetAlphabetIndexerOptions(frameNode, convValue);
+    auto arrayValue = Converter::Convert<std::vector<std::string>>(options->arrayValue);
+    auto index = Converter::Convert<int32_t>(options->selected);
+    if (index < 0 || index >= static_cast<int32_t>(arrayValue.size())) {
+        index = 0;
+    }
+    IndexerModelStatic::SetArrayValue(frameNode, arrayValue);
+    IndexerModelStatic::SetSelected(frameNode, index);
 }
 } // AlphabetIndexerInterfaceModifier
 namespace AlphabetIndexerAttributeModifier {

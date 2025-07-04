@@ -18,6 +18,7 @@ node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
 incremental_root = "../incremental"
+incremental_root = "../incremental"
 libarkts_root = "./libarkts"
 
 build_root = "//build"
@@ -58,6 +59,7 @@ npm_cmd("ui2abc_build") {
 }
 
 action("ui2abc_panda_sdk") {
+action("ui2abc_panda_sdk") {
     script = "gn/command/gen_sdk.py"
     inputs = [
       "$root_out_dir/clang_x64/arkcompiler/ets_frontend/es2panda"
@@ -85,6 +87,7 @@ action("ui2abc_panda_sdk") {
 
 group("ui2abc") {
     deps = [
+        ":ui2abc_build"
         ":ui2abc_build"
     ]
 }

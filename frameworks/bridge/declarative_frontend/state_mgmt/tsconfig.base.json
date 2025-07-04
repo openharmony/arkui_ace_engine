@@ -108,6 +108,8 @@
 
     // interop
     "src/lib/interop/interop.ts",
+    "src/lib/interop/interop_configure.ts",
+    "src/lib/interop/interop_module.ts",
     
     // init
     "src/index.ts",

@@ -18,6 +18,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+void SetBuilder(Ark_NativePointer node, FrameNode* frameNode, CustomNodeBuilder& customNodeBuilder)
+{
+    CallbackHelper(customNodeBuilder).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) mutable {
+        auto builder = [uiNode]() {
+            ViewStackProcessor::GetInstance()->Push(uiNode);
+        };
+        CheckBoxModelStatic::SetBuilder(frameNode, std::move(builder));
+        }, node);
+}
+}
 namespace CheckboxModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
@@ -31,8 +42,26 @@ void SetCheckboxOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //CheckboxModelNG::SetSetCheckboxOptions(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    Converter::WithOptional(*options, [frameNode, node](const Ark_CheckboxOptions& options) {
+        auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+        CHECK_NULL_VOID(eventHub);
+
+        auto name = Converter::OptConvert<std::string>(options.name);
+        if (name) {
+            eventHub->SetName(name.value());
+        }
+
+        auto group = Converter::OptConvert<std::string>(options.group);
+        if (group) {
+            eventHub->SetGroupName(group.value());
+        }
+
+        auto arkIndicatorBuilder = Converter::OptConvert<CustomNodeBuilder>(options.indicatorBuilder);
+        if (arkIndicatorBuilder) {
+            SetBuilder(node, frameNode, arkIndicatorBuilder.value());
+        }
+    });
 }
 } // CheckboxInterfaceModifier
 namespace CheckboxAttributeModifier {

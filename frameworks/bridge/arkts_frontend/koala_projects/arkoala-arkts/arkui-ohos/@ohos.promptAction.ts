@@ -13,15 +13,39 @@
  * limitations under the License.
  */
 
-import { Resource } from "global.resource"
-import { Alignment } from "arkui/component/enums"
-import { ResourceColor, Offset } from "arkui/component/units"
-import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType } from "arkui/component/common"
-import { Serializer } from "arkui/component/peers/Serializer"
-import { ArkUIGeneratedNativeModule } from "#components"
-import { BusinessError } from "#external"
+import { KPointer } from "@koalaui/interop"
+import { ResourceColor, Offset, Dimension, EdgeStyles, EdgeColors, EdgeWidths,
+    BorderRadiuses } from 'arkui/component/units';
+import { Callback } from '@ohos.base';
+import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, Rectangle, TransitionEffect, KeyboardAvoidMode,
+    DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions } from 'arkui/component/common';
+import { AsyncCallback, CustomBuilder } from 'arkui/component';
+import { DialogAlignment } from 'arkui/component/alertDialog';
+import { BorderStyle, Alignment } from 'arkui/component/enums';
+import { Resource } from 'global.resource';
+import { LengthMetrics } from 'arkui/Graphics';
 
-namespace promptAction {
+export enum LevelMode {
+    OVERLAY = 0,
+    EMBEDDED = 1,
+}
+
+export enum ImmersiveMode {
+    DEFAULT = 0,
+    EXTEND = 1,
+}
+
+export interface DismissDialogAction {
+    dismiss: (() => void);
+    reason: DismissReason;
+}
+
+export declare class LevelOrder {
+    static clamp(order: number): LevelOrder;
+    getOrder(): number;
+}
+
+declare namespace promptAction {
     export interface ShowToastOptions {
         message: string | Resource;
         duration?: number;
@@ -43,43 +67,138 @@ namespace promptAction {
         SYSTEM_TOP_MOST = 2
     }
 
-    export function showToast(value: ShowToastOptions): void {
-        const thisSerializer : Serializer = Serializer.hold();
-        thisSerializer.writeShowToastOptions(value);
-        ArkUIGeneratedNativeModule._PromptAction_showToast(thisSerializer.asBuffer(), thisSerializer.length());
-        thisSerializer.release();
+    export interface Button {
+        text: string | Resource;
+        color: string | Resource;
+        primary?: boolean;
     }
 
-    export function openToast(value: ShowToastOptions): Promise<number> {
-        const thisSerializer : Serializer = Serializer.hold();
-        thisSerializer.writeShowToastOptions(value);
-        const promise = new Promise<number>((resolve, reject) => {
-            const callback = (value: number) => {
-                if (value < 0) {
-                    const error: BusinessError = ({code: Math.abs(value), message: ''});
-                    reject(error);
-                } else {
-                    resolve(value!);
-                }
-            }
-            thisSerializer.holdAndWriteCallback(callback);
-        });
-        ArkUIGeneratedNativeModule._PromptAction_openToast(thisSerializer.asBuffer(), thisSerializer.length());
-        thisSerializer.release();
-        return promise;
+    export interface ShowDialogOptions {
+        title?: string | Resource;
+        message?: string | Resource;
+        buttons?: Array<Button>
+        maskRect?: Rectangle;
+        alignment?: DialogAlignment;
+        offset?: Offset;
+        showInSubWindow?: boolean;
+        isModal?: boolean;
+        backgroundColor?: ResourceColor;
+        backgroundBlurStyle?: BlurStyle;
+        backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
+        backgroundEffect?: BackgroundEffectOptions;
+        shadow?: ShadowOptions | ShadowStyle;
+        enableHoverMode?: boolean;
+        hoverModeArea?: HoverModeAreaType;
+        onDidAppear?: (() => void);
+        onDidDisappear?: (() => void);
+        onWillAppear?: (() => void);
+        onWillDisappear?: (() => void);
+        levelMode?: LevelMode;
+        levelUniqueId?: number;
+        immersiveMode?: ImmersiveMode;
     }
 
-    export function closeToast(id: number): void {
-        const thisSerializer : Serializer = Serializer.hold();
-        const callback = (value: number) => {
-            const error: BusinessError = ({code: value, message: ''});
-            throw error;
-        }
-        thisSerializer.holdAndWriteCallback(callback);
-        ArkUIGeneratedNativeModule._PromptAction_closeToast(
-            thisSerializer.asBuffer(), thisSerializer.length(), id);
-        thisSerializer.release();
+    export interface ShowDialogSuccessResponse {
+        index: number;
     }
+
+    export type PromptActionSingleButton = [Button];
+    export type PromptActionDoubleButtons = [Button, Button | undefined];
+    export type PromptActionTripleButtons = [Button, Button | undefined, Button | undefined];
+    export type PromptActionQuadrupleButtons = [Button, Button | undefined, Button | undefined, Button | undefined];
+    export type PromptActionQuintupleButtons = [
+        Button, Button | undefined, Button | undefined, Button | undefined, Button | undefined];
+    export type PromptActionSextupleButtons = [
+        Button, Button | undefined, Button | undefined, Button | undefined, Button | undefined, Button | undefined];
+
+    export interface ActionMenuOptions {
+        title?: string | Resource;
+        buttons: PromptActionSingleButton | PromptActionDoubleButtons | PromptActionTripleButtons |
+            PromptActionQuadrupleButtons | PromptActionQuintupleButtons | PromptActionSextupleButtons;
+        showInSubWindow?: boolean;
+        isModal?: boolean;
+        levelMode?: LevelMode;
+        levelUniqueId?: number;
+        immersiveMode?: ImmersiveMode;
+    }
+
+    export interface ActionMenuSuccessResponse {
+        index: number;
+    }
+
+    export interface BaseDialogOptions {
+        maskRect?: Rectangle;
+        alignment?: DialogAlignment;
+        offset?: Offset;
+        showInSubWindow?: boolean;
+        isModal?: boolean;
+        autoCancel?: boolean;
+        transition?: TransitionEffect;
+        dialogTransition?: TransitionEffect;
+        maskTransition?: TransitionEffect;
+        maskColor?: ResourceColor;
+        onWillDismiss?: Callback<DismissDialogAction>;
+        onDidAppear?: (() => void);
+        onDidDisappear?: (() => void);
+        onWillAppear?: (() => void);
+        onWillDisappear?: (() => void);
+        keyboardAvoidMode?: KeyboardAvoidMode;
+        enableHoverMode?: boolean;
+        hoverModeArea?: HoverModeAreaType;
+        backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
+        backgroundEffect?: BackgroundEffectOptions;
+        keyboardAvoidDistance?: LengthMetrics;
+        levelMode?: LevelMode;
+        levelUniqueId?: number;
+        immersiveMode?: ImmersiveMode;
+        focusable?: boolean;
+    }
+
+    export interface DialogOptionsInternal {
+        transition?: KPointer;
+        dialogTransition?: KPointer;
+        maskTransition?: KPointer;
+    }
+
+    export interface CustomDialogOptions extends BaseDialogOptions {
+        builder: CustomBuilder;
+        backgroundColor?: ResourceColor;
+        cornerRadius?: Dimension | BorderRadiuses;
+        width?: Dimension;
+        height?: Dimension;
+        borderWidth?: Dimension | EdgeWidths;
+        borderColor?: ResourceColor | EdgeColors;
+        borderStyle?: BorderStyle | EdgeStyles;
+        backgroundBlurStyle?: BlurStyle;
+        shadow?: ShadowOptions | ShadowStyle;
+    }
+
+    export function showToast(options: ShowToastOptions): void;
+
+    export function openToast(options: ShowToastOptions): Promise<number>;
+
+    export function closeToast(toastId: number): void;
+
+    export function showDialog1(options: ShowDialogOptions, callback?: AsyncCallback<ShowDialogSuccessResponse>): void;
+
+    export function showDialog(options: ShowDialogOptions): Promise<ShowDialogSuccessResponse>;
+
+    export function showActionMenu1(options: ActionMenuOptions,
+        callback?: AsyncCallback<ActionMenuSuccessResponse>): void;
+
+    export function showActionMenu(options: ActionMenuOptions): Promise<ActionMenuSuccessResponse>;
+
+    export function openCustomDialog1(content: KPointer, options?: BaseDialogOptions,
+        optionsInternal?: DialogOptionsInternal): Promise<void>;
+
+    export function openCustomDialog(builder: KPointer, options: CustomDialogOptions,
+        optionsInternal?: DialogOptionsInternal): Promise<number>;
+
+    export function updateCustomDialog(content: KPointer, options: BaseDialogOptions): Promise<void>;
+
+    export function closeCustomDialog1(content: KPointer): Promise<void>;
+
+    export function closeCustomDialog(dialogId: number): void;
 }
 
 export default promptAction

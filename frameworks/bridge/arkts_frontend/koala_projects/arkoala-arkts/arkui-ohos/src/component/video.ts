@@ -520,9 +520,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
     }
     public setVideoOptions(value: VideoOptions): this {
         if (this.checkPriority("setVideoOptions")) {
-            const value_casted = value as (VideoOptions)
-            this.getPeer()?.setVideoOptionsAttribute(value_casted)
-            return this
+            hookSetVideoOptions(this, value)
         }
         return this
     }

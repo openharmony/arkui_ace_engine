@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
@@ -500,7 +501,7 @@ void CheckBoxPattern::UpdateUIStatus(bool check)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+void CheckBoxPattern::UpdateGroupStatus(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
@@ -513,6 +514,19 @@ void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(groupNode);
     auto checkboxList = groupManager->GetCheckboxList(group);
     UpdateCheckBoxGroupStatus(groupNode, checkboxList);
+}
+
+
+void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
+    UpdateGroupStatus(frameNode);
+}
+
+void CheckBoxPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
 }
 
 void CheckBoxPattern::CheckPageNode()

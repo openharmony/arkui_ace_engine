@@ -3269,4 +3269,36 @@ HWTEST_F(TextTestFiveNg, TextShiftMultipleSelection001, TestSize.Level1)
 
     EXPECT_EQ(pattern->IsSelected(), false);
 }
+
+/**
+ * @tc.name: TextMultiThread01
+ * @tc.desc: test text_pattern multi thread function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, TextMultiThread01, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    textPattern->OnAttachToFrameNodeMultiThread();
+    textPattern->OnDetachFromFrameNodeMultiThread(AceType::RawPtr(textFrameNode));
+    textPattern->OnDetachFromMainTreeMultiThread();
+    textPattern->OnAttachToMainTreeMultiThread();
+    textPattern->OnModifyDoneMultiThread();
+
+    textPattern->SetTextDetectEnableMultiThread(true);
+    EXPECT_EQ(textPattern->setTextDetectEnableMultiThread_, true);
+    textPattern->SetTextDetectEnableMultiThread(false);
+    EXPECT_EQ(textPattern->setTextDetectEnableMultiThread_, true);
+
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"123456");
+    textPattern->SetStyledStringMultiThread(spanString, true);
+    EXPECT_EQ(textPattern->isSpanStringMode_, true);
+
+    std::list<RefPtr<SpanItem>> spanItems;
+    textPattern->SetExternalSpanItemMultiThread(spanItems);
+    EXPECT_EQ(textPattern->isSpanStringMode_, false);
+}
 } // namespace OHOS::Ace::NG

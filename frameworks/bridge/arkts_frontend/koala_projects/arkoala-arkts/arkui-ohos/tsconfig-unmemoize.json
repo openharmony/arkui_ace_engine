@@ -49,6 +49,9 @@
             "@ohos/arkui/componentSnapshot": [
                 "./@ohos.arkui.componentSnapshot.ts"
             ],
+            "@ohos/arkui/dragController": [
+                "./@ohos.arkui.dragController.ts"
+            ],
             "@ohos/arkui/inspector": [
                 "./@ohos.arkui.inspector.ts"
             ],
@@ -79,8 +82,14 @@
             "@ohos/arkui/graphics": [
                 "./@ohos.arkui.graphics.ts"
             ],
+            "@ohos/overlayManager": [
+                "./@ohos.overlayManager.ts"
+            ],
             "@ohos/promptAction": [
                 "./@ohos.promptAction.ts"
+            ],            
+            "@ohos.arkui.stateManagement": [
+                "arkui/stateManagement/index.ts"
             ],
             "#stateMgmtTool": [
                 "arkui/stateManagement/tools/ts"
@@ -97,6 +106,7 @@
         "./@ohos.arkui.componentUtils.ts",
         "./@ohos.arkui.focusController.ts",
         "./@ohos.arkui.componentSnapshot.ts",
+        "./@ohos.arkui.dragController.ts",
         "./@ohos.arkui.inspector.ts",
         "./global/**/*.ts",
         "./@ohos.router.ts",
@@ -105,6 +115,7 @@
         "./@ohos.graphics.common2D.ts",
         "./@ohos.graphics.drawing.ts",
         "./@ohos.arkui.graphics.ts",
+        "./@ohos.overlayManager.ts",
         "./@ohos.promptAction.ts"
     ],
     "exclude": [

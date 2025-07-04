@@ -59,7 +59,7 @@ enum class ResponseType : int32_t {
     RIGHT_CLICK = 0,
     LONG_PRESS,
 };
-
+class SpanString;
 class ACE_FORCE_EXPORT ViewAbstractModel {
 public:
     static ViewAbstractModel* GetInstance();
@@ -379,7 +379,7 @@ public:
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
-    virtual void BindTips(const RefPtr<PopupParam>& param) = 0;
+    virtual void BindTips(const RefPtr<PopupParam>& param, const RefPtr<SpanString>& spanString) = 0;
     virtual int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
     virtual int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
     virtual int32_t ClosePopup(const RefPtr<NG::UINode>& customNode) = 0;

@@ -33,7 +33,7 @@ import { ClassDefinition } from "./ClassDefinition"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 export class ETSStructDeclaration extends ClassDeclaration {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 84)
+        assertValidPeer(pointer, 86)
         super(pointer)
     }
     static createETSStructDeclaration(def?: ClassDefinition): ETSStructDeclaration {

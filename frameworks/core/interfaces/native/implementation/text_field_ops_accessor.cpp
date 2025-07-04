@@ -13,9 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/common/container.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
+#include "core/components_ng/pattern/text_field/text_field_model_static.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextFieldOpsAccessor {
@@ -24,110 +31,208 @@ Ark_NativePointer RegisterTextFieldValueCallbackImpl(Ark_NativePointer node,
                                                      const TextFieldValueCallback* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetRegisterTextFieldValueCallback(frameNode, convValue);
-    return {};
+    CHECK_NULL_RETURN(frameNode && value && callback, nullptr);
+    auto text = Converter::OptConvert<std::u16string>(*value);
+
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto textValue = pattern->GetTextUtf16Value();
+    if (text.has_value() && text.value() != textValue) {
+        auto changed = pattern->InitValueText(text.value());
+        pattern->SetTextChangedAtCreation(changed);
+    }
+    bool typeIsString = value->selector == 0;
+    Opt_Number resourceType = value->value1.type;
+    auto onEvent = [resourceType, typeIsString, arkCallback = CallbackHelper(*callback)]
+        (const std::u16string& content) {
+        Converter::ConvContext ctx;
+        Ark_ResourceStr arkContent;
+        if (typeIsString) {
+            arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(content, &ctx);
+        } else {
+            auto container = Container::Current();
+            if (!container) {
+                LOGW("container is null");
+                return;
+            }
+            std::variant<int32_t, std::string> u8Content = UtfUtils::Str16DebugToStr8(content);
+            auto arkResourceContent = Converter::ArkValue<Ark_Resource>(u8Content, &ctx);
+            arkResourceContent.bundleName = Converter::ArkValue<Ark_String>(container->GetBundleName(), &ctx);
+            arkResourceContent.moduleName = Converter::ArkValue<Ark_String>(container->GetModuleName(), &ctx);
+            arkResourceContent.type = resourceType;
+            arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(arkResourceContent, &ctx);
+        }
+        arkCallback.InvokeSync(arkContent);
+    };
+    TextFieldModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
+    return node;
 }
 Ark_NativePointer TextFieldOpsSetWidthImpl(Ark_NativePointer node,
                                            const Opt_Union_Length_LayoutPolicy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetTextFieldOpsSetWidth(frameNode, convValue);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    Converter::VisitUnion(*value,
+        [frameNode](const Ark_Length& value) {
+            auto result = Converter::OptConvert<CalcDimension>(value);
+            TextFieldModelStatic::SetWidthAuto(frameNode, false);
+            Validator::ValidateNonNegative(result);
+            if (!result) {
+                ViewAbstract::ClearWidthOrHeight(frameNode, true);
+                return;
+            }
+            ViewAbstractModelStatic::SetWidth(frameNode, *result);
+        },
+        [frameNode](const Ark_LayoutPolicy& value) {
+            LOGE("ARKOALA: TextFieldOpsSetWidthImpl: Ark_LayoutPolicy is not supported.\n");
+        },
+        []() {}
+    );
+
+    // todo: auto set
+    // if (jsValue->IsString() && jsValue->ToString() == "auto") {
+    //     ViewAbstractModel::ClearWidthOrHeight(frameNode, true);
+    //     TextFieldModel::GetInstance()->SetWidthAuto(frameNode, true);
+    //     return;
+    // }
+    
     return {};
 }
 Ark_NativePointer TextFieldOpsSetHeightImpl(Ark_NativePointer node,
                                             const Opt_Union_Length_LayoutPolicy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetTextFieldOpsSetHeight(frameNode, convValue);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    Converter::VisitUnion(*value,
+        [frameNode](const Ark_Length& value) {
+            auto result = Converter::OptConvert<CalcDimension>(value);
+            Validator::ValidateNonNegative(result);
+            if (!result) {
+                ViewAbstract::ClearWidthOrHeight(frameNode, false);
+                return;
+            }
+            ViewAbstractModelStatic::SetHeight(frameNode, *result);
+        },
+        [frameNode](const Ark_LayoutPolicy& value) {
+            LOGE("ARKOALA: TextFieldOpsSetHeightImpl: Ark_LayoutPolicy is not supported.\n");
+        },
+        []() {}
+    );
     return {};
 }
 Ark_NativePointer TextFieldOpsSetPaddingImpl(Ark_NativePointer node,
                                              const Opt_Union_Padding_Length_LocalizedPadding* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetTextFieldOpsSetPadding(frameNode, convValue);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto padding = Converter::OptConvertPtr<PaddingProperty>(value);
+    ViewAbstractModelStatic::SetPadding(frameNode, padding);
+    if (padding) {
+        TextFieldModelStatic::SetPadding(frameNode, padding.value(), false);
+    } else {
+        TextFieldModelStatic::SetPadding(frameNode, NG::PaddingProperty(), true);
+    }
     return {};
 }
 Ark_NativePointer TextFieldOpsSetMarginImpl(Ark_NativePointer node,
                                             const Opt_Union_Padding_Length_LocalizedPadding* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetTextFieldOpsSetMargin(frameNode, convValue);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
+    TextFieldModelStatic::SetMargin(frameNode);
     return {};
 }
 Ark_NativePointer TextFieldOpsSetBorderImpl(Ark_NativePointer node,
                                             const Opt_BorderOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetTextFieldOpsSetBorder(frameNode, convValue);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto optValue = Converter::GetOptPtr(value);
+    CHECK_NULL_RETURN(optValue, nullptr);
+    auto style = Converter::OptConvert<BorderStyleProperty>(optValue->style);
+    if (style) {
+        ViewAbstractModelStatic::SetBorderStyle(frameNode, style.value());
+    }
+    auto width = Converter::OptConvert<BorderWidthProperty>(optValue->width);
+    if (width) {
+        ViewAbstractModelStatic::SetBorderWidth(frameNode, width.value());
+    }
+    auto color = Converter::OptConvert<BorderColorProperty>(optValue->color);
+    if (color) {
+        ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
+    }
+    auto radius = Converter::OptConvert<BorderRadiusProperty>(optValue->radius);
+    if (radius) {
+        ViewAbstractModelStatic::SetBorderRadius(frameNode, radius.value());
+    }
+    auto dashGap = Converter::OptConvert<BorderWidthProperty>(optValue->dashGap);
+    if (dashGap) {
+        ViewAbstractModelStatic::SetDashGap(frameNode, dashGap.value());
+    }
+    auto dashWidth = Converter::OptConvert<BorderWidthProperty>(optValue->dashWidth);
+    if (dashWidth) {
+        ViewAbstractModelStatic::SetDashWidth(frameNode, dashWidth.value());
+    }
+    TextFieldModelStatic::SetBackBorder(frameNode);
     return {};
 }
 Ark_NativePointer TextFieldOpsSetBorderWidthImpl(Ark_NativePointer node,
                                                  const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetTextFieldOpsSetBorderWidth(frameNode, convValue);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto width = Converter::OptConvertPtr<BorderWidthProperty>(value);
+    if (width) {
+        ViewAbstractModelStatic::SetBorderWidth(frameNode, width.value());
+    }
+    TextFieldModelStatic::SetBackBorder(frameNode);
     return {};
 }
 Ark_NativePointer TextFieldOpsSetBorderColorImpl(Ark_NativePointer node,
                                                  const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetTextFieldOpsSetBorderColor(frameNode, convValue);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto color = Converter::OptConvertPtr<BorderColorProperty>(value);
+    if (color) {
+        ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
+    }
+    TextFieldModelStatic::SetBackBorder(frameNode);
     return {};
 }
 Ark_NativePointer TextFieldOpsSetBorderStyleImpl(Ark_NativePointer node,
                                                  const Opt_Union_BorderStyle_EdgeStyles* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetTextFieldOpsSetBorderStyle(frameNode, convValue);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto style = Converter::OptConvertPtr<BorderStyleProperty>(value);
+    if (style) {
+        ViewAbstractModelStatic::SetBorderStyle(frameNode, style.value());
+    }
+    TextFieldModelStatic::SetBackBorder(frameNode);
     return {};
 }
 Ark_NativePointer TextFieldOpsSetBorderRadiusImpl(Ark_NativePointer node,
                                                   const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetTextFieldOpsSetBorderRadius(frameNode, convValue);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto radiuses = Converter::OptConvertPtr<BorderRadiusProperty>(value);
+    if (radiuses) {
+        ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
+    }
+    TextFieldModelStatic::SetBackBorder(frameNode);
     return {};
 }
 Ark_NativePointer TextFieldOpsSetBackgroundColorImpl(Ark_NativePointer node,
                                                      const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetTextFieldOpsSetBackgroundColor(frameNode, convValue);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto color = Converter::OptConvertPtr<Color>(value);
+    ViewAbstractModelStatic::SetBackgroundColor(frameNode, color);
+    TextFieldModelStatic::SetBackgroundColor(frameNode, color);
     return {};
 }
 } // TextFieldOpsAccessor

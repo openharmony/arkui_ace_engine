@@ -151,6 +151,7 @@ export enum CallbackKind {
     Kind_Callback_RichEditorTextSpanResult_Void = 1980824326,
     Kind_Callback_SheetDismiss_Void = 22609082,
     Kind_Callback_SheetType_Void = -224451112,
+    Kind_Callback_Size_Void = -646869686,
     Kind_Callback_SpringBackAction_Void = 1536231691,
     Kind_Callback_String_Number_Void = -879490874,
     Kind_Callback_String_Opt_Object_Void = -716524508,

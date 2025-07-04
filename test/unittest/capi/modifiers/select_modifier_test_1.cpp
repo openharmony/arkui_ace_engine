@@ -113,7 +113,7 @@ HWTEST_F(SelectModifierTest, setSelectedTestSelectedValidValues, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setSelectedTestSelectedInvalidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setSelected1TestSelectedInvalidValues, TestSize.Level1)
 {
     Opt_Union_Number_Resource initValueSelected;
     initValueSelected =

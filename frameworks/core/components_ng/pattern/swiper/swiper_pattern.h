@@ -32,7 +32,6 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/scrollable/lazy_container.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/swiper/swiper_accessibility_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -66,8 +65,8 @@ constexpr SwiperHoverFlag HOVER_INDICATOR = 1 << 1;
 constexpr SwiperHoverFlag HOVER_ARROW = 1 << 2;
 constexpr int32_t NEW_STYLE_MIN_TURN_PAGE_VELOCITY = 780;
 
-class SwiperPattern : public NestableScrollContainer, public LinearLazyContainer {
-    DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer, LinearLazyContainer);
+class SwiperPattern : public NestableScrollContainer {
+    DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
     UNITEST_FRIEND_CLASS;
 
 public:
@@ -345,7 +344,9 @@ public:
     void ShowPrevious(bool needCheckWillScroll = false);
     void SwipeTo(int32_t index);
     void ChangeIndex(int32_t index, bool useAnimation);
+    void ChangeIndexMultiThread(int32_t index, bool useAnimation);
     void ChangeIndex(int32_t index, SwiperAnimationMode mode);
+    void ChangeIndexMultiThread(int32_t index, SwiperAnimationMode mode);
 
     void OnVisibleChange(bool isVisible) override;
 
@@ -469,13 +470,8 @@ public:
     {
         isIndicatorLongPress_ = isIndicatorLongPress;
     }
-    void SetCachedCount(int32_t cachedCount)
-    {
-        if (cachedCount_.has_value() && cachedCount_.value() != cachedCount) {
-            SetLazyLoadFeature(true);
-        }
-        cachedCount_ = cachedCount;
-    }
+    void SetCachedCount(int32_t cachedCount);
+    void SetCachedCountMultiThread(int32_t cachedCount);
 
     void SetFinishCallbackType(FinishCallbackType finishCallbackType)
     {
@@ -877,9 +873,13 @@ private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
     void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const RefPtr<SwiperLayoutAlgorithm>& algo);

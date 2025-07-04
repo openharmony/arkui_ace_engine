@@ -18,6 +18,16 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
+constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
+constexpr uint32_t SAFE_AREA_EDGE_SYSTEM = 0;
+constexpr uint32_t SAFE_AREA_EDGE_TOP = 0;
+constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
+constexpr uint32_t INVALID_VALUE = 0;
+constexpr uint32_t DEFAULT_NAV_BAR_WIDTH = 240;
+} // namespace
+
 namespace NavigationModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
@@ -50,8 +60,18 @@ void SetNavBarWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //NavigationModelNG::SetSetNavBarWidth(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    Dimension def(DEFAULT_NAV_BAR_WIDTH, DimensionUnit::VP);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    auto result = Converter::Convert<Dimension>(value->value);
+    auto resultVal = result.Value();
+    if (resultVal <= INVALID_VALUE) {
+        NavigationModelStatic::SetNavBarWidth(frameNode, def);
+        return;
+    }
+    NavigationModelStatic::SetNavBarWidth(frameNode, result);
 }
 void SetNavBarPositionImpl(Ark_NativePointer node,
                            const Opt_NavBarPosition* value)

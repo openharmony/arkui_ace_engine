@@ -42,8 +42,12 @@ void SetValueImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GaugeModelNG::SetSetValue(frameNode, convValue);
+    auto convValue = Converter::OptConvert<float>(*value);
+    if (!convValue) {
+        GaugeModelNG::SetValue(frameNode, DEFAULT_GAUGE_VALUE);
+        return;
+    }
+    GaugeModelStatic::SetValue(frameNode, convValue);
 }
 void SetStartAngleImpl(Ark_NativePointer node,
                        const Opt_Number* value)
@@ -82,8 +86,14 @@ void SetDescriptionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GaugeModelNG::SetSetDescription(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    CallbackHelper(*optValue).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+        GaugeModelStatic::SetDescription(frameNode, uiNode);
+        }, node);
 }
 void SetTrackShadowImpl(Ark_NativePointer node,
                         const Opt_GaugeShadowOptions* value)

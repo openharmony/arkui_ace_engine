@@ -72,6 +72,7 @@ template("ace_base_source_set") {
       "perfmonitor/perf_monitor.cpp",
       "ressched/ressched_report.cpp",
       "subwindow/subwindow_manager.cpp",
+      "subwindow/subwindow_manager_static.cpp",
       "thread/background_task_executor.cpp",
       "thread/task_dependency_manager.cpp",
       "utils/base_id.cpp",
@@ -170,9 +171,13 @@ foreach(item, ace_platforms) {
       sources += [
         "$ace_root/adapter/preview/osal/event_report.cpp",
         "$ace_root/adapter/preview/osal/system_properties.cpp",
+        "$ace_root/adapter/preview/osal/system_properties_multi_thread.cpp",
       ]
     } else {
-      sources += [ "$ace_root/adapter/$platform/osal/system_properties.cpp" ]
+      sources += [
+        "$ace_root/adapter/$platform/osal/system_properties.cpp",
+        "$ace_root/adapter/$platform/osal/system_properties_multi_thread.cpp",
+      ]
     }
 
     if (platform == "ohos") {

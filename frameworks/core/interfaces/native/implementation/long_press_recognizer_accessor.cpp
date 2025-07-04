@@ -36,7 +36,9 @@ Ark_Boolean IsRepeatImpl(Ark_LongPressRecognizer peer)
 }
 Ark_Number GetDurationImpl(Ark_LongPressRecognizer peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_LONG_PRESS_DURATION);
+    CHECK_NULL_RETURN(peer, errorValue);
+    return Converter::ArkValue<Ark_Number>(peer->GetDuration());
 }
 } // LongPressRecognizerAccessor
 const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor()

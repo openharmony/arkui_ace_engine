@@ -214,7 +214,7 @@
       OHOS::Ace::DrawableDescriptor::*;
       OHOS::Ace::PixelMapDrawableDescriptor::*;
       OHOS::Ace::LayeredDrawableDescriptor::*;
-      OHOS::Ace::DrawableDescriptorProcessor::*;
+      OHOS::Ace::AnimatedDrawableDescriptor::*;
 
       OHOS::Ace::Framework::JsAcePage::*;
       OHOS::Ace::TextPickerModel::*;
@@ -228,6 +228,7 @@
       OHOS::Ace::Framework::ManifestParser::*;
       OHOS::Ace::NG::PipelineContext::*;
       OHOS::Ace::NG::OverlayManager::*;
+      OHOS::Ace::NG::DialogManagerStatic::*;
       OHOS::Ace::PipelineBase::PostAsyncEvent*;
       "OHOS::Ace::PipelineBase::GetFrontend() const";
       OHOS::Ace::NG::UINode::*;
@@ -402,6 +403,7 @@
       VTT?for?OHOS::Ace::DrawableDescriptor;
       VTT?for?OHOS::Ace::LayeredDrawableDescriptor;
       VTT?for?OHOS::Ace::PixelMapDrawableDescriptor;
+      VTT?for?OHOS::Ace::AnimatedDrawableDescriptor;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -533,6 +535,7 @@
       vtable?for?OHOS::Ace::DrawableDescriptor;
       vtable?for?OHOS::Ace::LayeredDrawableDescriptor;
       vtable?for?OHOS::Ace::PixelMapDrawableDescriptor;
+      vtable?for?OHOS::Ace::AnimatedDrawableDescriptor;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;

@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { Identifier } from "./Identifier"
 export class TSQualifiedName extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 129)
+        assertValidPeer(pointer, 131)
         super(pointer)
     }
     static createTSQualifiedName(left?: Expression, right?: Identifier): TSQualifiedName {

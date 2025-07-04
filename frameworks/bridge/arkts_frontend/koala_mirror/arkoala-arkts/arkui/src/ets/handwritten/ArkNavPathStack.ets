@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+// HEAD:frameworks/bridge/arkts_frontend/koala_mirror/arkoala-arkts/arkui/src/ets/handwritten/ArkNavPathStack.ets
 export class PathData {
     readonly name: string
     readonly param: Array<Object> = new Array<Object>()
@@ -24,3 +25,15 @@ export class PathData {
     }
     static readonly EMPTY: PathData = new PathData("", undefined)
 }
+/*
+import { NullLiteral } from '../../../generated';
+import { attachModifiers, updateThenAttach } from '../utilities/private';
+
+export function updateNullLiteral(original: NullLiteral): NullLiteral {
+    /* TODO: no getter provided yet */
+
+    const update = updateThenAttach(NullLiteral.updateNullLiteral, attachModifiers);
+    return update(original);
+}
+>>> origin/OpenHarmony_feature_20250328:frameworks/bridge/arkts_frontend/koala_mirror/ui2abc/libarkts/src/wrapper-compat/arkts-api/node-utilities/NullLiteral.ts
+*/

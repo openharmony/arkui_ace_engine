@@ -61,5 +61,6 @@ int32_t RemoveNodeCustomEventReceiverSafely(ArkUI_NodeHandle nodePtr,
     void (*eventReceiver)(ArkUI_NodeCustomEvent* event));
 ArkUI_NodeHandle GetParentSafely(ArkUI_NodeHandle node);
 int32_t RemoveAllChildrenSafely(ArkUI_NodeHandle parentNode);
+bool IsValidArkUINodeMultiThread(ArkUI_NodeHandle nodePtr);
 }; // namespace OHOS::Ace::NodeModel
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_SAFELY_H

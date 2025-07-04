@@ -33,4 +33,5 @@ export * from "./component/peers/CallbacksChecker"
 // export * from "./component/peers/ArkButtonPeer"
 export * from './stateManagement'
 export { LengthMetrics } from './Graphics'
+export * from "@ohos/overlayManager"
 export * from "@ohos/promptAction"

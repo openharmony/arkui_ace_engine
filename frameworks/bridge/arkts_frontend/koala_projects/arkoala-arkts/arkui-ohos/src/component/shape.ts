@@ -397,15 +397,7 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
     }
     public setShapeOptions(value?: PixelMap): this {
         if (this.checkPriority("setShapeOptions")) {
-            const value_casted = value as (PixelMap | undefined);
-            const value_type = runtimeType(value)
-            if ((RuntimeType.UNDEFINED) != (value_type)) {
-                const pixelMap = value_casted as PixelMap;
-                this.getPeer()?.setShapeOptions0Attribute(pixelMap)
-            } else {
-                this.getPeer()?.setShapeOptions1Attribute()
-            }
-            return this
+            hookSetShapeOptions(this, value);
         }
         return this
     }

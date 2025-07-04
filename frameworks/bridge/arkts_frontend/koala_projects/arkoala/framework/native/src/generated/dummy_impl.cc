@@ -8917,7 +8917,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                                const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
+                                const Opt_OnScrollFrameBeginCallback* value)
     {
         if (!needGroupedLog(1))
             return;
@@ -28307,7 +28307,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return nullptr;
     }
     } // TabsOpsAccessor
-    namespace UIContextImpAccessor {
+    namespace IUIContextAccessor {
     void FreezeUINode0Impl(const Ark_String* id,
                            Ark_Boolean isFrozen)
     {
@@ -28332,7 +28332,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    } // UIContextImpAccessor
+    } // IUIContextAccessor
     namespace GridItemOpsAccessor {
     Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
                                                     Ark_Boolean value,
@@ -29101,6 +29101,146 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return nullptr;
     }
+    Ark_NativePointer TextFieldOpsSetWidthImpl(Ark_NativePointer node,
+                                               const Opt_Union_Length_LayoutPolicy* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetWidth(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetHeightImpl(Ark_NativePointer node,
+                                                const Opt_Union_Length_LayoutPolicy* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetHeight(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetPaddingImpl(Ark_NativePointer node,
+                                                 const Opt_Union_Padding_Length_LocalizedPadding* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetPadding(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetMarginImpl(Ark_NativePointer node,
+                                                const Opt_Union_Padding_Length_LocalizedPadding* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetMargin(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetBorderImpl(Ark_NativePointer node,
+                                                const Opt_BorderOptions* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetBorder(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetBorderWidthImpl(Ark_NativePointer node,
+                                                     const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetBorderWidth(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetBorderColorImpl(Ark_NativePointer node,
+                                                     const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetBorderColor(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetBorderStyleImpl(Ark_NativePointer node,
+                                                     const Opt_Union_BorderStyle_EdgeStyles* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetBorderStyle(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetBorderRadiusImpl(Ark_NativePointer node,
+                                                      const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetBorderRadius(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetBackgroundColorImpl(Ark_NativePointer node,
+                                                         const Opt_ResourceColor* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetBackgroundColor(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
     } // TextFieldOpsAccessor
     namespace ActionSheetAccessor {
     void ShowImpl(const Ark_ActionSheetOptions* value)
@@ -29125,32 +29265,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // AlertDialogAccessor
 
-    namespace PromptActionAccessor {
-    void ShowToastImpl(const Ark_ShowToastOptions* value,
-                       const Callback_Number_Void* callback_value)
-    {
-        if (!needGroupedLog(1))
-            return;
-        string out("showToast(");
-        WriteToString(&out, value);
-        out.append(", ");
-        WriteToString(&out, callback_value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void CloseToastImpl(const Ark_Number* id,
-                        const Callback_Number_Void* callback_value)
-    {
-        if (!needGroupedLog(1))
-            return;
-        string out("closeToast(");
-        WriteToString(&out, id);
-        out.append(", ");
-        WriteToString(&out, callback_value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    } // PromptActionAccessor
     namespace SpringPropAccessor {
     void DestroyPeerImpl(Ark_SpringProp peer)
     {
@@ -35139,6 +35253,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOwnerViewImpl(Ark_CustomDialogController peer, Ark_NodeHandle node)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setOwnerView(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // CustomDialogControllerAccessor
     namespace LinearGradientAccessor {
     void DestroyPeerImpl(Ark_LinearGradient peer)
@@ -36575,6 +36697,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
+    }
+    Ark_Boolean IsScrollableComponentImpl(Ark_EventTargetInfo peer)
+    {
+        if (!needGroupedLog(1))
+            return 0;
+        string out("isScrollableComponent(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
     }
     } // EventTargetInfoAccessor
     namespace GestureRecognizerAccessor {
@@ -44458,13 +44590,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &TabsOpsAccessorImpl;
     }
 
-    const GENERATED_ArkUIUIContextImpAccessor* GetUIContextImpAccessor()
+    const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
     {
-        static const GENERATED_ArkUIUIContextImpAccessor UIContextImpAccessorImpl {
-            UIContextImpAccessor::FreezeUINode0Impl,
-            UIContextImpAccessor::FreezeUINode1Impl,
+        static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
+            IUIContextAccessor::FreezeUINode0Impl,
+            IUIContextAccessor::FreezeUINode1Impl,
         };
-        return &UIContextImpAccessorImpl;
+        return &IUIContextAccessorImpl;
     }
 
     const GENERATED_ArkUIFilterAccessor* GetFilterAccessor()
@@ -44550,6 +44682,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUITextFieldOpsAccessor TextFieldOpsAccessorImpl {
             TextFieldOpsAccessor::RegisterTextFieldValueCallbackImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetWidthImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetHeightImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetPaddingImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetMarginImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderWidthImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderColorImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderStyleImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderRadiusImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBackgroundColorImpl,
         };
         return &TextFieldOpsAccessorImpl;
     }
@@ -44568,15 +44710,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AlertDialogAccessor::ShowImpl,
         };
         return &AlertDialogAccessorImpl;
-    }
-
-    const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor()
-    {
-        static const GENERATED_ArkUIPromptActionAccessor PromptActionAccessorImpl {
-            PromptActionAccessor::ShowToastImpl,
-            PromptActionAccessor::CloseToastImpl,
-        };
-        return &PromptActionAccessorImpl;
     }
 
     const GENERATED_ArkUISpringPropAccessor* GetSpringPropAccessor()
@@ -45548,6 +45681,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CustomDialogControllerAccessor::GetFinalizerImpl,
             CustomDialogControllerAccessor::OpenImpl,
             CustomDialogControllerAccessor::CloseImpl,
+            CustomDialogControllerAccessor::SetOwnerViewImpl,
         };
         return &CustomDialogControllerAccessorImpl;
     }
@@ -45883,6 +46017,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             EventTargetInfoAccessor::CtorImpl,
             EventTargetInfoAccessor::GetFinalizerImpl,
             EventTargetInfoAccessor::GetIdImpl,
+            EventTargetInfoAccessor::IsScrollableComponentImpl,
         };
         return &EventTargetInfoAccessorImpl;
     }
@@ -47479,7 +47614,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetGlobalScopeUicontextFontScaleAccessor,
             GetGlobalScopeUicontextTextMenuAccessor,
             GetTabsOpsAccessor,
-            GetUIContextImpAccessor,
+            GetIUIContextAccessor,
             GetFilterAccessor,
             GetVisualEffectAccessor,
             GetNavExtenderAccessor,
@@ -47638,7 +47773,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetCustomSpanAccessor,
             GetLinearIndicatorControllerAccessor,
             GetGlobalScopeAccessor,
-            GetPromptActionAccessor,
             GetRouterExtenderAccessor,
         };
         return &accessorsImpl;

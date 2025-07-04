@@ -1177,7 +1177,7 @@ ani_object UIContentImpl::GetUIAniContext()
     CHECK_NULL_RETURN(frontend, result);
     auto arktsFrontend = AceType::DynamicCast<ArktsFrontend>(frontend);
     CHECK_NULL_RETURN(arktsFrontend, result);
-    result = arktsFrontend->CallGetUIContextFunc();
+    result = arktsFrontend->CallGetUIContextFunc(instanceId_);
     return result;
 }
 
@@ -1261,6 +1261,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
             AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
             AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
             AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
+            AceApplicationInfo::GetInstance().SetDebugForParallel(context->GetApplicationInfo()->debug);
             AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
             AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
             CapabilityRegistry::Register();
@@ -1786,6 +1787,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         AceApplicationInfo::GetInstance().SetApiTargetVersion(context->GetApplicationInfo()->apiTargetVersion);
         AceApplicationInfo::GetInstance().SetAppVersionName(context->GetApplicationInfo()->versionName);
         AceApplicationInfo::GetInstance().SetAppVersionCode(context->GetApplicationInfo()->versionCode);
+        AceApplicationInfo::GetInstance().SetDebugForParallel(context->GetApplicationInfo()->debug);
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
         CapabilityRegistry::Register();
@@ -2042,6 +2044,14 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     if (vmType_ == VMType::ARK_NATIVE) {
         frontendType = FrontendType::ARK_TS;
+    }
+
+    if (appInfo->codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_HYBRID) {
+        if (vmType_ == VMType::ARK_NATIVE) {
+            frontendType = FrontendType::STATIC_HYBRID_DYNAMIC;
+        } else {
+            frontendType = FrontendType::DYNAMIC_HYBRID_STATIC;
+        }
     }
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType, context_, info,

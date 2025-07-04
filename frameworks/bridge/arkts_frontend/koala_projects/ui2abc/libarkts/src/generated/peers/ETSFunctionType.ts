@@ -37,7 +37,7 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 export class ETSFunctionType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 67)
+        assertValidPeer(pointer, 69)
         super(pointer)
     }
     static createETSFunctionType(signature: FunctionSignature | undefined, funcFlags: Es2pandaScriptFunctionFlags): ETSFunctionType {
@@ -65,12 +65,6 @@ export class ETSFunctionType extends TypeNode {
     }
     get flags(): Es2pandaScriptFunctionFlags {
         return global.generatedEs2panda._ETSFunctionTypeFlags(global.context, this.peer)
-    }
-    get isThrowing(): boolean {
-        return global.generatedEs2panda._ETSFunctionTypeIsThrowingConst(global.context, this.peer)
-    }
-    get isRethrowing(): boolean {
-        return global.generatedEs2panda._ETSFunctionTypeIsRethrowingConst(global.context, this.peer)
     }
     get isExtensionFunction(): boolean {
         return global.generatedEs2panda._ETSFunctionTypeIsExtensionFunctionConst(global.context, this.peer)

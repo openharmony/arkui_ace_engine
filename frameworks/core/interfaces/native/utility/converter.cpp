@@ -432,14 +432,18 @@ std::optional<StringArray> ResourceConverter::ToFontFamilies()
 std::optional<Dimension> ResourceConverter::ToDimension()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
-    if (type_ == ResourceType::FLOAT) {
+    if (type_ == ResourceType::INTEGER) {
+        auto resource = ToInt();
+        if (!resource) return std::nullopt;
+        return Dimension(*resource, DimensionUnit::VP);
+    } else if (type_ == ResourceType::FLOAT) {
         if (id_ == -1 && !params_.empty()) {
             return themeConstants_->GetDimensionByName(params_.front());
-        }
-        if (id_ != -1) {
+        } else if (id_ != -1) {
             return themeConstants_->GetDimension(id_);
+        } else {
+            LOGE("ResourceConverter::ToDimension Unknown resource value");
         }
-        LOGE("ResourceConverter::ToDimension Unknown resource value");
     }
     return std::nullopt;
 }
@@ -1022,6 +1026,7 @@ Font Convert(const Ark_Font& src)
     Font font;
     if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(src.family); fontfamiliesOpt) {
         font.fontFamilies = fontfamiliesOpt->families;
+        font.fontFamiliesNG = std::optional<std::vector<std::string>>(fontfamiliesOpt->families);
     }
     auto fontSize = OptConvert<Dimension>(src.size);
     if (fontSize) {
@@ -1309,6 +1314,7 @@ void AssignCast(std::optional<TextSpanType>& dst, const Ark_TextSpanType& src)
         case ARK_TEXT_SPAN_TYPE_TEXT: dst = TextSpanType::TEXT; break;
         case ARK_TEXT_SPAN_TYPE_IMAGE: dst = TextSpanType::IMAGE; break;
         case ARK_TEXT_SPAN_TYPE_MIXED: dst = TextSpanType::MIXED; break;
+        case ARK_TEXT_SPAN_TYPE_DEFAULT: dst = TextSpanType::NONE; break;
         default:
             LOGE("Unexpected enum value in Ark_TextSpanType: %{public}d", src);
             dst = std::nullopt;
@@ -1322,6 +1328,7 @@ void AssignCast(std::optional<TextResponseType>& dst, const Ark_TextResponseType
         case ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;
         case ARK_TEXT_RESPONSE_TYPE_LONG_PRESS: dst = TextResponseType::LONG_PRESS; break;
         case ARK_TEXT_RESPONSE_TYPE_SELECT: dst = TextResponseType::SELECTED_BY_MOUSE; break;
+        case ARK_TEXT_RESPONSE_TYPE_DEFAULT: dst = TextResponseType::NONE; break;
         default:
             LOGE("Unexpected enum value in Ark_TextResponseType: %{public}d", src);
             dst = std::nullopt;
@@ -1701,16 +1708,19 @@ RefPtr<Curve> Convert(const Ark_ICurve& src)
     return src ? src->handler : nullptr;
 }
 
-template<>
-DragPreviewOption Convert(const Ark_DragPreviewOptions &src)
+void ParseDragPreviewMode(DragPreviewOption& previewOption, const Ark_DragPreviewOptions &src)
 {
-    DragPreviewOption previewOption;
     auto previewModeHandler = [&previewOption](DragPreviewMode mode) -> bool {
         switch (mode) {
             case DragPreviewMode::AUTO: previewOption.ResetDragPreviewMode(); return true;
             case DragPreviewMode::DISABLE_SCALE: previewOption.isScaleEnabled = false; break;
             case DragPreviewMode::ENABLE_DEFAULT_SHADOW: previewOption.isDefaultShadowEnabled = true; break;
             case DragPreviewMode::ENABLE_DEFAULT_RADIUS: previewOption.isDefaultRadiusEnabled = true; break;
+            case DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT:
+                previewOption.isDefaultDragItemGrayEffectEnabled = true; break;
+            case DragPreviewMode::ENABLE_MULTI_TILE_EFFECT: previewOption.isMultiTiled = true; break;
+            case DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW:
+                previewOption.isTouchPointCalculationBasedOnFinalPreviewEnable = true; break;
             default: break;
         }
         return false;
@@ -1732,6 +1742,13 @@ DragPreviewOption Convert(const Ark_DragPreviewOptions &src)
             }
         },
         []() {});
+}
+
+template<>
+DragPreviewOption Convert(const Ark_DragPreviewOptions &src)
+{
+    DragPreviewOption previewOption;
+    ParseDragPreviewMode(previewOption, src);
     Converter::VisitUnion(src.numberBadge,
         [&previewOption](const Ark_Number& value) {
             previewOption.isNumber = true;
@@ -1745,6 +1762,12 @@ DragPreviewOption Convert(const Ark_DragPreviewOptions &src)
             previewOption.isNumber = false;
             previewOption.isShowBadge = true;
         });
+    if (src.sizeChangeEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto sizeChangeEffect = Converter::OptConvert<DraggingSizeChangeEffect>(src.sizeChangeEffect.value);
+        if (sizeChangeEffect) {
+            previewOption.sizeChangeEffect = sizeChangeEffect.value();
+        }
+    }
     return previewOption;
 }
 
@@ -1774,13 +1797,130 @@ void AssignCast(std::optional<float>& dst, const Ark_String& src)
     }
 }
 
-template<>
-void AssignCast(std::optional<double>& dst, const Ark_String& src)
+Dimension ConvertFromString(const std::string& str, DimensionUnit unit)
 {
-    auto value = Convert<std::string>(src);
-    double result;
-    if (StringUtils::StringToDouble(value, result)) {
-        dst = result;
+    static const int32_t percentUnit = 100;
+    static const std::unordered_map<std::string, DimensionUnit> uMap {
+        { "px", DimensionUnit::PX },
+        { "vp", DimensionUnit::VP },
+        { "fp", DimensionUnit::FP },
+        { "%", DimensionUnit::PERCENT },
+        { "lpx", DimensionUnit::LPX },
+        { "auto", DimensionUnit::AUTO },
+    };
+
+    double value = 0.0;
+
+    if (str.empty()) {
+        LOGE("UITree |ERROR| empty string");
+        return Dimension(value, unit);
+    }
+
+    for (int32_t i = static_cast<int32_t>(str.length() - 1); i >= 0; --i) {
+        if (str[i] >= '0' && str[i] <= '9') {
+            value = StringUtils::StringToDouble(str.substr(0, i + 1));
+            auto subStr = str.substr(i + 1);
+            auto iter = uMap.find(subStr);
+            if (iter != uMap.end()) {
+                unit = iter->second;
+            }
+            value = unit == DimensionUnit::PERCENT ? value / percentUnit : value;
+            break;
+        }
+    }
+    return Dimension(value, unit);
+}
+
+std::optional<Dimension> OptConvertFromArkResource(const Ark_Resource& src, DimensionUnit defaultUnit)
+{
+    ResourceConverter converter(src);
+    std::optional<Dimension> dimension;
+    ResourceType type = static_cast<ResourceType>(OptConvert<int>(src.type).value_or(0));
+    if (type == ResourceType::FLOAT) {
+        dimension = converter.ToDimension();
+    } else if (type == ResourceType::STRING) {
+        std::optional<std::string> optStr = converter.ToString();
+        if (optStr.has_value()) {
+            dimension = ConvertFromString(optStr.value(), defaultUnit);
+        }
+    } else if (type == ResourceType::INTEGER) {
+        std::optional<int32_t> intValue = converter.ToInt();
+        if (intValue.has_value()) {
+            dimension = Dimension(intValue.value(), defaultUnit);
+        }
+    } else {
+        LOGE("Unexpected converter type: %{public}d\n", type);
+    }
+    return dimension;
+}
+
+std::optional<Dimension> OptConvertFromArkLengthResource(const Ark_Resource& src, DimensionUnit defaultUnit)
+{
+    ResourceConverter converter(src);
+    std::optional<Dimension> dimension;
+    ResourceType type = static_cast<ResourceType>(OptConvert<int>(src.type).value_or(0));
+    if (type == ResourceType::STRING || type == ResourceType::FLOAT) {
+        auto temp = src;
+        temp.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::STRING));
+        ResourceConverter converter(temp);
+        std::optional<std::string> optStr = converter.ToString();
+        if (optStr.has_value() && !optStr.value().empty()) {
+            dimension = ConvertFromString(optStr.value(), defaultUnit);
+        } else {
+            ResourceConverter converter2(src);
+            std::optional<std::string> optStr2 = converter2.ToString();
+            if (optStr2.has_value()) {
+                dimension = ConvertFromString(optStr2.value(), defaultUnit);
+            }
+        }
+    } else if (type == ResourceType::INTEGER) {
+        std::optional<int32_t> intValue = converter.ToInt();
+        if (intValue.has_value()) {
+            dimension = Dimension(intValue.value(), defaultUnit);
+        }
+    } else {
+        LOGE("Unexpected converter type: %{public}d\n", type);
+    }
+    return dimension;
+}
+
+std::optional<Dimension> OptConvertFromArkNumStrRes(const Ark_Union_Number_String_Resource& src,
+    DimensionUnit defaultUnit)
+{
+    std::optional<Dimension> dimension;
+    auto selector = src.selector;
+    if (selector == NUM_0) {
+        std::optional<float> optValue = Converter::OptConvert<float>(src.value0);
+        if (optValue.has_value()) {
+            dimension = Dimension(optValue.value(), defaultUnit);
+        }
+    } else if (selector == NUM_1) {
+        std::optional<std::string> optStr = Converter::OptConvert<std::string>(src.value1);
+        if (optStr.has_value()) {
+            dimension = ConvertFromString(optStr.value(), defaultUnit);
+        }
+    } else if (selector == NUM_2) {
+        dimension = OptConvertFromArkResource(src.value2, defaultUnit);
+    } else {
+        LOGE("Unexpected converter type: %{public}d\n", selector);
+    }
+    return dimension;
+}
+
+std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
+{
+    std::optional<Dimension> dimension;
+    if (src.type == Ark_Tag::INTEROP_TAG_RESOURCE || src.type == Ark_RuntimeType::INTEROP_RUNTIME_OBJECT) {
+        auto resource = ArkValue<Ark_Resource>(src);
+        dimension = OptConvertFromArkLengthResource(resource, defaultUnit);
+        return dimension.value_or(Dimension());
+    } else {
+        auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
+        auto value = src.value;
+        if (unit == OHOS::Ace::DimensionUnit::PERCENT) {
+            value /= 100.0f;
+        }
+        return Dimension(value, unit);
     }
 }
 
@@ -1790,6 +1930,23 @@ void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src)
     auto str8 = OptConvert<std::string>(src);
     if (str8) {
         dst = UtfUtils::Str8ToStr16(str8.value());
+    }
+}
+
+template<>
+Dimension Convert(const Ark_Length& src)
+{
+    if (src.type == Ark_Tag::INTEROP_TAG_RESOURCE || src.type == Ark_RuntimeType::INTEROP_RUNTIME_OBJECT) {
+        auto resource = ArkValue<Ark_Resource>(src);
+        ResourceConverter converter(resource);
+        return converter.ToDimension().value_or(Dimension());
+    } else {
+        auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
+        auto value = src.value;
+        if (unit == OHOS::Ace::DimensionUnit::PERCENT) {
+            value /= 100.0f; // percent is normalized [0..1]
+        }
+        return Dimension(value, unit);
     }
 }
 

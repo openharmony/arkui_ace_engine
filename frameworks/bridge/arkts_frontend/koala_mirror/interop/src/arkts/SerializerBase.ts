@@ -19,11 +19,23 @@ import { NativeBuffer } from "./NativeBuffer"
 import { InteropNativeModule } from "./InteropNativeModule"
 import { MaterializedBase } from "./MaterializedBase"
 import {unsafeMemory} from "std/core"
+import {unsafeMemory} from "std/core"
 
 /**
  * Value representing possible JS runtime object type.
  * Must be synced with "enum RuntimeType" in C++.
  */
+export final class RuntimeType {
+    static readonly UNEXPECTED = -1
+    static readonly NUMBER = 1
+    static readonly STRING = 2
+    static readonly OBJECT = 3
+    static readonly BOOLEAN = 4
+    static readonly UNDEFINED = 5
+    static readonly BIGINT = 6
+    static readonly FUNCTION = 7
+    static readonly SYMBOL = 8
+    static readonly MATERIALIZED = 9
 export final class RuntimeType {
     static readonly UNEXPECTED = -1
     static readonly NUMBER = 1
@@ -41,6 +53,14 @@ export final class RuntimeType {
  * Value representing object type in serialized data.
  * Must be synced with "enum Tags" in C++.
  */
+export enum Tags {
+    UNDEFINED = 101,
+    INT32 = 102,
+    FLOAT32 = 103,
+    STRING = 104,
+    LENGTH = 105,
+    RESOURCE = 106,
+    OBJECT = 107,
 export enum Tags {
     UNDEFINED = 101,
     INT32 = 102,
@@ -123,6 +143,7 @@ SerializerBase.registerCustomSerializer(new DateSerializer())
 
 export class SerializerBase implements Disposable {
     private position: int64 = 0
+    private position: int64 = 0
     private _buffer: KSerializerBuffer
     private _length: int32
     private _last: int64
@@ -165,7 +186,10 @@ export class SerializerBase implements Disposable {
         this._length = length
         this.position = this._buffer
         this._last = this._buffer + length - 1;
+        this.position = this._buffer
+        this._last = this._buffer + length - 1;
     }
+
 
     public release() {
         this.releaseResources()
@@ -176,6 +200,7 @@ export class SerializerBase implements Disposable {
         SerializerBase.poolTop -= 1;
     }
     public final dispose() {
+    public final dispose() {
         InteropNativeModule._Free(this._buffer)
         this._buffer = nullptr
     }
@@ -185,6 +210,7 @@ export class SerializerBase implements Disposable {
     }
     final length(): int32 {
         return (this.position - this._buffer) as int32
+        return (this.position - this._buffer) as int32
     }
 
     final toArray(): byte[] {
@@ -192,9 +218,15 @@ export class SerializerBase implements Disposable {
         let result = new byte[len]
         for (let i = 0; i < len; i++) {
             result[i] = unsafeMemory.readInt8(this._buffer + i)
+        const len = this.length()
+        let result = new byte[len]
+        for (let i = 0; i < len; i++) {
+            result[i] = unsafeMemory.readInt8(this._buffer + i)
         }
         return result
     }
+
+    private final updateCapacity(value: int32) {
 
     private final updateCapacity(value: int32) {
         let buffSize = this._length
@@ -213,8 +245,10 @@ export class SerializerBase implements Disposable {
         InteropNativeModule._Free(oldBuffer)
     }
 
+
     private heldResources: Array<ResourceId> = new Array<ResourceId>()
     private heldResourcesCount: int32 = 0
+    private final addHeldResource(resourceId: ResourceId) {
     private final addHeldResource(resourceId: ResourceId) {
         if (this.heldResourcesCount == this.heldResources.length)
             this.heldResources.push(resourceId)
@@ -222,6 +256,7 @@ export class SerializerBase implements Disposable {
             this.heldResources[this.heldResourcesCount] = resourceId
         this.heldResourcesCount++
     }
+    final holdAndWriteCallback(callback: object, hold: pointer = 0, release: pointer = 0, call: pointer = 0, callSync: pointer = 0): ResourceId {
     final holdAndWriteCallback(callback: object, hold: pointer = 0, release: pointer = 0, call: pointer = 0, callSync: pointer = 0): ResourceId {
         const resourceId = ResourceHolder.instance().registerAndHold(callback)
         this.addHeldResource(resourceId)
@@ -232,6 +267,7 @@ export class SerializerBase implements Disposable {
         this.writePointer(callSync)
         return resourceId
     }
+    final holdAndWriteCallbackForPromiseVoid(hold: pointer = 0, release: pointer = 0, call: pointer = 0): [Promise<void>, ResourceId] {
     final holdAndWriteCallbackForPromiseVoid(hold: pointer = 0, release: pointer = 0, call: pointer = 0): [Promise<void>, ResourceId] {
         let resourceId: ResourceId = 0
         const promise = new Promise<void>((resolve: (value: PromiseLike<void>) => void, reject: (err: Error) => void) => {
@@ -246,6 +282,7 @@ export class SerializerBase implements Disposable {
         return [promise, resourceId]
     }
     final holdAndWriteCallbackForPromise<T>(hold: pointer = 0, release: pointer = 0, call: pointer = 0): [Promise<T>, ResourceId] {
+    final holdAndWriteCallbackForPromise<T>(hold: pointer = 0, release: pointer = 0, call: pointer = 0): [Promise<T>, ResourceId] {
         let resourceId: ResourceId = 0
         const promise = new Promise<T>((resolve: (value: T|PromiseLike<T>) => void, reject: (err: Error) => void) => {
             const callback = (value?: T|undefined, err?: Error|undefined) => {
@@ -258,6 +295,7 @@ export class SerializerBase implements Disposable {
         })
         return [promise, resourceId]
     }
+    final holdAndWriteObject(obj:object, hold: pointer = 0, release: pointer = 0): ResourceId {
     final holdAndWriteObject(obj:object, hold: pointer = 0, release: pointer = 0): ResourceId {
         const resourceId = ResourceHolder.instance().registerAndHold(obj)
         this.addHeldResource(resourceId)
@@ -277,6 +315,7 @@ export class SerializerBase implements Disposable {
         this.writeInt32(resourceId)
     }
     private final releaseResources() {
+    private final releaseResources() {
         if (this.heldResourcesCount == 0) return
         for (let i = 0; i < this.heldResourcesCount; i++) {
             InteropNativeModule._ReleaseCallbackResource(this.heldResources[i])
@@ -295,9 +334,11 @@ export class SerializerBase implements Disposable {
         this.writeInt8(Tags.UNDEFINED as int32)
     }
     final writeFunction(value: Object) {
+    final writeFunction(value: Object) {
         this.writeInt32(registerCallback(value))
     }
     final writeTag(tag: int32): void {
+        this.writeInt8(tag)
         this.writeInt8(tag)
     }
     final writeNumber(value: number|undefined) {
@@ -306,15 +347,29 @@ export class SerializerBase implements Disposable {
             return
         }
         if (value == Math.round(value)) {
+        if (value == Math.round(value)) {
             this.writeTag(Tags.INT32)
             this.writeInt32(value as int32)
         } else {
             this.writeInt8(Tags.FLOAT32)
             this.writeFloat32(value as float)
+            this.writeInt8(Tags.FLOAT32)
+            this.writeFloat32(value as float)
         }
     }
 
+
     final writeInt8(value: int32) {
+        let pos = this.position
+        let newPos = pos + 1
+        if (newPos > this._last) {
+            this.updateCapacity(1)
+            pos = this.position
+            newPos = pos + 1
+        }
+
+        unsafeMemory.writeInt8(pos, value as byte)
+        this.position = newPos
         let pos = this.position
         let newPos = pos + 1
         if (newPos > this._last) {
@@ -338,6 +393,16 @@ export class SerializerBase implements Disposable {
 
         unsafeMemory.writeInt32(pos, value)
         this.position = newPos
+        let pos = this.position
+        let newPos = pos + 4
+        if (newPos > this._last) {
+            this.updateCapacity(4)
+            pos = this.position
+            newPos = pos + 4
+        }
+
+        unsafeMemory.writeInt32(pos, value)
+        this.position = newPos
     }
     final writeInt64(value: int64) {
         let pos = this.position
@@ -350,8 +415,28 @@ export class SerializerBase implements Disposable {
 
         unsafeMemory.writeInt64(pos, value)
         this.position = newPos
+        let pos = this.position
+        let newPos = pos + 8
+        if (newPos > this._last) {
+            this.updateCapacity(8)
+            pos = this.position
+            newPos = pos + 8
+        }
+
+        unsafeMemory.writeInt64(pos, value)
+        this.position = newPos
     }
     final writeFloat32(value: float32) {
+        let pos = this.position
+        let newPos = pos + 4
+        if (newPos > this._last) {
+            this.updateCapacity(4)
+            pos = this.position
+            newPos = pos + 4
+        }
+
+        unsafeMemory.writeFloat32(pos, value)
+        this.position = newPos
         let pos = this.position
         let newPos = pos + 4
         if (newPos > this._last) {
@@ -382,8 +467,38 @@ export class SerializerBase implements Disposable {
             unsafeMemory.writeInt8(pos, 1 as byte);
         else if (value == false)
             unsafeMemory.writeInt8(pos, 0 as byte);
+        let pos = this.position
+        let newPos = pos + 1
+        if (newPos > this._last) {
+            this.updateCapacity(1)
+            pos = this.position
+            newPos = pos + 1
+        }
+        this.position = newPos
+
+        if (value == undefined)
+            unsafeMemory.writeInt8(pos, 5 as byte);
+        else if (value == true)
+            unsafeMemory.writeInt8(pos, 1 as byte);
+        else if (value == false)
+            unsafeMemory.writeInt8(pos, 0 as byte);
     }
     final writeString(value: string) {
+        const encodedLength = unsafeMemory.getStringSizeInBytes(value)
+
+        let pos = this.position
+        if (pos + encodedLength + 5 > this._last) {
+            this.updateCapacity(encodedLength + 5)
+            pos = this.position
+        }
+
+        if (encodedLength > 0)
+            unsafeMemory.writeString(pos + 4, value)
+        // NOTE: add \0 for supporting C char* reading from buffer for utf8-strings,
+        // need check native part fot utf16 cases and probably change this solution.
+        unsafeMemory.writeInt8(pos + encodedLength + 4, 0 as byte)
+        unsafeMemory.writeInt32(pos, encodedLength + 1)
+        this.position = pos + encodedLength + 4 + 1
         const encodedLength = unsafeMemory.getStringSizeInBytes(value)
 
         let pos = this.position

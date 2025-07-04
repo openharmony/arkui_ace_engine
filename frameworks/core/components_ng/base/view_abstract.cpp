@@ -23,6 +23,7 @@
 
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
@@ -43,7 +44,16 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+enum class WidthBreakpoint { WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL };
+enum class HeightBreakpoint { HEIGHT_SM, HEIGHT_MD, HEIGHT_LG };
+constexpr double WIDTH_BREAKPOINT_320VP = 320.0; // window width threshold
+constexpr double WIDTH_BREAKPOINT_600VP = 600.0;
+constexpr double WIDTH_BREAKPOINT_840VP = 840.0;
+constexpr double WIDTH_BREAKPOINT_1440VP = 1440.0;
+constexpr double HEIGHT_ASPECTRATIO_THRESHOLD1 = 0.8; // window height/width = 0.8
+constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
+} // namespace
 void ViewAbstract::SetWidth(const CalcLength& width)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1494,29 +1504,6 @@ void ViewAbstract::SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFun
     focusHub->SetOnFocusAxisCallback(std::move(onFocusAxisCallback));
 }
 
-void ViewAbstract::AddDragFrameNodeToManager()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-
-    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
-}
-
-void ViewAbstract::AddDragFrameNodeToManager(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-
-    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
-}
-
 void ViewAbstract::NotifyDragStartRequest(DragStartRequestStatus dragStatus)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1581,8 +1568,6 @@ void ViewAbstract::SetOnDragEnter(FrameNode* frameNode,
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_ENTER, std::move(onDragEnter));
-
-    AddDragFrameNodeToManager(frameNode);
 }
 
 void ViewAbstract::SetOnDragMove(FrameNode* frameNode,
@@ -1592,8 +1577,6 @@ void ViewAbstract::SetOnDragMove(FrameNode* frameNode,
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_MOVE, std::move(onDragMove));
-
-    AddDragFrameNodeToManager(frameNode);
 }
 
 void ViewAbstract::SetOnDragLeave(FrameNode* frameNode,
@@ -1603,8 +1586,6 @@ void ViewAbstract::SetOnDragLeave(FrameNode* frameNode,
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, std::move(onDragLeave));
-
-    AddDragFrameNodeToManager(frameNode);
 }
 
 void ViewAbstract::SetOnPreDrag(std::function<void(const PreDragStatus)>&& onPreDragFunc)
@@ -1628,8 +1609,6 @@ void ViewAbstract::SetOnDragEnter(
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_ENTER, std::move(onDragEnter));
-
-    AddDragFrameNodeToManager();
 }
 
 void ViewAbstract::SetOnDragLeave(
@@ -1638,8 +1617,6 @@ void ViewAbstract::SetOnDragLeave(
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, std::move(onDragLeave));
-
-    AddDragFrameNodeToManager();
 }
 
 void ViewAbstract::SetOnDragMove(
@@ -1648,8 +1625,6 @@ void ViewAbstract::SetOnDragMove(
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_MOVE, std::move(onDragMove));
-
-    AddDragFrameNodeToManager();
 }
 
 void ViewAbstract::SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop)
@@ -1657,8 +1632,6 @@ void ViewAbstract::SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEven
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_DROP, std::move(onDrop));
-
-    AddDragFrameNodeToManager();
 }
 
 void ViewAbstract::SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd)
@@ -1666,8 +1639,6 @@ void ViewAbstract::SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragE
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(onDragEnd));
-
-    AddDragFrameNodeToManager();
 }
 
 void ViewAbstract::SetOnDragEnd(
@@ -1677,8 +1648,6 @@ void ViewAbstract::SetOnDragEnd(
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(onDragEnd));
-
-    AddDragFrameNodeToManager(frameNode);
 }
 
 void ViewAbstract::SetOnDrop(
@@ -1689,8 +1658,6 @@ void ViewAbstract::SetOnDrop(
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_DROP, std::move(onDrop));
-
-    AddDragFrameNodeToManager(frameNode);
 }
 
 void ViewAbstract::SetAlign(Alignment alignment)
@@ -2090,7 +2057,8 @@ void ViewAbstract::BindPopup(
     }
 }
 
-void ViewAbstract::BindTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode)
+void ViewAbstract::BindTips(
+    const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<SpanString>& spanString)
 {
     CHECK_NULL_VOID(param);
     CHECK_NULL_VOID(targetNode);
@@ -2117,11 +2085,11 @@ void ViewAbstract::BindTips(const RefPtr<PopupParam>& param, const RefPtr<FrameN
             showInSubWindow = true;
         }
     }
-    HandleHoverTipsInfo(param, targetNode, tipsInfo, showInSubWindow, instanceId);
+    HandleHoverTipsInfo(param, targetNode, tipsInfo, showInSubWindow, spanString);
 }
 
 void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
-    PopupInfo& tipsInfo, bool showInSubWindow, int32_t instanceId)
+    PopupInfo& tipsInfo, bool showInSubWindow, const RefPtr<SpanString>& spanString)
 {
     CHECK_NULL_VOID(param);
     CHECK_NULL_VOID(targetNode);
@@ -2129,12 +2097,15 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
     auto targetTag = targetNode->GetTag();
     auto popupId = tipsInfo.popupId;
     auto popupNode = tipsInfo.popupNode;
+    auto context = targetNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
     if (!tipsInfo.isTips && popupNode) {
         return;
     }
     RefPtr<BubblePattern> popupPattern;
     tipsInfo.markNeedUpdate = true;
-    popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param);
+    popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param, spanString);
     if (popupNode) {
         popupId = popupNode->GetId();
     }
@@ -3810,6 +3781,7 @@ void ViewAbstract::ReSetMagnifier(FrameNode* frameNode)
 void ViewAbstract::SetBackgroundBlurStyle(
     FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions)
 {
+    FREE_NODE_CHECK(frameNode, SetBackgroundBlurStyle, frameNode, bgBlurStyle, sysOptions);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (bgBlurStyle.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
@@ -4296,6 +4268,7 @@ void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::set<std::string
 
 void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::string& inspectorId)
 {
+    FREE_NODE_CHECK(frameNode, SetInspectorId, frameNode, inspectorId);
     if (frameNode) {
         if (frameNode->GetInspectorId().has_value() && frameNode->GetInspectorIdValue() != inspectorId) {
             ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
@@ -4580,6 +4553,7 @@ void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()> &&onD
 void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
     const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
 {
+    FREE_NODE_CHECK(frameNode, SetOnAreaChanged, frameNode, std::move(onAreaChanged));
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -4720,6 +4694,7 @@ NG::OverlayOptions ViewAbstract::GetOverlay(FrameNode* frameNode)
 void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetNeedFocus, frameNode, value);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (value) {
@@ -5791,6 +5766,7 @@ bool ViewAbstract::GetRenderGroup(FrameNode* frameNode)
 void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)>&& onVisibleChange,
     const std::vector<double> &ratioList)
 {
+    FREE_NODE_CHECK(frameNode, SetOnVisibleChange, frameNode, std::move(onVisibleChange), ratioList);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -5802,6 +5778,8 @@ void ViewAbstract::SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
     const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
     int32_t expectedUpdateInterval)
 {
+    FREE_NODE_CHECK(frameNode, SetOnVisibleAreaApproximateChange, frameNode, std::move(onVisibleChange),
+        ratioList, expectedUpdateInterval);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -5851,6 +5829,7 @@ Color ViewAbstract::GetColorBlend(FrameNode* frameNode)
 
 void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
 {
+    FREE_NODE_CHECK(frameNode, ResetAreaChanged, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -5860,6 +5839,7 @@ void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
 
 void ViewAbstract::ResetVisibleChange(FrameNode* frameNode)
 {
+    FREE_NODE_CHECK(frameNode, ResetVisibleChange, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -6086,5 +6066,58 @@ void ViewAbstract::SetDisableDataPrefetch(FrameNode* frameNode, bool disableData
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetDisableDataPrefetch(disableDataPrefetch);
+}
+
+int32_t ViewAbstract::GetWindowWidthBreakpoint()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, -1);
+    auto window = container->GetWindow();
+    CHECK_NULL_RETURN(window, -1);
+    double density = PipelineBase::GetCurrentDensity();
+    double width = 0.0;
+    if (NearZero(density)) {
+        width = window->GetCurrentWindowRect().Width();
+    } else {
+        width = window->GetCurrentWindowRect().Width() / density;
+    }
+    WidthBreakpoint breakpoint;
+    if (width < WIDTH_BREAKPOINT_320VP) {
+        breakpoint = WidthBreakpoint::WIDTH_XS;
+    } else if (width < WIDTH_BREAKPOINT_600VP) {
+        breakpoint = WidthBreakpoint::WIDTH_SM;
+    } else if (width < WIDTH_BREAKPOINT_840VP) {
+        breakpoint = WidthBreakpoint::WIDTH_MD;
+    } else if (width < WIDTH_BREAKPOINT_1440VP) {
+        breakpoint = WidthBreakpoint::WIDTH_LG;
+    } else {
+        breakpoint = WidthBreakpoint::WIDTH_XL;
+    }
+    return static_cast<uint32_t>(breakpoint);
+}
+
+int32_t ViewAbstract::GetWindowHeightBreakpoint()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, -1);
+    auto window = container->GetWindow();
+    CHECK_NULL_RETURN(window, -1);
+    auto width = window->GetCurrentWindowRect().Width();
+    auto height = window->GetCurrentWindowRect().Height();
+    auto aspectRatio = 0.0;
+    if (NearZero(width)) {
+        aspectRatio = 0.0;
+    } else {
+        aspectRatio = height / width;
+    }
+    HeightBreakpoint breakpoint;
+    if (aspectRatio < HEIGHT_ASPECTRATIO_THRESHOLD1) {
+        breakpoint = HeightBreakpoint::HEIGHT_SM;
+    } else if (aspectRatio < HEIGHT_ASPECTRATIO_THRESHOLD2) {
+        breakpoint = HeightBreakpoint::HEIGHT_MD;
+    } else {
+        breakpoint = HeightBreakpoint::HEIGHT_LG;
+    }
+    return static_cast<uint32_t>(breakpoint);
 }
 } // namespace OHOS::Ace::NG

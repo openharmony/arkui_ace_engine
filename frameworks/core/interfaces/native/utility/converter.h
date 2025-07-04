@@ -202,6 +202,15 @@ namespace Converter {
             int32_t id_;
             StringArray params_;
     };
+    Dimension ConvertFromString(const std::string& str, DimensionUnit unit = DimensionUnit::FP);
+    std::optional<Dimension> OptConvertFromArkNumStrRes(const Ark_Union_Number_String_Resource& src,
+        DimensionUnit defaultUnit = DimensionUnit::FP);
+    std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src,
+        DimensionUnit defaultUnit = DimensionUnit::VP);
+    std::optional<Dimension> OptConvertFromArkResource(const Ark_Resource& src,
+        DimensionUnit defaultUnit = DimensionUnit::FP);
+    std::optional<Dimension> OptConvertFromArkLengthResource(const Ark_Resource& src,
+        DimensionUnit defaultUnit = DimensionUnit::VP);
     template<typename T, typename P>
     void AssignCast(std::optional<T>& dst, const P& src)
     {
@@ -673,6 +682,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);
     template<> void AssignCast(std::optional<DragBehavior>& dst, const Ark_DragBehavior& src);
     template<> void AssignCast(std::optional<DragPreviewMode>& dst, const Ark_DragPreviewMode& src);
+    template<> void AssignCast(std::optional<DraggingSizeChangeEffect>& dst, const Ark_DraggingSizeChangeEffect& src);
     template<> void AssignCast(std::optional<DynamicRangeMode>& dst, const Ark_DynamicRangeMode& src);
     template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
     template<> void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src);

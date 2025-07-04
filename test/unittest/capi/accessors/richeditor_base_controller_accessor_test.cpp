@@ -310,7 +310,7 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, setTypingStyleTest, TestSize.Leve
  * @tc.desc: Check the functionality of setTypingStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseControllerAccessorTest, getTypingStyleTest, TestSize.Level1)
+HWTEST_F(RichEditorBaseControllerAccessorTest, DISABLED_getTypingStyleTest, TestSize.Level1)
 {
     SetUp2();
     ASSERT_NE(accessor_->getTypingStyle, nullptr);

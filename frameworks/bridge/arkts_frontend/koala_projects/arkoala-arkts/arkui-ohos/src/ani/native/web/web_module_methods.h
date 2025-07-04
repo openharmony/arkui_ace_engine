@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::Ani {
 void SetWebOptions(ani_env* env, ani_class aniClass, ani_long node, ani_object object);
+void SetWebControllerControllerHandler(ani_env* env, ani_class aniClass, ani_long handler, ani_object object);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_WEB_MODULE_METHODS_H

@@ -331,8 +331,28 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextModelNG::SetSetEditMenuOptions(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
+        const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+            auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
+            auto result = arkCreateMenu.InvokeWithOptConvertResult<std::vector<NG::MenuOptionsParam>,
+                Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
+            return result.value_or(std::vector<NG::MenuOptionsParam>());
+        };
+    auto onMenuItemClick = [arkMenuItemClick = CallbackHelper(optValue->onMenuItemClick)](
+        NG::MenuItemParam menuOptionsParam) -> bool {
+            TextRange range {.start = menuOptionsParam.start, .end = menuOptionsParam.end};
+            auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
+            auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
+            auto arkResult = arkMenuItemClick.InvokeWithObtainResult<
+                Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+            return Converter::Convert<bool>(arkResult);
+        };
+    TextModelStatic::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 void SetHalfLeadingImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
@@ -388,9 +408,36 @@ void SetBindSelectionMenuImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(spanType);
-    //auto convValue = Converter::OptConvert<type>(spanType); // for enums
-    //TextModelNG::SetSetBindSelectionMenu(frameNode, convValue);
+    // TextSpanType
+    NG::TextSpanType textSpanType = NG::TextSpanType::TEXT;
+    bool isValidTextSpanType = false;
+    auto optSpanType = Converter::OptConvert<TextSpanType>(*spanType);
+    if (optSpanType) {
+        isValidTextSpanType = true;
+    }
+    // Builder
+    auto optContent = Converter::GetOptPtr(content);
+    CHECK_NULL_VOID(optContent);
+    // TextResponseType
+    auto convResponseType = Converter::OptConvert<TextResponseType>(*responseType);
+    if (!convResponseType) {
+        convResponseType = NG::TextResponseType::LONG_PRESS;
+    }
+    // SelectionMenuOptions
+    auto convMenuParam = Converter::OptConvert<SelectMenuParam>(*options);
+    if (convMenuParam) {
+        convMenuParam->isValid = isValidTextSpanType;
+    } else {
+        convMenuParam = NG::SelectMenuParam();
+    }
+
+    CallbackHelper(*optContent).BuildAsync([frameNode, spanType = optSpanType.value(), convResponseType,
+        menuParam = convMenuParam.value()](const RefPtr<UINode>& uiNode) mutable {
+        auto builder = [uiNode]() {
+            NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+        };
+        TextModelStatic::BindSelectionMenu(frameNode, spanType, *convResponseType, std::move(builder), menuParam);
+        }, node);
 }
 } // TextAttributeModifier
 const GENERATED_ArkUITextModifier* GetTextModifier()

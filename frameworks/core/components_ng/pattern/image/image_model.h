@@ -49,7 +49,7 @@ class ACE_FORCE_EXPORT ImageModel {
 public:
     static ImageModel* GetInstance();
     virtual ~ImageModel() = default;
-    virtual void Create(const RefPtr<DrawableDescriptor>& drawable) {}
+    virtual void Create(const RefPtr<AceDrawableDescriptor>& drawable) {}
     virtual void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) = 0;
 
     virtual void SetAlt(const ImageSourceInfo& src) = 0;

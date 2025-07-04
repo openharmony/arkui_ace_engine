@@ -76,8 +76,7 @@ void SetFillColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ImageModelNG::SetSetFillColor(frameNode, convValue);
+    ImageModelNG::ResetImageFill(frameNode);
 }
 void SetObjectFitImpl(Ark_NativePointer node,
                       const Opt_ImageFit* value)

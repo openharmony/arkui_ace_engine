@@ -15,6 +15,11 @@
 
 import { StateMgmtTool } from '#stateMgmtTool';
 import { NullableObject } from './types';
+import { WrappedArray } from './observeWrappedArray';
+import { WrappedDate } from './observeWrappedDate';
+import { WrappedSet } from './observeWrappedSet';
+import { WrappedMap } from './observeWrappedMap';
+import { ObserveWrappedBase } from './observeWrappedBase';
 
 export class UIUtilsImpl {
     private static observedMap: WeakMap<Object, Object> = new WeakMap<Object, Object>();
@@ -31,6 +36,10 @@ export class UIUtilsImpl {
         return UIUtilsImpl.observedMap.get(obj) as T | undefined;
     }
 
+    public static getObserved<T extends Object>(obj: T): T | undefined {
+        return UIUtilsImpl.observedMap.get(obj) as T | undefined;
+    }
+
     public static isProxied<T extends Object>(value: T): boolean {
         const handler = StateMgmtTool.tryGetHandler(value);
         return !!(handler && StateMgmtTool.isInterfaceProxyHandler(handler));
@@ -44,14 +53,76 @@ export class UIUtilsImpl {
         return UIUtilsImpl.set(source, StateMgmtTool.createProxy<T>(source));
     }
 
+    public static makeObservedArray<T>(source: Array<T>): Array<T> {
+        const observed = UIUtilsImpl.getObserved(source);
+        if (observed) {
+            return observed;
+        }
+        return UIUtilsImpl.set(source, new WrappedArray<T>(source));
+    }
+
+    public static makeObservedDate(source: Date): Date {
+        const observed = UIUtilsImpl.getObserved(source);
+        if (observed) {
+            return observed;
+        }
+        return UIUtilsImpl.set(source, new WrappedDate(source));
+    }
+
+    public static makeObservedMap<K, V>(source: Map<K, V>): Map<K, V> {
+        const observed = UIUtilsImpl.getObserved(source);
+        if (observed) {
+            return observed;
+        }
+        return UIUtilsImpl.set(source, new WrappedMap<K, V>(source));
+    }
+
+    public static makeObservedSet<T>(source: Set<T>): Set<T> {
+        const observed = UIUtilsImpl.getObserved(source);
+        if (observed) {
+            return observed;
+        }
+        return UIUtilsImpl.set(source, new WrappedSet<T>(source));
+    }
+
     public makeObserved<T>(value: T): T {
-        if (StateMgmtTool.isIObservedObject(value as NullableObject)) {
+        if (value instanceof ObserveWrappedBase) {
             return value as T;
+        }
+        if (value instanceof Array && Type.of(value).getName() === 'escompat.Array') {
+            return UIUtilsImpl.makeObservedArray(value) as T;
+        }
+        if (value instanceof Date && Type.of(value).getName() === 'escompat.Date') {
+            return UIUtilsImpl.makeObservedDate(value) as T;
+        }
+        if (value instanceof Map && Type.of(value).getName() === 'escompat.Map') {
+            return UIUtilsImpl.makeObservedMap(value) as T;
+        }
+        if (value instanceof Set && Type.of(value).getName() === 'escompat.Set') {
+            return UIUtilsImpl.makeObservedSet(value) as T;
         }
         if (value && StateMgmtTool.isObjectLiteral(value)) {
             return UIUtilsImpl.makeObservedProxyNoCheck(value as Object) as T;
         }
         return value;
+    }
+
+    public getTarget<T>(source: T): T {
+        if (!source || typeof source !== 'object') {
+            return source;
+        }
+        if (UIUtilsImpl.isProxied(source!)) {
+            return Proxy.tryGetTarget(source! as Object)! as Object as T;
+        }
+        if (
+            source instanceof WrappedArray ||
+            source instanceof WrappedMap ||
+            source instanceof WrappedDate ||
+            source instanceof WrappedSet
+        ) {
+            return (source as ObserveWrappedBase).getRaw()! as T;
+        }
+        return source;
     }
 }
 

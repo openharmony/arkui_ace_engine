@@ -37,7 +37,7 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 export class TSTypeAliasDeclaration extends AnnotatedStatement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 127)
+        assertValidPeer(pointer, 129)
         super(pointer)
     }
     static createTSTypeAliasDeclaration(id?: Identifier, typeParams?: TSTypeParameterDeclaration, typeAnnotation?: TypeNode): TSTypeAliasDeclaration {

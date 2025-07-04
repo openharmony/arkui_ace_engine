@@ -41,8 +41,8 @@ void SetSideLengthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //PatternLockModelNG::SetSetSideLength(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    PatternLockModelStatic::SetSideLength(frameNode, convValue);
 }
 void SetCircleRadiusImpl(Ark_NativePointer node,
                          const Opt_Length* value)

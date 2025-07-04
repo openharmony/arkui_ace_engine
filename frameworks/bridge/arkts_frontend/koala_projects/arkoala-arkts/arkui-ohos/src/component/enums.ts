@@ -201,9 +201,9 @@ export enum KeyType {
 export enum KeySource {
     UNKNOWN = 0,
     Unknown = 0,
-    KEYBOARD = 1,
-    Keyboard = 1,
-    JOYSTICK = 2
+    KEYBOARD = 4,
+    Keyboard = 4,
+    JOYSTICK = 5
 }
 export enum Edge {
     TOP = 0,

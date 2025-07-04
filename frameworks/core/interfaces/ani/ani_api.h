@@ -20,6 +20,8 @@
 #include <string>
 #include <cstdint>
 #include "core/common/ace_engine.h"
+#include "core/common/udmf/udmf_client.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/snapshot_param.h"
 
 #ifdef __cplusplus
@@ -35,13 +37,26 @@ struct _ArkUINodeContent;
 typedef class __ani_ref* ani_ref;
 typedef class __ani_object* ani_object;
 typedef struct __ani_env ani_env;
+typedef uint8_t ani_boolean;
 typedef int32_t ani_int;
 typedef int64_t ani_long;
 typedef class __ani_fn_object *ani_fn_object;
+typedef class __ani_string* ani_string;
+typedef class __ani_enum_item* ani_enum_item;
+typedef class __ani_error* ani_error;
 typedef _ArkUINode* ArkUINodeHandle;
 typedef int ArkUI_Int32;
+typedef size_t ani_size;
 typedef _ArkUIContentSlot* ArkUIContentSlot;
 typedef _ArkUINodeContent* ArkUINodeContent;
+typedef struct WebviewControllerInfo {
+    std::function<int32_t()> getWebIdFunc = nullptr;
+    std::function<void(int32_t)> completeWindowNewFunc = nullptr;
+    std::function<long()> getNativePtrFunc = nullptr;
+    std::function<void()> releaseRefFunc = nullptr;
+    std::function<void(int32_t)> setWebIdFunc = nullptr;
+    std::function<void(const std::string&)> setHapPathFunc = nullptr;
+} WebviewControllerInfo;
 struct ArkUIDragInfo {
     void* pixelMap;
     bool onlyForLifting = false;
@@ -50,12 +65,13 @@ struct ArkUIDragInfo {
 
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
+    void (*setDrawableDescriptor)(ArkUINodeHandle node, void* drawablem, int type);
+    void (*setResizableLattice)(ArkUINodeHandle node, void* lattice);
 };
 
 struct ArkUIAniWebModifier {
-    void (*setWebOptions)(ArkUINodeHandle node,
-        std::function<void(int32_t)>&& onNWebId,
-        std::function<void(const std::string&)>&& onHapPath);
+    void (*setWebOptions)(ArkUINodeHandle node, const WebviewControllerInfo& controllerInfo);
+    void (*setWebControllerControllerHandler)(void* controllerHandler, const WebviewControllerInfo& controllerInfo);
 };
 struct ArkUIAniDragModifier {
     void (*setDragData)(ani_ref event, ani_ref data);
@@ -67,6 +83,7 @@ struct ArkUIAniDragModifier {
     void (*setDragAllowDropNull)(ArkUINodeHandle node);
     void (*setDragAllowDrop)(ArkUINodeHandle node, const char** allowDrops, ArkUI_Int32 length);
     void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragInfo dragInfo);
+    const char* (*getUdKey)(ani_ref event);
 };
 struct ArkUIAniCommonModifier {
     ani_ref* (*getHostContext)();
@@ -75,12 +92,20 @@ struct ArkUIAniCommonModifier {
     void (*setDrawCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObj);
     ArkUI_Int32 (*getCurrentInstanceId)();
     ani_long (*builderProxyNodeConstruct)(ArkUI_Int32 id);
+    ani_ref (*getSharedLocalStorage)();
+    void (*setBackgroundImagePixelMap)(ani_env* env, ArkUINodeHandle node, ani_ref pixelMapPtr, ArkUI_Int32 repeat);
+    void (*setCustomCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
+    ArkUI_Int32 (*requireArkoalaNodeId)(ArkUI_Int32 capacity);
+    ani_boolean (*checkIsUIThread)(ArkUI_Int32 id);
+    ani_boolean (*isDebugMode)(ArkUI_Int32 id);
+    void (*onMeasureInnerMeasure)(ani_env* env, ani_long ptr);
+    void (*onLayoutInnerLayout)(ani_env* env, ani_long ptr);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);
 };
 struct ArkUIAniDrawModifier {
-    void (*setDrawModifier)(ani_env* env, ani_long ptr, ani_object fnObj);
+    void (*setDrawModifier)(ani_env* env, ani_long ptr, ani_int flag, ani_object fnObj);
     void (*invalidate)(ani_env* env, ani_long ptr);
 };
 struct ArkUIAniContentSlotModifier {
@@ -94,8 +119,64 @@ struct ArkUIAniComponentSnapshotModifier {
     int32_t (*getCurrentIdSafely)();
     OHOS::Ace::RefPtr<OHOS::Ace::Container> (*getContainer)(int32_t instanceId);
     void (*createFromBuilder)(ArkUINodeHandle node,
-    std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    OHOS::Ace::NG::ComponentSnapshot::JsCallback&& callback,
     OHOS::Ace::NG::SnapshotParam param);
+    void (*createFromComponent)(ArkUINodeHandle node,
+    OHOS::Ace::NG::ComponentSnapshot::JsCallback&& callback,
+    OHOS::Ace::NG::SnapshotParam param);
+};
+struct ArkUIAniAnimationModifier {
+    bool (*hasAnimatableProperty)(ani_env* env, ArkUINodeHandle node, ani_string name);
+    void (*updateAnimatableProperty)(
+        ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property);
+    void (*createAnimatableProperty)(
+        ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property, ani_fn_object callback);
+};
+struct ArkUIAniInteropModifier {
+    ani_long (*createViewStackProcessor)();
+    ani_long (*popViewStackProcessor)();
+    void (*deleteViewStackProcessor)(ani_long ptr);
+};
+struct ArkUIAniDragControllerModifier {
+    ani_object (*aniExecuteDragWithCallback)(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object custom,
+        ani_long builderObj, ani_object destroyCallbackObj, ani_object dragInfo, ani_object callback);
+    ani_object (*aniCreateDragAction)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
+        ani_object customArray, ani_object builderArray, ani_object destroyCallbackObj,
+        [[maybe_unused]] ani_object dragInfoObj);
+    ani_object (*aniDragActionStartDrag)(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragActionPtr);
+    void (*aniDragActionOn)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, const char* type,
+        ani_object callback, ani_long dragActionPtr);
+    void (*aniDragActionOff)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, const char* type,
+        [[maybe_unused]] ani_object callback, ani_long dragActionPtr);
+    ani_object (*aniGetDragPreview)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass);
+    void (*aniDragPreviewSetForegroundColor)(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object color, ani_long dragPreviewPtr);
+    void (*aniDragPreviewAnimate)(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object options, ani_object handler,
+        ani_long dragPreviewPtr);
+    void (*aniDragActionSetDragEventStrictReportingEnabled)(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, bool enable);
+    void (*aniDragActionCancelDataLoading)(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string key);
+    void (*aniDragActionNotifyDragStartReques)(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_enum_item requestStatus);
+};
+struct ArkUIAniImageSpanModifier {
+    void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
+    void (*setAltPixelMap)(ArkUINodeHandle node, void* pixelmap);
+};
+struct ArkUIAniVideoModifier {
+    void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
+};
+struct ArkUIAniShapeModifier {
+    void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
+};
+struct ArkUIAniXComponentModifier {
+    void (*setXComponentControllerCallback)(ArkUINodeHandle node,
+        std::function<void(const std::string&)>&& onSurfaceCreated,
+        std::function<void(const std::string&, float, float, float, float)>&& onSurfaceChanged,
+        std::function<void(const std::string&)>&& onSurfaceDestroyed);
 };
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
@@ -108,6 +189,13 @@ struct ArkUIAniModifiers {
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
+    const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
+    const ArkUIAniInteropModifier* (*getInteropAniModifier)();
+    const ArkUIAniDragControllerModifier* (*getDragControllerAniModifier)();
+    const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
+    const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
+    const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();
+    const ArkUIAniXComponentModifier* (*getArkUIAniXComponentModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

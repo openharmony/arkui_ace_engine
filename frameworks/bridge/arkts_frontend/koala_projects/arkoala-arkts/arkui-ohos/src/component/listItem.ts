@@ -128,12 +128,12 @@ export class ArkListItemPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     swipeActionAttribute(value: SwipeActionOptions | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
+        const thisSerializer: Serializer = Serializer.hold()
+        let value_type: int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
+            const value_value = value!
             thisSerializer.writeSwipeActionOptions(value_value)
         }
         ArkUIGeneratedNativeModule._ListItemAttribute_swipeAction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -199,7 +199,7 @@ export interface SwipeActionOptions {
     start?: CustomBuilder | SwipeActionItem;
     end?: CustomBuilder | SwipeActionItem;
     edgeEffect?: SwipeEdgeEffect;
-    onOffsetChange?: ((index: number) => void);
+    onOffsetChange?: ((offset: number) => void);
 }
 export enum ListItemStyle {
     NONE = 0,

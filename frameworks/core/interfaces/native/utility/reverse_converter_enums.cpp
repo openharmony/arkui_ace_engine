@@ -866,6 +866,7 @@ void AssignArkValue(Ark_KeySource& dst, const SourceType& src)
     switch (src) {
         case SourceType::NONE: dst = Ark_KeySource::ARK_KEY_SOURCE_UNKNOWN; break;
         case SourceType::KEYBOARD: dst = Ark_KeySource::ARK_KEY_SOURCE_KEYBOARD; break;
+        case SourceType::JOYSTICK: dst = Ark_KeySource::ARK_KEY_SOURCE_JOYSTICK; break;
         default: dst = static_cast<Ark_KeySource>(-1);
             LOGE("Unexpected enum value in SourceType: %{public}d", src);
     }

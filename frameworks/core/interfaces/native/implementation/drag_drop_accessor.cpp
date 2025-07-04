@@ -20,6 +20,7 @@
 #include "arkoala_api_generated.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DragDropOpsAccessor {
@@ -45,9 +46,7 @@ void RegisterOnDragStartImpl(Ark_NativePointer node, const Callback_onDragStart*
         dragDropInfo.customNode = customNode;
         return dragDropInfo;
     };
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragStart(std::move(onDragStartLambda));
+    ViewAbstract::SetOnDragStart(frameNode, std::move(onDragStartLambda));
 }
 }// DragDropOpsAccessor
 

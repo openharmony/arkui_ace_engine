@@ -169,23 +169,4 @@ bool DialogContainer::OnBackPressed(int32_t instanceId)
 {
     return AceContainer::CloseWindow(instanceId);
 }
-
-// ArkTS 1.2
-
-void DialogContainer::ShowToastStatic(int32_t instanceId, const NG::ToastInfo& toastInfo,
-    std::function<void(int32_t)>&& callback)
-{
-    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_VOID(container);
-    auto toastInfoNew = toastInfo;
-    toastInfoNew.showMode = NG::ToastShowMode::DEFAULT;
-    NG::DialogManagerStatic::ShowToastStatic(toastInfoNew, std::move(callback), instanceId);
-}
-
-void DialogContainer::CloseToastStatic(int32_t instanceId, int32_t toastId, std::function<void(int32_t)>&& callback)
-{
-    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_VOID(container);
-    NG::DialogManagerStatic::CloseToastStatic(toastId, std::move(callback), instanceId);
-}
 } // namespace OHOS::Ace::Platform

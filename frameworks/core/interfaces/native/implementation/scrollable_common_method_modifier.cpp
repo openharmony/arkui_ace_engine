@@ -142,9 +142,19 @@ void SetEdgeEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(edgeEffect);
-    //auto convValue = Converter::OptConvert<type>(edgeEffect); // for enums
-    //ScrollableCommonMethodModelNG::SetSetEdgeEffect(frameNode, convValue);
+    auto convEdgeEffect = Converter::OptConvert<EdgeEffect>(*edgeEffect);
+        
+    bool alwaysEnabled = true;
+    EffectEdge edge = EffectEdge::ALL;
+    auto edgeEffectOptions = options ? Converter::GetOpt(*options) : std::nullopt;
+    if (edgeEffectOptions) {
+        alwaysEnabled = Converter::Convert<bool>(edgeEffectOptions.value().alwaysEnabled);
+        auto value = Converter::OptConvert<int32_t>(edgeEffectOptions.value().effectEdge);
+        if (value.has_value()) {
+            edge = static_cast<EffectEdge>(value.value());
+        }
+    }
+    ScrollableModelStatic::SetEdgeEffect(frameNode, convEdgeEffect, alwaysEnabled, edge);
 }
 void SetFadingEdgeImpl(Ark_NativePointer node,
                        const Opt_Boolean* enabled,

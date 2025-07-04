@@ -26,7 +26,7 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_12 = 12;
 constexpr int DATE_SIZE = 3;
 const bool DEFAULT_MARK_TODAY = false;
-std::string g_strValue;
+thread_local std::string g_strValue;
 } // namespace
 void SetHintRadius(ArkUINodeHandle node, float radius, int32_t unit)
 {

@@ -135,12 +135,22 @@ void SetDragPreview(ArkUINodeHandle node, ArkUIDragInfo dragInfo)
     DragDropInfo info;
     #if defined(PIXEL_MAP_SUPPORTED)
     if (dragInfo.pixelMap) {
-        info.pixelMap = PixelMap::CreatePixelMapFromDataAbility(dragInfo.pixelMap);
+        info.pixelMap = PixelMap::CreatePixelMap(dragInfo.pixelMap);
     }
     #endif
     info.onlyForLifting = dragInfo.onlyForLifting;
     info.delayCreating = dragInfo.delayCreating;
     frameNode->SetDragPreview(info);
+}
+
+const char* GetUdKey(ani_ref event)
+{
+    auto peer = reinterpret_cast<Ark_DragEvent>(event);
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto dragEvent = peer->dragInfo;
+    CHECK_NULL_RETURN(dragEvent, nullptr);
+    auto& key = dragEvent->GetUdKey();
+    return key.c_str();
 }
 
 const ArkUIAniDragModifier* GetDragAniModifier()
@@ -155,6 +165,7 @@ const ArkUIAniDragModifier* GetDragAniModifier()
         .setDragAllowDropNull = OHOS::Ace::NG::SetDragAllowDropNull,
         .setDragAllowDrop = OHOS::Ace::NG::SetDragAllowDrop,
         .setDragPreview = OHOS::Ace::NG::SetDragPreview,
+        .getUdKey = OHOS::Ace::NG::GetUdKey,
     };
     return &impl;
 }

@@ -22,9 +22,14 @@ namespace XComponentControllerAccessor {
 void DestroyPeerImpl(Ark_XComponentController peer)
 {
 }
-Ark_XComponentController ConstructImpl()
+Ark_XComponentController CtorImpl()
 {
-    return {};
+    auto peerImpl = Referenced::MakeRefPtr<XComponentControllerPeerImpl>();
+    peerImpl->IncRefCount();
+#ifdef XCOMPONENT_SUPPORTED
+    peerImpl->controller = std::make_shared<XComponentControllerNG>();
+#endif //XCOMPONENT_SUPPORTED
+    return reinterpret_cast<Ark_XComponentController>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -60,6 +65,10 @@ void StartImageAnalyzerImpl(Ark_VMContext vmContext,
                             const Ark_ImageAnalyzerConfig* config,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+#ifdef XCOMPONENT_SUPPORTED
+    CHECK_NULL_VOID(peer);
+    peer->TriggerStartImageAnalyzer(vmContext, asyncWorker, config, outputArgumentForReturningPromise);
+#endif //XCOMPONENT_SUPPORTED
 }
 void StopImageAnalyzerImpl(Ark_XComponentController peer)
 {

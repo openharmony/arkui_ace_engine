@@ -51,4 +51,8 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
             this.sourceProvide_!.set(newValue); // makeObserved should be called in source
         }
     }
+
+    public getSource(): IProvideDecoratedVariable<T>{
+        return this.sourceProvide_!;
+    }
 }

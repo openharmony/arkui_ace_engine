@@ -41,7 +41,7 @@ import { addPartialUpdate, createUiDetachedRoot } from "../ArkUIEntry"
 import { PathStackUtils } from "../handwritten/ArkNavPathStack"
 import { setNeedCreate } from "../ArkComponentRoot"
 import { ArkStackComponent, ArkStackPeer } from "./stack"
-import { NavigationOpsHandWritten } from "./../handwritten"
+import { NavigationOpsHandWritten, hookNavigationBackButtonIconImpl, hookNavigationHideTitleBarImpl, hookNavigationMenusImpl, hookNavigationTitleImpl, hookNavigationSetNavigationOptionsImpl, hookNavigationToolbarConfigurationImpl} from "./../handwritten"
 
 export class NavPathInfoInternal {
     public static fromPtr(ptr: KPointer): NavPathInfo {
@@ -1563,7 +1563,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
             if (pathInfos_type != RuntimeType.UNDEFINED) {
                 info = pathInfos!
             }
-            this.getPeer()?.setNavigationOptions1Attribute(info)
+            hookNavigationSetNavigationOptionsImpl(this.getPeer().peer.ptr, info)
             return this
         }
         return this
@@ -1632,17 +1632,11 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
             const icon_type = runtimeType(icon)
             const accessibilityText_type = runtimeType(accessibilityText)
             if (((RuntimeType.STRING == icon_type) || (RuntimeType.OBJECT == icon_type) ||
-                (RuntimeType.UNDEFINED == icon_type)) && (RuntimeType.UNDEFINED == accessibilityText_type)) {
+                (RuntimeType.UNDEFINED == icon_type)) && ((RuntimeType.UNDEFINED == accessibilityText_type) ||
+                (RuntimeType.STRING == accessibilityText_type) || (RuntimeType.OBJECT == accessibilityText_type))) {
                 const value_casted = icon as (string | PixelMap | Resource | SymbolGlyphModifier | undefined)
-                this.getPeer()?.backButtonIcon0Attribute(value_casted)
-                return this
-            }
-            if (((RuntimeType.STRING == icon_type) || (RuntimeType.OBJECT == icon_type) ||
-                (RuntimeType.UNDEFINED == icon_type)) && ((RuntimeType.STRING == accessibilityText_type) ||
-                (RuntimeType.OBJECT == accessibilityText_type))) {
-                const icon_casted = icon as (string | PixelMap | Resource | SymbolGlyphModifier | undefined)
-                const accessibilityText_casted = accessibilityText as (ResourceStr)
-                this.getPeer()?.backButtonIcon1Attribute(icon_casted, accessibilityText_casted)
+                const accessibilityText_casted = accessibilityText as (ResourceStr | undefined)
+                hookNavigationBackButtonIconImpl(this.getPeer().peer.ptr, value_casted, accessibilityText_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -1669,15 +1663,12 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("hideTitleBar")) {
             const hide_type = runtimeType(hide)
             const animated_type = runtimeType(animated)
-            if (((RuntimeType.BOOLEAN == hide_type) || (RuntimeType.UNDEFINED == hide_type)) && (RuntimeType.UNDEFINED == animated_type)) {
+            if (((RuntimeType.BOOLEAN == hide_type) || (RuntimeType.UNDEFINED == hide_type)) && 
+                ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type) ||
+                (RuntimeType.UNDEFINED == animated_type))) {
                 const value_casted = hide as (boolean | undefined)
-                this.getPeer()?.hideTitleBar0Attribute(value_casted)
-                return this
-            }
-            if (((RuntimeType.BOOLEAN == hide_type) || (RuntimeType.UNDEFINED == hide_type)) && ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type))) {
-                const hide_casted = hide as (boolean | undefined)
                 const animated_casted = animated as (boolean | undefined)
-                this.getPeer()?.hideTitleBar1Attribute(hide_casted, animated_casted)
+                hookNavigationHideTitleBarImpl(this.getPeer().peer.ptr, value_casted, animated_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -1704,15 +1695,10 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("menus")) {
             const items_type = runtimeType(items)
             const options_type = runtimeType(options)
-            if (((RuntimeType.OBJECT == items_type) || (RuntimeType.FUNCTION == items_type) || (RuntimeType.UNDEFINED == items_type)) && (RuntimeType.UNDEFINED == options_type)) {
+            if ((RuntimeType.OBJECT == items_type) || (RuntimeType.FUNCTION == items_type) || (RuntimeType.UNDEFINED == items_type)) {
                 const value_casted = items as (Array<NavigationMenuItem> | CustomBuilder | undefined)
-                this.getPeer()?.menus0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == items_type) || (RuntimeType.FUNCTION == items_type) || (RuntimeType.UNDEFINED == items_type) && (RuntimeType.UNDEFINED != options_type)) {
-                const items_casted = items as (Array<NavigationMenuItem> | CustomBuilder | undefined)
-                const options_casted = options as (NavigationMenuOptions)
-                this.getPeer()?.menus1Attribute(items_casted, options_casted)
+                const options_casted = options as (NavigationMenuOptions | undefined)
+                hookNavigationMenusImpl(this.getPeer().peer.ptr, value_casted, options_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -1830,7 +1816,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("title")) {
             const value_casted = value as (ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined)
             const options_casted = options as (NavigationTitleOptions | undefined)
-            this.getPeer()?.titleAttribute(value_casted, options_casted)
+            hookNavigationTitleImpl(this.getPeer().peer.ptr, value_casted, options_casted)
             return this
         }
         return this
@@ -1839,7 +1825,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("toolbarConfiguration")) {
             const value_casted = value as (Array<ToolbarItem> | CustomBuilder | undefined)
             const options_casted = options as (NavigationToolbarOptions | undefined)
-            this.getPeer()?.toolbarConfigurationAttribute(value_casted, options_casted)
+            hookNavigationToolbarConfigurationImpl(this.getPeer().peer.ptr, value_casted, options_casted)
             return this
         }
         return this

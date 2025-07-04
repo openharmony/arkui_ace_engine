@@ -532,11 +532,47 @@ template<>
 void AssignCast(std::optional<DragPreviewMode>& dst, const Ark_DragPreviewMode& src)
 {
     switch (src) {
-        case ARK_DRAG_PREVIEW_MODE_AUTO: dst = DragPreviewMode::AUTO; break;
-        case ARK_DRAG_PREVIEW_MODE_DISABLE_SCALE: dst = DragPreviewMode::DISABLE_SCALE; break;
-        case ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_SHADOW: dst = DragPreviewMode::ENABLE_DEFAULT_SHADOW; break;
-        case ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_RADIUS: dst = DragPreviewMode::ENABLE_DEFAULT_RADIUS; break;
-        default: LOGE("Unexpected enum value in Ark_DragPreviewMode: %{public}d", src);
+        case ARK_DRAG_PREVIEW_MODE_AUTO:
+            dst = DragPreviewMode::AUTO;
+            break;
+        case ARK_DRAG_PREVIEW_MODE_DISABLE_SCALE:
+            dst = DragPreviewMode::DISABLE_SCALE;
+            break;
+        case ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_SHADOW:
+            dst = DragPreviewMode::ENABLE_DEFAULT_SHADOW;
+            break;
+        case ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_RADIUS:
+            dst = DragPreviewMode::ENABLE_DEFAULT_RADIUS;
+            break;
+        case ARK_DRAG_PREVIEW_MODE_ENABLE_DRAG_ITEM_GRAY_EFFECT:
+            dst = DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT;
+            break;
+        case ARK_DRAG_PREVIEW_MODE_ENABLE_MULTI_TILE_EFFECT:
+            dst = DragPreviewMode::ENABLE_MULTI_TILE_EFFECT;
+            break;
+        case ARK_DRAG_PREVIEW_MODE_ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW:
+            dst = DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_DragPreviewMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<DraggingSizeChangeEffect>& dst, const Ark_DraggingSizeChangeEffect& src)
+{
+    switch (src) {
+        case ARK_DRAGGING_SIZE_CHANGE_EFFECT_DEFAULT:
+            dst = DraggingSizeChangeEffect::DEFAULT;
+            break;
+        case ARK_DRAGGING_SIZE_CHANGE_EFFECT_SIZE_TRANSITION:
+            dst = DraggingSizeChangeEffect::SIZE_TRANSITION;
+            break;
+        case ARK_DRAGGING_SIZE_CHANGE_EFFECT_SIZE_CONTENT_TRANSITION:
+            dst = DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_DraggingSizeChangeEffect: %{public}d", src);
     }
 }
 

@@ -14,12 +14,52 @@
  */
 
 import { KPointer } from "@koalaui/interop"
-import { TextFieldOps, Bindable, ResourceStr } from "../component"
+import { TextFieldOps, Bindable, ResourceStr, Length, LayoutPolicy, BorderRadiuses, LocalizedBorderRadiuses, EdgeStyles, BorderStyle, ResourceColor, EdgeColors, LocalizedEdgeColors, LocalizedEdgeWidths, EdgeWidths, BorderOptions, Padding, LocalizedPadding } from "../component"
 
 export class TextFieldOpsHandWritten {
     static hookTextFieldInputValueImpl(node: KPointer, value: Bindable<ResourceStr>) {
-        TextFieldOps.registerTextFieldValueCallback(node, value.value, (v) => {
+        TextFieldOps.registerTextFieldValueCallback(node, value.value, (v : ResourceStr) => {
             value.onChange(v)
         })
+    }
+
+    static hookTextFieldSetWidth(node: KPointer, value?: Length | LayoutPolicy) {
+        TextFieldOps.textFieldOpsSetWidth(node, value)
+    }
+
+    static hookTextFieldSetHeight(node: KPointer, value?: Length | LayoutPolicy) {
+        TextFieldOps.textFieldOpsSetHeight(node, value)
+    }
+
+    static hookTextFieldSetPadding(node: KPointer, value?: Padding | Length | LocalizedPadding) {
+        TextFieldOps.textFieldOpsSetPadding(node, value)
+    }
+
+    static hookTextFieldSetMargin(node: KPointer, value?: Padding | Length | LocalizedPadding) {
+        TextFieldOps.textFieldOpsSetMargin(node, value)
+    }
+
+    static hookTextFieldSetBorder(node: KPointer, value?: BorderOptions) {
+        TextFieldOps.textFieldOpsSetBorder(node, value)
+    }
+
+    static hookTextFieldSetBorderWidth(node: KPointer, value?: Length | EdgeWidths | LocalizedEdgeWidths) {
+        TextFieldOps.textFieldOpsSetBorderWidth(node, value)
+    }
+
+    static hookTextFieldSetBorderColor(node: KPointer, value?: ResourceColor | EdgeColors | LocalizedEdgeColors) {
+        TextFieldOps.textFieldOpsSetBorderColor(node, value)
+    }
+
+    static hookTextFieldSetBorderStyle(node: KPointer, value?: BorderStyle | EdgeStyles) {
+        TextFieldOps.textFieldOpsSetBorderStyle(node, value)
+    }
+
+    static hookTextFieldSetBorderRadius(node: KPointer, value?: Length | BorderRadiuses | LocalizedBorderRadiuses) {
+        TextFieldOps.textFieldOpsSetBorderRadius(node, value)
+    }
+
+    static hookTextFieldSetBackgroundColor(node: KPointer, value?: ResourceColor) {
+        TextFieldOps.textFieldOpsSetBackgroundColor(node, value)
     }
 }

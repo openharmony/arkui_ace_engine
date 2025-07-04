@@ -28,6 +28,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/ace_ability.cpp",
       "$ace_root/adapter/ohos/entrance/ace_application_info.cpp",
       "$ace_root/adapter/ohos/entrance/ace_container.cpp",
+      "$ace_root/adapter/ohos/entrance/ace_container_hybrid_impl.cpp",
       "$ace_root/adapter/ohos/entrance/ace_data_ability.cpp",
       "$ace_root/adapter/ohos/entrance/ace_extra_input_data.cpp",
       "$ace_root/adapter/ohos/entrance/ace_form_ability.cpp",
@@ -39,6 +40,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/capability_registry.cpp",
       "$ace_root/adapter/ohos/entrance/data_ability_helper_standard.cpp",
       "$ace_root/adapter/ohos/entrance/dialog_container.cpp",
+      "$ace_root/adapter/ohos/entrance/dialog_container_static.cpp",
       "$ace_root/adapter/ohos/entrance/event_pass_through_subscriber.cpp",
       "$ace_root/adapter/ohos/entrance/file_asset_provider_impl.cpp",
       "$ace_root/adapter/ohos/entrance/form_utils_impl.cpp",
@@ -48,6 +50,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/pa_container.cpp",
       "$ace_root/adapter/ohos/entrance/plugin_utils_impl.cpp",
       "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos.cpp",
+      "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos_static.cpp",
       "$ace_root/adapter/ohos/entrance/touch_event_convertor.cpp",
       "$ace_root/adapter/ohos/entrance/window/foldable_window_ohos.cpp",
       "$ace_root/adapter/ohos/entrance/window_free_container.cpp",
@@ -122,7 +125,6 @@ template("ace_ohos_standard_source_set") {
       "bundle_framework:appexecfwk_core",
       "common_event_service:cesfwk_innerkits",
       "data_share:datashare_consumer",
-      "ets_runtime:libark_jsruntime",
       "eventhandler:libeventhandler",
       "graphic_2d:2d_graphics",
       "graphic_2d:librender_service_client",
@@ -146,6 +148,11 @@ template("ace_ohos_standard_source_set") {
       "window_manager:screen_session_manager_client",
       "zlib:shared_libz",
     ]
+    if (defined(ark_hybrid) && ark_hybrid) {
+      external_deps += [ "runtime_core:libarkruntime" ]
+    } else {
+      external_deps += [ "ets_runtime:libark_jsruntime" ]
+    }
     defines += [ "INDEXER_SUPPORT_VIBRATOR" ]
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       external_deps += [ "graphic_2d:librender_service_base" ]

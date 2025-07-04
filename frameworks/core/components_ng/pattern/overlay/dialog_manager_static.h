@@ -28,17 +28,27 @@ public:
     static RefPtr<OverlayManager> GetEmbeddedOverlay(int32_t uniqueId, const RefPtr<PipelineContext>& context);
 
     static RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& currentNode);
-    
-    RefPtr<OverlayManager> GetEmbeddedOverlayWithNode(const RefPtr<UINode>& dialogNode);
 
-    RefPtr<UINode> GetDialogNodeByContentNode(const RefPtr<UINode>& currentNode);
+    static RefPtr<OverlayManager> GetEmbeddedOverlayWithNode(const RefPtr<UINode>& dialogNode);
+
+    static RefPtr<UINode> GetDialogNodeByContentNode(const RefPtr<UINode>& currentNode);
 
     static void MainWindowOverlayStatic(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name,
         const RefPtr<NG::OverlayManager>& overlay, const int32_t containerId);
     static void ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback,
         const int32_t containerId);
     static void CloseToastStatic(const int32_t toastId, std::function<void(int32_t)>&& callback,
-    const int32_t containerId);
+        const int32_t containerId);
+    static void ShowDialogStatic(DialogProperties& dialogProps, std::function<void(int32_t, int32_t)>&& callback,
+        const int32_t containerId);
+    static void ShowActionMenuStatic(DialogProperties& dialogProps, std::function<void(int32_t, int32_t)>&& callback,
+        const int32_t containerId);
+    static void OpenCustomDialogStatic(DialogProperties& dialogProps, std::function<void(int32_t)>&& callback,
+        const int32_t containerId);
+    static void UpdateCustomDialogStatic(const WeakPtr<NG::UINode>& node, DialogProperties& dialogProps,
+        std::function<void(int32_t)>&& callback);
+    static void CloseCustomDialogStatic(const int32_t dialogId, const int32_t containerId);
+    static void CloseCustomDialogStatic(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
 
     void SetDismissDialogInfo(int32_t id, const std::string& name)
     {

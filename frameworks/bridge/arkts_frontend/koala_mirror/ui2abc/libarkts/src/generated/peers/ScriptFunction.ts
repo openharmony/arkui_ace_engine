@@ -39,7 +39,7 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 export class ScriptFunction extends AstNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 59)
+        assertValidPeer(pointer, 60)
         super(pointer)
     }
     static createScriptFunction(databody: AstNode | undefined, datasignature: FunctionSignature | undefined, datafuncFlags: number, dataflags: number): ScriptFunction {
@@ -150,11 +150,8 @@ export class ScriptFunction extends AstNode {
     get hasThrowStatement(): boolean {
         return global.generatedEs2panda._ScriptFunctionHasThrowStatementConst(global.context, this.peer)
     }
-    get isThrowing(): boolean {
-        return global.generatedEs2panda._ScriptFunctionIsThrowingConst(global.context, this.peer)
-    }
-    get isRethrowing(): boolean {
-        return global.generatedEs2panda._ScriptFunctionIsRethrowingConst(global.context, this.peer)
+    get isTrailingLambda(): boolean {
+        return global.generatedEs2panda._ScriptFunctionIsTrailingLambdaConst(global.context, this.peer)
     }
     get isTrailingLambda(): boolean {
         return global.generatedEs2panda._ScriptFunctionIsTrailingLambdaConst(global.context, this.peer)

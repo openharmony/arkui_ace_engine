@@ -91,44 +91,44 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     trackColorAttribute(value: ResourceColor | LinearGradient | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
+        const thisSerializer: Serializer = Serializer.hold()
+        let value_type: int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
+            const value_value = value!
+            let value_value_type: int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+            if (TypeChecker.isLinearGradient(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1 = value_value as LinearGradient
+                thisSerializer.writeLinearGradient(value_value_1)
+            }
+            else if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
                 thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as ResourceColor
-                let value_value_0_type : int32 = RuntimeType.UNDEFINED
+                const value_value_0 = value_value as ResourceColor
+                let value_value_0_type: int32 = RuntimeType.UNDEFINED
                 value_value_0_type = runtimeType(value_value_0)
                 if (TypeChecker.isColor(value_value_0)) {
                     thisSerializer.writeInt8(0 as int32)
-                    const value_value_0_0  = value_value_0 as Color
+                    const value_value_0_0 = value_value_0 as Color
                     thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0_0))
                 }
                 else if (RuntimeType.NUMBER == value_value_0_type) {
                     thisSerializer.writeInt8(1 as int32)
-                    const value_value_0_1  = value_value_0 as number
+                    const value_value_0_1 = value_value_0 as number
                     thisSerializer.writeNumber(value_value_0_1)
                 }
                 else if (RuntimeType.STRING == value_value_0_type) {
                     thisSerializer.writeInt8(2 as int32)
-                    const value_value_0_2  = value_value_0 as string
+                    const value_value_0_2 = value_value_0 as string
                     thisSerializer.writeString(value_value_0_2)
                 }
                 else if (RuntimeType.OBJECT == value_value_0_type) {
                     thisSerializer.writeInt8(3 as int32)
-                    const value_value_0_3  = value_value_0 as Resource
+                    const value_value_0_3 = value_value_0 as Resource
                     thisSerializer.writeResource(value_value_0_3)
                 }
-            }
-            else if (TypeChecker.isLinearGradient(value_value)) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as LinearGradient
-                thisSerializer.writeLinearGradient(value_value_1)
             }
         }
         ArkUIGeneratedNativeModule._SliderAttribute_trackColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -176,7 +176,12 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+            if (TypeChecker.isLinearGradient(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as LinearGradient
+                thisSerializer.writeLinearGradient(value_value_1)
+            }
+            else if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
                 thisSerializer.writeInt8(0 as int32)
                 const value_value_0  = value_value as ResourceColor
                 let value_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -201,11 +206,6 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
                     const value_value_0_3  = value_value_0 as Resource
                     thisSerializer.writeResource(value_value_0_3)
                 }
-            }
-            else if (TypeChecker.isLinearGradient(value_value)) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as LinearGradient
-                thisSerializer.writeLinearGradient(value_value_1)
             }
         }
         ArkUIGeneratedNativeModule._SliderAttribute_selectedColor1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -481,7 +481,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SliderAttribute_enableHapticFeedback(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    showTipsAttribute(value: boolean | undefined, content?: ResourceStr): void {
+    showTipsAttribute(value: boolean | undefined, content?:  ResourceStr | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -576,7 +576,7 @@ export type Callback_Number_SliderChangeMode_Void = (value: number, mode: Slider
 export interface SliderAttribute extends CommonMethod {
     blockColor(value: ResourceColor | undefined): this
     trackColor(value: ResourceColor | LinearGradient | undefined): this
-    selectedColor(value: ResourceColor | undefined | ResourceColor | LinearGradient | undefined): this
+    selectedColor(value: ResourceColor | LinearGradient | undefined): this
     minLabel(value: string | undefined): this
     maxLabel(value: string | undefined): this
     showSteps(value: boolean | undefined): this
@@ -596,7 +596,7 @@ export interface SliderAttribute extends CommonMethod {
     slideRange(value: SlideRange | undefined): this
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     enableHapticFeedback(value: boolean | undefined): this
-    showTips(value: boolean | undefined, content?: ResourceStr): this
+    showTips(value: boolean | undefined, content?:  ResourceStr | undefined): this
     _onChangeEvent_value(callback: ((index: number) => void)): void
 }
 export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttribute {
@@ -628,7 +628,7 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     public trackColor(value: ResourceColor | LinearGradient | undefined): this {
         return this
     }
-    public selectedColor(value: ResourceColor | undefined | ResourceColor | LinearGradient | undefined): this {
+    public selectedColor(value: ResourceColor | LinearGradient | undefined): this {
         return this
     }
     public minLabel(value: string | undefined): this {
@@ -688,7 +688,7 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     public enableHapticFeedback(value: boolean | undefined): this {
         return this
     }
-    public showTips(value: boolean | undefined, content?: ResourceStr): this {
+    public showTips(value: boolean | undefined, content?: ResourceStr | undefined): this {
         return this
     }
     public _onChangeEvent_value(callback: ((index: number) => void)): void {
@@ -736,12 +736,12 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         }
         return this
     }
-    public selectedColor(value: ResourceColor | undefined | ResourceColor | LinearGradient | undefined): this {
+    public selectedColor(value: ResourceColor | LinearGradient | undefined): this {
         if (this.checkPriority("selectedColor")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (ResourceColor | undefined)
-                this.getPeer()?.selectedColor0Attribute(value_casted)
+                this.getPeer()?.selectedColor1Attribute(value_casted)
                 return this
             }
             if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
@@ -905,10 +905,10 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         }
         return this
     }
-    public showTips(value: boolean | undefined, content?: ResourceStr): this {
+    public showTips(value: boolean | undefined, content?:  ResourceStr | undefined): this {
         if (this.checkPriority("showTips")) {
             const value_casted = value as (boolean | undefined)
-            const content_casted = content as (ResourceStr)
+            const content_casted = content as ( ResourceStr | undefined)
             this.getPeer()?.showTipsAttribute(value_casted, content_casted)
             return this
         }

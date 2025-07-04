@@ -31,16 +31,30 @@ import { RenderNode, RenderNodeInternal } from "./RenderNode"
 import { CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal } from './component/common'
 import { ArkBaseNode } from './handwritten/modifiers/ArkBaseNode'
 import { ArkListNode } from './handwritten/modifiers/ArkListNode'
+import { ArkSearchNode } from './handwritten/modifiers/ArkSearchNode'
+import { ArkTextAreaNode } from './handwritten/modifiers/ArkTextAreaNode'
+import { ArkTextInputNode } from './handwritten/modifiers/ArkTextInputNode'
 import { ModifierType } from './handwritten/modifiers/ArkCommonModifier'
 import { ListOptions, ListAttribute, ArkListPeer } from './component/list'
+import { SearchOptions, SearchAttribute, ArkSearchPeer } from './component/search'
+import { TextAreaOptions, TextAreaAttribute, ArkTextAreaPeer } from './component/textArea'
+import { TextInputOptions, TextInputAttribute, ArkTextInputPeer } from './component/textInput'
+import { ArkTextNode } from './handwritten/modifiers/ArkTextNode'
+import { TextOptions, TextAttribute, ArkTextPeer } from './component/text'
 import { Deserializer } from "./component/peers/Deserializer";
 import { ComponentContent } from './ComponentContent';
 import { DrawContext } from './Graphics';
 import { JSBuilderNode } from "./BuilderNode"
 import { BusinessError } from '#external';
+import { Resource } from 'global.resource';
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
+}
+export interface LayoutConstraint {
+    maxSize: Size;
+    minSize: Size;
+    percentReference: Size;
 }
 
 export class ArkFrameNodePeer extends ArkCommonMethodPeer {
@@ -150,6 +164,7 @@ export class FrameNode implements MaterializedBase {
             ArkUIAniModule._Common_Restore_InstanceId();
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(this._nodeId, this);
             this.onDraw_serialize(this.onDraw);
+            ArkUIAniModule._SetCustomCallback(this!.peer!.ptr, this.onMeasureInner, this.onLayoutInner);
         }
     }
     static getFinalizer(): KPointer {
@@ -389,6 +404,83 @@ export class FrameNode implements MaterializedBase {
         return ArkUIGeneratedNativeModule._FrameNode_getInspectorInfo(this.peer!.ptr);
     }
     public onDraw(context: DrawContext): void {
+    }
+    public onMeasureInner(width1: number, height1: number, width2: number, height2: number,
+        width3: number, height3: number): void {
+        const maxSize: Size = { width: width1, height: height1 };
+        const minSize: Size = { width: width2, height: height2 };
+        const percentReference: Size = { width: width3, height: height3 };
+        const constraint: LayoutConstraint = { maxSize: maxSize, minSize: minSize, percentReference: percentReference };
+        this.onMeasure(constraint);
+    }
+    public onMeasure(constraint: LayoutConstraint): void {
+        ArkUIAniModule._OnMeasure_InnerMeasure(this!.peer!.ptr);
+    }
+    public onLayoutInner(x: number, y: number): void {
+        const position: Position = { x: x, y: y };
+        this.onLayout(position);
+    }
+    public onLayout(position: Position): void {
+        ArkUIAniModule._OnLayout_InnerLayout(this!.peer!.ptr);
+    }
+    public setMeasuredSize(size: Size): void {
+        const width = Math.max(size.width, 0);
+        const height = Math.max(size.height, 0);
+        const size_casted = { width: width, height: height } as (Size);
+        this.setMeasuredSize_serialize(size_casted);
+        return;
+    }
+    public setLayoutPosition(position: Position): void {
+        const position_casted = position as (Position);
+        this.setLayoutPosition_serialize(position_casted);
+        return;
+    }
+    public measure(constraint: LayoutConstraint): void {
+        const constraint_casted = constraint as (LayoutConstraint);
+        const instanceId = this.instanceId_!.toInt();
+        ArkUIAniModule._Common_Sync_InstanceId(instanceId);
+        this.measure_serialize(constraint_casted);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return;
+    }
+    public layout(position: Position): void {
+        const position_casted = position as (Position);
+        const instanceId = this.instanceId_!.toInt();
+        ArkUIAniModule._Common_Sync_InstanceId(instanceId);
+        this.layout_serialize(position_casted);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return;
+    }
+    private setMeasuredSize_serialize(size: Size): void {
+        const thisSerializer : Serializer = Serializer.hold();
+        thisSerializer.writeSize(size);
+        ArkUIGeneratedNativeModule._FrameNode_setMeasuredSize(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length());
+        thisSerializer.release();
+    }
+    private setLayoutPosition_serialize(position: Position): void {
+        const thisSerializer : Serializer = Serializer.hold();
+        thisSerializer.writeGraphicsPosition(position);
+        ArkUIGeneratedNativeModule._FrameNode_setLayoutPosition(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length());
+        thisSerializer.release();
+    }
+    private measure_serialize(constraint: LayoutConstraint): void {
+        const thisSerializer : Serializer = Serializer.hold();
+        thisSerializer.writeLayoutConstraint(constraint);
+        ArkUIGeneratedNativeModule._FrameNode_measure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length());
+        thisSerializer.release();
+    }
+    private layout_serialize(position: Position): void {
+        const thisSerializer : Serializer = Serializer.hold();
+        thisSerializer.writeGraphicsPosition(position);
+        ArkUIGeneratedNativeModule._FrameNode_layout(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length());
+        thisSerializer.release();
+    }
+    public setNeedsLayout(): void {
+        this.setNeedsLayout_serialize();
+        return;
+    }
+    private setNeedsLayout_serialize(): void {
+        ArkUIGeneratedNativeModule._FrameNode_setNeedsLayout(this.peer!.ptr);
     }
     public invalidate(): void {
         ArkUIGeneratedNativeModule._FrameNode_invalidate(this.peer!.ptr);
@@ -881,8 +973,50 @@ export namespace typeNode {
         }
     }
 
+    class SearchFrameNode extends TypedFrameNode<ArkSearchNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSearchNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: SearchOptions): SearchAttribute {
+            let arkSearchNode = this.attribute as ArkSearchNode;
+            return arkSearchNode!.initialize(options);
+        }
+    }
+
+    class TextAreaFrameNode extends TypedFrameNode<ArkTextAreaNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextAreaNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: TextAreaOptions): TextAreaAttribute {
+            let arkTextAreaNode = this.attribute as ArkTextAreaNode;
+            return arkTextAreaNode!.initialize(options);
+        }
+    }
+
+    class TextInputFrameNode extends TypedFrameNode<ArkTextInputNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextInputNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: TextInputOptions): TextInputAttribute {
+            let arkTextInputNode = this.attribute as ArkTextInputNode;
+            return arkTextInputNode!.initialize(options);
+        }
+    }
+
+    class TextFrameNode extends TypedFrameNode<ArkTextNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(content?: string | Resource, value?: TextOptions): TextAttribute {
+            let arkTextNode = this.attribute as ArkTextNode;
+            return arkTextNode!.initialize(content, value);
+        }
+    }
+
+    overload createNode { createListNode, createSearchNode, createTextAreaNode, createTextInputNode, createTextNode }
+
     // @ts-ignore
-    function createNode(context: UIContext, type: string): ListFrameNode {
+    function createListNode(context: UIContext, type: string): ListFrameNode {
         return new ListFrameNode(context, 'List', (node: FrameNode, type: ModifierType): ArkListNode => {
             let arknode = new ArkListNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -891,4 +1025,48 @@ export namespace typeNode {
             return arknode;
         });
     }
+
+    // @ts-ignore
+    function createSearchNode(context: UIContext, type: string): SearchFrameNode {
+        return new SearchFrameNode(context, 'Search', (node: FrameNode, type: ModifierType): ArkSearchNode => {
+            let arknode = new ArkSearchNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkSearchPeer(retval, node._nodeId as int32, "Search", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createTextAreaNode(context: UIContext, type: string): TextAreaFrameNode {
+        return new TextAreaFrameNode(context, 'TextArea', (node: FrameNode, type: ModifierType): ArkTextAreaNode => {
+            let arknode = new ArkTextAreaNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkTextAreaPeer(retval, node._nodeId as int32, "TextArea", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createTextInputNode(context: UIContext, type: string): TextInputFrameNode {
+        return new TextInputFrameNode(context, 'TextInput', (node: FrameNode, type: ModifierType): ArkTextInputNode => {
+            let arknode = new ArkTextInputNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkTextInputPeer(retval, node._nodeId as int32, "TextInput", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+   // @ts-ignore
+   function createTextNode(context: UIContext, type: 'Text'): TextFrameNode {
+       return new TextFrameNode(context, 'Text', (node: FrameNode, type: ModifierType): ArkTextNode => {
+           let arknode = new ArkTextNode();
+           const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+           const peer = new ArkTextPeer(retval, node._nodeId as int32, "Text", 0);
+           arknode.setPeer(peer);
+           return arknode;
+       });
+   }
 }

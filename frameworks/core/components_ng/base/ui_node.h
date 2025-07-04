@@ -89,10 +89,9 @@ public:
         bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
     void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
-    UINode* GetChildAfter(UINode* node);
-    UINode* GetChildBefore(UINode* node);
 
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
+    bool RemoveChildSilently(const RefPtr<UINode>& child);
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
@@ -116,7 +115,7 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
-    void DetachFromMainTree(bool recursive = false, bool isRoot = true);
+    void DetachFromMainTree(bool recursive = false, bool needCheckThreadSafeNodeTree = false);
     virtual void FireCustomDisappear();
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
 
@@ -925,27 +924,14 @@ public:
         return true;
     }
 
-    bool IsFreeNode() const
+    bool IsThreadSafeNode() const
     {
-        return isFreeNode_;
+        return isThreadSafeNode_;
     }
 
-    bool IsFreeState() const
+    bool IsFree() const
     {
-        return isFreeState_;
-    }
-
-    bool IsFreeNodeTree()
-    {
-        if (!IsFreeNode()) {
-            return false;
-        }
-        for (const auto& child : GetChildren()) {
-            if (!child->IsFreeNodeTree()) {
-                return false;
-            }
-        }
-        return true;
+        return isFree_;
     }
 
     void PostAfterAttachMainTreeTask(std::function<void()>&& task)
@@ -954,16 +940,6 @@ public:
             return;
         }
         afterAttachMainTreeTasks_.emplace_back(std::move(task));
-    }
-
-    void ExecuteAfterAttachMainTreeTasks()
-    {
-        for (auto& task : afterAttachMainTreeTasks_) {
-            if (task) {
-                task();
-            }
-        }
-        afterAttachMainTreeTasks_.clear();
     }
 
 protected:
@@ -1054,6 +1030,16 @@ private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
     bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
+    void ExecuteAfterAttachMainTreeTasks()
+    {
+        for (auto& task : afterAttachMainTreeTasks_) {
+            if (task) {
+                task();
+            }
+        }
+        afterAttachMainTreeTasks_.clear();
+    }
+    bool CheckThreadSafeNodeTree(bool needCheck);
     virtual bool MaybeRelease() override;
 
     std::list<RefPtr<UINode>> children_;
@@ -1073,8 +1059,8 @@ private:
     int32_t themeScopeId_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
-    bool isFreeNode_ = false;
-    bool isFreeState_ = false;
+    bool isThreadSafeNode_ = false;
+    bool isFree_ = false; // the thread safe node in free state can be operated by non UI threads
     std::vector<std::function<void()>> afterAttachMainTreeTasks_;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;

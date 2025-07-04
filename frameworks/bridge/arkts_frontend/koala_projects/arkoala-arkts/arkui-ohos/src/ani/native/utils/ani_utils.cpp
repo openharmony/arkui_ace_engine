@@ -100,4 +100,13 @@ std::string AniUtils::ANIStringToStdString(ani_env* env, ani_string ani_str)
     std::string content = std::string(utf8Buffer);
     return content;
 };
+
+std::optional<ani_string> AniUtils::StdStringToANIString(ani_env *env, std::string str)
+{
+    ani_string result_string{};
+    if (env->String_NewUTF8(str.c_str(), str.size(), &result_string) != ANI_OK) {
+        return {};
+    }
+    return result_string;
+}
 }

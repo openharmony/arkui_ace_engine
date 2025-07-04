@@ -64,10 +64,12 @@ void SetTrackBackgroundColorImpl(Ark_NativePointer node,
 void SetStrokeWidthImpl(Ark_NativePointer node,
                         const Opt_Length* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //DataPanelModelNG::SetSetStrokeWidth(frameNode, convValue);
+    auto width = value ? Converter::OptConvertFromArkLength(value->value, DimensionUnit::VP) : std::nullopt;
+    Validator::ValidateNonNegative(width);
+    Validator::ValidateNonPercent(width);
+    DataPanelModelStatic::SetStrokeWidth(frameNode, width);
 }
 void SetTrackShadowImpl(Ark_NativePointer node,
                         const Opt_DataPanelShadowOptions* value)

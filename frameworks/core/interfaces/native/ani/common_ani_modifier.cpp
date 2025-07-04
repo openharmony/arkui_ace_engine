@@ -13,15 +13,23 @@
  * limitations under the License.
  */
 #include "common_ani_modifier.h"
+#include "ani_utils.h"
+#include "base/log/log.h"
+#include "base/memory/ace_type.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
+#include "core/common/thread_checker.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "bridge/arkts_frontend/ani_graphics_module.h"
+#include "bridge/arkts_frontend/arkts_frontend.h"
+#include "bridge/arkts_frontend/ani_context_module.h"
 
 #include <memory>
 #include <vector>
-
-#include "base/log/log.h"
-#include "bridge/arkts_frontend/ani_graphics_module.h"
-#include "core/common/container_scope.h"
-#include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "frameworks/bridge/arkts_frontend/ani_context_module.h"
 
 namespace OHOS::Ace::NG {
 
@@ -74,6 +82,88 @@ ani_long BuilderProxyNodeConstruct(ArkUI_Int32 id)
     return reinterpret_cast<ani_long>(AceType::RawPtr(proxyNode));
 }
 
+ani_ref GetSharedLocalStorage()
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetSharedLocalStorage-ani can not get current context.");
+        return nullptr;
+    }
+    auto frontend = context->GetFrontend();
+    if (frontend == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetSharedLocalStorage-ani can not get current frontend.");
+        return nullptr;
+    }
+    auto arkTsFrontend = AceType::DynamicCast<ArktsFrontend>(frontend);
+    if (arkTsFrontend == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetSharedLocalStorage-ani can not convert to arkts frontend.");
+        return nullptr;
+    }
+    int32_t currentInstance = Container::CurrentIdSafely();
+    auto storage = arkTsFrontend->GetShared(currentInstance);
+    if (storage) {
+        return storage;
+    }
+    return nullptr;
+}
+
+void SetBackgroundImagePixelMap(ani_env* env, ArkUINodeHandle node, ani_ref pixelMapPtr, ArkUI_Int32 repeat)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pixelMapValue = reinterpret_cast<void*>(pixelMapPtr);
+    CHECK_NULL_VOID(pixelMapValue);
+#if defined(PIXEL_MAP_SUPPORTED)
+    auto pixelMap = PixelMap::CreatePixelMap(pixelMapValue);
+    CHECK_NULL_VOID(pixelMap);
+    ViewAbstract::SetBackgroundImage(frameNode, ImageSourceInfo { pixelMap });
+#endif
+    auto arkRepeat = static_cast<OHOS::Ace::ImageRepeat>(repeat);
+    if (arkRepeat >= OHOS::Ace::ImageRepeat::NO_REPEAT && arkRepeat <= OHOS::Ace::ImageRepeat::REPEAT) {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, arkRepeat);
+    } else {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
+    }
+}
+
+void SetCustomCallback(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout)
+{
+    Framework::AniGraphicsModule::SetCustomCallback(env, ptr, fnObjMeasure, fnObjLayout);
+}
+
+ArkUI_Int32 RequireArkoalaNodeId(ArkUI_Int32 capacity)
+{
+    auto cursor = ElementRegister::GetInstance()->RequireArkoalaNodeId(capacity);
+    return cursor;
+}
+
+ani_boolean CheckIsUIThread(ArkUI_Int32 instanceId)
+{
+    SyncInstanceId(instanceId);
+    bool res = CheckThread(TaskExecutor::TaskType::UI);
+    RestoreInstanceId();
+    return res;
+}
+
+ani_boolean IsDebugMode(ArkUI_Int32 instanceId)
+{
+    SyncInstanceId(instanceId);
+    auto& aceApplicationInfo = AceApplicationInfo::GetInstance();
+    bool res = aceApplicationInfo.IsDebugForParallel();
+    RestoreInstanceId();
+    return res;
+}
+
+void OnMeasureInnerMeasure(ani_env* env, ani_long ptr)
+{
+    Framework::AniGraphicsModule::OnMeasureInnerMeasure(env, ptr);
+}
+
+void OnLayoutInnerLayout(ani_env* env, ani_long ptr)
+{
+    Framework::AniGraphicsModule::OnLayoutInnerLayout(env, ptr);
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -82,13 +172,21 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .restoreInstanceId = OHOS::Ace::NG::RestoreInstanceId,
         .setDrawCallback = OHOS::Ace::NG::SetDrawCallback,
         .getCurrentInstanceId = OHOS::Ace::NG::GetCurrentInstanceId,
-        .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct };
+        .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct,
+        .getSharedLocalStorage = OHOS::Ace::NG::GetSharedLocalStorage,
+        .setBackgroundImagePixelMap = OHOS::Ace::NG::SetBackgroundImagePixelMap,
+        .setCustomCallback = OHOS::Ace::NG::SetCustomCallback,
+        .requireArkoalaNodeId = OHOS::Ace::NG::RequireArkoalaNodeId,
+        .checkIsUIThread = OHOS::Ace::NG::CheckIsUIThread,
+        .isDebugMode =  OHOS::Ace::NG::IsDebugMode,
+        .onMeasureInnerMeasure = OHOS::Ace::NG::OnMeasureInnerMeasure,
+        .onLayoutInnerLayout = OHOS::Ace::NG::OnLayoutInnerLayout };
     return &impl;
 }
 
-void SetDrawModifier(ani_env* env, ani_long ptr, ani_object fnObj)
+void SetDrawModifier(ani_env* env, ani_long ptr, ani_int flag, ani_object fnObj)
 {
-    Framework::AniGraphicsModule::SetDrawModifier(env, ptr, fnObj);
+    Framework::AniGraphicsModule::SetDrawModifier(env, ptr, flag, fnObj);
 }
 
 void Invalidate(ani_env* env, ani_long ptr)

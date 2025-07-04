@@ -34,7 +34,7 @@ import { Identifier } from "./Identifier"
 import { Statement } from "./Statement"
 export class TSImportEqualsDeclaration extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 124)
+        assertValidPeer(pointer, 126)
         super(pointer)
     }
     static createTSImportEqualsDeclaration(id: Identifier | undefined, moduleReference: Expression | undefined, isExport: boolean): TSImportEqualsDeclaration {

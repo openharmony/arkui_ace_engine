@@ -39,7 +39,7 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypedStatement } from "./TypedStatement"
 export class TSInterfaceDeclaration extends TypedStatement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 131)
+        assertValidPeer(pointer, 133)
         super(pointer)
     }
     static createTSInterfaceDeclaration(_extends: readonly TSInterfaceHeritage[], id: AstNode | undefined, typeParams: AstNode | undefined, body: AstNode | undefined, isStatic: boolean, isExternal: boolean): TSInterfaceDeclaration {

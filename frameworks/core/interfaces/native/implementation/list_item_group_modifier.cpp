@@ -15,14 +15,31 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
+#include "frameworks/core/components/list/list_theme.h"
+#include "children_main_size_peer.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+V2::ItemDivider Convert(const Ark_ListDividerOptions& src);
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListItemGroupModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return {};
+    auto frameNode = ListItemGroupModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+RefPtr<ListTheme> GetListTheme()
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTheme<ListTheme>();
 }
 } // ListItemGroupModifier
 namespace ListItemGroupInterfaceModifier {
@@ -41,8 +58,26 @@ void SetDividerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ListItemGroupModelNG::SetSetDivider(frameNode, convValue);
+    auto options = value ? Converter::OptConvert<Ark_ListDividerOptions>(*value) : std::nullopt;
+    V2::ItemDivider dividerAns;
+    if (options.has_value()) {
+        auto widthOpt = Converter::OptConvert<Dimension>(options->strokeWidth);
+        dividerAns.strokeWidth = widthOpt.value_or(0.0_vp);
+        auto startMarginOpt = Converter::OptConvert<Dimension>(options->startMargin);
+        dividerAns.startMargin = startMarginOpt.value_or(0.0_vp);
+        auto endMarginOpt = Converter::OptConvert<Dimension>(options->endMargin);
+        dividerAns.endMargin = endMarginOpt.value_or(0.0_vp);
+        auto colorOpt = Converter::OptConvert<Color>(options->color);
+        if (colorOpt.has_value()) {
+            dividerAns.color = colorOpt.value();
+        } else {
+            auto listTheme = ListItemGroupModifier::GetListTheme();
+            if (listTheme) {
+                dividerAns.color = listTheme->GetDividerColor();
+            }
+        }
+    }
+    ListItemGroupModelStatic::SetDivider(frameNode, dividerAns);
 }
 void SetChildrenMainSizeImpl(Ark_NativePointer node,
                              const Opt_ChildrenMainSize* value)

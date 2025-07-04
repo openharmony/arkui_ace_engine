@@ -21,6 +21,8 @@ import { ArkStructBase } from "../ArkStructBase"
 import { ExtendableComponent, IExtendableComponent } from "./extendableComponent";
 import { GeometryInfo, Layoutable, Measurable, SizeResult, Theme } from "./common"
 import { ConstraintSizeOptions } from "./units"
+import { LocalStorage } from '@ohos.arkui.stateManagement';
+import { PeerNode } from "../PeerNode"
 
 export interface PageLifeCycle {
     onPageShow(): void {}
@@ -171,7 +173,6 @@ class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         }
     }
 
-    /** @memo */
     protected __updateStruct(
         initializers?: T_Options
     ): void {
@@ -191,6 +192,10 @@ class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     getUIContext(): UIContext {
         return this.uiContext!;
     }
+
+    getPeerNode(): PeerNode | undefined {
+        return this.getPeer();
+    }
 }
 
 function createInstance<T extends BaseCustomComponent<T_Options>, T_Options>(
@@ -202,6 +207,9 @@ function createInstance<T extends BaseCustomComponent<T_Options>, T_Options>(
 }
 
 export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent {
+    constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
+        super(useSharedStorage, storage);
+    }
     aboutToRecycle(): void {}
 
     __initializeStruct(
@@ -210,7 +218,6 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         content?: () => void
     ): void {}
 
-    /** @memo */
     __updateStruct(
         initializers?: T_Options
     ): void {}
@@ -223,6 +230,9 @@ interface ReusableLifeCycle {
 }
 
 export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T_Options> extends BaseCustomComponent<T_Options> implements ReusableLifeCycle {
+    constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
+        super(useSharedStorage, storage);
+    }
     /** @memo */
     static _instantiateImpl(
         /** @memo */

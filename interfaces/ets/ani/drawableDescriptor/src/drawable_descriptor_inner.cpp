@@ -25,13 +25,15 @@
 
 #include "base/image/pixel_map.h"
 #include "base/log/log.h"
+#include "core/drawable/animated_drawable_descriptor.h"
 #include "core/drawable/layered_drawable_descriptor.h"
 #include "core/drawable/pixel_map_drawable_descriptor.h"
 
 namespace OHOS::Ace::Ani {
 namespace {
-const char PIXEL_MAP_CONSTRUCTOR[] = "L@ohos/multimedia/image/image/PixelMap;:";
-const char PIXEL_MAP_DRAWABLE[] = "L@ohos/arkui/drawableDescriptor/PixelMapDrawableDescriptor;";
+constexpr char PIXEL_MAP_CONSTRUCTOR[] = "L@ohos/multimedia/image/image/PixelMap;:";
+constexpr char PIXEL_MAP_DRAWABLE[] = "L@ohos/arkui/drawableDescriptor/PixelMapDrawableDescriptor;";
+constexpr char ARRAY_GET[] = "i:C{std.core.Object}";
 } // namespace
 
 void CreatePixelMapDrawable(
@@ -72,6 +74,53 @@ void CreateLayeredDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, an
     if (!isMaskUndefined) {
         auto mask = Media::PixelMapTaiheAni::GetNativePixelMap(env, maskAni);
         drawable->SetMask(PixelMap::Create(mask));
+    }
+}
+
+void CreateAnimatedDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni,
+    ani_array pixelmapsAni, ani_object optionsAni)
+{
+    ani_boolean isOptionsUndefined;
+    env->Reference_IsUndefined(optionsAni, &isOptionsUndefined);
+    auto* drawable = new AnimatedDrawableDescriptor();
+    auto ptr = reinterpret_cast<ani_long>(drawable);
+    env->Object_SetPropertyByName_Long(drawableAni, "nativeObj", ptr);
+    ani_size size;
+    env->Array_GetLength(pixelmapsAni, &size);
+    std::vector<RefPtr<PixelMap>> results;
+    ani_class arrayClass;
+    env->FindClass("escompat.Array", &arrayClass);
+    ani_method getDataMethod;
+    env->Class_FindMethod(arrayClass, "$_get", ARRAY_GET, &getDataMethod);
+    for (size_t index = 0; index < size; index++) {
+        ani_ref pixelmapAni;
+        env->Object_CallMethod_Ref(pixelmapsAni, getDataMethod, &pixelmapAni, index);
+        auto pixelmap = Media::PixelMapTaiheAni::GetNativePixelMap(env, static_cast<ani_object>(pixelmapAni));
+        results.push_back(PixelMap::Create(pixelmap));
+    }
+    drawable->SetPixelMapList(results);
+    if (isOptionsUndefined) {
+        return;
+    }
+    ani_boolean isDurationUndefined;
+    ani_boolean isIterationsUndefined;
+    ani_ref durationRef;
+    ani_ref iterationsRef;
+    env->Object_GetPropertyByName_Ref(optionsAni, "duration", &durationRef);
+    env->Object_GetPropertyByName_Ref(optionsAni, "iterations", &iterationsRef);
+    ani_object durationAni = static_cast<ani_object>(durationRef);
+    ani_object iterationsAni = static_cast<ani_object>(iterationsRef);
+    env->Reference_IsUndefined(durationAni, &isDurationUndefined);
+    env->Reference_IsUndefined(iterationsAni, &isIterationsUndefined);
+    if (!isDurationUndefined) {
+        ani_double duration;
+        env->Object_CallMethodByName_Double(durationAni, "unboxed", ":d", &duration);
+        drawable->SetTotalDuration(static_cast<int32_t>(duration));
+    }
+    if (!isIterationsUndefined) {
+        ani_double iterations;
+        env->Object_CallMethodByName_Double(iterationsAni, "unboxed", ":d", &iterations);
+        drawable->SetIterations(static_cast<int32_t>(iterations));
     }
 }
 
@@ -225,6 +274,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "createPixelMapDrawable", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::CreatePixelMapDrawable) },
         ani_native_function {
             "createLayeredDrawable", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::CreateLayeredDrawable) },
+        ani_native_function {
+            "createAnimatedDrawable", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::CreateAnimatedDrawable) },
         ani_native_function { "createPixelMap", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::CreatePixelMap) },
         ani_native_function { "composePixelMap", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::ComposePixelMap) },
         ani_native_function { "createForeground", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::CreateForefround) },

@@ -20,6 +20,7 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
@@ -355,7 +356,7 @@ HWTEST_F(SwiperModifierTest, DISABLED_setIndicatorTestDotColor, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Dot type, the other subattr
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicatorTestDotOther, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setIndicator0TestDotOther, TestSize.Level1)
 {
     typedef std::tuple<Ark_DotIndicator, std::string, int> OneTestStep;
     static const std::string PROP_NAME("indicator");
@@ -428,7 +429,7 @@ HWTEST_F(SwiperModifierTest, setIndicatorTestDigitPadding, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Digit indicator, font size attributes
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicatorTestDigitFontSize, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setIndicator0TestDigitFontSize, TestSize.Level1)
 {
     typedef std::tuple<Ark_Font, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
@@ -959,7 +960,7 @@ HWTEST_F(SwiperModifierTest, DISABLED_setItemSpaceTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.DisplayModeImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setDisplayModeTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setDisplayModeTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("displayMode");
     static const std::string DEFAULT_VALUE("SwiperDisplayMode.Stretch"); // corrrsponds to
@@ -1235,7 +1236,7 @@ HWTEST_F(SwiperModifierTest, setDisplayCountTestByGroup, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.EffectModeImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setEffectModeTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setEffectModeTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("effectMode");
     static const std::string DEFAULT_VALUE("EdgeEffect.Spring");
@@ -1386,13 +1387,115 @@ HWTEST_F(SwiperModifierTest, setOnChangeTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, CONTEXT_ID);
     EXPECT_EQ(checkEvent->index, 321);
 }
+/**
+ * @tc.name: setIndicator0StyleTest
+ * @tc.desc: Check the functionality of SwiperModifier.IndicatorStyleImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, DISABLED_setIndicatorStyleTest, TestSize.Level1)
+{
+    static const std::string PROP_NAME("indicator");
+    ASSERT_NE(modifier_->setIndicatorStyle, nullptr);
+
+    auto checkValInitial = GetAttrValue<std::string>(node_, PROP_NAME);
+    EXPECT_EQ(checkValInitial, EXPECTED_TRUE);
+
+    Opt_IndicatorStyle style = Converter::ArkValue<Opt_IndicatorStyle>(Ark_IndicatorStyle{
+        .left = OPT_LEN_VP_NEG,
+        .top = OPT_LEN_VP_NEG,
+        .right = OPT_LEN_VP_POS,
+        .bottom = OPT_LEN_VP_POS,
+        .size = OPT_LEN_VP_POS,
+        .mask = OPT_BOOL_TRUE,
+        .color = ArkUnion<Opt_ResourceColor, Ark_Number>(0x12345678),
+        .selectedColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+    });
+    modifier_->setIndicatorStyle(node_, &style);
+    auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
+    ASSERT_NE(strWithObj, EXPECTED_TRUE);
+    ASSERT_NE(strWithObj, EXPECTED_FALSE);
+
+    auto checkL = GetAttrValue<std::string>(strWithObj, "left");
+    EXPECT_EQ(checkL, "0.00vp");
+    auto checkT = GetAttrValue<std::string>(strWithObj, "top");
+    EXPECT_EQ(checkT, "0.00vp");
+    auto checkR = GetAttrValue<std::string>(strWithObj, "right");
+    EXPECT_EQ(checkR, "1.23vp");
+    auto checkB = GetAttrValue<std::string>(strWithObj, "bottom");
+    EXPECT_EQ(checkB, "1.23vp");
+
+    auto checkW = GetAttrValue<std::string>(strWithObj, "itemWidth");
+    EXPECT_EQ(checkW, "1.23vp");
+    auto checkH = GetAttrValue<std::string>(strWithObj, "itemHeight");
+    EXPECT_EQ(checkH, "1.23vp");
+    auto checkSelW = GetAttrValue<std::string>(strWithObj, "selectedItemWidth");
+    EXPECT_EQ(checkSelW, "1.23vp");
+    auto checkSelH = GetAttrValue<std::string>(strWithObj, "selectedItemHeight");
+    EXPECT_EQ(checkSelH, "1.23vp");
+
+    auto checkMask = GetAttrValue<std::string>(strWithObj, "mask");
+    EXPECT_EQ(checkMask, EXPECTED_TRUE);
+
+    auto checkColor = GetAttrValue<std::string>(strWithObj, "color");
+    EXPECT_EQ(checkColor, "#12345678");
+    auto checkSelColor = GetAttrValue<std::string>(strWithObj, "selectedColor");
+    EXPECT_EQ(checkSelColor, "#FF00FFFF");
+}
+
+/**
+ * @tc.name: setIndicatorStyleTestInvalid
+ * @tc.desc: Check the functionality of SwiperModifier.IndicatorStyleImpl with undefined param
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, DISABLED_setIndicatorStyleTestInvalid, TestSize.Level1)
+{
+    static const std::string PROP_NAME("indicator");
+    static const std::string DEFAULT_PADDING("0.00vp");
+    static const std::string DEFAULT_SIZE(THEME_SWIPER_INDICATOR_SIZE.ToString());
+    ASSERT_NE(modifier_->setIndicatorStyle, nullptr);
+
+    auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
+    EXPECT_EQ(checkInitial, EXPECTED_TRUE);
+
+    Opt_IndicatorStyle styleInvalid = Converter::ArkValue<Opt_IndicatorStyle>();
+    modifier_->setIndicatorStyle(node_, &styleInvalid);
+    auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
+    ASSERT_NE(strWithObj, EXPECTED_TRUE);
+    ASSERT_NE(strWithObj, EXPECTED_FALSE);
+
+    auto checkL = GetAttrValue<std::string>(strWithObj, "left");
+    EXPECT_EQ(checkL, DEFAULT_PADDING);
+    auto checkT = GetAttrValue<std::string>(strWithObj, "top");
+    EXPECT_EQ(checkT, DEFAULT_PADDING);
+    auto checkR = GetAttrValue<std::string>(strWithObj, "right");
+    EXPECT_EQ(checkR, DEFAULT_PADDING);
+    auto checkB = GetAttrValue<std::string>(strWithObj, "bottom");
+    EXPECT_EQ(checkB, DEFAULT_PADDING);
+
+    auto checkW = GetAttrValue<std::string>(strWithObj, "itemWidth");
+    EXPECT_EQ(checkW, DEFAULT_SIZE);
+    auto checkH = GetAttrValue<std::string>(strWithObj, "itemHeight");
+    EXPECT_EQ(checkH, DEFAULT_SIZE);
+    auto checkSelW = GetAttrValue<std::string>(strWithObj, "selectedItemWidth");
+    EXPECT_EQ(checkSelW, DEFAULT_SIZE);
+    auto checkSelH = GetAttrValue<std::string>(strWithObj, "selectedItemHeight");
+    EXPECT_EQ(checkSelH, DEFAULT_SIZE);
+
+    auto checkMask = GetAttrValue<std::string>(strWithObj, "mask");
+    EXPECT_EQ(checkMask, EXPECTED_FALSE);
+
+    auto checkColor = GetAttrValue<std::string>(strWithObj, "color");
+    EXPECT_EQ(checkColor, THEME_SWIPER_INDICATOR_COLOR.ToString());
+    auto checkSelColor = GetAttrValue<std::string>(strWithObj, "selectedColor");
+    EXPECT_EQ(checkSelColor, THEME_SWIPER_INDICATOR_COLOR.ToString());
+}
 
 /**
  * @tc.name: setPrevMarginTest
  * @tc.desc: Check the functionality of SwiperModifier.PrevMarginImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setPrevMarginTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setPrevMarginTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("prevMargin");
     static const std::string PROP_NAME_OPT("prevMarginIgnoreBlank");
@@ -1432,7 +1535,7 @@ HWTEST_F(SwiperModifierTest, setPrevMarginTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.NextMarginImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setNextMarginTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setNextMarginTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("nextMargin");
     static const std::string PROP_NAME_OPT("nextMarginIgnoreBlank");

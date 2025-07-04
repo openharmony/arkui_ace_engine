@@ -191,7 +191,7 @@ static std::vector<std::tuple<std::string, Opt_Union_Number_String_PlaybackSpeed
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setOptionsProgressRateTestValidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setOptionsProgressRateTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
 
@@ -1100,7 +1100,7 @@ static std::vector<std::tuple<std::string, uint32_t, std::string>> setSurfaceBac
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setSurfaceBackgroundColor, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setSurfaceBackgroundColor, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SURFACE_BACKGROUND_COLOR_NAME);

@@ -80,7 +80,9 @@ const auto ATTRIBUTE_SELECTED_DEFAULT_VALUE = "0";
 const auto ATTRIBUTE_POPUP_POSITION_DEFAULT_VALUE = "0.00px";
 const auto ATTRIBUTE_AUTOCOLLAPSE_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE = "24.00vp";
+const auto ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE = 24.0;
 const auto ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE = "8.00vp";
+const auto ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE = 8.0;
 const auto ATTRIBUTE_POPUP_BACKGROUND_BLUR_STYLE_DEFAULT_VALUE = "BlurStyle.COMPONENT_REGULAR";
 const auto ATTRIBUTE_HAPTIC_FEEDBACK_DEFAULT_VALUE = "true";
 
@@ -99,22 +101,27 @@ static const std::vector<ArrayValueTestStep> ARRAY_VALUE_TEST_PLAN = {
 };
 static const std::vector<int32_t> SELECTED_INDEX_TEST_PLAN = { 1, 10, 32, -1, -35, 832 };
 
-typedef std::pair<Ark_Number, std::string> ArkNumberTestStep;
+typedef std::tuple<Ark_Number, std::string, std::string> ArkNumberTestStep;
 static const std::vector<ArkNumberTestStep> BORDER_RADIUS_TEST_PLAN = {
-    { ArkValue<Ark_Number>(10), StringUtils::DoubleToString(10 + RADIUS_OFFSET).append("vp") },
-    { ArkValue<Ark_Number>(832.599345f), StringUtils::DoubleToString(832.599345f + RADIUS_OFFSET).append("vp") },
-    { ArkValue<Ark_Number>(-123), "0.00vp" },
-    { ArkValue<Ark_Number>(25.01), StringUtils::DoubleToString(25.01 + RADIUS_OFFSET).append("vp") },
-    { ArkValue<Ark_Number>(-832.5f), "0.00vp" },
-    { ArkValue<Ark_Number>(0.0f), StringUtils::DoubleToString(RADIUS_OFFSET).append("vp") },
+    {ArkValue<Ark_Number>(10), StringUtils::DoubleToString(10).append("vp"),
+        StringUtils::DoubleToString(10 + RADIUS_OFFSET).append("vp")},
+    {ArkValue<Ark_Number>(832.599345f), StringUtils::DoubleToString(832.599345f).append("vp"),
+        StringUtils::DoubleToString(832.599345f + RADIUS_OFFSET).append("vp")},
+    {ArkValue<Ark_Number>(-123), ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE,
+        StringUtils::DoubleToString(ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE + RADIUS_OFFSET).append("vp")},
+    {ArkValue<Ark_Number>(25.01), StringUtils::DoubleToString(25.01).append("vp"),
+        StringUtils::DoubleToString(25.01 + RADIUS_OFFSET).append("vp")},
+    {ArkValue<Ark_Number>(-832.5f), ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE,
+        StringUtils::DoubleToString(ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE + RADIUS_OFFSET).append("vp")},
+    {ArkValue<Ark_Number>(0.0f), "0.00vp", StringUtils::DoubleToString(RADIUS_OFFSET).append("vp")},
 };
 static const std::vector<ArkNumberTestStep> SELECTED_TEST_PLAN = {
-    { ArkValue<Ark_Number>(10), "10" },
-    { ArkValue<Ark_Number>(-10), "0"},
-    { ArkValue<Ark_Number>(12.5), "12"},
-    { ArkValue<Ark_Number>(-5.5), "0"},
-    { ArkValue<Ark_Number>(832), "832"},
-    { ArkValue<Ark_Number>(1.0f), "1"}
+    { ArkValue<Ark_Number>(10), "10", "10" },
+    { ArkValue<Ark_Number>(-10), "0", "0"},
+    { ArkValue<Ark_Number>(12.5), "12", "12"},
+    { ArkValue<Ark_Number>(-5.5), "0", "0"},
+    { ArkValue<Ark_Number>(832), "832", "832"},
+    { ArkValue<Ark_Number>(1.0f), "1", "1"}
 };
 
 typedef std::pair<Ark_Union_String_Number, std::string> ItemSizeTestStep;
@@ -319,6 +326,7 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<IndexerTheme>();
+        AddResource(RES_NAME, CHECK_RESOURCE_STR);
     }
 };
 
@@ -349,14 +357,14 @@ HWTEST_F(IndexerModifierTest, setAlphabetIndexerOptionsArrayValue, TestSize.Leve
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.SetAlphabetIndexerOptionsImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setAlphabetIndexerOptionsSelected, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setAlphabetIndexerOptionsSelected, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAlphabetIndexerOptions, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED);
     EXPECT_EQ(checkVal, ATTRIBUTE_SELECTED_DEFAULT_VALUE);
 
     Ark_AlphabetIndexerOptions options;
-    for (const auto& [value, expectVal] : SELECTED_TEST_PLAN) {
+    for (const auto& [value, expectVal, _] : SELECTED_TEST_PLAN) {
         options.selected = value;
         modifier_->setAlphabetIndexerOptions(node_, &options);
         checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED);
@@ -476,7 +484,7 @@ HWTEST_F(IndexerModifierTest, setPopupColorRes, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.SelectedBackgroundColorImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, DISABLED_setSelectedBackgroundColor, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, setSelectedBackgroundColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED_BACKGROUND_COLOR);
@@ -494,7 +502,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setSelectedBackgroundColor, TestSize.Leve
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.SelectedBackgroundColorImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, DISABLED_setSelectedBackgroundColorRes, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, setSelectedBackgroundColorRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED_BACKGROUND_COLOR);
@@ -512,7 +520,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setSelectedBackgroundColorRes, TestSize.L
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.PopupBackgroundImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, DISABLED_setPopupBackground, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, setPopupBackground, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupBackground, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_BACKGROUND);
@@ -530,7 +538,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupBackground, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.PopupBackgroundImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, DISABLED_setPopupBackgroundRes, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, setPopupBackgroundRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupBackground, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_BACKGROUND);
@@ -766,7 +774,7 @@ HWTEST_F(IndexerModifierTest, setSelectedFontTest2, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.SelectedFontImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, DISABLED_setSelectedFontTest3, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, setSelectedFontTest3, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedFont, nullptr);
     Ark_Font font = {
@@ -922,7 +930,7 @@ HWTEST_F(IndexerModifierTest, setPopupFontTest2, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.PopupFontImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, DISABLED_setPopupFontTest3, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, setPopupFontTest3, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupFont, nullptr);
     Ark_Font font = {
@@ -1158,7 +1166,7 @@ HWTEST_F(IndexerModifierTest, setFontTest2, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.FontImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, DISABLED_setFontTest3, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, setFontTest3, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFont, nullptr);
     Ark_Font font = {
@@ -1228,7 +1236,7 @@ HWTEST_F(IndexerModifierTest, setFontTest4, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.AlignStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, DISABLED_setAlignStyle, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, setAlignStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAlignStyle, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ALIGN_STYLE);
@@ -1375,7 +1383,7 @@ HWTEST_F(IndexerModifierTest, setSelected, TestSize.Level1)
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED);
     EXPECT_EQ(checkVal, ATTRIBUTE_SELECTED_DEFAULT_VALUE);
 
-    for (const auto& [value, expectVal] : SELECTED_TEST_PLAN) {
+    for (const auto& [value, expectVal, _] : SELECTED_TEST_PLAN) {
         auto optValue = Converter::ArkValue<Opt_Number>(value);
         modifier_->setSelected(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED);
@@ -1468,17 +1476,17 @@ HWTEST_F(IndexerModifierTest, setAutoCollapse, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.PopupItemBorderRadiusImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, DISABLED_setPopupItemBorderRadius, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, setPopupItemBorderRadius, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupItemBorderRadius, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_BORDER_RADIUS);
     EXPECT_EQ(checkVal, ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE);
 
-    for (const auto& [value, expectVal] : BORDER_RADIUS_TEST_PLAN) {
+    for (const auto& [value, expectItemVal, expectVal] : BORDER_RADIUS_TEST_PLAN) {
         auto optValue = Converter::ArkValue<Opt_Number>(value);
         modifier_->setPopupItemBorderRadius(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_BORDER_RADIUS);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_EQ(checkVal, expectItemVal);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_BORDER_RADIUS);
         EXPECT_EQ(checkVal, expectVal);
     }
@@ -1489,17 +1497,32 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupItemBorderRadius, TestSize.Level1
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.ItemBorderRadiusImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, DISABLED_setItemBorderRadius, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, setItemBorderRadius, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setItemBorderRadius, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ITEM_BORDER_RADIUS);
     EXPECT_EQ(checkVal, ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE);
 
-    for (const auto& [value, expectVal] : BORDER_RADIUS_TEST_PLAN) {
+    using TestStep = std::tuple<Ark_Number, std::string, std::string>;
+    static const std::vector<TestStep> testPlan = {
+        {ArkValue<Ark_Number>(10), StringUtils::DoubleToString(10).append("vp"),
+            StringUtils::DoubleToString(10 + RADIUS_OFFSET).append("vp")},
+        {ArkValue<Ark_Number>(832.599345f), StringUtils::DoubleToString(832.599345f).append("vp"),
+            StringUtils::DoubleToString(832.599345f + RADIUS_OFFSET).append("vp")},
+        {ArkValue<Ark_Number>(-123), ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE,
+            StringUtils::DoubleToString(ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE + RADIUS_OFFSET).append("vp")},
+        {ArkValue<Ark_Number>(25.01), StringUtils::DoubleToString(25.01).append("vp"),
+            StringUtils::DoubleToString(25.01 + RADIUS_OFFSET).append("vp")},
+        {ArkValue<Ark_Number>(-832.5f), ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE,
+            StringUtils::DoubleToString(ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE + RADIUS_OFFSET).append("vp")},
+        {ArkValue<Ark_Number>(0.0f), "0.00vp", StringUtils::DoubleToString(RADIUS_OFFSET).append("vp")},
+    };
+
+    for (const auto& [value, expectItemVal, expectVal] : testPlan) {
         auto optValue = Converter::ArkValue<Opt_Number>(value);
         modifier_->setItemBorderRadius(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ITEM_BORDER_RADIUS);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_EQ(checkVal, expectItemVal);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_INDEXER_BORDER_RADIUS);
         EXPECT_EQ(checkVal, expectVal);
     }

@@ -34,7 +34,7 @@ import { LoopStatement } from "./LoopStatement"
 import { Statement } from "./Statement"
 export class WhileStatement extends LoopStatement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 152)
+        assertValidPeer(pointer, 154)
         super(pointer)
     }
     static createWhileStatement(test?: Expression, body?: Statement): WhileStatement {

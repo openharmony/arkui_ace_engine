@@ -75,11 +75,48 @@ void SetOnScrollBarUpdateImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridModelNG::SetSetOnScrollBarUpdate(frameNode, convValue);
+    GridModelStatic::SetScrollBarWidth(frameNode, Converter::OptConvert<Dimension>(*value));
 }
-void SetOnScrollIndexImpl(Ark_NativePointer node,
-                          const Opt_Callback_Number_Number_Void* value)
+void ScrollBarColorImpl(Ark_NativePointer node,
+                        const Opt_Union_Color_Number_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelStatic::SetScrollBarColor(frameNode, Converter::OptConvert<Color>(*value));
+}
+void ScrollBarImpl(Ark_NativePointer node,
+                   const Opt_BarState* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelStatic::SetScrollBarMode(frameNode, Converter::OptConvert<DisplayMode>(*value));
+}
+void OnScrollBarUpdateImpl(Ark_NativePointer node,
+                           const Opt_Callback_Number_Number_ComputedBarAttribute* value)
+{
+    using namespace Converter;
+    using ResType = std::pair<std::optional<float>, std::optional<float>>;
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onScrollBarUpdate =
+        [callback = CallbackHelper(*optValue)](int32_t index, const Dimension& offset) -> ResType {
+        auto arkIndex = ArkValue<Ark_Number>(index);
+        auto arkOffset = ArkValue<Ark_Number>(offset);
+        auto arkResult = callback.InvokeWithObtainResult<Ark_ComputedBarAttribute, Callback_ComputedBarAttribute_Void>(
+            arkIndex, arkOffset);
+        auto totalOffset = Convert<Dimension>(arkResult.totalOffset).ConvertToPx();
+        auto totalLength = Convert<Dimension>(arkResult.totalLength).ConvertToPx();
+        return ResType(totalOffset, totalLength);
+    };
+    GridModelStatic::SetOnScrollBarUpdate(frameNode, std::move(onScrollBarUpdate));
+}
+void OnScrollIndexImpl(Ark_NativePointer node,
+                       const Opt_Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

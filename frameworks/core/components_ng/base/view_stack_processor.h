@@ -197,6 +197,7 @@ struct PrebuildCompCmd {
 class ACE_EXPORT ViewStackProcessor final {
 public:
     friend class ScopedViewStackProcessor;
+    friend class InteropViewStackProcessor;
 
     ACE_FORCE_EXPORT static ViewStackProcessor* GetInstance();
     ~ViewStackProcessor() = default;
@@ -611,5 +612,8 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(ScopedViewStackProcessor);
 };
+
+class InteropViewStackProcessor;
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_STACK_PROCESSOR_H

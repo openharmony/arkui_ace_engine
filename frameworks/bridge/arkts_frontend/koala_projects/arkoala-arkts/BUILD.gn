@@ -14,6 +14,7 @@
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("./components.gni")
 
 koala_root = ".."
 koala_path = ""
@@ -130,4 +131,53 @@ group("arkoala") {
     deps = [
       "$koala_path:arkoala_build"
     ]
+}
+
+# Use build system to build arkoala
+action("arkoala_annotate") {
+  outputs = [ "$target_out_dir/arkui-preprocessed" ]
+
+  script = "../tools/annotate.py"
+
+  args = [
+    rebase_path("."),
+    rebase_path("annotate-config.json")
+  ]
+}
+
+action("arkoala_process") {
+  outputs = [ "$target_out_dir/ets-arkui-preprocessed" ]
+
+  script = "../../arkoala/process_arkoala.py"
+
+  args = [
+    rebase_path("."),
+  ]
+
+  deps = [
+    ":arkoala_annotate",
+    "../incremental/runtime:runtime_annotate"
+  ]
+}
+
+generate_static_abc("components_compile_abc") {
+  base_url = "./arkui-preprocessed"
+  files = arkui_files
+  paths_keys = arkui_path_keys
+  paths_values = arkui_path_values
+  ui_enable = "True"
+  only_memo = "True"
+  dependencies = [ ":arkoala_process" ]
+  dst_file = target_out_dir + "/components_compile_abc"
+  out_puts = [ target_out_dir + "/components_compile_abc/modules_static.abc" ]
+}
+
+ohos_copy("components_abc") {
+  sources = [
+    target_out_dir + "/components_compile_abc/modules_static.abc"
+  ]
+  outputs = [
+    target_out_dir + "/components.abc"
+  ]
+  deps = [ ":components_compile_abc" ]
 }

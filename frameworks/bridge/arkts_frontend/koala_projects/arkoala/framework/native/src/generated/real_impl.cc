@@ -4236,7 +4236,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                                const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
+                                const Opt_OnScrollFrameBeginCallback* value)
     {
     }
     void OnWillScrollImpl(Ark_NativePointer node,
@@ -14150,7 +14150,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // TabsOpsAccessor
-    namespace UIContextImpAccessor {
+    namespace IUIContextAccessor {
     void FreezeUINode0Impl(const Ark_String* id,
                            Ark_Boolean isFrozen)
     {
@@ -14159,7 +14159,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            Ark_Boolean isFrozen)
     {
     }
-    } // UIContextImpAccessor
+    } // IUIContextAccessor
     namespace GridItemOpsAccessor {
     Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
                                                     Ark_Boolean value,
@@ -14608,6 +14608,106 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         //undefinedModelNG::SetRegisterTextFieldValueCallback(frameNode, convValue);
         return {};
     }
+    Ark_NativePointer TextFieldOpsSetWidthImpl(Ark_NativePointer node,
+                                               const Opt_Union_Length_LayoutPolicy* value)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetWidth(frameNode, convValue);
+        return {};
+    }
+    Ark_NativePointer TextFieldOpsSetHeightImpl(Ark_NativePointer node,
+                                                const Opt_Union_Length_LayoutPolicy* value)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetHeight(frameNode, convValue);
+        return {};
+    }
+    Ark_NativePointer TextFieldOpsSetPaddingImpl(Ark_NativePointer node,
+                                                 const Opt_Union_Padding_Length_LocalizedPadding* value)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetPadding(frameNode, convValue);
+        return {};
+    }
+    Ark_NativePointer TextFieldOpsSetMarginImpl(Ark_NativePointer node,
+                                                const Opt_Union_Padding_Length_LocalizedPadding* value)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetMargin(frameNode, convValue);
+        return {};
+    }
+    Ark_NativePointer TextFieldOpsSetBorderImpl(Ark_NativePointer node,
+                                                const Opt_BorderOptions* value)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetBorder(frameNode, convValue);
+        return {};
+    }
+    Ark_NativePointer TextFieldOpsSetBorderWidthImpl(Ark_NativePointer node,
+                                                     const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetBorderWidth(frameNode, convValue);
+        return {};
+    }
+    Ark_NativePointer TextFieldOpsSetBorderColorImpl(Ark_NativePointer node,
+                                                     const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetBorderColor(frameNode, convValue);
+        return {};
+    }
+    Ark_NativePointer TextFieldOpsSetBorderStyleImpl(Ark_NativePointer node,
+                                                     const Opt_Union_BorderStyle_EdgeStyles* value)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetBorderStyle(frameNode, convValue);
+        return {};
+    }
+    Ark_NativePointer TextFieldOpsSetBorderRadiusImpl(Ark_NativePointer node,
+                                                      const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetBorderRadius(frameNode, convValue);
+        return {};
+    }
+    Ark_NativePointer TextFieldOpsSetBackgroundColorImpl(Ark_NativePointer node,
+                                                         const Opt_ResourceColor* value)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetTextFieldOpsSetBackgroundColor(frameNode, convValue);
+        return {};
+    }
     } // TextFieldOpsAccessor
     namespace ActionSheetAccessor {
     void ShowImpl(const Ark_ActionSheetOptions* value)
@@ -14619,16 +14719,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // AlertDialogAccessor
-    namespace PromptActionAccessor {
-    void ShowToastImpl(const Ark_ShowToastOptions* value,
-                       const Callback_Number_Void* callback_value)
-    {
-    }
-    void CloseToastImpl(const Ark_Number* toastId,
-                       const Callback_Number_Void* callback_value)
-    {
-    }
-    } // PromptActionAccessor
     namespace SpringPropAccessor {
     void DestroyPeerImpl(Ark_SpringProp peer)
     {
@@ -17210,6 +17300,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void CloseImpl(Ark_CustomDialogController peer)
     {
     }
+    void SetOwnerViewImpl(Ark_CustomDialogController peer, Ark_NodeHandle node)
+    {
+    }
     } // CustomDialogControllerAccessor
     namespace LinearGradientAccessor {
     void DestroyPeerImpl(Ark_LinearGradient peer)
@@ -17878,6 +17971,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     Ark_String GetIdImpl(Ark_EventTargetInfo peer)
+    {
+        return {};
+    }
+    Ark_Boolean IsScrollableComponentImpl(Ark_EventTargetInfo peer)
     {
         return {};
     }
@@ -21968,13 +22065,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &TabsOpsAccessorImpl;
     }
-    const GENERATED_ArkUIUIContextImpAccessor* GetUIContextImpAccessor()
+    const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
     {
-        static const GENERATED_ArkUIUIContextImpAccessor UIContextImpAccessorImpl {
-            UIContextImpAccessor::FreezeUINode0Impl,
-            UIContextImpAccessor::FreezeUINode1Impl,
+        static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
+            IUIContextAccessor::FreezeUINode0Impl,
+            IUIContextAccessor::FreezeUINode1Impl,
         };
-        return &UIContextImpAccessorImpl;
+        return &IUIContextAccessorImpl;
     }
 
     const GENERATED_ArkUIGridItemOpsAccessor* GetGridItemOpsAccessor()
@@ -22157,6 +22254,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUITextFieldOpsAccessor TextFieldOpsAccessorImpl {
             TextFieldOpsAccessor::RegisterTextFieldValueCallbackImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetWidthImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetHeightImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetPaddingImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetMarginImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderWidthImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderColorImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderStyleImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderRadiusImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBackgroundColorImpl,
         };
         return &TextFieldOpsAccessorImpl;
     }
@@ -22175,15 +22282,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AlertDialogAccessor::ShowImpl,
         };
         return &AlertDialogAccessorImpl;
-    }
-
-    const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor()
-    {
-        static const GENERATED_ArkUIPromptActionAccessor PromptActionAccessorImpl {
-            PromptActionAccessor::ShowToastImpl,
-            PromptActionAccessor::CloseToastImpl,
-        };
-        return &PromptActionAccessorImpl;
     }
 
     const GENERATED_ArkUISpringPropAccessor* GetSpringPropAccessor()
@@ -23155,6 +23253,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CustomDialogControllerAccessor::GetFinalizerImpl,
             CustomDialogControllerAccessor::OpenImpl,
             CustomDialogControllerAccessor::CloseImpl,
+            CustomDialogControllerAccessor::SetOwnerViewImpl,
         };
         return &CustomDialogControllerAccessorImpl;
     }
@@ -23490,6 +23589,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             EventTargetInfoAccessor::CtorImpl,
             EventTargetInfoAccessor::GetFinalizerImpl,
             EventTargetInfoAccessor::GetIdImpl,
+            EventTargetInfoAccessor::IsScrollableComponentImpl,
         };
         return &EventTargetInfoAccessorImpl;
     }
@@ -25085,7 +25185,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetGlobalScopeUicontextFontScaleAccessor,
             GetGlobalScopeUicontextTextMenuAccessor,
             GetTabsOpsAccessor,
-            GetUIContextImpAccessor,
+            GetIUIContextAccessor,
             GetGridItemOpsAccessor,
             GetFilterAccessor,
             GetVisualEffectAccessor,
@@ -25256,7 +25356,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetCustomSpanAccessor,
             GetLinearIndicatorControllerAccessor,
             GetGlobalScopeAccessor,
-            GetPromptActionAccessor,
             GetRouterExtenderAccessor,
         };
         return &accessorsImpl;

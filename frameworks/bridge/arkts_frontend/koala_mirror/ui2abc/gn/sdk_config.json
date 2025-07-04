@@ -10,6 +10,10 @@
       "destination": "linux_host_tools/lib/libes2panda-public.so"
     },
     {
+      "source": "$out_root/../sdk/clang_x64/arkcompiler/ets_frontend/libes2panda_public.so",
+      "destination": "linux_host_tools/lib/libes2panda-public.so"
+    },
+    {
       "source": "$out_root/clang_x64/arkcompiler/runtime_core/ark_link",
       "destination": "linux_host_tools/bin/ark_link"
     },

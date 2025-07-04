@@ -104,7 +104,11 @@ void SetStopPropagationImpl(Ark_MouseEvent peer,
 }
 Opt_Number GetRawDeltaXImpl(Ark_MouseEvent peer)
 {
-    return {};
+    const auto errValue = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer, errValue);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errValue);
+    return Converter::ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(info->GetRawDeltaX()));
 }
 void SetRawDeltaXImpl(Ark_MouseEvent peer,
                       const Opt_Number* rawDeltaX)
@@ -112,7 +116,11 @@ void SetRawDeltaXImpl(Ark_MouseEvent peer,
 }
 Opt_Number GetRawDeltaYImpl(Ark_MouseEvent peer)
 {
-    return {};
+    const auto errValue = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer, errValue);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errValue);
+    return Converter::ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(info->GetRawDeltaY()));
 }
 void SetRawDeltaYImpl(Ark_MouseEvent peer,
                       const Opt_Number* rawDeltaY)

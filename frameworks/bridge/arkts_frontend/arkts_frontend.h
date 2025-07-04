@@ -37,8 +37,13 @@ typedef struct __ani_env ani_env;
 typedef class __ani_ref* ani_ref;
 typedef class __ani_object* ani_object;
 typedef struct __ani_vm ani_vm;
+typedef struct __ani_method* ani_method;
 
 namespace OHOS::Ace {
+enum class ArkolaMessageType : int32_t {
+    DELETE_DETACHED_ROOT = 1,                // destroyUiDetachedRoot
+};
+
 using InspectorFunc = std::function<void()>;
 using MediaQueryCallback = std::function<void(const std::string& callbackId, const std::string& args)>;
 class InspectorEvent : public virtual AceType {
@@ -260,6 +265,7 @@ public:
     void SetColorMode(ColorMode colorMode) override {}
     void RebuildAllPages() override {}
     void NotifyAppStorage(const std::string& key, const std::string& value) override {}
+    bool HandleMessage(void *frameNode, int32_t type, const std::string& param);
 
     RefPtr<AceEventHandler> GetEventHandler() override
     {
@@ -310,7 +316,7 @@ public:
         storageMap_.erase(id);
     }
 
-    void* GetShared(int32_t id);
+    ani_ref GetShared(int32_t id);
     
     void RegisterLayoutInspectorCallback(const RefPtr<InspectorEvent>& layoutFunc, const std::string& componentId)
     {
@@ -350,7 +356,7 @@ public:
         mediaUpdateCallback_ = nullptr;
     }
 
-    ani_object CallGetUIContextFunc();
+    ani_object CallGetUIContextFunc(int32_t instanceId);
 
     void SetAniContext(int32_t instanceId, ani_ref* context);
 
@@ -359,11 +365,14 @@ public:
         return pageRouterManager_;
     }
 
+    static void PreloadAceModule(void* aniEnv);
+    static void* preloadArkTSRuntime;
 private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;
     ani_vm* vm_ = nullptr;
     ani_ref app_ = nullptr;
+    ani_method handleMessageMethod_ = nullptr;
     bool foregroundFrontend_ = false;
     RefPtr<NG::PageRouterManager> pageRouterManager_ = nullptr;
 

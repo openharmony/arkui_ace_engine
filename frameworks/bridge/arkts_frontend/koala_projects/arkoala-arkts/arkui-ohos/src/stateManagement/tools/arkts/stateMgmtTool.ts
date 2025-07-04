@@ -21,12 +21,17 @@ import {
     IProvideDecoratedVariable,
     IConsumeDecoratedVariable,
     IStorageLinkDecoratedVariable,
-    IStoragePropDecoratedVariable,
+    ILocalStorageLinkDecoratedVariable,
+    IStoragePropRefDecoratedVariable,
 } from '../../decorator';
 import { NullableObject } from '../../base/types';
 import { InterfaceProxyHandler } from './observeInterfaceProxy';
 import { ISubscribedWatches } from '../../decorator';
 import { DecoratedV1VariableBase } from '../../decoratorImpl/decoratorBase';
+import { StateManager, GlobalStateManager } from '@koalaui/runtime';
+import { UIContextUtil } from '../../../handwritten/UIContextUtil';
+import { UIContextImpl } from '../../../handwritten/UIContextImpl';
+import { StateMgmtConsole } from '../stateMgmtDFX';
 export class StateMgmtTool {
     static isIObservedObject(value: NullableObject): boolean {
         return value instanceof IObservedObject;
@@ -49,11 +54,14 @@ export class StateMgmtTool {
     static isIConsumeDecoratedVariable(value: NullableObject): boolean {
         return value instanceof IConsumeDecoratedVariable;
     }
+    static isILocalStorageLinkDecoratedVariable(value: NullableObject): boolean {
+        return value instanceof ILocalStorageLinkDecoratedVariable;
+    }
     static isIStorageLinkDecoratedVariable(value: NullableObject): boolean {
         return value instanceof IStorageLinkDecoratedVariable;
     }
-    static isIStoragePropDecoratedVariable(value: NullableObject): boolean {
-        return value instanceof IStoragePropDecoratedVariable;
+    static isIStoragePropRefDecoratedVariable(value: NullableObject): boolean {
+        return value instanceof IStoragePropRefDecoratedVariable;
     }
     static isDecoratedV1VariableBase(value: NullableObject): boolean {
         return value instanceof DecoratedV1VariableBase;
@@ -72,5 +80,18 @@ export class StateMgmtTool {
     }
     static isObjectLiteral<T extends Object>(value: T): boolean {
         return Reflect.isLiteralInitializedInterface(value);
+    }
+    static getGlobalStateManager(): StateManager {
+        return GlobalStateManager.instance;
+    }
+    static tryGetCurrentGlobalStateManager(): StateManager {
+        let context: UIContextImpl | undefined = undefined;
+        try {
+            context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        } catch (e) {
+            // for scenario where UIContext is not ready.
+            StateMgmtConsole.log('Get current UIContext fail, will directly use GlobalStateManager');
+        }
+        return context && context.stateMgr ? context.stateMgr! : GlobalStateManager.instance;
     }
 }

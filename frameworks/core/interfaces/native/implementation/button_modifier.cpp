@@ -60,80 +60,79 @@ void SetTypeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ButtonModelNG::SetSetType(frameNode, convValue);
+    auto typeInt = EnumToInt(Converter::OptConvertPtr<ButtonType>(value));
+    ButtonModelStatic::SetType(frameNode, typeInt);
 }
 void SetStateEffectImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ButtonModelNG::SetSetStateEffect(frameNode, convValue);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ButtonModelStatic::SetStateEffect(frameNode, *convValue);
 }
 void SetButtonStyleImpl(Ark_NativePointer node,
                         const Opt_ButtonStyleMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ButtonModelNG::SetSetButtonStyle(frameNode, convValue);
+    ButtonModelStatic::SetButtonStyle(frameNode, Converter::OptConvertPtr<ButtonStyleMode>(value));
 }
 void SetControlSizeImpl(Ark_NativePointer node,
                         const Opt_ControlSize* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ButtonModelNG::SetSetControlSize(frameNode, convValue);
+    ButtonModelStatic::SetControlSize(frameNode, Converter::OptConvertPtr<ControlSize>(value));
 }
 void SetRoleImpl(Ark_NativePointer node,
                  const Opt_ButtonRole* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ButtonModelNG::SetSetRole(frameNode, convValue);
+    ButtonModelStatic::SetRole(frameNode, Converter::OptConvertPtr<ButtonRole>(value));
 }
 void SetFontColorImpl(Ark_NativePointer node,
                       const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ButtonModelNG::SetSetFontColor(frameNode, convValue);
+    ButtonModelStatic::SetFontColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SetFontSizeImpl(Ark_NativePointer node,
                      const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ButtonModelNG::SetSetFontSize(frameNode, convValue);
+    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidatePositive(fontSize);
+    Validator::ValidateNonPercent(fontSize);
+    ButtonModelStatic::SetFontSize(frameNode, fontSize);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
                        const Opt_Union_Number_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ButtonModelNG::SetSetFontWeight(frameNode, convValue);
+    ButtonModelStatic::SetFontWeight(frameNode, Converter::OptConvertPtr<Ace::FontWeight>(value));
 }
 void SetFontStyleImpl(Ark_NativePointer node,
                       const Opt_FontStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ButtonModelNG::SetSetFontStyle(frameNode, convValue);
+    ButtonModelStatic::SetFontStyle(frameNode, Converter::OptConvertPtr<Ace::FontStyle>(value));
 }
 void SetFontFamilyImpl(Ark_NativePointer node,
                        const Opt_Union_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ButtonModelNG::SetSetFontFamily(frameNode, convValue);
+    std::optional<StringArray> families;
+    if (auto fontfamiliesOpt = Converter::OptConvertPtr<Converter::FontFamilies>(value); fontfamiliesOpt) {
+        families = fontfamiliesOpt->families;
+    }
+    ButtonModelStatic::SetFontFamily(frameNode, families);
 }
 void SetContentModifierImpl(Ark_NativePointer node,
                             const Opt_ContentModifier* value)
@@ -148,24 +147,28 @@ void SetLabelStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ButtonModelNG::SetSetLabelStyle(frameNode, convValue);
+    auto parameters = Converter::OptConvertPtr<ButtonParameters>(value);
+    ButtonModelStatic::SetLabelStyle(frameNode, parameters);
 }
 void SetMinFontScaleImpl(Ark_NativePointer node,
                          const Opt_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ButtonModelNG::SetSetMinFontScale(frameNode, convValue);
+    auto convValue = Converter::OptConvertPtr<float>(value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
+    ButtonModelStatic::SetMinFontScale(frameNode, convValue);
 }
 void SetMaxFontScaleImpl(Ark_NativePointer node,
                          const Opt_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ButtonModelNG::SetSetMaxFontScale(frameNode, convValue);
+    auto convValue = Converter::OptConvertPtr<float>(value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
+    ButtonModelStatic::SetMaxFontScale(frameNode, convValue);
 }
 } // ButtonAttributeModifier
 const GENERATED_ArkUIButtonModifier* GetButtonModifier()

@@ -17,7 +17,7 @@ import { DecoratedV1VariableBase } from './decoratorBase';
 import { propDeepCopy } from '@koalaui/common';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { ExtendableComponent } from '../../component/extendableComponent';
-import { IPropDecoratedVariable } from '../decorator';
+import { IObservedObject, IPropDecoratedVariable } from '../decorator';
 import { WatchFuncType } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { DecoratorBackingValue } from '../base/backingValue';
@@ -25,6 +25,9 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { UIUtils } from '../utils';
+import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
+import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
+import { WatchFunc } from './decoratorWatch';
 /**
 * implementation of V1 @Prop
 *
@@ -60,6 +63,9 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
     // constructor takes a copy of it
     constructor(owningView: ExtendableComponent | null, varName: string, initValue: T, watchFunc?: WatchFuncType) {
         super('@Prop', owningView, varName, watchFunc);
+        if (isDynamicObject(initValue)) {
+            initValue = getObservedObject(initValue);
+        }
         const deepCopyValue = deepCopy<T>(initValue);
         this.__localValue = new DecoratorBackingValue<T>(varName, deepCopyValue);
         // if initValue not from parent, this __sourceValue should never changed
@@ -82,6 +88,10 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
     public set(newValue: T): void {
         const value = this.__localValue.get(false);
         if (value !== newValue) {
+            // for interop
+            if (typeof this.setProxyValue === 'function') {
+                this.setProxyValue!(newValue);
+            }
             // @Watch
             // if new value is object, register so that property changes trigger
             // Watch function exec
@@ -121,5 +131,30 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             this.__localValue.set(UIUtils.makeObserved(deepCopy<T>(newValue)) as T);
             this.execWatchFuncs();
         }
+    }
+                
+    private proxy?: ESValue;
+
+    public getProxy(): ESValue | undefined {
+        return this.proxy;
+    }
+
+    public setProxy(proxy: ESValue): void {
+        this.proxy = proxy;
+    }
+
+    public setProxyValue?: CompatibleStateChangeCallback<T>;
+
+    public setNotifyCallback(callback: WatchFuncType): void {
+        const func = new WatchFunc(callback);
+        const id = func.id();
+        const value = this.__localValue.get(false);
+        if (StateMgmtTool.isIObservedObject(value as NullableObject)) {
+            (value as IObservedObject).addWatchSubscriber(id);
+        }
+    }
+    
+    public fireChange(): void {
+        this.__localValue.fireChange();
     }
 }

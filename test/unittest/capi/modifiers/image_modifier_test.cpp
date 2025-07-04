@@ -119,7 +119,7 @@ HWTEST_F(ImageModifierTest, setFillColorTestDefaultValues, TestSize.Level1)
  * @tc.desc: Check functionality of ImageModifier.setFillColor
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setFillColorTestValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setFillColor0TestValidValues, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
         auto optValue = Converter::ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(value);

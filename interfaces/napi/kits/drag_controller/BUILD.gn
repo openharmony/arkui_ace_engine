@@ -62,10 +62,12 @@ template("napi_dragcontroller_static") {
         "$ace_graphic_surface/interfaces/inner_api/utils",
       ]
     } else {
-      external_deps += [
-        "ets_runtime:libark_jsruntime",
-        "napi:ace_napi",
-      ]
+      external_deps += [ "napi:ace_napi" ]
+      if (defined(ark_hybrid) && ark_hybrid) {
+        external_deps += [ "runtime_core:libarkruntime" ]
+      } else {
+        external_deps += [ "ets_runtime:libark_jsruntime" ]
+      }
     }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
