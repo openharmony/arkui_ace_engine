@@ -7130,7 +7130,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
         const reason_result : DismissReason = TypeChecker.DismissReason_FromNumeric(valueDeserializer.readInt32())
-        let value : DismissPopupAction = ({dismiss: dismiss_result, reason: reason_result} as DismissPopupAction)
+        let value : DismissPopupAction = ({dismiss: CallbackTransformer.transformFromCallbackVoid(dismiss_result), reason: reason_result} as DismissPopupAction)
         return value
     }
     readDismissSheetAction(): DismissSheetAction {
@@ -26669,6 +26669,16 @@ export class Deserializer extends DeserializerBase {
         let value : NavigationToolbarOptions = ({backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, moreButtonOptions: moreButtonOptions_result, barStyle: barStyle_result, hideItemValue: hideItemValue_result} as NavigationToolbarOptions)
         return value
     }
+    readPopupButton(): PopupButton {
+        let valueDeserializer : Deserializer = this
+        const value_result: string = (valueDeserializer.readString() as string)
+        const action_result: (() => void) = valueDeserializer.readCallback_Void()
+        let value: PopupButton = ({
+            value: value_result,
+            action: CallbackTransformer.transformFromCallbackVoid(action_result)
+        } as PopupButton)
+        return value
+    }
     readPopupOptions(): PopupOptions {
         let valueDeserializer : Deserializer = this
         const message_result : string = (valueDeserializer.readString() as string)
@@ -26683,18 +26693,14 @@ export class Deserializer extends DeserializerBase {
         let primaryButton_buf : PopupButton | undefined
         if ((RuntimeType.UNDEFINED) != (primaryButton_buf_runtimeType))
         {
-            const primaryButton_buf__value : string = (valueDeserializer.readString() as string)
-            const primaryButton_buf__action : (() => void) = valueDeserializer.readCallback_Void()
-            primaryButton_buf = ({value: primaryButton_buf__value, action: primaryButton_buf__action} as PopupButton)
+            primaryButton_buf = valueDeserializer.readPopupButton()
         }
         const primaryButton_result : PopupButton | undefined = primaryButton_buf
         const secondaryButton_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let secondaryButton_buf : PopupButton | undefined
         if ((RuntimeType.UNDEFINED) != (secondaryButton_buf_runtimeType))
         {
-            const secondaryButton_buf__value : string = (valueDeserializer.readString() as string)
-            const secondaryButton_buf__action : (() => void) = valueDeserializer.readCallback_Void()
-            secondaryButton_buf = ({value: secondaryButton_buf__value, action: secondaryButton_buf__action} as PopupButton)
+            secondaryButton_buf = valueDeserializer.readPopupButton()
         }
         const secondaryButton_result : PopupButton | undefined = secondaryButton_buf
         const onStateChange_buf_runtimeType  = (valueDeserializer.readInt8() as int32)

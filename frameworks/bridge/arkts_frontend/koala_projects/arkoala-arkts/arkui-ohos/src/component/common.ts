@@ -7722,7 +7722,7 @@ export enum DismissReason {
     SLIDE_DOWN = 3
 }
 export interface DismissPopupAction {
-    dismiss: (() => void);
+    dismiss: ((data: undefined) => void);
     reason: DismissReason;
 }
 export interface PopupStateChangeParam {
@@ -7770,7 +7770,7 @@ export interface TipsOptions {
 
 export interface PopupButton {
     value: string;
-    action: (() => void);
+    action: ((data: undefined) => void);
 }
 export interface Literal_String_value_Callback_Void_action {
     value: string;

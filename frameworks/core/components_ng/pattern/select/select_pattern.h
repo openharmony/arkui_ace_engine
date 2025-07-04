@@ -114,30 +114,30 @@ public:
 
     // set properties of text node
     void SetValue(const std::string& value);
-    void SetFontSize(const std::optional<Dimension>& value);
-    void SetItalicFontStyle(const std::optional<Ace::FontStyle>& value);
-    void SetFontWeight(const std::optional<FontWeight>& value);
+    void SetFontSize(const Dimension& value);
+    void SetItalicFontStyle(const Ace::FontStyle& value);
+    void SetFontWeight(const FontWeight& value);
     void SetFontFamily(const std::vector<std::string>& value);
-    void SetFontColor(const std::optional<Color>& color);
+    void SetFontColor(const Color& color);
 
     // set props of option nodes
-    void SetOptionBgColor(const std::optional<Color>& color);
-    void SetOptionFontSize(const std::optional<Dimension>& value);
-    void SetOptionItalicFontStyle(const std::optional<Ace::FontStyle>& value);
-    void SetOptionFontWeight(const std::optional<FontWeight>& value);
+    void SetOptionBgColor(const Color& color);
+    void SetOptionFontSize(const Dimension& value);
+    void SetOptionItalicFontStyle(const Ace::FontStyle& value);
+    void SetOptionFontWeight(const FontWeight& value);
     void SetOptionFontFamily(const std::vector<std::string>& value);
-    void SetOptionFontColor(const std::optional<Color>& color);
+    void SetOptionFontColor(const Color& color);
 
     // set props of option node when selected
-    void SetSelectedOptionBgColor(const std::optional<Color>& color);
-    void SetSelectedOptionFontSize(const std::optional<Dimension>& value);
-    void SetSelectedOptionItalicFontStyle(const std::optional<Ace::FontStyle>& value);
-    void SetSelectedOptionFontWeight(const std::optional<FontWeight>& value);
+    void SetSelectedOptionBgColor(const Color& color);
+    void SetSelectedOptionFontSize(const Dimension& value);
+    void SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value);
+    void SetSelectedOptionFontWeight(const FontWeight& value);
     void SetSelectedOptionFontFamily(const std::vector<std::string>& value);
-    void SetSelectedOptionFontColor(const std::optional<Color>& color);
+    void SetSelectedOptionFontColor(const Color& color);
 
     // set props of menu background
-    void SetMenuBackgroundColor(const std::optional<Color>& color);
+    void SetMenuBackgroundColor(const Color& color);
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
 
     // Get functions for unit tests
@@ -146,7 +146,7 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
-        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, focusPattern);
         auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
         CHECK_NULL_RETURN(selectTheme, focusPattern);
@@ -204,7 +204,7 @@ public:
     void SetOptionWidthFitTrigger(bool isFitTrigger);
     void SetHasOptionWidth(bool hasOptionWidth);
     void SetControlSize(const ControlSize& controlSize);
-    void SetDivider(const std::optional<SelectDivider>& divider);
+    void SetDivider(const SelectDivider& divider);
     void SetDividerMode(const std::optional<DividerMode>& mode);
     ControlSize GetControlSize();
     void SetLayoutDirection(TextDirection value);
