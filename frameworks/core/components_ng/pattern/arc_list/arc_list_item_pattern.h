@@ -42,6 +42,20 @@ public:
 
     void HandleHoverEvent(bool isHover, const RefPtr<NG::FrameNode>& itemNode) override;
     void HandlePressEvent(bool isPressed, const RefPtr<NG::FrameNode>& itemNode) override;
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
 
 private:
     Color GetBlendGgColor() override;

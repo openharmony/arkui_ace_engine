@@ -4695,6 +4695,7 @@ void FrameNode::PostTaskForIgnore(PipelineContext* pipeline)
 bool FrameNode::PostponedTaskForIgnore()
 {
     auto pattern = GetPattern();
+    RefPtr<FrameNode> parent = GetAncestorNodeOfFrame(false);
     if (!pattern->PostponedTaskForIgnoreEnabled()) {
         delayLayoutChildren_.clear();
         return false;
@@ -4703,7 +4704,13 @@ bool FrameNode::PostponedTaskForIgnore()
         pattern->PostponedTaskForIgnore();
     } else {
         for (auto&& node : delayLayoutChildren_) {
-            ExpandEdges sae = node->GetAccumulatedSafeAreaExpand();
+            IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+                .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+            IgnoreStrategy strategy = IgnoreStrategy::NORMAL;
+            if (parent && parent->GetPattern()) {
+                parent->GetPattern()->ChildTentativelyLayouted(strategy);
+            }
+            ExpandEdges sae = node->GetAccumulatedSafeAreaExpand(false, options, strategy);
             auto offset = node->GetGeometryNode()->GetMarginFrameOffset();
             offset -= sae.Offset();
             node->GetGeometryNode()->SetMarginFrameOffset(offset);
