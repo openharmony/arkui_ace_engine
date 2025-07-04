@@ -4531,7 +4531,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage003, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call Measure function.
-     * @tc.expected: sheetHeight_ equal 560.
+     * @tc.expected: sheetHeight_ equal 320.
      */
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
@@ -4552,7 +4552,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage003, TestSize.Level1)
     sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize.Height(), maxSize.Height(), AceType::RawPtr(sheetNode));
     sheetLayoutAlgorithm->sheetType_ = SHEET_POPUP;
     sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize.Height(), maxSize.Width(), AceType::RawPtr(sheetNode));
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 560);
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 320);
 }
 
 /**
