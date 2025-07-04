@@ -55,7 +55,7 @@ import { Serializer } from "arkui/component/peers/Serializer"
 import { GlobalScopeUicontextFontScale, GlobalScopeUicontextTextMenu } from "arkui/component/arkui-uicontext-text-utils"
 import { GlobalScope } from "arkui/component/GlobalScope"
 import { mediaquery } from '@ohos/mediaquery'
-import { AsyncCallback, CustomBuilder, ArkComponentRootPeer, DragItemInfo } from 'arkui/component'
+import { AsyncCallback, CustomBuilder, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/component'
 import { createUiDetachedRoot, destroyUiDetachedRoot } from "arkui/ArkUIEntry"
 import { PeerNode } from 'arkui/PeerNode'
 import { Deserializer } from "arkui/component/peers/Deserializer"
@@ -66,7 +66,7 @@ import { InteropNativeModule } from "@koalaui/interop"
 import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
-
+import { CommonMethodHandWritten } from "./CommonHandWritten"
 export class ContextRecord {
     uiContext?: UIContext
 }
@@ -1049,6 +1049,14 @@ export class UIContextImpl extends UIContext {
     public animateTo(param: AnimateParam, event: (() => void)): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         _animateTo(param, event);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public animateToImmediately(value: AnimateParam, event: Callback<void>): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
+        CommonMethodHandWritten.hookCommonMethodAnimateToImmediatelyImpl(value, () => {
+            event(undefined);
+        });
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
