@@ -180,4 +180,12 @@ void DividerModelNG::ResetDividerColor()
     }
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(DividerRenderProperty, DividerColor, PROPERTY_UPDATE_RENDER);
 }
+
+void DividerModelNG::ResetDividerColor(FrameNode* frameNode)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByUser, false, frameNode);
+    }
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(DividerRenderProperty, DividerColor, PROPERTY_UPDATE_RENDER, frameNode);
+}
 } // namespace OHOS::Ace::NG

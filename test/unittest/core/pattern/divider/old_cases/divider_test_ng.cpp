@@ -373,4 +373,26 @@ HWTEST_F(DividerTestNg, OnColorConfigurationUpdateTest001, TestSize.Level1)
     auto color = paintProperty->GetDividerColorValue();
     EXPECT_EQ(color.ColorToString(), "#FF000000");
 }
+
+/**
+ * @tc.name: ResetDividerColorTests
+ * @tc.desc: Test ResetDividerColor of Divider
+ * @tc.type: FUNC
+ */
+HWTEST_F(DividerTestNg, ResetDividerColorTest01, TestSize.Level1)
+{
+    testProperty.strokeWidth = STROKE_WIDTH;
+    testProperty.vertical = VERTICAL_TRUE;
+    auto frameNode = CreateDividerNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<DividerRenderProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    std::optional<Color> colorOpt = Color::RED;
+    DividerModelNG::SetDividerColor(frameNode.GetRawPtr(), colorOpt, true);
+    auto dividerColor = paintProperty->GetDividerColorValue();
+    EXPECT_EQ(dividerColor, Color::RED);
+    DividerModelNG::ResetDividerColor(frameNode.GetRawPtr());
+    dividerColor = paintProperty->GetDividerColorValue(Color::BLACK);
+    EXPECT_EQ(dividerColor, Color::BLACK);
+}
 } // namespace OHOS::Ace::NG
