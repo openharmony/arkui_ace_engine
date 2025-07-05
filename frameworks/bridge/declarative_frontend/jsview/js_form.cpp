@@ -52,6 +52,24 @@ FormModel* FormModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
+void ParseFormId(RequestFormInfo formInfo, JSRef<JSVal> id) {
+    if (id->IsString()) {
+        if (!StringUtils::IsNumber(id->ToString())) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "Invalid form id : %{public}s", id->ToString().c_str());
+            return;
+        }
+        int64_t inputFormId = StringUtils::StringToLongInt(id->ToString().c_str(), -1);
+        if (inputFormId == -1) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "StringToLongInt failed : %{public}s", id->ToString().c_str());
+            return;
+        }
+        formInfo.id = inputFormId;
+    } else if (id->IsNumber()) {
+        formInfo.id = id->ToNumber<int64_t>();
+    }
+    TAG_LOGI(AceLogTag::ACE_FORM, "JSForm Create, info.id: %{public}" PRId64, formInfo.id);
+}
+
 void JSForm::Create(const JSCallbackInfo& info)
 {
     if (info.Length() == 0 || !info[0]->IsObject()) {
@@ -70,21 +88,7 @@ void JSForm::Create(const JSCallbackInfo& info)
     JSRef<JSVal> shape = obj->GetProperty("shape");
     JSRef<JSVal> exemptAppLock = obj->GetProperty("exemptAppLock");
     RequestFormInfo formInfo;
-    if (id->IsString()) {
-        if (!StringUtils::IsNumber(id->ToString())) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "Invalid form id : %{public}s", id->ToString().c_str());
-            return;
-        }
-        int64_t inputFormId = StringUtils::StringToLongInt(id->ToString().c_str(), -1);
-        if (inputFormId == -1) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "StringToLongInt failed : %{public}s", id->ToString().c_str());
-            return;
-        }
-        formInfo.id = inputFormId;
-    } else if (id->IsNumber()) {
-        formInfo.id = id->ToNumber<int64_t>();
-    }
-    TAG_LOGI(AceLogTag::ACE_FORM, "JSForm Create, info.id: %{public}" PRId64, formInfo.id);
+    ParseFormId(formInfo, id);
     formInfo.cardName = name->ToString();
     formInfo.bundleName = bundle->ToString();
     formInfo.abilityName = ability->ToString();
