@@ -77,6 +77,7 @@ namespace OHOS::NWeb {
     class NWebDateTimeChooserCallback;
     class NWebAccessibilityNodeInfo;
     class NWebMessage;
+    class NWebHapValue;
     class NWebKeyEvent;
     class NWebSelectMenuBound;
     class NWebUpdateScrollUpdateData;
@@ -591,11 +592,13 @@ public:
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, int32_t nodeId);
     void ParseNWebViewDataCommonField(std::unique_ptr<JsonValue> child,
         const std::shared_ptr<ViewDataCommon>& viewDataCommon);
-    void ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
+    void ParseNWebViewDataJson(const std::string& viewDataJson,
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, const std::shared_ptr<ViewDataCommon>& viewDataCommon);
     AceAutoFillType GetFocusedType();
     HintToTypeWrap GetHintTypeAndMetadata(const std::string& attribute, RefPtr<PageNodeInfoWrap> node);
+    bool HandleAutoFillEvent();
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
     bool RequestAutoFill(AceAutoFillType autoFillType);
     bool RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos);
     bool RequestAutoSave();

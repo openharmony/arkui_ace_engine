@@ -4861,11 +4861,11 @@ void WebPattern::ParseNWebViewDataCommonField(std::unique_ptr<JsonValue> child,
     }
 }
 
-void WebPattern::ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
+void WebPattern::ParseNWebViewDataJson(const std::string& viewDataJson,
     std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, const std::shared_ptr<ViewDataCommon>& viewDataCommon)
 {
     nodeInfos.clear();
-    auto sourceJson = JsonUtil::ParseJsonString(viewDataJson->GetString());
+    auto sourceJson = JsonUtil::ParseJsonString(viewDataJson);
     if (sourceJson == nullptr || sourceJson->IsNull()) {
         return;
     }
@@ -4906,13 +4906,8 @@ AceAutoFillType WebPattern::GetFocusedType()
     return type;
 }
 
-bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+bool WebPattern::HandleAutoFillEvent()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "AutoFillEvent");
-    viewDataCommon_ = std::make_shared<ViewDataCommon>();
-    isPasswordFill_ = false;
-    ParseNWebViewDataJson(viewDataJson, pageNodeInfo_, viewDataCommon_);
-
     if (isPasswordFill_ && viewDataCommon_->GetSource() != OHOS::NWeb::NWEB_AUTOFILL_FOR_LOGIN) {
         TAG_LOGI(AceLogTag::ACE_WEB,
             "Handle autofill event failed! The form contains a login node, but the soruce is incorrect.");
@@ -4949,6 +4944,24 @@ bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessa
     }
 
     return false;
+}
+
+bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "AutoFillEvent");
+    viewDataCommon_ = std::make_shared<ViewDataCommon>();
+    isPasswordFill_ = false;
+    ParseNWebViewDataJson(viewDataJson->GetString(), pageNodeInfo_, viewDataCommon_);
+    return HandleAutoFillEvent();
+}
+
+bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "AutoFillEvent");
+    viewDataCommon_ = std::make_shared<ViewDataCommon>();
+    isPasswordFill_ = false;
+    ParseNWebViewDataJson(viewDataJson->GetString(), pageNodeInfo_, viewDataCommon_);
+    return HandleAutoFillEvent();
 }
 
 bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)

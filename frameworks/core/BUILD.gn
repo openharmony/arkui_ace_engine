@@ -1084,6 +1084,7 @@ template("ace_core_ng_source_set") {
           "napi:ace_napi",
           "webview:libnweb",
           "webview:cj_webview_ffi",
+          "webview:ohos_base_glue_source",
           "window_manager:libwm",
         ]
       } else {
