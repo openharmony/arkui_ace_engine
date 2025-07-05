@@ -187,7 +187,7 @@ public:
     }
 
     // Return children for get inspector tree calling, return cache children directly
-    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector() const
+    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector(bool needCacheNode = false) const
     {
         return children_;
     }

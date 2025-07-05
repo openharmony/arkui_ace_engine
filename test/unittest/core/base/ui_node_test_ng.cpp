@@ -1534,7 +1534,6 @@ HWTEST_F(UINodeTestNg, DumpTreeById001, TestSize.Level1)
     child->tag_ = V2::COMMON_VIEW_ETS_TAG;
     child->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
     parent->AddChild(child);
-
     /**
      * @tc.steps: step2. call DumpTreeById
      * @tc.expected: cover branch GetDumpFile is nullptr and result is false

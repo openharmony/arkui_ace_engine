@@ -112,7 +112,7 @@ RefPtr<UINode> GetNodeById(const RefPtr<FrameNode>& root, int32_t id)
             return current;
         }
 
-        const auto& children = current->GetChildrenForInspector();
+        const auto& children = current->GetChildrenForInspector(true);
         for (const auto& child : children) {
             elements.push(child);
         }
@@ -242,7 +242,7 @@ bool SimplifiedInspector::GetInspectorStep2(
 
     pageId_ = pageRootNode->GetPageId();
     std::list<RefPtr<NG::UINode>> children;
-    for (const auto& item : pageRootNode->GetChildrenForInspector()) {
+    for (const auto& item : pageRootNode->GetChildrenForInspector(params_.enableCacheNode)) {
         GetFrameNodeChildren(item, children);
     }
     auto overlayNode = GetOverlayNode(pageRootNode);
@@ -283,7 +283,7 @@ void SimplifiedInspector::GetFrameNodeChildren(
             }
         }
     }
-    for (const auto& frameChild : uiNode->GetChildrenForInspector()) {
+    for (const auto& frameChild : uiNode->GetChildrenForInspector(params_.enableCacheNode)) {
         GetFrameNodeChildren(frameChild, children);
     }
 }
@@ -321,7 +321,7 @@ void SimplifiedInspector::GetInspectorChildren(
     GetWebContentIfNeed(node);
     FillInspectorAttrs(parent, jsonNode);
     std::list<RefPtr<NG::UINode>> children;
-    for (const auto& item : parent->GetChildrenForInspector()) {
+    for (const auto& item : parent->GetChildrenForInspector(params_.enableCacheNode)) {
         GetFrameNodeChildren(item, children);
     }
     auto jsonChildrenArray = JsonUtil::CreateArray(true);
@@ -506,7 +506,7 @@ void SimplifiedInspector::GetInspectorTreeNode(
 {
     collector_->RetainNode(pageRootNode);
     std::list<RefPtr<NG::UINode>> children;
-    for (const auto& item : pageRootNode->GetChildrenForInspector()) {
+    for (const auto& item : pageRootNode->GetChildrenForInspector(params_.enableCacheNode)) {
         GetFrameNodeChildren(item, children);
     }
     auto overlayNode2 = GetOverlayNode(pageRootNode);
@@ -542,7 +542,7 @@ void SimplifiedInspector::GetInspectorTreeNodeChildren(
     }
     treeNode->node = parent;
     std::list<RefPtr<NG::UINode>> children;
-    for (const auto& item : parent->GetChildrenForInspector()) {
+    for (const auto& item : parent->GetChildrenForInspector(params_.enableCacheNode)) {
         GetFrameNodeChildren(item, children);
     }
     for (auto uiNode : children) {
@@ -585,7 +585,7 @@ void SimplifiedInspector::GetInspectorChildrenBackground(
     GetWebContentIfNeed(node);
     FillInspectorAttrs(parent, jsonNode);
     std::list<RefPtr<NG::UINode>> children;
-    for (const auto& item : parent->GetChildrenForInspector()) {
+    for (const auto& item : parent->GetChildrenForInspector(params_.enableCacheNode)) {
         GetFrameNodeChildren(item, children);
     }
     auto jsonChildrenArray = JsonUtil::CreateArray(true);
