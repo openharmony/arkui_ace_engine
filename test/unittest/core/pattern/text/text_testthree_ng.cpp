@@ -2613,4 +2613,61 @@ HWTEST_F(TextTestThreeNg, PrepareAIMenuOptions002, TestSize.Level1)
     EXPECT_EQ(ret, false);
     textPattern->pManager_->Reset();
 }
+
+/**
+ * @tc.name: TextModelGetShaderStyleInJson001
+ * @tc.desc: Test if GetShaderStyleInJson is successful
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextModelGetShaderStyleInJson001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textModelNG and FrameNode
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set type == RADIAL.
+     */
+    Gradient gradientLinear = Gradient();
+    gradientLinear.type_ = GradientType::LINEAR;
+    LinearGradient linearGradient;
+    linearGradient.angle = std::make_optional(2.00_vp);
+    gradientLinear.SetLinearGradient(linearGradient);
+    textLayoutProperty->UpdateGradientShaderStyle(gradientLinear);
+    std::string radialJson = pattern->GetShaderStyleInJson().c_str();
+    EXPECT_EQ(radialJson,
+        "{\"angle\":\"2.00vp\",\"direction\":\"GradientDirection.None\",\"colors\":[],\"repeating\":\"false\"}");
+
+    /**
+     * @tc.steps: step3. Set type == RADIAL.
+     */
+    Gradient gradientRadial = Gradient();
+    gradientRadial.type_ = GradientType::RADIAL;
+    RadialGradient radialGradient;
+    radialGradient.radialCenterX = std::make_optional(25.0_vp);
+    radialGradient.radialCenterY = std::make_optional(25.0_vp);
+    gradientRadial.SetRadialGradient(radialGradient);
+    textLayoutProperty->UpdateGradientShaderStyle(gradientRadial);
+    std::string linearJson = pattern->GetShaderStyleInJson().c_str();
+    EXPECT_EQ(linearJson, "{\"center\":[\"25.00vp\",\"25.00vp\"],\"colors\":[],\"repeating\":\"false\"}");
+
+    /**
+     * @tc.steps: step4. Set ColorShaderStyle.
+     */
+    Color color = Color::RED;
+    textLayoutProperty->ResetGradientShaderStyle();
+    textLayoutProperty->UpdateColorShaderStyle(color);
+    std::string colorJson = pattern->GetShaderStyleInJson().c_str();
+    EXPECT_EQ(colorJson, "#FFFF0000");
+}
 } // namespace OHOS::Ace::NG
