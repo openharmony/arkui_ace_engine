@@ -441,7 +441,7 @@ public:
     }
     void ChangeAnimateOverScroll()
     {
-        if (GetScrollSource() == SCROLL_FROM_JUMP) {
+        if (GetScrollSource() == SCROLL_FROM_JUMP && GetCanStayOverScroll()) {
             SetAnimateCanOverScroll(false);
         }
     }

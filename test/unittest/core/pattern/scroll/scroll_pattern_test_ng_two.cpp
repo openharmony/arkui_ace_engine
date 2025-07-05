@@ -1459,6 +1459,7 @@ HWTEST_F(ScrollPatternTwoTestNg, ChangeAnimateOverScroll001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
     ASSERT_NE(frameNode, nullptr);
     scrollPattern->animateCanOverScroll_ = true;
+    scrollPattern->SetCanStayOverScroll(true);
     scrollPattern->SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollPattern->ChangeAnimateOverScroll();
     EXPECT_TRUE(scrollPattern->animateCanOverScroll_);
