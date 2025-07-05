@@ -890,8 +890,7 @@ void SearchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 bool SearchPattern::OnKeyEvent(const KeyEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_SEARCH, "KeyAction:%{public}d, KeyCode:%{public}d", static_cast<int>(event.action),
-        static_cast<int>(event.code));
+    TAG_LOGI(AceLogTag::ACE_SEARCH, "KeyAction:%{public}d", static_cast<int>(event.action));
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
