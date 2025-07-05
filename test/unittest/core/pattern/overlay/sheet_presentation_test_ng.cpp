@@ -2078,6 +2078,7 @@ HWTEST_F(SheetPresentationTestNg, ModifyFireSheetTransition001, TestSize.Level1)
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     sheetPattern->isNeedProcessHeight_ = true;
+    sheetPattern->SetStartProp(1.0);
     sheetPattern->ModifyFireSheetTransition();
     EXPECT_FALSE(sheetPattern->isNeedProcessHeight_);
 
@@ -2085,6 +2086,7 @@ HWTEST_F(SheetPresentationTestNg, ModifyFireSheetTransition001, TestSize.Level1)
      * @tc.steps: step5. set params of isNeedProcessHeight_, test ModifyFireSheetTransition.
      */
     sheetPattern->isSpringBack_ = true;
+    sheetPattern->SetStartProp(1.0);
     sheetPattern->ModifyFireSheetTransition();
     EXPECT_FALSE(sheetPattern->isSpringBack_);
     SheetPresentationTestNg::TearDownTestCase();
@@ -2150,6 +2152,75 @@ HWTEST_F(SheetPresentationTestNg, ModifyFireSheetTransition002, TestSize.Level1)
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     sheetPattern->isAnimationProcess_ = true;
+    sheetPattern->SetStartProp(1.0);
+    sheetPattern->ModifyFireSheetTransition();
+    EXPECT_FALSE(sheetPattern->isAnimationProcess_);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ModifyFireSheetTransition003
+ * @tc.desc: Test SheetPresentationPattern::ModifyFireSheetTransition().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, ModifyFireSheetTransition003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode("Root", 101, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 102, AceType::MakeRefPtr<SheetPresentationPattern>(103, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+    auto dragBarNode = FrameNode::CreateFrameNode("SheetDragBar", 104, AceType::MakeRefPtr<SheetDragBarPattern>());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MountToParent(sheetNode);
+    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 105, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode(
+        "SheetContent", 106, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+
+    /**
+     * @tc.steps: step2. get sheetPattern and layoutProperty.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. init SheetStyle and set sheetHeight.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.isTitleBuilder = false;
+    SheetHeight detent;
+    detent.sheetMode = SheetMode::LARGE;
+    sheetStyle.detents.emplace_back(detent);
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step4. set params of isNeedProcessHeight_, test ModifyFireSheetTransition.
+     */
+    auto host = sheetPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+    sheetPattern->isAnimationProcess_ = true;
+    sheetPattern->SetStartProp(0.0);
+    sheetPattern->ModifyFireSheetTransition();
+    EXPECT_TRUE(sheetPattern->isAnimationProcess_);
+    sheetPattern->SetStartProp(1.0);
     sheetPattern->ModifyFireSheetTransition();
     EXPECT_FALSE(sheetPattern->isAnimationProcess_);
     SheetPresentationTestNg::TearDownTestCase();
