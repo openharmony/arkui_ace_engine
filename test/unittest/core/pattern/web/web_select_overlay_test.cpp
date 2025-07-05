@@ -3052,7 +3052,7 @@ HWTEST_F(WebSelectOverlayTest, OnMenuItemAction_003, TestSize.Level1)
     overlay.OnMenuItemAction(OptionMenuActionId::PASTE, OptionMenuType::TOUCH_MENU);
     EXPECT_EQ(overlay.quickMenuCallback_, callback);
     overlay.OnMenuItemAction(OptionMenuActionId::ASK_CELIA, OptionMenuType::TOUCH_MENU);
-    EXPECT_EQ(overlay.isShowHandle, false);
+    EXPECT_EQ(overlay.isShowHandle_, false);
     g_editStateFlags = flags;
 #endif
 }
