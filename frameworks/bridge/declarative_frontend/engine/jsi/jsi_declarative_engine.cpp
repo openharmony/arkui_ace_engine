@@ -2112,7 +2112,8 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& routeNameOrU
         } else {
             auto container = Container::GetContainer(instanceId_);
             CHECK_NULL_RETURN(container, false);
-            bundleName = container->GetBundleName();
+            bundleName = container->IsUseStageModel() ?
+                container->GetBundleName() : AceApplicationInfo::GetInstance().GetPackageName();
             moduleName = container->GetModuleName();
         }
 #else
