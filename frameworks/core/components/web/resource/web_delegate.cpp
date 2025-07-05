@@ -8789,4 +8789,38 @@ void WebDelegate::SetViewportScaleState()
     nweb_->SetViewportScaleState();
 }
 
+void WebDelegate::OnPdfScrollAtBottom(const std::string& url)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), url]() {
+            TAG_LOGI(AceLogTag::ACE_WEB, "[arkwebpdf] WebDelegate::OnPdfScrollAtBottom, fire event task");
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnPdfScrollAtBottomEvent(std::make_shared<PdfScrollEvent>(url));
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebPdfScrollAtBottom");
+}
+
+void WebDelegate::OnPdfLoadEvent(int32_t result, const std::string& url)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), result, url]() {
+            TAG_LOGI(AceLogTag::ACE_WEB, "[arkwebpdf] WebDelegate::OnPdfLoadEvent, fire event task");
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnPdfLoadEvent(std::make_shared<PdfLoadEvent>(result, url));
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebPdfLoadEvent");
+}
+
 } // namespace OHOS::Ace

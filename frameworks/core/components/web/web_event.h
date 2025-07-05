@@ -824,6 +824,46 @@ private:
     std::string loadedUrl_;
 };
 
+class ACE_EXPORT PdfScrollEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(PdfScrollEvent, BaseEventInfo);
+
+public:
+    explicit PdfScrollEvent(const std::string& url)
+        : BaseEventInfo("PdfScrollEvent"), url_(url) {}
+    ~PdfScrollEvent() = default;
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+private:
+    std::string url_;
+};
+
+class ACE_EXPORT PdfLoadEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(PdfLoadEvent, BaseEventInfo);
+
+public:
+    explicit PdfLoadEvent(int32_t result, const std::string& url)
+        : BaseEventInfo("PdfLoadEvent"), result_(result), url_(url) {}
+    ~PdfLoadEvent() = default;
+
+    int32_t GetResult() const
+    {
+        return result_;
+    }
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+private:
+    int32_t result_;
+    std::string url_;
+};
+
 class ACE_EXPORT ContextMenuHideEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(ContextMenuHideEvent, BaseEventInfo);
 

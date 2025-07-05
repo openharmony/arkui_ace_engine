@@ -2134,6 +2134,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("bypassVsyncCondition", &JSWeb::BypassVsyncCondition);
     JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
     JSClass<JSWeb>::StaticMethod("gestureFocusMode", &JSWeb::GestureFocusMode);
+    JSClass<JSWeb>::StaticMethod("onPdfScrollAtBottom", &JSWeb::OnPdfScrollAtBottom);
+    JSClass<JSWeb>::StaticMethod("onPdfLoadEvent", &JSWeb::OnPdfLoadEvent);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -2223,6 +2225,21 @@ JSRef<JSVal> ContextMenuHideEventToJSValue(const ContextMenuHideEvent& eventInfo
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("info", eventInfo.GetInfo());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> PdfScrollEventToJSValue(const PdfScrollEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetUrl());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> PdfLoadEventToJSValue(const PdfScrollEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("result", eventInfo.GetState());
+    obj->SetProperty("url", eventInfo.GetUrl());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -6367,5 +6384,57 @@ void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
     }
     auto mode = static_cast<enum GestureFocusMode>(gestureFocusMode);
     WebModel::GetInstance()->SetGestureFocusMode(mode);
+}
+
+void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "[arkwebpdf] JSWeb::OnPdfScrollAtBottom, callback set");
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<PdfScrollEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), PdfScrollEventToJSValue);
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node)
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<PdfScrollEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetOnPdfScrollAtBottom(jsCallback);
+}
+
+void JSWeb::OnPdfLoadEvent(const JSCallbackInfo& args)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "[arkwebpdf] JSWeb::OnPdfLoadEvent, callback set");
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<PdfLoadEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), PdfLoadEventToJSValue);
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node)
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<PdfLoadEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetOnPdfLoadEvent(jsCallback);
 }
 } // namespace OHOS::Ace::Framework

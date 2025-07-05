@@ -326,6 +326,9 @@ public:
     void OnRemoveBlanklessFrame(int delayTime) override;
     bool OnBeforeUnloadByJSV2(const std::string& url, const std::string& message, bool isReload,
         std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
+
+    void OnPdfScrollAtBottom(const std::string& url) override;
+    void OnPdfLoadEvent(int32_t result, const std::string& url) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;
