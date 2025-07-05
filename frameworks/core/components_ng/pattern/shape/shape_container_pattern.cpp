@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
+
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/shape_container_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -108,5 +110,68 @@ RefPtr<NodePaintMethod> ShapeContainerPattern::CreateNodePaintMethod()
         shapeContainerModifier_ = MakeRefPtr<ShapeContainerModifier>();
     }
     return MakeRefPtr<ShapeContainerPaintMethod>(shapeContainerModifier_);
+}
+
+#define DEFINE_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                                                       \
+    { #KEY_TYPE, [](ShapeContainerPaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) { \
+         if (auto realValue = std::get_if<VALUE_TYPE>(&(value->GetValue()))) {                                         \
+             prop->UPDATE_METHOD(*realValue);                                                                          \
+         }                                                                                                             \
+     } }
+
+void ShapeContainerPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetPaintPropertyPtr<ShapeContainerPaintProperty>();
+    CHECK_NULL_VOID(property);
+    using Handler = std::function<void(ShapeContainerPaintProperty*, RefPtr<PropertyValueBase>, RefPtr<FrameNode>)>;
+    static const std::unordered_map<std::string, Handler> handlers = {
+        DEFINE_PROP_HANDLER(ShapeStroke, Color, UpdateStroke),
+        DEFINE_PROP_HANDLER(ShapeDashOffset, CalcDimension, UpdateStrokeDashOffset),
+        DEFINE_PROP_HANDLER(ShapeMiterLimit, double, UpdateStrokeMiterLimit),
+        { "ShapeFill",
+            [](ShapeContainerPaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, Fill, *realValue, frameNode);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *realValue, frameNode);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+                }
+            } },
+        { "ShapeStrokeOpacity",
+            [](ShapeContainerPaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                if (auto realValue = std::get_if<double>(&(value->GetValue()))) {
+                    auto strokeOpacity = std::clamp(*realValue, 0.0, 1.0);
+                    prop->UpdateStrokeOpacity(strokeOpacity);
+                }
+            } },
+        { "ShapeFillOpacity",
+            [](ShapeContainerPaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                if (auto realValue = std::get_if<double>(&(value->GetValue()))) {
+                    auto fillOpacity = std::clamp(*realValue, 0.0, 1.0);
+                    prop->UpdateFillOpacity(fillOpacity);
+                }
+            } },
+        { "ShapeStrokeWidth",
+            [](ShapeContainerPaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    auto strokeWidth = realValue->IsNegative() ? 1.0_vp : *realValue;
+                    prop->UpdateStrokeWidth(strokeWidth);
+                }
+            } },
+    };
+    auto it = handlers.find(key);
+    if (it != handlers.end()) {
+        it->second(property, value, frameNode);
+    }
+    if (frameNode->GetRerenderable()) {
+        for (auto childNode : ChildNodes_) {
+            auto child = childNode.Upgrade();
+            if (!child) {
+                continue;
+            }
+            child->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

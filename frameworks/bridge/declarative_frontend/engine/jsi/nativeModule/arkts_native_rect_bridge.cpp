@@ -37,12 +37,13 @@ ArkUINativeModuleValue RectBridge::SetRadiusWidth(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     CalcDimension radiusWidth;
     bool isSupportPercent = true;
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, radiusWidth, isSupportPercent)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, radiusWidth, resObj, isSupportPercent)) {
         GetArkUINodeModifiers()->getRectModifier()->resetRectRadiusWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getRectModifier()->setRectRadiusWidth(
-        nativeNode, radiusWidth.Value(), static_cast<int32_t>(radiusWidth.Unit()));
+        nativeNode, radiusWidth.Value(), static_cast<int32_t>(radiusWidth.Unit()), AceType::RawPtr(resObj));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -65,12 +66,13 @@ ArkUINativeModuleValue RectBridge::SetRadiusHeight(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     CalcDimension radiusHeight;
     bool isSupportPercent = true;
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, radiusHeight, isSupportPercent)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, radiusHeight, resObj, isSupportPercent)) {
         GetArkUINodeModifiers()->getRectModifier()->resetRectRadiusHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getRectModifier()->setRectRadiusHeight(
-        nativeNode, radiusHeight.Value(), static_cast<int32_t>(radiusHeight.Unit()));
+        nativeNode, radiusHeight.Value(), static_cast<int32_t>(radiusHeight.Unit()), AceType::RawPtr(resObj));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -95,19 +97,24 @@ ArkUINativeModuleValue RectBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
     std::vector<int32_t> radiusUnits;
     std::vector<uint32_t> radiusValidPairs;
     if (jsValue->IsArray(vm)) {
-        RectBridge::SetRadiusWithArray(vm, jsValue, radiusValues, radiusUnits, radiusValidPairs);
-        GetArkUINodeModifiers()->getRectModifier()->setRectRadiusWithArray(
-            nativeNode, radiusValues.data(), radiusUnits.data(), radiusValidPairs.data(), radiusValidPairs.size());
+        std::vector<RefPtr<ResourceObject>> radiusXResObjArray;
+        std::vector<RefPtr<ResourceObject>> radiusYResObjArray;
+        RectBridge::SetRadiusWithArray(
+            vm, jsValue, radiusValues, radiusUnits, radiusValidPairs, radiusXResObjArray, radiusYResObjArray);
+        GetArkUINodeModifiers()->getRectModifier()->setRectRadiusWithArray(nativeNode, radiusValues.data(),
+            radiusUnits.data(), radiusValidPairs.data(), radiusValidPairs.size(), radiusXResObjArray.data(),
+            radiusYResObjArray.data());
         return panda::JSValueRef::Undefined(vm);
     }
     if (jsValue->IsNumber() || jsValue->IsString(vm) || jsValue->IsObject(vm)) {
         CalcDimension parsedValue;
         bool isSupportPercent = true;
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, parsedValue, isSupportPercent)) {
+        RefPtr<ResourceObject> resObj;
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, parsedValue, resObj, isSupportPercent)) {
             parsedValue.Reset();
         }
         GetArkUINodeModifiers()->getRectModifier()->setRectRadiusWithValue(
-            nativeNode, parsedValue.Value(), static_cast<int32_t>(parsedValue.Unit()));
+            nativeNode, parsedValue.Value(), static_cast<int32_t>(parsedValue.Unit()), AceType::RawPtr(resObj));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -123,9 +130,9 @@ ArkUINativeModuleValue RectBridge::ResetRadius(ArkUIRuntimeCallInfo* runtimeCall
 }
 
 void RectBridge::SetRadiusWithArray(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-    std::vector<ArkUI_Float32>& radiusValues,
-    std::vector<int32_t>& radiusUnits,
-    std::vector<uint32_t>& radiusValidPairs)
+    std::vector<ArkUI_Float32>& radiusValues, std::vector<int32_t>& radiusUnits,
+    std::vector<uint32_t>& radiusValidPairs, std::vector<RefPtr<ResourceObject>>& radiusXResObjArray,
+    std::vector<RefPtr<ResourceObject>>& radiusYResObjArray)
 {
     if (!jsValue->IsArray(vm)) {
         return;
@@ -158,11 +165,13 @@ void RectBridge::SetRadiusWithArray(const EcmaVM* vm, const Local<JSValueRef>& j
         Local<JSValueRef> radiusY = panda::ArrayRef::GetValueAt(vm, radiusArray, indexY);
         CalcDimension radiusXValue;
         CalcDimension radiusYValue;
+        RefPtr<ResourceObject> radiusXResObj;
+        RefPtr<ResourceObject> radiusYResObj;
         bool isSupportPercent = true;
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, radiusX, radiusXValue, isSupportPercent)) {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, radiusX, radiusXValue, radiusXResObj, isSupportPercent)) {
             radiusXValue.Reset();
         }
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, radiusY, radiusYValue, isSupportPercent)) {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, radiusY, radiusYValue, radiusYResObj, isSupportPercent)) {
             radiusYValue.Reset();
         }
         radiusValidPairs.push_back(VALID_RADIUS_PAIR_FLAG);
@@ -170,6 +179,8 @@ void RectBridge::SetRadiusWithArray(const EcmaVM* vm, const Local<JSValueRef>& j
         radiusValues.push_back(static_cast<ArkUI_Float32>(radiusYValue.Value()));
         radiusUnits.push_back(static_cast<int32_t>(radiusXValue.Unit()));
         radiusUnits.push_back(static_cast<int32_t>(radiusYValue.Unit()));
+        radiusXResObjArray.push_back(radiusXResObj);
+        radiusYResObjArray.push_back(radiusYResObj);
     }
 }
 
