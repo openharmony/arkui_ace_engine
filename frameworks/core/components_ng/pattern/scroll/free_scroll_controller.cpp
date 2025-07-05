@@ -291,41 +291,51 @@ OffsetF FreeScrollController::FireOnWillScroll(const OffsetF& delta, ScrollState
 {
     auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_RETURN(eventHub, delta);
-    auto onScroll = eventHub->GetOnWillScrollEvent();
-    if (!onScroll) {
-        onScroll = eventHub->GetJSFrameNodeOnScrollWillScroll();
-    }
-    CHECK_NULL_RETURN(onScroll, delta);
+    const auto& onScroll = eventHub->GetOnWillScrollEvent();
+    const auto& frameCb = eventHub->GetJSFrameNodeOnScrollWillScroll();
 
     // delta sign is reversed in user space
-    const auto res = onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state, source);
+    std::optional<TwoDimensionScrollResult> res;
+    if (onScroll) {
+        res = onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state, source);
+    }
+    if (frameCb) {
+        res = frameCb(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state, source);
+    }
+    if (!res) {
+        return delta;
+    }
     auto* context = pattern_.GetContext();
     CHECK_NULL_RETURN(context, delta);
-    return { -context->NormalizeToPx(res.xOffset), -context->NormalizeToPx(res.yOffset) };
+    return { -context->NormalizeToPx(res->xOffset), -context->NormalizeToPx(res->yOffset) };
 }
 
 void FreeScrollController::FireOnDidScroll(const OffsetF& delta, ScrollState state) const
 {
     auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto onScroll = eventHub->GetOnDidScrollEvent();
-    if (!onScroll) {
-        onScroll = eventHub->GetJSFrameNodeOnScrollDidScroll();
+    const auto& onScroll = eventHub->GetOnDidScrollEvent();
+    const auto& frameCb = eventHub->GetJSFrameNodeOnScrollDidScroll();
+    if (onScroll) {
+        onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state);
     }
-    CHECK_NULL_VOID(onScroll);
-    onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state);
+    if (frameCb) {
+        frameCb(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state);
+    }
 }
 
 void FreeScrollController::FireOnScrollEnd() const
 {
     auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto onScrollStop = eventHub->GetOnScrollStop();
-    if (!onScrollStop) {
-        onScrollStop = eventHub->GetJSFrameNodeOnScrollStop();
+    const auto& onScrollStop = eventHub->GetOnScrollStop();
+    const auto& frameCb = eventHub->GetJSFrameNodeOnScrollStop();
+    if (frameCb) {
+        frameCb();
     }
-    CHECK_NULL_VOID(onScrollStop);
-    onScrollStop();
+    if (onScrollStop) {
+        onScrollStop();
+    }
 }
 
 void FreeScrollController::FireOnScrollEdge(const std::vector<ScrollEdge>& edges) const

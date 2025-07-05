@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/unittest/core/pattern/scroll/scroll_test_ng.h"
 #include "ui/base/geometry/dimension.h"
 
 #include "core/components_ng/pattern/scroll/free_scroll_controller.h"
+#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/velocity.h"
+// mocks
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/render/mock_render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -520,6 +522,67 @@ TEST_F(FreeScrollTest, Event001)
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
     EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::IDLE);
     EXPECT_FALSE(scrollBegun);
+}
+
+/**
+ * @tc.name: Events002
+ * @tc.desc: Test double callback behavior
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Event002)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    static int32_t scrollBegun = 0;
+    static int32_t scrollStop = 0;
+    static int32_t willScrollCalled = 0;
+    static int32_t didScroll = 0;
+
+    auto onScrollStart = []() { ++scrollBegun; };
+    auto onScrollStop = []() { ++scrollStop; };
+    auto onDidScroll = [](const Dimension& xOffset, const Dimension& yOffset, ScrollState state) { ++didScroll; };
+
+    model.SetOnScrollStart(onScrollStart);
+    model.SetOnScrollStop(onScrollStop);
+    model.SetOnDidScroll(onDidScroll);
+    model.SetOnWillScroll(
+        [](const Dimension& xOffset, const Dimension& yOffset, ScrollState state, ScrollSource source) {
+            ++willScrollCalled;
+            return TwoDimensionScrollResult { .xOffset = xOffset, .yOffset = yOffset };
+        });
+
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+
+    ViewAbstract::SetJSFrameNodeOnScrollWillScroll(frameNode_.GetRawPtr(),
+        [](const Dimension& xOffset, const Dimension& yOffset, ScrollState state, ScrollSource source) {
+            ++willScrollCalled;
+            return TwoDimensionScrollResult { .xOffset = 0.0_vp, .yOffset = 0.0_vp }; // should take precedence
+        });
+    ViewAbstract::SetJSFrameNodeOnScrollDidScroll(frameNode_.GetRawPtr(), onDidScroll);
+    ViewAbstract::SetJSFrameNodeOnScrollStart(frameNode_.GetRawPtr(), onScrollStart);
+    ViewAbstract::SetJSFrameNodeOnScrollStop(frameNode_.GetRawPtr(), onScrollStop);
+
+    PanStart({});
+    EXPECT_EQ(scrollBegun, 2);
+    PanUpdate({ -DELTA_X, -DELTA_Y });
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF {});
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(didScroll, 0); // position didn't change, so no trigger
+    EXPECT_EQ(willScrollCalled, 2);
+
+    PanEnd({ -DELTA_X, -DELTA_Y }, { -VELOCITY_X, -VELOCITY_Y });
+    EXPECT_EQ(scrollStop, 0);
+    EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(willScrollCalled, 4);
+    FlushUITasks(frameNode_);
+    EXPECT_TRUE(Negative(GetChildX(frameNode_, 0)));
+    EXPECT_TRUE(Negative(GetChildY(frameNode_, 0)));
+    EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::IDLE);
+    EXPECT_EQ(scrollStop, 2);
+    EXPECT_EQ(didScroll, 2);
 }
 
 /**
