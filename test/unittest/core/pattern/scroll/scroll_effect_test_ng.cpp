@@ -769,29 +769,6 @@ HWTEST_F(ScrollEffectTestNg, FadingEdge002, TestSize.Level1)
 }
 
 /**
- * @tc.name: CalculateOverScroll001
- * @tc.desc: Test ScrollFadeEffect CalculateOverScroll
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollEffectTestNg, CalculateOverScroll001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Construct the objects for test preparation
-     */
-    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
-
-    /**
-     * @tc.steps: step2. Set currentPositionCallback, leadingCallback, trailingCallback
-     * @tc.expected: The result return 0.0
-     */
-    scrollFadeEffect->currentPositionCallback_ = []() { return 2.0; };
-    scrollFadeEffect->leadingCallback_ = []() { return 1.0; };
-    scrollFadeEffect->trailingCallback_ = nullptr;
-    auto result = scrollFadeEffect->CalculateOverScroll(2.0, true);
-    EXPECT_EQ(result, 0.0);
-}
-
-/**
  * @tc.name: SetPaintDirection001
  * @tc.desc: Test ScrollFadeEffect SetPaintDirection
  * @tc.type: FUNC
@@ -880,5 +857,313 @@ HWTEST_F(ScrollEffectTestNg, ChangeStateDefault, TestSize.Level1)
     controller->state_ = static_cast<OverScrollState>(value);
     controller->ChangeState();
     EXPECT_EQ(controller->pullDistance_, 0.0);
+}
+
+/**
+ * @tc.name: CalculateOverScroll001
+ * @tc.desc: Test ScrollFadeEffect CalculateOverScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, CalculateOverScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set currentPositionCallback_ to nullptr
+     * set leadingCallback_ and trailingCallback_
+     */
+    scrollFadeEffect->currentPositionCallback_ = nullptr;
+    scrollFadeEffect->leadingCallback_ = []() { return -2.0; };
+    scrollFadeEffect->trailingCallback_ = []() { return -8.0; };
+
+    /**
+     * @tc.steps: step3. Set oldPostion to 2.0 and isReachMax to false
+     * @tc.expected: The result of this function returns 0
+     */
+    auto result = scrollFadeEffect->CalculateOverScroll(2.0, false);
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: CalculateOverScroll002
+ * @tc.desc: Test ScrollFadeEffect CalculateOverScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, CalculateOverScroll002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set currentPositionCallback_ and leadingCallback_
+     * set trailingCallback_ to nullptr
+     */
+    scrollFadeEffect->currentPositionCallback_ = []() { return -4.0; };
+    scrollFadeEffect->leadingCallback_ = []() { return -2.0; };
+    scrollFadeEffect->trailingCallback_ = nullptr;
+
+    /**
+     * @tc.steps: step3. Set oldPostion to 2.0 and isReachMax to false
+     * @tc.expected: The result of this function returns 0
+     */
+    auto result = scrollFadeEffect->CalculateOverScroll(2.0, false);
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: CalculateOverScroll003
+ * @tc.desc: Test ScrollFadeEffect CalculateOverScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, CalculateOverScroll003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set trailingCallback_ and leadingCallback_ to nullptr
+     * set currentPositionCallback_
+     */
+    scrollFadeEffect->currentPositionCallback_ = []() { return -4.0; };
+    scrollFadeEffect->leadingCallback_ = nullptr;
+    scrollFadeEffect->trailingCallback_ = nullptr;
+
+    /**
+     * @tc.steps: step3. Set oldPostion to 2.0 and isReachMax to false
+     * @tc.expected: The result of this function returns 0
+     */
+    auto result = scrollFadeEffect->CalculateOverScroll(2.0, false);
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: CalculateOverScroll004
+ * @tc.desc: Test ScrollFadeEffect CalculateOverScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, CalculateOverScroll004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set currentPositionCallback_, leadingCallback_ and trailingCallback_
+     * set -currentPositionCallback_() less than oldPosition and oldPosition less or equal to -trailingCallback_()
+     */
+    scrollFadeEffect->currentPositionCallback_ = []() { return -4.0; };
+    scrollFadeEffect->leadingCallback_ = []() { return -2.0; };
+    scrollFadeEffect->trailingCallback_ = []() { return -8.0; };
+
+    /**
+     * @tc.steps: step3. Set oldPostion to 6.0 and isReachMax to true
+     * @tc.expected: The result of this function returns -2
+     */
+    auto result = scrollFadeEffect->CalculateOverScroll(6.0, true);
+    EXPECT_EQ(result, -2.0);
+}
+
+/**
+ * @tc.name: CalculateOverScroll005
+ * @tc.desc: Test ScrollFadeEffect CalculateOverScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, CalculateOverScroll005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set currentPositionCallback_, leadingCallback_ and trailingCallback_
+     * set -currentPositionCallback_() greater than oldPosition and oldPosition greater or equal to -leadingCallback_()
+     */
+    scrollFadeEffect->currentPositionCallback_ = []() { return -7.0; };
+    scrollFadeEffect->leadingCallback_ = []() { return -2.0; };
+    scrollFadeEffect->trailingCallback_ = []() { return -8.0; };
+
+    /**
+     * @tc.steps: step3. Set oldPostion to 6.0 and isReachMax to true
+     * @tc.expected: The result of this function returns 1
+     */
+    auto result = scrollFadeEffect->CalculateOverScroll(6.0, true);
+    EXPECT_EQ(result, 1.0);
+}
+
+/**
+ * @tc.name: CalculateOverScroll006
+ * @tc.desc: Test ScrollFadeEffect CalculateOverScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, CalculateOverScroll006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set currentPositionCallback_, leadingCallback_ and trailingCallback_
+     * set -currentPositionCallback_() less than -trailingCallback_() and -trailingCallback_() less than oldPostion
+     */
+    scrollFadeEffect->currentPositionCallback_ = []() { return -4.0; };
+    scrollFadeEffect->leadingCallback_ = []() { return -2.0; };
+    scrollFadeEffect->trailingCallback_ = []() { return -8.0; };
+
+    /**
+     * @tc.steps: step3. Set oldPostion to 10.0 and isReachMax to true
+     * @tc.expected: The result of this function returns 4
+     */
+    auto result = scrollFadeEffect->CalculateOverScroll(10.0, true);
+    EXPECT_EQ(result, 4.0);
+}
+
+/**
+ * @tc.name: CalculateOverScroll007
+ * @tc.desc: Test ScrollFadeEffect CalculateOverScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, CalculateOverScroll007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set currentPositionCallback_, leadingCallback_ and trailingCallback_
+     * set -currentPositionCallback_() greater than oldPostion and oldPostion less than -leadingCallback_()
+     */
+    scrollFadeEffect->currentPositionCallback_ = []() { return -4.0; };
+    scrollFadeEffect->leadingCallback_ = []() { return -10.0; };
+    scrollFadeEffect->trailingCallback_ = []() { return -8.0; };
+
+    /**
+     * @tc.steps: step3. Set oldPostion to 2.0 and isReachMax to true
+     * @tc.expected: The result of this function returns 0
+     */
+    auto result = scrollFadeEffect->CalculateOverScroll(2.0, true);
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: CalculateOverScroll008
+ * @tc.desc: Test ScrollFadeEffect CalculateOverScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, CalculateOverScroll008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set currentPositionCallback_, leadingCallback_ and trailingCallback_
+     * set -currentPositionCallback_() greater than -leadingCallback_() and oldPostion less than -leadingCallback_()
+     */
+    scrollFadeEffect->currentPositionCallback_ = []() { return -10.0; };
+    scrollFadeEffect->leadingCallback_ = []() { return -8.0; };
+    scrollFadeEffect->trailingCallback_ = []() { return -2.0; };
+
+    /**
+     * @tc.steps: step3. Set oldPostion to 4.0 and isReachMax to true
+     * @tc.expected: The result of this function returns 2
+     */
+    auto result = scrollFadeEffect->CalculateOverScroll(4.0, true);
+    EXPECT_EQ(result, 2.0);
+}
+
+/**
+ * @tc.name: CalculateOverScroll009
+ * @tc.desc: Test ScrollFadeEffect CalculateOverScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, CalculateOverScroll009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set currentPositionCallback_, leadingCallback_ and trailingCallback_
+     * set -currentPositionCallback_() greater than -leadingCallback_() and oldPostion less than -leadingCallback_()
+     */
+    scrollFadeEffect->currentPositionCallback_ = []() { return -10.0; };
+    scrollFadeEffect->leadingCallback_ = []() { return -8.0; };
+    scrollFadeEffect->trailingCallback_ = []() { return -2.0; };
+
+    /**
+     * @tc.steps: step3. Set oldPostion to 4.0 and isReachMax to false
+     * @tc.expected: The result of this function returns 0
+     */
+    auto result = scrollFadeEffect->CalculateOverScroll(4.0, false);
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: CalculateOverScroll010
+ * @tc.desc: Test ScrollFadeEffect CalculateOverScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, CalculateOverScroll010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set currentPositionCallback_, leadingCallback_ and trailingCallback_
+     * set -trailingCallback_() greater than oldPostion and -currentPositionCallback_() less than -leadingCallback_()
+     */
+    scrollFadeEffect->currentPositionCallback_ = []() { return -6.0; };
+    scrollFadeEffect->leadingCallback_ = []() { return -4.0; };
+    scrollFadeEffect->trailingCallback_ = []() { return -2.0; };
+
+    /**
+     * @tc.steps: step3. Set oldPostion to 6.0 and isReachMax to false
+     * @tc.expected: The result of this function returns 0
+     */
+    auto result = scrollFadeEffect->CalculateOverScroll(6.0, false);
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: CalculateOverScroll011
+ * @tc.desc: Test ScrollFadeEffect CalculateOverScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, CalculateOverScroll011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+
+    /**
+     * @tc.steps: step2. Set currentPositionCallback_, leadingCallback_ and trailingCallback_
+     * set -trailingCallback_() greater than oldPostion and -currentPositionCallback_() less than -leadingCallback_()
+     */
+    scrollFadeEffect->currentPositionCallback_ = []() { return -10.0; };
+    scrollFadeEffect->leadingCallback_ = []() { return -10.0; };
+    scrollFadeEffect->trailingCallback_ = []() { return -10.0; };
+
+    /**
+     * @tc.steps: step3. Set oldPostion to 8.0 and isReachMax to false
+     * @tc.expected: The result of this function returns 0
+     */
+    auto result = scrollFadeEffect->CalculateOverScroll(10.0, false);
+    EXPECT_EQ(result, 0.0);
 }
 } // namespace OHOS::Ace::NG
