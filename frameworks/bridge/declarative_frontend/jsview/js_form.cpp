@@ -52,7 +52,8 @@ FormModel* FormModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-void ParseFormId(RequestFormInfo formInfo, JSRef<JSVal> id) {
+void ParseFormId(RequestFormInfo formInfo, JSRef<JSVal> id)
+{
     if (id->IsString()) {
         if (!StringUtils::IsNumber(id->ToString())) {
             TAG_LOGE(AceLogTag::ACE_FORM, "Invalid form id : %{public}s", id->ToString().c_str());
