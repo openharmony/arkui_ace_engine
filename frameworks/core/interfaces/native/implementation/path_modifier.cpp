@@ -83,7 +83,7 @@ void CommandsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<std::string>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        PathModelNG::SetCommands(frameNode, "");
         return;
     }
     PathModelNG::SetCommands(frameNode, *convValue);
