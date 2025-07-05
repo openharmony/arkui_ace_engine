@@ -80,6 +80,7 @@ void ZoomController::HandleZoomUpdate(GestureEvent& info)
     float minScale = std::min(pattern_.minZoomScale_, pattern_.maxZoomScale_);
     scale = std::clamp(scale, minScale, pattern_.maxZoomScale_);
     pattern_.UpdateZoomScale(scale);
+    UpdateOffset(scale, pattern_.GetZoomScale(), GetCenterPoint(info));
 }
 
 void ZoomController::HandleZoomEnd(GestureEvent& info)
@@ -87,5 +88,27 @@ void ZoomController::HandleZoomEnd(GestureEvent& info)
     auto hub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(hub);
     hub->FireOnZoomStop();
+}
+
+OffsetF ZoomController::GetCenterPoint(GestureEvent& info)
+{
+    std::size_t size = info.GetFingerList().size();
+    if (size > 0) {
+        Offset offset;
+        for (auto& info : info.GetFingerList()) {
+            offset += info.localLocation_;
+        }
+        return OffsetF(offset.GetX() / size, offset.GetY() / size);
+    }
+    return {};
+}
+
+void ZoomController::UpdateOffset(float scale, float prevScale, OffsetF centerOffset)
+{
+    CHECK_NULL_VOID(pattern_.freeScroll_);
+    auto currOffset = pattern_.freeScroll_->GetOffset();
+    float dx = (currOffset.GetX() - centerOffset.GetX()) * (prevScale / scale - 1);
+    float dy = (currOffset.GetY() - centerOffset.GetY()) * (prevScale / scale - 1);
+    pattern_.freeScroll_->UpdateOffset(OffsetF(dx, dy));
 }
 } // namespace OHOS::Ace::NG

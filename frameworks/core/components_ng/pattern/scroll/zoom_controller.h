@@ -39,6 +39,8 @@ private:
     void HandleZoomStart(GestureEvent& info);
     void HandleZoomUpdate(GestureEvent& info);
     void HandleZoomEnd(GestureEvent& info);
+    OffsetF GetCenterPoint(GestureEvent& info);
+    void UpdateOffset(float scale, float prevScale, OffsetF centerOffset);
 
     ScrollPattern& pattern_;
     RefPtr<PinchGesture> pinchGesture_;
