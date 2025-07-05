@@ -61,6 +61,8 @@ def install(dir):
         with open(koala_log, "a+") as f:
             f.write("\n")
             f.write("error message: "+ e.stderr + "\n")
+            # In order to see errors in CI log
+            print(f.read())
             f.close()
 
 def npm_command(dir, command):

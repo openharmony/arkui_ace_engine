@@ -278,7 +278,7 @@ def run_build_arkoala(env, path: Paths):
             f.write("\n")
             f.write("build log: "+ e.stdout + "\n")
             f.write("error message: "+ e.stderr + "\n")
-            print(f"build log:\n {ret.stdout}")
+            print(f"build log:\n {e.stdout}")
             print(f"error message: {e.stderr}")
             f.close()
 
