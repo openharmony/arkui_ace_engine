@@ -38,7 +38,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
         return AceType::RawPtr(frameNode);
     }
 #endif
-    auto container = Container::Current();
+    auto container = Container::CurrentSafelyWithCheck();
     CHECK_NULL_RETURN(container, nullptr);
     RefPtr<PipelineBase> pipeline;
     pipeline = container->GetPipelineContext();

@@ -495,27 +495,111 @@ export class DragControllerImpl extends DragController {
 }
 
 export class RouterImpl extends Router {
+    instanceId_: int32 = -1;
+    constructor(instanceId: int32) {
+        super()
+        this.instanceId_ = instanceId;
+    }
     public pushUrl(options: router.RouterOptions): Promise<void> {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
         }
-        return new Promise<void>((resolve, reject) => {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = new Promise<void>((resolve, reject) => {
             this.router_!.push(options)
         })
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public replaceUrl(options: router.RouterOptions): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = new Promise<void>((resolve, reject) => {
+            this.router_!.replace(options);
+        });
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
     }
 
     public back(options?:router.RouterOptions): void {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
         }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         this.router_!.back(options)
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public clear(): void {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
         }
-        this.router_!.clear()
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.clear();
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public getLength(): string {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getLength();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public getParams(): Object {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getParams();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public getState(): router.RouterState {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getState();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public getStateByIndex(index: number): router.RouterState | undefined {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getStateByIndex(index);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public getStateByUrl(url: string): Array<router.RouterState> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getStateByUrl(url);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public getStateRoot(): ComputableState<PeerNode> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getEntryRootValue();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
     }
 }
 
@@ -840,7 +924,7 @@ export class UIContextImpl extends UIContext {
     instanceId_: int32 = -1;
     stateMgr: StateManager | undefined = undefined;
     observer_ :UIObserver |null = null;
-    router_: Router = new RouterImpl()
+    router_: Router;
     focusController_: FocusControllerImpl;
     componentUtils_: ComponentUtilsImpl;
     componentSnapshot_: ComponentSnapshotImpl;
@@ -877,6 +961,7 @@ export class UIContextImpl extends UIContext {
         this.textMenuController_ = new TextMenuControllerImpl(instanceId);
         this.detachedRootEntryManager_ = new DetachedRootEntryManager(this);
         this.isDebugMode_ = ArkUIAniModule._IsDebugMode(instanceId) !== 0;
+        this.router_ = new RouterImpl(instanceId);
     }
     public getInstanceId() : int32 {
         return this.instanceId_;
@@ -1035,14 +1120,14 @@ export class UIContextImpl extends UIContext {
 
     public getRouter(): Router {
         if (this.router_ === undefined) {
-            this.router_ = new RouterImpl()
+            this.router_ = new RouterImpl(this.instanceId_)
         }
         return this.router_
     }
 
     public setRouter(router: RouterExt) {
         if (this.router_ === undefined) {
-            this.router_ = new RouterImpl()
+            this.router_ = new RouterImpl(this.instanceId_)
         }
         this.router_.setRouter(router);
     }
