@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,8 @@ public:
     void GetInspectorAsync(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector);
     void GetInspectorBackgroundAsync(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector);
     void ExecuteUICommand(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector);
+
+    static void TestScrollToTarget(const std::vector<std::string>& params, const RefPtr<FrameNode>& pageRootNode);
 
 private:
     struct SimplifiedInspectorTree {

@@ -17,6 +17,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.h"
 
+#include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 
@@ -137,5 +138,46 @@ HWTEST_F(GridPatternTestNg, ScrollToTagetTest001, TestSize.Level1)
     mockChildContext->SetPaintRectWithTransform(RectF(0.0f, 3 * ITEM_MAIN_SIZE, WIDTH, ITEM_MAIN_SIZE));
     EXPECT_EQ(ScrollablePattern::ScrollToTarget(frameNode_, childNode, targetOffset, align), RET_SUCCESS);
     EXPECT_TRUE(TickPosition(-150.0f));
+
+    // Move index 0 to start of Grid
+    align = ScrollAlign::START;
+    child = frameNode_->GetChildByIndex(0);
+    ASSERT_NE(child, nullptr);
+    childNode = child->GetHostNode();
+    ASSERT_NE(childNode, nullptr);
+    mockChildContext = AceType::DynamicCast<MockRenderContext>(childNode->GetRenderContext());
+    mockChildContext->SetPaintRectWithTransform(RectF(0.0f, -150.0f, WIDTH, ITEM_MAIN_SIZE));
+    EXPECT_EQ(ScrollablePattern::ScrollToTarget(frameNode_, childNode, 0.0f, align), RET_SUCCESS);
+    EXPECT_TRUE(TickPosition(0.0f));
+}
+
+/**
+ * @tc.name: ScrollToTagetTest002
+ * @tc.desc: Test ScrollToTaget from dump
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, ScrollToTagetTest002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetCachedCount(2, true);
+    CreateItemsInLazyForEach(50, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+    auto mockContext = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
+    mockContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, WIDTH, HEIGHT));
+    float targetOffset = 50.0f;
+    ScrollAlign align = ScrollAlign::CENTER;
+    // Move index 5 to middle of Grid with targetOffset
+    auto child = frameNode_->GetChildByIndex(5);
+    ASSERT_NE(child, nullptr);
+    auto childNode = child->GetHostNode();
+    ASSERT_NE(childNode, nullptr);
+    auto mockChildContext = AceType::DynamicCast<MockRenderContext>(childNode->GetRenderContext());
+    mockChildContext->SetPaintRectWithTransform(RectF(0.0f, 5 * ITEM_MAIN_SIZE, WIDTH, ITEM_MAIN_SIZE));
+    std::vector<std::string> params = { "-element", "-lastpage", std::to_string(childNode->GetId()),
+        std::to_string(targetOffset), std::to_string(static_cast<int32_t>(align)) };
+    SimplifiedInspector::TestScrollToTarget(params, frameNode_);
+    EXPECT_TRUE(TickPosition(-350.0f));
 }
 } // namespace OHOS::Ace::NG
