@@ -126,6 +126,7 @@ public:
     {
         isShowHandle_ = isShowHandle;
     }
+    void HandleOnAskCelia();
 
     // override BaseTextSelectOverlay
     bool PreProcessOverlay(const OverlayRequest& request) override;
