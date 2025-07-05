@@ -13,15 +13,13 @@
  * limitations under the License.
  */
 import { DecoratedV1VariableBase } from './decoratorBase';
-import {
-    WatchFuncType,
-    IStoragePropDecoratedVariable,
-} from '../decorator';
+import { WatchFuncType, IStoragePropDecoratedVariable } from '../decorator';
 import { ExtendableComponent } from '../../component/extendableComponent';
 
-export class StoragePropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IStoragePropDecoratedVariable<T> {
-
+export class StoragePropDecoratedVariable<T>
+    extends DecoratedV1VariableBase<T>
+    implements IStoragePropDecoratedVariable<T>
+{
     private readonly propertyNameInAppStorage_: string;
 
     // localInitValue is the rhs of @state variable : type = localInitialValue;
@@ -29,7 +27,7 @@ export class StoragePropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     constructor(
         owningComponent: ExtendableComponent | null,
         propertyNameInAppStorage: string,
-        varName: string, 
+        varName: string,
         watchFunc?: WatchFuncType
     ) {
         super('@StorageProp', owningComponent, varName, watchFunc);

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { IStorageProperty } from "./storageBase";
-import { DecoratedV1VariableBase } from "../decoratorImpl/decoratorBase";
+import { IStorageProperty } from './storageBase';
+import { DecoratedV1VariableBase } from '../decoratorImpl/decoratorBase';
 import { WatchFunc } from '../decoratorImpl/decoratorWatch';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
@@ -26,16 +26,15 @@ export interface IStorageProperties {
     ttype: Type;
 }
 
-export class AbstractProperty<T> extends DecoratedV1VariableBase<T>
-    implements IStorageProperty {
+export class AbstractProperty<T> extends DecoratedV1VariableBase<T> implements IStorageProperty {
     private readonly key_: string;
     private readonly ttype_: Type;
     private readonly get_: GetType<T>;
     private readonly set_: SetType<T>;
 
     constructor(key: string, ttype: Type, get: GetType<T>, set: SetType<T>) {
-        super("AbstractProperty", null, key);
-        StateMgmtConsole.log(`create new AbstractProperty for key '${key}' `)
+        super('AbstractProperty', null, key);
+        StateMgmtConsole.log(`create new AbstractProperty for key '${key}' `);
 
         this.key_ = key;
         this.ttype_ = ttype;
@@ -48,7 +47,7 @@ export class AbstractProperty<T> extends DecoratedV1VariableBase<T>
         // if initial value is object, register so that property changes trigger
         // @Watch function exec
         this.registerWatchForObservedObjectChanges(initValue);
-        // registerWatch  to source is done in the factory function 
+        // registerWatch  to source is done in the factory function
     }
 
     // FIXME change to info()
@@ -75,24 +74,23 @@ export class AbstractProperty<T> extends DecoratedV1VariableBase<T>
             this._watchFuncs.clear();
         }
         if (typeof onChangeCbFunc === 'function') {
-            const watchFunc = (propName: string) => {
+            const watchFunc = (propName: string): void => {
                 (onChangeCbFunc as OnChangeType<T>)(propName, this.get());
             };
             const watchFuncObj = new WatchFunc(watchFunc);
             this._watchFuncs.set(watchFuncObj.id(), watchFuncObj);
         }
-
     }
 }
 
 /**
  * for backward compatibility only
- * 
+ *
  */
 export class SubscribedAbstractProperty<T> extends AbstractProperty<T> {
     constructor(key: string, ttype: Type, get: GetType<T>, set: SetType<T>) {
         super(key, ttype, get, set);
     }
 
-    public aboutTODeleted() {};
+    public aboutToBeDeleted(): void {}
 }

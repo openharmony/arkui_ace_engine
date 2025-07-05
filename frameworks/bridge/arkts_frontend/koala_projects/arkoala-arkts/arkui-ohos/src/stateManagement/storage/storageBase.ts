@@ -14,7 +14,7 @@
  */
 import { AbstractProperty } from './storageProperty';
 import { WatchFuncType, WatchIdType, IDecoratedV1Variable } from '../decorator';
-import { DecoratedV1VariableBase } from '../decoratorImpl/decoratorBase';
+import { DecoratedV1VariableBase, DecoratedVariableBase } from '../decoratorImpl/decoratorBase';
 import { StateDecoratedVariable } from '../decoratorImpl/decoratorState';
 import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageLink';
 import { WatchFunc } from '../decoratorImpl/decoratorWatch';
@@ -26,14 +26,13 @@ export interface IStorageProperty {
     ttype(): Type;
 }
 
-export class StorageProperty<T> extends StateDecoratedVariable<T>
-    implements IDecoratedV1Variable<T> {
-
+export class StorageProperty<T> extends StateDecoratedVariable<T> implements IDecoratedV1Variable<T>, IPropRefCounter {
     private refRegistrations_: Set<WatchIdType> = new Set<WatchIdType>();
-    private finalizationRegistry_: FinalizationRegistry<WatchIdType> =
-        new FinalizationRegistry<WatchIdType>((registrationId: WatchIdType) => {
+    private finalizationRegistry_: FinalizationRegistry<WatchIdType> = new FinalizationRegistry<WatchIdType>(
+        (registrationId: WatchIdType) => {
             this.__unregister(registrationId);
-        });
+        }
+    );
 
     constructor(propName: string, initValue: T) {
         super(null, propName, initValue);
@@ -41,23 +40,34 @@ export class StorageProperty<T> extends StateDecoratedVariable<T>
 
     public mkRef(propertyNameInAppStorage: string, ttype: Type): AbstractProperty<T> {
         StateMgmtConsole.log(`mkRef('${propertyNameInAppStorage}')`);
-        const get = () => { return this.get() as T };
-        const set = (newValue: T) => { this.set(newValue); }
+        const get = (): T => {
+            return this.get() as T;
+        };
+        const set = (newValue: T): void => {
+            this.set(newValue);
+        };
         return new AbstractProperty<T>(propertyNameInAppStorage, ttype, get, set);
     }
 
-    public makeStorageLink(owner: ExtendableComponent, propertyNameInAppStorage: string, varName: string,
-        watchFunc?: WatchFuncType): StorageLinkDecoratedVariable<T> {
-
+    public makeStorageLink(
+        owner: ExtendableComponent,
+        propertyNameInAppStorage: string,
+        varName: string,
+        watchFunc?: WatchFuncType
+    ): StorageLinkDecoratedVariable<T> {
         StateMgmtConsole.log(`makeStorageLink('${propertyNameInAppStorage} ${varName}')`);
-        const get = () => { return this.get() as T };
-        const set = (newValue: T) => { this.set(newValue); }
+        const get = (): T => {
+            return this.get() as T;
+        };
+        const set = (newValue: T): void => {
+            this.set(newValue);
+        };
         return new StorageLinkDecoratedVariable<T>(owner, propertyNameInAppStorage, varName, this, get, set, watchFunc);
     }
 
     public registerWatch<T>(link: DecoratedV1VariableBase<T>): WatchIdType {
         const weakLink = new WeakRef<DecoratedV1VariableBase<T>>(link);
-        const watchObj = new WatchFunc((_: string) => { });
+        const watchObj = new WatchFunc((_: string) => {});
         const watchFunc: WatchFuncType = (_: string) => {
             const link = weakLink.deref();
             if (link) {
@@ -77,24 +87,25 @@ export class StorageProperty<T> extends StateDecoratedVariable<T>
     public __unregister(registrationId: WatchIdType): void {
         StateMgmtConsole.log(`ref/link/persitProp ${registrationId} unregistering.`);
         this.refRegistrations_.delete(registrationId);
-        this._watchFuncs.delete(registrationId)
+        this._watchFuncs.delete(registrationId);
     }
 
-    // how many @StorageLink, AbstractProperty created by ref/setAndRef and by 
-    // persistProperty
+    // how many @StorageLink, AbstractProperty created by ref/setAndRef and by persistProperty
     public refCount(): number {
         return this.refRegistrations_.size;
     }
 }
 
-interface IRepo {
+interface IRepo {}
+
+interface IPropRefCounter {
+    refCount(): number;
 }
 
-class Repo<T> extends Map<string, StorageProperty<T>> implements IRepo {
-}
+class Repo extends Map<string, DecoratedVariableBase> implements IRepo {}
 
 export class StorageBase {
-    private mapOfRepos = new Map<Type, IRepo>();
+    private repoAllTypes = new Repo();
     private key2Type = new Map<string, Type>();
     public keySet = new Set<string>();
 
@@ -102,10 +113,10 @@ export class StorageBase {
         return this.key2Type.get(key);
     }
 
-    public size() : number {
+    public size(): number {
         return this.key2Type.size;
     }
-    
+
     public createAndSet<T>(key: string, ttype: Type, value: T): boolean {
         const typeOpt = this.key2Type.get(key);
         if (typeOpt !== undefined) {
@@ -120,25 +131,15 @@ export class StorageBase {
 
         this.key2Type.set(key, ttype);
         this.keySet.add(key); // Ensure key is added to keySet
-
-        let irepo: IRepo | undefined = this.mapOfRepos.get(ttype);
-        let repo: Repo<T>;
-        if (irepo === undefined) {
-            repo = new Repo<T>;
-            this.mapOfRepos.set(ttype, repo);
-        } else {
-            repo = irepo as Repo<T>; // safe because of earlier checks
-        }
         const sp = new StorageProperty<T>(key, value);
-        repo!.set(key, sp);
+        this.repoAllTypes.set(key, sp);
         return true;
     }
-
 
     public update<T>(key: string, value: T): boolean {
         const ttype: Type | undefined = this.key2Type.get(key);
         if (!ttype) {
-            StateMgmtConsole.log(`update: key '${key}' unknown`)
+            StateMgmtConsole.log(`update: key '${key}' unknown`);
             // no value for key in DB, can not update
             return false;
         }
@@ -146,17 +147,12 @@ export class StorageBase {
             // attempt to set a value of a type incompatible with
             // fixed ttype for this key
             // can not update
-            StateMgmtConsole.log(`update: key '${key}' expected type is ${ttype.toString()} incompatible with new value. Error.`);
+            StateMgmtConsole.log(
+                `update: key '${key}' expected type is ${ttype.toString()} incompatible with new value. Error.`
+            );
             return false;
         }
-        const irepo: IRepo | undefined = this.mapOfRepos.get(ttype);
-        if (!irepo) {
-            // internal error
-            StateMgmtConsole.log(`update: key '${key}': ttype '${ttype.toString()}' unknown. Internal error`);
-            return false;
-        }
-        const repo: Repo<T> = irepo! as Repo<T>;  // type safe because of earlier checks
-        const sp: StorageProperty<T> | undefined = repo.get(key);
+        const sp: StorageProperty<T> | undefined = this.repoAllTypes.get(key) as StorageProperty<T>;
         if (sp === undefined) {
             StateMgmtConsole.log(`update: key '${key}' unknown. Internal error`);
             return false;
@@ -170,24 +166,19 @@ export class StorageBase {
         const ttype: Type | undefined = this.key2Type.get(key);
         if (!ttype) {
             // no value for key in DB, can not read
-            StateMgmtConsole.log(`get: key '${key}' unknown`);
+            // StateMgmtConsole.log(`get: key '${key}' unknown`);
             return undefined;
         }
         if (!expectedTtype.assignableFrom(ttype)) {
             // expected type is not compatible with permissible type
             // on file for key
-            StateMgmtConsole.log(`get: key '${key}' expected type is ${expectedTtype.toString()}, get requests for ${ttype.toString()}`);
+            // StateMgmtConsole.log(`get: key '${key}' expected type is ${expectedTtype.toString()}, get requests for ${ttype.toString()}`);
             return undefined;
         }
-        const irepo: IRepo | undefined = this.mapOfRepos.get(ttype);
-        if (!irepo) {
-            StateMgmtConsole.log(`get: ttype '${ttype.toString()}' unknown. Internal error`);
-            return undefined;
-        }
-        const repo: Repo<T> = irepo! as Repo<T>; // type safe because eof earlier checks
-        const sp: StorageProperty<T> | undefined = repo.get(key);
+        // eventually this.backing_.get
+        const sp: StorageProperty<T> | undefined = this.repoAllTypes.get(key) as StorageProperty<T>;
         if (sp === undefined) {
-            StateMgmtConsole.log(`get: key '${key}' unknown. Internal error`);
+            // StateMgmtConsole.log(`get: key '${key}' unknown. Internal error`);
             return undefined;
         }
         return sp ? sp.get() : undefined;
@@ -200,13 +191,7 @@ export class StorageBase {
             return undefined;
         }
 
-        const irepo: IRepo | undefined = this.mapOfRepos.get(ttype);
-        if (!irepo) {
-            StateMgmtConsole.log(`ref: ttype '${ttype.toString()}' unknown. Internal error`);
-            return undefined;
-        }
-        const repo: Repo<T> = irepo! as Repo<T>; // type safe because of earlier checks
-        const sp: StorageProperty<T> | undefined = repo.get(key);
+        const sp: StorageProperty<T> | undefined = this.repoAllTypes.get(key) as StorageProperty<T>;
         if (sp === undefined) {
             StateMgmtConsole.log(`ref: key '${key}' unknown. Internal error`);
             return undefined;
@@ -217,36 +202,42 @@ export class StorageBase {
         return ap;
     }
 
-    public makeStorageLink<T>(owner: ExtendableComponent, key: string, varName: string,
-        defaultValue: T, ttype: Type, watchFunc?: WatchFuncType): StorageLinkDecoratedVariable<T> | undefined {
+    public makeStorageLink<T>(
+        owner: ExtendableComponent,
+        key: string,
+        varName: string,
+        defaultValue: T,
+        ttype: Type,
+        watchFunc?: WatchFuncType
+    ): StorageLinkDecoratedVariable<T> | undefined {
         let expectedTtype: Type | undefined = this.key2Type.get(key);
 
         if (expectedTtype === undefined) {
             // key not yet in storage, add default value and type
             if (!this.createAndSet<T>(key, ttype, defaultValue)) {
-                StateMgmtConsole.log(`makeStorageLink: key '${key}' is new, can not add defaultValue + type to storage`);
+                StateMgmtConsole.log(
+                    `makeStorageLink: key '${key}' is new, can not add defaultValue + type to storage`
+                );
                 return undefined;
             }
             expectedTtype = ttype;
         } else {
             if (!expectedTtype!.equals(ttype)) {
-                StateMgmtConsole.log(`makeStorageLink: key '${key}' unknown or type ${ttype.toString()} mismatch storage type`);
+                StateMgmtConsole.log(
+                    `makeStorageLink: key '${key}' unknown or type ${ttype.toString()} mismatch storage type`
+                );
                 return undefined;
             }
         }
 
-        const irepo: IRepo | undefined = this.mapOfRepos.get(ttype);
-        if (!irepo) {
-            StateMgmtConsole.log(`makeStorageLink: ttype '${ttype.toString()}' unknown. Internal error`);
-            return undefined;
-        }
-        const repo: Repo<T> = irepo! as Repo<T>; // type safe because of earlier checks
-        const sp: StorageProperty<T> | undefined = repo.get(key);
+        const sp: StorageProperty<T> | undefined = this.repoAllTypes.get(key) as StorageProperty<T>;
         if (sp === undefined) {
             StateMgmtConsole.log(`makeStorageLink: key '${key}' unknown. Internal error`);
             return undefined;
         }
-        console.log(`makeStorageLink: key '${key}' found value of matching type. Create StorageLinkDecoratedVariable Ok`);
+        StateMgmtConsole.log(
+            `makeStorageLink: key '${key}' found value of matching type. Create StorageLinkDecoratedVariable Ok`
+        );
         const sLink = sp.makeStorageLink(owner, key, varName, watchFunc);
 
         sp.registerWatch<T>(sLink);
@@ -266,24 +257,14 @@ export class StorageBase {
         if (ttype === undefined) {
             return false;
         }
-        const irepo: IRepo | undefined = this.mapOfRepos.get(ttype);
-        if (!irepo) {
-            StateMgmtConsole.log(`delete: ttype '${ttype.toString()}' unknown. Internal error`)
-            return false;
-        }
-        // not type safe because T and storage type compatibility unchecked
-        const repo = irepo as Repo<NullishType>;
-        const sp = repo.get(key)
+        const sp = this.repoAllTypes.get(key);
         if (sp === undefined) {
             return false;
         }
-        if (sp.refCount() > 0) {
+        if ((sp as IPropRefCounter).refCount() > 0) {
             return false;
         }
-        repo.delete(key);
-        if (repo.size === 0) {
-            this.mapOfRepos.delete(ttype);
-        }
+        this.repoAllTypes.delete(key);
         this.key2Type.delete(key);
         this.keySet.delete(key);
         return true;
@@ -291,20 +272,16 @@ export class StorageBase {
 
     public clear(): boolean {
         let canDelete: boolean = true;
-        this.mapOfRepos.forEach((irepo, ttype) => {
-            const repo = irepo as Repo<NullishType>;
-            if (canDelete) {
-                repo.forEach((sp) => {
-                    if (sp.refCount() > 0) {
-                        canDelete = false;
-                    }
-                })
-            }
-        })
+        if (canDelete) {
+            this.repoAllTypes.forEach((sp) => {
+                if ((sp as IPropRefCounter).refCount() > 0) {
+                    canDelete = false;
+                }
+            });
+        }
         if (!canDelete) {
             return false;
         }
-        this.mapOfRepos.clear();
         this.key2Type.clear();
         this.keySet.clear();
         return true;
@@ -314,16 +291,9 @@ export class StorageBase {
         const ttype: Type | undefined = this.key2Type.get(key);
         if (!ttype) {
             // no value for key in DB, can not read
-            StateMgmtConsole.log(`getStorageProp: key '${key}' unknown`)
+            StateMgmtConsole.log(`getStorageProp: key '${key}' unknown`);
             return undefined;
         }
-        const irepo: IRepo | undefined = this.mapOfRepos.get(ttype);
-        if (!irepo) {
-            StateMgmtConsole.log(`getStorageProp: ttype '${ttype.toString()}' unknown. Internal error`)
-            return undefined;
-        }
-        // not type safe because T and storage type compatibility unchecked
-        const repo: Repo<T> = irepo! as Repo<T>;
-        return repo.get(key);
+        return this.repoAllTypes.get(key) as StorageProperty<T>;
     }
 }
