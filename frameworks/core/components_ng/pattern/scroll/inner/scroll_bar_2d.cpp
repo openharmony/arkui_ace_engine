@@ -123,6 +123,10 @@ ScrollBar2D::~ScrollBar2D()
 {
     RemoveGestures(vertical_);
     RemoveGestures(horizontal_);
+
+    auto* ctx = pattern_.GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    ctx->RemoveOverlayModifier(painter_);
 }
 
 namespace {

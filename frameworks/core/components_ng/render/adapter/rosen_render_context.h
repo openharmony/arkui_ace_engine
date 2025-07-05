@@ -351,6 +351,7 @@ public:
 
     void ClearDrawCommands() override;
 
+    void RemoveOverlayModifier(const RefPtr<OverlayModifier>& modifier) override;
     void RemoveContentModifier(const RefPtr<ContentModifier>& modifier) override;
 
     void OpacityAnimation(const AnimationOption& option, double begin, double end) override;

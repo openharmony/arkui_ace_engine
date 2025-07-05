@@ -20,6 +20,8 @@
 #include "core/components_ng/pattern/scroll/free_scroll_controller.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/velocity.h"
+#include "test/mock/core/render/mock_render_context.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float X = -3000;
@@ -691,9 +693,17 @@ TEST_F(FreeScrollTest, ScrollBar005)
     CreateScrollDone();
     EXPECT_TRUE(pattern_->scrollBar_);
 
+    auto* ctx = AceType::DynamicCast<MockRenderContext>(pattern_->GetRenderContext());
+    EXPECT_CALL(*ctx, RemoveOverlayModifier(Eq(pattern_->GetScrollBarOverlayModifier()))).Times(1);
     layoutProperty_->UpdateAxis(Axis::FREE);
     pattern_->OnModifyDone();
     EXPECT_TRUE(pattern_->scrollBar2d_);
     EXPECT_FALSE(pattern_->scrollBar_);
+
+    EXPECT_CALL(*ctx, RemoveOverlayModifier(Eq(pattern_->scrollBar2d_->GetPainter()))).Times(1);
+    layoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    pattern_->OnModifyDone();
+    EXPECT_FALSE(pattern_->scrollBar2d_);
+    EXPECT_TRUE(pattern_->scrollBar_);
 }
 } // namespace OHOS::Ace::NG
