@@ -627,4 +627,30 @@ int32_t UIContentServiceProxy::GetCurrentImagesShowing(
     }
     return NO_ERROR;
 }
+
+int32_t UIContentServiceProxy::ExeAppAIFunction(
+    const std::string& funcName, const std::string& params, const std::function<void(uint32_t)>& finishCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ExeAppAIFunction write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteString(funcName) || !data.WriteString(params)) {
+        LOGW("ExeAppAIFunction write data failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("ExeAppAIFunction is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterExeAppAIFunction(finishCallback);
+    if (Remote()->SendRequest(EXE_APP_AI_FUNCTION, data, reply, option) != ERR_NONE) {
+        LOGW("ExeAppAIFunction send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
 } // namespace OHOS::Ace

@@ -1098,6 +1098,8 @@ public:
         afterAttachMainTreeTasks_.emplace_back(std::move(task));
     }
 
+    void FindTopNavDestination(RefPtr<FrameNode>& result);
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {

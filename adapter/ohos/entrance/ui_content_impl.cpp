@@ -5713,6 +5713,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
     InitSendCommandFunctionsCallbacks(pipeline);
     sendCommandCallbackInner(pipeline);
     SaveGetCurrentInstanceId();
+    RegisterExeAppAIFunction(pipeline);
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline)
@@ -6026,5 +6027,17 @@ UIContentErrorCode UIContentImpl::InitializeByNameWithAniStorage(
     auto errorCode = InitializeInner(window, name, storageWrapper, true);
     AddWatchSystemParameter();
     return errorCode;
+}
+
+void UIContentImpl::RegisterExeAppAIFunction(const RefPtr<PipelineBase>& pipeline)
+{
+    auto exeAppAIFunctionCallback = [weakContext = WeakPtr(pipeline)](
+        const std::string& funcName, const std::string& params) -> uint32_t {
+        static constexpr uint32_t AI_CALL_ENV_INVALID = 4;
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        CHECK_NULL_RETURN(pipeline, AI_CALL_ENV_INVALID);
+        return pipeline->ExeAppAIFunctionCallback(funcName, params);
+    };
+    UiSessionManager::GetInstance()->RegisterPipeLineExeAppAIFunction(exeAppAIFunctionCallback);
 }
 } // namespace OHOS::Ace

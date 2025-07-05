@@ -3790,5 +3790,195 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg255, TestSize.Level1)
     context_->OnDragEvent({ DEFAULT_INT1, DEFAULT_INT1 }, DragEventAction::DRAG_EVENT_OUT);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
 }
+
+/**
+ * @tc.name: ExeAppAIFunctionCallback
+ * @tc.desc: Test ExeAppAIFunctionCallback of pipeline_context
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg256, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+ 
+    /**
+     * @tc.steps2: make rootNode_ is nullptr.
+     */
+    context_->rootNode_ = nullptr;
+    EXPECT_EQ(context_->rootNode_, nullptr);
+
+    uint32_t result = context_->ExeAppAIFunctionCallback("Success", "");
+    EXPECT_EQ(result, AI_CALL_NODE_INVALID);
+}
+
+/**
+ * @tc.name: ExeAppAIFunctionCallback
+ * @tc.desc: Test ExeAppAIFunctionCallback of pipeline_context
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg257, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: Ensure that rootNode_ is not nullptr.
+     */
+    auto rootNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<Pattern>(), true);
+    context_->rootNode_ = rootNode;
+    ASSERT_NE(context_->rootNode_, nullptr);
+ 
+    /**
+     * @tc.steps3: topNavNode cannot be found.
+     */
+    uint32_t result = context_->ExeAppAIFunctionCallback("Success", "");
+    EXPECT_EQ(result, AI_CALL_NODE_INVALID);
+}
+
+/**
+ * @tc.name: ExeAppAIFunctionCallback
+ * @tc.desc: Test ExeAppAIFunctionCallback of pipeline_context
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg258, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: Ensure that rootNode_ is not nullptr.
+     */
+    auto rootNode = FrameNode::CreateFrameNode("root", 1, AceType::MakeRefPtr<Pattern>(), true);
+    context_->rootNode_ = rootNode;
+    ASSERT_NE(context_->rootNode_, nullptr);
+ 
+    /**
+     * @tc.steps3: make navigationGroupNode.
+     */
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    RefPtr<NavigationPattern> navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    rootNode->AddChild(navigationGroupNode);
+
+    /**
+     * @tc.steps4: make some NavDestinationNode.
+     */
+    auto navDestinationNode1 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 21, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode2 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode3 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 23, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode4 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 24, AceType::MakeRefPtr<Pattern>(), true);
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", navDestinationNode1));
+    navPathList.emplace_back(std::make_pair("pageTwo", navDestinationNode2));
+    navPathList.emplace_back(std::make_pair("pageThree", navDestinationNode3));
+    navPathList.emplace_back(std::make_pair("pageFour", navDestinationNode4));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+    
+    uint32_t result = context_->ExeAppAIFunctionCallback("Success", "");
+    EXPECT_EQ(result, AI_CALLER_INVALID);
+}
+
+/**
+ * @tc.name: OnDumpBindAICaller
+ * @tc.desc: Test OnDumpBindAICaller.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: context_ is not null.
+     */
+    ASSERT_NE(context_, nullptr);
+    auto rootNode = FrameNode::CreateFrameNode("root", 1, AceType::MakeRefPtr<Pattern>(), true);
+    context_->rootNode_ = rootNode;
+    ASSERT_NE(context_->rootNode_, nullptr);
+ 
+    /**
+     * @tc.steps2: make navigationGroupNode.
+     */
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    RefPtr<NavigationPattern> navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    rootNode->AddChild(navigationGroupNode);
+
+    /**
+     * @tc.steps3: make some NavDestinationNode.
+     */
+    auto navDestinationNode1 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 21, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode2 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode3 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 23, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode4 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 24, AceType::MakeRefPtr<Pattern>(), true);
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", navDestinationNode1));
+    navPathList.emplace_back(std::make_pair("pageTwo", navDestinationNode2));
+    navPathList.emplace_back(std::make_pair("pageThree", navDestinationNode3));
+    navPathList.emplace_back(std::make_pair("pageFour", navDestinationNode4));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+
+    /**
+     * @tc.steps4: find topNavNode.
+     * @tc.expected: topNavNode found.
+     */
+    RefPtr<FrameNode> topNavNode;
+    rootNode->FindTopNavDestination(topNavNode);
+    ASSERT_NE(topNavNode, nullptr);
+    EXPECT_EQ(topNavNode, navDestinationNode4);
+
+    /**
+     * @tc.steps5: Call the function OnDumpBindAICaller.
+     * @tc.expected: topNavNode->CallAIFunction result is not AI_CALLER_INVALID.
+     */
+    std::vector<std::string> params;
+    params.push_back("-bindaihelper");
+    params.push_back("-bind");
+    EXPECT_EQ(params.size(), 2);
+    context_->OnDumpBindAICaller(params);
+    auto result = topNavNode->CallAIFunction("Success", "");
+    EXPECT_EQ(result, AI_CALL_SUCCESS);
+
+    /**
+     * @tc.steps6: Call the function OnDumpBindAICaller.
+     * @tc.expected: topNavNode->CallAIFunction result is AI_CALLER_INVALID.
+     */
+    params.clear();
+    params.push_back("-bindaihelper");
+    params.push_back("-unbind");
+    EXPECT_EQ(params.size(), 2);
+    context_->OnDumpBindAICaller(params);
+    result = topNavNode->CallAIFunction("Success", "");
+    EXPECT_EQ(result, AI_CALLER_INVALID);
+
+    /**
+     * @tc.steps7: Call the function OnDumpBindAICaller.
+     * @tc.expected: topNavNode->CallAIFunction result is AI_CALLER_INVALID.
+     */
+    params.clear();
+    EXPECT_EQ(params.size(), 0);
+    context_->OnDumpBindAICaller(params);
+    result = topNavNode->CallAIFunction("Success", "");
+    EXPECT_EQ(result, AI_CALLER_INVALID);
+}
 } // namespace NG
 } // namespace OHOS::Ace

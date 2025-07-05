@@ -21,6 +21,7 @@
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2266,5 +2267,22 @@ RefPtr<UINode> UINode::GetAncestor() const
 void UINode::SetAncestor(const WeakPtr<UINode>& parent)
 {
     ancestor_ = parent;
+}
+
+void UINode::FindTopNavDestination(RefPtr<FrameNode>& result)
+{
+    auto currentNode = AceType::DynamicCast<FrameNode>(this);
+    if (currentNode && currentNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+        auto navigationGroupNode = AceType::DynamicCast<NG::NavigationGroupNode>(currentNode);
+        CHECK_NULL_VOID(navigationGroupNode);
+        result = navigationGroupNode->GetTopDestination();
+        return;
+    }
+    for (const auto& item : GetChildren()) {
+        item->FindTopNavDestination(result);
+        if (result) {
+            return;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

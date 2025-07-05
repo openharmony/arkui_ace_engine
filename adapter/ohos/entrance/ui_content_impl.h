@@ -136,6 +136,7 @@ public:
     void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
+    void RegisterExeAppAIFunction(const RefPtr<PipelineBase>& pipeline);
 
     void ChangeSensitiveNodes(bool isSensitive) override;
 

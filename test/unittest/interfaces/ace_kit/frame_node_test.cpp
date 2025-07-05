@@ -776,7 +776,7 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest115, TestSize.Level1)
     EXPECT_EQ(frameNodeImpl->frameNode_->CallAIFunction("Success", "params1: 1"), 0);
     /**
      * @tc.steps6: call invalid function after set.
-     * @tc.excepted: step6 ai function noy found and return 2.
+     * @tc.excepted: step6 ai function not found and return 2.
      */
     EXPECT_EQ(frameNodeImpl->frameNode_->CallAIFunction("OTHERFunction", "params1: 1"), 2);
 }
