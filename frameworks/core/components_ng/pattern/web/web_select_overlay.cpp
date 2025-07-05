@@ -890,7 +890,7 @@ void WebSelectOverlay::HandleOnAskCelia()
             auto func = std::get<std::function<void(int, std::string)>>(funcVariant);
             if(func) {
                 TAG_LOGI(AceLogTag::ACE_WEB, "HandleOnAskCelia execute.");
-                func(true, GetSelectText());
+                func(true, GetSelectedText());
             } else {
                 TAG_LOGE(AceLogTag::ACE_WEB, "HandleOnAskCelia failed option is null.");
             }
