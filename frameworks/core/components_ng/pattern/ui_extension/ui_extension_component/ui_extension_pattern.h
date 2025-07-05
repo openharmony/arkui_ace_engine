@@ -370,7 +370,10 @@ private:
     void RegisterEventProxyFlagCallback();
 
     void RegisterGetAvoidInfoCallback();
-    void RegisterReplyPageModeCallback();
+
+    void SendPageModeToProvider();
+    void RegisterReceivePageModeRequestCallback();
+
     void UpdateFrameNodeState();
     bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);
     bool IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag);

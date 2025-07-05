@@ -382,10 +382,10 @@ HWTEST_F(UIExtensionComponentTestTwoNg, RegisterEventProxyFlagCallbackTest002, T
 
 /**
  * @tc.name: UIExtensionComponentTestTwoNg
- * @tc.desc: Test the method of pattern RegisterReplyPageModeCallback
+ * @tc.desc: Test the method of pattern RegisterReceivePageModeRequestCallback
  * @tc.type: FUNC
  */
-HWTEST_F(UIExtensionComponentTestTwoNg, RegisterReplyPageModeCallbackTest001, TestSize.Level1)
+HWTEST_F(UIExtensionComponentTestTwoNg, RegisterReceivePageModeRequestCallbackTest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     /**
@@ -402,20 +402,20 @@ HWTEST_F(UIExtensionComponentTestTwoNg, RegisterReplyPageModeCallbackTest001, Te
     ASSERT_NE(pattern, nullptr);
 
     /**
-     * @tc.steps: step2. test RegisterReplyPageModeCallback
+     * @tc.steps: step2. test RegisterReceivePageModeRequestCallback
      */
-    EXPECT_EQ(pattern->businessDataUECConsumeReplyCallbacks_.size(), 0);
-    pattern->RegisterReplyPageModeCallback();
-    EXPECT_EQ(pattern->businessDataUECConsumeReplyCallbacks_.size(), 1);
+    EXPECT_EQ(pattern->businessDataUECConsumeCallbacks_.size(), 0);
+    pattern->RegisterReceivePageModeRequestCallback();
+    EXPECT_EQ(pattern->businessDataUECConsumeCallbacks_.size(), 1);
 #endif
 }
 
 /**
  * @tc.name: UIExtensionComponentTestTwoNg
- * @tc.desc: Test the method of pattern RegisterReplyPageModeCallback
+ * @tc.desc: Test the method of pattern RegisterReceivePageModeRequestCallback
  * @tc.type: FUNC
  */
-HWTEST_F(UIExtensionComponentTestTwoNg, RegisterReplyPageModeCallbackTest002, TestSize.Level1)
+HWTEST_F(UIExtensionComponentTestTwoNg, RegisterReceivePageModeRequestCallbackTest002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     /**
@@ -432,26 +432,21 @@ HWTEST_F(UIExtensionComponentTestTwoNg, RegisterReplyPageModeCallbackTest002, Te
     ASSERT_NE(pattern, nullptr);
 
     /**
-     * @tc.steps: step2. test RegisterReplyPageModeCallback
+     * @tc.steps: step2. test RegisterReceivePageModeRequestCallback
      */
-    pattern->RegisterReplyPageModeCallback();
+    pattern->RegisterReceivePageModeRequestCallback();
     AAFwk::Want want;
-    std::optional<AAFwk::Want> op = std::nullopt;
-    auto ret = pattern->businessDataUECConsumeReplyCallbacks_.at(UIContentBusinessCode::SEND_PAGE_MODE)(
-        want, op);
+    auto ret = pattern->businessDataUECConsumeCallbacks_.at(UIContentBusinessCode::SEND_PAGE_MODE_REQUEST)(want);
     EXPECT_EQ(ret, -1);
 
     std::string value = "testuec";
     AAFwk::Want want2;
     want2.SetParam("requestPageMode", value);
-    op = want2;
-    ret = pattern->businessDataUECConsumeReplyCallbacks_.at(UIContentBusinessCode::SEND_PAGE_MODE)(
-        want, op);
+    ret = pattern->businessDataUECConsumeCallbacks_.at(UIContentBusinessCode::SEND_PAGE_MODE_REQUEST)(want);
     EXPECT_EQ(ret, -1);
 
     want.SetParam("requestPageMode", value);
-    ret = pattern->businessDataUECConsumeReplyCallbacks_.at(UIContentBusinessCode::SEND_PAGE_MODE)(
-        want, op);
+    ret = pattern->businessDataUECConsumeCallbacks_.at(UIContentBusinessCode::SEND_PAGE_MODE_REQUEST)(want);
     EXPECT_EQ(ret, 0);
 #endif
 }
@@ -481,7 +476,7 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SendBusinessDataSyncReplyTest001, TestSi
     /**
      * @tc.steps: step2. test SendBusinessDataSyncReply
      */
-    UIContentBusinessCode code = UIContentBusinessCode::SEND_PAGE_MODE;
+    UIContentBusinessCode code = UIContentBusinessCode::SEND_PAGE_MODE_REQUEST;
     AAFwk::Want want;
     AAFwk::Want reply;
     auto ret = pattern->SendBusinessDataSyncReply(code, want, reply);
@@ -518,7 +513,7 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SendBusinessDataTest001, TestSize.Level1
     /**
      * @tc.steps: step2. test SendBusinessData
      */
-    UIContentBusinessCode code = UIContentBusinessCode::SEND_PAGE_MODE;
+    UIContentBusinessCode code = UIContentBusinessCode::SEND_PAGE_MODE_REQUEST;
     AAFwk::Want want;
     BusinessDataSendType type = BusinessDataSendType::ASYNC;
     auto ret = pattern->SendBusinessData(code, want, type);
@@ -554,7 +549,7 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnUIExtBusinessReceiveReplyTest001, Test
     /**
      * @tc.steps: step2. test OnUIExtBusinessReceiveReply
      */
-    UIContentBusinessCode code = UIContentBusinessCode::SEND_PAGE_MODE;
+    UIContentBusinessCode code = UIContentBusinessCode::SEND_PAGE_MODE_REQUEST;
     AAFwk::Want data;
     std::string value = "testuec";
     data.SetParam("requestPageMode", value);
@@ -565,7 +560,14 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnUIExtBusinessReceiveReplyTest001, Test
     pattern->OnUIExtBusinessReceiveReply(code, data, reply);
     EXPECT_EQ(reply->HasParameter("pageMode"), false);
 
-    pattern->RegisterReplyPageModeCallback();
+    auto callback = [](const AAFwk::Want& data, std::optional<AAFwk::Want>& reply) -> int32_t {
+        if (reply.has_value() && data.HasParameter("requestPageMode")) {
+            reply->SetParam("pageMode", std::string("yes"));
+            return 0;
+        }
+        return -1;
+    };
+    pattern->RegisterUIExtBusinessConsumeReplyCallback(code, callback);
     pattern->OnUIExtBusinessReceiveReply(code, data, reply);
     EXPECT_EQ(reply->HasParameter("pageMode"), true);
 #endif
@@ -595,11 +597,14 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnUIExtBusinessReceiveTest001, TestSize.
     /**
      * @tc.steps: step2. test OnUIExtBusinessReceive
      */
-    UIContentBusinessCode code = UIContentBusinessCode::SEND_PAGE_MODE;
+    UIContentBusinessCode code = UIContentBusinessCode::SEND_PAGE_MODE_REQUEST;
     AAFwk::Want data;
     pattern->OnUIExtBusinessReceive(code, data);
 
-    pattern->RegisterReplyPageModeCallback();
+    auto callback = [](const AAFwk::Want& data) -> int32_t {
+        return -1;
+    };
+    pattern->RegisterUIExtBusinessConsumeCallback(code, callback);
     pattern->OnUIExtBusinessReceive(code, data);
 #endif
 }
@@ -1358,7 +1363,7 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionHandleTouchPullAndMouse, Test
     pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE);
     ret = pattern->HandleTouchEvent(pointerEvent);
     EXPECT_FALSE(ret);
- 
+
     pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP);
     ret = pattern->HandleTouchEvent(pointerEvent);
     EXPECT_FALSE(ret);
@@ -1366,5 +1371,28 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionHandleTouchPullAndMouse, Test
     pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_UP);
     ret = pattern->HandleTouchEvent(pointerEvent);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: InitBusinessDataHandleCallback001
+ * @tc.desc: Test Func InitBusinessDataHandleCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, InitBusinessDataHandleCallback001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct UIExtensionNode and get pattern
+    */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: step2. Test Func InitBusinessDataHandleCallback
+    */
+    pattern->InitBusinessDataHandleCallback();
+    EXPECT_GT(pattern->businessDataUECConsumeCallbacks_.count(UIContentBusinessCode::SEND_PAGE_MODE_REQUEST), 0);
 }
 } // namespace OHOS::Ace::NG

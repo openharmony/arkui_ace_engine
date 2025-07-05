@@ -565,7 +565,7 @@ void UIExtensionPattern::InitBusinessDataHandleCallback()
 {
     RegisterEventProxyFlagCallback();
     RegisterGetAvoidInfoCallback();
-    RegisterReplyPageModeCallback();
+    RegisterReceivePageModeRequestCallback();
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -1968,23 +1968,32 @@ void UIExtensionPattern::RegisterEventProxyFlagCallback()
         });
 }
 
-void UIExtensionPattern::RegisterReplyPageModeCallback()
+void UIExtensionPattern::SendPageModeToProvider()
 {
-    auto callback = [weak = WeakClaim(this)](const AAFwk::Want& data, std::optional<AAFwk::Want>& reply) -> int32_t {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto pageMode = accessibilityProperty->GetAccessibilitySamePage();
+    AAFwk::Want data;
+    data.SetParam("pageMode", pageMode);
+    SendBusinessData(UIContentBusinessCode::SEND_PAGE_MODE_TO_UEA, data, BusinessDataSendType::ASYNC);
+}
+
+void UIExtensionPattern::RegisterReceivePageModeRequestCallback()
+{
+    auto callback = [weak = WeakClaim(this)](const AAFwk::Want& data) -> int32_t {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, -1);
         auto host = pattern->GetHost();
         CHECK_NULL_RETURN(host, -1);
-        auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-        CHECK_NULL_RETURN(accessibilityProperty, -1);
-
-        if (reply.has_value() && data.HasParameter("requestPageMode")) {
-            reply->SetParam("pageMode", accessibilityProperty->GetAccessibilitySamePage());
+        if (data.HasParameter("requestPageMode")) {
+            pattern->SendPageModeToProvider();
             return 0;
         }
         return -1;
     };
-    RegisterUIExtBusinessConsumeReplyCallback(UIContentBusinessCode::SEND_PAGE_MODE, callback);
+    RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode::SEND_PAGE_MODE_REQUEST, callback);
 }
 
 void UIExtensionPattern::RegisterGetAvoidInfoCallback()

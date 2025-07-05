@@ -260,9 +260,10 @@ public:
     void RegisterUIExtGetPageModeCallback(RefPtr<NG::UIExtensionManager>& uiExtManager) override;
     void UpdateFrameNodeState(int32_t nodeId) override;
 
+    void ReleaseCacheEvent();
     void UpdatePageMode(const std::string& pageMode) override
     {
-        pageMode_ = pageMode;
+        pageMode_ = std::make_optional(pageMode);
     }
 
     bool SendAccessibilitySyncEvent(
@@ -849,7 +850,8 @@ private:
     std::function<void(AccessibilityParentRectInfo&)> getParentRectHandlerNew_;
     bool isUseJson_ = false;
     bool reentrantLimit_ = false;
-    std::string pageMode_;
+    std::optional<std::string> pageMode_ = std::nullopt;
+    std::queue<AccessibilityEvent> eventQueue_;
     std::vector<AccessibilityEvent> cacheEventVec_;
     std::list<WeakPtr<NG::FrameNode>> defaultFocusList_;
     std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>> extensionComponentStatusVec_;
