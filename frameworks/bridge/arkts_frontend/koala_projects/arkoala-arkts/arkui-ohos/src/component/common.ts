@@ -720,7 +720,7 @@ export interface DragEvent {
     getVelocityY(): number
     getVelocity(): number
     getModifierKeyState?: ((keys: Array<string>) => boolean)
-    executeDropAnimation(customDropAnimation: (() => void)): void
+    executeDropAnimation(customDropAnimation: ((data: undefined) => void)): void
     startDataLoading(options: DataSyncOptions): string
 }
 export class DragEventInternal implements MaterializedBase,DragEvent {
@@ -814,8 +814,8 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
             return this.getModifierKeyState_serialize(keys_casted)
         }
     }
-    public executeDropAnimation(customDropAnimation: (() => void)): void {
-        const customDropAnimation_casted = customDropAnimation as ((() => void))
+    public executeDropAnimation(customDropAnimation: ((data: undefined) => void)): void {
+        const customDropAnimation_casted = customDropAnimation as (((data: undefined) => void))
         this.executeDropAnimation_serialize(customDropAnimation_casted)
         return
     }
@@ -905,7 +905,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         thisSerializer.release()
         return retval
     }
-    private executeDropAnimation_serialize(customDropAnimation: (() => void)): void {
+    private executeDropAnimation_serialize(customDropAnimation: ((data: undefined) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(customDropAnimation)
         ArkUIGeneratedNativeModule._DragEvent_executeDropAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
