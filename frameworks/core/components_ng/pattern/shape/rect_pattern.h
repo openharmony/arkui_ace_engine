@@ -57,6 +57,60 @@ public:
         rectPaintProperty->SetContentSize(pixelRoundContentSize);
     }
 
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override
+    {
+        ShapePattern::UpdatePropertyImpl(key, value);
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto property = frameNode->GetPaintPropertyPtr<RectPaintProperty>();
+        CHECK_NULL_VOID(property);
+        using Handler = std::function<void(RectPaintProperty*, RefPtr<PropertyValueBase>, RefPtr<FrameNode>)>;
+        static const std::unordered_map<std::string, Handler> handlers = {
+            { "RectRadiusWidth",
+                [](RectPaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                    if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                        Radius radius;
+                        realValue->IsNegative() ? radius.SetX(Dimension(DEFAULT_RADIUS_VALUE))
+                                                   : radius.SetX(*realValue);
+                        radius.SetY(DEFAULT_RADIUS_INVALID);
+                        prop->UpdateRadius(radius);
+                    }
+                } },
+            { "RectRadiusHeight",
+                [](RectPaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                    if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                        Radius radius;
+                        realValue->IsNegative() ? radius.SetX(Dimension(DEFAULT_RADIUS_VALUE))
+                                                   : radius.SetX(*realValue);
+                        radius.SetY(DEFAULT_RADIUS_INVALID);
+                        prop->UpdateRadius(radius);
+                    }
+                } },
+            { "RectRadius",
+                [](RectPaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                    if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                        auto radiusVal = *realValue;
+                        Radius radius;
+                        if (radiusVal.IsNegative()) {
+                            radius.SetY(Dimension(DEFAULT_RADIUS_VALUE));
+                            radius.SetX(Dimension(DEFAULT_RADIUS_VALUE));
+                        } else {
+                            radius.SetX(radiusVal);
+                            radius.SetY(radiusVal);
+                        }
+                        prop->UpdateRadius(radius);
+                    }
+                } },
+        };
+        auto it = handlers.find(key);
+        if (it != handlers.end()) {
+            it->second(property, value, frameNode);
+        }
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RectPattern);
 };

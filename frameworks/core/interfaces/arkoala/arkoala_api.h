@@ -2722,48 +2722,48 @@ struct ArkUICommonModifier {
 };
 
 struct ArkUICommonShapeModifier {
-    void (*setStrokeDashArray)(
-        ArkUINodeHandle node, const ArkUI_Float32* dashArray, ArkUI_Int32* dimUnits, ArkUI_Int32 size);
+    void (*setStrokeDashArray)(ArkUINodeHandle node, const ArkUI_Float32* dashArray, ArkUI_Int32* dimUnits,
+        ArkUI_Int32 size, void* resObjArray);
     void (*resetStrokeDashArray)(ArkUINodeHandle node);
-    void (*setStrokeMiterLimit)(ArkUINodeHandle node, const ArkUI_Float32 miterLimit);
+    void (*setStrokeMiterLimit)(ArkUINodeHandle node, const ArkUI_Float32 miterLimit, void* resObjPtr);
     void (*resetStrokeMiterLimit)(ArkUINodeHandle node);
-    void (*setFillOpacity)(ArkUINodeHandle node, const ArkUI_Float32 fillOpacity);
+    void (*setFillOpacity)(ArkUINodeHandle node, const ArkUI_Float32 fillOpacity, void* resObjPtr);
     void (*resetFillOpacity)(ArkUINodeHandle node);
-    void (*setStrokeOpacity)(ArkUINodeHandle node, const ArkUI_Float32 strokeOpacity);
+    void (*setStrokeOpacity)(ArkUINodeHandle node, const ArkUI_Float32 strokeOpacity, void* resObjPtr);
     void (*resetStrokeOpacity)(ArkUINodeHandle node);
-    void (*setStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resObjPtr);
     void (*resetStrokeWidth)(ArkUINodeHandle node);
     void (*setAntiAlias)(ArkUINodeHandle node, const ArkUI_Bool antiAlias);
     void (*resetAntiAlias)(ArkUINodeHandle node);
-    void (*setStroke)(ArkUINodeHandle node, const ArkUI_Uint32 stroke);
+    void (*setStroke)(ArkUINodeHandle node, const ArkUI_Uint32 stroke, void* resObjPtr);
     void (*resetStroke)(ArkUINodeHandle node);
-    void (*setFill)(ArkUINodeHandle node, const ArkUI_Uint32 fill);
+    void (*setFill)(ArkUINodeHandle node, const ArkUI_Uint32 fill, void* resObjPtr);
     void (*resetFill)(ArkUINodeHandle node);
-    void (*setStrokeDashOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setStrokeDashOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resObjPtr);
     void (*resetStrokeDashOffset)(ArkUINodeHandle node);
     void (*setStrokeLineCap)(ArkUINodeHandle node, ArkUI_Int32 strokeLineCap);
     void (*resetStrokeLineCap)(ArkUINodeHandle node);
     void (*setStrokeLineJoin)(ArkUINodeHandle node, ArkUI_Int32 lineJoinStyle);
     void (*resetStrokeLineJoin)(ArkUINodeHandle node);
-    void (*setShapeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setShapeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resObjPtr);
     void (*resetShapeWidth)(ArkUINodeHandle node);
-    void (*setShapeHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setShapeHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resObjPtr);
     void (*resetShapeHeight)(ArkUINodeHandle node);
-    void (*setShapeForegroundColor)(ArkUINodeHandle node, ArkUI_Int32 isColor, ArkUI_Uint32 color);
+    void (*setShapeForegroundColor)(ArkUINodeHandle node, ArkUI_Int32 isColor, ArkUI_Uint32 color, void* resObjPtr);
     void (*resetShapeForegroundColor)(ArkUINodeHandle node);
 };
 
 struct ArkUILineModifier {
     void (*setStartPoint)(ArkUINodeHandle node, const ArkUI_Float32* pointValues, const ArkUI_Int32* pointUnits,
-        ArkUI_CharPtr pointStr[]);
+        ArkUI_CharPtr pointStr[], void* resObjArray);
     void (*resetStartPoint)(ArkUINodeHandle node);
     void (*setEndPoint)(ArkUINodeHandle node, const ArkUI_Float32* pointValues, const ArkUI_Int32* pointUnits,
-        ArkUI_CharPtr pointStr[]);
+        ArkUI_CharPtr pointStr[], void* resObjArray);
     void (*resetEndPoint)(ArkUINodeHandle node);
 };
 
 struct ArkUIPathModifier {
-    void (*setPathCommands)(ArkUINodeHandle node, ArkUI_CharPtr commands);
+    void (*setPathCommands)(ArkUINodeHandle node, ArkUI_CharPtr commands, void* resObjPtr);
     void (*resetPathCommands)(ArkUINodeHandle node);
 };
 
@@ -2780,18 +2780,23 @@ struct ArkUIPolylineModifier {
 };
 
 struct ArkUIRectModifier {
-    void (*setRectRadiusWidth)(ArkUINodeHandle node, ArkUI_Float32 radiusWidthValue, ArkUI_Int32 radiusWidthUnit);
+    void (*setRectRadiusWidth)(
+        ArkUINodeHandle node, ArkUI_Float32 radiusWidthValue, ArkUI_Int32 radiusWidthUnit, void* resObjPtr);
     void (*resetRectRadiusWidth)(ArkUINodeHandle node);
-    void (*setRectRadiusHeight)(ArkUINodeHandle node, ArkUI_Float32 radiusHeightValue, ArkUI_Int32 radiusHeightUnit);
+    void (*setRectRadiusHeight)(
+        ArkUINodeHandle node, ArkUI_Float32 radiusHeightValue, ArkUI_Int32 radiusHeightUnit, void* resObjPtr);
     void (*resetRectRadiusHeight)(ArkUINodeHandle node);
     void (*setRectRadiusWithArray)(ArkUINodeHandle node, ArkUI_Float32* radiusValues, ArkUI_Int32* radiusUnits,
-        ArkUI_Uint32* radiusValidPairs, ArkUI_Uint32 radiusValidPairsSize);
-    void (*setRectRadiusWithValue)(ArkUINodeHandle node, ArkUI_Float32 radiusValue, ArkUI_Int32 radiusUnit);
+        ArkUI_Uint32* radiusValidPairs, ArkUI_Uint32 radiusValidPairsSize, void* radiusXResObjArray,
+        void* radiusYResObjArray);
+    void (*setRectRadiusWithValue)(
+        ArkUINodeHandle node, ArkUI_Float32 radiusValue, ArkUI_Int32 radiusUnit, void* resObjPtr);
     void (*resetRectRadius)(ArkUINodeHandle node);
 };
 
 struct ArkUIShapeModifier {
-    void (*setShapeViewPort)(ArkUINodeHandle node, const ArkUI_Float32* dimValues, const ArkUI_Int32* dimUnits);
+    void (*setShapeViewPort)(
+        ArkUINodeHandle node, const ArkUI_Float32* dimValues, const ArkUI_Int32* dimUnits, void* resObjArray);
     void (*resetShapeViewPort)(ArkUINodeHandle node);
     void (*setShapeMesh)(ArkUINodeHandle node, const ArkUI_Float32* mesh, ArkUI_Uint32 arrayItemCount,
         ArkUI_Int32 column, ArkUI_Int32 row);

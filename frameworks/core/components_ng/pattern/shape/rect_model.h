@@ -32,6 +32,8 @@ public:
     virtual void SetRadiusWidth(const Dimension& value);
     virtual void SetRadiusHeight(const Dimension& value);
     virtual void SetRadiusValue(const Dimension& radiusX, const Dimension& radiusY, int32_t index);
+    virtual void SetRadiusValue(const Dimension& radiusX, const Dimension& radiusY,
+        const RefPtr<ResourceObject>& radiusXResObj, const RefPtr<ResourceObject>& radiusYResObj, int32_t index) {};
     virtual void SetShapeRectRadius(
         const RefPtr<ShapeRect>& shapeRect, const Dimension& radiusX, const Dimension& radiusY, int32_t index);
 
