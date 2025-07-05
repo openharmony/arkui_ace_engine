@@ -4672,10 +4672,6 @@ void JsAccessibilityManager::DumpSpecificPropertySearchTest(const std::vector<st
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
     CHECK_NULL_VOID(ngPipeline);
 
-    RefPtr<NG::FrameNode> frameNode;
-    ngPipeline = FindPipelineByElementId(nodeId, frameNode);
-    CHECK_NULL_VOID(frameNode);
-
     std::list<AccessibilityElementInfo> infos;
     std::list<AccessibilityElementInfo> treeInfos;
     SpecificPropertyParam propertyParam {
@@ -6005,32 +6001,45 @@ bool JsAccessibilityManager::SetAccessibilityCustomId(RefPtr<NG::FrameNode> chec
     return false;
 }
 
-void JsAccessibilityManager::FindUIExtensionAccessibilityElement(RefPtr<NG::FrameNode> checkNode,
-    const std::string &customId, std::list<AccessibilityElementInfo> &treeInfos,
+bool JsAccessibilityManager::FindUIExtensionAccessibilityElement(const RefPtr<NG::FrameNode>& checkNode,
+    const std::string &customId, const CommonProperty& commonProperty,
     std::list<AccessibilityElementInfo> &infos, const RefPtr<PipelineBase>& context)
 {
-    auto nodeId = checkNode->GetAccessibilityId();
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
-    CHECK_NULL_VOID(ngPipeline);
+    CHECK_NULL_RETURN(ngPipeline, false);
     auto rootNode = ngPipeline->GetRootElement();
-    CHECK_NULL_VOID(rootNode);
-    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
-    if (uiExtensionManager && uiExtensionManager->IsWrapExtensionAbilityId(nodeId)) {
-        std::list<AccessibilityElementInfo> ueaInfos;
-        int32_t mode = static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN);
-        SearchParameter param {nodeId, "", mode, NG::UI_EXTENSION_OFFSET_MAX};
-        SearchExtensionElementInfoByAccessibilityIdNG(param, rootNode, ueaInfos, context, ngPipeline);
-        for (auto& ueaInfo : ueaInfos) {
-            if (ueaInfo.GetInspectorKey() == customId) {
-                infos.emplace_back(ueaInfo);
-                treeInfos.clear();
-                break;
-            }
-        }
-        if (!infos.empty()) {
-            return;
+    CHECK_NULL_RETURN(rootNode, false);
+    if (!((checkNode->GetUiExtensionId() > NG::UI_EXTENSION_UNKNOW_ID) &&
+            (checkNode->GetUiExtensionId() <= NG::UI_EXTENSION_ID_FIRST_MAX))) {
+        return false;
+    }
+
+    SearchParameter searchParam {
+        .nodeId = NG::UI_EXTENSION_ROOT_ID,
+        .mode = static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN),
+        .uiExtensionOffset = NG::UI_EXTENSION_OFFSET_MAX,
+    };
+
+    AccessibilityElementInfo parentInfo;
+    UpdateAccessibilityElementInfo(checkNode, commonProperty, parentInfo, ngPipeline);
+    SetRootAccessibilityVisible(checkNode, parentInfo);
+    SetRootAccessibilityNextFocusId(checkNode, rootNode, parentInfo);
+    SetRootAccessibilityPreFocusId(checkNode, rootNode, parentInfo,
+        nextFocusMapWithSubWindow_[ngPipeline->GetInstanceId()]);
+
+    std::list<Accessibility::AccessibilityElementInfo> extensionElementInfos;
+    NG::SearchExtensionElementInfoNG(searchParam, checkNode, extensionElementInfos, parentInfo);
+
+    for (auto& ueaInfo : extensionElementInfos) {
+        if (ueaInfo.GetInspectorKey() == customId) {
+            infos.emplace_back(ueaInfo);
+            break;
         }
     }
+    if (!infos.empty()) {
+        return true;
+    }
+    return false;
 }
 
 void JsAccessibilityManager::SearchElementInfoByCustomIdNG(const int64_t elementId, const std::string &customId,
@@ -6064,7 +6073,11 @@ void JsAccessibilityManager::SearchElementInfoByCustomIdNG(const int64_t element
             break;
         }
 #ifdef WINDOW_SCENE_SUPPORTED
-    FindUIExtensionAccessibilityElement(checkNode, customId, treeInfos, infos, context);
+        auto isFind = FindUIExtensionAccessibilityElement(checkNode, customId, commonProperty, infos, context);
+        if (isFind) {
+            treeInfos.clear();
+            break;
+        }
 #endif
         auto accessibilityProperty = checkNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (accessibilityProperty && accessibilityProperty->GetChildTreeId() != -1) {
