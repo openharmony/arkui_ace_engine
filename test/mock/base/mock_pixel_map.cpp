@@ -31,4 +31,9 @@ RefPtr<PixelMap> PixelMap::CreatePixelMapFromDataAbility(void* /*rawPtr*/)
 {
     return AceType::MakeRefPtr<::testing::NiceMock<MockPixelMap>>();
 }
+
+RefPtr<PixelMap> PixelMap::Create(const InitializationOptions& opts)
+{
+    return AceType::MakeRefPtr<::testing::NiceMock<MockPixelMap>>();
+}
 } // namespace OHOS::Ace

@@ -402,7 +402,7 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
             }
         } else if (type == ImageType::PIXELMAP_DRAWABLE) {
             auto* address = UnwrapNapiValue(imageInfo);
-            auto drawable = DrawableDescriptor::CreateDrawable(address);
+            auto drawable = AceDrawableDescriptor::CreateDrawable(address);
             if (!drawable) {
                 return;
             }

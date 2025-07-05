@@ -210,7 +210,7 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
     }
     public setImageSpanOptions(value: ResourceStr | PixelMap): this {
         if (this.checkPriority("setImageSpanOptions")) {
-            hookSetImageSpanOptions(this.getPeer(), value)
+            hookSetImageSpanOptions(this, value)
             return this
         }
         return this
@@ -257,7 +257,7 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
     }
     public alt(value: PixelMap | undefined): this {
         if (this.checkPriority("alt")) {
-            hookSetAlt(this.getPeer(), value)
+            hookSetAlt(this, value)
             return this
         }
         return this

@@ -1,5 +1,4 @@
 import { InteropNativeModule, RuntimeType } from "@koalaui/interop";
-import { Serializer } from "./peers/Serializer";
 import { int32 } from "@koalaui/common";
 import { ArkUIGeneratedNativeModule } from "#components";
 import { TextFieldOpsHandWritten } from "./../handwritten"
@@ -15,11 +14,11 @@ function TextAreaOptionsValueIsBindable(value?: TextAreaOptions) : boolean {
     return false;
 }
 
-function hookSetTextAreaOptions(peer: ArkTextAreaPeer, value?: TextAreaOptions): void {
+function hookSetTextAreaOptions(textAreaComponent: ArkTextAreaComponent, value?: TextAreaOptions): void {
     const value_casted = value as (TextAreaOptions | undefined)
-    peer.setTextAreaOptionsAttribute(value_casted)
+    textAreaComponent.getPeer()?.setTextAreaOptionsAttribute(value_casted)
     if (TextAreaOptionsValueIsBindable(value)) {
-        TextFieldOpsHandWritten.hookTextFieldInputValueImpl(peer.getPeerPtr(),
+        TextFieldOpsHandWritten.hookTextFieldInputValueImpl(textAreaComponent.getPeer().getPeerPtr(),
         (value!.text as Bindable<ResourceStr>));
     }
 }

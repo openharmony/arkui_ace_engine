@@ -31806,6 +31806,20 @@ void impl_AnimationExtender_OpenImplicitAnimation(KSerializerBuffer thisArray, i
         GetAccessors()->getAnimationExtenderAccessor()->OpenImplicitAnimation((const Ark_AnimateParam*)&param_value);
 }
 KOALA_INTEROP_DIRECT_V2(AnimationExtender_OpenImplicitAnimation, KSerializerBuffer, int32_t)
+void impl_AnimationExtender_OpenImplicitAnimationImmediately(KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_AnimateParam param_value = thisDeserializer.readAnimateParam();;
+        const auto callback__value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Callback_Void callback__value_buf = {};
+        callback__value_buf.tag = callback__value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (callback__value_buf_runtimeType))
+        {
+            callback__value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};
+        }
+        Opt_Callback_Void callback__value = callback__value_buf;;
+        GetAccessors()->getAnimationExtenderAccessor()->AnimateToImmediatelyImpl((const Ark_AnimateParam*)&param_value, (const Opt_Callback_Void*)&callback__value);
+}
+KOALA_INTEROP_DIRECT_V2(AnimationExtender_OpenImplicitAnimationImmediately, KSerializerBuffer, int32_t)
 void impl_AnimationExtender_CloseImplicitAnimation() {
         GetAccessors()->getAnimationExtenderAccessor()->CloseImplicitAnimation();
 }

@@ -28,6 +28,10 @@ import { NullableObject } from '../../base/types';
 import { InterfaceProxyHandler } from './observeInterfaceProxy';
 import { ISubscribedWatches } from '../../decorator';
 import { DecoratedV1VariableBase } from '../../decoratorImpl/decoratorBase';
+import { StateManager, GlobalStateManager } from '@koalaui/runtime';
+import { UIContextUtil } from '../../../handwritten/UIContextUtil';
+import { UIContextImpl } from '../../../handwritten/UIContextImpl';
+import { StateMgmtConsole } from '../stateMgmtDFX';
 export class StateMgmtTool {
     static isIObservedObject(value: NullableObject): boolean {
         return value instanceof IObservedObject;
@@ -76,5 +80,18 @@ export class StateMgmtTool {
     }
     static isObjectLiteral<T extends Object>(value: T): boolean {
         return Reflect.isLiteralInitializedInterface(value);
+    }
+    static getGlobalStateManager(): StateManager {
+        return GlobalStateManager.instance;
+    }
+    static tryGetCurrentGlobalStateManager(): StateManager {
+        let context: UIContextImpl | undefined = undefined;
+        try {
+            context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        } catch (e) {
+            // for scenario where UIContext is not ready.
+            StateMgmtConsole.log('Get current UIContext fail, will directly use GlobalStateManager');
+        }
+        return context && context.stateMgr ? context.stateMgr! : GlobalStateManager.instance;
     }
 }

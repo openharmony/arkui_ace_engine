@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "native_image.h"
+#include "image_module.h"
 
 #include "load.h"
 #include "log/log.h"
@@ -35,5 +35,34 @@ void ImageResizableOptions(ani_env* env, [[maybe_unused]] ani_object obj, ani_lo
         return;
     }
     modifier->getImageAniModifier()->setResizableLattice(arkNode, lattice);
+}
+
+void ImageConstructPixelMap(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object pixelMapAni)
+{
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !arkNode) {
+        return;
+    }
+    auto pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapAni);
+    modifier->getImageAniModifier()->setPixelMap(arkNode, &pixelMap);
+}
+
+void ImageConstructDrawableDescriptor(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object drawableAni, ani_int drawableType)
+{
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !arkNode) {
+        return;
+    }
+    ani_long nativeObj = 0;
+    env->Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj);
+    auto* drawable = reinterpret_cast<void*>(nativeObj);
+    if (drawable == nullptr) {
+        HILOGE("image construct with drawable descriptor failed, nativeObj is nullptr");
+        return;
+    }
+    modifier->getImageAniModifier()->setDrawableDescriptor(arkNode, drawable, static_cast<int>(drawableType));
 }
 } // namespace OHOS::Ace::Ani

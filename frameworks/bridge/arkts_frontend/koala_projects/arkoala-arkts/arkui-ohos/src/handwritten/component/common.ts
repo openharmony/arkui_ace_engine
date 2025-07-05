@@ -2,7 +2,8 @@ import { GestureOps } from "./arkui-custom"
 import { GestureGroupHandler } from "./gesture"
 import { ArkUIAniModule } from "arkui.ani"
 import { int32 } from "@koalaui/common"
-
+import { AnimateParam } from "../component"
+import { CommonMethodHandWritten } from "./../handwritten"
 export function applyStyles<T extends CommonMethod>(this: T, customStyles: CustomStyles): T {
     customStyles(this);
     return this;
@@ -50,6 +51,9 @@ export function hookDrawModifierInvalidateImpl(modifier: DrawModifier): void {
     }
 }
 
+export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
+    CommonMethodHandWritten.hookCommonMethodAnimateToImmediatelyImpl(value, event);
+}
 export function hookDrawModifier(arkComponent: ArkCommonMethodComponent, value: DrawModifier | undefined): void {
     if (value !== undefined) {
         let classType: ClassType = (Type.of(value) as ClassType);

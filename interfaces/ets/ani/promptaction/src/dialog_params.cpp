@@ -21,6 +21,7 @@
 #include "frameworks/core/components_ng/base/ui_node.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "frameworks/core/interfaces/native/implementation/transition_effect_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MSG {
@@ -759,6 +760,38 @@ bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     return true;
 }
 
+bool GetTransitionEffectParam(ani_env* env, ani_object object, const char *name,
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::ChainedTransitionEffect>& result)
+{
+    long transitionEffectPtr;
+    if (!GetLongParam(env, object, name, transitionEffectPtr)) {
+        return false;
+    }
+
+    Ark_TransitionEffect transitionEffect = (Ark_TransitionEffect)transitionEffectPtr;
+    if (!transitionEffect->handler) {
+        return false;
+    }
+    result = transitionEffect->handler;
+    return true;
+}
+
+bool GetDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps)
+{
+    if (IsUndefinedObject(env, object)) {
+        return false;
+    }
+
+    if (!IsClassObject(env, object, "L@ohos/promptAction/promptAction/DialogOptionsInternal;")) {
+        return false;
+    }
+
+    GetTransitionEffectParam(env, object, "transition", dialogProps.transitionEffect);
+    GetTransitionEffectParam(env, object, "dialogTransition", dialogProps.dialogTransitionEffect);
+    GetTransitionEffectParam(env, object, "maskTransition", dialogProps.maskTransitionEffect);
+    return true;
+}
+
 std::function<void()> GetCustomBuilder(ani_env *env, ani_long builder)
 {
     auto result = [env, builder]() {
@@ -973,7 +1006,7 @@ bool GetBorderStyle(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG
 
 bool GetCustomDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps)
 {
-    if (!GetBaseDialogOptions(env, object, dialogProps)) {
+    if (IsUndefinedObject(env, object)) {
         return false;
     }
 
@@ -981,6 +1014,7 @@ bool GetCustomDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogPr
         return false;
     }
 
+    GetBaseDialogOptions(env, object, dialogProps);
     GetResourceColorParamOpt(env, object, "backgroundColor", dialogProps.backgroundColor);
     GetCornerRadius(env, object, dialogProps.borderRadius);
     GetDimesionParamOpt(env, object, "width", dialogProps.width);

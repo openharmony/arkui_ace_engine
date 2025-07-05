@@ -103,7 +103,7 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
 }
 
-void ImageModelNG::Create(const RefPtr<DrawableDescriptor>& drawable)
+void ImageModelNG::Create(const RefPtr<AceDrawableDescriptor>& drawable)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();

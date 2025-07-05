@@ -24,21 +24,10 @@ import { ArkComponentRootPeer } from "arkui/component";
 import { PixelMap, UniformDataType, DataSyncOptions} from "#external"
 
 export class HookDragInfo {
-    pixelMap?: KPointer;
+    pixelMap?: PixelMap;
     id?: string;
     onlyForLifting?: boolean;
     delayCreating?: boolean;
-
-    parseDragItemInfo(value: DragItemInfo) : void {
-        let info : HookDragInfo = this
-        const value_pixelMap = value.pixelMap
-        let value_pixelMap_type : int32 = RuntimeType.UNDEFINED
-        value_pixelMap_type = runtimeType(value_pixelMap)
-        if ((RuntimeType.UNDEFINED) != (value_pixelMap_type)) {
-            const value_pixelMap_value  = value_pixelMap as PixelMap
-            info.pixelMap = ArkUIAniModule._DragEvent_ConvertFromPixelMapToAniPointer(value_pixelMap_value)
-        }
-    }
 
     parseConfig(config: PreviewConfiguration) {
         let info : HookDragInfo = this
@@ -145,7 +134,7 @@ export function hookDragPreview(node: ArkCommonMethodComponent, preview: CustomB
     if (RuntimeType.OBJECT === preview_type) {
         let dragInfo = new HookDragInfo()
         const preview_casted = preview as DragItemInfo
-        dragInfo.parseDragItemInfo(preview_casted)
+        dragInfo.pixelMap = preview_casted.pixelMap
         if (dragInfo.pixelMap) {
             if ((RuntimeType.OBJECT === config_type)) {
                 const config_casted = config as PreviewConfiguration

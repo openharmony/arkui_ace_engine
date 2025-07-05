@@ -9119,7 +9119,12 @@ export interface GeometryInfo extends SizeResult {
     padding: Padding;
 }
 export interface Layoutable {
-    stub: string;
+    measureResult: MeasureResult;
+    uniqueId?: number | undefined;
+    layout(position: Position): void;
+    getMargin(): DirectionalEdgesT<number>;
+    getPadding(): DirectionalEdgesT<number>;
+    getBorderWidth(): DirectionalEdgesT<number>;
 }
 export interface SizeResult {
     width: number;
@@ -11778,9 +11783,6 @@ export function dollar_rawfile(value: string): Resource {
 }
 export function animateTo(value: AnimateParam, event: (() => void)): void {
     _animateTo(value, event)
-}
-export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
-    GlobalScope.animateToImmediately(value, event)
 }
 export function vp2px(value: number): number {
     return GlobalScope.vp2px(value)

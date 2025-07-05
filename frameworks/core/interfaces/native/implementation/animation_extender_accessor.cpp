@@ -20,6 +20,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
@@ -40,6 +41,138 @@ void SetClipRectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(renderContext);
 
     renderContext->ClipWithRRect(RectF(x, y, width, height), RadiusF(EdgeF(0.0f, 0.0f)));
+}
+
+void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const AnimationOption& option,
+    std::function<void()> jsAnimateToFunc, int32_t triggerId, const std::optional<int32_t>& count)
+{
+    pipelineContext->StartImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent(), count);
+    auto previousOption = pipelineContext->GetSyncAnimationOption();
+    pipelineContext->SetSyncAnimationOption(option);
+    // Execute the function.
+    jsAnimateToFunc();
+    pipelineContext->FlushOnceVsyncTask();
+    AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
+        auto context = container->GetPipelineContext();
+        ContainerScope scope(container->GetInstanceId());
+        context->FlushBuild();
+        if (context->GetInstanceId() == triggerId) {
+            return;
+        }
+        context->PrepareCloseImplicitAnimation();
+    });
+    pipelineContext->CloseImplicitAnimation();
+    pipelineContext->SetSyncAnimationOption(previousOption);
+}
+
+void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, const AnimationOption& option,
+    std::function<void()> jsAnimateToFunc, const std::optional<int32_t>& count, bool immediately)
+{
+    auto triggerId = pipelineContext->GetInstanceId();
+    ACE_SCOPED_TRACE("%s, instanceId:%d, finish cnt:%d", option.ToString().c_str(), triggerId, count.value_or(-1));
+    NG::ScopedViewStackProcessor scopedProcessor;
+    AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
+        auto context = container->GetPipelineContext();
+        ContainerScope scope(container->GetInstanceId());
+        context->FlushBuild();
+        if (context->GetInstanceId() == triggerId) {
+            return;
+        }
+        context->PrepareOpenImplicitAnimation();
+    });
+    pipelineContext->PrepareOpenImplicitAnimation();
+    if (!pipelineContext->CatchInteractiveAnimations([pipelineContext, option, jsAnimateToFunc, triggerId, count]() {
+        AnimateToForStageMode(pipelineContext, option, jsAnimateToFunc, triggerId, count);
+    })) {
+        AnimateToForStageMode(pipelineContext, option, jsAnimateToFunc, triggerId, count);
+    }
+    pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
+    if (immediately) {
+        pipelineContext->FlushModifier();
+        pipelineContext->FlushMessages();
+    } else {
+        pipelineContext->RequestFrame();
+    }
+}
+
+bool GetAnyContextIsLayouting(const RefPtr<PipelineBase>& currentPipeline)
+{
+    if (currentPipeline->IsLayouting()) {
+        return true;
+    }
+    bool isLayouting = false;
+    AceEngine::Get().NotifyContainers([&isLayouting](const RefPtr<Container>& container) {
+        if (isLayouting) {
+            // One container is already in layouting
+            return;
+        }
+        auto context = container->GetPipelineContext();
+        isLayouting |= context->IsLayouting();
+    });
+    return isLayouting;
+}
+
+void ExecuteSharedRuntimeAnimation(const RefPtr<Container>& container, const RefPtr<PipelineBase>& pipelineContextBase,
+    const AnimationOption& option, std::function<void()> onEventFinish, const std::optional<int32_t>& count,
+    bool immediately)
+{
+    if (GetAnyContextIsLayouting(pipelineContextBase)) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION,
+            "Pipeline layouting, post animateTo, dur:%{public}d, curve:%{public}s",
+            option.GetDuration(), option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
+        pipelineContextBase->GetTaskExecutor()->PostTask(
+            [id = Container::CurrentIdSafely(), option, func = std::move(onEventFinish), count, immediately]
+            () mutable {
+                ContainerScope scope(id);
+                auto container = Container::CurrentSafely();
+                CHECK_NULL_VOID(container);
+                auto pipelineContext = container->GetPipelineContext();
+                CHECK_NULL_VOID(pipelineContext);
+                StartAnimationForStageMode(pipelineContext, option, func, count, immediately);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIAnimateToForStageMode", PriorityType::IMMEDIATE);
+        return;
+    }
+    StartAnimationForStageMode(pipelineContextBase, option, onEventFinish, count, true);
+}
+
+void AnimateToImmediatelyImpl(const Ark_AnimateParam* param, const Opt_Callback_Void* event_)
+{
+    auto event = Converter::OptConvert<Callback_Void>(*event_);
+    std::function<void()> onEventFinish;
+    if (event) {
+        onEventFinish = [arkCallback = CallbackHelper(event.value())]() { 
+            arkCallback.InvokeSync();
+        };
+    }
+
+    auto currentId = Container::CurrentIdSafelyWithCheck();
+    ContainerScope cope(currentId);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContextBase = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContextBase);
+    auto timeInterval = (GetMicroTickCount() - pipelineContextBase->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
+    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
+        timeInterval > DEFAULT_DURATION) {
+        TAG_LOGW(
+            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
+        return;
+    }
+    
+    AnimationOption option = Converter::Convert<AnimationOption>(*param);
+    auto onFinish = Converter::OptConvert<Callback_Void>(param->onFinish);
+    std::optional<int32_t> count;
+    if (onFinish) {
+        count = GetAnimationFinshCount();
+        std::function<void()> onFinishEvent = [arkCallback = CallbackHelper(*onFinish), currentId]() mutable {
+            ContainerScope scope(currentId);
+            arkCallback.InvokeSync();
+        };
+        option.SetOnFinishEvent(onFinishEvent);
+    }
+
+    ExecuteSharedRuntimeAnimation(container, pipelineContextBase, option, onEventFinish, count, true);
 }
 
 void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
@@ -300,6 +433,7 @@ const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
         AnimationExtenderAccessor::SetClipRectImpl,
         AnimationExtenderAccessor::KeyFrameAnimationImpl,
         AnimationExtenderAccessor::OpenImplicitAnimationImpl,
+        AnimationExtenderAccessor::AnimateToImmediatelyImpl,
         AnimationExtenderAccessor::CloseImplicitAnimationImpl,
         AnimationExtenderAccessor::StartDoubleAnimationImpl,
         AnimationExtenderAccessor::AnimationTranslateImpl,

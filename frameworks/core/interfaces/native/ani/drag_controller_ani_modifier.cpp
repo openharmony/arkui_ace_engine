@@ -63,14 +63,10 @@ struct DragControllerAsyncCtx {
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
     bool isArray = false;
     bool isSwitchedToSubWindow = false;
-    ani_fn_object customBuilder = nullptr;
     ani_fn_object asyncCallback = nullptr;
     ani_resolver deferred = nullptr;
-
-    ArkUINodeHandle builderNode = nullptr;
+    ArkUINodeHandle customBuilderNode = nullptr;
     std::vector<ArkUINodeHandle> customBuilderNodeList;
-
-    std::vector<ani_ref> customBuilderList;
     RefPtr<OHOS::Ace::UnifiedData> unifiedData;
     std::string extraParams;
     int32_t instanceId = -1;
@@ -356,6 +352,9 @@ ParameterType GetParameterType(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     if (asyncCtx->pixelMap != nullptr) {
         return ParameterType::DRAG_PIXEL;
     }
+    if (asyncCtx->customBuilderNode != nullptr) {
+        return ParameterType::DRAG_CUSTOM_BUILDER;
+    }
     if (!asyncCtx->pixelMapList.empty() && asyncCtx->customBuilderNodeList.empty()) {
         return ParameterType::DRAG_PIXEL_ARRAY;
     }
@@ -394,24 +393,25 @@ double ConvertToPx(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const Dimen
 
 ani_enum_item GetDragBehavior(ani_env* env, const DragNotifyMsg& dragNotifyMsg)
 {
+    ani_status status = ANI_OK;
     ani_enum_item dragBehaviorItem {};
     CHECK_NULL_RETURN(env, dragBehaviorItem);
     static const char* namespaceName = "L@ohos/arkui/dragController/dragController;";
     ani_namespace nns;
-    if (ANI_OK != env->FindNamespace(namespaceName, &nns)) {
-        LOGI("AceDrag, find dragController namespace fail.");
+    if ((status = env->FindNamespace(namespaceName, &nns)) != ANI_OK) {
+        LOGI("AceDrag, find dragController namespace fail. status = %{public}d", status);
         return dragBehaviorItem;
     }
 
     static const char* enumName = "LDragBehavior;";
     ani_enum enumType;
-    if (ANI_OK != env->Namespace_FindEnum(nns, enumName, &enumType)) {
-        LOGI("AceDrag, find DragBehavior calss fail.");
+    if ((status = env->Namespace_FindEnum(nns, enumName, &enumType)) != ANI_OK) {
+        LOGI("AceDrag, find DragBehavior enum fail. status = %{public}d", status);
         return dragBehaviorItem;
     }
-    if (ANI_OK != env->Enum_GetEnumItemByIndex(
-        enumType, ani_size(static_cast<DragBehavior>(dragNotifyMsg.dragBehavior)), &dragBehaviorItem)) {
-        LOGI("AceDrag, get enum item fail.");
+    if ((status = env->Enum_GetEnumItemByIndex(
+        enumType, ani_size(static_cast<DragBehavior>(dragNotifyMsg.dragBehavior)), &dragBehaviorItem)) != ANI_OK) {
+        LOGE("AceDrag, get DragBehavior enum item fail. status = %{public}d", status);
         return dragBehaviorItem;
     }
     return dragBehaviorItem;
@@ -441,6 +441,7 @@ ani_object CreateDragEventObject(ani_env* env, const DragNotifyMsg& dragNotifyMs
     }
 
     auto dragEvent = new Ace::DragEvent();
+    CHECK_NULL_RETURN(dragEvent, dragEventObj);
     dragEvent->SetResult(static_cast<DragRet>(dragNotifyMsg.result));
     dragEvent->SetDragBehavior(static_cast<DragBehavior>(dragNotifyMsg.dragBehavior));
     if (ANI_OK != env->Object_New(cls, ctor, &dragEventObj, reinterpret_cast<ani_long>(dragEvent))) {
@@ -498,28 +499,24 @@ void CallBackJsFunction(
 {
     CHECK_NULL_VOID(asyncCtx);
     CHECK_NULL_VOID(asyncCtx->env);
-    if (ANI_OK != asyncCtx->env->CreateLocalScope(Ani::SPECIFIED_CAPACITY)) {
+    ani_status status = ANI_OK;
+    if ((status = asyncCtx->env->CreateLocalScope(Ani::SPECIFIED_CAPACITY)) != ANI_OK) {
+        LOGE("AceDrag, CreateLocalScope fail. status = %{public}d", status);
         return;
     }
     static const char* namespaceName = "L@ohos/arkui/dragController/dragController;";
     ani_namespace nns;
-    if (ANI_OK != asyncCtx->env->FindNamespace(namespaceName, &nns)) {
-        LOGI("AceDrag, find dragController namespace fail.");
+    if ((status = asyncCtx->env->FindNamespace(namespaceName, &nns)) != ANI_OK) {
+        LOGE("AceDrag, find dragController namespace fail. status = %{public}d", status);
         asyncCtx->env->DestroyLocalScope();
         return;
     }
 
     ani_object dragEventObj = nullptr;
-    ani_enum_item dragStatusItem;
-    if (!Ani::GetEnumItem(asyncCtx->env, ani_size(dragStatus), "LDragStatus;", dragStatusItem)) {
-        LOGE("AceDrag, get dragStatus enum item failed.");
-        asyncCtx->env->DestroyLocalScope();
-        return;
-    }
     ani_string extraParamsObj;
-    if (ANI_OK !=
-        asyncCtx->env->String_NewUTF8(asyncCtx->extraParams.c_str(), asyncCtx->extraParams.size(), &extraParamsObj)) {
-        LOGE("AceDrag, covert extraParams to ani object failed.");
+    if ((status = asyncCtx->env->String_NewUTF8(
+        asyncCtx->extraParams.c_str(), asyncCtx->extraParams.size(), &extraParamsObj)) != ANI_OK) {
+        LOGE("AceDrag, covert extraParams to ani object failed. status = %{public}d", status);
         asyncCtx->env->DestroyLocalScope();
         return;
     }
@@ -530,6 +527,12 @@ void CallBackJsFunction(
     ani_object dragObj;
     if (asyncCtx->isArray) {
         LOGI("AceDrag, LDragAndDropInfoInner;");
+        ani_enum_item dragStatusItem;
+        if (!Ani::GetEnumItem(asyncCtx->env, ani_size(dragStatus), "LDragStatus;", dragStatusItem)) {
+            LOGE("AceDrag, get dragStatus enum item failed.");
+            asyncCtx->env->DestroyLocalScope();
+            return;
+        }
         if (ANI_OK != asyncCtx->env->Namespace_FindClass(nns, className2, &cls)) {
             LOGE("AceDrag, find LDragAndDropInfoInner calss fail.");
             asyncCtx->env->DestroyLocalScope();
@@ -1141,7 +1144,7 @@ bool CreateCallbackFunc(
 {
     CHECK_NULL_RETURN(asyncCtx, false);
     if (Ani::IsFunctionObjectWith2Param(env, callback)) {
-        LOGI("AceDrag, Create asynccallback");
+        LOGI("AceDrag, Create async callback");
         ani_ref fnObjGlobalRef = nullptr;
         env->GlobalReference_Create(callback, &fnObjGlobalRef);
         asyncCtx->asyncCallback = static_cast<ani_fn_object>(fnObjGlobalRef);
@@ -1162,14 +1165,12 @@ bool CreateCallbackFunc(
 RefPtr<OHOS::Ace::UnifiedData> TransformUnifiedDataFormANI(ani_env* env, ani_object dataObj)
 {
     CHECK_NULL_RETURN(env, nullptr);
-    auto dataValue = OHOS::UDMF::AniConverter::UnwrapUnifiedData(env, dataObj);
-    auto unifiedData = reinterpret_cast<void*>(dataValue.get());
+    auto unifiedData = OHOS::UDMF::AniConverter::UnwrapUnifiedData(env, dataObj);
     if (!unifiedData) {
         return nullptr;
     }
-    auto unifiedDataPtr = reinterpret_cast<void*>(reinterpret_cast<ani_ref>(unifiedData));
-    CHECK_NULL_RETURN(unifiedDataPtr, nullptr);
-    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedDataFromANI(unifiedDataPtr);
+    auto udData = AceType::MakeRefPtr<UnifiedDataImpl>();
+    udData->SetUnifiedData(unifiedData);
     return udData;
 }
 
@@ -1231,31 +1232,19 @@ bool CheckAndParseSecondParams(ani_env* env, std::shared_ptr<DragControllerAsync
     return true;
 }
 
-bool ParseDragItemInfoParam(ani_env* env, std::shared_ptr<DragControllerAsyncCtx> asyncCtx, ani_object customObj)
+bool ParseDragItemInfoParam(ani_env* env, std::shared_ptr<DragControllerAsyncCtx> asyncCtx, ani_object dragItemInfo)
 {
     CHECK_NULL_RETURN(env, false);
     CHECK_NULL_RETURN(asyncCtx, false);
-    ani_ref builderAni;
     ani_ref pixelMapAni;
     ani_ref extraInfoAni;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(customObj, "builder", &builderAni)) {
-        LOGE("AceDrag, get builder failed.");
-        return false;
-    }
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(customObj, "pixelMap", &pixelMapAni)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(dragItemInfo, "pixelMap", &pixelMapAni)) {
         LOGE("AceDrag, get pixelMap failed.");
         return false;
     }
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(customObj, "extraInfo", &extraInfoAni)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(dragItemInfo, "extraInfo", &extraInfoAni)) {
         LOGE("AceDrag, get extraInfo failed.");
         return false;
-    }
-    if (Ani::IsFunctionObjectWith2Param(env, builderAni)) {
-        if (asyncCtx->isArray) {
-            ani_ref objectRef;
-            env->GlobalReference_Create(customObj, &objectRef);
-            asyncCtx->customBuilderList.emplace_back(objectRef);
-        }
     }
     if (Ani::IsStringObject(env, extraInfoAni)) {
         asyncCtx->extraParams = Ani::ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(extraInfoAni));
@@ -1263,101 +1252,112 @@ bool ParseDragItemInfoParam(ani_env* env, std::shared_ptr<DragControllerAsyncCtx
     if (!Ani::IsUndefinedObject(env, pixelMapAni)) {
         auto nativePixelMap =
             OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, reinterpret_cast<ani_object>(pixelMapAni));
-        if (asyncCtx->isArray) {
-            asyncCtx->pixelMapList.emplace_back(nativePixelMap);
+        if (nativePixelMap) {
+            if (asyncCtx->isArray) {
+                asyncCtx->pixelMapList.emplace_back(nativePixelMap);
+            } else {
+                asyncCtx->pixelMap = nativePixelMap;
+            }
         } else {
-            asyncCtx->pixelMap = nativePixelMap;
+            LOGE("AceDrag, get native pixelMap from taiheAni is null.");
+            return false;
         }
     }
     return true;
 }
 
-bool ParseDragItemListInfoParam(ani_env* env, std::shared_ptr<DragControllerAsyncCtx> asyncCtx, ani_object customObj)
+bool ParseDragMixParam(ani_env* env, std::shared_ptr<DragControllerAsyncCtx> asyncCtx, ani_object dragItemInfo,
+    ani_object builderObj, ani_double builderArrayLength, ani_double dragItemInfoArrayLength)
 {
-    CHECK_NULL_RETURN(env, false);
-    CHECK_NULL_RETURN(asyncCtx, false);
-    ani_double customArrayLength;
-    env->Object_GetPropertyByName_Double(customObj, "length", &customArrayLength);
-    for (int32_t i = 0; i < int32_t(customArrayLength); i++) {
-        ani_ref itemRef;
-        env->Object_CallMethodByName_Ref(customObj, "$_get", "I:Lstd/core/Object;", &itemRef, (ani_int)i);
-        if (Ani::IsUndefinedObject(env, itemRef)) {
-            return false;
+    bool isParseSucess = true;
+    ani_status status = ANI_OK;
+    int32_t dragItemInfoArrayLengthInt = static_cast<int32_t>(std::ceil(dragItemInfoArrayLength));
+    int32_t builderArrayLengthInt = static_cast<int32_t>(std::ceil(builderArrayLength));
+    if (dragItemInfoArrayLengthInt > 0 || builderArrayLengthInt > 0) {
+        for (int32_t i = 0; i < builderArrayLengthInt; i++) {
+            ani_ref itemRef;
+            if ((status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(builderObj), "$_get",
+                "i:C{std.core.Object}", &itemRef, (ani_int)i)) != ANI_OK) {
+                LOGE("AceDrag, get builder node from array fail. status = %{public}d", status);
+                isParseSucess = false;
+                break;
+            }
+            if (Ani::IsUndefinedObject(env, itemRef)) {
+                LOGE("AceDrag, get builder node from array is undefined.");
+                isParseSucess = false;
+                break;
+            }
+            ani_long builderPtr;
+            if (!Ani::GetBigIntValue(env, static_cast<ani_object>(itemRef), builderPtr)) {
+                LOGE("AceDrag, get builder node value from array fail.");
+                isParseSucess = false;
+                break;
+            }
+            asyncCtx->customBuilderNodeList.emplace_back(reinterpret_cast<ArkUINodeHandle>(builderPtr));
         }
-        if (Ani::IsFunctionObject(env, itemRef)) {
-            ani_ref objectRef;
-            env->GlobalReference_Create(itemRef, &objectRef);
-            asyncCtx->customBuilderList.emplace_back(objectRef);
-            continue;
+        for (int32_t i = 0; i < dragItemInfoArrayLengthInt; i++) {
+            ani_ref itemRef;
+            if ((status = env->Object_CallMethodByName_Ref(
+                dragItemInfo, "$_get", "I:Lstd/core/Object;", &itemRef, (ani_int)i)) != ANI_OK) {
+                LOGE("AceDrag, get dragItemInfo from array fail. status = %{public}d", status);
+                isParseSucess = false;
+                break;
+            }
+            if (Ani::IsUndefinedObject(env, itemRef)) {
+                LOGE("AceDrag, get dragItemInfo from array is undefined.");
+                isParseSucess = false;
+                break;
+            }
+            if (!ParseDragItemInfoParam(env, asyncCtx, static_cast<ani_object>(itemRef))) {
+                LOGE("AceDrag, parse dragItemInfo value from array fail.");
+                isParseSucess = false;
+                break;
+            }
         }
-        if (!ParseDragItemInfoParam(env, asyncCtx, static_cast<ani_object>(itemRef))) {
-            return false;
-        }
-    }
-    if (customArrayLength > 0) {
-        return true;
     } else {
-        return false;
+        isParseSucess = false;
     }
+    return isParseSucess;
 }
 
-bool ParseBuilderNodeListParam(ani_env* env, std::shared_ptr<DragControllerAsyncCtx> asyncCtx, ani_object builderObj)
+bool ParseDragItemListInfoParam(ani_env* env, std::shared_ptr<DragControllerAsyncCtx> asyncCtx, ani_object dragItemInfo,
+    ani_object builderObj)
 {
     CHECK_NULL_RETURN(env, false);
     CHECK_NULL_RETURN(asyncCtx, false);
     ani_double builderArrayLength;
-    env->Object_GetPropertyByName_Double(static_cast<ani_object>(builderObj), "length", &builderArrayLength);
-    for (int32_t i = 0; i < int32_t(builderArrayLength); i++) {
-        ani_ref itemRef;
-        env->Object_CallMethodByName_Ref(
-            static_cast<ani_object>(builderObj), "$_get", "i:C{std.core.Object}", &itemRef, (ani_int)i);
-        if (Ani::IsUndefinedObject(env, itemRef)) {
-            LOGE("AceDrag, the type of first parameter is incorrect.");
-            return false;
-        }
-        ani_long builderPtr;
-        if (!Ani::GetBigIntValue(env, static_cast<ani_object>(itemRef), builderPtr)) {
-            LOGE("AceDrag, Ani::GetBigIntValue is failed!");
-            return false;
-        }
-        asyncCtx->customBuilderNodeList.emplace_back(reinterpret_cast<ArkUINodeHandle>(builderPtr));
-        continue;
-    }
-    if (builderArrayLength > 0) {
-        return true;
-    } else {
+    ani_double dragItemInfoArrayLength;
+    ani_status status = ANI_OK;
+    if ((status = env->Object_GetPropertyByName_Double(builderObj, "length", &builderArrayLength)) != ANI_OK) {
+        LOGE("AceDrag, get builder array length fail. status = %{public}d", status);
         return false;
     }
+    if ((status = env->Object_GetPropertyByName_Double(dragItemInfo, "length", &dragItemInfoArrayLength)) != ANI_OK) {
+        LOGE("AceDrag, get dragItemInfo array length fail. status = %{public}d", status);
+        return false;
+    }
+    return ParseDragMixParam(env, asyncCtx, dragItemInfo, builderObj, builderArrayLength, dragItemInfoArrayLength);
 }
 
-bool CheckAndParseFirstParams(ani_env* env, std::shared_ptr<DragControllerAsyncCtx> asyncCtx, ani_object customObj,
+bool CheckAndParseFirstParams(ani_env* env, std::shared_ptr<DragControllerAsyncCtx> asyncCtx, ani_object dragItemInfo,
     ArkUINodeHandle builderNode, ani_object builderNodeArray)
 {
     CHECK_NULL_RETURN(env, false);
     CHECK_NULL_RETURN(asyncCtx, false);
-    if (Ani::IsUndefinedObject(env, customObj)) {
+    if (Ani::IsUndefinedObject(env, dragItemInfo)) {
         return false;
     }
     if (builderNode) {
-        asyncCtx->builderNode = builderNode;
+        asyncCtx->customBuilderNode = builderNode;
         return true;
     }
-    if (Ani::IsArrayObject(env, builderNodeArray)) {
+    if (Ani::IsArrayObject(env, dragItemInfo) || Ani::IsArrayObject(env, builderNodeArray)) {
         asyncCtx->isArray = true;
-        if (ParseBuilderNodeListParam(env, asyncCtx, builderNodeArray)) {
-            LOGI("AceDrag, drag controller is multi buidler object drag.");
-            return true;
-        }
-    }
-    if (Ani::IsArrayObject(env, customObj)) {
-        asyncCtx->isArray = true;
-        if (ParseDragItemListInfoParam(env, asyncCtx, customObj)) {
-            LOGI("AceDrag, drag controller is multi drgaItemInfo object drag.");
-            return true;
-        }
+        LOGI("AceDrag, drag controller is multi object drag.");
+        return ParseDragItemListInfoParam(env, asyncCtx, dragItemInfo, builderNodeArray);
     }
     asyncCtx->isArray = false;
-    return ParseDragItemInfoParam(env, asyncCtx, customObj);
+    return ParseDragItemInfoParam(env, asyncCtx, dragItemInfo);
 }
 
 void HandleStopDragCallback(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const RefPtr<Container>& container)
@@ -1558,7 +1558,7 @@ void HandleExecuteDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, ArkUINo
     if (parameterType == ParameterType::DRAG_PIXEL) {
         LOGI("AceDrag, drag preview is pixelMap.");
         OnComplete(asyncCtx);
-    } else if (builderNode) {
+    } else if (parameterType == ParameterType::DRAG_CUSTOM_BUILDER) {
         LOGI("AceDrag, drag preview is custom builder.");
         CreatePixelMapByCustom(asyncCtx, builderNode);
     } else {
@@ -1567,7 +1567,7 @@ void HandleExecuteDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, ArkUINo
     }
 }
 
-ani_object ANIExecuteDragWithCallback(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object custom,
+ani_object ANIExecuteDragWithCallback(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object dragItemInfo,
     ani_long builderObj, ani_object destroyCallbackObj, ani_object dragInfo, ani_object callback)
 {
     LOGI("AceDrag, ExecuteDrag function modifier has been called.");
@@ -1580,7 +1580,7 @@ ani_object ANIExecuteDragWithCallback(ani_env* env, [[maybe_unused]] ani_object 
     ani_ref escapedObj;
     ani_object result = {};
     auto* builderNode = reinterpret_cast<ArkUINodeHandle>(builderObj);
-    if (!CheckAndParseFirstParams(env, dragAsyncContext, custom, builderNode, nullptr)) {
+    if (!CheckAndParseFirstParams(env, dragAsyncContext, dragItemInfo, builderNode, nullptr)) {
         Ani::AniThrow(env, "parse first params failed.", ERROR_CODE_PARAM_INVALID);
         LOGE("AceDrag, parse first params failed.");
         env->DestroyEscapeLocalScope(result, &escapedObj);
@@ -1618,13 +1618,13 @@ ani_object ANIExecuteDragWithCallback(ani_env* env, [[maybe_unused]] ani_object 
         return result;
     }
 
-    HandleExecuteDrag(dragAsyncContext, dragAsyncContext->builderNode);
+    HandleExecuteDrag(dragAsyncContext, dragAsyncContext->customBuilderNode);
     env->DestroyEscapeLocalScope(result, &escapedObj);
     return result;
 }
 
 ani_object ANICreateDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
-    ani_object customArray, ani_object builderArray, ani_object destroyCallbackObj,
+    ani_object dragItemInfoArray, ani_object builderArray, ani_object destroyCallbackObj,
     [[maybe_unused]] ani_object dragInfoObj)
 {
     CHECK_NULL_RETURN(env, nullptr);
@@ -1636,7 +1636,7 @@ ani_object ANICreateDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     ani_ref escapedObj;
     ani_object dragActionObj = {};
 
-    if (!CheckAndParseFirstParams(env, dragAsyncContext, customArray, nullptr, builderArray)) {
+    if (!CheckAndParseFirstParams(env, dragAsyncContext, dragItemInfoArray, nullptr, builderArray)) {
         Ani::AniThrow(env, "parse first params failed.", ERROR_CODE_PARAM_INVALID);
         LOGE("AceDrag, parse first params failed.");
         env->DestroyEscapeLocalScope(dragActionObj, &escapedObj);

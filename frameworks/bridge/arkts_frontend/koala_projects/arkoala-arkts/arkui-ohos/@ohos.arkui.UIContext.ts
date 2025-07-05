@@ -43,7 +43,7 @@ import { ComponentContent } from 'arkui/ComponentContent'
 import overlayManager from '@ohos/overlayManager'
 import promptAction, { LevelOrder } from '@ohos/promptAction'
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
-import { AsyncCallback, CustomBuilder, DragItemInfo } from 'arkui/component'
+import { AsyncCallback, CustomBuilder, DragItemInfo, Callback } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
 
@@ -453,6 +453,10 @@ export class UIContext {
         throw Error("animateTo not implemented in UIContext!")
     }
 
+    public animateToImmediately(value: AnimateParam, event: Callback<void>): void {
+        throw Error("animateToImmediately not implemented in UIContext!")
+    }
+
     public createAnimator(options: AnimatorOptions | SimpleAnimatorOptions): AnimatorResult {
         throw Error("createAnimator not implemented in UIContext!")
     }
@@ -550,7 +554,6 @@ export abstract class FrameCallback {
     onIdle(timeLeftInNano: number): void {}
 }
 
-export type Callback<T,V = void> = (data: T) => V
 export class UIObserver {
     private instanceId_: number = 100000;
     private observerImpl: uiObserver.UIObserver | null = null;

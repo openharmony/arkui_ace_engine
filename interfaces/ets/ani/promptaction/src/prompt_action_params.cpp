@@ -154,6 +154,32 @@ bool GetInt32Param(ani_env* env, ani_object object, const char *name, int32_t& r
     return GetInt32Param(env, resultObj, result);
 }
 
+bool GetLongParam(ani_env* env, ani_object object, long& result)
+{
+    ani_long resultValue;
+    ani_status status = env->Object_CallMethodByName_Long(object, "unboxed", nullptr, &resultValue);
+    if (status != ANI_OK) {
+        return false;
+    }
+    result = static_cast<long>(resultValue);
+    return true;
+}
+
+bool GetLongParam(ani_env* env, ani_object object, const char *name, long& result)
+{
+    ani_ref resultRef;
+    ani_status status = env->Object_GetPropertyByName_Ref(object, name, &resultRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    if (IsUndefinedObject(env, resultRef)) {
+        return false;
+    }
+    ani_object resultObj = static_cast<ani_object>(resultRef);
+    return GetLongParam(env, resultObj, result);
+}
+
 bool GetDoubleParam(ani_env* env, ani_object object, double& result)
 {
     ani_double resultValue;

@@ -26,13 +26,13 @@
 
 namespace OHOS {
 namespace Ace {
-class DrawableDescriptor : public AceType {
-    DECLARE_ACE_TYPE(DrawableDescriptor, AceType);
+class AceDrawableDescriptor : public AceType {
+    DECLARE_ACE_TYPE(AceDrawableDescriptor, AceType);
 
 public:
     using RedrawCallback = std::function<void()>;
 
-    static RefPtr<DrawableDescriptor> CreateDrawable(void* sptrAddr);
+    static RefPtr<AceDrawableDescriptor> CreateDrawable(void* sptrAddr);
 
     virtual void RegisterRedrawCallback(RedrawCallback&& callback) = 0;
 
