@@ -891,6 +891,8 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
 
     CheckUpEvent(event);
     UpdateInfoWhenFinishDispatch(point, sendOnTouch);
+    auto item = touchTestResults_.find(event.id);
+    passThroughResult_ = (item != touchTestResults_.end() && !item->second.empty());
     return true;
 }
 
@@ -1100,7 +1102,6 @@ void EventManager::DispatchTouchEventToTouchTestResult(const TouchEvent& touchEv
             eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                 std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
         }
-        passThroughResult_ = isStopTouchEvent;
     }
 }
 
@@ -1551,6 +1552,8 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
     }
     lastHoverNode_ = currHoverNode_;
     currHoverNode_ = hoverNode;
+    auto item = currMouseTestResultsMap_.find(event.id);
+    passThroughResult_ = (item != currMouseTestResultsMap_.end() && !item->second.empty());
 }
 
 bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
@@ -1588,7 +1591,6 @@ bool EventManager::DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event
         }
     }
     auto result = DispatchMouseEventToCurResults(event, handledResults, isStopPropagation);
-    passThroughResult_ = isStopPropagation;
     if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL) {
         DoSingleMouseActionRelease(key);
     }
@@ -1880,6 +1882,8 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
     touchRestrict.inputEventType = InputEventType::AXIS;
     touchRestrict.touchEvent = ConvertAxisEventToTouchEvent(event);
     frameNode->AxisTest(point, point, point, touchRestrict, axisTestResultsMap_[event.id]);
+    auto item = axisTestResultsMap_.find(event.id);
+    passThroughResult_ = (item != axisTestResultsMap_.end() && !item->second.empty());
 }
 
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
@@ -1890,7 +1894,6 @@ bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
             !event.isRotationEvent) {
             axisTestResultsMap_[event.id].clear();
             axisTestResultsMap_.erase(event.id);
-            passThroughResult_  = false;
             return false;
         }
     }
@@ -1898,13 +1901,11 @@ bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
         if (axisTarget && axisTarget->HandleAxisEvent(event)) {
             axisTestResultsMap_[event.id].clear();
             axisTestResultsMap_.erase(event.id);
-            passThroughResult_  = true;
             return true;
         }
     }
     axisTestResultsMap_[event.id].clear();
     axisTestResultsMap_.erase(event.id);
-    passThroughResult_ = false;
     return true;
 }
 

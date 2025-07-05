@@ -1791,4 +1791,29 @@ HWTEST_F(EventManagerTestNg, EventManagerTest098, TestSize.Level1)
     container->isDialogContainer_ = true;
     EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
 }
+
+/**
+ * @tc.name: EventManagerTest099
+ * @tc.desc: Test FlushTouchEventsBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest099, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    AxisEvent axisEvent;
+    axisEvent.x = 1;
+    axisEvent.y = 2;
+    axisEvent.sourceType = SourceType::TOUCH;
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    eventManager->axisTestResultsMap_[axisEvent.id].clear();
+    eventManager->AxisTest(axisEvent, frameNode);
+    EXPECT_FALSE(eventManager->passThroughResult_);
+}
 } // namespace OHOS::Ace::NG

@@ -3604,7 +3604,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg251, TestSize.Level1)
     context_->eventManager_->passThroughResult_ = true;
     context_->accessibilityManagerNG_ = AceType::MakeRefPtr<AccessibilityManagerNG>();
     context_->OnAxisEvent(event, context_->rootNode_);
-    EXPECT_EQ(context_->postEventManager_->passThroughResult_, context_->eventManager_->passThroughResult_);
+    EXPECT_NE(context_->postEventManager_->passThroughResult_, context_->eventManager_->passThroughResult_);
 }
 
 /**
