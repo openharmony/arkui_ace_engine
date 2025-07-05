@@ -868,8 +868,8 @@ public:
     void ResetTextEffect();
     bool ResetTextEffectBeforeLayout();
 
-    void HandleOnAskCelia();
-    
+    virtual void HandleOnAskCelia();
+
     void SetIsAskCeliaEnabled(bool isAskCeliaEnabled)
     {
         isAskCeliaEnabled_ = isAskCeliaEnabled;
