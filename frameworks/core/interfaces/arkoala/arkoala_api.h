@@ -5442,6 +5442,9 @@ struct ArkUIRefreshModifier {
     void (*setMaxPullDownDistance)(ArkUINodeHandle node, ArkUI_Float32 distance);
     void (*resetMaxPullDownDistance)(ArkUINodeHandle node);
     ArkUI_Float32 (*getMaxPullDownDistance)(ArkUINodeHandle node);
+    void (*setOnStepOffsetChangeCallback)(ArkUINodeHandle node,
+        void (*callback)(const ArkUI_Float32 offset, void* extraData), void* extraData);
+    void (*resetOnStepOffsetChangeCallback)(ArkUINodeHandle node);
 };
 
 struct ArkUIHyperlinkModifier {

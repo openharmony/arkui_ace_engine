@@ -90,4 +90,14 @@ void ScrollerObserverManager::HandleOnScrollerAreaChangeEvent(
         }
     }
 }
+
+void ScrollerObserverManager::HandleOnWillScrollEventEx(
+    ScrollFrameResult& result, ScrollState state, ScrollSource source)
+{
+    for (const auto& pair : observers_) {
+        if (pair.second.onWillScrollEventEx) {
+            pair.second.onWillScrollEventEx(result, state, source);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

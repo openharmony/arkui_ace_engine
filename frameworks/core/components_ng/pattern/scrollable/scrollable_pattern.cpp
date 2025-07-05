@@ -4515,4 +4515,18 @@ bool ScrollablePattern::AccumulatingTerminateHelper(
     totalExpand = totalExpand.Plus(AdjacentExpandToRect(adjustingRect, expandFromList, frameRect));
     return true;
 }
+
+float ScrollablePattern::FireObserverOnWillScroll(float offset)
+{
+    auto scrollState = GetScrollState();
+    auto source = ConvertScrollSource(scrollSource_);
+    CHECK_NULL_RETURN(positionController_, offset);
+    auto obsMgr = positionController_->GetObserverManager();
+    CHECK_NULL_RETURN(obsMgr, offset);
+    ScrollFrameResult result = { .offset = Dimension(offset, DimensionUnit::PX) };
+    obsMgr->HandleOnWillScrollEventEx(result, scrollState, source);
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, result.offset.ConvertToPx());
+    return context->NormalizeToPx(result.offset);
+}
 } // namespace OHOS::Ace::NG
