@@ -1080,7 +1080,10 @@ export class UIContextImpl extends UIContext {
         return node;
     }
     getHostContext(): Context | undefined {
-        return ArkUIAniModule._Common_GetHostContext();
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const result = ArkUIAniModule._Common_GetHostContext();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result
     }
 
     public getAtomicServiceBar(): Nullable<AtomicServiceBar> {

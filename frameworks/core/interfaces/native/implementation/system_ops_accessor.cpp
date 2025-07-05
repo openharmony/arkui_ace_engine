@@ -150,9 +150,14 @@ Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
     }
     return Converter::ArkValue<Ark_LengthMetricsCustom>(result);
 }
-void ParseArrayNumber(Color& color, std::vector<uint32_t>& indexes)
+void ParseArrayNumber(Color& color, std::vector<uint32_t>& indexes, bool result)
 {
     indexes.clear();
+    if (result) {
+        indexes.emplace_back(1);
+    } else {
+        indexes.emplace_back(0);
+    }
     indexes.emplace_back(color.GetRed());
     indexes.emplace_back(color.GetGreen());
     indexes.emplace_back(color.GetBlue());
@@ -170,7 +175,7 @@ Array_Number ColorMetricsResourceColorImpl(const Ark_Resource* color)
 {
     Color colorColor;
     std::vector<uint32_t> indexes;
-    ParseArrayNumber(colorColor, indexes);
+    ParseArrayNumber(colorColor, indexes, false);
     Array_Number errValue = Converter::ArkValue<Array_Number>(indexes, Converter::FC);
     auto resId = Converter::Convert<int32_t>(color->id);
     auto bundleName = Converter::Convert<std::string>(color->bundleName);
@@ -184,7 +189,7 @@ Array_Number ColorMetricsResourceColorImpl(const Ark_Resource* color)
         }
         auto params = optParams.value();
         colorColor = resourceWrapper->GetColorByName(params[0]);
-        ParseArrayNumber(colorColor, indexes);
+        ParseArrayNumber(colorColor, indexes, true);
         return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
     }
     auto resType = Converter::OptConvert<int32_t>(color->type);
@@ -194,19 +199,21 @@ Array_Number ColorMetricsResourceColorImpl(const Ark_Resource* color)
     auto typeValue = resType.value();
     if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId);
-        Color::ParseColorString(value, colorColor);
-        ParseArrayNumber(colorColor, indexes);
+        if (!Color::ParseColorString(value, colorColor)) {
+            return errValue;
+        }
+        ParseArrayNumber(colorColor, indexes, true);
         return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
     }
     if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::INTEGER)) {
         auto value = resourceWrapper->GetInt(resId);
         colorColor = Color(ColorAlphaAdapt(value));
-        ParseArrayNumber(colorColor, indexes);
+        ParseArrayNumber(colorColor, indexes, true);
         return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
     }
     if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::COLOR)) {
         colorColor = resourceWrapper->GetColor(resId);
-        ParseArrayNumber(colorColor, indexes);
+        ParseArrayNumber(colorColor, indexes, true);
         indexes.emplace_back(resId);
         return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
     }

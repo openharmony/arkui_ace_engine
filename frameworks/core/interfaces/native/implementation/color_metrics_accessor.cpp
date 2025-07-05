@@ -83,8 +83,7 @@ Ark_ColorMetrics RgbaImpl(const Ark_Number* red,
     peer->colorValue.argb.blue = blue ? ClampInt32(Converter::Convert<int32_t>(*blue)) : 0x00;
     auto optAlpha = alpha ? Converter::OptConvert<float>(*alpha) : std::nullopt;
     if (optAlpha.has_value()) {
-        peer->colorValue.argb.alpha = std::min(std::max((optAlpha.value() * MAX_CHANNEL_VALUE),
-            static_cast<float>(MIN_VALUE)), static_cast<float>(MAX_CHANNEL_VALUE));
+        peer->colorValue.argb.alpha = ClampInt32(optAlpha.value());
     } else {
         peer->colorValue.argb.alpha = 0xff;
     }
