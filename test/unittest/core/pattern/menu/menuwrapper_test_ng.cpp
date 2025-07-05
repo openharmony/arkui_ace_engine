@@ -1420,6 +1420,87 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg030, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsNeedSetHotAreas001
+ * @tc.desc: test IsNeedSetHotAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, IsNeedSetHotAreas001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layoutWrapper
+     * @tc.expected: layoutWrapper null
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto* layoutWrapperNode = new LayoutWrapperNode(menuItemGroup, geometryNode, layoutProp);
+    RefPtr<LayoutWrapper> layoutWrapper = layoutWrapperNode->GetOrCreateChildByIndex(0, false);
+    EXPECT_EQ(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Create menuNode
+     * @tc.expected: menuPattern is not null
+     */
+    MenuModelNG model;
+    model.Create();
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    menuItem->MountToParent(wrapperNode);
+    auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+    itemGeoNode->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+    auto firstChildLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+
+    layoutWrapperNode->AppendChild(firstChildLayoutWrapper);
+    layoutWrapper = layoutWrapperNode->GetOrCreateChildByIndex(0, false);
+    EXPECT_EQ(layoutWrapper, firstChildLayoutWrapper);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    /**
+     * @tc.steps: step3. test IsNeedSetHotAreas
+     * @tc.expected: IsNeedSetHotAreas is false
+     */
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    EXPECT_FALSE(wrapperPattern->IsNeedSetHotAreas(layoutWrapper));
+
+    /**
+     * @tc.steps: step4. wrapperPattern->menuStatus_ is MenuStatus::SHOW
+     * @tc.expected: IsNeedSetHotAreas is false
+     */
+    wrapperPattern->menuStatus_ = MenuStatus::SHOW;
+    EXPECT_FALSE(wrapperPattern->IsNeedSetHotAreas(layoutWrapper));
+
+    /**
+     * @tc.steps: step5. wrapperNode->onMainTree_ is true
+     * @tc.expected: IsNeedSetHotAreas is false
+     */
+    wrapperNode->onMainTree_ = true;
+    EXPECT_FALSE(wrapperPattern->IsNeedSetHotAreas(layoutWrapper));
+
+    /**
+     * @tc.steps: step6. isSubContainer_ is true
+     * @tc.expected: IsNeedSetHotAreas is true
+     */
+    RefPtr<PipelineContext> pipelineContext = wrapperNode->GetContextRefPtr();
+    auto containerId = pipelineContext->GetInstanceId();
+    AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(containerId))->isSubContainer_ = true;
+    EXPECT_TRUE(wrapperPattern->IsNeedSetHotAreas(layoutWrapper));
+}
+
+/**
  * @tc.name: MenuWrapperPatternTestNg031
  * @tc.desc: test OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
