@@ -113,4 +113,50 @@ HWTEST_F(UniqueValuedMapTest, Size, TestSize.Level1)
     map.Remove(1);
     EXPECT_EQ(map.Size(), 1);
 }
+
+/**
+ * @tc.name: RemoveIfFunction
+ * @tc.desc: Test the RemoveIf functionality of UniqueValuedMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(UniqueValuedMapTest, RemoveIfFunction, TestSize.Level1)
+{
+    map.Put(1, "one");
+    map.Put(2, "two");
+    map.Put(3, "three");
+    map.Put(4, "four");
+
+    // Remove elements where key is even
+    map.RemoveIf([](const int& key, const std::string&) {
+        return key % 2 == 0;
+    });
+
+    EXPECT_EQ(map.Size(), 2);
+    EXPECT_TRUE(map.ContainsKey(1));
+    EXPECT_TRUE(map.ContainsKey(3));
+    EXPECT_FALSE(map.ContainsKey(2));
+    EXPECT_FALSE(map.ContainsKey(4));
+    EXPECT_TRUE(map.ContainsValue("one"));
+    EXPECT_TRUE(map.ContainsValue("three"));
+    EXPECT_FALSE(map.ContainsValue("two"));
+    EXPECT_FALSE(map.ContainsValue("four"));
+
+    // Remove elements where value contains 'e'
+    map.RemoveIf([](const int&, const std::string& value) {
+        return value.find('e') != std::string::npos;
+    });
+
+    EXPECT_EQ(map.Size(), 0);
+    EXPECT_FALSE(map.ContainsKey(1));
+    EXPECT_FALSE(map.ContainsKey(3));
+    EXPECT_FALSE(map.ContainsValue("one"));
+    EXPECT_FALSE(map.ContainsValue("three"));
+
+    // Test with empty predicate
+    map.Put(1, "one");
+    map.RemoveIf(nullptr);
+    EXPECT_EQ(map.Size(), 1);
+    EXPECT_TRUE(map.ContainsKey(1));
+    EXPECT_TRUE(map.ContainsValue("one"));
+}
 } // namespace OHOS::Ace
