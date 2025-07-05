@@ -143,7 +143,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
             (value as IObservedObject).addWatchSubscriber(id);
         }
     }
-    
+
     public fireChange(): void {
         this.backing_.fireChange();
     }

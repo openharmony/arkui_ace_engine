@@ -18,21 +18,25 @@ import {
     IStorageLinkDecoratedVariable,
     IStoragePropRefDecoratedVariable,
     ILocalStorageLinkDecoratedVariable,
-    IDecoratedV1Variable
+    IDecoratedV1Variable,
 } from '../decorator';
 import { ExtendableComponent } from '../../component/extendableComponent';
 
-export class StorageLinkDecoratedVariable<T> extends LinkDecoratedVariable<T>
-    implements IStorageLinkDecoratedVariable<T>, ILocalStorageLinkDecoratedVariable<T>,
-    IStoragePropRefDecoratedVariable<T> {
-
+export class StorageLinkDecoratedVariable<T>
+    extends LinkDecoratedVariable<T>
+    implements
+        IStorageLinkDecoratedVariable<T>,
+        ILocalStorageLinkDecoratedVariable<T>,
+        IStoragePropRefDecoratedVariable<T>
+{
     private readonly propertyNameInAppStorage_: string;
 
     // localInitValue is the rhs of @state variable : type = localInitialValue;
     // caller ensure it is IObseredObject, eg. by wrapping
     constructor(
         owningComponent: ExtendableComponent | null,
-        propertyNameInAppStorage: string, varName: string,
+        propertyNameInAppStorage: string,
+        varName: string,
         source: IDecoratedV1Variable<T>,
         sourceGet: () => T,
         sourceSet: (newValue: T) => void,

@@ -132,7 +132,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             this.execWatchFuncs();
         }
     }
-                
+
     private proxy?: ESValue;
 
     public getProxy(): ESValue | undefined {
@@ -153,7 +153,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             (value as IObservedObject).addWatchSubscriber(id);
         }
     }
-    
+
     public fireChange(): void {
         this.__localValue.fireChange();
     }

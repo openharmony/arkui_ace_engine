@@ -95,7 +95,7 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             this.sourceSet_!(newValue); // makeObserved should be called in source
         }
     }
-    
+
     private source_: IDecoratedV1Variable<T>;
 
     public getSource(): IDecoratedV1Variable<T> {
