@@ -33,6 +33,7 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { OnScrollFrameBeginCallback, Scroller, ScrollerInternal, ScrollAlign } from "./scroll"
 import { Deserializer } from "./peers/Deserializer"
+import { hookListChildrenMainSizeImpl } from "./../handwritten"
 export class ArkListPeer extends ArkScrollableCommonMethodPeer {
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -650,7 +651,8 @@ export interface ListAttribute extends ScrollableCommonMethod {
     divider(value: ListDividerOptions | null | undefined): this
     editMode(value: boolean | undefined): this
     multiSelectable(value: boolean | undefined): this
-    cachedCount(count: number | undefined, show?: boolean): this
+    cachedCount(count: number | undefined, show: boolean | undefined): this
+    cachedCount(value: number | undefined): this
     chainAnimation(value: boolean | undefined): this
     chainAnimationOptions(value: ChainAnimationOptions | undefined): this
     sticky(value: StickyStyle | undefined): this
@@ -742,7 +744,10 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     public multiSelectable(value: boolean | undefined): this {
         return this
     }
-    public cachedCount(count: number | undefined, show?: boolean): this {
+    public cachedCount(count: number | undefined, show: boolean | undefined): this {
+        return this
+    }
+    public cachedCount(value: number | undefined): this {
         return this
     }
     public chainAnimation(value: boolean | undefined): this {
@@ -909,19 +914,33 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public cachedCount(count: number | undefined, show?: boolean): this {
+    public cachedCount(count: number | undefined, show: boolean | undefined): this {
         if (this.checkPriority("cachedCount")) {
             const count_type = runtimeType(count)
             const show_type = runtimeType(show)
-            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && (RuntimeType.UNDEFINED == show_type)) {
+            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) &&
+                (RuntimeType.UNDEFINED == show_type)) {
                 const value_casted = count as (number | undefined)
                 this.getPeer()?.cachedCount0Attribute(value_casted)
                 return this
             }
-            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && ((RuntimeType.BOOLEAN == show_type) || (RuntimeType.UNDEFINED == show_type))) {
+            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) &&
+                ((RuntimeType.BOOLEAN == show_type) || (RuntimeType.UNDEFINED == show_type))) {
                 const count_casted = count as (number | undefined)
                 const show_casted = show as (boolean | undefined)
                 this.getPeer()?.cachedCount1Attribute(count_casted, show_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public cachedCount(value: number | undefined): this {
+        if (this.checkPriority("cachedCount")) {
+            const count_type = runtimeType(value)
+            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type))) {
+                const value_casted = value as (number | undefined)
+                this.getPeer()?.cachedCount0Attribute(value_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -986,8 +1005,7 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
     }
     public childrenMainSize(value: ChildrenMainSize | undefined): this {
         if (this.checkPriority("childrenMainSize")) {
-            const value_casted = value as (ChildrenMainSize | undefined)
-            this.getPeer()?.childrenMainSizeAttribute(value_casted)
+            hookListChildrenMainSizeImpl(this, (value as ChildrenMainSize | undefined));
             return this
         }
         return this
@@ -1230,8 +1248,15 @@ export class ListScroller extends Scroller implements MaterializedBase {
         return this.getVisibleListContentInfo_serialize(x_casted, y_casted)
     }
     private getItemRectInGroup_serialize(index: number, indexInGroup: number): RectResult {
-        const retval  = ArkUIGeneratedNativeModule._ListScroller_getItemRectInGroup(this.peer!.ptr, index, indexInGroup)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._ListScroller_getItemRectInGroup(this.peer!.ptr, index, indexInGroup) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : RectResult = retvalDeserializer.readRectResult()
         return returnResult
     }
@@ -1267,8 +1292,15 @@ export class ListScroller extends Scroller implements MaterializedBase {
         thisSerializer.release()
     }
     private getVisibleListContentInfo_serialize(x: number, y: number): VisibleListContentInfo {
-        const retval  = ArkUIGeneratedNativeModule._ListScroller_getVisibleListContentInfo(this.peer!.ptr, x, y)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._ListScroller_getVisibleListContentInfo(this.peer!.ptr, x, y) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : VisibleListContentInfo = retvalDeserializer.readVisibleListContentInfo()
         return returnResult
     }

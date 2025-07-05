@@ -28,6 +28,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent } from "./arkui-custom"
+import { hookListItemGroupChildrenMainSizeImpl } from "./../handwritten"
 
 export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -126,8 +127,7 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
     }
     public childrenMainSize(value: ChildrenMainSize | undefined): this {
         if (this.checkPriority("childrenMainSize")) {
-            const value_casted = value as (ChildrenMainSize | undefined)
-            this.getPeer()?.childrenMainSizeAttribute(value_casted)
+            hookListItemGroupChildrenMainSizeImpl(this, (value as ChildrenMainSize | undefined));
             return this
         }
         return this

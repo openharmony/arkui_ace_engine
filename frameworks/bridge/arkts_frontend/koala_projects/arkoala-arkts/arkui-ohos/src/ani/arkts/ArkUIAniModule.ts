@@ -24,6 +24,7 @@ import { DrawContext } from "arkui/Graphics"
 import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
 import { WaterFlowOptions,WaterFlowSections, XComponentControllerCallbackInternal } from "arkui/component"
+import { ChildrenMainSize } from "arkui/component"
 import { HookDragInfo } from "arkui/handwritten"
 import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
@@ -54,6 +55,7 @@ export class ArkUIAniModule {
     native static _SetDrawModifier(ptr: KPointer, flag: KInt, drawModifier: DrawModifier): void
     native static _Invalidate(ptr: KPointer): void
     native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
+    native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
 
     // for Drag
     native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
