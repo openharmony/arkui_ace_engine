@@ -97,7 +97,16 @@ namespace OHOS::Ace::Framework {
     FUNCTION("setIgnoreSizeValue", SET_IGNORE_SIZE_VALUE)       \
     FUNCTION("metricsColors", METRICS_COLORS)       \
     FUNCTION("scroller", SCROLLER)       \
-    FUNCTION("state", STATE)
+    FUNCTION("state", STATE)       \
+    FUNCTION("refreshing", REFRESHING)       \
+    FUNCTION("offset", OFFSET)       \
+    FUNCTION("friction", FRICTION)       \
+    FUNCTION("promptText", PROMPT_TEXT)       \
+    FUNCTION("$refreshing", $REFRESHING)       \
+    FUNCTION("changeEvent", CHANGE_EVENT)       \
+    FUNCTION("refreshingContent", REFRESHING_CONTENT)       \
+    FUNCTION("builderNode_", BUILDER_NODE)       \
+    FUNCTION("nodePtr_", NODEPTR)
 
 #define PROPERTY_NAME_INDEX(propertyName, index) index,
 enum class ArkUIIndex : uint32_t {
