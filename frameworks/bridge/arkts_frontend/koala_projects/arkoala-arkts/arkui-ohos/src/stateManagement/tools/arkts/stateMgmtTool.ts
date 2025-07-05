@@ -73,10 +73,10 @@ export class StateMgmtTool {
         return value instanceof InterfaceProxyHandler;
     }
     static tryGetHandler(value: Object): NullableObject {
-        return Proxy.tryGetHandler(value) as NullableObject;
+        return proxy.Proxy.tryGetHandler(value) as NullableObject;
     }
     static createProxy<T extends Object>(value: T): T {
-        return Proxy.create(value, new InterfaceProxyHandler<T>()) as T;
+        return proxy.Proxy.create(value, new InterfaceProxyHandler<T>()) as T;
     }
     static isObjectLiteral<T extends Object>(value: T): boolean {
         return Reflect.isLiteralInitializedInterface(value);

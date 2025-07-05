@@ -15,7 +15,7 @@
 
 export function getObservableTarget(proxy: Object): Object {
     try {
-        return (Proxy.tryGetTarget(proxy) as Object|undefined|null) ?? proxy
+        return (proxy.Proxy.tryGetTarget(proxy) as Object|undefined|null) ?? proxy
     } catch (error) {
         return proxy
     }
@@ -225,7 +225,7 @@ export function observableProxy<Value>(value: Value, parent?: ObservableHandler,
     return value as Value
 }
 
-class CustomProxyHandler<T extends Object> extends DefaultProxyHandler<T> {
+class CustomProxyHandler<T extends Object> extends proxy.DefaultProxyHandler<T> {
     override get(target: T, name: string): NullishType {
         const observable = ObservableHandler.find(target)
         if (observable) observable.onAccess()

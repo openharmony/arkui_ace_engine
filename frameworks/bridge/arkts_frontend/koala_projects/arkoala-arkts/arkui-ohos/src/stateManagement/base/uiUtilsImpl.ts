@@ -112,7 +112,7 @@ export class UIUtilsImpl {
             return source;
         }
         if (UIUtilsImpl.isProxied(source!)) {
-            return Proxy.tryGetTarget(source! as Object)! as Object as T;
+            return proxy.Proxy.tryGetTarget(source! as Object)! as Object as T;
         }
         if (
             source instanceof WrappedArray ||
