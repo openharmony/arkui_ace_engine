@@ -13,33 +13,30 @@
  * limitations under the License.
  */
 
-class InteropExtractorModule { 
-    static createObservedArrayForInterop<T extends Object>(rawObject: T, owningProperty: IPropertySubscriber): T {
-        if (ObservedObject.IsObservedObject(rawObject)) {
-            ObservedObject.addOwningProperty(rawObject, owningProperty);
-            return rawObject;
+class InteropExtractorModule {
+    static getInteropObservedObject<T extends Object>(newValue: T, owningProperty: ObservedPropertyAbstractPU<T>) {
+        if ((newValue instanceof Array || newValue instanceof Set || newValue instanceof Map || newValue instanceof Date) &&
+            !('addWatchSubscriber' in newValue) && (typeof InteropExtractorModule.makeObserved !== undefined && typeof InteropExtractorModule.makeObserved === 'function')) {
+            newValue = InteropExtractorModule.makeObserved(newValue) as T;
         }
-        const result = new Proxy(rawObject, new SubscribableArrayHandler(owningProperty));
-        if (owningProperty) {
-            result[SubscribableHandler.SUBSCRIBE] = owningProperty;
+        if ('addWatchSubscriber' in newValue && typeof newValue.addWatchSubscriber === 'function') {
+            const callback = () => {
+                owningProperty.onTrackedObjectPropertyCompatModeHasChangedPU(null, '');
+            };
+            if (typeof InteropExtractorModule.createWatchFunc !== undefined && typeof InteropExtractorModule.createWatchFunc === 'function') {
+                newValue.addWatchSubscriber(InteropExtractorModule.createWatchFunc(callback));
+            }
         }
-        return result as T;
-    }
-
-    static getInteropObservedObject<T extends Object>(newValue: T, owningProperty: IPropertySubscriber): T {
-        if (newValue instanceof Array) {
-            return InteropExtractorModule.createObservedArrayForInterop(newValue, owningProperty);
-        } else if (newValue instanceof Set || newValue instanceof Map || newValue instanceof Date) {
-            return ObservedObject.createNew(newValue, owningProperty);
-        } else {
-            return newValue;
-        }
+        return newValue;
     }
 
     static setStaticValueForInterop<T>(state: ObservedPropertyPU<T>, newValue: T): void {
-        if (state._setInteropValueForStaticState !== undefined && 
+        if (state._setInteropValueForStaticState !== undefined &&
             typeof state._setInteropValueForStaticState === 'function') {
             state._setInteropValueForStaticState(newValue);
         }
     }
+
+    static createWatchFunc?: (watchFuncCallback: WatchFuncType) => any;
+    static makeObserved?: (value: Object) => Object;
 }

@@ -45,7 +45,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
     constructor(owningView: ExtendableComponent | null, varName: string, initValue: T, watchFunc?: WatchFuncType) {
         super('@State', owningView, varName, watchFunc);
         if (isDynamicObject(initValue)) {
-            initValue = getObservedObject(initValue);
+            initValue = getObservedObject(initValue, this);
         }
         this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
         // @Watch
@@ -68,6 +68,13 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         const value = this.backing_.get(false);
         if (value === newValue) {
             return;
+        }
+        // for interop
+        if (isDynamicObject(newValue)) {
+            newValue = getObservedObject(newValue, this);
+        }
+        if (typeof this.setProxyValue === 'function') {
+            this.setProxyValue!(newValue);
         }
         if (this.backing_.set(UIUtils.makeObserved(newValue) as T)) {
             // @Watch
