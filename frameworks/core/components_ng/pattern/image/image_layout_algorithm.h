@@ -35,6 +35,8 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
+    void UpdateFrameSizeWithLayoutPolicy(
+        LayoutWrapper* layoutWrapper, OptionalSizeF& imageFrameSize, const std::optional<SizeF>& rawImageSize);
 
     static void PerformImageAnimationLayout(LayoutWrapper* layoutWrapper);
     static bool IsImageAnimationLayout(LayoutWrapper* layoutWrapper);

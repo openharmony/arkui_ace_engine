@@ -107,6 +107,16 @@ public:
         return GetHost();
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     void CreateModifier();
     void CreateObscuredImage();
     void LoadImageDataIfNeed();
