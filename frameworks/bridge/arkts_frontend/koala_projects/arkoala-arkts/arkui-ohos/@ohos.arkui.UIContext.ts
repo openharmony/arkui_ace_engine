@@ -46,6 +46,8 @@ import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
 import { AsyncCallback, CustomBuilder, DragItemInfo, Callback } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
+import { ComputableState } from '@koalaui/runtime'
+import { PeerNode } from 'arkui/PeerNode'
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver {
@@ -95,58 +97,42 @@ export class Router {
         return this.router_!;
     }
     public pushUrl(options: router.RouterOptions): Promise<void> {
-        throw Error("pushUrl not implemented in Router!")
+        throw Error("pushUrl not implemented in Router!");
     }
 
     public replaceUrl(options: router.RouterOptions): Promise<void> {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        return new Promise<void>((resolve, reject) => {
-            this.router_!.replace(options);
-        });
+        throw Error("replaceUrl not implemented in Router!");
     }
 
     public back(options?:router.RouterOptions): void {
-        throw Error("back not implemented in Router!")
+        throw Error("back not implemented in Router!");
     }
 
     public clear(): void {
-        throw Error("clear not implemented in Router!")
+        throw Error("clear not implemented in Router!");
     }
     public getLength(): string {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        return this.router_!.getLength();
+        throw Error("getLength not implemented in Router!");
     }
 
     public getParams(): Object {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        return this.router_!.getParams();
+        throw Error("getParams not implemented in Router!");
     }
 
     public getState(): router.RouterState {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        return this.router_!.getState();
+        throw Error("getState not implemented in Router!");
     }
 
     public getStateByIndex(index: number): router.RouterState | undefined {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        return this.router_!.getStateByIndex(index);
+        throw Error("getStateByIndex not implemented in Router!");
     }
 
     public getStateByUrl(url: string): Array<router.RouterState> {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        return this.router_!.getStateByUrl(url);
+        throw Error("getStateByUrl not implemented in Router!");
+    }
+
+    public getStateRoot(): ComputableState<PeerNode> {
+        throw Error("getStateRoot not implemented in Router!");
     }
 }
 
