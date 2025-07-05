@@ -882,13 +882,13 @@ void WebSelectOverlay::HandleOnAskCelia()
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
     auto vectorStringFunc = pattern->textDetectResult_.menuOptionAndAction.find(ASK_CELIA_TAG);
-    if (vectorStringFunc == pattern->textDetectResult_.menuOptionAndAction.end() || vectorStringFunc->second.EMPTY()) {
+    if (vectorStringFunc == pattern->textDetectResult_.menuOptionAndAction.end() || vectorStringFunc->second.empty()) {
         TAG_LOGE(AceLogTag::ACE_WEB, "HandleOnAskCelia failed no askCelia option.");
     } else {
         auto funcVariant = vectorStringFunc->second.begin()->second;
         if (std::holds_alternative<std::function<void(int, std::string)>>(funcVariant)) {
             auto func = std::get<std::function<void(int, std::string)>>(funcVariant);
-            if(func) {
+            if (func) {
                 TAG_LOGI(AceLogTag::ACE_WEB, "HandleOnAskCelia execute.");
                 func(true, GetSelectedText());
             } else {
