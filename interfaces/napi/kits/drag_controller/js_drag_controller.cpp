@@ -785,22 +785,27 @@ int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::st
     std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary)
 {
     int32_t dataSize = 1;
+    int32_t ret = 1;
     CHECK_NULL_RETURN(asyncCtx, dataSize);
     if (asyncCtx->dataLoadParams) {
-        UdmfClient::GetInstance()->SetDelayInfo(asyncCtx->dataLoadParams, udKey);
+        ret = UdmfClient::GetInstance()->SetDelayInfo(asyncCtx->dataLoadParams, udKey);
+        if (ret != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf setDelayInfo failed, return value is %{public}d", ret);
+        }
         dataSize = static_cast<int32_t>(asyncCtx->dataLoadParams->GetRecordCount());
     }
     if (asyncCtx->unifiedData) {
-        int32_t ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
+        ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
         if (ret != 0) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set data failed, return value is %{public}d", ret);
-        } else {
-            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
-            if (ret != 0) {
-                TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
-            }
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
+    }
+    if (ret == 0) {
+        ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
+        if (ret != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
+        }
     }
     return dataSize;
 }
