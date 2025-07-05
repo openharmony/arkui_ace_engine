@@ -8118,7 +8118,9 @@ void WebPattern::InitDataDetector()
 void WebPattern::InitAIDetectResult()
 {
     if (textDetectResult_.menuOptionAndAction.empty()) {
-        auto context = PipelineContext::GetCurrentContextSafely();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         TAG_LOGI(AceLogTag::ACE_WEB, "Web InitAIDetectResult");
