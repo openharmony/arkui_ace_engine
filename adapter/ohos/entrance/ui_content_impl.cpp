@@ -25,6 +25,7 @@
 #include "bundlemgr/bundle_mgr_proxy.h"
 #include "configuration.h"
 #include "event_pass_through_subscriber.h"
+#include "file_path_utils.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -2161,6 +2162,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     }
     static std::once_flag onceFlag;
     std::call_once(onceFlag, std::bind(&UIContentImpl::SetAceApplicationInfo, this, std::ref(context)));
+    AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = context->GetApplicationInfo()->apiReleaseType;
@@ -2181,9 +2183,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         EventReport::ReportReusedNodeSkipMeasureApp();
     }
     AceApplicationInfo::GetInstance().SetReusedNodeSkipMeasure(reusedNodeSkipMeasure);
-    auto useNewPipe =
-        AceNewPipeJudgement::QueryAceNewPipeEnabledStage(AceApplicationInfo::GetInstance().GetPackageName(),
-            apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
+    auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
+        bundleName_, apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     AceApplicationInfo::GetInstance().SetIsUseNewPipeline(useNewPipe);
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: "
          "%{public}d, and apiReleaseType: %{public}s, "
@@ -2272,6 +2273,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 
         if (appInfo) {
             std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
+            if (moduleList.empty()) {
+                resPath = "/";
+            }
             for (const auto& module : moduleList) {
                 if (module.moduleName == moduleName) {
                     std::regex pattern(ABS_BUNDLE_CODE_PATH + bundleName + FILE_SEPARATOR);
@@ -2358,7 +2362,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     FormManager::GetInstance().SetFormUtils(formUtils);
 #endif
 #ifdef APS_ENABLE
-    auto apsMonitor = std::make_shared<ApsMonitorImpl>();
+    auto apsMonitor = std::make_shared<ApsMonitorImpl>(instanceId_);
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
 #endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;

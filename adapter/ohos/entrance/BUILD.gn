@@ -113,6 +113,7 @@ template("ace_ohos_standard_source_set") {
       "ability_base:configuration",
       "ability_base:extractortool",
       "ability_base:view_data",
+      "ability_base:string_utils",
       "ability_base:want",
       "ability_runtime:ability_connect_callback_stub",
       "ability_runtime:ability_context_native",

@@ -187,6 +187,13 @@ ColorMode Container::CurrentColorMode()
     return curContainer->GetColorMode();
 }
 
+std::string Container::CurrentBundleName()
+{
+    auto curContainer = CurrentSafely();
+    CHECK_NULL_RETURN(curContainer, "");
+    return curContainer->GetBundleName();
+}
+
 bool Container::UpdateState(const Frontend::State& state)
 {
     std::lock_guard<std::mutex> lock(stateMutex_);

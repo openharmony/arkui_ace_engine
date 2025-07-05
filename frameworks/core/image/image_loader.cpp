@@ -218,7 +218,7 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& im
     if (imageSourceInfo.GetSrcType() == SrcType::INTERNAL) {
         // the internal source uri format is like "internal://app/imagename.png", the absolute path of which is like
         // "/data/data/{bundleName}/files/imagename.png"
-        auto bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+        auto bundleName = Container::CurrentBundleName();
         if (bundleName.empty()) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
                 "bundleName is empty, LoadImageData for internal source fail! %{private}s-%{public}s.",
