@@ -416,8 +416,6 @@ std::vector<RectF> TextSelectController::GetSelectedRects() const
 
 void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment) const
 {
-    TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "before move, handleRect.GetX():%{public}f,handleRect.GetY():%{public}f",
-        handleRect.GetX(), handleRect.GetY());
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto textField = DynamicCast<TextFieldPattern>(pattern);
