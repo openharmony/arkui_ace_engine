@@ -237,12 +237,8 @@ OffsetF FreeScrollController::GetOffset() const
 
 void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset, const SizeF& scrollableArea)
 {
-    if (offset_ && offset_->Get() != adjustedOffset) {
-        AnimationUtils::ExecuteWithoutAnimation([weak = WeakPtr(offset_), adjustedOffset]() {
-            auto offset = weak.Upgrade();
-            CHECK_NULL_VOID(offset);
-            offset->Set(adjustedOffset);
-        });
+    if (offset_ && offset_->Get() != adjustedOffset && state_ != ScrollState::FLING) {
+        offset_->Set(adjustedOffset);
     }
     if (adjustedOffset != prevOffset_) {
         // Fire onDidScroll only if the offset has changed.

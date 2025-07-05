@@ -473,20 +473,28 @@ TEST_F(FreeScrollTest, Event001)
     static int32_t willScrollCalled = 0;
     model.SetOnWillScroll(
         [](const Dimension& xOffset, const Dimension& yOffset, ScrollState state, ScrollSource source) {
-            EXPECT_EQ(xOffset.Unit(), DimensionUnit::VP);
-            EXPECT_EQ(yOffset.Unit(), DimensionUnit::VP);
-            EXPECT_EQ(xOffset.Value(), DELTA_X);
-            EXPECT_EQ(yOffset.Value(), DELTA_Y);
-            EXPECT_EQ(state, ScrollState::SCROLL);
-            EXPECT_EQ(source, ScrollSource::DRAG);
+            if (willScrollCalled == 0) {
+                EXPECT_EQ(xOffset.Unit(), DimensionUnit::VP);
+                EXPECT_EQ(yOffset.Unit(), DimensionUnit::VP);
+                EXPECT_EQ(xOffset.Value(), DELTA_X);
+                EXPECT_EQ(yOffset.Value(), DELTA_Y);
+                EXPECT_EQ(state, ScrollState::SCROLL);
+                EXPECT_EQ(source, ScrollSource::DRAG);
+            } else {
+                EXPECT_EQ(state, ScrollState::FLING);
+            }
             ++willScrollCalled;
             return TwoDimensionScrollResult { .xOffset = Dimension(DELTA_X), .yOffset = 0.0_vp };
         });
     static int32_t didScroll = 0;
     model.SetOnDidScroll([](const Dimension& xOffset, const Dimension& yOffset, ScrollState state) {
-        EXPECT_EQ(xOffset.Value(), DELTA_X);
-        EXPECT_EQ(yOffset.Value(), 0.0f);
-        EXPECT_EQ(state, ScrollState::SCROLL);
+        if (didScroll == 0) {
+            EXPECT_EQ(xOffset.Value(), DELTA_X);
+            EXPECT_EQ(yOffset.Value(), 0.0f);
+            EXPECT_EQ(state, ScrollState::SCROLL);
+        } else {
+            EXPECT_EQ(state, ScrollState::IDLE);
+        }
         ++didScroll;
     });
     CreateFreeContent({ CONTENT_W, CONTENT_H });
@@ -642,15 +650,13 @@ TEST_F(FreeScrollTest, ScrollBar004)
     ResponseLinkResult responseLinkResult;
     const auto& actuator = frameNode_->GetOrCreateGestureEventHub()->scrollableActuator_;
     ASSERT_EQ(actuator->scrollableEvents_.size(), 1);
-    actuator->CollectTouchTarget({}, {}, {}, result, localPoint,
-        frameNode_, nullptr, responseLinkResult);
+    actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, nullptr, responseLinkResult);
     EXPECT_EQ(responseLinkResult.size(), 2);
 
     localPoint = PointF(238, 5);
     result.clear();
     responseLinkResult.clear();
-    actuator->CollectTouchTarget({}, {}, {}, result, localPoint,
-        frameNode_, nullptr, responseLinkResult);
+    actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, nullptr, responseLinkResult);
     EXPECT_EQ(responseLinkResult.size(), 3);
     EXPECT_EQ(responseLinkResult.front(), pattern_->scrollBar2d_->vertical_.GetPanRecognizer());
 
@@ -658,8 +664,7 @@ TEST_F(FreeScrollTest, ScrollBar004)
     localPoint = PointF(1, 398);
     result.clear();
     responseLinkResult.clear();
-    actuator->CollectTouchTarget({}, {}, {}, result, localPoint,
-        frameNode_, nullptr, responseLinkResult);
+    actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, nullptr, responseLinkResult);
     EXPECT_EQ(responseLinkResult.size(), expectedRecognizerCount);
     EXPECT_EQ(*std::next(responseLinkResult.begin()), pattern_->scrollBar2d_->horizontal_.GetPanRecognizer());
 
@@ -667,9 +672,28 @@ TEST_F(FreeScrollTest, ScrollBar004)
     restrict.sourceType = SourceType::MOUSE;
     result.clear();
     responseLinkResult.clear();
-    actuator->CollectTouchTarget({}, {}, {}, result, localPoint,
-        frameNode_, nullptr, responseLinkResult);
+    actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, nullptr, responseLinkResult);
     EXPECT_EQ(responseLinkResult.size(), expectedRecognizerCount);
     EXPECT_EQ(*std::next(responseLinkResult.begin()), pattern_->scrollBar2d_->horizontal_.GetPanRecognizer());
+}
+
+/**
+ * @tc.name: ScrollBar005
+ * @tc.desc: Test scrollBar on axis change
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollBar005)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::VERTICAL);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    EXPECT_TRUE(pattern_->scrollBar_);
+
+    layoutProperty_->UpdateAxis(Axis::FREE);
+    pattern_->OnModifyDone();
+    EXPECT_TRUE(pattern_->scrollBar2d_);
+    EXPECT_FALSE(pattern_->scrollBar_);
 }
 } // namespace OHOS::Ace::NG

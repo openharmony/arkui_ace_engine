@@ -52,6 +52,7 @@ void ScrollPattern::OnModifyDone()
         SetAxis(axis);
         ResetPosition();
         freeScroll_ = axis == Axis::FREE ? MakeRefPtr<FreeScrollController>(*this) : nullptr;
+        SetScrollBar(DisplayMode::OFF); // turn off single-axis scrollBar
     }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
@@ -61,6 +62,7 @@ void ScrollPattern::OnModifyDone()
     }
     SetEdgeEffect();
     if (axisChanged) {
+        // need to init after scrollableEvent
         scrollBar2d_ = axis == Axis::FREE ? MakeRefPtr<ScrollBar2D>(*this) : nullptr;
     }
     if (scrollBar2d_) {

@@ -180,7 +180,6 @@ void ScrollBar2D::Update(const std::unique_ptr<ScrollBarProperty>& props)
 
     const PositionMode verticalMode = pattern_.IsRTL() ? PositionMode::LEFT : PositionMode::RIGHT;
     vertical_.SetPositionMode(verticalMode);
-    painter_->UpdateVerticalBarPosition(verticalMode);
 
     const auto* renderContext = pattern_.GetRenderContext();
     UpdateBorderRadius(vertical_, renderContext);
