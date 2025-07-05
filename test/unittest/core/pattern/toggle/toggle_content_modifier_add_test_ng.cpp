@@ -44,6 +44,10 @@ constexpr int CHILD_NODE_ID = 100;
 constexpr float ZERO_FLOAT = 0.0f;
 constexpr float ONE_FLOAT = 1.0f;
 constexpr float TWO_FLOAT = 2.0f;
+constexpr float TEN_FLOAT = 10.0f;
+constexpr float THIRTY_FLOAT = 30.0f;
+constexpr float FORTY_FLOAT = 40.0f;
+constexpr float FIFTY_FLOAT = 50.0f;
 constexpr double ONE_DOUBLE = 1.0;
 constexpr double TWO_DOUBLE = 2.0;
 constexpr Color SELECTED_COLOR = Color(0XFFFF0000);
@@ -1360,5 +1364,45 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg037, Test
     checkboxPattern->SetToggleBuilderFunc(nullptr);
     checkboxPattern->InitDefaultMargin();
     EXPECT_NE(layoutProperty->GetMarginProperty(), nullptr);
+}
+
+/**
+ * @tc.name: ToggleContentModifierAddTestNg038
+ * @tc.desc: Test FixPointOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg038, TestSize.Level1)
+{
+    SwitchModifier switchModifier(SizeF(), OffsetF(), 0.0, false, Color::RED, Color::RED, ZERO_FLOAT);
+    switchModifier.isSizeChange_ = true;
+    switchModifier.actualSize_.width_ = FIFTY_FLOAT;
+    switchModifier.actualSize_.height_ = FORTY_FLOAT;
+    float pointOffset = FIFTY_FLOAT;
+    switchModifier.pointOffset_->Set(pointOffset);
+    switchModifier.FixPointOffset();
+    EXPECT_EQ(switchModifier.pointOffset_->Get(), TEN_FLOAT);
+}
+
+/**
+ * @tc.name: ToggleContentModifierAddTestNg039
+ * @tc.desc: Test FixPointOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg039, TestSize.Level1)
+{
+    SwitchModifier switchModifier(SizeF(), OffsetF(), 0.0, false, Color::RED, Color::RED, ZERO_FLOAT);
+    switchModifier.isSizeChange_ = true;
+    switchModifier.actualSize_.width_ = FORTY_FLOAT;
+    switchModifier.actualSize_.height_ = FIFTY_FLOAT;
+    switchModifier.actualTrackRadius_ = THIRTY_FLOAT;
+    float pointOffset = FIFTY_FLOAT;
+    switchModifier.pointOffset_->Set(pointOffset);
+    switchModifier.FixPointOffset();
+    EXPECT_EQ(switchModifier.pointOffset_->Get(), TEN_FLOAT);
+    switchModifier.isSizeChange_ = true;
+    pointOffset = TWO_FLOAT;
+    switchModifier.pointOffset_->Set(pointOffset);
+    switchModifier.FixPointOffset();
+    EXPECT_FALSE(switchModifier.isSizeChange_);
 }
 } // namespace OHOS::Ace::NG
