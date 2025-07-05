@@ -837,6 +837,7 @@ public:
 
     bool GetDataDetectorEnable();
     void InitDataDetector();
+    void InitAIDetectResult();
     void CloseDataDetectorMenu();
 
     void SetAILinkMenuShow(bool isAILinkMenuShow)
@@ -1356,6 +1357,7 @@ private:
     // properties for AI data detector
     bool isAILinkMenuShow_ = false;
     RefPtr<WebDataDetectorAdapter> webDataDetectorAdapter_ = nullptr;
+    TextDataDetectResult textDetectResult_;
     int lastDragOperation_;
 
     bool isRotating_ {false};

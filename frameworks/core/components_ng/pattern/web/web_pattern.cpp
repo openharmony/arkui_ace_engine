@@ -8115,6 +8115,28 @@ void WebPattern::InitDataDetector()
     webDataDetectorAdapter_->Init();
 }
 
+void WebPattern::InitAIDetectResult()
+{
+    if (!textDetectResult_.menuOptionAndAction.empty()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web InitAIDetectResult");
+    uiTaskExecutor.PostTask(
+        [weak = AceType::WeakClaim(this), instanceId = context->GetInstanceId()] {
+            ContainerScope scope(instanceId);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            TAG_LOGI(AceLogTag::ACE_WEB, "Get AI entity menu from ai_engine");
+            DataDetectorMgr::GetInstance().GetAIEntityMenu(pattern->textDetectResult_);
+        },
+        "ArkUITextInitDataDetect");
+}
+
 void WebPattern::CloseDataDetectorMenu()
 {
     CHECK_NULL_VOID(webDataDetectorAdapter_);
