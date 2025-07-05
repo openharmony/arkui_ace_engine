@@ -472,6 +472,7 @@ TEST_F(FreeScrollTest, Event001)
     model.SetAxis(Axis::FREE);
     static bool scrollBegun = false;
     model.SetOnScrollStart([]() { scrollBegun = true; });
+    model.SetOnScrollStop([]() { scrollBegun = false; });
     static int32_t willScrollCalled = 0;
     model.SetOnWillScroll(
         [](const Dimension& xOffset, const Dimension& yOffset, ScrollState state, ScrollSource source) {
@@ -517,6 +518,7 @@ TEST_F(FreeScrollTest, Event001)
     FlushUITasks(frameNode_);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
     EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::IDLE);
+    EXPECT_FALSE(scrollBegun);
 }
 
 /**

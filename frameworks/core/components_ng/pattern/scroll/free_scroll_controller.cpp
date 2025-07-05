@@ -147,6 +147,11 @@ void FreeScrollController::HandlePanEndOrCancel(const GestureEvent& event)
     const auto& src = event.GetVelocity();
     OffsetF velocity { static_cast<float>(src.GetVelocityX()), static_cast<float>(src.GetVelocityY()) };
     TryScrollAnimation(velocity);
+    if (state_ == ScrollState::IDLE) {
+        // If the state is IDLE, it means no fling animation is running.
+        // We can fire the onScrollEnd event here.
+        FireOnScrollEnd();
+    }
 }
 
 void FreeScrollController::TryScrollAnimation(const OffsetF& velocity)
@@ -166,9 +171,15 @@ void FreeScrollController::TryScrollAnimation(const OffsetF& velocity)
     offset_->AnimateWithVelocity(option, finalPos, velocity, [weak = WeakClaim(this)]() {
         auto self = weak.Upgrade();
         if (self) {
-            self->state_ = ScrollState::IDLE;
+            self->HandleAnimationEnd();
         }
     });
+}
+
+void FreeScrollController::HandleAnimationEnd()
+{
+    state_ = ScrollState::IDLE;
+    FireOnScrollEnd();
 }
 
 void FreeScrollController::ClampPosition(OffsetF& finalPos) const
@@ -301,5 +312,17 @@ void FreeScrollController::FireOnDidScroll(const OffsetF& delta, ScrollState sta
     }
     CHECK_NULL_VOID(onScroll);
     onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state);
+}
+
+void FreeScrollController::FireOnScrollEnd() const
+{
+    auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onScrollStop = eventHub->GetOnScrollStop();
+    if (!onScrollStop) {
+        onScrollStop = eventHub->GetJSFrameNodeOnScrollStop();
+    }
+    CHECK_NULL_VOID(onScrollStop);
+    onScrollStop();
 }
 } // namespace OHOS::Ace::NG

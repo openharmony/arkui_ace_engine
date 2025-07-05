@@ -69,6 +69,7 @@ private:
     void TryScrollAnimation(const OffsetF& velocity);
     void StopScrollAnimation();
     void HandleAnimationUpdate(const OffsetF& currentValue);
+    void HandleAnimationEnd();
 
     /**
      * @brief clamp position to be within the scrollable area.
@@ -81,6 +82,7 @@ private:
      */
     OffsetF FireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const;
     void FireOnDidScroll(const OffsetF& delta, ScrollState state) const;
+    void FireOnScrollEnd() const;
 
     ScrollPattern& pattern_;
     RefPtr<NodeAnimatablePropertyOffsetF> offset_;
