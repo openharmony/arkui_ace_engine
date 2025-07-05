@@ -93,7 +93,6 @@ constexpr float WIDTH_RATIO_LIMIT = 1.0f;
 constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
 namespace OHOS::Ace::NG {
-
 namespace {
 void ClearAccessibilityFocus(const RefPtr<AccessibilityProperty>& accessibilityProperty,
     const RefPtr<RenderContext>& renderContext)
@@ -4237,7 +4236,7 @@ void FrameNode::OnRecycle()
     layoutProperty_->ResetGeometryTransition();
     pattern_->OnRecycle();
     UINode::OnRecycle();
-    
+
     auto accessibilityProperty = GetAccessibilityProperty<NG::AccessibilityProperty>();
     auto renderContext = GetRenderContext();
     ClearAccessibilityFocus(accessibilityProperty, renderContext);
@@ -6463,7 +6462,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
                 status = child->FindSuggestOpIncNode(path, boundary, depth + 1, axis);
             }
             if (status == OPINC_INVALID) {
-                    return OPINC_INVALID;
+                return OPINC_INVALID;
             }
         }
         return OPINC_PARENT_POSSIBLE;
@@ -7209,5 +7208,23 @@ void FrameNode::CleanupPipelineResources()
         pipeline->RemoveFrameNodeChangeListener(nodeId_);
         pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
     }
+}
+
+void FrameNode::SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper)
+{
+    aiCallerHelper_ = aiCallerHelper;
+}
+
+uint32_t FrameNode::CallAIFunction(const std::string& functionName, const std::string& params)
+{
+    static constexpr uint32_t AI_CALL_SUCCESS = 0;
+    static constexpr uint32_t AI_CALLER_INVALID = 1;
+    static constexpr uint32_t AI_CALL_FUNCNAME_INVALID = 2;
+    if (aiCallerHelper_) {
+        return aiCallerHelper_->onAIFunctionCaller(functionName, params) ?
+                AI_CALL_SUCCESS :
+                AI_CALL_FUNCNAME_INVALID;
+    }
+    return AI_CALLER_INVALID;
 }
 } // namespace OHOS::Ace::NG

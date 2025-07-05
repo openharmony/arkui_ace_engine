@@ -77,7 +77,7 @@ ohos_source_set("ace_kit") {
       "//foundation/arkui/napi",
       "//third_party/node/src",
     ]
-    deps += [ 
+    deps += [
       "${ace_graphic}/rosen/modules/render_service_client:librender_service_client_static",
       "//third_party/libuv:uv_static"
     ]
