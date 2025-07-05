@@ -137,7 +137,9 @@ void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
     OffsetF deltaF { NearZero(gammaX) ? dx : dx * pattern_.CalculateFriction(gammaX),
         NearZero(gammaY) ? dy : dy * pattern_.CalculateFriction(gammaY) };
     deltaF = FireOnWillScroll(deltaF, ScrollState::SCROLL, ScrollSource::DRAG);
-    offset_->Set(offset_->Get() + deltaF);
+    const auto newOffset = offset_->Get() + deltaF;
+    CheckCrashEdge(newOffset, scrollableArea);
+    offset_->Set(newOffset);
     pattern_.MarkDirty();
 }
 
@@ -324,5 +326,38 @@ void FreeScrollController::FireOnScrollEnd() const
     }
     CHECK_NULL_VOID(onScrollStop);
     onScrollStop();
+}
+
+void FreeScrollController::FireOnScrollEdge(const std::vector<ScrollEdge>& edges) const
+{
+    auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    const auto& onScrollEdge = eventHub->GetScrollEdgeEvent();
+    CHECK_NULL_VOID(onScrollEdge);
+    for (auto&& edge : edges) {
+        onScrollEdge(edge);
+    }
+    pattern_.AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_EDGE);
+}
+
+void FreeScrollController::CheckCrashEdge(const OffsetF& newOffset, const SizeF& scrollableArea) const
+{
+    CHECK_NULL_VOID(offset_);
+    std::vector<ScrollEdge> edges;
+
+    const auto checkEdge = [&](float prev, float curr, float minVal, ScrollEdge edgeMin, ScrollEdge edgeMax) {
+        if (Negative(prev) && NonNegative(curr)) {
+            edges.emplace_back(edgeMin);
+        } else if (GreatNotEqual(prev, minVal) && LessOrEqual(curr, minVal)) {
+            edges.emplace_back(edgeMax);
+        }
+    };
+
+    checkEdge(offset_->Get().GetX(), newOffset.GetX(), -scrollableArea.Width(), ScrollEdge::LEFT, ScrollEdge::RIGHT);
+    checkEdge(offset_->Get().GetY(), newOffset.GetY(), -scrollableArea.Height(), ScrollEdge::TOP, ScrollEdge::BOTTOM);
+
+    if (!edges.empty()) {
+        FireOnScrollEdge(edges);
+    }
 }
 } // namespace OHOS::Ace::NG

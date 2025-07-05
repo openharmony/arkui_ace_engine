@@ -21,6 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class ScrollPattern;
+enum class ScrollEdge;
 
 /**
  * @brief Controller for free scrolling behavior. It manages related gestures and animations.
@@ -77,12 +78,18 @@ private:
     void ClampPosition(OffsetF& finalPos) const;
 
     /**
+     * @brief Check if the new offset would reach any edges. If so, fire corresponding user callbacks.
+     */
+    void CheckCrashEdge(const OffsetF& newOffset, const SizeF& scrollableArea) const;
+
+    /**
      * @brief triggers onWillScroll user callback
      * @return user-modified delta
      */
     OffsetF FireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const;
     void FireOnDidScroll(const OffsetF& delta, ScrollState state) const;
     void FireOnScrollEnd() const;
+    void FireOnScrollEdge(const std::vector<ScrollEdge>& edges) const;
 
     ScrollPattern& pattern_;
     RefPtr<NodeAnimatablePropertyOffsetF> offset_;
