@@ -1796,11 +1796,11 @@ HWTEST_F(SelectOverlayManagerTestNg, GetSelectOverlayRoot, TestSize.Level1)
 }
 
 /**
- * @tc.name: CloseInternal
+ * @tc.name: CloseInternalTest001
  * @tc.desc: test CloseInternal
  * @tc.type: FUNC
  */
-HWTEST_F(SelectOverlayManagerTestNg, CloseInternal, TestSize.Level1)
+HWTEST_F(SelectOverlayManagerTestNg, CloseInternalTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. CloseInternal
@@ -1813,6 +1813,91 @@ HWTEST_F(SelectOverlayManagerTestNg, CloseInternal, TestSize.Level1)
     CloseReason reason = CloseReason::CLOSE_REASON_NORMAL;
     content.CloseInternal(id, animation, reason);
     EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: CloseInternalTest002
+ * @tc.desc: test CloseInternal
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, CloseInternalTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CloseInternal
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<MockSelectOverlayHolder>();
+    holder->SetOwner(root_);
+    content.SetHolder(holder);
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = true;
+    selectInfo.menuInfo.showCut = true;
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(content.shareOverlayInfo_);
+    ASSERT_NE(frameNode, nullptr);
+    content.menuNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(content.menuNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step2. mount menuNode to root node
+     */
+    frameNode->SetParent(root_);
+
+    /**
+     * @tc.steps: step3. call CloseInternal
+     */
+    int32_t id = root_->GetId();
+    bool animation = true;
+    CloseReason reason = CloseReason::CLOSE_REASON_NORMAL;
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>();
+    content.shareOverlayInfo_->menuInfo.menuIsShow = true;
+    content.shareOverlayInfo_->enableHandleLevel = true;
+    bool result = content.CloseInternal(id, animation, reason);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CloseInternalTest003
+ * @tc.desc: test CloseInternal
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, CloseInternalTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CloseInternal
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = true;
+    selectInfo.menuInfo.showCut = true;
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(content.shareOverlayInfo_);
+    ASSERT_NE(frameNode, nullptr);
+    content.menuNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(content.menuNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step2. mount menuNode to root node
+     */
+    frameNode->SetParent(root_);
+
+    /**
+     * @tc.steps: step3. call CloseInternal
+     */
+    int32_t id = root_->GetId();
+    bool animation = true;
+    CloseReason reason = CloseReason::CLOSE_REASON_NORMAL;
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>();
+    content.shareOverlayInfo_->menuInfo.menuIsShow = true;
+    content.shareOverlayInfo_->enableHandleLevel = false;
+    bool result = content.CloseInternal(id, animation, reason);
+    EXPECT_TRUE(result);
 }
 
 /**
