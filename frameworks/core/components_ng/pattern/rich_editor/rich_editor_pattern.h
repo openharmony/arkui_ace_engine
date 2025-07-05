@@ -1373,6 +1373,7 @@ public:
     float GetCaretWidth();
     void UpdateCaretStyleByTypingStyle();
     void MarkAISpanStyleChanged() override;
+    void HandleOnAskCelia() override;
 
 #if defined(IOS_PLATFORM)
     const TextEditingValue& GetInputEditingValue() const override;

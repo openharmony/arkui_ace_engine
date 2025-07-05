@@ -455,4 +455,48 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayTouchDownTest001, TestSize.Leve
 
     EXPECT_TRUE(richEditorPattern->textSelector_.SelectNothing());
 }
+
+/**
+ * @tc.name: HandleOnAskCeliaTest001
+ * @tc.desc: test OnHandleMoveDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, HandleOnAskCeliaTest001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    richEditorPattern->selectOverlay_->OnBind(manager);
+
+    // make double handle condition
+    manager->shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>();
+    manager->shareOverlayInfo_->isSingleHandle = false;
+    manager->shareOverlayInfo_->enableHandleLevel = true;
+    manager->shareOverlayInfo_->firstHandle.isShow = true;
+    manager->shareOverlayInfo_->secondHandle.isShow = true;
+    manager->shareOverlayInfo_->secondHandle.isShow = true;
+    manager->shareOverlayInfo_->menuInfo.menuIsShow = true;
+
+    // make manager isOpen is true
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<Pattern>();
+    auto handleNode = AceType::MakeRefPtr<FrameNode>("", 0, pattern, false);
+    auto parentNode = AceType::MakeRefPtr<FrameNode>("", 0, pattern, false);
+    handleNode->SetParent(parentNode);
+    manager->handleNode_ = handleNode;
+
+    EXPECT_TRUE(richEditorPattern->selectOverlay_->IsCurrentMenuVisibile());
+    EXPECT_NE(manager->handleNode_.Upgrade(), nullptr);
+
+    // make IsUsingMouse() is false, hide menu
+    richEditorPattern->sourceType_ = SourceType::TOUCH;
+    richEditorPattern->HandleOnAskCelia();
+    EXPECT_TRUE(richEditorPattern->selectOverlay_->SelectOverlayIsOn());
+
+    // make IsUsingMouse() is true, close selectOverlay
+    richEditorPattern->sourceType_ = SourceType::MOUSE;
+    richEditorPattern->HandleOnAskCelia();
+    EXPECT_TRUE(richEditorPattern->selectOverlay_->SelectOverlayIsOn());
+}
 } // namespace OHOS::Ace::NG

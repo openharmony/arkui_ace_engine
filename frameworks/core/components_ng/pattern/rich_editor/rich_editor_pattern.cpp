@@ -2243,6 +2243,16 @@ void RichEditorPattern::MarkAISpanStyleChanged()
     TextPattern::MarkAISpanStyleChanged();
 }
 
+void RichEditorPattern::HandleOnAskCelia()
+{
+    TextPattern::HandleOnAskCelia();
+    if (IsUsingMouse()) {
+        CloseSelectOverlay();
+    } else {
+        selectOverlay_->HideMenu();
+    }
+}
+
 void RichEditorPattern::UpdateCaretStyleByTypingStyle()
 {
     bool empty = spans_.empty();
@@ -8772,9 +8782,7 @@ void RichEditorPattern::UpdateAIMenuOptions()
     bool isAskCeliaEnabled = (copyOption_ == CopyOptions::Local || copyOption_ == CopyOptions::Distributed) &&
         ((NeedShowAIDetect() && !IsShowAIMenuOption()) || (IsEditing() && IsSelected()));
     SetIsAskCeliaEnabled(isAskCeliaEnabled);
-    if (!IsSupportAskCelia()) {
-        SetIsAskCeliaEnabled(false);
-    }
+
     CHECK_NULL_VOID(dataDetectorAdapter_);
     if (IsAskCeliaEnabled() && !NeedShowAIDetect() &&
         dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
