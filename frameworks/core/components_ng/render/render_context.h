@@ -456,6 +456,7 @@ public:
 
     virtual void ClearDrawCommands() {}
 
+    virtual void RemoveOverlayModifier(const RefPtr<OverlayModifier>& modifier) {}
     virtual void RemoveContentModifier(const RefPtr<ContentModifier>& ContentModifier) {}
 
     virtual void DumpInfo() {}

@@ -390,6 +390,8 @@ build_component_ng("pattern_ng") {
     "scroll/effect/scroll_fade_painter.cpp",
     "scroll/free_scroll_controller.cpp",
     "scroll/inner/scroll_bar.cpp",
+    "scroll/inner/scroll_bar_2d.cpp",
+    "scroll/inner/scroll_bar_2d_painter.cpp",
     "scroll/inner/scroll_bar_overlay_modifier.cpp",
     "scroll/scroll_accessibility_property.cpp",
     "scroll/scroll_content_modifier.cpp",

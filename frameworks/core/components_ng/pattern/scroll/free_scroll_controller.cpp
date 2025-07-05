@@ -20,12 +20,18 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
+void FreeScrollController::HandleAnimationUpdate(const OffsetF& currentValue)
+{
+    FireOnWillScroll(currentValue - prevOffset_, ScrollState::FLING, ScrollSource::FLING);
+    pattern_.MarkDirty();
+}
+
 FreeScrollController::FreeScrollController(ScrollPattern& pattern) : pattern_(pattern)
 {
-    offset_ = MakeRefPtr<NodeAnimatablePropertyOffsetF>(OffsetF {}, [weak = WeakClaim(this)](const OffsetF& _) {
+    offset_ = MakeRefPtr<NodeAnimatablePropertyOffsetF>(OffsetF {}, [weak = WeakClaim(this)](const OffsetF& newOffset) {
         auto controller = weak.Upgrade();
         if (controller) {
-            controller->pattern_.MarkDirty();
+            controller->HandleAnimationUpdate(newOffset);
         }
     });
     auto* renderCtx = pattern_.GetRenderContext();
@@ -113,7 +119,7 @@ float GetGamma(float offset, float scrollableDistance, float viewLength)
 
 void FreeScrollController::HandlePanStart(const GestureEvent& event)
 {
-    duringPan_ = true;
+    state_ = ScrollState::SCROLL;
     pattern_.FireOnScrollStart();
 }
 
@@ -130,14 +136,14 @@ void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
     // apply friction if overScrolling
     OffsetF deltaF { NearZero(gammaX) ? dx : dx * pattern_.CalculateFriction(gammaX),
         NearZero(gammaY) ? dy : dy * pattern_.CalculateFriction(gammaY) };
-    deltaF = pattern_.FreeModeFireOnWillScroll(deltaF, ScrollState::SCROLL, ScrollSource::DRAG);
+    deltaF = FireOnWillScroll(deltaF, ScrollState::SCROLL, ScrollSource::DRAG);
     offset_->Set(offset_->Get() + deltaF);
     pattern_.MarkDirty();
 }
 
 void FreeScrollController::HandlePanEndOrCancel(const GestureEvent& event)
 {
-    duringPan_ = false;
+    state_ = ScrollState::IDLE;
     const auto& src = event.GetVelocity();
     OffsetF velocity { static_cast<float>(src.GetVelocityX()), static_cast<float>(src.GetVelocityY()) };
     TryScrollAnimation(velocity);
@@ -147,18 +153,25 @@ void FreeScrollController::TryScrollAnimation(const OffsetF& velocity)
 {
     const auto curve = MakeRefPtr<ResponsiveSpringMotion>(fabs(2 * ACE_PI / friction_), 1.0f, 0.0f);
     AnimationOption option(curve, CUSTOM_SPRING_ANIMATION_DURATION);
+    option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
 
     OffsetF finalPos = offset_->Get() + velocity / friction_;
-    ClampFinalPosition(finalPos);
+    ClampPosition(finalPos);
 
     if (finalPos == offset_->Get()) {
         // No movement, no need to animate.
         return;
     }
-    offset_->AnimateWithVelocity(option, finalPos, velocity, nullptr);
+    state_ = ScrollState::FLING;
+    offset_->AnimateWithVelocity(option, finalPos, velocity, [weak = WeakClaim(this)]() {
+        auto self = weak.Upgrade();
+        if (self) {
+            self->state_ = ScrollState::IDLE;
+        }
+    });
 }
 
-void FreeScrollController::ClampFinalPosition(OffsetF& finalPos) const
+void FreeScrollController::ClampPosition(OffsetF& finalPos) const
 {
     finalPos.SetX(std::clamp(finalPos.GetX(), std::min(-pattern_.GetScrollableDistance(), 0.0f), 0.0f));
 
@@ -193,21 +206,25 @@ void FreeScrollController::InitializeTouchEvent()
 
 void FreeScrollController::HandleTouchDown()
 {
-    // pause animation
+    StopScrollAnimation();
+}
+
+void FreeScrollController::StopScrollAnimation()
+{
     AnimationOption option;
     option.SetCurve(Curves::EASE);
     option.SetDuration(0);
     AnimationUtils::StartAnimation(
         option, [this]() { offset_->Set(offset_->Get()); }, nullptr);
+    state_ = ScrollState::IDLE;
 }
 
 void FreeScrollController::HandleTouchUpOrCancel()
 {
-    if (duringPan_) {
-        return;
+    if (state_ == ScrollState::IDLE) {
+        // animate if currently out of bounds
+        TryScrollAnimation({});
     }
-    // animate if out of bounds
-    TryScrollAnimation({});
 }
 
 OffsetF FreeScrollController::GetOffset() const
@@ -220,12 +237,12 @@ OffsetF FreeScrollController::GetOffset() const
 
 void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset, const SizeF& scrollableArea)
 {
-    if (offset_ && offset_->Get() != adjustedOffset) {
+    if (offset_ && offset_->Get() != adjustedOffset && state_ != ScrollState::FLING) {
         offset_->Set(adjustedOffset);
     }
     if (adjustedOffset != prevOffset_) {
         // Fire onDidScroll only if the offset has changed.
-        pattern_.FreeModeFireOnDidScroll(adjustedOffset - prevOffset_, duringPan_ ? ScrollState::SCROLL : ScrollState::FLING);
+        FireOnDidScroll(adjustedOffset - prevOffset_, state_);
         prevOffset_ = adjustedOffset;
     }
     auto props = pattern_.GetLayoutProperty<ScrollLayoutProperty>();
@@ -235,5 +252,54 @@ void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset, const
     } else {
         enableScroll_ = props->GetScrollEnabled().value_or(true) && pattern_.GetAlwaysEnabled();
     }
+}
+
+void FreeScrollController::UpdateOffset(const OffsetF& delta)
+{
+    if (state_ == ScrollState::FLING) {
+        StopScrollAnimation();
+    }
+    auto newOffset = offset_->Get() + delta;
+    ClampPosition(newOffset); // overScroll not allowed
+    offset_->Set(newOffset);
+    if (newOffset != offset_->Get()) {
+        pattern_.MarkDirty();
+    }
+}
+
+namespace {
+Dimension ToVp(float value)
+{
+    return Dimension { Dimension(value).ConvertToVp(), DimensionUnit::VP };
+}
+} // namespace
+
+OffsetF FreeScrollController::FireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const
+{
+    auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_RETURN(eventHub, delta);
+    auto onScroll = eventHub->GetOnWillScrollEvent();
+    if (!onScroll) {
+        onScroll = eventHub->GetJSFrameNodeOnScrollWillScroll();
+    }
+    CHECK_NULL_RETURN(onScroll, delta);
+
+    // delta sign is reversed in user space
+    const auto res = onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state, source);
+    auto* context = pattern_.GetContext();
+    CHECK_NULL_RETURN(context, delta);
+    return { -context->NormalizeToPx(res.xOffset), -context->NormalizeToPx(res.yOffset) };
+}
+
+void FreeScrollController::FireOnDidScroll(const OffsetF& delta, ScrollState state) const
+{
+    auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onScroll = eventHub->GetOnDidScrollEvent();
+    if (!onScroll) {
+        onScroll = eventHub->GetJSFrameNodeOnScrollDidScroll();
+    }
+    CHECK_NULL_VOID(onScroll);
+    onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state);
 }
 } // namespace OHOS::Ace::NG

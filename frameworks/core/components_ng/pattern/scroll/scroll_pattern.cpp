@@ -46,15 +46,11 @@ void ScrollPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = host->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
-    if (axis != GetAxis()) {
+    const auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
+    const bool axisChanged = axis != GetAxis();
+    if (axisChanged) {
         SetAxis(axis);
         ResetPosition();
-        if (axis == Axis::FREE) {
-            freeScroll_ = MakeRefPtr<FreeScrollController>(*this);
-        } else {
-            freeScroll_.Reset();
-        }
     }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
@@ -63,7 +59,25 @@ void ScrollPattern::OnModifyDone()
 #endif
     }
     SetEdgeEffect();
-    SetScrollBar(paintProperty->GetScrollBarProperty());
+    if (axisChanged) {
+        // need to init after scrollableEvent
+        if (axis == Axis::FREE) {
+            freeScroll_ = MakeRefPtr<FreeScrollController>(*this);
+            scrollBar2d_ = MakeRefPtr<ScrollBar2D>(*this);
+            SetScrollBar(DisplayMode::OFF); // turn off single-axis scrollBar
+            auto* ctx = GetRenderContext();
+            CHECK_NULL_VOID(ctx);
+            ctx->RemoveOverlayModifier(GetScrollBarOverlayModifier());
+        } else {
+            freeScroll_.Reset();
+            scrollBar2d_.Reset();
+        }
+    }
+    if (scrollBar2d_) {
+        scrollBar2d_->Update(paintProperty->GetScrollBarProperty());
+    } else {
+        SetScrollBar(paintProperty->GetScrollBarProperty());
+    }
     SetAccessibilityAction();
     if (scrollSnapUpdate_) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -92,8 +106,12 @@ RefPtr<NodePaintMethod> ScrollPattern::CreateNodePaintMethod()
     auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
     auto drawDirection = (layoutDirection == TextDirection::RTL);
     auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
-    paint->SetScrollBar(GetScrollBar());
-    paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
+    if (scrollBar2d_) {
+        paint->Set2DPainter(scrollBar2d_);
+    } else {
+        paint->SetScrollBar(GetScrollBar());
+        paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
+    }
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
@@ -446,42 +464,6 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
     }
 }
 
-namespace {
-Dimension ToVp(float value)
-{
-    return Dimension { Dimension(value).ConvertToVp(), DimensionUnit::VP };
-}
-} // namespace
-
-OffsetF ScrollPattern::FreeModeFireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const
-{
-    auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
-    CHECK_NULL_RETURN(eventHub, delta);
-    auto onScroll = eventHub->GetOnWillScrollEvent();
-    if (!onScroll) {
-        onScroll = eventHub->GetJSFrameNodeOnScrollWillScroll();
-    }
-    CHECK_NULL_RETURN(onScroll, delta);
-
-    // delta sign is reversed in user space
-    const auto res = onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state, source);
-    auto* context = GetContext();
-    CHECK_NULL_RETURN(context, delta);
-    return { -context->NormalizeToPx(res.xOffset), -context->NormalizeToPx(res.yOffset) };
-}
-
-void ScrollPattern::FreeModeFireOnDidScroll(const OffsetF& delta, ScrollState state) const
-{
-    auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto onScroll = eventHub->GetOnDidScrollEvent();
-    if (!onScroll) {
-        onScroll = eventHub->GetJSFrameNodeOnScrollDidScroll();
-    }
-    CHECK_NULL_VOID(onScroll);
-    onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state);
-}
-
 void ScrollPattern::FireOnDidScroll(float scroll)
 {
     if (freeScroll_) {
@@ -825,6 +807,11 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
 
 void ScrollPattern::UpdateScrollBarOffset()
 {
+    if (scrollBar2d_ && freeScroll_) {
+        // update 2d scroll bar
+        scrollBar2d_->SyncLayout(freeScroll_->GetOffset(), GetViewSize(), GetViewPortExtent());
+        return;
+    }
     CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
@@ -1587,12 +1574,26 @@ void ScrollPattern::TriggerScrollBarDisplay()
     scrollBar->PlayScrollBarAppearAnimation();
     scrollBar->ScheduleDisappearDelayTask();
 }
+
 Offset ScrollPattern::GetFreeScrollOffset() const
 {
     if (freeScroll_) {
         auto res = freeScroll_->GetOffset();
-        return { Dimension(res.GetX()).ConvertToVp(), Dimension(res.GetY()).ConvertToVp() };
+        return { Dimension(-res.GetX()).ConvertToVp(), Dimension(-res.GetY()).ConvertToVp() };
     }
     return {};
+}
+RefPtr<NGGestureRecognizer> ScrollPattern::GetOverrideRecognizer() const
+{
+    if (freeScroll_) {
+        return freeScroll_->GetFreePanGesture();
+    }
+    return nullptr;
+}
+void ScrollPattern::FreeScrollBy(const OffsetF& delta)
+{
+    if (freeScroll_) {
+        freeScroll_->UpdateOffset(delta);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/pattern/scroll/free_scroll_controller.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_2d.h"
 #include "core/components_ng/pattern/scroll/scroll_accessibility_property.h"
 #include "core/components_ng/pattern/scroll/scroll_content_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
@@ -449,26 +450,14 @@ public:
     /**
      * @return Pan gesture recognizer configured for Axis::FREE mode
      */
-    RefPtr<NGGestureRecognizer> GetOverrideRecognizer() const
-    {
-        if (freeScroll_) {
-            return freeScroll_->GetFreePanGesture();
-        }
-        return nullptr;
-    }
+    RefPtr<NGGestureRecognizer> GetOverrideRecognizer() const;
 
     Offset GetFreeScrollOffset() const final;
-
-    /**
-     * @brief triggers onWillScroll user callback
-     * @return user-modified delta
-     */
-    OffsetF FreeModeFireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const;
-
-    void FreeModeFireOnDidScroll(const OffsetF& delta, ScrollState state) const;
+    void FreeScrollBy(const OffsetF& delta) final;
 
 private:
     RefPtr<FreeScrollController> freeScroll_;
+    RefPtr<ScrollBar2D> scrollBar2d_;
     /* ============================================================================== */
 
     // scrollSnap

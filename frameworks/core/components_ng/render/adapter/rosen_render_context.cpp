@@ -5972,6 +5972,15 @@ void RosenRenderContext::ClearDrawCommands()
     StopRecordingIfNeeded();
 }
 
+void RosenRenderContext::RemoveOverlayModifier(const RefPtr<OverlayModifier>& modifier)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(modifier);
+    auto modifierAdapter = std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(modifier));
+    CHECK_NULL_VOID(modifierAdapter);
+    rsNode_->RemoveModifier(modifierAdapter);
+}
+
 void RosenRenderContext::RemoveContentModifier(const RefPtr<ContentModifier>& modifier)
 {
     CHECK_NULL_VOID(rsNode_);

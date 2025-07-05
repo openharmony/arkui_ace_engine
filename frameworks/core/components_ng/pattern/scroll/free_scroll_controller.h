@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 class ScrollPattern;
@@ -41,6 +42,12 @@ public:
         return freePanGesture_;
     }
 
+    /**
+     * @brief Allow other modules to modify offset. Calling this function automatically stops scroll animations.
+     * @attention doesn't allow over-scroll
+     */
+    void UpdateOffset(const OffsetF& delta);
+
     void OnLayoutFinished(const OffsetF& adjustedOffset, const SizeF& scrollableArea);
 
     OffsetF GetOffset() const;
@@ -60,11 +67,20 @@ private:
      * @brief Start the scroll animation if possible with the given velocity and offset_.
      */
     void TryScrollAnimation(const OffsetF& velocity);
+    void StopScrollAnimation();
+    void HandleAnimationUpdate(const OffsetF& currentValue);
 
     /**
      * @brief clamp position to be within the scrollable area.
      */
-    void ClampFinalPosition(OffsetF& finalPos) const;
+    void ClampPosition(OffsetF& finalPos) const;
+
+    /**
+     * @brief triggers onWillScroll user callback
+     * @return user-modified delta
+     */
+    OffsetF FireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const;
+    void FireOnDidScroll(const OffsetF& delta, ScrollState state) const;
 
     ScrollPattern& pattern_;
     RefPtr<NodeAnimatablePropertyOffsetF> offset_;
@@ -72,7 +88,7 @@ private:
     RefPtr<PanRecognizer> freePanGesture_;
     RefPtr<TouchEventImpl> freeTouch_;
     float friction_ = 0.0f;
-    bool duringPan_ = false;
+    ScrollState state_ = ScrollState::IDLE;
     bool enableScroll_ = true;
 };
 
