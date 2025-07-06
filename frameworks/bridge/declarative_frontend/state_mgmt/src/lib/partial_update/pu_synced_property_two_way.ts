@@ -99,11 +99,11 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     stateMgmtProfiler.end();
   }
 
-  public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedTrackedObjectPropertyName: string): void {
+  public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedTrackedObjectPropertyName: string, isSync: boolean = false): void {
     stateMgmtProfiler.begin('SynchedPropertyTwoWayPU.syncPeerTrackedPropertyHasChanged');
     if (!this.changeNotificationIsOngoing_) {
       stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerTrackedPropertyHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}', changed property '${changedTrackedObjectPropertyName}'.`);
-      this.notifyTrackedObjectPropertyHasChanged(changedTrackedObjectPropertyName);
+      this.notifyTrackedObjectPropertyHasChanged(changedTrackedObjectPropertyName, isSync);
     }
     stateMgmtProfiler.end();
   }
@@ -206,23 +206,23 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
   }
 
   private syncFromSource(): void {
-    this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.source_);
-    this.syncPeerHasChanged(this.source_ as ObservedPropertyAbstractPU<any>);
+    this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.source_.getUnmonitored());
+    this.syncPeerHasChanged(this.source_ as ObservedPropertyAbstractPU<any>, true);
     let raw = ObservedObject.GetRawObject(this.source_.getUnmonitored());
     if (this.shouldInstallTrackedObjectReadCb) {
       Object.keys(raw)
         .forEach(propName => {
           // Collect only @Track'ed changed properties
-          if (Reflect.has(raw as undefined as object, `${TrackedObject.___TRACKED_PREFIX}${propName}`)) {
+          if (typeof propName === 'string' && Reflect.has(raw as undefined as object, `${TrackedObject.___TRACKED_PREFIX}${propName}`)) {
             // if the source is track property, need to notify the property update
-            this.syncPeerTrackedPropertyHasChanged(this.source_ as ObservedPropertyAbstractPU<any>, propName);
+            this.syncPeerTrackedPropertyHasChanged(this.source_ as ObservedPropertyAbstractPU<any>, propName, true);
           }
         });
     }
 
     // sort the view according to the view id
     const dirtyView = Array.from(SyncedViewRegistry.dirtyNodesList)
-      .map((weak) => weak.deref())
+      .map((weak) => weak?.deref())
       .filter((view): view is ViewPU => view instanceof ViewPU)
       .sort((view1, view2) => view1.id__() - view2.id__());
 

@@ -46,14 +46,15 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
    * Called by a SynchedPropertyObjectTwoWayPU (@Link, @Consume) that uses this as sync peer when it has changed
    * @param eventSource 
    */
-  public syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>) : void {
+  public syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>, isSync: boolean = false) : void {
     stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}'.`);
-    this.notifyPropertyHasChangedPU();
+    this.notifyPropertyHasChangedPU(isSync);
   }
 
-  public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<T>, changedTrackedObjectPropertyName: string): void {
+  public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<T>,
+    changedTrackedObjectPropertyName: string, isSync: boolean = false): void {
     stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerTrackedPropertyHasChanged: from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}', changed property '${changedTrackedObjectPropertyName}'.`);
-    this.notifyTrackedObjectPropertyHasChanged(changedTrackedObjectPropertyName);
+    this.notifyTrackedObjectPropertyHasChanged(changedTrackedObjectPropertyName, isSync);
   }
 
   /**
