@@ -22,6 +22,7 @@
 namespace OHOS::Ace::NG {
 void FreeScrollController::HandleAnimationUpdate(const OffsetF& currentValue)
 {
+    // todo: figure out how to modify offset_ without disrupting animation
     FireOnWillScroll(currentValue - prevOffset_, ScrollState::FLING, ScrollSource::FLING);
     CheckCrashEdge(currentValue, pattern_.GetViewPortExtent() - pattern_.GetViewSize());
     pattern_.MarkDirty();
