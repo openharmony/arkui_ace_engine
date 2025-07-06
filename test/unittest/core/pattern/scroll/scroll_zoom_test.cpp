@@ -37,7 +37,7 @@ public:
         MockAnimationManager::Enable(false);
     }
 
-    static GestureEvent MakePinchGesture(float scale)
+    static GestureEvent MakePinchGesture(float scale, const Offset& center = { 0, 0 })
     {
         GestureEvent gesture;
         gesture.SetSourceTool(SourceTool::FINGER);
@@ -45,6 +45,10 @@ public:
         gesture.SetGlobalPoint(Point(1, 1));
         gesture.SetGlobalLocation({ 1, 1 });
         gesture.SetLocalLocation({ 1, 1 });
+        FingerInfo info;
+        info.localLocation_ = center;
+        std::list<FingerInfo> fingerList { info };
+        gesture.SetFingerList(fingerList);
         gesture.SetScale(scale);
         return gesture;
     }
@@ -58,13 +62,22 @@ public:
         auto&& func = *(controller->pinchGesture_->onActionStartId_);
         func(gesture);
     }
-    void PinchUpdate(float scale)
+    void PinchUpdate(float scale, const Offset& center = { 0, 0 })
     {
         const auto& controller = pattern_->zoomCtrl_;
-        auto gesture = MakePinchGesture(scale);
+        auto gesture = MakePinchGesture(scale, center);
         ASSERT_TRUE(controller && controller->pinchGesture_);
         ASSERT_TRUE(controller->pinchGesture_->onActionUpdateId_);
         auto&& func = *(controller->pinchGesture_->onActionUpdateId_);
+        func(gesture);
+    }
+    void PinchEnd(const Offset& center = { 0, 0 })
+    {
+        const auto& controller = pattern_->zoomCtrl_;
+        auto gesture = MakePinchGesture(1.0, center);
+        ASSERT_TRUE(controller && controller->pinchGesture_);
+        ASSERT_TRUE(controller->pinchGesture_->onActionEndId_);
+        auto&& func = *(controller->pinchGesture_->onActionEndId_);
         func(gesture);
     }
 };
@@ -148,6 +161,7 @@ TEST_F(ScrollZoomTest,  MaxMinZoomScaleTest002)
     model.SetAxis(Axis::FREE);
     model.SetMinZoomScale(0.5f);
     model.SetMaxZoomScale(2.0f);
+    model.SetEnableBouncesZoom(false);
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
     ASSERT_NE(pattern_->zoomCtrl_, nullptr);
@@ -196,5 +210,80 @@ TEST_F(ScrollZoomTest,  MaxMinZoomScaleTest002)
     ScrollModelNG::SetMinZoomScale(AceType::RawPtr(frameNode_), -1.0f);
     EXPECT_EQ(pattern_->maxZoomScale_, 1.0f);
     EXPECT_EQ(pattern_->minZoomScale_, 1.0f);
+}
+
+/**
+ * @tc.name: MaxMinZoomScaleTest003
+ * @tc.desc: Test pinch gesture
+ * @tc.type: FUNC
+ */
+TEST_F(ScrollZoomTest,  MaxMinZoomScaleTest003)
+{
+    /**
+     * @tc.step: step1. Create Scroll, set max an min zoom scale.
+     * @tc.expected: pinch gesture initiated.
+     */
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    model.SetMinZoomScale(0.5f);
+    model.SetMaxZoomScale(2.0f);
+    model.SetEnableBouncesZoom(true);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    ASSERT_NE(pattern_->zoomCtrl_, nullptr);
+    EXPECT_NE(pattern_->zoomCtrl_->pinchGesture_, nullptr);
+
+    /**
+     * @tc.step: step2. Pinch to scale scroll view;
+     * @tc.expected: scroll view scaled;
+     */
+    PinchStart(1.0f);
+    PinchUpdate(2.3f);
+    EXPECT_GT(pattern_->zoomScale_.value(), 2.0f);
+    EXPECT_LT(pattern_->zoomScale_.value(), 2.3f);
+    PinchUpdate(1.5f);
+    EXPECT_EQ(pattern_->zoomScale_.value(), 1.5f);
+    PinchUpdate(0.4f);
+    EXPECT_GT(pattern_->zoomScale_.value(), 0.4f);
+    EXPECT_LT(pattern_->zoomScale_.value(), 0.5f);
+
+    /**
+     * @tc.step: step3. Pinch End
+     * @tc.expected: Bounces to min zoom;
+     */
+    PinchEnd();
+    EXPECT_EQ(pattern_->zoomScale_.value(), 0.5f);
+}
+
+/**
+ * @tc.name: ZoomCenterTest001
+ * @tc.desc: Test zoom center
+ * @tc.type: FUNC
+ */
+TEST_F(ScrollZoomTest,  ZoomCenterTest001)
+{
+    /**
+     * @tc.step: step1. Create Scroll, set max an min zoom scale.
+     * @tc.expected: pinch gesture initiated.
+     */
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    model.SetMinZoomScale(0.5f);
+    model.SetMaxZoomScale(2.5f);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    ASSERT_NE(pattern_->zoomCtrl_, nullptr);
+    EXPECT_NE(pattern_->zoomCtrl_->pinchGesture_, nullptr);
+
+    /**
+     * @tc.step: step2. Pinch update
+     * @tc.expected: currentOffset_ updated.
+     */
+    PinchStart(1.0f);
+    PinchUpdate(1.5f, { 1000.0, 1000.0 }); /* 1000.0: center offset */
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -500.0); /* -500.0: current offset */
 }
 } // namespace OHOS::Ace::NG
