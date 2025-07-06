@@ -2291,12 +2291,18 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg115, TestSize.Level1)
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg116, TestSize.Level1)
 {
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     TouchEvent event;
     event.force = 10.0;
     event.sourceTool = SourceTool::FINGER;
     context_->lastSourceType_ = SourceType::NONE;
+    TouchTestResult testResult;
+    context_->eventManager_->mouseTestResults_[0] = testResult;
+    EXPECT_FALSE(context_->eventManager_->mouseTestResults_.empty());
     context_->HandleTouchHoverOut(event);
-    EXPECT_NE(context_->lastSourceType_, SourceType::NONE);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    EXPECT_TRUE(context_->eventManager_->mouseTestResults_.empty());
 }
 
 /**
