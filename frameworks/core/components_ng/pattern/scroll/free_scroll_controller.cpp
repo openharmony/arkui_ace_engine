@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 void FreeScrollController::HandleAnimationUpdate(const OffsetF& currentValue)
 {
     FireOnWillScroll(currentValue - prevOffset_, ScrollState::FLING, ScrollSource::FLING);
+    CheckCrashEdge(currentValue, pattern_.GetViewPortExtent() - pattern_.GetViewSize());
     pattern_.MarkDirty();
 }
 
@@ -148,7 +149,7 @@ void FreeScrollController::HandlePanEndOrCancel(const GestureEvent& event)
     state_ = ScrollState::IDLE;
     const auto& src = event.GetVelocity();
     OffsetF velocity { static_cast<float>(src.GetVelocityX()), static_cast<float>(src.GetVelocityY()) };
-    TryScrollAnimation(velocity);
+    Fling(velocity);
     if (state_ == ScrollState::IDLE) {
         // If the state is IDLE, it means no fling animation is running.
         // We can fire the onScrollEnd event here.
@@ -156,7 +157,7 @@ void FreeScrollController::HandlePanEndOrCancel(const GestureEvent& event)
     }
 }
 
-void FreeScrollController::TryScrollAnimation(const OffsetF& velocity)
+void FreeScrollController::Fling(const OffsetF& velocity)
 {
     const auto curve = MakeRefPtr<ResponsiveSpringMotion>(fabs(2 * ACE_PI / friction_), 1.0f, 0.0f);
     AnimationOption option(curve, CUSTOM_SPRING_ANIMATION_DURATION);
@@ -236,7 +237,7 @@ void FreeScrollController::HandleTouchUpOrCancel()
 {
     if (state_ == ScrollState::IDLE) {
         // animate if currently out of bounds
-        TryScrollAnimation({});
+        Fling({});
     }
 }
 
@@ -369,5 +370,35 @@ void FreeScrollController::CheckCrashEdge(const OffsetF& newOffset, const SizeF&
     if (!edges.empty()) {
         FireOnScrollEdge(edges);
     }
+}
+
+using std::optional;
+void FreeScrollController::ScrollTo(
+    OffsetF finalPos, optional<float> velocity, optional<int32_t> duration, RefPtr<Curve> curve)
+{
+    ClampPosition(finalPos);
+    if (finalPos == offset_->Get()) {
+        // No movement, no need to animate.
+        return;
+    }
+
+    if (!curve) {
+        curve = MakeRefPtr<InterpolatingSpring>(velocity.value_or(DEFAULT_SCROLL_TO_VELOCITY), DEFAULT_SCROLL_TO_MASS,
+            DEFAULT_SCROLL_TO_STIFFNESS, DEFAULT_SCROLL_TO_DAMPING);
+    }
+    AnimationUtils::StartAnimation(
+        { curve, duration.value_or(CUSTOM_SPRING_ANIMATION_DURATION) },
+        [weak = WeakPtr(offset_), finalPos]() {
+            auto prop = weak.Upgrade();
+            CHECK_NULL_VOID(prop);
+            prop->Set(finalPos);
+        },
+        [weak = WeakClaim(this)]() {
+            auto self = weak.Upgrade();
+            CHECK_NULL_VOID(self);
+            self->HandleAnimationEnd();
+        });
+    state_ = ScrollState::FLING;
+    pattern_.FireOnScrollStart();
 }
 } // namespace OHOS::Ace::NG

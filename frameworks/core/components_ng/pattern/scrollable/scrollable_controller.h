@@ -63,6 +63,8 @@ public:
         return observer_;
     }
 
+    bool FreeScrollTo(const ScrollToParam& param) final;
+
 protected:
     WeakPtr<ScrollablePattern> scroll_;
     ScrollerObserver observer_;

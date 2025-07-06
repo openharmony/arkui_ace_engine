@@ -53,6 +53,12 @@ public:
 
     OffsetF GetOffset() const;
 
+    /**
+     * @brief Start a scroll animation to the final position.
+     */
+    void ScrollTo(OffsetF finalPos, std::optional<float> velocity, std::optional<int32_t> duration = std::nullopt,
+        RefPtr<Curve> curve = nullptr);
+
 private:
     void InitializePanRecognizer();
     void InitializeTouchEvent();
@@ -67,7 +73,7 @@ private:
     /**
      * @brief Start the scroll animation if possible with the given velocity and offset_.
      */
-    void TryScrollAnimation(const OffsetF& velocity);
+    void Fling(const OffsetF& velocity);
     void StopScrollAnimation();
     void HandleAnimationUpdate(const OffsetF& currentValue);
     void HandleAnimationEnd();

@@ -481,7 +481,10 @@ public:
     RefPtr<NGGestureRecognizer> GetOverrideRecognizer() const;
 
     Offset GetFreeScrollOffset() const final;
-    void FreeScrollBy(const OffsetF& delta) final;
+    bool FreeScrollBy(const OffsetF& delta) final;
+    bool FreeScrollPage(bool reverse, bool smooth) final;
+    bool FreeScrollToEdge(ScrollEdgeType type, float velocity) final;
+    void FreeScrollTo(const ScrollControllerBase::ScrollToParam& param) final;
 
 private:
     RefPtr<FreeScrollController> freeScroll_;
