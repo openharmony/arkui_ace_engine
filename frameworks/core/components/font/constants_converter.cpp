@@ -599,7 +599,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtStyle.fontFeatures = features;
     }
 
-    auto gradiantColor = textStyle.GetFontForegroudGradiantColor();
+    auto gradiantColor = textStyle.GetFontForegroudGradiantColor().value_or(FontForegroudGradiantColor());
     if (gradiantColor.IsValid()) {
         ConvertGradiantColor(textStyle, context, txtStyle, gradiantColor);
     }
