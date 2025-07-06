@@ -20,7 +20,7 @@ export class DrawableDescriptor {
   protected pixelMap?: image.PixelMap = undefined
   protected nativeObj: long = 0
 
-  constructor() {}
+  constructor() { }
 
   getPixelMap(): image.PixelMap | undefined {
     return this.pixelMap
@@ -38,7 +38,7 @@ export class PixelMapDrawableDescriptor extends DrawableDescriptor {
     if (this.pixelMap) {
       return this.pixelMap
     }
-    DrawableDescriptorInner.createPixelMap(this)
+    this.pixelMap = DrawableDescriptorInner.createPixelMap(this)
     return this.pixelMap
   }
 }
@@ -48,50 +48,44 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
   private background?: DrawableDescriptor = undefined
   private mask?: DrawableDescriptor = undefined
 
-  constructor(
-    foreground?: DrawableDescriptor,
-    background?: DrawableDescriptor,
-    mask?: DrawableDescriptor) {
+  constructor(foreground?: DrawableDescriptor, background?: DrawableDescriptor, mask?: DrawableDescriptor) {
     super();
     this.foreground = foreground
     this.background = background
     this.mask = mask
     DrawableDescriptorInner.createLayeredDrawable(
-      this,
-      foreground?.getPixelMap(),
-      background?.getPixelMap(),
-      mask?.getPixelMap())
+      this, foreground?.getPixelMap(), background?.getPixelMap(), mask?.getPixelMap())
   }
 
   getPixelMap(): image.PixelMap | undefined {
     if (this.pixelMap != undefined) {
       return this.pixelMap
     }
-    DrawableDescriptorInner.composePixelMap(this)
+    this.pixelMap = DrawableDescriptorInner.composePixelMap(this)
     return this.pixelMap
   }
 
   getForeground(): DrawableDescriptor | undefined {
-    if (this.foreground) {
+    if (this.foreground != undefined) {
       return this.foreground
     }
-    DrawableDescriptorInner.createForeground(this)
+    this.foreground = DrawableDescriptorInner.createForeground(this)
     return this.foreground
   }
 
   getBackground(): DrawableDescriptor | undefined {
-    if (this.background) {
+    if (this.background != undefined) {
       return this.background
     }
-    DrawableDescriptorInner.createBackground(this)
+    this.background = DrawableDescriptorInner.createBackground(this)
     return this.background
   }
 
   getMask(): DrawableDescriptor | undefined {
-    if (this.mask) {
+    if (this.mask != undefined) {
       return this.mask
     }
-    DrawableDescriptorInner.createMask(this)
+    this.mask = DrawableDescriptorInner.createMask(this)
     return this.mask
   }
 
@@ -121,22 +115,15 @@ export class AnimatedDrawableDescriptor extends DrawableDescriptor {
 
 export class DrawableDescriptorInner {
   static { loadLibrary("drawable_descriptor_ani") }
-  native static createPixelMapDrawable(
-    value: PixelMapDrawableDescriptor,
-    pixelmap?: image.PixelMap): void;
-  native static createLayeredDrawable(
-    value: LayeredDrawableDescriptor,
-    foreground?: image.PixelMap,
-    background?: image.PixelMap,
-    mask?: image.PixelMap): void;
-  native static createAnimatedDrawable(
-    value: AnimatedDrawableDescriptor,
-    pixelMaps: Array<image.PixelMap>,
-    options?: AnimationOptions): void;
-  native static createPixelMap(value: PixelMapDrawableDescriptor): void
-  native static composePixelMap(value: LayeredDrawableDescriptor): void;
-  native static createForeground(value: LayeredDrawableDescriptor): void
-  native static createBackground(value: LayeredDrawableDescriptor): void
-  native static createMask(value: LayeredDrawableDescriptor): void
+  native static createPixelMapDrawable(value: PixelMapDrawableDescriptor, pixelmap?: image.PixelMap): void;
+  native static createLayeredDrawable(value: LayeredDrawableDescriptor, foreground?: image.PixelMap,
+    background?: image.PixelMap, mask?: image.PixelMap): void;
+  native static createAnimatedDrawable(value: AnimatedDrawableDescriptor,
+      pixelMaps: Array<image.PixelMap>, options?: AnimationOptions): void;
+  native static createPixelMap(value: PixelMapDrawableDescriptor): image.PixelMap;
+  native static composePixelMap(value: LayeredDrawableDescriptor): image.PixelMap;
+  native static createForeground(value: LayeredDrawableDescriptor): DrawableDescriptor;
+  native static createBackground(value: LayeredDrawableDescriptor): DrawableDescriptor;
+  native static createMask(value: LayeredDrawableDescriptor): DrawableDescriptor;
   native static getMaskClipPath(): string;
 }

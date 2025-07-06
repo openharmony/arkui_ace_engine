@@ -337,7 +337,7 @@ bool LayeredDrawableDescriptor::CreateMaskByPath()
         return false;
     }
     auto imageSource = ImageSource::Create(maskPath_);
-    if (imageSource) {
+    if (!imageSource) {
         return false;
     }
     DecodeOptions options;
@@ -353,7 +353,7 @@ bool LayeredDrawableDescriptor::CreateMaskByData()
         return false;
     }
     auto imageSource = ImageSource::Create(maskData_.data(), maskData_.size());
-    if (imageSource) {
+    if (!imageSource) {
         return false;
     }
     DecodeOptions options;
@@ -368,6 +368,9 @@ bool LayeredDrawableDescriptor::CreateMaskByData()
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetForegroundData(
     void* object, uint8_t* data, size_t len)
 {
+    if (len == 0 || data == nullptr) {
+        return;
+    }
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable) {
         std::vector<uint8_t> result(data, data + len);
@@ -378,6 +381,9 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetForegroun
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetBackgroundData(
     void* object, uint8_t* data, size_t len)
 {
+    if (len == 0 || data == nullptr) {
+        return;
+    }
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable) {
         std::vector<uint8_t> result(data, data + len);
@@ -387,6 +393,9 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetBackgroun
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetMaskData(void* object, uint8_t* data, size_t len)
 {
+    if (len == 0 || data == nullptr) {
+        return;
+    }
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable) {
         std::vector<uint8_t> result(data, data + len);
@@ -396,6 +405,9 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetMaskData(
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetMaskPath(void* object, const char* path)
 {
+    if (path == nullptr) {
+        return;
+    }
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable) {
         drawable->SetMaskPath(std::string(path));
