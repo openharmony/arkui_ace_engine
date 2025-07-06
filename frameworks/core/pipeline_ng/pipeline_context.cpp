@@ -536,9 +536,10 @@ void PipelineContext::FlushDirtyNodeUpdate()
 // Executes the callback function for typescript update, if set
 void PipelineContext::FlushTSUpdates()
 {
-    if (flushTSUpdatesCb_) {
+    auto flushTSUpdateCb = flushTSUpdatesCb_;
+    if (flushTSUpdateCb) {
         // Pass the current container id in the callback.
-        bool result = flushTSUpdatesCb_(GetInstanceId());
+        bool result = flushTSUpdateCb(GetInstanceId());
         if (result) {
             // There is more to update
             RequestFrame();
