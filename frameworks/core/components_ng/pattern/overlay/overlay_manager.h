@@ -707,6 +707,7 @@ public:
     void TriggerCustomKeyboardAvoid(int32_t targetId, float safeHeight);
     void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
     void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode);
+    void ExecuteFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode);
     void EraseMenuInfo(int32_t targetId)
     {
         if (menuMap_.find(targetId) != menuMap_.end()) {
@@ -1026,6 +1027,7 @@ private:
 
     std::function<void()> onHideDialogCallback_ = nullptr;
     CancelableCallback<void()> continuousTask_;
+    CancelableCallback<void()> previewFilterTask_;
     std::function<bool()> backPressEvent_ = nullptr;
 
     std::set<WeakPtr<UINode>> windowSceneSet_;

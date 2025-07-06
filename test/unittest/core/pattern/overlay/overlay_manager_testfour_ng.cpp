@@ -489,4 +489,57 @@ HWTEST_F(OverlayManagerTestFourNg, RemoveGatherNode002, TestSize.Level1)
     overlayManager.RemoveGatherNode();
     EXPECT_FALSE(overlayManager.hasGatherNode_);
 }
+
+/**
+ * @tc.name: ShowFilterDisappearAnimation001
+ * @tc.desc: Test ShowFilterDisappearAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFourNg, ShowFilterDisappearAnimation001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID,
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "Menu", MenuType::MENU); });
+    ASSERT_NE(frameNode, nullptr);
+    OverlayManager overlayManager(frameNode);
+    RefPtr<FrameNode> filterNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MenuPattern>(1, "Menu", MenuType::MENU); });
+    overlayManager.ShowFilterDisappearAnimation(filterNode);
+    auto callback = []() {};
+    overlayManager.previewFilterTask_.Reset(callback);
+    overlayManager.ShowFilterDisappearAnimation(filterNode);
+    EXPECT_FALSE(overlayManager.previewFilterTask_);
+}
+
+/**
+ * @tc.name: ShowFilterAnimation001
+ * @tc.desc: Test ShowFilterAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFourNg, ShowFilterAnimation001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID,
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "Menu", MenuType::MENU); });
+    ASSERT_NE(frameNode, nullptr);
+    OverlayManager overlayManager(frameNode);
+    RefPtr<FrameNode> columnNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MenuPattern>(1, "Menu", MenuType::MENU); });
+    auto menuWrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
+    overlayManager.ShowFilterAnimation(columnNode, menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->hoverScaleInterruption_ = true;
+    auto pipelineContext = menuWrapperNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    ASSERT_NE(menuTheme, nullptr);
+    pipelineContext->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    menuTheme->hoverImageDelayDurationForInterrupt_ = 10;
+    MockPipelineContext::GetCurrent()->FlushUITasks();
+    overlayManager.ShowFilterAnimation(columnNode, menuWrapperNode);
+    EXPECT_TRUE(overlayManager.previewFilterTask_);
+}
 } // namespace OHOS::Ace::NG

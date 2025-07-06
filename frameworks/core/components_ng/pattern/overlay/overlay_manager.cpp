@@ -7113,6 +7113,10 @@ void OverlayManager::RemoveMenuFilter(const RefPtr<FrameNode>& menuWrapper, bool
 
 void OverlayManager::ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filterNode)
 {
+    if (previewFilterTask_) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "cancel preview filter delay task");
+        previewFilterTask_.Cancel();
+    }
     CHECK_NULL_VOID(filterNode);
     auto filterContext = filterNode->GetRenderContext();
     CHECK_NULL_VOID(filterContext);
@@ -8212,16 +8216,46 @@ const RefPtr<GroupManager>& OverlayManager::GetGroupManager() const
 void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode)
 {
     CHECK_NULL_VOID(columnNode);
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto pipelineContext = menuWrapperNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto hoverDelay = menuWrapperPattern->GetHoverScaleInterruption();
+    auto delay = hoverDelay ? menuTheme->GetHoverImageDelayDuration(true) : 0;
+    if (delay > 0) {
+        previewFilterTask_.Reset([weak = WeakClaim(this), columnWeak = WeakClaim(RawPtr(columnNode)),
+                                     wrapperWeak = WeakClaim(RawPtr(menuWrapperNode))]() {
+            auto columnNode = columnWeak.Upgrade();
+            auto menuWrapperNode = wrapperWeak.Upgrade();
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ExecuteFilterAnimation(columnNode, menuWrapperNode);
+        });
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostDelayedTask(
+            previewFilterTask_, TaskExecutor::TaskType::UI, delay, "ArkUIShowFilterDelayTask");
+    } else {
+        ExecuteFilterAnimation(columnNode, menuWrapperNode);
+    }
+}
+
+void OverlayManager::ExecuteFilterAnimation(
+    const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode)
+{
+    CHECK_NULL_VOID(columnNode);
 
     auto filterRenderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(filterRenderContext);
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto pipelineContext = menuWrapperNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
-
-    CHECK_NULL_VOID(menuWrapperNode);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     auto maskEnable = menuWrapperPattern->GetMenuMaskEnable();
@@ -8233,8 +8267,6 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, co
     AnimationOption option;
     option.SetDuration(menuTheme->GetFilterAnimationDuration());
     option.SetCurve(Curves::SHARP);
-    auto hoverDelay = menuWrapperPattern->GetHoverScaleInterruption();
-    option.SetDelay(hoverDelay ? menuTheme->GetHoverImageDelayDuration(true) : 0);
     option.SetOnFinishEvent([weak = WeakClaim(this), filterId = columnNode->GetId()] {
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "show filter animation finish");
         auto overlayManager = weak.Upgrade();
