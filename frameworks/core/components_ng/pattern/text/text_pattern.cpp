@@ -200,7 +200,7 @@ void TextPattern::ResetSelection()
     }
 }
 
-Offset TextPattern::GetIndexByOffset(const Offset& pos, int32_t& extend)
+void TextPattern::GetIndexByOffset(const Offset& pos, int32_t& extend)
 {
     auto selectionOffset = pos;
     if (GreatNotEqual(selectionOffset.GetY(), pManager_->GetHeight())) {
@@ -219,7 +219,6 @@ Offset TextPattern::GetIndexByOffset(const Offset& pos, int32_t& extend)
             }
         }
     }
-    return selectionOffset;
 }
 
 void TextPattern::InitSelection(const Offset& pos)
@@ -290,16 +289,15 @@ void TextPattern::InitAiSelection(const Offset& globalOffset)
     }
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { localOffset.GetX() - textPaintOffset.GetX(), localOffset.GetY() - textPaintOffset.GetY() };
-    auto selectionOffset = GetIndexByOffset(textOffset, extend);
-    if (IsSelected() && LocalOffsetInRange(selectionOffset, textSelector_.GetTextStart(), textSelector_.GetTextEnd())) {
+    GetIndexByOffset(textOffset, extend);
+    if (IsSelected() && LocalOffsetInRange(localOffset, textSelector_.GetTextStart(), textSelector_.GetTextEnd())) {
         return;
     }
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::ELLIPSIS) {
         auto range = pManager_->GetEllipsisTextRange();
-        if (LocalOffsetInRange(
-            selectionOffset, static_cast<int32_t>(range.first), static_cast<int32_t>(range.second))) {
+        if (LocalOffsetInRange(localOffset, static_cast<int32_t>(range.first), static_cast<int32_t>(range.second))) {
             return;
         }
     }
@@ -313,7 +311,7 @@ void TextPattern::InitAiSelection(const Offset& globalOffset)
         }
         start = aiSpanIter->second.start;
         end = aiSpanIter->second.end;
-        if (extend >= start && extend < end && LocalOffsetInRange(selectionOffset, start, end)) {
+        if (extend >= start && extend < end && LocalOffsetInRange(localOffset, start, end)) {
             isAiSpan = true;
         }
     }
