@@ -1683,9 +1683,9 @@ bool ScrollPattern::FreeScrollPage(bool reverse, bool smooth)
     CHECK_NULL_RETURN(freeScroll_, false);
     const float dy = reverse ? viewSize_.Height() : -viewSize_.Height();
     if (smooth) {
-        freeScroll_->UpdateOffset({ 0, dy });
-    } else {
         freeScroll_->ScrollTo(freeScroll_->GetOffset() + OffsetF { 0, dy }, std::nullopt);
+    } else {
+        freeScroll_->UpdateOffset({ 0, dy });
     }
     return true;
 }

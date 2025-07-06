@@ -647,6 +647,44 @@ TEST_F(FreeScrollTest, Scroller002)
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(-posX_2.Value(), 0.0f).ToString());
 }
 
+/**
+ * @tc.name: Scroller003
+ * @tc.desc: Test scroller scrollPage
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Scroller003)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    auto scroller = AceType::MakeRefPtr<ScrollableController>();
+    scroller->SetScrollPattern(pattern_);
+
+    scroller->ScrollPage(false, false);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, -HEIGHT).ToString());
+
+    scroller->ScrollPage(false, true);
+    EXPECT_EQ(ScrollState::FLING, pattern_->freeScroll_->state_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(ScrollState::IDLE, pattern_->freeScroll_->state_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, -HEIGHT * 2).ToString());
+
+    scroller->ScrollPage(true, false);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, -HEIGHT));
+
+    scroller->ScrollPage(true, true);
+    EXPECT_EQ(ScrollState::FLING, pattern_->freeScroll_->state_);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(ScrollState::IDLE, pattern_->freeScroll_->state_);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, 0).ToString());
+}
+
 namespace {
 const Dimension NORMAL_BAR_WIDTH = 4.0_vp;
 } // namespace
