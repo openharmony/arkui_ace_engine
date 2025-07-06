@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "mock_task_executor.h"
 #include "test/unittest/core/pattern/scroll/scroll_test_ng.h"
 #include "ui/base/geometry/dimension.h"
 
@@ -839,6 +840,40 @@ TEST_F(FreeScrollTest, ScrollBar005)
     pattern_->OnModifyDone();
     EXPECT_FALSE(pattern_->scrollBar2d_);
     EXPECT_TRUE(pattern_->scrollBar_);
+}
+
+/**
+ * @tc.name: ScrollBar006
+ * @tc.desc: Test scrollBar appear animation
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollBar006)
+{
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockScrollTaskExecutor>();
+    PipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    ASSERT_FALSE(pattern_->scrollBar_);
+    ASSERT_TRUE(pattern_->scrollBar2d_);
+    const auto& verticalBar = pattern_->scrollBar2d_->vertical_;
+    const auto& horizontalBar = pattern_->scrollBar2d_->horizontal_;
+    mockTaskExecutor->RunDelayTask(); // testing horizontal to avoid MockTaskExecutor's bug (only records last task)
+    EXPECT_EQ(horizontalBar.opacityAnimationType_, OpacityAnimationType::DISAPPEAR);
+    FlushUITasks(frameNode_);
+
+    PanStart({});
+    EXPECT_EQ(verticalBar.opacityAnimationType_, OpacityAnimationType::APPEAR);
+    PanUpdate({ -DELTA_X, -DELTA_Y });
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(horizontalBar.opacityAnimationType_, OpacityAnimationType::NONE);
+    PanEnd({}, {});
+    mockTaskExecutor->RunDelayTask();
+    EXPECT_EQ(horizontalBar.opacityAnimationType_, OpacityAnimationType::DISAPPEAR);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(horizontalBar.opacityAnimationType_, OpacityAnimationType::NONE);
 }
 
 /**

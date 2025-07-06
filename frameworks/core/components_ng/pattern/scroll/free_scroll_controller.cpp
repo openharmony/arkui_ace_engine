@@ -121,7 +121,7 @@ float GetGamma(float offset, float scrollableDistance, float viewLength)
 void FreeScrollController::HandlePanStart(const GestureEvent& event)
 {
     state_ = ScrollState::SCROLL;
-    pattern_.FireOnScrollStart();
+    FireOnScrollStart();
 }
 
 void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
@@ -324,6 +324,24 @@ void FreeScrollController::FireOnDidScroll(const OffsetF& delta, ScrollState sta
     }
 }
 
+void FreeScrollController::FireOnScrollStart() const
+{
+    auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    const auto& onScrollStart = eventHub->GetOnScrollStart();
+    const auto& frameCb = eventHub->GetJSFrameNodeOnScrollStart();
+    if (frameCb) {
+        frameCb();
+    }
+    if (onScrollStart) {
+        onScrollStart();
+    }
+    pattern_.AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_START);
+    if (auto scrollBar = pattern_.Get2DScrollBar()) {
+        scrollBar->OnScrollStart();
+    }
+}
+
 void FreeScrollController::FireOnScrollEnd() const
 {
     auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
@@ -335,6 +353,10 @@ void FreeScrollController::FireOnScrollEnd() const
     }
     if (onScrollStop) {
         onScrollStop();
+    }
+    pattern_.AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
+    if (auto scrollBar = pattern_.Get2DScrollBar()) {
+        scrollBar->OnScrollEnd();
     }
 }
 
@@ -397,6 +419,6 @@ void FreeScrollController::ScrollTo(
             self->HandleAnimationEnd();
         });
     state_ = ScrollState::FLING;
-    pattern_.FireOnScrollStart();
+    FireOnScrollStart();
 }
 } // namespace OHOS::Ace::NG

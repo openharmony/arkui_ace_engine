@@ -98,6 +98,7 @@ private:
      */
     OffsetF FireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const;
     void FireOnDidScroll(const OffsetF& delta, ScrollState state) const;
+    void FireOnScrollStart() const;
     void FireOnScrollEnd() const;
     void FireOnScrollEdge(const std::vector<ScrollEdge>& edges) const;
 

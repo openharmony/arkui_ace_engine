@@ -43,7 +43,14 @@ public:
     {
         return horizontal_;
     }
+    /**
+     * @brief Reset the animation flags for both scroll bars when render finishes.
+     * 
+     */
     void ResetAnimationSignals();
+
+    void OnScrollStart();
+    void OnScrollEnd();
 
     void Update(const std::unique_ptr<ScrollBarProperty>& props);
 
