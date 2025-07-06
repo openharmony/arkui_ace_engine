@@ -165,6 +165,7 @@ private:
         const RefPtr<SafeAreaManager>& safeAreaManager, float safeAreaTop, float safeAreaBottom);
     Dimension GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper);
     Dimension GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     double GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper);
     double GetTextMaxHeight();

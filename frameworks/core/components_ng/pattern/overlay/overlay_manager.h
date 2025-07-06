@@ -766,6 +766,7 @@ public:
     bool CheckSkipMenuShow(int32_t targetId);
     bool IsTopOrder(std::optional<double> levelOrder);
     std::optional<double> GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
+    void PopToast(int32_t targetId);
 
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
@@ -818,7 +819,6 @@ private:
         }
     }
     void CleanInvalidModalNode(const WeakPtr<FrameNode>& invalidNode);
-    void PopToast(int32_t targetId);
 
     // toast should contain id to avoid multiple delete.
     std::unordered_map<int32_t, WeakPtr<FrameNode>> toastMap_;
