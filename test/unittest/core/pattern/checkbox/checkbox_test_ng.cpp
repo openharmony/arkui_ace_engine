@@ -2979,13 +2979,13 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0134, TestSize.Level1)
 HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest0135, TestSize.Level1)
 {
     /**
-     * @tc.steps: MockContainer.apiTargetVersion_ = VERSION_TWELVE.
+     * @tc.steps: step1. MockContainer.apiTargetVersion_ = VERSION_TWELVE.
      */
     MockContainer::SetUp();
     MockContainer::Current()->SetApiTargetVersion(VERSION_TWELVE);
 
     /**
-     * @tc.steps: create GeometryNode
+     * @tc.steps: step2. create GeometryNode.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -2995,7 +2995,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest0135, TestSize.Level1)
     ASSERT_NE(checkBoxPaintProperty, nullptr);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
     /**
-     * @tc.case: case. CheckBoxPaintMethod's PaintCheckBox will be called.
+     * @tc.steps: step3. Create checkBoxModifier and call PaintCheckBox.
+     * @tc.expected: step3. expect DrawRoundRect call at least 1.
      */
     auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
         false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
