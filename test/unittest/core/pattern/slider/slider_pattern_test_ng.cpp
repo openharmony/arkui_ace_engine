@@ -123,6 +123,9 @@ const std::vector<std::pair<std::vector<float>, int32_t>> ACCESSIBILITY_STEP_IND
 constexpr float PLAY_HAPTIC_FEEDBACK_RATIO = 1.0f;
 constexpr float PLAY_HAPTIC_FEEDBACK_RATIO_HALF = 0.5f;
 constexpr float PLAY_HAPTIC_FEEDBACK_RATIO_ZERO = 0.0f;
+constexpr float OUTSET_HOT_BLOCK_SHADOW_WIDTH = 20.0f;
+constexpr float INSET_HOT_BLOCK_SHADOW_WIDTH = 30.0f;
+constexpr float TRACK_THICKNESS = 40.0f;
 } // namespace
 class SliderPatternTestNg : public testing::Test {
 public:
@@ -373,11 +376,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest003, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
-    sliderTheme->outsetHotBlockShadowWidth_ = Dimension(20.0f);
-    sliderTheme->insetHotBlockShadowWidth_ = Dimension(30.0f);
+    sliderTheme->outsetHotBlockShadowWidth_ = Dimension(OUTSET_HOT_BLOCK_SHADOW_WIDTH);
+    sliderTheme->insetHotBlockShadowWidth_ = Dimension(INSET_HOT_BLOCK_SHADOW_WIDTH);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
-    sliderLayoutAlgorithm->trackThickness_ = 40.0f;
+    sliderLayoutAlgorithm->trackThickness_ = TRACK_THICKNESS;
 
     auto imageId = ElementRegister::GetInstance()->MakeUniqueId();
     sliderPattern->imageFrameNode_ =

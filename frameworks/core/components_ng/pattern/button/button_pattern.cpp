@@ -32,7 +32,7 @@ constexpr float MAXFONTSCALE = 3.20f;
 
 inline std::string ToString(const ButtonType& type)
 {
-    static const LinearEnumMapNode<ButtonType, std::string> table[] = {
+    const LinearEnumMapNode<ButtonType, std::string> table[] = {
         { ButtonType::NORMAL, "NORMAL" }, { ButtonType::CAPSULE, "CAPSULE" },
         { ButtonType::CIRCLE, "CIRCLE" }, { ButtonType::TEXT, "TEXT" },
         { ButtonType::ARC, "ARC" }, { ButtonType::DOWNLOAD, "DOWNLOAD" },
@@ -45,7 +45,7 @@ inline std::string ToString(const ButtonType& type)
 
 inline std::string ToString(const ButtonStyleMode& mode)
 {
-    static const LinearEnumMapNode<ButtonStyleMode, std::string> table[] = {
+    const LinearEnumMapNode<ButtonStyleMode, std::string> table[] = {
         { ButtonStyleMode::NORMAL, "NORMAL" },
         { ButtonStyleMode::EMPHASIZE, "EMPHASIZE" },
         { ButtonStyleMode::TEXT, "TEXT" },
@@ -56,7 +56,7 @@ inline std::string ToString(const ButtonStyleMode& mode)
 
 inline std::string ToString(const ControlSize& size)
 {
-    static const LinearEnumMapNode<ControlSize, std::string> table[] = {
+    const LinearEnumMapNode<ControlSize, std::string> table[] = {
         { ControlSize::SMALL, "SMALL" },
         { ControlSize::NORMAL, "NORMAL" },
     };
@@ -66,7 +66,7 @@ inline std::string ToString(const ControlSize& size)
 
 inline std::string ToString(const ButtonRole& role)
 {
-    static const LinearEnumMapNode<ButtonRole, std::string> table[] = {
+    const LinearEnumMapNode<ButtonRole, std::string> table[] = {
         { ButtonRole::NORMAL, "NORMAL" },
         { ButtonRole::ERROR, "ERROR" },
     };
@@ -76,7 +76,7 @@ inline std::string ToString(const ButtonRole& role)
 
 inline std::string ToString(const TextHeightAdaptivePolicy& policy)
 {
-    static const LinearEnumMapNode<TextHeightAdaptivePolicy, std::string> table[] = {
+    const LinearEnumMapNode<TextHeightAdaptivePolicy, std::string> table[] = {
         { TextHeightAdaptivePolicy::MAX_LINES_FIRST, "MAX_LINES_FIRST" },
         { TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, "MIN_FONT_SIZE_FIRST" },
         { TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST, "LAYOUT_CONSTRAINT_FIRST" },

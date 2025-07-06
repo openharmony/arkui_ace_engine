@@ -81,7 +81,7 @@ public:
 
     std::string InteractionModeToJson() const
     {
-        static const std::array<std::string, 3> SLIDER_INTERACTION_MODE_TO_STRING = {
+        const std::array<std::string, 3> SLIDER_INTERACTION_MODE_TO_STRING = {
             "SliderInteraction.SLIDE_AND_CLICK",
             "SliderInteraction.SLIDE_ONLY",
             "SliderInteraction.SLIDE_AND_CLICK_UP",
@@ -96,7 +96,7 @@ public:
 
     std::string BlockTypeToJson() const
     {
-        static const std::array<std::string, 3> SLIDER_BLOCK_TYPE_TO_STRING = {
+        const std::array<std::string, 3> SLIDER_BLOCK_TYPE_TO_STRING = {
             "BlockStyleType.DEFAULT",
             "BlockStyleType.IMAGE",
             "BlockStyleType.SHAPE",
