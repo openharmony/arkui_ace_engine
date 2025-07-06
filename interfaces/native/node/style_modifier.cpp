@@ -14692,7 +14692,7 @@ int32_t SetWaterFlowSyncLoad(ArkUI_NodeHandle node, const ArkUI_AttributeItem* i
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Bool syncLoad = DEFAULT_FALSE;
+    ArkUI_Bool syncLoad = DEFAULT_TRUE;
     if (InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[0].i32)) {
         syncLoad = item->value[0].i32;
     }
@@ -15422,7 +15422,7 @@ int32_t SetGridSyncLoad(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    ArkUI_Bool syncLoad = DEFAULT_FALSE;
+    ArkUI_Bool syncLoad = DEFAULT_TRUE;
     if (InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[0].i32)) {
         syncLoad = item->value[0].i32;
     }
