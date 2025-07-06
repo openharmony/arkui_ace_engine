@@ -1551,6 +1551,36 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetPlacement004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BubblePatternUpdateStyleOptionTest001
+ * @tc.desc: Test BubblePattern::UpdateStyleOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateStyleOptionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set param.
+     */
+    bubblePattern->isTips_ = true;
+    bubblePattern->OnColorConfigurationUpdate();
+    auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto renderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(BlurStyle::COMPONENT_REGULAR, renderContext->GetBackBlurStyle()->blurStyle);
+}
+
+/**
  * @tc.name: AvoidOrCoverParent001
  * @tc.desc: Test AvoidOrCoverParent
  * @tc.type: FUNC

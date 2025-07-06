@@ -411,6 +411,12 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         }
     }
 
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (targetNode) {
+        bool isWithTheme = targetNode->GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED;
+        popupParam->SetIsWithTheme(isWithTheme);
+    }
+
     auto arrowPointPosition = popupObj->GetProperty("arrowPointPosition");
     if (arrowPointPosition->IsString()) {
         char* pEnd = nullptr;

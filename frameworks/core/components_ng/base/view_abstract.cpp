@@ -3668,8 +3668,10 @@ void ViewAbstract::UpdatePopupParamResource(const RefPtr<PopupParam>& param, con
         type = POPUPTYPE_POPUPCOLOR;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, popupColorResourceObject, type);
         type = POPUPTYPE_MASKCOLOR;
-        auto maskColorResourceObject = param->GetMaskColorResourceObject();
-        ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, maskColorResourceObject, type);
+        if (!param->GetIsWithTheme()) {
+            auto maskColorResourceObject = param->GetMaskColorResourceObject();
+            ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, maskColorResourceObject, type);
+        }
         auto maskResourceObject = param->GetMaskResourceObject();
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, maskResourceObject);
         auto widthResourceObject = param->GetWidthResourceObject();
