@@ -46,10 +46,11 @@ class SyncedViewRegistry {
   
   public static addSyncedUpdateDirtyNodes(view: ViewPU): void {
     let weakRef = this.wmap_.get(view)
-    if (weakRef) {
+    if (!weakRef) {
       SyncedViewRegistry.wmap_.set(view, weakRef = new WeakRef(view));
     }
     SyncedViewRegistry.dirtyNodesList.add(weakRef);
+    stateMgmtConsole.debug(`SyncedViewRegistry addSyncedUpdateDirtyNodes ${view.debugInfo__()}, syncDirtySize: ${SyncedViewRegistry.dirtyNodesList.size}`);
   }
 }
 
@@ -500,8 +501,8 @@ abstract class ViewPU extends PUV2ViewBase
           this.dirtyElementIdsNeedsUpdateSynchronously_.add(elmtId);
         }
       }
+      SyncedViewRegistry.addSyncedUpdateDirtyNodes(this);
     }
-    SyncedViewRegistry.addSyncedUpdateDirtyNodes(this);
   }
 
   // implements IMultiPropertiesChangeSubscriber
@@ -743,13 +744,6 @@ abstract class ViewPU extends PUV2ViewBase
         this.reconnectConsume_.delete(key);
       }
     }
-    this.childrenWeakrefMap_.forEach((weakRefChild) => {
-      const child = weakRefChild.deref();
-      if (!(child instanceof ViewPU) || child.reconnectConsume_.size === 0) {
-        return;
-      }
-      child.disconnectedConsume();
-    })
   }
 
   /**

@@ -313,13 +313,19 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
 
   // notify owning ViewPU and peers of a ObservedObject @Track property's assignment
-  protected notifyTrackedObjectPropertyHasChanged(changedPropertyName : string) : void {
+  protected notifyTrackedObjectPropertyHasChanged(changedPropertyName : string, isSync: boolean = false) : void {
     stateMgmtProfiler.begin('ObservedPropertyAbstract.notifyTrackedObjectPropertyHasChanged');
     stateMgmtConsole.debug(`${this.debugInfo()}: notifyTrackedObjectPropertyHasChanged.`);
     if (this.owningView_) {
       if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
         // send viewPropertyHasChanged right away
-        this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
+        if (!isSync) {
+          this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
+        } else {
+          this.owningView_.collectElementsNeedToUpdateSynchronously(this.info_,
+            this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
+        }
+        
         // send changed observed property to profiler
         // only will be true when enable profiler
         if (stateMgmtDFX.enableProfiler) {
@@ -334,7 +340,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     this.subscriberRefs_.forEach((subscriber) => {
       if (subscriber) {
         if ('syncPeerTrackedPropertyHasChanged' in subscriber) {
-          (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerTrackedPropertyHasChanged(this, changedPropertyName);
+          (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerTrackedPropertyHasChanged(this, changedPropertyName, isSync);
         } else  {
           stateMgmtConsole.warn(`${this.debugInfo()}: notifyTrackedObjectPropertyHasChanged: unknown subscriber ID 'subscribedId' error!`);
         }
