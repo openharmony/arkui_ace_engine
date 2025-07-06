@@ -45,7 +45,7 @@ public:
     }
     /**
      * @brief Reset the animation flags for both scroll bars when render finishes.
-     * 
+     *
      */
     void ResetAnimationSignals();
 
