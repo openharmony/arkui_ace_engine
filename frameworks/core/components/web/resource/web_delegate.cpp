@@ -8794,7 +8794,7 @@ void WebDelegate::OnPdfScrollAtBottom(const std::string& url)
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostTask(
         [weak = WeakClaim(this), url]() {
-            TAG_LOGI(AceLogTag::ACE_WEB, "[arkwebpdf] WebDelegate::OnPdfScrollAtBottom, fire event task");
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnPdfScrollAtBottom, fire event task");
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto webPattern = delegate->webPattern_.Upgrade();
@@ -8811,7 +8811,7 @@ void WebDelegate::OnPdfLoadEvent(int32_t result, const std::string& url)
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostTask(
         [weak = WeakClaim(this), result, url]() {
-            TAG_LOGI(AceLogTag::ACE_WEB, "[arkwebpdf] WebDelegate::OnPdfLoadEvent, fire event task");
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnPdfLoadEvent, fire event task");
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto webPattern = delegate->webPattern_.Upgrade();

@@ -1502,7 +1502,7 @@ bool WebClientImpl::OnBeforeUnloadByJSV2(
 void WebClientImpl::OnPdfScrollAtBottom(const std::string& url)
 {
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "[arkwebpdf] WebClientImpl::OnPdfScrollAtBottom, url: %{public}s", url.c_str());
+        "WebClientImpl::OnPdfScrollAtBottom, url: %{public}s", url.c_str());
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
@@ -1512,7 +1512,7 @@ void WebClientImpl::OnPdfScrollAtBottom(const std::string& url)
 void WebClientImpl::OnPdfLoadEvent(int32_t result, const std::string& url)
 {
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "[arkwebpdf] WebClientImpl::OnPdfLoadEvent, result: %{public}d, url: %{public}s", result, url.c_str());
+        "WebClientImpl::OnPdfLoadEvent, result: %{public}d, url: %{public}s", result, url.c_str());
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());

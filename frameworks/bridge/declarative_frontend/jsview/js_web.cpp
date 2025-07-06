@@ -2235,10 +2235,10 @@ JSRef<JSVal> PdfScrollEventToJSValue(const PdfScrollEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
-JSRef<JSVal> PdfLoadEventToJSValue(const PdfScrollEvent& eventInfo)
+JSRef<JSVal> PdfLoadEventToJSValue(const PdfLoadEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
-    obj->SetProperty("result", eventInfo.GetState());
+    obj->SetProperty("result", eventInfo.GetResult());
     obj->SetProperty("url", eventInfo.GetUrl());
     return JSRef<JSVal>::Cast(obj);
 }
@@ -6388,7 +6388,7 @@ void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
 
 void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "[arkwebpdf] JSWeb::OnPdfScrollAtBottom, callback set");
+    TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPdfScrollAtBottom, callback set");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
@@ -6402,11 +6402,13 @@ void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)
         CHECK_NULL_VOID(webNode);
         ContainerScope scope(webNode->GetInstanceId());
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        CHECK_NULL_VOID(func);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         if (pipelineContext) {
-            pipelineContext->UpdateCurrentActiveNode(node)
+            pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<PdfScrollEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetOnPdfScrollAtBottom(jsCallback);
@@ -6414,7 +6416,7 @@ void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)
 
 void JSWeb::OnPdfLoadEvent(const JSCallbackInfo& args)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "[arkwebpdf] JSWeb::OnPdfLoadEvent, callback set");
+    TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPdfLoadEvent, callback set");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
@@ -6428,11 +6430,13 @@ void JSWeb::OnPdfLoadEvent(const JSCallbackInfo& args)
         CHECK_NULL_VOID(webNode);
         ContainerScope scope(webNode->GetInstanceId());
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        CHECK_NULL_VOID(func);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         if (pipelineContext) {
-            pipelineContext->UpdateCurrentActiveNode(node)
+            pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<PdfLoadEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetOnPdfLoadEvent(jsCallback);
