@@ -8338,6 +8338,12 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
     if (!safeAreaManager || NearZero(safeAreaManager->GetKeyboardInset().Length(), 0)) {
         return;
     }
+    auto lastCaretPos = GetLastCaretPos();
+    auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
+    if (lastCaretPos.has_value() && caretPos > lastCaretPos.value() && !isTriggerAvoidOnCaretAvoidMode_) {
+        return;
+    }
+    SetLastCaretPos(caretPos);
     textFieldManager->SetHeight(GetCaretRect().Height());
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

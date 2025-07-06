@@ -1378,6 +1378,17 @@ public:
 #if defined(IOS_PLATFORM)
     const TextEditingValue& GetInputEditingValue() const override;
 #endif
+
+std::optional<float> GetLastCaretPos() const
+{
+    return lastCaretPos_;
+}
+
+void SetLastCaretPos(float lastCaretPos)
+{
+    lastCaretPos_ = lastCaretPos;
+}
+
 protected:
     bool CanStartAITask() const override;
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
@@ -1891,6 +1902,7 @@ private:
     RefPtr<RichEditorContentPattern> contentPattern_;
     std::unique_ptr<StyleManager> styleManager_;
     bool requestFocusBySingleClick_ = false;
+    std::optional<float> lastCaretPos_ = std::nullopt;
 #if defined(IOS_PLATFORM)
     TextCompose compose_;
     bool unmarkText_;
