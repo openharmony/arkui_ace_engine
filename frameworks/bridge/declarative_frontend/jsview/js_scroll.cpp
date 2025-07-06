@@ -381,6 +381,13 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("enablePaging", &JSScroll::SetEnablePaging);
     JSClass<JSScroll>::StaticMethod("clip", &JSScrollable::JsClip);
     JSClass<JSScroll>::StaticMethod("initialOffset", &JSScroll::SetInitialOffset);
+    JSClass<JSScroll>::StaticMethod("maxZoomScale", &JSScroll::SetMaxZoomScale);
+    JSClass<JSScroll>::StaticMethod("minZoomScale", &JSScroll::SetMinZoomScale);
+    JSClass<JSScroll>::StaticMethod("zoomScale", &JSScroll::SetZoomScale);
+    JSClass<JSScroll>::StaticMethod("enableBouncesZoom", &JSScroll::SetEnableBouncesZoom);
+    JSClass<JSScroll>::StaticMethod("onDidZoom", &JSScroll::OnDidZoomCallback, opt);
+    JSClass<JSScroll>::StaticMethod("onZoomStart", &JSScroll::OnZoomStartCallback, opt);
+    JSClass<JSScroll>::StaticMethod("onZoomStop", &JSScroll::OnZoomStopCallback, opt);
     JSClass<JSScroll>::InheritAndBind<JSScrollableBase>(globalObj);
 }
 
@@ -553,5 +560,93 @@ void JSScroll::SetInitialOffset(const JSCallbackInfo& args)
     CalcDimension yOffset;
     ParseJsDimensionVp(obj->GetProperty("yOffset"), yOffset);
     ScrollModel::GetInstance()->SetInitialOffset(NG::OffsetT(xOffset, yOffset));
+}
+
+void JSScroll::SetMaxZoomScale(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1) {
+        return;
+    }
+    double maxZoomScale = 1.0;
+    JSViewAbstract::ParseJsDouble(args[0], maxZoomScale);
+    ScrollModel::GetInstance()->SetMaxZoomScale(maxZoomScale);
+}
+
+void JSScroll::SetMinZoomScale(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1) {
+        return;
+    }
+    double minZoomScale = 1.0;
+    JSViewAbstract::ParseJsDouble(args[0], minZoomScale);
+    ScrollModel::GetInstance()->SetMinZoomScale(minZoomScale);
+}
+
+void JSScroll::SetZoomScale(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1) {
+        return;
+    }
+    double zoomScale = 1.0;
+    if (JSViewAbstract::ParseJsDouble(args[0], zoomScale)) {
+        ScrollModel::GetInstance()->SetZoomScale(zoomScale);
+    } else {
+        ScrollModel::GetInstance()->ResetZoomScale();
+    }
+}
+
+void JSScroll::SetEnableBouncesZoom(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1) {
+        return;
+    }
+    bool enableBouncesZoom = true;
+    if (args[0]->IsBoolean()) {
+        enableBouncesZoom = args[0]->ToBoolean();
+    }
+    ScrollModel::GetInstance()->SetEnableBouncesZoom(enableBouncesZoom);
+}
+
+void JSScroll::OnDidZoomCallback(const JSCallbackInfo& args)
+{
+    if (args.Length() > 0 && args[0]->IsFunction()) {
+        auto onZoom = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](float scale) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(scale);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+        ScrollModel::GetInstance()->SetOnDidZoom(std::move(onZoom));
+    } else {
+        ScrollModel::GetInstance()->SetOnDidZoom(nullptr);
+    }
+    args.SetReturnValue(args.This());
+}
+
+void JSScroll::OnZoomStartCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto zoomStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Call(JSRef<JSObject>(), 0, nullptr);
+        };
+        ScrollModel::GetInstance()->SetOnZoomStart(std::move(zoomStart));
+    } else {
+        ScrollModel::GetInstance()->SetOnZoomStart(nullptr);
+    }
+    args.SetReturnValue(args.This());
+}
+
+void JSScroll::OnZoomStopCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto zoomStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Call(JSRef<JSObject>(), 0, nullptr);
+        };
+        ScrollModel::GetInstance()->SetOnZoomStop(std::move(zoomStop));
+    } else {
+        ScrollModel::GetInstance()->SetOnZoomStop(nullptr);
+    }
+    args.SetReturnValue(args.This());
 }
 } // namespace OHOS::Ace::Framework

@@ -610,6 +610,98 @@ void CreateWithResourceObjSnapPaginations(ArkUINodeHandle node, void* resObjs)
     auto* resourceObj = reinterpret_cast<std::vector<RefPtr<ResourceObject>>*>(resObjs);
     ScrollModelNG::CreateWithResourceObjSnapPaginations(frameNode, *resourceObj);
 }
+
+void SetMaxZoomScale(ArkUINodeHandle node, ArkUI_Float32 scale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetMaxZoomScale(frameNode, scale);
+}
+
+void ResetMaxZoomScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetMaxZoomScale(frameNode, 1.0f);
+}
+
+void SetMinZoomScale(ArkUINodeHandle node, ArkUI_Float32 scale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetMinZoomScale(frameNode, scale);
+}
+
+void ResetMinZoomScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetMinZoomScale(frameNode, 1.0f);
+}
+
+void SetZoomScale(ArkUINodeHandle node, ArkUI_Float32 scale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetZoomScale(frameNode, scale);
+}
+
+void ResetZoomScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::ResetZoomScale(frameNode);
+}
+
+void SetEnableBouncesZoom(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetEnableBouncesZoom(frameNode, enable);
+}
+
+void ResetEnableBouncesZoom(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetEnableBouncesZoom(frameNode, true);
+}
+
+void SetScrollOnDidZoom(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onDidZoom = reinterpret_cast<std::function<void(float)>*>(callback);
+        ScrollModelNG::SetOnDidZoom(frameNode, std::move(*onDidZoom));
+    } else {
+        ScrollModelNG::SetOnDidZoom(frameNode, nullptr);
+    }
+}
+
+void SetScrollOnZoomStart(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEnd = reinterpret_cast<std::function<void()>*>(callback);
+        ScrollModelNG::SetOnZoomStart(frameNode, std::move(*onEnd));
+    } else {
+        ScrollModelNG::SetOnZoomStart(frameNode, nullptr);
+    }
+}
+
+void SetScrollOnZoomStop(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEnd = reinterpret_cast<std::function<void()>*>(callback);
+        ScrollModelNG::SetOnZoomStop(frameNode, std::move(*onEnd));
+    } else {
+        ScrollModelNG::SetOnZoomStop(frameNode, nullptr);
+    }
+}
 } // namespace
 
 namespace NodeModifier {
@@ -687,6 +779,17 @@ const ArkUIScrollModifier* GetScrollModifier()
         .getScrollContentSize = GetScrollContentSize,
         .createWithResourceObjFriction = CreateWithResourceObjFriction,
         .createWithResourceObjSnapPaginations = CreateWithResourceObjSnapPaginations,
+        .setMaxZoomScale = SetMaxZoomScale,
+        .resetMaxZoomScale = ResetMaxZoomScale,
+        .setMinZoomScale = SetMinZoomScale,
+        .resetMinZoomScale = ResetMinZoomScale,
+        .setZoomScale = SetZoomScale,
+        .resetZoomScale = ResetZoomScale,
+        .setEnableBouncesZoom = SetEnableBouncesZoom,
+        .resetEnableBouncesZoom = ResetEnableBouncesZoom,
+        .setScrollOnDidZoom = SetScrollOnDidZoom,
+        .setScrollOnZoomStart = SetScrollOnZoomStart,
+        .setScrollOnZoomStop = SetScrollOnZoomStop,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     /* clang-format on */

@@ -21234,6 +21234,62 @@ class ScrollOnScrollFrameBeginModifier extends ModifierWithKey {
 }
 ScrollOnScrollFrameBeginModifier.identity = Symbol('scrollOnScrollFrameBegin');
 
+class ScrollMaxZoomScaleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetMaxZoomScale(node);
+    } else {
+      getUINativeModule().scroll.setMaxZoomScale(node, this.value);
+    }
+  }
+}
+ScrollMaxZoomScaleModifier.identity = Symbol('maxZoomScale');
+
+class ScrollMinZoomScaleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetMinZoomScale(node);
+    } else {
+      getUINativeModule().scroll.setMinZoomScale(node, this.value);
+    }
+  }
+}
+ScrollMinZoomScaleModifier.identity = Symbol('minZoomScale');
+
+class ScrollZoomScaleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetZoomScale(node);
+    } else {
+      getUINativeModule().scroll.setZoomScale(node, this.value);
+    }
+  }
+}
+ScrollZoomScaleModifier.identity = Symbol('zoomScale');
+
+class ScrollEnableBouncesZoomModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetEnableBouncesZoom(node);
+    } else {
+      getUINativeModule().scroll.setEnableBouncesZoom(node, this.value);
+    }
+  }
+}
+ScrollEnableBouncesZoomModifier.identity = Symbol('enableBouncesZoom');
+
 class ArkScrollComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -21362,6 +21418,22 @@ class ArkScrollComponent extends ArkScrollable {
       }
       modifierWithKey(this._modifiersWithKeys, ScrollInitialOffsetModifier.identity, ScrollInitialOffsetModifier, options);
     }
+    return this;
+  }
+  maxZoomScale(value) {
+    modifierWithKey(this._modifiersWithKeys, ScrollMaxZoomScaleModifier.identity, ScrollMaxZoomScaleModifier, value);
+    return this;
+  }
+  minZoomScale(value) {
+    modifierWithKey(this._modifiersWithKeys, ScrollMinZoomScaleModifier.identity, ScrollMinZoomScaleModifier, value);
+    return this;
+  }
+  zoomScale(value) {
+    modifierWithKey(this._modifiersWithKeys, ScrollZoomScaleModifier.identity, ScrollZoomScaleModifier, value);
+    return this;
+  }
+  enableBouncesZoom(value) {
+    modifierWithKey(this._modifiersWithKeys, ScrollEnableBouncesZoomModifier.identity, ScrollEnableBouncesZoomModifier, value);
     return this;
   }
 }

@@ -145,6 +145,42 @@ public:
         return onJSFrameNodeDidScroll_;
     }
 
+    void SetOnDidZoom(std::function<void(float)>&& event)
+    {
+        onDidZoom_ = std::move(event);
+    }
+
+    void FireOnDidZoom(float scale)
+    {
+        if (onDidZoom_) {
+            onDidZoom_(scale);
+        }
+    }
+
+    void SetOnZoomStart(std::function<void()>&& event)
+    {
+        onZoomStart_ = std::move(event);
+    }
+
+    void FireOnZoomStart()
+    {
+        if (onZoomStart_) {
+            onZoomStart_();
+        }
+    }
+
+    void SetOnZoomStop(std::function<void()>&& event)
+    {
+        onZoomStop_ = std::move(event);
+    }
+
+    void FireOnZoomStop()
+    {
+        if (onZoomStop_) {
+            onZoomStop_();
+        }
+    }
+
 private:
     ScrollEvent onScroll_;
     ScrollEventWithReturn onWillScroll_;
@@ -154,6 +190,9 @@ private:
     OnScrollBeginEvent onScrollBegin_;
     ScrollEndEvent onScrollEnd_;
     ScrollEdgeEvent onScrollEdge_;
+    std::function<void(float)> onDidZoom_;
+    std::function<void()> onZoomStart_;
+    std::function<void()> onZoomStop_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ScrollEventHub);
 };

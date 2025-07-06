@@ -444,6 +444,8 @@ public:
     void SetShadowRadius(float radius) override;
     void SetRenderFrameOffset(const OffsetF& offset) override;
     void SetScale(float scaleX, float scaleY) override;
+    void SetScrollScale(float scale) override;
+    void ResetScrollScale() override;
     void SetBackgroundColor(uint32_t colorValue) override;
     void SetRenderPivot(float pivotX, float pivotY) override;
     void SetFrame(float positionX, float positionY, float width, float height) override;
@@ -840,6 +842,7 @@ protected:
     std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> rotationZUserModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> cameraDistanceUserModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> scaleXYUserModifier_;
+    std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> scrollScaleModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSAlphaModifier> alphaUserModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSAlphaModifier> alphaModifier_;
     // translate modifiers for interruption
@@ -863,6 +866,7 @@ protected:
     std::shared_ptr<Rosen::RSRotationModifier> rotationZUserModifier_;
     std::shared_ptr<Rosen::RSCameraDistanceModifier> cameraDistanceUserModifier_;
     std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
+    std::shared_ptr<Rosen::RSScaleModifier> scrollScaleModifier_;
     std::shared_ptr<Rosen::RSAlphaModifier> alphaUserModifier_;
     std::shared_ptr<Rosen::RSAlphaModifier> alphaModifier_;
     // translate modifiers for interruption
