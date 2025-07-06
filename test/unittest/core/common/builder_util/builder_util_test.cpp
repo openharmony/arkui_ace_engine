@@ -95,9 +95,9 @@ HWTEST_F(BuilderUtilsTest, BuilderUtilsTest002, TestSize.Level1)
     auto firstNode = NG::FrameNode::GetOrCreateFrameNode(
         TEST_NODE_TAG, UNIQUED_ID_OF_TEST_NODE++, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
     EXPECT_NE(firstNode, nullptr);
-    auto seconedNode = NG::FrameNode::GetOrCreateFrameNode(
+    auto secondedNode = NG::FrameNode::GetOrCreateFrameNode(
         TEST_NODE_TAG, UNIQUED_ID_OF_TEST_NODE++, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
-    EXPECT_NE(seconedNode, nullptr);
+    EXPECT_NE(secondedNode, nullptr);
     auto thirdNode = NG::FrameNode::GetOrCreateFrameNode(
         TEST_NODE_TAG, UNIQUED_ID_OF_TEST_NODE++, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
     EXPECT_NE(thirdNode, nullptr);
@@ -111,17 +111,17 @@ HWTEST_F(BuilderUtilsTest, BuilderUtilsTest002, TestSize.Level1)
     /**
      * @tc.steps: step2. Make a tree by the previous Node.
      *├─ firstNode
-     *│ ├─ seconedNode (true)
+     *│ ├─ secondedNode (true)
      *│ │  └─ thirdNode (true)
      *│ ├─ forthNode (true)
      *| └─ fifthNode
      */
-    firstNode->AddChild(seconedNode);
-    seconedNode->AddChild(thirdNode);
+    firstNode->AddChild(secondedNode);
+    secondedNode->AddChild(thirdNode);
     firstNode->AddChild(forthNode);
     firstNode->AddChild(fifthNode);
-    seconedNode->SetJsBuilderNodeId(firstNode->GetId());
-    thirdNode->SetJsBuilderNodeId(seconedNode->GetId());
+    secondedNode->SetJsBuilderNodeId(firstNode->GetId());
+    thirdNode->SetJsBuilderNodeId(secondedNode->GetId());
     forthNode->SetJsBuilderNodeId(firstNode->GetId());
 
     /**
@@ -134,7 +134,7 @@ HWTEST_F(BuilderUtilsTest, BuilderUtilsTest002, TestSize.Level1)
     BuilderUtils::GetBuilderNodes(firstNode, nodes);
     EXPECT_EQ(nodes.size(), 2);
     nodes.clear();
-    BuilderUtils::GetBuilderNodes(seconedNode, nodes);
+    BuilderUtils::GetBuilderNodes(secondedNode, nodes);
     EXPECT_EQ(nodes.size(), 1);
     nodes.clear();
     BuilderUtils::GetBuilderNodes(thirdNode, nodes);
@@ -145,5 +145,15 @@ HWTEST_F(BuilderUtilsTest, BuilderUtilsTest002, TestSize.Level1)
     nodes.clear();
     BuilderUtils::GetBuilderNodes(fifthNode, nodes);
     EXPECT_TRUE(nodes.empty());
+
+    /**
+     * @tc.steps: step4. Call GetBuilderNodes when contains CNode.
+     * @tc.expected: step4. Get the true count of those node.
+     */
+    nodes.clear();
+    secondedNode->SetJsBuilderNodeId(-1);
+    secondedNode->setIsCNode(true);
+    BuilderUtils::GetBuilderNodes(firstNode, nodes);
+    EXPECT_EQ(nodes.size(), 1);
 }
 } // namespace OHOS::Ace
