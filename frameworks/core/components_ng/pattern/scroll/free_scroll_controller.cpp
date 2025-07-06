@@ -268,15 +268,14 @@ void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset, const
     }
 }
 
-void FreeScrollController::UpdateOffset(const OffsetF& delta)
+void FreeScrollController::SetOffset(OffsetF newPos)
 {
     if (state_ == ScrollState::FLING) {
         StopScrollAnimation();
     }
-    auto newOffset = offset_->Get() + delta;
-    ClampPosition(newOffset); // overScroll not allowed
-    offset_->Set(newOffset);
-    if (newOffset != offset_->Get()) {
+    ClampPosition(newPos);
+    if (newPos != offset_->Get()) {
+        offset_->Set(newPos);
         pattern_.MarkDirty();
     }
 }
@@ -355,7 +354,6 @@ void FreeScrollController::CheckCrashEdge(const OffsetF& newOffset, const SizeF&
 {
     CHECK_NULL_VOID(offset_);
     std::vector<ScrollEdge> edges;
-
     const auto checkEdge = [&](float prev, float curr, float minVal, ScrollEdge edgeMin, ScrollEdge edgeMax) {
         if (Negative(prev) && NonNegative(curr)) {
             edges.emplace_back(edgeMin);
@@ -364,8 +362,8 @@ void FreeScrollController::CheckCrashEdge(const OffsetF& newOffset, const SizeF&
         }
     };
 
-    checkEdge(offset_->Get().GetX(), newOffset.GetX(), -scrollableArea.Width(), ScrollEdge::LEFT, ScrollEdge::RIGHT);
-    checkEdge(offset_->Get().GetY(), newOffset.GetY(), -scrollableArea.Height(), ScrollEdge::TOP, ScrollEdge::BOTTOM);
+    checkEdge(prevOffset_.GetX(), newOffset.GetX(), -scrollableArea.Width(), ScrollEdge::LEFT, ScrollEdge::RIGHT);
+    checkEdge(prevOffset_.GetY(), newOffset.GetY(), -scrollableArea.Height(), ScrollEdge::TOP, ScrollEdge::BOTTOM);
 
     if (!edges.empty()) {
         FireOnScrollEdge(edges);
@@ -374,7 +372,7 @@ void FreeScrollController::CheckCrashEdge(const OffsetF& newOffset, const SizeF&
 
 using std::optional;
 void FreeScrollController::ScrollTo(
-    OffsetF finalPos, optional<float> velocity, optional<int32_t> duration, RefPtr<Curve> curve)
+    OffsetF finalPos, const optional<float>& velocity, optional<int32_t> duration, RefPtr<Curve> curve)
 {
     ClampPosition(finalPos);
     if (finalPos == offset_->Get()) {

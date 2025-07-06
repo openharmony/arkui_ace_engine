@@ -1681,34 +1681,38 @@ bool ScrollPattern::FreeScrollBy(const OffsetF& delta)
 bool ScrollPattern::FreeScrollPage(bool reverse, bool smooth)
 {
     CHECK_NULL_RETURN(freeScroll_, false);
-    auto newPosition = freeScroll_->GetOffset();
-    newPosition.SetY(newPosition.GetY() + (reverse ? viewSize_.Height() : -viewSize_.Height()));
+    const float dy = reverse ? viewSize_.Height() : -viewSize_.Height();
     if (smooth) {
-        freeScroll_->UpdateOffset(newPosition);
+        freeScroll_->UpdateOffset({ 0, dy });
     } else {
-        freeScroll_->ScrollTo(newPosition, std::nullopt);
+        freeScroll_->ScrollTo(freeScroll_->GetOffset() + OffsetF { 0, dy }, std::nullopt);
     }
     return true;
 }
-bool ScrollPattern::FreeScrollToEdge(ScrollEdgeType type, float velocity)
+bool ScrollPattern::FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std::optional<float>& velocity)
 {
     CHECK_NULL_RETURN(freeScroll_, false);
-    const auto& currentPos = freeScroll_->GetOffset();
+    auto pos = freeScroll_->GetOffset();
     switch (type) {
         case ScrollEdgeType::SCROLL_LEFT:
-            freeScroll_->ScrollTo({ 0.0f, currentPos.GetY() }, velocity);
+            pos = { 0.0f, pos.GetY() };
             break;
         case ScrollEdgeType::SCROLL_RIGHT:
-            freeScroll_->ScrollTo({ FLT_MIN, currentPos.GetY() }, velocity);
+            pos = { -FLT_MAX, pos.GetY() };
             break;
         case ScrollEdgeType::SCROLL_TOP:
-            freeScroll_->ScrollTo({ currentPos.GetX(), 0.0f }, velocity);
+            pos = { pos.GetX(), 0.0f };
             break;
         case ScrollEdgeType::SCROLL_BOTTOM:
-            freeScroll_->ScrollTo({ currentPos.GetX(), FLT_MIN }, velocity);
+            pos = { pos.GetX(), -FLT_MAX };
             break;
         default:
             break;
+    }
+    if (smooth) {
+        freeScroll_->ScrollTo(pos, velocity);
+    } else {
+        freeScroll_->SetOffset(pos);
     }
     return true;
 }
@@ -1719,11 +1723,11 @@ void ScrollPattern::FreeScrollTo(const ScrollControllerBase::ScrollToParam& para
         TAG_LOGE(AceLogTag::ACE_SCROLL, "FreeScrollTo does not support percent offset.");
         return;
     }
-    OffsetF pos { static_cast<float>(param.xOffset.ConvertToPx()), static_cast<float>(param.yOffset.ConvertToPx()) };
+    OffsetF pos { -static_cast<float>(param.xOffset.ConvertToPx()), -static_cast<float>(param.yOffset.ConvertToPx()) };
     if (param.smooth) {
         freeScroll_->ScrollTo(pos, std::nullopt, param.duration, param.curve);
     } else {
-        freeScroll_->UpdateOffset(pos);
+        freeScroll_->SetOffset(pos);
     }
 }
 } // namespace OHOS::Ace::NG

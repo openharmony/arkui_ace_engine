@@ -483,7 +483,7 @@ public:
     Offset GetFreeScrollOffset() const final;
     bool FreeScrollBy(const OffsetF& delta) final;
     bool FreeScrollPage(bool reverse, bool smooth) final;
-    bool FreeScrollToEdge(ScrollEdgeType type, float velocity) final;
+    bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std::optional<float>& velocity) final;
     void FreeScrollTo(const ScrollControllerBase::ScrollToParam& param) final;
 
 private:

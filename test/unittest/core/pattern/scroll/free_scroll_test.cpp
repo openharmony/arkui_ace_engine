@@ -83,6 +83,7 @@ public:
         ASSERT_TRUE(controller->freePanGesture_->onActionUpdate_);
         auto&& func = *(controller->freePanGesture_->onActionUpdate_);
         func(gesture);
+        FlushUITasks(frameNode_);
     }
     void PanEnd(const Offset& delta, const Offset& velocity)
     {
@@ -168,8 +169,6 @@ TEST_F(FreeScrollTest, FreeScroll001)
     CreateScrollDone();
 
     PanUpdate({ -DELTA_X, -DELTA_Y });
-
-    FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X);
     EXPECT_EQ(GetChildY(frameNode_, 0), -DELTA_Y);
 }
@@ -192,8 +191,6 @@ TEST_F(FreeScrollTest, InitialOffset001)
     EXPECT_EQ(GetChildY(frameNode_, 0), -DELTA_Y);
 
     PanUpdate({ -DELTA_X, -DELTA_Y });
-
-    FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 0), -WIDTH / 2 - DELTA_X);
     EXPECT_EQ(GetChildY(frameNode_, 0), -DELTA_Y * 2);
 }
@@ -356,7 +353,6 @@ TEST_F(FreeScrollTest, Animation001)
     CreateScrollDone();
     PanStart({});
     PanUpdate({ DELTA_X, DELTA_Y });
-    FlushUITasks(frameNode_);
     EXPECT_LT(GetChildOffset(frameNode_, 0).GetX(), DELTA_X);
     EXPECT_LT(GetChildOffset(frameNode_, 0).GetY(), DELTA_Y);
 
@@ -374,7 +370,6 @@ TEST_F(FreeScrollTest, Animation001)
     PanStart({});
     PanUpdate({ -DELTA_X, DELTA_Y });
     EXPECT_EQ(controller->state_, ScrollState::SCROLL);
-    FlushUITasks(frameNode_);
     PanEnd({ -DELTA_X, DELTA_Y }, { -VELOCITY_X, VELOCITY_Y });
     EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
     EXPECT_EQ(controller->state_, ScrollState::FLING);
@@ -401,7 +396,6 @@ TEST_F(FreeScrollTest, Animation002)
     CreateScrollDone();
     PanStart({});
     PanUpdate({ DELTA_X, DELTA_Y });
-    FlushUITasks(frameNode_);
     EXPECT_LT(GetChildOffset(frameNode_, 0).GetX(), DELTA_X);
     EXPECT_LT(GetChildOffset(frameNode_, 0).GetY(), DELTA_Y);
 
@@ -447,7 +441,6 @@ TEST_F(FreeScrollTest, Animation003)
     EXPECT_EQ(GetChildY(frameNode_, 0), -CONTENT_H);
     PanStart({});
     PanUpdate({ -LARGE_DELTA_X, -LARGE_DELTA_Y });
-    FlushUITasks(frameNode_);
     EXPECT_LT(GetChildX(frameNode_, 0), -CONTENT_W);
     EXPECT_LT(GetChildY(frameNode_, 0), -CONTENT_H);
     EXPECT_GT(GetChildX(frameNode_, 0), -CONTENT_W - LARGE_DELTA_X);
@@ -507,7 +500,6 @@ TEST_F(FreeScrollTest, Event001)
     PanStart({});
     EXPECT_TRUE(scrollBegun);
     PanUpdate({ -DELTA_X, -DELTA_Y });
-    FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(didScroll, 1);
@@ -567,7 +559,6 @@ TEST_F(FreeScrollTest, Event002)
     EXPECT_EQ(scrollBegun, 2);
     PanUpdate({ -DELTA_X, -DELTA_Y });
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF {});
-    FlushUITasks(frameNode_);
     EXPECT_EQ(didScroll, 0); // position didn't change, so no trigger
     EXPECT_EQ(willScrollCalled, 2);
 
@@ -614,6 +605,46 @@ TEST_F(FreeScrollTest, Scroller001)
     scroller->ScrollBy(-DELTA_X, -DELTA_Y, false);
     FlushUITasks();
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-CONTENT_W + WIDTH + DELTA_X, -CONTENT_H + HEIGHT + DELTA_Y));
+}
+
+/**
+ * @tc.name: Scroller002
+ * @tc.desc: Test scroller interface
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Scroller002)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    auto scroller = AceType::MakeRefPtr<ScrollableController>();
+    scroller->SetScrollPattern(pattern_);
+
+    EXPECT_EQ(scroller->GetItemRect(0), Rect(0, 0, CONTENT_W, CONTENT_H));
+    scroller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, false);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(-CONTENT_W + WIDTH, 0).ToString());
+    scroller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, 1000.0f);
+    EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::FLING);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(-CONTENT_W + WIDTH, -CONTENT_H + HEIGHT).ToString());
+
+    const Dimension posX = 5.0_vp;
+    const Dimension posY = 10.0_vp;
+    scroller->FreeScrollTo({ posX, posY });
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(-posX.Value(), -posY.Value()).ToString());
+
+    const Dimension posX_2 = 500.0_vp;
+    const Dimension posY_2 = -100.0_vp;
+    scroller->FreeScrollTo({ posX_2, posY_2, 1000, nullptr, true });
+    EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::FLING);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(-posX_2.Value(), 0.0f).ToString());
 }
 
 namespace {
@@ -799,17 +830,15 @@ TEST_F(FreeScrollTest, OnScrollEdge001)
     EXPECT_EQ(triggeredEdges.size(), 1);
     EXPECT_EQ(triggeredEdges.front(), ScrollEdge::LEFT);
 
-    // Reset position to center for next test
-    controller->offset_->Set(OffsetF { -(CONTENT_W - WIDTH) + 1, -(CONTENT_H - HEIGHT) + 1 });
-    // Test RIGHT edge - scroll beyond the right boundary
+    controller->SetOffset(OffsetF { -(CONTENT_W - WIDTH) + 1, -(CONTENT_H - HEIGHT) + 1 });
     triggeredEdges.clear();
     PanUpdate({ -LARGE_DELTA_X, -LARGE_DELTA_Y }); // Scroll left to cross RIGHT edge
     EXPECT_EQ(triggeredEdges.size(), 2);
     EXPECT_EQ(triggeredEdges.front(), ScrollEdge::RIGHT);
     EXPECT_EQ(triggeredEdges.back(), ScrollEdge::BOTTOM);
 
-    controller->offset_->Set(OffsetF { 0, -1 });
-    // Test BOTTOM edge - scroll beyond the bottom boundary
+    controller->SetOffset(OffsetF { 0, -1 });
+    FlushUITasks(frameNode_);
     triggeredEdges.clear();
     PanUpdate({ LARGE_DELTA_X, LARGE_DELTA_Y });
     EXPECT_EQ(triggeredEdges.size(), 1);
@@ -818,7 +847,7 @@ TEST_F(FreeScrollTest, OnScrollEdge001)
 
 /**
  * @tc.name: OnScrollEdge002
- * @tc.desc: Test onScrollEdge event basic functionality
+ * @tc.desc: Test onScrollEdge event
  * @tc.type: FUNC
  */
 TEST_F(FreeScrollTest, OnScrollEdge002)
@@ -834,10 +863,20 @@ TEST_F(FreeScrollTest, OnScrollEdge002)
     const auto& controller = pattern_->freeScroll_;
     ASSERT_TRUE(controller && controller->offset_);
 
-    controller->offset_->Set(OffsetF { -(CONTENT_W - WIDTH) + 1, -1 });
+    controller->SetOffset(OffsetF { -(CONTENT_W - WIDTH) + 1, -1 });
+    FlushUITasks(frameNode_);
     PanUpdate({ -LARGE_DELTA_X, LARGE_DELTA_Y }); // Try to trigger TOP and RIGHT edges
     EXPECT_EQ(triggeredEdges.size(), 2);
     EXPECT_EQ(triggeredEdges.front(), ScrollEdge::RIGHT);
     EXPECT_EQ(triggeredEdges.back(), ScrollEdge::TOP);
+
+    triggeredEdges.clear();
+    controller->SetOffset(OffsetF { -1, -(CONTENT_H - HEIGHT) + 1 });
+    FlushUITasks(frameNode_);
+    PanEnd({ LARGE_DELTA_X, -LARGE_DELTA_Y }, { VELOCITY_X, -VELOCITY_Y }); // test edge during animation
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(triggeredEdges.size(), 2);
+    EXPECT_EQ(triggeredEdges.front(), ScrollEdge::LEFT);
+    EXPECT_EQ(triggeredEdges.back(), ScrollEdge::BOTTOM);
 }
 } // namespace OHOS::Ace::NG

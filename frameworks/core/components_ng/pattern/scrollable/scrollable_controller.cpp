@@ -113,7 +113,7 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, float vel
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    if (pattern->GetAxis() == Axis::FREE && pattern->FreeScrollToEdge(scrollEdgeType, velocity)) {
+    if (pattern->GetAxis() == Axis::FREE && pattern->FreeScrollToEdge(scrollEdgeType, true, velocity)) {
         return;
     }
     pattern->SetIsOverScroll(false);
@@ -130,6 +130,9 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smoo
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    if (pattern->GetAxis() == Axis::FREE && pattern->FreeScrollToEdge(scrollEdgeType, smooth, std::nullopt)) {
+        return;
+    }
     pattern->SetIsOverScroll(false);
     pattern->SetCanStayOverScroll(false);
     if (pattern->GetAxis() != Axis::NONE) {
