@@ -428,7 +428,7 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg006, 
     std::shared_ptr<Rosen::RSTransaction> rsTransaction(rawTransaction);
     EXPECT_NE(rsTransaction, nullptr);
     sessionWrapper->NotifySizeChangeReason(type, nullptr);
-    EXPECT_EQ(sessionWrapper->session_->reason_, Rosen::SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(sessionWrapper->session_->GetSizeChangeReason(), Rosen::SizeChangeReason::UNDEFINED);
 
     sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
     EXPECT_TRUE(sessionWrapper->transaction_.expired());
@@ -580,7 +580,7 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg010, 
     RectF paintRect = { 10.0f, 10.0f, 10.0f, 10.0f };
     sessionWrapper->NotifyDisplayArea(paintRect);
 
-    sessionWrapper->session_->reason_ = Rosen::SizeChangeReason::ROTATION;
+    sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::ROTATION);
     sessionWrapper->NotifyDisplayArea(paintRect);
 #endif
 }
