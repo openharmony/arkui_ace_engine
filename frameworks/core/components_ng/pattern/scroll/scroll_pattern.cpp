@@ -1695,16 +1695,16 @@ bool ScrollPattern::FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std
     auto pos = freeScroll_->GetOffset();
     switch (type) {
         case ScrollEdgeType::SCROLL_LEFT:
-            pos = { 0.0f, pos.GetY() };
+            pos.SetX(0.0f);
             break;
         case ScrollEdgeType::SCROLL_RIGHT:
-            pos = { -FLT_MAX, pos.GetY() };
+            pos.SetX(-FLT_MAX);
             break;
         case ScrollEdgeType::SCROLL_TOP:
-            pos = { pos.GetX(), 0.0f };
+            pos.SetY(0.0f);
             break;
         case ScrollEdgeType::SCROLL_BOTTOM:
-            pos = { pos.GetX(), -FLT_MAX };
+            pos.SetY(-FLT_MAX);
             break;
         default:
             break;
