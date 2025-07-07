@@ -119,8 +119,10 @@ void ShowImpl(const Ark_ActionSheetOptions* value)
         .type = DialogType::ACTION_SHEET
     };
     UpdateDynamicDialogProperties(dialogProps, *value);
-    dialogProps.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
-        value->backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
+    dialogProps.backgroundBlurStyle = static_cast<int32_t>(
+        Converter::OptConvert<BlurStyle>(value->backgroundBlurStyle).value_or(BlurStyle::COMPONENT_ULTRA_THICK));
+    dialogProps.blurStyleOption = Converter::OptConvert<BlurStyleOption>(value->backgroundBlurStyleOptions);
+    dialogProps.effectOption = Converter::OptConvert<EffectOption>(value->backgroundEffect);
     dialogProps.backgroundColor = Converter::OptConvert<Color>(value->backgroundColor);
     dialogProps.enableHoverMode =
         Converter::OptConvert<bool>(value->enableHoverMode).value_or(dialogProps.enableHoverMode);
