@@ -30,7 +30,20 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float WIDTH = 400.0f;
 constexpr float HEIGHT = 400.0f;
+constexpr float WIDTH0 = 0.0f;
+constexpr float HEIGHT0 = 0.0f;
 } // namespace
+struct GetDragPreviewInfoCase {
+    RefPtr<FrameNode> imageNode;
+    int32_t width;
+    int32_t height;
+    bool isDragWithContextMenu;
+
+    GetDragPreviewInfoCase(RefPtr<FrameNode> imageNode, int32_t width, int32_t height, bool isDragWithContextMenu)
+        : imageNode(imageNode), width(width), height(height), isDragWithContextMenu(isDragWithContextMenu)
+    {}
+};
+
 void DragDropManagerTestNgCoverage::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
@@ -2186,6 +2199,40 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage077, TestSi
     EXPECT_EQ(dragDropManager->dragCursorStyleCore_, DragCursorStyleCore::DEFAULT);
 }
 
+const std::vector<GetDragPreviewInfoCase> GET_DRAG_PREVIEW_INFO_TEST_CASES = {
+    // Test for GetDragPreviewInfo when tag is image, isNeedScale is true and isDragWithContextMenu is false.
+    GetDragPreviewInfoCase(FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                                                      AceType::MakeRefPtr<LinearLayoutPattern>(true)),
+                           WIDTH, HEIGHT, false),
+    // Test for GetDragPreviewInfo when tag is image, width is 0, isNeedScale is false and
+    // isDragWithContextMenu is false.
+    GetDragPreviewInfoCase(FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                                                      AceType::MakeRefPtr<LinearLayoutPattern>(true)),
+                           WIDTH0, HEIGHT, false),
+    // Test for GetDragPreviewInfo when tag is image, height is 0, isNeedScale is false and
+    // isDragWithContextMenu is false.
+    GetDragPreviewInfoCase(FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                                                      AceType::MakeRefPtr<LinearLayoutPattern>(true)),
+                           WIDTH, HEIGHT0, false),
+    // Test for GetDragPreviewInfo when tag is Text, isNeedScale is true, isDragWithContextMenu is false and
+    // previewOption.isScaleEnabled is false.
+    GetDragPreviewInfoCase(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                                                      AceType::MakeRefPtr<LinearLayoutPattern>(true)),
+                           WIDTH, HEIGHT, false),
+    // Test for GetDragPreviewInfo when tag is Web, isNeedScale is true and isDragWithContextMenu is false.
+    GetDragPreviewInfoCase(FrameNode::CreateFrameNode(V2::WEB_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                                                      AceType::MakeRefPtr<LinearLayoutPattern>(true)),
+                           WIDTH, HEIGHT, false),
+    // Test for GetDragPreviewInfo when tag is image, height is 0, isNeedScale is false and
+    // isDragWithContextMenu is true.
+    GetDragPreviewInfoCase(FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                                                      AceType::MakeRefPtr<LinearLayoutPattern>(true)),
+                           WIDTH, HEIGHT0, true),
+    // Test for GetDragPreviewInfo when tag is image, isNeedScale is true and isDragWithContextMenu is true.
+    GetDragPreviewInfoCase(FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                                                      AceType::MakeRefPtr<LinearLayoutPattern>(true)),
+                           WIDTH, HEIGHT, true),
+};
 /**
  * @tc.name: DragDropManagerTestNgCoverage078
  * @tc.desc: Test GetDragPreviewInfo
@@ -2201,27 +2248,47 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage078, TestSi
     ASSERT_NE(pipelineContext, nullptr);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     ASSERT_NE(dragDropManager, nullptr);
+    for (const auto& testCase : GET_DRAG_PREVIEW_INFO_TEST_CASES) {
+        dragDropManager->SetIsDragWithContextMenu(testCase.isDragWithContextMenu);
+        auto imageNode = testCase.imageNode;
+        ASSERT_NE(imageNode, nullptr);
+        imageNode->GetGeometryNode()->SetFrameWidth(testCase.width);
+        imageNode->GetGeometryNode()->SetFrameHeight(testCase.height);
 
-    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    ASSERT_NE(imageNode, nullptr);
-    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
-    imageNode->GetGeometryNode()->SetFrameWidth(WIDTH);
-    imageNode->GetGeometryNode()->SetFrameHeight(HEIGHT);
-
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("custom_node", -1, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->children_.push_back(imageNode);
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(AceType::DynamicCast<FrameNode>(frameNode));
-    overlayManager->hasDragPixelMap_ = true;
-    frameNode->isActive_ = true;
-    overlayManager->dragPixmapColumnNodeWeak_ = WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(frameNode));
-    NG::DragControllerFuncWrapper::GetDragPreviewInfo(overlayManager, containerId);
-    
-    EXPECT_EQ(dragDropManager->GetDragPreviewInfo().width, WIDTH);
-    EXPECT_EQ(dragDropManager->GetDragPreviewInfo().height, HEIGHT);
-    EXPECT_NE(dragDropManager->GetDragPreviewInfo().imageNode, nullptr);
-    EXPECT_NE(dragDropManager->GetDragPreviewInfo().scale, 1);
+        auto frameNode1 = AceType::MakeRefPtr<FrameNode>("custom_node", -1, AceType::MakeRefPtr<Pattern>());
+        ASSERT_NE(frameNode1, nullptr);
+        auto frameNode2 = AceType::MakeRefPtr<FrameNode>("custom_node", -1, AceType::MakeRefPtr<Pattern>());
+        ASSERT_NE(frameNode2, nullptr);
+        RefPtr<OverlayManager> overlayManager;
+        if (imageNode->GetTag() == V2::WEB_ETS_TAG) {
+            frameNode1->children_.push_back(imageNode);
+            frameNode2->children_.push_back(frameNode1);
+            overlayManager = AceType::MakeRefPtr<OverlayManager>(AceType::DynamicCast<FrameNode>(frameNode2));
+        } else if (imageNode->GetTag() == V2::TEXT_ETS_TAG) {
+            auto previewOption = frameNode1->GetDragPreviewOption();
+            previewOption.isScaleEnabled = false;
+            imageNode->SetDragPreviewOptions(previewOption, false);
+            frameNode1->children_.push_back(imageNode);
+            frameNode2->children_.push_back(frameNode1);
+            overlayManager = AceType::MakeRefPtr<OverlayManager>(AceType::DynamicCast<FrameNode>(frameNode2));
+        } else {
+            frameNode1->children_.push_back(imageNode);
+            frameNode1->children_.push_back(imageNode);
+            overlayManager = AceType::MakeRefPtr<OverlayManager>(AceType::DynamicCast<FrameNode>(frameNode1));
+        }
+        
+        overlayManager->hasDragPixelMap_ = true;
+        frameNode1->isActive_ = true;
+        if (imageNode->GetTag() == V2::WEB_ETS_TAG || imageNode->GetTag() == V2::TEXT_ETS_TAG) {
+            overlayManager->dragPixmapColumnNodeWeak_ = WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(frameNode2));
+        } else {
+            overlayManager->dragPixmapColumnNodeWeak_ = WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(frameNode1));
+        }
+        NG::DragControllerFuncWrapper::GetDragPreviewInfo(overlayManager, containerId);
+        EXPECT_EQ(dragDropManager->GetDragPreviewInfo().width, testCase.width);
+        EXPECT_EQ(dragDropManager->GetDragPreviewInfo().height, testCase.height);
+        EXPECT_NE(dragDropManager->GetDragPreviewInfo().imageNode, nullptr);
+    }
 }
 
 /**
