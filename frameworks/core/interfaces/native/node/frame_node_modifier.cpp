@@ -780,6 +780,13 @@ ArkUI_Int32 GetWindowInfoByNode(ArkUINodeHandle node, char** name)
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
+void UpdateConfiguration(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->UpdateConfigurationUpdate();
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -797,7 +804,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         GetCurrentPageRootNode, GetNodeTag, GetActiveChildrenInfo, GetCustomProperty, SetDrawCompleteEvent,
         ResetDrawCompleteEvent, SetLayoutEvent, ResetLayoutEvent, RequestFocus, ClearFocus, FocusActivate,
         SetAutoFocusTransfer, GetWindowInfoByNode, SetCrossLanguageOptions, GetCrossLanguageOptions,
-        CheckIfCanCrossLanguageAttributeSetting, SetKeyProcessingMode };
+        CheckIfCanCrossLanguageAttributeSetting, SetKeyProcessingMode, UpdateConfiguration };
     return &modifier;
 }
 

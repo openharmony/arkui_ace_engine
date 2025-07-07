@@ -2697,6 +2697,7 @@ void AceContainer::UpdateConfiguration(
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
 #endif
+    pipelineContext_->SaveConfigurationConfig(configurationChange);
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
     NotifyConfigToSubContainers(parsedConfig, configuration);
     // change color mode and theme to clear image cache

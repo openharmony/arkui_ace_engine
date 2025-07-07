@@ -341,6 +341,16 @@ void UINode::MountToParent(const RefPtr<UINode>& parent,
     AfterMountToParent();
 }
 
+void UINode::UpdateConfigurationUpdate()
+{
+    if (onMainTree_) {
+        return;
+    }
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    UpdateConfigurationUpdate(pipeline->GetConfigurationChange());
+}
+
 void UINode::UpdateConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     OnConfigurationUpdate(configurationChange);

@@ -113,6 +113,7 @@ public:
     static ArkUINativeModuleValue SetCrossLanguageOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetCrossLanguageOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue CheckIfCanCrossLanguageAttributeSetting(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue UpdateConfiguration(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 
 } // namespace OHOS::Ace::NG
