@@ -2051,14 +2051,10 @@ void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<p
     std::string pageFullPath;
     std::string ohmUrl;
     if (!ParseNamedRouterParams(vm, params, bundleName, moduleName, pagePath, pageFullPath, ohmUrl)) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "parse named router params failed!");
         return;
     }
 
-    TAG_LOGI(AceLogTag::ACE_ROUTER,
-        "add named router record, name: %{public}s, bundleName: %{public}s, moduleName: %{public}s, "
-        "pagePath: %{public}s, pageFullPath: %{public}s, ohmUrl: %{public}s",
-        namedRoute.c_str(), bundleName.c_str(), moduleName.c_str(), pagePath.c_str(), pageFullPath.c_str(),
-        ohmUrl.c_str());
     NamedRouterProperty namedRouterProperty({ pageGenerator, bundleName, moduleName, pagePath, ohmUrl });
     auto ret = namedRouterRegisterMap_.insert(std::make_pair(namedRoute, namedRouterProperty));
     if (!ret.second) {
