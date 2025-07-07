@@ -814,6 +814,8 @@ std::pair<float, float> DotIndicatorPaintMethod::ForwardCalculation(
     LinearVector<float> endVectorBlackPointCenterX(itemCount_);
 
     auto [startCurrentIndex, endCurrentIndex] = GetStartAndEndIndex(index);
+    startCurrentIndex = std::clamp(startCurrentIndex, 0, itemCount_ - 1);
+    endCurrentIndex = std::clamp(endCurrentIndex, 0, itemCount_ - 1);
     for (int32_t i = 0; i < itemCount_; ++i) {
         if (i != startCurrentIndex) {
             startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
