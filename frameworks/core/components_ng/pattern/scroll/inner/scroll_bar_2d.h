@@ -31,6 +31,8 @@ public:
     explicit ScrollBar2D(ScrollPattern& pattern);
     ~ScrollBar2D() final;
 
+    static constexpr ScrollBarMargin DEFAULT_MARGIN { 8.0_vp, 8.0_vp };
+
     const RefPtr<ScrollBar2DPainter>& GetPainter() const
     {
         return painter_;

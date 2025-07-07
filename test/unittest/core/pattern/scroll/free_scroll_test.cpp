@@ -721,11 +721,11 @@ TEST_F(FreeScrollTest, ScrollBar001)
 
     const auto scrollBar = pattern_->scrollBar2d_;
     ASSERT_TRUE(scrollBar);
-    EXPECT_EQ(scrollBar->vertical_.GetActiveRect().ToString(), "Rect (236.00, 0.00) - [4.00 x 80.00]");
-    EXPECT_EQ(scrollBar->horizontal_.GetActiveRect().ToString(), "Rect (0.00, 396.00) - [28.80 x 4.00]");
+    EXPECT_EQ(scrollBar->vertical_.GetActiveRect().ToString(), "Rect (236.00, 8.00) - [4.00 x 76.80]");
+    EXPECT_EQ(scrollBar->horizontal_.GetActiveRect().ToString(), "Rect (8.00, 396.00) - [26.88 x 4.00]");
     EXPECT_EQ(scrollBar->vertical_.GetActiveWidth(), NORMAL_BAR_WIDTH * 2);
     EXPECT_EQ(scrollBar->horizontal_.GetActiveWidth(), NORMAL_BAR_WIDTH * 2);
-    EXPECT_EQ(scrollBar->vertical_.GetTouchRegion().ToString(), "Rect (208.00, 0.00) - [32.00 x 80.00]");
+    EXPECT_EQ(scrollBar->vertical_.GetTouchRegion().ToString(), "Rect (208.00, 8.00) - [32.00 x 76.80]");
     EXPECT_EQ(scrollBar->vertical_.GetNormalWidth(), NORMAL_BAR_WIDTH);
 
     const Dimension NEW_BAR_WIDTH = 10.0_vp;
@@ -736,6 +736,7 @@ TEST_F(FreeScrollTest, ScrollBar001)
     ASSERT_TRUE(scrollBar->painter_);
     EXPECT_EQ(scrollBar->painter_->vertical_.GetHoverAnimatingType(), HoverAnimationType::NONE);
     EXPECT_EQ(scrollBar->painter_->horizontal_.GetBarColor()->Get().ToString(), "#66182431");
+    EXPECT_EQ(scrollBar->vertical_.GetScrollBarMargin(), ScrollBar2D::DEFAULT_MARGIN);
 }
 
 /**
@@ -755,8 +756,8 @@ TEST_F(FreeScrollTest, ScrollBar002)
     FlushUITasks(frameNode_);
     const auto scrollBar = pattern_->scrollBar2d_;
     ASSERT_TRUE(scrollBar);
-    EXPECT_EQ(scrollBar->vertical_.GetActiveRect().ToString(), "Rect (236.00, 320.00) - [4.00 x 80.00]");
-    EXPECT_EQ(scrollBar->horizontal_.GetActiveRect().ToString(), "Rect (211.20, 396.00) - [28.80 x 4.00]");
+    EXPECT_EQ(scrollBar->vertical_.GetActiveRect().ToString(), "Rect (236.00, 315.20) - [4.00 x 76.80]");
+    EXPECT_EQ(scrollBar->horizontal_.GetActiveRect().ToString(), "Rect (205.12, 396.00) - [26.88 x 4.00]");
 
     ScrollModelNG::SetScrollBarColor(frameNode_.GetRawPtr(), Color::BLUE);
     pattern_->OnModifyDone();
@@ -806,7 +807,7 @@ TEST_F(FreeScrollTest, ScrollBar004)
     actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, nullptr, responseLinkResult);
     EXPECT_EQ(responseLinkResult.size(), 2);
 
-    localPoint = PointF(238, 5);
+    localPoint = PointF(238, 10);
     result.clear();
     responseLinkResult.clear();
     actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, nullptr, responseLinkResult);
@@ -814,7 +815,7 @@ TEST_F(FreeScrollTest, ScrollBar004)
     EXPECT_EQ(responseLinkResult.front(), pattern_->scrollBar2d_->vertical_.GetPanRecognizer());
 
     constexpr int32_t expectedRecognizerCount = 3; // 2 from scrollBars, 1 from pan recognizer
-    localPoint = PointF(1, 398);
+    localPoint = PointF(10, 398);
     result.clear();
     responseLinkResult.clear();
     actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, nullptr, responseLinkResult);
