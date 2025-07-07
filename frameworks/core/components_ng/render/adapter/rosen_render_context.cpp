@@ -6284,6 +6284,16 @@ void RosenRenderContext::DumpInfo()
             std::string("transitionCnt:").append(std::to_string(disappearingTransitionCount_))
         );
     }
+
+    if (HasProgressMask() && GetProgressMaskValue()) {
+        auto progressMaskPropertyPtr = GetProgressMaskValue();
+        DumpLog::GetInstance().AddDesc(
+            std::string("ProgressMaskProperty value:") + std::to_string(progressMaskPropertyPtr->GetValue())
+            + " maxValue:" + std::to_string(progressMaskPropertyPtr->GetMaxValue()) + " color:"
+            + progressMaskPropertyPtr->GetColor().ToString() + " enableBreathe:"
+            + std::to_string(progressMaskPropertyPtr->GetEnableBreathe())
+        );
+    }
 }
 
 void RosenRenderContext::DumpAdvanceInfo()
