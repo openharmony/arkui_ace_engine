@@ -527,11 +527,11 @@ void ClearAllMenuPopup(int32_t instanceId, WindowChangeType type)
     CHECK_NULL_VOID(pipeline);
     auto overlay = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    // The non-subwindow menu disappears when the window area changes, and does not follow the current logic.
+    // The non-subwindow menu and popup disappear when the window area changes, and do not follow the current logic.
     if (type != WindowChangeType::RECT_CHANGE) {
         overlay->HideAllMenusWithoutAnimation(false);
+        overlay->HideAllPopupsWithoutAnimation();
     }
-    overlay->HideAllPopupsWithoutAnimation();
     SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
 }
 
