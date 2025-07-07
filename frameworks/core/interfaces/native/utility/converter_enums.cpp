@@ -19,6 +19,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
 #include "arkoala_api_generated.h"
 #include "converter.h"
@@ -2285,6 +2286,19 @@ void AssignCast(std::optional<HapticFeedbackMode>& dst, const Ark_HapticFeedback
         case ARK_HAPTIC_FEEDBACK_MODE_AUTO: dst = HapticFeedbackMode::AUTO; break;
         default: {
             LOGE("Unexpected enum value in Ark_HapticFeedbackMode: %{public}d", src);
+            dst = std::nullopt;
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<DividerMode>& dst, const Ark_DividerMode& src)
+{
+    switch (src) {
+        case ARK_DIVIDER_MODE_FLOATING_ABOVE_MENU: dst = DividerMode::FLOATING_ABOVE_MENU; break;
+        case ARK_DIVIDER_MODE_EMBEDDED_IN_MENU: dst = DividerMode::EMBEDDED_IN_MENU; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_DividerMode: %{public}d", src);
             dst = std::nullopt;
         }
     }

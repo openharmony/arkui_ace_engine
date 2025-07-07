@@ -365,7 +365,8 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
         CHECK_NULL_VOID(hub);
         auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
         if (type == ResponseType::RIGHT_CLICK) {
-            OnMouseEventFunc event = [builderF = buildFunc, weakTarget, menuParam](MouseInfo& info) mutable {
+            OnMouseEventFunc event = [builderF = buildFunc, weakTarget, menuParam,
+                                         previewBuildFunc = std::move(previewBuildFunc)](MouseInfo& info) mutable {
                 TAG_LOGI(AceLogTag::ACE_MENU, "Execute rightClick task for menu");
                 auto containerId = Container::CurrentId();
                 auto taskExecutor = Container::CurrentTaskExecutor();
@@ -374,13 +375,13 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
                     info.SetStopPropagation(true);
                 }
                 taskExecutor->PostTask(
-                    [containerId, builder = builderF, weakTarget, menuParam, info]() mutable {
+                    [containerId, builder = builderF, weakTarget, menuParam, info,
+                        previewBuildFunc = std::move(previewBuildFunc)]() mutable {
                         auto targetNode = weakTarget.Upgrade();
                         CHECK_NULL_VOID(targetNode);
                         NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                             info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
                         if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-                            std::function<void()> previewBuildFunc;
                             auto pipelineContext = targetNode->GetContext();
                             CHECK_NULL_VOID(pipelineContext);
                             auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
