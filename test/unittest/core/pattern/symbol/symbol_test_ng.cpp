@@ -834,8 +834,9 @@ HWTEST_F(SymbolTestNg, SetShaderStyle001, TestSize.Level1)
     // test input radial gradient
     SymbolGradient radialGradientCase;
     radialGradientCase.type = SymbolGradientType::RADIAL_GRADIENT;
-    radialGradientCase.center = Point2F{0.5f, 0.5f};
-    radialGradientCase.radius = 0.6f;
+    radialGradientCase.radialCenterX = Dimension(0.5);
+    radialGradientCase.radialCenterY = Dimension(0.5);
+    radialGradientCase.radius =  Dimension(0.6);
 
     gradients.emplace_back(std::move(colorShaderCase));
     gradients.emplace_back(std::move(linearGradientCase));
