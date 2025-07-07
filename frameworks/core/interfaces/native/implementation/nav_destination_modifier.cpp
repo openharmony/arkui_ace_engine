@@ -485,6 +485,21 @@ void CustomTransitionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    auto onNavigationAnimation = [callback = CallbackHelper(value->value)](NG::NavigationOperation operation,
+        bool isEnter)-> std::optional<std::vector<NG::NavDestinationTransition>> {
+        std::vector<NG::NavDestinationTransition> allTransitions;
+        auto navOperation = static_cast<Ark_NavigationOperation>(operation);
+        auto arkIsEnter = Converter::ArkValue<Ark_Boolean>(isEnter);
+        auto resultOpt = callback.InvokeWithOptConvertResult<std::optional<std::vector<NG::NavDestinationTransition>>,
+            Opt_Array_NavDestinationTransition,
+            Callback_Opt_Array_NavDestinationTransition_Void>(navOperation, arkIsEnter);
+        return resultOpt.value_or(allTransitions);
+    };
+    NavDestinationModelStatic::SetCustomTransition(frameNode, onNavigationAnimation);
 }
 void OnNewParamImpl(Ark_NativePointer node,
                     const Opt_Callback_Object_Void* value)
@@ -503,6 +518,11 @@ void EnableNavigationIndicatorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto enabled = false;
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        enabled = Converter::OptConvert<bool>(*value).value_or(false);
+    }
+    NavDestinationModelStatic::SetEnableNavigationIndicator(frameNode, enabled);
 }
 void TitleImpl(Ark_NativePointer node,
                const Opt_Type_NavDestinationAttribute_title_value* value,

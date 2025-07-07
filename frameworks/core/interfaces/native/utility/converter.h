@@ -544,6 +544,7 @@ namespace Converter {
     template<> ListItemGroupIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> MenuOptionsParam Convert(const Ark_TextMenuItem& src);
+    template<> NG::NavDestinationTransition Convert(const Ark_NavDestinationTransition& src);
     template<> NG::NavToolbarItemStatus Convert(const Opt_ToolbarItemStatus& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src);
@@ -681,6 +682,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src);
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
     template<> void AssignCast(std::optional<CrownSensitivity>& dst, const Ark_CrownSensitivity& src);
+    template<> void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_Curve& src);
     template<> void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src);
     template<> void AssignCast(std::optional<DateTimeType>& dst, const Ark_DateTimeOptions& src);
     template<> void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src);
@@ -739,6 +741,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<ModalTransition>& dst, const Ark_ModalTransition& src);
     template<> void AssignCast(std::optional<ModifierKey>& dst, const Ark_ModifierKey& src);
     template<> void AssignCast(std::optional<NG::NavigationTransition>& dst, const Opt_NavigationAnimatedTransition& src);
+    template<> void AssignCast(std::optional<std::vector<NG::NavDestinationTransition>>& dst,
+        const Opt_Array_NavDestinationTransition& src);
     template<> void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestinationMode& src);
     template<> void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src);
     template<> void AssignCast(std::optional<NavigationOptions>& dst, const Ark_NavigationOptions& src);
