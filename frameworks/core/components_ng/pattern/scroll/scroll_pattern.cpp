@@ -1612,6 +1612,9 @@ void ScrollPattern::UpdateZoomScale(float scale)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        auto eventHub = host->GetOrCreateEventHub<ScrollEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnZoomScaleChange(scale);
     }
 }
 

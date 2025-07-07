@@ -181,6 +181,18 @@ public:
         }
     }
 
+    void SetOnZoomScaleChange(std::function<void(float)>&& event)
+    {
+        onZoomScaleChange_ = std::move(event);
+    }
+
+    void FireOnZoomScaleChange(float scale)
+    {
+        if (onZoomScaleChange_) {
+            onZoomScaleChange_(scale);
+        }
+    }
+
 private:
     ScrollEvent onScroll_;
     ScrollEventWithReturn onWillScroll_;
@@ -193,6 +205,7 @@ private:
     std::function<void(float)> onDidZoom_;
     std::function<void()> onZoomStart_;
     std::function<void()> onZoomStop_;
+    std::function<void(float)> onZoomScaleChange_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ScrollEventHub);
 };

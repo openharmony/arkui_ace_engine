@@ -72,6 +72,7 @@ public:
     virtual void SetMinZoomScale(float scale) {};
     virtual void SetZoomScale(float scale) {};
     virtual void ResetZoomScale() {};
+    virtual void SetZoomScaleChangeEvent(std::function<void(float)>&& event) {};
     virtual void SetEnableBouncesZoom(bool enable) {};
     virtual void SetOnDidZoom(std::function<void(float)>&& event) {};
     virtual void SetOnZoomStart(std::function<void(void)>&& event) {};

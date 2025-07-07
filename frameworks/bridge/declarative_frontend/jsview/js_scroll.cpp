@@ -588,10 +588,29 @@ void JSScroll::SetZoomScale(const JSCallbackInfo& args)
         return;
     }
     double zoomScale = 1.0;
-    if (JSViewAbstract::ParseJsDouble(args[0], zoomScale)) {
+    JSRef<JSVal> changeEventVal;
+    auto scaleValue = args[0];
+    if (scaleValue->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(scaleValue);
+        scaleValue = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    }
+    if (JSViewAbstract::ParseJsDouble(scaleValue, zoomScale)) {
         ScrollModel::GetInstance()->SetZoomScale(zoomScale);
     } else {
         ScrollModel::GetInstance()->ResetZoomScale();
+    }
+    if (changeEventVal->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto changeEvent = [execCtx = args.GetExecutionContext(),
+            func = std::move(jsFunc), node = targetNode](float param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(1, &newJSVal);
+        };
+        ScrollModel::GetInstance()->SetZoomScaleChangeEvent(std::move(changeEvent));
     }
 }
 

@@ -783,6 +783,15 @@ void ScrollModelNG::ResetZoomScale(FrameNode* frameNode)
     pattern->SetZoomScale(std::nullopt);
 }
 
+void ScrollModelNG::SetZoomScaleChangeEvent(std::function<void(float)>&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnZoomScaleChange(std::move(event));
+}
+
 void ScrollModelNG::SetEnableBouncesZoom(bool enable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

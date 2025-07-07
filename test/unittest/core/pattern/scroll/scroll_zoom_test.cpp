@@ -115,6 +115,46 @@ TEST_F(ScrollZoomTest, ZoomScaleTest001)
 }
 
 /**
+ * @tc.name: ZoomScaleTest002
+ * @tc.desc: Test zoom scale two-way binding
+ * @tc.type: FUNC
+ */
+TEST_F(ScrollZoomTest, ZoomScaleTest002)
+{
+    /**
+     * @tc.step: step1. Create Scroll, set max and min scale.
+     * @tc.expected: scrollPattern pinch gesture initiated.
+     */
+    float currScale = 1.0f;
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    model.SetMinZoomScale(0.5f);
+    model.SetMaxZoomScale(2.0f);
+    model.SetZoomScaleChangeEvent([&currScale](float scale) { currScale = scale; });
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    ASSERT_NE(pattern_->zoomCtrl_, nullptr);
+
+    /**
+     * @tc.step: step2. pinch update;
+     * @tc.expected: current scale updated;
+     */
+    PinchStart(1.0f);
+    PinchUpdate(2.0f);
+    EXPECT_EQ(currScale, 2.0f);
+    FlushUITasks();
+
+    /**
+     * @tc.step: step3. update zoom scale from user.
+     * @tc.expected: ZoomScaleChangeEvent not callback.
+     */
+    ScrollModelNG::SetZoomScale(AceType::RawPtr(frameNode_), 1.0f);
+    FlushUITasks();
+    EXPECT_EQ(currScale, 2.0f);
+}
+
+/**
  * @tc.name: MaxMinZoomScaleTest001
  * @tc.desc: Test set max an min zoom scale.
  * @tc.type: FUNC
