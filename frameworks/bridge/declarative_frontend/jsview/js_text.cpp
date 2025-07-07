@@ -542,13 +542,18 @@ void JSText::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     JSRef<JSVal> args = info[0];
-    if (!ParseLengthMetricsToPositiveDimension(args, value)) {
+    UnRegisterResource("LineSpacing");
+    RefPtr<ResourceObject> resObj;
+    if (!ParseLengthMetricsToPositiveDimension(args, value, resObj)) {
         value.Reset();
     }
     if (value.IsNegative()) {
         value.Reset();
     }
     TextModel::GetInstance()->SetLineSpacing(value);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("LineSpacing", resObj, value);
+    }
     if (info.Length() < 2) { // 2 : two args
         TextModel::GetInstance()->SetIsOnlyBetweenLines(false);
         return;

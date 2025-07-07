@@ -25,11 +25,17 @@ constexpr int NUM_3 = 3;
 constexpr int DEFAULT_LENGTH = 4;
 
 void SetContainerSpanTextBackgroundStyle(
-    ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
+    ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length,
+    void* style)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     if (length != DEFAULT_LENGTH) {
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && style) {
+        auto textBackgroundStyle = reinterpret_cast<TextBackgroundStyle*>(style);
+        SpanModelNG::SetTextBackgroundStyleByBaseSpan(uiNode, *textBackgroundStyle);
         return;
     }
     TextBackgroundStyle font;

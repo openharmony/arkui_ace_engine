@@ -253,7 +253,6 @@ void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterSpanResource<CalcDimension>("letterSpacing", resObj, value);
-        return;
     }
     SpanModel::GetInstance()->SetLetterSpacing(value);
 }
@@ -264,9 +263,15 @@ void JSSpan::SetBaselineOffset(const JSCallbackInfo& info)
         return;
     }
     NG::CalcLength value;
-    if (ConvertFromJSValueNG(info[0], value) &&
+    RefPtr<ResourceObject> resObj;
+    UnRegisterResource("baselineOffset");
+    if (ConvertFromJSValueNG(info[0], value, resObj) &&
         value.GetDimensionContainsNegative().Unit() != DimensionUnit::PERCENT) {
         SpanModel::GetInstance()->SetBaselineOffset(value.GetDimensionContainsNegative());
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            RegisterSpanResource<CalcDimension>("baselineOffset", resObj,
+                value.GetDimensionContainsNegative());
+        }
         return;
     }
     value.Reset();

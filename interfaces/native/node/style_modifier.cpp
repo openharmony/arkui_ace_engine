@@ -7711,7 +7711,7 @@ int32_t SetBaseLineOffset(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     auto* fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_SPAN) {
         fullImpl->getNodeModifiers()->getSpanModifier()->setSpanBaselineOffset(node->uiNodeHandle,
-            item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+            item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
     } else {
         fullImpl->getNodeModifiers()->getTextModifier()->setTextBaselineOffset(node->uiNodeHandle,
             item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
@@ -7898,7 +7898,7 @@ int32_t SetTextFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     fontStruct.fontStyle = style;
     ArkUIFontWithOptionsStruct* fontInfo = &fontStruct;
-    fullImpl->getNodeModifiers()->getTextModifier()->setTextFont(node->uiNodeHandle, fontInfo);
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextFont(node->uiNodeHandle, fontInfo, nullptr, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -11332,7 +11332,7 @@ int32_t SetLetterSpacing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setTextLetterSpacing(
-                node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+                node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
             break;
         case ARKUI_NODE_TEXT_INPUT:
             fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputLetterSpacing(
@@ -11511,7 +11511,7 @@ int32_t SetLineSpacing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->setTextLineSpacing(
-            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), false);
+            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), false, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }

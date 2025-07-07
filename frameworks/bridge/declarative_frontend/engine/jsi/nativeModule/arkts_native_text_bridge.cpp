@@ -197,15 +197,17 @@ ArkUINativeModuleValue TextBridge::SetForegroundColor(ArkUIRuntimeCallInfo* runt
     ForegroundColorStrategy strategy;
     if (ArkTSUtils::ParseJsColorStrategy(vm, colorArg, strategy)) {
         auto strategyInt = static_cast<uint32_t>(ForegroundColorStrategy::INVERT);
-        GetArkUINodeModifiers()->getTextModifier()->setTextForegroundColor(nativeNode, false, strategyInt);
+        GetArkUINodeModifiers()->getTextModifier()->setTextForegroundColor(nativeNode, false, strategyInt, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
     Color foregroundColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor)) {
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getTextModifier()->resetTextForegroundColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextModifier()->setTextForegroundColor(
-            nativeNode, true, foregroundColor.GetValue());
+            nativeNode, true, foregroundColor.GetValue(), AceType::RawPtr(colorResObj));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -893,12 +895,13 @@ ArkUINativeModuleValue TextBridge::SetLetterSpacing(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension letterSpacing;
-    if (!ArkTSUtils::ParseJsDimensionNG(vm, secondArg, letterSpacing, DimensionUnit::FP, false)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, secondArg, letterSpacing, DimensionUnit::FP, resourceObject, false)) {
         letterSpacing.Reset();
     }
 
     GetArkUINodeModifiers()->getTextModifier()->setTextLetterSpacing(
-        nativeNode, letterSpacing.Value(), static_cast<int8_t>(letterSpacing.Unit()));
+        nativeNode, letterSpacing.Value(), static_cast<int8_t>(letterSpacing.Unit()), AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -928,7 +931,8 @@ ArkUINativeModuleValue TextBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     ArkUIFontWithOptionsStruct fontInfo;
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, sizeArg, fontSize, false) || sizeArg->IsNull()) {
+    RefPtr<ResourceObject> fontSizeResObj;
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, sizeArg, fontSize, fontSizeResObj, false) || sizeArg->IsNull()) {
         fontSize.SetValue(DEFAULT_SPAN_FONT_SIZE);
         fontSize.SetUnit(DEFAULT_SPAN_FONT_UNIT);
     }
@@ -968,17 +972,20 @@ ArkUINativeModuleValue TextBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     fontInfo.fontStyle = static_cast<uint8_t>(style);
 
     std::vector<std::string> fontFamilies;
+    RefPtr<ResourceObject> fontFamilyObject;
     fontInfo.fontFamilies = nullptr;
-    if (!familyArg->IsNull() && ArkTSUtils::ParseJsFontFamilies(vm, familyArg, fontFamilies)) {
+    if (!familyArg->IsNull() && ArkTSUtils::ParseJsFontFamilies(vm, familyArg, fontFamilies, fontFamilyObject)) {
         fontInfo.familyLength = fontFamilies.size();
         auto families = std::make_unique<const char* []>(fontInfo.familyLength);
         for (uint32_t i = 0; i < fontFamilies.size(); i++) {
             families[i] = fontFamilies[i].c_str();
         }
         fontInfo.fontFamilies = families.get();
-        GetArkUINodeModifiers()->getTextModifier()->setTextFont(nativeNode, &fontInfo);
+        GetArkUINodeModifiers()->getTextModifier()->setTextFont(nativeNode, &fontInfo,
+            AceType::RawPtr(fontSizeResObj), AceType::RawPtr(fontFamilyObject));
     } else {
-        GetArkUINodeModifiers()->getTextModifier()->setTextFont(nativeNode, &fontInfo);
+        GetArkUINodeModifiers()->getTextModifier()->setTextFont(nativeNode, &fontInfo,
+            AceType::RawPtr(fontSizeResObj), AceType::RawPtr(fontFamilyObject));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1145,7 +1152,8 @@ ArkUINativeModuleValue TextBridge::SetLineSpacing(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension value;
-    if (!ArkTSUtils::ParseJsLengthMetrics(vm, secondArg, value)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!ArkTSUtils::ParseJsLengthMetrics(vm, secondArg, value, resourceObject)) {
         GetArkUINodeModifiers()->getTextModifier()->resetTextLineSpacing(nativeNode);
     } else {
         if (value.IsNegative()) {
@@ -1153,7 +1161,8 @@ ArkUINativeModuleValue TextBridge::SetLineSpacing(ArkUIRuntimeCallInfo* runtimeC
         }
         bool isOnlyBetweenLines = optionsArg->IsBoolean() ? optionsArg->ToBoolean(vm)->Value() : false;
         GetArkUINodeModifiers()->getTextModifier()->setTextLineSpacing(
-            nativeNode, value.Value(), static_cast<int>(value.Unit()), isOnlyBetweenLines);
+            nativeNode, value.Value(), static_cast<int>(value.Unit()), isOnlyBetweenLines,
+            AceType::RawPtr(resourceObject));
     }
     return panda::JSValueRef::Undefined(vm);
 }
