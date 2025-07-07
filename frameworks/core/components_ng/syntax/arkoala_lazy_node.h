@@ -76,9 +76,7 @@ public:
 
     void RecycleItems(int32_t from, int32_t to) final
     {
-        // for (int32_t i = from; i <= to; i++) {
-        //     items_.Remove(i);
-        // }
+        /* not implemented yet */
     }
 
     void OnDataChange(int32_t changeIndex, int32_t count, NotificationType type)
