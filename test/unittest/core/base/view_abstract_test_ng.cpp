@@ -4139,4 +4139,52 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest020, TestSize.Level1)
     g_isConfigChangePerform = false;
 }
 
+/**
+ * @tc.name: SetForegroundColorStrategy
+ * @tc.desc: Test SetForegroundColorStrategy of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest021, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    ForegroundColorStrategy strategy = ForegroundColorStrategy::INVERT;
+    ViewAbstract::SetForegroundColorStrategy(strategy);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetForegroundColorStrategy().has_value(), true);
+    EXPECT_EQ(renderContext->GetForegroundColorStrategyValue(), strategy);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    EXPECT_EQ(renderContext->GetForegroundColorStrategy().has_value(), true);
+    EXPECT_EQ(renderContext->GetForegroundColorStrategyValue(), strategy);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetForegroundColorStrategy
+ * @tc.desc: Test SetForegroundColorStrategy of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest022, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    ForegroundColorStrategy strategy = ForegroundColorStrategy::INVERT;
+    ViewAbstract::SetForegroundColorStrategy(frameNode, strategy);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetForegroundColorStrategy().has_value(), true);
+    EXPECT_EQ(renderContext->GetForegroundColorStrategyValue(), strategy);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    EXPECT_EQ(renderContext->GetForegroundColorStrategy().has_value(), true);
+    EXPECT_EQ(renderContext->GetForegroundColorStrategyValue(), strategy);
+    g_isConfigChangePerform = false;
+}
+
 } // namespace OHOS::Ace::NG

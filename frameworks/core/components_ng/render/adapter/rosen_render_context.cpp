@@ -872,6 +872,7 @@ void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pattern = host->GetPattern();
+        CHECK_NULL_VOID(pattern);
         pattern->OnForegroundColorUpdate();
     }
 }
@@ -902,6 +903,12 @@ void RosenRenderContext::OnForegroundColorStrategyUpdate(const ForegroundColorSt
     }
     rsNode_->SetEnvForegroundColorStrategy(rsStrategy);
     RequestNextFrame();
+    if (SystemProperties::ConfigChangePerform()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pattern = host->GetPattern();
+        pattern->OnForegroundColorUpdate();
+    }
 }
 
 DataReadyNotifyTask RosenRenderContext::CreateBgImageDataReadyCallback()
