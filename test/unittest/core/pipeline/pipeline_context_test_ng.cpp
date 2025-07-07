@@ -2385,6 +2385,22 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg121, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PipelineContextTestNgForBundleName
+ * @tc.desc: Test GetBundleName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNgForBundleName, TestSize.Level1)
+{
+    auto bundleName = context_->GetBundleName();
+    EXPECT_EQ(bundleName, "");
+    bundleName = MockContainer::CurrentBundleName();
+    EXPECT_EQ(bundleName, "");
+    MockContainer::Current()->SetBundleName("test");
+    bundleName = MockContainer::CurrentBundleName();
+    EXPECT_EQ(bundleName, "test");
+}
+
+/**
  * @tc.name: PipelineContextTestNg122
  * @tc.desc: Test FlushMouseEventForHover.
  * @tc.type: FUNC
