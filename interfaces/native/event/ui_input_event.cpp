@@ -3563,22 +3563,34 @@ int32_t OH_ArkUI_PointerEvent_CreateClonedEvent(const ArkUI_UIInputEvent* event,
     if (!event) {
         RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
-    auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-    if (!touchEvent) {
+    if (!clonedEvent) {
         RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
-    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!fullImpl) {
-        RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
+    switch (event->eventTypeId) {
+        case TOUCH_EVENT_ID:
+        case C_TOUCH_EVENT_ID: {
+            auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (!touchEvent) {
+                RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+            if (!fullImpl) {
+                RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
+            currentEvent->inputType = event->inputType;
+            currentEvent->eventTypeId = event->eventTypeId;
+            ArkUITouchEvent* touchEventCloned = new ArkUITouchEvent();
+            fullImpl->getNodeModifiers()->getCommonModifier()->createClonedTouchEvent(touchEventCloned, touchEvent);
+            currentEvent->inputEvent = touchEventCloned;
+            currentEvent->isCloned = true;
+            *clonedEvent = currentEvent;
+            break;
+        }
+        default: {
+            RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_NO_ERROR, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+        }
     }
-    ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
-    currentEvent->inputType = event->inputType;
-    currentEvent->eventTypeId = event->eventTypeId;
-    ArkUITouchEvent* touchEventCloned = new ArkUITouchEvent();
-    fullImpl->getNodeModifiers()->getCommonModifier()->createClonedTouchEvent(touchEventCloned, touchEvent);
-    currentEvent->inputEvent = touchEventCloned;
-    currentEvent->isCloned = true;
-    *clonedEvent = currentEvent;
     RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_NO_ERROR, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
