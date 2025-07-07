@@ -223,13 +223,14 @@ void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
     ani_boolean isUndef = ANI_FALSE;
     ArkUIDragInfo info;
     ani_ref pixelMap;
+    std::shared_ptr<Media::PixelMap> pixelMapValue = nullptr;
     if (ANI_OK == env->Object_GetFieldByName_Ref(dragInfo, "pixelMap", &pixelMap)) {
         env->Reference_IsUndefined(pixelMap, &isUndef);
         if (isUndef != ANI_TRUE) {
             ani_object value = static_cast<ani_object>(pixelMap);
-            ani_long pixelMapPtr;
-            if (ANI_OK == env->Object_CallMethodByName_Long(value, "unboxed", ":J", &pixelMapPtr)) {
-                info.pixelMap = reinterpret_cast<void*>(pixelMapPtr);
+            pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, value);
+            if (pixelMapValue) {
+                info.pixelMap = reinterpret_cast<void*>(&pixelMapValue);
             }
         }
     }
@@ -263,14 +264,5 @@ void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
         return;
     }
     modifier->getDragAniModifier()->setDragPreview(frameNode, info);
-}
-
-ani_long ConvertFromPixelMapToAniPointer(ani_env* env, [[maybe_unused]]ani_object object, ani_object pixelMap)
-{
-    auto pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMap);
-    if (!pixelMapValue) {
-        return {};
-    }
-    return reinterpret_cast<ani_long>(pixelMapValue.get());
 }
 } // namespace OHOS::Ace::Ani

@@ -25,6 +25,7 @@
 
 #include "base/image/image_source.h"
 #include "base/image/pixel_map.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace {
@@ -32,7 +33,6 @@ namespace {
 constexpr float HALF = 0.5;
 constexpr float SIDE = 192.0f;
 constexpr int32_t NOT_ADAPTIVE_SIZE = 288;
-constexpr float THRESHOLD = 0.001;
 
 RSColorType PixelFormatToColorType(PixelFormat format)
 {
@@ -102,7 +102,7 @@ void BlendForeground(RSCanvas& bitmapCanvas, RSBrush& brush, RSImage& image,
     }
     auto scale = std::min(background->GetWidth() * 1.0f / foreground->GetWidth(),
         background->GetHeight() * 1.0f / foreground->GetHeight());
-    if ((scale - 0.0) > THRESHOLD) {
+    if (NearEqual(scale, 0.0)) {
         return;
     }
     auto destWidth = foreground->GetWidth() * scale;
@@ -137,8 +137,8 @@ std::shared_ptr<RSBitmap> PixelMapToBitMap(RefPtr<PixelMap>& pixelmap)
 RefPtr<PixelMap> BitMapToPixelMap(const RSBitmap& bitmap, InitializationOptions& opts)
 {
     auto data = bitmap.GetPixels();
-    opts.size.SetWidth(static_cast<int32_t>(bitmap.GetWidth()));
-    opts.size.SetHeight(static_cast<int32_t>(bitmap.GetHeight()));
+    opts.size.SetWidth(bitmap.GetWidth());
+    opts.size.SetHeight(bitmap.GetHeight());
     opts.editable = false;
     auto pixelmap = PixelMap::Create(opts);
     if (!pixelmap) {
@@ -168,14 +168,18 @@ RefPtr<PixelMap> CompositeLayerAdaptive(
     tempCache.Build(imageInfo);
     RSCanvas bitmapCanvas;
     bitmapCanvas.Bind(tempCache);
-    brush.SetBlendMode(RSBlendMode::SRC);
-    bitmapCanvas.AttachBrush(brush);
-    DrawOntoCanvas(backBitmap, background->GetWidth(), background->GetHeight(), bitmapCanvas);
-    bitmapCanvas.DetachBrush();
-    RSRect dstRect(0.0, 0.0, static_cast<float>(background->GetWidth()), static_cast<float>(background->GetHeight()));
-    RSImage image;
 
+    if (backBitmap) {
+        brush.SetBlendMode(RSBlendMode::SRC);
+        bitmapCanvas.AttachBrush(brush);
+        DrawOntoCanvas(backBitmap, background->GetWidth(), background->GetHeight(), bitmapCanvas);
+        bitmapCanvas.DetachBrush();
+    }
+
+    RSImage image;
     if (maskBitmap) {
+        RSRect dstRect(
+            0.0, 0.0, static_cast<float>(background->GetWidth()), static_cast<float>(background->GetHeight()));
         RSRect srcRect(0.0, 0.0, static_cast<float>(mask->GetWidth()), static_cast<float>(mask->GetHeight()));
         image.BuildFromBitmap(*maskBitmap);
         brush.SetBlendMode(RSBlendMode::DST_IN);
@@ -184,9 +188,11 @@ RefPtr<PixelMap> CompositeLayerAdaptive(
             image, srcRect, dstRect, RSSamplingOptions(), RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
         bitmapCanvas.DetachBrush();
     }
+
     if (foreBitmap) {
         BlendForeground(bitmapCanvas, brush, image, backBitmap, foreBitmap);
     }
+
     bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
     InitializationOptions opts;
     opts.alphaType = background->GetAlphaType();
@@ -331,7 +337,7 @@ bool LayeredDrawableDescriptor::CreateMaskByPath()
         return false;
     }
     auto imageSource = ImageSource::Create(maskPath_);
-    if (imageSource) {
+    if (!imageSource) {
         return false;
     }
     DecodeOptions options;
@@ -347,7 +353,7 @@ bool LayeredDrawableDescriptor::CreateMaskByData()
         return false;
     }
     auto imageSource = ImageSource::Create(maskData_.data(), maskData_.size());
-    if (imageSource) {
+    if (!imageSource) {
         return false;
     }
     DecodeOptions options;
@@ -362,6 +368,9 @@ bool LayeredDrawableDescriptor::CreateMaskByData()
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetForegroundData(
     void* object, uint8_t* data, size_t len)
 {
+    if (len == 0 || data == nullptr) {
+        return;
+    }
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable) {
         std::vector<uint8_t> result(data, data + len);
@@ -372,6 +381,9 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetForegroun
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetBackgroundData(
     void* object, uint8_t* data, size_t len)
 {
+    if (len == 0 || data == nullptr) {
+        return;
+    }
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable) {
         std::vector<uint8_t> result(data, data + len);
@@ -379,9 +391,11 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetBackgroun
     }
 }
 
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetMaskData(
-    void* object, uint8_t* data, size_t len)
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetMaskData(void* object, uint8_t* data, size_t len)
 {
+    if (len == 0 || data == nullptr) {
+        return;
+    }
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable) {
         std::vector<uint8_t> result(data, data + len);
@@ -391,6 +405,9 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetMaskData(
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetMaskPath(void* object, const char* path)
 {
+    if (path == nullptr) {
+        return;
+    }
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable) {
         drawable->SetMaskPath(std::string(path));

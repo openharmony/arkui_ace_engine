@@ -26,8 +26,7 @@ export interface IStorageProperties {
     ttype: Type;
 }
 
-export class AbstractProperty<T> extends DecoratedV1VariableBase<T>
-    implements IStorageProperty {
+export class AbstractProperty<T> extends DecoratedV1VariableBase<T> implements IStorageProperty {
     private readonly key_: string;
     private readonly ttype_: Type;
     private readonly get_: GetType<T>;
@@ -35,7 +34,7 @@ export class AbstractProperty<T> extends DecoratedV1VariableBase<T>
 
     constructor(key: string, ttype: Type, get: GetType<T>, set: SetType<T>) {
         super('AbstractProperty', null, key);
-        StateMgmtConsole.log(`create new AbstractProperty for key '${key}' `)
+        StateMgmtConsole.log(`create new AbstractProperty for key '${key}' `);
 
         this.key_ = key;
         this.ttype_ = ttype;
@@ -48,7 +47,7 @@ export class AbstractProperty<T> extends DecoratedV1VariableBase<T>
         // if initial value is object, register so that property changes trigger
         // @Watch function exec
         this.registerWatchForObservedObjectChanges(initValue);
-        // registerWatch  to source is done in the factory function 
+        // registerWatch  to source is done in the factory function
     }
 
     // FIXME change to info()
@@ -86,12 +85,12 @@ export class AbstractProperty<T> extends DecoratedV1VariableBase<T>
 
 /**
  * for backward compatibility only
- * 
+ *
  */
 export class SubscribedAbstractProperty<T> extends AbstractProperty<T> {
     constructor(key: string, ttype: Type, get: GetType<T>, set: SetType<T>) {
         super(key, ttype, get, set);
     }
 
-    public aboutTODeleted(): void {};
+    public aboutToBeDeleted(): void {}
 }

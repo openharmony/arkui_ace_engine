@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt, KLong, KBoolean } from "@koalaui/interop"
+import { KPointer, KInt, KLong, KBoolean, KFloat } from "@koalaui/interop"
 import { drawing } from "@ohos/graphics/drawing"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
@@ -21,12 +21,14 @@ import common from "@ohos.app.ability.common"
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from "arkui/Graphics"
-import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo } from "arkui/component"
+import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
 import { WaterFlowOptions,WaterFlowSections, XComponentControllerCallbackInternal } from "arkui/component"
+import { ChildrenMainSize } from "arkui/component"
 import { HookDragInfo } from "arkui/handwritten"
 import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
+import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 
 export class ArkUIAniModule {
     static {
@@ -34,6 +36,9 @@ export class ArkUIAniModule {
     }
 
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
+    native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
+    native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
+    native static _Image_DrawingColorFilter(ptr: KPointer, value: drawing.ColorFilter): void
     native static _Web_SetWebOptions(ptr: KPointer, webviewController: webview.WebviewController): void
     native static _Web_SetWebController_ControllerHandler(ptr: KPointer, webviewController: webview.WebviewController): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
@@ -51,6 +56,7 @@ export class ArkUIAniModule {
     native static _SetDrawModifier(ptr: KPointer, flag: KInt, drawModifier: DrawModifier): void
     native static _Invalidate(ptr: KPointer): void
     native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
+    native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
 
     // for Drag
     native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
@@ -60,7 +66,6 @@ export class ArkUIAniModule {
     native static _DragEvent_Set_PixelMap(ptr: KLong, pixelMap: image.PixelMap) : void
     native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
     native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void
-    native static _DragEvent_ConvertFromPixelMapToAniPointer(pixelMap: image.PixelMap) : KPointer
     native static _Drag_Set_AllowDrop_Null(ptr: KLong) : void
     native static _Drag_Set_AllowDrop(ptr: KPointer, thisArray: Array<string>, thisLength: KInt): void
     native static _Drag_Set_DragPreview(ptr: KPointer, dragInfo: HookDragInfo): void
@@ -92,6 +97,14 @@ export class ArkUIAniModule {
     native static _DragController_setDragEventStrictReportingEnabled(enable: boolean): void
     native static _DragController_cancelDataLoading(key: string): void
     native static _DragController_notifyDragStartReques(requestStatus: dragController.DragStartRequestStatus): void
+
+    native static _DragController_getDragPreview(): dragController.DragPreview
+
+    native static _DragController_setForegroundColor(color: ResourceColor, dragPreviewPtr: KPointer): void
+
+    native static _DragController_animate(options: dragController.AnimationOptions, handler: () =>void,
+        dragPreviewPtr: KPointer): void
+
     native static _Animation_SetOrCreateAnimatableProperty<T>(ptr: KPointer, propertyName: string, property: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void
 
@@ -100,6 +113,7 @@ export class ArkUIAniModule {
     native static _PopViewStackProcessor(): KPointer
 
     native static _DeleteViewStackProcessor(ptr: KPointer): void
+    
     native static _BackgroundImage_PixelMap(ptr: KPointer, pixelmap: image.PixelMap, repeat: KInt): void
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
@@ -133,4 +147,6 @@ export class ArkUIAniModule {
 
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean
+    native static _OnMeasure_InnerMeasure(ptr: KPointer): void
+    native static _OnLayout_InnerLayout(ptr: KPointer): void
 }

@@ -26,12 +26,12 @@ namespace OHOS::Ace::Ani {
     void PersistentStorage_Delete(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string key);
 
     // for environment
-    ani_boolean Env_GetAccessibilityEnabled(ani_env* env, [[maybe_unused]] ani_object aniClass);
-    ani_int Env_GetColorMode(ani_env* env, [[maybe_unused]] ani_object aniClass);
-    ani_float Env_GetFontScale(ani_env* env, [[maybe_unused]] ani_object aniClass);
-    ani_float Env_GetFontWeightScale(ani_env* env, [[maybe_unused]] ani_object aniClass);
-    ani_string Env_GetLayoutDirection(ani_env* env, [[maybe_unused]] ani_object aniClass);
-    ani_string Env_GetLanguageCode(ani_env* env, [[maybe_unused]] ani_object aniClass);
+    ani_boolean Env_GetAccessibilityEnabled(ani_env* env);
+    ani_int Env_GetColorMode(ani_env* env);
+    ani_float Env_GetFontScale(ani_env* env);
+    ani_float Env_GetFontWeightScale(ani_env* env);
+    ani_string Env_GetLayoutDirection(ani_env* env);
+    ani_string Env_GetLanguageCode(ani_env* env);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_STATEMGMT_MODULE

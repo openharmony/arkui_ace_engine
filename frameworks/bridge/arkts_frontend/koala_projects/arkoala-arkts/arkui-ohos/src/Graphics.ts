@@ -230,10 +230,15 @@ export class ColorMetrics implements MaterializedBase {
         const red_casted = red as (number)
         const green_casted = green as (number)
         const blue_casted = blue as (number)
-        const alpha_casted = alpha as (number | undefined)
+        let alpha_casted = alpha as (number | undefined);
+        if (alpha !== undefined && alpha !== null) {
+            alpha_casted = alpha * MAX_CHANNEL_VALUE;
+        } else {
+            alpha_casted = MAX_CHANNEL_VALUE;
+        }
         let result = ColorMetrics.rgba_serialize(red_casted, green_casted, blue_casted, alpha_casted);
         if (alpha !== undefined) {
-            result.alpha_ = alpha * MAX_ALPHA_VALUE;
+            result.alpha_ = ColorMetrics.clamp(alpha! * MAX_CHANNEL_VALUE);
         }
         return result;
     }
@@ -270,15 +275,15 @@ export class ColorMetrics implements MaterializedBase {
         if (typeof color === 'object') {
             const color_casted = (color as Object) as (Resource);
             chanels = ColorMetrics.colorMetricsResourceColor_serialize(color_casted);
-            if (chanels === undefined) {
+            if (chanels[0] === 0) {
                 const error = new Error('Failed to obtain the color resource.');
                 throw new BusinessError(ERROR_CODE_RESOURCE_GET_FAILED, error);
             }
-            const red = chanels[0];
-            const green = chanels[1];
-            const blue = chanels[2];
-            const alpha = chanels[3];
-            const resourceId = chanels[4];
+            const red = chanels[1];
+            const green = chanels[2];
+            const blue = chanels[3];
+            const alpha = chanels[4];
+            const resourceId = chanels[5];
             const colorMetrics = ColorMetrics.rgba(red, green, blue, alpha);
             colorMetrics.setResourceId(resourceId);
             return colorMetrics;

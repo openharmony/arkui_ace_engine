@@ -86,19 +86,19 @@ export class UIUtilsImpl {
     }
 
     public makeObserved<T>(value: T): T {
-        if (StateMgmtTool.isIObservedObject(value as NullableObject)) {
+        if (value instanceof ObserveWrappedBase) {
             return value as T;
         }
-        if (value instanceof Array) {
+        if (value instanceof Array && Type.of(value).getName() === 'escompat.Array') {
             return UIUtilsImpl.makeObservedArray(value) as T;
         }
-        if (value instanceof Date) {
+        if (value instanceof Date && Type.of(value).getName() === 'escompat.Date') {
             return UIUtilsImpl.makeObservedDate(value) as T;
         }
-        if (value instanceof Map) {
+        if (value instanceof Map && Type.of(value).getName() === 'escompat.Map') {
             return UIUtilsImpl.makeObservedMap(value) as T;
         }
-        if (value instanceof Set) {
+        if (value instanceof Set && Type.of(value).getName() === 'escompat.Set') {
             return UIUtilsImpl.makeObservedSet(value) as T;
         }
         if (value && StateMgmtTool.isObjectLiteral(value)) {
@@ -112,7 +112,7 @@ export class UIUtilsImpl {
             return source;
         }
         if (UIUtilsImpl.isProxied(source!)) {
-            return Proxy.tryGetTarget(source! as Object)! as Object as T;
+            return proxy.Proxy.tryGetTarget(source! as Object)! as Object as T;
         }
         if (
             source instanceof WrappedArray ||

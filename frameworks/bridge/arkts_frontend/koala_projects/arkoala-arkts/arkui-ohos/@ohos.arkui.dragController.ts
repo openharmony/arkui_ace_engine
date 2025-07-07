@@ -43,6 +43,29 @@ export namespace dragController {
         WAITING = 0,
         READY = 1,
     }
+
+    export interface AnimationOptions {
+        duration?: number;
+        curve?: Curve | ICurve;
+    }
+
+    export interface DragPreview {
+        setForegroundColor(color: ResourceColor): void;
+        animate(options: AnimationOptions, handler: () =>void): void;
+    }
+
+    class DragPreviewInner implements DragPreview {
+        dragPreview:KPointer = 0;
+        constructor(result:KPointer) {
+            this.dragPreview = result;
+        }
+        public setForegroundColor(color: ResourceColor) {
+            ArkUIAniModule._DragController_setForegroundColor(color, this.dragPreview);
+        }
+        public animate(options: AnimationOptions, handler: () =>void) {
+            ArkUIAniModule._DragController_animate(options, handler, this.dragPreview);
+        }
+    }
     
     export interface DragInfo {
         pointerId: number;
@@ -144,15 +167,5 @@ export namespace dragController {
         public off(type: string, callback?: Callback<DragAndDropInfo>) {
             ArkUIAniModule._DragController_off(type, callback, this.dragAction);
         }
-    }
-
-    export interface AnimationOptions {
-        duration?: number;
-        curve?: Curve | ICurve;
-    }
-
-    export interface DragPreview {
-        setForegroundColor(color: ResourceColor): void;
-        animate(options: AnimationOptions, handler: () =>void): void;
     }
 }

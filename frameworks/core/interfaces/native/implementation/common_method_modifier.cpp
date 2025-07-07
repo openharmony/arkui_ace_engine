@@ -420,7 +420,12 @@ auto g_bindMenuOptionsParam = [](
         menuParam.placement = Placement::TOP;
     }
     menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
+    menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
     menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
+    menuParam.hapticFeedbackMode =
+        OptConvert<HapticFeedbackMode>(menuOptions.hapticFeedbackMode).value_or(menuParam.hapticFeedbackMode);
+    menuParam.outlineColor = OptConvert<BorderColorProperty>(menuOptions.outlineColor);
+    menuParam.outlineWidth = OptConvert<BorderWidthProperty>(menuOptions.outlineWidth);
 };
 
 auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,

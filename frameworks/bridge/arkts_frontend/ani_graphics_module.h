@@ -33,6 +33,8 @@ public:
     static void SetDrawModifier(ani_env* env, ani_long ptr, ani_int flag, ani_object fnObj);
     static void Invalidate(ani_env* env, ani_long ptr);
     static void SetCustomCallback(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
+    static void OnMeasureInnerMeasure(ani_env* env, ani_long ptr);
+    static void OnLayoutInnerLayout(ani_env* env, ani_long ptr);
 
 private:
     static ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context);

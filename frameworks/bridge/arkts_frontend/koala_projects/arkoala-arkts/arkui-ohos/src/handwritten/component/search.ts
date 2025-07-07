@@ -1,5 +1,4 @@
 import { InteropNativeModule, RuntimeType } from "@koalaui/interop";
-import { Serializer } from "./peers/Serializer";
 import { int32 } from "@koalaui/common";
 import { ArkUIGeneratedNativeModule } from "#components";
 import { SearchOpsHandWritten } from "./../handwritten"
@@ -15,11 +14,11 @@ function SearchOptionsValueIsBindable(value?: SearchOptions) : boolean {
     return false;
 }
 
-function hookSetSearchOptions(peer: ArkSearchPeer, options?: SearchOptions): void {
+function hookSetSearchOptions(searchComponent: ArkSearchComponent, options?: SearchOptions): void {
     const options_casted = options as (SearchOptions | undefined)
-    peer.setSearchOptionsAttribute(options_casted)
+    searchComponent.getPeer()?.setSearchOptionsAttribute(options_casted)
     if (SearchOptionsValueIsBindable(options)) {
-        SearchOpsHandWritten.hookSearchInputValueImpl(peer.getPeerPtr(),
+        SearchOpsHandWritten.hookSearchInputValueImpl(searchComponent.getPeer().getPeerPtr(),
         (options!.value as Bindable<string>));
     }
 }

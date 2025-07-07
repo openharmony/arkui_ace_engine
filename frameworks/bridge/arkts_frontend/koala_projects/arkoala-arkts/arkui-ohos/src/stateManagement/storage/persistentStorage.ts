@@ -17,7 +17,7 @@ import { IStorageProperty } from './storageBase';
 import { AbstractProperty, OnChangeType } from './storageProperty';
 import { AppStorage } from './appStorage';
 import { ArkUIAniModule } from 'arkui.ani';
-import { InteropNativeModule } from '@koalaui/interop';
+import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
 interface IAniStorage {
     get(key: string): string | undefined;
@@ -55,7 +55,7 @@ class TypedMap {
     private key2Value_ = new Map<string, IStorageProperty>();
 
     public add(key: string, ttype: Type, sp: IStorageProperty): boolean {
-        const typeOpt = this.key2Type_.get(key)
+        const typeOpt = this.key2Type_.get(key);
         if (typeOpt !== undefined) {
             if (!typeOpt!.equals(ttype)) {
                 return false;
@@ -67,11 +67,11 @@ class TypedMap {
     }
 
     public get(key: string, expectedTtype: Type): IStorageProperty | undefined {
-        const typeOpt = this.key2Type_.get(key)
+        const typeOpt = this.key2Type_.get(key);
         if (typeOpt === undefined || !typeOpt!.equals(expectedTtype)) {
             return undefined;
         }
-        return this.key2Value_.get(key)
+        return this.key2Value_.get(key);
     }
 
     public delete(key: string): boolean {
@@ -117,6 +117,7 @@ class AniStorage implements IAniStorage {
 class PersistentStorage {
     private static instance_: PersistentStorage | undefined = undefined;
     private map_: TypedMap = new TypedMap();
+    private simpleTypeSet: Set<Type> = new Set<Type>([Type.from<number>(), Type.from<string>(), Type.from<boolean>()]);
     private readonly storage_: IAniStorage = new AniStorage();
 
     private static getOrCreate(): PersistentStorage {
@@ -144,16 +145,33 @@ class PersistentStorage {
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public static persistProp<T>(key: string, ttype: Type, defaultValue: T, toJson?: ToJSONType<T>, fromJson?: FromJSONType<T>): boolean {
+    public static persistProp<T>(
+        key: string,
+        ttype: Type,
+        defaultValue: T,
+        toJson?: ToJSONType<T>,
+        fromJson?: FromJSONType<T>
+    ): boolean {
         return PersistentStorage.getOrCreate().persistProp1(key, ttype, defaultValue, toJson, fromJson);
     }
 
-    private persistProp1<T>(key: string, ttype: Type, defaultValue: T, toJson?: ToJSONType<T>, fromJson?: FromJSONType<T>): boolean {
+    private persistProp1<T>(
+        key: string,
+        ttype: Type,
+        defaultValue: T,
+        toJson?: ToJSONType<T>,
+        fromJson?: FromJSONType<T>
+    ): boolean {
         try {
+            if (!this.simpleTypeSet.has(ttype) && (!toJson || !fromJson)) {
+                StateMgmtConsole.log(
+                    `Object Types for key ${key} requires toJson and fromJson functions to be defined`
+                );
+            }
             const apOpt = PersistentStorage.getOrCreate().map_.get(key, ttype);
             if (apOpt !== undefined) {
                 // persisted property already
-                InteropNativeModule._NativeLog(`persistProp key ${key} persistedAlready`);
+                StateMgmtConsole.log(`persistProp key ${key} persistedAlready`);
                 return false;
             }
 
@@ -161,25 +179,36 @@ class PersistentStorage {
             if (AppStorage.keySets().has(key)) {
                 const success = PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, toJson);
                 if (!success) {
-                     InteropNativeModule._NativeLog(`Failed to start persistence for existing key ${key}`);
+                    StateMgmtConsole.log(`Failed to start persistence for existing key ${key}`);
                 }
                 return success;
             }
             // case 2: Read from disk, set in AppStorage and start persistence
-            if (PersistentStorage.getOrCreate().__readFromDiskSetAndPersist<T>(key, ttype, fromJson, toJson)) {
-                InteropNativeModule._NativeLog(`Successfully persisted key ${key} from disk`);
+            if (
+                PersistentStorage.getOrCreate().__readFromDiskSetAndPersist<T>(
+                    key,
+                    ttype,
+                    this.simpleTypeSet.has(ttype) ? undefined : fromJson,
+                    this.simpleTypeSet.has(ttype) ? undefined : toJson
+                )
+            ) {
                 return true;
             }
 
             // case 3: Create new property with default value and start persistence
-            const success = PersistentStorage.getOrCreate().__createNewAndPersist(key, ttype, defaultValue, toJson, fromJson);
+            const success = PersistentStorage.getOrCreate().__createNewAndPersist(
+                key,
+                ttype,
+                defaultValue,
+                this.simpleTypeSet.has(ttype) ? undefined : toJson,
+                this.simpleTypeSet.has(ttype) ? undefined : fromJson
+            );
             if (!success) {
-                InteropNativeModule._NativeLog(`Failed to create and persist key ${key} with default value`);
+                StateMgmtConsole.log(`Failed to create and persist key ${key} with default value`);
             }
             return success;
-
         } catch (error) {
-            InteropNativeModule._NativeLog(`Unexpected error in persistProp for key ${key}: ${error}`);
+            StateMgmtConsole.log(`Unexpected error in persistProp for key ${key}: ${error}`);
             return false;
         }
     }
@@ -226,9 +255,15 @@ class PersistentStorage {
 
     // case 1: neither on disk nor in storage
     // create with default value and start to persist
-    private __createNewAndPersist<T>(key: string, ttype: Type, defaultValue: T, toJson?: ToJSONType<T>, fromJson?: FromJSONType<T>): boolean {
+    private __createNewAndPersist<T>(
+        key: string,
+        ttype: Type,
+        defaultValue: T,
+        toJson?: ToJSONType<T>,
+        fromJson?: FromJSONType<T>
+    ): boolean {
         if (!AppStorage.setOrCreate<T>(key, defaultValue, ttype)) {
-            InteropNativeModule._NativeLog(`__createNewAndPersist return false`);
+            StateMgmtConsole.log(`__createNewAndPersist return false`);
             return false;
         }
         return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, toJson);
@@ -237,7 +272,12 @@ class PersistentStorage {
     // case 2: not in storage
     // try to read from disk (return false if not found)
     // create in storage with read value and start to persist
-    private __readFromDiskSetAndPersist<T>(key: string, ttype: Type, fromJson?: FromJSONType<T>, toJson?: ToJSONType<T>): boolean {
+    private __readFromDiskSetAndPersist<T>(
+        key: string,
+        ttype: Type,
+        fromJson?: FromJSONType<T>,
+        toJson?: ToJSONType<T>
+    ): boolean {
         // Step 1: Read JSON string from storage
         const jsonString = PersistentStorage.getOrCreate().storage_.get(key);
         if (jsonString === undefined) {
@@ -245,25 +285,36 @@ class PersistentStorage {
         }
 
         try {
-            // Step 2: Parse JSON string into JsonElement
-            const jsonElement = JSON.parseJsonElement(jsonString);
+            if (this.simpleTypeSet.has(ttype)) {
+                // Step 2: simple type just parse from disk
+                const value = JSON.parse<T>(jsonString, ttype);
 
-            // Step 3: Convert JsonElement to type T using fromJson
-            if (fromJson === undefined) {
-                return false; // Cannot deserialize without fromJson
-            }
-            const value: T = fromJson(jsonElement);
+                // Step 3: Store the value in AppStorage
+                AppStorage.setOrCreate(key, value, ttype);
 
-            // Step 4: Store the value in AppStorage
-            AppStorage.setOrCreate(key, value, ttype);
-
-            // Step 5: persist the property
-            return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, toJson); // returns true on success
-         } catch (error) {
-            if (error instanceof jsonx.JsonError) {
-                 InteropNativeModule._NativeLog(`JSON parsing error: ${error.message}`);
+                // Step 4: persist the property
+                return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, toJson); // returns true on success
             } else {
-                 InteropNativeModule._NativeLog(`Unexpected error: ${error}`);
+                // Step 2: Parse JSON string into JsonElement
+                const jsonElement = JSON.parseJsonElement(jsonString);
+
+                // Step 3: Convert JsonElement to type T using fromJson
+                if (fromJson === undefined) {
+                    return false; // Cannot deserialize without fromJson
+                }
+                const value: T = fromJson(jsonElement);
+
+                // Step 4: Store the value in AppStorage
+                AppStorage.setOrCreate(key, value, ttype);
+
+                // Step 5: persist the property
+                return PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, toJson); // returns true on success
+            }
+        } catch (error) {
+            if (error instanceof jsonx.JsonError) {
+                StateMgmtConsole.log(`JSON parsing error: ${error.message}`);
+            } else {
+                StateMgmtConsole.log(`Unexpected error: ${error}`);
             }
             return false; // Failure due to parsing or deserialization error
         }
@@ -274,30 +325,33 @@ class PersistentStorage {
     private __startToPersistStorageProperty<T>(key: string, ttype: Type, toJson?: ToJSONType<T>): boolean {
         const ref = AppStorage.ref<T>(key, ttype) as AbstractProperty<T> | undefined; // Explicitly specify T
         if (ref === undefined) {
-            InteropNativeModule._NativeLog(`Failed to get AppStorage ref for key ${key}`);
+            StateMgmtConsole.log(`Failed to get AppStorage ref for key ${key}`);
             return false;
         }
         PersistentStorage.getOrCreate().map_.add(key, ttype, ref);
         const writeToDiskOnChange: OnChangeType<T> = (key1: string, newValue: T) => {
             if (key != key1) {
-                InteropNativeModule._NativeLog("persistProp callback will non-matching key. Ignoring. Internal error.")
+                StateMgmtConsole.log('persistProp callback will non-matching key. Ignoring. Internal error.');
                 return;
             }
             try {
-                const jsonElement = toJson!(newValue);
-                // convert JsonElement to jsonString
-
-                const jsonString = JSON.stringifyJsonElement(jsonElement);
-                PersistentStorage.getOrCreate().storage_.set(key, jsonString);
-                InteropNativeModule._NativeLog(`Successfully persisted key ${key} to storage`);
+                if (this.simpleTypeSet.has(ttype)) {
+                    const jsonString = JSON.stringify(newValue);
+                    PersistentStorage.getOrCreate().storage_.set(key, jsonString);
+                } else {
+                    const jsonElement = toJson!(newValue);
+                    // convert JsonElement to jsonString
+                    const jsonString = JSON.stringifyJsonElement(jsonElement);
+                    PersistentStorage.getOrCreate().storage_.set(key, jsonString);
+                }
             } catch (error) {
                 if (error instanceof jsonx.JsonError) {
-                     InteropNativeModule._NativeLog(`JSON serialization error for key ${key}: ${error.message}`);
+                    StateMgmtConsole.log(`JSON serialization error for key ${key}: ${error.message}`);
                 } else {
-                     InteropNativeModule._NativeLog(`Unexpected error persisting key ${key}: ${error}`);
+                    StateMgmtConsole.log(`Unexpected error persisting key ${key}: ${error}`);
                 }
             }
-        }
+        };
         ref.onChange(writeToDiskOnChange);
         PersistentStorage.getOrCreate().map_.add(key, ttype, ref);
         return true;

@@ -40,7 +40,7 @@ V2:
 /**
  * Base class of all decorated variable classes
  */
-export abstract class DecoratedVariableBase<T> {
+export class DecoratedVariableBase {
     protected readonly owningComponent_: ExtendableComponent | null;
     // can be read publically
     public _varName: string;
@@ -67,16 +67,13 @@ export abstract class DecoratedVariableBase<T> {
 base class for all V1 decorated DecoratedVariableBase implements DecoratedVariableBase
 */
 
-export abstract class DecoratedV1VariableBase<T>
-    extends DecoratedVariableBase<T>
-    implements IDecoratedV1Variable<T>
-{
+export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase implements IDecoratedV1Variable<T> {
     // V1 decorators can optionally have one @Watch function
     // to manage Local/AppStorge dependencies additional WatchFunc are required
     // therefore _watchFuncs is an Map<WatchIdType, WatchFunc>
     /* compiler BUG: change to protcted */
     public readonly _watchFuncs: Map<WatchIdType, WatchFunc> = new Map<WatchIdType, WatchFunc>();
-    protected myTriggerFromSourceWatchId_ : WatchIdType = -1;
+    protected myTriggerFromSourceWatchId_: WatchIdType = -1;
 
     constructor(
         decorator: string,
@@ -103,11 +100,11 @@ export abstract class DecoratedV1VariableBase<T>
         return;
     }
 
-    public setMyTriggerFromSourceWatchId(id :WatchIdType) : void {
+    public setMyTriggerFromSourceWatchId(id: WatchIdType): void {
         this.myTriggerFromSourceWatchId_ = id;
     }
 
-    public getMyTriggerFromSourceWatchId() : WatchIdType {
+    public getMyTriggerFromSourceWatchId(): WatchIdType {
         return this.myTriggerFromSourceWatchId_;
     }
 
@@ -139,7 +136,7 @@ export abstract class DecoratedV1VariableBase<T>
             });
         } else {
             const handler = StateMgmtTool.tryGetHandler(value as Object);
-            if (handler && (StateMgmtTool.isISubscribedWatches(handler as Object))) {
+            if (handler && StateMgmtTool.isISubscribedWatches(handler as Object)) {
                 const iSubscribedWatches = handler as Object as ISubscribedWatches;
                 this._watchFuncs.forEach((watchFunc) => {
                     watchFunc.registerMeTo(iSubscribedWatches);
@@ -161,7 +158,7 @@ export abstract class DecoratedV1VariableBase<T>
         } else {
             // check if value is observed / proxied interface
             const handler = StateMgmtTool.tryGetHandler(value as Object);
-            if (handler && (StateMgmtTool.isISubscribedWatches(handler as Object))) {
+            if (handler && StateMgmtTool.isISubscribedWatches(handler as Object)) {
                 const iSubscribedWatches = handler as ISubscribedWatches;
                 this._watchFuncs.forEach((watchFunc) => {
                     watchFunc.unregisterMeFrom(iSubscribedWatches);

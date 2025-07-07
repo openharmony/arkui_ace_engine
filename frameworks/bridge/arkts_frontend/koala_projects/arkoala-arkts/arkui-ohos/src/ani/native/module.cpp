@@ -24,7 +24,8 @@
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "dragController/drag_controller_module.h"
 #include "image_span/image_span_module.h"
-#include "image/native_image.h"
+#include "image/image_module.h"
+#include "list/list_children_main_size_module.h"
 #include "load.h"
 #include "log/log.h"
 #include "utils/convert_utils.h"
@@ -32,6 +33,7 @@
 #include "interop/interop_module.h"
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
+#include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
 #include "xcomponent/xcomponent_module_methods.h"
 
@@ -53,6 +55,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Image_ResizableOptions",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ImageResizableOptions)
+        },
+        ani_native_function {
+            "_Image_Consturct_PixelMap",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ImageConstructPixelMap)
+        },
+        ani_native_function {
+            "_Image_Consturct_DrawableDescriptor",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ImageConstructDrawableDescriptor)
+        },
+        ani_native_function {
+            "_Image_DrawingColorFilter",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ImageDrawingColorFilter)
         },
         ani_native_function {
             "_Web_SetWebOptions",
@@ -135,6 +152,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowOptions)
         },
         ani_native_function {
+            "_SetListChildrenMainSize",
+            "JLarkui/component/common/ChildrenMainSize;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetListChildrenMainSize)
+        },
+        ani_native_function {
             "_DragEvent_Set_Data",
             "JL@ohos/data/unifiedDataChannel/unifiedDataChannel/UnifiedData;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetData)
@@ -183,11 +205,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Drag_Set_DragPreview",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragSetDragPreview)
-        },
-        ani_native_function {
-            "_DragEvent_ConvertFromPixelMapToAniPointer",
-            "L@ohos/multimedia/image/image/PixelMap;:J",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertFromPixelMapToAniPointer)
         },
         ani_native_function {
             "_ComponentSnapshot_createFromBuilderWithCallback",
@@ -265,6 +282,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionOff)
         },
         ani_native_function {
+            "_DragController_getDragPreview",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIGetDragPreview)
+        },
+        ani_native_function {
+            "_DragController_setForegroundColor",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragPreviewSetForegroundColor)
+        },
+        ani_native_function {
+            "_DragController_animate",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragPreviewAnimate)
+        },
+        ani_native_function {
             "_DragController_setDragEventStrictReportingEnabled",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionSetDragEventStrictReportingEnabled)
@@ -316,7 +348,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_PersistentStorage_Set",
-           "Lstd/core/String;Lstd/core/String;:V",
+            "Lstd/core/String;Lstd/core/String;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Set)
         },
         ani_native_function {
@@ -378,7 +410,17 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_IsDebugMode",
             "I:I",
             reinterpret_cast<void*>(OHOS::Ace::Ani::IsDebugMode)
-        }
+        },
+        ani_native_function {
+            "_OnMeasure_InnerMeasure",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::OnMeasureInnerMeasure)
+        },
+        ani_native_function {
+            "_OnLayout_InnerLayout",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::OnLayoutInnerLayout)
+        },
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());

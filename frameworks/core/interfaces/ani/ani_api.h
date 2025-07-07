@@ -65,7 +65,9 @@ struct ArkUIDragInfo {
 
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
+    void (*setDrawableDescriptor)(ArkUINodeHandle node, void* drawablem, int type);
     void (*setResizableLattice)(ArkUINodeHandle node, void* lattice);
+    void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
 };
 
 struct ArkUIAniWebModifier {
@@ -97,6 +99,8 @@ struct ArkUIAniCommonModifier {
     ArkUI_Int32 (*requireArkoalaNodeId)(ArkUI_Int32 capacity);
     ani_boolean (*checkIsUIThread)(ArkUI_Int32 id);
     ani_boolean (*isDebugMode)(ArkUI_Int32 id);
+    void (*onMeasureInnerMeasure)(ani_env* env, ani_long ptr);
+    void (*onLayoutInnerLayout)(ani_env* env, ani_long ptr);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);
@@ -111,6 +115,9 @@ struct ArkUIAniContentSlotModifier {
 };
 struct ArkUIAniWaterFlowModifier {
     void (*setWaterFlowOptions)(ani_env* env, ani_long ptr, ani_object fnObj);
+};
+struct ArkUIAniListModifier {
+    void (*setListChildrenMainSize)(ani_env* env, ani_long ptr, ani_object obj);
 };
 struct ArkUIAniComponentSnapshotModifier {
     int32_t (*getCurrentIdSafely)();
@@ -146,6 +153,12 @@ struct ArkUIAniDragControllerModifier {
         ani_object callback, ani_long dragActionPtr);
     void (*aniDragActionOff)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, const char* type,
         [[maybe_unused]] ani_object callback, ani_long dragActionPtr);
+    ani_object (*aniGetDragPreview)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass);
+    void (*aniDragPreviewSetForegroundColor)(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object color, ani_long dragPreviewPtr);
+    void (*aniDragPreviewAnimate)(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object options, ani_object handler,
+        ani_long dragPreviewPtr);
     void (*aniDragActionSetDragEventStrictReportingEnabled)(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, bool enable);
     void (*aniDragActionCancelDataLoading)(
@@ -166,16 +179,16 @@ struct ArkUIAniShapeModifier {
 struct ArkUIAniStateMgmtModifier {
     std::string (*persistentStorageGet)(std::string key);
     void (*persistentStorageSet)(std::string key, std::string value);
-    void (*persistentStorageHas)(std::string key);
+    bool (*persistentStorageHas)(std::string key);
     void (*persistentStorageDelete)(std::string key);
     void (*persistentStorageClear)();
     int32_t (*getColorMode)();
     float (*getFontWeightScale)();
     float (*getFontScale)();
-    int32_t (*getAccessibilityEnabled)();
-    int32_t (*getLayoutDirection)();
-    int32_t (*getLanguageCode)();
-}
+    bool (*getAccessibilityEnabled)();
+    std::string (*getLayoutDirection)();
+    std::string (*getLanguageCode)();
+};
 struct ArkUIAniXComponentModifier {
     void (*setXComponentControllerCallback)(ArkUINodeHandle node,
         std::function<void(const std::string&)>&& onSurfaceCreated,
@@ -192,6 +205,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
+    const ArkUIAniListModifier* (*getArkUIAniListModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
     const ArkUIAniInteropModifier* (*getInteropAniModifier)();

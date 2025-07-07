@@ -24,11 +24,10 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { Resource } from "global.resource"
-import { PixelMap } from "#external"
+import { PixelMap, PixelMapDrawableDescriptor, AnimatedDrawableDescriptor, LayeredDrawableDescriptor } from "#external"
 import { ResourceColor, ColorFilter, ResourceStr, EdgeWidths } from "./units"
 import { ImageFit, ImageRepeat, CopyOptions, Color } from "./enums"
 import { Matrix4Transit } from "./arkui-matrix4"
-import { DrawingColorFilter } from "./arkui-drawing"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./imageCommon"
 import { ResolutionQuality } from "./arkui-external"
 import { DrawableDescriptor } from "#external"
@@ -380,7 +379,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAttribute_syncLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    colorFilterAttribute(value: ColorFilter | DrawingColorFilter | undefined): void {
+    colorFilterAttribute(value: ColorFilter | drawing.ColorFilter | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -393,11 +392,6 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8(0 as int32)
                 const value_value_0  = value_value as ColorFilter
                 thisSerializer.writeColorFilter(value_value_0)
-            }
-            else if (TypeChecker.isDrawingColorFilter(value_value)) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as DrawingColorFilter
-                thisSerializer.writeDrawingColorFilter(value_value_1)
             }
         }
         ArkUIGeneratedNativeModule._ImageAttribute_colorFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -621,7 +615,7 @@ export interface ImageAttribute extends CommonMethod {
     interpolation(value: ImageInterpolation | undefined): this
     sourceSize(value: ImageSourceSize | undefined): this
     syncLoad(value: boolean | undefined): this
-    colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this
+    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this
     copyOption(value: CopyOptions | undefined): this
     draggable(value: boolean | undefined): this
     pointLight(value: PointLightStyle | undefined): this
@@ -650,7 +644,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     interpolation_value?: ImageInterpolation | undefined
     sourceSize_value?: ImageSourceSize | undefined
     syncLoad_value?: boolean | undefined
-    colorFilter_value?: ColorFilter | DrawingColorFilter | undefined
+    colorFilter_value?: ColorFilter | drawing.ColorFilter | undefined
     copyOption_value?: CopyOptions | undefined
     draggable_value?: boolean | undefined
     pointLight_value?: PointLightStyle | undefined
@@ -703,7 +697,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     public syncLoad(value: boolean | undefined): this {
         return this
     }
-    public colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
+    public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
         return this
     }
     public copyOption(value: CopyOptions | undefined): this {
@@ -771,25 +765,8 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
 
     public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setImageOptions")) {
-            const src_type = runtimeType(src)
-            const imageAIOptions_type = runtimeType(imageAIOptions)
-            if ((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src))) {
-                const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor)
-                this.getPeer()?.setImageOptions0Attribute(src_casted)
-                return this
-            }
-            if ((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src))) {
-                const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor)
-                const imageAIOptions_casted = imageAIOptions as (ImageAIOptions)
-                this.getPeer()?.setImageOptions2Attribute(src_casted, imageAIOptions_casted)
-                return this
-            }
-            if ((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src)) || (TypeChecker.isImageContent(src))) {
-                const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor | ImageContent)
-                this.getPeer()?.setImageOptions1Attribute(src_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookSetImageOptions(this, src, imageAIOptions)
+            return this
         }
         return this
     }
@@ -895,11 +872,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
-    public colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
+    public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
         if (this.checkPriority("colorFilter")) {
-            const value_casted = value as (ColorFilter | DrawingColorFilter | undefined)
-            this.getPeer()?.colorFilterAttribute(value_casted)
-            return this
+            hookSetColorFilter(this, value);
         }
         return this
     }

@@ -28,7 +28,7 @@ import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { dragController } from "@ohos/arkui/dragController"
 import { focusController } from "@ohos/arkui/focusController"
 import { Frame } from "arkui/Graphics"
-import { KeyEvent } from "arkui/component/common"
+import { KeyEvent, KeyframeAnimateParam, KeyframeState } from "arkui/component/common"
 import { TextMenuOptions } from "arkui/component/textCommon"
 import { Nullable, WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyProcessingMode } from "arkui/component/focus"
@@ -41,11 +41,13 @@ import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
 import { ComponentContent } from 'arkui/ComponentContent'
 import overlayManager from '@ohos/overlayManager'
-import promptAction from '@ohos/promptAction';
+import promptAction, { LevelOrder } from '@ohos/promptAction'
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
-import { AsyncCallback, CustomBuilder, DragItemInfo } from 'arkui/component'
+import { AsyncCallback, CustomBuilder, DragItemInfo, Callback } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
+import { ComputableState } from '@koalaui/runtime'
+import { PeerNode } from 'arkui/PeerNode'
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver {
@@ -95,40 +97,42 @@ export class Router {
         return this.router_!;
     }
     public pushUrl(options: router.RouterOptions): Promise<void> {
-        throw Error("pushUrl not implemented in Router!")
+        throw Error("pushUrl not implemented in Router!");
     }
 
     public replaceUrl(options: router.RouterOptions): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            router.replaceUrl(options)
-        });
+        throw Error("replaceUrl not implemented in Router!");
     }
 
     public back(options?:router.RouterOptions): void {
-        throw Error("back not implemented in Router!")
+        throw Error("back not implemented in Router!");
     }
 
     public clear(): void {
-        throw Error("clear not implemented in Router!")
+        throw Error("clear not implemented in Router!");
     }
     public getLength(): string {
-        return router.getLength();
+        throw Error("getLength not implemented in Router!");
     }
 
     public getParams(): Object {
-        return router.getParams();
+        throw Error("getParams not implemented in Router!");
     }
 
     public getState(): router.RouterState {
-        return router.getState();
+        throw Error("getState not implemented in Router!");
     }
 
     public getStateByIndex(index: number): router.RouterState | undefined {
-        return router.getStateByIndex(index);
+        throw Error("getStateByIndex not implemented in Router!");
     }
 
     public getStateByUrl(url: string): Array<router.RouterState> {
-        return router.getStateByUrl(url);
+        throw Error("getStateByUrl not implemented in Router!");
+    }
+
+    public getStateRoot(): ComputableState<PeerNode> {
+        throw Error("getStateRoot not implemented in Router!");
     }
 }
 
@@ -216,6 +220,9 @@ export class DragController {
         dragInfo: dragController.DragInfo): dragController.DragAction {
         throw Error("createDragAction not implemented in DragController!")
     }
+    public getDragPreview(): dragController.DragPreview {
+        throw Error("getDragPreview not implemented in DragController!")
+    }
     public setDragEventStrictReportingEnabled(enable: boolean): void {
         throw Error("setDragEventStrictReportingEnabled not implemented in DragController!")
     }
@@ -251,7 +258,7 @@ export class OverlayManager {
         throw Error("addComponentContent not implemented in OverlayManager!")
     }
 
-    addComponentContentWithOrder(content: ComponentContent, levelOrder?: number): void {
+    addComponentContentWithOrder(content: ComponentContent, levelOrder?: LevelOrder): void {
         throw Error("addComponentContentWithOrder not implemented in OverlayManager!")
     }
 
@@ -289,28 +296,34 @@ export class PromptAction {
         throw Error("closeToast not implemented in PromptAction!")
     }
 
-    showDialog1(options: promptAction.ShowDialogOptions,
+    //@ts-ignore
+    showDialog(options: promptAction.ShowDialogOptions,
         callback?: AsyncCallback<promptAction.ShowDialogSuccessResponse>): void {
         throw Error("showDialog1 not implemented in PromptAction!")
     }
 
+    //@ts-ignore
     showDialog(options: promptAction.ShowDialogOptions): Promise<promptAction.ShowDialogSuccessResponse> {
         throw Error("showDialog not implemented in PromptAction!")
     }
 
-    showActionMenu1(options: promptAction.ActionMenuOptions,
+    //@ts-ignore
+    showActionMenu(options: promptAction.ActionMenuOptions,
         callback?: AsyncCallback<promptAction.ActionMenuSuccessResponse>): void {
         throw Error("showActionMenu1 not implemented in PromptAction!")
     }
 
+    //@ts-ignore
     showActionMenu(options: promptAction.ActionMenuOptions): Promise<promptAction.ActionMenuSuccessResponse> {
         throw Error("showActionMenu not implemented in PromptAction!")
     }
 
-    openCustomDialog1(content: ComponentContent, options?: promptAction.BaseDialogOptions): Promise<void> {
+    //@ts-ignore
+    openCustomDialog(content: ComponentContent, options?: promptAction.BaseDialogOptions): Promise<void> {
         throw Error("openCustomDialog1 not implemented in PromptAction!")
     }
 
+    //@ts-ignore
     openCustomDialog(options: promptAction.CustomDialogOptions): Promise<number> {
         throw Error("openCustomDialog not implemented in PromptAction!")
     }
@@ -319,10 +332,12 @@ export class PromptAction {
         throw Error("updateCustomDialog not implemented in PromptAction!")
     }
 
-    closeCustomDialog1(content: ComponentContent): Promise<void> {
+    //@ts-ignore
+    closeCustomDialog(content: ComponentContent): Promise<void> {
         throw Error("closeCustomDialog1 not implemented in PromptAction!")
     }
 
+    //@ts-ignore
     closeCustomDialog(dialogId: number): void {
         throw Error("closeCustomDialog not implemented in PromptAction!")
     }
@@ -416,8 +431,16 @@ export class UIContext {
         throw Error("getRouter not implemented in UIContext!")
     }
 
+    public keyframeAnimateTo(param: KeyframeAnimateParam, keyframes: Array<KeyframeState>): void {
+        throw Error("animateTo not implemented in UIContext!")
+    }
+
     public animateTo(param: AnimateParam, event: (() => void)): void {
         throw Error("animateTo not implemented in UIContext!")
+    }
+
+    public animateToImmediately(value: AnimateParam, event: Callback<void>): void {
+        throw Error("animateToImmediately not implemented in UIContext!")
     }
 
     public createAnimator(options: AnimatorOptions | SimpleAnimatorOptions): AnimatorResult {
@@ -517,7 +540,6 @@ export abstract class FrameCallback {
     onIdle(timeLeftInNano: number): void {}
 }
 
-export type Callback<T,V = void> = (data: T) => V
 export class UIObserver {
     private instanceId_: number = 100000;
     private observerImpl: uiObserver.UIObserver | null = null;

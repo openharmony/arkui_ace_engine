@@ -211,7 +211,8 @@ export class Application {
         // let handle = ArkUINativeModule._SystemAPI_StartFrame()
         let result: PeerNode
         try {
-            result = router.getStateRoot().value
+            let uiContextRouter = this.uiContext!.getRouter();
+            result = uiContextRouter.getStateRoot().value
         } finally {
             // ArkUINativeModule._SystemAPI_EndFrame(handle)
         }
@@ -302,7 +303,8 @@ export class Application {
 
     private updateState() {
         // NativeModule._NativeLog("ARKTS: updateState")
-        let rootState = router.getStateRoot();
+        let uiContextRouter = this.uiContext!.getRouter();
+        let rootState = uiContextRouter.getStateRoot();
         this.updateStates(this.manager!, rootState)
         while (StateUpdateLoop.len) {
             StateUpdateLoop.consume();

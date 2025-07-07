@@ -21,6 +21,7 @@
 #include "core/common/container.h"
 #include "core/common/storage/storage_proxy.h"
 #include "core/common/environment/environment_proxy.h"
+#include "core/pipeline/pipeline_base.h"
 
 #include <vector>
 #include <memory>
@@ -32,7 +33,7 @@ std::string PersistentStorageGet(std::string key)
 #if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
         "emulator or a real device instead.");
-    return;
+    return "";
 #endif
     auto storage = StorageProxy::GetInstance()->GetStorage();
     if (!storage) {
@@ -40,7 +41,7 @@ std::string PersistentStorageGet(std::string key)
         return "";
     }
     std::string value = storage->GetString(key);
-    LOGI("PersistentStorageGet:%s", key);
+    LOGI("PersistentStorageGet:%s", key.c_str());
     if (value.empty() || value == "undefined") {
         LOGE("value is empty or undefined");
         return "";
@@ -59,7 +60,7 @@ void PersistentStorageSet(std::string key, std::string value)
         LOGW("no storage available");
         return;
     }
-    LOGI("PersistentStorageSet:%s value:%s", key, value);
+    LOGI("PersistentStorageSet:%s value:%s", key.c_str(), value.c_str());
     StorageProxy::GetInstance()->GetStorage()->SetString(key, value);
 }
 
@@ -75,7 +76,7 @@ bool PersistentStorageHas(std::string key)
         return false;
     }
     std::string value = StorageProxy::GetInstance()->GetStorage()->GetString(key);
-    LOGI("PersistentStorageHas:%s", value);
+    LOGI("PersistentStorageHas:key:%s, value:%s", key.c_str(), value.c_str());
     if (!value.empty()) {
         return true;
     }
@@ -94,7 +95,7 @@ void PersistentStorageDelete(std::string key)
         return;
     }
     StorageProxy::GetInstance()->GetStorage()->Delete(key);
-    LOGI("PersistentStorageDelete:%s", key);
+    LOGI("PersistentStorageDelete:%s", key.c_str());
 }
 
 void PersistentStorageClear()
@@ -143,7 +144,7 @@ float GetFontWeightScale()
     return weightScale;
 }
 
-std::string GetAccessibilityEnabled()
+bool GetAccessibilityEnabled()
 {
     std::string value;
 #if defined(PREVIEW)
@@ -152,13 +153,16 @@ std::string GetAccessibilityEnabled()
     auto container = Container::Current();
     if (!container) {
         LOGW("container is null");
-        return "false";
+        return false;
     }
     auto executor = container->GetTaskExecutor();
     value = EnvironmentProxy::GetInstance()->GetEnvironment(executor)->GetAccessibilityEnabled();
 #endif
     LOGI("GetAccessibilityEnabled value:%s", value.c_str());
-    return value;
+    if (value == "true") {
+        return true;
+    }
+    return  false;
 }
 
 std::string GetLayoutDirection()

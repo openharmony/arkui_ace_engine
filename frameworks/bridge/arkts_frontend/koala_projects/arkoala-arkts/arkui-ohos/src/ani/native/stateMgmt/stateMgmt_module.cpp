@@ -20,7 +20,8 @@
 #include <memory>
 
 namespace OHOS::Ace::Ani {
-ani_string PersistentStorage_Get(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string aniKey) {
+ani_string PersistentStorage_Get(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string aniKey)
+{
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return nullptr;
@@ -29,13 +30,16 @@ ani_string PersistentStorage_Get(ani_env* env, [[maybe_unused]] ani_object aniCl
     auto strKey = AniUtils::ANIStringToStdString(env, aniKey);
     std::string ret = modifier->getStateMgmtAniModifier()->persistentStorageGet(strKey);
     if (!ret.empty()) {
-        ani_string retValue = AniUtils::StdStringToANIString(env, ret);
-        return retValue;
+        auto retValue = AniUtils::StdStringToANIString(env, ret);
+        if (retValue) {
+            return *retValue;
+        }
     }
     return nullptr;
 }
 
-void PersistentStorage_Set(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string aniKey, ani_string aniValue) {
+void PersistentStorage_Set(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string aniKey, ani_string aniValue)
+{
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return;
@@ -46,7 +50,8 @@ void PersistentStorage_Set(ani_env* env, [[maybe_unused]] ani_object aniClass, a
     return;
 }
 
-ani_boolean PersistentStorage_Has(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string aniKey) {
+ani_boolean PersistentStorage_Has(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string aniKey)
+{
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return false;
@@ -59,7 +64,8 @@ ani_boolean PersistentStorage_Has(ani_env* env, [[maybe_unused]] ani_object aniC
     return false;
 }
 
-void PersistentStorage_Clear(ani_env* env, [[maybe_unused]] ani_object aniClass) {
+void PersistentStorage_Clear(ani_env* env, [[maybe_unused]] ani_object aniClass)
+{
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return;
@@ -68,7 +74,8 @@ void PersistentStorage_Clear(ani_env* env, [[maybe_unused]] ani_object aniClass)
     return;
 }
 
-void PersistentStorage_Delete(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string aniKey) {
+void PersistentStorage_Delete(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string aniKey)
+{
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return;
@@ -78,7 +85,8 @@ void PersistentStorage_Delete(ani_env* env, [[maybe_unused]] ani_object aniClass
     return;
 }
 
-ani_int Env_GetColorMode(ani_env* env) {
+ani_int Env_GetColorMode(ani_env* env)
+{
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return -1;
@@ -87,7 +95,8 @@ ani_int Env_GetColorMode(ani_env* env) {
     return ret;
 }
 
-ani_float Env_GetFontScale(ani_env* env) {
+ani_float Env_GetFontScale(ani_env* env)
+{
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return -1;
@@ -96,7 +105,8 @@ ani_float Env_GetFontScale(ani_env* env) {
     return ret;
 }
 
-ani_float Env_GetFontWeightScale(ani_env* env) {
+ani_float Env_GetFontWeightScale(ani_env* env)
+{
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return -1;
@@ -105,40 +115,44 @@ ani_float Env_GetFontWeightScale(ani_env* env) {
     return ret;
 }
 
-ani_boolean Env_GetAccessibilityEnabled(ani_env* env) {
+ani_boolean Env_GetAccessibilityEnabled(ani_env* env)
+{
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return false;
     }
     auto ret = modifier->getStateMgmtAniModifier()->getAccessibilityEnabled();
-    if (ret) {
-        return true;
-    }
-    return nullptr;
+    return ret;
 }
 
-ani_string Env_GetLayoutDirection(ani_env* env) {
+ani_string Env_GetLayoutDirection(ani_env* env)
+{
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return nullptr;
     }
     auto ret = modifier->getStateMgmtAniModifier()->getLayoutDirection();
     if (!ret.empty()) {
-        ani_string retValue = AniUtils::StdStringToANIString(env, ret);
-        return retValue;
+        auto retValue = AniUtils::StdStringToANIString(env, ret);
+        if (retValue) {
+            return *retValue;
+        }
     }
     return nullptr;
 }
 
-ani_string Env_GetLanguageCode(ani_env* env) {
+ani_string Env_GetLanguageCode(ani_env* env)
+{
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return nullptr;
     }
     auto ret = modifier->getStateMgmtAniModifier()->getLanguageCode();
     if (!ret.empty()) {
-        ani_string retValue = AniUtils::StdStringToANIString(env, ret);
-        return retValue;
+        auto retValue = AniUtils::StdStringToANIString(env, ret);
+        if (retValue) {
+            return *retValue;
+        }
     }
     return nullptr;
 }

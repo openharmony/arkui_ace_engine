@@ -52,7 +52,7 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         }
     }
 
-    public getSource(): IProvideDecoratedVariable<T>{
+    public getSource(): IProvideDecoratedVariable<T> {
         return this.sourceProvide_!;
     }
 }

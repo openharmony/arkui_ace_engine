@@ -3135,4 +3135,46 @@ HWTEST_F(SearchTestTwoNg, searchLayoutCancelButtonTest, TestSize.Level1)
     layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
 }
+
+/**
+ * @tc.name: SearchMultiThreadTest01
+ * @tc.desc: Test search multi thread function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, SearchMultiThreadTest01, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper = GetLayoutWrapper(frameNode, geometryNode, layoutAlgorithm);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    auto searchTheme = pattern->GetTheme();
+    ASSERT_NE(searchTheme, nullptr);
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto searchNode = SearchModelNG::GetOrCreateSearchNode(V2::SEARCH_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<SearchPattern>(); });
+    ASSERT_NE(searchNode, nullptr);
+    searchModelInstance.CreateTextFieldMultiThread(searchNode, u"", u"", true, searchTheme);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+}
 } // namespace OHOS::Ace::NG

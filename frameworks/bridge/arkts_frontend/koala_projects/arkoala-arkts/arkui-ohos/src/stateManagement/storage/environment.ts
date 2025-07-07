@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 import { AppStorage } from './appStorage';
-import { ArkUIAniModule } from 'arkui.ani'
+import { ArkUIAniModule } from 'arkui.ani';
 
 interface IAniEnvironment {
-    getAccessibilityEnabled(): string;
+    getAccessibilityEnabled(): boolean;
     getColorMode(): number;
     getFontScale(): number;
     getFontWeightScale(): number;
@@ -25,7 +25,7 @@ interface IAniEnvironment {
 }
 
 class AniEnvironment implements IAniEnvironment {
-    getAccessibilityEnabled(): string {
+    getAccessibilityEnabled(): boolean {
         return ArkUIAniModule._Env_GetAccessibilityEnabled();
     }
     getColorMode(): number {
@@ -45,7 +45,7 @@ class AniEnvironment implements IAniEnvironment {
     }
 }
 
-interface EnvProperty {
+interface EnvPropsOptions {
     key: string;
     defaultValue: NullishType;
 }
@@ -66,7 +66,7 @@ class Environment {
         ['languageCode', Type.from<string>()],
         ['colorMode', Type.from<number>()],
         ['fontScale', Type.from<number>()],
-        ['fontWeightScale', Type.from<number>()]
+        ['fontWeightScale', Type.from<number>()],
     ]);
 
     public aboutToBeDeleted(): void {
@@ -136,19 +136,19 @@ class Environment {
         return true;
     }
 
-    public envProps(properties: EnvProperty[]): void {
+    public static envProps(properties: EnvPropsOptions[]): void {
         properties.forEach((prop) => {
-           const key: string = prop.key;
+            const key: string = prop.key;
             const defaultValue: NullishType = prop.defaultValue;
             const ttype = Environment.getOrCreate().ttypeMap_.get(key)!;
             Environment.envProp(key, defaultValue);
         });
     }
 
-
     public static keys(): Array<string> {
         return Environment.getOrCreate().keys1();
     }
+
     public keys1(): Array<string> {
         return Array.from(Environment.getOrCreate().props_.keys());
     }

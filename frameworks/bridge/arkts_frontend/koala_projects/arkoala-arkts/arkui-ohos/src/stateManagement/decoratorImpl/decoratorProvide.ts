@@ -23,8 +23,8 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
-import { WatchFunc } from "./decoratorWatch";
-import { StateMgmtTool } from "../tools/arkts/stateMgmtTool";
+import { WatchFunc } from './decoratorWatch';
+import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
 
 export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IProvideDecoratedVariable<T> {
     private readonly provideAlias_: string;
@@ -67,7 +67,7 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
             this.execWatchFuncs();
         }
     }
-            
+
     private proxy?: ESValue;
 
     public getProxy(): ESValue | undefined {

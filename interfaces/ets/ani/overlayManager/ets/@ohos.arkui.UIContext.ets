@@ -16,3 +16,8 @@ export interface OverlayManagerOptions {
     renderRootOverlay?: boolean;
     enableBackPressedEvent?: boolean;
 }
+
+class OverlayManagerOptionsInner implements OverlayManagerOptions {
+    renderRootOverlay?: boolean = true;
+    enableBackPressedEvent?: boolean = false;
+}

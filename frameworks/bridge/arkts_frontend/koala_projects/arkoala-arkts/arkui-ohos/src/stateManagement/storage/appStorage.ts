@@ -22,4 +22,3 @@ import { LocalStorage } from './localStorage';
  * @since 20
  */
 export const AppStorage: LocalStorage = new LocalStorage();
-

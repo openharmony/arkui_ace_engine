@@ -15,6 +15,7 @@
 
 import { KPointer } from "@koalaui/interop"
 import { OverlayManagerOptions } from "@ohos/arkui/UIContext"
+import { LevelOrder } from "@ohos/promptAction"
 
 export default declare namespace overlayManager {
     loadLibrary("overlayManager_ani");
@@ -25,7 +26,7 @@ export default declare namespace overlayManager {
 
     export function addComponentContent(contentNode: KPointer, index: number): void;
 
-    export function addComponentContentWithOrder(contentNode: KPointer, levelOrder: number): void;
+    export function addComponentContentWithOrder(contentNode: KPointer, levelOrder: LevelOrder): void;
 
     export function removeComponentContent(contentNode: KPointer): void;
 

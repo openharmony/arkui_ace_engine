@@ -290,6 +290,9 @@ void CachedCount1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto countValue = Converter::OptConvert<int>(*count);
+    auto showValue = Converter::OptConvert<bool>(*show);
+    ListModelStatic::SetCachedCount(frameNode, countValue, showValue);
 }
 void ChainAnimationImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)

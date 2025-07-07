@@ -1827,7 +1827,7 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
     }
     public setTextInputOptions(value?: TextInputOptions): this {
         if (this.checkPriority("setTextInputOptions")) {
-            hookSetTextInputOptions(this.getPeer(), value)
+            hookSetTextInputOptions(this, value)
             return this
         }
         return this

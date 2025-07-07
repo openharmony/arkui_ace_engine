@@ -209,7 +209,7 @@ void AntiAliasImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        ShapeModelNG::SetAntiAlias(frameNode, false);
         return;
     }
     ShapeModelNG::SetAntiAlias(frameNode, *convValue);

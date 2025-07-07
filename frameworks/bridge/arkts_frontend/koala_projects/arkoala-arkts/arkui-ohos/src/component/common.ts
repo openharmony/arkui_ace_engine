@@ -720,7 +720,7 @@ export interface DragEvent {
     getVelocityY(): number
     getVelocity(): number
     getModifierKeyState?: ((keys: Array<string>) => boolean)
-    executeDropAnimation(customDropAnimation: (() => void)): void
+    executeDropAnimation(customDropAnimation: ((data: undefined) => void)): void
     startDataLoading(options: DataSyncOptions): string
 }
 export class DragEventInternal implements MaterializedBase,DragEvent {
@@ -814,8 +814,8 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
             return this.getModifierKeyState_serialize(keys_casted)
         }
     }
-    public executeDropAnimation(customDropAnimation: (() => void)): void {
-        const customDropAnimation_casted = customDropAnimation as ((() => void))
+    public executeDropAnimation(customDropAnimation: ((data: undefined) => void)): void {
+        const customDropAnimation_casted = customDropAnimation as (((data: undefined) => void))
         this.executeDropAnimation_serialize(customDropAnimation_casted)
         return
     }
@@ -905,7 +905,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         thisSerializer.release()
         return retval
     }
-    private executeDropAnimation_serialize(customDropAnimation: (() => void)): void {
+    private executeDropAnimation_serialize(customDropAnimation: ((data: undefined) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(customDropAnimation)
         ArkUIGeneratedNativeModule._DragEvent_executeDropAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -1593,93 +1593,6 @@ export class TextContentControllerBase implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getText(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
-    }
-}
-export class ChildrenMainSizeInternal {
-    public static fromPtr(ptr: KPointer): ChildrenMainSize {
-        const obj : ChildrenMainSize = new ChildrenMainSize(undefined)
-        obj.peer = new Finalizable(ptr, ChildrenMainSize.getFinalizer())
-        return obj
-    }
-}
-export class ChildrenMainSize implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    get childDefaultSize(): number {
-        return this.getChildDefaultSize()
-    }
-    set childDefaultSize(childDefaultSize: number) {
-        this.setChildDefaultSize(childDefaultSize)
-    }
-    static ctor_childrenmainsize(childDefaultSize: number): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_ctor(childDefaultSize)
-        return retval
-    }
-    constructor(childDefaultSize?: number) {
-        if ((childDefaultSize) !== (undefined))
-        {
-            const ctorPtr : KPointer = ChildrenMainSize.ctor_childrenmainsize((childDefaultSize)!)
-            this.peer = new Finalizable(ctorPtr, ChildrenMainSize.getFinalizer())
-        }
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ChildrenMainSize_getFinalizer()
-    }
-    public splice(start: number, deleteCount?: number, childrenSize?: Array<number>): void {
-        const start_casted = start as (number)
-        const deleteCount_casted = deleteCount as (number | undefined)
-        const childrenSize_casted = childrenSize as (Array<number> | undefined)
-        this.splice_serialize(start_casted, deleteCount_casted, childrenSize_casted)
-        return
-    }
-    public update(index: number, childSize: number): void {
-        const index_casted = index as (number)
-        const childSize_casted = childSize as (number)
-        this.update_serialize(index_casted, childSize_casted)
-        return
-    }
-    private getChildDefaultSize(): number {
-        return this.getChildDefaultSize_serialize()
-    }
-    private setChildDefaultSize(childDefaultSize: number): void {
-        const childDefaultSize_casted = childDefaultSize as (number)
-        this.setChildDefaultSize_serialize(childDefaultSize_casted)
-        return
-    }
-    private splice_serialize(start: number, deleteCount?: number, childrenSize?: Array<number>): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let deleteCount_type : int32 = RuntimeType.UNDEFINED
-        deleteCount_type = runtimeType(deleteCount)
-        thisSerializer.writeInt8(deleteCount_type as int32)
-        if ((RuntimeType.UNDEFINED) != (deleteCount_type)) {
-            const deleteCount_value  = deleteCount!
-            thisSerializer.writeNumber(deleteCount_value)
-        }
-        let childrenSize_type : int32 = RuntimeType.UNDEFINED
-        childrenSize_type = runtimeType(childrenSize)
-        thisSerializer.writeInt8(childrenSize_type as int32)
-        if ((RuntimeType.UNDEFINED) != (childrenSize_type)) {
-            const childrenSize_value  = childrenSize!
-            thisSerializer.writeInt32(childrenSize_value.length as int32)
-            for (let i = 0; i < childrenSize_value.length; i++) {
-                const childrenSize_value_element : number = childrenSize_value[i]
-                thisSerializer.writeNumber(childrenSize_value_element)
-            }
-        }
-        ArkUIGeneratedNativeModule._ChildrenMainSize_splice(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private update_serialize(index: number, childSize: number): void {
-        ArkUIGeneratedNativeModule._ChildrenMainSize_update(this.peer!.ptr, index, childSize)
-    }
-    private getChildDefaultSize_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_getChildDefaultSize(this.peer!.ptr)
-        return retval
-    }
-    private setChildDefaultSize_serialize(childDefaultSize: number): void {
-        ArkUIGeneratedNativeModule._ChildrenMainSize_setChildDefaultSize(this.peer!.ptr, childDefaultSize)
     }
 }
 export interface UICommonEvent {
@@ -9119,7 +9032,12 @@ export interface GeometryInfo extends SizeResult {
     padding: Padding;
 }
 export interface Layoutable {
-    stub: string;
+    measureResult: MeasureResult;
+    uniqueId?: number | undefined;
+    layout(position: Position): void;
+    getMargin(): DirectionalEdgesT<number>;
+    getPadding(): DirectionalEdgesT<number>;
+    getBorderWidth(): DirectionalEdgesT<number>;
 }
 export interface SizeResult {
     width: number;
@@ -11778,9 +11696,6 @@ export function dollar_rawfile(value: string): Resource {
 }
 export function animateTo(value: AnimateParam, event: (() => void)): void {
     _animateTo(value, event)
-}
-export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
-    GlobalScope.animateToImmediately(value, event)
 }
 export function vp2px(value: number): number {
     return GlobalScope.vp2px(value)

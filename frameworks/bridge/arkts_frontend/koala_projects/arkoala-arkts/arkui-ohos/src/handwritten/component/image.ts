@@ -16,7 +16,7 @@
 import { ArkUIAniModule } from "arkui.ani"
 
 export class ColorContent {
-    constructor() {}
+    constructor() { }
     public static readonly ORIGIN: ColorContent = new ColorContent();
 }
 function fillColor0Attribute(peer: KPointer, value: ResourceColor | undefined): void {
@@ -80,14 +80,99 @@ function hookSetResizableOptions(peer: ArkImagePeer, value: ResizableOptions | u
         ArkUIAniModule._Image_ResizableOptions(peer.getPeerPtr(), value.lattice as drawing.Lattice)
         return
     }
+    const thisSerializer: Serializer = Serializer.hold()
+    let value_type: int32 = RuntimeType.UNDEFINED
+    value_type = runtimeType(value)
+    thisSerializer.writeInt8(value_type as int32)
+    if ((RuntimeType.UNDEFINED) != (value_type)) {
+        const value_value = value!
+        thisSerializer.writeResizableOptions(value_value)
+    }
+    ArkUIGeneratedNativeModule._ImageAttribute_resizable(peer.getPeerPtr(), thisSerializer.asBuffer(), thisSerializer.length())
+    thisSerializer.release()
+}
+
+enum DrawableType {
+    BASE = 0,
+    LAYERDED = 1,
+    ANIMATED = 2,
+    PIXELMAP = 3
+}
+
+function checkDrawableType(value: DrawableDescriptor): DrawableType {
+    if (value instanceof PixelMapDrawableDescriptor) {
+        return DrawableType.PIXELMAP
+    }
+    if (value instanceof AnimatedDrawableDescriptor) {
+        return DrawableType.ANIMATED
+    }
+    if (value instanceof LayeredDrawableDescriptor) {
+        return DrawableType.LAYERDED
+    }
+    return DrawableType.BASE
+}
+
+function SetImageAIOptions(component: ArkImageComponent, imageAIOptions?: ImageAIOptions) {
+    if (imageAIOptions == undefined) {
+        return
+    }
+    throw new Error("ImageAIOptions parameters not implemented")
+}
+
+function hookSetImageOptions(component: ArkImageComponent, src: PixelMap | Resource | string | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): void {
+    if (src instanceof DrawableDescriptor) {
+        let drawableType = checkDrawableType(src) as int
+        let value = src as DrawableDescriptor
+        ArkUIAniModule._Image_Consturct_DrawableDescriptor(component.getPeer().getPeerPtr(), value, drawableType)
+        SetImageAIOptions(component, imageAIOptions)
+        return
+    }
+    if (src instanceof PixelMap) {
+        let value = src as PixelMap
+        ArkUIAniModule._Image_Consturct_PixelMap(component.getPeer().getPeerPtr(), value)
+        SetImageAIOptions(component, imageAIOptions)
+        return
+    }
+    const thisSerializer: Serializer = Serializer.hold()
+    if (src instanceof string || src instanceof Resource) {
+        thisSerializer.writeInt8(1 as int32)
+        if (src instanceof string) {
+            thisSerializer.writeInt8(0 as int32)
+            thisSerializer.writeString(src as string)
+        }
+        else if (src instanceof Resource) {
+            thisSerializer.writeInt8(1 as int32)
+            thisSerializer.writeResource(src as Resource)
+        }
+    }
+    else if (src instanceof ImageContent) {
+        thisSerializer.writeInt8(3 as int32)
+        thisSerializer.writeInt32(src as int32)
+    }
+    ArkUIGeneratedNativeModule._ImageInterface_setImageOptions1(component.getPeer().getPeerPtr(), thisSerializer.asBuffer(), thisSerializer.length())
+    SetImageAIOptions(component, imageAIOptions)
+    thisSerializer.release()
+}
+
+function hookSetColorFilter(component: ArkImageComponent, value: ColorFilter | drawing.ColorFilter | undefined) {
+    if (value !== undefined && value instanceof drawing.ColorFilter) {
+        ArkUIAniModule._Image_DrawingColorFilter(component.getPeer().getPeerPtr(), value as drawing.ColorFilter)
+        return
+    }
     const thisSerializer : Serializer = Serializer.hold()
     let value_type : int32 = RuntimeType.UNDEFINED
     value_type = runtimeType(value)
     thisSerializer.writeInt8(value_type as int32)
     if ((RuntimeType.UNDEFINED) != (value_type)) {
         const value_value  = value!
-        thisSerializer.writeResizableOptions(value_value)
+        let value_value_type : int32 = RuntimeType.UNDEFINED
+        value_value_type = runtimeType(value_value)
+        if (TypeChecker.isColorFilter(value_value)) {
+            thisSerializer.writeInt8(0 as int32)
+            const value_value_0  = value_value as ColorFilter
+            thisSerializer.writeColorFilter(value_value_0)
+        }
     }
-    ArkUIGeneratedNativeModule._ImageAttribute_resizable(peer.getPeerPtr(), thisSerializer.asBuffer(), thisSerializer.length())
+    ArkUIGeneratedNativeModule._ImageAttribute_colorFilter(component.getPeer().getPeerPtr(), thisSerializer.asBuffer(), thisSerializer.length())
     thisSerializer.release()
 }

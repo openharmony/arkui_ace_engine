@@ -27,6 +27,7 @@ import { ArkBuilderProxyNodePeer } from "./handwritten/BuilderProxyNode"
 import { setNeedCreate } from "./ArkComponentRoot"
 import { UIContextUtil } from 'arkui/handwritten/UIContextUtil'
 import { ArkUIAniModule } from 'arkui.ani'
+import { UIContextImpl } from "./handwritten/UIContextImpl"
 
 export enum NodeRenderType {
     RENDER_TYPE_DISPLAY = 0,
@@ -202,7 +203,8 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     private __builder?: WrappedBuilder<TBuilderFunc<T>>;
     private __builder0?: WrappedBuilder<voidBuilderFunc>;
     private __frameNode: BuilderRootFrameNode<T> | null;
-    private __uiContext?: UIContext;
+    private __uiContext?: UIContextImpl;
+    private _instanceId: int32 = -1;
 
     private reset(): void {
         this.__root = undefined;
@@ -220,7 +222,8 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     }
     constructor(uiContext: UIContext, options?: RenderOptions) {
         super();
-        this.__uiContext = uiContext;
+        this.__uiContext = uiContext as UIContextImpl;
+        this._instanceId = (uiContext as UIContextImpl).instanceId_;
         if (options !== undefined) {
             let buildOptions: BuilderNodeOptions = {};
             if (options?.selfIdealSize !== undefined) {
@@ -242,6 +245,8 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         let instanceId : int32 = 0;
         if (this.__uiContext === undefined) {
             instanceId = UIContextUtil.getCurrentInstanceId();
+        } else {
+            instanceId = this._instanceId;
         }
         this.__rootStage = createUiDetachedBuilderRoot(() => {
             if (this.__root == null) {
@@ -295,20 +300,24 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__builder0 = builder;
         this.__arg = undefined;
         this.__builder = undefined;
+        ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
         const old = GlobalStateManager.GetLocalManager();
         GlobalStateManager.SetLocalManager(this.__manager);
         this.create(this.buildFunc);
         GlobalStateManager.SetLocalManager(old);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public buildT(builder: WrappedBuilder<TBuilderFunc<T>>, arg?: T, options?: BuildOptions): void {
         this.__builder = builder;
         this.__builder0 = undefined;
         this.__arg = arg;
+        ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
         const old = GlobalStateManager.GetLocalManager();
         GlobalStateManager.SetLocalManager(this.__manager);
         this.create(this.buildFunc);
         GlobalStateManager.SetLocalManager(old);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public update(arg: T): void {
@@ -316,6 +325,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             InteropNativeModule._NativeLog("the params is not Initialized!!!");
             return;
         }
+        ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
         const old = GlobalStateManager.GetLocalManager();
         GlobalStateManager.SetLocalManager(this.__manager);
         this.__params!.value = arg!;
@@ -323,6 +333,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__manager!.updateSnapshot();
         this.__rootStage?.value;
         GlobalStateManager.SetLocalManager(old);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public getFrameNode(): FrameNode | null {
@@ -344,6 +355,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     }
 
     public updateConfiguration(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
         const old = GlobalStateManager.GetLocalManager();
         GlobalStateManager.SetLocalManager(this.__manager);
         this.__rootStage?.forceCompleteRerender();
@@ -351,6 +363,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__manager?.updateSnapshot();
         this.__rootStage?.value;
         GlobalStateManager.SetLocalManager(old);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public getValidNodePtr(): KPointer | undefined {
@@ -358,8 +371,10 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     }
 
     public disposeNode(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
         this.disposeAll();
         this.__frameNode = null;
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     private disposeAll(): void {
@@ -370,8 +385,10 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     }
 
     public dispose(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
         this.disposeAll();
         this.__frameNode?.disposeNode();
         this.__frameNode = null;
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 }

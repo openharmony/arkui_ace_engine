@@ -29,7 +29,6 @@
 namespace OHOS::Ace::NG {
 using ArrowStyleVariantType = std::variant<SwiperArrowParameters, bool>;
 using DisplayCountVariantType = std::variant<int32_t, std::string, Ark_SwiperAutoFill>;
-const static int32_t DEFAULT_INTERVAL = 3000;
 const static int32_t DEFAULT_DURATION = 400;
 const static int32_t DEFAULT_DISPLAY_COUNT = 1;
 const static int32_t DEFAULT_CACHED_COUNT = 1;
@@ -248,6 +247,10 @@ void CheckSwiperDigitalParameters(SwiperDigitalParameters& p)
 using namespace OHOS::Ace::NG::SwiperAttributeModifierInternal;
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+constexpr uint32_t DEFAULT_INTERVAL_VALUE = 3000;
+constexpr int32_t INVALID_VALUE = 0;
+constexpr int32_t DEFAULT_VALUE = 6;
+
 namespace SwiperModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
@@ -328,12 +331,17 @@ void IntervalImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<int32_t>(*value);
-    if (!convValue) {
-        SwiperModelStatic::SetAutoPlayInterval(frameNode, DEFAULT_INTERVAL);
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        SwiperModelStatic::SetAutoPlayInterval(frameNode, DEFAULT_INTERVAL_VALUE);
         return;
     }
-    SwiperModelStatic::SetAutoPlayInterval(frameNode, *convValue);
+    auto convValue = Converter::Convert<int32_t>(value->value);
+    if (convValue < INVALID_VALUE) {
+        SwiperModelStatic::SetAutoPlayInterval(frameNode, DEFAULT_INTERVAL_VALUE);
+        return;
+    }
+    SwiperModelStatic::SetAutoPlayInterval(frameNode, convValue);
 }
 namespace {
 void SetIndicator(FrameNode* frameNode, const Ark_DigitIndicator& src)

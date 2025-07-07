@@ -33,11 +33,11 @@
 
 namespace OHOS::Ace {
 using setColorFunc = std::function<void(const std::string&)>;
-class RosenRenderOffscreenCanvas : public RenderOffscreenCanvas {
+class ACE_FORCE_EXPORT RosenRenderOffscreenCanvas : public RenderOffscreenCanvas {
     DECLARE_ACE_TYPE(RosenRenderOffscreenCanvas, RenderOffscreenCanvas);
 
 public:
-    RosenRenderOffscreenCanvas(const WeakPtr<PipelineBase>& context, int32_t width, int32_t height);
+    ACE_FORCE_EXPORT RosenRenderOffscreenCanvas(const WeakPtr<PipelineBase>& context, int32_t width, int32_t height);
     ~RosenRenderOffscreenCanvas() override = default;
     void SetAntiAlias(bool isEnabled) override;
     void FillRect(Rect rect) override;

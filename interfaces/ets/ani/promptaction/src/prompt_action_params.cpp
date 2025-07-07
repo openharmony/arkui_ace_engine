@@ -32,6 +32,23 @@ std::unordered_map<int, uint32_t> colorMap = {
     {PromptActionColor::PROMPT_ACTION_COLOR_TRANSPARENT, 0x00000000},
 };
 
+ani_object CreateANIDoubleObject(ani_env *env, double doubleValue)
+{
+    ani_class doubleCls {};
+    env->FindClass("std.core.Double", &doubleCls);
+    ani_method ctor {};
+    env->Class_FindMethod(doubleCls, "<ctor>", "d:", &ctor);
+    ani_object result {};
+    ani_double aniDouble = static_cast<ani_double>(doubleValue);
+    ani_status status = env->Object_New(doubleCls, ctor, &result, aniDouble);
+    if (status != ANI_OK) {
+        ani_ref undefinedRef;
+        env->GetUndefined(&undefinedRef);
+        return static_cast<ani_object>(undefinedRef);
+    }
+    return result;
+}
+
 bool IsUndefinedObject(ani_env *env, ani_ref objectRef)
 {
     ani_boolean isUndefined;
@@ -137,6 +154,32 @@ bool GetInt32Param(ani_env* env, ani_object object, const char *name, int32_t& r
     return GetInt32Param(env, resultObj, result);
 }
 
+bool GetLongParam(ani_env* env, ani_object object, long& result)
+{
+    ani_long resultValue;
+    ani_status status = env->Object_CallMethodByName_Long(object, "unboxed", nullptr, &resultValue);
+    if (status != ANI_OK) {
+        return false;
+    }
+    result = static_cast<long>(resultValue);
+    return true;
+}
+
+bool GetLongParam(ani_env* env, ani_object object, const char *name, long& result)
+{
+    ani_ref resultRef;
+    ani_status status = env->Object_GetPropertyByName_Ref(object, name, &resultRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    if (IsUndefinedObject(env, resultRef)) {
+        return false;
+    }
+    ani_object resultObj = static_cast<ani_object>(resultRef);
+    return GetLongParam(env, resultObj, result);
+}
+
 bool GetDoubleParam(ani_env* env, ani_object object, double& result)
 {
     ani_double resultValue;
@@ -213,7 +256,7 @@ bool GetFloatArrayParam(ani_env *env, ani_object object, const char *name, std::
         ani_ref itemRef;
         status = env->Object_CallMethodByName_Ref(resultObj, "$_get", "I:Lstd/core/Object;", &itemRef, (ani_int)i);
         if (status != ANI_OK) {
-            return false;
+            continue;
         }
 
         float itemFloat;
@@ -300,7 +343,7 @@ bool GetStringArrayParam(ani_env *env, ani_object object, const char *name, std:
         ani_ref itemRef;
         status = env->Object_CallMethodByName_Ref(resultObj, "$_get", "I:Lstd/core/Object;", &itemRef, (ani_int)i);
         if (status != ANI_OK) {
-            return false;
+            continue;
         }
         stringArray.emplace_back(ANIStringToStdString(env, static_cast<ani_string>(itemRef)));
     }
@@ -529,7 +572,7 @@ void ProcessResourceType(ani_env *env, ani_object value, ani_ref paramsRef, size
         ani_ref itemRef;
         status = env->Object_CallMethodByName_Ref(paramsObj, "$_get", "I:Lstd/core/Object;", &itemRef, (ani_int)i);
         if (status != ANI_OK) {
-            break;
+            continue;
         }
         auto itemStr = ANIStringToStdString(env, static_cast<ani_string>(itemRef));
         stringArray.emplace_back(itemStr);

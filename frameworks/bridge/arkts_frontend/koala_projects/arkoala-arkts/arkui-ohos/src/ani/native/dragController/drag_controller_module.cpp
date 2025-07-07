@@ -23,7 +23,7 @@ ani_object ANIExecuteDragWithCallback(ani_env* env, [[maybe_unused]] ani_object 
     ani_long builderObj, ani_object destroyCallbackObj, ani_object dragInfo, ani_object callback)
 {
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
         return nullptr;
     }
     ani_object object = modifier->getDragControllerAniModifier()->aniExecuteDragWithCallback(
@@ -42,7 +42,7 @@ ani_object ANICreateDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     [[maybe_unused]] ani_object dragInfoObj)
 {
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
         return nullptr;
     }
     ani_object object = modifier->getDragControllerAniModifier()->aniCreateDragAction(
@@ -54,7 +54,7 @@ ani_object ANIDragActionStartDrag(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragActionPtr)
 {
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
         return nullptr;
     }
     ani_object object = modifier->getDragControllerAniModifier()->aniDragActionStartDrag(env, aniClass, dragActionPtr);
@@ -65,7 +65,7 @@ void ANIDragActionOn([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object 
     ani_object callback, ani_long dragActionPtr)
 {
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
         return;
     }
     std::string aniType = AniUtils::ANIStringToStdString(env, type);
@@ -76,18 +76,47 @@ void ANIDragActionOff([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object
     [[maybe_unused]] ani_object callback, ani_long dragActionPtr)
 {
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
         return;
     }
     std::string aniType = AniUtils::ANIStringToStdString(env, type);
     modifier->getDragControllerAniModifier()->aniDragActionOff(env, aniClass, aniType.c_str(), callback, dragActionPtr);
 }
 
+ani_object ANIGetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
+        return nullptr;
+    }
+    return modifier->getDragControllerAniModifier()->aniGetDragPreview(env, aniClass);
+}
+
+void ANIDragPreviewSetForegroundColor([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
+    ani_object color, ani_long dragPreviewPtr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
+        return;
+    }
+    modifier->getDragControllerAniModifier()->aniDragPreviewSetForegroundColor(env, aniClass, color, dragPreviewPtr);
+}
+
+void ANIDragPreviewAnimate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object options,
+    ani_object handler, ani_long dragPreviewPtr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
+        return;
+    }
+    modifier->getDragControllerAniModifier()->aniDragPreviewAnimate(env, aniClass, options, handler, dragPreviewPtr);
+}
+
 void ANIDragActionSetDragEventStrictReportingEnabled(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, bool enable)
 {
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
         return;
     }
     modifier->getDragControllerAniModifier()->aniDragActionSetDragEventStrictReportingEnabled(env, aniClass, enable);
@@ -97,7 +126,7 @@ void ANIDragActionCancelDataLoading(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string key)
 {
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
         return;
     }
     modifier->getDragControllerAniModifier()->aniDragActionCancelDataLoading(env, aniClass, key);
@@ -107,7 +136,7 @@ void ANIDragActionNotifyDragStartReques(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_enum_item requestStatus)
 {
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
         return;
     }
     modifier->getDragControllerAniModifier()->aniDragActionNotifyDragStartReques(env, aniClass, requestStatus);

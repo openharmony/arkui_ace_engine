@@ -12046,10 +12046,6 @@ void impl_ImageAttribute_colorFilter(Ark_NativePointer thisPtr, KSerializerBuffe
                 value_value_buf_.selector = 0;
                 value_value_buf_.value0 = static_cast<Ark_ColorFilter>(thisDeserializer.readColorFilter());
             }
-            else if (value_value_buf__selector == 1) {
-                value_value_buf_.selector = 1;
-                value_value_buf_.value1 = static_cast<Ark_DrawingColorFilter>(thisDeserializer.readDrawingColorFilter());
-            }
             else {
                 INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
             }
@@ -12520,10 +12516,6 @@ void impl_ImageSpanAttribute_colorFilter(Ark_NativePointer thisPtr, KSerializerB
             if (value_value_buf__selector == 0) {
                 value_value_buf_.selector = 0;
                 value_value_buf_.value0 = static_cast<Ark_ColorFilter>(thisDeserializer.readColorFilter());
-            }
-            else if (value_value_buf__selector == 1) {
-                value_value_buf_.selector = 1;
-                value_value_buf_.value1 = static_cast<Ark_DrawingColorFilter>(thisDeserializer.readDrawingColorFilter());
             }
             else {
                 INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
@@ -31785,12 +31777,41 @@ void impl_AnimationExtender_SetClipRect(Ark_NativePointer node, KFloat x, KFloat
         GetAccessors()->getAnimationExtenderAccessor()->SetClipRect(node, x, y, width, height);
 }
 KOALA_INTEROP_DIRECT_V5(AnimationExtender_SetClipRect, Ark_NativePointer, KFloat, KFloat, KFloat, KFloat)
+void impl_AnimationExtender_KeyFrameAnimation(KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_KeyFrameAnimateParam param_value = thisDeserializer.readKeyFrameAnimateParam();
+        int32_t keyframeCount = thisDeserializer.readInt32();
+        std::vector<Ark_KeyframeState> keyframes;
+        Array_Ark_KeyframeState params_value_buf = {};
+        thisDeserializer.resizeArray<std::decay<decltype(params_value_buf)>::type,
+                                std::decay<decltype(*params_value_buf.array)>::type>(&params_value_buf, keyframeCount);
+        for (int32_t i = 0; i < keyframeCount; ++i) {
+            params_value_buf.array[i] = static_cast<Ark_KeyframeState>(thisDeserializer.readKeyframeStateParam());
+        }
+        Array_Ark_KeyframeState params_value = params_value_buf;
+        GetAccessors()->getAnimationExtenderAccessor()->KeyFrameAnimationImpl((const Ark_KeyFrameAnimateParam*)&param_value, (const Array_Ark_KeyframeState*)&params_value);
+}
+KOALA_INTEROP_DIRECT_V2(AnimationExtender_KeyFrameAnimation, KSerializerBuffer, int32_t)
 void impl_AnimationExtender_OpenImplicitAnimation(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         Ark_AnimateParam param_value = thisDeserializer.readAnimateParam();;
         GetAccessors()->getAnimationExtenderAccessor()->OpenImplicitAnimation((const Ark_AnimateParam*)&param_value);
 }
 KOALA_INTEROP_DIRECT_V2(AnimationExtender_OpenImplicitAnimation, KSerializerBuffer, int32_t)
+void impl_AnimationExtender_OpenImplicitAnimationImmediately(KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_AnimateParam param_value = thisDeserializer.readAnimateParam();;
+        const auto callback__value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Callback_Void callback__value_buf = {};
+        callback__value_buf.tag = callback__value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (callback__value_buf_runtimeType))
+        {
+            callback__value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};
+        }
+        Opt_Callback_Void callback__value = callback__value_buf;;
+        GetAccessors()->getAnimationExtenderAccessor()->AnimateToImmediatelyImpl((const Ark_AnimateParam*)&param_value, (const Opt_Callback_Void*)&callback__value);
+}
+KOALA_INTEROP_DIRECT_V2(AnimationExtender_OpenImplicitAnimationImmediately, KSerializerBuffer, int32_t)
 void impl_AnimationExtender_CloseImplicitAnimation() {
         GetAccessors()->getAnimationExtenderAccessor()->CloseImplicitAnimation();
 }
@@ -44935,11 +44956,6 @@ KInteropReturnBuffer impl_ImageAttachment_getColorFilter(Ark_NativePointer thisP
                 _retSerializer.writeInt8(0);
                 const auto retValue_value_0 = retValue_value.value0;
                 _retSerializer.writeColorFilter(retValue_value_0);
-            }
-            else if (retValue_value_type == 1) {
-                _retSerializer.writeInt8(1);
-                const auto retValue_value_1 = retValue_value.value1;
-                _retSerializer.writeDrawingColorFilter(retValue_value_1);
             }
         }
         return _retSerializer.toReturnBuffer();

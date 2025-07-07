@@ -32,6 +32,11 @@ void ANIDragActionOn([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object 
     ani_object callback, ani_long dragActionPtr);
 void ANIDragActionOff([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string type,
     [[maybe_unused]] ani_object callback, ani_long dragActionPtr);
+ani_object ANIGetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass);
+void ANIDragPreviewSetForegroundColor([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
+    ani_object color, ani_long dragPreviewPtr);
+void ANIDragPreviewAnimate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object options,
+    ani_object handler, ani_long dragPreviewPtr);
 void ANIDragActionSetDragEventStrictReportingEnabled(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, bool enable);
 void ANIDragActionCancelDataLoading(
