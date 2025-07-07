@@ -28,7 +28,7 @@
 extern "C" {
 #endif
 
-#define ARKUI_ANI_API_VERSION 101
+#define ARKUI_ANI_API_VERSION 100
 #define ARKUI_ANI_MODIFIER_FUNCTION_NAME "GetArkUIAniModifiers"
 
 struct _ArkUINode;
