@@ -226,13 +226,6 @@ export class FullScreenLaunchComponent extends ViewPU {
             });
             UIExtensionComponent.height('100%');
             UIExtensionComponent.width('100%');
-            UIExtensionComponent.backgroundColor({
-                "id": -1,
-                "type": -1,
-                params: [`sys.color.background_primary`],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
-            });
             UIExtensionComponent.onError(err => {
                 if (this.onError != undefined) {
                     this.onError(err);
