@@ -31,9 +31,28 @@
 
 namespace OHOS::Ace::Ani {
 namespace {
-constexpr char PIXEL_MAP_CONSTRUCTOR[] = "L@ohos/multimedia/image/image/PixelMap;:";
+constexpr char PIXEL_MAP_CONSTRUCTOR[] = "C{@ohos.multimedia.image.image.PixelMap}:";
 constexpr char PIXEL_MAP_DRAWABLE[] = "L@ohos/arkui/drawableDescriptor/PixelMapDrawableDescriptor;";
 constexpr char ARRAY_GET[] = "i:C{std.core.Object}";
+
+ani_object CreatePixelMapDrawableByPixelMap(ani_env* env, const RefPtr<PixelMap>& pixelMap)
+{
+    auto pixelAni = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pixelMap->GetPixelMapSharedPtr());
+    if (pixelAni == nullptr) {
+        return nullptr;
+    }
+    // set foreground property to arkts object
+    ani_class cls;
+    auto status = env->FindClass(PIXEL_MAP_DRAWABLE, &cls);
+    if (status != ANI_OK) {
+        return nullptr;
+    }
+    ani_object obj {};
+    ani_method ctor {};
+    env->Class_FindMethod(cls, "<ctor>", PIXEL_MAP_CONSTRUCTOR, &ctor);
+    env->Object_New(cls, ctor, &obj, pixelAni);
+    return obj;
+}
 } // namespace
 
 void CreatePixelMapDrawable(
@@ -124,125 +143,86 @@ void CreateAnimatedDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, a
     }
 }
 
-void CreatePixelMap(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
+ani_object CreatePixelMap(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
 {
     ani_long nativeObj = 0;
     env->Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj);
     auto* pixelMapDrawable = reinterpret_cast<PixelMapDrawableDescriptor*>(nativeObj);
     if (pixelMapDrawable == nullptr) {
-        return;
+        return nullptr;
     }
     auto pixelMap = pixelMapDrawable->GetPixelMap();
     if (pixelMap == nullptr) {
-        return;
+        return nullptr;
     }
     // set pixel map property to arkts object
     auto pixelAni = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pixelMap->GetPixelMapSharedPtr());
-    if (pixelAni == nullptr) {
-        return;
-    }
-    env->Object_SetPropertyByName_Ref(drawableAni, "pixelMap", pixelAni);
+    return pixelAni;
 }
 
-void ComposePixelMap(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
+ani_object ComposePixelMap(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
 {
     ani_long nativeObj = 0;
     env->Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj);
     auto* layeredDrawable = reinterpret_cast<LayeredDrawableDescriptor*>(nativeObj);
     if (layeredDrawable == nullptr) {
-        return;
+        return nullptr;
     }
     auto pixelMap = layeredDrawable->GetPixelMap();
     if (pixelMap == nullptr) {
-        return;
+        return nullptr;
     }
     // set pixel map property to arkts object
     auto pixelAni = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pixelMap->GetPixelMapSharedPtr());
-    if (pixelAni == nullptr) {
-        return;
-    }
-    env->Object_SetPropertyByName_Ref(drawableAni, "pixelMap", pixelAni);
+    return pixelAni;
 }
 
-void CreateForefround(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
+ani_object CreateForefround(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
 {
     ani_long nativeObj = 0;
     env->Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj);
     auto* layeredDrawable = reinterpret_cast<LayeredDrawableDescriptor*>(nativeObj);
     if (layeredDrawable == nullptr) {
-        return;
+        return nullptr;
     }
     auto foreground = layeredDrawable->GetForeground();
     if (foreground == nullptr) {
-        return;
+        return nullptr;
     }
-    auto pixelAni = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, foreground->GetPixelMapSharedPtr());
-    if (pixelAni == nullptr) {
-        return;
-    }
-    // set foreground property to arkts object
-    ani_class cls;
-    ani_object obj;
-    auto status = env->FindClass(PIXEL_MAP_DRAWABLE, &cls);
-    if (status != ANI_OK) {
-        return;
-    }
-    ani_method ctor;
-    env->Class_FindMethod(cls, "<ctor>", PIXEL_MAP_CONSTRUCTOR, &ctor);
-    env->Object_New(cls, ctor, &obj, pixelAni);
-    env->Object_SetPropertyByName_Ref(drawableAni, "foreground", obj);
+    auto obj = CreatePixelMapDrawableByPixelMap(env, foreground);
+    return obj;
 }
 
-void CreateBackground(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
+ani_object CreateBackground(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
 {
     ani_long nativeObj = 0;
     env->Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj);
     auto* layeredDrawable = reinterpret_cast<LayeredDrawableDescriptor*>(nativeObj);
     if (layeredDrawable == nullptr) {
-        return;
+        return nullptr;
     }
     auto background = layeredDrawable->GetBackground();
     if (background == nullptr) {
-        return;
+        return nullptr;
     }
-    auto pixelAni = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, background->GetPixelMapSharedPtr());
-    // set background property to arkts object
-    ani_class cls;
-    ani_object obj;
-    auto status = env->FindClass(PIXEL_MAP_DRAWABLE, &cls);
-    if (status != ANI_OK) {
-        return;
-    }
-    ani_method ctor;
-    env->Class_FindMethod(cls, "<ctor>", PIXEL_MAP_CONSTRUCTOR, &ctor);
-    env->Object_New(cls, ctor, &obj, pixelAni);
-    env->Object_SetPropertyByName_Ref(drawableAni, "background", obj);
+    auto obj = CreatePixelMapDrawableByPixelMap(env, background);
+    return obj;
 }
 
-void CreateMask(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
+ani_object CreateMask(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)
 {
     ani_long nativeObj = 0;
     env->Object_GetPropertyByName_Long(drawableAni, "nativeObj", &nativeObj);
     auto* layeredDrawable = reinterpret_cast<LayeredDrawableDescriptor*>(nativeObj);
     if (layeredDrawable == nullptr) {
-        return;
+        return nullptr;
     }
     auto mask = layeredDrawable->GetMask();
     if (mask == nullptr) {
-        return;
+        return nullptr;
     }
-    auto pixelAni = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, mask->GetPixelMapSharedPtr());
-    // set mask property to arkts object
-    ani_class cls;
-    ani_object obj;
-    auto status = env->FindClass(PIXEL_MAP_DRAWABLE, &cls);
-    if (status != ANI_OK) {
-        return;
-    }
-    ani_method ctor;
-    env->Class_FindMethod(cls, "<ctor>", PIXEL_MAP_CONSTRUCTOR, &ctor);
-    env->Object_New(cls, ctor, &obj, pixelAni);
-    env->Object_SetPropertyByName_Ref(drawableAni, "mask", obj);
+    auto obj = CreatePixelMapDrawableByPixelMap(env, mask);
+    return obj;
 }
 
 ani_string DrawableMaskClipPath(ani_env* env)
