@@ -571,7 +571,7 @@ HWTEST_F(PreviewSessionWrapperImplTestNg, PreviewSessionWrapperImplTestNg010, Te
     RectF paintRect = { 10.0f, 10.0f, 10.0f, 10.0f };
     sessionWrapper->NotifyDisplayArea(paintRect);
 
-    sessionWrapper->session_->reason_ = Rosen::SizeChangeReason::ROTATION;
+    sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::ROTATION);
     sessionWrapper->NotifyDisplayArea(paintRect);
 #endif
 }
