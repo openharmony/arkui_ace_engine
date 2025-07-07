@@ -115,7 +115,7 @@ float GetGamma(float offset, float scrollableDistance, float viewLength)
 float GetFriction(const ScrollPattern& pattern)
 {
     auto friction = static_cast<float>(pattern.GetFriction());
-    if (NearEqual(friction, -1.0)) {
+    if (NonPositive(friction)) {
         auto* ctx = pattern.GetContext();
         CHECK_NULL_RETURN(ctx, 0.0f);
         auto theme = ctx->GetTheme<ScrollableTheme>();

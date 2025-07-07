@@ -347,11 +347,11 @@ TEST_F(FreeScrollTest, OverScroll002)
  */
 TEST_F(FreeScrollTest, Animation001)
 {
-    constexpr float FRICTION = 0.5f;
+    constexpr float friction = 0.5f;
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
-    model.SetFriction(FRICTION);
+    model.SetFriction(friction);
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
     PanStart({});
@@ -379,17 +379,17 @@ TEST_F(FreeScrollTest, Animation001)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     ASSERT_TRUE(pattern_->freeScroll_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X - VELOCITY_X / (FRICTION * -FRICTION_SCALE));
+    EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X - VELOCITY_X / (friction * -FRICTION_SCALE));
     EXPECT_EQ(GetChildY(frameNode_, 0), 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
     EXPECT_EQ(controller->state_, ScrollState::IDLE);
 
-    constexpr float FRICTION_2 = 0.8f;
-    ScrollModelNG::SetFriction(frameNode_.GetRawPtr(), FRICTION_2);
+    constexpr float friction2 = 0.8f;
+    ScrollModelNG::SetFriction(frameNode_.GetRawPtr(), friction2);
     PanEnd({}, { 0, -VELOCITY_Y });
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VELOCITY_Y / (FRICTION_2 * -FRICTION_SCALE));
+    EXPECT_EQ(GetChildY(frameNode_, 0), -VELOCITY_Y / (friction2 * -FRICTION_SCALE));
 }
 
 /**
