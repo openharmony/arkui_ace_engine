@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/common/manager_interface.h"
+#include "core/components_ng/property/property.h"
 
 #define private public
 #define protected public
@@ -42,6 +43,18 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {} // namespace
+
+class MockPattern : public Pattern {
+    DECLARE_ACE_TYPE(MockPattern, Pattern);
+
+public:
+    MockPattern() = default;
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
+    {
+        changeFlag_ = flag;
+    }
+    FrameNodeChangeInfoFlag changeFlag_;
+};
 
 class SelectOverlayPatternTestNg : public testing::Test {
 public:
@@ -554,5 +567,35 @@ HWTEST_F(SelectOverlayPatternTestNg, DisableMenuItems, TestSize.Level1)
         SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
     ASSERT_NE(selectOverlayNode, nullptr);
     EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 6);
+}
+
+/**
+ * @tc.name: FrameNode::ProcessFrameNodeChangeFlag
+ * @tc.desc: test ProcessFrameNodeChangeFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, ProcessFrameNodeChangeFlag, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<MockPattern>();
+    auto mockNode = FrameNode::CreateFrameNode("Mock", 1, pattern, false);
+
+    auto parentPattern1 = AceType::MakeRefPtr<MockPattern>();
+    auto parentNode1 = FrameNode::CreateFrameNode("Mock", 2, pattern, false);
+    parentNode1->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_END_SCROLL);
+    mockNode->MountToParent(parentNode1);
+
+    auto parentPattern2 = AceType::MakeRefPtr<MockPattern>();
+    auto parentNode2 = FrameNode::CreateFrameNode("Mock", 3, pattern, false);
+    parentNode2->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
+    parentNode1->MountToParent(parentNode2);
+
+    auto parentPattern3 = AceType::MakeRefPtr<MockPattern>();
+    auto parentNode3 = FrameNode::CreateFrameNode("Mock", 4, pattern, false);
+    parentNode3->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_ANIMATION);
+    parentNode2->MountToParent(parentNode3);
+
+    mockNode->ProcessFrameNodeChangeFlag();
+    EXPECT_EQ(pattern->changeFlag_,
+        FRAME_NODE_CHANGE_END_SCROLL | FRAME_NODE_CHANGE_GEOMETRY_CHANGE | FRAME_NODE_CHANGE_START_ANIMATION);
 }
 } // namespace OHOS::Ace::NG

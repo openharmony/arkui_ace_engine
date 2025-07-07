@@ -6632,10 +6632,11 @@ void FrameNode::ProcessFrameNodeChangeFlag()
     auto changeFlag = FRAME_NODE_CHANGE_INFO_NONE;
     auto parent = Claim(this);
     while (parent) {
-        if (parent->GetChangeInfoFlag() != FRAME_NODE_CHANGE_INFO_NONE) {
-            changeFlag = changeFlag | parent->GetChangeInfoFlag();
-        }
+        changeFlag = changeFlag | parent->GetChangeInfoFlag();
         parent = parent->GetAncestorNodeOfFrame(true);
+        if (changeFlag == FRAME_NODE_CHANGE_ALL) {
+            break;
+        }
     }
     if (changeFlag == FRAME_NODE_CHANGE_INFO_NONE) {
         return;
