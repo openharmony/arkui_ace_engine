@@ -1189,4 +1189,340 @@ HWTEST_F(ScrollEffectTestNg, CalculateOverScroll011, TestSize.Level1)
     auto result = scrollFadeEffect->CalculateOverScroll(10.0, false);
     EXPECT_EQ(result, 0.0);
 }
+
+/**
+ * @tc.name: SetPaintDirection004
+ * @tc.desc: Test ScrollFadeEffect SetPaintDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetPaintDirection004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+
+    /**
+     * @tc.steps: step2. Set scaleFactor_ of fadePainter less than SCALE_THRESHOLD(0.3)
+     * and set direction_ of fadePainter to UP
+     */
+    scrollFadeEffect->fadePainter_->scaleFactor_ = 0.2f;
+    scrollFadeEffect->fadePainter_->SetDirection(OverScrollDirection::UP);
+
+    /**
+     * @tc.steps: step3. Set axis to VERTICAL, overScroll to 3.0f and isNotPositiveScrollableDistance to true
+     * @tc.expected: The direction_ of fadePainter to be DOWN
+     */
+    scrollFadeEffect->SetPaintDirection(Axis::VERTICAL, 3.0f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetDirection(), OverScrollDirection::DOWN);
+}
+
+/**
+ * @tc.name: SetPaintDirection005
+ * @tc.desc: Test ScrollFadeEffect SetPaintDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetPaintDirection005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+
+    /**
+     * @tc.steps: step2. Set scaleFactor_ to 0.2f and set direction_ of fadePainter to LEFT
+     */
+    scrollFadeEffect->fadePainter_->scaleFactor_ = 0.2f;
+    scrollFadeEffect->fadePainter_->SetDirection(OverScrollDirection::LEFT);
+
+    /**
+     * @tc.steps: step3. Set axis to VERTICAL, overScroll to 3.0f and isNotPositiveScrollableDistance to true
+     * @tc.expected: The direction_ of fadePainter to be DOWN
+     */
+    scrollFadeEffect->SetPaintDirection(Axis::VERTICAL, 3.0f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetDirection(), OverScrollDirection::DOWN);
+}
+
+/**
+ * @tc.name: SetPaintDirection006
+ * @tc.desc: Test ScrollFadeEffect SetPaintDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetPaintDirection006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+
+    /**
+     * @tc.steps: step2. Set scaleFactor_ of fadePainter less than SCALE_THRESHOLD(0.3)
+     * and set direction_ of fadePainter to RIGHT
+     */
+    scrollFadeEffect->fadePainter_->scaleFactor_ = 0.2f;
+    scrollFadeEffect->fadePainter_->SetDirection(OverScrollDirection::RIGHT);
+
+    /**
+     * @tc.steps: step3. Set axis to HORIZONTAL, overScroll to 3.0f and isNotPositiveScrollableDistance to true
+     * @tc.expected: The direction_ of fadePainter to be LEFT
+     */
+    scrollFadeEffect->SetPaintDirection(Axis::HORIZONTAL, -3.0f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetDirection(), OverScrollDirection::LEFT);
+}
+
+/**
+ * @tc.name: SetPaintDirection007
+ * @tc.desc: Test ScrollFadeEffect SetPaintDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetPaintDirection007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+
+    /**
+     * @tc.steps: step2. Set scaleFactor_ to 0.2f and set direction_ of fadePainter to UP
+     */
+    scrollFadeEffect->fadePainter_->scaleFactor_ = 0.2f;
+    scrollFadeEffect->fadePainter_->SetDirection(OverScrollDirection::UP);
+
+    /**
+     * @tc.steps: step3. Set axis to HORIZONTAL, overScroll to 3.0f and isNotPositiveScrollableDistance to true
+     * @tc.expected: The direction_ of fadePainter to be LEFT
+     */
+    scrollFadeEffect->SetPaintDirection(Axis::HORIZONTAL, -3.0f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetDirection(), OverScrollDirection::LEFT);
+}
+
+/**
+ * @tc.name: SetPaintDirection008
+ * @tc.desc: Test ScrollFadeEffect SetPaintDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetPaintDirection008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+
+    /**
+     * @tc.steps: step2. Set scaleFactor_ of fadePainter less than SCALE_THRESHOLD(0.3)
+     * and set direction_ of fadePainter to UP
+     */
+    scrollFadeEffect->fadePainter_->scaleFactor_ = 0.2f;
+    scrollFadeEffect->fadePainter_->SetDirection(OverScrollDirection::UP);
+
+    /**
+     * @tc.steps: step3. Set axis to HORIZONTAL, overScroll to 3.0f and isNotPositiveScrollableDistance to true
+     * @tc.expected: The direction_ of fadePainter to be RIGHT
+     */
+    scrollFadeEffect->SetPaintDirection(Axis::HORIZONTAL, 3.0f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetDirection(), OverScrollDirection::RIGHT);
+}
+
+/**
+ * @tc.name: SetPaintDirection009
+ * @tc.desc: Test ScrollFadeEffect SetPaintDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetPaintDirection009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+
+    /**
+     * @tc.steps: step2. Set scaleFactor_ to 0.2f and set direction_ of fadePainter to LEFT
+     */
+    scrollFadeEffect->fadePainter_->scaleFactor_ = 0.2f;
+    scrollFadeEffect->fadePainter_->SetDirection(OverScrollDirection::LEFT);
+
+    /**
+     * @tc.steps: step3. Set axis to HORIZONTAL, overScroll to 3.0f and isNotPositiveScrollableDistance to true
+     * @tc.expected: The direction_ of fadePainter to be RIGHT
+     */
+    scrollFadeEffect->SetPaintDirection(Axis::HORIZONTAL, 3.0f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetDirection(), OverScrollDirection::RIGHT);
+}
+
+/**
+ * @tc.name: SetPaintDirection010
+ * @tc.desc: Test ScrollFadeEffect SetPaintDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetPaintDirection010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+
+    /**
+     * @tc.steps: step2. Set scaleFactor_ of fadePainter less than SCALE_THRESHOLD(0.3)
+     * and set direction_ of fadePainter to DOWN
+     */
+    scrollFadeEffect->fadePainter_->scaleFactor_ = 0.2f;
+    scrollFadeEffect->fadePainter_->SetDirection(OverScrollDirection::DOWN);
+
+    /**
+     * @tc.steps: step3. Set axis to VERTICAL, overScroll to -3.0f and isNotPositiveScrollableDistance to true
+     * @tc.expected: The direction_ of fadePainter to be UP
+     */
+    scrollFadeEffect->SetPaintDirection(Axis::VERTICAL, -3.0f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetDirection(), OverScrollDirection::UP);
+}
+
+/**
+ * @tc.name: SetPaintDirection011
+ * @tc.desc: Test ScrollFadeEffect SetPaintDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetPaintDirection011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+
+    /**
+     * @tc.steps: step2. Set scaleFactor_ to 0.2f and set direction_ of fadePainter to LEFT
+     */
+    scrollFadeEffect->fadePainter_->scaleFactor_ = 0.2f;
+    scrollFadeEffect->fadePainter_->SetDirection(OverScrollDirection::LEFT);
+
+    /**
+     * @tc.steps: step3. Set axis to VERTICAL, overScroll to -3.0f and isNotPositiveScrollableDistance to true
+     * @tc.expected: The direction_ of fadePainter to be DOWN
+     */
+    scrollFadeEffect->SetPaintDirection(Axis::VERTICAL, -3.0f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetDirection(), OverScrollDirection::UP);
+}
+
+/**
+ * @tc.name: SetPaintDirection012
+ * @tc.desc: Test ScrollFadeEffect SetPaintDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetPaintDirection012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+
+    /**
+     * @tc.steps: step2. Set scaleFactor_ of fadePainter less than SCALE_THRESHOLD(0.3)
+     * and set direction_ of fadePainter to UP
+     */
+    scrollFadeEffect->fadePainter_->scaleFactor_ = 0.2f;
+    scrollFadeEffect->fadePainter_->SetDirection(OverScrollDirection::UP);
+
+    /**
+     * @tc.steps: step3. Set axis to HORIZONTAL, overScroll to -3.0f and isNotPositiveScrollableDistance to false
+     * @tc.expected: The direction_ of fadePainter to be LEFT
+     */
+    scrollFadeEffect->SetPaintDirection(Axis::HORIZONTAL, -3.0f, false);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetDirection(), OverScrollDirection::LEFT);
+}
+
+/**
+ * @tc.name: SetPaintDirection013
+ * @tc.desc: Test ScrollFadeEffect SetPaintDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetPaintDirection013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+
+    /**
+     * @tc.steps: step2. Set scaleFactor_ to 0.2f and set direction_ of fadePainter to LEFT
+     */
+    scrollFadeEffect->fadePainter_->scaleFactor_ = 0.2f;
+    scrollFadeEffect->fadePainter_->SetDirection(OverScrollDirection::LEFT);
+
+    /**
+     * @tc.steps: step3. Set axis to HORIZONTAL, overScroll to 3.0f and isNotPositiveScrollableDistance to false
+     * @tc.expected: The direction_ of fadePainter to be RIGHT
+     */
+    scrollFadeEffect->SetPaintDirection(Axis::HORIZONTAL, 3.0f, false);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetDirection(), OverScrollDirection::RIGHT);
+}
+
+/**
+ * @tc.name: SetOpacityAndScale001
+ * @tc.desc: Test ScrollFadeEffect SetOpacityAndScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetOpacityAndScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+
+    /**
+     * @tc.steps: step2. Set scaleFactor_ to 0.2f and opacity_ of fadePainter to 1.0f
+     */
+    scrollFadeEffect->fadePainter_->SetScaleFactor(0.2f);
+    scrollFadeEffect->fadePainter_->SetOpacity(1.0f);
+
+    /**
+     * @tc.steps: step3. Calling the SetOpacityAndScale function
+     * @tc.expected: The scaleFactor_ to be 2.0f and the opacity_ to be 3.0f
+     */
+    scrollFadeEffect->SetOpacityAndScale(3.0f, 2.0f);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetScaleFactor(), 2.0f);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetOpacity(), 3.0f);
+}
+
+/**
+ * @tc.name: SetOpacityAndScale002
+ * @tc.desc: Test ScrollFadeEffect SetOpacityAndScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetOpacityAndScale002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollFadeEffect> scrollFadeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::RED);
+    scrollFadeEffect->fadePainter_ = AceType::MakeRefPtr<ScrollFadePainter>();
+
+    /**
+     * @tc.steps: step2. Set scaleFactor_ to 0.2f and opacity_ of fadePainter to 1.0f
+     * and set handleOverScroll to false
+     */
+    scrollFadeEffect->fadePainter_->SetScaleFactor(0.2f);
+    scrollFadeEffect->fadePainter_->SetOpacity(1.0f);
+    bool handleOverScroll = false;
+    scrollFadeEffect->handleOverScrollCallback_ = [&handleOverScroll] { handleOverScroll = true; };
+
+    /**
+     * @tc.steps: step3. Calling the SetOpacityAndScale function
+     * @tc.expected: The scaleFactor_ to be 2.0f and the opacity_ to be 3.0f
+     * the handleOverScroll to be true
+     */
+    scrollFadeEffect->SetOpacityAndScale(3.0f, 2.0f);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetScaleFactor(), 2.0f);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->GetOpacity(), 3.0f);
+    EXPECT_EQ(handleOverScroll, true);
+}
 } // namespace OHOS::Ace::NG
