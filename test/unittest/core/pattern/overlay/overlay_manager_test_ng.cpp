@@ -3889,6 +3889,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern9, TestSize.Level1)
      * @tc.expected: sheetTransition is called, isAnimationProcess_ = false.
      */
     topSheetPattern->isAnimationBreak_ = false;
+    topSheetPattern->SetStartProp(1.0);
     topSheetPattern->ModifyFireSheetTransition();
     EXPECT_FALSE(topSheetPattern->isAnimationProcess_);
 
@@ -3897,6 +3898,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern9, TestSize.Level1)
      * @tc.expected: sheetTransition is called, isAnimationBreak_ = false.
      */
     topSheetPattern->isAnimationBreak_ = true;
+    topSheetPattern->SetStartProp(1.0);
     topSheetPattern->ModifyFireSheetTransition();
     EXPECT_FALSE(topSheetPattern->isAnimationBreak_);
 

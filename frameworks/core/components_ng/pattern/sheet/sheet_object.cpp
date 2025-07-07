@@ -575,6 +575,7 @@ void SheetObject::ModifyFireSheetTransition(float dragVelocity)
         } else {
             ref->SetAnimationBreak(false);
         }
+        ref->SetStartProp(0.0);
         ref->AvoidAiBar();
         ref->SetIsNeedProcessHeight(false);
         ref->FireOnDetentsDidChange(ref->GetHeight());
@@ -584,6 +585,9 @@ void SheetObject::ModifyFireSheetTransition(float dragVelocity)
 
     sheetPattern->SetAnimationProcess(true);
     sheetPattern->HandleDragEndAccessibilityEvent();
+    if (NearZero(sheetPattern->GetStartProp())) {
+        return;
+    }
     property->Set(sheetPattern->GetStartProp());
     sheetPattern->SetBottomStyleHotAreaInSubwindow();
     std::shared_ptr<AnimationUtils::Animation> animation = AnimationUtils::StartAnimation(option,
