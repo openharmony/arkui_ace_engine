@@ -421,6 +421,24 @@ HWTEST_F(TextFieldPatternTestEight, ClearTextContent001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ClearTextContent002
+ * @tc.desc: test ClearTextContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ClearTextContent002, TestSize.Level0)
+{
+    CreateTextField();
+
+    pattern_->ClearTextContent();
+    EXPECT_TRUE(pattern_->contentController_->IsEmpty());
+
+    std::u16string value = u"n";
+    pattern_->contentController_->SetTextValue(value);
+    pattern_->ClearTextContent();
+    EXPECT_FALSE(pattern_->showCountBorderStyle_);
+}
+
+/**
  * @tc.name: HandleButtonMouseEvent001
  * @tc.desc: test HandleButtonMouseEvent
  * @tc.type: FUNC
