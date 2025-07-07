@@ -3009,7 +3009,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnRecycle001, TestSize.Level1)
      * @tc.expected: expect is not nullptr.
      */
     auto renderContext = frameNode->GetRenderContext();
-    EXPECT_NE(accessibilityProperty, nullptr);
+    EXPECT_NE(renderContext, nullptr);
     renderContext->UpdateAccessibilityFocus(true);
 
     /**
@@ -3054,7 +3054,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnRecycle002, TestSize.Level1)
      * @tc.expected: expect is not nullptr.
      */
     auto renderContext = frameNode->GetRenderContext();
-    EXPECT_NE(accessibilityProperty, nullptr);
+    EXPECT_NE(renderContext, nullptr);
     renderContext->UpdateAccessibilityFocus(true);
 
     /**
@@ -3099,7 +3099,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnRecycle003, TestSize.Level1)
      * @tc.expected: expect is not nullptr.
      */
     auto renderContext = frameNode->GetRenderContext();
-    EXPECT_NE(accessibilityProperty, nullptr);
+    EXPECT_NE(renderContext, nullptr);
     renderContext->UpdateAccessibilityFocus(false);
 
     /**
@@ -3144,7 +3144,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnRecycle004, TestSize.Level1)
      * @tc.expected: expect is not nullptr.
      */
     auto renderContext = frameNode->GetRenderContext();
-    EXPECT_NE(accessibilityProperty, nullptr);
+    EXPECT_NE(renderContext, nullptr);
     renderContext->UpdateAccessibilityFocus(true);
 
     /**
