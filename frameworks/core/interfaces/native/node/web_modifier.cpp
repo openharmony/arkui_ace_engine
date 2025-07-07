@@ -30,12 +30,12 @@ constexpr WebCacheMode DEFAULT_CACHE_MODE = WebCacheMode::DEFAULT;
 constexpr WebDarkMode DEFAULT_DARK_MODE = WebDarkMode::Off;
 constexpr int32_t DEFAULT_MULTIWINDOW_ACCESS_ENABLED = false;
 constexpr int32_t DEFAULT_ALLOW_WINDOWOPEN_METHOD = false;
-constexpr WebKeyboardAvoidMode DEFAULT_KEYBOAED_AVIOD_MODE = WebKeyboardAvoidMode::RESIZE_CONTENT;
-constexpr bool DEFAULT_VERTICALSCROLL_BAR_ACCESS_ENABLED = true;
-constexpr bool DEFAULT_HORIZONTALSCROLL_BAR_ACCESS_ENABLED = true;
+constexpr WebKeyboardAvoidMode DEFAULT_KEYBOARD_AVOID_MODE = WebKeyboardAvoidMode::RESIZE_VISUAL;
+constexpr bool DEFAULT_VERTICAL_SCROLL_BAR_ACCESS_ENABLED = false;
+constexpr bool DEFAULT_HORIZONTAL_SCROLL_BAR_ACCESS_ENABLED = false;
 constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
 constexpr float DEFAULT_INITIAL_SCALE = 100.0f;
-constexpr bool DEFAULT_GEOLOCATION_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_GEOLOCATION_ACCESS_ENABLED = false;
 constexpr bool DEFAULT_DATABASE_ACCESS_ENABLED = false;
 constexpr bool DEFAULT_OVERVIEWMODE_ACCESS_ENABLED = true;
 constexpr bool DEFAULT_FORCEDARK_ACCESS_ENABLED = false;
@@ -55,8 +55,8 @@ constexpr char DEFAULT_WEBFANTASY_FONT[] = "fantasy";
 constexpr char DEFAULT_WEBCURSIVE_FONT[] = "cursive";
 constexpr WebLayoutMode DEFAULT_LAYOUT_MODE = WebLayoutMode::NONE;
 constexpr bool DEFAULT_NATIVE_EMBED_OPTIONS = false;
-constexpr bool DEFAULT_IMAGE_ACCESS_ENABLED = true;
-constexpr bool DEFAULT_ONLINEIMAGE_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_IMAGE_ACCESS_ENABLED = false;
+constexpr bool DEFAULT_ONLINE_IMAGE_ACCESS_ENABLED = false;
 constexpr bool MEDIA_PLAY_GESTURE_ACCESS_ENABLED = true;
 constexpr bool DEFAULT_MEDIA_OPTIONS_ENABLED = true;
 constexpr int32_t DEFAULT_RESUMEINTERVAL = 0;
@@ -215,7 +215,7 @@ void ResetKeyboardAvoidMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetKeyboardAvoidMode(frameNode, DEFAULT_KEYBOAED_AVIOD_MODE);
+    WebModelNG::SetKeyboardAvoidMode(frameNode, DEFAULT_KEYBOARD_AVOID_MODE);
 }
 
 void SetOnControllerAttached(ArkUINodeHandle node, void* extraParam)
@@ -248,7 +248,7 @@ void ResetVerticalScrollBarAccessEnabled(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetVerticalScrollBarAccessEnabled(frameNode, DEFAULT_VERTICALSCROLL_BAR_ACCESS_ENABLED);
+    WebModelNG::SetVerticalScrollBarAccessEnabled(frameNode, DEFAULT_VERTICAL_SCROLL_BAR_ACCESS_ENABLED);
 }
 
 void SetHorizontalScrollBarAccessEnabled(ArkUINodeHandle node, ArkUI_Bool value)
@@ -262,7 +262,7 @@ void ResetHorizontalScrollBarAccessEnabled(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetHorizontalScrollBarAccessEnabled(frameNode, DEFAULT_HORIZONTALSCROLL_BAR_ACCESS_ENABLED);
+    WebModelNG::SetHorizontalScrollBarAccessEnabled(frameNode, DEFAULT_HORIZONTAL_SCROLL_BAR_ACCESS_ENABLED);
 }
 
 void SetTextZoomRatio(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -886,7 +886,7 @@ void ResetOnlineImageAccess(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetOnLineImageAccessEnabled(frameNode, DEFAULT_ONLINEIMAGE_ACCESS_ENABLED);
+    WebModelNG::SetOnLineImageAccessEnabled(frameNode, DEFAULT_ONLINE_IMAGE_ACCESS_ENABLED);
 }
 
 void SetMediaPlayGestureAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -1984,6 +1984,151 @@ void ResetGestureFocusMode(ArkUINodeHandle node)
     WebModelNG::SetGestureFocusMode(frameNode, DEFAULT_GESTURE_FOCUS_MODE);
 }
 
+void SetOnSslErrorEventReceive(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* webSslErrorEventPtr = reinterpret_cast<std::function<bool(WebSslErrorEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(webSslErrorEventPtr);
+        auto webSslErrorEventCallback = *webSslErrorEventPtr;
+        auto callback = [webSslErrorEventCallback](const BaseEventInfo* event) {
+            CHECK_NULL_RETURN(event, false);
+            auto webSslErrorEvent = static_cast<const WebSslErrorEvent*>(event);
+            if (webSslErrorEvent) {
+                auto& nonConstEvent = const_cast<WebSslErrorEvent&>(*webSslErrorEvent);
+                return webSslErrorEventCallback(nonConstEvent);
+            }
+            return false;
+        };
+        WebModelNG::SetOnSslErrorRequest(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnSslErrorRequest(frameNode, nullptr);
+    }
+}
+
+void ResetOnSslErrorEventReceive(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnSslErrorRequest(frameNode, nullptr);
+}
+
+void SetOnClientAuthenticationRequest(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* webSslSelectCertEventPtr = reinterpret_cast<std::function<bool(WebSslSelectCertEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(webSslSelectCertEventPtr);
+        auto callback = [webSslSelectCertEventCallback = *webSslSelectCertEventPtr](const BaseEventInfo* event) {
+            CHECK_NULL_RETURN(event, false);
+            auto webSslSelectCertEvent = static_cast<const WebSslSelectCertEvent*>(event);
+            if (webSslSelectCertEvent) {
+                auto& nonConstEvent = const_cast<WebSslSelectCertEvent&>(*webSslSelectCertEvent);
+                return webSslSelectCertEventCallback(nonConstEvent);
+            }
+            return false;
+        };
+        WebModelNG::SetOnClientAuthenticationRequest(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnClientAuthenticationRequest(frameNode, nullptr);
+    }
+}
+
+void ResetOnClientAuthenticationRequest(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnClientAuthenticationRequest(frameNode, nullptr);
+}
+
+void SetOnInterceptRequest(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr =
+            reinterpret_cast<std::function<RefPtr<WebResponse>(OnInterceptRequestEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto callback = [originalCallback = *originalCallbackPtr](const BaseEventInfo* event) {
+            if (event == nullptr) {
+                return RefPtr<WebResponse>(nullptr);
+            }
+            if (auto scrollEvent = static_cast<const OnInterceptRequestEvent*>(event)) {
+                auto& nonConstEvent = const_cast<OnInterceptRequestEvent&>(*scrollEvent);
+                return originalCallback(nonConstEvent);
+            }
+            return RefPtr<WebResponse>(nullptr);
+        };
+        WebModelNG::SetOnInterceptRequest(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetOnInterceptRequest(frameNode, nullptr);
+    }
+}
+
+void ResetOnInterceptRequest(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnInterceptRequest(frameNode, nullptr);
+}
+
+void SetOnFaviconReceived(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* originalCallbackPtr = reinterpret_cast<std::function<void(FaviconReceivedEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(originalCallbackPtr);
+        auto adaptedCallback = [originalCallback = *originalCallbackPtr](const std::shared_ptr<BaseEventInfo>& event) {
+            auto* onFaviconReceived = static_cast<FaviconReceivedEvent*>(event.get());
+            if (onFaviconReceived != nullptr) {
+                originalCallback(*onFaviconReceived);
+            }
+        };
+        WebModelNG::SetFaviconReceivedId(frameNode, std::move(adaptedCallback));
+    } else {
+        WebModelNG::SetFaviconReceivedId(frameNode, nullptr);
+    }
+}
+
+void ResetOnFaviconReceived(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetFaviconReceivedId(frameNode, nullptr);
+}
+
+void SetOnBeforeUnload(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* webDialogEventPtr = reinterpret_cast<std::function<bool(WebDialogEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(webDialogEventPtr);
+        auto callback = [webDialogEventCallback = *webDialogEventPtr](const BaseEventInfo* event) {
+            CHECK_NULL_RETURN(event, false);
+            auto webDialogEvent = static_cast<const WebDialogEvent*>(event);
+            if (webDialogEvent) {
+                auto& nonConstEvent = const_cast<WebDialogEvent&>(*webDialogEvent);
+                return webDialogEventCallback(nonConstEvent);
+            }
+            return false;
+        };
+        WebModelNG::SetOnBeforeUnload(frameNode, std::move(callback), DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+    } else {
+        WebModelNG::SetOnBeforeUnload(frameNode, nullptr, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+    }
+}
+
+void ResetOnBeforeUnload(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetOnBeforeUnload(frameNode, nullptr, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+}
+
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -2177,6 +2322,16 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnDataResubmitted = ResetOnDataResubmitted,
         .setGestureFocusMode = SetGestureFocusMode,
         .resetGestureFocusMode = ResetGestureFocusMode,
+        .setOnSslErrorEventReceive = SetOnSslErrorEventReceive,
+        .resetOnSslErrorEventReceive = ResetOnSslErrorEventReceive,
+        .setOnClientAuthenticationRequest = SetOnClientAuthenticationRequest,
+        .resetOnClientAuthenticationRequest = ResetOnClientAuthenticationRequest,
+        .setOnInterceptRequest = SetOnInterceptRequest,
+        .resetOnInterceptRequest = ResetOnInterceptRequest,
+        .setOnFaviconReceived = SetOnFaviconReceived,
+        .resetOnFaviconReceived = ResetOnFaviconReceived,
+        .setOnBeforeUnload = SetOnBeforeUnload,
+        .resetOnBeforeUnload = ResetOnBeforeUnload,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2374,6 +2529,16 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnDataResubmitted = ResetOnDataResubmitted,
         .setGestureFocusMode = SetGestureFocusMode,
         .resetGestureFocusMode = ResetGestureFocusMode,
+        .setOnSslErrorEventReceive = SetOnSslErrorEventReceive,
+        .resetOnSslErrorEventReceive = ResetOnSslErrorEventReceive,
+        .setOnClientAuthenticationRequest = SetOnClientAuthenticationRequest,
+        .resetOnClientAuthenticationRequest = ResetOnClientAuthenticationRequest,
+        .setOnInterceptRequest = SetOnInterceptRequest,
+        .resetOnInterceptRequest = ResetOnInterceptRequest,
+        .setOnFaviconReceived = SetOnFaviconReceived,
+        .resetOnFaviconReceived = ResetOnFaviconReceived,
+        .setOnBeforeUnload = SetOnBeforeUnload,
+        .resetOnBeforeUnload = ResetOnBeforeUnload,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

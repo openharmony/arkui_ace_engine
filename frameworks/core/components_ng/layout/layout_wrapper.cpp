@@ -427,6 +427,11 @@ ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpand(
     StartPoint startPoint = StartPoint::NORMAL;
     if (strategy == IgnoreStrategy::FROM_MARGIN) {
         startPoint = StartPoint::FROM_MARGIN;
+    } else if (strategy == IgnoreStrategy::SCROLLABLE_AXIS) {
+        isScrollableAxis_ = true;
+        auto sae = FilterEdges(GetAccumulatedSafeAreaExpandForAllEdges(startPoint, options.type), options.edges);
+        isScrollableAxis_ = false;
+        return sae;
     } else if (includingSelf) {
         startPoint = StartPoint::INCLUDING_SELF;
     }
@@ -459,7 +464,7 @@ ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpandForAllEdges(StartPoint st
     }
     // total expanding distance of four sides used to calculate cache
     GetAccumulatedSafeAreaExpandHelper(adjustingRect, totalExpand, false, ignoreType);
-    if (IsIgnoreTypeTrivial(ignoreType)) {
+    if (IsIgnoreTypeTrivial(ignoreType) && !isScrollableAxis_) {
         geometryNode->SetAccumulatedSafeAreaEdges(totalExpand);
     }
     return totalExpand;
@@ -543,6 +548,13 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(
         safeAreaPadding = layoutProperty->GetOrCreateSafeAreaPadding();
     }
     auto innerSpace = layoutProperty->CreatePaddingAndBorder(false, false);
+
+    auto pattern = recursiveHost->GetPattern();
+    if (isScrollableAxis_ && pattern && pattern->NeedCustomizeSafeAreaPadding()) {
+        innerSpace.Plus(pattern->CustomizeSafeAreaPadding(safeAreaPadding, true), true);
+        safeAreaPadding = pattern->CustomizeSafeAreaPadding(safeAreaPadding, false);
+    }
+
     if (fromSelf) {
         // if fromSelf is true, adjustingRect should cut innerSpace
         ReduceRectByRolling(adjustingRect, innerSpace, -1.0);
@@ -560,10 +572,46 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(
         (recursiveHost->GetTag() == V2::STAGE_ETS_TAG)) {
         return;
     }
-    if (IsIgnoreTypeTrivial(ignoreType) && recursiveHost->AccumulateExpandCacheHit(totalExpand, innerSpace)) {
+    if (IsIgnoreTypeTrivial(ignoreType) && !isScrollableAxis_ &&
+        recursiveHost->AccumulateExpandCacheHit(totalExpand, innerSpace)) {
+        return;
+    }
+    if (pattern && pattern->AccumulatingTerminateHelper(adjustingRect, totalExpand, fromSelf, ignoreType)) {
         return;
     }
     recursiveHost->GetAccumulatedSafeAreaExpandHelper(adjustingRect, totalExpand, false, ignoreType);
+}
+
+bool LayoutWrapper::PredictMeasureResult(
+    LayoutWrapper* childWrapper, const std::optional<LayoutConstraintF>& parentConstraint)
+{
+    auto layoutProperty = childWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    if (!layoutConstraint.has_value() || !parentConstraint.has_value()) {
+        return false;
+    }
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (!layoutPolicy || !layoutPolicy->IsMatch()) {
+        return false;
+    }
+    OptionalSizeF realSize;
+    auto parentIdealSize = parentConstraint->parentIdealSize;
+    auto widthLayoutPolicy = layoutPolicy->widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    auto heightLayoutPolicy = layoutPolicy->heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    if (parentIdealSize.Width().has_value() && widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        realSize.SetWidth(parentIdealSize.Width().value());
+    }
+    if (parentIdealSize.Height().has_value() && heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        realSize.SetHeight(parentIdealSize.Height().value());
+    }
+    auto selfIdealSize = layoutConstraint->selfIdealSize;
+    realSize.UpdateIllegalSizeWithCheck(selfIdealSize);
+    if (realSize.IsValid()) {
+        childWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
+        return true;
+    }
+    return false;
 }
 
 void LayoutWrapper::AdjustChildren(const OffsetF& offset, bool parentScrollable)
@@ -767,6 +815,13 @@ void LayoutWrapper::AddNodeLayoutTime(int64_t time)
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
     host->SetLayoutTime(time);
+}
+
+bool LayoutWrapper::IsIgnoreOptsValid()
+{
+    auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->IsIgnoreOptsValid();
 }
 
 } // namespace OHOS::Ace::NG

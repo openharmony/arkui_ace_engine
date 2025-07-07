@@ -62,6 +62,7 @@ public:
     virtual void OnScrollStartRecursive(float position, float dragVelocity = 0.0f);
     virtual void OnScrollEndRecursive (const std::optional<float>& velocity);
     virtual bool HandleScrollVelocity(float velocity);
+    virtual void InitScrollProps();
     ScrollResult HandleScrollWithSheet(float scrollOffset);
 
     void BindPattern(const WeakPtr<SheetPresentationPattern>& pattern)
@@ -107,6 +108,16 @@ public:
     virtual uint32_t GetPanDirection()
     {
         return PanDirection::VERTICAL;
+    }
+    
+    virtual bool CheckIfUpdateObject(SheetType newType)
+    {
+        return (newType == SheetType::SHEET_SIDE) || (newType == SheetType::SHEET_CONTENT_COVER);
+    }
+
+    virtual bool IsSheetObjectBase() const
+    {
+        return true;
     }
 
     void SetCurrentOffset(float value)

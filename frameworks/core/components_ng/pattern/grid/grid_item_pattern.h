@@ -146,6 +146,21 @@ public:
 
     void UpdateGridItemStyle(GridItemStyle gridItemStyle);
 
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
 protected:
     void OnModifyDone() override;
 

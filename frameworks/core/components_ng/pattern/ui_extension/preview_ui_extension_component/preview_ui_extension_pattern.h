@@ -23,17 +23,21 @@ class PreviewUIExtensionPattern : public SecurityUIExtensionPattern {
 public:
     PreviewUIExtensionPattern();
     ~PreviewUIExtensionPattern() override;
-    void Initialize(const NG::UIExtensionConfig& config);
-    void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
-    void UpdateWant(const AAFwk::Want& want);
+    void Initialize(const NG::UIExtensionConfig& config) override;
     void OnConnect();
     void OnAttachToFrameNode() override;
     void FireOnRemoteReadyCallback() override;
-    void OnAttachContext(PipelineContext *context) override;
+    void FireOnErrorCallback(
+        int32_t code, const std::string& name, const std::string& message) override;
     void RegisterVisibleAreaChange();
     void InitializeAccessibility();
+
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 private:
-    void UpdateSessionInstanceId(int32_t instanceId);
+    // Preview UEC dump info
+    uint32_t focusWindowId_ = 0;
+    uint32_t realHostWindowId_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(PreviewUIExtensionPattern);
 };
 } // namespace OHOS::Ace::NG

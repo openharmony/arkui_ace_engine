@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/distRelease/stateMgmt.d.ts" />
-let LogTag;
+/// <reference path="../../state_mgmt/src/lib/common/ace_console.native.d.ts" />
+var LogTag;
 (function (LogTag) {
-  LogTag[LogTag['STATE_MGMT'] = 0] = 'STATE_MGMT';
-  LogTag[LogTag['ARK_COMPONENT'] = 1] = 'ARK_COMPONENT';
+    LogTag[LogTag["ARK_COMPONENT"] = 1] = "ARK_COMPONENT";
 })(LogTag || (LogTag = {}));
 class JSXNodeLogConsole {
-  static warn(...args) {
-      aceConsole.warn(LogTag.ARK_COMPONENT, ...args);
-  }
+    static warn(...args) {
+        aceConsole.warn(LogTag.ARK_COMPONENT, ...args);
+    }
 }
 var NodeRenderType;
 (function (NodeRenderType) {
@@ -78,7 +78,7 @@ class BaseNode extends ViewBuildNodeBase {
     }
 }
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -163,7 +163,7 @@ class BuilderNode extends Disposable {
     onRecycleWithBindObject() {
         this._JSBuilderNode.onRecycleWithBindObject();
     }
-    inheritFreezeOptions(enable) {   
+    inheritFreezeOptions(enable) {
         this._JSBuilderNode.inheritFreezeOptions(enable);
     }
 }
@@ -178,6 +178,13 @@ class JSBuilderNode extends BaseNode {
         this.allowFreezeWhenInactive = false;
         this.parentallowFreeze = false;
         this.isFreeze = false;
+        this.__parentViewOfBuildNode = undefined;
+    }
+    findProvidePU__(providePropName) {
+        if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {
+            return this.__parentViewOfBuildNode.findProvidePU__(providePropName);
+        }
+        return undefined;
     }
     reuse(param) {
         this.updateStart();
@@ -195,14 +202,6 @@ class JSBuilderNode extends BaseNode {
         });
         this.updateEnd();
     }
-
-    findProvidePU__(providePropName) {
-        if (this.__parentViewBuildNode) {
-            return this.__parentViewBuildNode.findProvidePU__(providePropName);
-        }
-        return undefined;
-    }
-
     recycle() {
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
@@ -285,6 +284,7 @@ class JSBuilderNode extends BaseNode {
         this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
         const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
         this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
+        this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing) ? (options?.enableProvideConsumeCrossing) : false;
         this.params_ = params;
         if (options?.localStorage instanceof LocalStorage) {
             this.setShareLocalStorage(options.localStorage);
@@ -305,7 +305,12 @@ class JSBuilderNode extends BaseNode {
         this.frameNode_.setRenderNode(this._nativeRef);
         this.frameNode_.setBaseNode(this);
         this.frameNode_.setBuilderNode(this);
-        this.id_ = this.frameNode_.getUniqueId();
+        let id = this.frameNode_.getUniqueId();
+        if (this.id_ && this.id_ !== id) {
+            this.__parentViewOfBuildNode?.removeChildBuilderNode(this.id_);
+        }
+        this.id_ = id;
+        this.__parentViewOfBuildNode?.addChildBuilderNode(this);
         FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(this.frameNode_.getUniqueId(), new WeakRef(this.frameNode_));
         __JSScopeUtil__.restoreInstanceId();
     }
@@ -2454,7 +2459,7 @@ class ColorMetrics {
         return this.resourceId_;
     }
     setColorSpace(colorSpace) {
-        if (ColorSpace.DISPLAY_P3 == colorSpace || ColorSpace.SRGB == colorSpace) {
+        if (ColorSpace.DISPLAY_P3 === colorSpace || ColorSpace.SRGB === colorSpace) {
             this.colorSpace_ = colorSpace;
         }
     }
@@ -3211,7 +3216,6 @@ class NodeContent extends Content {
             return;
         }
         if (getUINativeModule().frameNode.addFrameNodeToNodeContent(node.getNodePtr(), this.nativePtr_)) {
-            getUINativeModule().frameNode.addBuilderNode(this.nativePtr_, node.getNodePtr());
             this.nodeArray_.push(node);
         }
     }
@@ -3219,7 +3223,6 @@ class NodeContent extends Content {
         if (!this.nodeArray_.includes(node)) {
             return;
         }
-        getUINativeModule().frameNode.removeBuilderNode(this.nativePtr_, node.getNodePtr());
         if (getUINativeModule().frameNode.removeFrameNodeFromNodeContent(node.getNodePtr(), this.nativePtr_)) {
             let index = this.nodeArray_.indexOf(node);
             if (index > -1) {
@@ -3228,13 +3231,6 @@ class NodeContent extends Content {
         }
     }
 }
-
-export default {
-    NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
-    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
-    edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    typeNode, NodeAdapter, ExpandMode, UIState
-};
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -3249,26 +3245,10 @@ export default {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
- * Check if the node has parent View.
- * @param nodeId id of node, obtained on the c++ side.
- * @returns true if the node has parent View.
- */
-globalThis.__hasParentView__ = function __hasParentView__(nodeId) {
-    let view = UINodeRegisterProxy.GetView(nodeId);
-    if (view) {
-      return true;
-    }
-    return false;
-}
-
-globalThis.__addBuilderNode__ = function __addBuilderNode__(id, builderIds) {
-    let view = UINodeRegisterProxy.GetView(id);
-    if (!view) {
+function __establishConnection__(allow, parentView, builderIds) {
+    if (!parentView) {
         return false;
     }
-    let allow = view.isCompFreezeAllowed();
     builderIds.forEach((builderId, indx) => {
         let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(builderId);
         let builderNode = builderNodePtr?.deref()?.getBuilderNode();
@@ -3279,14 +3259,13 @@ globalThis.__addBuilderNode__ = function __addBuilderNode__(id, builderIds) {
         if (builderNode.getInheritFreeze()) {
             builderNode.setAllowFreezeWhenInactive(allow);
         }
-        view.addChildBuilderNode(builderNode);
+        builderNode.__parentViewOfBuildNode = parentView;
+        parentView?.addChildBuilderNode(builderNode);
     });
     return true;
 }
-
-globalThis.__deleteBuilderNode__ = function __deleteBuilderNode__(id, builderIds) {
-    let view = UINodeRegisterProxy.GetView(id);
-    if (!view) {
+function __disconnectConnection__(parentView, builderIds) {
+    if (!parentView) {
         return false;
     }
     builderIds.forEach((builderId, indx) => {
@@ -3300,84 +3279,37 @@ globalThis.__deleteBuilderNode__ = function __deleteBuilderNode__(id, builderIds
         if (builderNode.getIsFreeze()) {
             builderNode.setActiveInternal(true);
         }
-        view.removeChildBuilderNode(builderId);
+        builderNode.__parentViewOfBuildNode = undefined;
+        parentView?.removeChildBuilderNode(builderId);
     });
     return true;
 }
-
-globalThis.__addBuilderNodeToBuilder__ = function __addBuilderNodeToBuilder__(id, builderIds) {
-    let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(id);
-    let builderNode = builderNodePtr?.deref()?.getBuilderNode();
-    if (!builderNode) {
-        return false;
-    }
-    let allow = builderNode.getAllowFreezeWhenInactive();
-    builderIds.forEach((builderId, indx) => {
-        let childBuilderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(builderId);
-        let childBuilderNode = childBuilderNodePtr?.deref()?.getBuilderNode();
-        if (!childBuilderNode) {
-            return false;
-        }
-        childBuilderNode.setParentAllowFreeze(allow);
-        if (childBuilderNode.getInheritFreeze()) {
-            childBuilderNode.setAllowFreezeWhenInactive(allow);
-        }
-        builderNode.addChildBuilderNode(childBuilderNode);
-    });
-    return true;
-}
-
-globalThis.__deleteBuilderNodeFromBuilder__ = function __deleteBuilderNodeFromBuilder__(id, builderIds) {
-    let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(id);
-    let builderNode = builderNodePtr?.deref()?.getBuilderNode();
-    if (!builderNode) {
-        return false;
-    }
-    builderIds.forEach((builderId, indx) => {
-        let childBuilderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(builderId);
-        let childBuilderNode = childBuilderNodePtr?.deref()?.getBuilderNode();
-        if (!childBuilderNode) {
-            return false;
-        }
-        childBuilderNode.setParentAllowFreeze(false);
-        childBuilderNode.setAllowFreezeWhenInactive(false);
-        if (builderNode.getIsFreeze()) {
-            builderNode.setActiveInternal(true);
-        }
-        builderNode.removeChildBuilderNode(childBuilderNode.id__());
-    });
-    return true;
-}
-
-globalThis.__clearBuilderNodes__ = function __clearBuilderNodes__(id) {
+globalThis.__addBuilderNode__ = function __addBuilderNode__(id, builderIds) {
     let view = UINodeRegisterProxy.GetView(id);
-    if (view) {
-        for (const child of view.builderNodeWeakrefMap_.values()) {
-            child.deref()?.setParentAllowFreeze(false);
-            child.deref()?.setAllowFreezeWhenInactive(false);
-            if (child?.deref()?.getIsFreeze()) {
-                child?.deref()?.setActiveInternal(true);
-            }
-        }
-        view.clearChildBuilderNode();
-        return true;
-    }
-    return false;
-}
-
-globalThis.__clearFromBuilder__ = function clearFromBuilder(id) {
-    let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(id);
-    let builderNode = builderNodePtr?.deref()?.getBuilderNode();
-    if (!builderNode) {
+    if (!view || !(view instanceof PUV2ViewBase)) {
+        globalThis.__addBuilderNodeToBuilder__(id, builderIds);
         return false;
     }
-    for (const child of builderNode.builderNodeWeakrefMap_.values()) {
-        child.deref()?.setParentAllowFreeze(false);
-        child.deref()?.setAllowFreezeWhenInactive(false);
-        if (child?.deref()?.getIsFreeze()) {
-            child?.deref()?.setActiveInternal(true);
-        }
+    return __establishConnection__(view.isCompFreezeAllowed(), view, builderIds);
+};
+globalThis.__deleteBuilderNode__ = function __deleteBuilderNode__(id, builderIds) {
+    return __disconnectConnection__(UINodeRegisterProxy.GetViewBuildNodeBase(id), builderIds);
+};
+globalThis.__addBuilderNodeToBuilder__ = function __addBuilderNodeToBuilder__(id, builderIds) {
+    let builderNode = UINodeRegisterProxy.GetViewBuildNodeBase(id);
+    if (!builderNode || !(builderNode instanceof JSBuilderNode)) {
+        return false;
     }
-    builderNode.clearChildBuilderNode();
-    return true;
-}
+    return __establishConnection__(builderNode.getAllowFreezeWhenInactive(), builderNode, builderIds);
+};
+globalThis.__deleteBuilderNodeFromBuilder__ = function __deleteBuilderNodeFromBuilder__(id, builderIds) {
+    return __disconnectConnection__(UINodeRegisterProxy.GetViewBuildNodeBase(id), builderIds);
+};
+
+
+export default {
+    NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
+    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
+    edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
+    typeNode, NodeAdapter, ExpandMode, UIState
+};

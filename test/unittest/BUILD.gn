@@ -219,8 +219,8 @@ ohos_source_set("ace_components_base") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
-    "$ace_root/frameworks/core/common/builder_util.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_session_json_util.cpp",
+    "$ace_root/frameworks/core/common/builder_util.cpp",
     "$ace_root/frameworks/core/common/card_scope.cpp",
     "$ace_root/frameworks/core/common/color_inverter.cpp",
     "$ace_root/frameworks/core/common/multi_thread_build_manager.cpp",
@@ -823,6 +823,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/component_ext/movingphoto/movingphoto_node.cpp",
     "$ace_root/component_ext/movingphoto/movingphoto_pattern.cpp",
     "$ace_root/frameworks/core/animation/animation_util.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/scroll_adjust/scroll_adjust_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/action_sheet/action_sheet_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/animator/animator_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/arc_list/arc_list_item_pattern.cpp",
@@ -979,6 +980,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
@@ -1131,6 +1133,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_wrapper_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_wrapper_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/panel/close_icon_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/panel/close_icon_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/panel/drag_bar_layout_algorithm.cpp",
@@ -1203,7 +1206,10 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/scroll/effect/scroll_fade_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/effect/scroll_fade_effect.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/effect/scroll_fade_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scroll/free_scroll_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/inner/scroll_bar.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scroll/inner/scroll_bar_2d.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scroll/inner/scroll_bar_2d_painter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_content_modifier.cpp",
@@ -1212,6 +1218,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_spring_effect.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scroll/zoom_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.cpp",
@@ -1262,6 +1269,8 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/sheet/content_cover/sheet_content_cover_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/sheet/content_cover/sheet_content_cover_object.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/sheet/sheet_object.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/sheet/side/sheet_presentation_side_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/sheet/side/sheet_side_object.cpp",
@@ -1343,6 +1352,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text/image_span_view_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/multiple_click_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/paragraph_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span/mutable_span_string.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span/span_object.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span/span_string.cpp",
@@ -1350,7 +1360,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text/span_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span_node.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/text/paragraph_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/symbol_span_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/symbol_span_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_accessibility_property.cpp",
@@ -1473,7 +1482,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp",
     "$ace_root/test/mock/core/pattern/mock_picker_haptic_factory.cpp",
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/manager/scroll_adjust/scroll_adjust_manager.cpp"
   ]
   if (ace_engine_feature_enable_split_mode &&
       defined(

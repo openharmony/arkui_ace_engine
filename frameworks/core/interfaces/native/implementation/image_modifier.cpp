@@ -15,6 +15,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_component.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/pattern/image/image_model_static.h"
 #include "core/interfaces/native/implementation/image_common_methods.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -69,7 +70,8 @@ void SetImageOptions0Impl(Ark_NativePointer node, const Ark_Union_PixelMap_Resou
     if (info) {
         auto frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        ImageModelNG::InitImage(frameNode, info->GetSrc());
+        std::string source = info->GetSrc();
+        ImageModelNG::InitImage(frameNode, source);
     }
 }
 void SetImageOptions1Impl(
@@ -84,7 +86,8 @@ void SetImageOptions1Impl(
     if (info) {
         auto frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        ImageModelNG::InitImage(frameNode, info->GetSrc());
+        std::string source = info->GetSrc();
+        ImageModelNG::InitImage(frameNode, source);
     }
 }
 void SetImageOptions2Impl(Ark_NativePointer node, const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src,
@@ -106,7 +109,7 @@ void AltImpl(Ark_NativePointer node, const Ark_Union_String_Resource_PixelMap* v
     CHECK_NULL_VOID(value);
     auto info = Converter::OptConvert<ImageSourceInfo>(*value);
     LOGE("Arkoala: GENERATED_ArkUIImageModifier.AltImpl - method doesn't support PixelMap");
-    ImageModelNG::SetAlt(frameNode, info);
+    ImageModelStatic::SetAlt(frameNode, info);
 }
 void MatchTextDirectionImpl(Ark_NativePointer node, Ark_Boolean value)
 {
@@ -125,20 +128,20 @@ void FillColorImpl(Ark_NativePointer node, const Ark_ResourceColor* value)
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    ImageModelNG::SetImageFill(frameNode, Converter::OptConvert<Color>(*value));
+    ImageModelStatic::SetImageFill(frameNode, Converter::OptConvert<Color>(*value));
 }
 void ObjectFitImpl(Ark_NativePointer node, Ark_ImageFit value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto fit = Converter::OptConvert<ImageFit>(value);
-    ImageModelNG::SetImageFit(frameNode, fit);
+    ImageModelStatic::SetImageFit(frameNode, fit);
 }
 void ObjectRepeatImpl(Ark_NativePointer node, Ark_ImageRepeat value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetImageRepeat(frameNode, Converter::OptConvert<ImageRepeat>(value));
+    ImageModelStatic::SetImageRepeat(frameNode, Converter::OptConvert<ImageRepeat>(value));
 }
 void AutoResizeImpl(Ark_NativePointer node, Ark_Boolean value)
 {
@@ -150,19 +153,19 @@ void RenderModeImpl(Ark_NativePointer node, Ark_ImageRenderMode value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetImageRenderMode(frameNode, Converter::OptConvert<ImageRenderMode>(value));
+    ImageModelStatic::SetImageRenderMode(frameNode, Converter::OptConvert<ImageRenderMode>(value));
 }
 void DynamicRangeModeImpl(Ark_NativePointer node, Ark_DynamicRangeMode value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetDynamicRangeMode(frameNode, Converter::OptConvert<DynamicRangeMode>(value));
+    ImageModelStatic::SetDynamicRangeMode(frameNode, Converter::OptConvert<DynamicRangeMode>(value));
 }
 void InterpolationImpl(Ark_NativePointer node, Ark_ImageInterpolation value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetImageInterpolation(frameNode, Converter::OptConvert<ImageInterpolation>(value));
+    ImageModelStatic::SetImageInterpolation(frameNode, Converter::OptConvert<ImageInterpolation>(value));
 }
 void SourceSizeImpl(Ark_NativePointer node, const Ark_ImageSourceSize* value)
 {
@@ -170,7 +173,7 @@ void SourceSizeImpl(Ark_NativePointer node, const Ark_ImageSourceSize* value)
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto sourceSize = Converter::OptConvert<std::pair<CalcDimension, CalcDimension>>(*value);
-    ImageModelNG::SetImageSourceSize(frameNode, sourceSize);
+    ImageModelStatic::SetImageSourceSize(frameNode, sourceSize);
 }
 void SyncLoadImpl(Ark_NativePointer node, Ark_Boolean value)
 {
@@ -186,7 +189,7 @@ void CopyOptionImpl(Ark_NativePointer node, Ark_CopyOptions value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetCopyOption(frameNode, Converter::OptConvert<CopyOptions>(value));
+    ImageModelStatic::SetCopyOption(frameNode, Converter::OptConvert<CopyOptions>(value));
 }
 void DraggableImpl(Ark_NativePointer node, Ark_Boolean value)
 {
@@ -235,7 +238,7 @@ void EdgeAntialiasingImpl(Ark_NativePointer node, const Ark_Number* value)
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<float>(*value);
     Validator::ValidateByRange(convValue, FLOOR_SMOOTHEDGE_VALUE, CEIL_SMOOTHEDGE_VALUE);
-    ImageModelNG::SetSmoothEdge(frameNode, convValue);
+    ImageModelStatic::SetSmoothEdge(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node, const Callback_Type_ImageAttribute_onComplete_callback_event_Void* value)
 {

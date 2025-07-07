@@ -154,6 +154,18 @@ public:
 
     std::string GetCurrentOption() const override;
 
+    bool GetWheelModeEnabled() const
+    {
+        return wheelModeEnabled_;
+    }
+
+    void SetWheelModeEnabled(bool value)
+    {
+        wheelModeEnabled_ = value;
+    }
+
+    bool GetCanLoopFromLayoutProperty() const override;
+
 private:
     void OnModifyDone() override;
     void SetDividerHeight(uint32_t showOptionCount);
@@ -196,6 +208,7 @@ private:
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isTossReadyToStop_ = false;
+    bool wheelModeEnabled_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
     friend class PickerColumnPatternCircleUtils<TimePickerColumnPattern>;
 };

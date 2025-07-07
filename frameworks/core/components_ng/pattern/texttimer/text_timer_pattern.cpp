@@ -226,6 +226,10 @@ void TextTimerPattern::OnVisibleAreaChange(bool visible)
         if (!childNode) {
             host->AddChild(textNode_);
             host->RebuildRenderContextTree();
+            if (SystemProperties::ConfigChangePerform()) {
+                host->MarkModifyDone();
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
         }
     } else {
         host->RemoveChild(textNode_);

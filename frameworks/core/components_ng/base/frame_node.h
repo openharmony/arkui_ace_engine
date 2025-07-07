@@ -57,6 +57,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/inspector_node.h"
 
+#include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
+
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
@@ -852,8 +854,30 @@ public:
     OffsetF GetParentGlobalOffsetDuringLayout() const;
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override {};
 
-    // layoutwrapper function override
+    // layout wrapper function override
     const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) override;
+
+    bool PreMeasure(const std::optional<LayoutConstraintF>& parentConstraint);
+
+    bool ChildPreMeasureHelper(LayoutWrapper* childWrapper, const std::optional<LayoutConstraintF>& parentConstraint);
+
+    void CollectDelayMeasureChild(LayoutWrapper* childWrapper);
+
+    void PostTaskForIgnore(PipelineContext* pipeline);
+
+    bool PostponedTaskForIgnore();
+
+    void AddDelayLayoutChild(const RefPtr<FrameNode>& child)
+    {
+        if (child) {
+            delayLayoutChildren_.emplace_back(child);
+        }
+    }
+
+    const std::vector<RefPtr<FrameNode>>& GetDelayLayoutChildren() const
+    {
+        return delayLayoutChildren_;
+    }
 
     void Measure(const std::optional<LayoutConstraintF>& parentConstraint) override;
 
@@ -1248,8 +1272,22 @@ public:
         LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount);
 
     void ArkoalaRemoveItemsOnChange(int32_t changeIndex);
+    /* ============================== Arkoala LazyForEach adapter section END ==============================*/
+
+    void SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper);
+    /**
+     * @description: this callback triggered by ai assistant by ui_session proxy.
+     * @param funcName function name of the target function.
+     * @param params params for target function in json format.
+     * @return check ai function call success or not:
+     * 0 means success, 1 means aiCallerHelper_ is null, 2 means functionName not found
+     */
+    uint32_t CallAIFunction(const std::string& functionName, const std::string& params);
 
 private:
+    RefPtr<LayoutWrapper> ArkoalaGetOrCreateChild(uint32_t index);
+    void ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached);
+
     /* temporary adapter to provide LazyForEach feature in Arkoala */
     std::unique_ptr<LazyComposeAdapter> arkoalaLazyAdapter_;
 
@@ -1531,7 +1569,7 @@ private:
 
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
-    // set costom background layoutConstraint
+    // set custom background layoutConstraint
     void SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode);
 
     void GetPercentSensitive();
@@ -1750,6 +1788,10 @@ private:
 
     RefPtr<FrameNode> cornerMarkNode_ = nullptr;
     RefPtr<DragDropRelatedConfigurations> dragDropRelatedConfigurations_;
+
+    std::vector<RefPtr<FrameNode>> delayMeasureChildren_;
+    std::vector<RefPtr<FrameNode>> delayLayoutChildren_;
+    std::shared_ptr<AICallerHelper> aiCallerHelper_;
 };
 } // namespace OHOS::Ace::NG
 

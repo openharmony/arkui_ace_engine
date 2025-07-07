@@ -489,6 +489,37 @@ class ArkPrefixOrSuffix {
   }
 }
 
+class ArkSliderStepOptions {
+  showSteps: boolean;
+  stepOptions?: SliderShowStepOptions;
+
+  constructor(value: boolean, options?: SliderShowStepOptions) {
+    this.showSteps = value;
+    this.stepOptions = options;
+  }
+
+  isEqual(another: ArkSliderStepOptions): boolean {
+    let isShowStepsEqual = this.showSteps === another.showSteps;
+    let isStepOptionsEqual = true;
+    if ((this.stepOptions === null) || (this.stepOptions === undefined)) {
+      isStepOptionsEqual = (another.stepOptions === null) || (another.stepOptions === undefined);
+    } else if ((another.stepOptions === null) || (another.stepOptions === undefined)) {
+      isStepOptionsEqual = false;
+    } else if (this.stepOptions.stepsAccessibility.size !== another.stepOptions.stepsAccessibility.size) {
+      isStepOptionsEqual = false;
+    } else {
+      for (const [key, val] of this.stepOptions.stepsAccessibility) {
+        if (!another.stepOptions.stepsAccessibility.has(key)) {
+          isStepOptionsEqual = false;
+        } else if (!isBaseOrResourceEqual(another.stepOptions.stepsAccessibility.get(key), val)) {
+          isStepOptionsEqual = false;
+        }
+      }
+    }
+    return isShowStepsEqual && isStepOptionsEqual;
+  }
+}
+
 class ArkSliderTips {
   showTip: boolean;
   tipText: string | ResourceStr;

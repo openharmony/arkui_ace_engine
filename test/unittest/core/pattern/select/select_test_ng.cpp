@@ -1400,11 +1400,23 @@ HWTEST_F(SelectTestNg, SelectPattern001, TestSize.Level1)
      * @tc.steps: step1. Create pipeline, select theme, select model and parameters of select.
      * @tc.expected: Objects are created successfully.
      */
-    auto pipeline = MockPipelineContext::GetCurrent();
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(pipeline->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
+
+    // Create a single theme object that you will control for this test.
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    const Color themeBgColor = Color::BLUE;
+    selectTheme->backgroundColor_ = themeBgColor;
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly(Return(selectTheme));
     /**
      * @tc.steps: step2. Call Create() of select model and get select frame node and select pattern.
      * @tc.expected: Objects are created and gotten successfully and select pattern should not be null.
@@ -1424,11 +1436,11 @@ HWTEST_F(SelectTestNg, SelectPattern001, TestSize.Level1)
      * @tc.steps: step4. Set and update background color of option.
      * @tc.expected: Objects are gotten successfully and option pattern should not be null.
      */
-    pattern->SetSelectedOptionBgColor(Color::BLACK);
     ASSERT_NE(pattern, nullptr);
+    pattern->SetSelectedOptionBgColor(Color::BLACK);
     pattern->OnColorConfigurationUpdate();
     auto selectColor = optionPattern->GetBgColor();
-    EXPECT_EQ(selectColor, Color::BLACK);
+    EXPECT_EQ(selectColor, selectTheme->GetBackgroundColor());
 }
 
 /**
@@ -2143,6 +2155,37 @@ HWTEST_F(SelectTestNg, ToJsonValue002, TestSize.Level1)
     EXPECT_FALSE(pattern->options_.empty());
 }
 
+/**
+ * @tc.name: ToJsonValue003
+ * @tc.desc: Test SelectPattern ToJsonDividerMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ToJsonValue003, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProps, nullptr);
+    auto json = JsonUtil::Create(true);
+    pattern->ToJsonDividerMode(json);
+    EXPECT_EQ(json->GetString("dividerMode", ""), "");
+    menuLayoutProps->UpdateItemDividerMode(DividerMode::FLOATING_ABOVE_MENU);
+    pattern->ToJsonDividerMode(json);
+    EXPECT_EQ(json->GetString("dividerMode", ""), "FLOATING_ABOVE_MENU");
+    json->Delete("dividerMode");
+    menuLayoutProps->UpdateItemDividerMode(DividerMode::EMBEDDED_IN_MENU);
+    pattern->ToJsonDividerMode(json);
+    EXPECT_EQ(json->GetString("dividerMode", ""), "EMBEDDED_IN_MENU");
+}
+
 HWTEST_F(SelectTestNg, SelectLayoutPropertyTest006, TestSize.Level1)
 {
     /**
@@ -2236,7 +2279,6 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
     auto pattern = select->GetPattern<SelectPattern>();
     EXPECT_TRUE(pattern);
-
     auto options = pattern->GetOptions();
     EXPECT_EQ(options.size(), params.size());
     RefPtr<FrameNode> row =

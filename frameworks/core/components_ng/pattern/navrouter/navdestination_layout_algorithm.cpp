@@ -235,8 +235,8 @@ float TransferBarHeight(const RefPtr<NavDestinationGroupNode>& hostNode, float d
             return 0.0f;
         }
     }
-    return navDestinationPattern->GetTitleBarStyle().value_or(BarStyle::STANDARD) == BarStyle::STANDARD ?
-        defaultBarHeight : 0.0f;
+    auto barStyle = isTitleBar ? navDestinationPattern->GetTitleBarStyle() : navDestinationPattern->GetToolBarStyle();
+    return barStyle.value_or(BarStyle::STANDARD) == BarStyle::STANDARD ? defaultBarHeight : 0.0f;
 }
 
 bool IsDestSizeMatchNavigation(const RefPtr<NavDestinationGroupNode>& destNode, const SizeF& navDestSize)
@@ -350,16 +350,9 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     size.SetHeight(transferedTitleBarHeight + transferedToolBarHeight + transferedToolBarDividerHeight +
                    contentChildSize.Height());
     size.SetWidth(contentChildSize.Width());
-    if (NearZero(size.Height())) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto height = pipeline->GetRootHeight();
-        size.SetHeight(height);
-    } else {
-        size.AddWidth(padding.left.value_or(0.0f) + padding.right.value_or(0.0f));
-        size.AddHeight(padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
-    }
-    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+    
+    ReCalcNavDestinationSize(layoutWrapper, size);
+
     MeasureOverlay(hostNode, navDestinationLayoutProperty->CreateChildConstraint());
 
     MeasureAdaptiveLayoutChildren(
@@ -448,5 +441,27 @@ void NavDestinationLayoutAlgorithm::MeasureAdaptiveLayoutChildren(
     auto context = hostNode->GetContextWithCheck();
     CHECK_NULL_VOID(context);
     context->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
+}
+
+void NavDestinationLayoutAlgorithm::ReCalcNavDestinationSize(LayoutWrapper* layoutWrapper, SizeF& size)
+{
+    auto navDestinationLayoutProperty =
+        AceType::DynamicCast<NavDestinationLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
+
+    if (NearZero(size.Height())) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto height = pipeline->GetRootHeight();
+        size.SetHeight(height);
+    } else {
+        size.AddWidth(padding.left.value_or(0.0f) + padding.right.value_or(0.0f));
+        size.AddHeight(padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
+    }
+    auto realSize = UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(size.Width(), size.Height()),
+        navDestinationLayoutProperty->GetCalcLayoutConstraint(),
+        navDestinationLayoutProperty->GetLayoutConstraint()->percentReference);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
 }
 } // namespace OHOS::Ace::NG

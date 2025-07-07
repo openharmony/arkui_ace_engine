@@ -645,12 +645,12 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
-    auto selectedTxt = theme->GetSelectedTxt();
-    auto unSelectedTxt = theme->GetUnselectedTxt();
     auto unSelectedDesc = theme->GetUnselectedDesc();
     auto disabledDesc = theme->GetDisabelDesc();
     uint32_t indexPrefix = 0;
     uint32_t indexSuffix = static_cast<int32_t>(pointAccessibilityNodeVec_.size()) - STEP_POINT_OFFSET;
+    SliderModel::SliderShowStepOptions optionsMap =
+        sliderPaintProperty->GetSliderShowStepOptions().value_or(SliderModel::SliderShowStepOptions ());
     for (uint32_t i = 0; i < pointCount; i++) {
         auto isDisabledDesc = false;
         bool isClickAbled = true;
@@ -658,24 +658,19 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
         auto pointAccessibilityProperty = pointNode->GetAccessibilityProperty<TextAccessibilityProperty>();
         pointAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
 
-        auto pointNodeProperty = pointNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(pointNodeProperty);
-        auto valueTxt = UtfUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
         if (currentStepIndex == i) {
             pointAccessibilityProperty->SetSelected(true);
-            pointAccessibilityProperty->SetAccessibilityText(valueTxt);
             pointAccessibilityProperty->SetAccessibilityDescription(" ");
             isClickAbled = false;
         } else if (i >= rangeFromPointIndex && i <= rangeToPointIndex) {
             pointAccessibilityProperty->SetSelected(false);
-            pointAccessibilityProperty->SetAccessibilityText(valueTxt);
             pointAccessibilityProperty->SetAccessibilityDescription(unSelectedDesc);
         } else {
             pointAccessibilityProperty->SetSelected(false);
-            pointAccessibilityProperty->SetAccessibilityText(valueTxt);
             pointAccessibilityProperty->SetAccessibilityDescription(disabledDesc);
             isDisabledDesc = true;
         }
+        UpdateStepPointsAccessibilityText(pointNode, i, optionsMap);
 
         if (i == indexPrefix && HasPrefix()) {
             if (!prefixAccessibilityoptions_.accessibilityText.empty()) {
@@ -2859,5 +2854,22 @@ void SliderPattern::DumpSubInfo(RefPtr<SliderPaintProperty> paintProperty)
     if (paintProperty->HasValidSlideRange()) {
         DumpLog::GetInstance().AddDesc("SlideRange: " + paintProperty->GetValidSlideRange().value()->ToString());
     }
+}
+
+void SliderPattern::UpdateStepPointsAccessibilityText(
+    RefPtr<FrameNode>& node, uint32_t nodeIndex, SliderModel::SliderShowStepOptions& options)
+{
+    CHECK_NULL_VOID(node);
+    auto accessibilityProperty = node->GetAccessibilityProperty<TextAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto nodeProperty = node->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(nodeProperty);
+    auto text = UtfUtils::Str16ToStr8(nodeProperty->GetContent().value_or(u""));
+    if (options.find(nodeIndex) != options.end()) {
+        text = options[nodeIndex];
+    }
+    accessibilityProperty->SetAccessibilityText(text);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
+        "Update step point, index:%{public}u, accessibility text:%{public}s.", nodeIndex, text.c_str());
 }
 } // namespace OHOS::Ace::NG

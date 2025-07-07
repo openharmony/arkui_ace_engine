@@ -758,6 +758,75 @@ HWTEST_F(TextTestThreeNg, TryLinkJump001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateAIMenuOptions
+ * @tc.desc: test test_pattern.h UpdateAIMenuOptions function with valid textSelector
+ *           check multi ai entity in selection range
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, UpdateAIMenuOptions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and text textPattern
+     */
+    auto [frameNode, textPattern] = Init();
+    textPattern->textSelector_.Update(0, 42);
+
+    /**
+     * @tc.steps: step2. prepare spanItem with at least 2 ai entity
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = std::get<std::u16string>(U16_TEXT_FOR_AI_INFO_2.content);
+    spanItem->position = spanItem->content.length();
+    textPattern->spans_.emplace_back(spanItem);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> selectedRects { RectF(0, 0, 20, 20), RectF(30, 30, 20, 20), RectF(60, 60, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForPlaceholders(_)).WillRepeatedly(SetArgReferee<0>(selectedRects));
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    textPattern->SetTextDetectEnable(true);
+    textPattern->copyOption_ = CopyOptions::InApp;
+
+    auto aiSpan1 = U16_TEXT_FOR_AI_INFO_2.aiSpans[0];
+    auto aiSpan2 = U16_TEXT_FOR_AI_INFO_2.aiSpans[1];
+    std::map<int32_t, Ace::AISpan> aiSpanMap;
+    aiSpanMap[aiSpan1.start] = aiSpan1;
+    aiSpanMap[aiSpan2.start] = aiSpan2;
+    textPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+    textPattern->textDetectEnable_ = true;
+    textPattern->enabled_ = true;
+
+    /**
+     * @tc.steps: step3. create GestureEvent and call PrepareAIMenuOptions function.
+     * @tc.expected: aiMenuOptions is been setted true.
+     */
+    textPattern->UpdateAIMenuOptions();
+    EXPECT_EQ(textPattern->isAskCeliaEnabled_, false);
+    EXPECT_EQ(textPattern->isShowAIMenuOption_, false);
+    textPattern->pManager_->Reset();
+
+    /**
+     * @tc.steps: step4. unexpected input set 1.
+     * @tc.expected: aiMenuOptions is been setted true.
+     */
+    textPattern->textSelector_.Update(-10, -42);
+    textPattern->UpdateAIMenuOptions();
+    EXPECT_EQ(textPattern->isAskCeliaEnabled_, false);
+    EXPECT_EQ(textPattern->isShowAIMenuOption_, false);
+    textPattern->pManager_->Reset();
+
+    /**
+     * @tc.steps: step5. unexpected input set 2.
+     * @tc.expected: aiMenuOptions is been setted true.
+     */
+    textPattern->textSelector_.Update(42, 0);
+    textPattern->UpdateAIMenuOptions();
+    EXPECT_EQ(textPattern->isAskCeliaEnabled_, false);
+    EXPECT_EQ(textPattern->isShowAIMenuOption_, false);
+    textPattern->pManager_->Reset();
+}
+
+/**
  * @tc.name: SetTextSelection001
  * @tc.desc: test test_pattern.h SetTextSelection function.
  * @tc.type: FUNC

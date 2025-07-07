@@ -248,4 +248,28 @@ HWTEST_F(RectPatternTestNg, RectPaintProperty004, TestSize.Level1)
     EXPECT_EQ(rect->bottomLeftRadius_, rect04);
 }
 
+/**
+ * @tc.name: RectPaintProperty005
+ * @tc.desc: create rect with radius width and radius height
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(RectPatternTestNg, RectPaintProperty005, TestSize.Level1)
+{
+    RectModelNG().Create();
+    RectModelNG().SetRadiusWidth(RADIUS_WIDTH);
+    RectModelNG().SetRadiusHeight(RADIUS_HEIGHT);
+    auto shapeAbstactModel = ShapeAbstractModelNG();
+    SetSize(shapeAbstactModel);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ViewStackProcessor::GetInstance()->Pop();
+    EXPECT_EQ(frameNode == nullptr, false);
+    auto paintProperty = frameNode->GetPaintProperty<RectPaintProperty>();
+    EXPECT_EQ(paintProperty == nullptr, false);
+    Radius radius;
+    radius.SetX(RADIUS_WIDTH);
+    radius.SetY(RADIUS_HEIGHT);
+    paintProperty->UpdateRadius(radius);
+    EXPECT_EQ(paintProperty->HasBottomRightRadius(), true);
+}
 } // namespace OHOS::Ace::NG

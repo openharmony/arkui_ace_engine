@@ -247,6 +247,9 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm001, TestSize.Level1)
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
+
+    AddSpan(EMPTY_STRING);
+    AddSpan(INIT_VALUE_1);
     auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
     ASSERT_NE(layoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
@@ -262,7 +265,6 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm001, TestSize.Level1)
 
     ParagraphStyle testStyle = {};
     EXPECT_CALL(*paragraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(testStyle));
-    AddSpan(INIT_VALUE_1);
     layoutAlgorithm->spans_.emplace_back(richEditorPattern->spans_);
     layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
 
@@ -462,6 +464,14 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateConstraintByLayoutPolicy, TestSize.Level1
     layoutAlgorithm->UpdateConstraintByLayoutPolicy(contentSize, parentLayoutConstraint,
         AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(parentLayoutConstraint.maxSize.Height(), CONTAINER_HEIGHT);
+
+    CalcSize maxSize{ CalcLength(1.0), CalcLength(1.0) };
+    MeasureProperty constraint;
+    constraint.maxSize = maxSize;
+    layoutProperty->UpdateCalcLayoutProperty(constraint);
+    layoutAlgorithm->UpdateConstraintByLayoutPolicy(contentSize, parentLayoutConstraint,
+        AceType::RawPtr(layoutWrapper));
+    EXPECT_NE(parentLayoutConstraint.maxSize.Height(), CONTAINER_HEIGHT);
 }
 
 /**

@@ -1746,6 +1746,42 @@ HWTEST_F(ViewAbstractTestNg, BackgroundResourceTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CustomBackgroundResourceTest001
+ * @tc.desc: Test set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CustomBackgroundResourceTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Test customBackgroundColor.
+     */
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    auto instance = ViewStackProcessor::GetInstance();
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+    auto frameNode = instance->GetMainFrameNode();
+    EXPECT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    EXPECT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    EXPECT_TRUE(pattern->resourceMgr_);
+    auto resMap = pattern->resourceMgr_->resMap_;
+    ViewAbstract::SetCustomBackgroundColorWithResourceObj(BLUE, resourceObject);
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::pipeline_ = nullptr;
+    pattern->resourceMgr_->ReloadResources();
+    MockPipelineContext::SetUp();
+    ViewAbstract::SetCustomBackgroundColorWithResourceObj(BLUE, nullptr);
+    EXPECT_TRUE(resMap.find("customBackgroundColor") == resMap.end());
+    ViewAbstract::SetCustomBackgroundColor(BLUE);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+}
+
+/**
  * @tc.name: ViewAbstractClearJSFrameNodeOnClickTest001
  * @tc.desc: Test ClearJsFrameNodeOnClick.
  * @tc.type: FUNC

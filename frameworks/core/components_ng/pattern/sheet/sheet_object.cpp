@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -138,7 +139,7 @@ void SheetObject::ClipSheetNode()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto sheetSize = geometryNode->GetFrameSize();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
@@ -273,7 +274,7 @@ void SheetObject::HandleDragStart()
 {
     auto sheetPattern = GetPattern();
     CHECK_NULL_VOID(sheetPattern);
-    sheetPattern->InitScrollProps();
+    InitScrollProps();
     sheetPattern->SetIsDragging(true);
     if (sheetPattern->GetAnimation() && sheetPattern->GetAnimationProcess()) {
         AnimationUtils::StopAnimation(sheetPattern->GetAnimation());
@@ -405,7 +406,7 @@ void SheetObject::OnScrollStartRecursive(float position, float velocity)
 {
     auto sheetPattern = GetPattern();
     CHECK_NULL_VOID(sheetPattern);
-    sheetPattern->InitScrollProps();
+    InitScrollProps();
     if (sheetPattern->GetAnimation() && sheetPattern->GetAnimationProcess()) {
         AnimationUtils::StopAnimation(sheetPattern->GetAnimation());
         sheetPattern->SetAnimationBreak(true);
@@ -521,6 +522,27 @@ bool SheetObject::HandleScrollVelocity(float velocity)
         return false;
     }
     return true;
+}
+
+void SheetObject::InitScrollProps()
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto scrollNode = pattern->GetSheetScrollNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+
+    // When sheet content height is larger than sheet height,
+    // the sheet height should set scroll always enabled.
+    auto edgeEffectAlwaysEnabled =
+        pattern->GetScrollSizeMode() == ScrollSizeMode::CONTINUOUS && pattern->IsScrollable();
+    if (pattern->GetSheetEffectEdge() == SheetEffectEdge::NONE) {
+        scrollPattern->SetEdgeEffect(EdgeEffect::NONE, edgeEffectAlwaysEnabled);
+    } else {
+        scrollPattern->SetEdgeEffect(EdgeEffect::SPRING,
+            edgeEffectAlwaysEnabled, static_cast<EffectEdge>(pattern->GetSheetEffectEdge()));
+    }
 }
 
 void SheetObject::ModifyFireSheetTransition(float dragVelocity)

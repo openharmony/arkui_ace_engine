@@ -29,6 +29,8 @@
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
 
 namespace OHOS::Ace::NG {
+constexpr float DEFAULT_RADIO_IMAGE_SCALE = 0.7F;
+
 class RadioPattern : public Pattern {
     DECLARE_ACE_TYPE(RadioPattern, Pattern);
 

@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/render/mock_texteffect.h"
 #include "text_base.h"
 
 #include "core/components/common/properties/text_style_parser.h"
@@ -472,5 +473,54 @@ HWTEST_F(TextTestSixNg, CreateOrUpdateTextEffectTest001, TestSize.Level1)
     // Verify no text effect was created
     auto textEffect = pattern->GetTextEffect();
     EXPECT_EQ(textEffect, nullptr);
+}
+
+/**
+ * @tc.name: RelayoutResetOrUpdateTextEffect001
+ * @tc.desc: Test Update When Values Change
+ */
+HWTEST_F(TextTestSixNg, RelayoutResetOrUpdateTextEffect001, TestSize.Level1)
+{
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    // Set up textEffect_ with initial values
+    textPattern->textEffect_ = TextEffect::CreateTextEffect();
+    auto textEffect = AceType::DynamicCast<MockTextEffect>(textPattern->textEffect_);
+    ASSERT_NE(textEffect, nullptr);
+    textEffect->direction_ = TextFlipDirection::DOWN;
+    textEffect->enableBlur_ = false;
+
+    // Call the function with new values (should return -1)
+    textLayoutProperty->UpdateTextFlipDirection(TextFlipDirection::UP);
+    textLayoutProperty->UpdateTextFlipEnableBlur(true);
+    textLayoutProperty->UpdateTextEffectStrategy(TextEffectStrategy::FLIP);
+    textPattern->RelayoutResetOrUpdateTextEffect();
+
+    // Verify updates occurred (return value -1)
+    EXPECT_EQ(textEffect->direction_, TextFlipDirection::UP);
+    EXPECT_EQ(textEffect->enableBlur_, true);
+}
+
+/**
+ * @tc.name: IsSelectableAndCopyTest001
+ * @tc.desc: Test IsSelectableAndCopy when textEffect is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, IsSelectableAndCopyTest001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
+
+    // 设置 SELECTABLE 模式和非 None copyOption
+    textLayoutProperty->UpdateTextSelectableMode(TextSelectableMode::SELECTABLE_FOCUSABLE);
+    pattern->copyOption_ = CopyOptions::Local;
+    pattern->textEffect_ = TextEffect::CreateTextEffect(); // textEffect 不为空
+
+    EXPECT_FALSE(pattern->IsSelectableAndCopy());
 }
 } // namespace OHOS::Ace::NG

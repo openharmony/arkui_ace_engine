@@ -685,6 +685,7 @@ HWTEST_F(WindowSceneTest, CreateSnapshotWindow, TestSize.Level1)
     windowScene->CreateSnapshotWindow();
 
     session->scenePersistence_->isSavingSnapshot_[key.first][key.second] = true;
+    session->freeMultiWindow_ = true;
     windowScene->CreateSnapshotWindow();
     EXPECT_EQ(windowScene->isBlankForSnapshot_, false);
 }
@@ -711,12 +712,43 @@ HWTEST_F(WindowSceneTest, OnAttachToFrameNode, TestSize.Level1)
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     ASSERT_NE(windowScene->GetHost(), nullptr);
 
-    session->state_ == Rosen::SessionState::STATE_DISCONNECT;
+    session->state_ = Rosen::SessionState::STATE_DISCONNECT;
     session->SetShowRecent(true);
     auto key = Rosen::defaultStatus;
     session->scenePersistence_->isSavingSnapshot_[key.first][key.second] = true;
-    windowScene->OnAttachToFrameNode();
+    windowScene->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(session->GetShowRecent(), true);
+}
+
+/**
+ * @tc.name: OnBoundsChanged
+ * @tc.desc: OnBoundsChanged Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, OnBoundsChanged, TestSize.Level1)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = "ABILITY_NAME",
+        .bundleName_ = "BUNDLE_NAME",
+        .moduleName_ = "MODULE_NAME",
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    session->scenePersistence_ = sptr<Rosen::ScenePersistence>::MakeSptr("bundleName", 1);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+
+    Rosen::Vector4f bounds {1.0, 1.0, 1.0, 1.0};
+    session->SetShowRecent(true);
+    windowScene->OnBoundsChanged(bounds);
+    EXPECT_EQ(session->GetShowRecent(), true);
+    session->SetShowRecent(false);
+    windowScene->OnBoundsChanged(bounds);
+    EXPECT_EQ(session->GetShowRecent(), false);
 }
 
 /**
@@ -741,6 +773,9 @@ HWTEST_F(WindowSceneTest, TransformOrientationForMatchSnapshot, TestSize.Level1)
     uint32_t windowRotation = 0;
     auto ret = windowScene->TransformOrientationForMatchSnapshot(lastRotation, windowRotation);
     EXPECT_EQ(ret, ImageRotateOrientation::UP);
+
+    auto ret1 = windowScene->TransformOrientation(lastRotation, windowRotation, 0);
+    EXPECT_EQ(ret1, 0);
 }
 
 /**
@@ -773,9 +808,14 @@ HWTEST_F(WindowSceneTest, TransformOrientationForDisMatchSnapshot, TestSize.Leve
 
     lastRotation = 2;
     ret = windowScene->TransformOrientationForDisMatchSnapshot(lastRotation, windowRotation, snapshotRotation);
-    EXPECT_EQ(ret, ImageRotateOrientation::DOWN);
+    EXPECT_EQ(ret, ImageRotateOrientation::UP);
 
     lastRotation = 0;
+    ret = windowScene->TransformOrientationForDisMatchSnapshot(lastRotation, windowRotation, snapshotRotation);
+    EXPECT_EQ(ret, ImageRotateOrientation::UP);
+
+    windowRotation = 2;
+    snapshotRotation = 2;
     ret = windowScene->TransformOrientationForDisMatchSnapshot(lastRotation, windowRotation, snapshotRotation);
     EXPECT_EQ(ret, ImageRotateOrientation::UP);
 }

@@ -45,6 +45,7 @@ public:
     virtual int UpdateTypography(std::vector<std::pair<RefPtr<Paragraph>, RefPtr<Paragraph>>>& paragraphs) = 0;
     virtual void StartEffect(RSCanvas& canvas, double x, double y) = 0;
     virtual void StopEffect() = 0;
+    virtual void NoEffect(RSCanvas& canvas, double x, double y) = 0;
 };
 } // namespace OHOS::Ace::NG
 

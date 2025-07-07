@@ -33,6 +33,7 @@ constexpr int32_t JS_ENUM_TRANSITIONTYPE_EXPLODE = 5;
 constexpr int32_t JS_ENUM_TRANSITIONTYPE_SLIDE_RIGHT = 6;
 constexpr int32_t JS_ENUM_TRANSITIONTYPE_SLIDE_BOTTOM = 7;
 constexpr int32_t MIN_INFO_LENGTH = 2;
+constexpr uint32_t ARGC_TWO = 2;
 constexpr char MORE_BUTTON_OPTIONS_PROPERTY[] = "moreButtonOptions";
 
 // sources in js_window_utils.h
@@ -167,6 +168,39 @@ ArkUINativeModuleValue NavDestinationBridge::ResetToolBarConfiguration(ArkUIRunt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    CHECK_EQUAL_RETURN(runtimeCallInfo->GetArgsNumber() < ARGC_TWO, true, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Color color;
+    RefPtr<ResourceObject> backgroundColorResObj;
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, backgroundColorResObj, nodeInfo)) {
+        GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationBackgroundColor(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto bgColorRawPtr = AceType::RawPtr(backgroundColorResObj);
+    GetArkUINodeModifiers()->getNavDestinationModifier()->setNavDestinationBackgroundColor(
+        nativeNode, color.GetValue(), bgColorRawPtr);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::ResetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

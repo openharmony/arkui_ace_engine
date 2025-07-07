@@ -54,6 +54,18 @@ public:
         return MakeRefPtr<PathLayoutAlgorithm>(GetAncestorPaintProperty());
     }
 
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override
+    {
+        ShapePattern::UpdatePropertyImpl(key, value);
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        if (key == "PathCommands") {
+            if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
+                ACE_UPDATE_NODE_PAINT_PROPERTY(PathPaintProperty, Commands, *realValue, frameNode);
+            }
+        }
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(PathPattern);
     void SetClipBounds()

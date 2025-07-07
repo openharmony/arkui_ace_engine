@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,6 +105,10 @@ const std::string TEST_RESULT_THIRD = "test_ok_3";
 const std::string TEST_RESULT_FORTH = "test_ok_4";
 constexpr int32_t OFFSET_FIRST = 10;
 constexpr int32_t OFFSET_SECOND = 20;
+const SizeF TEST_SIZE_0 = SizeF(0.0f, 0.0f);
+const SizeF TEST_SIZE_200 = SizeF(200.0f, 200.0f);
+constexpr float TEST_WIDTH_50 = 50.0f;
+constexpr float TEST_HEIGHT_60 = 60.0f;
 } // namespace
 
 class RatingTestNg : public testing::Test {
@@ -2273,4 +2277,132 @@ HWTEST_F(RatingTestNg, StyleTest001, TestSize.Level1)
         RATING_SECONDARY_URL);
 }
 
+/**
+ * @tc.name: MeasureTest001
+ * @tc.desc: Test Rating MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, MeasureTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LayoutWrapperNode and RatingLayoutAlgorithm.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->SetRatingScore(RATING_SCORE);
+    auto ratingLayoutProperty = AceType::MakeRefPtr<RatingLayoutProperty>();
+    ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, ratingLayoutProperty);
+    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr, nullptr);
+    ASSERT_NE(ratingLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. call MeasureContent function.
+     * @tc.expected: ret is not equal to TEST_SIZE_200.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
+    ASSERT_NE(ratingTheme, nullptr);
+    auto ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(ret->Width(), TEST_SIZE_200.Width());
+    EXPECT_NE(ret->Height(), TEST_SIZE_200.Height());
+
+    /**
+     * @tc.steps: step3. call MeasureContent function.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    ret = ratingLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret->Width(), TEST_SIZE_200.Width());
+    EXPECT_EQ(ret->Height(), TEST_SIZE_200.Height());
+}
+
+/**
+ * @tc.name: LayoutPolicyIsMatchParentTest001
+ * @tc.desc: Test Rating LayoutPolicyIsMatchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, LayoutPolicyIsMatchParentTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LayoutWrapperNode and RatingLayoutAlgorithm.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->SetRatingScore(RATING_SCORE);
+    auto ratingLayoutProperty = AceType::MakeRefPtr<RatingLayoutProperty>();
+    ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, ratingLayoutProperty);
+    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr, nullptr);
+    ASSERT_NE(ratingLayoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. call LayoutPolicyIsMatchParent function.
+     * @tc.expected: ret is equal to TEST_SIZE_0.
+     */
+    LayoutConstraintF contentConstraint;
+    int32_t stars = 1;
+    auto layoutPolicy = ratingLayoutProperty->GetLayoutPolicyProperty();
+    auto ret = ratingLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, stars);
+    EXPECT_EQ(ret, TEST_SIZE_0);
+
+    /**
+     * @tc.steps: step3. set layoutPolicy->widthLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = ratingLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, stars);
+    EXPECT_EQ(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step4. set selfIdealSize.height_ to TEST_HEIGHT_60.
+     * @tc.expected: result equals.
+     */
+    contentConstraint.selfIdealSize.SetHeight(TEST_HEIGHT_60);
+    ret = ratingLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, stars);
+    EXPECT_EQ(ret, SizeF({ TEST_SIZE_200.Width(), TEST_HEIGHT_60 }));
+
+    /**
+     * @tc.steps: step5. set layoutPolicy->heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: ret is equal to TEST_SIZE_200.
+     */
+    layoutPolicy->widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicy->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    ret = ratingLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, stars);
+    EXPECT_EQ(ret, TEST_SIZE_200);
+
+    /**
+     * @tc.steps: step6. set selfIdealSize.width_ to TEST_WIDTH_50.
+     * @tc.expected: result equals.
+     */
+    contentConstraint.selfIdealSize.SetWidth(TEST_WIDTH_50);
+    ret = ratingLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, stars);
+    EXPECT_EQ(ret, SizeF({ TEST_WIDTH_50, TEST_SIZE_200.Height() }));
+}
 } // namespace OHOS::Ace::NG

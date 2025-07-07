@@ -640,9 +640,9 @@ public:
     {
         return keyCode_;
     }
-    const char* GetKeyText() const
+    const std::string& GetKeyText() const
     {
-        return keyText_.c_str();
+        return keyText_;
     }
     int32_t GetMetaKey() const
     {

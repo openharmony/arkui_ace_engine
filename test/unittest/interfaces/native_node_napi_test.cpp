@@ -327,6 +327,19 @@ HWTEST_F(NativeNodeNapiTest, InitModuleForArkTSEnvAPITest001, TestSize.Level1)
      */
     ret = OH_ArkUI_InitModuleForArkTSEnv(napi_env(engine));
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step3. Call OH_ArkUI_InitModuleForArkTSEnv again with the same environment.
+     * @tc.expected: The return value should be ARKUI_ERROR_CODE_NO_ERROR.
+     */
+    ret = OH_ArkUI_InitModuleForArkTSEnv(napi_env(engine));
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step4. Call OH_ArkUI_NotifyArkTSEnvDestroy.
+     */
+    OH_ArkUI_NotifyArkTSEnvDestroy(napi_env(engine));
+    OH_ArkUI_NotifyArkTSEnvDestroy(nullptr);
 }
 
 /**

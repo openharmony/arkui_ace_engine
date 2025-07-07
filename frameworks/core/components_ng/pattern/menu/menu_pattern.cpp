@@ -686,10 +686,10 @@ void MenuPattern::UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINo
             auto pattern = childItemNode->GetPattern<MenuItemGroupPattern>();
             CHECK_NULL_VOID(pattern);
             pattern->ModifyDivider();
-            auto itemGroupNode = AceType::DynamicCast<UINode>(child);
-            CHECK_NULL_VOID(itemGroupNode);
             isNeedDivider_ = false;
+            AddGroupHeaderDivider(previousNode, child, layoutProperty, index);
             UpdateMenuItemChildren(child, previousNode);
+            AddGroupFooterDivider(previousNode, child, layoutProperty, index);
             isNeedDivider_ = false;
             auto accessibilityProperty =
                 childItemNode->GetAccessibilityProperty<AccessibilityProperty>();
@@ -709,25 +709,131 @@ void MenuPattern::UpdateMenuDividerWithMode(const RefPtr<UINode>& previousNode, 
     CHECK_NULL_VOID(previousNode);
     CHECK_NULL_VOID(currentNode);
     CHECK_NULL_VOID(property);
-    auto previousFrameNode = AceType::DynamicCast<FrameNode>(previousNode);
-    CHECK_NULL_VOID(previousFrameNode);
-    auto previousPattern = previousFrameNode->GetPattern<MenuItemPattern>();
-    CHECK_NULL_VOID(previousPattern);
-    auto itemDividerMode = isNeedDivider_ ? property->GetItemDividerModeValue(DividerMode::FLOATING_ABOVE_MENU)
-                                          : property->GetItemGroupDividerModeValue(DividerMode::FLOATING_ABOVE_MENU);
-    UpdateDividerProperty(previousPattern->GetBottomDivider(),
-        isNeedDivider_ ? property->GetItemDivider() : property->GetItemGroupDivider());
-    if (itemDividerMode == DividerMode::FLOATING_ABOVE_MENU) {
-        previousPattern->RemoveBottomDivider();
-    } else {
-        previousPattern->AttachBottomDivider();
-        index++;
-    }
     auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_VOID(currentFrameNode);
     auto currentPattern = currentFrameNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(currentPattern);
-    currentPattern->SetTopDivider(previousPattern->GetBottomDivider());
+    auto previousFrameNode = AceType::DynamicCast<FrameNode>(previousNode);
+    CHECK_NULL_VOID(previousFrameNode);
+    auto itemDividerMode = isNeedDivider_ ? property->GetItemDividerModeValue(DividerMode::FLOATING_ABOVE_MENU)
+                                          : property->GetItemGroupDividerModeValue(DividerMode::FLOATING_ABOVE_MENU);
+    if (previousFrameNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+        auto previousPattern = previousFrameNode->GetPattern<MenuItemGroupPattern>();
+        CHECK_NULL_VOID(previousPattern);
+        UpdateDividerProperty(previousPattern->GetBottomDivider(),
+            isNeedDivider_ ? property->GetItemDivider() : property->GetItemGroupDivider());
+        if (itemDividerMode == DividerMode::FLOATING_ABOVE_MENU) {
+            previousPattern->RemoveBottomDivider();
+        } else {
+            previousPattern->AttachBottomDivider();
+            index++;
+        }
+        currentPattern->SetTopDivider(previousPattern->GetBottomDivider());
+    } else {
+        auto previousPattern = previousFrameNode->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(previousPattern);
+        UpdateDividerProperty(previousPattern->GetBottomDivider(),
+            isNeedDivider_ ? property->GetItemDivider() : property->GetItemGroupDivider());
+        if (itemDividerMode == DividerMode::FLOATING_ABOVE_MENU) {
+            previousPattern->RemoveBottomDivider();
+        } else {
+            previousPattern->AttachBottomDivider();
+            index++;
+        }
+        currentPattern->SetTopDivider(previousPattern->GetBottomDivider());
+    }
+}
+
+void MenuPattern::AddGroupHeaderDivider(RefPtr<UINode>& previousNode, const RefPtr<UINode>& currentNode,
+    const RefPtr<MenuLayoutProperty>& property, int32_t& index)
+{
+    auto groupNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_VOID(groupNode);
+    auto groupPattern = groupNode->GetPattern<MenuItemGroupPattern>();
+    CHECK_NULL_VOID(groupPattern && groupPattern->GetHeader());
+    auto itemDividerMode = property->GetItemGroupDividerModeValue(DividerMode::FLOATING_ABOVE_MENU);
+    auto previousFrameNode = AceType::DynamicCast<FrameNode>(previousNode);
+    CHECK_NULL_VOID(previousFrameNode);
+    if (previousFrameNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+        auto previousPattern = previousFrameNode->GetPattern<MenuItemGroupPattern>();
+        CHECK_NULL_VOID(previousPattern);
+        UpdateDividerProperty(previousPattern->GetBottomDivider(), property->GetItemGroupDivider());
+        if (itemDividerMode == DividerMode::FLOATING_ABOVE_MENU) {
+            previousPattern->RemoveBottomDivider();
+        } else {
+            previousPattern->AttachBottomDivider();
+            index++;
+        }
+    } else {
+        auto previousPattern = previousFrameNode->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(previousPattern);
+        UpdateDividerProperty(previousPattern->GetBottomDivider(), property->GetItemGroupDivider());
+        if (itemDividerMode == DividerMode::FLOATING_ABOVE_MENU) {
+            previousPattern->RemoveBottomDivider();
+        } else {
+            previousPattern->AttachBottomDivider();
+            index++;
+        }
+    }
+    // If the child of the group contains only the header.
+    if (groupNode->GetChildren().size() == 1) {
+        previousNode = currentNode;
+    } else {
+        previousNode = nullptr;
+    }
+}
+
+void MenuPattern::AddGroupFooterDivider(RefPtr<UINode>& previousNode, const RefPtr<UINode>& currentNode,
+    const RefPtr<MenuLayoutProperty>& property, int32_t& index)
+{
+    auto groupNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_VOID(groupNode);
+    auto groupPattern = groupNode->GetPattern<MenuItemGroupPattern>();
+    CHECK_NULL_VOID(groupPattern && groupPattern->GetFooter());
+    auto parent = groupNode->GetParent();
+    CHECK_NULL_VOID(parent);
+    auto itemDividerMode = property->GetItemGroupDividerModeValue(DividerMode::FLOATING_ABOVE_MENU);
+    // If the child of the group contains only the footer.
+    if (groupNode->GetChildren().size() == 1 && previousNode) {
+        if (previousNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+            auto previousFrameNode = AceType::DynamicCast<FrameNode>(previousNode);
+            CHECK_NULL_VOID(previousFrameNode);
+            auto previousPattern = previousFrameNode->GetPattern<MenuItemGroupPattern>();
+            CHECK_NULL_VOID(previousPattern);
+            UpdateDividerProperty(previousPattern->GetBottomDivider(), property->GetItemGroupDivider());
+            if (itemDividerMode == DividerMode::FLOATING_ABOVE_MENU) {
+                previousPattern->RemoveBottomDivider();
+            } else {
+                previousPattern->AttachBottomDivider();
+                index++;
+            }
+        } else {
+            auto previousFrameNode = AceType::DynamicCast<FrameNode>(previousNode);
+            CHECK_NULL_VOID(previousFrameNode);
+            auto previousPattern = previousFrameNode->GetPattern<MenuItemPattern>();
+            CHECK_NULL_VOID(previousPattern);
+            UpdateDividerProperty(previousPattern->GetBottomDivider(), property->GetItemGroupDivider());
+            if (itemDividerMode == DividerMode::FLOATING_ABOVE_MENU) {
+                previousPattern->RemoveBottomDivider();
+            } else {
+                previousPattern->AttachBottomDivider();
+                index++;
+            }
+        }
+    }
+    // When the group is not the last item of the menu.
+    if (parent->GetChildIndex(groupNode) < parent->GetChildren().size() - 1) {
+        UpdateDividerProperty(groupPattern->GetBottomDivider(), property->GetItemGroupDivider());
+        if (itemDividerMode == DividerMode::FLOATING_ABOVE_MENU) {
+            groupPattern->RemoveBottomDivider();
+        } else {
+            groupPattern->AttachBottomDivider();
+            index++;
+        }
+        previousNode = currentNode;
+    } else {
+        previousNode = nullptr;
+    }
 }
 
 void MenuPattern::UpdateDividerProperty(

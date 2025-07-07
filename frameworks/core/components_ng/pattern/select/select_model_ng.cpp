@@ -776,27 +776,6 @@ std::string SelectModelNG::ModifierColorTypeToString(const SelectColorType& sele
     return "Unknown";
 }
 
-std::string SelectModelNG::ColorTypeToString(const SelectColorType& selectColorType)
-{
-    switch (selectColorType) {
-        case SelectColorType::FONT_COLOR:
-            return "FontColor";
-        case SelectColorType::BACKGROUND_COLOR:
-            return "BackgroundColor";
-        case SelectColorType::SELECTED_OPTION_BG_COLOR:
-            return "SelectedOptionBgColor";
-        case SelectColorType::SELECTED_OPTION_FONT_COLOR:
-            return "SelectedOptionFontColor";
-        case SelectColorType::OPTION_BG_COLOR:
-            return "OptionBgColor";
-        case SelectColorType::OPTION_FONT_COLOR:
-            return "OptionFontColor";
-        case SelectColorType::MENU_BACKGROUND_COLOR:
-            return "MenuBackgroundColor";
-    }
-    return "Unknown";
-}
-
 void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1236,6 +1215,14 @@ void SelectModelNG::SetShowInSubWindow(FrameNode* frameNode, bool isShowInSubWin
     auto selectPattern = frameNode->GetPattern<SelectPattern>();
     CHECK_NULL_VOID(selectPattern);
     selectPattern->SetShowInSubWindow(isShowInSubWindow);
+}
+
+void SelectModelNG::SetArrowColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(selectPattern);
+    selectPattern->SetArrowColor(color);
 }
 
 void SelectModelNG::SetShowDefaultSelectedIcon(FrameNode* frameNode, bool show)

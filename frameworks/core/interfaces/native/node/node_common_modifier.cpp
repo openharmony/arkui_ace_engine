@@ -148,7 +148,7 @@ const std::vector<AnimationDirection> DIRECTION_LIST = {
 };
 
 constexpr int32_t DEFAULT_DURATION = 1000;
-std::string g_strValue;
+thread_local std::string g_strValue;
 
 BorderStyle ConvertBorderStyle(int32_t value)
 {
@@ -265,7 +265,7 @@ void CheckGradientColorsResObj(NG::Gradient& gradient, const NG::GradientColor& 
 {
     auto&& updateFunc = [gradientColor, index](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t i = 0; i < colorLength; i++) {
             NG::GradientColor gradColor = colorVector[i];
@@ -286,7 +286,7 @@ void CheckSweepGradientColorsResObj(NG::Gradient& gradient, const NG::GradientCo
 {
     auto&& updateFunc = [gradientColor, index](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t i = 0; i < colorLength; i++) {
             NG::GradientColor gradColor = colorVector[i];
@@ -307,7 +307,7 @@ void CheckRadialGradientColorsResObj(NG::Gradient& gradient, const NG::GradientC
 {
     auto&& updateFunc = [gradientColor, index](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t i = 0; i < colorLength; i++) {
             NG::GradientColor gradColor = colorVector[i];
@@ -357,8 +357,8 @@ void SetSweepGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* c
         }
         gradient.AddColor(gradientColor);
         auto idx = index / NUM_3 + startPos;
-        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr && objs.size() > idx &&
-            objs[idx] != nullptr) {
+        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr &&
+            objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
             CheckSweepGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
         }
     }
@@ -388,8 +388,8 @@ void SetRadialGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* 
         }
         gradient.AddColor(gradientColor);
         auto idx = index / NUM_3 + startPos;
-        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr && objs.size() > idx &&
-            objs[idx] != nullptr) {
+        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr &&
+            objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
             CheckRadialGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
         }
     }
@@ -425,8 +425,8 @@ void SetGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors
         }
         gradient.AddColor(gradientColor);
         auto idx = index / NUM_3;
-        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr && objs.size() > idx &&
-            objs[idx] != nullptr) {
+        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr &&
+            objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
             CheckGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
         }
     }
@@ -9781,6 +9781,8 @@ void SetOnClickInfo(ArkUINodeEvent& event, GestureEvent& info, bool usePx)
     event.clickEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
     // deviceid
     event.clickEvent.deviceId = info.GetDeviceId();
+    // targetDisplayId
+    event.clickEvent.targetDisplayId = info.GetTargetDisplayId();
     // modifierkeystates
     event.clickEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
     if (!info.GetFingerList().empty()) {
@@ -9890,7 +9892,7 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_EVENT;
         event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
         event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
-        event.keyEvent.keyText = info.GetKeyText();
+        event.keyEvent.keyText = info.GetKeyText().c_str();
         event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
@@ -9932,7 +9934,7 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.subKind = ON_KEY_PREIME;
         event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
         event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
-        event.keyEvent.keyText = info.GetKeyText();
+        event.keyEvent.keyText = info.GetKeyText().c_str();
         event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
@@ -9972,7 +9974,7 @@ void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_DISPATCH;
         event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
         event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
-        event.keyEvent.keyText = info.GetKeyText();
+        event.keyEvent.keyText = info.GetKeyText().c_str();
         event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
@@ -10369,6 +10371,8 @@ void TriggerOnHoverEvent(void* extraParam, int32_t nodeId, bool isHover, HoverIn
     // globalDisplayX globalDisplayY
     event.hoverEvent.globalDisplayX = info.GetGlobalDisplayLocation().GetX();
     event.hoverEvent.globalDisplayY = info.GetGlobalDisplayLocation().GetY();
+    // targetDisplayId
+    event.hoverEvent.targetDisplayId = info.GetTargetDisplayId();
     SendArkUISyncEvent(&event);
     info.SetStopPropagation(event.hoverEvent.stopPropagation);
 }

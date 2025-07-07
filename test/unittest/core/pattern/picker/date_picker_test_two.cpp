@@ -624,6 +624,50 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DatePickerCanLoopTest009
+ * @tc.desc: Test OnKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnNode and default canLoop is true.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    auto options = columnPattern_->GetOptions();
+    auto pickerDates = options[columnNode_];
+    pickerDates.clear();
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    options[columnNode_] = pickerDates;
+    columnPattern_->options_ = options;
+    columnPattern_->showCount_ = pickerDates.size();
+ 
+    /**
+     * @tc.steps: step2. Call OnKeyEvent while canLoop is true.
+     * @tc.expected: CurrentIndex changes.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    
+    KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
+    columnPattern_->SetCurrentIndex(0);
+    datePickerPattern->OnKeyEvent(keyEventUp);
+    EXPECT_EQ(columnPattern_->GetCurrentIndex(), 2);
+
+    /**
+     * @tc.steps: step3. Call OnKeyEvent while canLoop is false.
+     * @tc.expected: CurrentIndex does not change.
+     */
+    DatePickerModel::GetInstance()->SetCanLoop(false);
+    columnPattern_->SetCurrentIndex(0);
+    datePickerPattern->OnKeyEvent(keyEventUp);
+    EXPECT_EQ(columnPattern_->GetCurrentIndex(), 0);
+}
+
+/**
  * @tc.name: DatePickerFocusRectWithPadding
  * @tc.desc: Test datePicker focus rect normal when padding is set.
  * @tc.type: FUNC
@@ -783,6 +827,55 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerDialogCanLoop002, TestSize.Level1)
             EXPECT_TRUE(timePickerColumnPattern->CanMove(true));
             tested = true;
         }
+    }
+    EXPECT_TRUE(tested);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest022
+ * @tc.desc: Test OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerPatternTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pickerPattern.
+     */
+    CreateDatePickerColumnNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    auto host = pickerPattern->GetHost();
+    auto optionCount = pickerPattern->datePickerColumns_.size();
+    EXPECT_EQ(optionCount, 3);
+    RefPtr<FrameNode> stackYear;
+    RefPtr<FrameNode> stackMonth;
+    RefPtr<FrameNode> stackDay;
+    pickerPattern->OrderAllChildNode(stackYear, stackMonth, stackDay);
+    for (const auto& child : stackDay->GetChildren()) {
+        auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(child);
+        CHECK_NULL_VOID(frameNodeChild);
+        auto layoutProperty = frameNodeChild->GetLayoutProperty();
+        EXPECT_EQ(layoutProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+    }
+    /**
+     * @tc.steps: step2.call OnModifyDone.
+     * @tc.expected:all branch of OnModifyDone is executed correctly.
+     */
+    auto datePickerRowLayoutProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(datePickerRowLayoutProperty, nullptr);
+
+    pickerPattern->isFiredDateChange_ = true;
+    pickerPattern->SetMode(DatePickerMode::YEAR_AND_MONTH);
+    pickerPattern->OnModifyDone();
+    pickerPattern->OrderAllChildNode(stackYear, stackMonth, stackDay);
+    bool tested = false;
+    for (const auto& child : stackDay->GetChildren()) {
+        auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(child);
+        CHECK_NULL_VOID(frameNodeChild);
+        auto layoutProperty = frameNodeChild->GetLayoutProperty();
+        EXPECT_EQ(layoutProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::GONE);
+        tested = true;
     }
     EXPECT_TRUE(tested);
 }

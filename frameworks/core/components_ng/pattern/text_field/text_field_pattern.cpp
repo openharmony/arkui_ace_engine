@@ -2296,22 +2296,17 @@ TextDragInfo TextFieldPattern::CreateTextDragInfo() const
     auto selectedBackgroundColor = textFieldTheme->GetSelectedColor();
     auto firstIndex = selectController_->GetFirstHandleIndex();
     auto secondIndex = selectController_->GetSecondHandleIndex();
-    if (firstIndex > secondIndex) {
-        info.secondHandle = selectOverlayInfo->firstHandle.paintRect;
-        info.firstHandle = selectOverlayInfo->secondHandle.paintRect;
-    } else {
-        info.firstHandle = selectOverlayInfo->firstHandle.paintRect;
-        info.secondHandle = selectOverlayInfo->secondHandle.paintRect;
-    }
     auto firstIsShow = selectOverlayInfo->firstHandle.isShow;
     auto secondIsShow = selectOverlayInfo->secondHandle.isShow;
-    if (!firstIsShow) {
+    if (firstIndex > secondIndex) {
+        selectOverlay_->GetDragViewHandleRects(info.secondHandle, info.firstHandle);
+        info.isFirstHandleAnimation = secondIsShow;
+        info.isSecondHandleAnimation = firstIsShow;
+    } else {
+        selectOverlay_->GetDragViewHandleRects(info.firstHandle, info.secondHandle);
         info.isFirstHandleAnimation = firstIsShow;
-    }
-    if (!secondIsShow) {
         info.isSecondHandleAnimation = secondIsShow;
     }
-
     info.selectedBackgroundColor = selectedBackgroundColor;
     info.handleColor = handleColor;
     return info;
@@ -3214,7 +3209,7 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     action_ = GetTextInputActionValue(GetDefaultTextInputAction());
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (needToResetKeyboard && HasFocus()) {
-        if (isCustomKeyboardAttached_) {
+        if (isCustomKeyboardAttached_ || keyboard_ == TextInputType::ONE_TIME_CODE) {
             RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::RESET_KEYBOARD);
             return;
         }
@@ -8443,9 +8438,6 @@ bool TextFieldPattern::IsReachedBoundary(float offset)
 
 OffsetF TextFieldPattern::GetTextPaintOffset() const
 {
-    if (selectOverlay_->HasRenderTransform()) {
-        return selectOverlay_->GetPaintRectOffsetWithTransform();
-    }
     return GetPaintRectGlobalOffset();
 }
 
@@ -8457,7 +8449,7 @@ OffsetF TextFieldPattern::GetPaintRectGlobalOffset() const
     CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     OffsetF textPaintOffset;
-    textPaintOffset = host->GetPaintRectOffset(false, true);
+    textPaintOffset = host->GetPaintRectOffsetNG(false, true);
     return textPaintOffset - rootOffset;
 }
 
@@ -11363,13 +11355,13 @@ void TextFieldPattern::OnColorModeChange(uint32_t colorMode)
     host->MarkModifyDone();
 }
 
-#define DEFINE_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                   \
-    {                                                                              \
-        #KEY_TYPE, [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) { \
-            if (auto castedVal = DynamicCast<PropertyValue<VALUE_TYPE>>(value)) {  \
-                prop->UPDATE_METHOD(castedVal->value);                             \
-            }                                                                      \
-        }                                                                          \
+#define DEFINE_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                            \
+    {                                                                                       \
+        #KEY_TYPE, [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {     \
+            if (auto realValue = std::get_if<VALUE_TYPE>(&(value->GetValue()))) {           \
+                prop->UPDATE_METHOD(*realValue);                                            \
+            }                                                                               \
+        }                                                                                   \
     }
 
 void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value)
@@ -11378,30 +11370,32 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutPropertyPtr<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(value);
 
     using Handler = std::function<void(TextFieldLayoutProperty*, RefPtr<PropertyValueBase>)>;
-    static const std::unordered_map<std::string, Handler> handlers = {
+    const std::unordered_map<std::string, Handler> handlers = {
         DEFINE_PROP_HANDLER(fontSize, CalcDimension, UpdateFontSize),
         DEFINE_PROP_HANDLER(decorationColor, Color, UpdateTextDecorationColor),
         DEFINE_PROP_HANDLER(minFontSize, CalcDimension, UpdateAdaptMinFontSize),
         DEFINE_PROP_HANDLER(maxFontSize, CalcDimension, UpdateAdaptMaxFontSize),
-        DEFINE_PROP_HANDLER(lineHeight, Dimension, UpdateLineHeight),
+        DEFINE_PROP_HANDLER(lineHeight, CalcDimension, UpdateLineHeight),
+        DEFINE_PROP_HANDLER(lineHeight, CalcDimension, UpdateLineHeight),
         DEFINE_PROP_HANDLER(cancelButtonIconSrc, std::string, UpdateIconSrc),
         
         {"placeholder", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::u16string>>(value)) {
-                    prop->UpdatePlaceholder(intVal->value);
+                if (auto realValue = std::get_if<std::u16string>(&(value->GetValue()))) {
+                    prop->UpdatePlaceholder(*realValue);
                 }
             }
         },
 
         {"text", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::u16string>>(value)) {
+                if (auto realValue = std::get_if<std::u16string>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
                     auto oldValue = pattern->GetTextUtf16Value();
-                    if (intVal->value != oldValue) {
-                        pattern->InitEditingValueText(intVal->value);
+                    if (*realValue != oldValue) {
+                        pattern->InitEditingValueText(*realValue);
                         pattern->SetTextChangedAtCreation(true);
                     }
                 }
@@ -11409,29 +11403,29 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
         },
 
         {"cancelButtonIconSize", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<CalcDimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    prop->UpdateIconSize(intVal->value);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    prop->UpdateIconSize(*realValue);
                     pattern->ProcessResponseArea();
                 }
             }
         },
 
         {"cancelButtonIconColor", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    prop->UpdateIconColor(intVal->value);
+                    prop->UpdateIconColor(*realValue);
                     pattern->ProcessResponseArea();
                 }
             }
         },
 
         {"placeholderColor", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
-                    prop->UpdatePlaceholderTextColor(intVal->value);
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    prop->UpdatePlaceholderTextColor(*realValue);
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
                     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PlaceholderColorFlagByUser, true, frameNode);
@@ -11440,34 +11434,34 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
         },
 
         {"placeholderFontSize", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<CalcDimension>>(value)) {
-                    prop->UpdatePlaceholderFontSize(intVal->value);
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    prop->UpdatePlaceholderFontSize(*realValue);
                     prop->UpdatePreferredPlaceholderLineHeightNeedToUpdate(true);
                 }
             }
         },
 
         {"placeholderFontFamily", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::vector<std::string>>>(value)) {
-                    prop->UpdatePlaceholderFontFamily(intVal->value);
+                if (auto realValue = std::get_if<std::vector<std::string>>(&(value->GetValue()))) {
+                    prop->UpdatePlaceholderFontFamily(*realValue);
                     prop->UpdatePreferredPlaceholderLineHeightNeedToUpdate(true);
                 }
             }
         },
         
         {"backgroundColor", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
-                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, intVal->value, frameNode);
-                    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, intVal->value, frameNode);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, *realValue, frameNode);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, *realValue, frameNode);
                 }
             }
         },
 
         {"foregroundColor", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
-                    prop->UpdateTextColor(intVal->value);
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    prop->UpdateTextColor(*realValue);
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
                     auto renderContext = frameNode->GetRenderContext();
@@ -11476,64 +11470,64 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
                         renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
                         renderContext->ResetForegroundColorStrategy();
                     }
-                    renderContext->UpdateForegroundColor(intVal->value);
+                    renderContext->UpdateForegroundColor(*realValue);
                     renderContext->UpdateForegroundColorFlag(true);
                 }
             }
         },
 
         {"caretColor", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
-                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, intVal->value, frameNode);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, *realValue, frameNode);
                     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CaretColorFlagByUser, true, frameNode);
                 }
             }
         },
 
         {"selectedBackgroundColor", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
-                    if (intVal->value.GetAlpha() == 255) {
-                        intVal->value = intVal->value.ChangeOpacity(0.2);
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    if (realValue->GetAlpha() == 255) {
+                        *realValue = realValue->ChangeOpacity(0.2);
                     }
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
-                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, intVal->value, frameNode);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, *realValue, frameNode);
                 }
             }
         },
 
         {"caretWidth", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
                     auto frameNode = pattern->GetHost();
                     CHECK_NULL_VOID(frameNode);
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, intVal->value, frameNode);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, *realValue, frameNode);
                     pattern->CalculateDefaultCursor();
                 }
             }
         },
 
         {"letterSpacing", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    prop->UpdateLetterSpacing(intVal->value);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    prop->UpdateLetterSpacing(*realValue);
                 }
             }
         },
 
         {"width", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    if (LessNotEqual(intVal->value.Value(), 0.0)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    realValue->SetUnit(DimensionUnit::VP);
+                    if (LessNotEqual(realValue->Value(), 0.0)) {
                         return;
                     }
-                    CalcLength width(intVal->value);
+                    CalcLength width(*realValue);
                     std::optional<CalcLength> height = std::nullopt;
                     auto&& layoutConstraint = prop->GetCalcLayoutConstraint();
                     if (layoutConstraint && layoutConstraint->selfIdealSize) {
@@ -11545,128 +11539,128 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
         },
 
         {"paddingTop", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
                     auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
                     CHECK_NULL_VOID(paintProperty);
                     PaddingProperty padding;
                     padding = paintProperty->GetPaddingByUserValue(padding);
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    padding.top = CalcLength(intVal->value);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    padding.top = CalcLength(*realValue);
                     paintProperty->UpdatePaddingByUser(padding);
                 }
             }
         },
 
         {"paddingBottom", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
                     auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
                     CHECK_NULL_VOID(paintProperty);
                     PaddingProperty padding;
                     padding = paintProperty->GetPaddingByUserValue(padding);
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    padding.bottom = CalcLength(intVal->value);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    padding.bottom = CalcLength(*realValue);
                     paintProperty->UpdatePaddingByUser(padding);
                 }
             }
         },
 
         {"paddingLeft", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
                     auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
                     CHECK_NULL_VOID(paintProperty);
                     PaddingProperty padding;
                     padding = paintProperty->GetPaddingByUserValue(padding);
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    padding.left = CalcLength(intVal->value);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    padding.left = CalcLength(*realValue);
                     paintProperty->UpdatePaddingByUser(padding);
                 }
             }
         },
 
         {"paddingRight", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
                     auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
                     CHECK_NULL_VOID(paintProperty);
                     PaddingProperty padding;
                     padding = paintProperty->GetPaddingByUserValue(padding);
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    padding.right = CalcLength(intVal->value);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    padding.right = CalcLength(*realValue);
                     paintProperty->UpdatePaddingByUser(padding);
                 }
             }
         },
 
         {"marginTop", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
                     auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
                     CHECK_NULL_VOID(paintProperty);
                     PaddingProperty margin;
                     margin = paintProperty->GetMarginByUserValue(margin);
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    margin.top = CalcLength(intVal->value);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    margin.top = CalcLength(*realValue);
                     paintProperty->UpdatePaddingByUser(margin);
                 }
             }
         },
 
         {"marginBottom", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
                     auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
                     CHECK_NULL_VOID(paintProperty);
                     PaddingProperty margin;
                     margin = paintProperty->GetMarginByUserValue(margin);
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    margin.bottom = CalcLength(intVal->value);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    margin.bottom = CalcLength(*realValue);
                     paintProperty->UpdatePaddingByUser(margin);
                 }
             }
         },
 
         {"marginLeft", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
                     auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
                     CHECK_NULL_VOID(paintProperty);
                     PaddingProperty margin;
                     margin = paintProperty->GetMarginByUserValue(margin);
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    margin.left = CalcLength(intVal->value);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    margin.left = CalcLength(*realValue);
                     paintProperty->UpdatePaddingByUser(margin);
                 }
             }
         },
 
         {"marginRight", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
                     auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
                     CHECK_NULL_VOID(paintProperty);
                     PaddingProperty margin;
                     margin = paintProperty->GetMarginByUserValue(margin);
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    margin.right = CalcLength(intVal->value);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    margin.right = CalcLength(*realValue);
                     paintProperty->UpdatePaddingByUser(margin);
                 }
             }
         },
 
         {"fontWeight", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::string>>(value)) {
-                    FontWeight fontWeight = ConvertStrToFontWeight(intVal->value);
+                if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
+                    FontWeight fontWeight = ConvertStrToFontWeight(*realValue);
                     prop->UpdateFontWeight(fontWeight);
                     prop->UpdatePreferredTextLineHeightNeedToUpdate(true);
                 }
@@ -11674,63 +11668,63 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
         },
 
         {"fontColor", [wp = WeakClaim(RawPtr(frameNode))](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
-                    prop->UpdateTextColor(intVal->value);
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    prop->UpdateTextColor(*realValue);
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
-                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, intVal->value, frameNode);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *realValue, frameNode);
                     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
                     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
-                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, TextColorFlagByUser, intVal->value, frameNode);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, TextColorFlagByUser, *realValue, frameNode);
                 }
             }
         },
 
         {"fontFamily", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::vector<std::string>>>(value)) {
-                    prop->UpdateFontFamily(intVal->value);
+                if (auto realValue = std::get_if<std::vector<std::string>>(&(value->GetValue()))) {
+                    prop->UpdateFontFamily(*realValue);
                     prop->UpdatePreferredTextLineHeightNeedToUpdate(true);
                 }
             }
         },
 
         {"errorString", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::u16string>>(value)) {
-                    prop->UpdateErrorText(intVal->value);
+                if (auto realValue = std::get_if<std::u16string>(&(value->GetValue()))) {
+                    prop->UpdateErrorText(*realValue);
                     prop->UpdateShowErrorText(true);
                 }
             }
         },
 
         {"onIconSrc", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::string>>(value)) {
+                if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
                     auto frameNode = pattern->GetHost();
                     CHECK_NULL_VOID(frameNode);
                     pattern->SetIsPasswordSymbol(false);
                     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordSourceInfo,
-                        ImageSourceInfo(intVal->value, "", ""), frameNode);
+                        ImageSourceInfo(*realValue, "", ""), frameNode);
                 }
             }
         },
 
         {"offIconSrc", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::string>>(value)) {
+                if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
                     auto frameNode = pattern->GetHost();
                     CHECK_NULL_VOID(frameNode);
                     pattern->SetIsPasswordSymbol(false);
                     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HidePasswordSourceInfo,
-                        ImageSourceInfo(intVal->value, "", ""), frameNode);
+                        ImageSourceInfo(*realValue, "", ""), frameNode);
                 }
             }
         },
 
         {"inputFilter", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::string>>(value)) {
-                    prop->UpdateInputFilter(intVal->value);
+                if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
+                    prop->UpdateInputFilter(*realValue);
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
                     pattern->FilterInitializeText();
@@ -11739,45 +11733,45 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
         },
 
         {"underlineColorTyping", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->SetTypingUnderlineColor(intVal->value);
+                    pattern->SetTypingUnderlineColor(*realValue);
                 }
             }
         },
 
         {"underlineColorNormal", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->SetNormalUnderlineColor(intVal->value);
+                    pattern->SetNormalUnderlineColor(*realValue);
                 }
             }
         },
 
         {"underlineColorError", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->SetErrorUnderlineColor(intVal->value);
+                    pattern->SetErrorUnderlineColor(*realValue);
                 }
             }
         },
 
         {"underlineColorDisable", [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-            if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+            if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->SetDisableUnderlineColor(intVal->value);
+                    pattern->SetDisableUnderlineColor(*realValue);
                 }
             }
         },
 
         {"textIndent", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    prop->UpdateTextIndent(intVal->value);
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    realValue->SetUnit(DimensionUnit::VP);
+                    prop->UpdateTextIndent(*realValue);
                 }
             }
         },
@@ -11800,8 +11794,8 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
         },
 
         {"minFontScale", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<float>>(value)) {
-                    float minFontScale = intVal->value;
+                if (auto realValue = std::get_if<float>(&(value->GetValue()))) {
+                    float minFontScale = *realValue;
                     minFontScale = LessOrEqual(minFontScale, 0.0f) ? 0.0f : minFontScale;
                     minFontScale = GreatOrEqual(minFontScale, 1.0f) ? 1.0f : minFontScale;
                     prop->UpdateMinFontScale(minFontScale);
@@ -11810,8 +11804,8 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
         },
 
         {"maxFontScale", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<float>>(value)) {
-                    float maxFontScale = intVal->value;
+                if (auto realValue = std::get_if<float>(&(value->GetValue()))) {
+                    float maxFontScale = *realValue;
                     maxFontScale = LessOrEqual(maxFontScale, 1.0f) ? 1.0f : maxFontScale;
                     prop->UpdateMaxFontScale(maxFontScale);
                 }
@@ -11897,12 +11891,16 @@ void TextFieldPattern::UpdateMarginResource()
 
 Offset TextFieldPattern::GetCaretClickLocalOffset(const Offset& offset)
 {
+    if (!IsTextArea()) {
+        return offset;
+    }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, offset);
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     auto localOffset = offset;
     if (GreatNotEqual(localOffset.GetY(), textRect_.Bottom())) {
-        localOffset.SetX(isRTL ? textRect_.Left() : textRect_.Right());
+        localOffset.SetX(isRTL ? contentRect_.Left() : contentRect_.Right());
+        localOffset.SetY(textRect_.Bottom() - PreferredLineHeight() / 2.0f);
     } else if (GreatNotEqual(localOffset.GetY(), contentRect_.Bottom())) {
         localOffset.SetX(isRTL ? contentRect_.Left() : contentRect_.Right());
         localOffset.SetY(contentRect_.Bottom() - PreferredLineHeight() / 2.0f);

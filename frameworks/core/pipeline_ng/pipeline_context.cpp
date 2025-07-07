@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,7 @@
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
+#include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
@@ -375,6 +376,9 @@ void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&&
         LOGW("Cannot add ignoreSafeArea bundle as the pipeline context is destroyed.");
         return;
     }
+    if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+        ACE_MEASURE_SCOPED_TRACE("PostponeBundleByIgnore postponedChildCount = %zu", bundle.first.size());
+    }
     taskScheduler_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
 }
 
@@ -532,9 +536,10 @@ void PipelineContext::FlushDirtyNodeUpdate()
 // Executes the callback function for typescript update, if set
 void PipelineContext::FlushTSUpdates()
 {
-    if (flushTSUpdatesCb_) {
+    auto flushTSUpdateCb = flushTSUpdatesCb_;
+    if (flushTSUpdateCb) {
         // Pass the current container id in the callback.
-        bool result = flushTSUpdatesCb_(GetInstanceId());
+        bool result = flushTSUpdateCb(GetInstanceId());
         if (result) {
             // There is more to update
             RequestFrame();
@@ -674,7 +679,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         nanoTimestamp, static_cast<uint64_t>(frameCount), instanceId_);
     window_->Lock();
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
-                                               ? AceApplicationInfo::GetInstance().GetPackageName()
+                                               ? GetBundleName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     uint64_t vsyncPeriod = static_cast<uint64_t>(window_->GetVSyncPeriod());
@@ -764,8 +769,17 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
             FlushFocusScroll();
         }
     }
-    HandleOnAreaChangeEvent(nanoTimestamp);
-    HandleVisibleAreaChangeEvent(nanoTimestamp);
+    if (SystemProperties::GetContainerDeleteFlag()) {
+        if (isNeedCallbackAreaChange_) {
+            HandleOnAreaChangeEvent(nanoTimestamp);
+            HandleVisibleAreaChangeEvent(nanoTimestamp);
+            isNeedCallbackAreaChange_ = false;
+            RenderContext::SetNeedCallbackNodeChange(true);
+        }
+    } else {
+        HandleOnAreaChangeEvent(nanoTimestamp);
+        HandleVisibleAreaChangeEvent(nanoTimestamp);
+    }
     FlushMouseEventInVsync();
     eventManager_->FlushCursorStyleRequests();
     if (isNeedFlushAnimationStartTime_) {
@@ -2896,9 +2910,7 @@ void PipelineContext::OnTouchEvent(
     CHECK_RUN_ON(UI);
 
     HandlePenHoverOut(point);
-    auto gestureReferee = eventManager_->GetGestureRefereeNG(nullptr);
-    CHECK_NULL_VOID(gestureReferee);
-    if (gestureReferee->CheckSourceTypeChange(lastSourceType_)) {
+    if (CheckSourceTypeChange(point.sourceType)) {
         HandleTouchHoverOut(point);
     }
 
@@ -3361,6 +3373,9 @@ void PipelineContext::DumpData(
     if (paramSize == used_id_flag && !node->DumpTreeById(depth, params[PARAM_NUM], hasJson)) {
         DumpLog::GetInstance().Print(
             "There is no id matching the ID in the parameter, please check whether the id is correct.");
+    }
+    if (paramSize > used_id_flag) {
+        SimplifiedInspector::TestScrollToTarget(params, stageManager_->GetLastPage());
     }
 }
 
@@ -6347,7 +6362,6 @@ void PipelineContext::HandleTouchHoverOut(const TouchEvent& point)
     if (point.sourceTool != SourceTool::FINGER || NearZero(point.force)) {
         return;
     }
-    lastSourceType_ = SourceType::TOUCH;
     CHECK_RUN_ON(UI);
     eventManager_->CleanHoverStatusForDragBegin();
 }
@@ -6443,5 +6457,15 @@ void PipelineContext::DumpForceColor(const std::vector<std::string>& params) con
     auto invertColor = ColorInverter::GetInstance().Invert(
         color, PipelineContext::GetCurrentContext(), params[2]); // Index 2 represents the third parameter
     DumpLog::GetInstance().Print(1, "InvertColor: [" + invertColor.ToString() + "]");
+}
+
+bool PipelineContext::CheckSourceTypeChange(SourceType currentSourceType)
+{
+    bool ret = false;
+    if (currentSourceType != lastSourceType_) {
+        ret = true;
+        lastSourceType_ = currentSourceType;
+    }
+    return ret;
 }
 } // namespace OHOS::Ace::NG

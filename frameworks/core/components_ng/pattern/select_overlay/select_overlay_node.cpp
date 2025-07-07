@@ -71,6 +71,7 @@ constexpr int32_t OPTION_INDEX_SHARE = 6;
 constexpr int32_t OPTION_INDEX_CAMERA_INPUT = 7;
 constexpr int32_t OPTION_INDEX_AI_WRITE = 8;
 constexpr int32_t OPTION_INDEX_AI_MENU = 9;
+constexpr int32_t OPTION_INDEX_ASK_CELIA = 10;
 constexpr int32_t ANIMATION_DURATION1 = 350;
 constexpr int32_t ANIMATION_DURATION2 = 150;
 constexpr int32_t SYMBOL_ANIMATION_DELAY = 50;
@@ -97,6 +98,11 @@ bool IsAIMenuOption(const std::string& id)
 {
     return id == OH_DEFAULT_AI_MENU_PHONE || id == OH_DEFAULT_AI_MENU_URL || id == OH_DEFAULT_AI_MENU_EMAIL ||
             id == OH_DEFAULT_AI_MENU_ADDRESS || id == OH_DEFAULT_AI_MENU_DATETIME;
+}
+
+bool IsAskCeliaOption(const std::string& id)
+{
+    return id == OH_DEFAULT_ASK_CELIA;
 }
 
 bool IsShowAIMenuOption(OHOS::Ace::TextDataDetectType type)
@@ -157,6 +163,9 @@ const std::unordered_map<std::string, std::function<uint32_t(RefPtr<OHOS::Ace::T
     },
     { OH_DEFAULT_AI_MENU_DATETIME, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
         { return textOverlayTheme->GetAIMenuSymbolId();}
+    },
+    { OH_DEFAULT_ASK_CELIA, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAskCeliaSymbolId();}
     }
 };
 
@@ -608,7 +617,7 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
     auto textLayoutProperty = text->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, button);
     textLayoutProperty->UpdateContent(data);
-    auto buttonType = IsAIMenuOption(menuOptionsParam.id) ?
+    auto buttonType = IsAIMenuOption(menuOptionsParam.id) || IsAskCeliaOption(menuOptionsParam.id) ?
                       SelectOverlayMenuButtonType::AIBUTTON : SelectOverlayMenuButtonType::NORMAL;
     ButtonBasicInfo buttonBasicInfo = {.data = data, .buttonType = buttonType};
     PrepareButtonTextProp(textLayoutProperty, true, contentWidth, buttonBasicInfo, info);
@@ -744,6 +753,7 @@ RefPtr<FrameNode> BuildMoreOrBackButton(const std::shared_ptr<SelectOverlayInfo>
                                     padding.Top().ConvertToPx() - padding.Bottom().ConvertToPx());
         buttonLayoutProperty->UpdateUserDefinedIdealSize({ sideWidth, sideWidth });
         accessibilityProperty->SetAccessibilityText(textOverlayTheme->GetMoreAccessibilityText());
+        SetMoreOrBackButtonResponse(button);
     } else {
         auto sideWidth = CalcLength(textOverlayTheme->GetMenuToolbarHeight().ConvertToPx());
         UpdateBackButtonPadding(button, sideWidth, padding, overlayId);
@@ -753,7 +763,6 @@ RefPtr<FrameNode> BuildMoreOrBackButton(const std::shared_ptr<SelectOverlayInfo>
     PrepareMoreOrBackButtonNode(button, overlayId, isMoreButton, textOverlayTheme);
 
     button->MarkModifyDone();
-    SetMoreOrBackButtonResponse(button);
     return button;
 }
 
@@ -902,6 +911,12 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
         params.back().isAIMenuOption = true;
     }
 
+    if (TextSystemMenu::IsShowAskCelia() && info->menuInfo.isAskCeliaEnabled) {
+        params.emplace_back(theme->GetAskCelia(),
+            GetMenuCallbackWithContainerId(info->menuCallback.onAskCelia), "", true);
+        params.back().isAskCeliaOption = true;
+    }
+
     return params;
 }
 
@@ -927,6 +942,7 @@ std::unordered_map<std::string, std::function<void()>> GetSystemCallback(
             info->menuCallback.onAIMenuOption, OH_DEFAULT_AI_MENU_ADDRESS) },
         { OH_DEFAULT_AI_MENU_DATETIME, ConvertToVoidFunction(
             info->menuCallback.onAIMenuOption, OH_DEFAULT_AI_MENU_DATETIME) },
+        { OH_DEFAULT_ASK_CELIA, info->menuCallback.onAskCelia }
     };
     return systemCallback;
 }
@@ -1009,6 +1025,9 @@ std::string GetItemContent(const std::string& id, const std::string& content,
         CHECK_NULL_RETURN(info, content);
         return textOverlayTheme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType);
     }
+    if (id == OH_DEFAULT_ASK_CELIA) {
+        return textOverlayTheme->GetAskCelia();
+    }
     return content;
 }
 
@@ -1030,6 +1049,7 @@ void SetMenuOptionsItem(std::vector<OptionParam>& params, MenuOptionsParam& item
     params.back().enabled = IsSystemMenuItemEnabled(info, item.id);
     params.back().disableSystemClick = true;
     params.back().isAIMenuOption = IsAIMenuOption(item.id);
+    params.back().isAskCeliaOption = IsAskCeliaOption(item.id);
 }
 
 std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOptionsParam>& menuOptionItems,
@@ -1114,6 +1134,7 @@ RefPtr<FrameNode> CreateMenuTextNode(const std::string& value, const RefPtr<Fram
         colorInfo.scalars = textOverlayTheme->GetAiMenuFontGradientScalars();
         textProperty->UpdateFontForegroudGradiantColor(colorInfo);
     }
+
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_RETURN(textRenderContext, nullptr);
     textRenderContext->UpdateForegroundColor(theme->GetMenuFontColor());
@@ -1217,7 +1238,7 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std:
     if (!isPaste) {
         SetMenuItemIcon(menuItem, param, leftRow);
     }
-    auto leftTextNode = CreateMenuTextNode(content, leftRow, param.isAIMenuOption);
+    auto leftTextNode = CreateMenuTextNode(content, leftRow, param.isAIMenuOption || param.isAskCeliaOption);
     CHECK_NULL_VOID(leftTextNode);
     leftRow->MountToParent(menuItem);
     leftRow->MarkModifyDone();
@@ -1229,7 +1250,7 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std:
     rightRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     rightRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
     rightRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
-    auto rightTextNode = CreateMenuTextNode(labelInfo, rightRow, param.isAIMenuOption);
+    auto rightTextNode = CreateMenuTextNode(labelInfo, rightRow, param.isAIMenuOption || param.isAskCeliaOption);
     CHECK_NULL_VOID(rightTextNode);
     rightRow->MountToParent(menuItem);
     auto rightTextRenderContext = rightTextNode->GetRenderContext();
@@ -1951,7 +1972,7 @@ std::function<void(WeakPtr<NG::FrameNode>)> SelectOverlayNode::GetSymbolFunc(con
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, symbol);
     std::vector<Color> symbolColor;
-    if (symbolId == OH_DEFAULT_AI_MENU_PHONE) {
+    if (symbolId == OH_DEFAULT_AI_MENU_PHONE || symbolId == OH_DEFAULT_ASK_CELIA) {
         symbolColor = { textOverlayTheme->GetAIMenuSymbolColor() };
     }
     auto symbolIdFunc = getSymbolIdMap.find(symbolId);
@@ -2048,6 +2069,14 @@ void SelectOverlayNode::GetFlexibleOptionsParams(
         params.emplace_back(iconName, iconPath, GetMenuCallbackWithContainerId(
             info->menuCallback.onAIMenuOption, iconName), symbolFunc);
         params.back().isAIMenuOption = true;
+    }
+    if (!isShowInDefaultMenu_[OPTION_INDEX_ASK_CELIA]) {
+        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_AI_WRITE_SVG) : "";
+        std::function<void(WeakPtr<NG::FrameNode>)> symbolFunc = GetSymbolFunc(OH_DEFAULT_ASK_CELIA);
+        auto iconName = textOverlayTheme ? textOverlayTheme->GetAskCelia() : "";
+        params.emplace_back(iconName, iconPath, GetMenuCallbackWithContainerId(info->menuCallback.onAskCelia),
+            symbolFunc);
+        params.back().isAskCeliaOption = true;
     }
 }
 
@@ -2203,7 +2232,7 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
         std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
         auto symbolIdFunc = getSymbolIdMap.find(item.id);
         std::vector<Color> symbolColor;
-        if (IsAIMenuOption(item.id)) {
+        if (IsAIMenuOption(item.id) || IsAskCeliaOption(item.id)) {
             symbolColor = { textOverlayTheme->GetAIMenuSymbolColor() };
         }
         if (symbolIdFunc != getSymbolIdMap.end()) {
@@ -2223,6 +2252,7 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
             param.isPasteOption = true;
         }
         param.isAIMenuOption = IsAIMenuOption(item.id) ? true : false;
+        param.isAskCeliaOption = IsAskCeliaOption(item.id) ? true : false;
         params.emplace_back(param);
         itemNum++;
     }
@@ -2376,6 +2406,7 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
     ShowCamera(maxWidth, allocatedSize, info, theme->GetCameraInput());
     ShowAIWrite(maxWidth, allocatedSize, info, theme->GetAIWrite());
     ShowAIMenuOptions(maxWidth, allocatedSize, info, theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType));
+    ShowAskCelia(maxWidth, allocatedSize, info, theme->GetAskCelia());
     if (isDefaultBtnOverMaxWidth_) {
         isDefaultBtnOverMaxWidth_ = false;
         return true;
@@ -2764,6 +2795,9 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
         AddMenuItemParamIf(true, findIter->second.first,
             theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType), systemItemParams);
     }
+
+    AddMenuItemParamIf(menuInfo.isAskCeliaEnabled && TextSystemMenu::IsShowAskCelia(), OH_DEFAULT_ASK_CELIA,
+        theme->GetAskCelia(), systemItemParams);
     return systemItemParams;
 }
 
@@ -3422,5 +3456,27 @@ void SelectOverlayNode::UpdateToolBarFromMainWindow(bool menuItemChanged, bool n
     }
 
     UpdateToolBar(menuItemChanged, noAnimation);
+}
+
+void SelectOverlayNode::ShowAskCelia(
+    float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
+{
+    if (info->menuInfo.isAskCeliaEnabled) {
+        CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
+        float buttonWidth = 0.0f;
+        ButtonBasicInfo buttonBasicInfo = { .data = label, .buttonType = SelectOverlayMenuButtonType::AIBUTTON };
+        auto button = BuildButton(info, info->menuCallback.onAskCelia, GetId(), buttonWidth, buttonBasicInfo);
+        CHECK_NULL_VOID(button);
+        if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
+            button->MountToParent(selectMenuInner_);
+            allocatedSize += buttonWidth;
+            isShowInDefaultMenu_[OPTION_INDEX_ASK_CELIA] = true;
+        } else {
+            button.Reset();
+            isDefaultBtnOverMaxWidth_ = true;
+        }
+    } else {
+        isShowInDefaultMenu_[OPTION_INDEX_ASK_CELIA] = true;
+    }
 }
 } // namespace OHOS::Ace::NG

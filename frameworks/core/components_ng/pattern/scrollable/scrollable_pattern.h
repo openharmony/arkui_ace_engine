@@ -394,6 +394,15 @@ public:
     {
         return 0.0f;
     }
+    
+    /* ============================= Free Scroll Enhancements ============================= */
+    virtual Offset GetFreeScrollOffset() const
+    {
+        return {};
+    }
+    virtual void FreeScrollBy(const OffsetF& delta) {}
+    /* ============================================================================== */
+
     virtual float GetContentStartOffset() const
     {
         return 0.0f;
@@ -434,6 +443,12 @@ public:
     bool GetCanStayOverScroll() const
     {
         return canStayOverScroll_;
+    }
+    void ChangeAnimateOverScroll()
+    {
+        if (GetScrollSource() == SCROLL_FROM_JUMP && GetCanStayOverScroll()) {
+            SetAnimateCanOverScroll(false);
+        }
     }
     void ChangeCanStayOverScroll()
     {
@@ -517,6 +532,9 @@ public:
     static ScrollState GetScrollState(int32_t scrollSource);
 
     static ScrollSource ConvertScrollSource(int32_t source);
+
+    static int32_t ScrollToTarget(
+        RefPtr<FrameNode>& scrollable, RefPtr<FrameNode>& target, float targetOffset, ScrollAlign targetAlign);
 
     float CalculateFriction(float gamma)
     {
@@ -858,6 +876,32 @@ public:
     }
 
     void MarkScrollBarProxyDirty();
+
+    bool ChildPreMeasureHelperEnabled() override
+    {
+        return true;
+    }
+    bool PostponedTaskForIgnoreEnabled() override
+    {
+        return true;
+    }
+
+    bool NeedCustomizeSafeAreaPadding() override
+    {
+        return true;
+    }
+
+    PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate) override;
+
+    bool ChildTentativelyLayouted(IgnoreStrategy& strategy) override
+    {
+        strategy = IgnoreStrategy::SCROLLABLE_AXIS;
+        return true;
+    }
+
+    bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
+        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -882,6 +926,7 @@ protected:
     void FireObserverOnScrollStop();
     void FireObserverOnDidScroll(float finalOffset);
     void FireObserverOnScrollerAreaChange(float finalOffset);
+    float FireObserverOnWillScroll(float offset);
 
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
     void FireOnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);

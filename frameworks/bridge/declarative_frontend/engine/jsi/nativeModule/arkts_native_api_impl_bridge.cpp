@@ -2964,6 +2964,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetBackButtonIcon));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackButtonIcon"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetBackButtonIcon));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetBackgroundColor));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetBackgroundColor));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetNavDestinationMode));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMode"),
@@ -5630,6 +5634,34 @@ void ArkUINativeModule::RegisterScrollAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnScrollFrameBegin));
     scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnScrollFrameBegin"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnScrollFrameBegin));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxZoomScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetMaxZoomScale));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxZoomScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetMaxZoomScale));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinZoomScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetMinZoomScale));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinZoomScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetMinZoomScale));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setZoomScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetZoomScale));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetZoomScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetZoomScale));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableBouncesZoom"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetEnableBouncesZoom));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableBouncesZoom"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetEnableBouncesZoom));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollOnDidZoom"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnDidZoom));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnDidZoom"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnDidZoom));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollOnZoomStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnZoomStart));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnZoomStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnZoomStart));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollOnZoomStop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnZoomStop));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnZoomStop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnZoomStop));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "scroll"), scroll);
 }
 
@@ -5959,6 +5991,10 @@ void ArkUINativeModule::RegisterSwiperAttributes(Local<panda::ObjectRef> object,
     swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperMaintainVisibleContentPosition"),
         panda::FunctionRef::New(
             const_cast<panda::EcmaVM*>(vm), SwiperBridge::ReSetSwiperMaintainVisibleContentPosition));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwiperOnScrollStateChanged"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperOnScrollStateChanged));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperOnScrollStateChanged"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperOnScrollStateChanged));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "swiper"), swiper);
 }
 
@@ -6847,6 +6883,26 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetGestureFocusMode));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGestureFocusMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetGestureFocusMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSslErrorEventReceive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnSslErrorEventReceive));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSslErrorEventReceive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnSslErrorEventReceive));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnClientAuthenticationRequest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnClientAuthenticationRequest));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnClientAuthenticationRequest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnClientAuthenticationRequest));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnInterceptRequest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnInterceptRequest));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnInterceptRequest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnInterceptRequest));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFaviconReceived"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnFaviconReceived));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFaviconReceived"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnFaviconReceived));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnBeforeUnload"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnBeforeUnload));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnBeforeUnload"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnBeforeUnload));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

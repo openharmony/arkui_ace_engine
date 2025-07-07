@@ -189,7 +189,7 @@ void SearchPattern::UpdateDisable(const std::u16string& textValue)
     }
 }
 
-void SearchPattern::UpdateEnable(bool needToenable)
+void SearchPattern::UpdateEnable(bool needToEnable)
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -197,14 +197,13 @@ void SearchPattern::UpdateEnable(bool needToenable)
     CHECK_NULL_VOID(searchButtonFrameNode);
     auto buttonEventHub = searchButtonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
-    if (needToenable) {
+    if (needToEnable) {
         buttonEventHub->SetEnabled(true);
     } else {
         buttonEventHub->SetEnabled(false);
     }
     isSearchButtonEnabled_ = buttonEventHub->IsEnabled();
     searchButtonFrameNode->MarkModifyDone();
-    searchButtonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 bool SearchPattern::IsEventEnabled(const std::u16string& textValue, int16_t style)
@@ -891,8 +890,7 @@ void SearchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 bool SearchPattern::OnKeyEvent(const KeyEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_SEARCH, "KeyAction:%{public}d, KeyCode:%{public}d", static_cast<int>(event.action),
-        static_cast<int>(event.code));
+    TAG_LOGI(AceLogTag::ACE_SEARCH, "KeyAction:%{public}d", static_cast<int>(event.action));
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -2768,13 +2766,13 @@ void SearchPattern::SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& 
     textFieldPattern->SetKeyboardAppearanceConfig(config);
 }
 
-#define DEFINE_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                   \
-    {                                                                              \
-        #KEY_TYPE, [](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) { \
-            if (auto castedVal = DynamicCast<PropertyValue<VALUE_TYPE>>(value)) {  \
-                prop->UPDATE_METHOD(castedVal->value);                             \
-            }                                                                      \
-        }                                                                          \
+#define DEFINE_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                            \
+    {                                                                                       \
+        #KEY_TYPE, [](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {        \
+            if (auto realValue = std::get_if<VALUE_TYPE>(&(value->GetValue()))) {           \
+                prop->UPDATE_METHOD(*realValue);                                            \
+            }                                                                               \
+        }                                                                                   \
     }
 
 void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value)
@@ -2783,258 +2781,259 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutPropertyPtr<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(value);
 
     using Handler = std::function<void(SearchLayoutProperty*, RefPtr<PropertyValueBase>)>;
-    static const std::unordered_map<std::string, Handler> handlers = {
+    const std::unordered_map<std::string, Handler> handlers = {
 
         {"placeholder", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::u16string>>(value)) {
+                if (auto realValue = std::get_if<std::u16string>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdatePlaceholderResource(intVal->value);
+                    pattern->UpdatePlaceholderResource(*realValue);
                 }
             }
         },
 
         {"text", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::u16string>>(value)) {
+                if (auto realValue = std::get_if<std::u16string>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateTextResource(intVal->value);
+                    pattern->UpdateTextResource(*realValue);
                 }
             }
         },
 
         {"searchButtonValue", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::string>>(value)) {
+                if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateSearchButtonValueResource(intVal->value);
+                    pattern->UpdateSearchButtonValueResource(*realValue);
                 }
             }
         },
 
         {"searchButtonFontSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateSearchButtonFontSizeResource(intVal->value);
-                    prop->UpdateSearchButtonFontSize(intVal->value);
+                    pattern->UpdateSearchButtonFontSizeResource(*realValue);
+                    prop->UpdateSearchButtonFontSize(*realValue);
                 }
             }
         },
 
         {"searchButtonFontColor", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateSearchButtonFontColorResource(intVal->value);
+                    pattern->UpdateSearchButtonFontColorResource(*realValue);
                 }
             }
         },
 
         {"searchIconSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    pattern->SetSearchIconSize(intVal->value);
-                    prop->UpdateSearchIconUDSize(intVal->value);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    pattern->SetSearchIconSize(*realValue);
+                    prop->UpdateSearchIconUDSize(*realValue);
                 }
             }
         },
 
         {"searchIconColor", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->GetSearchNode()->SetSearchImageIconColor(intVal->value);
-                    pattern->SetSearchIconColor(intVal->value);
+                    pattern->GetSearchNode()->SetSearchImageIconColor(*realValue);
+                    pattern->SetSearchIconColor(*realValue);
                 }
             }
         },
 
         {"searchIconSrc", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::string>>(value)) {
+                if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->SetSearchSrcPath(intVal->value, "", "");
+                    pattern->SetSearchSrcPath(*realValue, "", "");
                 }
             }
         },
         
         {"cancelButtonIconSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    intVal->value.SetUnit(DimensionUnit::VP);
-                    pattern->SetCancelIconSize(intVal->value);
-                    prop->UpdateCancelButtonUDSize(intVal->value);
+                    realValue->SetUnit(DimensionUnit::VP);
+                    pattern->SetCancelIconSize(*realValue);
+                    prop->UpdateCancelButtonUDSize(*realValue);
                 }
             }
         },
 
         {"cancelButtonIconColor", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->SetCancelIconColor(intVal->value);
+                    pattern->SetCancelIconColor(*realValue);
                 }
             }
         },
 
         {"scancelButtonIconSrc", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::string>>(value)) {
+                if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
-                    pattern->SetRightIconSrcPath(intVal->value);
+                    pattern->SetRightIconSrcPath(*realValue);
                 }
             }
         },
 
         {"fontSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<CalcDimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateFontSizeResource(intVal->value);
+                    pattern->UpdateFontSizeResource(*realValue);
                 }
             }
         },
 
         {"fontColor", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateFontColorResource(intVal->value);
+                    pattern->UpdateFontColorResource(*realValue);
                 }
             }
         },
 
         {"caretColor", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateCaretColorResource(intVal->value);
+                    pattern->UpdateCaretColorResource(*realValue);
                 }
             }
         },
 
         {"caretWidth", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateCaretWidthResource(intVal->value);
+                    pattern->UpdateCaretWidthResource(*realValue);
                 }
             }
         },
 
         {"placeholderColor", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdatePlaceholderColorResource(intVal->value);
+                    pattern->UpdatePlaceholderColorResource(*realValue);
                 }
             }
         },
 
         {"placeholderFontSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<CalcDimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdatePlaceholderFontSizeResource(intVal->value);
+                    pattern->UpdatePlaceholderFontSizeResource(*realValue);
                 }
             }
         },
 
         {"decorationColor", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateDecorationColorResource(intVal->value);
+                    pattern->UpdateDecorationColorResource(*realValue);
                 }
             }
         },
 
         {"minFontSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-            if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+            if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateMinFontSizeResource(intVal->value);
+                    pattern->UpdateMinFontSizeResource(*realValue);
                 }
             }
         },
 
         {"maxFontSize", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-            if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+            if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateMaxFontSizeResource(intVal->value);
+                    pattern->UpdateMaxFontSizeResource(*realValue);
                 }
             }
         },
 
         {"letterSpacing", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-            if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+            if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateLetterSpacingResource(intVal->value);
+                    pattern->UpdateLetterSpacingResource(*realValue);
                 }
             }
         },
 
         {"lineHeight", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-            if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+            if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateLineHeightResource(intVal->value);
+                    pattern->UpdateLineHeightResource(*realValue);
                 }
             }
         },
 
         {"minFontScale", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<float>>(value)) {
+                if (auto realValue = std::get_if<float>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateMinFontScaleResource(intVal->value);
+                    pattern->UpdateMinFontScaleResource(*realValue);
                 }
             }
         },
 
         {"maxFontScale", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<float>>(value)) {
+                if (auto realValue = std::get_if<float>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateMaxFontScaleResource(intVal->value);
+                    pattern->UpdateMaxFontScaleResource(*realValue);
                 }
             }
         },
 
         {"selectedBackgroundColor", [wp = WeakClaim(this)]
             (SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
-                    if (intVal->value.GetAlpha() == 255) {
-                        intVal->value = intVal->value.ChangeOpacity(0.2);
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    if (realValue->GetAlpha() == 255) {
+                        *realValue = realValue->ChangeOpacity(0.2);
                     }
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateSelectedBackgroundColorResource(intVal->value);
+                    pattern->UpdateSelectedBackgroundColorResource(*realValue);
                 }
             }
         },
 
         {"inputFilter", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<std::string>>(value)) {
+                if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateInputFilterResource(intVal->value);
+                    pattern->UpdateInputFilterResource(*realValue);
                 }
             }
         },
 
         {"textIndent", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Dimension>>(value)) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->UpdateTextIndentResource(intVal->value);
+                    pattern->UpdateTextIndentResource(*realValue);
                 }
             }
         },

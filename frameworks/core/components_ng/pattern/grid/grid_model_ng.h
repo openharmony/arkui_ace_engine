@@ -107,6 +107,7 @@ public:
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& value);
     static void SetFocusWrapMode(FrameNode* frameNode, const std::optional<FocusWrapMode>& focusWrapMode);
+    static FocusWrapMode GetFocusWrapMode(FrameNode* frameNode);
     static void SetAlignItems(FrameNode* frameNode, const std::optional<GridItemAlignment>& itemAlign);
     static std::string GetColumnsTemplate(FrameNode* frameNode);
     static std::string GetRowsTemplate(FrameNode* frameNode);

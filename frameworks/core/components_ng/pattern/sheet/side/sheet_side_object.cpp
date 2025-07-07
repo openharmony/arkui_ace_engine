@@ -355,7 +355,7 @@ void SheetSideObject::HandleDragStart()
 {
     auto sheetPattern = GetPattern();
     CHECK_NULL_VOID(sheetPattern);
-    sheetPattern->InitScrollProps();
+    InitScrollProps();
     sheetPattern->SetIsDragging(true);
     if (sheetPattern->GetAnimation() && sheetPattern->GetAnimationProcess()) {
         AnimationUtils::StopAnimation(sheetPattern->GetAnimation());

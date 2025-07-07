@@ -1741,4 +1741,40 @@ HWTEST_F(NavDestinationPatternTestNg, OnModifyDone, TestSize.Level1)
     EXPECT_EQ(layoutPolicy->IsWidthWrap(), true);
     EXPECT_EQ(layoutPolicy->IsHeightMatch(), true);
 }
+
+/**
+ * @tc.name: ReCalcNavDestinationSize001
+ * @tc.desc: Test Navdestination constraintSize no branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternTestNg, ReCalcNavDestinationSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create navdestinationNode
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_NE(navDestinationLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Update CalcSize
+     */
+    auto size = CalcSize(CalcLength(500), CalcLength(500));
+    navDestinationLayoutProperty->UpdateCalcMaxSize(size);
+    auto layoutWrapper = navDestinationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(600, 600));
+
+    auto navdestinationLayoutAlgorithm = AceType::MakeRefPtr<NavDestinationLayoutAlgorithm>();
+    ASSERT_NE(navdestinationLayoutAlgorithm, nullptr);
+
+    SizeF frameSize = SizeF(600, 600);
+    navdestinationLayoutAlgorithm->ReCalcNavDestinationSize(AceType::RawPtr(layoutWrapper), frameSize);
+
+    SizeF targetSize = SizeF(500, 500);
+    EXPECT_EQ(geometryNode->GetFrameSize(), targetSize);
+}
 } // namespace OHOS::Ace::NG

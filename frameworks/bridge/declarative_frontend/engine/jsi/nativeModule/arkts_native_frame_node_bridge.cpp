@@ -976,7 +976,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateKeyEventInfoObj(EcmaVM* vm, KeyEv
         "isScrollLockOn" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
-        panda::StringRef::NewFromUtf8(vm, info.GetKeyText()),
+        panda::StringRef::NewFromUtf8(vm, info.GetKeyText().c_str()),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeySource())),
         panda::NumberRef::New(vm, info.GetDeviceId()), panda::NumberRef::New(vm, info.GetMetaKey()),
         panda::NumberRef::New(vm, info.GetUnicode()),

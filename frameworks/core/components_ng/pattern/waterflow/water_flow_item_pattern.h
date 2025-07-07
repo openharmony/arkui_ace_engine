@@ -43,6 +43,21 @@ public:
     {
         return OPINC_NODE;
     }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_ITEM_PATTERN_H

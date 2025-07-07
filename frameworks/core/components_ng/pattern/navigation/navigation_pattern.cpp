@@ -497,7 +497,6 @@ void NavigationPattern::OnModifyDone()
     UpdateChildLayoutPolicy();
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    hostNode->CreateHomeDestinationIfNeeded();
     auto navBarOrHomeDesteNode =
         AceType::DynamicCast<NavDestinationNodeBase>(hostNode->GetNavBarOrHomeDestinationNode());
     if (navBarOrHomeDesteNode) {
@@ -5158,7 +5157,7 @@ void NavigationPattern::TryForceSplitIfNeeded(const SizeF& frameSize)
          * The force split mode must meet the following conditions to take effect:
          *   1. Belonging to the main window of the application
          *   2. Belonging to the main page of the application (excluding container model, popups, etc.)
-         *   3. The application is in landscape mode
+         *   3. The application is in landscape mode or ignore orientation
          *   4. The application is not in split screen mode
          *   5. Navigation width greater than 600vp
          *   6. It belongs to the outermost Navigation within the page
@@ -5167,13 +5166,15 @@ void NavigationPattern::TryForceSplitIfNeeded(const SizeF& frameSize)
         bool isInAppMainPage = pageNode_.Upgrade() != nullptr;
         auto thresholdWidth = SPLIT_THRESHOLD_WIDTH.ConvertToPx();
         auto dipScale = context->GetDipScale();
+        bool ignoreOrientation = navManager->GetIgnoreOrientation();
         auto orientation = SystemProperties::GetDeviceOrientation();
         auto windowMode = windowManager->GetWindowMode();
         bool isInSplitScreenMode = windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
         bool isOuterMostNav = navManager->IsOuterMostNavigation(hostNode->GetId(), hostNode->GetDepth());
         forceSplitSuccess = isMainWindow && isInAppMainPage && isOuterMostNav &&
-            orientation == DeviceOrientation::LANDSCAPE && thresholdWidth < frameSize.Width() && !isInSplitScreenMode;
+            (ignoreOrientation || orientation == DeviceOrientation::LANDSCAPE) &&
+            thresholdWidth < frameSize.Width() && !isInSplitScreenMode;
         /**
          * When NavBar is not hidden and its width is greater than 0,
          * it is considered that there is content in NavBar, and NavBar is used as the homepage
@@ -5183,11 +5184,12 @@ void NavigationPattern::TryForceSplitIfNeeded(const SizeF& frameSize)
             (GreatNotEqual(property->GetMaxNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).Value(), 0));
         forceSplitUseNavBar = forceSplitSuccess && navBarHasContent;
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "calc splitMode, isMainWindow:%{public}d, isInAppMainPage:%{public}d, "
-            "isInSplitScreenMode:%{public}d, isOuterMostNav:%{public}d, orientation: %{public}s, dipScale: %{public}f, "
-            "thresholdWidth: %{public}f, curWidth: %{public}f, navBarHasContent:%{public}d, "
-            "forceSplitSuccess:%{public}d, forceSplitUseNavBar:%{public}d", isMainWindow, isInAppMainPage,
-            isInSplitScreenMode, isOuterMostNav, DeviceOrientationToString(orientation), dipScale, thresholdWidth,
-            frameSize.Width(), navBarHasContent, forceSplitSuccess, forceSplitUseNavBar);
+            "isInSplitScreenMode:%{public}d, isOuterMostNav:%{public}d, ignoreOrientation:%{public}d, "
+            "orientation: %{public}s, dipScale: %{public}f, thresholdWidth: %{public}f, curWidth: %{public}f, "
+            "navBarHasContent:%{public}d, forceSplitSuccess:%{public}d, forceSplitUseNavBar:%{public}d",
+            isMainWindow, isInAppMainPage, isInSplitScreenMode, isOuterMostNav, ignoreOrientation,
+            DeviceOrientationToString(orientation), dipScale, thresholdWidth, frameSize.Width(), navBarHasContent,
+            forceSplitSuccess, forceSplitUseNavBar);
     }
     if (forceSplitSuccess == forceSplitSuccess_ && forceSplitUseNavBar_ == forceSplitUseNavBar) {
         return;

@@ -1775,6 +1775,61 @@ HWTEST_F(SelectOverlayTestTwoNg, BuildMoreOrBackButton, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: SetResponseRegion
+ * @tc.desc: Test SetResponseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, SetResponseRegion, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return AceType::MakeRefPtr<TextOverlayTheme>();
+    });
+    SelectOverlayInfo selectInfo;
+    auto menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuOptionItems = menuOptionItems;
+    auto onMenuItemClick = [](NG::MenuItemParam menuOptionsParam) -> bool { return false; };
+    selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick;
+    auto onCreateMenuCallback = [menuOptionItems](
+                                    const std::vector<NG::MenuItemParam>& menuItems) -> std::vector<MenuOptionsParam> {
+        return menuOptionItems;
+    };
+    selectInfo.onCreateCallback.onCreateMenuCallback = onCreateMenuCallback;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(infoPtr, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    ASSERT_NE(frameNode, nullptr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    RefPtr<GestureEventHub> gestureHub =
+        AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureHub, nullptr);
+    selectOverlayNode->moreButton_->eventHub_ = eventHub;
+    auto value = Dimension(0.0f, DimensionUnit::VP);
+    gestureHub->responseRegion_.emplace_back(DimensionRect(value, value));
+    selectOverlayNode->moreButton_->eventHub_->gestureEventHub_ = gestureHub;
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+
+    float maxWidth = 1040.0f;
+    selectOverlayNode->CreateToolBar();
+    selectOverlayNode->AddMenuItemByCreateMenuCallback(infoPtr, maxWidth);
+    EXPECT_NE(selectOverlayNode->moreButton_, nullptr);
+    EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
+    auto vector = gestureHub->GetResponseRegion();
+    EXPECT_NE(vector.size(), 0);
+    auto menuPadding = textOverlayTheme->GetMenuPadding();
+    auto buttonHeight = textOverlayTheme->GetMenuButtonHeight();
+    auto responseHeight = menuPadding.Bottom().Value() + menuPadding.Top().Value() + buttonHeight.Value();
+    EXPECT_EQ(vector.begin()->GetHeight().Value(), responseHeight);
+}
+
 HWTEST_F(SelectOverlayTestTwoNg, GetCreateMenuOptionsParams001, TestSize.Level1)
 {
     auto onMenuItemClick = [](NG::MenuItemParam menuOptionsParam) -> bool {

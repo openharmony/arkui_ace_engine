@@ -33,7 +33,8 @@ public:
     void SetSelectColor(const NG::Gradient& value, bool isResourceColor = false) override {};
     void SetMinLabel(float value) override;
     void SetMaxLabel(float value) override;
-    void SetShowSteps(bool value) override;
+    void SetShowSteps(
+        bool value, const std::optional<SliderModel::SliderShowStepOptions>& options = std::nullopt) override;
     void SetShowTips(bool value, const std::optional<std::string>& content) override;
     void SetThickness(const Dimension& value) override;
     void SetBlockBorderColor(const Color& value) override;

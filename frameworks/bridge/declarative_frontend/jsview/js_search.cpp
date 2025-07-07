@@ -350,17 +350,16 @@ void JSSearch::SetSearchButtonOptions(const JSCallbackInfo& info)
     // set button font size, unit FP
     auto fontSize = param->GetProperty("fontSize");
     RefPtr<ResourceObject> fontSizeObject;
+    UnregisterResource("searchButtonFontSize");
     CalcDimension size = theme->GetButtonFontSize();
     if (ParseJsDimensionVpNG(fontSize, size, fontSizeObject) && size.Unit() != DimensionUnit::PERCENT &&
         GreatOrEqual(size.Value(), 0.0)) {
-        ParseJsDimensionFp(fontSize, size);
+        ParseJsDimensionFp(fontSize, size, fontSizeObject);
     } else {
         size = theme->GetButtonFontSize();
     }
     if (SystemProperties::ConfigChangePerform() && fontSizeObject) {
         RegisterResource<CalcDimension>("searchButtonFontSize", fontSizeObject, size);
-    } else {
-        UnregisterResource("searchButtonFontSize");
     }
     SearchModel::GetInstance()->SetSearchButtonFontSize(size);
     
@@ -391,17 +390,14 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
     std::string buttonValue = "";
+    UnregisterResource("searchButtonValue");
     if (info[0]->IsString()) {
         buttonValue = info[0]->ToString();
     } else {
         RefPtr<ResourceObject> resourceObject;
-        auto ret = ParseJsString(info[0], buttonValue, resourceObject);
-        if (ret) {
-            if (SystemProperties::ConfigChangePerform() && resourceObject) {
-                RegisterResource<std::string>("searchButtonValue", resourceObject, buttonValue);
-            } else {
-                UnregisterResource("searchButtonValue");
-            }
+        ParseJsString(info[0], buttonValue, resourceObject);
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<std::string>("searchButtonValue", resourceObject, buttonValue);
         }
     }
     SearchModel::GetInstance()->SetSearchButton(buttonValue);
@@ -534,8 +530,8 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     auto sizeProp = param->GetProperty("size");
     RefPtr<ResourceObject> sizeObject;
     UnregisterResource("searchIconSize");
-    auto ret = ParseJsDimensionVpNG(sizeProp, size, sizeObject);
-    if (!sizeProp->IsUndefined() && !sizeProp->IsNull() && ret) {
+    if (!sizeProp->IsUndefined() && !sizeProp->IsNull() &&
+        ParseJsDimensionVpNG(sizeProp, size, sizeObject)) {
         if (LessNotEqual(size.Value(), 0.0) || size.Unit() == DimensionUnit::PERCENT) {
             size = theme->GetIconHeight();
         }
@@ -548,19 +544,13 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     // set icon src
     std::string src;
     RefPtr<ResourceObject> mediaObject;
+    UnregisterResource("searchButtonIconSrc");
     auto srcPathProp = param->GetProperty("src");
-    if (srcPathProp->IsUndefined() || srcPathProp->IsNull()) {
+    if (srcPathProp->IsUndefined() || srcPathProp->IsNull() || !ParseJsMedia(srcPathProp, src, mediaObject)) {
         src = "";
     }
-    ret = ParseJsMedia(srcPathProp, src, mediaObject);
-    if (!ret) {
-        src = "";
-    } else {
-        if (SystemProperties::ConfigChangePerform() && mediaObject) {
-            RegisterResource<std::string>("searchButtonIconSrc", mediaObject, src);
-        } else {
-            UnregisterResource("searchButtonIconSrc");
-        }
+    if (SystemProperties::ConfigChangePerform() && mediaObject) {
+        RegisterResource<std::string>("searchButtonIconSrc", mediaObject, src);
     }
     std::string bundleName;
     std::string moduleName;
@@ -723,20 +713,21 @@ void JSSearch::SetInputFilter(const JSCallbackInfo& info)
     auto errInfo = info[1];
     std::string inputFilter;
     if (tmpInfo->IsUndefined()) {
+        UnregisterResource("inputFilter");
         SearchModel::GetInstance()->SetInputFilter(inputFilter, nullptr);
         return;
     }
 
     RefPtr<ResourceObject> resourceObject;
-    auto ret = ParseJsString(tmpInfo, inputFilter, resourceObject);
-    CHECK_NULL_VOID(ret);
-    if (SystemProperties::ConfigChangePerform()) {
-        if (resourceObject) {
-            RegisterResource<std::string>("inputFilter", resourceObject, inputFilter);
-        } else {
-            UnregisterResource("inputFilter");
-        }
+    if (!ParseJsString(tmpInfo, inputFilter, resourceObject)) {
+        return;
     }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<std::string>("inputFilter", resourceObject, inputFilter);
+    } else {
+        UnregisterResource("inputFilter");
+    }
+
     if (!CheckRegexValid(inputFilter)) {
         inputFilter = "";
     }
@@ -804,37 +795,27 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
     auto themeFontSize = theme->GetFontSize();
     Font font;
     auto fontSize = param->GetProperty("size");
-    if (SystemProperties::ConfigChangePerform()) {
-        RefPtr<ResourceObject> resourceObject;
-        CalcDimension size = themeFontSize;
-        auto ret = ParseJsDimensionNG(fontSize, size, DimensionUnit::FP, resourceObject, false);
-        if (ret) {
-            if (resourceObject) {
-                RegisterResource<CalcDimension>("placeholderFontSize", resourceObject, size);
-                font.fontSize = size;
-            } else {
-                font.fontSize = size;
-                UnregisterResource("placeholderFontSize");
-            }
-        } else {
-            font.fontSize = themeFontSize;
-            UnregisterResource("placeholderFontSize");
-        }
+    RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("placeholderFontSize");
+    if (fontSize->IsNull() || fontSize->IsUndefined()) {
+        font.fontSize = themeFontSize;
     } else {
-        if (fontSize->IsNull() || fontSize->IsUndefined()) {
-            font.fontSize = themeFontSize;
+        auto versionTenOrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
+        CalcDimension size;
+        if ((versionTenOrLarger ?
+            ParseJsDimensionVpNG(fontSize, size, resourceObject) :
+            ParseJsDimensionVp(fontSize, size, resourceObject)) &&
+            size.Unit() != DimensionUnit::PERCENT) {
+            ParseJsDimensionFp(fontSize, size, resourceObject);
+            font.fontSize = size;
         } else {
-            auto versionTenOrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
-            CalcDimension size;
-            if ((versionTenOrLarger ? ParseJsDimensionVpNG(fontSize, size) : ParseJsDimensionVp(fontSize, size)) &&
-                size.Unit() != DimensionUnit::PERCENT) {
-                ParseJsDimensionFp(fontSize, size);
-                font.fontSize = size;
-            } else {
-                font.fontSize = themeFontSize;
-            }
+            font.fontSize = themeFontSize;
+        }
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<CalcDimension>("placeholderFontSize", resourceObject, size);
         }
     }
+    
     auto weight = param->GetProperty("weight");
     if (!weight->IsNull()) {
         std::string weightVal;
@@ -1529,18 +1510,15 @@ void JSSearch::SetMaxFontSize(const JSCallbackInfo& info)
 void JSSearch::SetMinFontScale(const JSCallbackInfo& info)
 {
     double minFontScale = 0.0;
-    if (info.Length() < 1) {
+    RefPtr<ResourceObject> resourceObject;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale, resourceObject)) {
         return;
     }
-    RefPtr<ResourceObject> resourceObject;
-    auto ret = ParseJsDouble(info[0], minFontScale, resourceObject);
-    CHECK_NULL_VOID(ret);
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
         RegisterResource<float>("minFontScale", resourceObject, minFontScale);
     } else {
         UnregisterResource("minFontScale");
     }
-
     if (LessOrEqual(minFontScale, 0.0f)) {
         SearchModel::GetInstance()->SetMinFontScale(0.0f);
         return;
@@ -1555,12 +1533,10 @@ void JSSearch::SetMinFontScale(const JSCallbackInfo& info)
 void JSSearch::SetMaxFontScale(const JSCallbackInfo& info)
 {
     double maxFontScale = 0.0;
-    if (info.Length() < 1) {
+    RefPtr<ResourceObject> resourceObject;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale, resourceObject)) {
         return;
     }
-    RefPtr<ResourceObject> resourceObject;
-    auto ret = ParseJsDouble(info[0], maxFontScale, resourceObject);
-    CHECK_NULL_VOID(ret);
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
         RegisterResource<float>("maxFontScale", resourceObject, maxFontScale);
     } else {
@@ -1577,17 +1553,14 @@ void JSSearch::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     RefPtr<ResourceObject> resourceObject;
-    auto ret = ParseJsDimensionFpNG(info[0], value, resourceObject, false);
-    if (!ret) {
+    if (!ParseJsDimensionFpNG(info[0], value, resourceObject, false)) {
         value.Reset();
         SearchModel::GetInstance()->SetLetterSpacing(value);
+        UnregisterResource("letterSpacing");
         return;
-    } else {
-        if (SystemProperties::ConfigChangePerform() && resourceObject) {
-            RegisterResource<CalcDimension>("letterSpacing", resourceObject, value);
-        } else {
-            UnregisterResource("letterSpacing");
-        }
+    }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("letterSpacing", resourceObject, value);
     }
     SearchModel::GetInstance()->SetLetterSpacing(value);
 }
@@ -1595,35 +1568,20 @@ void JSSearch::SetLetterSpacing(const JSCallbackInfo& info)
 void JSSearch::SetLineHeight(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (SystemProperties::ConfigChangePerform()) {
-        RefPtr<ResourceObject> resourceObject;
-        auto ret = ParseJsDimensionFpNG(info[0], value, resourceObject, false);
-        if (ret) {
-            if (resourceObject) {
-                RegisterResource<CalcDimension>("lineHeight", resourceObject, value);
-            } else {
-                if (value.IsNegative()) {
-                    value.Reset();
-                }
-                SearchModel::GetInstance()->SetLineHeight(value);
-                UnregisterResource("lineHeight");
-            }
-        } else {
-            value.Reset();
-            SearchModel::GetInstance()->SetLineHeight(value);
-            UnregisterResource("lineHeight");
-        }
-    } else {
-        if (!ParseJsDimensionFpNG(info[0], value)) {
-            value.Reset();
-            SearchModel::GetInstance()->SetLineHeight(value);
-            return;
-        }
-        if (value.IsNegative()) {
-            value.Reset();
-        }
+    RefPtr<ResourceObject> resourceObject;
+    if (!ParseJsDimensionFpNG(info[0], value, resourceObject)) {
+        value.Reset();
         SearchModel::GetInstance()->SetLineHeight(value);
+        UnregisterResource("lineHeight");
+        return;
     }
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<CalcDimension>("lineHeight", resourceObject, value);
+    }
+    if (value.IsNegative()) {
+        value.Reset();
+    }
+    SearchModel::GetInstance()->SetLineHeight(value);
 }
 
 void JSSearch::SetHalfLeading(const JSCallbackInfo& info)

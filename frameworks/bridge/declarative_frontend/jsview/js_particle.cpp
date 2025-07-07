@@ -478,6 +478,85 @@ void ParseFloatOption(JSRef<JSObject>& floatJsObject, OHOS::Ace::NG::ParticleFlo
     floatOption.SetUpdater(updater);
 }
 
+template<typename T>
+void AnnulusRegisterResourceObject(T& annulusRegionValue,
+    const RefPtr<ResourceObject>& centerXResObj, const RefPtr<ResourceObject>& centerYResObj,
+    const RefPtr<ResourceObject>& innerRadiusResObj, const RefPtr<ResourceObject>& outerRadiusResObj)
+{
+    if (centerXResObj) {
+        auto&& centerXUpdateFunc = [](const RefPtr<ResourceObject>& centerXResObj,
+            OHOS::Ace::NG::ParticleAnnulusRegion& annulusRegion) {
+            CalcDimension centerXValue;
+            ResourceParseUtils::ParseResDimensionVpNG(centerXResObj, centerXValue);
+            annulusRegion.SetCenterX(centerXValue);
+        };
+        annulusRegionValue.AddResource(
+            "annulusRegion.centerX", centerXResObj, std::move(centerXUpdateFunc));
+    } else {
+        annulusRegionValue.RemoveResource("annulusRegion.centerX");
+    }
+    if (centerYResObj) {
+        auto&& centerYUpdateFunc = [](const RefPtr<ResourceObject>& centerYResObj,
+            OHOS::Ace::NG::ParticleAnnulusRegion& annulusRegion) {
+            CalcDimension centerYValue;
+            ResourceParseUtils::ParseResDimensionVpNG(centerYResObj, centerYValue);
+            annulusRegion.SetCenterY(centerYValue);
+        };
+        annulusRegionValue.AddResource(
+            "annulusRegion.centerY", centerYResObj, std::move(centerYUpdateFunc));
+    } else {
+        annulusRegionValue.RemoveResource("annulusRegion.centerY");
+    }
+    if (innerRadiusResObj) {
+        auto&& innerRadiusUpdateFunc = [](const RefPtr<ResourceObject>& innerRadiusResObj,
+            OHOS::Ace::NG::ParticleAnnulusRegion& annulusRegion) {
+            CalcDimension innerRadiusValue;
+            ResourceParseUtils::ParseResDimensionVpNG(innerRadiusResObj, innerRadiusValue);
+            annulusRegion.SetInnerRadius(innerRadiusValue);
+        };
+        annulusRegionValue.AddResource(
+            "annulusRegion.innerRadius", innerRadiusResObj, std::move(innerRadiusUpdateFunc));
+    } else {
+        annulusRegionValue.RemoveResource("annulusRegion.innerRadius");
+    }
+    if (outerRadiusResObj) {
+        auto&& outerRadiusUpdateFunc = [](const RefPtr<ResourceObject>& outerRadiusResObj,
+            OHOS::Ace::NG::ParticleAnnulusRegion& annulusRegion) {
+            CalcDimension outerRadiusValue;
+            ResourceParseUtils::ParseResDimensionVpNG(outerRadiusResObj, outerRadiusValue);
+            annulusRegion.SetOuterRadius(outerRadiusValue);
+        };
+        annulusRegionValue.AddResource(
+            "annulusRegion.outerRadius", outerRadiusResObj, std::move(outerRadiusUpdateFunc));
+    } else {
+        annulusRegionValue.RemoveResource("annulusRegion.outerRadius");
+    }
+}
+
+void ParseAnnulusCenter(const JSRef<JSObject>& centerJson, std::pair<CalcDimension, CalcDimension>& center,
+    RefPtr<ResourceObject>& centerXResObj, RefPtr<ResourceObject>& centerYResObj)
+{
+    CalcDimension centerXValue;
+    CalcDimension centerYValue;
+    if (SystemProperties::ConfigChangePerform()) {
+        if (JSViewAbstract::ParseLengthMetricsToDimension(centerJson->GetProperty("x"),
+            centerXValue, centerXResObj)) {
+            center.first = centerXValue;
+        }
+        if (JSViewAbstract::ParseLengthMetricsToDimension(centerJson->GetProperty("y"),
+            centerYValue, centerYResObj)) {
+            center.second = centerYValue;
+        }
+    } else {
+        if (JSViewAbstract::ParseLengthMetricsToDimension(centerJson->GetProperty("x"), centerXValue)) {
+            center.first = centerXValue;
+        }
+        if (JSViewAbstract::ParseLengthMetricsToDimension(centerJson->GetProperty("y"), centerYValue)) {
+            center.second = centerYValue;
+        }
+    }
+}
+
 void ParseEmitterPropertyAnnulus(const JSRef<JSObject>& paramObj, EmitterProperty& emitterProperty)
 {
     auto annulusRegionProperty = paramObj->GetProperty("annulusRegion");
@@ -522,27 +601,40 @@ void ParseEmitterOptionAnnulus(JSRef<JSObject>& emitterJsObject, OHOS::Ace::NG::
         std::pair<CalcDimension, CalcDimension> center = {
             DEFAULT_CENTER_VALUE, DEFAULT_CENTER_VALUE
             };
+        RefPtr<ResourceObject> centerXResObj;
+        RefPtr<ResourceObject> centerYResObj;
         if (centerProperty->IsObject()) {
             auto centerJson = JSRef<JSObject>::Cast(centerProperty);
-            CalcDimension centerXValue;
-            CalcDimension centerYValue;
-            if (JSViewAbstract::ParseLengthMetricsToDimension(centerJson->GetProperty("x"), centerXValue)) {
-                center.first = centerXValue;
-            }
-            if (JSViewAbstract::ParseLengthMetricsToDimension(centerJson->GetProperty("y"), centerYValue)) {
-                center.second = centerYValue;
-            }
+            ParseAnnulusCenter(centerJson, center, centerXResObj, centerYResObj);
         }
         CalcDimension innerRadiusValue;
+        RefPtr<ResourceObject> innerRadiusResObj;
+        if (SystemProperties::ConfigChangePerform()) {
+            JSViewAbstract::ParseLengthMetricsToDimension(
+                annulusRegion->GetProperty("innerRadius"), innerRadiusValue, innerRadiusResObj);
+        } else {
+            JSViewAbstract::ParseLengthMetricsToDimension(
+                annulusRegion->GetProperty("innerRadius"), innerRadiusValue);
+        }
         CalcDimension outerRadiusValue;
-        JSViewAbstract::ParseLengthMetricsToDimension(annulusRegion->GetProperty("innerRadius"), innerRadiusValue);
-        JSViewAbstract::ParseLengthMetricsToDimension(annulusRegion->GetProperty("outerRadius"), outerRadiusValue);
+        RefPtr<ResourceObject> outerRadiusResObj;
+        if (SystemProperties::ConfigChangePerform()) {
+            JSViewAbstract::ParseLengthMetricsToDimension(
+                annulusRegion->GetProperty("outerRadius"), outerRadiusValue, outerRadiusResObj);
+        } else {
+            JSViewAbstract::ParseLengthMetricsToDimension(
+                annulusRegion->GetProperty("outerRadius"), outerRadiusValue);
+        }
         auto startAngle = annulusRegion->GetProperty("startAngle");
         auto startAngleValue = startAngle->IsNumber() ? startAngle->ToNumber<float>() : DEFAULT_START_ANGLE_VALUE;
         auto endAngle = annulusRegion->GetProperty("endAngle");
         auto endAngleValue = endAngle->IsNumber() ? endAngle->ToNumber<float>() : DEFAULT_END_ANGLE_VALUE;
         auto annulusRegionValue =
             NG::ParticleAnnulusRegion(center, innerRadiusValue, outerRadiusValue, startAngleValue, endAngleValue);
+        if (SystemProperties::ConfigChangePerform()) {
+            AnnulusRegisterResourceObject(annulusRegionValue, centerXResObj,
+                centerYResObj, innerRadiusResObj, outerRadiusResObj);
+        }
         emitterOption.SetAnnulusRegion(annulusRegionValue);
     }
 }

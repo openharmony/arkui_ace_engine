@@ -442,6 +442,8 @@ public:
 
     float GetPageAvoidOffset() override;
 
+    bool CheckSourceTypeChange(SourceType currentSourceType);
+
     bool CheckNeedAvoidInSubWindow() override;
 
     void CheckAndUpdateKeyboardInset(float keyboardHeight) override;
@@ -1260,6 +1262,11 @@ public:
     void UnregisterArkUIObjectLifecycleCallback();
     void FireArkUIObjectLifecycleCallback(void* data);
 
+    inline void SetNeedCallbackAreaChange(bool needChange)
+    {
+        isNeedCallbackAreaChange_ = needChange;
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1517,6 +1524,7 @@ private:
     bool isWindowSizeDragging_ = false;
     KeyBoardAvoidMode prevKeyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     bool isFreezeFlushMessage_ = false;
+    bool isNeedCallbackAreaChange_ = true;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;

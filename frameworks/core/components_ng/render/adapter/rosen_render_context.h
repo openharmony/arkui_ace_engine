@@ -351,6 +351,7 @@ public:
 
     void ClearDrawCommands() override;
 
+    void RemoveOverlayModifier(const RefPtr<OverlayModifier>& modifier) override;
     void RemoveContentModifier(const RefPtr<ContentModifier>& modifier) override;
 
     void OpacityAnimation(const AnimationOption& option, double begin, double end) override;
@@ -443,6 +444,8 @@ public:
     void SetShadowRadius(float radius) override;
     void SetRenderFrameOffset(const OffsetF& offset) override;
     void SetScale(float scaleX, float scaleY) override;
+    void SetScrollScale(float scale) override;
+    void ResetScrollScale() override;
     void SetBackgroundColor(uint32_t colorValue) override;
     void SetRenderPivot(float pivotX, float pivotY) override;
     void SetFrame(float positionX, float positionY, float width, float height) override;
@@ -489,6 +492,7 @@ public:
     void GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
     void AddRsNodeForCapture();
     static bool initDrawNodeChangeCallback_;
+    static bool initPropertyNodeChangeCallback_;
 
     void FreezeCanvasNode(bool freezeFlag = false);
     void RemoveCanvasNode();
@@ -533,6 +537,8 @@ public:
     std::vector<float> GetRenderNodePropertyValue(AnimationPropertyType property) override;
     void SyncRSPropertyToRenderContext(AnimationPropertyType property) override;
     void RemoveFromTree() override;
+
+    void SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion) override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -836,6 +842,7 @@ protected:
     std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> rotationZUserModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> cameraDistanceUserModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> scaleXYUserModifier_;
+    std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> scrollScaleModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSAlphaModifier> alphaUserModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSAlphaModifier> alphaModifier_;
     // translate modifiers for interruption
@@ -859,6 +866,7 @@ protected:
     std::shared_ptr<Rosen::RSRotationModifier> rotationZUserModifier_;
     std::shared_ptr<Rosen::RSCameraDistanceModifier> cameraDistanceUserModifier_;
     std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
+    std::shared_ptr<Rosen::RSScaleModifier> scrollScaleModifier_;
     std::shared_ptr<Rosen::RSAlphaModifier> alphaUserModifier_;
     std::shared_ptr<Rosen::RSAlphaModifier> alphaModifier_;
     // translate modifiers for interruption
@@ -918,6 +926,7 @@ protected:
 
 private:
     void ModifyCustomBackground();
+    bool ShouldSkipAffineTransformation(std::shared_ptr<RSNode> rsNode);
 };
 } // namespace OHOS::Ace::NG
 

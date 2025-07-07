@@ -367,6 +367,8 @@ public:
     virtual void SetShadowElevation(float elevation) {}
     virtual void SetShadowRadius(float radius) {}
     virtual void SetScale(float scaleX, float scaleY) {}
+    virtual void SetScrollScale(float scale) {}
+    virtual void ResetScrollScale() {}
     virtual void SetBackgroundColor(uint32_t colorValue) {}
     virtual void SetRenderPivot(float pivotX, float pivotY) {}
     virtual void SetFrame(float positionX, float positionY, float width, float height) {}
@@ -456,6 +458,7 @@ public:
 
     virtual void ClearDrawCommands() {}
 
+    virtual void RemoveOverlayModifier(const RefPtr<OverlayModifier>& modifier) {}
     virtual void RemoveContentModifier(const RefPtr<ContentModifier>& ContentModifier) {}
 
     virtual void DumpInfo() {}
@@ -813,6 +816,8 @@ public:
 
     virtual void SetDrawNode() {}
 
+    static void SetNeedCallbackNodeChange(bool needCallback);
+
     virtual void UpdateOcclusionCullingStatus(bool enable) {}
 
     virtual void SetAnimationPropertyValue(AnimationPropertyType property, const std::vector<float>& value) {}
@@ -827,6 +832,8 @@ public:
     virtual void SyncRSPropertyToRenderContext(AnimationPropertyType property) {}
 
     virtual void RemoveFromTree() {}
+
+    virtual void SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion) {}
 
 protected:
     RenderContext() = default;

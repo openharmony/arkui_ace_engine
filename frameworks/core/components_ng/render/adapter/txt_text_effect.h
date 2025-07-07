@@ -37,6 +37,7 @@ public:
     int UpdateTypography(std::vector<std::pair<RefPtr<Paragraph>, RefPtr<Paragraph>>>& paragraphs) override;
     void StartEffect(RSCanvas& canvas, double x, double y) override;
     void StopEffect() override;
+    void NoEffect(RSCanvas& canvas, double x, double y) override;
 
 private:
     std::shared_ptr<RSTextEffect> textEffect_;

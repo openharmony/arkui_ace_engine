@@ -70,6 +70,7 @@ void JSShape::SetViewPort(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    UnRegisterResource("ShapeViewPort");
     if (info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> leftValue = obj->GetProperty("x");
@@ -78,13 +79,24 @@ void JSShape::SetViewPort(const JSCallbackInfo& info)
         JSRef<JSVal> heightValue = obj->GetProperty("height");
         ShapeViewBox viewBox;
         CalcDimension dimLeft;
-        ParseJsDimensionVp(leftValue, dimLeft);
+        RefPtr<ResourceObject> dimLeftResObj;
+        ParseJsDimensionVp(leftValue, dimLeft, dimLeftResObj);
         CalcDimension dimTop;
-        ParseJsDimensionVp(topValue, dimTop);
+        RefPtr<ResourceObject> dimTopResObj;
+        ParseJsDimensionVp(topValue, dimTop, dimTopResObj);
         CalcDimension dimWidth;
-        ParseJsDimensionVp(widthValue, dimWidth);
+        RefPtr<ResourceObject> dimWidthResObj;
+        ParseJsDimensionVp(widthValue, dimWidth, dimWidthResObj);
         CalcDimension dimHeight;
-        ParseJsDimensionVp(heightValue, dimHeight);
+        RefPtr<ResourceObject> dimHeightResObj;
+        ParseJsDimensionVp(heightValue, dimHeight, dimHeightResObj);
+        if (SystemProperties::ConfigChangePerform() &&
+            (dimLeftResObj || dimTopResObj || dimWidthResObj || dimHeightResObj)) {
+            std::vector<RefPtr<ResourceObject>> resObjArray = { dimLeftResObj, dimTopResObj, dimWidthResObj,
+                dimHeightResObj };
+            std::vector<Dimension> dimArray = { dimLeft, dimTop, dimWidth, dimHeight };
+            ShapeModel::GetInstance()->SetViewPort(dimArray, resObjArray);
+        }
         ShapeModel::GetInstance()->SetViewPort(dimLeft, dimTop, dimWidth, dimHeight);
     }
     info.SetReturnValue(info.This());
@@ -138,6 +150,9 @@ void JSShape::JsSize(const JSCallbackInfo& info)
 void JSShape::SetStrokeDashArray(const JSCallbackInfo& info)
 {
     std::vector<Dimension> dashArray;
+    std::vector<RefPtr<ResourceObject>> resObjArray;
+    bool hasResObj = false;
+    UnRegisterResource("ShapeStrokeDashArray");
     if (info.Length() < 1 || !info[0]->IsArray()) {
         ShapeModel::GetInstance()->SetStrokeDashArray(dashArray);
         return;
@@ -151,16 +166,22 @@ void JSShape::SetStrokeDashArray(const JSCallbackInfo& info)
     for (int32_t i = 0; i < length; i++) {
         JSRef<JSVal> value = array->GetValueAt(i);
         CalcDimension dim;
+        RefPtr<ResourceObject> resObj;
         bool paramIsValid = false;
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            paramIsValid = ParseJsDimensionVp(value, dim);
+            paramIsValid = ParseJsDimensionVp(value, dim, resObj);
         } else {
-            paramIsValid = ParseJsDimensionVpNG(value, dim);
+            paramIsValid = ParseJsDimensionVpNG(value, dim, resObj);
+        }
+        if (resObj) {
+            hasResObj = true;
         }
         if (paramIsValid) {
             dashArray.emplace_back(dim);
+            resObjArray.emplace_back(resObj);
         } else {
             dashArray.clear();
+            resObjArray.clear();
             break;
         }
     }
@@ -168,7 +189,11 @@ void JSShape::SetStrokeDashArray(const JSCallbackInfo& info)
     if (static_cast<uint32_t>(length) == dashArray.size() && (static_cast<uint32_t>(length) & 1)) {
         for (int32_t i = 0; i < length; i++) {
             dashArray.emplace_back(dashArray[i]);
+            resObjArray.emplace_back(resObjArray[i]);
         }
+    }
+    if (SystemProperties::ConfigChangePerform() &&  hasResObj) {
+        ShapeModel::GetInstance()->SetStrokeDashArray(dashArray, resObjArray);
     }
     ShapeModel::GetInstance()->SetStrokeDashArray(dashArray);
     info.SetReturnValue(info.This());
@@ -180,7 +205,12 @@ void JSShape::SetStroke(const JSCallbackInfo& info)
         return;
     }
     Color strokeColor = Color::TRANSPARENT;
-    ParseJsColor(info[0], strokeColor);
+    RefPtr<ResourceObject> strokeResObj;
+    ParseJsColor(info[0], strokeColor, strokeResObj);
+    UnRegisterResource("ShapeStroke");
+    if (SystemProperties::ConfigChangePerform() && strokeResObj) {
+        RegisterResource<Color>("ShapeStroke", strokeResObj, strokeColor);
+    }
     ShapeModel::GetInstance()->SetStroke(strokeColor);
 }
 
@@ -191,14 +221,19 @@ void JSShape::SetFill(const JSCallbackInfo& info)
     }
     if (info[0]->IsString() && info[0]->ToString() == "none") {
         ShapeModel::GetInstance()->SetFill(Color::TRANSPARENT);
-    } else {
-        Color fillColor;
-        if (ParseJsColor(info[0], fillColor)) {
-            ShapeModel::GetInstance()->SetFill(fillColor);
-        } else {
-            ShapeModel::GetInstance()->SetFill(Color::BLACK);
-        }
+        return;
     }
+    Color fillColor;
+    RefPtr<ResourceObject> fillResObj;
+    UnRegisterResource("ShapeFill");
+    if (!ParseJsColor(info[0], fillColor, fillResObj)) {
+        ShapeModel::GetInstance()->SetFill(Color::BLACK);
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && fillResObj) {
+        RegisterResource<Color>("ShapeFill", fillResObj, fillColor);
+    }
+    ShapeModel::GetInstance()->SetFill(fillColor);
 }
 
 void JSShape::SetStrokeDashOffset(const JSCallbackInfo& info)
@@ -207,15 +242,20 @@ void JSShape::SetStrokeDashOffset(const JSCallbackInfo& info)
         return;
     }
     CalcDimension offset(0.0f);
+    RefPtr<ResourceObject> dashOffsetResObj;
+    UnRegisterResource("ShapeDashOffset");
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ParseJsDimensionVp(info[0], offset)) {
+        if (!ParseJsDimensionVp(info[0], offset, dashOffsetResObj)) {
             return;
         }
     } else {
-        if (!ParseJsDimensionVpNG(info[0], offset)) {
+        if (!ParseJsDimensionVpNG(info[0], offset, dashOffsetResObj)) {
             // set to default value(0.0f)
             offset.SetValue(0.0f);
         }
+    }
+    if (SystemProperties::ConfigChangePerform() && dashOffsetResObj) {
+        RegisterResource<CalcDimension>("ShapeDashOffset", dashOffsetResObj, offset);
     }
     ShapeModel::GetInstance()->SetStrokeDashOffset(offset);
 }
@@ -236,7 +276,12 @@ void JSShape::SetStrokeMiterLimit(const JSCallbackInfo& info)
         return;
     }
     double miterLimit = STROKE_MITERLIMIT_DEFAULT;
-    ParseJsDouble(info[0], miterLimit);
+    RefPtr<ResourceObject> miterLimitResObj;
+    ParseJsDouble(info[0], miterLimit, miterLimitResObj);
+    UnRegisterResource("ShapeMiterLimit");
+    if (SystemProperties::ConfigChangePerform() && miterLimitResObj) {
+        RegisterResource<double>("ShapeMiterLimit", miterLimitResObj, miterLimit);
+    }
     ShapeModel::GetInstance()->SetStrokeMiterLimit(miterLimit);
 }
 
@@ -246,7 +291,12 @@ void JSShape::SetStrokeOpacity(const JSCallbackInfo& info)
         return;
     }
     double strokeOpacity = DEFAULT_OPACITY;
-    ParseJsDouble(info[0], strokeOpacity);
+    RefPtr<ResourceObject> strokeOpacityResObj;
+    ParseJsDouble(info[0], strokeOpacity, strokeOpacityResObj);
+    UnRegisterResource("ShapeStrokeOpacity");
+    if (SystemProperties::ConfigChangePerform() && strokeOpacityResObj) {
+        RegisterResource<double>("ShapeStrokeOpacity", strokeOpacityResObj, strokeOpacity);
+    }
     ShapeModel::GetInstance()->SetStrokeOpacity(strokeOpacity);
 }
 
@@ -256,7 +306,12 @@ void JSShape::SetFillOpacity(const JSCallbackInfo& info)
         return;
     }
     double fillOpacity = DEFAULT_OPACITY;
-    ParseJsDouble(info[0], fillOpacity);
+    RefPtr<ResourceObject> fillOpacityResObj;
+    ParseJsDouble(info[0], fillOpacity, fillOpacityResObj);
+    UnRegisterResource("ShapeFillOpacity");
+    if (SystemProperties::ConfigChangePerform() && fillOpacityResObj) {
+        RegisterResource<double>("ShapeFillOpacity", fillOpacityResObj, fillOpacity);
+    }
     ShapeModel::GetInstance()->SetFillOpacity(fillOpacity);
 }
 
@@ -267,6 +322,7 @@ void JSShape::SetStrokeWidth(const JSCallbackInfo& info)
     }
     // the default value is 1.0_vp
     CalcDimension lineWidth = 1.0_vp;
+    UnRegisterResource("ShapeStrokeWidth");
     if (info[0]->IsString()) {
         const std::string& value = info[0]->ToString();
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -278,7 +334,11 @@ void JSShape::SetStrokeWidth(const JSCallbackInfo& info)
             }
         }
     } else {
-        ParseJsDimensionVp(info[0], lineWidth);
+        RefPtr<ResourceObject> strokeWidthResObj;
+        ParseJsDimensionVp(info[0], lineWidth, strokeWidthResObj);
+        if (SystemProperties::ConfigChangePerform() && strokeWidthResObj) {
+            RegisterResource<CalcDimension>("ShapeStrokeWidth", strokeWidthResObj, lineWidth);
+        }
     }
     if (lineWidth.IsNegative()) {
         lineWidth = 1.0_vp;
@@ -338,14 +398,19 @@ void JSShape::SetForegroundColor(const JSCallbackInfo& info)
         return;
     }
     Color foregroundColor;
+    RefPtr<ResourceObject> foregroundColorResObj;
     ForegroundColorStrategy strategy;
+    UnRegisterResource("ShapeForegroundColor");
     if (ParseJsColorStrategy(info[0], strategy)) {
         ShapeModel::GetInstance()->SetFill(Color::FOREGROUND);
         ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
         return;
     }
-    if (!ParseJsColor(info[0], foregroundColor)) {
+    if (!ParseJsColor(info[0], foregroundColor, foregroundColorResObj)) {
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && foregroundColorResObj) {
+        RegisterResource<Color>("ShapeForegroundColor", foregroundColorResObj, foregroundColor);
     }
     ShapeModel::GetInstance()->SetForegroundColor(foregroundColor);
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);

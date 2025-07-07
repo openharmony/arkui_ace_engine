@@ -60,6 +60,15 @@ public:
     void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjIntervalSize(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjSnapPaginations(std::vector<RefPtr<ResourceObject>>& resObjs) override;
+    void SetMaxZoomScale(float scale) override;
+    void SetMinZoomScale(float scale) override;
+    void SetZoomScale(float scale) override;
+    void ResetZoomScale() override;
+    void SetEnableBouncesZoom(bool enable) override;
+    void SetOnDidZoom(std::function<void(float)>&& event) override;
+    void SetOnZoomStart(std::function<void()>&& event) override;
+    void SetOnZoomStop(std::function<void()>&& event) override;
+
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetScrollController(
         FrameNode* frameNode, const RefPtr<ScrollControllerBase>& scroller, const RefPtr<ScrollProxy>& proxy);
@@ -103,6 +112,14 @@ public:
     static void SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollProxy>& proxy);
     static void CreateWithResourceObjSnapPaginations(
         FrameNode* frameNode, std::vector<RefPtr<ResourceObject>>& resObjs);
+    static void SetMaxZoomScale(FrameNode* frameNode, float scale);
+    static void SetMinZoomScale(FrameNode* frameNode, float scale);
+    static void SetZoomScale(FrameNode* frameNode, float scale);
+    static void ResetZoomScale(FrameNode* frameNode);
+    static void SetEnableBouncesZoom(FrameNode* frameNode, bool enable);
+    static void SetOnDidZoom(FrameNode* frameNode, std::function<void(float)>&& event);
+    static void SetOnZoomStart(FrameNode* frameNode, std::function<void()>&& event);
+    static void SetOnZoomStop(FrameNode* frameNode, std::function<void()>&& event);
 private:
     static bool CheckSnapPaginations(const std::vector<Dimension>& snapPaginations);
     static bool HasResObj(const std::vector<RefPtr<ResourceObject>>& resObjs);

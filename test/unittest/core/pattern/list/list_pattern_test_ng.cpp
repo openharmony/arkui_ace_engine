@@ -1770,4 +1770,36 @@ HWTEST_F(ListPatternTestNg, VerifyFocusIndex08, TestSize.Level1)
     listPattern->VerifyFocusIndex(nextIndex, nextIndexInGroup, param);
     EXPECT_EQ(nextIndexInGroup, 3);
 }
+
+/**
+ * @tc.name: CustomizeSafeAreaPadding001
+ * @tc.desc: Test ListPattern CustomizeSafeAreaPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, CustomizeSafeAreaPadding001, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    PaddingPropertyF padding { 10, 10, 10, 10 };
+    padding = listPattern->CustomizeSafeAreaPadding(padding, false);
+    EXPECT_EQ(padding.top, std::nullopt);
+    EXPECT_EQ(padding.bottom, std::nullopt);
+    EXPECT_EQ(padding.left, 10);
+    EXPECT_EQ(padding.right, 10);
+}
+
+/**
+ * @tc.name: CustomizeSafeAreaPadding002
+ * @tc.desc: Test ListPattern CustomizeSafeAreaPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, CustomizeSafeAreaPadding002, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    PaddingPropertyF padding { 10, 10, 10, 10 };
+    padding = listPattern->CustomizeSafeAreaPadding(padding, true);
+    EXPECT_EQ(padding.top, 10);
+    EXPECT_EQ(padding.bottom, 10);
+    EXPECT_EQ(padding.left, std::nullopt);
+    EXPECT_EQ(padding.right, std::nullopt);
+}
 } // namespace OHOS::Ace::NG

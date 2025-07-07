@@ -235,6 +235,7 @@ public:
     void SetMenuOutline(const MenuParam& menuParam);
     void SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply);
     void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply);
+    void SetArrowColor(const Color& color);
     void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
     void SetSelectedOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply);
     std::function<void(WeakPtr<NG::FrameNode>)>& GetTextModifier();
@@ -366,6 +367,7 @@ private:
     void ToJsonOptionAlign(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonMenuBackgroundStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonDivider(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonDividerMode(std::unique_ptr<JsonValue>& json) const;
     void ToJsonOptionMaxlines(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     // XTS inspector helper functions
     std::string InspectorGetOptions() const;

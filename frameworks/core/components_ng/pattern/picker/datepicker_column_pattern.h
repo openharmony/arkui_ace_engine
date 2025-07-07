@@ -72,7 +72,7 @@ public:
     void UpdateColumnChildPosition(double offsetY) override;
     bool CanMove(bool isDown) const override;
     bool IsTossNeedToStop() override;
-    bool GetCanLoopFromLayoutProperty() const;
+    bool GetCanLoopFromLayoutProperty() const override;
 
     const std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>>& GetOptions() const
     {

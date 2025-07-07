@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "core/components/common/properties/color.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 enum ModalTransition {
@@ -44,6 +45,18 @@ struct ModalStyle {
             isAllowAddChildBelowModalUec != modelStyle.isAllowAddChildBelowModalUec ||
             prohibitedRemoveByNavigation != modelStyle.prohibitedRemoveByNavigation);
     }
+
+    void SetBackgroundColorResObj(RefPtr<ResourceObject>& obj)
+    {
+        backgroundColorObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetBackgroundColorResObj()
+    {
+        return backgroundColorObj_;
+    }
+
+    RefPtr<ResourceObject> backgroundColorObj_;
 };
 } // namespace OHOS::Ace::NG
 

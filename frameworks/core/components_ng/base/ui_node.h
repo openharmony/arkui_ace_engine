@@ -187,7 +187,7 @@ public:
     }
 
     // Return children for get inspector tree calling, return cache children directly
-    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector() const
+    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector(bool needCacheNode = false) const
     {
         return children_;
     }
@@ -648,6 +648,16 @@ public:
     NodeStatus GetNodeStatus() const;
     void UpdateNodeStatus(NodeStatus nodeStatus);
     void SetIsRootBuilderNode(bool isRootBuilderNode);
+    void SetJsBuilderNodeId(int32_t jsBuilderNodeId)
+    {
+        jsBuilderNodeId_ = jsBuilderNodeId;
+    }
+
+    int32_t GetJsBuilderNodeId() const
+    {
+        return jsBuilderNodeId_;
+    }
+
     bool GetIsRootBuilderNode() const;
     void SetNodeAdapter(bool enable)
     {
@@ -1178,6 +1188,7 @@ protected:
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
+    int32_t jsBuilderNodeId_ = -1;
     int64_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
     int32_t rootNodeId_ = 0; // host is Page or NavDestination

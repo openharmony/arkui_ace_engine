@@ -33,6 +33,7 @@ namespace OHOS::Ace::NG {
 constexpr Dimension SELECT_HANDLE_DEFAULT_HEIGHT = 16.0_vp;
 constexpr float SELECT_MENE_HEIGHT = 140.0f;
 constexpr int32_t HALF = 2;
+const std::string ASK_CELIA_TAG = "askCelia";
 
 bool WebSelectOverlay::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
@@ -118,7 +119,7 @@ void WebSelectOverlay::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebT
     } else {
         if (overlayType == INSERT_OVERLAY) {
             if (!selectOverlayDragging_) {
-                UpdateTouchHandleForOverlay(false);
+                UpdateTouchHandleForOverlay(true);
             }
         } else {
             UpdateSelectHandleInfo();
@@ -352,6 +353,7 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     canShowAIMenu_ = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
                      (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
     canShowAIMenu_ = canShowAIMenu_ && !(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT);
+    selectInfo.menuInfo.isAskCeliaEnabled = canShowAIMenu_;
     DetectSelectedText(detectFlag ? value : std::string());
 }
 
@@ -767,6 +769,7 @@ bool WebSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     SetEnableSubWindowMenu(true);
     SetMenuTranslateIsSupport(true);
     SetIsSupportMenuSearch(true);
+    CheckEnableContainerModal();
     pipeline->AddOnAreaChangeNode(host->GetId());
     return true;
 }
@@ -865,10 +868,39 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
             pattern->CloseSelectOverlay();
             SelectCancel();
             break;
+        case OptionMenuActionId::ASK_CELIA:
+            HandleOnAskCelia();
+            break;
         default:
             TAG_LOGI(AceLogTag::ACE_WEB, "Unsupported menu option id %{public}d", id);
             break;
     }
+}
+
+void WebSelectOverlay::HandleOnAskCelia()
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto vectorStringFunc = pattern->textDetectResult_.menuOptionAndAction.find(ASK_CELIA_TAG);
+    if (vectorStringFunc == pattern->textDetectResult_.menuOptionAndAction.end() || vectorStringFunc->second.empty()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "HandleOnAskCelia failed no askCelia option.");
+    } else {
+        auto funcVariant = vectorStringFunc->second.begin()->second;
+        if (std::holds_alternative<std::function<void(int, std::string)>>(funcVariant)) {
+            auto func = std::get<std::function<void(int, std::string)>>(funcVariant);
+            if (func) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "HandleOnAskCelia execute.");
+                func(true, GetSelectedText());
+            } else {
+                TAG_LOGE(AceLogTag::ACE_WEB, "HandleOnAskCelia failed option is null.");
+            }
+        } else {
+            TAG_LOGE(AceLogTag::ACE_WEB, "HandleOnAskCelia failed option type error.");
+        }
+    }
+    pattern->CloseSelectOverlay();
+    SelectCancel();
+    return;
 }
 
 void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo)
@@ -923,6 +955,7 @@ void WebSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst
     }
     aiMenuType_ = TextDataDetectType::INVALID;
     webSelectInfo_.menuInfo.aiMenuOptionType = aiMenuType_;
+    webSelectInfo_.menuInfo.isAskCeliaEnabled = canShowAIMenu_;
     pattern->WebOverlayRequestFocus();
 }
 
@@ -986,6 +1019,7 @@ void WebSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reaso
     CHECK_NULL_VOID(host);
     aiMenuType_ = TextDataDetectType::INVALID;
     webSelectInfo_.menuInfo.aiMenuOptionType = aiMenuType_;
+    webSelectInfo_.menuInfo.isAskCeliaEnabled = canShowAIMenu_;
     StopListenSelectOverlayParentScroll(host);
     SetTouchHandleExistState(false);
 }
@@ -1097,6 +1131,7 @@ void WebSelectOverlay::OnHandleMarkInfoChange(
         if (info->menuInfo.aiMenuOptionType != aiMenuType_) {
             TAG_LOGI(AceLogTag::ACE_WEB, "WebSelectOverlay::OnHandleMarkInfoChange aiMenuOptionType change.");
             info->menuInfo.aiMenuOptionType = aiMenuType_;
+            info->menuInfo.isAskCeliaEnabled = canShowAIMenu_ && (aiMenuType_ == TextDataDetectType::INVALID);
             manager->NotifyUpdateToolBar(true);
         }
     }
@@ -1163,6 +1198,7 @@ void WebSelectOverlay::UpdateAISelectMenu(TextDataDetectType type, const std::st
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     webSelectInfo_.menuInfo.aiMenuOptionType = aiMenuType_;
+    webSelectInfo_.menuInfo.isAskCeliaEnabled = canShowAIMenu_ && (aiMenuType_ == TextDataDetectType::INVALID);
     manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM);
 }
 

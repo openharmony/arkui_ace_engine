@@ -15,9 +15,48 @@
 
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 
+#include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
 namespace OHOS::Ace::NG {
+void MenuItemGroupPattern::OnAttachToFrameNode()
+{
+    CreateBottomDivider();
+}
+
+void MenuItemGroupPattern::CreateBottomDivider()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bottomDivider_ = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    auto dividerPattern = bottomDivider_->GetPattern<MenuDividerPattern>();
+    dividerPattern->BindMenuItem(host);
+}
+
+void MenuItemGroupPattern::AttachBottomDivider()
+{
+    CHECK_NULL_VOID(bottomDivider_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    RemoveBottomDivider();
+    auto index = parent->GetChildIndex(host);
+    if (index >= 0) {
+        bottomDivider_->MountToParent(parent, ++index);
+    }
+}
+
+void MenuItemGroupPattern::RemoveBottomDivider()
+{
+    CHECK_NULL_VOID(bottomDivider_);
+    auto dividerParent = bottomDivider_->GetParent();
+    if (dividerParent) {
+        dividerParent->RemoveChild(bottomDivider_);
+    }
+}
+
 void MenuItemGroupPattern::OnMountToParentDone()
 {
     ModifyFontSize();
@@ -77,6 +116,7 @@ void MenuItemGroupPattern::AddHeader(const RefPtr<NG::UINode>& header)
         host->ReplaceChild(host->GetChildAtIndex(headerIndex_), header);
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(header);
+    header_ = frameNode;
     CHECK_NULL_VOID(frameNode);
     if (headerContent_) {
         auto pipeline = headerContent_->GetContext();
@@ -103,6 +143,7 @@ void MenuItemGroupPattern::AddFooter(const RefPtr<NG::UINode>& footer)
         host->ReplaceChild(host->GetChildAtIndex(footerIndex_), footer);
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(footer);
+    footer_ = frameNode;
     CHECK_NULL_VOID(frameNode);
     if (footerContent_) {
         auto pipeline = footerContent_->GetContext();

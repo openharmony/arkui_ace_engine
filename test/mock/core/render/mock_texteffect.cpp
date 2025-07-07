@@ -25,6 +25,11 @@ MockTextEffect::MockTextEffect() {}
 
 int MockTextEffect::UpdateEffectConfig(TextFlipDirection direction, bool enableBlur)
 {
+    if (direction_ && direction_.value() == direction && enableBlur == enableBlur_) {
+        return 0;
+    }
+    direction_ = direction;
+    enableBlur_ = enableBlur;
     return -1;
 }
 
@@ -42,4 +47,5 @@ int MockTextEffect::UpdateTypography(std::vector<std::pair<RefPtr<Paragraph>, Re
 
 void MockTextEffect::StartEffect(RSCanvas& canvas, double x, double y) {}
 void MockTextEffect::StopEffect() {}
+void MockTextEffect::NoEffect(RSCanvas& canvas, double x, double y) {}
 } // namespace OHOS::Ace::NG

@@ -426,9 +426,11 @@ class __RepeatVirtualScroll2Impl<T> {
             this.preventReRender_ = false;
             return this.totalCount();
         }
-        return (typeof this.totalCount_ === 'function')
-            ? (this.totalCount_() >= 0 ? this.totalCount_() : this.arr_.length)
-            : this.totalCount_ ?? this.arr_.length;
+        if (typeof this.totalCount_ === 'function') {
+            let totalCount = this.totalCount_();
+            return (Number.isInteger(totalCount) && totalCount >= 0) ? totalCount : this.arr_.length;
+        }
+        return this.totalCount_ ?? this.arr_.length;
     }
 
     // initial render

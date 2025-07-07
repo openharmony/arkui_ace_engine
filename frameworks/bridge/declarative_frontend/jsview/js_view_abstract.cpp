@@ -1421,32 +1421,48 @@ void ParseEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& co
     bool notNegative, CalcDimension defaultValue)
 {
     CalcDimension left;
-    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(LEFT_PROPERTY), left, true)) {
+    RefPtr<ResourceObject> leftResObj;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(LEFT_PROPERTY), left, leftResObj, true)) {
         CheckDimensionUnit(left, notPercent, notNegative);
         commonCalcDimension.left = left;
     } else {
         commonCalcDimension.left = defaultValue;
     }
     CalcDimension right;
-    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(RIGHT_PROPERTY), right, true)) {
+    RefPtr<ResourceObject> rightResObj;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(RIGHT_PROPERTY), right, rightResObj, true)) {
         CheckDimensionUnit(right, notPercent, notNegative);
         commonCalcDimension.right = right;
     } else {
         commonCalcDimension.right = defaultValue;
     }
     CalcDimension top;
-    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(TOP_PROPERTY), top, true)) {
+    RefPtr<ResourceObject> topResObj;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(TOP_PROPERTY), top, topResObj, true)) {
         CheckDimensionUnit(top, notPercent, notNegative);
         commonCalcDimension.top = top;
     } else {
         commonCalcDimension.top = defaultValue;
     }
     CalcDimension bottom;
-    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(BOTTOM_PROPERTY), bottom, true)) {
+    RefPtr<ResourceObject> bottomResObj;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(BOTTOM_PROPERTY), bottom, bottomResObj, true)) {
         CheckDimensionUnit(bottom, false, true);
         commonCalcDimension.bottom = bottom;
     } else {
         commonCalcDimension.bottom = defaultValue;
+    }
+    if (leftResObj) {
+        commonCalcDimension.leftResObj = leftResObj;
+    }
+    if (rightResObj) {
+        commonCalcDimension.rightResObj = rightResObj;
+    }
+    if (topResObj) {
+        commonCalcDimension.topResObj = topResObj;
+    }
+    if (bottomResObj) {
+        commonCalcDimension.bottomResObj = bottomResObj;
     }
 }
 
@@ -1496,33 +1512,41 @@ void ParseLocalizedEdgeWidthsProps(const JSRef<JSObject>& object, LocalizedCalcD
     if (object->HasProperty(START_PROPERTY) && object->GetProperty(START_PROPERTY)->IsObject()) {
         JSRef<JSObject> startObj = JSRef<JSObject>::Cast(object->GetProperty(START_PROPERTY));
         CalcDimension calcDimension;
-        if (ParseJsLengthMetrics(startObj, calcDimension)) {
+        RefPtr<ResourceObject> leftResObj;
+        if (JSViewAbstract::ParseJsLengthMetricsVpWithResObj(startObj, calcDimension, leftResObj)) {
             CheckDimensionUnit(calcDimension, false, true);
             localizedCalcDimension.start = calcDimension;
+            localizedCalcDimension.leftResObj = leftResObj;
         }
     }
     if (object->HasProperty(END_PROPERTY) && object->GetProperty(END_PROPERTY)->IsObject()) {
         JSRef<JSObject> endObj = JSRef<JSObject>::Cast(object->GetProperty(END_PROPERTY));
         CalcDimension calcDimension;
-        if (ParseJsLengthMetrics(endObj, calcDimension)) {
+        RefPtr<ResourceObject> rightResObj;
+        if (JSViewAbstract::ParseJsLengthMetricsVpWithResObj(endObj, calcDimension, rightResObj)) {
             CheckDimensionUnit(calcDimension, false, true);
             localizedCalcDimension.end = calcDimension;
+            localizedCalcDimension.rightResObj = rightResObj;
         }
     }
     if (object->HasProperty(TOP_PROPERTY) && object->GetProperty(TOP_PROPERTY)->IsObject()) {
         JSRef<JSObject> topObj = JSRef<JSObject>::Cast(object->GetProperty(TOP_PROPERTY));
         CalcDimension calcDimension;
-        if (ParseJsLengthMetrics(topObj, calcDimension)) {
+        RefPtr<ResourceObject> topResObj;
+        if (JSViewAbstract::ParseJsLengthMetricsVpWithResObj(topObj, calcDimension, topResObj)) {
             CheckDimensionUnit(calcDimension, false, true);
             localizedCalcDimension.top = calcDimension;
+            localizedCalcDimension.topResObj = topResObj;
         }
     }
     if (object->HasProperty(BOTTOM_PROPERTY) && object->GetProperty(BOTTOM_PROPERTY)->IsObject()) {
         JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(object->GetProperty(BOTTOM_PROPERTY));
         CalcDimension calcDimension;
-        if (ParseJsLengthMetrics(bottomObj, calcDimension)) {
+        RefPtr<ResourceObject> bottomResObj;
+        if (JSViewAbstract::ParseJsLengthMetricsVpWithResObj(bottomObj, calcDimension, bottomResObj)) {
             CheckDimensionUnit(calcDimension, false, true);
             localizedCalcDimension.bottom = calcDimension;
+            localizedCalcDimension.bottomResObj = bottomResObj;
         }
     }
 }
@@ -1570,6 +1594,10 @@ void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimensi
         commonCalcDimension.bottom = localizedCalcDimension.bottom;
         commonCalcDimension.left = isRightToLeft ? localizedCalcDimension.end : localizedCalcDimension.start;
         commonCalcDimension.right = isRightToLeft ? localizedCalcDimension.start : localizedCalcDimension.end;
+        commonCalcDimension.leftResObj = isRightToLeft ? localizedCalcDimension.rightResObj : localizedCalcDimension.leftResObj;
+        commonCalcDimension.rightResObj = isRightToLeft ? localizedCalcDimension.leftResObj : localizedCalcDimension.rightResObj;
+        commonCalcDimension.topResObj = localizedCalcDimension.topResObj;
+        commonCalcDimension.bottomResObj = localizedCalcDimension.bottomResObj;
         return;
     }
     ParseEdgeWidthsProps(object, commonCalcDimension, false, true, 0.0_vp);
@@ -1613,6 +1641,107 @@ void SetConstraintSize(const RefPtr<ResourceObject>& minWidthResObj, const RefPt
     }
     if (maxHeightResObj) {
         ViewAbstractModel::GetInstance()->SetMaxHeight(maxHeightResObj);
+    }
+}
+
+void RegisterBorderColorRes(NG::BorderColorProperty& colorProperty,
+    const CommonColor& commonColor, bool isLocalizedEdgeColor)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+       return; 
+    }
+    if (commonColor.leftResObj) {
+        auto&& updateFunc = [isLocalizedEdgeColor](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            isLocalizedEdgeColor ? (borderColors.startColor = result) : (borderColors.leftColor = result);
+        };
+        colorProperty.AddResource("borderColor.start", commonColor.leftResObj, std::move(updateFunc));
+    } else {
+        colorProperty.RemoveResource("borderColor.start");
+    }
+    if (commonColor.rightResObj) {
+        auto&& updateFunc = [isLocalizedEdgeColor](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            isLocalizedEdgeColor ? (borderColors.endColor = result) : (borderColors.rightColor = result);
+        };
+        colorProperty.AddResource("borderColor.end", commonColor.rightResObj, std::move(updateFunc));
+    } else {
+        colorProperty.RemoveResource("borderColor.end");
+    }
+    if (commonColor.topResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.topColor = result;
+        };
+        colorProperty.AddResource("borderColor.top", commonColor.topResObj, std::move(updateFunc));
+    } else {
+        colorProperty.RemoveResource("borderColor.top");
+    }
+    if (commonColor.bottomResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.bottomColor = result;
+        };
+        colorProperty.AddResource("borderColor.bottom", commonColor.bottomResObj, std::move(updateFunc));
+    } else {
+        colorProperty.RemoveResource("borderColor.bottom");
+    }
+}
+
+void RegisterRadiusRes(NG::BorderRadiusProperty& radius,
+    RefPtr<ResourceObject> topStartResObj, RefPtr<ResourceObject> topEndResObj,
+    RefPtr<ResourceObject> bottomStartResObj, RefPtr<ResourceObject> bottomEndResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (topStartResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& radius) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            radius.radiusTopLeft = result;
+            radius.multiValued = true;
+        };
+        radius.AddResource("radius.topStart", topStartResObj, std::move(updateFunc));
+    } else {
+        radius.RemoveResource("radius.topStart");
+    }
+    if (topEndResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& radius) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            radius.radiusTopRight = result;
+            radius.multiValued = true;
+        };
+        radius.AddResource("radius.topEnd", topEndResObj, std::move(updateFunc));
+    } else {
+        radius.RemoveResource("radius.topEnd");
+    }
+    if (bottomStartResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& radius) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            radius.radiusBottomRight = result;
+            radius.multiValued = true;
+        };
+        radius.AddResource("radius.bottomStart", bottomStartResObj, std::move(updateFunc));
+    } else {
+        radius.RemoveResource("radius.bottomStart");
+    }
+    if (bottomEndResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& radius) {
+            CalcDimension result;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+            radius.radiusBottomLeft = result;
+            radius.multiValued = true;
+        };
+        radius.AddResource("radius.bottomEnd", bottomEndResObj, std::move(updateFunc));
+    } else {
+        radius.RemoveResource("radius.bottomEnd");
     }
 }
 } // namespace
@@ -2608,6 +2737,10 @@ void JSViewAbstract::JsSize(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
 {
+    ViewAbstractModel::GetInstance()->ResetResObj("constraintSize.minWidth");
+    ViewAbstractModel::GetInstance()->ResetResObj("constraintSize.maxWidth");
+    ViewAbstractModel::GetInstance()->ResetResObj("constraintSize.minHeight");
+    ViewAbstractModel::GetInstance()->ResetResObj("constraintSize.maxHeight");
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsConstraintSize", jsVal, checkList)) {
@@ -8936,6 +9069,7 @@ void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
     Color strokeColor;
     RefPtr<ResourceObject> resObjColor;
     if (ParseColorMetricsToColor(obj->GetProperty("strokeColor"), strokeColor, resObjColor)) {
+        CompleteResourceObjectFromColor(resObjColor, strokeColor, true);
         ViewAbstractModel::GetInstance()->SetFocusBoxStyleUpdateFunc(style, resObjColor, "focusBoxStyleColor");
         style.strokeColor = strokeColor;
     }
@@ -9042,14 +9176,24 @@ void JSViewAbstract::JsOnCrownEvent(const JSCallbackInfo& args)
 
 void JSViewAbstract::ParseBindSheetBorderRadius(const JSRef<JSVal>& args, NG::SheetStyle& sheetStyle)
 {
+    RefPtr<ResourceObject> resObj;
+    ParseBindSheetBorderRadius(args, sheetStyle, resObj);
+}
+
+void JSViewAbstract::ParseBindSheetBorderRadius(const JSRef<JSVal>& args,
+    NG::SheetStyle& sheetStyle, RefPtr<ResourceObject>& resourceObj)
+{
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
         TAG_LOGE(AceLogTag::ACE_SHEET, "radius is not correct type");
         return;
     }
     CalcDimension radius;
     NG::BorderRadiusProperty borderRadius;
-    if (ParseJsLengthMetrics(args, radius)) {
+    if (ParseJsLengthMetricsVpWithResObj(args, radius, resourceObj)) {
         borderRadius.SetRadius(radius);
+
+        // multiValued: indicates whether to set multiple directions. The default value is false.
+        borderRadius.multiValued = false;
         sheetStyle.radius = borderRadius;
     } else if (ParseBindSheetBorderRadiusProps(args, borderRadius)) {
         sheetStyle.radius = borderRadius;
@@ -9064,17 +9208,29 @@ bool JSViewAbstract::ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, N
     if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         if (CheckLengthMetrics(object)) {
-            std::optional<CalcDimension> radiusTopStart = ParseBindSheetBorderRadiusProp(object, TOP_START_PROPERTY);
-            std::optional<CalcDimension> radiusTopEnd = ParseBindSheetBorderRadiusProp(object, TOP_END_PROPERTY);
+            RefPtr<ResourceObject> topStartResObj;
+            std::optional<CalcDimension> radiusTopStart =
+                ParseBindSheetBorderRadiusProp(object, TOP_START_PROPERTY, topStartResObj);
+            RefPtr<ResourceObject> topEndResObj;
+            std::optional<CalcDimension> radiusTopEnd =
+                ParseBindSheetBorderRadiusProp(object, TOP_END_PROPERTY, topEndResObj);
+            RefPtr<ResourceObject> bottomStartResObj;
             std::optional<CalcDimension> radiusBottomStart =
-                ParseBindSheetBorderRadiusProp(object, BOTTOM_START_PROPERTY);
-            std::optional<CalcDimension> radiusBottomEnd = ParseBindSheetBorderRadiusProp(object, BOTTOM_END_PROPERTY);
+                ParseBindSheetBorderRadiusProp(object, BOTTOM_START_PROPERTY, bottomStartResObj);
+            RefPtr<ResourceObject> bottomEndResObj;
+            std::optional<CalcDimension> radiusBottomEnd =
+                ParseBindSheetBorderRadiusProp(object, BOTTOM_END_PROPERTY, bottomEndResObj);
             auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
             radius.radiusTopLeft = isRightToLeft ? radiusTopEnd : radiusTopStart;
             radius.radiusTopRight = isRightToLeft ? radiusTopStart : radiusTopEnd;
             radius.radiusBottomLeft = isRightToLeft ? radiusBottomEnd : radiusBottomStart;
             radius.radiusBottomRight = isRightToLeft ? radiusBottomStart : radiusBottomEnd;
             radius.multiValued = true;
+            if (isRightToLeft) {
+                RegisterRadiusRes(radius, topEndResObj, topStartResObj, bottomEndResObj, bottomStartResObj);
+            } else {
+                RegisterRadiusRes(radius, topStartResObj, topEndResObj, bottomStartResObj, bottomEndResObj);
+            }
         } else {
             ParseBorderRadiusProps(object, radius);
         }
@@ -9084,7 +9240,7 @@ bool JSViewAbstract::ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, N
 }
 
 std::optional<CalcDimension> JSViewAbstract::ParseBindSheetBorderRadiusProp(
-    const JSRef<JSObject>& object, const char* prop)
+    const JSRef<JSObject>& object, const char* prop, RefPtr<ResourceObject>& resourceObj)
 {
     if (object->IsEmpty()) {
         return std::nullopt;
@@ -9092,7 +9248,7 @@ std::optional<CalcDimension> JSViewAbstract::ParseBindSheetBorderRadiusProp(
     if (object->HasProperty(prop) && object->GetProperty(prop)->IsObject()) {
         JSRef<JSObject> propObj = JSRef<JSObject>::Cast(object->GetProperty(prop));
         CalcDimension calcDimension;
-        if (ParseJsLengthMetrics(propObj, calcDimension)) {
+        if (ParseJsLengthMetricsVpWithResObj(propObj, calcDimension, resourceObj)) {
             return calcDimension;
         }
     }
@@ -9743,13 +9899,26 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
 
 void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY) && !info[0]->IsObject()) {
         return;
     }
 
     auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
     bool IsSupportDrawModifier = frameNode && frameNode->IsSupportDrawModifier();
     if (!IsSupportDrawModifier) {
+        return;
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) && !info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetDrawModifier(nullptr);
+        if (frameNode) {
+            const auto& extensionHandler = frameNode->GetExtensionHandler();
+            if (extensionHandler) {
+                extensionHandler->InvalidateRender();
+                extensionHandler->ForegroundRender();
+            } else {
+                frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+            }
+        }
         return;
     }
     auto jsDrawModifier = JSRef<JSObject>::Cast(info[0]);
@@ -10608,7 +10777,7 @@ void JSViewAbstract::NewParseSweepGradientColor(NG::Gradient& gradient, RefPtr<R
     auto&& updateFunc = [gradientColor, indx](const RefPtr<ResourceObject>& resObj,
         NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t index = 0; index < colorLength; index++) {
             NG::GradientColor gradColor = colorVector[index];
@@ -10630,7 +10799,7 @@ void JSViewAbstract::NewParseRadialGradientColor(NG::Gradient& gradient, RefPtr<
     auto&& updateFunc = [gradientColor, indx](const RefPtr<ResourceObject>& resObj,
         NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t index = 0; index < colorLength; index++) {
             NG::GradientColor gradColor = colorVector[index];
@@ -10652,7 +10821,7 @@ void JSViewAbstract::NewParseGradientColor(NG::Gradient& gradient, RefPtr<Resour
     auto&& updateFunc = [gradientColor, indx](const RefPtr<ResourceObject>& resObj,
         NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t index = 0; index < colorLength; index++) {
             NG::GradientColor gradColor = colorVector[index];
@@ -10706,7 +10875,7 @@ void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JS
         gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
         gradient.AddColor(gradientColor);
         if (SystemProperties::ConfigChangePerform() && resObj) {
-            int32_t indx = i - nullNum;
+            int32_t indx = static_cast<int32_t>(i) - nullNum;
             if (mapIdx == NUM_1) {
                 NewParseSweepGradientColor(gradient, resObj, gradientColor, indx);
             } else if (mapIdx == NUM_2) {
@@ -11636,6 +11805,13 @@ void JSViewAbstract::GetBorderColorsFromResource(const JSRef<JSVal>& args, NG::B
 
 bool JSViewAbstract::ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty)
 {
+    RefPtr<ResourceObject> resourceObj;
+    return ParseBorderColorProps(args, colorProperty, resourceObj);
+}
+
+bool JSViewAbstract::ParseBorderColorProps(const JSRef<JSVal>& args,
+    NG::BorderColorProperty& colorProperty, RefPtr<ResourceObject>& resourceObj)
+{
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
         return false;
     }
@@ -11644,7 +11820,7 @@ bool JSViewAbstract::ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderC
         return true;
     }
     Color borderColor;
-    if (ParseJsColor(args, borderColor)) {
+    if (ParseJsColor(args, borderColor, resourceObj)) {
         colorProperty.SetColor(borderColor);
         return true;
     } else if (args->IsObject()) {
@@ -11661,12 +11837,20 @@ bool JSViewAbstract::ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderC
             colorProperty.rightColor = commonColor.right;
         }
         colorProperty.multiValued = true;
+        RegisterBorderColorRes(colorProperty, commonColor, isLocalizedEdgeColor);
         return true;
     }
     return false;
 }
 
 bool JSViewAbstract::ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty)
+{
+    RefPtr<ResourceObject> resourceObj;
+    return ParseBorderWidthProps(args, borderWidthProperty, resourceObj);
+}
+
+bool JSViewAbstract::ParseBorderWidthProps(const JSRef<JSVal>& args,
+    NG::BorderWidthProperty& borderWidthProperty, RefPtr<ResourceObject>& resourceObj)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
         return false;
@@ -11676,7 +11860,7 @@ bool JSViewAbstract::ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderW
         return true;
     }
     CalcDimension borderWidth;
-    if (ParseJsDimensionVpNG(args, borderWidth, true)) {
+    if (ParseJsDimensionVpNG(args, borderWidth, resourceObj, true)) {
         if (borderWidth.IsNegative()) {
             borderWidth.Reset();
         }
@@ -11692,6 +11876,11 @@ bool JSViewAbstract::ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderW
         borderWidthProperty.leftDimen = commonCalcDimension.left;
         borderWidthProperty.rightDimen = commonCalcDimension.right;
         borderWidthProperty.multiValued = true;
+        if (SystemProperties::ConfigChangePerform()) {
+            ParseEdgeWidthsResObjFunc(borderWidthProperty,
+                commonCalcDimension.leftResObj, commonCalcDimension.rightResObj,
+                commonCalcDimension.topResObj, commonCalcDimension.bottomResObj);
+        }
         return true;
     }
     return false;
@@ -11738,19 +11927,23 @@ void JSViewAbstract::ParseBorderRadiusProps(const JSRef<JSObject>& object, NG::B
     std::optional<CalcDimension> radiusBottomLeft;
     std::optional<CalcDimension> radiusBottomRight;
     CalcDimension topLeft;
-    if (ParseJsDimensionVpNG(object->GetProperty("topLeft"), topLeft, true)) {
+    RefPtr<ResourceObject> topStartResObj;
+    if (ParseJsDimensionVpNG(object->GetProperty("topLeft"), topLeft, topStartResObj, true)) {
         radiusTopLeft = topLeft;
     }
     CalcDimension topRight;
-    if (ParseJsDimensionVpNG(object->GetProperty("topRight"), topRight, true)) {
+    RefPtr<ResourceObject> topEndResObj;
+    if (ParseJsDimensionVpNG(object->GetProperty("topRight"), topRight, topEndResObj, true)) {
         radiusTopRight = topRight;
     }
     CalcDimension bottomLeft;
-    if (ParseJsDimensionVpNG(object->GetProperty("bottomLeft"), bottomLeft, true)) {
+    RefPtr<ResourceObject> bottomStartResObj;
+    if (ParseJsDimensionVpNG(object->GetProperty("bottomLeft"), bottomLeft, bottomStartResObj, true)) {
         radiusBottomLeft = bottomLeft;
     }
     CalcDimension bottomRight;
-    if (ParseJsDimensionVpNG(object->GetProperty("bottomRight"), bottomRight, true)) {
+    RefPtr<ResourceObject> bottomEndResObj;
+    if (ParseJsDimensionVpNG(object->GetProperty("bottomRight"), bottomRight, bottomEndResObj, true)) {
         radiusBottomRight = bottomRight;
     }
     CheckLengthMetrics(object);
@@ -11759,6 +11952,7 @@ void JSViewAbstract::ParseBorderRadiusProps(const JSRef<JSObject>& object, NG::B
     radius.radiusBottomLeft = radiusBottomLeft;
     radius.radiusBottomRight = radiusBottomRight;
     radius.multiValued = true;
+    RegisterRadiusRes(radius, topStartResObj, topEndResObj, bottomStartResObj, bottomEndResObj);
     return;
 }
 
@@ -12597,6 +12791,7 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     std::function<void()> builderFunc;
     BackgroundType backgroundType = BackgroundType::COLOR;
     if (!ParseJsColor(info[0], color, backgroundColorResObj)) {
+        ViewAbstractModel::GetInstance()->ClearResObj("customBackgroundColor");
         if (ParseBackgroundBuilder(info, info[0], builderFunc)) {
             backgroundType = BackgroundType::CUSTOM_BUILDER;
         } else {
@@ -12634,8 +12829,8 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackground(std::move(builderFunc));
     ViewAbstractModel::GetInstance()->SetBackgroundIgnoresLayoutSafeAreaEdges(ignoreLayoutSafeAreaEdges);
     ViewAbstractModel::GetInstance()->SetBackgroundAlign(alignment);
-    if (SystemProperties::ConfigChangePerform() && backgroundColorResObj) {
-        ViewAbstractModel::GetInstance()->SetCustomBackgroundColorWithResourceObj(backgroundColorResObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        ViewAbstractModel::GetInstance()->SetCustomBackgroundColorWithResourceObj(color, backgroundColorResObj);
     } else {
         ViewAbstractModel::GetInstance()->SetCustomBackgroundColor(color);
     }

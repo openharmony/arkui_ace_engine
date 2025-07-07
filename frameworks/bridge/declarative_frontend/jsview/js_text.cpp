@@ -193,20 +193,21 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     }
     CalcDimension fontSize;
     RefPtr<ResourceObject> resObj;
-    if (ParseJsDimensionNG(info[0], fontSize, DimensionUnit::FP, resObj, false)) {
-        if (SystemProperties::ConfigChangePerform() && resObj) {
-            RegisterResource<CalcDimension>("FontSize", resObj, fontSize);
-            return;
-        }
-    } else {
+    UnRegisterResource("FontSize");
+    JSRef<JSVal> args = info[0];
+    if (!ParseJsDimensionFpNG(args, fontSize, resObj, false) || fontSize.IsNegative()) {
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         fontSize = theme->GetTextStyle().GetFontSize();
+        TextModel::GetInstance()->SetFontSize(fontSize);
+        return;
     }
-    UnRegisterResource("FontSize");
     TextModel::GetInstance()->SetFontSize(fontSize);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("FontSize", resObj, fontSize);
+    }
 }
 
 void JSText::SetFontWeight(const JSCallbackInfo& info)
@@ -571,14 +572,12 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
 {
     std::vector<std::string> fontFamilies;
     RefPtr<ResourceObject> resObj;
-    JSRef<JSVal> args = info[0];
-    if (ParseJsFontFamilies(args, fontFamilies, resObj)) {
-        if (SystemProperties::ConfigChangePerform() && resObj) {
-            RegisterResource<std::vector<std::string>>("FontFamily", resObj, fontFamilies);
-            return;
-        }
-    }
     UnRegisterResource("FontFamily");
+    JSRef<JSVal> args = info[0];
+    ParseJsFontFamilies(args, fontFamilies, resObj);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<std::vector<std::string>>("FontFamily", resObj, fontFamilies);
+    }
     TextModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 
@@ -635,19 +634,15 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
     CalcDimension value;
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
+    UnRegisterResource("LetterSpacing");
     if (!ParseJsDimensionFpNG(args, value, resObj, false)) {
         value.Reset();
         TextModel::GetInstance()->SetLetterSpacing(value);
         return;
-    } else if (SystemProperties::ConfigChangePerform() && resObj) {
-        RegisterResource<CalcDimension>("LetterSpacing", resObj, value);
-        return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterResource<CalcDimension>("LetterSpacing", resObj, value);
-        return;
     }
-    UnRegisterResource("LetterSpacing");
     TextModel::GetInstance()->SetLetterSpacing(value);
 }
 
@@ -1153,10 +1148,6 @@ void JSText::SetShaderStyle(const JSCallbackInfo& info)
 void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient)
 {
     CalcDimension value;
-    if (info.Length() < 1 || (info.Length() > 0 && !info[0]->IsObject())) {
-        TextModel::GetInstance()->ResetGradientShaderStyle();
-        return;
-    }
     auto shaderStyleObj = JSRef<JSObject>::Cast(info[0]);
     if (shaderStyleObj->HasProperty("center") && shaderStyleObj->HasProperty("radius")) {
         NewJsRadialGradient(info, gradient);
@@ -1164,11 +1155,6 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
     } else if (shaderStyleObj->HasProperty("colors")) {
         NewJsLinearGradient(info, gradient);
         TextModel::GetInstance()->SetGradientShaderStyle(gradient);
-    } else if (shaderStyleObj->HasProperty("color")) {
-        Color textColor;
-        auto infoColor = shaderStyleObj->GetProperty("color");
-        ParseJsColor(infoColor, textColor);
-        TextModel::GetInstance()->SetColorShaderStyle(textColor);
     } else {
         TextModel::GetInstance()->ResetGradientShaderStyle();
     }

@@ -30,19 +30,18 @@ namespace OHOS::Ace::NG {
 
 RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans,
     RichEditorParagraphManager* paragraphs, LRUMap<std::uintptr_t, RefPtr<Paragraph>>* paraMapPtr,
-    std::unique_ptr<StyleManager>& styleManager, bool needShowPlaceholder, AISpanLayoutInfo aiSpanLayoutInfo)
-    : pManager_(paragraphs), paraMapPtr_(paraMapPtr), styleManager_(styleManager),
+    std::unique_ptr<StyleManager>& styleManager, bool needShowPlaceholder, const AISpanLayoutInfo& aiSpanLayoutInfo)
+    : allSpans_(spans), pManager_(paragraphs), paraMapPtr_(paraMapPtr), styleManager_(styleManager),
     needShowPlaceholder_(needShowPlaceholder)
 {
     ACE_SCOPED_TRACE("RichEditorLayoutAlgorithm::Constructor");
-    allSpans_ = spans;
     // split spans into groups by \newline
     IF_TRUE(spans.empty() && paraMapPtr_, paraMapPtr_->Clear());
     auto it = spans.begin();
     while (it != spans.end()) {
         auto span = *it;
         // only checking the last char
-        if (span->content.back() == u'\n') {
+        if (!span->content.empty() && span->content.back() == u'\n') {
             span->SetNeedRemoveNewLine(true);
             std::list<RefPtr<SpanItem>> newGroup;
             newGroup.splice(newGroup.begin(), spans, spans.begin(), std::next(it));
@@ -63,9 +62,9 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
     if (!spans.empty()) {
         spans_.push_back(std::move(spans));
     }
-    AppendNewLineSpan();
     HandleAISpan(allSpans_, aiSpanLayoutInfo);
     HandleParagraphCache();
+    AppendNewLineSpan();
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spans=%{public}s", SpansToString().c_str());
 }
 
@@ -288,6 +287,10 @@ void RichEditorLayoutAlgorithm::UpdateConstraintByLayoutPolicy(
     const auto& percentReference = layoutConstraint->percentReference;
     auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(textSize), calcLayoutConstraint,
         percentReference);
+    if (calcLayoutConstraint->maxSize.has_value() && calcLayoutConstraint->maxSize->Height().has_value()) {
+        const auto& padding = layoutProperty->CreatePaddingAndBorder();
+        MinusPaddingToSize(padding, finalSize);
+    }
     IF_TRUE(finalSize.Height().has_value(), constraint.maxSize.SetHeight(finalSize.Height().value()));
 }
 
@@ -417,10 +420,7 @@ bool RichEditorLayoutAlgorithm::CreateParagraph(
         paragraphManager_ = AceType::MakeRefPtr<ParagraphManager>();
     }
     paragraphManager_->Reset();
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto pipeline = frameNode->GetContextRefPtr();
-    CHECK_NULL_RETURN(pipeline, false);
+
     // default paragraph style
     auto paraStyle = GetEditorParagraphStyle(textStyle, content, layoutWrapper);
     return UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
@@ -438,7 +438,8 @@ void RichEditorLayoutAlgorithm::UpdateRichTextRect(const SizeF& textSize, Layout
 {
     auto pattern = GetRichEditorPattern(layoutWrapper);
     CHECK_NULL_VOID(pattern);
-    richTextRect_.SetSize(pattern->IsShowPlaceholder() ? SizeF() : textSize);
+    IF_TRUE(!richTextRect_.has_value(), richTextRect_ = std::make_optional<RectF>());
+    richTextRect_->SetSize(pattern->IsShowPlaceholder() ? SizeF() : textSize);
 }
 
 bool RichEditorLayoutAlgorithm::SetPlaceholder(LayoutWrapper* layoutWrapper)
@@ -535,6 +536,7 @@ void RichEditorLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* l
 
 void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    ACE_SCOPED_TRACE("RichEditorLayoutAlgorithm::Layout");
     auto context = layoutWrapper->GetHostNode()->GetContext();
     CHECK_NULL_VOID(context);
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffsetNG() - context->GetRootRect().GetOffset();
@@ -579,8 +581,9 @@ OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper
     CHECK_NULL_RETURN(host, contentOffset);
     auto pattern = host->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, contentOffset);
-    richTextRect_.SetOffset(OffsetF(contentOffset.GetX(), pattern->GetTextRect().GetY()));
-    return richTextRect_.GetOffset();
+    IF_TRUE(!richTextRect_.has_value(), richTextRect_ = std::make_optional<RectF>());
+    richTextRect_->SetOffset(OffsetF(contentOffset.GetX(), pattern->GetTextRect().GetY()));
+    return richTextRect_->GetOffset();
 }
 
 ParagraphStyle RichEditorLayoutAlgorithm::GetEditorParagraphStyle(

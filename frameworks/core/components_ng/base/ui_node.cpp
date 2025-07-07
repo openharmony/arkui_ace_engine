@@ -1119,6 +1119,12 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
     if (!CheckVisibleOrActive()) {
         return;
     }
+    if (GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG || GetTag() == V2::JS_REPEAT_ETS_TAG) {
+        for (const auto& item : GetChildrenForInspector(true)) {
+            CHECK_NULL_CONTINUE(item);
+            item->DumpTree(depth + 1, hasJson);
+        }
+    }
     for (const auto& item : GetChildren()) {
         item->DumpTree(depth + 1, hasJson);
     }
@@ -1881,6 +1887,11 @@ void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
 void UINode::SetIsRootBuilderNode(bool isRootBuilderNode)
 {
     isRootBuilderNode_ = isRootBuilderNode;
+    if (isRootBuilderNode) {
+        jsBuilderNodeId_ = nodeId_;
+    } else {
+        jsBuilderNodeId_ = -1;
+    }
 }
 
 bool UINode::GetIsRootBuilderNode() const

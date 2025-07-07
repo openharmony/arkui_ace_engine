@@ -592,6 +592,21 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScroll2Node::GetChildren(bool /*no
     return children_;
 }
 
+const std::list<RefPtr<UINode>>& RepeatVirtualScroll2Node::GetChildrenForInspector(bool needCacheNode) const
+{
+    if (needCacheNode) {
+        childrenWithCache_.clear();
+        caches_.ForEachCacheItem([this](RIDType rid, const CacheItem& cacheItem) {
+            if (cacheItem->node_ != nullptr) {
+                childrenWithCache_.emplace_back(cacheItem->node_);
+            }
+        });
+        return childrenWithCache_;
+    } else {
+        return children_;
+    }
+}
+
 // called by container layout
 // instructs range of L1 items to move to L2, make available for update
 // unfortunately, layout gets it occasionally wrong during fast scroll

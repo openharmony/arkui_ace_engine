@@ -76,6 +76,7 @@ const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example
 constexpr int32_t NODE_ID = 1;
 constexpr int32_t TARGET_ID = 3;
 constexpr int32_t TWO_NUMBER = 2;
+constexpr int32_t FOUR_NUMBER = 4;
 constexpr int32_t FIVE_NUMBER = 5;
 constexpr int32_t TEN_NUMBER = 10;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
@@ -958,5 +959,293 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg022, TestSize.Level1)
     menuLayoutAlgorithm.placement_ = Placement::RIGHT_BOTTOM;
     menuLayoutAlgorithm.LayoutOtherDeviceLeftPreviewRightMenuLessThan(previewGeometryNode, menuGeometryNode, totalSize);
     EXPECT_EQ(previewGeometryNode->GetMarginFrameOffset().y_, ZERO_FLOAT);
+}
+
+/**
+ * @tc.name: MenuExpandTestNg023
+ * @tc.desc: To test the AddGroupHeaderDivider function with previewsNode is a group.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuExpandTestNg, MenuExpandTestNg023, TestSize.Level1)
+{
+    auto groupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    ASSERT_NE(groupPattern, nullptr);
+    auto header =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    groupPattern->header_ = std::move(header);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, NODE_ID, groupPattern);
+    ASSERT_NE(child, nullptr);
+    RefPtr<UINode> previousNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, TWO_NUMBER, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    RefPtr<MenuLayoutProperty> property = AceType::MakeRefPtr<MenuLayoutProperty>();
+    int32_t index = 0;
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, FOUR_NUMBER, AceType::MakeRefPtr<MenuPattern>(TWO_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->AddGroupHeaderDivider(previousNode, child, property, index);
+    EXPECT_EQ(previousNode, nullptr);
+}
+
+/**
+ * @tc.name: MenuExpandTestNg024
+ * @tc.desc: To test the AddGroupHeaderDivider function in the EMBEDDED_IN_MENU scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuExpandTestNg, MenuExpandTestNg024, TestSize.Level1)
+{
+    auto groupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    ASSERT_NE(groupPattern, nullptr);
+    auto header =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    groupPattern->header_ = std::move(header);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, NODE_ID, groupPattern);
+    ASSERT_NE(child, nullptr);
+    auto node = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, FOUR_NUMBER, AceType::MakeRefPtr<MenuPattern>(TWO_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(node, nullptr);
+    node->MountToParent(child);
+    RefPtr<UINode> previousNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, TWO_NUMBER, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    RefPtr<MenuLayoutProperty> property = AceType::MakeRefPtr<MenuLayoutProperty>();
+    property->UpdateItemGroupDividerMode(DividerMode::EMBEDDED_IN_MENU);
+    int32_t index = 0;
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, FIVE_NUMBER, AceType::MakeRefPtr<MenuPattern>(TWO_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->AddGroupHeaderDivider(previousNode, child, property, index);
+    EXPECT_EQ(index, 1);
+}
+
+/**
+ * @tc.name: MenuExpandTestNg025
+ * @tc.desc: To test the AddGroupHeaderDivider function with previewsNode is a menu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuExpandTestNg, MenuExpandTestNg025, TestSize.Level1)
+{
+    auto groupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    ASSERT_NE(groupPattern, nullptr);
+    auto header =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    groupPattern->header_ = std::move(header);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, NODE_ID, groupPattern);
+    ASSERT_NE(child, nullptr);
+    RefPtr<UINode> previousNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, TWO_NUMBER, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    RefPtr<MenuLayoutProperty> property = AceType::MakeRefPtr<MenuLayoutProperty>();
+    int32_t index = 0;
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, FOUR_NUMBER, AceType::MakeRefPtr<MenuPattern>(TWO_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->AddGroupHeaderDivider(previousNode, child, property, index);
+    EXPECT_EQ(previousNode, nullptr);
+}
+
+/**
+ * @tc.name: MenuExpandTestNg026
+ * @tc.desc: To test the AddGroupHeaderDivider function in the EMBEDDED_IN_MENU scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuExpandTestNg, MenuExpandTestNg026, TestSize.Level1)
+{
+    auto groupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    ASSERT_NE(groupPattern, nullptr);
+    auto header =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    groupPattern->header_ = std::move(header);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, NODE_ID, groupPattern);
+    ASSERT_NE(child, nullptr);
+    RefPtr<UINode> previousNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, TWO_NUMBER, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    RefPtr<MenuLayoutProperty> property = AceType::MakeRefPtr<MenuLayoutProperty>();
+    property->UpdateItemGroupDividerMode(DividerMode::EMBEDDED_IN_MENU);
+    int32_t index = 0;
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(TWO_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->AddGroupHeaderDivider(previousNode, child, property, index);
+    EXPECT_EQ(index, 1);
+}
+
+/**
+ * @tc.name: MenuExpandTestNg027
+ * @tc.desc: To test the AddGroupHeaderDivider function in the complex situation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuExpandTestNg, MenuExpandTestNg027, TestSize.Level1)
+{
+    auto groupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    ASSERT_NE(groupPattern, nullptr);
+    auto footer =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    groupPattern->footer_ = std::move(footer);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, NODE_ID, groupPattern);
+    ASSERT_NE(child, nullptr);
+    auto node = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(FOUR_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(node, nullptr);
+    child->MountToParent(node);
+    RefPtr<UINode> previousNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, TWO_NUMBER, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    RefPtr<MenuLayoutProperty> property = AceType::MakeRefPtr<MenuLayoutProperty>();
+    property->UpdateItemGroupDividerMode(DividerMode::EMBEDDED_IN_MENU);
+    int32_t index = 0;
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(TWO_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->AddGroupFooterDivider(previousNode, child, property, index);
+    EXPECT_EQ(previousNode, nullptr);
+    auto childNodeOne = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, TEN_NUMBER, AceType::MakeRefPtr<MenuPattern>(TWO_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(childNodeOne, nullptr);
+    childNodeOne->MountToParent(child);
+    previousNode = nullptr;
+    menuPattern->AddGroupFooterDivider(previousNode, child, property, index);
+    EXPECT_EQ(previousNode, nullptr);
+}
+
+/**
+ * @tc.name: MenuExpandTestNg028
+ * @tc.desc: To test the AddGroupFooterDivider function in the complex situation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuExpandTestNg, MenuExpandTestNg028, TestSize.Level1)
+{
+    auto groupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    ASSERT_NE(groupPattern, nullptr);
+    auto footer =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    groupPattern->footer_ = std::move(footer);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, NODE_ID, groupPattern);
+    ASSERT_NE(child, nullptr);
+    auto node = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(TWO_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(node, nullptr);
+    child->MountToParent(node);
+    auto childNodeOne = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(FOUR_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(childNodeOne, nullptr);
+    childNodeOne->MountToParent(child);
+    RefPtr<UINode> previousNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, TWO_NUMBER, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    RefPtr<MenuLayoutProperty> property = AceType::MakeRefPtr<MenuLayoutProperty>();
+    int32_t index = 0;
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(FIVE_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->AddGroupFooterDivider(previousNode, child, property, index);
+    EXPECT_EQ(previousNode, nullptr);
+    previousNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, TWO_NUMBER, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    menuPattern->AddGroupFooterDivider(previousNode, child, property, index);
+    EXPECT_EQ(previousNode, nullptr);
+    previousNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, TWO_NUMBER, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    property->UpdateItemGroupDividerMode(DividerMode::EMBEDDED_IN_MENU);
+    menuPattern->AddGroupFooterDivider(previousNode, child, property, index);
+    EXPECT_EQ(index, 1);
+    previousNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, TWO_NUMBER, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    property->UpdateItemGroupDividerMode(DividerMode::EMBEDDED_IN_MENU);
+    menuPattern->AddGroupFooterDivider(previousNode, child, property, index);
+    EXPECT_EQ(index, 2);
+}
+
+/**
+ * @tc.name: MenuExpandTestNg029
+ * @tc.desc: To test the AddGroupFooterDivider function in the complex situation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuExpandTestNg, MenuExpandTestNg029, TestSize.Level1)
+{
+    auto groupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    ASSERT_NE(groupPattern, nullptr);
+    auto footer =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    groupPattern->footer_ = std::move(footer);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, NODE_ID, groupPattern);
+    ASSERT_NE(child, nullptr);
+    auto node = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(TWO_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(node, nullptr);
+    child->MountToParent(node);
+    auto childNodeOne = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(TWO_NUMBER, TEXT_TAG, MenuType::MENU));
+    auto childNodeTwo = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, FIVE_NUMBER, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    auto childNodeThree = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, TEN_NUMBER, AceType::MakeRefPtr<MenuPattern>(TEN_NUMBER, "test3", MenuType::MENU));
+    childNodeOne->MountToParent(node);
+    childNodeTwo->MountToParent(node);
+    childNodeThree->MountToParent(node);
+    RefPtr<UINode> previousNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, TWO_NUMBER, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    RefPtr<MenuLayoutProperty> property = AceType::MakeRefPtr<MenuLayoutProperty>();
+    int32_t index = 0;
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(TWO_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->AddGroupFooterDivider(previousNode, child, property, index);
+    EXPECT_EQ(previousNode, child);
+    previousNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, TWO_NUMBER, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    property->UpdateItemGroupDividerMode(DividerMode::EMBEDDED_IN_MENU);
+    menuPattern->AddGroupFooterDivider(previousNode, child, property, index);
+    EXPECT_EQ(index, 1);
+}
+
+/**
+ * @tc.name: MenuExpandTestNg030
+ * @tc.desc: To test the UpdateMenuDividerWithMode function in the EMBEDDED_IN_MENU scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuExpandTestNg, MenuExpandTestNg030, TestSize.Level1)
+{
+    auto currentNode =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(currentNode, nullptr);
+    auto node = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(TWO_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(node, nullptr);
+    currentNode->MountToParent(node);
+    RefPtr<UINode> previousNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, TWO_NUMBER, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    RefPtr<MenuLayoutProperty> property = AceType::MakeRefPtr<MenuLayoutProperty>();
+    int32_t index = 0;
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(FOUR_NUMBER, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->UpdateMenuDividerWithMode(previousNode, currentNode, property, index);
+    property->UpdateItemGroupDividerMode(DividerMode::EMBEDDED_IN_MENU);
+    previousNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, TWO_NUMBER, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    menuPattern->UpdateMenuDividerWithMode(previousNode, currentNode, property, index);
+    EXPECT_EQ(index, 1);
 }
 } // namespace OHOS::Ace::NG

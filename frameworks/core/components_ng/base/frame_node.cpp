@@ -93,6 +93,21 @@ constexpr float WIDTH_RATIO_LIMIT = 1.0f;
 constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
 namespace OHOS::Ace::NG {
+namespace {
+void ClearAccessibilityFocus(const RefPtr<AccessibilityProperty>& accessibilityProperty,
+    const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_VOID(accessibilityProperty);
+    CHECK_NULL_VOID(renderContext);
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() &&
+        accessibilityProperty->GetAccessibilityFocusState()) {
+        accessibilityProperty->SetAccessibilityFocusState(false);
+        if (renderContext->GetAccessibilityFocus().value_or(false)) {
+            renderContext->UpdateAccessibilityFocus(false);
+        }
+    }
+}
+} // namespace
 
 class FrameNode::FrameProxy final : public RecursiveLock {
 public:
@@ -2102,10 +2117,11 @@ void FrameNode::ProcessThrottledVisibleCallback(bool forceDisappear)
     auto& visibleAreaUserCallback = eventHub_->GetThrottledVisibleAreaCallback();
     CHECK_NULL_VOID(visibleAreaUserCallback.callback);
 
-    if (forceDisappear && !NearEqual(lastThrottledVisibleCbRatio_, VISIBLE_RATIO_MIN)) {
+    if (forceDisappear && !NearEqual(lastThrottledVisibleRatio_, VISIBLE_RATIO_MIN)) {
         auto& userRatios = eventHub_->GetThrottledVisibleAreaRatios();
         ProcessAllVisibleCallback(
             userRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastThrottledVisibleCbRatio_, true);
+        lastThrottledVisibleRatio_ = VISIBLE_RATIO_MIN;
         return;
     }
 
@@ -4220,6 +4236,10 @@ void FrameNode::OnRecycle()
     layoutProperty_->ResetGeometryTransition();
     pattern_->OnRecycle();
     UINode::OnRecycle();
+
+    auto accessibilityProperty = GetAccessibilityProperty<NG::AccessibilityProperty>();
+    auto renderContext = GetRenderContext();
+    ClearAccessibilityFocus(accessibilityProperty, renderContext);
 }
 
 void FrameNode::OnReuse()
@@ -4607,6 +4627,99 @@ void FrameNode::UpdatePercentSensitive()
     }
 }
 
+bool FrameNode::PreMeasure(const std::optional<LayoutConstraintF>& parentConstraint)
+{
+    if (GetHasPreMeasured()) {
+        return false;
+    }
+    auto parent = GetAncestorNodeOfFrame(true);
+    CHECK_NULL_RETURN(parent, false);
+    if (parent->ChildPreMeasureHelper(this, parentConstraint)) {
+        parent->CollectDelayMeasureChild(this);
+        return true;
+    }
+    return false;
+}
+
+bool FrameNode::ChildPreMeasureHelper(
+    LayoutWrapper* childWrapper, const std::optional<LayoutConstraintF>& parentConstraint)
+{
+    auto pattern = GetPattern();
+    if (!pattern->ChildPreMeasureHelperEnabled()) {
+        return false;
+    }
+    CHECK_NULL_RETURN(childWrapper, false);
+    auto layoutProperty = childWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    if (!layoutProperty->IsIgnoreOptsValid()) {
+        return false;
+    }
+    auto childNode = childWrapper->GetHostNode();
+    if (childNode) {
+        childNode->SetDelaySelfLayoutForIgnore();
+        AddDelayLayoutChild(childNode);
+    }
+    bool needDelayMeasure = false;
+    if (pattern->ChildPreMeasureHelperCustomized()) {
+        needDelayMeasure = pattern->ChildPreMeasureHelper(childWrapper, parentConstraint);
+    } else {
+        needDelayMeasure = PredictMeasureResult(childWrapper, parentConstraint);
+    }
+    if (needDelayMeasure && childNode) {
+        childNode->SetHasPreMeasured();
+    }
+    return needDelayMeasure;
+}
+
+void FrameNode::CollectDelayMeasureChild(LayoutWrapper* childWrapper)
+{
+    CHECK_NULL_VOID(childWrapper);
+    auto childNode = childWrapper->GetHostNode();
+    CHECK_NULL_VOID(childNode);
+    delayMeasureChildren_.emplace_back(childNode);
+}
+
+void FrameNode::PostTaskForIgnore(PipelineContext* pipeline)
+{
+    if (delayMeasureChildren_.empty() && delayLayoutChildren_.empty()) {
+        return;
+    }
+    CHECK_NULL_VOID(pipeline);
+    IgnoreLayoutSafeAreaBundle bundle;
+    bundle.second = Claim(this);
+    bundle.first = std::move(delayMeasureChildren_);
+    pipeline->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
+}
+
+bool FrameNode::PostponedTaskForIgnore()
+{
+    auto pattern = GetPattern();
+    RefPtr<FrameNode> parent = GetAncestorNodeOfFrame(false);
+    if (!pattern->PostponedTaskForIgnoreEnabled()) {
+        delayLayoutChildren_.clear();
+        return false;
+    }
+    if (pattern->PostponedTaskForIgnoreCustomized()) {
+        pattern->PostponedTaskForIgnore();
+    } else {
+        for (auto&& node : delayLayoutChildren_) {
+            IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+                .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+            IgnoreStrategy strategy = IgnoreStrategy::NORMAL;
+            if (parent && parent->GetPattern()) {
+                parent->GetPattern()->ChildTentativelyLayouted(strategy);
+            }
+            ExpandEdges sae = node->GetAccumulatedSafeAreaExpand(false, options, strategy);
+            auto offset = node->GetGeometryNode()->GetMarginFrameOffset();
+            offset -= sae.Offset();
+            node->GetGeometryNode()->SetMarginFrameOffset(offset);
+            node->Layout();
+        }
+    }
+    delayLayoutChildren_.clear();
+    return true;
+}
+
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
@@ -4666,6 +4779,10 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         ApplyConstraint(*parentConstraint);
     } else {
         CreateRootConstraint();
+    }
+
+    if (PreMeasure(parentConstraint)) {
+        return;
     }
 
     layoutProperty_->UpdateContentConstraint();
@@ -4734,6 +4851,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         measureCallback_(kitNode_);
     }
 
+    PostTaskForIgnore(pipeline);
+
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
         ACE_MEASURE_SCOPED_TRACE("MeasureFinish[frameRect:%s][contentSize:%s]",
@@ -4746,6 +4865,10 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 // Called to perform layout children.
 void FrameNode::Layout()
 {
+    if (GetDelaySelfLayoutForIgnore()) {
+        return;
+    }
+
     ACE_LAYOUT_TRACE_BEGIN("Layout[%s][self:%d][parent:%d][key:%s]", tag_.c_str(), nodeId_,
         GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0, GetInspectorIdValue("").c_str());
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
@@ -4995,8 +5118,14 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config);
     needRerender =
         needRerender || pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config.skipMeasure, config.skipLayout);
-    if (needRerender || (extensionHandler_ && extensionHandler_->NeedRender()) ||
-        CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto skippedMeasure = config.skipMeasure || SkipMeasureContent();
+        needRerender = needRerender || (extensionHandler_ &&
+            (extensionHandler_->NeedRender() || (extensionHandler_->HasDrawModifier() && !skippedMeasure)));
+    } else {
+        needRerender = needRerender || (extensionHandler_ && extensionHandler_->NeedRender());
+    }
+    if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
@@ -5094,9 +5223,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
     if (arkoalaLazyAdapter_) {
-        auto node = arkoalaLazyAdapter_->GetOrCreateChild(index);
-        AddChild(node);
-        return node;
+        return ArkoalaGetOrCreateChild(index);
     }
     auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
@@ -5163,22 +5290,7 @@ void FrameNode::RemoveAllChildInRenderTree()
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
     if (arkoalaLazyAdapter_) {
-        int32_t startIndex = showCached ? std::max(0, start - cacheStart) : start;
-        int32_t endIndex = showCached ? std::min(GetTotalChildCount() - 1, end + cacheEnd) : end;
-        std::vector<RefPtr<UINode>> toRemove;
-        for (const auto& child : GetChildren()) {
-            const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
-            if (index >= startIndex && index <= endIndex) {
-                child->SetActive(true);
-            } else {
-                toRemove.push_back(child);
-            }
-        }
-        for (auto&& node : toRemove) {
-            RemoveChild(node);
-        }
-        arkoalaLazyAdapter_->SetActiveRange(startIndex - cacheStart, endIndex + cacheEnd);
-        return;
+        return ArkoalaUpdateActiveRange(start, end, cacheStart, cacheEnd, showCached);
     }
     frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd, showCached);
 }
@@ -5208,6 +5320,41 @@ void FrameNode::ArkoalaRemoveItemsOnChange(int32_t changeIndex)
         RemoveChild(node);
     }
     arkoalaLazyAdapter_->OnDataChange(changeIndex);
+}
+
+void FrameNode::ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
+{
+    CHECK_NULL_VOID(arkoalaLazyAdapter_);
+    const int32_t liveStart = start - cacheStart;
+    const int32_t liveEnd = end + cacheEnd;
+    const int32_t visibleStart = showCached ? liveStart : start;
+    const int32_t visibleEnd = showCached ? liveEnd : end;
+    std::vector<RefPtr<UINode>> toRemove;
+    for (const auto& child : GetChildren()) {
+        const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
+        if (index < liveStart || index > liveEnd) {
+            toRemove.push_back(child);
+            continue;
+        }
+        child->SetActive(index >= visibleStart && index <= visibleEnd);
+    }
+    for (auto&& node : toRemove) {
+        RemoveChild(node);
+    }
+    arkoalaLazyAdapter_->SetActiveRange(liveStart, liveEnd);
+}
+
+RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index)
+{
+    CHECK_NULL_RETURN(arkoalaLazyAdapter_, nullptr);
+    if (auto node = arkoalaLazyAdapter_->GetChild(index)) {
+        return node;
+    }
+    auto node = arkoalaLazyAdapter_->GetOrCreateChild(index);
+    CHECK_NULL_RETURN(node, nullptr);
+    AddChild(node);
+    node->SetActive(true);
+    return node;
 }
 /* ============================== Arkoala LazyForEach adapter section END ================================*/
 
@@ -6315,7 +6462,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
                 status = child->FindSuggestOpIncNode(path, boundary, depth + 1, axis);
             }
             if (status == OPINC_INVALID) {
-                    return OPINC_INVALID;
+                return OPINC_INVALID;
             }
         }
         return OPINC_PARENT_POSSIBLE;
@@ -7061,5 +7208,23 @@ void FrameNode::CleanupPipelineResources()
         pipeline->RemoveFrameNodeChangeListener(nodeId_);
         pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
     }
+}
+
+void FrameNode::SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper)
+{
+    aiCallerHelper_ = aiCallerHelper;
+}
+
+uint32_t FrameNode::CallAIFunction(const std::string& functionName, const std::string& params)
+{
+    static constexpr uint32_t AI_CALL_SUCCESS = 0;
+    static constexpr uint32_t AI_CALLER_INVALID = 1;
+    static constexpr uint32_t AI_CALL_FUNCNAME_INVALID = 2;
+    if (aiCallerHelper_) {
+        return aiCallerHelper_->onAIFunctionCaller(functionName, params) ?
+                AI_CALL_SUCCESS :
+                AI_CALL_FUNCNAME_INVALID;
+    }
+    return AI_CALLER_INVALID;
 }
 } // namespace OHOS::Ace::NG

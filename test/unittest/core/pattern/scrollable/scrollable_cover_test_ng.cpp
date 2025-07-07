@@ -1791,7 +1791,7 @@ HWTEST_F(ScrollableCoverTestNg, InitCurveOffsetPropertyTest001, TestSize.Level1)
     scrollPn->AnimateTo(100.0f, 300.0f, curve, false, true, false);
     MockAnimationManager::GetInstance().Tick();
     auto curveOffsetProperty = scrollPn->curveOffsetProperty_;
-    float actualValue = curveOffsetProperty->Get();
+    float actualValue = curveOffsetProperty->GetStagingValue();
     EXPECT_NEAR(actualValue, 100.0f, 1.0f);
     EXPECT_TRUE(scrollPn->isAnimationStop_);
 }

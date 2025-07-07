@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
@@ -188,6 +189,39 @@ bool SecurityUIExtensionPattern::CheckConstraint()
 #endif
 }
 
+void SecurityUIExtensionPattern::AfterMountToParent()
+{
+    hasMountToParent_ = true;
+    if (needReNotifyForeground_ && hasAttachContext_) {
+        needReNotifyForeground_ = false;
+        NotifyForeground();
+    }
+}
+
+void SecurityUIExtensionPattern::OnAttachContext(PipelineContext *context)
+{
+    CHECK_NULL_VOID(context);
+    hasAttachContext_ = true;
+    auto newInstanceId = context->GetInstanceId();
+    if (newInstanceId != instanceId_) {
+        instanceId_ = newInstanceId;
+        UpdateSessionInstanceId(newInstanceId);
+    }
+    if (needReNotifyForeground_ && hasMountToParent_) {
+        needReNotifyForeground_ = false;
+        NotifyForeground();
+    }
+}
+
+void SecurityUIExtensionPattern::UpdateSessionInstanceId(int32_t instanceId)
+{
+    auto sessionWrapperImpl = AceType::DynamicCast<PreviewSessionWrapperImpl>(sessionWrapper_);
+    if (!sessionWrapperImpl) {
+        return;
+    }
+    sessionWrapperImpl->UpdateInstanceId(instanceId);
+}
+
 void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 {
     uiExtensionType_ = want.GetStringParam(UI_EXTENSION_TYPE_KEY);
@@ -195,9 +229,8 @@ void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         PLATFORM_LOGE("Check constraint failed.");
         return;
     }
-
-    CHECK_NULL_VOID(sessionWrapper_);
     PLATFORM_LOGI("The current state is '%{public}s' when UpdateWant.", ToString(state_));
+    CHECK_NULL_VOID(sessionWrapper_);
     bool isBackground = state_ == AbilityState::BACKGROUND;
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {
@@ -219,13 +252,20 @@ void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         // reset callback, in order to register childtree call back again when onConnect to new ability
         ResetAccessibilityChildTreeCallback();
     }
-
     MountPlaceholderNode();
     SessionConfig config;
-    config.uiExtensionUsage = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    if (sessionType_ == SessionType::PREVIEW_UI_EXTENSION_ABILITY) {
+        config.uiExtensionUsage = UIExtensionUsage::PREVIEW_EMBEDDED;
+    } else {
+        config.uiExtensionUsage = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    }
     sessionWrapper_->CreateSession(want, config);
     if (isBackground) {
         PLATFORM_LOGW("Unable to StartUiextensionAbility while in the background.");
+        return;
+    }
+    if (sessionType_ == SessionType::PREVIEW_UI_EXTENSION_ABILITY && !(hasAttachContext_ && hasMountToParent_)) {
+        needReNotifyForeground_ = true;
         return;
     }
     NotifyForeground();
@@ -714,6 +754,9 @@ void SecurityUIExtensionPattern::OnVisibleChangeInner(bool visible)
         isVisible_ ? "visible" : "invisible", visible ? "visible" : "invisible");
     isVisible_ = visible;
     if (visible) {
+        if (needReNotifyForeground_) {
+            return;
+        }
         NotifyForeground();
     } else {
         NotifyBackground();

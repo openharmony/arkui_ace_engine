@@ -224,7 +224,6 @@ public:
 
     void SetShowLunar(bool value)
     {
-        isForceUpdate_ = value != lunar_;
         lunar_ = value;
     }
 
@@ -465,6 +464,7 @@ public:
 
     void SetMode(const DatePickerMode& value)
     {
+        isForceUpdate_ = value != datePickerMode_;
         datePickerMode_ = value;
     }
 

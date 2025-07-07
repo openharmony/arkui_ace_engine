@@ -174,6 +174,7 @@ build_component_ng("pattern_ng") {
     "image/image_layout_algorithm.cpp",
     "image/image_layout_property.cpp",
     "image/image_model_ng.cpp",
+    "image/image_model_static.cpp",
     "image/image_overlay_modifier.cpp",
     "image/image_paint_method.cpp",
     "image/image_pattern.cpp",
@@ -326,6 +327,7 @@ build_component_ng("pattern_ng") {
     "overlay/sheet_view.cpp",
     "overlay/sheet_wrapper_layout_algorithm.cpp",
     "overlay/sheet_wrapper_paint_method.cpp",
+    "overlay/sheet_wrapper_pattern.cpp",
     "panel/close_icon_layout_algorithm.cpp",
     "panel/close_icon_pattern.cpp",
     "panel/drag_bar_layout_algorithm.cpp",
@@ -386,7 +388,10 @@ build_component_ng("pattern_ng") {
     "scroll/effect/scroll_fade_controller.cpp",
     "scroll/effect/scroll_fade_effect.cpp",
     "scroll/effect/scroll_fade_painter.cpp",
+    "scroll/free_scroll_controller.cpp",
     "scroll/inner/scroll_bar.cpp",
+    "scroll/inner/scroll_bar_2d.cpp",
+    "scroll/inner/scroll_bar_2d_painter.cpp",
     "scroll/inner/scroll_bar_overlay_modifier.cpp",
     "scroll/scroll_accessibility_property.cpp",
     "scroll/scroll_content_modifier.cpp",
@@ -395,6 +400,7 @@ build_component_ng("pattern_ng") {
     "scroll/scroll_paint_method.cpp",
     "scroll/scroll_pattern.cpp",
     "scroll/scroll_spring_effect.cpp",
+    "scroll/zoom_controller.cpp",
     "scroll_bar/proxy/scroll_bar_proxy.cpp",
     "scroll_bar/scroll_bar_accessibility_property.cpp",
     "scroll_bar/scroll_bar_layout_algorithm.cpp",
@@ -454,6 +460,8 @@ build_component_ng("pattern_ng") {
     "shape/shape_model_ng.cpp",
     "shape/shape_overlay_modifier.cpp",
     "shape/shape_paint_property.cpp",
+    "sheet/content_cover/sheet_content_cover_layout_algorithm.cpp",
+    "sheet/content_cover/sheet_content_cover_object.cpp",
     "sheet/sheet_object.cpp",
     "sheet/side/sheet_presentation_side_layout_algorithm.cpp",
     "sheet/side/sheet_side_object.cpp",
@@ -633,10 +641,10 @@ build_component_ng("pattern_ng") {
   ]
 
   # Add Cangjie application window registration
-  sources += [ 
+  sources += [
+    "$ace_root/frameworks/bridge/cj_frontend/frontend/cj_app_bar_utils.cpp",
     "$ace_root/frameworks/bridge/cj_frontend/frontend/container_modal_cj_utils.cpp",
-    "$ace_root/frameworks/bridge/cj_frontend/frontend/cj_app_bar_utils.cpp"
-    ]
+  ]
 
   if (!ace_engine_feature_wearable) {
     sources += [

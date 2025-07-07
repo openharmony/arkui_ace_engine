@@ -235,18 +235,19 @@ HWTEST_F(DragAndDropTest, DragAndDropTest006, TestSize.Level1)
     ArkUIDragEvent dragEvent;
     auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
     auto ret1 = OH_ArkUI_DragEvent_DisableDefaultDropAnimation(drag_Event, true);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(dragEvent.useCustomDropAnimation, true);
+    auto ret2 = OH_ArkUI_DragEvent_DisableDefaultDropAnimation(drag_Event, false);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(dragEvent.useCustomDropAnimation, false);
 
     /**
      * @tc.steps: step2.set DragEvent is nullptr, related function is called.
      */
-    auto ret2 = OH_ArkUI_DragEvent_DisableDefaultDropAnimation(nullptr, false);
-
-    /**
-     * @tc.expected: Return expected results.
-     */
-    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(dragEvent.useCustomDropAnimation, true);
+    auto ret3 = OH_ArkUI_DragEvent_DisableDefaultDropAnimation(nullptr, false);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret4 = OH_ArkUI_DragEvent_DisableDefaultDropAnimation(nullptr, false);
+    EXPECT_EQ(ret4, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -261,17 +262,18 @@ HWTEST_F(DragAndDropTest, DragAndDropTest007, TestSize.Level1)
      */
     auto textNode = new ArkUI_Node({ ARKUI_NODE_TEXT, nullptr, true });
     auto ret1 = OH_ArkUI_SetNodeDraggable(textNode, true);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto ret2 = OH_ArkUI_SetNodeDraggable(textNode, false);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
 
     /**
      * @tc.steps: step2.set DragEvent is nullptr, related function is called.
      */
-    auto ret2 = OH_ArkUI_SetNodeDraggable(nullptr, false);
-
-    /**
-     * @tc.expected: Return expected results.
-     */
-    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret3 = OH_ArkUI_SetNodeDraggable(nullptr, true);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret4 = OH_ArkUI_SetNodeDraggable(nullptr, false);
+    EXPECT_EQ(ret4, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -316,14 +318,21 @@ HWTEST_F(DragAndDropTest, DragAndDropTest009, TestSize.Level1)
     EXPECT_TRUE(option->isScaleEnabled);
     EXPECT_FALSE(option->isDefaultShadowEnabled);
     EXPECT_FALSE(option->isDefaultRadiusEnabled);
+    auto ret2 = OH_ArkUI_DragPreviewOption_SetScaleMode(
+        dragPreviewOption, ArkUI_DragPreviewScaleMode::ARKUI_DRAG_PREVIEW_SCALE_DISABLED);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_FALSE(option->isScaleEnabled);
 
     /**
      * @tc.steps: step2.set preview option with nullptr.
      * @tc.expected: Return expected results.
      */
-    auto ret2 =
+    auto ret3 =
         OH_ArkUI_DragPreviewOption_SetScaleMode(nullptr, ArkUI_DragPreviewScaleMode::ARKUI_DRAG_PREVIEW_SCALE_AUTO);
-    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret4 =
+        OH_ArkUI_DragPreviewOption_SetScaleMode(nullptr, ArkUI_DragPreviewScaleMode::ARKUI_DRAG_PREVIEW_SCALE_DISABLED);
+    EXPECT_EQ(ret4, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -342,13 +351,18 @@ HWTEST_F(DragAndDropTest, DragAndDropTest010, TestSize.Level1)
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
     auto* option = reinterpret_cast<ArkUIDragPreViewAndInteractionOptions*>(dragPreviewOption);
     EXPECT_TRUE(option->isDefaultShadowEnabled);
+    auto ret2 = OH_ArkUI_DragPreviewOption_SetDefaultShadowEnabled(dragPreviewOption, false);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_FALSE(option->isDefaultShadowEnabled);
 
     /**
      * @tc.steps: step2.set preview option with nullptr.
      * @tc.expected: Return expected results.
      */
-    auto ret2 = OH_ArkUI_DragPreviewOption_SetDefaultShadowEnabled(nullptr, true);
-    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret3 = OH_ArkUI_DragPreviewOption_SetDefaultShadowEnabled(nullptr, true);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret4 = OH_ArkUI_DragPreviewOption_SetDefaultShadowEnabled(nullptr, false);
+    EXPECT_EQ(ret4, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -368,12 +382,18 @@ HWTEST_F(DragAndDropTest, DragAndDropTest011, TestSize.Level1)
     auto* option = reinterpret_cast<ArkUIDragPreViewAndInteractionOptions*>(dragPreviewOption);
     EXPECT_TRUE(option->isDefaultRadiusEnabled);
 
+    auto ret2 = OH_ArkUI_DragPreviewOption_SetDefaultRadiusEnabled(dragPreviewOption, false);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_FALSE(option->isDefaultRadiusEnabled);
+
     /**
      * @tc.steps: step2.set preview option with nullptr.
      * @tc.expected: Return expected results.
      */
-    auto ret2 = OH_ArkUI_DragPreviewOption_SetDefaultRadiusEnabled(nullptr, true);
-    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret3 = OH_ArkUI_DragPreviewOption_SetDefaultRadiusEnabled(nullptr, true);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret4 = OH_ArkUI_DragPreviewOption_SetDefaultRadiusEnabled(nullptr, false);
+    EXPECT_EQ(ret4, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -394,12 +414,19 @@ HWTEST_F(DragAndDropTest, DragAndDropTest012, TestSize.Level1)
     EXPECT_FALSE(option->isNumberBadgeEnabled);
     EXPECT_TRUE(option->isShowBadge);
 
+    auto ret2 = OH_ArkUI_DragPreviewOption_SetNumberBadgeEnabled(dragPreviewOption, false);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_FALSE(option->isNumberBadgeEnabled);
+    EXPECT_FALSE(option->isShowBadge);
+
     /**
      * @tc.steps: step2.set preview option with nullptr.
      * @tc.expected: Return expected results.
      */
-    auto ret2 = OH_ArkUI_DragPreviewOption_SetNumberBadgeEnabled(nullptr, true);
-    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret3 = OH_ArkUI_DragPreviewOption_SetNumberBadgeEnabled(nullptr, true);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret4 = OH_ArkUI_DragPreviewOption_SetNumberBadgeEnabled(nullptr, false);
+    EXPECT_EQ(ret4, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**
@@ -444,13 +471,18 @@ HWTEST_F(DragAndDropTest, DragAndDropTest014, TestSize.Level1)
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
     auto* option = reinterpret_cast<ArkUIDragPreViewAndInteractionOptions*>(dragPreviewOption);
     EXPECT_TRUE(option->defaultAnimationBeforeLifting);
+    auto ret2 = OH_ArkUI_DragPreviewOption_SetDefaultAnimationBeforeLiftingEnabled(dragPreviewOption, false);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_FALSE(option->defaultAnimationBeforeLifting);
 
     /**
      * @tc.steps: step2.set preview option with nullptr.
      * @tc.expected: Return expected results.
      */
-    auto ret2 = OH_ArkUI_DragPreviewOption_SetDefaultAnimationBeforeLiftingEnabled(nullptr, true);
-    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret3 = OH_ArkUI_DragPreviewOption_SetDefaultAnimationBeforeLiftingEnabled(nullptr, true);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret4 = OH_ArkUI_DragPreviewOption_SetDefaultAnimationBeforeLiftingEnabled(nullptr, false);
+    EXPECT_EQ(ret4, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**

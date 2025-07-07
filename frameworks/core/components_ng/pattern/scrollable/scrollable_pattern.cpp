@@ -18,6 +18,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/point.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
@@ -854,7 +855,7 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
     if (GetAxis() == Axis::FREE) {
         gestureHub->RemoveTouchEvent(touchEvent_);
         touchEvent_.Reset();
-        return;
+        return; // using custom touch event in free scroll mode
     }
     // use TouchEvent to receive next touch down event to stop animation.
     if (touchEvent_) {
@@ -2275,6 +2276,33 @@ ScrollSource ScrollablePattern::ConvertScrollSource(int32_t source)
     return sourceType;
 }
 
+int32_t ScrollablePattern::ScrollToTarget(
+    RefPtr<FrameNode>& scrollable, RefPtr<FrameNode>& target, float targetOffset, ScrollAlign targetAlign)
+{
+    CHECK_NULL_RETURN(scrollable, RET_FAILED);
+    CHECK_NULL_RETURN(target, RET_FAILED);
+    auto pattern = scrollable->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, RET_FAILED);
+    ACE_SCOPED_TRACE("ScrollToTarget, scrollable:%d, target:%d, offset:%f, align:%d", scrollable->GetId(),
+        target->GetId(), targetOffset, targetAlign);
+
+    auto scrollablePos = scrollable->GetTransformRelativeOffset();
+    auto targetPos = target->GetTransformRelativeOffset();
+    auto offsetToScrollable = (targetPos - scrollablePos).GetMainOffset(pattern->GetAxis());
+    auto scrollToOffset = pattern->GetTotalOffset();
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
+        "ScrollToTarget, scrollable:%{public}d, target:%{public}d, offset:%{public}f, align:%{public}d, "
+        "currentOffset:%{public}f, offsetToScrollabl:%{public}f",
+        scrollable->GetId(), target->GetId(), targetOffset, targetAlign, scrollToOffset, offsetToScrollable);
+    scrollToOffset += offsetToScrollable;
+    scrollToOffset += targetOffset;
+    if (targetAlign == ScrollAlign::CENTER) {
+        scrollToOffset -= pattern->GetMainContentSize() / 2;
+    }
+    pattern->AnimateTo(scrollToOffset, -1, nullptr, true, false, false);
+    return RET_SUCCESS;
+}
+
 ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t source, NestedState state)
 {
     auto parent = GetNestedScrollParent();
@@ -3569,7 +3597,7 @@ PositionMode ScrollablePattern::GetPositionMode()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, PositionMode::RIGHT);
     auto positionMode = PositionMode::RIGHT;
-    if (axis_ == Axis::HORIZONTAL || axis_ == Axis::FREE) {
+    if (axis_ == Axis::HORIZONTAL) {
         positionMode = PositionMode::BOTTOM;
     } else {
         auto isRtl = host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
@@ -4453,5 +4481,52 @@ void ScrollablePattern::ReportOnItemStopEvent()
         TAG_LOGI(
             AceLogTag::ACE_LIST, "nodeId:[%{public}d] List reportComponentChangeEvent onScrollStop", host->GetId());
     }
+}
+
+PaddingPropertyF ScrollablePattern::CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate)
+{
+    bool isVertical = GetAxis() == Axis::VERTICAL;
+    if (needRotate) {
+        isVertical = !isVertical;
+    }
+    if (isVertical) {
+        safeAreaPadding.top = std::nullopt;
+        safeAreaPadding.bottom = std::nullopt;
+    } else {
+        safeAreaPadding.left = std::nullopt;
+        safeAreaPadding.right = std::nullopt;
+    }
+    return safeAreaPadding;
+}
+
+bool ScrollablePattern::AccumulatingTerminateHelper(
+    RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf, LayoutSafeAreaType ignoreType)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GetScrollableAxisSensitive()) {
+        return false;
+    }
+    auto expandFromList = host->GetAccumulatedSafeAreaExpand(false,
+        { .edges = GetAxis() == Axis::VERTICAL ? LAYOUT_SAFE_AREA_EDGE_HORIZONTAL : LAYOUT_SAFE_AREA_EDGE_VERTICAL });
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto frameRect = geometryNode->GetFrameRect();
+    totalExpand = totalExpand.Plus(AdjacentExpandToRect(adjustingRect, expandFromList, frameRect));
+    return true;
+}
+
+float ScrollablePattern::FireObserverOnWillScroll(float offset)
+{
+    auto scrollState = GetScrollState();
+    auto source = ConvertScrollSource(scrollSource_);
+    CHECK_NULL_RETURN(positionController_, offset);
+    auto obsMgr = positionController_->GetObserverManager();
+    CHECK_NULL_RETURN(obsMgr, offset);
+    ScrollFrameResult result = { .offset = Dimension(offset, DimensionUnit::PX) };
+    obsMgr->HandleOnWillScrollEventEx(result, scrollState, source);
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, result.offset.ConvertToPx());
+    return context->NormalizeToPx(result.offset);
 }
 } // namespace OHOS::Ace::NG

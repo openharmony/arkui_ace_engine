@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "layout_wrapper.h"
 #include "base/utils/string_expression.h"
 #include "core/components_ng/layout/layout_property.h"
 
@@ -445,7 +446,11 @@ void LayoutProperty::ExpandConstraintWithSafeArea()
     if (ignoreLayoutSafeAreaOpts_) {
         options = *ignoreLayoutSafeAreaOpts_;
     }
-    ExpandEdges sae = parent->GetAccumulatedSafeAreaExpand(true, options);
+    auto pattern = parent->GetPattern();
+    IgnoreStrategy strategy = IgnoreStrategy::NORMAL;
+    ExpandEdges sae = pattern && pattern->ChildTentativelyLayouted(strategy)
+                          ? host->GetAccumulatedSafeAreaExpand(false, options, strategy)
+                          : parent->GetAccumulatedSafeAreaExpand(true, options);
     OptionalSizeF expandedSize;
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -530,6 +535,9 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
 void LayoutProperty::CheckCalcLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
     if (calcLayoutConstraint_) {
+        auto host = GetHost();
+        auto versionCheck = host && (host->GetTag() == V2::COLUMN_ETS_TAG || host->GetTag() == V2::ROW_ETS_TAG) &&
+                            host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY);
         if (calcLayoutConstraint_->maxSize.has_value()) {
             if (!calcLayoutConstraint_->preMaxSize.has_value() ||
                 calcLayoutConstraint_->preMaxSize.value() != calcLayoutConstraint_->maxSize.value()) {
@@ -538,6 +546,12 @@ void LayoutProperty::CheckCalcLayoutConstraint(const LayoutConstraintF& parentCo
             }
             layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
                 parentConstraint.scaleProperty, parentConstraint.percentReference, calcMaxSizeRpn_));
+            if (!versionCheck && GetLayoutPolicyProperty().has_value() && GetLayoutPolicyProperty().value().IsMatch()) {
+                layoutConstraint_->UpdateParentIdealSizeByLayoutPolicy(
+                    ConvertToSize(calcLayoutConstraint_->maxSize.value(), parentConstraint.scaleProperty,
+                        parentConstraint.percentReference, calcMaxSizeRpn_),
+                    true, GetLayoutPolicyProperty().value());
+            }
         }
         if (calcLayoutConstraint_->minSize.has_value()) {
             if (!calcLayoutConstraint_->preMinSize.has_value() ||
@@ -547,6 +561,12 @@ void LayoutProperty::CheckCalcLayoutConstraint(const LayoutConstraintF& parentCo
             }
             layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
                 parentConstraint.scaleProperty, parentConstraint.percentReference, calcMinSizeRpn_));
+            if (!versionCheck && GetLayoutPolicyProperty().has_value() && GetLayoutPolicyProperty().value().IsMatch()) {
+                layoutConstraint_->UpdateParentIdealSizeByLayoutPolicy(
+                    ConvertToSize(calcLayoutConstraint_->minSize.value(), parentConstraint.scaleProperty,
+                        parentConstraint.percentReference, calcMinSizeRpn_),
+                    false, GetLayoutPolicyProperty().value());
+            }
         }
         if (calcLayoutConstraint_->selfIdealSize.has_value()) {
             if (!calcLayoutConstraint_->preSelfIdealSize.has_value() ||

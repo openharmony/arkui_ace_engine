@@ -1192,8 +1192,13 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto touchPassMode = AceApplicationInfo::GetInstance().GetTouchEventPassMode();
-    bool isDebugAcc = (SystemProperties::GetTouchAccelarate() == static_cast<int32_t>(TouchPassMode::ACCELERATE));
-    pipelineContext_->SetTouchAccelarate((touchPassMode == TouchPassMode::ACCELERATE) || isDebugAcc);
+    int32_t debugMode = SystemProperties::GetTouchAccelarate();
+    if (debugMode != static_cast<int32_t>(touchPassMode)) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Debug touch pass mode %{public}d", debugMode);
+        touchPassMode = static_cast<TouchPassMode>(debugMode);
+        AceApplicationInfo::GetInstance().SetTouchEventPassMode(touchPassMode);
+    }
+    pipelineContext_->SetTouchAccelarate(touchPassMode == TouchPassMode::ACCELERATE);
     pipelineContext_->SetTouchPassThrough(touchPassMode == TouchPassMode::PASS_THROUGH);
     auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event,
                                     const std::function<void()>& markProcess,
@@ -2745,6 +2750,25 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     if (fontManager) {
         fontManager->SetOpenLinkOnMapSearchHandler(openLinkOnMapSearchHandler);
     }
+
+    auto&& startAbilityOnCalendar = [weak = WeakClaim(this), instanceId](
+                                        const std::map<std::string, std::string>& params) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId);
+        auto context = container->GetPipelineContext();
+        CHECK_NULL_VOID(context);
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakPtr<AceContainer>(container), params]() {
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                container->OnStartAbilityOnCalendar(params);
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleStartAbilityOnCalendar");
+    };
+    if (fontManager) {
+        fontManager->SetStartAbilityOnCalendar(startAbilityOnCalendar);
+    }
     auto&& setStatusBarEventHandler = [weak = WeakClaim(this), instanceId](const Color& color) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
@@ -3938,10 +3962,18 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
     }
     dragPointerEvent.sourceType = currentPointerEvent->GetSourceType();
     if (currentPointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
-        dragPointerEvent.displayX = static_cast<float>(pointerItem.GetDisplayXPos());
-        dragPointerEvent.displayY = static_cast<float>(pointerItem.GetDisplayYPos());
-        dragPointerEvent.windowX = static_cast<float>(pointerItem.GetWindowXPos());
-        dragPointerEvent.windowY = static_cast<float>(pointerItem.GetWindowYPos());
+        dragPointerEvent.displayX = NearZero(pointerItem.GetDisplayXPos())
+                                        ? pointerItem.GetDisplayX()
+                                        : static_cast<float>(pointerItem.GetDisplayXPos());
+        dragPointerEvent.displayY = NearZero(pointerItem.GetDisplayYPos())
+                                        ? pointerItem.GetDisplayY()
+                                        : static_cast<float>(pointerItem.GetDisplayYPos());
+        dragPointerEvent.windowX = NearZero(pointerItem.GetWindowXPos())
+                                       ? pointerItem.GetWindowX()
+                                       : static_cast<float>(pointerItem.GetWindowXPos());
+        dragPointerEvent.windowY = NearZero(pointerItem.GetWindowYPos())
+                                       ? pointerItem.GetWindowY()
+                                       : static_cast<float>(pointerItem.GetWindowYPos());
     } else {
         dragPointerEvent.displayX = pointerItem.GetDisplayX();
         dragPointerEvent.displayY = pointerItem.GetDisplayY();
@@ -3995,10 +4027,18 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
         return false;
     }
     if (currentPointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
-        dragPointerEvent.displayX = static_cast<float>(pointerItem.GetDisplayXPos());
-        dragPointerEvent.displayY = static_cast<float>(pointerItem.GetDisplayYPos());
-        dragPointerEvent.windowX = static_cast<float>(pointerItem.GetWindowXPos());
-        dragPointerEvent.windowY = static_cast<float>(pointerItem.GetWindowYPos());
+        dragPointerEvent.displayX = NearZero(pointerItem.GetDisplayXPos())
+                                        ? pointerItem.GetDisplayX()
+                                        : static_cast<float>(pointerItem.GetDisplayXPos());
+        dragPointerEvent.displayY = NearZero(pointerItem.GetDisplayYPos())
+                                        ? pointerItem.GetDisplayY()
+                                        : static_cast<float>(pointerItem.GetDisplayYPos());
+        dragPointerEvent.windowX = NearZero(pointerItem.GetWindowXPos())
+                                       ? pointerItem.GetWindowX()
+                                       : static_cast<float>(pointerItem.GetWindowXPos());
+        dragPointerEvent.windowY = NearZero(pointerItem.GetWindowYPos())
+                                       ? pointerItem.GetWindowY()
+                                       : static_cast<float>(pointerItem.GetWindowYPos());
     } else {
         dragPointerEvent.displayX = pointerItem.GetDisplayX();
         dragPointerEvent.displayY = pointerItem.GetDisplayY();

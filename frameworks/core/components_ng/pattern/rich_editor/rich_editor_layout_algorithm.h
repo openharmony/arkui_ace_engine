@@ -119,7 +119,7 @@ public:
     RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RichEditorParagraphManager* paragraphs,
         LRUMap<std::uintptr_t, RefPtr<Paragraph>>* paraMapPtr,
         std::unique_ptr<StyleManager>& styleManager, bool needShowPlaceholder,
-        AISpanLayoutInfo aiSpanLayoutInfo);
+        const AISpanLayoutInfo& aiSpanLayoutInfo);
     ~RichEditorLayoutAlgorithm() override = default;
 
     const OffsetF& GetParentGlobalOffset() const
@@ -131,7 +131,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
     void Measure(LayoutWrapper* layoutWrapper) override;
 
-    const RectF& GetTextRect()
+    const std::optional<RectF>& GetTextRect()
     {
         return richTextRect_;
     }
@@ -199,8 +199,7 @@ private:
     std::list<RefPtr<SpanItem>> allSpans_;
     RichEditorParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
-    RectF richTextRect_;
-    std::optional<TextStyle> typingTextStyle_;
+    std::optional<RectF> richTextRect_;
     LRUMap<std::uintptr_t, RefPtr<Paragraph>>* const paraMapPtr_;
     std::unique_ptr<StyleManager>& styleManager_;
     bool needShowPlaceholder_ = false;

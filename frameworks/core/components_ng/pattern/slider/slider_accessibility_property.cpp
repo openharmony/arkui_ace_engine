@@ -15,9 +15,22 @@
 
 #include "core/components_ng/pattern/slider/slider_accessibility_property.h"
 
+#include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+#include "accessibility_element_info.h"
+#endif
+
 namespace OHOS::Ace::NG {
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+namespace {
+constexpr const char* AXIS_VERTICAL = "vertical";
+constexpr const char* AXIS_HORIZONTAL = "horizontal";
+constexpr const char* AXIS_FREE = "free";
+constexpr const char* AXIS_NONE = "none";
+} // namespace
+#endif
 std::string SliderAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
@@ -56,5 +69,34 @@ void SliderAccessibilityProperty::SetSpecificSupportAction()
     if (value.min < value.current) {
         AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
     }
+}
+
+void SliderAccessibilityProperty::GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
+{
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(sliderPattern);
+    std::string axisStr = AXIS_NONE;
+    switch (sliderPattern->GetDirection()) {
+        case Axis::VERTICAL:
+            axisStr = AXIS_VERTICAL;
+            break;
+        case Axis::HORIZONTAL:
+            axisStr = AXIS_HORIZONTAL;
+            break;
+        case Axis::FREE:
+            axisStr = AXIS_FREE;
+            break;
+        case Axis::NONE:
+            axisStr = AXIS_NONE;
+            break;
+        default:
+            axisStr = AXIS_NONE;
+            break;
+    }
+    extraElementInfo.SetExtraElementInfo("direction", axisStr);
+#endif
 }
 } // namespace OHOS::Ace::NG

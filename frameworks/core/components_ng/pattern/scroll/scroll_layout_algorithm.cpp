@@ -92,6 +92,13 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     UseInitialOffset(axis, selfSize, layoutWrapper);
 }
 
+namespace {
+float DimensionToFloat(const CalcDimension& value, float selfLength)
+{
+    return value.Unit() == DimensionUnit::PERCENT ? -value.Value() * selfLength : -value.ConvertToPx();
+}
+} // namespace
+
 void ScrollLayoutAlgorithm::UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper)
 {
     auto scrollNode = layoutWrapper->GetHostNode();
@@ -102,12 +109,12 @@ void ScrollLayoutAlgorithm::UseInitialOffset(Axis axis, SizeF selfSize, LayoutWr
         auto initialOffset = scrollPattern->GetInitialOffset();
         if (axis == Axis::VERTICAL) {
             auto offset = initialOffset.GetY();
-            currentOffset_ =
-                offset.Unit() == DimensionUnit::PERCENT ? -offset.Value() * selfSize.Height() : -offset.ConvertToPx();
+            currentOffset_ = DimensionToFloat(offset, selfSize.Height());
+        } else if (axis == Axis::FREE) {
+            currentOffset_ = DimensionToFloat(initialOffset.GetX(), selfSize.Width());
+            crossOffset_ = DimensionToFloat(initialOffset.GetY(), selfSize.Height());
         } else {
-            auto offset = initialOffset.GetX();
-            currentOffset_ =
-                offset.Unit() == DimensionUnit::PERCENT ? -offset.Value() * selfSize.Width() : -offset.ConvertToPx();
+            currentOffset_ = DimensionToFloat(initialOffset.GetX(), selfSize.Width());
         }
     }
 }
@@ -130,14 +137,23 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     viewSize_ = size;
     MinusPaddingToSize(padding, size);
     viewPort_ = size;
-    auto childSize = childGeometryNode->GetMarginFrameSize();
+    auto scroll = DynamicCast<ScrollPattern>(scrollNode->GetPattern());
+    CHECK_NULL_VOID(scroll);
+    float zoomScale = scroll->GetZoomScale();
+    auto childSize = childGeometryNode->GetMarginFrameSize() * zoomScale;
     auto contentEndOffset = layoutProperty->GetScrollContentEndOffsetValue(.0f);
     if (axis == Axis::FREE) { // horizontal is the main axis in Free mode
         scrollableDistance_ = childSize.Width() - viewPort_.Width() + contentEndOffset;
     } else {
         scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(viewPort_, axis) + contentEndOffset;
     }
-    if (UnableOverScroll(layoutWrapper)) {
+    if (axis == Axis::FREE) {
+        auto effect = scroll->GetEdgeEffect();
+        const float verticalSpace = childSize.Height() - viewPort_.Height();
+        crossOffset_ = AdjustOffsetInFreeMode(crossOffset_, verticalSpace, effect, EffectEdge::ALL);
+        // effectEdge only applies to horizontal axis
+        currentOffset_ = AdjustOffsetInFreeMode(currentOffset_, scrollableDistance_, effect, scroll->GetEffectEdge());
+    } else if (UnableOverScroll(layoutWrapper)) {
         if (scrollableDistance_ > 0.0f) {
             currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
         } else {
@@ -162,7 +178,14 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         axis == Axis::VERTICAL) {
         alignmentPosition.SetX(size.Width() - viewPortExtent_.Width());
     }
-    childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
+    if (zoomScale != 1.0) {
+        auto allOffset = padding.Offset() + currentOffset + alignmentPosition;
+        auto sizeDelta = childSize - childGeometryNode->GetMarginFrameSize();
+        allOffset += OffsetF(sizeDelta.Width() / 2, sizeDelta.Height() / 2); /* 2:half */
+        childGeometryNode->SetMarginFrameOffset(allOffset);
+    } else {
+        childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
+    }
     childWrapper->Layout();
     UpdateOverlay(layoutWrapper);
     if (scrollNode && scrollNode->GetSuggestOpIncActivatedOnce()) {
@@ -228,6 +251,22 @@ void ScrollLayoutAlgorithm::UpdateScrollAlignment(Alignment& scrollAlignment)
     } else if (scrollAlignment == Alignment::CENTER_LEFT) {
         scrollAlignment = Alignment::CENTER_RIGHT;
     }
+}
+
+float ScrollLayoutAlgorithm::AdjustOffsetInFreeMode(
+    float offset, float scrollableDistance, EdgeEffect effect, EffectEdge appliedEdge)
+{
+    const float minOffsetY = std::min(-scrollableDistance, 0.0f); // Max scroll to end
+    if (Positive(offset)) {                                       // Overscroll at start
+        if (effect != EdgeEffect::SPRING || appliedEdge == EffectEdge::END) {
+            offset = 0.0f;
+        }
+    } else if (LessNotEqual(offset, minOffsetY)) { // Overscroll at end
+        if (effect != EdgeEffect::SPRING || appliedEdge == EffectEdge::START) {
+            offset = minOffsetY;
+        }
+    }
+    return offset;
 }
 
 } // namespace OHOS::Ace::NG

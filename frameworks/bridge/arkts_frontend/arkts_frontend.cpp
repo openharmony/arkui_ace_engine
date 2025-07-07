@@ -251,7 +251,7 @@ ani_object ArktsFrontend::CallGetUIContextFunc()
     ani_status status;
 
     ani_class uiContextClass;
-    if ((status = env_->FindClass("Larkui/ohos/arkui/UIContext/UIContext;", &uiContextClass)) != ANI_OK) {
+    if ((status = env_->FindClass("L@ohos/arkui/UIContext/UIContext;", &uiContextClass)) != ANI_OK) {
         LOGE("FindClass UIContext failed, %{public}d", status);
         return result;
     }

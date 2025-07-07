@@ -550,9 +550,9 @@ void JSNavDestination::SetMenus(const JSCallbackInfo& info)
 void JSNavDestination::SetBackgroundColor(const JSCallbackInfo& info)
 {
     Color backgroundColor;
-    bool isValid = ParseJsColor(info[0], backgroundColor);
-
-    NavDestinationModel::GetInstance()->SetBackgroundColor(backgroundColor, isValid);
+    RefPtr<ResourceObject> backgroundColorResObj;
+    bool isValid = ParseJsColor(info[0], backgroundColor, backgroundColorResObj);
+    NavDestinationModel::GetInstance()->SetBackgroundColor(backgroundColor, isValid, backgroundColorResObj);
 }
 
 void JSNavDestination::SetWillAppear(const JSCallbackInfo& info)

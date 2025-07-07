@@ -196,6 +196,14 @@ public:
                 .c_str(),
             filter);
 #endif
+        auto sliderShowStepOptions = GetSliderShowStepOptions();
+        if ((sliderShowStepOptions.has_value()) && (!sliderShowStepOptions.value().empty())) {
+            auto stepOptions = JsonUtil::Create(true);
+            for (auto option : sliderShowStepOptions.value()) {
+                stepOptions->Put(std::to_string(option.first).c_str(), option.second.c_str());
+            }
+            json->PutExtAttr("sliderShowStepOptions", stepOptions, filter);
+        }
     }
 
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
@@ -269,6 +277,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, DigitalCrownSensitivity, CrownSensitivity, PROPERTY_UPDATE_RENDER)
 #endif
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        SliderPaintStyle, SliderShowStepOptions, SliderModel::SliderShowStepOptions, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_GROUP(SliderTipStyle, SliderTipStyle)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, ShowTips, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, Padding, Dimension, PROPERTY_UPDATE_RENDER)

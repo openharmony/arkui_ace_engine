@@ -40,6 +40,7 @@ void ScrollerImpl::AddObserver(const Observer& observer, int32_t id)
     scrollerObserver.onScrollStopEvent = observer.onScrollStopEvent;
     scrollerObserver.onDidScrollEvent = observer.onDidScrollEvent;
     scrollerObserver.onScrollerAreaChangeEvent = observer.onScrollerAreaChangeEvent;
+    scrollerObserver.onWillScrollEventEx = observer.onWillScrollEventEx;
     jsScroller_->AddObserver(scrollerObserver, id);
 }
 
@@ -274,4 +275,19 @@ bool ScrollerImpl::operator==(const Ace::RefPtr<Scroller>& other) const
     return jsScroller_ == impl->jsScroller_;
 }
 
+RefPtr<FrameNode> ScrollerImpl::GetBindingFrameNode()
+{
+    auto pattern = GetScrollablePattern(jsScroller_);
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto kitNode = host->GetKitNode();
+    if (kitNode) {
+        return kitNode;
+    }
+
+    kitNode = AceType::MakeRefPtr<FrameNodeImpl>(AceType::RawPtr(host));
+    host->SetKitNode(kitNode);
+    return kitNode;
+}
 } // namespace OHOS::Ace::Kit

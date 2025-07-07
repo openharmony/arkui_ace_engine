@@ -1963,6 +1963,48 @@ HWTEST_F(SearchTestTwoNg, testSearchUpdateDisableAndEnable, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testSearchUpdateDisableAndEnable001
+ * @tc.desc: Test Search UpdateDisable and UpdateEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, testSearchUpdateDisableAndEnable001, TestSize.Level1)
+{
+     /**
+      * @tc.steps: Create Search Node
+      */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    buttonLayoutProperty->UpdateAutoDisable(true);
+
+     /**
+      * @tc.expected: Test Search UpdateDisable and UpdateEnable
+      */
+    pattern->UpdateDisable(u"abcd");
+    EXPECT_EQ(pattern->isSearchButtonEnabled_, true);
+
+    std::u16string textValue;
+    pattern->UpdateDisable(textValue);
+    EXPECT_EQ(pattern->isSearchButtonEnabled_, false);
+
+    pattern->UpdateEnable(true);
+    EXPECT_EQ(pattern->isSearchButtonEnabled_, true);
+
+    pattern->UpdateEnable(false);
+    EXPECT_EQ(pattern->isSearchButtonEnabled_, false);
+}
+
+/**
  * @tc.name: testSearchAccessibility
  * @tc.desc: searchAccessibility PerformAction test Select ClearSelection and Copy.
  * @tc.type: FUNC
@@ -3316,5 +3358,34 @@ HWTEST_F(SearchTestTwoNg, searchMeasureTest01, TestSize.Level1)
     pipeline->SetFontScale(3.0f);
     layoutAlgorithm->SearchButtonMeasure(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_GE(pipeline->GetFontScale(), 0.5f);
+}
+
+/**
+ * @tc.name: GetIMEClientInfo001
+ * @tc.desc: Test search GetIMEClientInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, GetIMEClientInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize search
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto searchPattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(searchPattern, nullptr);
+
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    auto searchHost = searchPattern->GetHost();
+    EXPECT_NE(searchHost, nullptr);
+
+    IMEClient iMEClientInfo = textFieldPattern->GetIMEClientInfo();
+    EXPECT_EQ(iMEClientInfo.nodeId, searchHost->GetId());
 }
 } // namespace OHOS::Ace::NG

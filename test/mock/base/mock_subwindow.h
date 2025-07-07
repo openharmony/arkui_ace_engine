@@ -133,6 +133,7 @@ public:
     MOCK_METHOD1(RemoveFollowParentWindowLayoutNode, void(int32_t nodeId));
     MOCK_METHOD1(SetNodeId, void(int32_t nodeId));
     MOCK_CONST_METHOD0(GetNodeId, int32_t());
+    MOCK_METHOD3(SetWindowAnchorInfo, void(const NG::OffsetF& offset, SubwindowType type, int32_t nodeId));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

@@ -35,6 +35,8 @@ public:
         stack->Push(frameNode);
     }
 
+    void GetImageLayoutAlgorithm();
+
     FrameNode* GetNode()
     {
         return ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -43,7 +45,33 @@ public:
     static void setSrcType(ImageSourceInfo& info, SrcType value) {
         info.srcType_ = value;
     };
+
+    RefPtr<FrameNode> frameNode_;
+    RefPtr<LayoutWrapperNode> imageLayoutWrapper_;
+    RefPtr<ImageLayoutAlgorithm> imageLayoutAlgorithm_;
 };
+
+void ImageTestNg::GetImageLayoutAlgorithm()
+{
+    CreateNode();
+    frameNode_ = GetNode();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    imageLayoutWrapper_ =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    ASSERT_NE(imageLayoutWrapper_, nullptr);
+    auto imagePattern = AceType::DynamicCast<ImagePattern>(frameNode_->GetPattern());
+    ASSERT_NE(imagePattern, nullptr);
+    auto layoutAlgorithm = imagePattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    imageLayoutWrapper_->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    auto layoutAlgorithmWrapper =
+        AceType::DynamicCast<LayoutAlgorithmWrapper>(imageLayoutWrapper_->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    imageLayoutAlgorithm_ = AceType::DynamicCast<ImageLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(imageLayoutAlgorithm_, nullptr);
+}
 
 /**
  * @tc.name: ImagePatternCreator001
@@ -2451,5 +2479,343 @@ HWTEST_F(ImageTestNg, TestReportPerfData002, TestSize.Level0)
     auto mockImagePerf = reinterpret_cast<MockImagePerf*>(MockImagePerf::GetPerfMonitor());
     EXPECT_CALL(*mockImagePerf, StartRecordImageLoadStat(_)).Times(AtLeast(1));
     imagePattern->LoadImage(ImageSourceInfo(""), false);
+}
+
+/**
+ * @tc.name: ImageSafeArea001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageSafeArea001, TestSize.Level1)
+{
+    CreateNode();
+    auto frameNode = GetNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    EXPECT_TRUE(imagePattern->IsEnableMatchParent());
+    EXPECT_TRUE(imagePattern->IsEnableFix());
+}
+
+/**
+ * @tc.name: ImageSafeArea002
+ * @tc.desc: Verify that LayoutPolicy is applied correctly when width and height are set to FIX_AT_IDEAL_SIZE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageSafeArea002, TestSize.Level0)
+{
+    // Step 1: Create Image node and retrieve its pattern.
+    GetImageLayoutAlgorithm();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pattern = frameNode_->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Step 2: Set layout constraint and layout policy (fixed size).
+    auto imageLayoutProperty = frameNode_->GetLayoutProperty<ImageLayoutProperty>();
+
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize.width_ = 100.0;
+    layoutConstraint.parentIdealSize.height_ = 100.0;
+    layoutConstraint.selfIdealSize.width_ = 10.0;
+    layoutConstraint.selfIdealSize.height_ = 10.0;
+
+    imageLayoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+
+    // Constraints are still considered invalid (not resolved sizes).
+    EXPECT_TRUE(layoutConstraint.selfIdealSize.IsValid());
+    EXPECT_TRUE(layoutConstraint.parentIdealSize.IsValid());
+
+    // Step 3: Test UpdateFrameSizeWithLayoutPolicy before image is loaded.
+    OptionalSizeF imageFrameSize;
+    imageLayoutAlgorithm_->UpdateFrameSizeWithLayoutPolicy(
+        AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, std::nullopt);
+    EXPECT_EQ(pattern->GetImageSizeForMeasure(), std::nullopt);
+
+    // Step 4: Create loading context to simulate image load.
+    auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(loadingCtx, nullptr);
+    pattern->loadingCtx_ = loadingCtx;
+
+    // Step 5: Validate image size fetched from loading context.
+    auto imageSize = pattern->GetImageSizeForMeasure();
+    EXPECT_EQ(imageSize->Width(), IMAGE_SOURCESIZE_WIDTH);
+    EXPECT_EQ(imageSize->Height(), IMAGE_SOURCESIZE_HEIGHT);
+
+    /**
+     * Equivalent ETS code:
+     *   Image(IMAGE_SRC_URL)
+     *     .width(LayoutPolicy.fixAtIdealSize)
+     *     .height(LayoutPolicy.fixAtIdealSize)
+     */
+
+    // Step 6: Apply layout policy and verify resulting frame size.
+    imageLayoutAlgorithm_->UpdateFrameSizeWithLayoutPolicy(
+        AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, imageSize);
+    EXPECT_EQ(imageSize->Width(), imageFrameSize.Width());
+    EXPECT_EQ(imageSize->Height(), imageFrameSize.Height());
+}
+
+/**
+ * @tc.name: ImageSafeArea003
+ * @tc.desc: Verify that LayoutPolicy is applied correctly when width and height are set to WRAP_CONTENT.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageSafeArea003, TestSize.Level0)
+{
+    // Step 1: Create Image node and retrieve its pattern.
+    GetImageLayoutAlgorithm();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pattern = frameNode_->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Step 2: Set layout constraint and layout policy (fixed size).
+    auto imageLayoutProperty = frameNode_->GetLayoutProperty<ImageLayoutProperty>();
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize.width_ = 100.0;
+    layoutConstraint.parentIdealSize.height_ = 300.0;
+    layoutConstraint.selfIdealSize.width_ = 10.0;
+    layoutConstraint.selfIdealSize.height_ = 10.0;
+
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+
+    imageLayoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+
+    // Step 3: Initial check before image is loaded.
+    OptionalSizeF imageFrameSize;
+    imageLayoutAlgorithm_->UpdateFrameSizeWithLayoutPolicy(
+        AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, std::nullopt);
+    EXPECT_EQ(pattern->GetImageSizeForMeasure(), std::nullopt);
+
+    // Step 4: Simulate loading the image using loading context.
+    auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(loadingCtx, nullptr);
+    pattern->loadingCtx_ = loadingCtx;
+
+    // Constraint sizes are still not resolved directly.
+    EXPECT_TRUE(layoutConstraint.selfIdealSize.IsValid());
+    EXPECT_TRUE(layoutConstraint.parentIdealSize.IsValid());
+
+    // Step 5: Get image size and validate.
+    auto imageSize = pattern->GetImageSizeForMeasure();
+    EXPECT_EQ(imageSize->Width(), IMAGE_SOURCESIZE_WIDTH);
+    EXPECT_EQ(imageSize->Height(), IMAGE_SOURCESIZE_HEIGHT);
+
+    /**
+     * Equivalent ETS code:
+     *   Image(IMAGE_SRC_URL)
+     *     .width(LayoutPolicy.wrapContent)
+     *     .height(LayoutPolicy.wrapContent)
+     */
+
+    // Step 6: Apply WRAP_CONTENT policy and check resulting frame size.
+    imageLayoutAlgorithm_->UpdateFrameSizeWithLayoutPolicy(
+        AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, imageSize);
+    EXPECT_EQ(imageFrameSize.Width(), layoutConstraint.parentIdealSize.width_);
+    EXPECT_EQ(imageFrameSize.Height(), imageSize->Height());
+}
+
+/**
+ * @tc.name: ImageSafeArea004
+ * @tc.desc: Verify that LayoutPolicy is applied correctly when width and height are set to MATCH_PARENT.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageSafeArea004, TestSize.Level0)
+{
+    // Step 1: Create Image node and retrieve its pattern.
+    GetImageLayoutAlgorithm();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pattern = frameNode_->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Step 2: Set layout constraint and layout policy (fixed size).
+    auto imageLayoutProperty = frameNode_->GetLayoutProperty<ImageLayoutProperty>();
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize.width_ = 100.0;
+    layoutConstraint.parentIdealSize.height_ = 300.0;
+
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+
+    imageLayoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+
+    // Step 3: Initial check before image is loaded.
+    OptionalSizeF imageFrameSize;
+    imageLayoutAlgorithm_->UpdateFrameSizeWithLayoutPolicy(
+        AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, std::nullopt);
+    EXPECT_EQ(pattern->GetImageSizeForMeasure(), std::nullopt);
+
+    // Step 4: Simulate loading the image using loading context.
+    auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(loadingCtx, nullptr);
+    pattern->loadingCtx_ = loadingCtx;
+
+    // Constraint sizes are still not resolved directly.
+    EXPECT_FALSE(layoutConstraint.selfIdealSize.IsValid());
+    EXPECT_TRUE(layoutConstraint.parentIdealSize.IsValid());
+
+    // Step 5: Get image size and validate.
+    auto imageSize = pattern->GetImageSizeForMeasure();
+    EXPECT_EQ(imageSize->Width(), IMAGE_SOURCESIZE_WIDTH);
+    EXPECT_EQ(imageSize->Height(), IMAGE_SOURCESIZE_HEIGHT);
+
+    /**
+     * Equivalent ETS code:
+     *   Image(IMAGE_SRC_URL)
+     *     .width(LayoutPolicy.matchParent)
+     *     .height(LayoutPolicy.matchParent)
+     */
+
+    // Step 6: Apply WRAP_CONTENT policy and check resulting frame size.
+    imageLayoutAlgorithm_->UpdateFrameSizeWithLayoutPolicy(
+        AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, imageSize);
+    EXPECT_EQ(imageFrameSize.Width(), std::nullopt);
+    EXPECT_EQ(imageFrameSize.Height(), std::nullopt);
+}
+
+/**
+ * @tc.name: ImageSafeArea005
+ * @tc.desc: Verify that LayoutPolicy is applied correctly when width is MATCH_PARENT and height are set to
+ * FIX_AT_IDEAL_SIZE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageSafeArea005, TestSize.Level0)
+{
+    // Step 1: Create Image node and retrieve its pattern.
+    GetImageLayoutAlgorithm();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pattern = frameNode_->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Step 2: Set layout constraint and layout policy (fixed size).
+    auto imageLayoutProperty = frameNode_->GetLayoutProperty<ImageLayoutProperty>();
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize.width_ = 100.0;
+    layoutConstraint.parentIdealSize.height_ = 300.0;
+
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+
+    imageLayoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+
+    // Step 3: Initial check before image is loaded.
+    OptionalSizeF imageFrameSize;
+    imageLayoutAlgorithm_->UpdateFrameSizeWithLayoutPolicy(
+        AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, std::nullopt);
+    EXPECT_EQ(pattern->GetImageSizeForMeasure(), std::nullopt);
+
+    // Step 4: Simulate loading the image using loading context.
+    auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(loadingCtx, nullptr);
+    pattern->loadingCtx_ = loadingCtx;
+
+    // Constraint sizes are still not resolved directly.
+    EXPECT_FALSE(layoutConstraint.selfIdealSize.IsValid());
+    EXPECT_TRUE(layoutConstraint.parentIdealSize.IsValid());
+
+    // Step 5: Get image size and validate.
+    auto imageSize = pattern->GetImageSizeForMeasure();
+    EXPECT_EQ(imageSize->Width(), IMAGE_SOURCESIZE_WIDTH);
+    EXPECT_EQ(imageSize->Height(), IMAGE_SOURCESIZE_HEIGHT);
+
+    /**
+     * Equivalent ETS code:
+     *   Image(IMAGE_SRC_URL)
+     *     .width(LayoutPolicy.matchParent)
+     *     .height(LayoutPolicy.matchParent)
+     */
+
+    // Step 6: Apply WRAP_CONTENT policy and check resulting frame size.
+    imageLayoutAlgorithm_->UpdateFrameSizeWithLayoutPolicy(
+        AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, imageSize);
+    EXPECT_EQ(imageFrameSize.Width(), std::nullopt);
+    EXPECT_EQ(imageFrameSize.Height(), imageSize->Height());
+}
+
+/**
+ * @tc.name: ImageSafeArea006
+ * @tc.desc: Verify that LayoutPolicy is applied correctly when height is MATCH_PARENT and width are set to
+ * FIX_AT_IDEAL_SIZE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageSafeArea006, TestSize.Level0)
+{
+    // Step 1: Create Image node and retrieve its pattern.
+    GetImageLayoutAlgorithm();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pattern = frameNode_->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Step 2: Set layout constraint and layout policy (fixed size).
+    auto imageLayoutProperty = frameNode_->GetLayoutProperty<ImageLayoutProperty>();
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize.width_ = 100.0;
+    layoutConstraint.parentIdealSize.height_ = 300.0;
+
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+
+    imageLayoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+
+    // Step 3: Initial check before image is loaded.
+    OptionalSizeF imageFrameSize;
+    imageLayoutAlgorithm_->UpdateFrameSizeWithLayoutPolicy(
+        AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, std::nullopt);
+    EXPECT_EQ(pattern->GetImageSizeForMeasure(), std::nullopt);
+
+    // Step 4: Simulate loading the image using loading context.
+    auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(loadingCtx, nullptr);
+    pattern->loadingCtx_ = loadingCtx;
+
+    // Constraint sizes are still not resolved directly.
+    EXPECT_FALSE(layoutConstraint.selfIdealSize.IsValid());
+    EXPECT_TRUE(layoutConstraint.parentIdealSize.IsValid());
+
+    // Step 5: Get image size and validate.
+    auto imageSize = pattern->GetImageSizeForMeasure();
+    EXPECT_EQ(imageSize->Width(), IMAGE_SOURCESIZE_WIDTH);
+    EXPECT_EQ(imageSize->Height(), IMAGE_SOURCESIZE_HEIGHT);
+
+    /**
+     * Equivalent ETS code:
+     *   Image(IMAGE_SRC_URL)
+     *     .width(LayoutPolicy.matchParent)
+     *     .height(LayoutPolicy.matchParent)
+     */
+
+    // Step 6: Apply WRAP_CONTENT policy and check resulting frame size.
+    imageLayoutAlgorithm_->UpdateFrameSizeWithLayoutPolicy(
+        AccessibilityManager::RawPtr(imageLayoutWrapper_), imageFrameSize, imageSize);
+    EXPECT_EQ(imageFrameSize.Height(), std::nullopt);
+    EXPECT_EQ(imageFrameSize.Width(), imageSize->Width());
 }
 } // namespace OHOS::Ace::NG

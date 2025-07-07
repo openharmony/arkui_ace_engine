@@ -2049,6 +2049,10 @@ HWTEST_F(ViewAbstractTestNg, UpdateMenu004, TestSize.Level1)
     auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
     menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
     EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode), ERROR_CODE_NO_ERROR);
+
+    menuParam.isAnchorPosition = true;
+    menuParam.anchorPosition = {10.0, 10.0};
+    EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode), ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -3562,6 +3566,575 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest001, TestSize.Level1)
     ASSERT_NE(renderContext, nullptr);
     EXPECT_EQ(renderContext->GetLinearGradient().has_value(), true);
     EXPECT_EQ(renderContext->GetLinearGradient()->GetLinearGradient()->linearX, NG::GradientDirection::LEFT);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetSweepGradient
+ * @tc.desc: Test SetSweepGradient of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::SWEEP);
+    gradient.GetSweepGradient()->endAngle = CalcDimension(100.0f, DimensionUnit::PX);
+    ViewAbstract::SetSweepGradient(frameNode, gradient);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetSweepGradient().has_value(), true);
+    EXPECT_EQ(renderContext->GetSweepGradient()->GetSweepGradient()->endAngle,
+      CalcDimension(100.0f, DimensionUnit::PX));
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetRadialGradient
+ * @tc.desc: Test SetRadialGradient of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest003, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    gradient.GetRadialGradient()->radialSizeType = std::make_optional(RadialSizeType::CLOSEST_CORNER);
+    ViewAbstract::SetRadialGradient(frameNode, gradient);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetRadialGradient().has_value(), true);
+    EXPECT_EQ(renderContext->GetRadialGradient()->GetRadialGradient()->radialSizeType, RadialSizeType::CLOSEST_CORNER);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetForegroundColor
+ * @tc.desc: Test SetForegroundColor of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest004, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string foregroundColor = pattern->GetResCacheMapByKey("foregroundColor");
+    EXPECT_EQ(foregroundColor, "");
+    g_isConfigChangePerform = true;
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    Color color;
+    ViewAbstract::SetForegroundColor(frameNode, color, resObj);
+    Color result;
+    ResourceParseUtils::ParseResColor(resObj, result);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    foregroundColor = pattern->GetResCacheMapByKey("foregroundColor");
+    EXPECT_EQ(foregroundColor, result.ColorToString());
+}
+
+/**
+ * @tc.name: SetOpacity
+ * @tc.desc: Test SetOpacity of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest005, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string opacityStr = pattern->GetResCacheMapByKey("viewAbstract.opacity");
+    EXPECT_EQ(opacityStr, "");
+    g_isConfigChangePerform = true;
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    double opacity = 0.0;
+    ViewAbstract::SetOpacity(frameNode, opacity, resObj);
+    double result;
+    ResourceParseUtils::ParseResDouble(resObj, result);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    opacityStr = pattern->GetResCacheMapByKey("viewAbstract.opacity");
+    EXPECT_EQ(opacityStr, std::to_string(result));
+}
+
+/**
+ * @tc.name: SetClipShape
+ * @tc.desc: Test SetClipShape of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest006, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetClipEdge(frameNode, true);
+    auto basicShape = AceType::MakeRefPtr<Circle>();
+    basicShape->SetBasicShapeType(BasicShapeType::CIRCLE);
+    EXPECT_EQ(basicShape->GetBasicShapeType(), BasicShapeType::CIRCLE);
+    ViewAbstract::SetClipShape(frameNode, basicShape);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    std::string shapeStr = pattern->GetResCacheMapByKey("clipShape");
+    EXPECT_EQ(shapeStr, "");
+}
+
+/**
+ * @tc.name: SetBackgroundBlurStyle
+ * @tc.desc: Test SetBackgroundBlurStyle of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest007, TestSize.Level1)
+{
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    blurStyleOption.colorMode = ThemeColorMode::SYSTEM;
+    blurStyleOption.adaptiveColor = AdaptiveColor::DEFAULT;
+    blurStyleOption.policy = BlurStyleActivePolicy::ALWAYS_INACTIVE;
+    g_isConfigChangePerform = true;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    ViewAbstract::SetBackgroundBlurStyle(frameNode, blurStyleOption);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackBlurStyle().has_value(), true);
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->blurStyle, BlurStyle::NO_MATERIAL);
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->colorMode, ThemeColorMode::SYSTEM);
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->adaptiveColor, AdaptiveColor::DEFAULT);
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->policy, BlurStyleActivePolicy::ALWAYS_INACTIVE);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: UpdateBackgroundBlurStyle
+ * @tc.desc: Test UpdateBackgroundBlurStyle of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest008, TestSize.Level1)
+{
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    blurStyleOption.colorMode = ThemeColorMode::SYSTEM;
+    blurStyleOption.adaptiveColor = AdaptiveColor::DEFAULT;
+    blurStyleOption.policy = BlurStyleActivePolicy::ALWAYS_INACTIVE;
+    g_isConfigChangePerform = true;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto target = frameNode->GetRenderContext();
+    ASSERT_NE(target, nullptr);
+
+    SysOptions sysOptions;
+    EffectOption effectOption;
+    Color effectOptionColor;
+    effectOption.color = effectOptionColor;
+    target->UpdateBackgroundEffect(effectOption, sysOptions);
+    target->UpdateBackBlurRadius(Dimension(0.5f, DimensionUnit::PERCENT));
+    ViewAbstract::UpdateBackgroundBlurStyle(frameNode, blurStyleOption, sysOptions);
+    EXPECT_EQ(target->GetBackBlurStyle().has_value(), true);
+    EXPECT_EQ(target->GetBackBlurStyle()->blurStyle, BlurStyle::NO_MATERIAL);
+    EXPECT_EQ(target->GetBackBlurStyle()->colorMode, ThemeColorMode::SYSTEM);
+    EXPECT_EQ(target->GetBackBlurStyle()->adaptiveColor, AdaptiveColor::DEFAULT);
+    EXPECT_EQ(target->GetBackBlurStyle()->policy, BlurStyleActivePolicy::ALWAYS_INACTIVE);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetBackgroundEffect
+ * @tc.desc: Test SetBackgroundEffect of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest009, TestSize.Level1)
+{
+    EffectOption option;
+    Color color = Color::TRANSPARENT;
+    option.color = color;
+    option.policy = BlurStyleActivePolicy::ALWAYS_INACTIVE;
+    g_isConfigChangePerform = true;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    ViewAbstract::SetBackgroundEffect(frameNode, option);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackgroundEffect().has_value(), true);
+    EXPECT_EQ(renderContext->GetBackgroundEffect()->color, Color::TRANSPARENT);
+    EXPECT_EQ(renderContext->GetBackgroundEffect()->policy, BlurStyleActivePolicy::ALWAYS_INACTIVE);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: UpdateBackgroundEffect
+ * @tc.desc: Test UpdateBackgroundEffect of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest010, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto target = frameNode->GetRenderContext();
+    ASSERT_NE(target, nullptr);
+    g_isConfigChangePerform = true;
+    SysOptions sysOptions;
+    EffectOption effectOption;
+    effectOption.color = Color::TRANSPARENT;
+    effectOption.policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    blurStyleOption.colorMode = ThemeColorMode::SYSTEM;
+    blurStyleOption.adaptiveColor = AdaptiveColor::DEFAULT;
+    blurStyleOption.policy = BlurStyleActivePolicy::ALWAYS_INACTIVE;
+    ViewAbstract::UpdateBackgroundBlurStyle(frameNode, blurStyleOption, sysOptions);
+    target->UpdateBackBlurRadius(Dimension(0.5f, DimensionUnit::PERCENT));
+    EXPECT_EQ(target->GetBackBlurStyle().has_value(), true);
+    EXPECT_EQ(target->GetBackBlurStyle()->blurStyle, BlurStyle::NO_MATERIAL);
+    EXPECT_EQ(target->GetBackBlurStyle()->colorMode, ThemeColorMode::SYSTEM);
+    EXPECT_EQ(target->GetBackBlurStyle()->adaptiveColor, AdaptiveColor::DEFAULT);
+    EXPECT_EQ(target->GetBackBlurStyle()->policy, BlurStyleActivePolicy::ALWAYS_INACTIVE);
+
+    ViewAbstract::UpdateBackgroundEffect(frameNode, effectOption, sysOptions);
+    EXPECT_EQ(target->GetBackgroundEffect().has_value(), true);
+    EXPECT_EQ(target->GetBackgroundEffect()->color, Color::TRANSPARENT);
+    EXPECT_EQ(target->GetBackgroundEffect()->policy, BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetPixelStretchEffect
+ * @tc.desc: Test SetPixelStretchEffect of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest011, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    PixStretchEffectOption option;
+    option.ResetValue();
+    ViewAbstract::SetPixelStretchEffect(frameNode, option);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetPixelStretchEffect().has_value(), true);
+    EXPECT_EQ(renderContext->GetPixelStretchEffect()->left, Dimension(0.0f));
+    EXPECT_EQ(renderContext->GetPixelStretchEffect()->top, Dimension(0.0f));
+    EXPECT_EQ(renderContext->GetPixelStretchEffect()->right, Dimension(0.0f));
+    EXPECT_EQ(renderContext->GetPixelStretchEffect()->bottom, Dimension(0.0f));
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetOuterBorderRadius
+ * @tc.desc: Test SetOuterBorderRadius of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest012, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(1.0f, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(2.0f, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(3.0f, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(4.0f, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopStart = Dimension(5.0f, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopEnd = Dimension(6.0f, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomEnd = Dimension(7.0f, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomStart = Dimension(8.0f, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.multiValued = true;
+    ViewAbstract::SetOuterBorderRadius(frameNode, borderRadius);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetOuterBorderRadius().has_value(), true);
+    EXPECT_EQ(renderContext->GetOuterBorderRadius()->multiValued, true);
+    EXPECT_EQ(renderContext->GetOuterBorderRadius()->radiusTopLeft, Dimension(1.0f, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ(renderContext->GetOuterBorderRadius()->radiusTopRight, Dimension(2.0f, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ(renderContext->GetOuterBorderRadius()->radiusBottomRight, Dimension(3.0f, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ(renderContext->GetOuterBorderRadius()->radiusBottomLeft, Dimension(4.0f, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ(renderContext->GetOuterBorderRadius()->radiusTopStart, Dimension(5.0f, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ(renderContext->GetOuterBorderRadius()->radiusTopEnd, Dimension(6.0f, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ(renderContext->GetOuterBorderRadius()->radiusBottomEnd, Dimension(7.0f, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ(renderContext->GetOuterBorderRadius()->radiusBottomStart, Dimension(8.0f, OHOS::Ace::DimensionUnit::VP));
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetOuterBorderColor
+ * @tc.desc: Test SetOuterBorderColor of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest013, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    BorderColorProperty borderColor;
+    borderColor.leftColor = Color::BLUE;
+    borderColor.rightColor = Color::BLACK;
+    borderColor.topColor = Color::WHITE;
+    borderColor.bottomColor = Color::RED;
+    borderColor.startColor = Color::GRAY;
+    borderColor.endColor = Color::GREEN;
+    borderColor.multiValued = true;
+    ViewAbstract::SetOuterBorderColor(frameNode, borderColor);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetOuterBorderColor().has_value(), true);
+    EXPECT_EQ(renderContext->GetOuterBorderColor()->multiValued, true);
+    EXPECT_EQ(renderContext->GetOuterBorderColor()->leftColor, Color::BLUE);
+    EXPECT_EQ(renderContext->GetOuterBorderColor()->rightColor, Color::BLACK);
+    EXPECT_EQ(renderContext->GetOuterBorderColor()->topColor, Color::WHITE);
+    EXPECT_EQ(renderContext->GetOuterBorderColor()->bottomColor, Color::RED);
+    EXPECT_EQ(renderContext->GetOuterBorderColor()->startColor, Color::GRAY);
+    EXPECT_EQ(renderContext->GetOuterBorderColor()->endColor, Color::GREEN);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetOuterBorderWidth
+ * @tc.desc: Test SetOuterBorderWidth of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest014, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    BorderWidthProperty borderWidth;
+    borderWidth.leftDimen = Dimension(1.0f, OHOS::Ace::DimensionUnit::VP);
+    borderWidth.topDimen = Dimension(2.0f, OHOS::Ace::DimensionUnit::VP);
+    borderWidth.rightDimen = Dimension(3.0f, OHOS::Ace::DimensionUnit::VP);
+    borderWidth.bottomDimen = Dimension(4.0f, OHOS::Ace::DimensionUnit::VP);
+    borderWidth.startDimen = Dimension(5.0f, OHOS::Ace::DimensionUnit::VP);
+    borderWidth.endDimen = Dimension(6.0f, OHOS::Ace::DimensionUnit::VP);
+    borderWidth.multiValued = true;
+    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), true);
+    EXPECT_EQ(renderContext->GetOuterBorderWidth()->multiValued, true);
+    EXPECT_EQ(renderContext->GetOuterBorderWidth()->leftDimen, Dimension(1.0f, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ(renderContext->GetOuterBorderWidth()->topDimen, Dimension(2.0f, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ(renderContext->GetOuterBorderWidth()->rightDimen, Dimension(3.0f, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ(renderContext->GetOuterBorderWidth()->bottomDimen, Dimension(4.0f, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ(renderContext->GetOuterBorderWidth()->startDimen, Dimension(5.0f, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ(renderContext->GetOuterBorderWidth()->endDimen, Dimension(6.0f, OHOS::Ace::DimensionUnit::VP));
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetColorBlend
+ * @tc.desc: Test SetColorBlend of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest015, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    std::string colorStr = pattern->GetResCacheMapByKey("viewAbstract.colorBlend");
+    EXPECT_EQ(colorStr, "");
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    Color colorBlend = Color::BLUE;
+    ViewAbstract::SetColorBlend(frameNode, colorBlend, resObj);
+    Color result;
+    ResourceParseUtils::ParseResColor(resObj, result);
+    colorStr = pattern->GetResCacheMapByKey("viewAbstract.colorBlend");
+    EXPECT_EQ(colorStr, result.ToString());
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetMask
+ * @tc.desc: Test SetMask of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest016, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    RefPtr<BasicShape> basicShape = AceType::MakeRefPtr<BasicShape>(BasicShapeType::CIRCLE);
+    RefPtr<NG::ProgressMaskProperty> progressMaskProperty = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+    progressMaskProperty->SetMaxValue(200.0f);
+    progressMaskProperty->SetColor(Color(0xffff0000));
+    progressMaskProperty->SetValue(1.0f);
+    auto target = frameNode->GetRenderContext();
+    ASSERT_NE(target, nullptr);
+    target->UpdateClipMask(basicShape);
+    ViewAbstract::SetProgressMask(frameNode, progressMaskProperty);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetProgressMask().has_value(), true);
+    g_isConfigChangePerform = true;
+    
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    ViewAbstract::SetMask(frameNode, basicShape);
+    bool result = ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess();
+    EXPECT_TRUE(result);
+
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetProgressMask
+ * @tc.desc: Test SetProgressMask of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest017, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    RefPtr<BasicShape> basicShape = AceType::MakeRefPtr<BasicShape>(BasicShapeType::CIRCLE);
+    RefPtr<NG::ProgressMaskProperty> progressMaskProperty = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+    progressMaskProperty->SetMaxValue(200.0f);
+    progressMaskProperty->SetColor(Color(0xffff0000));
+    progressMaskProperty->SetValue(1.0f);
+    auto target = frameNode->GetRenderContext();
+    ASSERT_NE(target, nullptr);
+    target->UpdateClipMask(basicShape);
+    ViewAbstract::SetProgressMask(frameNode, progressMaskProperty);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetProgressMask().has_value(), true);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetLightPosition
+ * @tc.desc: Test SetLightPosition of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest018, TestSize.Level1)
+{
+    NG::TranslateOptions option;
+    option.x = Dimension(30.0f, OHOS::Ace::DimensionUnit::VP);
+    option.y = Dimension(20.0f, OHOS::Ace::DimensionUnit::VP);
+    option.z = Dimension(10.0f, OHOS::Ace::DimensionUnit::VP);
+    g_isConfigChangePerform = true;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    ViewAbstract::SetLightPosition(frameNode, option);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetLightPosition().has_value(), true);
+    EXPECT_EQ(renderContext->GetLightPosition()->x, Dimension(30.0f, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ(renderContext->GetLightPosition()->y, Dimension(20.0f, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ(renderContext->GetLightPosition()->z, Dimension(10.0f, OHOS::Ace::DimensionUnit::VP));
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetLightColor
+ * @tc.desc: Test SetLightColor of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest019, TestSize.Level1)
+{
+    Color color = Color::TRANSPARENT;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    std::string colorStr = pattern->GetResCacheMapByKey("LightColorRes");
+    EXPECT_EQ(colorStr, "");
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    ViewAbstract::SetLightColor(frameNode, color, resObj);
+    Color lightColor;
+    ResourceParseUtils::ParseResColor(resObj, lightColor);
+    colorStr = pattern->GetResCacheMapByKey("LightColorRes");
+    EXPECT_EQ(colorStr, lightColor.ColorToString());
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+    std::string lightSource = pattern->GetResCacheMapByKey("LightColorRes");
+    EXPECT_EQ(lightSource, lightColor.ColorToString());
+}
+
+/**
+ * @tc.name: SetBackShadow
+ * @tc.desc: Test SetBackShadow of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest020, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    Shadow shadow;
+    shadow.SetBlurRadius(10);
+    shadow.SetOffsetX(10.0);
+    shadow.SetOffsetY(10.0);
+    shadow.SetColor(Color(Color::RED));
+    shadow.SetShadowType(ShadowType::COLOR);
+    ViewAbstract::SetBackShadow(frameNode, shadow);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackShadow().has_value(), true);
+    EXPECT_EQ(renderContext->GetBackShadow()->GetBlurRadius(), 10);
+    EXPECT_EQ(renderContext->GetBackShadow()->GetOffset().GetX(), 10);
+    EXPECT_EQ(renderContext->GetBackShadow()->GetOffset().GetY(), 10);
+    EXPECT_EQ(renderContext->GetBackShadow()->GetColor(), Color(Color::RED));
+    EXPECT_EQ(renderContext->GetBackShadow()->GetShadowType(), ShadowType::COLOR);
     pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
     g_isConfigChangePerform = false;
 }

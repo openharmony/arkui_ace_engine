@@ -25,6 +25,7 @@
 #include "bundlemgr/bundle_mgr_proxy.h"
 #include "configuration.h"
 #include "event_pass_through_subscriber.h"
+#include "file_path_utils.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -154,6 +155,9 @@ const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 const std::string ACTION_APPDETAIL = "ohos.want.action.appdetail";
 const std::string USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
+const std::string ACRION_CALENDAR = "JUMP_TO_VIEW_BY_AGENDA_PREVIEW";
+const std::string ABILITYNAME_CALENDAR = "MainAbility";
+const std::string ACTION_PARAM = "action";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
 static std::atomic<bool> g_isDynamicVsync = false;
@@ -2158,6 +2162,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     }
     static std::once_flag onceFlag;
     std::call_once(onceFlag, std::bind(&UIContentImpl::SetAceApplicationInfo, this, std::ref(context)));
+    AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = context->GetApplicationInfo()->apiReleaseType;
@@ -2178,9 +2183,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         EventReport::ReportReusedNodeSkipMeasureApp();
     }
     AceApplicationInfo::GetInstance().SetReusedNodeSkipMeasure(reusedNodeSkipMeasure);
-    auto useNewPipe =
-        AceNewPipeJudgement::QueryAceNewPipeEnabledStage(AceApplicationInfo::GetInstance().GetPackageName(),
-            apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
+    auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
+        bundleName_, apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     AceApplicationInfo::GetInstance().SetIsUseNewPipeline(useNewPipe);
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: "
          "%{public}d, and apiReleaseType: %{public}s, "
@@ -2269,6 +2273,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 
         if (appInfo) {
             std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
+            if (moduleList.empty()) {
+                resPath = "/";
+            }
             for (const auto& module : moduleList) {
                 if (module.moduleName == moduleName) {
                     std::regex pattern(ABS_BUNDLE_CODE_PATH + bundleName + FILE_SEPARATOR);
@@ -2355,7 +2362,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     FormManager::GetInstance().SetFormUtils(formUtils);
 #endif
 #ifdef APS_ENABLE
-    auto apsMonitor = std::make_shared<ApsMonitorImpl>();
+    auto apsMonitor = std::make_shared<ApsMonitorImpl>(instanceId_);
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
 #endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
@@ -2448,6 +2455,23 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         want.AddEntity(Want::ENTITY_BROWSER);
         want.SetAction(ACTION_SEARCH);
         want.SetParam(PARAM_QUERY_KEY, queryWord);
+        abilityContext->StartAbility(want, REQUEST_CODE);
+    });
+
+    container->SetAbilityOnCalendar([context = context_](const std::map<std::string, std::string>& params) {
+        auto sharedContext = context.lock();
+        CHECK_NULL_VOID(sharedContext);
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
+        AAFwk::Want want;
+        auto bundleName = NG::ExpandedMenuPluginLoader::GetInstance().GetAPPName(TextDataDetectType::DATE_TIME);
+        CHECK_NULL_VOID(!bundleName.empty());
+        want.SetElementName(bundleName, ABILITYNAME_CALENDAR);
+        for (const auto& param : params) {
+            want.SetParam(param.first, param.second);
+        }
+        want.SetParam(ACTION_PARAM, ACRION_CALENDAR);
         abilityContext->StartAbility(want, REQUEST_CODE);
     });
 
@@ -5393,7 +5417,8 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
     appBar->SetStatusBarItemColor(IsDarkColor(color));
 }
 
-void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool isRouter)
+void UIContentImpl::SetForceSplitEnable(
+    bool isForceSplit, const std::string& homePage, bool isRouter, bool ignoreOrientation)
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -5402,18 +5427,18 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& ho
     CHECK_NULL_VOID(context);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, homePage, isRouter]() {
+    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, homePage, isRouter, ignoreOrientation]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
         if (isRouter) {
             auto stageManager = context->GetStageManager();
             CHECK_NULL_VOID(stageManager);
-            stageManager->SetForceSplitEnable(isForceSplit, homePage);
+            stageManager->SetForceSplitEnable(isForceSplit, homePage, ignoreOrientation);
             return;
         }
         auto navManager = context->GetNavigationManager();
         CHECK_NULL_VOID(navManager);
-        navManager->SetForceSplitEnable(isForceSplit, homePage);
+        navManager->SetForceSplitEnable(isForceSplit, homePage, ignoreOrientation);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         forceSplitTask();

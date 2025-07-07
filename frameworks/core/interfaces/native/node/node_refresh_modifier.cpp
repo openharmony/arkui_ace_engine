@@ -195,6 +195,24 @@ ArkUI_Float32 GetMaxPullDownDistance(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return RefreshModelNG::GetMaxPullDownDistance(frameNode);
 }
+
+void SetOnStepOffsetChangeCallback(ArkUINodeHandle node,
+    void (*callback)(const ArkUI_Float32 offset, void* extraData), void* extraData)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode && callback);
+    auto onChange = [callback, extraData](const float offset) {
+        callback(offset, extraData);
+    };
+    RefreshModelNG::SetStepOffsetChange(frameNode, std::move(onChange));
+}
+
+void ResetOnStepOffsetChangeCallback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetStepOffsetChange(frameNode, nullptr);
+}
 } // namespace
 namespace NodeModifier {
 
@@ -223,6 +241,8 @@ const ArkUIRefreshModifier* GetRefreshModifier()
         .setMaxPullDownDistance = SetMaxPullDownDistance,
         .resetMaxPullDownDistance = ResetMaxPullDownDistance,
         .getMaxPullDownDistance = GetMaxPullDownDistance,
+        .setOnStepOffsetChangeCallback = SetOnStepOffsetChangeCallback,
+        .resetOnStepOffsetChangeCallback = ResetOnStepOffsetChangeCallback,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -127,6 +127,14 @@ config("lto_link_config") {
         "-Wl,--no-warn-symbol-ordering",
       ]
     }
+    if (ace_engine_feature_enable_inst_prefetch && target_cpu == "arm64") {
+      ldflags += [
+        "-Wl,-mllvm,--aarch64-enable-inst-prefetch",
+        "-Wl,-mllvm,--mir-cachemiss-profile-l2i=" + rebase_path(
+                "${ace_engine_feature_pgo_path}/afdo/libace_compatible.z-l2i.afdo",
+                root_build_dir),
+      ]
+    }
   }
 }
 

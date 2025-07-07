@@ -39,6 +39,7 @@ public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     static void SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType);
+    static void SetApiVersion(int32_t apiTargetVersion);
 };
 
 RefPtr<SheetTheme> SheetWrapperPaintTestNg::sheetTheme_ = nullptr;
@@ -68,7 +69,6 @@ void SheetWrapperPaintTestNg::TearDownTestCase()
 
 void SheetWrapperPaintTestNg::SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType)
 {
-    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
@@ -81,6 +81,13 @@ void SheetWrapperPaintTestNg::SetSheetType(RefPtr<SheetPresentationPattern> shee
     MockPipelineContext::SetCurrentWindowRect(windowRect);
     sheetPattern->sheetKey_.hasValidTargetNode = true;
     sheetTheme_->sheetType_ = "popup";
+}
+
+void SheetWrapperPaintTestNg::SetApiVersion(int32_t apiTargetVersion)
+{
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(apiTargetVersion);
 }
 
 /**
@@ -126,6 +133,7 @@ HWTEST_F(SheetWrapperPaintTestNg, IsDrawBorder001, TestSize.Level1)
 HWTEST_F(SheetWrapperPaintTestNg, IsDrawBorder002, TestSize.Level1)
 {
     SheetWrapperPaintTestNg::SetUpTestCase();
+    SheetWrapperPaintTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -161,6 +169,7 @@ HWTEST_F(SheetWrapperPaintTestNg, IsDrawBorder002, TestSize.Level1)
 HWTEST_F(SheetWrapperPaintTestNg, IsDrawBorder003, TestSize.Level1)
 {
     SheetWrapperPaintTestNg::SetUpTestCase();
+    SheetWrapperPaintTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -197,6 +206,7 @@ HWTEST_F(SheetWrapperPaintTestNg, IsDrawBorder003, TestSize.Level1)
 HWTEST_F(SheetWrapperPaintTestNg, IsDrawBorder004, TestSize.Level1)
 {
     SheetWrapperPaintTestNg::SetUpTestCase();
+    SheetWrapperPaintTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });

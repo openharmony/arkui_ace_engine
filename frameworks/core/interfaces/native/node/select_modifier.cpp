@@ -888,7 +888,6 @@ void SetSelectSymbolValue(ArkUINodeHandle node, ArkUI_CharPtr* values,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(values);
-    CHECK_NULL_VOID(symbolFunction);
 
     std::vector<SelectParam> params(length);
     for (uint32_t i = 0; i < length; i++) {
@@ -896,10 +895,26 @@ void SetSelectSymbolValue(ArkUINodeHandle node, ArkUI_CharPtr* values,
             return;
         }
         params[i].text = values[i];
-        auto symbolCallback = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbolFunction[i]);
-        params[i].symbolIcon = *symbolCallback;
+        if (symbolFunction != nullptr && symbolFunction[i] != nullptr) {
+            auto symbolCallback = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbolFunction[i]);
+            params[i].symbolIcon = *symbolCallback;
+        }
     }
     SelectModelNG::InitSelect(frameNode, params);
+}
+
+void SetArrowColor(ArkUINodeHandle node, const ArkUI_Uint32 arrowColor)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::SetArrowColor(frameNode, Color(arrowColor));
+}
+
+void SetShowDefaultSelectedIcon(ArkUINodeHandle node, ArkUI_Bool show)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::SetShowDefaultSelectedIcon(frameNode, show);
 }
 
 void SetAvoidance(ArkUINodeHandle node, ArkUI_Int32 modeValue)
@@ -998,6 +1013,8 @@ const ArkUISelectModifier* GetSelectModifier()
         .setMenuOutline = SetMenuOutline,
         .resetMenuOutline = ResetMenuOutline,
         .setSelectSymbolValue = SetSelectSymbolValue,
+        .setArrowColor = SetArrowColor,
+        .setShowDefaultSelectedIcon = SetShowDefaultSelectedIcon,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

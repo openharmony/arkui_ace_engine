@@ -1943,7 +1943,7 @@ HWTEST_F(ScrollEventTestNg, SpringFinalPosition001, TestSize.Level1)
     EXPECT_TRUE(TickPosition(dragDelta / TICK));
     EXPECT_TRUE(TickPosition(0));
     auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
-    EXPECT_EQ(scrollable->springOffsetProperty_->Get(), -1);
+    EXPECT_EQ(scrollable->springOffsetProperty_->GetStagingValue(), -1);
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN

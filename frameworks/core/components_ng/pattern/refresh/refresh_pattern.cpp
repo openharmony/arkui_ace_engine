@@ -460,9 +460,11 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
             return { delta, true };
         }
         auto pullDownRatio = CalculatePullDownRatio();
+        auto lastOffset = scrollOffset_;
         scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, GetMaxPullDownDistance());
         UpdateFirstChildPlacement();
         FireOnOffsetChange(scrollOffset_);
+        FireOnStepOffsetChange(scrollOffset_ - lastOffset);
         if (!isSourceFromAnimation_) {
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
@@ -589,6 +591,13 @@ void RefreshPattern::FireOnOffsetChange(float value)
         refreshEventHub->FireOnOffsetChange(Dimension(value).ConvertToVp());
         lastScrollOffset_ = value;
     }
+}
+
+void RefreshPattern::FireOnStepOffsetChange(float value)
+{
+    auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(refreshEventHub);
+    refreshEventHub->FireOnStepOffsetChange(value);
 }
 
 void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
@@ -1388,5 +1397,35 @@ void RefreshPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("LoadingProgressOpacity", GetLoadingProgressOpacity());
     json->Put("LoadingTextOpacity", GetLoadingTextOpacity());
     json->Put("LoadingProgressColor", GetLoadingProgressColor().ColorToString().c_str());
+}
+
+PaddingPropertyF RefreshPattern::CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate)
+{
+    bool isVertical = GetAxis() == Axis::VERTICAL;
+    if (needRotate) {
+        isVertical = !isVertical;
+    }
+    if (isVertical) {
+        safeAreaPadding.top = std::nullopt;
+        safeAreaPadding.bottom = std::nullopt;
+    } else {
+        safeAreaPadding.left = std::nullopt;
+        safeAreaPadding.right = std::nullopt;
+    }
+    return safeAreaPadding;
+}
+
+bool RefreshPattern::AccumulatingTerminateHelper(
+    RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf, LayoutSafeAreaType ignoreType)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto expandFromList = host->GetAccumulatedSafeAreaExpand(false,
+        { .edges = GetAxis() == Axis::VERTICAL ? LAYOUT_SAFE_AREA_EDGE_HORIZONTAL : LAYOUT_SAFE_AREA_EDGE_VERTICAL });
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto frameRect = geometryNode->GetFrameRect();
+    totalExpand = totalExpand.Plus(AdjacentExpandToRect(adjustingRect, expandFromList, frameRect));
+    return true;
 }
 } // namespace OHOS::Ace::NG

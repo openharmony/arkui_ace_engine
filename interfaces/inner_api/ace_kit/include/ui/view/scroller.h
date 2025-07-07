@@ -32,6 +32,7 @@ public:
     using OnScrollStopEvent = std::function<void()>;
     using OnDidScrollEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
     using OnScrollerAreaChangeEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
+    using OnWillScrollEventEx = std::function<void(ScrollFrameResult&, ScrollState, ScrollSource)>;
     struct Observer {
         OnReachEvent onReachStartEvent;
         OnReachEvent onReachEndEvent;
@@ -39,6 +40,7 @@ public:
         OnScrollStopEvent onScrollStopEvent;
         OnDidScrollEvent onDidScrollEvent;
         OnScrollerAreaChangeEvent onScrollerAreaChangeEvent;
+        OnWillScrollEventEx onWillScrollEventEx;
     };
     Scroller() = default;
     virtual ~Scroller() = default;
@@ -55,6 +57,7 @@ public:
         const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false) = 0;
 
     virtual bool operator==(const Ace::RefPtr<Scroller>& other) const = 0;
+    virtual RefPtr<FrameNode> GetBindingFrameNode() = 0;
 };
 
 } // namespace OHOS::Ace::Kit

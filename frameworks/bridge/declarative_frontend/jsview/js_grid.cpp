@@ -705,7 +705,7 @@ void JSGrid::SetAlignItems(const JSCallbackInfo& info)
 
 void JSGrid::SetSyncLoad(const JSCallbackInfo& info)
 {
-    bool syncLoad = false;
+    bool syncLoad = true;
     if (info.Length() >= 1) {
         auto value = info[0];
         if (value->IsBoolean()) {

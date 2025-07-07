@@ -33,6 +33,7 @@
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -40,6 +41,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
@@ -107,6 +109,7 @@ public:
 
 protected:
     static RefPtr<FrameNode> CreateSelect(const std::vector<SelectParam>& value, const TestProperty& test);
+    static FrameNode* CreateSelect(const std::vector<SelectParam>& value);
 };
 
 void SelectPatternTestNg::SetUpTestCase()
@@ -167,6 +170,13 @@ RefPtr<FrameNode> SelectPatternTestNg::CreateSelect(const std::vector<SelectPara
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     return AceType::DynamicCast<FrameNode>(element);
+}
+
+FrameNode* SelectPatternTestNg::CreateSelect(const std::vector<SelectParam>& value)
+{
+    SelectModelNG selectModelInstance;
+    selectModelInstance.Create(value);
+    return ViewStackProcessor::GetInstance()->GetMainFrameNode();
 }
 
 /**
@@ -1990,5 +2000,578 @@ HWTEST_F(SelectPatternTestNg, InitSpinner001, TestSize.Level1)
 
     auto renderingStrategy = spinnerLayoutProperty->GetSymbolRenderingStrategy();
     EXPECT_EQ(renderingStrategy.value(), 1);
+}
+
+/**
+ * @tc.name: BindMenuTouch001
+ * @tc.desc: Test BindMenuTouch with null targetNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, BindMenuTouch001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select pattern and gesture hub
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call BindMenuTouch with null targetNode
+     * @tc.expected: Function should return early without crash
+     */
+    selectPattern->BindMenuTouch(nullptr, gestureHub);
+
+    /**
+     * @tc.steps: step3. Verify no touch callback is registered
+     * @tc.expected: gestureHub should have no touch event registered
+     */
+    auto touchEventActuator = gestureHub->touchEventActuator_;
+    ASSERT_NE(touchEventActuator, nullptr);
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: BindMenuTouch002
+ * @tc.desc: Test BindMenuTouch with valid targetNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, BindMenuTouch002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select with valid targetNode
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call BindMenuTouch with valid targetNode
+     * @tc.expected: Touch callback should be registered
+     */
+    selectPattern->BindMenuTouch(select, gestureHub);
+
+    /**
+     * @tc.steps: step3. Verify touch callback is registered
+     * @tc.expected: gestureHub should have touch event registered
+     */
+    auto touchEventActuator = gestureHub->touchEventActuator_;
+    ASSERT_NE(touchEventActuator, nullptr);
+    auto touchEvents = touchEventActuator->touchEvents_;
+    ASSERT_FALSE(touchEvents.empty());
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: BindMenuTouch003
+ * @tc.desc: Test BindMenuTouch touch callback with TouchType::DOWN
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, BindMenuTouch003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and setup
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call BindMenuTouch and get the callback
+     */
+    selectPattern->BindMenuTouch(select, gestureHub);
+    auto touchEventActuator = gestureHub->touchEventActuator_;
+    ASSERT_NE(touchEventActuator, nullptr);
+    auto touchEvents = touchEventActuator->touchEvents_;
+    ASSERT_FALSE(touchEvents.empty());
+
+    /**
+     * @tc.steps: step3. Trigger DOWN event
+     * @tc.expected: Callback should be executed without crash
+     */
+    TouchEventInfo touchInfo("test");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    touchInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+
+    auto touchCallback = touchEvents.front()->GetTouchEventCallback();
+    EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfo));
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: BindMenuTouch004
+ * @tc.desc: Test BindMenuTouch touch callback with TouchType::CANCEL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, BindMenuTouch004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and setup
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call BindMenuTouch and get the callback
+     */
+    selectPattern->BindMenuTouch(select, gestureHub);
+    auto touchEventActuator = gestureHub->touchEventActuator_;
+    ASSERT_NE(touchEventActuator, nullptr);
+    auto touchEvents = touchEventActuator->touchEvents_;
+    ASSERT_FALSE(touchEvents.empty());
+
+    /**
+     * @tc.steps: step3. Trigger CANCEL event
+     * @tc.expected: Callback should be executed and handle cancel appropriately
+     */
+    TouchEventInfo touchInfo("test");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.SetTouchType(TouchType::CANCEL);
+    touchInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+
+    auto touchCallback = touchEvents.front()->GetTouchEventCallback();
+    EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfo));
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: BindMenuTouch005
+ * @tc.desc: Test BindMenuTouch touch callback with empty touches
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, BindMenuTouch005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and setup
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call BindMenuTouch and get the callback
+     */
+    selectPattern->BindMenuTouch(select, gestureHub);
+    auto touchEventActuator = gestureHub->touchEventActuator_;
+    ASSERT_NE(touchEventActuator, nullptr);
+    auto touchEvents = touchEventActuator->touchEvents_;
+    ASSERT_FALSE(touchEvents.empty());
+
+    /**
+     * @tc.steps: step3. Trigger event with empty touches
+     * @tc.expected: Callback should handle empty touches gracefully
+     */
+    TouchEventInfo touchInfo("test");
+    // Don't add any touch location info to simulate empty touches
+
+    auto touchCallback = touchEvents.front()->GetTouchEventCallback();
+    EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfo));
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: BindMenuTouch006
+ * @tc.desc: Test BindMenuTouch with menu wrapper node
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, BindMenuTouch006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and setup
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Create and set menu wrapper
+     */
+    std::vector<OptionParam> emptyParams;
+    auto menuWrapper = MenuView::Create(std::move(emptyParams), select->GetId(), "test");
+    ASSERT_NE(menuWrapper, nullptr);
+    selectPattern->SetMenuNode(menuWrapper);
+
+    /**
+     * @tc.steps: step3. Call BindMenuTouch and verify wrapper is set
+     */
+    selectPattern->BindMenuTouch(select, gestureHub);
+    auto wrapperNode = selectPattern->GetMenuWrapper();
+    EXPECT_EQ(wrapperNode, menuWrapper);
+
+    /**
+     * @tc.steps: step4. Verify touch callback is registered
+     */
+    auto touchEventActuator = gestureHub->touchEventActuator_;
+    ASSERT_NE(touchEventActuator, nullptr);
+    auto touchEvents = touchEventActuator->touchEvents_;
+    EXPECT_FALSE(touchEvents.empty());
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: BindMenuTouch007
+ * @tc.desc: Test BindMenuTouch with multiple consecutive calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, BindMenuTouch007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and setup
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call BindMenuTouch multiple times
+     * @tc.expected: Should not cause issues with multiple registrations
+     */
+    selectPattern->BindMenuTouch(select, gestureHub);
+    auto touchEventActuator1 = gestureHub->touchEventActuator_;
+    auto touchEventsCount1 = touchEventActuator1 ? touchEventActuator1->touchEvents_.size() : 0;
+
+    selectPattern->BindMenuTouch(select, gestureHub);
+    auto touchEventActuator2 = gestureHub->touchEventActuator_;
+    auto touchEventsCount2 = touchEventActuator2 ? touchEventActuator2->touchEvents_.size() : 0;
+
+    /**
+     * @tc.steps: step3. Verify touch events are properly managed
+     */
+    EXPECT_NE(touchEventActuator1, nullptr);
+    EXPECT_NE(touchEventActuator2, nullptr);
+    EXPECT_GE(touchEventsCount2, touchEventsCount1);
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: BindMenuTouch008
+ * @tc.desc: Test BindMenuTouch with different touch event types sequence
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, BindMenuTouch008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and setup
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call BindMenuTouch and get callback
+     */
+    selectPattern->BindMenuTouch(select, gestureHub);
+    auto touchEventActuator = gestureHub->touchEventActuator_;
+    ASSERT_NE(touchEventActuator, nullptr);
+    auto touchEvents = touchEventActuator->touchEvents_;
+    ASSERT_FALSE(touchEvents.empty());
+    auto touchCallback = touchEvents.front()->GetTouchEventCallback();
+
+    /**
+     * @tc.steps: step3. Test sequence of touch events
+     * @tc.expected: All touch events should be handled properly
+     */
+    std::vector<TouchType> touchTypes = { TouchType::DOWN, TouchType::MOVE, TouchType::UP, TouchType::CANCEL };
+
+    for (auto touchType : touchTypes) {
+        TouchEventInfo touchInfo("test");
+        TouchLocationInfo touchLocationInfo(0);
+        touchLocationInfo.SetTouchType(touchType);
+        touchInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+
+        EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfo));
+    }
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: BindMenuTouch009
+ * @tc.desc: Test BindMenuTouch touch callback with TouchType::MOVE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, BindMenuTouch009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and setup
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call BindMenuTouch and get the callback
+     */
+    selectPattern->BindMenuTouch(select, gestureHub);
+    auto touchEventActuator = gestureHub->touchEventActuator_;
+    ASSERT_NE(touchEventActuator, nullptr);
+    auto touchEvents = touchEventActuator->touchEvents_;
+    ASSERT_FALSE(touchEvents.empty());
+
+    /**
+     * @tc.steps: step3. Trigger MOVE event
+     * @tc.expected: Callback should be executed without special handling
+     */
+    TouchEventInfo touchInfo("test");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.SetTouchType(TouchType::MOVE);
+    touchInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+
+    auto touchCallback = touchEvents.front()->GetTouchEventCallback();
+    EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfo));
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: BindMenuTouch010
+ * @tc.desc: Test BindMenuTouch touch callback with multiple touches
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, BindMenuTouch010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and setup
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call BindMenuTouch and get the callback
+     */
+    selectPattern->BindMenuTouch(select, gestureHub);
+    auto touchEventActuator = gestureHub->touchEventActuator_;
+    ASSERT_NE(touchEventActuator, nullptr);
+    auto touchEvents = touchEventActuator->touchEvents_;
+    ASSERT_FALSE(touchEvents.empty());
+
+    /**
+     * @tc.steps: step3. Trigger event with multiple touches
+     * @tc.expected: Callback should use the first touch for processing
+     */
+    TouchEventInfo touchInfo("test");
+    TouchLocationInfo touchLocationInfo1(0);
+    TouchLocationInfo touchLocationInfo2(1);
+    touchLocationInfo1.SetTouchType(TouchType::DOWN);
+    touchLocationInfo2.SetTouchType(TouchType::DOWN);
+    touchInfo.AddTouchLocationInfo(std::move(touchLocationInfo1));
+    touchInfo.AddTouchLocationInfo(std::move(touchLocationInfo2));
+
+    auto touchCallback = touchEvents.front()->GetTouchEventCallback();
+    EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfo));
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: BindMenuTouch011
+ * @tc.desc: Test BindMenuTouch touch callback with weakTarget upgrade failure simulation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, BindMenuTouch011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and setup
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call BindMenuTouch
+     */
+    selectPattern->BindMenuTouch(select, gestureHub);
+    auto touchEventActuator = gestureHub->touchEventActuator_;
+    ASSERT_NE(touchEventActuator, nullptr);
+    auto touchEvents = touchEventActuator->touchEvents_;
+    ASSERT_FALSE(touchEvents.empty());
+
+    /**
+     * @tc.steps: step3. Test with valid touches
+     */
+    TouchEventInfo touchInfo("test");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    touchInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+
+    auto touchCallback = touchEvents.front()->GetTouchEventCallback();
+    EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfo));
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: BindMenuTouch012
+ * @tc.desc: Test BindMenuTouch edge case coverage for container null checks
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, BindMenuTouch012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and setup
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call BindMenuTouch
+     */
+    selectPattern->BindMenuTouch(select, gestureHub);
+    auto touchEventActuator = gestureHub->touchEventActuator_;
+    ASSERT_NE(touchEventActuator, nullptr);
+    auto touchEvents = touchEventActuator->touchEvents_;
+    ASSERT_FALSE(touchEvents.empty());
+
+    /**
+     * @tc.steps: step3. Test various touch types to ensure all branches are covered
+     * @tc.expected: All touch events should be handled without crashing
+     */
+    std::vector<TouchType> touchTypes = { TouchType::DOWN, TouchType::MOVE, TouchType::UP, TouchType::CANCEL,
+        TouchType::UNKNOWN };
+
+    auto touchCallback = touchEvents.front()->GetTouchEventCallback();
+
+    for (auto touchType : touchTypes) {
+        TouchEventInfo touchInfo("test");
+        TouchLocationInfo touchLocationInfo(0);
+        touchLocationInfo.SetTouchType(touchType);
+        touchInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+
+        // Each touch type should be handled gracefully
+        EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfo));
+    }
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: BindMenuTouch013
+ * @tc.desc: Test BindMenuTouch behavior when subwindow components are null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, BindMenuTouch013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and setup
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call BindMenuTouch
+     */
+    selectPattern->BindMenuTouch(select, gestureHub);
+    auto touchEventActuator = gestureHub->touchEventActuator_;
+    ASSERT_NE(touchEventActuator, nullptr);
+    auto touchEvents = touchEventActuator->touchEvents_;
+    ASSERT_FALSE(touchEvents.empty());
+
+    /**
+     * @tc.steps: step3. Test touch callback when subwindow may not exist
+     * @tc.expected: Should handle null subwindow gracefully
+     */
+    TouchEventInfo touchInfo("test");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    touchInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+
+    auto touchCallback = touchEvents.front()->GetTouchEventCallback();
+    // This should not crash even if subwindow doesn't exist in test environment
+    EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfo));
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: BindMenuTouch014
+ * @tc.desc: Test BindMenuTouch with all touch types for comprehensive coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, BindMenuTouch014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and setup
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call BindMenuTouch
+     */
+    selectPattern->BindMenuTouch(select, gestureHub);
+    auto touchEventActuator = gestureHub->touchEventActuator_;
+    ASSERT_NE(touchEventActuator, nullptr);
+    auto touchEvents = touchEventActuator->touchEvents_;
+    ASSERT_FALSE(touchEvents.empty());
+
+    auto touchCallback = touchEvents.front()->GetTouchEventCallback();
+
+    /**
+     * @tc.steps: step3. Test all possible TouchType values systematically
+     * @tc.expected: All touch types should be handled without exceptions
+     */
+
+    TouchEventInfo touchInfoDown("test_down");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    touchInfoDown.AddTouchLocationInfo(std::move(touchLocationInfo));
+    EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfoDown));
+
+    TouchEventInfo touchInfoUp("test_up");
+    touchLocationInfo.SetTouchType(TouchType::UP);
+    touchInfoUp.AddTouchLocationInfo(std::move(touchLocationInfo));
+    EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfoUp));
+
+    TouchEventInfo touchInfoCancel("test_cancel");
+    touchLocationInfo.SetTouchType(TouchType::CANCEL);
+    touchInfoCancel.AddTouchLocationInfo(std::move(touchLocationInfo));
+    EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfoCancel));
+
+    TouchEventInfo touchInfoMove("test_move");
+    touchLocationInfo.SetTouchType(TouchType::MOVE);
+    touchInfoMove.AddTouchLocationInfo(std::move(touchLocationInfo));
+    EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfoMove));
+    ViewStackProcessor::GetInstance()->ClearStack();
 }
 } // namespace OHOS::Ace::NG

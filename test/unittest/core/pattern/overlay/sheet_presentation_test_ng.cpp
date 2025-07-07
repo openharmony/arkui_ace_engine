@@ -50,6 +50,7 @@ public:
     static void SetSheetTheme(RefPtr<SheetTheme> sheetTheme);
     static void SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType);
     static void TearDownTestCase();
+    static void SetApiVersion(int32_t apiTargetVersion);
 };
 
 void SheetPresentationTestNg::SetUpTestCase()
@@ -87,7 +88,6 @@ void SheetPresentationTestNg::SetSheetTheme(RefPtr<SheetTheme> sheetTheme)
 
 void SheetPresentationTestNg::SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType)
 {
-    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
@@ -103,6 +103,13 @@ void SheetPresentationTestNg::SetSheetType(RefPtr<SheetPresentationPattern> shee
     sheetTheme->sheetType_ = "popup";
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+}
+
+void SheetPresentationTestNg::SetApiVersion(int32_t apiTargetVersion)
+{
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(apiTargetVersion);
 }
 
 void SheetPresentationTestNg::TearDownTestCase()
@@ -204,6 +211,7 @@ HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet001, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet002, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -230,6 +238,7 @@ HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet002, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -334,6 +343,7 @@ HWTEST_F(SheetPresentationTestNg, CheckBuilderChange001, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, OnAttachToFrameNode001, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -514,9 +524,7 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto001, TestSize.Level1)
     /**
      * @tc.steps: step1. set API14.
      */
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
 
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
@@ -570,9 +578,7 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto002, TestSize.Level1)
     /**
      * @tc.steps: step1. set API14.
      */
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
 
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
@@ -939,6 +945,7 @@ HWTEST_F(SheetPresentationTestNg, GetOverlayManager001, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, OnWindowSizeChanged001, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
         AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
@@ -1010,6 +1017,7 @@ HWTEST_F(SheetPresentationTestNg, HandleFitContontChange001, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, DismissTransition001, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
         AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
@@ -1373,6 +1381,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth001, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1413,6 +1422,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth002, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1449,6 +1459,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth003, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1487,6 +1498,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth004, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1523,6 +1535,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth005, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -2002,159 +2015,6 @@ HWTEST_F(SheetPresentationTestNg, GetTitleBuilderHeight002, TestSize.Level1)
     firstChildGeometryNode->SetFrameSize(SizeF(0, 0));
     sheetPattern->UpdateSheetTitle();
     EXPECT_EQ(sheetPattern->GetTitleBuilderHeight(), 0.0f);
-    SheetPresentationTestNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: InitScrollProps001
- * @tc.desc: test InitScrollProps function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestNg, InitScrollProps001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet page.
-     */
-    SheetPresentationTestNg::SetUpTestCase();
-    auto rootNode = FrameNode::CreateFrameNode("Root", 101, AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 201,
-        AceType::MakeRefPtr<SheetPresentationPattern>(301, "SheetPresentation", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    sheetNode->MountToParent(rootNode);
-    auto dragBarNode =
-        FrameNode::CreateFrameNode("SheetDragBar", 401, AceType::MakeRefPtr<SheetDragBarPattern>());
-    ASSERT_NE(dragBarNode, nullptr);
-    dragBarNode->MountToParent(sheetNode);
-    auto scrollNode =
-        FrameNode::CreateFrameNode("Scroll", 501, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scrollNode, nullptr);
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 601,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    ASSERT_NE(contentNode, nullptr);
-    contentNode->MountToParent(scrollNode);
-    scrollNode->MountToParent(sheetNode);
-
-    /**
-     * @tc.steps: step2. get sheetPattern and scrollPattern.
-     */
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
-
-    /**
-     * @tc.steps: step3. init sheetPattern value.
-     */
-    sheetPattern->sheetDetentHeight_.emplace_back(1);
-    sheetPattern->currentOffset_ = 1.0f;
-    sheetPattern->height_ = 0.0f;
-    sheetPattern->sheetHeightUp_ = 0.0f;
-    sheetPattern->sheetMaxHeight_ = 0.0f;
-
-    /**
-     * @tc.steps: step4. test "InitScrollProps",
-     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, scrollableDistance_ > 0.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
-    scrollPattern->scrollableDistance_ = 5.2f;
-    sheetPattern->InitScrollProps();
-    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-
-    /**
-     * @tc.steps: step5. test "InitScrollProps",
-     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, scrollableDistance_ < 0.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
-    scrollPattern->scrollableDistance_ = -1.0f;
-    sheetPattern->InitScrollProps();
-    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-
-    /**
-     * @tc.steps: step6. test "InitScrollProps"，
-     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, scrollableDistance_ = 0.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
-    scrollPattern->scrollableDistance_ = 0.0f;
-    sheetPattern->InitScrollProps();
-    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-    SheetPresentationTestNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: InitScrollProps002
- * @tc.desc: test InitScrollProps function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestNg, InitScrollProps002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet page.
-     */
-    SheetPresentationTestNg::SetUpTestCase();
-    auto rootNode = FrameNode::CreateFrameNode("Root", 101, AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 201,
-        AceType::MakeRefPtr<SheetPresentationPattern>(301, "SheetPresentation", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    sheetNode->MountToParent(rootNode);
-    auto dragBarNode =
-        FrameNode::CreateFrameNode("SheetDragBar", 401, AceType::MakeRefPtr<SheetDragBarPattern>());
-    ASSERT_NE(dragBarNode, nullptr);
-    dragBarNode->MountToParent(sheetNode);
-    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 501, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scrollNode, nullptr);
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 601,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    ASSERT_NE(contentNode, nullptr);
-    contentNode->MountToParent(scrollNode);
-    scrollNode->MountToParent(sheetNode);
-
-    /**
-     * @tc.steps: step2. get sheetPattern and scrollPattern.
-     */
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
-
-    /**
-     * @tc.steps: step3. init sheetPattern value.
-     */
-    sheetPattern->sheetDetentHeight_.emplace_back(1);
-    sheetPattern->currentOffset_ = 1.0f;
-    sheetPattern->height_ = 0.0f;
-    sheetPattern->sheetHeightUp_ = 0.0f;
-    sheetPattern->sheetMaxHeight_ = 0.0f;
-
-    /**
-     * @tc.steps: step4. test "InitScrollProps"，
-     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, scrollableDistance_ > 0.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
-    scrollPattern->scrollableDistance_ = 5.2f;
-    sheetPattern->InitScrollProps();
-    EXPECT_TRUE(scrollPattern->GetAlwaysEnabled());
-
-    /**
-     * @tc.steps: step5. test "InitScrollProps"。
-     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, scrollableDistance_ < 0.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
-    scrollPattern->scrollableDistance_ = -1.0f;
-    sheetPattern->InitScrollProps();
-    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-
-    /**
-     * @tc.steps: step6. test "InitScrollProps"。
-     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, scrollableDistance_ = 0.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
-    scrollPattern->scrollableDistance_ = 0.0f;
-    sheetPattern->InitScrollProps();
-    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
     SheetPresentationTestNg::TearDownTestCase();
 }
 

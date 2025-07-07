@@ -127,7 +127,8 @@ struct ActiveChildSets {
 enum class IgnoreStrategy {
     NORMAL = 0,
     FROM_MARGIN,
-    STRIDE_OVER
+    STRIDE_OVER,
+    SCROLLABLE_AXIS
 };
 class ACE_FORCE_EXPORT LayoutWrapper : public virtual AceType {
     DECLARE_ACE_TYPE(LayoutWrapper, AceType)
@@ -274,6 +275,40 @@ public:
         return ignoreLayoutProcess_;
     }
 
+    // Paired with GetHasPreMeasured. Once a node being collected as a measure-delayed child, set true.
+    void SetHasPreMeasured()
+    {
+        hasPreMeasured_ = true;
+    }
+
+    // Paired with SetHasPreMeasured. To avoid re-entering PreMeasure in the delayed measure process.
+    bool GetHasPreMeasured()
+    {
+        return std::exchange(hasPreMeasured_, false);
+    }
+
+    bool PredictMeasureResult(LayoutWrapper* childWrapper, const std::optional<LayoutConstraintF>& parentConstraint);
+
+    // Paired with GetDelaySelfLayoutForIgnore. Once a node being collected as a layout-delayed child, set true.
+    void SetDelaySelfLayoutForIgnore()
+    {
+        delaySelfLayoutForIgnore_ = true;
+    }
+
+    // Paired with SetDelaySelfLayoutForIgnore. Access to skip THE JUST first layout after SetDelaySelfLayoutForIgnore,
+    // and valid layout should be called during PostponedTaskForIgnore.
+    bool GetDelaySelfLayoutForIgnore()
+    {
+        return std::exchange(delaySelfLayoutForIgnore_, false);
+    }
+
+    bool IsIgnoreOptsValid();
+
+    bool GetScrollableAxisSensitive()
+    {
+        return isScrollableAxis_;
+    }
+
 protected:
     void CreateRootConstraint();
     void ApplyConstraint(LayoutConstraintF constraint);
@@ -318,7 +353,9 @@ protected:
     std::optional<bool> skipMeasureContent_;
     std::optional<bool> needForceMeasureAndLayout_;
     bool ignoreLayoutProcess_ = false;
-
+    bool hasPreMeasured_ = false;
+    bool delaySelfLayoutForIgnore_ = false;
+    bool isScrollableAxis_ = false;
 private:
     void AdjustChildren(const OffsetF& offset, bool parentScrollable);
     void AdjustChild(RefPtr<UINode> node, const OffsetF& offset, bool parentScrollable);

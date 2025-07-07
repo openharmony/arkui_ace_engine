@@ -783,11 +783,11 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     frameRect_ = dirty->GetGeometryNode()->GetFrameRect();
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto richEditorLayoutAlgorithm =
-        DynamicCast<RichEditorLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(richEditorLayoutAlgorithm, false);
+    auto layoutAlgorithm = DynamicCast<RichEditorLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithm, false);
     UpdateParentOffsetAndOverlay();
-    richTextRect_ = richEditorLayoutAlgorithm->GetTextRect();
+    const auto& richTextRectOpt = layoutAlgorithm->GetTextRect();
+    IF_TRUE(richTextRectOpt.has_value(), richTextRect_ = richTextRectOpt.value());
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     UpdateScrollStateAfterLayout(config.frameSizeChange);
@@ -2241,6 +2241,16 @@ void RichEditorPattern::MarkAISpanStyleChanged()
 {
     std::for_each(spans_.begin(), spans_.end(), [](const auto& span) { span->aiSpanResultCount = 0; });
     TextPattern::MarkAISpanStyleChanged();
+}
+
+void RichEditorPattern::HandleOnAskCelia()
+{
+    TextPattern::HandleOnAskCelia();
+    if (IsUsingMouse()) {
+        CloseSelectOverlay();
+    } else {
+        selectOverlay_->HideMenu();
+    }
 }
 
 void RichEditorPattern::UpdateCaretStyleByTypingStyle()
@@ -8328,6 +8338,12 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
     if (!safeAreaManager || NearZero(safeAreaManager->GetKeyboardInset().Length(), 0)) {
         return;
     }
+    auto lastCaretPos = GetLastCaretPos();
+    auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
+    if (lastCaretPos.has_value() && caretPos > lastCaretPos.value() && !isTriggerAvoidOnCaretAvoidMode_) {
+        return;
+    }
+    SetLastCaretPos(caretPos);
     textFieldManager->SetHeight(GetCaretRect().Height());
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -8762,13 +8778,22 @@ void RichEditorPattern::UpdateAIMenuOptions()
 {
     if ((copyOption_ != CopyOptions::Local && copyOption_ != CopyOptions::Distributed) || !NeedShowAIDetect()) {
         SetIsShowAIMenuOption(false);
-        return;
+    } else {
+        auto aiItemOptions = GetAIItemOption();
+        auto isShowAIMenuOption = TextPattern::PrepareAIMenuOptions(aiItemOptions);
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateAIMenuOptions isShowAIMenuOption=%{public}d", isShowAIMenuOption);
+        SetIsShowAIMenuOption(isShowAIMenuOption);
+        SetAIItemOption(aiItemOptions);
     }
-    auto aiItemOptions = GetAIItemOption();
-    auto isShowAIMenuOption = TextPattern::PrepareAIMenuOptions(aiItemOptions);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateAIMenuOptions isShowAIMenuOption=%{public}d", isShowAIMenuOption);
-    SetIsShowAIMenuOption(isShowAIMenuOption);
-    SetAIItemOption(aiItemOptions);
+    bool isAskCeliaEnabled = (copyOption_ == CopyOptions::Local || copyOption_ == CopyOptions::Distributed) &&
+        ((NeedShowAIDetect() && !IsShowAIMenuOption()) || (IsEditing() && IsSelected()));
+    SetIsAskCeliaEnabled(isAskCeliaEnabled);
+
+    CHECK_NULL_VOID(dataDetectorAdapter_);
+    if (IsAskCeliaEnabled() && !NeedShowAIDetect() &&
+        dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
+        dataDetectorAdapter_->GetAIEntityMenu();
+    }
 }
 
 Offset RichEditorPattern::ConvertGlobalToTextOffset(const Offset& globalOffset)
@@ -8926,7 +8951,11 @@ void RichEditorPattern::CreateHandles()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CalculateHandleOffsetAndShowOverlay();
-    selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
+    bool isCurrentMenuVisibile = selectOverlay_->IsCurrentMenuVisibile();
+    selectOverlay_->UpdateMenuOffset();
+    if (!isCurrentMenuVisibile) {
+        selectOverlay_->HideMenu();
+    }
 }
 
 void RichEditorPattern::ShowHandles(const bool isNeedShowHandles)
@@ -10461,12 +10490,12 @@ void RichEditorPattern::HandleOnCameraInput()
 
 bool RichEditorPattern::CanStartAITask() const
 {
-    return TextPattern::CanStartAITask() && !isEditing_ && !spans_.empty();
+    return !isEditing_ && !spans_.empty() && TextPattern::CanStartAITask();
 }
 
 bool RichEditorPattern::NeedShowAIDetect()
 {
-    return TextPattern::NeedShowAIDetect() && !isEditing_ && !isShowPlaceholder_ && !spans_.empty();
+    return !isEditing_ && !isShowPlaceholder_ && !spans_.empty() && TextPattern::NeedShowAIDetect();
 }
 
 void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

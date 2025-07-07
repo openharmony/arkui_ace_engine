@@ -35,6 +35,9 @@ declare_args() {
   # Enable pgo for building.
   ace_engine_feature_enable_codemerge = false
 
+  # Enable AArch64 instruction prefetch for building.
+  ace_engine_feature_enable_inst_prefetch = false
+
   # Set pgo profdata path
   ace_engine_feature_pgo_path = ""
 

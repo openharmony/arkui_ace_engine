@@ -37,9 +37,13 @@ public:
     void SetFillOpacity(double opacity) override;
     void SetStrokeWidth(const Ace::Dimension& lineWidth) override;
     void SetStrokeDashArray(const std::vector<Ace::Dimension>& segments) override;
+    void SetStrokeDashArray(
+        const std::vector<Ace::Dimension>& segments, const std::vector<RefPtr<ResourceObject>>& resObjArray) override;
     void SetAntiAlias(bool antiAlias) override;
     void SetWidth(Dimension& width) override;
     void SetHeight(Dimension& height) override;
+    static void SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments,
+        const std::vector<RefPtr<ResourceObject>>& resObjArray);
     static void SetWidth(FrameNode* frameNode, Dimension& width);
     static void ResetWidth(FrameNode* frameNode);
     static void SetHeight(FrameNode* frameNode, Dimension& height);

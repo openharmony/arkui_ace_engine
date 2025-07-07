@@ -229,7 +229,7 @@ class ColorMetrics {
   static rgba(red: number, green: number, blue: number, alpha: number = MAX_ALPHA_VALUE): ColorMetrics {
     return new ColorMetrics(red, green, blue, alpha * MAX_CHANNEL_VALUE);
   }
-  static colorWithSpace(colorSpace: ColorSpace, red: number, green: number, blue: number, alpha?: number): ColorMetrics {
+  static colorWithSpace(colorSpace: ColorSpace, red: number, green: number, blue: number, alpha: number = MAX_ALPHA_VALUE): ColorMetrics {
     let redInt = Math.round(red * MAX_CHANNEL_VALUE);
     let greenInt = Math.round(green * MAX_CHANNEL_VALUE);
     let blueInt = Math.round(blue * MAX_CHANNEL_VALUE);
@@ -365,7 +365,9 @@ class ColorMetrics {
     return this.resourceId_;
   }
   setColorSpace(colorSpace: ColorSpace): void {
-    this.colorSpace_ = colorSpace;
+    if (ColorSpace.DISPLAY_P3 === colorSpace || ColorSpace.SRGB === colorSpace) {
+      this.colorSpace_ = colorSpace;
+    }
   }
   getColorSpace(): ColorSpace {
     return this.colorSpace_;

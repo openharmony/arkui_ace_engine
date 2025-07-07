@@ -32,7 +32,6 @@ class ImageAnalyzerManager;
 
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
-class OffscreenCanvasPattern;
 class CanvasModifier;
 // CanvasPattern is the base class for custom paint render node to perform paint canvas.
 class ACE_FORCE_EXPORT CanvasPattern : public Pattern {
@@ -202,7 +201,6 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    void OnDetachFromMainTree() override;
     void FireOnContext2DAttach();
     void FireOnContext2DDetach();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

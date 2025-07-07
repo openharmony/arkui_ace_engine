@@ -210,6 +210,7 @@ public:
 
     RefPtr<FrameNode> GetBottomDivider()
     {
+        CreateBottomDivider();
         return bottomDivider_;
     }
 

@@ -1219,6 +1219,14 @@ HWTEST_F(SwiperAttrTestNg, SwiperModelNg002, TestSize.Level1)
     auto onSelected = [](const BaseEventInfo* info) {};
     model.SetOnSelected(std::move(onSelected));
     EXPECT_NE(pattern->selectedEvent_, nullptr);
+
+    /**
+     * @tc.steps: step3.9 Test SetOnScrollStateChanged function.
+     * @tc.expected:pattern->scrollStateChangedEvent_ not null.
+     */
+    auto onScrollStateChanged = [](const BaseEventInfo* info) {};
+    model.SetOnScrollStateChanged(std::move(onScrollStateChanged));
+    EXPECT_NE(eventHub->scrollStateChangedEvent_, nullptr);
 }
 
 /**

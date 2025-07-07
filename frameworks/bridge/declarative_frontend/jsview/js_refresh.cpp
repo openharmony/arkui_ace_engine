@@ -20,6 +20,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/refresh_model_impl.h"
@@ -168,22 +169,23 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     }
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto refreshing = paramObject->GetProperty("refreshing");
-    auto jsOffset = paramObject->GetProperty("offset");
-    auto friction = paramObject->GetProperty("friction");
-    auto promptText = paramObject->GetProperty("promptText");
+    auto refreshing = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::REFRESHING));
+    auto jsOffset = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::OFFSET));
+    auto friction = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FRICTION));
+    auto promptText = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::PROMPT_TEXT));
     JSRef<JSVal> changeEventVal;
     RefreshModel::GetInstance()->Create();
 
     if (refreshing->IsBoolean()) {
         RefreshModel::GetInstance()->SetRefreshing(refreshing->ToBoolean());
-        changeEventVal = paramObject->GetProperty("$refreshing");
+        changeEventVal = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::$REFRESHING));
         ParseRefreshingObject(info, changeEventVal);
     } else if (refreshing->IsObject()) {
         JSRef<JSObject> refreshingObj = JSRef<JSObject>::Cast(refreshing);
-        changeEventVal = refreshingObj->GetProperty("changeEvent");
+        changeEventVal = refreshingObj->GetProperty(static_cast<int32_t>(ArkUIIndex::CHANGE_EVENT));
         ParseRefreshingObject(info, changeEventVal);
-        RefreshModel::GetInstance()->SetRefreshing(refreshingObj->GetProperty("value")->ToBoolean());
+        RefreshModel::GetInstance()->SetRefreshing(
+            refreshingObj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE))->ToBoolean());
     } else {
         RefreshModel::GetInstance()->SetRefreshing(false);
     }
@@ -217,17 +219,17 @@ void JSRefresh::Create(const JSCallbackInfo& info)
 
 bool JSRefresh::ParseRefreshingContent(const JSRef<JSObject>& paramObject)
 {
-    JSRef<JSVal> contentParam = paramObject->GetProperty("refreshingContent");
+    JSRef<JSVal> contentParam = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::REFRESHING_CONTENT));
     if (!contentParam->IsObject()) {
         return false;
     }
     JSRef<JSObject> contentObject = JSRef<JSObject>::Cast(contentParam);
-    JSRef<JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
+    JSRef<JSVal> builderNodeParam = contentObject->GetProperty(static_cast<int32_t>(ArkUIIndex::BUILDER_NODE));
     if (!builderNodeParam->IsObject()) {
         return false;
     }
     JSRef<JSObject> builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
-    JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+    JSRef<JSVal> nodeptr = builderNodeObject->GetProperty(static_cast<int32_t>(ArkUIIndex::NODEPTR));
     if (nodeptr.IsEmpty()) {
         return false;
     }
@@ -248,7 +250,7 @@ bool JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
         return false;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto builder = paramObject->GetProperty("builder");
+    auto builder = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::BUILDER));
     RefPtr<NG::UINode> customNode;
     if (builder->IsFunction()) {
         {

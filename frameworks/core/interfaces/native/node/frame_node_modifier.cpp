@@ -151,7 +151,9 @@ void ClearBuilderNodeInFrameNode(ArkUINodeHandle node)
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto currentRef = Referenced::Claim<UINode>(currentNode);
-    BuilderUtils::ClearBuilder(currentRef);
+    std::list<RefPtr<NG::UINode>> nodes;
+    BuilderUtils::GetBuilderNodes(currentRef, nodes);
+    BuilderUtils::RemoveBuilderFromParent(currentRef, nodes);
 }
 
 void ClearChildrenInFrameNode(ArkUINodeHandle node)
@@ -1045,6 +1047,24 @@ ArkUI_Int32 SetForceDarkConfig(
     return ERROR_CODE_NO_ERROR;
 }
 
+void SetFocusDependence(ArkUINodeHandle node, ArkUI_Uint32 focusDependence)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusDependence(static_cast<FocusDependence>(focusDependence));
+}
+
+void ResetFocusDependence(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusDependence(FocusDependence::CHILD);
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -1131,6 +1151,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .addSupportedUIStates = AddSupportedUIStates,
         .removeSupportedUIStates = RemoveSupportedUIStates,
         .setForceDarkConfig = SetForceDarkConfig,
+        .setFocusDependence = SetFocusDependence,
+        .resetFocusDependence = ResetFocusDependence,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

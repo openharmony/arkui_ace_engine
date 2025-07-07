@@ -176,6 +176,14 @@ void LazyForEachNode::OnDataDeleted(size_t index)
             }
             builder_->ProcessOffscreenNode(node, true);
         }
+        auto pipeline = GetContext();
+        if (pipeline && !pipeline->GetOnShow()) {
+            pipeline->AddAfterLayoutTask(
+                [node = std::move(node)]() mutable {
+                    node = nullptr;
+                }
+            );
+        }
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
@@ -349,15 +357,11 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
         child.second->SetJSViewActive(false, true);
         return child.second->GetFrameChildByIndex(0, needBuild);
     }
-    if (addToRenderTree) {
-        child.second->SetActive(true);
-        auto frameNode = AceType::DynamicCast<FrameNode>(child.second->GetFrameChildByIndex(0, true));
-        if (frameNode && !frameNode->IsActive()) {
-            frameNode->SetActive(true);
-        }
-    }
     if (isActive_) {
         child.second->SetJSViewActive(true, true);
+    }
+    if (addToRenderTree) {
+        child.second->SetActive(true);
     }
     if (child.second->GetDepth() != GetDepth() + 1) {
         child.second->SetDepth(GetDepth() + 1);
@@ -492,9 +496,19 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
     }
 }
 
-const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector() const
+const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector(bool needCacheNode) const
 {
-    return children_;
+    if (needCacheNode) {
+        std::vector<UINode*> childList;
+        builder_->GetAllItems(childList);
+        childrenWithCache_.clear();
+        for (const auto& uiNode : childList) {
+            childrenWithCache_.emplace_back(Claim(uiNode));
+        }
+        return childrenWithCache_;
+    } else {
+        return children_;
+    }
 }
 
 void LazyForEachNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)

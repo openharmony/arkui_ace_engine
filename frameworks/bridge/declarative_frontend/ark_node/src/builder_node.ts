@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
+/// <reference path="./disposable.ts" />
 
 class BuilderNode extends Disposable {
   private _JSBuilderNode: JSBuilderNode;
@@ -95,7 +96,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
   private allowFreezeWhenInactive: boolean;
   private parentallowFreeze: boolean;
   private isFreeze: boolean;
-
+  public __parentViewOfBuildNode?: ViewBuildNodeBase;
   constructor(uiContext: UIContext, options?: RenderOptions) {
     super(uiContext, options);
     this.uiContext_ = uiContext;
@@ -106,6 +107,13 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.allowFreezeWhenInactive = false;
     this.parentallowFreeze = false;
     this.isFreeze = false;
+    this.__parentViewOfBuildNode = undefined;
+  }
+  public findProvidePU__(providePropName: string): ObservedPropertyAbstractPU<any> | undefined {
+    if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {
+      return this.__parentViewOfBuildNode.findProvidePU__(providePropName);
+    }
+    return undefined;
   }
   public reuse(param: Object): void {
     this.updateStart();
@@ -205,6 +213,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
     const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
     this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
+    this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing)? (options?.enableProvideConsumeCrossing) : false; 
     this.params_ = params;
     if (options?.localStorage instanceof LocalStorage) {
       this.setShareLocalStorage(options.localStorage);
@@ -225,8 +234,13 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.frameNode_.setRenderNode(this._nativeRef);
     this.frameNode_.setBaseNode(this);
     this.frameNode_.setBuilderNode(this);
-    this.id_ = this.frameNode_.getUniqueId();
-    BuilderNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(this.frameNode_.getUniqueId(), new WeakRef(this));
+    let id = this.frameNode_.getUniqueId();
+    if (this.id_ && this.id_ !== id) {
+      this.__parentViewOfBuildNode?.removeChildBuilderNode(this.id_);
+    }
+    this.id_ = id;
+    this.__parentViewOfBuildNode?.addChildBuilderNode(this);
+    FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(this.frameNode_.getUniqueId(), new WeakRef(this.frameNode_));
     __JSScopeUtil__.restoreInstanceId();
   }
   public update(param: Object) {

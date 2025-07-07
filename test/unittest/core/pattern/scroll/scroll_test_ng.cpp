@@ -20,10 +20,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
-#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "test/mock/core/common/mock_resource_adapter_v2.h"
 #include "test/mock/base/mock_system_properties.h"

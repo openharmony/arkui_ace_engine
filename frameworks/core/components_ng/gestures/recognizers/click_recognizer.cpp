@@ -175,6 +175,7 @@ ClickInfo ClickRecognizer::GetClickInfo()
         info.SetRollAngle(touchPoint.rollAngle.value());
     }
     info.SetSourceTool(touchPoint.sourceTool);
+    info.SetTargetDisplayId(touchPoint.targetDisplayId);
     return info;
 }
 
@@ -440,10 +441,29 @@ void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
 }
 
+void ClickRecognizer::ResetStatusInHandleOverdueDeadline()
+{
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto refereeNG = eventManager->GetGestureRefereeNG(nullptr);
+    CHECK_NULL_VOID(refereeNG);
+    if (refereeNG->QueryAllDone()) {
+        for (const auto& recognizer : responseLinkRecognizer_) {
+            if (recognizer && recognizer != AceType::Claim(this)) {
+                recognizer->ResetResponseLinkRecognizer();
+            }
+        }
+        ResetResponseLinkRecognizer();
+    }
+}
+
 void ClickRecognizer::HandleOverdueDeadline()
 {
     if (currentTouchPointsNum_ < fingers_ || tappedCount_ < count_) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        ResetStatusInHandleOverdueDeadline();
     }
 }
 
@@ -533,6 +553,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
         info.SetRollAngle(touchPoint.rollAngle.value());
     }
     info.SetSourceTool(touchPoint.sourceTool);
+    info.SetTargetDisplayId(touchPoint.targetDisplayId);
 #ifdef SECURITY_COMPONENT_ENABLE
     info.SetDisplayX(touchPoint.screenX);
     info.SetDisplayY(touchPoint.screenY);
@@ -648,6 +669,7 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEventType(inputEventType_);
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
+    info->SetTargetDisplayId(touchPoint.targetDisplayId);
     if (sysJudge_) {
         return sysJudge_(gestureInfo_, info);
     }

@@ -31,8 +31,6 @@ build_component_ng("ui_extension_pattern_ng") {
 
   # security_ui_extension_component
   sources += [
-    "preview_ui_extension_component/preview_session_wrapper_impl.cpp",
-    "preview_ui_extension_component/preview_ui_extension_pattern.cpp",
     "security_ui_extension_component/security_session_wrapper_impl.cpp",
     "security_ui_extension_component/security_ui_extension_pattern.cpp",
     "security_ui_extension_component/security_ui_extension_proxy.cpp",
@@ -61,6 +59,13 @@ build_component_ng("ui_extension_pattern_ng") {
 
   # isolated_component
   sources += [ "isolated_component/isolated_pattern.cpp" ]
+
+  # preview_ui_extension_component
+  sources += [
+    "preview_ui_extension_component/preview_ui_extension_adapter.cpp",
+    "preview_ui_extension_component/preview_session_wrapper_impl.cpp",
+    "preview_ui_extension_component/preview_ui_extension_pattern.cpp",
+  ]
 
   if (is_ohos_standard_system) {
     external_deps = [

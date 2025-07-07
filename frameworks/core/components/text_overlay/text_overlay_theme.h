@@ -74,6 +74,7 @@ public:
             theme->translateSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.translate_c2e");
             theme->aiMenuSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.AI_retouch");
             theme->shareSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.share");
+            theme->askCeliaSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.AI_retouch");
         }
 
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
@@ -202,6 +203,8 @@ public:
                 pattern->GetAttr<double>("ai_intelligent_gradient_scalar3", 0.0),
                 pattern->GetAttr<double>("ai_intelligent_gradient_scalar4", 0.0) };
             theme->aiMenuSymbolColor_ = pattern->GetAttr<Color>("ai_intelligent_gradient_color1", Color(0xFF3A73DE));
+
+            theme->askCelia_ = pattern->GetAttr<std::string>("general_ai_ask_celia", "Ask Celia");
         }
     };
 
@@ -566,6 +569,15 @@ public:
         return menuButtonRadius_;
     }
 
+    const uint32_t& GetAskCeliaSymbolId() const
+    {
+        return askCeliaSymbolId_;
+    }
+
+    const std::string& GetAskCelia() const
+    {
+        return askCelia_;
+    }
 protected:
     TextOverlayTheme() = default;
     TextStyle menuButtonTextStyle_;
@@ -626,6 +638,7 @@ private:
     uint32_t translateSymbolId_ = 0;
     uint32_t aiMenuSymbolId_ = 0;
     uint32_t shareSymbolId_ = 0;
+    uint32_t askCeliaSymbolId_ = 0;
 
     std::unordered_map<OHOS::Ace::TextDataDetectType, std::string> aiMenuPreviewDisplayFailedContent_;
     std::unordered_map<OHOS::Ace::TextDataDetectType, std::string> aiMenuTypePreviewOptionNames_;
@@ -634,6 +647,7 @@ private:
     std::vector<float> aiMenuFontGradientScalars_;
     Color aiMenuSymbolColor_;
     Dimension menuButtonRadius_;
+    std::string askCelia_;
 };
 
 } // namespace OHOS::Ace

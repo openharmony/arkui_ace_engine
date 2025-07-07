@@ -2695,6 +2695,14 @@ int32_t OH_ArkUI_UIInputEvent_GetTargetDisplayId(const ArkUI_UIInputEvent* event
         case C_TOUCH_EVENT_ID:
             RETURN_RET_WITH_STATUS_CHECK(
                 getTargetDisplayId(reinterpret_cast<ArkUITouchEvent*>(event->inputEvent)), ARKUI_ERROR_CODE_NO_ERROR);
+        case C_CLICK_EVENT_ID: {
+            RETURN_RET_WITH_STATUS_CHECK(
+                getTargetDisplayId(reinterpret_cast<ArkUIClickEvent*>(event->inputEvent)), ARKUI_ERROR_CODE_NO_ERROR);
+        }
+        case C_HOVER_EVENT_ID: {
+            RETURN_RET_WITH_STATUS_CHECK(
+                getTargetDisplayId(reinterpret_cast<ArkUIHoverEvent*>(event->inputEvent)), ARKUI_ERROR_CODE_NO_ERROR);
+        }
         case C_AXIS_EVENT_ID:
             RETURN_RET_WITH_STATUS_CHECK(
                 getTargetDisplayId(reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent)), ARKUI_ERROR_CODE_NO_ERROR);

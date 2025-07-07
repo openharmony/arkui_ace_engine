@@ -15,6 +15,7 @@
 
 #include "base/perfmonitor/perf_interfaces.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "core/common/ace_application_info.h"
 #include "perf_monitor_adapter.h"
 #include "xcollie/watchdog.h"
@@ -27,7 +28,7 @@ OHOS::HiviewDFX::AceAppInfo GetAceAppInfo()
 {
     OHOS::HiviewDFX::AceAppInfo appInfo;
     appInfo.pid = AceApplicationInfo::GetInstance().GetPid();
-    appInfo.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+    appInfo.bundleName = Container::CurrentBundleName();
     appInfo.versionCode = static_cast<int32_t>(AceApplicationInfo::GetInstance().GetAppVersionCode());
     appInfo.versionName = AceApplicationInfo::GetInstance().GetAppVersionName();
     appInfo.processName = AceApplicationInfo::GetInstance().GetProcessName();

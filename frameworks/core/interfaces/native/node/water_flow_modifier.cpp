@@ -381,13 +381,13 @@ void ResetWaterFlowSyncLoad(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WaterFlowModelNG::SetSyncLoad(frameNode, false);
+    WaterFlowModelNG::SetSyncLoad(frameNode, true);
 }
 
 ArkUI_Bool GetWaterFlowSyncLoad(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, 0);
+    CHECK_NULL_RETURN(frameNode, 1);
     return WaterFlowModelNG::GetSyncLoad(frameNode);
 }
 

@@ -286,7 +286,8 @@ void ListLayoutAlgorithm::LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int
 
 bool ListLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    if (layoutWrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(layoutWrapper)) {
+    if (layoutWrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(layoutWrapper) ||
+        layoutWrapper->IsIgnoreOptsValid()) {
         return true;
     }
     return CheckLayoutConstraintChanged(layoutWrapper);
@@ -1803,7 +1804,8 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             itemCount++;
         }
         LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
-        if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
+        auto childLayoutProperty = wrapper->GetLayoutProperty();
+        if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout() || wrapper->IsIgnoreOptsValid()) {
             wrapper->Layout();
         } else {
             SyncGeometry(wrapper);

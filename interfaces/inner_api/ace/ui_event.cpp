@@ -49,4 +49,9 @@ void UIEvent::GetSimplifiedInspectorTreeAsync(const TreeParams& params, OnInspec
 {
     UIEventFunc::GetSimplifiedInspectorTreeAsync(params, std::move(callback));
 }
+
+void UIEvent::ExecuteCommandAsync(const UICommandParams& params, UICommandResult&& callback)
+{
+    UIEventFunc::ExecuteCommandAsync(params, std::move(callback));
+}
 } // namespace OHOS::Ace

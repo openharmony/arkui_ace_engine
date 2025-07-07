@@ -335,6 +335,31 @@ HWTEST_F(SwiperIndicatorTestNg, SetDigitIndicatorStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation001
+ * @tc.desc: PlayIndicatorTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation001, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems(5);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    pattern_->PlayIndicatorTranslateAnimation(0.0f);
+    EXPECT_EQ(frameNode_->GetAnimatablePropertyFloat("indicator"), 0);
+
+    pattern_->PlayIndicatorTranslateAnimation(1.0f);
+    EXPECT_EQ(frameNode_->GetAnimatablePropertyFloat("indicator"), 1);
+
+    pattern_->PlayIndicatorTranslateAnimation(0.0f);
+    EXPECT_EQ(frameNode_->GetAnimatablePropertyFloat("indicator"), 1);
+}
+
+/**
  * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation002
  * @tc.desc: PlayIndicatorTranslateAnimation
  * @tc.type: FUNC

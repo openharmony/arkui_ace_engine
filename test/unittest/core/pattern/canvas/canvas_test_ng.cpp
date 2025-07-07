@@ -22,6 +22,12 @@
 
 #define protected public
 #define private public
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_font_manager.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components_ng/pattern/canvas/canvas_event_hub.h"
 #include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
 #include "core/components_ng/pattern/canvas/canvas_model.h"
@@ -584,6 +590,161 @@ HWTEST_F(CanvasTestNg, GetImageDataTest, TestSize.Level1)
     ASSERT_TRUE(pattern->paintMethod_);
     auto imageData2 = pattern->GetImageData(10, 20, 30, 40);
     EXPECT_FALSE(imageData2);
+}
+
+/**
+ * @tc.name: CanvasPaintMethodTest001
+ * @tc.desc: CanvasPaintMethod::CalculatePixelMapRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPaintMethodTest001, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    Ace::CanvasImage canvasImage;
+    Testing::TestingRect srcRect(0, 0, 0, 0);
+    Testing::TestingRect dstRect(0, 0, 0, 0);
+    canvasImage.sx = 10.0;
+    canvasImage.sy = 20.0;
+    canvasImage.sWidth = 30.0;
+    canvasImage.sHeight = 40.0;
+    canvasImage.dx = 50.0;
+    canvasImage.dy = 60.0;
+    canvasImage.dWidth = 70.0;
+    canvasImage.dHeight = 80.0;
+
+    /**
+     * @tc.steps: step1. Default
+     * srcRect = {0, 0, 0, 0}
+     * dstRect = {0, 0, 0, 0}
+     */
+    canvasImage.flag = static_cast<CustomPaintPaintMethod::DrawImageType>(-1);
+    paintMethod->CalculatePixelMapRect(canvasImage, 100, 200, srcRect, dstRect);
+    EXPECT_FLOAT_EQ(srcRect.GetLeft(), 0);
+    EXPECT_FLOAT_EQ(srcRect.GetTop(), 0);
+    EXPECT_FLOAT_EQ(srcRect.GetRight(), 0);
+    EXPECT_FLOAT_EQ(srcRect.GetBottom(), 0);
+    EXPECT_FLOAT_EQ(dstRect.GetLeft(), 0);
+    EXPECT_FLOAT_EQ(dstRect.GetTop(), 0);
+    EXPECT_FLOAT_EQ(dstRect.GetRight(), 0);
+    EXPECT_FLOAT_EQ(dstRect.GetBottom(), 0);
+
+    /**
+     * @tc.steps: step2. THREE_PARAMS
+     * srcRect = {0, 0, 100, 200}
+     * dstRect = {50, 60, 150, 260}
+     */
+    srcRect = Testing::TestingRect(0, 0, 0, 0);
+    dstRect = Testing::TestingRect(0, 0, 0, 0);
+    canvasImage.flag = static_cast<CustomPaintPaintMethod::DrawImageType>(0);
+    paintMethod->CalculatePixelMapRect(canvasImage, 100, 200, srcRect, dstRect);
+    EXPECT_FLOAT_EQ(srcRect.GetLeft(), 0);
+    EXPECT_FLOAT_EQ(srcRect.GetTop(), 0);
+    EXPECT_FLOAT_EQ(srcRect.GetRight(), 100);
+    EXPECT_FLOAT_EQ(srcRect.GetBottom(), 200);
+    EXPECT_FLOAT_EQ(dstRect.GetLeft(), 50);
+    EXPECT_FLOAT_EQ(dstRect.GetTop(), 60);
+    EXPECT_FLOAT_EQ(dstRect.GetRight(), 150);
+    EXPECT_FLOAT_EQ(dstRect.GetBottom(), 260);
+}
+
+/**
+ * @tc.name: CanvasPaintMethodTest002
+ * @tc.desc: CanvasPaintMethod::CalculatePixelMapRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPaintMethodTest002, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    Ace::CanvasImage canvasImage;
+    Testing::TestingRect srcRect(0, 0, 0, 0);
+    Testing::TestingRect dstRect(0, 0, 0, 0);
+    canvasImage.sx = 10.0;
+    canvasImage.sy = 20.0;
+    canvasImage.sWidth = 30.0;
+    canvasImage.sHeight = 40.0;
+    canvasImage.dx = 50.0;
+    canvasImage.dy = 60.0;
+    canvasImage.dWidth = 70.0;
+    canvasImage.dHeight = 80.0;
+
+    /**
+     * @tc.steps: step1. FIVE_PARAMS
+     * srcRect = {0, 0, 100, 200}
+     * dstRect = {50, 60, 120, 140}
+     */
+    canvasImage.flag = static_cast<CustomPaintPaintMethod::DrawImageType>(1);
+    paintMethod->CalculatePixelMapRect(canvasImage, 100, 200, srcRect, dstRect);
+    EXPECT_FLOAT_EQ(srcRect.GetLeft(), 0);
+    EXPECT_FLOAT_EQ(srcRect.GetTop(), 0);
+    EXPECT_FLOAT_EQ(srcRect.GetRight(), 100);
+    EXPECT_FLOAT_EQ(srcRect.GetBottom(), 200);
+    EXPECT_FLOAT_EQ(dstRect.GetLeft(), 50);
+    EXPECT_FLOAT_EQ(dstRect.GetTop(), 60);
+    EXPECT_FLOAT_EQ(dstRect.GetRight(), 120);
+    EXPECT_FLOAT_EQ(dstRect.GetBottom(), 140);
+
+    /**
+     * @tc.steps: step2. NINE_PARAMS
+     * srcRect = {10, 20, 40, 60}
+     * dstRect = {50, 60, 120, 140}
+     */
+    srcRect = Testing::TestingRect(0, 0, 0, 0);
+    dstRect = Testing::TestingRect(0, 0, 0, 0);
+    canvasImage.flag = static_cast<CustomPaintPaintMethod::DrawImageType>(2);
+    paintMethod->CalculatePixelMapRect(canvasImage, 100, 200, srcRect, dstRect);
+    EXPECT_FLOAT_EQ(srcRect.GetLeft(), 10);
+    EXPECT_FLOAT_EQ(srcRect.GetTop(), 20);
+    EXPECT_FLOAT_EQ(srcRect.GetRight(), 40);
+    EXPECT_FLOAT_EQ(srcRect.GetBottom(), 60);
+    EXPECT_FLOAT_EQ(dstRect.GetLeft(), 50);
+    EXPECT_FLOAT_EQ(dstRect.GetTop(), 60);
+    EXPECT_FLOAT_EQ(dstRect.GetRight(), 120);
+    EXPECT_FLOAT_EQ(dstRect.GetBottom(), 140);
+}
+
+/**
+ * @tc.name: CanvasPaintMethodTest003
+ * @tc.desc: CanvasPaintMethod::SetCustomTextType
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPaintMethodTest003, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(frameNode);
+    auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();
+    ASSERT_TRUE(contentModifier);
+    auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>(contentModifier, frameNode);
+    ASSERT_TRUE(paintMethod);
+    paintMethod->rsCanvas_ = std::make_shared<Testing::TestingRecordingCanvas>(100, 100);
+    auto recordingCanvas = std::static_pointer_cast<Testing::TestingRecordingCanvas>(paintMethod->rsCanvas_);
+    ASSERT_TRUE(recordingCanvas);
+    MockPipelineContext::SetUp();
+    auto pipeContext = MockPipelineContext::GetCurrent();
+    ASSERT_TRUE(pipeContext);
+    paintMethod->context_ = AceType::WeakClaim(AceType::RawPtr(pipeContext));
+    pipeContext->fontManager_ = AceType::MakeRefPtr<MockFontManager>();
+
+    /**
+     * @tc.steps: step1. FontManager isDefaultFontChanged_ is false
+     * @tc.expected: RSRecordingCanvas isCustomTextType_ is false
+     */
+    pipeContext->fontManager_->isDefaultFontChanged_ = false;
+    paintMethod->SetCustomTextType();
+    EXPECT_FALSE(recordingCanvas->isCustomTextType_);
+
+    /**
+     * @tc.steps: step2. FontManager isDefaultFontChanged_ is true
+     * @tc.expected: RSRecordingCanvas isCustomTextType_ is true
+     */
+    pipeContext->fontManager_->isDefaultFontChanged_ = true;
+    paintMethod->SetCustomTextType();
+    EXPECT_TRUE(recordingCanvas->isCustomTextType_);
+    MockPipelineContext::TearDown();
 }
 
 /**

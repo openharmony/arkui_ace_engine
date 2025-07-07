@@ -345,6 +345,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_SWIPER_UNSELECTED;
         case NODE_SWIPER_EVENT_ON_CONTENT_WILL_SCROLL:
             return ON_SWIPER_CONTENT_WILL_SCROLL;
+        case NODE_SWIPER_EVENT_ON_SCROLL_STATE_CHANGED:
+            return ON_SWIPER_SCROLL_STATE_CHANGED;
         case NODE_ON_ACCESSIBILITY_ACTIONS:
             return ON_ACCESSIBILITY_ACTIONS;
         case NODE_REFRESH_ON_OFFSET_CHANGE:
@@ -589,6 +591,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SWIPER_EVENT_ON_UNSELECTED;
         case ON_SWIPER_CONTENT_WILL_SCROLL:
             return NODE_SWIPER_EVENT_ON_CONTENT_WILL_SCROLL;
+        case ON_SWIPER_SCROLL_STATE_CHANGED:
+            return NODE_SWIPER_EVENT_ON_SCROLL_STATE_CHANGED;
         case ON_ACCESSIBILITY_ACTIONS:
             return NODE_ON_ACCESSIBILITY_ACTIONS;
         case ON_REFRESH_ON_OFFSET_CHANGE:

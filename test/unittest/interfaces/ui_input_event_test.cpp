@@ -2287,6 +2287,29 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetTargetDisplayId, TestSize.Le
     EXPECT_EQ(result, 6);
 
     uiInputEvent->eventTypeId = C_HOVER_EVENT_ID;
+    auto ohosHoverEvent = std::make_unique<ArkUIHoverEvent>();
+    ohosHoverEvent->targetDisplayId = 7;
+    uiInputEvent->inputEvent = ohosHoverEvent.get();
+    result = OH_ArkUI_UIInputEvent_GetTargetDisplayId(uiInputEvent.get());
+    EXPECT_EQ(result, 7);
+}
+
+/**
+ * @tc.name: OH_ArkUI_UIInputEvent_GetTargetDisplayId008
+ * @tc.desc: test OH_ArkUI_UIInputEvent_GetTargetDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetTargetDisplayId008, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    uiInputEvent->eventTypeId = C_CLICK_EVENT_ID;
+    auto ohosClickEvent = std::make_unique<ArkUIClickEvent>();
+    ohosClickEvent->targetDisplayId = 8;
+    uiInputEvent->inputEvent = ohosClickEvent.get();
+    auto result = OH_ArkUI_UIInputEvent_GetTargetDisplayId(uiInputEvent.get());
+    EXPECT_EQ(result, 8);
+
+    uiInputEvent->eventTypeId = C_KEY_EVENT_ID;
     result = OH_ArkUI_UIInputEvent_GetTargetDisplayId(uiInputEvent.get());
     EXPECT_EQ(result, 0);
 }

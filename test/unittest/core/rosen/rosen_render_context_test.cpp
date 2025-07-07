@@ -15,6 +15,7 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #define private public
 #define protected public
@@ -1099,6 +1100,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest043, TestSize.Level1)
     rosenRenderContext->rsNode_->SetBackgroundColor(rsColor);
     rosenRenderContext->PaintBackground();
     auto backgroundColorVal = rosenRenderContext->rsNode_->GetStagingProperties().GetBackgroundColor();
+    rsColor.ConvertToP3ColorSpace();
     EXPECT_EQ(backgroundColorVal.GetRed(), rsColor.GetRed());
     EXPECT_EQ(backgroundColorVal.GetGreen(), rsColor.GetGreen());
     EXPECT_EQ(backgroundColorVal.GetBlue(), rsColor.GetBlue());
@@ -1718,6 +1720,45 @@ HWTEST_F(RosenRenderContextTest, GetWithRange005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetWithRange006
+ * @tc.desc: Test GetWithRange Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetWithRange006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    auto startNode = FrameNode::CreateFrameNode("startNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto endNode = FrameNode::CreateFrameNode("endNode", -1, AceType::MakeRefPtr<Pattern>());
+    NodeIdentity startID;
+    NodeIdentity endID;
+    bool isStartRect = true;
+    int32_t errorCode = -1;
+    ComponentSnapshot::JsCallback callback = [&errorCode](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode,
+        std::function<void()> finishCallback) {
+        errorCode = errCode;
+    };
+    SnapshotOptions options{};
+
+    /**
+     * @tc.steps: step2. Call ComponentSnapshot::GetWithRange.
+     * @tc.expected: Check error code.
+     */
+    startID.first = "0";
+    endID.first = "endNode";
+    ComponentSnapshot snapshot;
+    snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+
+    errorCode = -1;
+    startID.first = "startNode";
+    endID.first = "0";
+    snapshot.GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+    EXPECT_EQ(errorCode, ERROR_CODE_INTERNAL_ERROR);
+}
+
+/**
  * @tc.name: GetRangeIDNode001
  * @tc.desc: Test GetRangeIDNode Func.
  * @tc.type: FUNC
@@ -2157,5 +2198,44 @@ HWTEST_F(RosenRenderContextTest, RemoveFromTreeTest002, TestSize.Level1)
     EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
     EXPECT_EQ(rosenRenderContext->rsNode_->isOnTheTreeInit_, true);
     EXPECT_EQ(rosenRenderContext->rsNode_->isOnTheTree_, false);
+}
+
+class MockRosenRenderContext : public RosenRenderContext {
+public:
+    MOCK_METHOD1(SetNeedUseCmdlistDrawRegion, void(bool needUseCmdlistDrawRegion));
+};
+
+/**
+ * @tc.name: SetNeedUseCmdlistDrawRegion001
+ * @tc.desc: Test RosenRenderContext SetNeedUseCmdlistDrawRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, SetNeedUseCmdlistDrawRegion001, TestSize.Level1)
+{
+    auto mockRosenRenderContext = AceType::MakeRefPtr<MockRosenRenderContext>();
+    EXPECT_CALL(*mockRosenRenderContext, SetNeedUseCmdlistDrawRegion(_)).Times(2);
+    mockRosenRenderContext->SetNeedUseCmdlistDrawRegion(true);
+    mockRosenRenderContext->SetNeedUseCmdlistDrawRegion(false);
+}
+
+/**
+ * @tc.name: ShouldSkipAffineTransformation001
+ * @tc.desc: Test ShouldSkipAffineTransformation Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, ShouldSkipAffineTransformation001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    rosenRenderContext->rsNode_->SetDrawNodeType(Rosen::DrawNodeType::DrawPropertyType);
+    bool res = rosenRenderContext->ShouldSkipAffineTransformation(rosenRenderContext->rsNode_);
+    rosenRenderContext->rsNode_->SetDrawNodeType(Rosen::DrawNodeType::GeometryPropertyType);
+    res = rosenRenderContext->ShouldSkipAffineTransformation(rosenRenderContext->rsNode_);
+    ASSERT_EQ(res, false);
+    rosenRenderContext->rsNode_ = nullptr;
+    ASSERT_EQ(rosenRenderContext->rsNode_, nullptr);
 }
 } // namespace OHOS::Ace::NG

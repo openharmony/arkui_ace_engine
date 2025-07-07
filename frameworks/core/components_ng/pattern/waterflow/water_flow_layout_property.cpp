@@ -75,7 +75,7 @@ void WaterFlowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
         json->PutExtAttr("itemConstraintSize", "0", filter);
     }
     json->PutExtAttr("enableScrollInteraction", propScrollEnabled_.value_or(true), filter);
-    json->PutExtAttr("syncLoad", propSyncLoad_.value_or(false), filter);
+    json->PutExtAttr("syncLoad", propSyncLoad_.value_or(true), filter);
 }
 
 std::string WaterFlowLayoutProperty::GetWaterflowDirectionStr() const

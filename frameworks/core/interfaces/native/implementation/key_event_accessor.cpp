@@ -75,7 +75,7 @@ Ark_String GetKeyTextImpl(Ark_KeyEvent peer)
     CHECK_NULL_RETURN(peer, {});
     const auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, {});
-    const auto keyText = info->GetKeyText();
+    const auto keyText = info->GetKeyText().c_str();
     return Converter::ArkValue<Ark_String>(keyText, Converter::FC);
 }
 void SetKeyTextImpl(Ark_KeyEvent peer,

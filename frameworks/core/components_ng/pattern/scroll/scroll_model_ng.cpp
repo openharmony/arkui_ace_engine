@@ -727,4 +727,115 @@ void ScrollModelNG::CreateWithResourceObjSnapPaginations(
     pattern->AddResObj("ScrollSnapPaginations", resObj, std::move(updateFunc));
 }
 
+void ScrollModelNG::SetMaxZoomScale(float scale)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetMaxZoomScale(frameNode, scale);
+}
+
+void ScrollModelNG::SetMaxZoomScale(FrameNode* frameNode, float scale)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaxZoomScale(scale);
+}
+
+void ScrollModelNG::SetMinZoomScale(float scale)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetMinZoomScale(frameNode, scale);
+}
+
+void ScrollModelNG::SetMinZoomScale(FrameNode* frameNode, float scale)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMinZoomScale(scale);
+}
+
+void ScrollModelNG::SetZoomScale(float scale)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetZoomScale(frameNode, scale);
+}
+
+void ScrollModelNG::SetZoomScale(FrameNode* frameNode, float scale)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetZoomScale(scale);
+}
+
+void ScrollModelNG::ResetZoomScale()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ResetZoomScale(frameNode);
+}
+
+void ScrollModelNG::ResetZoomScale(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetZoomScale(std::nullopt);
+}
+
+void ScrollModelNG::SetEnableBouncesZoom(bool enable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetEnableBouncesZoom(frameNode, enable);
+}
+
+void ScrollModelNG::SetEnableBouncesZoom(FrameNode* frameNode, bool enable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableBouncesZoom(enable);
+}
+
+void ScrollModelNG::SetOnDidZoom(std::function<void(float)>&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetOnDidZoom(frameNode, std::move(event));
+}
+
+void ScrollModelNG::SetOnZoomStart(std::function<void()>&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetOnZoomStart(frameNode, std::move(event));
+}
+
+void ScrollModelNG::SetOnZoomStop(std::function<void()>&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetOnZoomStop(frameNode, std::move(event));
+}
+
+void ScrollModelNG::SetOnDidZoom(FrameNode* frameNode, std::function<void(float)>&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidZoom(std::move(event));
+}
+
+void ScrollModelNG::SetOnZoomStart(FrameNode* frameNode, std::function<void()>&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnZoomStart(std::move(event));
+}
+
+void ScrollModelNG::SetOnZoomStop(FrameNode* frameNode, std::function<void()>&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnZoomStop(std::move(event));
+}
 } // namespace OHOS::Ace::NG

@@ -420,6 +420,13 @@ public:
         return frameNode->GetContext();
     }
 
+    RenderContext* GetRenderContext() const
+    {
+        auto frameNode = GetHost();
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return frameNode->GetRenderContext().GetRawPtr();
+    }
+
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
@@ -456,6 +463,13 @@ public:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         return DynamicCast<T>(host->GetOrCreateEventHub<T>());
+    }
+
+    void MarkDirty(PropertyChangeFlag flag = PROPERTY_UPDATE_MEASURE_SELF)
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(flag);
     }
 
     // Called after frameNode RebuildRenderContextTree.
@@ -786,6 +800,45 @@ public:
         return false;
     }
     virtual bool GetNodeAdapterComponent(ArkUINodeAdapterHandle handle, const RefPtr<FrameNode>& node)
+    {
+        return false;
+    }
+    virtual bool ChildPreMeasureHelperEnabled()
+    {
+        return false;
+    }
+    virtual bool ChildPreMeasureHelperCustomized()
+    {
+        return false;
+    }
+    virtual bool ChildPreMeasureHelper(
+        LayoutWrapper* layoutWrapper, const std::optional<LayoutConstraintF>& parentConstraint)
+    {
+        return false;
+    }
+    virtual bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
+        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM)
+    {
+        return false;
+    }
+    virtual bool PostponedTaskForIgnoreEnabled()
+    {
+        return false;
+    }
+    virtual bool PostponedTaskForIgnoreCustomized()
+    {
+        return false;
+    }
+    virtual void PostponedTaskForIgnore() {}
+    virtual bool NeedCustomizeSafeAreaPadding()
+    {
+        return false;
+    }
+    virtual PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate)
+    {
+        return safeAreaPadding;
+    }
+    virtual bool ChildTentativelyLayouted(IgnoreStrategy& strategy)
     {
         return false;
     }
