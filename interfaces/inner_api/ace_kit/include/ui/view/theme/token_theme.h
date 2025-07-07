@@ -38,9 +38,15 @@ public:
         colors_ = colors;
     }
 
+    void SetDarkColors(const RefPtr<TokenColors>& darkColors)
+    {
+        darkColors_ = darkColors;
+    }
+
     const RefPtr<TokenColors>& Colors() const
     {
-        return colors_;
+        bool isDark = IsDarkMode();
+        return isDark ? darkColors_ : colors_;
     }
 
     void SetColorMode(ColorMode colorMode)
@@ -63,15 +69,26 @@ public:
         resObjs_ = std::move(resObjs);
     }
 
+    void SetDarkResObjs(std::vector<RefPtr<ResourceObject>>&& darkResObjs)
+    {
+        darkResObjs_ = std::move(darkResObjs);
+    }
+
     const std::vector<RefPtr<ResourceObject>>& GetResObjs() const
     {
-        return resObjs_;
+        bool isDark = IsDarkMode();
+        return isDark ? darkResObjs_ : resObjs_;
     }
+
 private:
     int32_t id_ { 0 };
     RefPtr<TokenColors> colors_;
+    RefPtr<TokenColors> darkColors_;
     std::vector<RefPtr<ResourceObject>> resObjs_;
+    std::vector<RefPtr<ResourceObject>> darkResObjs_;
     ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
+    static bool IsDarkMode();
+    
 };
 
 } // namespace OHOS::Ace

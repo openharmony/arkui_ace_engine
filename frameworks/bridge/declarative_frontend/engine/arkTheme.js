@@ -42,7 +42,9 @@ class ArkThemeNativeHelper {
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
             ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
         }
-        getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId, ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.colors), colorMode, onThemeScopeDestroy);
+        const lightColorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.colors);
+        const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.darkColors);
+        getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId, lightColorArray, darkColorArray, colorMode, onThemeScopeDestroy );
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
             ArkThemeScopeManager.getInstance().onExitLocalColorMode();
         }
@@ -295,7 +297,12 @@ class ArkThemeBase {
         if (customTheme.darkColors) {
             copyTheme.darkColors = {};
             Object.assign(copyTheme.darkColors, customTheme.darkColors);
+        } else if (customTheme.colors) {
+            // 如果用户没有传递 darkColors，则使用 colors 的值
+            copyTheme.darkColors = {};
+            Object.assign(copyTheme.darkColors, customTheme.colors);
         }
+        
         if (customTheme.shapes) {
             copyTheme.shapes = {};
             Object.assign(copyTheme.shapes, customTheme.shapes);

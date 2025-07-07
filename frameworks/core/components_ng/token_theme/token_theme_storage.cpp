@@ -185,8 +185,10 @@ RefPtr<TokenTheme> TokenThemeStorage::CreateSystemTokenTheme(ColorMode colorMode
     auto themeId = colorMode == ColorMode::DARK ?
         TokenThemeStorage::SYSTEM_THEME_DARK_ID : TokenThemeStorage::SYSTEM_THEME_LIGHT_ID;
     auto tokenColors = AceType::MakeRefPtr<TokenColors>();
+    auto tokenDarkColors = AceType::MakeRefPtr<TokenColors>();
     auto tokenTheme = AceType::MakeRefPtr<TokenTheme>(themeId);
     tokenTheme->SetColors(tokenColors);
+    tokenTheme->SetDarkColors(tokenDarkColors);
 
     std::vector<Color> colors;
     colors.reserve(TokenColors::TOTAL_NUMBER);
@@ -194,6 +196,10 @@ RefPtr<TokenTheme> TokenThemeStorage::CreateSystemTokenTheme(ColorMode colorMode
         colors.push_back(themeConstants->GetColor(TokenColors::GetSystemColorResIdByIndex(resId)));
     }
     tokenColors->SetColors(std::move(colors));
+    
+    // 为深色模式也设置相同的颜色
+    std::vector<Color> darkColors = colors; // 暂时使用相同的颜色
+    tokenDarkColors->SetColors(std::move(darkColors));
     return tokenTheme;
 }
 
