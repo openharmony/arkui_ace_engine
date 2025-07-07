@@ -683,12 +683,12 @@ void UIObserverListener::AddGestureEventInfoOne(napi_value objValueEvent, const 
     }
     napi_value napiAngle = GetNamedProperty(env_, objValueEvent, "angle");
     if (GetValueType(env_, napiAngle) != napi_null) {
-        napi_create_double(env_, gestureEventInfo.GetAngle() / scale, &napiAngle);
+        napi_create_double(env_, gestureEventInfo.GetAngle(), &napiAngle);
         napi_set_named_property(env_, objValueEvent, "angle", napiAngle);
     }
     napi_value napiSpeed = GetNamedProperty(env_, objValueEvent, "speed");
     if (GetValueType(env_, napiSpeed) != napi_null) {
-        napi_create_double(env_, gestureEventInfo.GetSpeed() / scale, &napiSpeed);
+        napi_create_double(env_, gestureEventInfo.GetSpeed(), &napiSpeed);
         napi_set_named_property(env_, objValueEvent, "speed", napiSpeed);
     }
     napi_close_handle_scope(env_, scope);
