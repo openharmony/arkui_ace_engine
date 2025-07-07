@@ -877,20 +877,24 @@ TEST_F(FreeScrollTest, ScrollBar006)
     ASSERT_TRUE(pattern_->scrollBar2d_);
     const auto& verticalBar = pattern_->scrollBar2d_->vertical_;
     const auto& horizontalBar = pattern_->scrollBar2d_->horizontal_;
-    mockTaskExecutor->RunDelayTask(); // testing horizontal to avoid MockTaskExecutor's bug (only records last task)
+    const auto& painter = pattern_->scrollBar2d_->painter_->horizontal_;
+    mockTaskExecutor->RunDelayTask(); // testing horizontal to avoid MockTaskExecutor's bug (only running last added task)
     EXPECT_EQ(horizontalBar.opacityAnimationType_, OpacityAnimationType::DISAPPEAR);
     FlushUITasks(frameNode_);
+    EXPECT_EQ(painter.opacity_->Get(), 0);
 
     PanStart({});
     EXPECT_EQ(verticalBar.opacityAnimationType_, OpacityAnimationType::APPEAR);
     PanUpdate({ -DELTA_X, -DELTA_Y });
     FlushUITasks(frameNode_);
     EXPECT_EQ(horizontalBar.opacityAnimationType_, OpacityAnimationType::NONE);
+    EXPECT_EQ(painter.opacity_->Get(), UINT8_MAX);
     PanEnd({}, {});
     mockTaskExecutor->RunDelayTask();
     EXPECT_EQ(horizontalBar.opacityAnimationType_, OpacityAnimationType::DISAPPEAR);
     FlushUITasks(frameNode_);
     EXPECT_EQ(horizontalBar.opacityAnimationType_, OpacityAnimationType::NONE);
+    EXPECT_EQ(painter.opacity_->Get(), 0);
 }
 
 /**
