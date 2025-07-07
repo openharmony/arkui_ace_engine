@@ -3400,7 +3400,8 @@ void WebPattern::OnModifyDone()
     // Set the default background color when the component did not set backgroundColor()
     // or needSetDefaultBackgroundColor_ is true.
     if (!renderContext->GetBackgroundColor() || needSetDefaultBackgroundColor_) {
-        OnBackgroundColorUpdate(GetDefaultBackgroundColor().GetValue());
+        UpdateBackgroundColor(GetDefaultBackgroundColor().GetValue());
+        needSetDefaultBackgroundColor_ = true;
     }
 
     // Initialize events such as keyboard, focus, etc.
