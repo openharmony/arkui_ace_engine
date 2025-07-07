@@ -600,7 +600,7 @@ public:
     void UpdateModalUIExtensionConfig(
         int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config);
     static ModalStyle SetUIExtensionModalStyleAndGet(bool prohibitedRemoveByRouter,
-        bool isAllowAddChildBelowModalUec, bool prohibitedRemoveByNavigation);
+        bool isAllowAddChildBelowModalUec, bool prohibitedRemoveByNavigation, bool isModalRequestFocus);
 
     RefPtr<FrameNode> BuildAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
     RefPtr<FrameNode> CreateAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,

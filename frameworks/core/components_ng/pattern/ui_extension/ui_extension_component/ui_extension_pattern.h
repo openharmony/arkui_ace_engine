@@ -267,6 +267,10 @@ public:
         avoidInfo_ = info;
     }
     bool HandleTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void SetModalRequestFocus(bool requestFocus)
+    {
+        isModalRequestFocus_ = requestFocus;
+    }
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -445,6 +449,7 @@ private:
     std::map<UIContentBusinessCode, BusinessDataUECConsumeReplyCallback> businessDataUECConsumeReplyCallbacks_;
 
     bool isWindowModeFollowHost_ = false;
+    bool isModalRequestFocus_ = true;
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
 
     ContainerModalAvoidInfo avoidInfo_;
