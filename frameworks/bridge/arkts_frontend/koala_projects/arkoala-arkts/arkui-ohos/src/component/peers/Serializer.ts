@@ -78,7 +78,7 @@ import { Resource } from "global.resource"
 import { PixelMap } from "#external"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle, LocalizedBarrierStyle } from "./../relativeContainer"
-import { DrawingCanvas, DrawingCanvasInternal, DrawingColorFilter, DrawingColorFilterInternal, RectType } from "./../arkui-drawing"
+import { DrawingCanvas, DrawingCanvasInternal, RectType } from "./../arkui-drawing"
 import { drawing } from "@ohos/graphics/drawing"
 import { BreakpointsReference, GridRowDirection, Callback_String_Void, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../gridRow"
 import { CalendarAlign, CalendarPickerAttribute, Callback_Date_Void, CalendarOptions, CalendarDialogOptions } from "./../calendarPicker"
@@ -289,10 +289,6 @@ export class Serializer extends SerializerBase {
     writeDrawingCanvas(value: drawing.Canvas): void {
         let valueSerializer : Serializer = this
         valueSerializer.holdAndWriteObject(value)
-    }
-    writeDrawingColorFilter(value: DrawingColorFilter): void {
-        let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeDrawModifier(value: DrawModifier): void {
         let valueSerializer : Serializer = this
@@ -20971,11 +20967,6 @@ export class Serializer extends SerializerBase {
                 const value_colorFilter_value_0  = value_colorFilter_value as ColorFilter
                 valueSerializer.writeColorFilter(value_colorFilter_value_0)
             }
-            else if (TypeChecker.isDrawingColorFilter(value_colorFilter_value)) {
-                valueSerializer.writeInt8(1 as int32)
-                const value_colorFilter_value_1  = value_colorFilter_value as DrawingColorFilter
-                valueSerializer.writeDrawingColorFilter(value_colorFilter_value_1)
-            }
         }
     }
     writeLabelStyle(value: LabelStyle): void {
@@ -21857,11 +21848,6 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(0 as int32)
                 const value_colorFilter_value_0  = value_colorFilter_value as ColorFilter
                 valueSerializer.writeColorFilter(value_colorFilter_value_0)
-            }
-            else if (TypeChecker.isDrawingColorFilter(value_colorFilter_value)) {
-                valueSerializer.writeInt8(1 as int32)
-                const value_colorFilter_value_1  = value_colorFilter_value as DrawingColorFilter
-                valueSerializer.writeDrawingColorFilter(value_colorFilter_value_1)
             }
         }
         const value_syncLoad  = value.syncLoad

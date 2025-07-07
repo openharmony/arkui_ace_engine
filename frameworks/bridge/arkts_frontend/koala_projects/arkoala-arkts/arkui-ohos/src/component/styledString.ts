@@ -32,9 +32,10 @@ import { ShadowOptions, Callback_ClickEvent_Void, ClickEvent } from "./common"
 import { TextBackgroundStyle } from "./span"
 import { LeadingMarginPlaceholder } from "./richEditor"
 import { PixelMap } from "#external"
-import { DrawingColorFilter, DrawingColorFilterInternal } from "./arkui-drawing"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Callback_GestureEvent_Void, GestureEvent } from "./gesture"
+import { drawing } from "@ohos/graphics/drawing"
+
 export class StyledStringInternal {
     public static fromPtr(ptr: KPointer): StyledString {
         const obj : StyledString = new StyledString(undefined, undefined)
@@ -1200,17 +1201,14 @@ export class ImageAttachment implements MaterializedBase {
         if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
         {
             const buffer__selector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : ColorFilter | DrawingColorFilter | undefined
+            let buffer_ : ColorFilter | drawing.ColorFilter | undefined
             if (buffer__selector == 0) {
                 buffer_ = (retvalDeserializer.readColorFilter() as ColorFilter)
-            }
-            else if (buffer__selector == 1) {
-                buffer_ = (retvalDeserializer.readDrawingColorFilter() as DrawingColorFilter)
             }
             else {
                 throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
             }
-            buffer = (buffer_ as ColorFilter | DrawingColorFilter)
+            buffer = (buffer_ as ColorFilter | drawing.ColorFilter)
         }
         const returnResult : ColorFilterType | undefined = buffer
         return returnResult
@@ -1354,7 +1352,7 @@ export interface ImageAttachmentInterface {
     colorFilter?: ColorFilterType;
 }
 export type AttachmentType = ImageAttachmentInterface | ResourceImageAttachmentOptions;
-export type ColorFilterType = ColorFilter | DrawingColorFilter;
+export type ColorFilterType = ColorFilter | drawing.ColorFilter;
 export interface ImageAttachmentLayoutStyle {
     margin?: LengthMetrics | Padding;
     padding?: LengthMetrics | Padding;

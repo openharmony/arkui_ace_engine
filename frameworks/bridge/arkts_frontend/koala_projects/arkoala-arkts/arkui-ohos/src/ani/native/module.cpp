@@ -65,6 +65,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ImageConstructDrawableDescriptor)
         },
         ani_native_function {
+            "_Image_DrawingColorFilter",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ImageDrawingColorFilter)
+        },
+        ani_native_function {
             "_Web_SetWebOptions",
             "JL@ohos/web/webview/webview/WebviewController;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWebOptions)

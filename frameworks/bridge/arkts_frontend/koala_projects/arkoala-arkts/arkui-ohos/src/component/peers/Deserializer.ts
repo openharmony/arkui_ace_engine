@@ -91,7 +91,7 @@ import { Resource } from "global.resource"
 import { PixelMap } from "#external"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle, LocalizedBarrierStyle } from "./../relativeContainer"
-import { DrawingCanvas, DrawingCanvasInternal, DrawingColorFilter, DrawingColorFilterInternal, RectType } from "./../arkui-drawing"
+import { DrawingCanvas, DrawingCanvasInternal, RectType } from "./../arkui-drawing"
 import { BreakpointsReference, GridRowDirection, Callback_String_Void, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../gridRow"
 import { CalendarAlign, CalendarPickerAttribute, Callback_Date_Void, CalendarOptions, CalendarDialogOptions } from "./../calendarPicker"
 import { CalendarController, CalendarControllerInternal, Literal_Number_day_month_year, Callback_CalendarRequestedData_Void, CalendarRequestedData, Callback_CalendarSelectedDate_Void, CalendarSelectedDate, CalendarDay, MonthData, CurrentDayStyle, NonCurrentDayStyle, TodayStyle, WeekStyle, WorkStateStyle } from "./../calendar"
@@ -322,11 +322,6 @@ export class Deserializer extends DeserializerBase {
         let ptr : KPointer = valueDeserializer.readPointer()
         return new drawing.Canvas()
         // return DrawingCanvasInternal.fromPtr(ptr)
-    }
-    readDrawingColorFilter(): DrawingColorFilter {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return DrawingColorFilterInternal.fromPtr(ptr)
     }
     readEllipseShape(): EllipseShape {
         let valueDeserializer : Deserializer = this
@@ -24378,17 +24373,14 @@ export class Deserializer extends DeserializerBase {
         if ((RuntimeType.UNDEFINED) != (colorFilter_buf_runtimeType))
         {
             const colorFilter_buf__selector : int32 = valueDeserializer.readInt8()
-            let colorFilter_buf_ : ColorFilter | DrawingColorFilter | undefined
+            let colorFilter_buf_ : ColorFilter | drawing.ColorFilter | undefined
             if (colorFilter_buf__selector == 0) {
                 colorFilter_buf_ = (valueDeserializer.readColorFilter() as ColorFilter)
-            }
-            else if (colorFilter_buf__selector == 1) {
-                colorFilter_buf_ = (valueDeserializer.readDrawingColorFilter() as DrawingColorFilter)
             }
             else {
                 throw new Error("One of the branches for colorFilter_buf_ has to be chosen through deserialisation.")
             }
-            colorFilter_buf = (colorFilter_buf_ as ColorFilter | DrawingColorFilter)
+            colorFilter_buf = (colorFilter_buf_ as ColorFilter | drawing.ColorFilter)
         }
         const colorFilter_result : ColorFilterType | undefined = colorFilter_buf
         let value : ImageAttachmentInterface = ({value: value_result, size: size_result, verticalAlign: verticalAlign_result, objectFit: objectFit_result, layoutStyle: layoutStyle_result, colorFilter: colorFilter_result} as ImageAttachmentInterface)
@@ -25191,17 +25183,14 @@ export class Deserializer extends DeserializerBase {
         if ((RuntimeType.UNDEFINED) != (colorFilter_buf_runtimeType))
         {
             const colorFilter_buf__selector : int32 = valueDeserializer.readInt8()
-            let colorFilter_buf_ : ColorFilter | DrawingColorFilter | undefined
+            let colorFilter_buf_ : ColorFilter | drawing.ColorFilter | undefined
             if (colorFilter_buf__selector == 0) {
                 colorFilter_buf_ = (valueDeserializer.readColorFilter() as ColorFilter)
-            }
-            else if (colorFilter_buf__selector == 1) {
-                colorFilter_buf_ = (valueDeserializer.readDrawingColorFilter() as DrawingColorFilter)
             }
             else {
                 throw new Error("One of the branches for colorFilter_buf_ has to be chosen through deserialisation.")
             }
-            colorFilter_buf = (colorFilter_buf_ as ColorFilter | DrawingColorFilter)
+            colorFilter_buf = (colorFilter_buf_ as ColorFilter | drawing.ColorFilter)
         }
         const colorFilter_result : ColorFilterType | undefined = colorFilter_buf
         const syncLoad_buf_runtimeType  = (valueDeserializer.readInt8() as int32)

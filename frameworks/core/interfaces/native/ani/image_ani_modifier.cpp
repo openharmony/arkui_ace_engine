@@ -17,6 +17,7 @@
 
 #include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
+#include "base/image/drawing_color_filter.h"
 #include "base/log/log.h"
 #include "core/components_ng/pattern/image/image_model_static.h"
 
@@ -42,12 +43,20 @@ void SetResizableLattice(ArkUINodeHandle node, void* aniLattice)
     ImageModelStatic::SetResizableLattice(frameNode, lattice);
 }
 
+void SetDrawingColorFilter(ArkUINodeHandle node, void* aniColorFilter)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto colorFilter = DrawingColorFilter::CreateDrawingColorFilterFromAni(aniColorFilter);
+    ImageModelStatic::SetDrawingColorFilter(frameNode, colorFilter);
+}
+
 const ArkUIAniImageModifier* GetImageAniModifier()
 {
     static const ArkUIAniImageModifier impl = {
         .setPixelMap = OHOS::Ace::NG::SetPixelMap,
         .setDrawableDescriptor = OHOS::Ace::NG::SetDrawableDescriptor,
         .setResizableLattice = OHOS::Ace::NG::SetResizableLattice,
+        .setDrawingColorFilter = OHOS::Ace::NG::SetDrawingColorFilter,
     };
     return &impl;
 }
