@@ -41,8 +41,9 @@ import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
 import { ComponentContent } from 'arkui/ComponentContent'
 import overlayManager from '@ohos/overlayManager'
-import promptAction from '@ohos/promptAction';
-import { AsyncCallback, CustomBuilder, DragItemInfo } from 'arkui/component'
+import promptAction, { LevelOrder } from '@ohos/promptAction'
+import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
+import { AsyncCallback, CustomBuilder, DragItemInfo, Callback } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
 
@@ -98,8 +99,11 @@ export class Router {
     }
 
     public replaceUrl(options: router.RouterOptions): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
         return new Promise<void>((resolve, reject) => {
-            router.replaceUrl(options)
+            this.router_!.replace(options);
         });
     }
 
@@ -111,23 +115,38 @@ export class Router {
         throw Error("clear not implemented in Router!")
     }
     public getLength(): string {
-        return router.getLength();
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        return this.router_!.getLength();
     }
 
     public getParams(): Object {
-        return router.getParams();
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        return this.router_!.getParams();
     }
 
     public getState(): router.RouterState {
-        return router.getState();
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        return this.router_!.getState();
     }
 
     public getStateByIndex(index: number): router.RouterState | undefined {
-        return router.getStateByIndex(index);
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        return this.router_!.getStateByIndex(index);
     }
 
     public getStateByUrl(url: string): Array<router.RouterState> {
-        return router.getStateByUrl(url);
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        return this.router_!.getStateByUrl(url);
     }
 }
 
@@ -215,6 +234,9 @@ export class DragController {
         dragInfo: dragController.DragInfo): dragController.DragAction {
         throw Error("createDragAction not implemented in DragController!")
     }
+    public getDragPreview(): dragController.DragPreview {
+        throw Error("getDragPreview not implemented in DragController!")
+    }
     public setDragEventStrictReportingEnabled(enable: boolean): void {
         throw Error("setDragEventStrictReportingEnabled not implemented in DragController!")
     }
@@ -250,7 +272,7 @@ export class OverlayManager {
         throw Error("addComponentContent not implemented in OverlayManager!")
     }
 
-    addComponentContentWithOrder(content: ComponentContent, levelOrder?: number): void {
+    addComponentContentWithOrder(content: ComponentContent, levelOrder?: LevelOrder): void {
         throw Error("addComponentContentWithOrder not implemented in OverlayManager!")
     }
 
@@ -288,28 +310,34 @@ export class PromptAction {
         throw Error("closeToast not implemented in PromptAction!")
     }
 
-    showDialog1(options: promptAction.ShowDialogOptions,
+    //@ts-ignore
+    showDialog(options: promptAction.ShowDialogOptions,
         callback?: AsyncCallback<promptAction.ShowDialogSuccessResponse>): void {
         throw Error("showDialog1 not implemented in PromptAction!")
     }
 
+    //@ts-ignore
     showDialog(options: promptAction.ShowDialogOptions): Promise<promptAction.ShowDialogSuccessResponse> {
         throw Error("showDialog not implemented in PromptAction!")
     }
 
-    showActionMenu1(options: promptAction.ActionMenuOptions,
+    //@ts-ignore
+    showActionMenu(options: promptAction.ActionMenuOptions,
         callback?: AsyncCallback<promptAction.ActionMenuSuccessResponse>): void {
         throw Error("showActionMenu1 not implemented in PromptAction!")
     }
 
+    //@ts-ignore
     showActionMenu(options: promptAction.ActionMenuOptions): Promise<promptAction.ActionMenuSuccessResponse> {
         throw Error("showActionMenu not implemented in PromptAction!")
     }
 
-    openCustomDialog1(content: ComponentContent, options?: promptAction.BaseDialogOptions): Promise<void> {
+    //@ts-ignore
+    openCustomDialog(content: ComponentContent, options?: promptAction.BaseDialogOptions): Promise<void> {
         throw Error("openCustomDialog1 not implemented in PromptAction!")
     }
 
+    //@ts-ignore
     openCustomDialog(options: promptAction.CustomDialogOptions): Promise<number> {
         throw Error("openCustomDialog not implemented in PromptAction!")
     }
@@ -318,10 +346,12 @@ export class PromptAction {
         throw Error("updateCustomDialog not implemented in PromptAction!")
     }
 
-    closeCustomDialog1(content: ComponentContent): Promise<void> {
+    //@ts-ignore
+    closeCustomDialog(content: ComponentContent): Promise<void> {
         throw Error("closeCustomDialog1 not implemented in PromptAction!")
     }
 
+    //@ts-ignore
     closeCustomDialog(dialogId: number): void {
         throw Error("closeCustomDialog not implemented in PromptAction!")
     }
@@ -362,6 +392,9 @@ export class UIContext {
     }
     public getFrameNodeById(id: string): FrameNode | null {
         throw Error("getFrameNodeById not implemented in UIContext!")
+    }
+    public getSharedLocalStorage(): LocalStorage | undefined {
+        throw Error('getFrameNodeById not implemented in UIContext!');
     }
     getAttachedFrameNodeById(id: string): FrameNode | null {
         throw Error("getAttachedFrameNodeById not implemented in UIContext!")
@@ -414,6 +447,10 @@ export class UIContext {
 
     public animateTo(param: AnimateParam, event: (() => void)): void {
         throw Error("animateTo not implemented in UIContext!")
+    }
+
+    public animateToImmediately(value: AnimateParam, event: Callback<void>): void {
+        throw Error("animateToImmediately not implemented in UIContext!")
     }
 
     public createAnimator(options: AnimatorOptions | SimpleAnimatorOptions): AnimatorResult {
@@ -503,13 +540,16 @@ export class UIContext {
     public px2lpx(value: number): number {
         throw Error("px2lpx not implemented in UIContext!")
     }
+
+    public setUIStates(callback: () => void): void {
+        throw Error("setUIStates not implemented in UIContext!")
+    }
 }
 export abstract class FrameCallback {
     onFrame(frameTimeInNano: number): void {}
     onIdle(timeLeftInNano: number): void {}
 }
 
-export type Callback<T,V = void> = (data: T) => V
 export class UIObserver {
     private instanceId_: number = 100000;
     private observerImpl: uiObserver.UIObserver | null = null;

@@ -316,7 +316,7 @@ public:
         storageMap_.erase(id);
     }
 
-    void* GetShared(int32_t id);
+    ani_ref GetShared(int32_t id);
     
     void RegisterLayoutInspectorCallback(const RefPtr<InspectorEvent>& layoutFunc, const std::string& componentId)
     {
@@ -356,7 +356,7 @@ public:
         mediaUpdateCallback_ = nullptr;
     }
 
-    ani_object CallGetUIContextFunc();
+    ani_object CallGetUIContextFunc(int32_t instanceId);
 
     void SetAniContext(int32_t instanceId, ani_ref* context);
 

@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 class MeasureLayoutParam;
 
-class MeasureLayoutChild {
+class ACE_FORCE_EXPORT MeasureLayoutChild {
 public:
     inline void Init(MeasureLayoutParam* parent, int32_t index)
     {
@@ -38,7 +38,7 @@ private:
     int32_t index_ = 0;
 };
 
-class MeasureLayoutParam : public AceType {
+class ACE_FORCE_EXPORT MeasureLayoutParam : public AceType {
     DECLARE_ACE_TYPE(MeasureLayoutParam, AceType)
 public:
     MeasureLayoutParam(LayoutWrapper* layoutWrapper);

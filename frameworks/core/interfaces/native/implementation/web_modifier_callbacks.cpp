@@ -223,6 +223,7 @@ bool OnPrompt(const CallbackHelper<Callback_OnPromptEvent_Boolean>& arkCallback,
     Ark_OnPromptEvent parameter;
     parameter.message = Converter::ArkValue<Ark_String>(eventInfo->GetMessage());
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
+    parameter.value = Converter::ArkValue<Ark_String>(eventInfo->GetValue());
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result = peer;
@@ -643,6 +644,26 @@ bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthentication
     return false;
 }
 
+static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
+{
+    auto handler = eventInfo->GetWebWindowNewHandler();
+    if ((handler) && (!handler->IsFrist())) {
+        int32_t parentId = -1;
+        auto controllerInfo = ControllerHandlerPeer::PopController(handler->GetId(), &parentId);
+        if (controllerInfo.getWebIdFunc) {
+            handler->SetWebController(controllerInfo.getWebIdFunc());
+        }
+        if (controllerInfo.completeWindowNewFunc) {
+            controllerInfo.completeWindowNewFunc(parentId);
+        }
+        if (controllerInfo.releaseRefFunc) {
+            controllerInfo.releaseRefFunc();
+        }
+        return false;
+    }
+    return true;
+}
+
 void OnWindowNew(const CallbackHelper<Callback_OnWindowNewEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
@@ -652,6 +673,9 @@ void OnWindowNew(const CallbackHelper<Callback_OnWindowNewEvent_Void>& arkCallba
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewEvent>(info.get());
     CHECK_NULL_VOID(eventInfo);
+    if (!HandleWindowNewEvent(eventInfo)) {
+        return;
+    }
     Ark_OnWindowNewEvent parameter;
     parameter.isAlert = Converter::ArkValue<Ark_Boolean>(eventInfo->IsAlert());
     parameter.isUserTrigger = Converter::ArkValue<Ark_Boolean>(eventInfo->IsUserTrigger());

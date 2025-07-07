@@ -17,13 +17,14 @@ import { IMutableKeyedStateMeta, IObservedObject, RenderIdType, WatchIdType } fr
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { ObserveSingleton } from './observeSingleton';
 import { FactoryInternal } from './iFactoryInternal';
-
+import { ObserveWrappedBase } from './observeWrappedBase';
+import { UIUtils } from '../utils';
 final class CONSTANT {
-    public static readonly OB_ARRAY_ANY_KEY = "__OB_ANY_INDEX";
-    public static readonly OB_LENGTH = "__OB_LENGTH";
+    public static readonly OB_ARRAY_ANY_KEY = '__OB_ANY_INDEX';
+    public static readonly OB_LENGTH = '__OB_LENGTH';
 }
 
-export class WrappedArray<T> extends Array<T> implements IObservedObject {
+export class WrappedArray<T> extends Array<T> implements IObservedObject, ObserveWrappedBase {
     public store_: Array<T>;
     private meta_: IMutableKeyedStateMeta;
     // support for @Watch
@@ -37,7 +38,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
     constructor(src: Array<T>) {
         super();
         this.store_ = src;
-        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta("WrappedArray");
+        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedArray');
     }
 
     public getRaw(): Object {
@@ -56,12 +57,12 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.subscribedWatches.executeOnSubscribingWatches(propertyName);
     }
 
-    public setV1RenderId(renderId : RenderIdType): void {
+    public setV1RenderId(renderId: RenderIdType): void {
         this.____V1RenderId = renderId;
     }
 
     public shouldAddRef(): boolean {
-      return ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
+        return ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
     }
 
     override get length(): number {
@@ -81,7 +82,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
                 this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
                 // exec all subscribing @Watch
-                this.executeOnSubscribingWatches("length");
+                this.executeOnSubscribingWatches('length');
             }
         }
     }
@@ -102,7 +103,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
             this.meta_.addRef(CONSTANT.OB_LENGTH);
             this.meta_.addRef(String(idx as Object | undefined | null));
         }
-        return this.store_[idx];
+        return UIUtils.makeObserved(this.store_[idx]);
     }
 
     // [] operator
@@ -129,7 +130,6 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         other.fill(initialValue);
         return new WrappedArray<T>(other);
     }
-
 
     /**
      * Extends Array with new elements to specified length.
@@ -217,7 +217,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("sort");
+        this.executeOnSubscribingWatches('sort');
 
         return this;
     }
@@ -234,7 +234,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("shift");
+        this.executeOnSubscribingWatches('shift');
 
         return ret;
     }
@@ -251,7 +251,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("pop");
+        this.executeOnSubscribingWatches('pop');
 
         return ret;
     }
@@ -267,7 +267,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("push");
+        this.executeOnSubscribingWatches('push');
 
         return ret;
     }
@@ -283,7 +283,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("pushECMA");
+        this.executeOnSubscribingWatches('pushECMA');
 
         return ret;
     }
@@ -302,7 +302,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("splice");
+        this.executeOnSubscribingWatches('splice');
         return ret;
     }
 
@@ -320,7 +320,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("splice");
+        this.executeOnSubscribingWatches('splice');
 
         return ret;
     }
@@ -338,7 +338,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("splice");
+        this.executeOnSubscribingWatches('splice');
 
         return ret;
     }
@@ -356,7 +356,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("splice");
+        this.executeOnSubscribingWatches('splice');
 
         return ret;
     }
@@ -387,7 +387,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("unshift");
+        this.executeOnSubscribingWatches('unshift');
 
         return ret;
     }
@@ -454,7 +454,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
 
     /**
      * Applies flat and than map
-     * 
+     *
      * @param fn a function to apply
      * @return new Array after map and than flat
      */
@@ -512,7 +512,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("copyWithin");
+        this.executeOnSubscribingWatches('copyWithin');
 
         return this;
     }
@@ -531,7 +531,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("copyWithin");
+        this.executeOnSubscribingWatches('copyWithin');
 
         return this;
     }
@@ -549,7 +549,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("copyWithin");
+        this.executeOnSubscribingWatches('copyWithin');
 
         return this;
     }
@@ -566,7 +566,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("copyWithin");
+        this.executeOnSubscribingWatches('copyWithin');
 
         return this;
     }
@@ -585,7 +585,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("fill");
+        this.executeOnSubscribingWatches('fill');
 
         return this;
     }
@@ -604,7 +604,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("fill");
+        this.executeOnSubscribingWatches('fill');
 
         return this;
     }
@@ -676,13 +676,13 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
     }
 
     /**
-    * Iterates the array in reverse order and returns the index of
-    * the first element that satisfies the provided testing function.
-    * If no elements satisfy the testing function, -1 is returned.
-    *
-    * @param predicate testing function
-    * @returns index of first element satisfying to predicate, -1 if no such element
-    */
+     * Iterates the array in reverse order and returns the index of
+     * the first element that satisfies the provided testing function.
+     * If no elements satisfy the testing function, -1 is returned.
+     *
+     * @param predicate testing function
+     * @returns index of first element satisfying to predicate, -1 if no such element
+     */
     public override findLastIndex(predicate: (element: T, index: number, array: Array<T>) => boolean): number {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.findLastIndex(predicate);
@@ -706,7 +706,10 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
      * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
      * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduce<U = T>(callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U, initialValue: U): U {
+    public override reduce<U = T>(
+        callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U,
+        initialValue: U
+    ): U {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.reduce<U>(callbackfn, initialValue);
     }
@@ -717,7 +720,9 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
      * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
      * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduceRight(callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T): T {
+    public override reduceRight(
+        callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T
+    ): T {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.reduceRight(callbackfn);
     }
@@ -729,7 +734,10 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
      * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
      * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U, initialValue: U): U {
+    public override reduceRight<U>(
+        callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U,
+        initialValue: U
+    ): U {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.reduceRight(callbackfn, initialValue);
     }
@@ -751,7 +759,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
                 this.meta_.addRef(String(index as Object | undefined | null));
             }
             callbackfn(value, index, array);
-        }
+        };
         return this.store_.forEach(observedCb);
     }
 
@@ -860,7 +868,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
      * @returns string representation
      */
     public override toString(): string {
-        return this.join(",");
+        return this.join(',');
     }
 
     /**
@@ -1010,7 +1018,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
         // exec all subscribing @Watch
-        this.executeOnSubscribingWatches("reverse");
+        this.executeOnSubscribingWatches('reverse');
 
         return this; // WrappedArray
     }
@@ -1089,4 +1097,3 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject {
         return this.store_.map<U>(callbackfn);
     }
 }
-

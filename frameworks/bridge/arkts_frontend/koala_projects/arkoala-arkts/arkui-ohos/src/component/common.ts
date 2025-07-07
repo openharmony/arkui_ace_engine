@@ -58,7 +58,6 @@ import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
 import { hookBackgroundImageImpl } from "../handwritten/ArkBackgroundImageImpl"
 import { rememberMutableState } from '@koalaui/runtime'
-import { hookDrawModifierInvalidateImpl, hookDrawModifierAttributeImpl } from "../handwritten/ArkDrawModifierImpl"
 import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl, hookOnDrop, hookDragEventStartDataLoading } from "../handwritten/ArkDragDrop"
 import { ArkUIAniModule } from "arkui.ani"
 import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType, DataSyncOptions } from "#external"
@@ -94,30 +93,6 @@ export class ICurveInternal implements MaterializedBase,ICurve {
         const obj : ICurveInternal = new ICurveInternal()
         obj.peer = new Finalizable(ptr, ICurveInternal.getFinalizer())
         return obj
-    }
-}
-export class DrawModifierInternal {
-    public static fromPtr(ptr: KPointer): DrawModifier {
-        const obj : DrawModifier = new DrawModifier()
-        return obj
-    }
-}
-export class DrawModifier  {
-    weakRefOfPeerNode ?: WeakRef<PeerNode>;
-    constructor() {
-    }
-    public drawBehind(drawContext: DrawContext): void {
-        return
-    }
-    public drawContent(drawContext: DrawContext): void {
-        return
-    }
-    public drawFront(drawContext: DrawContext): void {
-        return
-    }
-    public invalidate(): void {
-        hookDrawModifierInvalidateImpl(this);
-        return
     }
 }
 export class TransitionEffectInternal {
@@ -2048,9 +2023,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         }
         ArkUIGeneratedNativeModule._CommonMethod_height1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-    }
-    drawModifierAttribute(value: DrawModifier | undefined): void {
-        hookDrawModifierAttributeImpl(this,value)
     }
     responseRegionAttribute(value: Array<Rectangle> | Rectangle | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -9147,7 +9119,12 @@ export interface GeometryInfo extends SizeResult {
     padding: Padding;
 }
 export interface Layoutable {
-    stub: string;
+    measureResult: MeasureResult;
+    uniqueId?: number | undefined;
+    layout(position: Position): void;
+    getMargin(): DirectionalEdgesT<number>;
+    getPadding(): DirectionalEdgesT<number>;
+    getBorderWidth(): DirectionalEdgesT<number>;
 }
 export interface SizeResult {
     width: number;
@@ -9420,9 +9397,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public drawModifier(value: DrawModifier | undefined): this {
         if (this.checkPriority("drawModifier")) {
-            const value_casted = value as (DrawModifier | undefined)
-            this.getPeer()?.drawModifierAttribute(value_casted)
-            return this
+            hookDrawModifier(this, value)
         }
         return this
     }
@@ -11808,9 +11783,6 @@ export function dollar_rawfile(value: string): Resource {
 }
 export function animateTo(value: AnimateParam, event: (() => void)): void {
     _animateTo(value, event)
-}
-export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
-    GlobalScope.animateToImmediately(value, event)
 }
 export function vp2px(value: number): number {
     return GlobalScope.vp2px(value)

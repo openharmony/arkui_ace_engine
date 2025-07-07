@@ -17,20 +17,21 @@ import { IMutableKeyedStateMeta, IObservedObject, RenderIdType, WatchIdType } fr
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { FactoryInternal } from './iFactoryInternal';
 import { ObserveSingleton } from './observeSingleton';
+import { ObserveWrappedBase } from './observeWrappedBase';
 
 final class CONSTANT {
-    public static readonly OB_SET_ANY_PROPERTY = "__OB_ANY_INDEX";
-    public static readonly OB_LENGTH = "__OB_LENGTH";
+    public static readonly OB_SET_ANY_PROPERTY = '__OB_ANY_INDEX';
+    public static readonly OB_LENGTH = '__OB_LENGTH';
 }
 
-export class WrappedSet<K>  extends Set<K> implements IObservedObject {
+export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWrappedBase {
     public store_: Set<K>;
     // Use public access to enable unit testing.
     public meta_: IMutableKeyedStateMeta;
     // support for @Watch
     // each IObservedObject manages a set of @Watch subscribers
     // when a object property changes need to call executeOnSubscribingWatches
-    // compare interface 
+    // compare interface
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     // IObservedObject interface
     private ____V1RenderId: RenderIdType = 0;
@@ -43,7 +44,7 @@ export class WrappedSet<K>  extends Set<K> implements IObservedObject {
         super();
 
         this.store_ = set;
-        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta("WrappedSet");
+        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedSet');
     }
 
     // implementation of ISubscribedWatches by forwarding to subscribedWatches

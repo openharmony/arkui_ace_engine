@@ -1855,6 +1855,48 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest025, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SliderPatternTest026
+ * @tc.desc: Test Slider OnDetachFromFrameNodeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest026, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->OnDetachFromFrameNodeMultiThread();
+}
+
+/**
+ * @tc.name: SliderPatternTest027
+ * @tc.desc: Test Slider OnDetachFromMainTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest027, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->OnDetachFromMainTree();
+}
+
+/**
+ * @tc.name: SliderPatternTest028
+ * @tc.desc: Test Slider OnDetachFromMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest028, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->OnDetachFromMainTreeMultiThread(frameNode);
+}
+
+/**
  * @tc.name: EnableHapticFeedbackTest001
  * @tc.desc: Test SliderModelNG GetEnableHapticFeedback SetEnableHapticFeedback
  * @tc.type: FUNC

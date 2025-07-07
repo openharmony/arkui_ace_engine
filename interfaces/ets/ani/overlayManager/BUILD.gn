@@ -35,7 +35,11 @@ ohos_shared_library("overlayManager_ani") {
 #构建abc
 generate_static_abc("overlayManager") {
   base_url = "./ets"
-  files = [ "./ets/@ohos.overlayManager.ets" ]
+  files = [
+    "./ets/@ohos.arkui.UIContext.ets",
+    "./ets/@ohos.overlayManager.ets",
+    "./ets/@ohos.promptAction.ets",
+  ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/overlayManager.abc"
 }

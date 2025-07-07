@@ -24,14 +24,16 @@
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "dragController/drag_controller_module.h"
 #include "image_span/image_span_module.h"
-#include "image/native_image.h"
+#include "image/image_module.h"
 #include "load.h"
 #include "log/log.h"
 #include "utils/convert_utils.h"
 #include "water_flow/waterFlowSection_module.h"
+#include "interop/interop_module.h"
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
 #include "shape/shape_module_methods.h"
+#include "xcomponent/xcomponent_module_methods.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -53,9 +55,24 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ImageResizableOptions)
         },
         ani_native_function {
+            "_Image_Consturct_PixelMap",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ImageConstructPixelMap)
+        },
+        ani_native_function {
+            "_Image_Consturct_DrawableDescriptor",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ImageConstructDrawableDescriptor)
+        },
+        ani_native_function {
             "_Web_SetWebOptions",
             "JL@ohos/web/webview/webview/WebviewController;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWebOptions)
+        },
+        ani_native_function {
+            "_Web_SetWebController_ControllerHandler",
+            "JL@ohos/web/webview/webview/WebviewController;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWebControllerControllerHandler)
         },
         ani_native_function {
             "_ConvertUtils_ConvertFromPixelMapAni",
@@ -114,7 +131,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_SetDrawModifier",
-            "JLarkui/component/common/DrawModifier;:V",
+            "JILarkui/component/common/DrawModifier;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetDrawModifier)
         },
         ani_native_function {
@@ -178,11 +195,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragSetDragPreview)
         },
         ani_native_function {
-            "_DragEvent_ConvertFromPixelMapToAniPointer",
-            "L@ohos/multimedia/image/image/PixelMap;:J",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertFromPixelMapToAniPointer)
-        },
-        ani_native_function {
             "_ComponentSnapshot_createFromBuilderWithCallback",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromBuilderWithCallback)
@@ -193,6 +205,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromBuilderWithPromise)
         },
         ani_native_function {
+            "_Common_GetSharedLocalStorage",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetSharedLocalStorage)
+        },
+        ani_native_function {
             "_ComponentSnapshot_createFromComponentWithPromise",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromComponentWithPromise)
@@ -201,6 +218,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Animation_SetOrCreateAnimatableProperty",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetOrCreateAnimatableProperty)
+        },
+        ani_native_function {
+            "_CreateViewStackProcessor",
+            ":J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateViewStackProcessor)
+        },
+        ani_native_function {
+            "_PopViewStackProcessor",
+            ":J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PopViewStackProcessor)
+        },
+        ani_native_function {
+            "_DeleteViewStackProcessor",
+            "J:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DeleteViewStackProcessor)
         },
         ani_native_function {
             "_BackgroundImage_PixelMap",
@@ -236,6 +268,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_DragController_off",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionOff)
+        },
+        ani_native_function {
+            "_DragController_getDragPreview",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIGetDragPreview)
+        },
+        ani_native_function {
+            "_DragController_setForegroundColor",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragPreviewSetForegroundColor)
+        },
+        ani_native_function {
+            "_DragController_animate",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragPreviewAnimate)
         },
         ani_native_function {
             "_DragController_setDragEventStrictReportingEnabled",
@@ -281,6 +328,31 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Shape_Transfer_PixelMap",
             "JL@ohos/multimedia/image/image/PixelMap;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetShapePixelMap)
+        },
+        ani_native_function {
+            "_XComponent_SetSurfaceCallback",
+            "JLarkui/component/xcomponent/XComponentControllerCallbackInternal;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetXComponentControllerCallback)
+        },
+        ani_native_function {
+            "_CheckIsUIThread",
+            "I:I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CheckIsUIThread)
+        },
+        ani_native_function {
+            "_IsDebugMode",
+            "I:I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::IsDebugMode)
+        },
+        ani_native_function {
+            "_OnMeasure_InnerMeasure",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::OnMeasureInnerMeasure)
+        },
+        ani_native_function {
+            "_OnLayout_InnerLayout",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::OnLayoutInnerLayout)
         },
     };
 

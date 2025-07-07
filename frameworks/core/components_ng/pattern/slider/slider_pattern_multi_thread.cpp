@@ -20,9 +20,11 @@
 namespace OHOS::Ace::NG {
 void SliderPattern::UpdateValueMultiThread(const RefPtr<FrameNode>& frameNode)
 {
-    auto updateTask = [this]() {
-        CalcSliderValue();
-        FireBuilder();
+    auto updateTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CalcSliderValue();
+        pattern->FireBuilder();
     };
     frameNode->PostAfterAttachMainTreeTask(std::move(updateTask));
 }

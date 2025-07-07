@@ -52,6 +52,7 @@ bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
 ani_ref CreateShowDialogSuccessResponse(ani_env* env, int32_t index);
 std::function<void(int32_t, int32_t)> GetShowDialogCallback(std::shared_ptr<PromptActionAsyncContext>& asyncContext);
 std::function<void(int32_t, int32_t)> GetShowDialogPromise(std::shared_ptr<PromptActionAsyncContext>& asyncContext);
+bool GetActionMenuButtons(ani_env *env, ani_object object, std::vector<OHOS::Ace::ButtonInfo>& result);
 bool GetActionMenuOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
 ani_ref CreateActionMenuSuccessResponse(ani_env* env, int32_t index);
 std::function<void(int32_t, int32_t)> GetShowActionMenuCallback(
@@ -61,7 +62,10 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuPromise(
 bool GetKeyboardAvoidMode(ani_env* env, ani_object object, OHOS::Ace::KeyboardAvoidMode& result);
 bool GetKeyboardAvoidDistance(ani_env *env, ani_object object, std::optional<OHOS::Ace::Dimension>& result);
 bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
-bool GetCustomBuilder(ani_env *env, ani_object object, std::function<void()>& result);
+bool GetTransitionEffectParam(ani_env* env, ani_object object, const char *name,
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::ChainedTransitionEffect>& result);
+bool GetDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
+std::function<void()> GetCustomBuilder(ani_env *env, ani_long builder);
 bool GetCornerRadius(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG::BorderRadiusProperty>& result);
 bool GetBorderWidth(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG::BorderWidthProperty>& result);
 bool GetBorderColor(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG::BorderColorProperty>& result);
@@ -70,5 +74,6 @@ bool GetBorderStyle(ani_env* env, ani_object object, const char *name, OHOS::Ace
 bool GetBorderStyle(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG::BorderStyleProperty>& result);
 bool GetCustomDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
 std::function<void(int32_t)> GetOpenCustomDialogPromise(std::shared_ptr<PromptActionAsyncContext>& asyncContext);
+std::function<void(int32_t)> GetCustomDialogContentPromise(std::shared_ptr<PromptActionAsyncContext>& asyncContext);
 
 #endif // INTERFACES_ETS_ANI_PROMPTACTION_SRC_DIALOG_PARAMS_H

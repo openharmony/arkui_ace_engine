@@ -1902,4 +1902,38 @@ HWTEST_F(MarqueeTestNg, OnFontScaleConfigurationUpdate_001, TestSize.Level1)
     marqueeModel.OnFontScaleConfigurationUpdate();
     EXPECT_FALSE(AnimationUtils::IsImplicitAnimationOpen());
 }
+
+
+/**
+ * @tc.name: MarqueeMultiThreadTest01
+ * @tc.desc: Test marquee multi thread function
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeMultiThreadTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    RefPtr<GeometryNode> geo = AceType::MakeRefPtr<GeometryNode>();
+    geo->SetFrameSize(SizeF(2, 2));
+    frameNode->SetGeometryNode(geo);
+
+    /**
+     * @tc.steps: step2. Create MarqueePattern and create MarqueeLayoutProperty.
+     */
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    pattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    RefPtr<MarqueeLayoutProperty> marqueeLayoutProperty = AceType::MakeRefPtr<MarqueeLayoutProperty>();
+    marqueeLayoutProperty->positionProperty_ = std::make_unique<PositionProperty>();
+    frameNode->SetLayoutProperty(marqueeLayoutProperty);
+
+    /**
+     * @tc.steps: step3. case.
+     */
+    pattern->OnAttachToMainTreeMultiThread();
+    pattern->OnDetachFromMainTreeMultiThread();
+    EXPECT_FALSE(AnimationUtils::IsImplicitAnimationOpen());
+}
 } // namespace OHOS::Ace::NG

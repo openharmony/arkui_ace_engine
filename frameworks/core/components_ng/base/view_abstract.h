@@ -61,6 +61,7 @@ class BrightnessBlender;
 namespace OHOS::Ace {
 class ImageSourceInfo;
 class BasicShape;
+class SpanString;
 }
 
 namespace OHOS::Ace::NG {
@@ -391,9 +392,10 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
-    static void BindTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode);
+    static void BindTips(
+        const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<SpanString>& spanString);
     static void HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
-        PopupInfo& tipsInfo, bool showInSubWindow, int32_t instanceId);
+        PopupInfo& tipsInfo, bool showInSubWindow, const RefPtr<SpanString>& spanString);
     static void AddHoverEventForTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
         PopupInfo& tipsInfo, bool showInSubWindow);
     static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
@@ -906,8 +908,6 @@ public:
     static int32_t GetWindowHeightBreakpoint();
 
 private:
-    static void AddDragFrameNodeToManager();
-    static void AddDragFrameNodeToManager(FrameNode* frameNode);
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
@@ -916,6 +916,22 @@ private:
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;
 };
+
+// multi thread function start
+void SetInspectorIdMultiThread(FrameNode* frameNode, const std::string& inspectorId);
+void SetBackgroundBlurStyleMultiThread(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle,
+    const SysOptions& sysOptions);
+void SetOnAreaChangedMultiThread(FrameNode* frameNode, std::function<void(const RectF& oldRect,
+    const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&& onAreaChanged);
+void SetOnVisibleChangeMultiThread(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
+    const std::vector<double> &ratioList);
+void SetOnVisibleAreaApproximateChangeMultiThread(FrameNode* frameNode,
+    const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
+    int32_t expectedUpdateInterval);
+void ResetAreaChangedMultiThread(FrameNode* frameNode);
+void ResetVisibleChangeMultiThread(FrameNode* frameNode);
+void SetNeedFocusMultiThread(FrameNode* frameNode, bool value);
+// multi thread function end
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_H

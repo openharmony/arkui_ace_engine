@@ -414,15 +414,19 @@ export class FrameNode implements MaterializedBase {
         this.onMeasure(constraint);
     }
     public onMeasure(constraint: LayoutConstraint): void {
+        ArkUIAniModule._OnMeasure_InnerMeasure(this!.peer!.ptr);
     }
     public onLayoutInner(x: number, y: number): void {
         const position: Position = { x: x, y: y };
         this.onLayout(position);
     }
     public onLayout(position: Position): void {
+        ArkUIAniModule._OnLayout_InnerLayout(this!.peer!.ptr);
     }
     public setMeasuredSize(size: Size): void {
-        const size_casted = size as (Size);
+        const width = Math.max(size.width, 0);
+        const height = Math.max(size.height, 0);
+        const size_casted = { width: width, height: height } as (Size);
         this.setMeasuredSize_serialize(size_casted);
         return;
     }

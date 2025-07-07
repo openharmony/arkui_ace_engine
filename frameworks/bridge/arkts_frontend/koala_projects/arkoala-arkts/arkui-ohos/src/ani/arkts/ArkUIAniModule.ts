@@ -13,39 +13,45 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt, KLong } from "@koalaui/interop"
+import { KPointer, KInt, KLong, KBoolean } from "@koalaui/interop"
 import { drawing } from "@ohos/graphics/drawing"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
+import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from "arkui/Graphics"
-import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo } from "arkui/component"
+import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
-import { WaterFlowOptions,WaterFlowSections } from "arkui/component"
+import { WaterFlowOptions,WaterFlowSections, XComponentControllerCallbackInternal } from "arkui/component"
 import { HookDragInfo } from "arkui/handwritten"
 import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
+import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 
 export class ArkUIAniModule {
     static {
-        loadLibrary("arkoala_native_ani")
+        loadLibrary('arkoala_native_ani')
     }
 
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
+    native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
+    native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
     native static _Web_SetWebOptions(ptr: KPointer, webviewController: webview.WebviewController): void
+    native static _Web_SetWebController_ControllerHandler(ptr: KPointer, webviewController: webview.WebviewController): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
     native static _Common_GetHostContext(): common.Context
     native static _Common_Sync_InstanceId(id: KInt): void
     native static _Common_Restore_InstanceId(): void
     native static _Common_Get_Current_InstanceId(): KInt
+    native static _Common_GetSharedLocalStorage(): LocalStorage
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
     native static _BuilderProxyNode_Construct(id: KInt): KPointer
     native static _ContentSlot_construct(id: KInt): KPointer
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
     native static _SetDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
-    native static _SetDrawModifier(ptr: KPointer, drawModifier: DrawModifier): void
+    native static _SetDrawModifier(ptr: KPointer, flag: KInt, drawModifier: DrawModifier): void
     native static _Invalidate(ptr: KPointer): void
     native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
 
@@ -63,8 +69,6 @@ export class ArkUIAniModule {
     native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
 
     native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void
-
-    native static _DragEvent_ConvertFromPixelMapToAniPointer(pixelMap: image.PixelMap) : KPointer
 
     native static _Drag_Set_AllowDrop_Null(ptr: KLong) : void
 
@@ -108,9 +112,22 @@ export class ArkUIAniModule {
 
     native static _DragController_notifyDragStartReques(requestStatus: dragController.DragStartRequestStatus): void
 
+    native static _DragController_getDragPreview(): dragController.DragPreview
+
+    native static _DragController_setForegroundColor(color: ResourceColor, dragPreviewPtr: KPointer): void
+
+    native static _DragController_animate(options: dragController.AnimationOptions, handler: () =>void,
+        dragPreviewPtr: KPointer): void
+
     native static _Animation_SetOrCreateAnimatableProperty<T>(ptr: KPointer, propertyName: string, property: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void
 
+    native static _CreateViewStackProcessor(): KPointer
+
+    native static _PopViewStackProcessor(): KPointer
+
+    native static _DeleteViewStackProcessor(ptr: KPointer): void
+    
     native static _BackgroundImage_PixelMap(ptr: KPointer, pixelmap: image.PixelMap, repeat: KInt): void
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
@@ -125,4 +142,12 @@ export class ArkUIAniModule {
 
     // for Shape
     native static _Shape_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void;
+
+    // for XComponent
+    native static _XComponent_SetSurfaceCallback(ptr: KPointer, callback: XComponentControllerCallbackInternal): void;
+
+    native static _CheckIsUIThread(id: KInt): KBoolean
+    native static _IsDebugMode(id: KInt): KBoolean
+    native static _OnMeasure_InnerMeasure(ptr: KPointer): void
+    native static _OnLayout_InnerLayout(ptr: KPointer): void
 }

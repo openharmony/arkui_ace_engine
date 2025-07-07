@@ -371,7 +371,7 @@ public:
     }
     void AddPixelMapToUiManager();
 
-    void SetDrawable(const RefPtr<DrawableDescriptor>& drawable)
+    void SetDrawable(const RefPtr<AceDrawableDescriptor>& drawable)
     {
         drawable_ = drawable;
     }
@@ -409,7 +409,13 @@ private:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
+
+    void OnAttachToFrameNodeMultiThread() {}
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
 
     void OnModifyDone() override;
     void OnPixelMapDrawableModifyDone();
@@ -558,7 +564,7 @@ private:
 
     // The component has an internal encapsulation class drawable of the image.
     // The internal drawable has an external raw pointer.
-    RefPtr<DrawableDescriptor> drawable_;
+    RefPtr<AceDrawableDescriptor> drawable_;
     bool isRegisterRedrawCallback_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);

@@ -14150,7 +14150,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // TabsOpsAccessor
-    namespace UIContextImpAccessor {
+    namespace IUIContextAccessor {
     void FreezeUINode0Impl(const Ark_String* id,
                            Ark_Boolean isFrozen)
     {
@@ -14159,7 +14159,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            Ark_Boolean isFrozen)
     {
     }
-    } // UIContextImpAccessor
+    } // IUIContextAccessor
     namespace GridItemOpsAccessor {
     Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
                                                     Ark_Boolean value,
@@ -22065,13 +22065,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &TabsOpsAccessorImpl;
     }
-    const GENERATED_ArkUIUIContextImpAccessor* GetUIContextImpAccessor()
+    const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
     {
-        static const GENERATED_ArkUIUIContextImpAccessor UIContextImpAccessorImpl {
-            UIContextImpAccessor::FreezeUINode0Impl,
-            UIContextImpAccessor::FreezeUINode1Impl,
+        static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
+            IUIContextAccessor::FreezeUINode0Impl,
+            IUIContextAccessor::FreezeUINode1Impl,
         };
-        return &UIContextImpAccessorImpl;
+        return &IUIContextAccessorImpl;
     }
 
     const GENERATED_ArkUIGridItemOpsAccessor* GetGridItemOpsAccessor()
@@ -25185,7 +25185,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetGlobalScopeUicontextFontScaleAccessor,
             GetGlobalScopeUicontextTextMenuAccessor,
             GetTabsOpsAccessor,
-            GetUIContextImpAccessor,
+            GetIUIContextAccessor,
             GetGridItemOpsAccessor,
             GetFilterAccessor,
             GetVisualEffectAccessor,

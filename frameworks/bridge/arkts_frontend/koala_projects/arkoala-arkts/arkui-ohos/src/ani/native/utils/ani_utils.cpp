@@ -99,7 +99,43 @@ std::string AniUtils::ANIStringToStdString(ani_env* env, ani_string ani_str)
     utf8Buffer[bytes_written] = '\0';
     std::string content = std::string(utf8Buffer);
     return content;
-};
+}
+
+bool AniUtils::IsString(ani_env* env, ani_object obj)
+{
+    ani_class stringClass;
+    env->FindClass("Lstd/core/String;", &stringClass);
+
+    ani_boolean isString;
+    env->Object_InstanceOf(obj, stringClass, &isString);
+    return isString;
+}
+
+bool AniUtils::IsNumber(ani_env* env, ani_object obj)
+{
+    ani_class numberClass;
+    env->FindClass("Lstd/core/Double;", &numberClass);
+
+    ani_boolean isNumber;
+    env->Object_InstanceOf(obj, numberClass, &isNumber);
+    return isNumber;
+}
+
+bool AniUtils::IsUndefined(ani_env* env, ani_object obj)
+{
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(obj, &isUndefined);
+    return isUndefined;
+}
+
+ani_object AniUtils::GetUndefined(ani_env* env)
+{
+    ani_ref undefinedRef = nullptr;
+    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
+        return nullptr;
+    }
+    return static_cast<ani_object>(undefinedRef);
+}
 
 std::optional<ani_string> AniUtils::StdStringToANIString(ani_env *env, std::string str)
 {

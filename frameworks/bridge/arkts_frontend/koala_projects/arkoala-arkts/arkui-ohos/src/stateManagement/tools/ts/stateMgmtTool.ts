@@ -21,7 +21,8 @@ import {
     IProvideDecoratedVariable,
     IConsumeDecoratedVariable,
     IStorageLinkDecoratedVariable,
-    IStoragePropDecoratedVariable,
+    ILocalStorageLinkDecoratedVariable,
+    IStoragePropRefDecoratedVariable,
 } from '../../decorator';
 import { NullableObject } from '../../base/types';
 export class StateMgmtTool {
@@ -46,10 +47,13 @@ export class StateMgmtTool {
     static isIConsumeDecoratedVariable(value: NullableObject): boolean {
         return true;
     }
+    static isILocalStorageLinkDecoratedVariable(value: NullableObject): boolean {
+        return true;
+    }
     static isIStorageLinkDecoratedVariable(value: NullableObject): boolean {
         return true;
     }
-    static isIStoragePropDecoratedVariable(value: NullableObject): boolean {
+    static isIStoragePropRefDecoratedVariable(value: NullableObject): boolean {
         return true;
     }
     static isDecoratedV1VariableBase(value: NullableObject): boolean {

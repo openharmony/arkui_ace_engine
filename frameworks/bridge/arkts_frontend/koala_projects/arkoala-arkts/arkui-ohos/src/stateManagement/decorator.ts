@@ -60,9 +60,16 @@ export interface IObjectLinkDecoratedVariable<T>
 
 export interface IStorageLinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
 
+export interface ILocalStorageLinkDecoratedVariable<T>
+    extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+
+export interface IStoragePropRefDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+
 export interface IStoragePropDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
 
-export type LinkSourceType<T> = IDecoratedV1Variable<T>;
+export type LinkSourceType<T> = IStateDecoratedVariable<T> | ILinkDecoratedVariable<T> | IObjectLinkDecoratedVariable<T> |
+    IPropDecoratedVariable<T> | IStorageLinkDecoratedVariable<T> | ILocalStorageLinkDecoratedVariable<T> |
+    IStoragePropRefDecoratedVariable<T> | IProvideDecoratedVariable<T> | IConsumeDecoratedVariable<T>;
 
 export interface IMutableStateMeta {
     addRef(): void;
@@ -136,15 +143,25 @@ export interface IStateMgmtFactory {
         propName: string,
         varName: string,
         initValue: T,
+        ttype: Type,
         watchFunc?: WatchFuncType
     ): IStorageLinkDecoratedVariable<T>;
-    makeStorageProp<T>(
+    makeLocalStorageLink<T>(
         owningView: ExtendableComponent,
         propName: string,
         varName: string,
         initValue: T,
+        ttype: Type,
         watchFunc?: WatchFuncType
-    ): IStoragePropDecoratedVariable<T>;
+    ): ILocalStorageLinkDecoratedVariable<T>;
+    makeStoragePropRef<T>(
+        owningView: ExtendableComponent,
+        propName: string,
+        varName: string,
+        initValue: T,
+        ttype: Type,
+        watchFunc?: WatchFuncType
+    ): IStoragePropRefDecoratedVariable<T>;
 }
 
 export type WatchFuncType = (propertyName: string) => void;
@@ -158,12 +175,4 @@ export interface IWatchSubscriberRegister {
 
 export interface ISubscribedWatches extends IWatchSubscriberRegister {
     executeOnSubscribingWatches(propertyName: string): void;
-}
-
-export interface AbstractProperty<T> extends IDecoratedMutableVariable<T> {
-    info(): string;
-}
-
-export interface SubscribedAbstractProperty<T> extends AbstractProperty<T> {
-    aboutToBeDeleted(): void;
 }

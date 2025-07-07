@@ -122,19 +122,10 @@ EntryLoader::EntryLoader(ani_env* env, const std::vector<uint8_t>& abcContent): 
     ani_ref undefined;
     ANI_CALL(env, GetUndefined(&undefined), return);
 
-    ani_array byteArray;
-    ANI_CALL(env, Array_New(abcContent.size(), undefined, &byteArray), return);
-
-    ani_class byteClass = nullptr;
-    ANI_CALL(env, FindClass("Lstd/core/Byte;", &byteClass), return);
-    ani_method byteCtor = nullptr;
-    ANI_CALL(env, Class_FindMethod(byteClass, "<ctor>", "B:V", &byteCtor), return);
-
-    for (ani_size i = 0; i < abcContent.size(); i++) {
-        ani_object boxedByte {};
-        ANI_CALL(env, Object_New(byteClass, byteCtor, &boxedByte, abcContent[i]), return);
-        ANI_CALL(env, Array_Set(byteArray, i, boxedByte), return);
-    }
+    ani_fixedarray_byte byteArray;
+    ANI_CALL(env, FixedArray_New_Byte(abcContent.size(), &byteArray), return);
+    const auto *data = reinterpret_cast<const ani_byte *>(abcContent.data());
+    ANI_CALL(env, FixedArray_SetRegion_Byte(byteArray, 0, abcContent.size(), data));
 
     ani_array refArray;
     ANI_CALL(env, Array_New(1, byteArray, &refArray), return);

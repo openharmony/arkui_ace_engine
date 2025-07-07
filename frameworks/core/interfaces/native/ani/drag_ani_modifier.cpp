@@ -135,7 +135,7 @@ void SetDragPreview(ArkUINodeHandle node, ArkUIDragInfo dragInfo)
     DragDropInfo info;
     #if defined(PIXEL_MAP_SUPPORTED)
     if (dragInfo.pixelMap) {
-        info.pixelMap = PixelMap::CreatePixelMapFromDataAbility(dragInfo.pixelMap);
+        info.pixelMap = PixelMap::CreatePixelMap(dragInfo.pixelMap);
     }
     #endif
     info.onlyForLifting = dragInfo.onlyForLifting;

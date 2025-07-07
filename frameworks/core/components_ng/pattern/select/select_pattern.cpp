@@ -564,14 +564,14 @@ void SelectPattern::AddIsFocusActiveUpdateEvent()
         };
     }
 
-    auto pipline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipline);
     pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
 }
 
 void SelectPattern::RemoveIsFocusActiveUpdateEvent()
 {
-    auto pipline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipline);
     pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
 }
@@ -785,40 +785,28 @@ void SelectPattern::SetValue(const std::string& value)
     selectValue_ = value;
 }
 
-void SelectPattern::SetFontSize(const std::optional<Dimension>& value)
+void SelectPattern::SetFontSize(const Dimension& value)
 {
+    if (value.IsNegative()) {
+        return;
+    }
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
-    if (value) {
-        if (value->IsNegative()) {
-            return;
-        }
-        props->UpdateFontSize(value.value());
-    } else {
-        props->ResetFontSize();
-    }
+    props->UpdateFontSize(value);
 }
 
-void SelectPattern::SetItalicFontStyle(const std::optional<Ace::FontStyle>& value)
+void SelectPattern::SetItalicFontStyle(const Ace::FontStyle& value)
 {
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
-    if (value) {
-        props->UpdateItalicFontStyle(value.value());
-    } else {
-        props->ResetItalicFontStyle();
-    }
+    props->UpdateItalicFontStyle(value);
 }
 
-void SelectPattern::SetFontWeight(const std::optional<FontWeight>& value)
+void SelectPattern::SetFontWeight(const FontWeight& value)
 {
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
-    if (value) {
-        props->UpdateFontWeight(value.value());
-    } else {
-        props->ResetFontWeight();
-    }
+    props->UpdateFontWeight(value);
 }
 
 void SelectPattern::SetFontFamily(const std::vector<std::string>& value)
@@ -828,25 +816,19 @@ void SelectPattern::SetFontFamily(const std::vector<std::string>& value)
     props->UpdateFontFamily(value);
 }
 
-void SelectPattern::SetFontColor(const std::optional<Color>& color)
+void SelectPattern::SetFontColor(const Color& color)
 {
     fontColor_ = color;
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
+    props->UpdateTextColor(color);
     auto context = text_->GetRenderContext();
-    if (color) {
-        auto value = color.value();
-        props->UpdateTextColor(value);
-        context->UpdateForegroundColor(value);
-    } else {
-        props->ResetTextColor();
-        context->ResetForegroundColor();
-    }
+    context->UpdateForegroundColor(color);
     context->UpdateForegroundColorFlag(false);
     context->ResetForegroundColorStrategy();
 }
 
-void SelectPattern::SetOptionBgColor(const std::optional<Color>& color)
+void SelectPattern::SetOptionBgColor(const Color& color)
 {
     optionBgColor_ = color;
     for (size_t i = 0; i < options_.size(); ++i) {
@@ -862,7 +844,7 @@ void SelectPattern::SetOptionBgColor(const std::optional<Color>& color)
     }
 }
 
-void SelectPattern::SetOptionFontSize(const std::optional<Dimension>& value)
+void SelectPattern::SetOptionFontSize(const Dimension& value)
 {
     optionFont_.FontSize = value;
     for (size_t i = 0; i < options_.size(); ++i) {
@@ -875,7 +857,7 @@ void SelectPattern::SetOptionFontSize(const std::optional<Dimension>& value)
     }
 }
 
-void SelectPattern::SetOptionItalicFontStyle(const std::optional<Ace::FontStyle>& value)
+void SelectPattern::SetOptionItalicFontStyle(const Ace::FontStyle& value)
 {
     optionFont_.FontStyle = value;
     for (size_t i = 0; i < options_.size(); ++i) {
@@ -888,7 +870,7 @@ void SelectPattern::SetOptionItalicFontStyle(const std::optional<Ace::FontStyle>
     }
 }
 
-void SelectPattern::SetOptionFontWeight(const std::optional<FontWeight>& value)
+void SelectPattern::SetOptionFontWeight(const FontWeight& value)
 {
     optionFont_.FontWeight = value;
     for (size_t i = 0; i < options_.size(); ++i) {
@@ -914,7 +896,7 @@ void SelectPattern::SetOptionFontFamily(const std::vector<std::string>& value)
     }
 }
 
-void SelectPattern::SetOptionFontColor(const std::optional<Color>& color)
+void SelectPattern::SetOptionFontColor(const Color& color)
 {
     optionFont_.FontColor = color;
     for (size_t i = 0; i < options_.size(); ++i) {
@@ -930,7 +912,7 @@ void SelectPattern::SetOptionFontColor(const std::optional<Color>& color)
 }
 
 // set props of option node when selected
-void SelectPattern::SetSelectedOptionBgColor(const std::optional<Color>& color)
+void SelectPattern::SetSelectedOptionBgColor(const Color& color)
 {
     selectedBgColor_ = color;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
@@ -941,7 +923,7 @@ void SelectPattern::SetSelectedOptionBgColor(const std::optional<Color>& color)
     }
 }
 
-void SelectPattern::SetSelectedOptionFontSize(const std::optional<Dimension>& value)
+void SelectPattern::SetSelectedOptionFontSize(const Dimension& value)
 {
     selectedFont_.FontSize = value;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
@@ -951,7 +933,7 @@ void SelectPattern::SetSelectedOptionFontSize(const std::optional<Dimension>& va
     }
 }
 
-void SelectPattern::SetSelectedOptionItalicFontStyle(const std::optional<Ace::FontStyle>& value)
+void SelectPattern::SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value)
 {
     selectedFont_.FontStyle = value;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
@@ -961,7 +943,7 @@ void SelectPattern::SetSelectedOptionItalicFontStyle(const std::optional<Ace::Fo
     }
 }
 
-void SelectPattern::SetSelectedOptionFontWeight(const std::optional<FontWeight>& value)
+void SelectPattern::SetSelectedOptionFontWeight(const FontWeight& value)
 {
     selectedFont_.FontWeight = value;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
@@ -981,7 +963,7 @@ void SelectPattern::SetSelectedOptionFontFamily(const std::vector<std::string>& 
     }
 }
 
-void SelectPattern::SetSelectedOptionFontColor(const std::optional<Color>& color)
+void SelectPattern::SetSelectedOptionFontColor(const Color& color)
 {
     selectedFont_.FontColor = color;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
@@ -1207,22 +1189,13 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         ToJsonMenuBackgroundStyle(json, filter);
         return;
     }
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-
     json->PutExtAttr("options", InspectorGetOptions().c_str(), filter);
     json->PutExtAttr("selected", std::to_string(selected_).c_str(), filter);
     ToJsonArrowAndText(json, filter);
-    json->PutExtAttr("selectedOptionBgColor",
-        selectedBgColor_ ? selectedBgColor_->ColorToString().c_str() : "", filter);
+    json->PutExtAttr("selectedOptionBgColor", selectedBgColor_->ColorToString().c_str(), filter);
     json->PutExtAttr("selectedOptionFont", InspectorGetSelectedFont().c_str(), filter);
     json->PutExtAttr("selectedOptionFontColor",
-        selectedFont_.FontColor.value_or(theme->GetSelectedColorText()).ColorToString().c_str(), filter);
+        selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
 
     if (options_.empty()) {
         json->PutExtAttr("optionBgColor", "", filter);
@@ -1239,8 +1212,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     for (size_t i = 0; i < options_.size(); ++i) {
         auto optionPaintProperty = options_[i]->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(optionPaintProperty);
-        std::string optionWidth = isFitTrigger_ ? "OptionWidthMode.FIT_TRIGGER"
-            : std::to_string(optionPaintProperty->GetSelectModifiedWidthValue(0.0f));
+        std::string optionWidth = std::to_string(optionPaintProperty->GetSelectModifiedWidthValue(0.0f));
         json->PutExtAttr("optionWidth", optionWidth.c_str(), filter);
     }
     
@@ -1693,17 +1665,13 @@ void SelectPattern::SetOptionHeight(const Dimension& value)
     menuLayoutProps->UpdateSelectModifiedHeight(menuMaxHeight);
 }
 
-void SelectPattern::SetMenuBackgroundColor(const std::optional<Color>& color)
+void SelectPattern::SetMenuBackgroundColor(const Color& color)
 {
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     auto renderContext = menu->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (color) {
-        renderContext->UpdateBackgroundColor(color.value());
-    } else {
-        renderContext->ResetBackgroundColor();
-    }
+    renderContext->UpdateBackgroundColor(color);
 }
 
 void SelectPattern::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
@@ -1812,16 +1780,12 @@ bool SelectPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
     return true;
 }
 
-void SelectPattern::SetDivider(const std::optional<SelectDivider>& divider)
+void SelectPattern::SetDivider(const SelectDivider& divider)
 {
     for (auto&& option : options_) {
         auto props = option->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
-        if (divider) {
-            props->UpdateDivider(divider.value());
-        } else {
-            props->ResetDivider();
-        }
+        props->UpdateDivider(divider);
         auto optionPattern = option->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
         auto frameNode = optionPattern->GetBottomDivider();
@@ -1830,17 +1794,10 @@ void SelectPattern::SetDivider(const std::optional<SelectDivider>& divider)
         }
         auto dividerProperty = frameNode->GetPaintProperty<MenuDividerPaintProperty>();
         CHECK_NULL_VOID(dividerProperty);
-        if (divider) {
-            dividerProperty->UpdateStrokeWidth(divider->strokeWidth);
-            dividerProperty->UpdateDividerColor(divider->color);
-            dividerProperty->UpdateStartMargin(divider->startMargin);
-            dividerProperty->UpdateEndMargin(divider->endMargin);
-        } else {
-            dividerProperty->ResetStrokeWidth();
-            dividerProperty->ResetDividerColor();
-            dividerProperty->ResetStartMargin();
-            dividerProperty->ResetEndMargin();
-        }
+        dividerProperty->UpdateStrokeWidth(divider.strokeWidth);
+        dividerProperty->UpdateDividerColor(divider.color);
+        dividerProperty->UpdateStartMargin(divider.startMargin);
+        dividerProperty->UpdateEndMargin(divider.endMargin);
     }
 }
 

@@ -186,6 +186,12 @@ export default namespace promptAction {
         focusable?: boolean;
     }
 
+    export interface DialogOptionsInternal {
+        transition?: long;
+        dialogTransition?: long;
+        maskTransition?: long;
+    }
+
     export interface CustomDialogOptions extends BaseDialogOptions {
         builder: CustomBuilder;
         backgroundColor?: ResourceColor;
@@ -215,13 +221,15 @@ export default namespace promptAction {
 
     export native function showActionMenu(options: ActionMenuOptions): Promise<ActionMenuSuccessResponse>;
 
-    export native function openCustomDialog1(contentNode: long, options?: BaseDialogOptions): Promise<void>;
+    export native function openCustomDialog1(content: long, options?: BaseDialogOptions,
+        optionsInternal?: DialogOptionsInternal): Promise<void>;
 
-    export native function openCustomDialog(options: CustomDialogOptions): Promise<number>;
+    export native function openCustomDialog(builder: long, options: CustomDialogOptions,
+        optionsInternal?: DialogOptionsInternal): Promise<number>;
 
-    export native function updateCustomDialog(contentNode: long, options: BaseDialogOptions): Promise<void>;
+    export native function updateCustomDialog(content: long, options: BaseDialogOptions): Promise<void>;
 
-    export native function closeCustomDialog1(contentNode: long): Promise<void>;
+    export native function closeCustomDialog1(content: long): Promise<void>;
 
     export native function closeCustomDialog(dialogId: number): void;
 }

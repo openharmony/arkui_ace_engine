@@ -12,54 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { PropDecoratedVariable } from './decoratorProp';
-import { WatchFuncType } from '../decorator';
-
-import { NullableObject } from '../base/types';
 import { DecoratedV1VariableBase } from './decoratorBase';
-
-import { AppStorage } from '../storage/appStorage';
+import {
+    WatchFuncType,
+    IStoragePropDecoratedVariable,
+} from '../decorator';
 import { ExtendableComponent } from '../../component/extendableComponent';
-import { IStoragePropDecoratedVariable } from '../decorator';
-import { ObserveSingleton } from '../base/observeSingleton';
 
-export class StoragePropDecoratedVariable<T>
-    extends DecoratedV1VariableBase<T>
-    implements IStoragePropDecoratedVariable<T>
-{
-    private asProp: PropDecoratedVariable<NullableObject> | undefined;
+export class StoragePropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
+    implements IStoragePropDecoratedVariable<T> {
+
+    private readonly propertyNameInAppStorage_: string;
+
+    // localInitValue is the rhs of @state variable : type = localInitialValue;
+    // caller ensure it is IObseredObject, eg. by wrapping
     constructor(
-        owningView: ExtendableComponent,
-        propName: string,
-        varName: string,
-        localVal: T,
+        owningComponent: ExtendableComponent | null,
+        propertyNameInAppStorage: string,
+        varName: string, 
         watchFunc?: WatchFuncType
     ) {
-        super('StorageProp', owningView, varName, undefined);
-        this.asProp = AppStorage.createProp<T>(propName, localVal);
-        const value: T = this.asProp!.get() as T;
-        this.registerWatchForObservedObjectChanges(value);
-        this.asProp!.addWatch(watchFunc);
-    }
-
-    public getInfo(): string {
-        return `@StorageLink ${this.varName} (StorageLinkDecoratedVariable)`;
-    }
-
-    public get(): T {
-        const value = this.asProp!.get() as T;
-        ObserveSingleton.instance.setV1RenderId(value as NullableObject);
-        return value;
-    }
-
-    public set(newValue: T): void {
-        const oldValue: T = this.asProp!.get() as T;
-        if (oldValue === newValue) {
-            return;
-        }
-        this.unregisterWatchFromObservedObjectChanges(oldValue);
-        this.registerWatchForObservedObjectChanges(newValue);
-        this.asProp!.set(newValue as NullableObject); // makeObserved should be called in Prop.set
+        super('@StorageProp', owningComponent, varName, watchFunc);
+        this.propertyNameInAppStorage_ = propertyNameInAppStorage;
     }
 }

@@ -38,7 +38,6 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Deserializer } from "./peers/Deserializer"
-import { TextFieldOpsHandWritten } from "./../handwritten"
 
 export class ArkTextAreaPeer extends ArkCommonMethodPeer {
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -1358,25 +1357,11 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
     getPeer(): ArkTextAreaPeer {
         return (this.peer as ArkTextAreaPeer)
     }
-    TextAreaOptionsValueIsBindable(value?: TextAreaOptions) : boolean {
-        if ((RuntimeType.UNDEFINED) != runtimeType(value)) {
-            const value_text  = value!.text;
-            if ((RuntimeType.UNDEFINED) != (runtimeType(value_text))) {
-                const value_text_value  = value_text!;
-                return TypeChecker.isBindableResourceStr(value_text_value);
-            }
-        }
-        return false;
-    }
     public setTextAreaOptions(value?: TextAreaOptions): this {
         if (this.checkPriority("setTextAreaOptions")) {
-            const value_casted = value as (TextAreaOptions | undefined)
-            this.getPeer()?.setTextAreaOptionsAttribute(value_casted)
+            hookSetTextAreaOptions(this, value)
+            return this
         }
-        if (this.TextAreaOptionsValueIsBindable(value)) {
-            TextFieldOpsHandWritten.hookTextFieldInputValueImpl(this.getPeer().peer.ptr,
-                (value!.text as Bindable<ResourceStr>));
-         }
         return this
     }
     public placeholderColor(value: ResourceColor | undefined): this {

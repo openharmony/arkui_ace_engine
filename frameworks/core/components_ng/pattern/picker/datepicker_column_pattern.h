@@ -299,6 +299,15 @@ public:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+
+    void OnAttachToFrameNodeMultiThread() {}
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
+
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetDividerHeight(uint32_t showOptionCount);
     void OnTouchDown();
@@ -365,7 +374,6 @@ private:
     DimensionRect CalculateHotZone(int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight);
     void AddHotZoneRectToText();
     void InitTextFontFamily();
-    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback(FrameNode* frameNode);
     void OnWindowHide() override;

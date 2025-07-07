@@ -21,6 +21,7 @@ import { ArkStructBase } from "../ArkStructBase"
 import { ExtendableComponent, IExtendableComponent } from "./extendableComponent";
 import { GeometryInfo, Layoutable, Measurable, SizeResult, Theme } from "./common"
 import { ConstraintSizeOptions } from "./units"
+import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { PeerNode } from "../PeerNode"
 
 export interface PageLifeCycle {
@@ -48,6 +49,10 @@ class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.uiContext = uiContext;
         this.instance = instance;
         this.instance.setDelegate(this);
+    }
+
+    get isCustomLayout(): boolean {
+        return this.instance instanceof LayoutCallback;
     }
 
     aboutToAppear(): void {
@@ -206,6 +211,9 @@ function createInstance<T extends BaseCustomComponent<T_Options>, T_Options>(
 }
 
 export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent {
+    constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
+        super(useSharedStorage, storage);
+    }
     aboutToRecycle(): void {}
 
     __initializeStruct(
@@ -226,6 +234,9 @@ interface ReusableLifeCycle {
 }
 
 export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T_Options> extends BaseCustomComponent<T_Options> implements ReusableLifeCycle {
+    constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
+        super(useSharedStorage, storage);
+    }
     /** @memo */
     static _instantiateImpl(
         /** @memo */

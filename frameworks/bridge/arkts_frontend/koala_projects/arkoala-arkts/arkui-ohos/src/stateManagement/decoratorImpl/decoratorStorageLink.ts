@@ -12,57 +12,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import { LinkDecoratedVariable } from './decoratorLink';
-import { WatchFuncType } from '../decorator';
-
-import { NullableObject } from '../base/types';
-import { DecoratedV1VariableBase } from './decoratorBase';
-import { AppStorage } from '../storage/appStorage';
+import {
+    WatchFuncType,
+    IStorageLinkDecoratedVariable,
+    IStoragePropRefDecoratedVariable,
+    ILocalStorageLinkDecoratedVariable,
+    IDecoratedV1Variable
+} from '../decorator';
 import { ExtendableComponent } from '../../component/extendableComponent';
-import { IStorageLinkDecoratedVariable } from '../decorator';
-import { ObserveSingleton } from '../base/observeSingleton';
 
-export class StorageLinkDecoratedVariable<T>
-    extends DecoratedV1VariableBase<T>
-    implements IStorageLinkDecoratedVariable<T>
-{
-    private asLink: LinkDecoratedVariable<NullableObject>;
-    private readonly propertyName_: string;
+export class StorageLinkDecoratedVariable<T> extends LinkDecoratedVariable<T>
+    implements IStorageLinkDecoratedVariable<T>, ILocalStorageLinkDecoratedVariable<T>,
+    IStoragePropRefDecoratedVariable<T> {
 
+    private readonly propertyNameInAppStorage_: string;
+
+    // localInitValue is the rhs of @state variable : type = localInitialValue;
+    // caller ensure it is IObseredObject, eg. by wrapping
     constructor(
-        owningView: ExtendableComponent,
-        propName: string,
-        varName: string,
-        localValue: T,
+        owningComponent: ExtendableComponent | null,
+        propertyNameInAppStorage: string, varName: string,
+        source: IDecoratedV1Variable<T>,
+        sourceGet: () => T,
+        sourceSet: (newValue: T) => void,
         watchFunc?: WatchFuncType
     ) {
-        super('@StorageLink', owningView, varName, watchFunc);
-        this.propertyName_ = propName;
-        this.asLink = AppStorage.createLink<T>(propName, localValue);
-        const value: T = this.asLink!.get() as T;
-        this.registerWatchForObservedObjectChanges(value);
-        this.asLink!.addWatch(watchFunc);
-        // registerWatchToSource in mkLink
-    }
-
-    public getInfo(): string {
-        return `@StorageLink ${this.varName} (StorageLinkDecoratedVariable)`;
-    }
-
-    public get(): T {
-        const value = this.asLink!.get() as T;
-        ObserveSingleton.instance.setV1RenderId(value as NullableObject);
-        return value;
-    }
-
-    public set(newValue: T): void {
-        const oldValue: T = this.asLink!.get() as T;
-        if (oldValue === newValue) {
-            return;
-        }
-        this.unregisterWatchFromObservedObjectChanges(oldValue);
-        this.registerWatchForObservedObjectChanges(newValue);
-        this.asLink!.set(newValue as NullableObject); // makeObserved should be called in source
+        super(owningComponent, varName, source, sourceGet, sourceSet, watchFunc);
+        this.propertyNameInAppStorage_ = propertyNameInAppStorage;
     }
 }

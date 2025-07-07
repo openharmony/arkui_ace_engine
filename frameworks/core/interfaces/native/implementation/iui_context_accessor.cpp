@@ -19,7 +19,7 @@
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace UIContextImpAccessor {
+namespace IUIContextAccessor {
 void FreezeUINode0Impl(const Ark_String* id, Ark_Boolean isFrozen)
 {
     CHECK_NULL_VOID(id);
@@ -30,14 +30,14 @@ void FreezeUINode1Impl(const Ark_Number* id, Ark_Boolean isFrozen)
     CHECK_NULL_VOID(id);
     ViewAbstract::FreezeUINodeByUniqueId(Converter::Convert<int32_t>(*id), Converter::Convert<bool>(isFrozen));
 }
-} // namespace UIContextImpAccessor
-const GENERATED_ArkUIUIContextImpAccessor* GetUIContextImpAccessor()
+} // namespace IUIContextAccessor
+const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
 {
-    static const GENERATED_ArkUIUIContextImpAccessor UIContextImpAccessorImpl {
-        UIContextImpAccessor::FreezeUINode0Impl,
-        UIContextImpAccessor::FreezeUINode1Impl,
+    static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
+        IUIContextAccessor::FreezeUINode0Impl,
+        IUIContextAccessor::FreezeUINode1Impl,
     };
-    return &UIContextImpAccessorImpl;
+    return &IUIContextAccessorImpl;
 }
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

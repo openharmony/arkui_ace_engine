@@ -64,7 +64,7 @@ void PixelMapDrawableSetRawDataC(void* drawable, uint8_t* data, size_t len)
     entry(drawable, data, len);
 }
 
-void LayeredDrawableSetForegoundDataC(void* drawable, uint8_t* data, size_t len)
+void LayeredDrawableSetForegroundDataC(void* drawable, uint8_t* data, size_t len)
 {
     void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
     if (handle == nullptr) {
@@ -202,7 +202,7 @@ ani_object CreatePixelMapDrawable(ani_env* env, const MediaData& mediaData)
     env->Object_GetPropertyByName_Long(obj, "nativeObj", &nativeObj);
     // take native pixelmap drawable
     auto drawable = reinterpret_cast<void*>(nativeObj);
-    if (drawable) {
+    if (drawable == nullptr) {
         return obj;
     }
     PixelMapDrawableSetRawDataC(drawable, mediaData.data.get(), mediaData.len);
@@ -246,7 +246,7 @@ ani_object CreateLayeredDrawableByJsonBuffer(ani_env* env, const DrawableInfo& i
     if (datas.size() < BUFFER_NUMBER) {
         return obj;
     }
-    LayeredDrawableSetForegoundDataC(drawable, datas[0].first, datas[0].second);
+    LayeredDrawableSetForegroundDataC(drawable, datas[0].first, datas[0].second);
     LayeredDrawableSetBackgroundDataC(drawable, datas[1].first, datas[1].second);
     // initialize mask data
     std::unique_ptr<uint8_t[]> maskData;
@@ -275,7 +275,7 @@ ani_object CreateLayerdDrawableByTwoBuffer(ani_env* env, const DrawableInfo& inf
     if (drawable == nullptr) {
         return obj;
     }
-    LayeredDrawableSetForegoundDataC(drawable, info.firstBuffer.data.get(), info.firstBuffer.len);
+    LayeredDrawableSetForegroundDataC(drawable, info.firstBuffer.data.get(), info.firstBuffer.len);
     LayeredDrawableSetBackgroundDataC(drawable, info.secondBuffer.data.get(), info.secondBuffer.len);
     // initialize mask data
     auto resMgr = info.manager;

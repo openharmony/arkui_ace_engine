@@ -186,7 +186,6 @@ typedef struct InteropObject {
 #define GENERATED_ARKUI_EXTENDED_NODE_API_VERSION 8
 #define GENERATED_ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define GENERATED_ARKUI_NODE_MODIFIERS_API_VERSION 6
-#define GENERATED_ARKUI_INTEROP_NODE_API_VERSION 1
 
 #define GENERATED_ARKUI_AUTO_GENERATE_NODE_ID (-2)
 
@@ -238,8 +237,7 @@ enum GENERATED_Ark_APIVariantKind {
     GENERATED_FULL = 11,
     GENERATED_GRAPHICS = 12,
     GENERATED_EXTENDED = 13,
-    GENERATED_INTEROP = 15,
-    GENERATED_COUNT = GENERATED_INTEROP + 1,
+    GENERATED_COUNT = GENERATED_EXTENDED + 1,
 };
 
 enum Ark_APINodeFlags {
@@ -4313,8 +4311,7 @@ typedef enum Ark_FormDimension {
     ARK_FORM_DIMENSION_DIMENSION_1_1 = 6,
     ARK_FORM_DIMENSION_DIMENSION_6_4 = 7,
     ARK_FORM_DIMENSION_DIMENSION_2_3 = 8,
-    ARK_FORM_DIMENSION_DIMENSION_3_3 = 9,
-    ARK_FORM_DIMENSION_DIMENSION_3_4 = 10,
+    ARK_FORM_DIMENSION_DIMENSION_3_3 = 9
 } Ark_FormDimension;
 typedef struct Opt_FormDimension {
     Ark_Tag tag;
@@ -23630,6 +23627,7 @@ typedef struct GENERATED_ArkUIAnimationExtenderAccessor {
                         Ark_Float32 width,
                         Ark_Float32 height);
     void (*OpenImplicitAnimation)(const Ark_AnimateParam* param);
+    void (*AnimateToImmediatelyImpl)(const Ark_AnimateParam* param, const Opt_Callback_Void* event_);
     void (*CloseImplicitAnimation)();
     void (*StartDoubleAnimation)(Ark_NativePointer node,
                                  const Ark_DoubleAnimationParam* param);
@@ -24588,12 +24586,12 @@ typedef struct GENERATED_ArkUITabsOpsAccessor {
                                                const IndexCallback* callback);
 } GENERATED_ArkUITabsOpsAccessor;
 
-typedef struct GENERATED_ArkUIUIContextImpAccessor {
+typedef struct GENERATED_ArkUIIUIContextAccessor {
     void (*freezeUINode0)(const Ark_String* id,
                           Ark_Boolean isFrozen);
     void (*freezeUINode1)(const Ark_Number* id,
                           Ark_Boolean isFrozen);
-} GENERATED_ArkUIUIContextImpAccessor;
+} GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIGridItemOpsAccessor {
     Ark_NativePointer (*registerSelectedCallback)(Ark_NativePointer node,
@@ -27566,7 +27564,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* (*getGlobalScopeUicontextFontScaleAccessor)();
     const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* (*getGlobalScopeUicontextTextMenuAccessor)();
     const GENERATED_ArkUITabsOpsAccessor* (*getTabsOpsAccessor)();
-    const GENERATED_ArkUIUIContextImpAccessor* (*getUIContextImpAccessor)();
+    const GENERATED_ArkUIIUIContextAccessor* (*getIUIContextAccessor)();
     const GENERATED_ArkUIGridItemOpsAccessor* (*getGridItemOpsAccessor)();
     const GENERATED_ArkUIFilterAccessor* (*getFilterAccessor)();
     const GENERATED_ArkUIVisualEffectAccessor* (*getVisualEffectAccessor)();
@@ -28015,14 +28013,6 @@ typedef struct GENERATED_ArkUIFullNodeAPI {
     const GENERATED_ArkUIAccessors* (*getAccessors)();
     const GENERATED_ArkUIGraphicsAPI* (*getGraphicsAPI)();
 } GENERATED_ArkUIFullNodeAPI;
-
-typedef struct GENERATED_ArkUIInteropNodeAPI {
-    Ark_Int32 version;
-    Ark_NodeHandle (*createViewStackProcessor)();
-    Ark_NodeHandle (*popViewStackProcessor)();
-    void (*deleteViewStackProcessor)(Ark_NodeHandle ptr);
-} GENERATED_ArkUIInteropNodeAPI;
-
 
 #ifndef GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_GENERIC_SERVICE_API_H
 #define GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_GENERIC_SERVICE_API_H

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ArkCommonMethodComponent, Gesture, GestureGroup, GestureMask, GestureModifier, GestureType } from "../component"
+import { ArkCommonMethodComponent, Gesture, GestureGroup, GestureMask, GestureModifier, GestureType, AnimateParam, AnimationExtender } from "../component"
 
 export function hookCommonMethodGestureImpl(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
     if (gesture instanceof Gesture) {
@@ -53,4 +53,11 @@ export function hookCommonMethodGestureModifierImpl(commonMethod: ArkCommonMetho
     let gestureEvent = commonMethod.getOrCreateGestureEvent();
     gestureEvent.clearGestures();
     value_casted.applyGesture(gestureEvent);
+}
+
+
+export class CommonMethodHandWritten {
+    static hookCommonMethodAnimateToImmediatelyImpl(value: AnimateParam, event: (() => void)): void {
+        AnimationExtender.AnimateToImmediatelyImpl(value, event);
+    }
 }

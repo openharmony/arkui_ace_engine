@@ -230,6 +230,9 @@ export class Application {
             uiData.uiContext = uiContext;
             this.uiContext = uiContext;
             this.manager!.contextData = uiData;
+            this.manager!.isDebugMode = uiContext.isDebugMode_;
+            let instanceId = uiContext.getInstanceId();
+            this.manager!.setThreadChecker(() => uiContext.checkThread(instanceId));
             this.timer = getAnimationTimer() ?? createAnimationTimer(this.manager!)
             /** @memo */
             let builder: UserViewBuilder

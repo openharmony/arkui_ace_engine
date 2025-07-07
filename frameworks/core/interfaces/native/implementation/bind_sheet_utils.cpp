@@ -117,7 +117,7 @@ void BindSheetUtil::ParseFuntionalCallbacks(SheetCallbacks& callbacks, const Ark
 
 void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOptions& sheetOptions)
 {
-    sheetStyle.showInPage = OptConvert<SheetLevel>(sheetOptions.mode).value_or(SheetLevel::EMBEDDED);
+    sheetStyle.showInPage = OptConvert<SheetLevel>(sheetOptions.mode).value_or(SheetLevel::OVERLAY);
     std::vector<SheetHeight> detents;
     auto detentsOpt = OptConvert<Ark_Type_SheetOptions_detents>(sheetOptions.detents);
     if (detentsOpt) {
