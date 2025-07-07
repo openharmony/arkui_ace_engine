@@ -1725,9 +1725,9 @@ void ScrollPattern::FreeScrollTo(const ScrollControllerBase::ScrollToParam& para
     }
     OffsetF pos { -static_cast<float>(param.xOffset.ConvertToPx()), -static_cast<float>(param.yOffset.ConvertToPx()) };
     if (param.smooth) {
-        freeScroll_->ScrollTo(pos, std::nullopt, param.duration, param.curve);
+        freeScroll_->ScrollTo(pos, std::nullopt, param.duration, param.curve, param.canOverScroll);
     } else {
-        freeScroll_->SetOffset(pos);
+        freeScroll_->SetOffset(pos, param.canOverScroll);
     }
 }
 } // namespace OHOS::Ace::NG

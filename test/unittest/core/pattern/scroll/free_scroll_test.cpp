@@ -541,7 +541,7 @@ TEST_F(FreeScrollTest, Event002)
     model.SetOnWillScroll(
         [](const Dimension& xOffset, const Dimension& yOffset, ScrollState state, ScrollSource source) {
             ++willScrollCalled;
-            return TwoDimensionScrollResult { .xOffset = xOffset, .yOffset = yOffset };
+            return TwoDimensionScrollResult { .xOffset = xOffset * 2, .yOffset = yOffset * 2 };
         });
 
     CreateFreeContent({ CONTENT_W, CONTENT_H });
@@ -549,6 +549,14 @@ TEST_F(FreeScrollTest, Event002)
 
     ViewAbstract::SetJSFrameNodeOnScrollWillScroll(frameNode_.GetRawPtr(),
         [](const Dimension& xOffset, const Dimension& yOffset, ScrollState state, ScrollSource source) {
+            EXPECT_EQ(xOffset.Unit(), DimensionUnit::VP);
+            EXPECT_EQ(willScrollCalled % 2, 1);
+            if (willScrollCalled == 1) {
+                EXPECT_EQ(xOffset.Value(), DELTA_X * 2); // should receive offset already modified by onWillScroll
+                EXPECT_EQ(yOffset.Value(), DELTA_Y * 2);
+                EXPECT_EQ(state, ScrollState::SCROLL);
+                EXPECT_EQ(source, ScrollSource::DRAG);
+            }
             ++willScrollCalled;
             return TwoDimensionScrollResult { .xOffset = 0.0_vp, .yOffset = 0.0_vp }; // should take precedence
         });
@@ -569,7 +577,7 @@ TEST_F(FreeScrollTest, Event002)
     MockAnimationManager::GetInstance().Tick();
     EXPECT_EQ(willScrollCalled, 4);
     FlushUITasks(frameNode_);
-    EXPECT_TRUE(Negative(GetChildX(frameNode_, 0)));
+    EXPECT_TRUE(Negative(GetChildX(frameNode_, 0))); // delta during animation can't be modified by onWillScroll
     EXPECT_TRUE(Negative(GetChildY(frameNode_, 0)));
     EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::IDLE);
     EXPECT_EQ(scrollStop, 2);
@@ -646,6 +654,14 @@ TEST_F(FreeScrollTest, Scroller002)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(-posX_2.Value(), 0.0f).ToString());
+
+    scroller->FreeScrollTo({ -posX, -posY });
+    FlushUITasks(frameNode_); // can't overScroll by default
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF());
+
+    scroller->FreeScrollTo({ .xOffset = -posX, .yOffset = -posY, .canOverScroll = true });
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(posX.Value(), posY.Value()));
 }
 
 /**

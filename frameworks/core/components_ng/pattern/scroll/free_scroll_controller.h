@@ -47,7 +47,7 @@ public:
      * @brief Allow other modules to modify offset. Calling this function automatically stops scroll animations.
      * @attention doesn't allow over-scroll
      */
-    void SetOffset(OffsetF newPos);
+    void SetOffset(OffsetF newPos, bool allowOverScroll = false);
     inline void UpdateOffset(const OffsetF& delta)
     {
         SetOffset(offset_->Get() + delta);
@@ -61,7 +61,7 @@ public:
      * @brief Start a scroll animation to the final position.
      */
     void ScrollTo(OffsetF finalPos, const std::optional<float>& velocity,
-        std::optional<int32_t> duration = std::nullopt, RefPtr<Curve> curve = nullptr);
+        std::optional<int32_t> duration = std::nullopt, RefPtr<Curve> curve = nullptr, bool allowOverScroll = false);
 
 private:
     void InitializePanRecognizer();

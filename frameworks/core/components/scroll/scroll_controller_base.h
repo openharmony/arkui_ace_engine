@@ -100,6 +100,7 @@ public:
         float duration = 0.0f;
         RefPtr<Curve> curve;
         bool smooth = false;
+        bool canOverScroll = false;
     };
     virtual bool FreeScrollTo(const ScrollToParam& param)
     {

@@ -269,12 +269,14 @@ void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset, const
     }
 }
 
-void FreeScrollController::SetOffset(OffsetF newPos)
+void FreeScrollController::SetOffset(OffsetF newPos, bool allowOverScroll)
 {
     if (state_ == ScrollState::FLING) {
         StopScrollAnimation();
     }
-    ClampPosition(newPos);
+    if (!allowOverScroll) {
+        ClampPosition(newPos);
+    }
     if (newPos != offset_->Get()) {
         offset_->Set(newPos);
         pattern_.MarkDirty();
@@ -301,7 +303,12 @@ OffsetF FreeScrollController::FireOnWillScroll(const OffsetF& delta, ScrollState
         res = onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state, source);
     }
     if (frameCb) {
-        res = frameCb(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state, source);
+        if (res) {
+            // use the result from JS callback if available
+            res = frameCb(res->xOffset, res->yOffset, state, source);
+        } else {
+            res = frameCb(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state, source);
+        }
     }
     if (!res) {
         return delta;
@@ -331,11 +338,11 @@ void FreeScrollController::FireOnScrollStart() const
     CHECK_NULL_VOID(eventHub);
     const auto& onScrollStart = eventHub->GetOnScrollStart();
     const auto& frameCb = eventHub->GetJSFrameNodeOnScrollStart();
-    if (frameCb) {
-        frameCb();
-    }
     if (onScrollStart) {
         onScrollStart();
+    }
+    if (frameCb) {
+        frameCb();
     }
     pattern_.AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_START);
     if (auto scrollBar = pattern_.Get2DScrollBar()) {
@@ -395,9 +402,11 @@ void FreeScrollController::CheckCrashEdge(const OffsetF& newOffset, const SizeF&
 
 using std::optional;
 void FreeScrollController::ScrollTo(
-    OffsetF finalPos, const optional<float>& velocity, optional<int32_t> duration, RefPtr<Curve> curve)
+    OffsetF finalPos, const optional<float>& velocity, optional<int32_t> duration, RefPtr<Curve> curve, bool allowOverScroll)
 {
-    ClampPosition(finalPos);
+    if (!allowOverScroll) {
+        ClampPosition(finalPos);
+    }
     if (finalPos == offset_->Get()) {
         // No movement, no need to animate.
         return;
