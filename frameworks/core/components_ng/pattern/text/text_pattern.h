@@ -914,7 +914,7 @@ protected:
     void RecoverSelection();
     virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
-    Offset GetIndexByOffset(const Offset& pos, int32_t& extend);
+    void GetIndexByOffset(const Offset& pos, int32_t& extend);
     void StartVibratorByLongPress();
     void HandleLongPress(GestureEvent& info);
     void HandleClickEvent(GestureEvent& info);
