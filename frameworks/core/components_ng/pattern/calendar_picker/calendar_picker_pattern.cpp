@@ -1493,4 +1493,19 @@ void CalendarPickerPattern::UpdateTextStyle(const PickerTextStyle& textStyle)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
+
+void CalendarPickerPattern::BeforeCreateLayoutWrapper()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value());
+
+    if (layoutPolicy->IsWidthMatch() || layoutPolicy->IsHeightMatch()) {
+        layoutProperty->ClearUserDefinedIdealSize(false, true);
+    }
+}
+
 } // namespace OHOS::Ace::NG

@@ -271,10 +271,20 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerHeight(ArkUIRuntim
     std::string calcStr;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
         GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerHeight(nativeNode);
+        if (jsValue->IsObject(vm)) {
+            auto obj = jsValue->ToObject(vm);
+            auto layoutPolicy = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id_"));
+            if (layoutPolicy->IsString(vm)) {
+                auto policy = ParseLayoutPolicy(layoutPolicy->ToString(vm)->ToString(vm));
+                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
+                return panda::JSValueRef::Undefined(vm);
+            }
+        }
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerHeight(nativeNode);
+                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
                 return panda::JSValueRef::Undefined(vm);
             }
             height.SetValue(0.0);
@@ -287,6 +297,7 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerHeight(ArkUIRuntim
                 nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
         }
     }
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
     return panda::JSValueRef::Undefined(vm);
 }
 
