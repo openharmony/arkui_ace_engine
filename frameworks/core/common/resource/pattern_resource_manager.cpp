@@ -30,6 +30,7 @@ void PatternResourceManager::AddResource(
     }
     if (resMap_.count(key) > 0) {
         resCacheMap_.clear();
+        resKeyArray_.erase(std::remove(resKeyArray_.begin(), resKeyArray_.end(), key), resKeyArray_.end());
     }
     resMap_[key] = { resObj, std::move(updateFunc) };
     resKeyArray_.emplace_back(key);
