@@ -8042,6 +8042,9 @@ void OverlayManager::RemoveGatherNodeWithAnimation()
                 CHECK_NULL_VOID(rootNode);
                 rootNode->RemoveChild(frameNode);
                 rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+                auto subwindowManager = SubwindowManager::GetInstance();
+                CHECK_NULL_VOID(subwindowManager);
+                subwindowManager->HideSubWindowNG();
             },
             TaskExecutor::TaskType::UI, "ArkUIOverlayRemoveGatherNodeEvent");
     });
