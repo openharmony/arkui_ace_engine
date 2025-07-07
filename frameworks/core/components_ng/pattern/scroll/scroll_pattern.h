@@ -479,9 +479,16 @@ public:
      * @return Pan gesture recognizer configured for Axis::FREE mode
      */
     RefPtr<NGGestureRecognizer> GetOverrideRecognizer() const;
+    RefPtr<ScrollBar2D> Get2DScrollBar() const
+    {
+        return scrollBar2d_;
+    }
 
     Offset GetFreeScrollOffset() const final;
-    void FreeScrollBy(const OffsetF& delta) final;
+    bool FreeScrollBy(const OffsetF& delta) final;
+    bool FreeScrollPage(bool reverse, bool smooth) final;
+    bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std::optional<float>& velocity) final;
+    void FreeScrollTo(const ScrollControllerBase::ScrollToParam& param) final;
 
 private:
     RefPtr<FreeScrollController> freeScroll_;

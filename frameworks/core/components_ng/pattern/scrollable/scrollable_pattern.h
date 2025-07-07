@@ -20,12 +20,13 @@
 #include <vector>
 
 #include "base/geometry/axis.h"
+#include "core/animation/bezier_variable_velocity_motion.h"
 #include "core/animation/select_motion.h"
 #include "core/animation/spring_curve.h"
-#include "core/animation/bezier_variable_velocity_motion.h"
 #include "core/animation/velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
@@ -43,7 +44,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/event/mouse_event.h"
-#include "core/components_ng/event/scrollable_event.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
@@ -394,13 +394,25 @@ public:
     {
         return 0.0f;
     }
-    
+
     /* ============================= Free Scroll Enhancements ============================= */
     virtual Offset GetFreeScrollOffset() const
     {
         return {};
     }
-    virtual void FreeScrollBy(const OffsetF& delta) {}
+    virtual bool FreeScrollBy(const OffsetF& delta)
+    {
+        return false;
+    }
+    virtual bool FreeScrollPage(bool reverse, bool smooth)
+    {
+        return false;
+    }
+    virtual bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std::optional<float>& velocity)
+    {
+        return false;
+    }
+    virtual void FreeScrollTo(const ScrollControllerBase::ScrollToParam& param) {}
     /* ============================================================================== */
 
     virtual float GetContentStartOffset() const

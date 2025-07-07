@@ -135,7 +135,7 @@ void ConfigureScrollBar(const std::unique_ptr<ScrollBarProperty>& property, Scro
     const auto mode = property->GetScrollBarMode().value_or(DisplayMode::AUTO);
     if (mode != bar.GetDisplayMode()) {
         bar.SetDisplayMode(mode);
-        if (mode != DisplayMode::OFF) {
+        if (mode == DisplayMode::AUTO) {
             bar.ScheduleDisappearDelayTask();
         }
     }
@@ -154,9 +154,9 @@ void ConfigureScrollBar(const std::unique_ptr<ScrollBarProperty>& property, Scro
     if (barColor) {
         bar.SetForegroundColor(*barColor, false);
     }
-    const auto& margin = property->GetScrollBarMargin();
-    if (margin && bar.GetScrollBarMargin() != margin) {
-        bar.SetScrollBarMargin(*margin);
+    const auto margin = property->GetScrollBarMargin().value_or(ScrollBar2D::DEFAULT_MARGIN);
+    if (bar.GetScrollBarMargin() != margin) {
+        bar.SetScrollBarMargin(margin);
         bar.FlushBarWidth();
     }
 }
@@ -192,9 +192,11 @@ void ScrollBar2D::Update(const std::unique_ptr<ScrollBarProperty>& props)
 
 void ScrollBar2D::SyncLayout(const OffsetF& offset, const SizeF& viewSize, const SizeF& content)
 {
-    const auto scrollableSize = content - viewSize;
-    vertical_.SetScrollable(Positive(scrollableSize.Height()));
-    horizontal_.SetScrollable(Positive(scrollableSize.Width()));
+    const auto scrollableArea = content - viewSize;
+    vertical_.SetScrollable(Positive(scrollableArea.Height()));
+    horizontal_.SetScrollable(Positive(scrollableArea.Width()));
+    vertical_.ScheduleDisappearDelayTask();
+    horizontal_.ScheduleDisappearDelayTask();
     vertical_.SetOutBoundary(GetOverScroll(offset.GetY(), content.Height() - viewSize.Height()));
     horizontal_.SetOutBoundary(GetOverScroll(offset.GetX(), content.Width() - viewSize.Width()));
 
@@ -211,5 +213,16 @@ void ScrollBar2D::ResetAnimationSignals()
     vertical_.SetOpacityAnimationType(OpacityAnimationType::NONE);
     horizontal_.SetHoverAnimationType(HoverAnimationType::NONE);
     horizontal_.SetOpacityAnimationType(OpacityAnimationType::NONE);
+}
+
+void ScrollBar2D::OnScrollStart()
+{
+    vertical_.PlayScrollBarAppearAnimation();
+    horizontal_.PlayScrollBarAppearAnimation();
+}
+void ScrollBar2D::OnScrollEnd()
+{
+    vertical_.ScheduleDisappearDelayTask();
+    horizontal_.ScheduleDisappearDelayTask();
 }
 } // namespace OHOS::Ace::NG

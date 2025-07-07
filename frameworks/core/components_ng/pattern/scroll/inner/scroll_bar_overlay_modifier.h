@@ -147,6 +147,11 @@ public:
         isScrollable_ = isScrollable;
     }
 
+    bool GetScrollable() const
+    {
+        return isScrollable_;
+    }
+
     void SetNavDestinationShow(bool isNavDestinationShow)
     {
         isNavDestinationShow_ = isNavDestinationShow;
@@ -154,11 +159,6 @@ public:
 
 protected:
     std::shared_ptr<AnimationUtils::Animation> hoverAnimation_;
-
-    bool GetScrollable()
-    {
-        return isScrollable_;
-    }
 
 private:
     Offset GetHoverOffset(const Size& size) const;

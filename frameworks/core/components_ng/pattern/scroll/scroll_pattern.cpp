@@ -1672,10 +1672,62 @@ RefPtr<NGGestureRecognizer> ScrollPattern::GetOverrideRecognizer() const
     }
     return nullptr;
 }
-void ScrollPattern::FreeScrollBy(const OffsetF& delta)
+bool ScrollPattern::FreeScrollBy(const OffsetF& delta)
 {
-    if (freeScroll_) {
-        freeScroll_->UpdateOffset(delta);
+    CHECK_NULL_RETURN(freeScroll_, false);
+    freeScroll_->UpdateOffset(delta);
+    return true;
+}
+bool ScrollPattern::FreeScrollPage(bool reverse, bool smooth)
+{
+    CHECK_NULL_RETURN(freeScroll_, false);
+    const float dy = reverse ? viewSize_.Height() : -viewSize_.Height();
+    if (smooth) {
+        freeScroll_->ScrollTo(freeScroll_->GetOffset() + OffsetF { 0, dy }, std::nullopt);
+    } else {
+        freeScroll_->UpdateOffset({ 0, dy });
+    }
+    return true;
+}
+bool ScrollPattern::FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std::optional<float>& velocity)
+{
+    CHECK_NULL_RETURN(freeScroll_, false);
+    auto pos = freeScroll_->GetOffset();
+    switch (type) {
+        case ScrollEdgeType::SCROLL_LEFT:
+            pos.SetX(0.0f);
+            break;
+        case ScrollEdgeType::SCROLL_RIGHT:
+            pos.SetX(-FLT_MAX);
+            break;
+        case ScrollEdgeType::SCROLL_TOP:
+            pos.SetY(0.0f);
+            break;
+        case ScrollEdgeType::SCROLL_BOTTOM:
+            pos.SetY(-FLT_MAX);
+            break;
+        default:
+            break;
+    }
+    if (smooth) {
+        freeScroll_->ScrollTo(pos, velocity);
+    } else {
+        freeScroll_->SetOffset(pos);
+    }
+    return true;
+}
+void ScrollPattern::FreeScrollTo(const ScrollControllerBase::ScrollToParam& param)
+{
+    CHECK_NULL_VOID(freeScroll_);
+    if (param.xOffset.Unit() == DimensionUnit::PERCENT || param.yOffset.Unit() == DimensionUnit::PERCENT) {
+        TAG_LOGE(AceLogTag::ACE_SCROLL, "FreeScrollTo does not support percent offset.");
+        return;
+    }
+    OffsetF pos { -static_cast<float>(param.xOffset.ConvertToPx()), -static_cast<float>(param.yOffset.ConvertToPx()) };
+    if (param.smooth) {
+        freeScroll_->ScrollTo(pos, std::nullopt, param.duration, param.curve, param.canOverScroll);
+    } else {
+        freeScroll_->SetOffset(pos, param.canOverScroll);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -31,6 +31,8 @@ public:
     explicit ScrollBar2D(ScrollPattern& pattern);
     ~ScrollBar2D() final;
 
+    static constexpr ScrollBarMargin DEFAULT_MARGIN { 8.0_vp, 8.0_vp };
+
     const RefPtr<ScrollBar2DPainter>& GetPainter() const
     {
         return painter_;
@@ -43,7 +45,14 @@ public:
     {
         return horizontal_;
     }
+    /**
+     * @brief Reset the animation flags for both scroll bars when render finishes.
+     *
+     */
     void ResetAnimationSignals();
+
+    void OnScrollStart();
+    void OnScrollEnd();
 
     void Update(const std::unique_ptr<ScrollBarProperty>& props);
 
