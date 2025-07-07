@@ -872,12 +872,20 @@ public:
 
     void SetIsAskCeliaEnabled(bool isAskCeliaEnabled)
     {
-        isAskCeliaEnabled_ = isAskCeliaEnabled;
+        isAskCeliaEnabled_ = isAskCeliaEnabled && IsNeedAskCelia();
     }
     
     bool IsAskCeliaEnabled() const
     {
         return isAskCeliaEnabled_;
+    }
+    bool IsNeedAskCelia() const
+    {
+        // placeholder and symbol not support
+        auto start = GetTextSelector().GetTextStart();
+        auto end = GetTextSelector().GetTextEnd();
+        auto content = UtfUtils::Str16DebugToStr8(GetSelectedText(start, end));
+        return !std::regex_match(content, std::regex("^\\s*$"));
     }
     void UpdateTextSelectorSecondHandle(const RectF& rect)
     {
