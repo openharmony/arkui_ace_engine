@@ -515,8 +515,10 @@ HWTEST_F(WebPatternTestNg, InitDragEvent006, TestSize.Level1)
     WeakPtr<EventHub> eventHub = nullptr;
     RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_NE(gestureHub, nullptr);
+    MockPipelineContext::SetUp();
     bool rerult = webPattern->NotifyStartDragTask();
     EXPECT_TRUE(rerult);
+    MockPipelineContext::TearDown();
     webPattern->isDisableDrag_ = true;
     rerult = webPattern->NotifyStartDragTask();
     EXPECT_FALSE(rerult);
