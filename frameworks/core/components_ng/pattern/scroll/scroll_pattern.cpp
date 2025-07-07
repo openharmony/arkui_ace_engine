@@ -1433,6 +1433,20 @@ std::string ScrollPattern::GetScrollSnapPagination() const
     return snapPaginationStr;
 }
 
+void ScrollPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (scrollSnapUpdate_) {
+        CaleSnapOffsets();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
 bool ScrollPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
 {
     auto scrollBar = GetScrollBar();

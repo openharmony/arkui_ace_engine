@@ -216,10 +216,7 @@ ArkUINativeModuleValue ScrollBridge::SetScrollSnap(ArkUIRuntimeCallInfo* runtime
     std::vector<ArkUI_Float32> vPaginationValue;
     std::vector<int32_t> vPaginationUnit;
     std::vector<RefPtr<ResourceObject>> resObjs;
-    if (!ParsePaginationNG(vm, paginationValue, vPaginationValue, resObjs, vPaginationUnit)) {
-        GetArkUINodeModifiers()->getScrollModifier()->resetScrollScrollSnap(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
-    }
+    auto parseOK = ParsePaginationNG(vm, paginationValue, vPaginationValue, resObjs, vPaginationUnit);
     bool isArray = true;
     if (!paginationValue->IsArray(vm)) {
         isArray = false;
@@ -232,7 +229,12 @@ ArkUINativeModuleValue ScrollBridge::SetScrollSnap(ArkUIRuntimeCallInfo* runtime
     auto uLength = pLength + 4;
 
     if (SystemProperties::ConfigChangePerform()) {
-        GetArkUINodeModifiers()->getScrollModifier()->createWithResourceObjSnapPaginations(nativeNode, &resObjs);
+        GetArkUINodeModifiers()->getScrollModifier()->createWithResourceObjSnap(
+            nativeNode, vPaginationValue.data(), pLength, vPaginationUnit.data(), &resObjs);
+    }
+    if (!parseOK) {
+        GetArkUINodeModifiers()->getScrollModifier()->resetScrollScrollSnap(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getScrollModifier()->setScrollScrollSnap(
         nativeNode, vPaginationValue.data(), pLength, vPaginationUnit.data(), uLength);
@@ -248,7 +250,8 @@ ArkUINativeModuleValue ScrollBridge::ResetScrollSnap(ArkUIRuntimeCallInfo* runti
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollModifier()->resetScrollScrollSnap(nativeNode);
     if (SystemProperties::ConfigChangePerform()) {
-        GetArkUINodeModifiers()->getScrollModifier()->createWithResourceObjSnapPaginations(nativeNode, nullptr);
+        GetArkUINodeModifiers()->getScrollModifier()->createWithResourceObjSnap(
+            nativeNode, nullptr, 0, nullptr, nullptr);
     }
     return panda::JSValueRef::Undefined(vm);
 }

@@ -4329,7 +4329,9 @@ void ScrollablePattern::OnColorConfigurationUpdate()
     scrollBar_->SetForegroundColor(theme->GetForegroundColor(), isRoundScroll_);
     scrollBar_->SetBackgroundColor(theme->GetBackgroundColor(), isRoundScroll_);
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
-    paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    if (paintProperty) {
+        paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 SizeF ScrollablePattern::GetViewSizeMinusPadding() const

@@ -48,11 +48,17 @@ void ListModelNG::Create(bool isCreateArc)
     CHECK_NULL_VOID(pattern);
     pattern->AddScrollableFrameInfo(SCROLL_FROM_NONE);
     if (SystemProperties::ConfigChangePerform()) {
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(frameNode);
         auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->ResetDividerColorSetByUser();
+        auto resourceObject = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+        auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(frameNode))](
+                                const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            frameNode->SetMeasureAnyway(frameNode->GetRerenderable());
+        };
+        pattern->AddResObj("listMeasureAllItem", resourceObject, std::move(updateFunc));
     }
 }
 

@@ -246,15 +246,6 @@ public:
             scrollSnapUpdate_ = true;
         }
     }
-    void SetKeepSnapPaginations(const std::vector<Dimension>& snapPaginations)
-    {
-        keepSnapPaginations_ = snapPaginations;
-    }
-
-    std::vector<Dimension> GetKeepSnapPaginations()
-    {
-        return keepSnapPaginations_;
-    }
 
     std::vector<Dimension> GetSnapPaginations() const
     {
@@ -434,6 +425,7 @@ private:
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
     bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
     std::string GetScrollSnapPagination() const;
+    void OnColorModeChange(uint32_t colorMode) override;
 
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
@@ -498,7 +490,6 @@ private:
     // scrollSnap
     std::vector<float> snapOffsets_;
     std::vector<Dimension> snapPaginations_;
-    std::vector<Dimension> keepSnapPaginations_;
     std::pair<bool, bool> enableSnapToSide_ = { true, true };
     Dimension intervalSize_;
     bool scrollSnapUpdate_ = false;

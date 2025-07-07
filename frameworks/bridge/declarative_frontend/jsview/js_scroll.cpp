@@ -65,19 +65,20 @@ bool ParseJsDimensionArray(
     if (!jsValue->IsArray()) {
         return false;
     }
+    bool parseOK = true;
     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
     for (size_t i = 0; i < array->Length(); i++) {
         JSRef<JSVal> value = array->GetValueAt(i);
         CalcDimension dimension;
         RefPtr<ResourceObject> resObj;
-        if (JSViewAbstract::ParseJsDimensionVp(value, dimension, resObj)) {
-            result.emplace_back(static_cast<Dimension>(dimension));
-            resObjs.emplace_back(resObj);
-        } else {
-            return false;
+        auto parseDimensionOK = JSViewAbstract::ParseJsDimensionVp(value, dimension, resObj);
+        result.emplace_back(static_cast<Dimension>(dimension));
+        resObjs.emplace_back(resObj);
+        if (!parseDimensionOK) {
+            parseOK = false;
         }
     }
-    return true;
+    return parseOK;
 }
 
 bool CheckSnapPaginations(std::vector<Dimension> snapPaginations)
@@ -523,12 +524,13 @@ void JSScroll::SetScrollSnap(const JSCallbackInfo& args)
     if (!ParseJsDimensionVp(paginationValue, intervalSize, resObj) || intervalSize.IsNegative()) {
         intervalSize = CalcDimension(0.0);
     }
-    if (!ParseJsDimensionArray(paginationValue, snapPaginations, resObjs) || !CheckSnapPaginations(snapPaginations)) {
-        std::vector<Dimension>().swap(snapPaginations);
-    }
+    auto parseArrayOK = ParseJsDimensionArray(paginationValue, snapPaginations, resObjs);
     if (SystemProperties::ConfigChangePerform()) {
         ScrollModel::GetInstance()->CreateWithResourceObjIntervalSize(resObj);
-        ScrollModel::GetInstance()->CreateWithResourceObjSnapPaginations(resObjs);
+        ScrollModel::GetInstance()->CreateWithResourceObjSnapPaginations(snapPaginations, resObjs);
+    }
+    if (!parseArrayOK || !CheckSnapPaginations(snapPaginations)) {
+        std::vector<Dimension>().swap(snapPaginations);
     }
 
     bool enableSnapToStart = true;

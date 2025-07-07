@@ -198,6 +198,7 @@ void SetItem4GetDotIndicatorInfo(
 void InitIndicatorParametersWithResObj(SwiperParameters& indicatorParameters, const void* resObjs)
 {
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    CHECK_NULL_VOID(resObjs);
     auto resourceObjs = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(resObjs));
     indicatorParameters.resourceItemWidthValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_WIDTH);
     indicatorParameters.resourceItemHeightValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_HEIGHT);
