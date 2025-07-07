@@ -27,6 +27,7 @@ import {
     ConsumeDecoratedVariable, 
     WatchFunc,
     UIUtils,
+    IObservedObject
 } from '../stateManagement';
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 
@@ -203,9 +204,11 @@ export function getObservedObject<T>(value: T, staticState: StateUnion<T>): T {
 }
 
 export function registerCreateWatchFuncCallback(): void {
-    const createWatchFuncCallback = (callback: WatchFuncType): WatchIdType => {
+    const createWatchFuncCallback = (callback: WatchFuncType, value: Object): WatchIdType => {
         const watchFunc = new WatchFunc(callback);
-        return watchFunc.id();
+        const watchFuncId = watchFunc.id();
+        (value as IObservedObject).addWatchSubscriber(watchFuncId);
+        return watchFuncId;
     }
     let global = ESValue.getGlobal();
     let registerCallback = global.getProperty('registerCallbackForCreateWatchID');

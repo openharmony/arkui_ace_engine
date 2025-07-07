@@ -14,7 +14,7 @@
  */
 
 class InteropExtractorModule {
-    static getInteropObservedObject<T extends Object>(newValue: T, owningProperty: ObservedPropertyAbstractPU<T>) {
+    static getInteropObservedObject<T extends Object>(newValue: T, owningProperty: ObservedPropertyPU<T>) {
         if ((newValue instanceof Array || newValue instanceof Set || newValue instanceof Map || newValue instanceof Date) &&
             !('addWatchSubscriber' in newValue) && (typeof InteropExtractorModule.makeObserved !== undefined && typeof InteropExtractorModule.makeObserved === 'function')) {
             newValue = InteropExtractorModule.makeObserved(newValue) as T;
@@ -24,7 +24,7 @@ class InteropExtractorModule {
                 owningProperty.onTrackedObjectPropertyCompatModeHasChangedPU(null, '');
             };
             if (typeof InteropExtractorModule.createWatchFunc !== undefined && typeof InteropExtractorModule.createWatchFunc === 'function') {
-                newValue.addWatchSubscriber(InteropExtractorModule.createWatchFunc(callback));
+                owningProperty.staticWatchId = InteropExtractorModule.createWatchFunc(callback, newValue);
             }
         }
         return newValue;
@@ -37,6 +37,6 @@ class InteropExtractorModule {
         }
     }
 
-    static createWatchFunc?: (watchFuncCallback: WatchFuncType) => any;
+    static createWatchFunc?: (watchFuncCallback: WatchFuncType, newValue: Object) => any;
     static makeObserved?: (value: Object) => Object;
 }

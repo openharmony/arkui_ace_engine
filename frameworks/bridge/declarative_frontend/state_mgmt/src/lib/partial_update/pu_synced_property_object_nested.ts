@@ -135,8 +135,9 @@ class SynchedPropertyNestedObjectPU<C extends Object>
         // make sure the ObservedObject no longer has a read callback function
         // assigned to it
         ObservedObject.unregisterPropertyReadCb(this.obsObject_);
-      } else if (this.staticWatchId && typeof this.obsObject_ === 'object' && 'removeWatchSubscriber' in this.obsObject_ &&
-        typeof this.obsObject_.removeWatchSubscriber === 'function') {
+      // for interop
+      } else if (InteropConfigureStateMgmt.instance.needsInterop() && this.staticWatchId && typeof this.obsObject_ === 'object' &&
+        'removeWatchSubscriber' in this.obsObject_ && typeof this.obsObject_.removeWatchSubscriber === 'function') {
         this.obsObject_.removeWatchSubscriber(this.staticWatchId);
       }
     }
@@ -152,14 +153,13 @@ class SynchedPropertyNestedObjectPU<C extends Object>
         ObservedObject.addOwningProperty(this.obsObject_, this);
         this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.obsObject_);
       // for interop
-      } else if (typeof this.obsObject_ === 'object' && 'addWatchSubscriber' in this.obsObject_ &&
-        typeof this.obsObject_.addWatchSubscriber === 'function') {
+      } else if (InteropConfigureStateMgmt.instance.needsInterop() && typeof this.obsObject_ === 'object' &&
+        'addWatchSubscriber' in this.obsObject_ && typeof this.obsObject_.addWatchSubscriber === 'function') {
         const callback = () => {
             this.notifyPropertyHasChangedPU();
         };
         if (typeof InteropExtractorModule.createWatchFunc !== undefined && typeof InteropExtractorModule.createWatchFunc === 'function') {
-          this.staticWatchId = InteropExtractorModule.createWatchFunc(callback);
-          this.obsObject_.addWatchSubscriber(this.staticWatchId);
+          this.staticWatchId = InteropExtractorModule.createWatchFunc(callback, this.obsObject_);
         }
       } else {
         stateMgmtConsole.applicationWarn(`${this.debugInfo()}: set/init (method setValueInternal): assigned value is not
