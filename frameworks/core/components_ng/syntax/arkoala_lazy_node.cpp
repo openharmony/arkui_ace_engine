@@ -69,4 +69,25 @@ RefPtr<FrameNode> ArkoalaLazyNode::GetFrameNode(int32_t index)
     auto item = items_.Get(index);
     return item ? item->Upgrade() : nullptr;
 }
+
+void ArkoalaLazyNode::OnDataChange(int32_t changeIndex, int32_t count, NotificationType type)
+{
+    // temp: naive data reset
+    for (const auto& [index, nodeWeak] : items_) {
+        auto node = nodeWeak.Upgrade();
+        if (index >= changeIndex) {
+            RemoveChild(node);
+        }
+    }
+    items_.RemoveIf([changeIndex](const uint32_t& k, const auto& _) {
+        const auto idx = static_cast<int32_t>(k);
+        return idx >= changeIndex;
+    });
+
+    auto parent = GetParent();
+    int64_t accessibilityId = GetAccessibilityId();
+    if (parent) {
+        parent->NotifyChange(changeIndex, count, accessibilityId, type);
+    }
+}
 } // namespace OHOS::Ace::NG
