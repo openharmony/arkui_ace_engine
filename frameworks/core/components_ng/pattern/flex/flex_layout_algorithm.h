@@ -89,6 +89,7 @@ private:
     void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF& realSize);
     void MeasureAndCleanMagicNodes(LayoutWrapper* containerLayoutWrapper, FlexItemProperties& flexItemProperties);
     bool HandleBlankFirstTimeMeasure(const MagicLayoutNode& child, FlexItemProperties& flexItemProperties);
+    bool CheckBlankIllegality(const RefPtr<LayoutProperty>& blankLayoutProperty);
     void UpdateFlexProperties(FlexItemProperties& flexItemProperties, const RefPtr<LayoutWrapper>& layoutWrapper);
     void SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties, LayoutWrapper* layoutWrapper);
     void UpdateLayoutConstraintOnMainAxis(LayoutConstraintF& layoutConstraint, float size);
