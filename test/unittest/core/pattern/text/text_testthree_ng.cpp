@@ -827,6 +827,21 @@ HWTEST_F(TextTestThreeNg, UpdateAIMenuOptions001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsNeedAskCelia
+ * @tc.desc: test test_pattern.h IsNeedAskCelia function with valid textSelector
+ *           check multi ai entity in selection range
+ * @tc.type: FUNC
+ */
+ HWTEST_F(TextTestThreeNg, IsNeedAskCelia001, TestSize.Level1)
+ {
+     /**
+      * @tc.steps: step1. create frameNode and text textPattern
+      */
+     auto [frameNode, textPattern] = Init();
+     EXPECT_FALSE(textPattern->IsNeedAskCelia());
+ }
+
+/**
  * @tc.name: SetTextSelection001
  * @tc.desc: test test_pattern.h SetTextSelection function.
  * @tc.type: FUNC

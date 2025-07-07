@@ -1288,15 +1288,15 @@ void TextPattern::UpdateAIMenuOptions()
     }
     if (copyOption_ == CopyOptions::Local || copyOption_ == CopyOptions::Distributed) {
         if (NeedShowAIDetect()) {
-            isAskCeliaEnabled_ = !isShowAIMenuOption_;
+            SetIsAskCeliaEnabled(!isShowAIMenuOption_);
         } else {
-            isAskCeliaEnabled_ = true;
+            SetIsAskCeliaEnabled(true);
         }
     } else {
-        isAskCeliaEnabled_ = false;
+        SetIsAskCeliaEnabled(false);
     }
     if (!IsSupportAskCelia()) {
-        isAskCeliaEnabled_ = false;
+        SetIsAskCeliaEnabled(false);
     }
     CHECK_NULL_VOID(dataDetectorAdapter_);
     if (isAskCeliaEnabled_ && !NeedShowAIDetect() &&
