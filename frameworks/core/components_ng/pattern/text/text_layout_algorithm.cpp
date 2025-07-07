@@ -118,7 +118,8 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         auto result = BuildTextRaceParagraph(textStyle_, textLayoutProperty, contentConstraint, layoutWrapper);
         return result;
     }
-    if (isSpanStringMode_ && host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GetTag() == V2::SYMBOL_ETS_TAG ||
+        (isSpanStringMode_ && host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN))) {
         BuildParagraph(textStyle_, textLayoutProperty, contentConstraint, layoutWrapper);
     } else {
         if (!AddPropertiesAndAnimations(textStyle_, textLayoutProperty, contentConstraint, layoutWrapper)) {
@@ -249,8 +250,9 @@ void TextLayoutAlgorithm::CheckNeedReCreateParagraph(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
+    alwaysReCreateParagraph_ = AlwaysReCreateParagraph(layoutWrapper);
     needReCreateParagraph_ = textLayoutProperty->GetNeedReCreateParagraphValue(false) ||
-                             textStyle.NeedReCreateParagraph() || AlwaysReCreateParagraph(layoutWrapper);
+                             textStyle.NeedReCreateParagraph() || alwaysReCreateParagraph_;
 }
 
 void TextLayoutAlgorithm::ResetNeedReCreateParagraph(LayoutWrapper* layoutWrapper)
@@ -258,7 +260,7 @@ void TextLayoutAlgorithm::ResetNeedReCreateParagraph(LayoutWrapper* layoutWrappe
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->ResetNeedReCreateParagraph();
-    CHECK_NULL_VOID(!AlwaysReCreateParagraph(layoutWrapper));
+    CHECK_NULL_VOID(!alwaysReCreateParagraph_);
     needReCreateParagraph_ = false;
 }
 
@@ -513,7 +515,9 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(TextStyle& textStyle, const s
         return false;
     }
 
-    if (!needReCreateParagraph_) {
+    if (needReCreateParagraph_) {
+        CHECK_NULL_RETURN(LayoutParagraphs(maxSize.Width()), false);
+    } else {
         auto frameNode = layoutWrapper->GetHostNode();
         CHECK_NULL_RETURN(frameNode, false);
         auto pattern = frameNode->GetPattern<TextPattern>();
@@ -523,8 +527,6 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(TextStyle& textStyle, const s
             CHECK_NULL_RETURN(CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width()), false);
             CHECK_NULL_RETURN(LayoutParagraphs(maxSize.Width()), false);
         }
-    } else {
-        CHECK_NULL_RETURN(LayoutParagraphs(maxSize.Width()), false);
     }
     // Reset the flag after each paragraph layout.
     ResetNeedReCreateParagraph(layoutWrapper);
@@ -789,17 +791,19 @@ void TextLayoutAlgorithm::CreateOrUpdateTextEffect(const RefPtr<Paragraph>& oldP
 bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
     if (!textStyle.GetAdaptTextSize() ||
-        (!spans_.empty() && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN))) {
-        if (!CreateParagraphAndLayout(textStyle, layoutProperty->GetContent().value_or(u""), contentConstraint,
-            layoutWrapper)) {
+        (!spans_.empty() && host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN))) {
+        if (!CreateParagraphAndLayout(
+            textStyle, layoutProperty->GetContent().value_or(u""), contentConstraint, layoutWrapper)) {
             TAG_LOGW(AceLogTag::ACE_TEXT, "BuildParagraph fail, contentConstraint:%{public}s",
                 contentConstraint.ToString().c_str());
             return false;
         }
     } else {
-        if (!AdaptMinTextSize(textStyle, layoutProperty->GetContent().value_or(u""), contentConstraint,
-            layoutWrapper)) {
+        if (!AdaptMinTextSize(
+            textStyle, layoutProperty->GetContent().value_or(u""), contentConstraint, layoutWrapper)) {
             return false;
         }
     }

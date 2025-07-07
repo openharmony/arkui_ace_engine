@@ -652,7 +652,7 @@ HWTEST_F(TextTestSevenNg, SpanBuildParagraph001, TestSize.Level1)
     int originApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)); // 16 means min platformVersion.
-
+    textFrameNode->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
     textLayoutAlgorithm->BuildParagraph(
         textStyle, textLayoutProperty, contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
     MockContainer::Current()->SetApiTargetVersion(originApiVersion);

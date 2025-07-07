@@ -85,7 +85,6 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_VOID(textTheme);
     CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
-    textStyle.SetSymbolType(textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM));
     std::vector<std::string> fontFamilies;
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
@@ -100,7 +99,6 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         fontFamilies = textLayoutProperty->GetFontFamilyValue(defaultFontFamily);
     }
     UpdateFontFamilyWithSymbol(textStyle, fontFamilies, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
-    UpdateSymbolStyle(textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     auto lineThicknessScale = textLayoutProperty->GetLineThicknessScale().value_or(1.0f);
     textStyle.SetLineThicknessScale(lineThicknessScale);
     auto textColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
@@ -221,15 +219,6 @@ void MultipleParagraphLayoutAlgorithm::UpdateFontFamilyWithSymbol(TextStyle& tex
     }
 }
 
-void MultipleParagraphLayoutAlgorithm::UpdateSymbolStyle(TextStyle& textStyle, bool isSymbol)
-{
-    if (!isSymbol) {
-        return;
-    }
-    textStyle.SetRenderStrategy(textStyle.GetRenderStrategy() < 0 ? 0 : textStyle.GetRenderStrategy());
-    textStyle.SetEffectStrategy(textStyle.GetEffectStrategy() < 0 ? 0 : textStyle.GetEffectStrategy());
-}
-
 void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     // child constraint has already been calculated by the UpdateParagraphBySpan method when triggering MeasureContent
@@ -254,6 +243,7 @@ void MultipleParagraphLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(paragraphManager_);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(frameNode->GetTag() != V2::SYMBOL_ETS_TAG);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
     std::vector<int32_t> placeholderIndex;
@@ -509,18 +499,19 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
     // generally not allowed to be modified
     CHECK_NULL_RETURN(paragraphManager_, false);
     auto paragraphs = paragraphManager_->GetParagraphs();
-    auto maxWidth = paragraphManager_->GetMaxWidth();
-    auto indentWidth = paragraphManager_->GetTextWidthIncludeIndent();
-    float paragraphNewWidth = std::min(std::min(indentWidth, maxWidth), GetMaxMeasureSize(contentConstraint).Width());
+    float paragraphNewWidth =
+        std::min(std::min(paragraphManager_->GetTextWidthIncludeIndent(), paragraphManager_->GetMaxWidth()),
+            GetMaxMeasureSize(contentConstraint).Width());
     paragraphNewWidth =
         std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
     if (!contentConstraint.selfIdealSize.Width() || IsNeedParagraphReLayout()) {
         for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
             auto paragraph = pIter->paragraph;
             CHECK_NULL_RETURN(paragraph, false);
-            if (SystemProperties::GetDebugEnabled()) {
+            if (SystemProperties::GetTextTraceEnabled()) {
                 ACE_TEXT_SCOPED_TRACE("ParagraphReLayout[NewWidth:%f][MaxWidth:%f][IndentWidth:%f][Constraint:%s]",
-                    paragraphNewWidth, paragraph->GetMaxWidth(), indentWidth, contentConstraint.ToString().c_str());
+                    paragraphNewWidth, paragraph->GetMaxWidth(), paragraphManager_->GetTextWidthIncludeIndent(),
+                    contentConstraint.ToString().c_str());
             }
             if (!NearEqual(paragraphNewWidth, paragraph->GetMaxWidth())) {
                 int32_t id = -1;
@@ -660,6 +651,7 @@ bool MultipleParagraphLayoutAlgorithm::PlaceholderSpanMeasure(const RefPtr<Place
 
 void MultipleParagraphLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, const TextStyle& textStyle)
 {
+    CHECK_NULL_VOID(!spans_.empty());
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);

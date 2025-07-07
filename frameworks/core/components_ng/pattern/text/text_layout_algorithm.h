@@ -140,6 +140,7 @@ private:
     RefPtr<PropertyBool> showSelect_;
     std::optional<LayoutConstraintF> cachedCalcContentConstraint_;
     bool isFixIdealSizeAndNoMaxWidth_ = false;
+    bool alwaysReCreateParagraph_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
