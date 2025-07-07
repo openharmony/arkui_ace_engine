@@ -2277,6 +2277,7 @@ HWTEST_F(SearchTestTwoNg, searchHandleFocusChoiceTest, TestSize.Level1)
     /**
     * @tc.steps: case
     */
+    searchTextFieldPattern->PerformAction(TextInputAction::SEARCH, false);
     pattern->directionKeysMoveFocusOut_ = true;
     pattern->HandleFocusChoiceSearch(textFieldPattern, false, searchTextFieldPattern);
     EXPECT_EQ(textFieldPattern->GetTextUtf16Value().empty(), false);

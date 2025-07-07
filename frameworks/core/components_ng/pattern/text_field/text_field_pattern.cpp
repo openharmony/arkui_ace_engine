@@ -5838,7 +5838,12 @@ bool TextFieldPattern::ProcessFocusIndexAction()
 
 void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
 {
+    if (!HasFocus()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Not Trigger OnSubmit because field blur");
+        return;
+    }
     if (!ProcessFocusIndexAction()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Not Trigger OnSubmit because focus index not on text");
         return;
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField PerformAction %{public}d", static_cast<int32_t>(action));
@@ -5855,9 +5860,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         RecordSubmitEvent();
         eventHub->FireOnSubmit(static_cast<int32_t>(action), event);
         OnReportSubmitEvent(host);
-        if (event.IsKeepEditable()) {
-            return;
-        }
+        CHECK_NULL_VOID(!event.IsKeepEditable());
         TextFieldLostFocusToViewRoot();
         return;
     }
@@ -5875,9 +5878,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     eventHub->FireOnSubmit(static_cast<int32_t>(action), event);
     OnReportSubmitEvent(host);
     RecordSubmitEvent();
-    if (event.IsKeepEditable()) {
-        return;
-    }
+    CHECK_NULL_VOID(!event.IsKeepEditable());
     // LostFocusToViewRoot may not cause current lost focus, only stop twinkling when it is truly lost focus,
     // which will call StopTwinkling on HandleBlurEvent method.
     if (textInputBlurOnSubmit_) {
@@ -8616,7 +8617,8 @@ bool TextFieldPattern::IsShowUnit() const
     CHECK_NULL_RETURN(layoutProperty, false);
     auto typeValue = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
     return layoutProperty->GetShowUnderlineValue(false) &&
-           (typeValue == TextInputType::UNSPECIFIED || typeValue == TextInputType::TEXT);
+           (typeValue == TextInputType::UNSPECIFIED || typeValue == TextInputType::TEXT) &&
+           unitNode_ != nullptr;
 }
 
 bool TextFieldPattern::IsShowPasswordIcon() const

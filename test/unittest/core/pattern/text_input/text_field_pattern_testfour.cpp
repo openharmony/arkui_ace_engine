@@ -406,6 +406,7 @@ HWTEST_F(TextFieldPatternTestFour, PerformAction001, TestSize.Level0)
     ASSERT_NE(eventHub, nullptr);
     auto paintProperty = textFieldNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
+    pattern->GetFocusHub()->currentFocus_ = true;
     pattern->focusIndex_ = FocuseIndex::TEXT;
     auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
     Recorder::EventRecorder::Get().eventSwitch_[index] = true;
