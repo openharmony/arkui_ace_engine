@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from "@koalaui/runtime";
-import { InteropNativeModule, nullptr, pointer } from "@koalaui/interop";
-import { PeerNode } from "../PeerNode";
-import { InternalListener } from "../DataChangeListener";
-import { setNeedCreate } from "../ArkComponentRoot";
-import { int32 } from "@koalaui/common";
-import { IDataSource } from "../component/lazyForEach";
-import { LazyForEachOps } from "../component";
-import { LazyItemNode } from "./LazyItemNode";
-import { CustomComponent } from "../component/customComponent";
+import { __id, NodeAttach, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from "@koalaui/runtime"
+import { InteropNativeModule, nullptr, pointer } from "@koalaui/interop"
+import { PeerNode } from "../PeerNode"
+import { InternalListener } from "../DataChangeListener"
+import { setNeedCreate } from "../ArkComponentRoot"
+import { int32 } from "@koalaui/common"
+import { IDataSource } from "../component/lazyForEach"
+import { LazyForEachOps } from "../component"
+import { LazyItemNode } from "./LazyItemNode"
+import { ArkUIAniModule } from "../ani/arkts/ArkUIAniModule"
+import { CustomComponent } from "@component_handwritten/customComponent"
 
 let globalLazyItems: Set<ComputableState<LazyItemNode>> = new Set<ComputableState<LazyItemNode>>()
 export function updateLazyItems() {
@@ -36,6 +37,27 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
     /** @memo */
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
+) {
+    NodeAttach(
+        () => {
+            const peerId = PeerNode.nextId()
+            const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId)
+            if (!_peerPtr) {
+                throw new Error("create LazyForEachNode failed")
+            }
+            const _peer = new PeerNode(_peerPtr, peerId, "LazyForEach", 0)
+            return _peer
+        },
+        (_: PeerNode) => {
+            Sync(dataSource, itemGenerator)
+        }
+    )
+}
+
+/** @memo:intrinsic */
+function Sync<T>(dataSource: IDataSource<T>,
+    /** @memo */
+    itemGenerator: (item: T, index: number) => void,
 ) {
     const parent = contextNode<PeerNode>()
     let pool = rememberDisposable(() => new LazyItemPool(parent, CustomComponent.current), (pool?: LazyItemPool) => {

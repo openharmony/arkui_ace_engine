@@ -19,8 +19,6 @@
 import { __context, __id, NodeAttach } from "@koalaui/runtime";
 import { DynamicNode } from "./common";
 import { LazyForEachImpl } from "../handwritten/LazyForEachImpl";
-import { PeerNode } from "../PeerNode";
-import { ArkUIAniModule } from "../ani/arkts/ArkUIAniModule";
 
 export enum DataOperationType {
     ADD = "add",
@@ -122,18 +120,5 @@ export function LazyForEach<T>(
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
 ) {
-    NodeAttach(
-        () => {
-            const peerId = PeerNode.nextId();
-            const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId);
-            if (!_peerPtr) {
-                throw new Error("create LazyForEachNode failed");
-            }
-            const _peer = new PeerNode(_peerPtr, peerId, "LazyForEach", 0);
-            return _peer;
-        },
-        (node: PeerNode) => {
-            LazyForEachImpl(dataSource, itemGenerator, keyGenerator);
-        }
-    );
+    LazyForEachImpl(dataSource, itemGenerator, keyGenerator);
 }

@@ -31,6 +31,9 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
     std::list<RefPtr<UINode>> toRemove;
     for (const auto& [index, nodeWeak] : items_) {
         auto node = nodeWeak.Upgrade();
+        if (!node) {
+            continue;
+        }
         if (index < liveRange.start || index > liveRange.end) {
             RemoveChild(node);
         } else {
@@ -51,17 +54,20 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
     if (item || !needBuild) {
         return item;
     }
-    auto newItem = createItem_ ? createItem_(indexCasted) : nullptr;
-    items_.Put(indexCasted, newItem);
-    AddChild(newItem);
+    if (createItem_) {
+        item = createItem_(indexCasted);
+    }
+    CHECK_NULL_RETURN(item, nullptr);
+    items_.Put(indexCasted, item);
+    AddChild(item);
 
     if (isCache) {
-        newItem->SetJSViewActive(false, true);
+        item->SetJSViewActive(false, true);
     } else if (addToRenderTree) {
-        newItem->SetActive(true);
+        item->SetActive(true);
     }
 
-    return newItem;
+    return item;
 }
 
 RefPtr<FrameNode> ArkoalaLazyNode::GetFrameNode(int32_t index)
