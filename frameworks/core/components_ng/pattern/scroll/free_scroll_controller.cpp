@@ -168,6 +168,10 @@ void FreeScrollController::HandlePanEndOrCancel(const GestureEvent& event)
 void FreeScrollController::Fling(const OffsetF& velocity)
 {
     const float friction = GetFriction(pattern_);
+    if (NearZero(friction)) {
+        TAG_LOGW(AceLogTag::ACE_SCROLL, "Fling called with zero friction, skipping fling animation.");
+        return;
+    }
     const auto curve = MakeRefPtr<ResponsiveSpringMotion>(fabs(2 * ACE_PI / friction), 1.0f, 0.0f);
     AnimationOption option(curve, CUSTOM_SPRING_ANIMATION_DURATION);
     option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
