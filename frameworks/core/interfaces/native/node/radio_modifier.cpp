@@ -73,17 +73,25 @@ void SetRadioStylePtr(ArkUINodeHandle node, ArkUI_Uint32 checkedBackgroundColor,
             auto backgroundColorResObj = AceType::Claim(backgroundColor);
             RadioModelNG::CreateWithColorResourceObj(frameNode, backgroundColorResObj,
                 RadioColorType::CHECKED_BACKGROUND_COLOR);
+        } else {
+            RadioModelNG::CreateWithColorResourceObj(frameNode, nullptr, RadioColorType::CHECKED_BACKGROUND_COLOR);
         }
+
         if (resObjStru.uncheckedBorderColor) {
             auto* unBorderColor = reinterpret_cast<ResourceObject*>(resObjStru.uncheckedBorderColor);
             auto unBorderrResObj = AceType::Claim(unBorderColor);
             RadioModelNG::CreateWithColorResourceObj(frameNode, unBorderrResObj,
                 RadioColorType::UNCHECKED_BORDER_COLOR);
+        } else {
+            RadioModelNG::CreateWithColorResourceObj(frameNode, nullptr, RadioColorType::UNCHECKED_BORDER_COLOR);
         }
+
         if (resObjStru.indicatorColor) {
             auto* indicatorColor = reinterpret_cast<ResourceObject*>(resObjStru.indicatorColor);
             auto indicatorResObj = AceType::Claim(indicatorColor);
             RadioModelNG::CreateWithColorResourceObj(frameNode, indicatorResObj, RadioColorType::INDICATOR_COLOR);
+        } else {
+            RadioModelNG::CreateWithColorResourceObj(frameNode, nullptr, RadioColorType::INDICATOR_COLOR);
         }
     }
 }

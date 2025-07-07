@@ -101,6 +101,7 @@ ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeC
         !ArkTSUtils::ParseJsColorAlpha(vm, checkedBackgroundColor, checkedBackgroundColorVal, backgroundColorResObj,
         nodeInfo)) {
         checkedBackgroundColorVal = radioTheme->GetActiveColor();
+        resObjStru.checkedBackgroundColor = nullptr;
     } else {
         jsBgColorSetByUser = true;
         resObjStru.checkedBackgroundColor = AceType::RawPtr(backgroundColorResObj);
@@ -110,6 +111,7 @@ ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeC
         !ArkTSUtils::ParseJsColorAlpha(vm, uncheckedBorderColor, uncheckedBorderColorVal,
         unBorderColorResObj, nodeInfo)) {
         uncheckedBorderColorVal = radioTheme->GetInactiveColor();
+        resObjStru.uncheckedBorderColor = nullptr;
     } else {
         jsUnBorderColorSetByUser = true;
         resObjStru.uncheckedBorderColor = AceType::RawPtr(unBorderColorResObj);
@@ -118,6 +120,7 @@ ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeC
     if (indicatorColor->IsNull() || indicatorColor->IsUndefined() ||
         !ArkTSUtils::ParseJsColorAlpha(vm, indicatorColor, indicatorColorVal, indicatorColorResObj, nodeInfo)) {
         indicatorColorVal = radioTheme->GetPointColor();
+        resObjStru.indicatorColor = nullptr;
     } else {
         jsIndicatorColorSetByUser = true;
         resObjStru.indicatorColor = AceType::RawPtr(indicatorColorResObj);
