@@ -1256,6 +1256,9 @@ HWTEST_F(LinearSplitTestNg, MeasureSelfByLayoutPolicyTest01, TestSize.Level1)
  */
 HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea001, TestSize.Level1)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
     RefPtr<FrameNode> column;
     auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [this, &column](LinearSplitModelNG model) {
         column = CreateColumn([this](ColumnModelNG model) {
@@ -1265,10 +1268,10 @@ HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea001, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(300.0f, DimensionUnit::PX), CalcLength(350.0f, DimensionUnit::PX)));
     PaddingProperty padding;
-    padding.left = CalcLength(0.0f);
-    padding.right = CalcLength(0.0f);
-    padding.top = CalcLength(0.0f);
-    padding.bottom = CalcLength(0.0f);
+    padding.left = CalcLength(10.0f);
+    padding.right = CalcLength(10.0f);
+    padding.top = CalcLength(10.0f);
+    padding.bottom = CalcLength(10.0f);
     layoutProperty->UpdateSafeAreaPadding(padding);
     auto childLayoutProperty = column->GetLayoutProperty();
     ASSERT_NE(childLayoutProperty, nullptr);
