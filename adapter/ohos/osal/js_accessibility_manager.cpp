@@ -7923,12 +7923,6 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
                 AceApplicationInfo::GetInstance().SetAccessibilityEnabled(state);
                 jsAccessibilityManager->NotifyAccessibilitySAStateChange(state);
             } else if (eventType == AccessibilityStateEventType::EVENT_SCREEN_READER_STATE_CHANGED) {
-                auto pipelineRef = jsAccessibilityManager->GetPipelineContext().Upgrade();
-                CHECK_NULL_VOID(pipelineRef);
-                if (jsAccessibilityManager->ShouldSkipAccessibilityStateChange(pipelineRef)) {
-                    return;
-                }
-
                 jsAccessibilityManager->isScreenReaderEnabledInitialized_ = true;
                 jsAccessibilityManager->isScreenReaderEnabled_ = state;
             } else if (eventType == AccessibilityStateEventType::EVENT_CONFIG_EVENT_CHANGED) {
