@@ -4827,4 +4827,70 @@ HWTEST_F(WebModelTestNg, SetOnBeforeUnload003, TestSize.Level1)
     EXPECT_FALSE(callbackCalled);
 #endif
 }
+
+/**
+ * @tc.name: SetOnPdfScrollAtBottom001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnPdfScrollAtBottom001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->CreateEventHubInner();
+    stack->Push(frameNode);
+
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetOnPdfScrollAtBottom([&callbackCalled](const BaseEventInfo* info) {
+        callbackCalled = true;
+        return nullptr;
+    });
+
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnPdfScrollAtBottomEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnPdfLoadEvent001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnPdfLoadEvent001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->CreateEventHubInner();
+    stack->Push(frameNode);
+
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetOnPdfLoadEvent([&callbackCalled](const BaseEventInfo* info) {
+        callbackCalled = true;
+        return nullptr;
+    });
+
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnPdfLoadEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
 } // namespace OHOS::Ace::NG

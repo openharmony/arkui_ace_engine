@@ -220,6 +220,8 @@ public:
     virtual void SetBypassVsyncCondition(WebBypassVsyncCondition condition) {}
     virtual void SetDefaultBackgroundColor() {};
     virtual void SetGestureFocusMode(GestureFocusMode mode) {}
+    virtual void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
+    virtual void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

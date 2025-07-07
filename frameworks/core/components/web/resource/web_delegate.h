@@ -1295,6 +1295,9 @@ public:
 
     void SetViewportScaleState();
 
+    void OnPdfScrollAtBottom(const std::string& url);
+    void OnPdfLoadEvent(int32_t result, const std::string& url);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();

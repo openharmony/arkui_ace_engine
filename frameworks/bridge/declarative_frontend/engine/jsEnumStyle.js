@@ -4256,3 +4256,12 @@ let GestureFocusMode;
   GestureFocusMode[GestureFocusMode.DEFAULT = 0] = 'DEFAULT';
   GestureFocusMode[GestureFocusMode.GESTURE_TAP_AND_LONG_PRESS = 1] = 'GESTURE_TAP_AND_LONG_PRESS';
 })(GestureFocusMode || (GestureFocusMode = {}));
+
+let PdfLoadResult;
+(function (PdfLoadResult) {
+  PdfLoadResult[PdfLoadResult.LOAD_SUCCESS = 0] = 'LOAD_SUCCESS';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_FILE = 1] = 'PARSE_ERROR_FILE';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_FORMAT = 2] = 'PARSE_ERROR_FORMAT';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_PASSWORD = 3] = 'PARSE_ERROR_PASSWORD';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_HANDLER = 4] = 'PARSE_ERROR_HANDLER';
+})(PdfLoadResult || (PdfLoadResult = {}));
