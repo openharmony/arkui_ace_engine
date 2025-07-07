@@ -128,6 +128,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             SendCommandKeyCodeInner(data, reply, option);
             break;
         }
+        case EXE_APP_AI_FUNCTION: {
+            ExeAppAIFunctionInner(data, reply, option);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -325,6 +329,14 @@ int32_t UiContentStub::GetCurrentImagesShowingInner(MessageParcel& data, Message
 int32_t UiContentStub::GetVisibleInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     GetVisibleInspectorTree(nullptr);
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::ExeAppAIFunctionInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    std::string funcName = data.ReadString();
+    std::string params = data.ReadString();
+    reply.WriteInt32(ExeAppAIFunction(funcName, params, nullptr));
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

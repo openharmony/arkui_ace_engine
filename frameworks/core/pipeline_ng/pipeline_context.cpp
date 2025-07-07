@@ -69,6 +69,7 @@
 #include "component_test/pipeline_status.h"
 #endif // COMPONENT_TEST_ENABLED
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
@@ -129,6 +130,19 @@ int32_t GetDepthFromParams(const std::vector<std::string>& params)
 
     return depth;
 }
+
+class TestAICaller : public AICallerHelper {
+public:
+    TestAICaller() = default;
+    ~TestAICaller() override = default;
+    bool onAIFunctionCaller(const std::string& funcName, const std::string& params) override
+    {
+        if (funcName.compare("Success") == 0) {
+            return true;
+        }
+        return false;
+    }
+};
 } // namespace
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -3518,6 +3532,8 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 #endif
     } else if (params[0] == "-forcedark" && params.size() > 2) { // 2 means the forcedark needs at least 3 args
         DumpForceColor(params);
+    } else if (params[0] == "-bindaicaller" && params.size() >= PARAM_NUM) {
+        OnDumpBindAICaller(params);
     }
     return true;
 }
@@ -6468,4 +6484,31 @@ bool PipelineContext::CheckSourceTypeChange(SourceType currentSourceType)
     }
     return ret;
 }
+
+uint32_t PipelineContext::ExeAppAIFunctionCallback(const std::string& funcName, const std::string& params)
+{
+    static constexpr uint32_t AI_CALL_NODE_INVALID = 3;
+    RefPtr<NG::FrameNode> topNavNode;
+    CHECK_NULL_RETURN(rootNode_, AI_CALL_NODE_INVALID);
+    rootNode_->FindTopNavDestination(topNavNode);
+    CHECK_NULL_RETURN(topNavNode, AI_CALL_NODE_INVALID);
+    return topNavNode->CallAIFunction(funcName, params);
+}
+
+void PipelineContext::OnDumpBindAICaller(const std::vector<std::string>& params) const
+{
+    RefPtr<NG::FrameNode> topNavNode;
+    CHECK_NULL_VOID(rootNode_);
+    rootNode_->FindTopNavDestination(topNavNode);
+    CHECK_NULL_VOID(topNavNode);
+    if (params.size() > 1) {
+        if (params[1] == "-bind") {
+            auto myAICaller = std::make_shared<TestAICaller>();
+            topNavNode->SetAICallerHelper(myAICaller);
+        } else if (params[1] == "-unbind") {
+            topNavNode->SetAICallerHelper(nullptr);
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG

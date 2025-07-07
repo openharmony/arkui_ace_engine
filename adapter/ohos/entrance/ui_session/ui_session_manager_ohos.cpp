@@ -522,4 +522,31 @@ void UiSessionManagerOhos::SaveSendCommandFunction(SendCommandFunction&& functio
 {
     sendCommandFunction_ = std::move(function);
 }
+
+void UiSessionManagerOhos::RegisterPipeLineExeAppAIFunction(
+    std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    pipelineExeAppAIFunctionCallback_ = std::move(callback);
+}
+
+void UiSessionManagerOhos::ExeAppAIFunction(const std::string& funcName, const std::string& params)
+{
+    if (pipelineExeAppAIFunctionCallback_) {
+        auto result = pipelineExeAppAIFunctionCallback_(funcName, params);
+        SendExeAppAIFunctionResult(result);
+    }
+}
+
+void UiSessionManagerOhos::SendExeAppAIFunctionResult(uint32_t result)
+{
+    for (auto& pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr) {
+            reportService->SendExeAppAIFunctionResult(result);
+        } else {
+            LOGW("report send execute application AI function result failed,process id:%{public}d", pair.first);
+        }
+    }
+}
 } // namespace OHOS::Ace
