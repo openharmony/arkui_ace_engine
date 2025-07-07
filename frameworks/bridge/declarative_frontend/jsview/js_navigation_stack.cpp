@@ -1256,7 +1256,7 @@ std::string JSNavigationStack::GetSerializedParamSafely(int32_t index) const
     }
     JSRef<JSVal> arg[1] = { JSRef<JSVal>::Make(ToJSValue(index)) };
     auto serializedParam = JSRef<JSFunc>::Cast(getSerializedParamSafelyFunc)->Call(dataSourceObj_, 1, arg);
-    if (serializedParam->IsString() || serializedParam->ToString().empty()) {
+    if (!serializedParam->IsString() || serializedParam->ToString().empty()) {
         TAG_LOGW(AceLogTag::ACE_NAVIGATION,
             "current navDestination(index: %{public}d)'s param can't be serialized or is empty!", index);
     }
