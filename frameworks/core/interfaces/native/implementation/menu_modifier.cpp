@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_model_static.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -62,6 +63,13 @@ V2::ItemDivider Convert(const Ark_DividerStyleOptions& src)
         dst.endMargin = endMargin.value();
     }
     return dst;
+}
+
+template<>
+DividerMode Convert(const Ark_DividerStyleOptions& src)
+{
+    DividerMode mode = OptConvert<DividerMode>(src.mode).value_or(mode);
+    return mode;
 }
 }
 
@@ -141,7 +149,8 @@ void MenuItemDividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    MenuModelStatic::SetItemDivider(frameNode, divider, std::nullopt);
+    auto mode = Converter::OptConvert<DividerMode>(*value);
+    MenuModelStatic::SetItemDivider(frameNode, divider, mode);
 }
 void MenuItemGroupDividerImpl(Ark_NativePointer node,
                               const Opt_DividerStyleOptions* value)
@@ -150,7 +159,8 @@ void MenuItemGroupDividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    MenuModelStatic::SetItemGroupDivider(frameNode, divider, std::nullopt);
+    auto mode = Converter::OptConvert<DividerMode>(*value);
+    MenuModelStatic::SetItemGroupDivider(frameNode, divider, mode);
 }
 void SubMenuExpandingModeImpl(Ark_NativePointer node,
                               const Opt_SubMenuExpandingMode* value)

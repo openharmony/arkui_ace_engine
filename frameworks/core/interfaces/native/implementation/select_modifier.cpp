@@ -80,21 +80,6 @@ void AssignCast(std::optional<AvoidanceMode>& dst, const Ark_AvoidanceMode& src)
 }
 
 template<>
-void AssignCast(std::optional<OHOS::Ace::DividerMode>& dst, const Ark_DividerMode& src)
-{
-    switch (src) {
-        case ARK_DIVIDER_MODE_FLOATING_ABOVE_MENU:
-            dst = DividerMode::FLOATING_ABOVE_MENU;
-            break;
-        case ARK_DIVIDER_MODE_EMBEDDED_IN_MENU:
-            dst = DividerMode::EMBEDDED_IN_MENU;
-            break;
-        default:
-            LOGE("Unexpected enum value in Ark_DeviderMode: %{public}d", src);
-    }
-}
-
-template<>
 Avoidance Convert(const Ark_AvoidanceMode& src)
 {
     Avoidance avoidance;
