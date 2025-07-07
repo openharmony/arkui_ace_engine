@@ -25,6 +25,7 @@
 #include "dragController/drag_controller_module.h"
 #include "image_span/image_span_module.h"
 #include "image/image_module.h"
+#include "list/list_children_main_size_module.h"
 #include "load.h"
 #include "log/log.h"
 #include "utils/convert_utils.h"
@@ -148,6 +149,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_SetWaterFlowOptions",
             "JLarkui/component/waterFlow/WaterFlowOptions;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowOptions)
+        },
+        ani_native_function {
+            "_SetListChildrenMainSize",
+            "JLarkui/component/common/ChildrenMainSize;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetListChildrenMainSize)
         },
         ani_native_function {
             "_DragEvent_Set_Data",

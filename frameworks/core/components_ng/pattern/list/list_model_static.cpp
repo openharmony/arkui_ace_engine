@@ -40,6 +40,22 @@ RefPtr<FrameNode> ListModelStatic::CreateFrameNode(int32_t nodeId, bool isCreate
     return frameNode;
 }
 
+RefPtr<ListChildrenMainSize> ListModelStatic::GetOrCreateListChildrenMainSize(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetOrCreateListChildrenMainSize();
+}
+
+void ListModelStatic::ResetListChildrenMainSize(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetChildrenSize();
+}
+
 void ListModelStatic::SetListItemAlign(FrameNode* frameNode, const std::optional<V2::ListItemAlign>& listItemAlign)
 {
     if (listItemAlign.has_value()) {
@@ -144,6 +160,21 @@ void ListModelStatic::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
     }
 }
 
+void ListModelStatic::SetCachedCount(
+        FrameNode* frameNode, const std::optional<int32_t>& count, const std::optional<bool>& show)
+{
+    if (count.has_value() && count.value() >= 0) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, count.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, frameNode);
+    }
+    if (show.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, frameNode);
+    }
+}
+
 void ListModelStatic::SetListNestedScroll(FrameNode* frameNode, const std::optional<NestedScrollMode>& forward,
     const std::optional<NestedScrollMode>& backward)
 {
@@ -187,28 +218,6 @@ void ListModelStatic::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll
     const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScroll(std::move(onScroll));
-}
-
-RefPtr<ListChildrenMainSize> ListModelStatic::GetOrCreateListChildrenMainSize(
-    FrameNode* frameNode, const std::optional<float>& defaultSize)
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ListPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    auto childrenMainSize = pattern->GetOrCreateListChildrenMainSize();
-    if (defaultSize.has_value()) {
-        childrenMainSize->UpdateDefaultSize(defaultSize.value());
-    }
-    return childrenMainSize;
-}
-
-RefPtr<ListChildrenMainSize> ListModelStatic::GetOrCreateListChildrenMainSize(
-    FrameNode* frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ListPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    return pattern->GetOrCreateListChildrenMainSize();
 }
 
 void ListModelStatic::SetOnItemDelete(FrameNode* frameNode, OnItemDeleteEvent&& onItemDelete)
@@ -460,6 +469,7 @@ void ListModelStatic::SetEditMode(FrameNode* frameNode, bool editMode)
 
 void ListModelStatic::SetMultiSelectable(FrameNode* frameNode, const std::optional<bool>& selectable)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     bool isSelectable = selectable.value_or(false);

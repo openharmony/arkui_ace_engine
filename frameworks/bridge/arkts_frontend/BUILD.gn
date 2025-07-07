@@ -58,6 +58,7 @@ template("arkts_frontend") {
       "ani_context_module.cpp",
       "ani_graphics_module.cpp",
       "ani_water_flow_module.cpp",
+      "ani_list_module.cpp",
       "arkts_ani_utils.cpp",
       "arkts_frontend.cpp",
       "arkts_plugin_frontend.cpp",

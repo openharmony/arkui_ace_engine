@@ -116,6 +116,9 @@ struct ArkUIAniContentSlotModifier {
 struct ArkUIAniWaterFlowModifier {
     void (*setWaterFlowOptions)(ani_env* env, ani_long ptr, ani_object fnObj);
 };
+struct ArkUIAniListModifier {
+    void (*setListChildrenMainSize)(ani_env* env, ani_long ptr, ani_object obj);
+};
 struct ArkUIAniComponentSnapshotModifier {
     int32_t (*getCurrentIdSafely)();
     OHOS::Ace::RefPtr<OHOS::Ace::Container> (*getContainer)(int32_t instanceId);
@@ -189,6 +192,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
+    const ArkUIAniListModifier* (*getArkUIAniListModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
     const ArkUIAniInteropModifier* (*getInteropAniModifier)();

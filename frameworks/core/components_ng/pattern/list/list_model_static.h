@@ -27,6 +27,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ListModelStatic {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isCreateArc = false);
+    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);
+    static void ResetListChildrenMainSize(FrameNode* frameNode);
     static void SetListItemAlign(FrameNode* frameNode, const std::optional<V2::ListItemAlign>& listItemAlign);
     static void SetListDirection(FrameNode* frameNode, const std::optional<int32_t>& axis);
     static void SetListScrollBar(FrameNode* frameNode, const std::optional<int32_t>& barState);
@@ -40,13 +42,12 @@ public:
         const std::optional<NestedScrollMode>& backward);
     static void SetLaneGutter(FrameNode* frameNode, const std::optional<Dimension>& laneGutter);
     static void SetListSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
-    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(
-        FrameNode* frameNode, const std::optional<float>& defaultSize);
-    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetContentStartOffset(FrameNode* frameNode, float startOffset);
     static void SetContentEndOffset(FrameNode* frameNode, float endOffset);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
+    static void SetCachedCount(
+        FrameNode* frameNode, const std::optional<int32_t>& count, const std::optional<bool>& show);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);

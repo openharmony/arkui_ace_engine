@@ -64,7 +64,10 @@ export class ArkListNode extends ArkBaseNode  implements ListAttribute  {
     multiSelectable(value: boolean | undefined): this {
         return this;
     }
-    cachedCount(count: number | undefined, show?: boolean): this {
+    cachedCount(count: number | undefined, show: boolean | undefined): this {
+        return this;
+    }
+    cachedCount(count: number | undefined): this {
         return this;
     }
     chainAnimation(value: boolean | undefined): this {
