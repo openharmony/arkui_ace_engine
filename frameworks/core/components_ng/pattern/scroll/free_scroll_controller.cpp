@@ -92,12 +92,6 @@ void FreeScrollController::InitializePanRecognizer()
     };
     freePanGesture_->SetOnActionEnd(endCallback);
     freePanGesture_->SetOnActionCancel(endCallback);
-
-    auto* ctx = pattern_.GetContext();
-    CHECK_NULL_VOID(ctx);
-    auto theme = ctx->GetTheme<ScrollableTheme>();
-    CHECK_NULL_VOID(theme);
-    friction_ = theme->GetFriction() * -FRICTION_SCALE;
 }
 
 namespace {
@@ -116,6 +110,19 @@ float GetGamma(float offset, float scrollableDistance, float viewLength)
         return -(scrollableDistance + offset) / viewLength;
     }
     return 0.0f;
+}
+
+float GetFriction(const ScrollPattern& pattern)
+{
+    auto friction = static_cast<float>(pattern.GetFriction());
+    if (NearEqual(friction, -1.0)) {
+        auto* ctx = pattern.GetContext();
+        CHECK_NULL_RETURN(ctx, 0.0f);
+        auto theme = ctx->GetTheme<ScrollableTheme>();
+        CHECK_NULL_RETURN(theme, 0.0f);
+        friction = theme->GetFriction();
+    }
+    return friction * -FRICTION_SCALE;
 }
 } // namespace
 
@@ -160,11 +167,12 @@ void FreeScrollController::HandlePanEndOrCancel(const GestureEvent& event)
 
 void FreeScrollController::Fling(const OffsetF& velocity)
 {
-    const auto curve = MakeRefPtr<ResponsiveSpringMotion>(fabs(2 * ACE_PI / friction_), 1.0f, 0.0f);
+    const float friction = GetFriction(pattern_);
+    const auto curve = MakeRefPtr<ResponsiveSpringMotion>(fabs(2 * ACE_PI / friction), 1.0f, 0.0f);
     AnimationOption option(curve, CUSTOM_SPRING_ANIMATION_DURATION);
     option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
 
-    OffsetF finalPos = offset_->Get() + velocity / friction_;
+    OffsetF finalPos = offset_->Get() + velocity / friction;
     ClampPosition(finalPos);
 
     if (finalPos == offset_->Get()) {
@@ -401,8 +409,8 @@ void FreeScrollController::CheckCrashEdge(const OffsetF& newOffset, const SizeF&
 }
 
 using std::optional;
-void FreeScrollController::ScrollTo(
-    OffsetF finalPos, const optional<float>& velocity, optional<int32_t> duration, RefPtr<Curve> curve, bool allowOverScroll)
+void FreeScrollController::ScrollTo(OffsetF finalPos, const optional<float>& velocity, optional<int32_t> duration,
+    RefPtr<Curve> curve, bool allowOverScroll)
 {
     if (!allowOverScroll) {
         ClampPosition(finalPos);

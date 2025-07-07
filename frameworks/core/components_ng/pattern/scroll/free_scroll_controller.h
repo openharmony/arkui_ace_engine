@@ -107,7 +107,6 @@ private:
     OffsetF prevOffset_;
     RefPtr<PanRecognizer> freePanGesture_;
     RefPtr<TouchEventImpl> freeTouch_;
-    float friction_ = 0.0f;
     ScrollState state_ = ScrollState::IDLE;
     bool enableScroll_ = true;
 };

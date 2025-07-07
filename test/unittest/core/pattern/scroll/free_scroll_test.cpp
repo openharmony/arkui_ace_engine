@@ -347,9 +347,11 @@ TEST_F(FreeScrollTest, OverScroll002)
  */
 TEST_F(FreeScrollTest, Animation001)
 {
+    constexpr float FRICTION = 0.5f;
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
+    model.SetFriction(FRICTION);
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
     PanStart({});
@@ -377,10 +379,17 @@ TEST_F(FreeScrollTest, Animation001)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     ASSERT_TRUE(pattern_->freeScroll_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X - VELOCITY_X / pattern_->freeScroll_->friction_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X - VELOCITY_X / (FRICTION * -FRICTION_SCALE));
     EXPECT_EQ(GetChildY(frameNode_, 0), 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
     EXPECT_EQ(controller->state_, ScrollState::IDLE);
+
+    constexpr float FRICTION_2 = 0.8f;
+    ScrollModelNG::SetFriction(frameNode_.GetRawPtr(), FRICTION_2);
+    PanEnd({}, { 0, -VELOCITY_Y });
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -VELOCITY_Y / (FRICTION_2 * -FRICTION_SCALE));
 }
 
 /**
@@ -878,7 +887,8 @@ TEST_F(FreeScrollTest, ScrollBar006)
     const auto& verticalBar = pattern_->scrollBar2d_->vertical_;
     const auto& horizontalBar = pattern_->scrollBar2d_->horizontal_;
     const auto& painter = pattern_->scrollBar2d_->painter_->horizontal_;
-    mockTaskExecutor->RunDelayTask(); // testing horizontal to avoid MockTaskExecutor's bug (only running last added task)
+    mockTaskExecutor
+        ->RunDelayTask(); // testing horizontal to avoid MockTaskExecutor's bug (only running last added task)
     EXPECT_EQ(horizontalBar.opacityAnimationType_, OpacityAnimationType::DISAPPEAR);
     FlushUITasks(frameNode_);
     EXPECT_EQ(painter.opacity_->Get(), 0);
