@@ -134,7 +134,7 @@ public:
         return photoDecodeFormat_;
     }
 
-    void FinishMearuse()
+    void FinishMeasure()
     {
         measureFinish_ = true;
     }

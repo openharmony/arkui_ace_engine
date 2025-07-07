@@ -125,7 +125,6 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->isOrientationChange_ = false;
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -144,7 +143,6 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->isOrientationChange_ = false;
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -164,7 +162,6 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
                const ImageSourceInfo& sourceInfo, const std::string& errorMsg, const ImageErrorInfo& errorInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->isOrientationChange_ = false;
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -792,6 +789,15 @@ ImageDfxConfig ImagePattern::CreateImageDfxConfig(const ImageSourceInfo& src)
     };
 }
 
+void ImagePattern::ClearReloadFlagsAfterLoad()
+{
+    // Reset the reload flag before loading the image to ensure a fresh state.
+    isImageReloadNeeded_ = false;
+    isOrientationChange_ = false;
+    // Before loading new image data, reset the render success status to `false`.
+    renderedImageInfo_.renderSuccess = false;
+}
+
 void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
 {
     if (loadingCtx_) {
@@ -814,12 +820,9 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
     if (!needLayout) {
-        loadingCtx_->FinishMearuse();
+        loadingCtx_->FinishMeasure();
     }
-    // Before loading new image data, reset the render success status to `false`.
-    renderedImageInfo_.renderSuccess = false;
-    // Reset the reload flag before loading the image to ensure a fresh state.
-    isImageReloadNeeded_ = false;
+    ClearReloadFlagsAfterLoad();
     ImagePerf::GetPerfMonitor()->StartRecordImageLoadStat(imageDfxConfig_.GetAccessibilityId());
     loadingCtx_->LoadImageData();
 }
@@ -1143,7 +1146,7 @@ std::optional<SizeF> ImagePattern::GetImageSizeForMeasure()
 void ImagePattern::FinishMeasureForOnComplete()
 {
     CHECK_NULL_VOID(loadingCtx_);
-    loadingCtx_->FinishMearuse();
+    loadingCtx_->FinishMeasure();
     loadingCtx_->CallbackAfterMeasureIfNeed();
 }
 
