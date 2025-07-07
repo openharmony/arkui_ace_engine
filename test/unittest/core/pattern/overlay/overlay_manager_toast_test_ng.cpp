@@ -538,6 +538,46 @@ HWTEST_F(OverlayManagerToastTestNg, ToastTest011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToastTest002
+ * @tc.desc: Test OverlayManager::ShowToast->PopToast.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and toast node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto toastNode =
+        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowToast when rootElement is not nullptr.
+     * @tc.expected: toastMap_ is empty
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrent()->rootNode_ = rootNode;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.shadow = ShadowConfig::DefaultShadowL;
+    overlayManager->ShowToast(toastInfo, nullptr);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+    /**
+     * @tc.steps: step2. call PopToast.
+     * @tc.expected: toastMap_ is empty
+     */
+    overlayManager->PopToast(toastId);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+}
+
+/**
  * @tc.name: ToastDumpInfoTest001
  * @tc.desc: Test Toast DumpInfo.
  * @tc.type: FUNC

@@ -21,6 +21,14 @@
 #include "adapter/ohos/entrance/rs_adapter.h"
 #include "base/utils/system_properties.h"
 #include "command/rs_base_node_command.h"
+#include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/pipeline/pipeline_base.h"
+#include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_root_node.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
+#include "wm/window.h"
 
 
 using namespace testing;

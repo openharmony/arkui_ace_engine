@@ -98,8 +98,10 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     } else {
         auto rsUIDirector = window->GetRSUIDirector();
         if (rsUIDirector) {
+            directorFromWindow_ = true;
             rsUIDirector_ = rsUIDirector;
         } else {
+            directorFromWindow_ = false;
             rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
         }
         if (window && window->GetSurfaceNode()) {
@@ -251,7 +253,9 @@ void RosenWindow::Destroy()
     rsWindow_ = nullptr;
     vsyncCallback_.reset();
     rsUIDirector_->SendMessages();
-    rsUIDirector_->Destroy();
+    if (!directorFromWindow_) {
+        rsUIDirector_->Destroy();
+    }
     rsUIDirector_.reset();
     callbacks_.clear();
 }

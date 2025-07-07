@@ -169,6 +169,7 @@ ohos_unittest("layout_inspector_test") {
     "mock_component_snapshot.cpp",
     "mock_connect_server_manager.cpp",
     "mock_inspector_pixel_map.cpp",
+    "mock_rs_adapter.cpp",
     "mock_v2_inspector.cpp",
     "mock_websocket_manager.cpp",
   ]
