@@ -176,6 +176,15 @@ void NavDestinationModelStatic::SetOnInactive(FrameNode* frameNode, std::functio
     eventHub->SetOnInactive(onInactive);
 }
 
+void NavDestinationModelStatic::SetCustomTransition(FrameNode* frameNode,
+    NG::NavDestinationTransitionDelegate transitionDelegate)
+{
+    CHECK_NULL_VOID(frameNode && transitionDelegate);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetNavDestinationTransitionDelegate(std::move(transitionDelegate));
+}
+
 void NavDestinationModelStatic::SetMenuOptions(FrameNode* frameNode, NavigationMenuOptions&& opt)
 {
     CHECK_NULL_VOID(frameNode);
@@ -626,5 +635,14 @@ void NavDestinationModelStatic::SetEnableStatusBar(
     auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
     CHECK_NULL_VOID(node);
     node->SetStatusBarConfig(statusBar);
+}
+
+void NavDestinationModelStatic::SetEnableNavigationIndicator(FrameNode* frameNode,
+    const std::optional<bool>& navigationIndicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetNavigationIndicatorConfig(navigationIndicator);
 }
 } // namespace OHOS::Ace::NG

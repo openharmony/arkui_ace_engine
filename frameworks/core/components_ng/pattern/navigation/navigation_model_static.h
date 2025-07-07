@@ -54,6 +54,7 @@ public:
 
     static void SetToolBarItems(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems);
     static void SetToolbarConfiguration(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems);
+    static void SetHideItemText(FrameNode* frameNode, bool isHideItemText);
     static void SetToolbarOptions(FrameNode* frameNode, NavigationToolbarOptions&& opt);
     static void SetToolbarMorebuttonOptions(FrameNode* frameNode, MoreButtonOptions&& opt);
     static void ParseCommonTitle(

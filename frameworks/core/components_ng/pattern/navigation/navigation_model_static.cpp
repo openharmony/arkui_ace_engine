@@ -710,6 +710,14 @@ void NavigationModelStatic::SetToolbarMorebuttonOptions(FrameNode* frameNode, Mo
     NavigationToolbarUtil::SetToolbarMoreButtonOptions(navBarNode, std::move(opt));
 }
 
+void NavigationModelStatic::SetHideItemText(FrameNode* frameNode, bool isHideItemText)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    NavigationToolbarUtil::SetHideItemText(navBarNode, isHideItemText);
+}
+
 void NavigationModelStatic::SetToolbarOptions(FrameNode* frameNode, NavigationToolbarOptions&& opt)
 {
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
