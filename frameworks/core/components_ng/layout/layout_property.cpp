@@ -436,13 +436,13 @@ std::pair<std::vector<std::string>, std::vector<std::string>> LayoutProperty::Ca
 void LayoutProperty::ExpandConstraintWithSafeArea()
 {
     auto host = GetHost();
-    if (!host || !host->GetIgnoreLayoutProcess()) {
+    if (!host || !IsExpandConstraintNeeded() || (!host->GetIgnoreLayoutProcess() && !host->IsRootMeasureNode())) {
         return;
     }
     RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
-    IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
-        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_NONE,
+        .edges = NG::LAYOUT_SAFE_AREA_TYPE_NONE };
     if (ignoreLayoutSafeAreaOpts_) {
         options = *ignoreLayoutSafeAreaOpts_;
     }
