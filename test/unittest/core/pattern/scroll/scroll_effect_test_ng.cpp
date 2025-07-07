@@ -838,6 +838,29 @@ HWTEST_F(ScrollEffectTestNg, SetPaintDirection003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ChangeState_RecedeToIdle
+ * @tc.desc: Test ScrollFadeController state change from RECEDE to IDLE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, ChangeState_RecedeToIdle, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create controller and set RECEDE state
+     */
+    RefPtr<ScrollFadeController> controller = AceType::MakeRefPtr<ScrollFadeController>();
+    controller->state_ = OverScrollState::RECEDE;
+    controller->pullDistance_ = 50.0f;
+
+    /**
+     * @tc.steps: step2. Trigger state change
+     * @tc.expected: State changes to IDLE and pullDistance resets
+     */
+    controller->ChangeState();
+    EXPECT_EQ(controller->state_, OverScrollState::IDLE);
+    EXPECT_FLOAT_EQ(controller->pullDistance_, 0.0f);
+}
+
+/**
  * @tc.name: ChangeStateDefault
  * @tc.desc: Test ScrollFadeController ChangeState
  * @tc.type: FUNC
