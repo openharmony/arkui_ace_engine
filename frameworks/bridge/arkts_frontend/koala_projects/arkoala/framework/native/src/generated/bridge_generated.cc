@@ -31777,6 +31777,21 @@ void impl_AnimationExtender_SetClipRect(Ark_NativePointer node, KFloat x, KFloat
         GetAccessors()->getAnimationExtenderAccessor()->SetClipRect(node, x, y, width, height);
 }
 KOALA_INTEROP_DIRECT_V5(AnimationExtender_SetClipRect, Ark_NativePointer, KFloat, KFloat, KFloat, KFloat)
+void impl_AnimationExtender_KeyFrameAnimation(KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_KeyFrameAnimateParam param_value = thisDeserializer.readKeyFrameAnimateParam();
+        int32_t keyframeCount = thisDeserializer.readInt32();
+        std::vector<Ark_KeyframeState> keyframes;
+        Array_Ark_KeyframeState params_value_buf = {};
+        thisDeserializer.resizeArray<std::decay<decltype(params_value_buf)>::type,
+                                std::decay<decltype(*params_value_buf.array)>::type>(&params_value_buf, keyframeCount);
+        for (int32_t i = 0; i < keyframeCount; ++i) {
+            params_value_buf.array[i] = static_cast<Ark_KeyframeState>(thisDeserializer.readKeyframeStateParam());
+        }
+        Array_Ark_KeyframeState params_value = params_value_buf;
+        GetAccessors()->getAnimationExtenderAccessor()->KeyFrameAnimationImpl((const Ark_KeyFrameAnimateParam*)&param_value, (const Array_Ark_KeyframeState*)&params_value);
+}
+KOALA_INTEROP_DIRECT_V2(AnimationExtender_KeyFrameAnimation, KSerializerBuffer, int32_t)
 void impl_AnimationExtender_OpenImplicitAnimation(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         Ark_AnimateParam param_value = thisDeserializer.readAnimateParam();;

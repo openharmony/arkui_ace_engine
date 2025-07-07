@@ -28,7 +28,7 @@ import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { dragController } from "@ohos/arkui/dragController"
 import { focusController } from "@ohos/arkui/focusController"
 import { Frame } from "arkui/Graphics"
-import { KeyEvent } from "arkui/component/common"
+import { KeyEvent, KeyframeAnimateParam, KeyframeState } from "arkui/component/common"
 import { TextMenuOptions } from "arkui/component/textCommon"
 import { Nullable, WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyProcessingMode } from "arkui/component/focus"
@@ -429,6 +429,10 @@ export class UIContext {
 
     public getRouter(): Router {
         throw Error("getRouter not implemented in UIContext!")
+    }
+
+    public keyframeAnimateTo(param: KeyframeAnimateParam, keyframes: Array<KeyframeState>): void {
+        throw Error("animateTo not implemented in UIContext!")
     }
 
     public animateTo(param: AnimateParam, event: (() => void)): void {

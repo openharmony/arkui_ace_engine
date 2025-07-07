@@ -26,6 +26,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
+constexpr int32_t MAX_FLUSH_COUNT = 2;
 } // namespace
 namespace AnimationExtenderAccessor {
 void SetClipRectImpl(Ark_NativePointer node,
@@ -271,6 +272,139 @@ void StartDoubleAnimationImpl(Ark_NativePointer node,
     frameNode->UpdateAnimatablePropertyFloat(propertyName, endValue);
     AnimationUtils::CloseImplicitAnimation();
 }
+
+struct Keyframe {
+    int32_t duration = 0;
+    RefPtr<Curve> curve;
+    std::function<void()> animationClosure;
+};
+
+void FlushDirtyNodesWhenExist(const RefPtr<PipelineBase>& pipelineContext,
+    const AnimationOption& option, const std::optional<int32_t>& count, AnimationInterface interface)
+{
+    auto animationInterfaceName = GetAnimationInterfaceName(interface);
+    CHECK_NULL_VOID(animationInterfaceName);
+    int32_t flushCount = 0;
+    bool isDirtyNodesEmpty = pipelineContext->IsDirtyNodesEmpty();
+    bool isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
+    while (!isDirtyNodesEmpty || (!isDirtyLayoutNodesEmpty && !pipelineContext->IsLayouting())) {
+        if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
+            TAG_LOGD(AceLogTag::ACE_ANIMATION, "%{public}s, option:%{public}s, finish cnt:%{public}d,"
+                "dirtyNodes is empty:%{public}d, dirtyLayoutNodes is empty:%{public}d",
+                animationInterfaceName, option.ToString().c_str(), count.value_or(-1),
+                isDirtyNodesEmpty, isDirtyLayoutNodesEmpty);
+            break;
+        }
+        if (!isDirtyNodesEmpty) {
+            pipelineContext->FlushBuild();
+            isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
+        }
+        if (!isDirtyLayoutNodesEmpty && !pipelineContext->IsLayouting()) {
+            pipelineContext->FlushUITasks(true);
+        }
+        isDirtyNodesEmpty = pipelineContext->IsDirtyNodesEmpty();
+        isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
+        flushCount++;
+    }
+}
+
+void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& overallAnimationOption,
+    std::vector<Keyframe>& keyframes, const std::optional<int32_t>& count)
+{
+    // flush build and flush ui tasks before open animation closure.
+    pipelineContext->FlushBuild();
+    if (!pipelineContext->IsLayouting()) {
+        pipelineContext->FlushUITasks(true);
+    }
+
+    // flush build when exist dirty nodes, flush ui tasks when exist dirty layout nodes.
+    FlushDirtyNodesWhenExist(pipelineContext,
+        overallAnimationOption, count, AnimationInterface::KEYFRAME_ANIMATE_TO);
+
+    // start KeyframeAnimation.
+    pipelineContext->StartImplicitAnimation(
+        overallAnimationOption, overallAnimationOption.GetCurve(), overallAnimationOption.GetOnFinishEvent(), count);
+    for (auto& keyframe : keyframes) {
+        if (!keyframe.animationClosure) {
+            continue;
+        }
+        AceTraceBeginWithArgs("keyframe duration%d", keyframe.duration);
+        AnimationUtils::AddDurationKeyFrame(keyframe.duration, keyframe.curve, [&keyframe, &pipelineContext]() {
+            keyframe.animationClosure();
+            pipelineContext->FlushBuild();
+            if (!pipelineContext->IsLayouting()) {
+                pipelineContext->FlushUITasks(true);
+            } else {
+                TAG_LOGI(AceLogTag::ACE_ANIMATION, "isLayouting, maybe some layout keyframe animation not generated");
+            }
+        });
+        AceTraceEnd();
+    }
+
+    // close KeyframeAnimation.
+    AnimationUtils::CloseImplicitAnimation();
+}
+
+void KeyFrameAnimationImpl(const Ark_KeyFrameAnimateParam* param, const Array_Ark_KeyframeState* keyframes)
+{
+    auto scopedDelegate = Container::CurrentIdSafelyWithCheck();
+    if (!scopedDelegate) {
+        return;
+    }
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto timeInterval = (GetMicroTickCount() - pipelineContext->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
+    AnimationOption option;
+    std::optional<int32_t> count;
+    int32_t delay = 0;
+    int32_t iterations = 1;
+    if (param) {
+        delay = Converter::OptConvert<int32_t>(param->delay).value_or(0);
+        iterations = Converter::OptConvert<int32_t>(param->iterations).value_or(1);
+    }
+    option.SetDelay(delay);
+    option.SetIteration(iterations);
+    if (param && param->onFinish.tag != INTEROP_TAG_UNDEFINED) {
+        count = GetAnimationFinshCount();
+        auto onFinishEvent = [arkCallback = CallbackHelper(param->onFinish.value),
+                                 currentId = Container::CurrentIdSafely()]() mutable {
+            ContainerScope scope(currentId);
+            arkCallback.InvokeSync();
+        };
+        option.SetOnFinishEvent(onFinishEvent);
+    }
+    std::vector<Keyframe> parsedKeyframes;
+    int32_t totalDuration = 0;
+    if (keyframes && keyframes->array) {
+        for (int i = 0; i < keyframes->length; ++i) {
+            const auto& arkFrame = keyframes->array[i];
+            if (arkFrame.event.tag == INTEROP_TAG_UNDEFINED) {
+                continue;
+            }
+            Keyframe keyframe;
+            keyframe.duration = Converter::OptConvert<int32_t>(arkFrame.duration).value_or(DEFAULT_DURATION);
+            if (keyframe.duration < 0) {
+                keyframe.duration = 0;
+            }
+            totalDuration += keyframe.duration;
+            keyframe.curve = Converter::OptConvert<RefPtr<Curve>>(arkFrame.curve).value_or(Curves::EASE_IN_OUT);
+            keyframe.animationClosure = [arkCallback = CallbackHelper(arkFrame.event.value),
+                                            currentId = Container::CurrentIdSafely()]() {
+                ContainerScope scope(currentId);
+                arkCallback.InvokeSync();
+            };
+
+            parsedKeyframes.emplace_back(std::move(keyframe));
+        }
+    }
+    option.SetDuration(totalDuration);
+    option.SetCurve(Curves::EASE_IN_OUT);
+    StartKeyframeAnimation(pipelineContext, option, parsedKeyframes, count);
+    pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
+}
+
 void AnimationTranslateImpl(Ark_NativePointer node,
                             const Ark_TranslateOptions* value)
 {
@@ -297,6 +431,7 @@ const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
 {
     static const GENERATED_ArkUIAnimationExtenderAccessor AnimationExtenderAccessorImpl {
         AnimationExtenderAccessor::SetClipRectImpl,
+        AnimationExtenderAccessor::KeyFrameAnimationImpl,
         AnimationExtenderAccessor::OpenImplicitAnimationImpl,
         AnimationExtenderAccessor::AnimateToImmediatelyImpl,
         AnimationExtenderAccessor::CloseImplicitAnimationImpl,
