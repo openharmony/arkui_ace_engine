@@ -364,11 +364,11 @@ void FreeScrollController::FireOnScrollEnd() const
     CHECK_NULL_VOID(eventHub);
     const auto& onScrollStop = eventHub->GetOnScrollStop();
     const auto& frameCb = eventHub->GetJSFrameNodeOnScrollStop();
-    if (frameCb) {
-        frameCb();
-    }
     if (onScrollStop) {
         onScrollStop();
+    }
+    if (frameCb) {
+        frameCb();
     }
     pattern_.AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
     if (auto scrollBar = pattern_.Get2DScrollBar()) {
