@@ -1726,6 +1726,7 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
 
 void TextPickerColumnPattern::SetOptionShiftDistanceByIndex(int32_t index, const bool isLandscape)
 {
+    CHECK_EQUAL_VOID(optionProperties_.empty(), true);
     TextPickerOptionProperty& prop = optionProperties_[index];
     if (isLandscape) {
         prop.prevDistance = GetShiftDistanceForLandscape(index, ScrollDirection::UP);
