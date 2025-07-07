@@ -64,6 +64,7 @@ public:
     void SetMinZoomScale(float scale) override;
     void SetZoomScale(float scale) override;
     void ResetZoomScale() override;
+    void SetZoomScaleChangeEvent(std::function<void(float)>&& event) override;
     void SetEnableBouncesZoom(bool enable) override;
     void SetOnDidZoom(std::function<void(float)>&& event) override;
     void SetOnZoomStart(std::function<void()>&& event) override;
