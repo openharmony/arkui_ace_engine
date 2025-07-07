@@ -469,4 +469,57 @@ HWTEST_F(WebPatternTest, ProcessVirtualKeyBoardHideAvoidMenu, TestSize.Level1)
     EXPECT_FALSE(result);
 }
 
+/**
+ * @tc.name: UpdateScrollBarWithBorderRadius
+ * @tc.desc: Test UpdateScrollBarWithBorderRadius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, UpdateScrollBarWithBorderRadius, TestSize.Level1)
+{
+    std::string src = "web_test";
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    ASSERT_NE(controller, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    RefPtr<WebPattern> webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    auto host = webPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto renderContext = host->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    BorderRadiusProperty borderRadius;
+
+    webPattern->UpdateScrollBarWithBorderRadius();
+    bool borderRadiusStructHasValue = renderContext->GetBorderRadius().has_value();
+    EXPECT_FALSE(borderRadiusStructHasValue);
+    webPattern->UpdateScrollBarWithBorderRadius();
+    bool hasBorderRadiusValue = borderRadius.radiusTopLeft.has_value();
+    EXPECT_FALSE(hasBorderRadiusValue);
+    
+    borderRadius.radiusTopLeft = Dimension(10.0f);
+    borderRadius.radiusTopRight = Dimension(20.0f);
+    borderRadius.radiusBottomLeft = Dimension(30.0f);
+    borderRadius.radiusBottomRight = Dimension(40.0f);
+    renderContext->UpdateBorderRadius(borderRadius);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto clipState = renderContext->GetClipEdge().value_or(false);
+    webPattern->UpdateScrollBarWithBorderRadius();
+    renderContext->UpdateClipEdge(true);
+    clipState = renderContext->GetClipEdge().value_or(false);
+    webPattern->UpdateScrollBarWithBorderRadius();
+
+    borderRadiusStructHasValue = renderContext->GetBorderRadius().has_value();
+    webPattern->UpdateScrollBarWithBorderRadius();
+    EXPECT_TRUE(borderRadiusStructHasValue);
+    hasBorderRadiusValue = !borderRadius.radiusTopLeft.has_value();
+    webPattern->UpdateScrollBarWithBorderRadius();
+    EXPECT_FALSE(hasBorderRadiusValue);
+}
 } // namespace OHOS::Ace::NG
