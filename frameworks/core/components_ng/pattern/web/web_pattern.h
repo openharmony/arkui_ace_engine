@@ -727,6 +727,7 @@ public:
     void UpdateImageOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType);
     void PushOverlayInfo(float x, float y, int32_t id);
     void WebOverlayRequestFocus();
+    void SetDefaultBackgroundColor();
 
 private:
     friend class WebContextSelectOverlay;
@@ -1169,7 +1170,7 @@ private:
     int64_t lastHeight_ = 0L;
     int64_t lastWidth_ = 0L;
     bool dragWindowFlag_ = false;
-
+    bool needSetDefaultBackgroundColor_ = false;
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
