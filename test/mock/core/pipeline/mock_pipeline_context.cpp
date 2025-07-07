@@ -1152,7 +1152,7 @@ void PipelineBase::SetDestroyed() {}
 
 RefPtr<Frontend> PipelineBase::GetFrontend() const
 {
-    return nullptr;
+    return weakFrontend_.Upgrade();
 }
 
 void PipelineBase::SetTouchPipeline(const WeakPtr<PipelineBase>& context) {}
