@@ -9433,12 +9433,6 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     changeValueInfo.rangeAfter = TextRange { GetPreviewTextStart(), GetPreviewTextStart() };
     bool hasInsertValue = false;
     auto originLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) - (end - start);
-    auto attemptInsertLength = static_cast<int32_t>(info.text.length()) - (end - start);
-    if (layoutProperty->HasMaxLength() &&
-        attemptInsertLength + static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) >
-        static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()))) {
-        isPreviewTextOverCount_ = true;
-    }
     hasInsertValue = contentController_->ReplaceSelectedValue(start, end, info.text);
     int32_t caretMoveLength = abs(static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) -
         originLength);
@@ -9486,9 +9480,7 @@ void TextFieldPattern::FinishTextPreviewOperation(bool triggerOnWillChange)
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->HasMaxLength()) {
         int32_t len = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
-        showCountBorderStyle_ = isPreviewTextOverCount_ || (len >
-            static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>())));
-        isPreviewTextOverCount_ = false;
+        showCountBorderStyle_ = len > static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
         HandleCountStyle();
     }
 
@@ -10911,6 +10903,7 @@ void TextFieldPattern::ClearTextContent()
         return;
     }
     showCountBorderStyle_ = false;
+    HandleCountStyle();
     InputCommandInfo inputCommandInfo;
     inputCommandInfo.deleteRange = { 0, contentController_->GetTextUtf16Value().length() };
     inputCommandInfo.insertOffset = 0;

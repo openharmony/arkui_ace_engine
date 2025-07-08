@@ -188,6 +188,32 @@ HWTEST_F(TextFieldPatternTestNine, FinishTextPreviewOperation001, TestSize.Level
 }
 
 /**
+ * @tc.name: FinishTextPreviewOperation002
+ * @tc.desc: test FinishTextPreviewOperation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, FinishTextPreviewOperation002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Initialize text field.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+        model.SetShowError(u"error", true);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Call FinishTextPreviewOperation.
+     */
+    pattern_->hasPreviewText_ = true;
+    pattern_->contentController_->content_ = u"01234567890";
+    pattern_->FinishTextPreviewOperation();
+    EXPECT_TRUE(pattern_->showCountBorderStyle_);
+}
+
+/**
  * @tc.name: OnTextGestureSelectionUpdate001
  * @tc.desc: test OnTextGestureSelectionUpdate
  * @tc.type: FUNC
