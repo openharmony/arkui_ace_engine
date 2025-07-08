@@ -143,6 +143,56 @@ public:
 
     // called for DFX
     void DumpInfo() override;
+
+    void SetOnPageShowFunc(std::function<void()>&& onPageShow)
+    {
+        onPageShowFunc_ = std::move(onPageShow);
+    }
+
+    void FireOnPageShow()
+    {
+        if (onPageShowFunc_) {
+            onPageShowFunc_();
+        }
+    }
+
+    void SetOnPageHideFunc(std::function<void()>&& onPageHide)
+    {
+        onPageHideFunc_ = std::move(onPageHide);
+    }
+
+    void FireOnPageHide()
+    {
+        if (onPageHideFunc_) {
+            onPageHideFunc_();
+        }
+    }
+
+    void SetOnBackPressedFunc(std::function<bool()>&& onBackPress)
+    {
+        onBackPressFunc_ = std::move(onBackPress);
+    }
+
+    bool FireOnBackPressed()
+    {
+        if (onBackPressFunc_) {
+            return onBackPressFunc_();
+        }
+        return false;
+    }
+
+    void SetPageTransitionFunc(std::function<void()> pageTransition)
+    {
+        pageTransitionFunc_ = std::move(pageTransition);
+    }
+
+    void FirePageTransition()
+    {
+        if (pageTransitionFunc_) {
+            pageTransitionFunc_();
+        }
+    }
+
 private:
     // for DFX
     void DumpComponentInfo(std::unique_ptr<JsonValue>& componentInfo);
@@ -157,6 +207,11 @@ private:
     WeakPtr<UINode> navigationNode_;
     std::unique_ptr<ViewStackProcessor> prebuildViewStackProcessor_;
     int32_t prebuildFrameRounds_ = 0;
+
+    std::function<void()> onPageShowFunc_ = nullptr;
+    std::function<void()> onPageHideFunc_ = nullptr;
+    std::function<bool()> onBackPressFunc_ = nullptr;
+    std::function<void()> pageTransitionFunc_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

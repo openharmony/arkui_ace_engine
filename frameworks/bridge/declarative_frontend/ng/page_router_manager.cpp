@@ -209,7 +209,7 @@ void PageRouterManager::Push(const RouterPageInfo& target)
     StartPush(target);
 }
 
-RefPtr<FrameNode> PageRouterManager::PushExtender(const RouterPageInfo& target)
+RefPtr<FrameNode> PageRouterManager::PushExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
@@ -274,11 +274,15 @@ RefPtr<FrameNode> PageRouterManager::PushExtender(const RouterPageInfo& target)
         return nullptr;
     }
     auto pageNode = pageRouterStack_.back().Upgrade();
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, nullptr);
+    pagePattern->SetOnNodeDisposeCallback(std::move(finishCallback));
     return pageNode;
 }
 
-RefPtr<FrameNode> PageRouterManager::ReplaceExtender(
-    const RouterPageInfo& target, std::function<void()>&& finishCallback)
+RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& target,
+    std::function<void()>&& enterFinishCallback, std::function<void()>&& exitFinishCallback)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
@@ -372,6 +376,9 @@ RefPtr<FrameNode> PageRouterManager::ReplaceExtender(
         bool loadPageSuccess = LoadPageExtender(GenerateNextPageId(), info, false, false);
         if (loadPageSuccess) {
             pageNode = pageRouterStack_.back().Upgrade();
+            auto pagePattern = pageNode->GetPattern<PagePattern>();
+            CHECK_NULL_RETURN(pagePattern, nullptr);
+            pagePattern->SetOnNodeDisposeCallback(std::move(enterFinishCallback));
         }
 #if defined(ENABLE_SPLIT_MODE)
         stageManager->SetIsNewPageReplacing(false);
@@ -384,7 +391,7 @@ RefPtr<FrameNode> PageRouterManager::ReplaceExtender(
     CHECK_NULL_RETURN(popNode, nullptr);
     auto pagePattern = popNode->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, nullptr);
-    pagePattern->SetOnNodeDisposeCallback(std::move(finishCallback));
+    pagePattern->SetOnNodeDisposeCallback(std::move(exitFinishCallback));
     auto iter = pageRouterStack_.begin();
     std::advance(iter, popIndex);
     auto lastIter = pageRouterStack_.erase(iter);
@@ -412,7 +419,8 @@ RefPtr<FrameNode> PageRouterManager::ReplaceExtender(
     return pageNode;
 }
 
-RefPtr<FrameNode> PageRouterManager::RunPageExtender(const RouterPageInfo& target)
+RefPtr<FrameNode> PageRouterManager::RunPageExtender(
+    const RouterPageInfo& target, std::function<void()>&& finishCallback)
 {
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
     ACE_SCOPED_TRACE("PageRouterManager::RunPage");
@@ -424,6 +432,10 @@ RefPtr<FrameNode> PageRouterManager::RunPageExtender(const RouterPageInfo& targe
         return nullptr;
     }
     auto pageNode = pageRouterStack_.back().Upgrade();
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, nullptr);
+    pagePattern->SetOnNodeDisposeCallback(std::move(finishCallback));
     return pageNode;
 }
 

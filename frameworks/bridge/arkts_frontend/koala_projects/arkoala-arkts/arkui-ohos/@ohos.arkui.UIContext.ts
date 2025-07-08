@@ -46,8 +46,7 @@ import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
 import { AsyncCallback, CustomBuilder, DragItemInfo, Callback } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
-import { ComputableState } from '@koalaui/runtime'
-import { PeerNode } from 'arkui/PeerNode'
+import { ComputableState, IncrementalNode } from '@koalaui/runtime'
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver {
@@ -131,7 +130,7 @@ export class Router {
         throw Error("getStateByUrl not implemented in Router!");
     }
 
-    public getStateRoot(): ComputableState<PeerNode> {
+    public getStateRoot(): ComputableState<IncrementalNode> {
         throw Error("getStateRoot not implemented in Router!");
     }
 }

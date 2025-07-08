@@ -24,7 +24,7 @@ import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, Con
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController }
     from "@ohos/arkui/UIContext"
-import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry } from '@koalaui/runtime'
+import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry, IncrementalNode } from '@koalaui/runtime'
 import { Context, PointerStyle, PixelMap } from "#external"
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyEvent } from "arkui/component/common"
@@ -592,7 +592,7 @@ export class RouterImpl extends Router {
         return result;
     }
 
-    public getStateRoot(): ComputableState<PeerNode> {
+    public getStateRoot(): ComputableState<IncrementalNode> {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
         }

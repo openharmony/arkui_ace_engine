@@ -114,10 +114,12 @@ public:
 
     void AddPage(const RefPtr<AcePage>& page) override {}
 
-    void* PushExtender(const std::string& url, const std::string& params) override;
-    void* ReplaceExtender(
-        const std::string& url, const std::string& params, std::function<void()>&& finishCallback) override;
-    void* RunPageExtender(const std::string& url, const std::string& params) override;
+    void* PushExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& finishCallback) override;
+    void* ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& enterFinishCallback, std::function<void()>&& exitFinishCallback) override;
+    void* RunPageExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& finishCallback) override;
     void BackExtender(const std::string& url, const std::string& params) override;
     void ClearExtender() override;
 
