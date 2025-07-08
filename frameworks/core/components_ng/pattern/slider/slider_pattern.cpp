@@ -838,14 +838,6 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto sliderLayoutAlgorithm = DynamicCast<SliderLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(sliderLayoutAlgorithm, false);
-    trackThickness_ = sliderLayoutAlgorithm->GetTrackThickness();
-    blockSize_ = sliderLayoutAlgorithm->GetBlockSize();
-    blockHotSize_ = sliderLayoutAlgorithm->GetBlockHotSize();
     return UpdateParameters();
 }
 

@@ -84,6 +84,15 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
 
     float width = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     float height = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
+    auto layoutPolicy = GetLayoutPolicy(layoutWrapper);
+    if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
+        if (layoutPolicy->IsWidthMatch()) {
+            width = contentConstraint.parentIdealSize.Width().value();
+        }
+        if (layoutPolicy->IsHeightMatch()) {
+            height = contentConstraint.parentIdealSize.Height().value();
+        }
+    }
     Axis direction = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     if (direction == Axis::HORIZONTAL && GreaterOrEqualToInfinity(width)) {
         width = static_cast<float>(theme->GetLayoutMaxLength().ConvertToPx());
@@ -113,6 +122,7 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     }
     blockSize_ = sliderLayoutProperty->GetBlockSizeValue(SizeF(blockDiameter, blockDiameter));
     blockHotSize_ = CalculateHotSize(layoutWrapper, blockSize_, static_cast<float>(themeBlockHotSize.ConvertToPx()));
+    pattern->UpdateSliderParams(trackThickness_, blockSize_, blockHotSize_);
     auto mode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
     auto sliderWidth = CalculateSliderWidth(width, height, direction, hotBlockShadowWidth, mode);
     float sliderLength =
@@ -371,4 +381,12 @@ void SliderLayoutAlgorithm::CalculateBlockOffset(
     child->Layout();
 }
 
+std::optional<NG::LayoutPolicyProperty> SliderLayoutAlgorithm::GetLayoutPolicy(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, NG::LayoutPolicyProperty());
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_RETURN(layoutPolicy, NG::LayoutPolicyProperty());
+    return layoutPolicy;
+}
 } // namespace OHOS::Ace::NG
