@@ -549,7 +549,7 @@ export struct SelectDialog {
               .onClick(() => {
                 this.selectedIndex = index;
                 item.action && item.action();
-                this.controller?.close();
+                closeDialog(this.controller, 'onClick');
               })
             }
             .paddingStyle()
@@ -1671,7 +1671,7 @@ function setButtonProperties(buttonOptions: ButtonOptions, isHasDefaultFocus: bo
       if (buttonOptions.action) {
         buttonOptions.action();
       }
-      controller?.close();
+      closeDialog(controller, 'onKeyEvent');
       event.stopPropagation();
     }
   })
@@ -1679,13 +1679,22 @@ function setButtonProperties(buttonOptions: ButtonOptions, isHasDefaultFocus: bo
     if (buttonOptions.action) {
       buttonOptions.action();
     }
-    controller?.close();
+    closeDialog(controller, 'onClick');
   })
   .defaultFocus(isDefaultFocus(buttonOptions, isHasDefaultFocus, isAllFocusFalse))
   .buttonStyle(buttonOptions.buttonStyle ??
     (buttonOptions.role === ButtonRole.ERROR ? ERROR_BUTTON_STYLE() : ALERT_BUTTON_STYLE()))
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
   .type(ButtonType.ROUNDED_RECTANGLE)
+}
+
+function closeDialog(controller: CustomDialogController | undefined, funcName: string) {
+  if (controller) {
+    hilog?.info(0x3900,'Ace',`AdvancedDialog button ${funcName} controller true`);
+    controller?.close();
+  } else {
+    hilog?.info(0x3900,'Ace',`AdvancedDialog button ${funcName} controller false`);
+  }
 }
 
 /**

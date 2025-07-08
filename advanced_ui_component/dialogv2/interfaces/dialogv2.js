@@ -849,7 +849,7 @@ export class SelectDialogV2 extends ViewV2 {
               Column.onClick(() => {
                 this.selectedIndexInner = index;
                 item.action && item.action();
-                this.getDialogController()?.close();
+                closeDialog(this.getDialogController(), 'onClick');
               });
             }, Column);
             this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -2637,7 +2637,7 @@ function __Button__setButtonProperties(buttonOptions, isHasDefaultFocus, isAllFo
       if (buttonOptions?.action) {
         buttonOptions.action();
       }
-      controller?.close();
+      closeDialog(controller, 'onKeyEvent');
       event.stopPropagation();
     }
   });
@@ -2645,13 +2645,21 @@ function __Button__setButtonProperties(buttonOptions, isHasDefaultFocus, isAllFo
     if (buttonOptions?.action) {
       buttonOptions.action();
     }
-    controller?.close();
+    closeDialog(controller, 'onClick');
   });
   Button.defaultFocus(isDefaultFocus(buttonOptions, isHasDefaultFocus, isAllFocusFalse));
   Button.buttonStyle(buttonOptions?.buttonStyle ?? ALERT_BUTTON_STYLE);
   Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
   Button.type(ButtonType.ROUNDED_RECTANGLE);
   Button.enabled(buttonOptions?.enabled ?? true);
+}
+function closeDialog(controller, funcName) {
+  if (controller) {
+    hilog?.info(0x3900, 'Ace', `AdvancedDialog button ${funcName} controller true`);
+    controller?.close();
+  } else {
+    hilog?.info(0x3900, 'Ace', `AdvancedDialog button ${funcName} controller false`);
+  }
 }
 /**
  * is button set default focus

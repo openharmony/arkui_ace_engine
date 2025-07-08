@@ -1222,7 +1222,7 @@ export class SelectDialog extends ViewPU {
                             Column.onClick(() => {
                                 this.selectedIndex = index;
                                 item.action && item.action();
-                                this.controller?.close();
+                                closeDialog(this.controller, 'onClick');
                             });
                         }, Column);
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -3765,7 +3765,7 @@ function __Button__setButtonProperties(buttonOptions, isHasDefaultFocus, isAllFo
             if (buttonOptions.action) {
                 buttonOptions.action();
             }
-            controller?.close();
+            closeDialog(controller, 'onKeyEvent');
             event.stopPropagation();
         }
     });
@@ -3773,13 +3773,21 @@ function __Button__setButtonProperties(buttonOptions, isHasDefaultFocus, isAllFo
         if (buttonOptions.action) {
             buttonOptions.action();
         }
-        controller?.close();
+        closeDialog(controller, 'onClick');
     });
     Button.defaultFocus(isDefaultFocus(buttonOptions, isHasDefaultFocus, isAllFocusFalse));
     Button.buttonStyle(buttonOptions.buttonStyle ??
         (buttonOptions.role === ButtonRole.ERROR ? ERROR_BUTTON_STYLE() : ALERT_BUTTON_STYLE()));
     Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
     Button.type(ButtonType.ROUNDED_RECTANGLE);
+}
+function closeDialog(controller, funcName) {
+    if (controller) {
+        hilog?.info(0x3900, 'Ace', `AdvancedDialog button ${funcName} controller true`);
+        controller?.close();
+    } else {
+        hilog?.info(0x3900, 'Ace', `AdvancedDialog button ${funcName} controller false`);
+    }
 }
 function isDefaultFocus(singleButton, isHasDefaultFocus, isAllFocusFalse) {
     try {
