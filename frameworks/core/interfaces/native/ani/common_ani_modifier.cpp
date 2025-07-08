@@ -70,6 +70,13 @@ ArkUI_Int32 GetCurrentInstanceId()
     return ContainerScope::CurrentId();
 }
 
+ArkUI_Int32 GetFocusedInstanceId()
+{
+    auto container = Container::GetFoucsed();
+    CHECK_NULL_RETURN(container, -1);
+    return container->GetInstanceId();
+}
+
 ani_long BuilderProxyNodeConstruct(ArkUI_Int32 id)
 {
     auto proxyNode = NG::FrameNode::GetOrCreateFrameNode(
@@ -172,6 +179,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .restoreInstanceId = OHOS::Ace::NG::RestoreInstanceId,
         .setDrawCallback = OHOS::Ace::NG::SetDrawCallback,
         .getCurrentInstanceId = OHOS::Ace::NG::GetCurrentInstanceId,
+        .getFocusedInstanceId = OHOS::Ace::NG::GetFocusedInstanceId,
         .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct,
         .getSharedLocalStorage = OHOS::Ace::NG::GetSharedLocalStorage,
         .setBackgroundImagePixelMap = OHOS::Ace::NG::SetBackgroundImagePixelMap,

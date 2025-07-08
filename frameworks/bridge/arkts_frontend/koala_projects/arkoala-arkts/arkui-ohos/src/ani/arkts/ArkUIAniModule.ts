@@ -47,6 +47,7 @@ export class ArkUIAniModule {
     native static _Common_Sync_InstanceId(id: KInt): void
     native static _Common_Restore_InstanceId(): void
     native static _Common_Get_Current_InstanceId(): KInt
+    native static _Common_GetFocused_InstanceId(): KInt
     native static _Common_GetSharedLocalStorage(): LocalStorage
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
     native static _BuilderProxyNode_Construct(id: KInt): KPointer

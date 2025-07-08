@@ -111,6 +111,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetCurrentInstanceId)
         },
         ani_native_function {
+            "_Common_GetFocused_InstanceId",
+            ":I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetFocusedInstanceId)
+        },
+        ani_native_function {
             "_CustomNode_Construct",
             "ILarkui/ArkCustomComponent/ArkCustomComponent;:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructCustomNode)
