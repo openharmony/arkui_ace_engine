@@ -758,6 +758,8 @@ typedef struct Opt_UICommonEvent Opt_UICommonEvent;
 typedef struct UIContextPeer UIContextPeer;
 typedef struct UIContextPeer* Ark_UIContext;
 typedef struct Opt_UIContext Opt_UIContext;
+typedef struct PromptActionPeer PromptAction;
+typedef struct PromptActionPeer* Ark_PromptAction;
 typedef struct UIExtensionProxyPeer UIExtensionProxyPeer;
 typedef struct UIExtensionProxyPeer* Ark_UIExtensionProxy;
 typedef struct Opt_UIExtensionProxy Opt_UIExtensionProxy;
@@ -1711,6 +1713,10 @@ typedef struct Ark_BackgroundBrightnessOptions Ark_BackgroundBrightnessOptions;
 typedef struct Opt_BackgroundBrightnessOptions Opt_BackgroundBrightnessOptions;
 typedef struct Ark_BackgroundImageOptions Ark_BackgroundImageOptions;
 typedef struct Opt_BackgroundImageOptions Opt_BackgroundImageOptions;
+typedef struct Ark_TargetInfo Ark_TargetInfo;
+typedef struct Opt_TargetInfo Opt_TargetInfo;
+typedef struct Ark_PopupCommonOptions Ark_PopupCommonOptions;
+typedef struct Opt_PopupCommonOptions Opt_PopupCommonOptions;
 typedef struct Ark_BarGridColumnOptions Ark_BarGridColumnOptions;
 typedef struct Opt_BarGridColumnOptions Opt_BarGridColumnOptions;
 typedef struct Ark_BarrierStyle Ark_BarrierStyle;
@@ -18583,6 +18589,42 @@ typedef struct Opt_CustomPopupOptions {
     Ark_Tag tag;
     Ark_CustomPopupOptions value;
 } Opt_CustomPopupOptions;
+typedef struct Ark_TargetInfo {
+    Ark_Union_String_Number id;
+    Opt_Number componentId;
+} Ark_TargetInfo;
+typedef struct Opt_TargetInfo {
+    Ark_Tag tag;
+    Ark_TargetInfo value;
+} Opt_TargetInfo;
+typedef struct Ark_PopupCommonOptions {
+    Opt_Placement placement;
+    Opt_Union_Color_String_Resource_Number popupColor;
+    Opt_Boolean enableArrow;
+    Opt_Boolean autoCancel;
+    Opt_PopupStateChangeCallback onStateChange;
+    Opt_Boolean showInSubWindow;
+    Opt_Union_Boolean_PopupMaskType mask;
+    Opt_Length targetSpace;
+    Opt_Length arrowOffset;
+    Opt_Position offset;
+    Opt_Length width;
+    Opt_ArrowPointPosition arrowPointPosition;
+    Opt_Length arrowWidth;
+    Opt_Length arrowHeight;
+    Opt_Length radius;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_Boolean focusable;
+    Opt_TransitionEffect transition;
+    Opt_Union_Boolean_Callback_DismissPopupAction_Void onWillDismiss;
+    Opt_Boolean enableHoverMode;
+    Opt_Boolean followTransformOfTarget;
+} Ark_PopupCommonOptions;
+typedef struct Opt_PopupCommonOptions {
+    Ark_Tag tag;
+    Ark_PopupCommonOptions value;
+} Opt_PopupCommonOptions;
 typedef struct Ark_CustomTheme {
     Opt_CustomColors colors;
 } Ark_CustomTheme;
@@ -27403,6 +27445,28 @@ typedef struct GENERATED_ArkUIGlobalScopeAccessor {
     Ark_Boolean (*focusControl_requestFocus)(const Ark_String* value);
 } GENERATED_ArkUIGlobalScopeAccessor;
 
+typedef struct GENERATED_ArkUIPromptActionAccessor {
+    void (*openPopup)(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                        Ark_PromptAction peer,
+                        Ark_NativePointer content,
+                        const Ark_TargetInfo* targetInfo,
+                        const Opt_PopupCommonOptions* options,
+                        const Callback_Opt_Array_String_Void* promiseValue);
+    void (*updatePopup)(Ark_VMContext vmContext,
+                         Ark_AsyncWorkerPtr asyncWorker,
+                         Ark_PromptAction peer,
+                         Ark_NativePointer content,
+                         const Ark_PopupCommonOptions* options,
+                         const Opt_Boolean* partialUpdate,
+                         const Callback_Opt_Array_String_Void* promiseValue);
+    void (*closePopup)(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
+                            Ark_PromptAction peer,
+                            Ark_NativePointer content,
+                            const Callback_Opt_Array_String_Void* promiseValue);
+} GENERATED_ArkUIPromptActionAccessor;
+
 typedef struct GENERATED_ArkUIRouterExtenderAccessor {
     Ark_NativePointer (*push)(const Ark_String* url);
     Ark_NativePointer (*replace)(const Ark_String* url, const Opt_Callback_Void* finishCallback);
@@ -27767,6 +27831,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUICustomSpanAccessor* (*getCustomSpanAccessor)();
     const GENERATED_ArkUILinearIndicatorControllerAccessor* (*getLinearIndicatorControllerAccessor)();
     const GENERATED_ArkUIGlobalScopeAccessor* (*getGlobalScopeAccessor)();
+    const GENERATED_ArkUIPromptActionAccessor* (*getPromptActionAccessor)();
     const GENERATED_ArkUIRouterExtenderAccessor* (*getRouterExtenderAccessor)();
 } GENERATED_ArkUIAccessors;
 

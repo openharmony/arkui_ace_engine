@@ -29265,6 +29265,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // AlertDialogAccessor
 
+    namespace PromptActionAccessor {
+    void OpenPopupImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Ark_TargetInfo* targetInfo,
+        const Opt_PopupCommonOptions* options,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void UpdatePopupImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Ark_PopupCommonOptions* options,
+        const Opt_Boolean* partialUpdate,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void ClosePopupImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    } // PromptActionAccessor
+
     namespace SpringPropAccessor {
     void DestroyPeerImpl(Ark_SpringProp peer)
     {
@@ -44712,6 +44740,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &AlertDialogAccessorImpl;
     }
 
+    const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor()
+    {
+        static const GENERATED_ArkUIPromptActionAccessor PromptActionAccessorImpl {
+            PromptActionAccessor::OpenPopupImpl,
+            PromptActionAccessor::UpdatePopupImpl,
+            PromptActionAccessor::ClosePopupImpl,
+        };
+        return &PromptActionAccessorImpl;
+    }
+
     const GENERATED_ArkUISpringPropAccessor* GetSpringPropAccessor()
     {
         static const GENERATED_ArkUISpringPropAccessor SpringPropAccessorImpl {
@@ -47623,6 +47661,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetTextFieldOpsAccessor,
             GetActionSheetAccessor,
             GetAlertDialogAccessor,
+            GetPromptActionAccessor,
             GetSpringPropAccessor,
             GetSpringMotionAccessor,
             GetFrictionMotionAccessor,

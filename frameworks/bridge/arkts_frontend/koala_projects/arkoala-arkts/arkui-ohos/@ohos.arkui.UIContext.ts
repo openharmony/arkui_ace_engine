@@ -28,7 +28,7 @@ import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { dragController } from "@ohos/arkui/dragController"
 import { focusController } from "@ohos/arkui/focusController"
 import { Frame } from "arkui/Graphics"
-import { KeyEvent, KeyframeAnimateParam, KeyframeState } from "arkui/component/common"
+import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions } from "arkui/component/common"
 import { TextMenuOptions } from "arkui/component/textCommon"
 import { Nullable, WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyProcessingMode } from "arkui/component/focus"
@@ -53,6 +53,11 @@ export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver {
         throw Error("createComponentObserver not implemented in UIInspector!")
     }
+}
+
+export interface TargetInfo {
+    id: string | number;
+    componentId?: number;
 }
 
 export class Font {
@@ -340,6 +345,18 @@ export class PromptAction {
     //@ts-ignore
     closeCustomDialog(dialogId: number): void {
         throw Error("closeCustomDialog not implemented in PromptAction!")
+    }
+
+    openPopup(content: ComponentContent, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
+        throw Error("openPopup not implemented in PromptAction!")
+    }
+
+    updatePopup(content: ComponentContent, options: PopupCommonOptions, partialUpdate?: boolean): Promise<void> {
+        throw Error("updatePopup not implemented in PromptAction!")
+    }
+
+    closePopup(content: ComponentContent): Promise<void> {
+        throw Error("closePopup not implemented in PromptAction!")
     }
 }
 
