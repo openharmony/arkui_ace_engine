@@ -2507,7 +2507,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
 
     CHECK_NULL_VOID(pManager_);
     auto start = textSelector_.baseOffset;
-    auto end = textSelector_.destinationOffset;
+    auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
     if (!IsSelected()) {
         start = -1;
         end = -1;
