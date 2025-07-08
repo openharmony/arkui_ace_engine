@@ -1646,6 +1646,18 @@ class QuickReplaceSymbolEffect extends SymbolEffect {
   }
 }
 
+class ContentTransition{
+}
+
+class NumericTextTransition extends ContentTransition {
+  constructor(options) {
+    super();
+    this.type = 'NumericTextTransition';
+    this.flipDirection = options.flipDirection;
+    this.enableBlur = options.enableBlur;
+  }
+}
+
 class ShaderStyle {
 }
 

@@ -1900,7 +1900,7 @@ std::pair<bool, bool> TextPattern::GetCopyAndSelectable()
     auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
     bool isShowCopy = true;
     bool isShowSelectText = true;
-    if (copyOption_ == CopyOptions::None) {
+    if (copyOption_ == CopyOptions::None || textEffect_) {
         isShowCopy = false;
         isShowSelectText = false;
     } else if (mode == TextSelectableMode::UNSELECTABLE) {
@@ -2787,6 +2787,7 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
     if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
         return false;
     }
+    CHECK_NULL_RETURN(!textEffect_, false);
     UpdateShiftFlag(keyEvent);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -3753,6 +3754,7 @@ void TextPattern::OnModifyDone()
             ResetSelection();
         }
     }
+    ResetTextEffectBeforeLayout();
     RecoverCopyOption();
     RegisterFormVisibleChangeCallback();
     RegisterVisibleAreaChangeCallback();
@@ -4337,7 +4339,6 @@ void TextPattern::BeforeCreateLayoutWrapper()
     if (HasSpanOnHoverEvent()) {
         InitSpanMouseEvent();
     }
-    ResetTextEffectBeforeLayout();
 }
 
 bool TextPattern::ResetTextEffectBeforeLayout(bool onlyReset)
