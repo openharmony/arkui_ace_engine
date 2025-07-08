@@ -21,6 +21,8 @@
 namespace OHOS::Ace::Ani {
 void SetImageSpanPixelMap([[maybe_unused]] ani_env* env, ani_object aniClass, ani_object node, ani_object pixelMap);
 void SetImageSpanAltPixelMap([[maybe_unused]] ani_env* env, ani_object aniClass, ani_object node, ani_object pixelMap);
+void SetImageSpanDrawingColorFilter(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node,
+    ani_object colorFilterAni);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_IMAGE_SPAN_MODULE
