@@ -50,6 +50,11 @@ public:
         return true;
     }
 
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     int32_t GetId() const
     {
         auto host = GetHost();

@@ -20,6 +20,7 @@
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_layout_property.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -34,6 +35,9 @@ public:
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+
+    void MeasureLayoutPolicySize(
+        const LayoutConstraintF& contentConstraint, RefPtr<XComponentLayoutProperty> layoutProperty, SizeF& size);
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 

@@ -31,8 +31,12 @@ public:
     {}
     ~PathLayoutAlgorithm() override = default;
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
+
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+
+    void MeasureLayoutPolicySize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, SizeF& size);
 
 private:
     RefPtr<ShapePaintProperty> propertiesFromAncestor_;

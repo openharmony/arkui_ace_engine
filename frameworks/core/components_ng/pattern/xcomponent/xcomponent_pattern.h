@@ -66,6 +66,11 @@ public:
         return true;
     }
 
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     bool IsAtomicNode() const override
     {
         return type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE || type_ == XComponentType::NODE;

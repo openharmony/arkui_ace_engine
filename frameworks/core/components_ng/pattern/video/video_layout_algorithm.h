@@ -30,6 +30,9 @@ public:
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+
+    void MeasureLayoutPolicySize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, SizeF& size);
+
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 

@@ -51,6 +51,11 @@ public:
         return true;
     }
 
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<VideoEventHub>();

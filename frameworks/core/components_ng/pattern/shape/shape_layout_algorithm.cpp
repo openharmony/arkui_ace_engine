@@ -45,17 +45,32 @@ std::optional<SizeF> ShapeLayoutAlgorithm::MeasureContent(
         // wrap content case use min size default.
         contentSize.UpdateIllegalSizeWithCheck(contentConstraint.minSize);
 
-        // if width or height is matchParent
-        auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-        if (layoutPolicy.has_value()) {
-            if (layoutPolicy->IsWidthMatch()) {
-                contentSize.SetWidth(contentConstraint.parentIdealSize.Width());
-            }
-            if (layoutPolicy->IsHeightMatch()) {
-                contentSize.SetHeight(contentConstraint.parentIdealSize.Height());
-            }
-        }
+        MeasureLayoutPolicySize(contentConstraint, layoutProperty, contentSize);
     } while (false);
     return contentSize.ConvertToSizeT();
+}
+
+void ShapeLayoutAlgorithm::MeasureLayoutPolicySize(
+    const LayoutConstraintF& contentConstraint, const RefPtr<LayoutProperty> layoutProperty, OptionalSizeF& size)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value());
+
+    if (layoutPolicy->IsWidthMatch() && contentConstraint.parentIdealSize.Width().has_value()) {
+        // if width is matchParent
+        size.SetWidth(contentConstraint.parentIdealSize.Width());
+    } else if (layoutPolicy->IsWidthAdaptive()) {
+        // if width is wrapContent or fixAtIdealSize set width 0.0
+        size.SetWidth(0.0);
+    }
+
+    if (layoutPolicy->IsHeightMatch() && contentConstraint.parentIdealSize.Height().has_value()) {
+        // if height is matchParent
+        size.SetHeight(contentConstraint.parentIdealSize.Height());
+    } else if (layoutPolicy->IsHeightAdaptive()) {
+        // if height is wrapContent or fixAtIdealSize set height 0.0
+        size.SetHeight(0.0);
+    }
 }
 } // namespace OHOS::Ace::NG
