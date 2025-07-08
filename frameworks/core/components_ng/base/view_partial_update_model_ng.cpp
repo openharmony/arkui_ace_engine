@@ -97,6 +97,7 @@ bool ViewPartialUpdateModelNG::MarkNeedUpdate(const WeakPtr<AceType>& node)
     auto customNode = weakNode.Upgrade();
     if (!customNode) {
         LOGW("customNode invalid");
+        return false;
     }
     customNode->MarkNeedUpdate();
     return true;

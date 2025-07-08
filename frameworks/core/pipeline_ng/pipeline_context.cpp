@@ -309,6 +309,7 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
     CHECK_RUN_ON(UI);
     if (!dirtyNode) {
         LOGW("dirtyNode invalid");
+        return;
     }
     auto customNode = DynamicCast<CustomNode>(dirtyNode);
     if (customNode && !dirtyNode->GetInspectorIdValue("").empty()) {
