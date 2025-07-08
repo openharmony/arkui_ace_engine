@@ -1249,6 +1249,8 @@ public:
 
     bool IsActivePolicyDisable();
 
+    OHOS::NWeb::WebDestroyMode GetWebDestroyMode();
+
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
 
     std::string GetCurrentLanguage();

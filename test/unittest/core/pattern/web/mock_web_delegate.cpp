@@ -1288,6 +1288,10 @@ bool WebDelegate::IsActivePolicyDisable()
 {
     return false;
 }
+OHOS::NWeb::WebDestroyMode GetWebDestroyMode()
+{
+    return OHOS::NWeb::WebDestroyMode::NORMAL_MODE;
+}
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
 void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}
 void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled) {}
