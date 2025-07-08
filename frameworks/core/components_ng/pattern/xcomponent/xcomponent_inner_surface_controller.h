@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -33,11 +34,10 @@ public:
         const std::string& surfaceId, RenderFit renderFit, bool isRenderFitNewVersionEnabled);
     static int32_t GetRenderFitBySurfaceId(
         const std::string& surfaceId, int32_t& renderFitNumber, bool& isRenderFitNewVersionEnabled);
-    static void RegisterSurfaceRenderContext(
-        const std::string& surfaceId, const WeakPtr<RenderContext>& renderContext);
-    static void UnregisterSurfaceRenderContext(const std::string& surfaceId);
+    static void RegisterNode(const std::string& surfaceId, const WeakPtr<FrameNode>& node);
+    static void UnregisterNode(const std::string& surfaceId);
 private:
-    static std::unordered_map<std::string, WeakPtr<RenderContext>> surfaceRenderContextMap;
+    static std::unordered_map<std::string, WeakPtr<FrameNode>> nodeMap;
     static std::mutex mutex;
 };
 
