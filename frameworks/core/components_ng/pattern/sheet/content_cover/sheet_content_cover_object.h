@@ -60,6 +60,16 @@ public:
     {
         return false;
     }
+
+    bool CheckIfNeedSetOuterBorderProp() const override
+    {
+        return false;
+    }
+
+    bool CheckIfNeedShadowByDefault() const override
+    {
+        return false;
+    }
 };
 } // namespace OHOS::Ace::NG
 

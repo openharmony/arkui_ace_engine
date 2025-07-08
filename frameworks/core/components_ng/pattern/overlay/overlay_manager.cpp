@@ -5855,7 +5855,7 @@ void OverlayManager::UpdateSheetRender(
     }
     sheetNodePattern->UpdateMaskBackgroundColor();
 }
-void OverlayManager::UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode,
+void OverlayManager::UpdateSheetRenderProperty(const RefPtr<FrameNode>& sheetNode,
     const NG::SheetStyle& currentStyle, bool isPartialUpdate)
 {
     UpdateSheetRender(sheetNode, currentStyle, isPartialUpdate);
@@ -5887,7 +5887,9 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     auto currentStyle = sheetStyle;
     if (isStartByUIContext) {
         currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
-        UpdateSheetProperty(sheetNode, currentStyle, isPartialUpdate);
+        sheetNodePattern->UpdateSheetType();
+        sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
+        UpdateSheetRenderProperty(sheetNode, currentStyle, isPartialUpdate);
         sheetNodePattern->UpdateDragBarStatus();
         sheetNodePattern->UpdateTitleColumnSize();
     } else {
@@ -5904,10 +5906,12 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
         sheetNodePattern->UpdateSheetSpringBack(std::move(sheetSpringBack));
         auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
         layoutProperty->UpdateSheetStyle(sheetStyle);
-        UpdateSheetProperty(sheetNode, sheetStyle, isPartialUpdate);
+        sheetNodePattern->UpdateSheetType();
+        sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
+        UpdateSheetRenderProperty(sheetNode, sheetStyle, isPartialUpdate);
     }
     sheetNodePattern->SetBottomOffset(sheetStyle);
-    // onModifyDone, the sheetType_ is updated, and the sheetObject is also updated.
+    // MarkModifyDone must be called after UpdateSheetObject. InitSheetMode depends on SheetObject.
     sheetNode->MarkModifyDone();
 
     auto pipeline = sheetNode->GetContext();
@@ -5935,7 +5939,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     sheetNodePattern->IsNeedPlayTransition(sheetStyle);
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     layoutProperty->UpdateSheetStyle(sheetStyle);
-    UpdateSheetProperty(sheetNode, sheetStyle, false);
+    UpdateSheetRenderProperty(sheetNode, sheetStyle, false);
     sheetNodePattern->SetBottomOffset(sheetStyle);
     sheetNode->MarkModifyDone();
     auto pipeline = sheetNode->GetContext();

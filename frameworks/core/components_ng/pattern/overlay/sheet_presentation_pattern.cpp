@@ -43,7 +43,6 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/stage/content_root_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -81,6 +80,8 @@ constexpr Dimension ARROW_CORNER_P4_OFFSET_Y = 6.0_vp;
 constexpr Dimension ARROW_RADIUS = 2.0_vp;
 constexpr Dimension SUBWINDOW_SHEET_TRANSLATION = 80.0_vp;
 } // namespace
+
+// MarkModifyDone must be called after UpdateSheetObject. InitSheetMode depends on SheetObject.
 void SheetPresentationPattern::OnModifyDone()
 {
     Pattern::CheckLocalized();
@@ -109,8 +110,6 @@ void SheetPresentationPattern::OnModifyDone()
     }
     InitPanEvent();
     InitPageHeight();
-    UpdateSheetType();
-    UpdateSheetObject(sheetType_);
     InitSheetMode();
     sheetObject_->InitScrollProps();
     InitFoldCreaseRegion();
@@ -2944,7 +2943,7 @@ void SheetPresentationPattern::SetSheetOuterBorderWidth(
         BorderColorProperty outBorderColor;
         borderWidth.SetBorderWidth(0.0_vp);
         outBorderWidth.SetBorderWidth(0.0_vp);
-        if (sheetType != SheetType::SHEET_POPUP) {
+        if (sheetObject_->CheckIfNeedSetOuterBorderProp()) {
             borderColor.SetColor(sheetTheme->GetSheetInnerBorderColor());
             outBorderColor.SetColor(sheetTheme->GetSheetOuterBorderColor());
             renderContext->UpdateOuterBorderColor(outBorderColor);
@@ -3276,7 +3275,7 @@ Rect SheetPresentationPattern::GetFoldScreenRect() const
 
 Shadow SheetPresentationPattern::GetShadowFromTheme(ShadowStyle shadowStyle)
 {
-    if (shadowStyle == ShadowStyle::None) {
+    if (shadowStyle == ShadowStyle::None || !sheetObject_->CheckIfNeedShadowByDefault()) {
         return Shadow();
     }
     auto host = GetHost();
@@ -3870,6 +3869,22 @@ void SheetPresentationPattern::InitSheetObject()
     // and the data is not updated to the pattern.
 }
 
+/**
+ * @brief Update SheetObject according to the new SheetType
+ *
+ * UpdateSheetObject must be called after Update sheetType.
+ *
+ * UpdateSheetRender is a function which can handle the differentiating capabilities of 2in1.
+ * The capabilities are include about default shadow, double border.
+ * UpdateSheetObject must be called before UpdateSheetRender.
+ * Default shadow and double border depend on new SheetObject.
+ *
+ * MarkModifyDone will be called after UpdateSheetRender.
+ *
+ * UpdateSheetType -> UpdateSheetObject -> UpdateSheetRender -> MarkModifyDone
+ *
+ * @param newType new SheetType
+ */
 void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
 {
     CHECK_NULL_VOID(sheetObject_);

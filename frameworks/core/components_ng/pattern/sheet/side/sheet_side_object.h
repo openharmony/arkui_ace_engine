@@ -59,9 +59,19 @@ public:
         return false;
     }
 
-    virtual uint32_t GetPanDirection() override
+    uint32_t GetPanDirection() const override
     {
         return PanDirection::HORIZONTAL;
+    }
+
+    bool CheckIfNeedSetOuterBorderProp() const override
+    {
+        return false;
+    }
+
+    bool CheckIfNeedShadowByDefault() const override
+    {
+        return false;
     }
 
     float GetResizeDecreasedHeight() const
