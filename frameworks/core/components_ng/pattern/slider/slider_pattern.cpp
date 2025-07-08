@@ -763,9 +763,9 @@ int32_t SliderPattern::GetOffsetStepIndex(uint32_t index)
     if (NearZero(step)) {
         return 0;
     }
-    auto stepIndex = static_cast<uint32_t>(std::ceil((currentValue - min) / step));
+    auto stepIndex = static_cast<int32_t>(std::ceil((currentValue - min) / step));
     auto diffValue = stepIndex * step + min - currentValue;
-    int32_t offsetStepIndex = index - stepIndex;
+    int32_t offsetStepIndex = static_cast<int32_t>(index) - stepIndex;
     if (NearZero(diffValue) || offsetStepIndex <= 0) {
         return offsetStepIndex;
     } else {
