@@ -1974,6 +1974,47 @@ HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier012, TestSize.Level1
 }
 
 /**
+ * @tc.name: DotIndicatorModifier013
+ * @tc.desc: Test PaintBackground and GetTouchBottomCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    LinearVector<float> vectorBlackPointCenterX;
+    for (float i = 0.0f; i <= 300.0f ; i += 10.0f) {
+        vectorBlackPointCenterX.emplace_back(i);
+    }
+    contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX;
+    LinearVector<float> itemHalfSizes = { 20.f, 30.f, 40.f, 50.f };
+
+    contentProperty.itemHalfSizes = itemHalfSizes;
+    DotIndicatorModifier dotIndicatorModifier;
+    contentProperty.backgroundColor.colorValue_.value = 0xff000000;
+    dotIndicatorModifier.backgroundWidthDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.225f);
+    dotIndicatorModifier.backgroundHeightDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.8f);
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, 100.f, 100.f };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DetachBrush()).Times(AtLeast(1)).WillRepeatedly(ReturnRef(canvas));
+    /**
+     * @tc.steps: step2.Call PaintBackground
+     * @tc.expected: The PaintBackground executed successfuly
+     */
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::START;
+    dotIndicatorModifier.isCustomSize_ = true;
+    dotIndicatorModifier.PaintBackground(context, contentProperty);
+
+    dotIndicatorModifier.axis_ = Axis::HORIZONTAL;
+    dotIndicatorModifier.PaintBackground(context, contentProperty);
+}
+
+/**
  * @tc.name: CircleDotIndicatorModifier001
  * @tc.desc: Test DotIndicatorModifier
  * @tc.type: FUNC
