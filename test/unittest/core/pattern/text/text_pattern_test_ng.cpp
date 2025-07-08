@@ -609,6 +609,8 @@ HWTEST_F(TextPatternTestNg, RecoverCopyOption006, TestSize.Level1)
     textPattern->enabled_ = false;
     textPattern->dataDetectorAdapter_->aiDetectInitialized_ = true;
     textPattern->RecoverCopyOption();
+    GestureEvent info;
+    textPattern->HandleSingleClickEvent(info);
     EXPECT_EQ(textPattern->dataDetectorAdapter_->textForAI_, textPattern->textForDisplay_);
 }
 

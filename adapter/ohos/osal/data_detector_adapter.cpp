@@ -536,8 +536,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
                    aiSpanMapIt->first < std::min(wTextForAILength, startPos + AI_TEXT_MAX_LENGTH - AI_TEXT_GAP)) {
                 auto aiContent = aiSpanMapIt->second.content;
                 auto wAIContent = StringUtils::ToWstring(aiContent);
-                if (isSameDetectText || aiContent == UtfUtils::Str16DebugToStr8(wTextForAI.substr(aiSpanMapIt->first,
-                    std::min(static_cast<int32_t>(wAIContent.length()), wTextForAILength - aiSpanMapIt->first)))) {
+                if (isSameDetectText) {
                     dataDetectorAdapter->aiSpanMap_[aiSpanMapIt->first] = aiSpanMapIt->second;
                     hasSame = true;
                 }
