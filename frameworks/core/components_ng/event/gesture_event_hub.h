@@ -398,6 +398,7 @@ public:
 
     bool IsDragNewFwk() const;
     bool TriggerTouchEvent(const TouchEvent& point);
+    void SetRecognizerDelayStatus(const RecognizerDelayStatus& recognizerDelayStatus = RecognizerDelayStatus::NONE);
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,

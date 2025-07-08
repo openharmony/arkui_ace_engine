@@ -1298,6 +1298,14 @@ public:
     void OnPdfScrollAtBottom(const std::string& url);
     void OnPdfLoadEvent(int32_t result, const std::string& url);
 
+    bool HasOnNativeEmbedGestureEventV2()
+    {
+#ifdef OHOS_STANDARD_SYSTEM
+        return static_cast<bool>(OnNativeEmbedGestureEventV2_);
+#else
+        return false;
+#endif
+    }
 private:
     void InitWebEvent();
     void RegisterWebEvent();

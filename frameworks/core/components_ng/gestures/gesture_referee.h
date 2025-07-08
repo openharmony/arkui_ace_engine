@@ -99,8 +99,8 @@ public:
     void ForceCleanGestureScopeState();
     void CleanGestureScopeState();
     void CleanGestureScopeStateVoluntarily();
-private:
     bool Existed(const RefPtr<NGGestureRecognizer>& recognizer);
+private:
     std::list<WeakPtr<NGGestureRecognizer>> recognizers_;
 
     size_t touchId_ = 0;
@@ -148,7 +148,10 @@ public:
     void ForceCleanGestureRefereeState();
     void CleanGestureRefereeState(int32_t touchId);
     bool IsScopesEmpty() const;
+    void SetRecognizerDelayStatus(const RecognizerDelayStatus& recognizerDelayStatus);
 private:
+    void RecallOnAcceptGesture();
+    bool CheckRecognizerInInnerContainer(const RefPtr<NGGestureRecognizer>& recognizer);
     void HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
     void HandlePendingDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
     void HandleRejectDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
@@ -158,6 +161,8 @@ private:
 
     std::function<void(size_t)> queryStateFunc_;
     SourceType lastSourceType_ = SourceType::NONE;
+    RecognizerDelayStatus recognizerDelayStatus_ = RecognizerDelayStatus::NONE;
+    WeakPtr<NGGestureRecognizer> delayRecognizer_;
     bool lastIsAxis_ = false;
 };
 

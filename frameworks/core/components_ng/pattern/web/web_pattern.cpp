@@ -1792,6 +1792,21 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
+
+    auto button = static_cast<MouseButton>(info.GetButton());
+    bool isSupportMouse = button == MouseButton::LEFT_BUTTON
+        || button == MouseButton::RIGHT_BUTTON || button == MouseButton::MIDDLE_BUTTON;
+    if (delegate_ && delegate_->HasOnNativeEmbedGestureEventV2() && isSupportMouse) {
+        auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        if (info.GetAction() == MouseAction::PRESS) {
+            // start RecognizerDelay
+            gestureHub->SetRecognizerDelayStatus(RecognizerDelayStatus::START);
+        } else if (info.GetAction() == MouseAction::RELEASE) {
+            gestureHub->SetRecognizerDelayStatus(RecognizerDelayStatus::NONE);
+        }
+    }
+
     auto mouseEventCallback = eventHub->GetOnMouseEvent();
     CHECK_NULL_VOID(mouseEventCallback);
     mouseEventCallback(info);
@@ -2380,6 +2395,7 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     dragEvent_ = MakeRefPtr<DragEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->SetCustomDragEvent(dragEvent_, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetRecognizerDelayStatus(RecognizerDelayStatus::NONE);
 }
 
 void WebPattern::HandleDragStart(int32_t x, int32_t y)
