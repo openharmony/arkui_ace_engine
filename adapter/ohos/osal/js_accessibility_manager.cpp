@@ -17,6 +17,7 @@
 
 #include "accessibility_system_ability_client.h"
 #include "js_third_provider_interaction_operation.h"
+#include "perf_monitor_adapter.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/event_report.h"
@@ -3977,6 +3978,9 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNodeInner(
     ACE_SCOPED_TRACE("SendAccessibilityAsyncEvent");
     CHECK_NULL_VOID(node);
     CHECK_NULL_VOID(context);
+    // set perf monitor
+    HiviewDFX::PerfMonitorAdapter::GetInstance().OnSceneChanged(HiviewDFX::ACCESSIBLE_FEATURE, true);
+
     int32_t windowId = static_cast<int32_t>(context->GetRealHostWindowId());
     if (windowId == 0) {
         return;
@@ -4069,6 +4073,9 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
 void JsAccessibilityManager::SendAccessibilityAsyncEventInner(const AccessibilityEvent& accessibilityEvent)
 {
     ACE_ACCESS_SCOPED_TRACE("SendAccessibilityAsyncEvent");
+    // set perf monitor
+    HiviewDFX::PerfMonitorAdapter::GetInstance().OnSceneChanged(HiviewDFX::ACCESSIBLE_FEATURE, true);
+
     auto context = GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
     int32_t windowId = static_cast<int32_t>(context->GetRealHostWindowId());
@@ -5859,6 +5866,8 @@ void JsAccessibilityManager::WebInteractionOperation::OutsideTouch() {}
 void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
     AccessibilityElementOperatorCallback& callback, const int32_t mode, const int32_t windowId)
 {
+    // set perf monitor
+    HiviewDFX::PerfMonitorAdapter::GetInstance().OnSceneChanged(HiviewDFX::ACCESSIBLE_FEATURE, true);
     std::list<AccessibilityElementInfo> infos;
 
     auto pipeline = GetPipelineByWindowId(windowId);
