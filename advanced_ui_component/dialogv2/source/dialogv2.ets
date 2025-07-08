@@ -558,7 +558,7 @@ export struct SelectDialogV2 {
               .onClick(() => {
                 this.selectedIndexInner = index;
                 item.action && item.action();
-                this.getDialogController()?.close();
+                closeDialog(this.getDialogController(), 'onClick');
               })
             }
             .paddingStyle()
@@ -1539,12 +1539,7 @@ function setButtonProperties(buttonOptions?: AdvancedDialogV2Button,
       if (buttonOptions?.action) {
         buttonOptions.action();
       }
-      if (controller) {
-        hilog?.info(0x3900,'Ace',`AdvancedDialog button onKeyEvent controller true`);
-        controller?.close();
-      } else {
-        hilog?.info(0x3900,'Ace',`AdvancedDialog button onKeyEvent controller false`);
-      }
+      closeDialog(controller, 'onKeyEvent');
       event.stopPropagation();
     }
   })
@@ -1552,18 +1547,22 @@ function setButtonProperties(buttonOptions?: AdvancedDialogV2Button,
     if (buttonOptions?.action) {
       buttonOptions.action();
     }
-    if (controller) {
-      hilog?.info(0x3900,'Ace',`AdvancedDialog button onClick controller true`);
-      controller?.close();
-    } else {
-      hilog?.info(0x3900,'Ace',`AdvancedDialog button onClick controller false`);
-    }
+    closeDialog(controller, 'onClick');
   })
   .defaultFocus(isDefaultFocus(buttonOptions, isHasDefaultFocus, isAllFocusFalse))
   .buttonStyle(buttonOptions?.buttonStyle ?? ALERT_BUTTON_STYLE)
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
   .type(ButtonType.ROUNDED_RECTANGLE)
   .enabled(buttonOptions?.enabled ?? true)
+}
+
+function closeDialog(controller: CustomDialogController | undefined, funcName: string) {
+  if (controller) {
+    hilog?.info(0x3900,'Ace',`AdvancedDialog button ${funcName} controller true`);
+    controller?.close();
+  } else {
+    hilog?.info(0x3900,'Ace',`AdvancedDialog button ${funcName} controller false`);
+  }
 }
 
 /**
