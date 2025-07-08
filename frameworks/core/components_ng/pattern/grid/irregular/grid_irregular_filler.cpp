@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -141,6 +141,8 @@ void GridIrregularFiller::FillOne(const int32_t idx)
 bool GridIrregularFiller::FindNextItem(int32_t target)
 {
     const auto& mat = info_->gridMatrix_;
+    // start from first cross everytime, for the current target might be before the previous target
+    posX_ = -1;
     while (AdvancePos()) {
         if (mat.at(posY_).at(posX_) == target) {
             return true;
