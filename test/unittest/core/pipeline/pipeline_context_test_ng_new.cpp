@@ -3775,7 +3775,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg255, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
  
     /**
-     * @tc.steps1: Call the function OnDragEvent with isDragged_=true, currentId_=DEFAULT_INT1 and DRAG_EVENT_OUT.
+     * @tc.steps2: Call the function OnDragEvent with isDragged_=true, currentId_=DEFAULT_INT1 and DRAG_EVENT_OUT.
      * @tc.expected: The currentId_ is equal to DEFAULT_INT1.
      */
     manager->isDragged_ = true;
