@@ -2165,9 +2165,12 @@ void JSViewAbstract::ParseSheetStyle(
         }
     }
 
-    bool isInteractive = (NG::SheetType::SHEET_CONTENT_COVER == sheetStyle.sheetType);
-    ParseJsBool(interactive, isInteractive);
-    sheetStyle.interactive = isInteractive;
+    bool isInteractive = false;
+    if (ParseJsBool(interactive, isInteractive)) {
+        sheetStyle.interactive = isInteractive;
+    } else if (!isPartialUpdate && NG::SheetType::SHEET_CONTENT_COVER == sheetStyle.sheetType) {
+        sheetStyle.interactive = true;
+    }
 
     bool showClose = true;
     if (NG::SheetType::SHEET_CONTENT_COVER == sheetStyle.sheetType) {
