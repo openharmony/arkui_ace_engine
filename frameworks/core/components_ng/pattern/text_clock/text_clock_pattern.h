@@ -122,6 +122,11 @@ public:
         return textClockLayoutProperty->GetPrefixHourValue(ZeroPrefixType::AUTO);
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;

@@ -248,4 +248,27 @@ HWTEST_F(DataPanelTestNg, DataPanelPatternTest003, TestSize.Level1)
     pattern->OnColorConfigurationUpdate();
     ASSERT_EQ(dataPanelPaintProperty->GetStrokeWidthValue(), strokeWidth);
 }
+
+/**
+ * @tc.name: DataPanelPatternTest060
+ * @tc.desc: Test LayoutPolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelPatternTest060, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create data panel and get frameNode
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_LINE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. get pattern and test UpdateTrackBackground
+     */
+    auto pattern = frameNode->GetPattern<DataPanelPattern>();
+    EXPECT_TRUE(pattern->IsEnableMatchParent());
+    EXPECT_TRUE(pattern->IsEnableFix());
+}
 } // namespace OHOS::Ace::NG

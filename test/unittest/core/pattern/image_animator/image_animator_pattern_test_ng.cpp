@@ -393,4 +393,29 @@ HWTEST_F(ImageAnimatorPatternTestNg, OnePicFinish001, TestSize.Level1)
     // Check that playbackListener was triggered even though there's only one picture
     EXPECT_TRUE(numFlag2 == 1);
 }
+
+/**
+ * @tc.name: LayoutPolicyTest001
+ * @tc.desc: Test LayoutPolicy of ImageAnimator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorPatternTestNg, LayoutPolicyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create imageAnimatorView and get frameNode.
+     * @tc.expected: step1. check frameNode exists and tag is correct.
+     */
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
+    /**
+     * @tc.steps: step2. get childNode of frameNode.
+     * @tc.expected: step2. check whether childNode is empty.
+     */
+    auto imageAnimatorPattern_ = frameNode->GetPattern<ImageAnimatorPattern>();
+    EXPECT_TRUE(imageAnimatorPattern_->IsEnableMatchParent());
+    EXPECT_TRUE(imageAnimatorPattern_->IsEnableFix());
+}
 } // namespace OHOS::Ace::NG
