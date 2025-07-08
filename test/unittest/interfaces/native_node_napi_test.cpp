@@ -386,7 +386,7 @@ HWTEST_F(NativeNodeNapiTest, WhiteListInCustomEnvTest001, TestSize.Level1)
         "ImageAnimator",
         "Counter",
         "Progress",
-        "Column"
+        "Column",
         "Row",
         "Grid",
         "GridItem",
