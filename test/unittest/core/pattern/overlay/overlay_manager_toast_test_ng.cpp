@@ -1370,7 +1370,7 @@ HWTEST_F(OverlayManagerToastTestNg, ToastPatternOnDetachFromFrameNode, TestSize.
     CHECK_NULL_VOID(pipeline);
     toastPattern->foldDisplayModeChangedCallbackId_ = std::nullopt;
     toastPattern->halfFoldHoverChangedCallbackId_ = std::nullopt;
-    toastPattern->OnDetachFromFrameNode(nullptr);
+    toastPattern->OnDetachFromFrameNode(AceType::RawPtr(toastNode));
 }
 
 /**
@@ -2086,7 +2086,7 @@ HWTEST_F(OverlayManagerToastTestNg, OnAttachToFrameNode001, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     auto currentCallBackId = pipeline->callbackId_;
     toastPattern->OnAttachToFrameNode();
-    toastPattern->OnDetachFromFrameNode(nullptr);
+    toastPattern->OnDetachFromFrameNode(AceType::RawPtr(toastNode));
     EXPECT_EQ(toastPattern->rowKeyboardCallbackId_, currentCallBackId + CALLBACK_COUNT);
 }
 
