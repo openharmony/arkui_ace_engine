@@ -4476,8 +4476,9 @@ bool FrameNode::RemoveImmediately() const
 
 std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<int32_t>& set)
 {
+    std::vector<int32_t> ids(set.begin(), set.end());
     std::vector<RefPtr<FrameNode>> nodes;
-    for (auto nodeId : set) {
+    for (auto nodeId : ids) {
         auto uiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
         if (!uiNode) {
             continue;

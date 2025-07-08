@@ -2433,6 +2433,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOrCreate002, TestSize.Level1)
     EXPECT_NE(frameNode2, nullptr);
     EXPECT_EQ(frameNode2->GetId(), 2);
     frameNode2->AddChild(frameNode2, 1, true);
+
     /**
      * @tc.steps: step4. test GetFrameNodeOnly
      * @tc.expected: expect is not nullptr.
