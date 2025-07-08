@@ -288,6 +288,8 @@ export class OverlayManager {
     }
 }
 
+export type CustomBuilderWithId = (id: number) => void;
+
 export class PromptAction {
     showToast(options: promptAction.ShowToastOptions): void {
         throw Error("showToast not implemented in PromptAction!")
@@ -303,7 +305,7 @@ export class PromptAction {
 
     //@ts-ignore
     showDialog(options: promptAction.ShowDialogOptions,
-        callback?: AsyncCallback<promptAction.ShowDialogSuccessResponse>): void {
+        callback: AsyncCallback<promptAction.ShowDialogSuccessResponse>): void {
         throw Error("showDialog1 not implemented in PromptAction!")
     }
 
@@ -314,7 +316,7 @@ export class PromptAction {
 
     //@ts-ignore
     showActionMenu(options: promptAction.ActionMenuOptions,
-        callback?: AsyncCallback<promptAction.ActionMenuSuccessResponse>): void {
+        callback: AsyncCallback<promptAction.ActionMenuSuccessResponse>): void {
         throw Error("showActionMenu1 not implemented in PromptAction!")
     }
 
@@ -345,6 +347,16 @@ export class PromptAction {
     //@ts-ignore
     closeCustomDialog(dialogId: number): void {
         throw Error("closeCustomDialog not implemented in PromptAction!")
+    }
+
+    openCustomDialogWithController(content: ComponentContent, controller: promptAction.DialogController,
+        options?: promptAction.BaseDialogOptions): Promise<void> {
+        throw Error("openCustomDialogWithController not implemented in PromptAction!")
+    }
+
+    presentCustomDialog(builder: CustomBuilder | CustomBuilderWithId, controller?: promptAction.DialogController,
+        options?: promptAction.DialogOptions): Promise<number> {
+        throw Error("presentCustomDialog not implemented in PromptAction!")
     }
 
     openPopup(content: ComponentContent, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {

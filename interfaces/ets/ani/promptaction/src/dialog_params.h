@@ -75,5 +75,6 @@ bool GetBorderStyle(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG
 bool GetCustomDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
 std::function<void(int32_t)> GetOpenCustomDialogPromise(std::shared_ptr<PromptActionAsyncContext>& asyncContext);
 std::function<void(int32_t)> GetCustomDialogContentPromise(std::shared_ptr<PromptActionAsyncContext>& asyncContext);
+bool GetDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
 
 #endif // INTERFACES_ETS_ANI_PROMPTACTION_SRC_DIALOG_PARAMS_H

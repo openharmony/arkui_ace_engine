@@ -173,18 +173,43 @@ declare namespace promptAction {
         shadow?: ShadowOptions | ShadowStyle;
     }
 
+    export class CommonController {
+        constructor();
+        close(): void;
+    }
+
+    export class DialogController extends CommonController {}
+
+    export type DialogOptionsCornerRadius = Dimension | BorderRadiuses;
+    export type DialogOptionsBorderWidth = Dimension | EdgeWidths;
+    export type DialogOptionsBorderColor = ResourceColor | EdgeColors;
+    export type DialogOptionsBorderStyle = BorderStyle | EdgeStyles;
+    export type DialogOptionsShadow = ShadowOptions | ShadowStyle;
+
+    export interface DialogOptions extends BaseDialogOptions {
+        backgroundColor?: ResourceColor;
+        cornerRadius?: DialogOptionsCornerRadius;
+        width?: Dimension;
+        height?: Dimension;
+        borderWidth?: DialogOptionsBorderWidth;
+        borderColor?: DialogOptionsBorderColor;
+        borderStyle?: DialogOptionsBorderStyle;
+        backgroundBlurStyle?: BlurStyle;
+        shadow?: DialogOptionsShadow;
+    }
+
     export function showToast(options: ShowToastOptions): void;
 
     export function openToast(options: ShowToastOptions): Promise<number>;
 
     export function closeToast(toastId: number): void;
 
-    export function showDialog1(options: ShowDialogOptions, callback?: AsyncCallback<ShowDialogSuccessResponse>): void;
+    export function showDialog1(options: ShowDialogOptions, callback: AsyncCallback<ShowDialogSuccessResponse>): void;
 
     export function showDialog(options: ShowDialogOptions): Promise<ShowDialogSuccessResponse>;
 
     export function showActionMenu1(options: ActionMenuOptions,
-        callback?: AsyncCallback<ActionMenuSuccessResponse>): void;
+        callback: AsyncCallback<ActionMenuSuccessResponse>): void;
 
     export function showActionMenu(options: ActionMenuOptions): Promise<ActionMenuSuccessResponse>;
 
@@ -199,6 +224,12 @@ declare namespace promptAction {
     export function closeCustomDialog1(content: KPointer): Promise<void>;
 
     export function closeCustomDialog(dialogId: number): void;
+
+    export function openCustomDialogWithController(content: KPointer, controller: DialogController,
+        options?: BaseDialogOptions, optionsInternal?: DialogOptionsInternal): Promise<void>;
+
+    export function presentCustomDialog(builder: KPointer, controller?: DialogController,
+        options?: DialogOptions, optionsInternal?: DialogOptionsInternal): Promise<number>;
 }
 
 export default promptAction
