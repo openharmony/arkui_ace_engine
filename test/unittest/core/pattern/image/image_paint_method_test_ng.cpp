@@ -351,4 +351,28 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_HdrBrightness, TestSize.
     auto config = pattern->image_->GetPaintConfig();
     EXPECT_EQ(config.dynamicMode, DynamicRangeMode::HIGH);
 }
+
+/**
+ * @tc.name: ImagePaintMethodTestNg_DfxSetFrameSize
+ * @tc.desc: Test SetFrameSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_DfxSetFrameSize, TestSize.Level0)
+{
+    /* *
+     * @tc.steps: step1. create imageDfx object
+     */
+    ImageDfxConfig imageDfxConfig;
+    /**
+     * @tc.steps: step2. call function.
+     */
+    imageDfxConfig.SetFrameSize(WIDTH, HEIGHT);
+    /**
+     * @tc.steps: step3. call function and EQ.
+     */
+    auto width = imageDfxConfig.GetFrameSizeWidth();
+    auto height = imageDfxConfig.GetFrameSizeHeight();
+    EXPECT_EQ(width, WIDTH);
+    EXPECT_EQ(height, HEIGHT);
+}
 } // namespace OHOS::Ace::NG

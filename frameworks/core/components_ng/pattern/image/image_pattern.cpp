@@ -445,6 +445,7 @@ void ImagePattern::OnImageLoadSuccess()
     dstRect_ = loadingCtx_->GetDstRect();
     auto srcInfo = loadingCtx_->GetSourceInfo();
     auto frameCount = loadingCtx_->GetFrameCount();
+    imageDfxConfig_.SetFrameSize(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
 
     image_->SetImageDfxConfig(imageDfxConfig_);
     RectF paintRect = CalcImageContentPaintSize(geometryNode);
