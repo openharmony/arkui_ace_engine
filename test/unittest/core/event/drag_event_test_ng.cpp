@@ -875,6 +875,7 @@ HWTEST_F(DragEventTestNg, DragEventExecutePreDragActionTest001, TestSize.Level1)
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
         AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+
     /**
      * @tc.steps: step2. Create onPreDrag function and bind to eventHub.
      * @tc.expected: Bind onPreDrag function successful.
