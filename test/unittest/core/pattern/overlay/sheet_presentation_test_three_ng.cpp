@@ -1860,4 +1860,79 @@ HWTEST_F(SheetPresentationTestThreeNg, IsNeedChangeScrollHeight003, TestSize.Lev
     bool isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);
     ASSERT_FALSE(isNeedChangeScrollHeight);
 }
+
+/**
+ * @tc.name: LayoutScrollNode001
+ * @tc.desc: Test LayoutScrollNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, LayoutScrollNode001, TestSize.Level1)
+{
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
+    EXPECT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    EXPECT_NE(sheetPattern, nullptr);
+    auto titleBuilder = sheetPattern->GetTitleBuilderNode();
+    CHECK_NULL_VOID(titleBuilder);
+    auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
+    EXPECT_NE(sheetLayoutAlgorithm, nullptr);
+
+    auto titleBuilderNode = titleBuilder->GetGeometryNode();
+    EXPECT_NE(titleBuilderNode, nullptr);
+    titleBuilderNode->frame_.rect_.SetHeight(10.0f);
+
+    auto dragBarNode = sheetPattern->GetDragBarNode();
+    EXPECT_NE(dragBarNode, nullptr);
+    auto dragBar = dragBarNode->GetGeometryNode();
+    EXPECT_NE(dragBar, nullptr);
+    dragBar->frame_.rect_.SetHeight(10.0f);
+
+    sheetPattern->sheetType_ = SHEET_POPUP;
+    OffsetF translate;
+    auto layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    EXPECT_NE(layoutWrapperNode, nullptr);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    EXPECT_NE(layoutWrapper, nullptr);
+    sheetLayoutAlgorithm->LayoutScrollNode(translate, layoutWrapper);
+    EXPECT_EQ(dragBar->frame_.rect_.GetOffset(), OffsetF(0.0f, 20.0f));
+}
+
+/**
+ * @tc.name: LayoutTitleBuilder001
+ * @tc.desc: Test LayoutTitleBuilder function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, LayoutTitleBuilder001, TestSize.Level1)
+{
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
+    EXPECT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    EXPECT_NE(sheetPattern, nullptr);
+    auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
+    EXPECT_NE(sheetLayoutAlgorithm, nullptr);
+    sheetPattern->sheetType_ = SHEET_POPUP;
+    OffsetF translate;
+    auto layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    EXPECT_NE(layoutWrapperNode, nullptr);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    EXPECT_NE(layoutWrapper, nullptr);
+    auto sheetGeometryNode = sheetNode->GetGeometryNode();
+    EXPECT_NE(sheetGeometryNode, nullptr);
+
+    auto dragBarNode = sheetPattern->GetDragBarNode();
+    CHECK_NULL_VOID(dragBarNode);
+    auto dragBar = dragBarNode->GetGeometryNode();
+    dragBar->frame_.rect_.SetHeight(10.0f);
+    dragBar->margin_ = nullptr;
+    sheetLayoutAlgorithm->LayoutTitleBuilder(translate, layoutWrapper);
+    EXPECT_EQ(sheetGeometryNode->frame_.rect_.GetOffset(), OffsetF(0.0f, 10.0f));
+}
 } // namespace OHOS::Ace::NG
