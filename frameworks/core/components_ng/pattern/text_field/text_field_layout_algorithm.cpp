@@ -1280,18 +1280,24 @@ void TextFieldLayoutAlgorithm::UpdateTextAreaMaxLines(
     if (ShouldUseInfiniteMaxLines(textFieldLayoutProperty)) {
         textStyle.SetMaxLines(INT32_MAX);
     } else {
-        textStyle.SetMaxLines(textFieldLayoutProperty->GetNormalMaxViewLines().value());
+        auto maxLinesOpt = textFieldLayoutProperty->GetNormalMaxViewLines();
+        if (maxLinesOpt.has_value()) {
+            textStyle.SetMaxLines(maxLinesOpt.value());
+        }
     }
 }
 
 bool TextFieldLayoutAlgorithm::ShouldUseInfiniteMaxLines(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
 {
     CHECK_NULL_RETURN(textFieldLayoutProperty, false);
-    return textFieldLayoutProperty->HasOverflowMode() &&
-           textFieldLayoutProperty->GetOverflowMode() == OverflowMode::SCROLL &&
-           (textFieldLayoutProperty->GetTextOverflow() == TextOverflow::NONE ||
-               textFieldLayoutProperty->GetTextOverflow() == TextOverflow::CLIP ||
-               textFieldLayoutProperty->GetTextOverflow() == TextOverflow::DEFAULT);
+    const auto& overflowMode = textFieldLayoutProperty->GetOverflowMode();
+    if (!overflowMode.has_value() || overflowMode.value() != OverflowMode::SCROLL) {
+        return false;
+    }
+    const auto& textOverflow = textFieldLayoutProperty->GetTextOverflow();
+    return textOverflow.has_value() &&
+           (textOverflow.value() == TextOverflow::NONE || textOverflow.value() == TextOverflow::CLIP ||
+               textOverflow.value() == TextOverflow::DEFAULT);
 }
 
 void TextFieldLayoutAlgorithm::CalculateContentMaxSizeWithPolicy(

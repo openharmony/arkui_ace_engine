@@ -321,7 +321,7 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
         paint->SetScrollBar(scrollBar);
         if (scrollBar->NeedPaint()) {
             textFieldOverlayModifier_->SetRect(scrollBar->GetActiveRect());
-        } else if (!HasFocus()) {
+        } else if (!HasFocus() && NeedSetScrollRect()) {
             auto scrollRect = scrollBar->GetActiveRect();
             CalcScrollRect(scrollRect);
             textFieldOverlayModifier_->SetRect(scrollRect);
@@ -330,6 +330,27 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
     }
     CalculateBoundsRect();
     return paint;
+}
+
+bool TextFieldPattern::NeedSetScrollRect()
+{
+    auto textFieldLayoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
+    bool needSetScrollRect = true;
+    if (!IsNormalInlineState() && textFieldLayoutProperty->HasOverflowMode() &&
+        lastOverflowMode_ != textFieldLayoutProperty->GetOverflowMode().value()) {
+        lastOverflowMode_ = textFieldLayoutProperty->GetOverflowMode().value();
+        needSetScrollRect = false;
+    }
+    if (!IsNormalInlineState() && textFieldLayoutProperty->HasTextOverflow() &&
+        lastTextOverflow_ != textFieldLayoutProperty->GetTextOverflow().value()) {
+        lastTextOverflow_ = textFieldLayoutProperty->GetTextOverflow().value();
+        needSetScrollRect = false;
+    }
+    if (IsNormalInlineState() && textFieldLayoutProperty->HasOverflowMode()) {
+        needSetScrollRect = false;
+    }
+    return needSetScrollRect;
 }
 
 void TextFieldPattern::CalculateBoundsRect()

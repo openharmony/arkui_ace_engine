@@ -1041,6 +1041,128 @@ HWTEST_F(TextFieldPatternTestNine, PasteAfterStopEditing001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: NeedSetScrollRect001
+ * @tc.desc: test NeedSetScrollRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, NeedSetScrollRect001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    GetFocus();
+
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->lastOverflowMode_ = OverflowMode::CLIP;
+    auto textFieldLayoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    textFieldLayoutProperty->UpdateOverflowMode(OverflowMode::SCROLL);
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
+
+    auto result = pattern_->NeedSetScrollRect();
+    EXPECT_FALSE(result);
+    EXPECT_EQ(pattern_->lastOverflowMode_, OverflowMode::SCROLL);
+}
+
+/**
+ * @tc.name: NeedSetScrollRect002
+ * @tc.desc: test NeedSetScrollRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, NeedSetScrollRect002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    GetFocus();
+
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->lastOverflowMode_ = OverflowMode::CLIP;
+    auto textFieldLayoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    textFieldLayoutProperty->UpdateOverflowMode(OverflowMode::SCROLL);
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+
+    auto result = pattern_->NeedSetScrollRect();
+    EXPECT_FALSE(result);
+    EXPECT_EQ(pattern_->lastOverflowMode_, OverflowMode::SCROLL);
+}
+
+/**
+ * @tc.name: NeedSetScrollRect003
+ * @tc.desc: test NeedSetScrollRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, NeedSetScrollRect003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    GetFocus();
+
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->lastTextOverflow_ = TextOverflow::DEFAULT;
+    auto textFieldLayoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
+
+    auto result = pattern_->NeedSetScrollRect();
+    EXPECT_FALSE(result);
+    EXPECT_EQ(pattern_->lastTextOverflow_, TextOverflow::MARQUEE);
+}
+
+/**
+ * @tc.name: NeedSetScrollRect004
+ * @tc.desc: test NeedSetScrollRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, NeedSetScrollRect004, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    GetFocus();
+
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->lastOverflowMode_ = OverflowMode::CLIP;
+    pattern_->lastTextOverflow_ = TextOverflow::DEFAULT;
+    auto textFieldLayoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    textFieldLayoutProperty->UpdateOverflowMode(OverflowMode::SCROLL);
+    textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
+
+    auto result = pattern_->NeedSetScrollRect();
+    EXPECT_FALSE(result);
+    EXPECT_EQ(pattern_->lastOverflowMode_, OverflowMode::SCROLL);
+    EXPECT_EQ(pattern_->lastTextOverflow_, TextOverflow::MARQUEE);
+}
+
+/**
+ * @tc.name: NeedSetScrollRect005
+ * @tc.desc: test NeedSetScrollRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, NeedSetScrollRect005, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    GetFocus();
+
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->lastTextOverflow_ = TextOverflow::MARQUEE;
+    auto textFieldLayoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
+
+    auto result = pattern_->NeedSetScrollRect();
+    EXPECT_TRUE(result);
+}
+
+/**
  * @tc.name: RegisterFontCallback
  * @tc.desc: test RegisterFontCallback.
  * @tc.type: FUNC
