@@ -432,10 +432,12 @@ extern "C" ACE_FORCE_EXPORT char* OHOS_ACE_GetCurrentUIStackInfo()
     return tmp.data();
 }
 
-void AddAlarmLogFunc()
+void AddAlarmLogFunc(const RefPtr<PipelineBase>& pipeline)
 {
-    std::function<void(uint64_t, int, int)> logFunc = [](uint64_t nodeId, int count, int num) {
-        auto rsNode = Rosen::RSNodeMap::Instance().GetNode<Rosen::RSNode>(nodeId);
+    std::function<void(uint64_t, int, int)> logFunc = [pipeline](uint64_t nodeId, int count, int num) {
+        auto rsUIContext = RsAdapter::GetRSUIContext(pipeline);
+        auto rsNode = rsUIContext ? rsUIContext->GetNodeMap().GetNode(nodeId)
+                        : Rosen::RSNodeMap::Instance().GetNode(nodeId);
         if (rsNode == nullptr) {
             LOGI("rsNodeId:%{public}" PRId64 "not found, sendCommands:%{public}d, totalNumber:%{public}d",
                 nodeId, count, num);
@@ -2704,7 +2706,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     LayoutInspector::SetCallback(instanceId_);
 
     // setLogFunc of current app
-    AddAlarmLogFunc();
+    AddAlarmLogFunc(pipeline);
     InitUISessionManagerCallbacks(pipeline);
     UiSessionManager::GetInstance()->SaveBaseInfo(std::string("bundleName:")
                                                      .append(bundleName)
@@ -3367,6 +3369,7 @@ void UIContentImpl::LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvas
         auto surfaceNode = window_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
         CHECK_NULL_VOID(canvasNode);
+        canvasNode->SetRSUIContext(surfaceNode->GetRSUIContext());
         TAG_LOGD(AceLogTag::ACE_WINDOW, "AddChild surfaceNode %{public}" PRIu64 "canvasNode %{public}" PRIu64 "",
             surfaceNode->GetId(), canvasNode->GetId());
         surfaceNode->AddChild(canvasNode, -1);

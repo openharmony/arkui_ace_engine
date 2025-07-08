@@ -16,6 +16,14 @@
 #include "adapter/ohos/entrance/rs_adapter.h"
 
 #include "base/utils/system_properties.h"
+#include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/pipeline/pipeline_base.h"
+#include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_root_node.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
+#include "wm/window.h"
 
 namespace OHOS::Ace {
 
@@ -117,5 +125,16 @@ void RsAdapter::FlushImplicitTransaction()
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
     }
+}
+
+std::shared_ptr<Rosen::RSUIContext> RsAdapter::GetRSUIContext(const RefPtr<PipelineBase>& pipeline)
+{
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_RETURN(window, nullptr);
+    auto rsUIDirector = window->GetRSUIDirector();
+    CHECK_NULL_RETURN(rsUIDirector, nullptr);
+    auto rsUIContext = rsUIDirector->GetRSUIContext();
+    return rsUIContext;
 }
 }

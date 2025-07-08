@@ -17,16 +17,20 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_RS_ADAPTER_H
 
 #include <string>
-#include "window.h"
 
+#include "base/memory/referenced.h"
 #include "transaction/rs_transaction_proxy.h"
-#include "ui/rs_root_node.h"
-#include "render_service_client/core/ui/rs_root_node.h"
-#include "render_service_client/core/ui/rs_surface_node.h"
-#include "render_service_client/core/ui/rs_ui_context.h"
-#include "render_service_client/core/ui/rs_ui_director.h"
+
+namespace OHOS::Rosen {
+class RSUIContext;
+class RSUIDirector;
+class RSSurfaceNode;
+class RSNode;
+class Window;
+}
 
 namespace OHOS::Ace {
+class PipelineBase;
 class RsAdapter {
 public:
     RsAdapter() = default;
@@ -43,6 +47,7 @@ public:
           const OHOS::sptr<OHOS::Rosen::Window>& dragWindow,
           std::shared_ptr<OHOS::Rosen::RSSurfaceNode>& surfaceNode,
           std::shared_ptr<Rosen::RSNode>& rootNode);
+    static std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(const RefPtr<PipelineBase>& pipeline);
 private:
     static void FlushImplicitTransaction();
 };
