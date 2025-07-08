@@ -73,6 +73,25 @@ uint32_t GetJankRange(double jank)
     return JANK_FRAME_180_FREQ;
 }
 
+int64_t GetCurrentRealTimeNs()
+{
+    struct timespec ts = { 0, 0 };
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
+        return 0;
+    }
+    return (ts.tv_sec * NS_TO_S + ts.tv_nsec);
+}
+
+void ClockTimeCalibration(int64_t &now)
+{
+    int64_t realTime = GetCurrentRealTimeNs();
+    if (now - realTime >= NS_TO_MS || realTime - now >= NS_TO_MS) {
+        ACE_SCOPED_TRACE("ClockTimeCalibration realTime = %ld, now = %ld",
+            static_cast<long>(realTime), static_cast<long>(now));
+        now = realTime;
+    }
+}
+
 class SteadyTimeRecorder {
 public:
     static steady_clock::time_point begin;
@@ -118,6 +137,7 @@ void JankFrameReport::JankFrameRecord(int64_t timeStampNanos, const std::string&
         return;
     }
     int64_t now = GetSteadyTimestamp<std::chrono::nanoseconds>();
+    ClockTimeCalibration(now);
     int64_t durationTmp = now - std::max(timeStampNanos, prevEndTimeStamp_);
     int64_t duration = (now <= timeStampNanos) ? 0 : durationTmp;
     double jank = double(duration) / refreshPeriod_;
