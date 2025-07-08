@@ -15,6 +15,7 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTIL_BUILDER_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTIL_BUILDER_UTILS_H
+
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::BuilderUtils {
@@ -30,7 +31,7 @@ namespace OHOS::Ace::BuilderUtils {
     void RemoveBuilderFromBuilder(const RefPtr<NG::UINode>& node, const std::list<RefPtr<NG::UINode>>& nodes);
     void GetBuilderNodes(const RefPtr<NG::UINode>& node, std::list<RefPtr<NG::UINode>>& nodes);
     void GetFirstBuilderNode(const RefPtr<NG::UINode>& node, std::list<RefPtr<NG::UINode>>& nodes);
-
+    void ClearChildInBuilderContainer(int32_t nodeId, std::list<RefPtr<NG::UINode>>& nodes);
 } // namespace OHOS::Ace::BuilderUtils
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTIL_BUILDER_UTILS_H

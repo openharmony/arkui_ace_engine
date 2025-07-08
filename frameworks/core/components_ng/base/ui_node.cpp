@@ -856,7 +856,7 @@ void UINode::DetachFromMainTree(bool recursive, bool isRoot)
         std::list<RefPtr<UINode>> nodes;
         RefPtr<UINode> uiNode = AceType::Claim<UINode>(this);
         BuilderUtils::GetBuilderNodes(uiNode, nodes);
-        BuilderUtils::RemoveBuilderFromParent(uiNode, nodes);
+        BuilderUtils::RemoveBuilderFromParent(GetParent(), nodes);
     }
     OnDetachFromMainTree(recursive, context);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
@@ -1024,7 +1024,7 @@ void UINode::OnAttachToMainTree(bool)
         std::list<RefPtr<UINode>> nodes;
         RefPtr<UINode> uiNode = AceType::Claim<UINode>(this);
         BuilderUtils::GetBuilderNodes(uiNode, nodes);
-        BuilderUtils::AddBuilderToParent(uiNode, nodes);
+        BuilderUtils::AddBuilderToParent(GetParent(), nodes);
     }
 }
 
