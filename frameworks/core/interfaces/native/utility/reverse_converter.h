@@ -312,6 +312,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src);
     void AssignArkValue(Ark_RichEditorParagraphResult& dst, const ParagraphInfo& src);
     void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src);
+    void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& src);
     void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src);
     void AssignArkValue(Ark_RichEditorSelection& dst, const BaseEventInfo& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorSelection& dst, const SelectionInfo& src, ConvContext *ctx);
