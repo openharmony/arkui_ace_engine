@@ -560,7 +560,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest011, TestSize.L
         param,
         point,
         touchEvent);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 
     ret = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(false,
         nullptr,

@@ -444,7 +444,7 @@ public:
     bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) override;
 
     void AddHoverTransparentCallback(const RefPtr<NG::FrameNode>& node) override;
-    bool IsInHoverTransparentCallbackList(const RefPtr<NG::FrameNode>& node) override;
+    bool CheckHoverTransparentCallbackListEmpty(int32_t containerId) override;
 
     int64_t CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node);
     void ChooseDumpEvent(const std::vector<std::string>& params,

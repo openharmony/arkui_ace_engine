@@ -224,6 +224,7 @@ class HoverTransparentCallbackController {
 public:
     bool AddToHoverTransparentCallbackList(const RefPtr<FrameNode>& frameNode)
     {
+        UpdateHoverTransparentCallbackList();
         CHECK_NULL_RETURN(frameNode, false);
         auto pipeline = frameNode->GetContextRefPtr();
         CHECK_NULL_RETURN(pipeline, false);
@@ -248,8 +249,24 @@ public:
         return true;
     }
 
+    void UpdateHoverTransparentCallbackList()
+    {
+        for (auto it = controller_.begin(); it != controller_.end(); ++it) {
+            auto& controllerList = it->second;
+            for (auto controllerListIt = controllerList.begin(); controllerListIt != controllerList.end();) {
+                auto node = (*controllerListIt).Upgrade();
+                if (!node) {
+                    controllerListIt = controllerList.erase(controllerListIt);
+                } else {
+                    ++controllerListIt;
+                }
+            }
+        }
+    }
+
     bool IsInHoverTransparentCallbackList(const RefPtr<FrameNode>& frameNode)
     {
+        UpdateHoverTransparentCallbackList();
         CHECK_NULL_RETURN(frameNode, false);
         auto pipeline = frameNode->GetContextRefPtr();
         CHECK_NULL_RETURN(pipeline, false);
@@ -273,6 +290,7 @@ public:
 
     bool CheckHoverTransparentCallbackListEmpty(int32_t containerId)
     {
+        UpdateHoverTransparentCallbackList();
         auto it = controller_.find(containerId);
         if (it != controller_.end()) {
             return it->second.empty();
