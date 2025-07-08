@@ -890,9 +890,9 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
     NotifyDragTouchEventListener(point);
 
     CheckUpEvent(event);
-    UpdateInfoWhenFinishDispatch(point, sendOnTouch);
     auto item = touchTestResults_.find(event.id);
     passThroughResult_ = (item != touchTestResults_.end() && !item->second.empty());
+    UpdateInfoWhenFinishDispatch(point, sendOnTouch);
     return true;
 }
 
