@@ -672,6 +672,11 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
      * @tc.expected: menu wrapperRect is equal to the size of the security box on the upper half screen.
      */
     EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(left, top, width - left - right, creaseYTop - top));
+
+    float windowsOffsetY = 0.0f;
+    layoutAlgorithm->canExpandCurrentWindow_= true;
+    layoutAlgorithm->param_.windowsOffsetY = windowsOffsetY;
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(left, top + windowsOffsetY, width - left - right, creaseYTop - top));
 }
 
 /**
