@@ -41,6 +41,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/thread/background_task_executor.h"
+#include "base/utils/cpu_boost.h"
 #include "core/common/ace_engine.h"
 #include "core/common/font_manager.h"
 #include "core/common/font_change_observer.h"
@@ -499,6 +500,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
         ACE_SCOPED_TRACE("Error update, node stack non-empty");
         LOGW("stack is not empty when call FlushDirtyNodeUpdate, node may be mounted to incorrect pos!");
     }
+    FlushDirtyNodeCpuBoostOperate(true);
     // SomeTimes, customNode->Update may add some dirty custom nodes to dirtyNodes_,
     // use maxFlushTimes to avoid dead cycle.
     int maxFlushTimes = 3;
@@ -515,6 +517,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
         }
         --maxFlushTimes;
     }
+    FlushDirtyNodeCpuBoostOperate(false);
 
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushBuild();
@@ -895,6 +898,7 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
         return;
     }
 
+    DisplaysyncCpuBoostOperate(true);
     displaySyncManager->SetRefreshRateMode(window_->GetCurrentRefreshRateMode());
     displaySyncManager->SetVsyncPeriod(window_->GetVSyncPeriod());
 
@@ -914,6 +918,7 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
     auto monitorVsyncRate = displaySyncManager->GetMonitorVsyncRate();
     auto id = GetInstanceId();
     ArkUIPerfMonitor::GetPerfMonitor(id)->RecordDisplaySyncRate(monitorVsyncRate);
+    DisplaysyncCpuBoostOperate(false);
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)

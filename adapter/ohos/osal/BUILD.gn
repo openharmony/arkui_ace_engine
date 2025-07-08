@@ -59,6 +59,7 @@ template("ace_osal_ohos_source_set") {
       "ai_write_adapter.cpp",
       "anr_thread.cpp",
       "app_bar_helper_impl.cpp",
+      "cpu_boost.cpp",
       "data_detector_adapter.cpp",
       "data_detector_loader.cpp",
       "data_detector_mgr.cpp",
@@ -140,6 +141,7 @@ template("ace_osal_ohos_source_set") {
           resourceschedule_ffrt_support) {
         sources += [ "long_frame_report_impl.cpp" ]
         external_deps += [ "ffrt:libffrt" ]
+        defines += [ "FFRT_CPUBOOST_EN" ]
       }
 
       external_deps += [
