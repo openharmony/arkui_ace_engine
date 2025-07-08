@@ -1183,7 +1183,7 @@ HWTEST_F(WebPatternAddTestNg, NotifyStartDragTask001, TestSize.Level1)
     EXPECT_NE(gestureHub, nullptr);
     auto pipeline = MockPipelineContext::GetCurrentContext();
     auto dragDropManager = pipeline->dragDropManager_;
-    dragDropManager->dragDropState = OHOS::Ace::NG::DragDropMgrState::DRAGGING;
+    dragDropManager->dragDropState_ = OHOS::Ace::NG::DragDropMgrState::DRAGGING;
     bool result = webPattern->NotifyStartDragTask(false);
     EXPECT_FALSE(result);
     pipeline->dragDropManager_ = nullptr;
