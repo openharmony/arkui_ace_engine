@@ -14,6 +14,7 @@
  */
 
 #include "dialog_params.h"
+#include "prompt_action_utils.h"
 
 #include "frameworks/base/error/error_code.h"
 #include "frameworks/base/i18n/localization.h"
@@ -22,44 +23,6 @@
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/transition_effect_peer_impl.h"
-
-namespace OHOS::Ace::NG {
-static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MSG {
-    { ERROR_CODE_PERMISSION_DENIED, "Permission denied. " },
-    { ERROR_CODE_PARAM_INVALID, "Parameter error. " },
-    { ERROR_CODE_SYSTEMCAP_ERROR, "Capability not supported. " },
-    { ERROR_CODE_INTERNAL_ERROR, "Internal error. " },
-    { ERROR_CODE_URI_ERROR, "Uri error. " },
-    { ERROR_CODE_PAGE_STACK_FULL, "Page stack error. " },
-    { ERROR_CODE_URI_ERROR_LITE, "Uri error. " },
-    { ERROR_CODE_DIALOG_CONTENT_ERROR, "Dialog content error. " },
-    { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "Dialog content already exist. " },
-    { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "Dialog content not found. " },
-    { ERROR_CODE_TOAST_NOT_FOUND, "Toast not found. " }
-};
-
-std::string ErrorToMessage(int32_t code)
-{
-    auto iter = ERROR_CODE_TO_MSG.find(code);
-    return (iter != ERROR_CODE_TO_MSG.end()) ? iter->second : "";
-}
-
-std::string GetErrorMsg(int32_t errorCode)
-{
-    std::string strMsg;
-    if (errorCode == ERROR_CODE_DIALOG_CONTENT_ERROR) {
-        strMsg = ErrorToMessage(ERROR_CODE_DIALOG_CONTENT_ERROR) + "The ComponentContent is incorrect.";
-    } else if (errorCode == ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST) {
-        strMsg = ErrorToMessage(ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST) +
-            "The ComponentContent has already been opened.";
-    } else if (errorCode == ERROR_CODE_DIALOG_CONTENT_NOT_FOUND) {
-        strMsg = ErrorToMessage(ERROR_CODE_DIALOG_CONTENT_NOT_FOUND) + "The ComponentContent cannot be found.";
-    } else {
-        strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Build custom dialog failed.";
-    }
-    return strMsg;
-}
-} // OHOS::Ace::NG
 
 bool GetButtonInfo(ani_env* env, ani_ref resultRef, OHOS::Ace::ButtonInfo& result)
 {
@@ -1069,7 +1032,7 @@ std::function<void(int32_t)> GetOpenCustomDialogPromise(std::shared_ptr<PromptAc
                 }
             } else {
                 int32_t errorCode = OHOS::Ace::ERROR_CODE_INTERNAL_ERROR;
-                std::string errorMsg = OHOS::Ace::NG::GetErrorMsg(errorCode);
+                std::string errorMsg = OHOS::Ace::Ani::GetErrorMsg(errorCode);
                 ani_ref errorRef = CreateBusinessError(asyncContext->env, errorCode, errorMsg);
                 ani_error error = static_cast<ani_error>(errorRef);
                 ani_status status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
@@ -1126,7 +1089,7 @@ std::function<void(int32_t)> GetCustomDialogContentPromise(std::shared_ptr<Promp
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] PromiseResolver_Resolve fail.");
                 }
             } else {
-                std::string strMsg = OHOS::Ace::NG::GetErrorMsg(errorCode);
+                std::string strMsg = OHOS::Ace::Ani::GetErrorMsg(errorCode);
                 ani_ref errorRef = CreateBusinessError(asyncContext->env, errorCode, strMsg);
                 ani_error error = static_cast<ani_error>(errorRef);
                 ani_status status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
