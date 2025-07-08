@@ -440,6 +440,7 @@ void ToastPattern::OnAttachToFrameNode()
     auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
     auto pipeline = parentContainerId < 0 ? host->GetContextRefPtr() : PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowSizeChangeCallback(host->GetId());
     auto callbackId =
         pipeline->RegisterFoldDisplayModeChangedCallback([parentContainerId](FoldDisplayMode foldDisplayMode) {
             if (foldDisplayMode == FoldDisplayMode::FULL || foldDisplayMode == FoldDisplayMode::MAIN) {
@@ -473,6 +474,7 @@ void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
     auto current_context = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto pipeline = parentContainerId < 0 ? current_context : PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowSizeChangeCallback(node->GetId());
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
     }
@@ -692,5 +694,23 @@ RefPtr<PipelineContext> ToastPattern::GetToastContext()
     CHECK_NULL_RETURN(host, nullptr);
     auto context = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     return context;
+}
+
+void ToastPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "WindowSize is changed, type: %{public}d", type);
+    auto isRotation = type == WindowSizeChangeReason::ROTATION;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto container = Container::GetContainer(context->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    if (isRotation && container->IsSubContainer()) {
+        auto overlayManager = context->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->PopToast(host->GetId());
+    }
 }
 } // namespace OHOS::Ace::NG
