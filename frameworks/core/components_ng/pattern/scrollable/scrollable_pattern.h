@@ -909,13 +909,13 @@ public:
     bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
         LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
 
-protected:
-    void SuggestOpIncGroup(bool flag);
-    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     RefPtr<ScrollBar> GetScrollBar() const
     {
         return scrollBar_;
     }
+protected:
+    void SuggestOpIncGroup(bool flag);
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
     EdgeEffect GetEdgeEffect() const;
