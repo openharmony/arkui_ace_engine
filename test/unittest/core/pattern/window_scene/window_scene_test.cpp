@@ -685,7 +685,7 @@ HWTEST_F(WindowSceneTest, CreateSnapshotWindow, TestSize.Level1)
     windowScene->CreateSnapshotWindow();
 
     session->scenePersistence_->isSavingSnapshot_[key.first][key.second] = true;
-    session->freeMultiWindow_ = true;
+    session->freeMultiWindow_.store(true);
     windowScene->CreateSnapshotWindow();
     EXPECT_EQ(windowScene->isBlankForSnapshot_, false);
 }
