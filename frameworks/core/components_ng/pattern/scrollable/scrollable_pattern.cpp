@@ -311,7 +311,7 @@ void ScrollablePattern::ProcessNavBarReactOnEnd()
 bool ScrollablePattern::OnScrollPosition(double& offset, int32_t source)
 {
     auto isSearchRefresh = GetIsSearchRefresh();
-    if (needLinked_) {
+    if (GetNeedLinked()) {
         bool isAtTop = IsAtTop();
         auto isAtTopAndPositive = (isAtTop && Positive(offset));
         auto refreshCoordinateMode = RefreshCoordinationMode::UNKNOWN;

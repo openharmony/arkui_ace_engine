@@ -21,6 +21,7 @@
 namespace OHOS::Ace::NG {
 RefPtr<NestableScrollContainer> NestableScrollContainer::SearchParent()
 {
+    CHECK_NULL_RETURN(needLinked_, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
