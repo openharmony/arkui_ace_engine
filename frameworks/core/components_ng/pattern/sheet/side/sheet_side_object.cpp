@@ -65,9 +65,9 @@ void SheetSideObject::UpdateDragBarStatus()
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
 
-    auto titleColumn = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_VOID(titleColumn);
-    auto sheetDragBar = AceType::DynamicCast<FrameNode>(titleColumn->GetFirstChild());
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto sheetDragBar = sheetPattern->GetDragBarNode();
     CHECK_NULL_VOID(sheetDragBar);
     auto dragBarLayoutProperty = sheetDragBar->GetLayoutProperty();
     CHECK_NULL_VOID(dragBarLayoutProperty);
