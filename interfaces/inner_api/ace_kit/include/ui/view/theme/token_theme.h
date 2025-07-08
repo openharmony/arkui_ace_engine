@@ -79,7 +79,8 @@ public:
         bool isDark = IsDarkMode();
         return isDark ? darkResObjs_ : resObjs_;
     }
-
+    
+    static bool IsDarkMode();   
 private:
     int32_t id_ { 0 };
     RefPtr<TokenColors> colors_;
@@ -87,8 +88,6 @@ private:
     std::vector<RefPtr<ResourceObject>> resObjs_;
     std::vector<RefPtr<ResourceObject>> darkResObjs_;
     ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
-    static bool IsDarkMode();
-    
 };
 
 } // namespace OHOS::Ace

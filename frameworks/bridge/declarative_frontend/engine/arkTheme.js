@@ -296,9 +296,10 @@ class ArkThemeBase {
         }
         if (customTheme.darkColors) {
             copyTheme.darkColors = {};
-            Object.assign(copyTheme.darkColors, customTheme.darkColors);
+            // For properties missing in darkColors, use the values from colors
+            Object.assign(copyTheme.darkColors, customTheme?.colors, customTheme.darkColors);
         } else if (customTheme.colors) {
-            // 如果用户没有传递 darkColors，则使用 colors 的值
+            // If the user does not provide darkColors, use the values from colors
             copyTheme.darkColors = {};
             Object.assign(copyTheme.darkColors, customTheme.colors);
         }

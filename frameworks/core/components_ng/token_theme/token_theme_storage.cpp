@@ -197,8 +197,8 @@ RefPtr<TokenTheme> TokenThemeStorage::CreateSystemTokenTheme(ColorMode colorMode
     }
     tokenColors->SetColors(std::move(colors));
     
-    // 为深色模式也设置相同的颜色
-    std::vector<Color> darkColors = colors; // 暂时使用相同的颜色
+    // Set the same colors for dark mode as well
+    std::vector<Color> darkColors = colors;
     tokenDarkColors->SetColors(std::move(darkColors));
     return tokenTheme;
 }

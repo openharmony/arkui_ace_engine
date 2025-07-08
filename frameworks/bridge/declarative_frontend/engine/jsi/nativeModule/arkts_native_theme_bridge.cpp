@@ -42,12 +42,14 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
     std::vector<ArkUI_Uint32> lightColors;
     std::vector<RefPtr<ResourceObject>> lightResObjs;
     if (!HandleThemeColorsArg(vm, colorsArg, lightColors, lightResObjs)) {
+        TAG_LOGD(AceLogTag::ACE_THEME, "Handle Theme Colors to array failed");
         return panda::JSValueRef::Undefined(vm);
     }
 
     std::vector<ArkUI_Uint32> darkColors;
     std::vector<RefPtr<ResourceObject>> darkResObjs;
     if (!HandleThemeColorsArg(vm, darkColorsArg, darkColors, darkResObjs)) {
+        TAG_LOGD(AceLogTag::ACE_THEME, "Handle Theme darkColors to array failed");
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -92,6 +94,7 @@ bool ThemeBridge::HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>
         RefPtr<ResourceObject> resObj;
         NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
         if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color, resObj, nodeInfo)) {
+            TAG_LOGD(AceLogTag::ACE_THEME, "Parse JS Color Alpha failed");
             color = basisTheme->Colors()->GetByIndex(i);
         }
         resObjs.push_back(resObj);
@@ -142,6 +145,7 @@ ArkUINativeModuleValue ThemeBridge::SetDefaultTheme(ArkUIRuntimeCallInfo* runtim
         auto colorParams = panda::ArrayRef::GetValueAt(vm, colorsArg, i);
         bool isColorAvailable = false;
         if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color, true)) {
+            TAG_LOGD(AceLogTag::ACE_THEME, "Parse JS Color Alpha failed");
             if (basisTheme) {
                 color = basisTheme->Colors()->GetByIndex(i);
                 isColorAvailable = true;
