@@ -16,9 +16,9 @@
 
 // HANDWRITTEN, DO NOT REGENERATE
 
-import { __context, __id, NodeAttach } from "@koalaui/runtime";
-import { DynamicNode } from "./common";
-import { LazyForEachImpl } from "../handwritten/LazyForEachImpl";
+import { __context, __id } from "@koalaui/runtime"
+import { DynamicNode } from "./common"
+import { LazyForEachImpl } from "../handwritten/LazyForEachImpl"
 
 export enum DataOperationType {
     ADD = "add",
@@ -120,5 +120,5 @@ export function LazyForEach<T>(
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
 ) {
-    LazyForEachImpl(dataSource, itemGenerator, keyGenerator);
+    LazyForEachImpl(dataSource, itemGenerator, keyGenerator)
 }
