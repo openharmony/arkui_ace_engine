@@ -692,11 +692,6 @@ public:
         return false;
     }
 
-    void SetNeedLinked(bool needLinked)
-    {
-        needLinked_ = needLinked;
-    }
-
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
         bool isScrollable = !(IsAtBottom() && IsAtTop() && !GetAlwaysEnabled());
@@ -1209,7 +1204,6 @@ private:
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool edgeEffectAlwaysEnabled_ = false;
     EffectEdge effectEdge_ = EffectEdge::ALL;
-    bool needLinked_ = true;
 
     RefPtr<NodeAnimatablePropertyFloat> springOffsetProperty_;
     RefPtr<NodeAnimatablePropertyFloat> curveOffsetProperty_;

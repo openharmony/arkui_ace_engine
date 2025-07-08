@@ -380,7 +380,8 @@ HWTEST_F(ScrollablePatternTestNg, OnScrollPosition001, TestSize.Level1)
 {
     RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
     scrollablePattern->isSearchRefresh_ = false;
-    scrollablePattern->needLinked_ = false;
+    scrollablePattern->SetNeedLinked(false);
+    EXPECT_FALSE(scrollablePattern->GetNeedLinked());
     scrollablePattern->isAnimationStop_ = false;
     double offset = 2.0;
     auto result = scrollablePattern->OnScrollPosition(offset, SCROLL_FROM_UPDATE);
@@ -396,7 +397,8 @@ HWTEST_F(ScrollablePatternTestNg, OnScrollPosition002, TestSize.Level1)
 {
     RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
     scrollablePattern->isSearchRefresh_ = false;
-    scrollablePattern->needLinked_ = true;
+    scrollablePattern->SetNeedLinked(true);
+    EXPECT_TRUE(scrollablePattern->GetNeedLinked());
     scrollablePattern->isAnimationStop_ = true;
     scrollablePattern->animator_ = nullptr;
     double offset = 2.0;
