@@ -896,6 +896,7 @@ void WindowScene::OnPreLoadStartingWindowFinished()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         auto imageLayoutProperty = self->startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
         const auto& sessionInfo = self->session_->GetSessionInfo();
         auto preLoadPixelMap = Rosen::SceneSessionManager::GetInstance().GetPreLoadStartingWindow(sessionInfo);
         CHECK_NULL_VOID(preLoadPixelMap);
