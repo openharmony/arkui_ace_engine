@@ -59,8 +59,6 @@ private:
     CreateItemCb createItem_;
     UpdateRangeCb updateRange_;
     int32_t totalCount_ = 0;
-    int32_t activeStart_ = -1;
-    int32_t activeEnd_ = -1;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_LAZY_COMPOSE_ADAPTER_H
