@@ -142,6 +142,13 @@ ohos_shared_library("ArkoalaNative_ark") {
     "runtime_core:ani",
   ]
 
+
+  if (is_arkui_x) {
+    deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+  } else {
+    external_deps += [ "bounds_checking_function:libsec_static" ]
+  }
+
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
