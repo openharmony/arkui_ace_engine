@@ -7246,7 +7246,7 @@ typedef struct Opt_OnOverScrollEvent {
     Ark_OnOverScrollEvent value;
 } Opt_OnOverScrollEvent;
 typedef struct Ark_OnProgressChangeEvent {
-    Ark_Number newProgress;
+    Ark_Int32 newProgress;
 } Ark_OnProgressChangeEvent;
 typedef struct Opt_OnProgressChangeEvent {
     Ark_Tag tag;

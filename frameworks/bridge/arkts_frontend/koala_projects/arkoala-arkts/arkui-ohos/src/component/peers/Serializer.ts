@@ -509,7 +509,7 @@ export class Serializer extends SerializerBase {
     writeOnProgressChangeEvent(value: OnProgressChangeEvent): void {
         let valueSerializer : Serializer = this
         const value_newProgress  = value.newProgress
-        valueSerializer.writeNumber(value_newProgress)
+        valueSerializer.writeInt32(value_newProgress)
     }
     writeOnScaleChangeEvent(value: OnScaleChangeEvent): void {
         let valueSerializer : Serializer = this
