@@ -2097,28 +2097,27 @@ LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunar
     bool hasLeapMonth = GetLunarLeapMonth(lunarYear, lunarLeapMonth);
     uint32_t remainingDays = monthDaysDatePickerColumnPattern->GetCurrentIndex();
 
-    // 处理一个月（平月或闰月）的通用函数
+    // common function for processing a month
     auto processMonth = [&](uint32_t month, bool isLeap) -> bool {
         uint32_t daysInMonth = GetLunarMaxDay(lunarYear, month, isLeap);
         if (remainingDays < daysInMonth) {
             lunarResult.month = month;
             lunarResult.isLeapMonth = isLeap;
             lunarResult.day = remainingDays + 1;
-            return true; // 找到目标月份
+            return true; // target month is found
         }
         remainingDays -= daysInMonth;
-        return false; // 继续处理下个月
+        return false; // continue to process next month
     };
     
     lunarResult.year = lunarYear;
-    // 遍历所有月份
     for (uint32_t month = MIN_MONTH; month <= MAX_MONTH; ++month) {
-        // 处理平月
+        // process regular month
         if (processMonth(month, false)) {
             break;
         }
         
-        // 处理闰月（如果存在且是当前月）
+        // process leap month if exists
         if (hasLeapMonth && lunarLeapMonth == month) {
             if (processMonth(month, true)) {
                 break;
