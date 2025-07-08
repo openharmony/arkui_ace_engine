@@ -38,39 +38,19 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
 ) {
-    NodeAttach(
-        () => {
-            const peerId = PeerNode.nextId()
-            const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId)
-            if (!_peerPtr) {
-                throw new Error("create LazyForEachNode failed")
-            }
-            const _peer = new PeerNode(_peerPtr, peerId, "LazyForEach", 0)
-            return _peer
-        },
-        (_: PeerNode) => {
-            Sync(dataSource, itemGenerator)
-        }
-    )
-}
+    const node = createLazyNode()
 
-/** @memo:intrinsic */
-function Sync<T>(dataSource: IDataSource<T>,
-    /** @memo */
-    itemGenerator: (item: T, index: number) => void,
-) {
-    const parent = contextNode<PeerNode>()
-    let pool = rememberDisposable(() => new LazyItemPool(parent, CustomComponent.current), (pool?: LazyItemPool) => {
+    let pool = rememberDisposable(() => new LazyItemPool(node, CustomComponent.current), (pool?: LazyItemPool) => {
         pool?.dispose()
     })
     let changeCounter = rememberMutableState(0)
     changeCounter.value //subscribe
     let listener = remember(() => {
-        let res = new InternalListener(parent.peer.ptr, changeCounter)
+        let res = new InternalListener(changeCounter)
         dataSource.registerDataChangeListener(res)
         return res
     })
-    const changeIndex = listener.flush(0) // first item index that's affected by DataChange
+    const changeIndex = listener.flush(node.getPeerPtr()) // first item index that's affected by DataChange
     if (changeIndex < Number.POSITIVE_INFINITY) {
         scheduleCallback(() => {
             pool.pruneBy((index: int32) => index >= changeIndex)
@@ -88,7 +68,35 @@ function Sync<T>(dataSource: IDataSource<T>,
             return nullptr
         }
     }
-    LazyForEachOps.Sync(parent.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
+    LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
+}
+
+class NodeHolder {
+    node?: PeerNode
+}
+
+/** @memo:intrinsic */
+function createLazyNode(): PeerNode {
+    /**
+     *  We don't want cache behavior with LazyForEach (to support Repeat's non-memo data updates),
+     *  therefore LazyForEach implementation is outside NodeAttach, and LazyForEachNode is provided through a remembered NodeHolder.
+     */
+    let nodeHolder = remember(() => new NodeHolder())
+    NodeAttach(
+        () => {
+            const peerId = PeerNode.nextId()
+            const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId)
+            if (!_peerPtr) {
+                throw new Error("create LazyForEachNode failed")
+            }
+            const _peer = new PeerNode(_peerPtr, peerId, "LazyForEach", 0)
+            return _peer
+        },
+        (node: PeerNode) => {
+            nodeHolder.node = node
+        }
+    )
+    return nodeHolder.node!
 }
 
 class LazyItemCompositionContext {
