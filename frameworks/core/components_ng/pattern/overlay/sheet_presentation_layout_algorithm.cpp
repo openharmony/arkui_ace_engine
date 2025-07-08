@@ -423,7 +423,7 @@ void SheetPresentationLayoutAlgorithm::LayoutTitleBuilder(const NG::OffsetF& tra
     auto offset = translate;
     auto dragBarNode = sheetPattern->GetDragBarNode();
     CHECK_NULL_VOID(dragBarNode);
-    if (!sheetStyle_.enableFloatingDragBar.value_or(false)) {
+    if (!sheetStyle_.enableFloatingDragBar.value_or(false) || !sheetPattern->IsSheetBottomStyle()) {
         auto dragBar = dragBarNode->GetGeometryNode();
         CHECK_NULL_VOID(dragBar);
         offset += OffsetF(0, dragBar->GetFrameSize().Height());
@@ -490,7 +490,7 @@ void SheetPresentationLayoutAlgorithm::LayoutScrollNode(const NG::OffsetF& trans
             Positive(titleBuilderNode->GetFrameSize().Height()) ? titleBuilderNode->GetFrameSize().Height() : 0.0f;
         auto dragBar = dragBarNode->GetGeometryNode();
         CHECK_NULL_VOID(dragBar);
-        if (!sheetStyle_.enableFloatingDragBar.value_or(false)) {
+        if (!sheetStyle_.enableFloatingDragBar.value_or(false) || !sheetPattern->IsSheetBottomStyle()) {
             offset += OffsetF(0, titleHeight + dragBar->GetFrameSize().Height());
         } else {
             offset += OffsetF(0, titleHeight);
