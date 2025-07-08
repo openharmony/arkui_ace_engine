@@ -922,6 +922,9 @@ private:
     void OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration);
     void OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<OverlayManager> weak,
         int32_t instanceId);
+    void HandleMenuDisappearCallback(const RefPtr<FrameNode>& menu);
+    bool CheckSelectSubWindowToClose(
+        const RefPtr<FrameNode>& menu, const RefPtr<OverlayManager>& overlayManager, bool expandDisplay);
     void OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<UINode> rootWeak,
         const WeakPtr<OverlayManager> weak, int32_t instanceId);
     void UpdateMenuVisibility(const RefPtr<FrameNode>& menu);

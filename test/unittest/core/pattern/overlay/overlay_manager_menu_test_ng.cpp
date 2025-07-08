@@ -810,6 +810,594 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest012, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMenuDisappearCallbackNoCallback
+ * @tc.desc: Test HandleMenuDisappearCallback when disappear callback is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackNoCallback, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create overlay manager and proper menu wrapper
+     * @tc.expected: nodes are created successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto menuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Do not set disappear callback (keep it null)
+     * @tc.expected: callback remains null
+     */
+    EXPECT_EQ(menuWrapperPattern->GetMenuDisappearCallback(), nullptr);
+
+    /**
+     * @tc.steps: step3. Call HandleMenuDisappearCallback
+     * @tc.expected: Basic operations execute but callback condition fails
+     */
+    overlayManager->HandleMenuDisappearCallback(menuWrapper);
+
+    EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
+    EXPECT_FALSE(menuWrapperPattern->GetOnMenuDisappear());
+}
+
+/**
+ * @tc.name: HandleMenuDisappearCallbackWithMainPipelineAndCallback
+ * @tc.desc: Test HandleMenuDisappearCallback with main pipeline and callback present
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackWithMainPipelineAndCallback, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create overlay manager and proper menu wrapper
+     * @tc.expected: nodes are created successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto menuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up main pipeline context and disappear callback
+     * @tc.expected: setup is successful
+     */
+    bool callbackExecuted = false;
+    auto disappearCallback = [&callbackExecuted]() { callbackExecuted = true; };
+    menuWrapperPattern->RegisterMenuDisappearCallback(disappearCallback);
+
+    auto mainPipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(mainPipeline, nullptr);
+
+    /**
+     * @tc.steps: step3. Call HandleMenuDisappearCallback
+     * @tc.expected: All operations execute including pipeline flush due to both conditions being true
+     */
+    overlayManager->HandleMenuDisappearCallback(menuWrapper);
+
+    EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
+    EXPECT_FALSE(menuWrapperPattern->GetOnMenuDisappear());
+}
+
+/**
+ * @tc.name: HandleMenuDisappearCallbackMenuStatusChangeCallback
+ * @tc.desc: Test HandleMenuDisappearCallback verifies menu status changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackMenuStatusChangeCallback, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create overlay manager and menu wrapper with initial status
+     * @tc.expected: nodes are created successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto menuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set initial menu status and disappear state
+     * @tc.expected: initial states are set correctly
+     */
+    menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+    menuWrapperPattern->SetOnMenuDisappear(true);
+    EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::SHOW);
+    EXPECT_TRUE(menuWrapperPattern->GetOnMenuDisappear());
+
+    /**
+     * @tc.steps: step3. Call HandleMenuDisappearCallback
+     * @tc.expected: Status and disappear state are updated correctly
+     */
+    overlayManager->HandleMenuDisappearCallback(menuWrapper);
+
+    EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
+    EXPECT_FALSE(menuWrapperPattern->GetOnMenuDisappear());
+}
+
+/**
+ * @tc.name: HandleMenuDisappearCallbackComprehensiveBranchCoverage
+ * @tc.desc: Test HandleMenuDisappearCallback comprehensive branch coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackComprehensiveBranchCoverage, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test all combinations to ensure 100% branch coverage
+     * @tc.expected: All branches are covered
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step3. Call HandleMenuDisappearCallback with various conditions
+     * @tc.expected: All branches execute correctly
+     */
+    overlayManager->HandleMenuDisappearCallback(nullptr);
+
+    auto invalidMenuNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    overlayManager->HandleMenuDisappearCallback(invalidMenuNode);
+
+    auto validMenuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
+    auto validMenuWrapperPattern = validMenuWrapper->GetPattern<MenuWrapperPattern>();
+
+    overlayManager->HandleMenuDisappearCallback(validMenuWrapper);
+    EXPECT_EQ(validMenuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
+
+    auto menuWrapper2 = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
+    auto menuWrapperPattern2 = menuWrapper2->GetPattern<MenuWrapperPattern>();
+
+    overlayManager->HandleMenuDisappearCallback(menuWrapper2);
+    EXPECT_EQ(menuWrapperPattern2->GetMenuStatus(), MenuStatus::HIDE);
+
+    auto menuWrapper3 = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
+    auto menuWrapperPattern3 = menuWrapper3->GetPattern<MenuWrapperPattern>();
+
+    bool callbackExecuted = false;
+    auto disappearCallback = [&callbackExecuted]() { callbackExecuted = true; };
+    menuWrapperPattern3->RegisterMenuDisappearCallback(disappearCallback);
+
+    overlayManager->HandleMenuDisappearCallback(menuWrapper3);
+    EXPECT_EQ(menuWrapperPattern3->GetMenuStatus(), MenuStatus::HIDE);
+}
+
+/**
+ * @tc.name: HandleMenuDisappearCallbackMainPipelineExistsNoCallback
+ * @tc.desc: Test HandleMenuDisappearCallback with main pipeline exists but no disappear callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackMainPipelineExistsNoCallback, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create overlay manager and proper menu wrapper
+     * @tc.expected: nodes are created successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto menuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up main pipeline context but do NOT set disappear callback
+     * @tc.expected: main pipeline exists but callback is null
+     */
+    EXPECT_EQ(menuWrapperPattern->GetMenuDisappearCallback(), nullptr);
+
+    /**
+     * @tc.steps: step3. Call HandleMenuDisappearCallback
+     * @tc.expected: Basic operations execute, pipeline branch is taken but callback condition fails
+     */
+    overlayManager->HandleMenuDisappearCallback(menuWrapper);
+
+    EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
+    EXPECT_FALSE(menuWrapperPattern->GetOnMenuDisappear());
+}
+
+/**
+ * @tc.name: HandleMenuDisappearCallbackMainPipelineExistsWithCallback
+ * @tc.desc: Test HandleMenuDisappearCallback with both main pipeline and disappear callback present
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackMainPipelineExistsWithCallback, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create overlay manager and proper menu wrapper
+     * @tc.expected: nodes are created successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto menuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up both main pipeline context AND disappear callback
+     * @tc.expected: both main pipeline and callback are available
+     */
+    bool callbackExecuted = false;
+    auto disappearCallback = [&callbackExecuted]() { callbackExecuted = true; };
+    menuWrapperPattern->RegisterMenuDisappearCallback(disappearCallback);
+
+    ASSERT_NE(menuWrapperPattern->GetMenuDisappearCallback(), nullptr);
+
+    /**
+     * @tc.steps: step3. Call HandleMenuDisappearCallback
+     * @tc.expected: All operations execute including pipeline flush due to both conditions being true
+     */
+    overlayManager->HandleMenuDisappearCallback(menuWrapper);
+
+    EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
+    EXPECT_FALSE(menuWrapperPattern->GetOnMenuDisappear());
+}
+
+/**
+ * @tc.name: HandleMenuDisappearCallbackStateChangeCallbackVerification
+ * @tc.desc: Test HandleMenuDisappearCallback verifies CallMenuStateChangeCallback is called
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackStateChangeCallbackVerification, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create overlay manager and menu wrapper
+     * @tc.expected: nodes are created successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto menuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call HandleMenuDisappearCallback
+     * @tc.expected: CallMenuStateChangeCallback is invoked with "false"
+     */
+    overlayManager->HandleMenuDisappearCallback(menuWrapper);
+
+    EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
+    EXPECT_FALSE(menuWrapperPattern->GetOnMenuDisappear());
+}
+
+/**
+ * @tc.name: HandleMenuDisappearCallback_InvalidMainPipeline_Test
+ * @tc.desc: Test HandleMenuDisappearCallback when mainPipeline is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallback_InvalidMainPipeline_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create overlay manager and proper menu wrapper
+     * @tc.expected: nodes are created successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto menuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    bool callbackExecuted = false;
+    auto disappearCallback = [&callbackExecuted]() { callbackExecuted = true; };
+    menuWrapperPattern->RegisterMenuDisappearCallback(disappearCallback);
+    menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+
+    /**
+     * @tc.steps: step2. Simulate an invalid mainPipeline context and call HandleMenuDisappearCallback
+     * @tc.expected: The function executes correctly, updates menu status, and calls the callback
+     */
+    MockPipelineContext::TearDown();
+    overlayManager->HandleMenuDisappearCallback(menuWrapper);
+    MockPipelineContext::SetUp();
+
+    /**
+     * @tc.steps: step3. Verify the menu status and that the callback was NOT executed
+     * @tc.expected: Menu status is HIDE and callback was not called
+     */
+    EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
+    EXPECT_FALSE(callbackExecuted);
+}
+
+/**
+ * @tc.name: CheckSelectSubWindowToClose_NullMenu_Test
+ * @tc.desc: Test CheckSelectSubWindowToClose with null menu parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_NullMenu_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call CheckSelectSubWindowToClose with null menu
+     * @tc.expected: step1. Function returns false due to null menu check
+     */
+    RefPtr<FrameNode> nullMenu = nullptr;
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    bool expandDisplay = true;
+
+    bool result = overlayManager->CheckSelectSubWindowToClose(nullMenu, overlayManager, expandDisplay);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckSelectSubWindowToClose_NullOverlayManager_Test
+ * @tc.desc: Test CheckSelectSubWindowToClose with null overlayManager parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_NullOverlayManager_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a valid menu node
+     * @tc.expected: step1. Menu node is created successfully
+     */
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(2));
+    ASSERT_NE(menu, nullptr);
+
+    /**
+     * @tc.steps: step2. Call CheckSelectSubWindowToClose with null overlayManager
+     * @tc.expected: step2. Function returns false due to null overlayManager check
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    RefPtr<OverlayManager> nullOverlayManager = nullptr;
+    bool expandDisplay = true;
+
+    bool result = overlayManager->CheckSelectSubWindowToClose(menu, nullOverlayManager, expandDisplay);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckSelectSubWindowToClose_MenuWithNoChildren_Test
+ * @tc.desc: Test CheckSelectSubWindowToClose with menu that has no child nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_MenuWithNoChildren_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a menu frame node without children
+     * @tc.expected: step1. Menu node is created but has no children
+     */
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(2));
+    ASSERT_NE(menu, nullptr);
+    ASSERT_EQ(menu->GetChildren().size(), 0);
+
+    /**
+     * @tc.steps: step2. Call CheckSelectSubWindowToClose
+     * @tc.expected: step2. Function returns false due to null menuNode check (no child at index 0)
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    bool expandDisplay = true;
+
+    bool result = overlayManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckSelectSubWindowToClose_InvalidMenuPattern_Test
+ * @tc.desc: Test CheckSelectSubWindowToClose with child node that doesn't have MenuPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_InvalidMenuPattern_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a menu wrapper with child that has no MenuPattern
+     * @tc.expected: step1. Menu structure is created with different target tag
+     */
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(2));
+    auto childNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 2, AceType::MakeRefPtr<ButtonPattern>());
+    menu->AddChild(childNode);
+    ASSERT_NE(menu, nullptr);
+    ASSERT_EQ(menu->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. Call CheckSelectSubWindowToClose
+     * @tc.expected: step2. Function returns false due to null menuPattern check (cast fails)
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    bool expandDisplay = true;
+
+    bool result = overlayManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckSelectSubWindowToClose_NullMenuLayoutProperty_Test
+ * @tc.desc: Test CheckSelectSubWindowToClose with MenuPattern that has no layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_NullMenuLayoutProperty_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu structure with MenuPattern but no layout property
+     * @tc.expected: step1. Menu structure is created but layout property is null
+     */
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(2));
+    ASSERT_NE(menu, nullptr);
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(2, V2::SELECT_ETS_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    menu->AddChild(menuNode);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_NE(menuPattern->GetLayoutProperty<MenuLayoutProperty>(), nullptr);
+
+    /**
+     * @tc.steps: step2. Call CheckSelectSubWindowToClose
+     * @tc.expected: step2. Function returns false due to null menuLayoutProp check
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    bool expandDisplay = true;
+
+    bool result = overlayManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckSelectSubWindowToClose_ExpandDisplayFalse_Test
+ * @tc.desc: Test CheckSelectSubWindowToClose with expandDisplay set to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_ExpandDisplayFalse_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create complete valid menu structure
+     * @tc.expected: step1. Menu structure is created successfully
+     */
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(2));
+    ASSERT_NE(menu, nullptr);
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(2, V2::SELECT_ETS_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    menu->AddChild(menuNode);
+    /**
+     * @tc.steps: step2. Call CheckSelectSubWindowToClose with expandDisplay=false
+     * @tc.expected: step2. Function returns false due to expandDisplay condition
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    bool expandDisplay = false;
+
+    bool result = overlayManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckSelectSubWindowToClose_NonSelectTargetTag_Test
+ * @tc.desc: Test CheckSelectSubWindowToClose with menu that doesn't have SELECT_ETS_TAG
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_NonSelectTargetTag_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu structure with non-SELECT target tag
+     * @tc.expected: step1. Menu structure is created with different target tag
+     */
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(2));
+    ASSERT_NE(menu, nullptr);
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(2, V2::BUTTON_ETS_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    menu->AddChild(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+
+    ASSERT_NE(menuPattern->GetTargetTag(), V2::SELECT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Call CheckSelectSubWindowToClose with expandDisplay=true
+     * @tc.expected: step2. Function returns false due to target tag condition
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    bool expandDisplay = true;
+
+    bool result = overlayManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckSelectSubWindowToClose_ShowInSubWindowFalse_Test
+ * @tc.desc: Test CheckSelectSubWindowToClose with ShowInSubWindow set to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_ShowInSubWindowFalse_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu structure with SELECT target tag but ShowInSubWindow=false
+     * @tc.expected: step1. Menu structure is created with correct target tag
+     */
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(2));
+    ASSERT_NE(menu, nullptr);
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(2, V2::SELECT_ETS_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    menu->AddChild(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    auto menuLayoutProp = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+
+    menuLayoutProp->UpdateShowInSubWindow(false);
+
+    ASSERT_FALSE(menuLayoutProp->GetShowInSubWindowValue(false));
+
+    /**
+     * @tc.steps: step2. Call CheckSelectSubWindowToClose with expandDisplay=true
+     * @tc.expected: step2. Function returns false due to ShowInSubWindow condition
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    bool expandDisplay = true;
+
+    bool result = overlayManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
+    EXPECT_FALSE(result);
+}
+
+/**
  * @tc.name: HideAllMenusWithoutAnimation001
  * @tc.desc: Test OverlayManager::HideAllMenusWithoutAnimation.
  * @tc.type: FUNC

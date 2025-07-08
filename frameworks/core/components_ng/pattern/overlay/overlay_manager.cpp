@@ -1434,14 +1434,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
         menuWrapperPattern->CallMenuDisappearCallback();
         menuWrapperPattern->CallMenuOnDidDisappearCallback();
     }
-    menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
-    menuWrapperPattern->SetOnMenuDisappear(false);
-    menuWrapperPattern->CallMenuStateChangeCallback("false");
-    auto mainPipeline = PipelineContext::GetMainPipelineContext();
-    if (mainPipeline && menuWrapperPattern->GetMenuDisappearCallback()) {
-        ContainerScope scope(mainPipeline->GetInstanceId());
-        mainPipeline->FlushPipelineImmediately();
-    }
+    HandleMenuDisappearCallback(menu);
     // clear contextMenu then return
     auto pipeline = GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
@@ -1454,14 +1447,62 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     auto targetId = menuWrapperPattern->GetTargetId();
     overlayManager->EraseMenuInfo(targetId);
     if ((menuWrapperPattern->IsContextMenu() ||
-            (isShowInSubWindow && (expandDisplay || menuWrapperPattern->GetIsOpenMenu())))) {
+            (isShowInSubWindow && (expandDisplay || menuWrapperPattern->GetIsOpenMenu()))) &&
+        (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
         if (overlayManager->RemoveMenuInSubWindow(menu)) {
             overlayManager->SetIsMenuShow(false);
         }
         return;
     }
+    if (CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay)) {
+        return;
+    }
     overlayManager->RemoveMenuNotInSubWindow(menuWK, rootWeak, weak);
     overlayManager->SetIsMenuShow(false);
+}
+
+void OverlayManager::HandleMenuDisappearCallback(const RefPtr<FrameNode>& menu)
+{
+    CHECK_NULL_VOID(menu);
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+    menuWrapperPattern->SetOnMenuDisappear(false);
+    menuWrapperPattern->CallMenuStateChangeCallback("false");
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    if (mainPipeline && menuWrapperPattern->GetMenuDisappearCallback()) {
+        ContainerScope scope(mainPipeline->GetInstanceId());
+        mainPipeline->FlushPipelineImmediately();
+    }
+}
+
+bool OverlayManager::CheckSelectSubWindowToClose(
+    const RefPtr<FrameNode>& menu, const RefPtr<OverlayManager>& overlayManager, bool expandDisplay)
+{
+    CHECK_NULL_RETURN(menu, false);
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(menuNode, false);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+    auto menuLayoutProp = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuLayoutProp, false);
+    if (expandDisplay && menuPattern->GetTargetTag() == V2::SELECT_ETS_TAG &&
+        menuLayoutProp->GetShowInSubWindowValue(false)) {
+        auto subWindowManager = SubwindowManager::GetInstance();
+        CHECK_NULL_RETURN(subWindowManager, false);
+        auto context = menu->GetContextRefPtr();
+        CHECK_NULL_RETURN(context, false);
+        auto containerid = context->GetInstanceId();
+        auto subwindow = subWindowManager->GetSubwindowByType(containerid, SubwindowType::TYPE_MENU);
+        if (subWindowManager->IsSubwindowExist(subwindow)) {
+            if (overlayManager->RemoveMenuInSubWindow(menu)) {
+                overlayManager->SetIsMenuShow(false);
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
