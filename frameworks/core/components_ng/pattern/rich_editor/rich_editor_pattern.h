@@ -1087,7 +1087,7 @@ public:
         IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
     }
 
-    Color GetCaretColor();
+    Color GetCaretColor() const;
 
     void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
     {
@@ -1096,7 +1096,7 @@ public:
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
 
-    Color GetSelectedBackgroundColor();
+    Color GetSelectedBackgroundColor() const;
 
     void SetCustomKeyboardOption(bool supportAvoidance);
     void StopEditing();
@@ -1345,7 +1345,7 @@ public:
     }
 
     template<typename T>
-    RefPtr<T> GetTheme()
+    RefPtr<T> GetTheme() const
     {
         auto pipelineContext = GetContext();
         CHECK_NULL_RETURN(pipelineContext, {});
@@ -1510,6 +1510,7 @@ private:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     std::string GetPlaceHolderInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
+    std::string GetCustomKeyboardInJson() const;
     void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const override;
     void ResetSelectionAfterAddSpan(bool isPaste);
     RefPtr<UINode> GetChildByIndex(int32_t index) const override;

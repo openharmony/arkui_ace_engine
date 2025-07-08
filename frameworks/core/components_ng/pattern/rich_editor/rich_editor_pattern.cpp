@@ -10507,15 +10507,31 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("enableDataDetector", textDetectEnable_ ? "true" : "false", filter);
     json->PutExtAttr("dataDetectorConfig", dataDetectorAdapter_->textDetectConfigStr_.c_str(), filter);
     json->PutExtAttr("placeholder", GetPlaceHolderInJson().c_str(), filter);
+    json->PutExtAttr("customKeyboard", GetCustomKeyboardInJson().c_str(), filter);
     json->PutExtAttr("bindSelectionMenu", GetBindSelectionMenuInJson().c_str(), filter);
+    json->PutExtAttr("copyOptions", static_cast<int32_t>(copyOption_), filter);
+    json->PutExtAttr("enablePreviewText", isTextPreviewSupported_ ? "true" : "false", filter);
+    json->PutExtAttr("caretColor", GetCaretColor().ColorToString().c_str(), filter);
+    json->PutExtAttr("selectedBackgroundColor", GetSelectedBackgroundColor().ColorToString().c_str(), filter);
+    auto enterKeyType = static_cast<int32_t>(GetTextInputActionValue(GetDefaultTextInputAction()));
+    json->PutExtAttr("enterKeyType", enterKeyType, filter);
     json->PutExtAttr("stopBackPress", isStopBackPress_ ? "true" : "false", filter);
     json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(keyboardAppearance_), filter);
     json->PutExtAttr("maxLength", maxLength_.value_or(INT_MAX), filter);
+    json->PutExtAttr("maxLines", maxLines_, filter);
     json->PutExtAttr("enableHapticFeedback", isEnableHapticFeedback_ ? "true" : "false", filter);
     json->PutExtAttr("barState", static_cast<int32_t>(GetBarDisplayMode()), filter);
     json->PutExtAttr("enableKeyboardOnFocus", needToRequestKeyboardOnFocus_ ? "true" : "false", filter);
     auto undoStyle = isStyledUndoSupported_ ? OHOS::Ace::UndoStyle::KEEP_STYLE : OHOS::Ace::UndoStyle::CLEAR_STYLE;
     json->PutExtAttr("undoStyle", static_cast<int32_t>(undoStyle), filter);
+    json->PutExtAttr("enableAutoSpacing", isEnableAutoSpacing_ ? "true" : "false", filter);
+}
+
+std::string RichEditorPattern::GetCustomKeyboardInJson() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("supportAvoidance", keyboardAvoidance_ ? "true" : "false");
+    return StringUtils::RestoreBackslash(jsonValue->ToString());
 }
 
 void RichEditorPattern::FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const
@@ -10749,7 +10765,7 @@ std::string RichEditorPattern::GetPlaceHolder() const
     return UtfUtils::Str16ToStr8(layoutProperty->GetPlaceholderValue(u""));
 }
 
-Color RichEditorPattern::GetCaretColor()
+Color RichEditorPattern::GetCaretColor() const
 {
     if (caretColor_.has_value()) {
         return caretColor_.value();
@@ -10759,7 +10775,7 @@ Color RichEditorPattern::GetCaretColor()
     return richEditorTheme->GetCaretColor();
 }
 
-Color RichEditorPattern::GetSelectedBackgroundColor()
+Color RichEditorPattern::GetSelectedBackgroundColor() const
 {
     Color selectedBackgroundColor;
     if (selectedBackgroundColor_.has_value()) {
