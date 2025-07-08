@@ -88,6 +88,7 @@ void RemoveBuilderFromContainer(const RefPtr<NG::UINode>& node, const std::list<
 void ClearChildInBuilderContainer(int32_t nodeId, std::list<RefPtr<NG::UINode>>& nodes)
 {
     NG::ScopedViewStackProcessor builder;
+    CHECK_NULL_VOID(!nodes.empty());
     auto node = nodes.front();
     CHECK_NULL_VOID(node);
     auto context = node->GetContext();
