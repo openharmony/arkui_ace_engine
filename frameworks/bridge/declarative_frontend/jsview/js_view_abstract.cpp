@@ -6995,10 +6995,17 @@ void JSViewAbstract::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& res
         resObj = nullptr;
         return;
     }
-
-    auto colorMode = Container::CurrentColorMode();
     bool hasDarkRes = CheckDarkResource(resObj);
-    if ((colorMode == ColorMode::DARK || localColorMode == ColorMode::DARK) && (!resObj || !hasDarkRes)) {
+    if (localColorMode == ColorMode::DARK) {
+        if (!hasDarkRes) {
+            color = Color(invertFunc(color.GetValue()));
+        }
+        resObj = nullptr;
+        return;
+    }
+    auto colorMode = Container::CurrentColorMode();
+    Color curColor = color;
+    if ((colorMode == ColorMode::DARK) && !hasDarkRes) {
         color = Color(invertFunc(color.GetValue()));
     }
     if (!resObj) {
@@ -7009,7 +7016,7 @@ void JSViewAbstract::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& res
     resObj->SetNodeTag(nodeTag);
     resObj->SetColorMode(colorMode);
     resObj->SetHasDarkRes(hasDarkRes);
-    resObj->SetColor(color);
+    resObj->SetColor(((colorMode == ColorMode::DARK) ? curColor : color));
 }
 
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)

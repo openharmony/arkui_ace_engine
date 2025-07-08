@@ -159,7 +159,8 @@ HWTEST_F(ColorInverterTest, ColorInverterTest005, TestSize.Level1)
      */
     static const uint8_t fullColor = 255;
     Color full = Color::FromRGB(fullColor, fullColor, fullColor);
-    EXPECT_EQ(ColorInverter::DefaultInverter(0), full.GetValue());
+    Color invertColor = Color::FromRGB(0, 0, 0);
+    EXPECT_EQ(ColorInverter::DefaultInverter(invertColor.GetValue()), full.GetValue());
 }
 
 /**
@@ -339,4 +340,21 @@ HWTEST_F(ColorInverterTest, ColorInverterTest011, TestSize.Level1)
     EXPECT_EQ(managerMapNew.size(), 1 + 1);
 }
 
+/**
+ * @tc.name: ColorInverterTest0012
+ * @tc.desc: ColorInverter::DefaultInverter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorInverterTest, ColorInverterTest0012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call DefaultInverter With ARGB color
+     * @tc.expected: DefaultInverter Give Back Right Value
+     */
+    static const uint8_t fullColor = 255;
+    static const uint8_t halfAlpha = 128;
+    Color full = Color::FromARGB(halfAlpha, fullColor, fullColor, fullColor);
+    Color invertColor = Color::FromARGB(halfAlpha, 0, 0, 0);
+    EXPECT_EQ(ColorInverter::DefaultInverter(full.GetValue()), invertColor.GetValue());
+}
 } // namespace OHOS::Ace

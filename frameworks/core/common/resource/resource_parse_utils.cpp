@@ -356,12 +356,12 @@ bool ResourceParseUtils::ParseResFontFamilies(const RefPtr<ResourceObject>& resO
 void ResourceParseUtils::InvertColorWithResource(const RefPtr<ResourceObject>& resObj, Color& result,
     const ColorMode& colorMode)
 {
-    if (isReloading_ && !resObj->HasDarkResource() && (colorMode == ColorMode::DARK) &&
-        (colorMode != resObj->GetColorMode()) &&
-        (resObj->GetColorMode() != ColorMode::COLOR_MODE_UNDEFINED)) {
+    if (!isReloading_ || (resObj->GetColorMode() == ColorMode::COLOR_MODE_UNDEFINED)) {
+        return;
+    }
+    if ((colorMode == ColorMode::DARK) && !resObj->HasDarkResource()) {
         result = ColorInverter::Invert(result, resObj->GetInstanceId(), resObj->GetNodeTag());
     }
-    resObj->SetColor(result);
     resObj->SetColorMode(colorMode);
 }
 
@@ -383,12 +383,14 @@ bool ResourceParseUtils::ParseResColor(const RefPtr<ResourceObject>& resObj, Col
 
     auto colorMode = Container::CurrentColorMode();
     if (!resObj->IsResource()) {
-        if (isReloading_ && (colorMode != resObj->GetColorMode() &&
-            (resObj->GetColorMode() != ColorMode::COLOR_MODE_UNDEFINED))) {
-            result = ColorInverter::Invert(resObj->GetColor(), resObj->GetInstanceId(), resObj->GetNodeTag());
-            resObj->SetColor(result);
+        if (resObj->GetColorMode() == ColorMode::COLOR_MODE_UNDEFINED) {
+            return false;
         }
-        result = resObj->GetColor();
+        if (isReloading_ && (colorMode == ColorMode::DARK)) {
+            result = ColorInverter::Invert(resObj->GetColor(), resObj->GetInstanceId(), resObj->GetNodeTag());
+        } else {
+            result = resObj->GetColor();
+        }
         resObj->SetColorMode(colorMode);
         return true;
     }

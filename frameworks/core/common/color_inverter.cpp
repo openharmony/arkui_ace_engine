@@ -100,7 +100,9 @@ uint32_t ColorInverter::DefaultInverter(uint32_t color)
 {
     Color curColor = Color(color);
     uint8_t full = 255;
-    Color invertColor = Color::FromRGB(full - curColor.GetRed(), full - curColor.GetGreen(), full - curColor.GetBlue());
+    auto curAlpha = curColor.GetAlpha();
+    Color invertColor = Color::FromARGB(curAlpha,
+        full - curColor.GetRed(), full - curColor.GetGreen(), full - curColor.GetBlue());
     return invertColor.GetValue();
 }
 
