@@ -3488,17 +3488,34 @@ bool JsAccessibilityManager::IsSendAccessibilityEvent(const AccessibilityEvent& 
     return IsSendAccessibilityEventForHost(accessibilityEvent, infoOfNode.componentType, infoOfNode.pageId);
 }
 
+void JsAccessibilityManager::ReleaseCacheEvent()
+{
+    if (eventQueue_.empty()) {
+        return;
+    }
+    while (!eventQueue_.empty()) {
+        auto event = eventQueue_.front();
+        SendAccessibilityAsyncEvent(event);
+        eventQueue_.pop();
+    }
+}
+
 bool JsAccessibilityManager::IsSendAccessibilityEventForUEA(
     const AccessibilityEvent& accessibilityEvent, const std::string& componentType, const int32_t pageId)
 {
-    if (pageMode_.empty()) {
+    if (!pageMode_.has_value()) {
+        eventQueue_.push(accessibilityEvent);
+        return false;
+    }
+    const auto& pageMode = pageMode_.value();
+    if (pageMode.empty()) {
         if (treeId_ == -1) {
             cacheEventVec_.push_back(accessibilityEvent);
             return false;
         }
         return true;
     }
-    if (!CheckSendAccessibilityEventByPageMode(pageMode_, componentType, pageId)) {
+    if (!CheckSendAccessibilityEventByPageMode(pageMode, componentType, pageId)) {
         return false;
     }
     if (treeId_ == -1) {
@@ -3518,7 +3535,7 @@ bool JsAccessibilityManager::IsSendAccessibilityEventForHost(
 
     pageController_.Update();
     bool isPageEventControllerEmpty = ngPipeline ? pageController_.CheckEmpty(ngPipeline->GetInstanceId()) : true;
-    if ((extensionComponentStatusVec_.empty() || defaultFocusList_.empty()) && isPageEventControllerEmpty) {
+    if (extensionComponentStatusVec_.empty() && isPageEventControllerEmpty) {
         return true;
     }
 
@@ -3774,6 +3791,7 @@ void JsAccessibilityManager::RegisterUIExtGetPageModeCallback(RefPtr<NG::UIExten
         TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
             "host send pageMode to uea, pageMode: %{public}s.", pageMode.c_str());
         accessibilityManager->UpdatePageMode(pageMode);
+        accessibilityManager->ReleaseCacheEvent();
         return 0;
     };
     uiExtManager->RegisterBusinessDataConsumeCallback(NG::UIContentBusinessCode::SEND_PAGE_MODE_TO_UEA, callback);

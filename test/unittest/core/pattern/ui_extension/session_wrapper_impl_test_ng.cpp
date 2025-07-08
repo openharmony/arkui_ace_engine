@@ -124,7 +124,7 @@ HWTEST_F(SessionWrapperImplTestNg, SessionWrapperImplTestNg001, TestSize.Level1)
     auto ret = sessionWrapper->SendBusinessDataSyncReply(code, want, reply, RSSubsystemId::WM_UIEXT);
     EXPECT_FALSE(ret);
 
-    code = UIContentBusinessCode::SEND_PAGE_MODE;
+    code = UIContentBusinessCode::SEND_PAGE_MODE_REQUEST;
     ret = sessionWrapper->SendBusinessDataSyncReply(code, want, reply, RSSubsystemId::WM_UIEXT);
     EXPECT_FALSE(ret);
 
@@ -164,7 +164,7 @@ HWTEST_F(SessionWrapperImplTestNg, SessionWrapperImplTestNg002, TestSize.Level1)
     auto ret = sessionWrapper->SendBusinessDataSyncReply(code, want, reply, RSSubsystemId::WM_UIEXT);
     EXPECT_FALSE(ret);
 
-    code = UIContentBusinessCode::SEND_PAGE_MODE;
+    code = UIContentBusinessCode::SEND_PAGE_MODE_REQUEST;
     ret = sessionWrapper->SendBusinessDataSyncReply(code, want, reply, RSSubsystemId::WM_UIEXT);
     EXPECT_FALSE(ret);
 
