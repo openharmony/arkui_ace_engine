@@ -1682,13 +1682,27 @@ Offset ScrollPattern::GetFreeScrollOffset() const
     }
     return {};
 }
-RefPtr<NGGestureRecognizer> ScrollPattern::GetOverrideRecognizer() const
+
+RefPtr<NGGestureRecognizer> ScrollPattern::GetOverrideRecognizer()
 {
-    if (freeScroll_) {
+    if (!freeScroll_) {
+        return nullptr;
+    }
+    if (!zoomCtrl_) {
         return freeScroll_->GetFreePanGesture();
     }
-    return nullptr;
+    auto pan = freeScroll_->GetFreePanGesture();
+    auto pinch = zoomCtrl_->GetPinchGesture();
+    if (!gestureGroup_) {
+        std::vector<RefPtr<NGGestureRecognizer>> recognizers = { pan, pinch };
+        gestureGroup_ = MakeRefPtr<ParallelRecognizer>(recognizers);
+    } else if (gestureGroup_->GetGroupRecognizer().empty()) {
+        std::list<RefPtr<NGGestureRecognizer>> recognizers = { pan, pinch };
+        gestureGroup_->AddChildren(recognizers);
+    }
+    return gestureGroup_;
 }
+
 bool ScrollPattern::FreeScrollBy(const OffsetF& delta)
 {
     CHECK_NULL_RETURN(freeScroll_, false);

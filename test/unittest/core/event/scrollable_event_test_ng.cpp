@@ -195,7 +195,7 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest003, Test
     ResponseLinkResult responseLinkResult;
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
-        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
+        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult, 1);
     EXPECT_EQ(result.size(), SCROLL_TEST_RESULT_SIZE);
     EXPECT_EQ(scrollableActuator->scrollableEvents_.size(), SCROLLABLE_EVENT_SIZE);
 
@@ -216,7 +216,7 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest003, Test
      * @tc.expected: gestureEventHub cannot GetFrameNode, InitializeScrollable fuction will return directly.
      */
     scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
-        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
+        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult, 1);
     EXPECT_EQ(result.size(), SCROLL_TEST_RESULT_SIZE_1);
     auto coordinateOffset = scrollableEvent->GetScrollable()->panRecognizerNG_->GetCoordinateOffset();
     EXPECT_EQ(coordinateOffset, Offset(WIDTH, HEIGHT)) <<
@@ -239,7 +239,7 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest003, Test
      */
     scrollableEvent->SetEnabled(SCROLLABLE_EVENT_DISENABLED);
     scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
-        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
+        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult, 1);
     EXPECT_EQ(result.size(), SCROLL_TEST_RESULT_SIZE_1);
 }
 
@@ -297,7 +297,7 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest004, Test
     TouchTestResult result;
     ResponseLinkResult responseLinkResult;
     scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
-        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
+        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult, 1);
     EXPECT_FALSE(results);
 }
 
@@ -329,7 +329,7 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest005, Test
     TouchTestResult result;
     ResponseLinkResult responseLinkResult;
     scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
-        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
+        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult, 1);
     EXPECT_FALSE(results);
 }
 
@@ -358,10 +358,10 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest006, Test
     TouchTestResult result;
     ResponseLinkResult responseLinkResult;
     scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
-        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
+        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult, 1);
     scrollableEvent->SetEnabled(true);
     scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
-        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
+        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult, 1);
     EXPECT_FALSE(results);
 }
 
@@ -384,14 +384,14 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest007, Test
     TouchTestResult result;
     ResponseLinkResult responseLinkResult;
     scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
-        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
+        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult, 1);
     RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     scrollableActuator->clickRecognizer_->targetComponent_ = targetComponent;
     EXPECT_EQ(scrollableActuator->clickRecognizer_->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
     scrollable->isTouching_ = true;
     scrollable->currentVelocity_ = HTMBLOCK_VELOCITY + 1.0f;
     scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
-        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult);
+        result, LOCAL_POINT, frameNode, nullptr, responseLinkResult, 1);
     EXPECT_EQ(scrollableActuator->clickRecognizer_->TriggerGestureJudgeCallback(), GestureJudgeResult::CONTINUE);
 }
 } // namespace OHOS::Ace::NG

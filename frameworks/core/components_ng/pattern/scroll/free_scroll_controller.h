@@ -37,9 +37,6 @@ public:
 
     RefPtr<PanRecognizer> GetFreePanGesture() const
     {
-        if (!enableScroll_) {
-            return MakeRefPtr<PanRecognizer>(0, PanDirection {}, 1.0); // dummy recognizer
-        }
         return freePanGesture_;
     }
 

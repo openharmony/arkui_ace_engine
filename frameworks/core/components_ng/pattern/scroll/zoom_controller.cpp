@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr int32_t DEFAULT_PINCH_FINGER = 2;
-    constexpr double DEFAULT_PINCH_DISTANCE = 5.0;
+    constexpr Dimension DEFAULT_PINCH_DISTANCE = 5.0_vp;
     constexpr float MAX_OVER_SCALE = 2.0f;
     constexpr float MIN_OVER_SCALE = 0.5f;
     constexpr float ANIMATION_CURVE_VELOCITY = 0.0f;    // The move animation spring curve velocity is 0.0
@@ -43,13 +43,13 @@ ZoomController::~ZoomController()
 
 void ZoomController::InitializePinchGesture()
 {
-    pinchGesture_ = MakeRefPtr<PinchGesture>(DEFAULT_PINCH_FINGER, DEFAULT_PINCH_DISTANCE);
-    pinchGesture_->SetOnActionStartId([weak = AceType::WeakClaim(this)](GestureEvent& info) {
+    pinchGesture_ = MakeRefPtr<PinchRecognizer>(DEFAULT_PINCH_FINGER, DEFAULT_PINCH_DISTANCE.ConvertToPx());
+    pinchGesture_->SetOnActionStart([weak = AceType::WeakClaim(this)](GestureEvent& info) {
         auto controller = weak.Upgrade();
         CHECK_NULL_VOID(controller);
         controller->HandleZoomStart(info);
     });
-    pinchGesture_->SetOnActionUpdateId([weak = AceType::WeakClaim(this)](GestureEvent& info) {
+    pinchGesture_->SetOnActionUpdate([weak = AceType::WeakClaim(this)](GestureEvent& info) {
         auto controller = weak.Upgrade();
         CHECK_NULL_VOID(controller);
         controller->HandleZoomUpdate(info);
@@ -59,20 +59,12 @@ void ZoomController::InitializePinchGesture()
         CHECK_NULL_VOID(controller);
         controller->HandleZoomEnd(info);
     };
-    pinchGesture_->SetOnActionEndId(endCallback);
-    pinchGesture_->SetOnActionCancelId(endCallback);
-    auto gestureHub = pattern_.GetGestureHub();
-    if (gestureHub) {
-        gestureHub->AddGesture(pinchGesture_);
-    }
+    pinchGesture_->SetOnActionEnd(endCallback);
+    pinchGesture_->SetOnActionCancel(endCallback);
 }
 
 void ZoomController::DeinitializePinchGesture()
 {
-    auto gestureHub = pattern_.GetGestureHub();
-    if (gestureHub) {
-        gestureHub->RemoveGesture(pinchGesture_);
-    }
     pinchGesture_.Reset();
 }
 
