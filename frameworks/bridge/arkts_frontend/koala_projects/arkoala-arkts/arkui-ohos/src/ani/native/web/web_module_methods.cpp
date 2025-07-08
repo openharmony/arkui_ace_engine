@@ -71,7 +71,7 @@ void SetWebOptions(ani_env* env, ani_class aniClass, ani_long node, ani_object o
     auto setWebIdFunc = [vm, object = savePtr](int32_t nwebId) {
         ani_env* envTemp = GetAniEnv(vm);
         if (!envTemp || envTemp->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_object>(object), "_setNWebId", "D:V", static_cast<ani_double>(nwebId)) != ANI_OK) {
+            reinterpret_cast<ani_object>(object), "_setNWebId", "I:V", static_cast<ani_int>(nwebId)) != ANI_OK) {
             return;
         }
     };
@@ -116,10 +116,10 @@ void SetWebControllerControllerHandler(ani_env* env, ani_class aniClass, ani_lon
     }
 
     auto getWebIdFunc = [vm, object = savePtr]() -> int32_t {
-        ani_double nwebId;
+        ani_int nwebId;
         ani_env* envTemp = GetAniEnv(vm);
-        if (!envTemp || envTemp->Object_CallMethodByName_Double(
-            reinterpret_cast<ani_object>(object), "getWebId", ":D", &nwebId) != ANI_OK) {
+        if (!envTemp || envTemp->Object_CallMethodByName_Int(
+            reinterpret_cast<ani_object>(object), "getWebId", ":I", &nwebId) != ANI_OK) {
             return -1;
         }
         return static_cast<int32_t>(nwebId);
