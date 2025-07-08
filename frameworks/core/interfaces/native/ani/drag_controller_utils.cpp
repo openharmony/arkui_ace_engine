@@ -203,13 +203,8 @@ bool GetEnumItem([[maybe_unused]] ani_env* env, ani_size index, const char* enum
 {
     ani_enum enumType;
     auto status = ANI_OK;
-    static const char* namespaceName = "L@ohos/arkui/dragController/dragController;";
-    ani_namespace nns;
-    if ((status = env->FindNamespace(namespaceName, &nns)) != ANI_OK) {
-        LOGE("AceDrag, find dragController namespace fail. status = %{public}d", status);
-        return false;
-    }
-    if ((status = env->Namespace_FindEnum(nns, enumName, &enumType)) != ANI_OK) {
+    static const std::string fullEnumName = std::string("@ohos.arkui.dragController.dragController.").append(enumName);
+    if ((status = env->FindEnum(fullEnumName.c_str(), &enumType)) != ANI_OK) {
         LOGE("AceDrag, find DragStatus Enum fail. status = %{public}d", status);
         return false;
     }
@@ -222,15 +217,9 @@ bool GetEnumItem([[maybe_unused]] ani_env* env, ani_size index, const char* enum
 
 bool IsDragPreviewModeEnum(ani_env *env, ani_ref obj)
 {
-    static const char *namespaceName = "L@ohos/arkui/dragController/dragController;";
-    ani_namespace nns;
-    if (ANI_OK != env->FindNamespace(namespaceName, &nns)) {
-        LOGE("AceDrag, find dragController namespace fail.");
-        return false;
-    }
-    static const char *className = "LDragPreviewMode;";
+    static const char *className = "@ohos.arkui.dragController.dragController.DragPreviewMode";
     ani_enum enumType;
-    if (ANI_OK != env->Namespace_FindEnum(nns, className, &enumType)) {
+    if (ANI_OK != env->FindEnum(className, &enumType)) {
         LOGE("AceDrag, find DragPreviewMode calss fail.");
         return false;
     }
@@ -244,15 +233,9 @@ bool IsDragPreviewModeEnum(ani_env *env, ani_ref obj)
 
 bool IsResourceObject(ani_env *env, ani_ref object_ref)
 {
-    static const char *nameSpaceName = "L@ohos/arkui/dragController/dragController;";
-    ani_namespace nns;
-    if (ANI_OK != env->FindNamespace(nameSpaceName, &nns)) {
-        LOGW("AceDrag, find dragController namespace failed.");
-        return false;
-    }
-    static const char *enumName = "LResource;";
+    static const char *enumName = "@ohos.arkui.dragController.dragController.Resource";
     ani_enum enumType;
-    if (ANI_OK != env->Namespace_FindEnum(nns, enumName, &enumType)) {
+    if (ANI_OK != env->FindEnum(enumName, &enumType)) {
         LOGW("AceDrag, find Resource calss fail");
         return false;
     }
