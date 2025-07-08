@@ -270,7 +270,7 @@ uint32_t GetFontColor(ArkUINodeHandle node)
     return TextModelNG::GetFontColor(frameNode).GetValue();
 }
 
-void SetTextForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color)
+void SetTextForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color, void* colorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -281,6 +281,7 @@ void SetTextForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t c
         auto strategy = static_cast<ForegroundColorStrategy>(color);
         ViewAbstract::SetForegroundColorStrategy(frameNode, strategy);
     }
+    NodeModifier::ProcessResourceObj<Color>(frameNode, "TextColor", Color(color), colorRawPtr);
 }
 
 void ResetTextForegroundColor(ArkUINodeHandle node)
@@ -326,7 +327,7 @@ void SetTextLineHeight(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 u
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetLineHeight(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
-    NodeModifier::ProcessResourceObj<Dimension>(
+    NodeModifier::ProcessResourceObj<CalcDimension>(
         frameNode, "LineHeight", Dimension(number, static_cast<DimensionUnit>(unit)), lineHeightRawPtr);
 }
 
@@ -462,7 +463,7 @@ void SetTextMinFontSize(ArkUINodeHandle node, ArkUI_Float32 number, const ArkUI_
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetAdaptMinFontSize(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
-    NodeModifier::ProcessResourceObj<Dimension>(
+    NodeModifier::ProcessResourceObj<CalcDimension>(
         frameNode, "AdaptMinFontSize", Dimension(number, static_cast<DimensionUnit>(unit)), minFontSizeRawPtr);
 }
 
@@ -513,7 +514,7 @@ void SetTextMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetAdaptMaxFontSize(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
-    NodeModifier::ProcessResourceObj<Dimension>(
+    NodeModifier::ProcessResourceObj<CalcDimension>(
         frameNode, "AdapttMaxFontSize", Dimension(number, static_cast<DimensionUnit>(unit)), maxFontSizeRawPtr);
 }
 
@@ -718,7 +719,7 @@ void SetTextTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 u
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetTextIndent(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
-    NodeModifier::ProcessResourceObj<Dimension>(
+    NodeModifier::ProcessResourceObj<CalcDimension>(
         frameNode, "TextIndent", Dimension(number, static_cast<DimensionUnit>(unit)), textIndentRawPtr);
 }
 
@@ -746,7 +747,7 @@ void SetTextBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetBaselineOffset(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
-    NodeModifier::ProcessResourceObj<Dimension>(
+    NodeModifier::ProcessResourceObj<CalcDimension>(
         frameNode, "BaselineOffset", Dimension(number, static_cast<DimensionUnit>(unit)), baselineOffsetRawPtr);
 }
 
@@ -769,11 +770,13 @@ ArkUI_Float32 GetTextBaselineOffset(ArkUINodeHandle node)
     return TextModelNG::GetTextBaselineOffset(frameNode).ConvertToVp();
 }
 
-void SetTextLetterSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+void SetTextLetterSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* resObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetLetterSpacing(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+    NodeModifier::ProcessResourceObj<CalcDimension>(
+        frameNode, "LetterSpacing", Dimension(number, static_cast<DimensionUnit>(unit)), resObj);
 }
 
 ArkUI_Float32 GetTextLetterSpacing(ArkUINodeHandle node)
@@ -789,9 +792,15 @@ void ResetTextLetterSpacing(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     CalcDimension letterSpacing(0.0, DimensionUnit::FP);
     TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("LetterSpacing");
+    }
 }
 
-void SetTextFont(ArkUINodeHandle node, const struct ArkUIFontWithOptionsStruct* fontInfo)
+void SetTextFont(ArkUINodeHandle node, const struct ArkUIFontWithOptionsStruct* fontInfo,
+    void* fontSizeRawPtr, void* fontFamilyRawPtr)
 {
     CHECK_NULL_VOID(fontInfo);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -814,6 +823,9 @@ void SetTextFont(ArkUINodeHandle node, const struct ArkUIFontWithOptionsStruct* 
     TextModelNG::SetFont(frameNode, font);
     TextModelNG::SetVariableFontWeight(frameNode, fontInfo->variableFontWeight);
     TextModelNG::SetEnableVariableFontWeight(frameNode, fontInfo->enableVariableFontWeight);
+    auto fontSizeValue = Dimension(fontInfo->fontSizeNumber, static_cast<DimensionUnit>(fontInfo->fontSizeUnit));
+    NodeModifier::ProcessResourceObj<CalcDimension>(frameNode, "FontSize", fontSizeValue, fontSizeRawPtr);
+    NodeModifier::ProcessResourceObj<std::vector<std::string>>(frameNode, "FontFamily", families, fontFamilyRawPtr);
 }
 
 void ResetTextFont(ArkUINodeHandle node)
@@ -830,6 +842,12 @@ void ResetTextFont(ArkUINodeHandle node)
     TextModelNG::SetFont(frameNode, font);
     TextModelNG::SetVariableFontWeight(frameNode, DEFAULT_VARIABLE_FONT_WEIGHT);
     TextModelNG::SetEnableVariableFontWeight(frameNode, false);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("FontSize");
+        pattern->UnRegisterResource("FontFamily");
+    }
 }
 
 void SetWordBreak(ArkUINodeHandle node, ArkUI_Uint32 wordBreak)
@@ -1072,11 +1090,14 @@ ArkUI_CharPtr GetTextFontFeature(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
-void SetTextLineSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, ArkUI_Bool isOnlyBetweenLines)
+void SetTextLineSpacing(
+    ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, ArkUI_Bool isOnlyBetweenLines, void* resObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetLineSpacing(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)), isOnlyBetweenLines);
+    NodeModifier::ProcessResourceObj<CalcDimension>(
+        frameNode, "LineSpacing", Dimension(number, static_cast<DimensionUnit>(unit)), resObj);
 }
 
 float GetTextLineSpacing(ArkUINodeHandle node)
@@ -1091,6 +1112,11 @@ void ResetTextLineSpacing(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetLineSpacing(frameNode, DEFAULT_LINE_SPACING, false);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("LineSpacing");
+    }
 }
 
 void SetTextCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* caretColorRawPtr)

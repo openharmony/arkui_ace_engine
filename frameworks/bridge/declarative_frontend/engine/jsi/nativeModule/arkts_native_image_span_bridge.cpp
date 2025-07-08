@@ -119,7 +119,8 @@ ArkUINativeModuleValue ImageSpanBridge::SetTextBackgroundStyle(ArkUIRuntimeCallI
     ArkTSUtils::ParseOuterBorderRadius(runtimeCallInfo, vm, radiusArray, valueUnits, NUM_2, style);
     ArkTSUtils::SetTextBackgroundStyle(style, color, colorResObj, radiusArray.data(), valueUnits.data());
     GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanTextBackgroundStyle(
-        nativeNode, color.GetValue(), radiusArray.data(), valueUnits.data(), static_cast<int32_t>(radiusArray.size()));
+        nativeNode, color.GetValue(), radiusArray.data(), valueUnits.data(), static_cast<int32_t>(radiusArray.size()),
+        style.get());
     return panda::JSValueRef::Undefined(vm);
 }
 

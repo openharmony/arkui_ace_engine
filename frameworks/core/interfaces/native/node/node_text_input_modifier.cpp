@@ -806,9 +806,9 @@ void SetTextInputPlaceholderFont(ArkUINodeHandle node, const struct ArkUIPlaceho
     }
     if (SystemProperties::ConfigChangePerform() && fontfamilyRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontfamilyRawPtr));
-        pattern->RegisterResource<std::vector<std::string>>("fontFamily", resObj, font.fontFamilies);
+        pattern->RegisterResource<std::vector<std::string>>("placeholderFontFamily", resObj, font.fontFamilies);
     } else {
-        pattern->UnRegisterResource("fontFamily");
+        pattern->UnRegisterResource("placeholderFontFamily");
     }
 }
 
@@ -840,11 +840,10 @@ void SetTextInputFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRa
     TextFieldModelNG::SetTextColor(frameNode, Color(color));
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
+    pattern->UnRegisterResource("fontColor");
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         pattern->RegisterResource<Color>("fontColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("fontColor");
     }
 }
 

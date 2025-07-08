@@ -2813,7 +2813,7 @@ struct ArkUITextModifier {
     void (*resetTextAlign)(ArkUINodeHandle node);
     void (*setFontColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPtr);
     void (*resetFontColor)(ArkUINodeHandle node);
-    void (*setTextForegroundColor)(ArkUINodeHandle node, ArkUI_Bool isColor, ArkUI_Uint32 color);
+    void (*setTextForegroundColor)(ArkUINodeHandle node, ArkUI_Bool isColor, ArkUI_Uint32 color, void* colorRawPtr);
     void (*resetTextForegroundColor)(ArkUINodeHandle node);
     void (*setFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* fontSizeRawPtr);
     void (*resetFontSize)(ArkUINodeHandle node);
@@ -2852,9 +2852,10 @@ struct ArkUITextModifier {
     void (*setTextBaselineOffset)(
         ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* baseLineOffsetRawPtr);
     void (*resetTextBaselineOffset)(ArkUINodeHandle node);
-    void (*setTextLetterSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setTextLetterSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resObj);
     void (*resetTextLetterSpacing)(ArkUINodeHandle node);
-    void (*setTextFont)(ArkUINodeHandle node, const struct ArkUIFontWithOptionsStruct* fontInfo);
+    void (*setTextFont)(ArkUINodeHandle node, const struct ArkUIFontWithOptionsStruct* fontInfo,
+        void* fontsizeResRawPtr, void* fontfamilyResRawPtr);
     void (*resetTextFont)(ArkUINodeHandle node);
     void (*setFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr weight);
     void (*setFontWeightWithOption)(ArkUINodeHandle node, const struct ArkUIFontWeightWithOptionsStruct* weightInfo);
@@ -2891,7 +2892,7 @@ struct ArkUITextModifier {
     void (*setTextFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextFontFeature)(ArkUINodeHandle node);
     void (*setTextLineSpacing)(
-        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Bool isOnlyBetweenLines);
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Bool isOnlyBetweenLines, void* resObj);
     ArkUI_Float32 (*getTextLineSpacing)(ArkUINodeHandle node);
     void (*resetTextLineSpacing)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextFontFeature)(ArkUINodeHandle node);
@@ -5114,7 +5115,7 @@ struct ArkUIImageSpanModifier {
     ArkUI_Int32 (*getImageSpanVerticalAlign)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageSpanObjectFit)(ArkUINodeHandle node);
     void (*setImageSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
-        const ArkUI_Int32* units, ArkUI_Int32 length);
+        const ArkUI_Int32* units, ArkUI_Int32 length, void* style);
     void (*resetImageSpanTextBackgroundStyle)(ArkUINodeHandle node);
     void (*getImageSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUITextBackgroundStyleOptions* options);
     void (*setImageSpanBaselineOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
@@ -6004,9 +6005,9 @@ struct ArkUITextTimerControllerModifier {
 };
 
 struct ArkUIMarqueeModifier {
-    void (*setMarqueeFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setMarqueeFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* fontSizeRawPtr);
     void (*resetMarqueeFontSize)(ArkUINodeHandle node);
-    void (*setMarqueeFontColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setMarqueeFontColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resourceRawPtr);
     void (*resetMarqueeFontColor)(ArkUINodeHandle node);
     void (*setMarqueeAllowScale)(ArkUINodeHandle node, ArkUI_Bool allowScale);
     void (*resetMarqueeAllowScale)(ArkUINodeHandle node);
@@ -6108,7 +6109,7 @@ struct ArkUISpanModifier {
     void (*setSpanLetterSpacing)(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingValue,
         void* resourceRawPtr);
     void (*resetSpanLetterSpacing)(ArkUINodeHandle node);
-    void (*setSpanBaselineOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setSpanBaselineOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resourceRawPtr);
     void (*resetSpanBaselineOffset)(ArkUINodeHandle node);
     void (*setSpanFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo);
     void (*resetSpanFont)(ArkUINodeHandle node);
@@ -6924,7 +6925,7 @@ struct ArkUIRelativeContainerModifier {
 
 struct ArkUIContainerSpanModifier {
     void (*setContainerSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
-        const ArkUI_Int32* units, ArkUI_Int32 length);
+        const ArkUI_Int32* units, ArkUI_Int32 length, void* style);
     void (*resetContainerSpanTextBackgroundStyle)(ArkUINodeHandle node);
 };
 
