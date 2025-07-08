@@ -237,13 +237,13 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
             lastAngle_ = 0.0;
             angleSignChanged_ = false;
             resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
+            if (CheckLimitFinger()) {
+                extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
+                return;
+            }
             auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
             if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-                return;
-            }
-            if (CheckLimitFinger()) {
-                extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
                 return;
             }
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
