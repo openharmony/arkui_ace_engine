@@ -361,8 +361,8 @@ HWTEST_F(DatePickerTestTwoNg, ParseDirectionKey001, TestSize.Level1)
  * @tc.desc: Test SetCanLoop.
  * @tc.type: FUNC
  */
- HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest001, TestSize.Level1)
- {
+HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest001, TestSize.Level1)
+{
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
@@ -372,7 +372,7 @@ HWTEST_F(DatePickerTestTwoNg, ParseDirectionKey001, TestSize.Level1)
     ASSERT_NE(pickerProperty, nullptr);
     DatePickerModel::GetInstance()->SetCanLoop(false);
     EXPECT_FALSE(pickerProperty->GetCanLoopValue());
- }
+}
 
  /**
  * @tc.name: DatePickerCanLoopTest002
@@ -423,8 +423,8 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest002, TestSize.Level1)
 HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest003, TestSize.Level1)
 {
     /**
-    * @tc.step: step1. create picker framenode and pattern.
-    */
+     * @tc.step: step1. create picker framenode and pattern.
+     */
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -436,15 +436,15 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest003, TestSize.Level1)
     auto rowLayoutProperty = pickerPattern->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(rowLayoutProperty, nullptr);
     /**
-    * @tc.step: step2. call pattern's ToJsonValue method.
-    * @tc.expected: jsonValue2->GetBool("canLoop") is not nullptr.
-    */
+     * @tc.step: step2. call pattern's ToJsonValue method.
+     * @tc.expected: jsonValue2->GetBool("canLoop") is not nullptr.
+     */
     rowLayoutProperty->ToJsonValue(jsonValue, filter);
     ASSERT_NE(jsonValue->GetValue("canLoop"), nullptr);
     ASSERT_EQ(jsonValue->GetValue("canLoop")->GetString(), "true");
     /**
-    * cover branch canLoop == false
-    */
+     * cover branch canLoop == false
+     */
     DatePickerModel::GetInstance()->SetCanLoop(false);
     rowLayoutProperty->ToJsonValue(jsonValue2, filter);
     ASSERT_NE(jsonValue2->GetValue("canLoop"), nullptr);
@@ -459,8 +459,8 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest003, TestSize.Level1)
 HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest004, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. Create columnNode and columnPattern.
-    */
+     * @tc.steps: step1. Create columnNode and columnPattern.
+     */
     CreateDatePickerColumnNode();
     ASSERT_NE(columnNode_, nullptr);
     ASSERT_NE(columnPattern_, nullptr);
@@ -478,9 +478,9 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest004, TestSize.Level1)
     columnPattern_->OnModifyDone();
 
     /**
-    * @tc.steps: step2. Call HandleDragMove while inputEventType is AXIS and sourceTool is FINGER.
-    * @tc.expected: index is reduced.
-    */
+     * @tc.steps: step2. Call HandleDragMove while inputEventType is AXIS and sourceTool is FINGER.
+     * @tc.expected: index is reduced.
+     */
     auto eventHub = columnNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
@@ -528,8 +528,8 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest004, TestSize.Level1)
 HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest005, TestSize.Level1)
 {
     /**
-    * @tc.step: step1. create picker framenode and pattern.
-    */
+     * @tc.step: step1. create picker framenode and pattern.
+     */
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -541,9 +541,9 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest005, TestSize.Level1)
     DatePickerModel::GetInstance()->SetCanLoop(false);
     ASSERT_FALSE(rowLayoutProperty->GetCanLoopValue(true));
     /**
-    * @tc.step: step2. call pattern's Reset method.
-    * @tc.expected: rowLayoutProperty->GetCanLoopValue is false.
-    */
+     * @tc.step: step2. call pattern's Reset method.
+     * @tc.expected: rowLayoutProperty->GetCanLoopValue is false.
+     */
     rowLayoutProperty->Reset();
     ASSERT_TRUE(rowLayoutProperty->GetCanLoopValue(true));
 }
@@ -556,8 +556,8 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest005, TestSize.Level1)
 HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest006, TestSize.Level1)
 {
     /**
-    * @tc.step: step1. create picker framenode and pattern.
-    */
+     * @tc.step: step1. create picker framenode and pattern.
+     */
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -569,9 +569,9 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest006, TestSize.Level1)
     DatePickerModel::GetInstance()->SetCanLoop(false);
     ASSERT_FALSE(rowLayoutProperty->GetCanLoopValue(true));
     /**
-    * @tc.step: step2. call pattern's Clone method.
-    * @tc.expected: rowLayoutProperty2->GetCanLoopValue is false.
-    */
+     * @tc.step: step2. call pattern's Clone method.
+     * @tc.expected: rowLayoutProperty2->GetCanLoopValue is false.
+     */
     auto rowLayoutProperty2 = AceType::DynamicCast<DataPickerRowLayoutProperty>(rowLayoutProperty->Clone());
     ASSERT_FALSE(rowLayoutProperty2->GetCanLoopValue(true));
 }
@@ -602,8 +602,8 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest007, TestSize.Level1)
 HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest008, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. Create columnNode and default canLoop is true.
-    */
+     * @tc.steps: step1. Create columnNode and default canLoop is true.
+     */
     CreateDatePickerColumnNode();
     ASSERT_NE(columnNode_, nullptr);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -613,13 +613,13 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest008, TestSize.Level1)
     EXPECT_TRUE(columnPattern_->GetCanLoopFromLayoutProperty());
 
     /**
-    * @tc.steps: step2. Set canLoop value to false.
-    */
+     * @tc.steps: step2. Set canLoop value to false.
+     */
     DatePickerModelNG::SetCanLoop(frameNode, false);
 
     /**
-    * @tc.steps: step3. GetCanLoopFromLayoutProperty.
-    */
+     * @tc.steps: step3. GetCanLoopFromLayoutProperty.
+     */
     EXPECT_FALSE(columnPattern_->GetCanLoopFromLayoutProperty());
 }
 
@@ -778,8 +778,8 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerDialogCanLoop001, TestSize.Level1)
 HWTEST_F(DatePickerTestTwoNg, DatePickerDialogCanLoop002, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. Create pickeDialog.
-    */
+     * @tc.steps: step1. Create pickeDialog.
+     */
     DatePickerSettingData settingData;
     settingData.isLunar = false;
     settingData.showTime = true;
@@ -807,9 +807,9 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerDialogCanLoop002, TestSize.Level1)
     auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
     auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
     /**
-    * @tc.steps: step2.call CanMove.
-    * @tc.expected:timePickerNode can loop when at top.
-    */
+     * @tc.steps: step2.call CanMove.
+     * @tc.expected:timePickerNode can loop when at top.
+     */
     bool tested = false;
     for (uint32_t i = 0; i < timePickerNode->GetChildren().size(); i++) {
         auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
@@ -878,5 +878,52 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerPatternTest022, TestSize.Level1)
         tested = true;
     }
     EXPECT_TRUE(tested);
+}
+
+/**
+ * @tc.name: DatePickerGetDateTest001
+ * @tc.desc: Test get date in DatePickerDialog when canLoop is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerGetDateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pickeDialog.
+     */
+    DatePickerSettingData settingData;
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.canLoop = true;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto datePickerNode = DatePickerDialogView::CreateDateNode(dateNodeId, settingData, false);
+    ASSERT_NE(datePickerNode, nullptr);
+    auto pickerStack = DatePickerDialogView::CreateStackNode();
+    auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto monthDaysNode = DatePickerDialogView::CreateDateNode(monthDaysNodeId, settingData, true);
+    datePickerNode->MountToParent(pickerStack);
+    auto pickerRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    monthDaysNode->MountToParent(pickerRow);
+    pickerRow->MountToParent(pickerStack);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    std::vector<ButtonInfo> buttonInfos;
+    auto contentRow = DatePickerDialogView::CreateButtonNode(
+        monthDaysNode, datePickerNode, buttonInfos, dialogEvent, std::move(dialogCancelEvent));
+    contentRow->AddChild(DatePickerDialogView::CreateDividerNode(datePickerNode), 1);
+    LunarDate result = datePickerPattern->GetCurrentLunarDateByMonthDaysColumn(2025);
+    EXPECT_EQ(result.isLeapMonth, false);
+    PickerDate solarResult = datePickerPattern->LunarToSolar(result);
+    EXPECT_EQ(solarResult.GetYear(), 2025);
+    EXPECT_EQ(solarResult.GetMonth(), 1);
+    EXPECT_EQ(solarResult.GetDay(), 29);
 }
 } // namespace OHOS::Ace::NG

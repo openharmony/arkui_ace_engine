@@ -2086,46 +2086,45 @@ LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunar
     auto iter = children.begin();
     auto monthDays = (*iter);
     CHECK_NULL_RETURN(monthDays, lunarResult);
-    iter++;
-    auto year = *iter;
-    CHECK_NULL_RETURN(year, lunarResult);
     auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
     auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetLastChild()->GetLastChild());
-    auto stackYear = DynamicCast<FrameNode>(year);
-    auto blendYear = DynamicCast<FrameNode>(stackYear->GetLastChild());
-    CHECK_NULL_RETURN(blendYear, lunarResult);
-    auto yearDaysNode = DynamicCast<FrameNode>(blendYear->GetLastChild());
     CHECK_NULL_RETURN(monthDaysNode, lunarResult);
-    CHECK_NULL_RETURN(yearDaysNode, lunarResult);
 
     auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
-    auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_RETURN(monthDaysDatePickerColumnPattern, lunarResult);
-    CHECK_NULL_RETURN(yearDatePickerColumnPattern, lunarResult);
-
 
     uint32_t lunarLeapMonth = 0;
     bool hasLeapMonth = GetLunarLeapMonth(lunarYear, lunarLeapMonth);
-    auto monthDaysIndex = monthDaysDatePickerColumnPattern->GetCurrentIndex();
-    uint32_t month = 1;
-    for (; month <= 12; ++month) { // month start from 1 to 12
-        auto flag = hasLeapMonth && lunarLeapMonth == month;
-        uint32_t daysInMonth = GetLunarMaxDay(lunarYear, month, flag && lunarResult.isLeapMonth);
-        if (monthDaysIndex < daysInMonth) {
-            break;
-        } else {
-            monthDaysIndex -= daysInMonth;
+    uint32_t remainingDays = monthDaysDatePickerColumnPattern->GetCurrentIndex();
+
+    // 处理一个月（平月或闰月）的通用函数
+    auto processMonth = [&](uint32_t month, bool isLeap) -> bool {
+        uint32_t daysInMonth = GetLunarMaxDay(lunarYear, month, isLeap);
+        if (remainingDays < daysInMonth) {
+            lunarResult.month = month;
+            lunarResult.isLeapMonth = isLeap;
+            lunarResult.day = remainingDays + 1;
+            return true; // 找到目标月份
         }
-        if (flag && !lunarResult.isLeapMonth) {
-            --month;
-            lunarResult.isLeapMonth = true;
+        remainingDays -= daysInMonth;
+        return false; // 继续处理下个月
+    };
+    
+    lunarResult.year = lunarYear;
+    // 遍历所有月份
+    for (uint32_t month = MIN_MONTH; month <= MAX_MONTH; ++month) {
+        // 处理平月
+        if (processMonth(month, false)) {
+            break;
+        }
+        
+        // 处理闰月（如果存在且是当前月）
+        if (hasLeapMonth && lunarLeapMonth == month) {
+            if (processMonth(month, true)) {
+                break;
+            }
         }
     }
-    lunarResult.month = month;
-    lunarResult.isLeapMonth = (lunarResult.month == lunarLeapMonth && hasLeapMonth);
-    lunarResult.day = monthDaysIndex + 1; // day start form 1, index start from 0
-    lunarResult.year = startDateLunar_.year + yearDatePickerColumnPattern->GetCurrentIndex();
-
     return lunarResult;
 }
 
