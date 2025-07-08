@@ -1539,7 +1539,12 @@ function setButtonProperties(buttonOptions?: AdvancedDialogV2Button,
       if (buttonOptions?.action) {
         buttonOptions.action();
       }
-      controller?.close();
+      if (controller) {
+        hilog?.info(0x3900,'Ace',`AdvancedDialog button onKeyEvent controller true`);
+        controller?.close();
+      } else {
+        hilog?.info(0x3900,'Ace',`AdvancedDialog button onKeyEvent controller false`);
+      }
       event.stopPropagation();
     }
   })
@@ -1547,7 +1552,12 @@ function setButtonProperties(buttonOptions?: AdvancedDialogV2Button,
     if (buttonOptions?.action) {
       buttonOptions.action();
     }
-    controller?.close();
+    if (controller) {
+      hilog?.info(0x3900,'Ace',`AdvancedDialog button onClick controller true`);
+      controller?.close();
+    } else {
+      hilog?.info(0x3900,'Ace',`AdvancedDialog button onClick controller false`);
+    }
   })
   .defaultFocus(isDefaultFocus(buttonOptions, isHasDefaultFocus, isAllFocusFalse))
   .buttonStyle(buttonOptions?.buttonStyle ?? ALERT_BUTTON_STYLE)

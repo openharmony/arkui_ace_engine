@@ -3765,7 +3765,12 @@ function __Button__setButtonProperties(buttonOptions, isHasDefaultFocus, isAllFo
             if (buttonOptions.action) {
                 buttonOptions.action();
             }
-            controller?.close();
+            if (controller) {
+                hilog?.info(0x3900, 'Ace', `AdvancedDialog button onKeyEvent controller true`);
+                controller?.close();
+            } else {
+                hilog?.info(0x3900, 'Ace', `AdvancedDialog button onKeyEvent controller false`);
+            }
             event.stopPropagation();
         }
     });
@@ -3773,7 +3778,12 @@ function __Button__setButtonProperties(buttonOptions, isHasDefaultFocus, isAllFo
         if (buttonOptions.action) {
             buttonOptions.action();
         }
-        controller?.close();
+        if (controller) {
+            hilog?.info(0x3900, 'Ace', `AdvancedDialog button onClick controller true`);
+            controller?.close();
+        } else {
+            hilog?.info(0x3900, 'Ace', `AdvancedDialog button onClick controller false`);
+        }
     });
     Button.defaultFocus(isDefaultFocus(buttonOptions, isHasDefaultFocus, isAllFocusFalse));
     Button.buttonStyle(buttonOptions.buttonStyle ??
