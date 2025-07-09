@@ -45,6 +45,7 @@ group("core_pattern_unittest") {
     "form:form_node_test",
     "form:form_pattern_test",
     "form:form_test_ng",
+    "form:form_special_style_test",
     "form_link:form_link_test",
     "gauge:gauge_test_ng",
     "grid:grid_test_ng",

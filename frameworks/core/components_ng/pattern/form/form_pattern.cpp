@@ -795,11 +795,6 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
 #endif
 
     bool isFormBundleForbidden = CheckFormBundleForbidden(info.bundleName);
-    if (formInfo.transparencyEnabled && isFormBundleForbidden) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "transparencyEnabled.");
-        formSpecialStyle_.SetInitDone();
-        return;
-    }
     bool isFormProtected = IsFormBundleProtected(info.bundleName, info.id);
     if (!info.exemptAppLock && (isFormProtected || isFormBundleForbidden))  {
         auto newFormSpecialStyle = formSpecialStyle_;
