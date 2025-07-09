@@ -866,13 +866,12 @@ void UIObserverListener::AddFingerListInfo(napi_value objValueClickEvent, const 
         napi_close_handle_scope(env_, scope);
         return;
     }
-    int32_t index = 0;
     if (fingerList.size() > 0) {
         for (auto finger : fingerList) {
             napi_value napiFinger = nullptr;
             napi_create_object(env_, &napiFinger);
             AddFingerObjectInfo(napiFinger, finger);
-            napi_set_element(env_, napiFingerList, index++, napiFinger);
+            napi_set_element(env_, napiFingerList, finger.fingerId_, napiFinger);
         }
     }
     napi_set_named_property(env_, objValueClickEvent, "fingerList", napiFingerList);
