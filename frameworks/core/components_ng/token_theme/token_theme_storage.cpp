@@ -191,14 +191,14 @@ RefPtr<TokenTheme> TokenThemeStorage::CreateSystemTokenTheme(ColorMode colorMode
     tokenTheme->SetDarkColors(tokenDarkColors);
 
     std::vector<Color> colors;
+    std::vector<Color> darkColors;
     colors.reserve(TokenColors::TOTAL_NUMBER);
+    darkColors.reserve(TokenColors::TOTAL_NUMBER);
     for (size_t resId = 0; resId < TokenColors::TOTAL_NUMBER; ++resId) {
         colors.push_back(themeConstants->GetColor(TokenColors::GetSystemColorResIdByIndex(resId)));
+        darkColors.push_back(themeConstants->GetColor(TokenColors::GetSystemColorResIdByIndex(resId)));
     }
     tokenColors->SetColors(std::move(colors));
-    
-    // Set the same colors for dark mode as well
-    std::vector<Color> darkColors = colors;
     tokenDarkColors->SetColors(std::move(darkColors));
     return tokenTheme;
 }

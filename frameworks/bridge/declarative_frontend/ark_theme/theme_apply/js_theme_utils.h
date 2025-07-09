@@ -23,7 +23,6 @@
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "ui/view/theme/token_theme.h"
 
 namespace OHOS::Ace::Framework {
 class JSThemeUtils {
@@ -38,14 +37,8 @@ public:
 
     static std::optional<JSThemeColors> GetThemeColors()
     {
-        bool isDark = IsDarkMode();
         return (JSThemeScope::jsCurrentTheme) ?
-            std::make_optional(JSThemeScope::jsCurrentTheme->Colors(isDark)) : std::nullopt;
-    }
-private:
-    static bool IsDarkMode()
-    {
-        return OHOS::Ace::TokenTheme::IsDarkMode();
+            std::make_optional(JSThemeScope::jsCurrentTheme->Colors()) : std::nullopt;
     }
 };
 }
