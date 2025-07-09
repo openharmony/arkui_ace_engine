@@ -4473,6 +4473,7 @@ void PipelineContext::OnShow()
 {
     CHECK_RUN_ON(UI);
     onShow_ = true;
+    isNeedCallbackAreaChange_ = true;
     window_->OnShow();
     PerfMonitor::GetPerfMonitor()->SetAppForeground(true);
     RequestFrame();
@@ -4488,6 +4489,7 @@ void PipelineContext::OnHide()
     CHECK_RUN_ON(UI);
     NotifyDragOnHide();
     onShow_ = false;
+    isNeedCallbackAreaChange_ = true;
     window_->OnHide();
     PerfMonitor::GetPerfMonitor()->SetAppForeground(false);
     RequestFrame();
