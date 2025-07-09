@@ -1,0 +1,68 @@
+/*
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <ctime>
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/time_picker/timepicker_model_static.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+namespace TimePickerSelectedOpsAccessor {
+Ark_NativePointer RegisterTimePickerSelectedCallbackImpl(Ark_NativePointer node,
+                                                         const Ark_Int64 selected,
+                                                         const TimePickerSelectedCallback* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode && callback, nullptr);
+
+    std::time_t time = static_cast<std::time_t>(selected);
+    std::tm* loc = std::localtime(&time);
+    CHECK_NULL_RETURN(loc, nullptr);
+
+    const uint32_t hours = loc->tm_hour;
+    const uint32_t minutes = loc->tm_min;
+    const uint32_t seconds = loc->tm_sec;
+
+    PickerTime pickerTime(hours, minutes, seconds);
+    TimePickerModelStatic::SetSelectedTime(frameNode, pickerTime);
+
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* event) {
+        CHECK_NULL_VOID(event);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
+        CHECK_NULL_VOID(eventInfo);
+        auto selectedStr = eventInfo->GetSelectedStr();
+        auto result = Converter::ArkValue<Ark_Date>(selectedStr);
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(result);
+    };
+    TimePickerModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
+    return node;
+}
+} // TimePickerSelectedOpsAccessor
+
+const GENERATED_ArkUITimePickerSelectedOpsAccessor* GetTimePickerSelectedOpsAccessor()
+{
+    static const GENERATED_ArkUITimePickerSelectedOpsAccessor TimePickerSelectedOpsAccessorImpl {
+        TimePickerSelectedOpsAccessor::RegisterTimePickerSelectedCallbackImpl,
+    };
+    return &TimePickerSelectedOpsAccessorImpl;
+}
+
+} // namespace OHOS::Ace::NG::GeneratedModifier
