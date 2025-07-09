@@ -58,9 +58,18 @@ bool CustomNode::Render(int64_t deadline)
                 id = Container::CurrentId();
             }
             COMPONENT_CREATION_DURATION(id);
-            ACE_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d][frameRound:%d]",
-                GetJSViewName().c_str(), GetId(), GetParent() ? GetParent()->GetId() : 0, prebuildFrameRounds_);
-            // first create child node and wrapper.
+            std::string reuseId = GetReuseId().empty() ? "-1" : GetReuseId();
+            std::string parentInfo = "-1";
+            if (SystemProperties::GetDynamicDetectionTraceEnabled()) {
+                auto customParent = FindParentCustomNode();
+                if (customParent) {
+                    parentInfo = customParent->GetJSViewName() + "[" + std::to_string(customParent->GetId()) + "]";
+                }
+            }
+            ACE_SCOPED_TRACE(
+                "CustomNode:BuildItem [%s][self:%d][parent:%d][frameRound:%d][reuseId:%s][parentCustomNode:%s]",
+                GetJSViewName().c_str(), GetId(), GetParent() ? GetParent()->GetId() : 0,
+                prebuildFrameRounds_, reuseId.c_str(), parentInfo.c_str());
             ScopedViewStackProcessor scopedViewStackProcessor(prebuildViewStackProcessor_);
             auto parent = GetParent();
             bool parentNeedExportTexture = parent ? parent->IsNeedExportTexture() : false;
@@ -273,6 +282,39 @@ void CustomNode::DumpInfo()
             DumpDecoratorInfo(decoratorInfo);
         }
     }
+}
+
+void CustomNode::FireRecycleRenderFunc()
+{
+    if (HasRecycleRenderFunc()) {
+        std::string reuseId = GetReuseId().empty() ? "-1" : GetReuseId();
+        std::string parentInfo = "-1";
+        if (SystemProperties::GetDynamicDetectionTraceEnabled()) {
+            auto customParent = FindParentCustomNode();
+            if (customParent) {
+                parentInfo = customParent->GetJSViewName() + "[" + std::to_string(customParent->GetId()) + "]";
+            }
+        }
+
+        ACE_SCOPED_TRACE("CustomNode:BuildRecycle [%s][self:%d][parent:%d][reuseId:%s][parentCustomNode:%s]",
+            GetJSViewName().c_str(), GetId(), GetParent() ? GetParent()->GetId() : 0,
+            reuseId.c_str(), parentInfo.c_str());
+    }
+
+    CustomNodeBase::FireRecycleRenderFunc();
+}
+
+RefPtr<CustomNode> CustomNode::FindParentCustomNode() const
+{
+    auto current = GetParent();
+    while (current) {
+        auto customParent = DynamicCast<CustomNode>(current);
+        if (customParent) {
+            return customParent;
+        }
+        current = current->GetParent();
+    }
+    return nullptr;
 }
 
 void CustomNode::OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
