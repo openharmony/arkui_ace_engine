@@ -1689,7 +1689,7 @@ int32_t GestureEventHub::GetBadgeNumber(const RefPtr<OHOS::Ace::DragEvent>& drag
         badgeNumber = recordSize > 1 ? recordSize : 1;
     } else if (dataLoadParams && isUseDataLoadParams) {
         auto recodeCount = dataLoadParams->GetRecordCount();
-        badgeNumber = static_cast<int32_t>(recodeCount) > 1 ? recodeCount : 1;
+        badgeNumber = (recodeCount == 0 || recodeCount > INT32_MAX) ? 1 : static_cast<int32_t>(recodeCount);
     }
 
     auto dragPreviewOptions = frameNode->GetDragPreviewOption();
