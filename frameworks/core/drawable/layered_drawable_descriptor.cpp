@@ -295,10 +295,10 @@ RefPtr<PixelMap> LayeredDrawableDescriptor::GetMask()
 
 void LayeredDrawableDescriptor::CreateForeground()
 {
-    if (foregroundData_.empty()) {
+    if (foregroundData_.len == 0 || foregroundData_.data == nullptr) {
         return;
     }
-    auto imageSource = ImageSource::Create(foregroundData_.data(), foregroundData_.size());
+    auto imageSource = ImageSource::Create(foregroundData_.data.get(), foregroundData_.len);
     if (!imageSource) {
         return;
     }
@@ -310,10 +310,10 @@ void LayeredDrawableDescriptor::CreateForeground()
 
 void LayeredDrawableDescriptor::CreateBackground()
 {
-    if (backgroundData_.empty()) {
+    if (backgroundData_.len == 0 || backgroundData_.data == nullptr) {
         return;
     }
-    auto imageSource = ImageSource::Create(backgroundData_.data(), backgroundData_.size());
+    auto imageSource = ImageSource::Create(backgroundData_.data.get(), backgroundData_.len);
     if (!imageSource) {
         return;
     }
@@ -349,10 +349,10 @@ bool LayeredDrawableDescriptor::CreateMaskByPath()
 
 bool LayeredDrawableDescriptor::CreateMaskByData()
 {
-    if (maskData_.empty()) {
+    if (maskData_.len == 0 || maskData_.data == nullptr) {
         return false;
     }
-    auto imageSource = ImageSource::Create(maskData_.data(), maskData_.size());
+    auto imageSource = ImageSource::Create(maskData_.data.get(), maskData_.len);
     if (!imageSource) {
         return false;
     }
@@ -373,8 +373,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetForegroun
     }
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable) {
-        std::vector<uint8_t> result(data, data + len);
-        drawable->SetForegroundData(result);
+        drawable->SetForegroundData(data, len);
     }
 }
 
@@ -386,8 +385,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetBackgroun
     }
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable) {
-        std::vector<uint8_t> result(data, data + len);
-        drawable->SetBackgroundData(result);
+        drawable->SetBackgroundData(data, len);
     }
 }
 
@@ -398,8 +396,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_SetMaskData(
     }
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable) {
-        std::vector<uint8_t> result(data, data + len);
-        drawable->SetMaskData(result);
+        drawable->SetMaskData(data, len);
     }
 }
 
