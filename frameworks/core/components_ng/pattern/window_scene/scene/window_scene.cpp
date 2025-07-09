@@ -210,6 +210,7 @@ void WindowScene::OnAttachToFrameNode()
     context->SetRSNode(surfaceNode);
     surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
+    Rosen::SceneSessionManager::GetInstance().OnAttachToFrameNode(session_->getWindowId());
     RegisterFocusCallback();
     WindowPattern::OnAttachToFrameNode();
 }
