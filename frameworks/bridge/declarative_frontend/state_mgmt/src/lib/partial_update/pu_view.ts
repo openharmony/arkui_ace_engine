@@ -503,6 +503,11 @@ abstract class ViewPU extends PUV2ViewBase
       }
       SyncedViewRegistry.addSyncedUpdateDirtyNodes(this);
     }
+    const cb = this.watchedProps.get(varName);
+    if (cb && typeof cb === 'function') {
+      stateMgmtConsole.debug(`${this.debugInfo__()} state var ${varName} calling @Watch function`);
+      cb.call(this, varName);
+    }
   }
 
   // implements IMultiPropertiesChangeSubscriber
@@ -718,10 +723,10 @@ abstract class ViewPU extends PUV2ViewBase
     this.defaultConsume_.forEach((value: SynchedPropertyObjectTwoWayPU<any>, providedPropName: string) => {
       let providedVarStore: ObservedPropertyAbstractPU<any> = this.findProvidePU__(providedPropName);
       if (providedVarStore) {
-        stateMgmtConsole.debug(`${value.debugInfo} connected to the provide ${providedVarStore.debugInfo()}`);
+        stateMgmtConsole.debug(`${value.debugInfo()} connected to the provide ${providedVarStore.debugInfo()}`);
+        value.resetSource(providedVarStore);
         // store the consume reconnect to provide
         this.reconnectConsume_.set(providedPropName, value);
-        value.resetSource(providedVarStore);
         value.getDependencies().forEach((id: number) => {
           this.UpdateElement(id);
         })

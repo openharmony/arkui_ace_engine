@@ -170,6 +170,35 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     stateMgmtProfiler.end();
   }
 
+  private isSameType(a: unknown, b: unknown): [boolean, string, string] {
+    if (a === null && b === null) {
+      return [true, 'null', 'null'];
+    }
+    if (a === null) {
+      return [false, 'null', typeof b];
+    }
+    if (b === null) {
+      return [false, typeof a, 'null'];
+    }
+
+    // check SimpleType
+    const typeA = typeof a;
+    const typeB = typeof b;
+    if (typeA !== 'object' && typeB !== 'object') {
+      return [typeA === typeB, typeA, typeB];
+    }
+    // check built-in type
+    const objectTypeA = Object.prototype.toString.call(a);
+    const objectTypeB = Object.prototype.toString.call(b);
+    if (objectTypeA !== objectTypeB) {
+      return [false, objectTypeA, objectTypeB];
+    }
+    // check class instance
+    const classConstructorA = (a as object).constructor;
+    const classConstructorB = (b as object).constructor;
+    return [classConstructorA === classConstructorB, classConstructorA.name, classConstructorB.name];
+  }
+
   /**
   * Reset the source for the SynchedPropertyTwoWayPU. Only used when build node attached to the main tree
   * the consume used the default value need find its provide.
@@ -183,14 +212,22 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     let newRaw = ObservedObject.GetRawObject(newSource.getUnmonitored());
     let fakeRaw = ObservedObject.GetRawObject(this.source_.getUnmonitored());
     // if the new source value type is not same with the old one, cannot connect
-    if (typeof newRaw  !== typeof fakeRaw) {
-      stateMgmtConsole.applicationError(`connect ${(newSource as ObservedPropertyObjectPU<any>).debugInfo()} to ${this.debugInfo()}.The types are not same.`)
-      return;
+    const [isSame, typeNew, typeFake] = this.isSameType(newRaw, fakeRaw);
+    if (!isSame) {
+      const error = `cannot connect ${this.debugInfo()} (type ${typeFake})
+        to ${(newSource as unknown as ObservedPropertyObjectPU<any>).debugInfo()} (type ${typeNew}). Their types are not same.`;
+      stateMgmtConsole.applicationError(error);
+      throw new TypeError(error);
     }
     this.fakeSourceBackup_ = this.source_;
     this.source_ = newSource;
     // register two-way sync to the new source
     this.source_.addSubscriber(this);
+    if (newRaw === fakeRaw) {
+      stateMgmtConsole.debug(`the new value ${(newSource as unknown as ObservedPropertyObjectPU<any>).debugInfo()} value
+        same with the default value ${this.debugInfo()}. ignore it.`);
+      return;
+    }
     this.syncFromSource();
   }
 
