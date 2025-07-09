@@ -226,6 +226,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/component/tabContent.ets",
   "arkui-preprocessed/arkui/component/test-api.ets",
   "arkui-preprocessed/arkui/component/alertDialog.ets",
+  "arkui-preprocessed/arkui/component/commonOps.ets",
   "arkui-preprocessed/arkui/component/checkboxops.ets",
   "arkui-preprocessed/arkui/component/panel.ets",
   "arkui-preprocessed/arkui/component/waterFlow.ets",

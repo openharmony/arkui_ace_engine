@@ -62,6 +62,7 @@ generated_sources = [
   "implementation/color_metrics_accessor.cpp",
   "implementation/column_modifier.cpp",
   "implementation/column_split_modifier.cpp",
+  "implementation/common_method_ops_accessor.cpp",
   "implementation/common_method_modifier.cpp",
   "implementation/bind_sheet_utils.cpp",
   "implementation/bind_sheet_ops_accessor.cpp",

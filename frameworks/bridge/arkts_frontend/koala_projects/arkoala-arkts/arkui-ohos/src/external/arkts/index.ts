@@ -20,10 +20,14 @@ import common from "@ohos.app.ability.common"
 import pointer from '@ohos.multimodalInput.pointer'
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import uniformTypeDescriptor from "@ohos.data.uniformTypeDescriptor"
+import uiEffect from "@ohos.graphics.uiEffect"
 
 export * from "@ohos.base"
 export * from "@ohos.arkui.drawableDescriptor"
 
+export type Filter = uiEffect.Filter
+export type VisualEffect = uiEffect.VisualEffect
+export type BrightnessBlender = uiEffect.BrightnessBlender
 export type PixelMap = image.PixelMap
 export type AbilityWant = _Want
 export type WebviewController = webview.WebviewController
