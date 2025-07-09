@@ -449,6 +449,33 @@ HWTEST_F(RichEditorPatternTestNg, DeleteToMaxLength002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DeleteToMaxLength003
+ * @tc.desc: test DeleteToMaxLength003
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, DeleteToMaxLength003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    int32_t maxLen = 5;
+    // make textLength to 6
+    ClearSpan();
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    ASSERT_EQ(richEditorPattern->GetTextContentLength(), static_cast<int32_t>(INIT_VALUE_1.length()));
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->DeleteToMaxLength(maxLen);
+    richEditorPattern->isSpanStringMode_ = false;
+
+    // make textLength to 6
+    ClearSpan();
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    ASSERT_EQ(richEditorPattern->GetTextContentLength(), static_cast<int32_t>(INIT_VALUE_1.length()));
+    richEditorPattern->DeleteToMaxLength(maxLen);
+    ASSERT_EQ(richEditorPattern->GetTextContentLength(), maxLen);
+}
+
+/**
  * @tc.name: RichEditorScopeTest
  * @tc.desc: test RichEditorScope
  * @tc.type: FUNC
