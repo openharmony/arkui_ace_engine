@@ -592,9 +592,6 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SearchModelNG::SetEditMenuOptions(frameNode, convValue);
     LOGE("ARKOALA SearchAttributeModifier.EditMenuOptionsImpl -> Method is not implemented.");
 }
 void EnablePreviewTextImpl(Ark_NativePointer node,
