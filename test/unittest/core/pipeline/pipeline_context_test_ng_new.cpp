@@ -3756,6 +3756,22 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg302, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PipelineContextTestNgAvoidance
+ * @tc.desc: Test AvoidanceLogic.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNgAvoidance, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    EXPECT_NE(pipeline, nullptr);
+    pipeline->rootHeight_ = 400.0f;
+    EXPECT_EQ(pipeline->GetCurrentRootHeight(), 400.0f);
+    pipeline->AvoidanceLogic(0.0);
+    auto keyboardOffset = pipeline->safeAreaManager_->GetKeyboardOffset();
+    EXPECT_EQ(keyboardOffset, 0.0f);
+}
+
+/**
  * @tc.name: PipelineContextTestNg255
  * @tc.desc: Test FlushMouseEventForHover.
  * @tc.type: FUNC

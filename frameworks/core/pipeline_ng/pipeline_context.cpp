@@ -2311,16 +2311,9 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         safeAreaManager_->UpdateKeyboardSafeArea(static_cast<uint32_t>(keyboardHeight));
         keyboardHeight += safeAreaManager_->GetSafeHeight();
         float positionY = 0.0f;
-        float keyboardPosition = rootHeight_ - keyboardHeight;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-        float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         if (manager) {
-            positionY = static_cast<float>(manager->GetClickPosition().GetY()) - keyboardOffset;
-            auto onFocusField = manager->GetOnFocusTextField().Upgrade();
-            if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
-                auto adjustRect = onFocusField->GetHost()->GetGeometryNode()->GetParentAdjust();
-                positionY += adjustRect.Top();
-            }
+            positionY = manager->GetFocusedNodeCaretRect().Top() - safeAreaManager_->GetKeyboardOffset();
         }
         auto bottomLen = safeAreaManager_->GetNavSafeArea().bottom_.IsValid() ?
             safeAreaManager_->GetNavSafeArea().bottom_.Length() : 0;
@@ -2334,7 +2327,6 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         } else {
             safeAreaManager_->UpdateKeyboardOffset(0.0f);
         }
-        safeAreaManager_->SetLastKeyboardPoistion(keyboardPosition);
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         CHECK_NULL_VOID(manager);
         manager->AvoidKeyBoardInNavigation();
