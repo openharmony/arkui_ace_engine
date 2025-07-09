@@ -74,7 +74,6 @@ void* FindModule(int kind) {
             LOGE("ACE module at: %s", libraryName.c_str());
             return module;
         } else {
-            // LOGE("Cannot find ACE module: %s %s", libraryName.c_str(), libraryError());
         }
     }
     return nullptr;

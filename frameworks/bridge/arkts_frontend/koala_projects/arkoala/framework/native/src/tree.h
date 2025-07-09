@@ -149,8 +149,6 @@ struct TreeNode {
     }
 
     int insertChildAfter(TreeNode* node, TreeNode* sibling) {
-        // fprintf(stderr, "insertChildAfter in %p what=%p where=%p\n", this, node, sibling);
-
         if (sibling == (TreeNode*)1 || sibling == nullptr) {
             node->setParent(this);
             _children.push_back(node);
@@ -173,8 +171,6 @@ struct TreeNode {
     }
 
     int insertChildBefore(TreeNode* node, TreeNode* sibling) {
-        //fprintf(stderr, "insertChildBefore in %p what=%p where=%p\n", this, node, sibling);
-
         if (sibling == (TreeNode*)1 || sibling == nullptr) {
             _children.insert(_children.begin(), node);
             return 0;
