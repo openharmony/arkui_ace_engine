@@ -3757,7 +3757,7 @@ void PipelineContext::AccelerateConsumeTouchEvents(
     if (needInterpolation) {
         auto targetTimeStamp = GetResampleStamp();
         for (const auto& idIter : idToTouchPoints) {
-            TouchEvent newTouchEvent;
+            TouchEvent newTouchEvent = idIter.second;
             eventManager_->TryResampleTouchEvent(
                 historyPointsById_[idIter.first], idIter.second.history, targetTimeStamp, newTouchEvent);
             lastDispatchTime[idIter.first] = curVsyncArrivalTime;
