@@ -18,27 +18,12 @@
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::Converter {
-// template<>
-// void AssignCast(std::optional<StepperItemModelNG::ItemState>& dst, const Ark_ItemState& src)
-// {
-//     switch (src) {
-//         case ARK_ITEM_STATE_NORMAL: dst = StepperItemModelNG::ItemState::NORMAL; break;
-//         case ARK_ITEM_STATE_DISABLED: dst = StepperItemModelNG::ItemState::DISABLED; break;
-//         case ARK_ITEM_STATE_WAITING: dst = StepperItemModelNG::ItemState::WAITING; break;
-//         case ARK_ITEM_STATE_SKIP: dst = StepperItemModelNG::ItemState::SKIP; break;
-//         default: LOGE("Unexpected enum value in Ark_ItemState: %{public}d", src);
-//     }
-// }
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StepperItemModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = StepperItemModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 } // StepperItemModifier
@@ -72,12 +57,6 @@ void StatusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<StepperItemModelNG::ItemState>(*value) : std::nullopt;
-    // if (convValue.has_value()) {
-    //     // StepperItemModelNG::SetStatus(frameNode, StepperItemModelNG::ITEM_STATE.at(convValue.value()));
-    // } else {
-    //     // StepperItemModelNG::SetStatus(frameNode, std::nullopt);
-    // }
 }
 } // StepperItemAttributeModifier
 const GENERATED_ArkUIStepperItemModifier* GetStepperItemModifier()

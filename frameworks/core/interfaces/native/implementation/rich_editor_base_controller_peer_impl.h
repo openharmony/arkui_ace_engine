@@ -131,7 +131,6 @@ public:
             auto richEditorController = AceType::DynamicCast<RichEditorController>(controller);
             CHECK_NULL_RETURN(richEditorController, nullptr);
             // need check
-            // return richEditorController->GetPattern();
         }
         return nullptr;
     }
