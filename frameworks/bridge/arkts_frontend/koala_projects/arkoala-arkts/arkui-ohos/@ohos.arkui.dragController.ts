@@ -26,19 +26,6 @@ export namespace dragController {
         ENDED = 1,
     }
 
-    export enum DragBehavior {
-        COPY = 0,
-        MOVE = 1,
-    }
-
-    export enum DragResult {
-        DRAG_SUCCESSFUL = 0,
-        DRAG_FAILED = 1,
-        DRAG_CANCELED = 2,
-        DROP_ENABLED = 3,
-        DROP_DISABLED = 4,
-    }
-
     export enum DragStartRequestStatus {
         WAITING = 0,
         READY = 1,
@@ -94,55 +81,33 @@ export namespace dragController {
     
     export class DragAndDropInfoInner implements DragAndDropInfo {
         status: DragStatus;
-        event: DragEvent;
+        _event: DragEvent;
         extraParams: string;
         constructor(status: DragStatus, event: DragEvent, extraParmas: string) {
             this.status = status
-            this.event = event
+            this._event = event
             this.extraParams = extraParmas
+        }
+        set event(value: DragEvent) {
+            this._event = value;
+        }
+        get event() : DragEvent {
+            return this._event;
         }
     }
 
     export class DragEventParamInner implements DragEventParam {
-        event: DragEvent;
+        _event: DragEvent;
         extraParams: string;
         constructor(event: DragEvent, extraParams: string) {
-            this.event = event
+            this._event = event
             this.extraParams = extraParams
         }
-    }
-
-    export interface DragEvent {
-        dragBehavior: DragBehavior;
-        setResult(dragResult: DragResult): void;
-        getResult(): DragResult;
-    }
-
-    export class DragEventInner implements DragEvent {
-        dragEvent:KPointer;
-        constructor(result:KPointer) {
-            this.dragEvent = result;
+        set event(value: DragEvent) {
+            this._event = value;
         }
-        dragResult: DragResult
-        public getResult(): DragResult {
-            return this.dragResult;
-        }
-        public setResult(value: DragResult) {
-            this.dragResult = value;
-        }
-
-        // set and get dragBehavior
-        private setDragBehavior(value: DragBehavior){
-            this.dragBehavior = value;
-        };
-        private getDragBehavior() : DragBehavior {
-            return this.dragBehavior;
-        }
-        set dragBehavior(value: DragBehavior) {
-            this.setDragBehavior(value);
-        }
-        get dragBehavior() : DragBehavior {
-            return this.getDragBehavior();
+        get event() : DragEvent {
+            return this._event;
         }
     }
 

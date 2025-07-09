@@ -28,13 +28,14 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/udmf/udmf_client.h"
+#include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+#include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/base/error/error_code.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/core/components_ng/base/view_abstract_model.h"
-#include "frameworks/core/components_ng/base/view_stack_model.h"
-#include "frameworks/core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
-#include "frameworks/core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 
 namespace OHOS::Ace::NG {
 class DragAction;
@@ -385,57 +386,88 @@ double ConvertToPx(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const Dimen
     return 0.0;
 }
 
-ani_enum_item GetDragBehavior(ani_env* env, const DragNotifyMsg& dragNotifyMsg)
+void SetDragResult(
+    const DragNotifyMsg& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
 {
-    ani_status status = ANI_OK;
-    ani_enum_item dragBehaviorItem {};
-    CHECK_NULL_RETURN(env, dragBehaviorItem);
+    DragRet result = DragRet::DRAG_FAIL;
+    switch (notifyMessage.result) {
+        case Msdp::DeviceStatus::DragResult::DRAG_SUCCESS:
+            result = DragRet::DRAG_SUCCESS;
+            break;
+        case Msdp::DeviceStatus::DragResult::DRAG_FAIL:
+            result = DragRet::DRAG_FAIL;
+            break;
+        case Msdp::DeviceStatus::DragResult::DRAG_CANCEL:
+            result = DragRet::DRAG_CANCEL;
+            break;
+        default:
+            break;
+    }
+    CHECK_NULL_VOID(dragEvent);
+    dragEvent->SetResult(result);
+}
 
-    static const char* enumName = "@ohos.arkui.dragController.dragController.DragBehavior";
-    ani_enum enumType;
-    if ((status = env->FindEnum(enumName, &enumType)) != ANI_OK) {
-        LOGI("AceDrag, find DragBehavior enum fail. status = %{public}d", status);
-        return dragBehaviorItem;
+void SetDragBehavior(
+    const DragNotifyMsg& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
+{
+    DragBehavior dragBehavior = DragBehavior::UNKNOWN;
+    switch (notifyMessage.dragBehavior) {
+        case Msdp::DeviceStatus::DragBehavior::COPY:
+            dragBehavior = DragBehavior::COPY;
+            break;
+        case Msdp::DeviceStatus::DragBehavior::MOVE:
+            dragBehavior = DragBehavior::MOVE;
+            break;
+        default:
+            break;
     }
-    if ((status = env->Enum_GetEnumItemByIndex(
-        enumType, ani_size(static_cast<DragBehavior>(dragNotifyMsg.dragBehavior)), &dragBehaviorItem)) != ANI_OK) {
-        LOGE("AceDrag, get DragBehavior enum item fail. status = %{public}d", status);
-        return dragBehaviorItem;
-    }
-    return dragBehaviorItem;
+    CHECK_NULL_VOID(dragEvent);
+    dragEvent->SetDragBehavior(dragBehavior);
 }
 
 ani_object CreateDragEventObject(ani_env* env, const DragNotifyMsg& dragNotifyMsg)
 {
     ani_object dragEventObj = {};
     CHECK_NULL_RETURN(env, dragEventObj);
-    static const char* className = "@ohos.arkui.dragController.dragController.DragEventInner";
+    ani_status status = ANI_OK;
+    static const char* className = "Larkui/component/common/DragEventInternal;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        LOGE("AceDrag, find DragEventInner calss fail.");
+    if ((status = env->FindClass(className, &cls)) != ANI_OK) {
+        LOGE("AceDrag, find DragEventInner calss fail. status = %{public}d", status);
         return dragEventObj;
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "J:V", &ctor)) {
-        LOGE("AceDrag, find constructor method fail");
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) != ANI_OK) {
+        LOGE("AceDrag, find constructor method fail. status = %{public}d", status);
         return dragEventObj;
     }
 
-    auto dragEvent = new Ace::DragEvent();
-    CHECK_NULL_RETURN(dragEvent, dragEventObj);
-    dragEvent->SetResult(static_cast<DragRet>(dragNotifyMsg.result));
-    dragEvent->SetDragBehavior(static_cast<DragBehavior>(dragNotifyMsg.dragBehavior));
-    if (ANI_OK != env->Object_New(cls, ctor, &dragEventObj, reinterpret_cast<ani_long>(dragEvent))) {
-        LOGE("AceDrag, create dragEvent fail");
+    if ((status = env->Object_New(cls, ctor, &dragEventObj)) != ANI_OK) {
+        LOGE("AceDrag, create dragEvent fail. status = %{public}d", status);
         return dragEventObj;
     }
-    if (ANI_OK !=
-        env->Object_SetPropertyByName_Ref(dragEventObj, "dragBehavior", GetDragBehavior(env, dragNotifyMsg))) {
-        LOGE("AceDrag, set dragEvent dragBehavior property failed.");
+
+    ani_static_method getEventFromPeer;
+    if ((status = env->Class_FindStaticMethod(
+        cls, "fromPtr", "l:C{arkui.component.common.DragEventInternal}", &getEventFromPeer)) != ANI_OK) {
+        LOGE("AceDrag, find fromPtr method fail. status = %{public}d", status);
         return dragEventObj;
     }
-    return dragEventObj;
+
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    SetDragResult(dragNotifyMsg, dragEvent);
+    SetDragBehavior(dragNotifyMsg, dragEvent);
+    auto arkDragInfo = DragEventPeer::Create(dragEvent);
+
+    ani_ref commonDragEvent;
+    if ((status = env->Class_CallStaticMethod_Ref(
+        cls, getEventFromPeer, &commonDragEvent, reinterpret_cast<ani_long>(arkDragInfo))) != ANI_OK) {
+        LOGE("AceDrag, call fromPtr method failed. status = %{public}d", status);
+        delete arkDragInfo;
+        return dragEventObj;
+    }
+    return static_cast<ani_object>(commonDragEvent);
 }
 
 void TriggerJsCallback(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, ani_ref result)
@@ -494,7 +526,7 @@ void CallBackJsFunction(
         return;
     }
 
-    ani_object dragEventObj = nullptr;
+    ani_object dragEventObj = CreateDragEventObject(asyncCtx->env, dragNotifyMsg);
     ani_string extraParamsObj;
     if ((status = asyncCtx->env->String_NewUTF8(
         asyncCtx->extraParams.c_str(), asyncCtx->extraParams.size(), &extraParamsObj)) != ANI_OK) {
@@ -521,8 +553,8 @@ void CallBackJsFunction(
             return;
         }
         if (ANI_OK != asyncCtx->env->Class_FindMethod(cls, "<ctor>",
-            "C{@ohos.arkui.dragController.dragController.DragStatus}C{@ohos.arkui.dragController."
-            "dragController.DragEvent}C{std.core.String}:", &ctor)) {
+            "C{@ohos.arkui.dragController.dragController.DragStatus}C{arkui.component.common.DragEvent}"
+            "C{std.core.String}:", &ctor)) {
             LOGE("AceDrag, find LDragAndDropInfoInner constructor method failed.");
             asyncCtx->env->DestroyLocalScope();
             return;
@@ -540,7 +572,7 @@ void CallBackJsFunction(
             return;
         }
         if (ANI_OK != asyncCtx->env->Class_FindMethod(cls, "<ctor>",
-            "C{@ohos.arkui.dragController.dragController.DragEvent}C{std.core.String}:", &ctor)) {
+            "C{arkui.component.common.DragEvent}C{std.core.String}:", &ctor)) {
             LOGE("AceDrag, find LDragEventParamInner constructor method failed.");
             asyncCtx->env->DestroyLocalScope();
             return;
@@ -1156,6 +1188,15 @@ RefPtr<OHOS::Ace::UnifiedData> TransformUnifiedDataFormANI(ani_env* env, ani_obj
     return udData;
 }
 
+void GetCurrentDipScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
+{
+    auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    asyncCtx->dipScale = pipeline->GetDipScale();
+}
+
 bool CheckAndParseSecondParams(ani_env* env, std::shared_ptr<DragControllerAsyncCtx> asyncCtx, ani_object dragInfo)
 {
     CHECK_NULL_RETURN(asyncCtx, false);
@@ -1211,6 +1252,7 @@ bool CheckAndParseSecondParams(ani_env* env, std::shared_ptr<DragControllerAsync
         LOGE("AceDrag, parse previewOptions failed.");
         return false;
     }
+    GetCurrentDipScale(asyncCtx);
     return true;
 }
 
@@ -1559,6 +1601,9 @@ ani_object ANIExecuteDragWithCallback(ani_env* env, [[maybe_unused]] ani_object 
     }
     auto dragAsyncContext = std::make_shared<DragControllerAsyncCtx>();
     CHECK_NULL_RETURN(dragAsyncContext, nullptr);
+    dragAsyncContext->instanceId = Ace::Container::CurrentIdSafely();
+    dragAsyncContext->env = env;
+
     ani_ref escapedObj;
     ani_object result = {};
     auto* builderNode = reinterpret_cast<ArkUINodeHandle>(builderObj);
@@ -1580,9 +1625,6 @@ ani_object ANIExecuteDragWithCallback(ani_env* env, [[maybe_unused]] ani_object 
         env->DestroyEscapeLocalScope(result, &escapedObj);
         return result;
     }
-
-    dragAsyncContext->instanceId = Ace::Container::CurrentIdSafely();
-    dragAsyncContext->env = env;
 
     auto container = Ace::AceEngine::Get().GetContainer(dragAsyncContext->instanceId);
     CHECK_NULL_RETURN(container, result);
@@ -1615,9 +1657,11 @@ ani_object ANICreateDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     }
     auto dragAsyncContext = std::make_shared<DragControllerAsyncCtx>();
     CHECK_NULL_RETURN(dragAsyncContext, nullptr);
+    dragAsyncContext->instanceId = Ace::Container::CurrentIdSafely();
+    dragAsyncContext->env = env;
+
     ani_ref escapedObj;
     ani_object dragActionObj = {};
-
     if (!CheckAndParseFirstParams(env, dragAsyncContext, dragItemInfoArray, nullptr, builderArray)) {
         Ani::AniThrow(env, "parse first params failed.", ERROR_CODE_PARAM_INVALID);
         LOGE("AceDrag, parse first params failed.");
@@ -1631,8 +1675,6 @@ ani_object ANICreateDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] a
         return dragActionObj;
     }
     
-    dragAsyncContext->instanceId = Ace::Container::CurrentIdSafely();
-    dragAsyncContext->env = env;
     auto container = Ace::AceEngine::Get().GetContainer(dragAsyncContext->instanceId);
     CHECK_NULL_RETURN(container, dragActionObj);
     if (CheckDragging(container)) {
