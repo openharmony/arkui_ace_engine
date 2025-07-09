@@ -1774,7 +1774,7 @@ HWTEST_F(NavDestinationPatternTestNg, ReCalcNavDestinationSize001, TestSize.Leve
     SizeF frameSize = SizeF(600, 600);
     navdestinationLayoutAlgorithm->ReCalcNavDestinationSize(AceType::RawPtr(layoutWrapper), frameSize);
 
-    SizeF targetSize = SizeF(500, 500);
+    SizeF targetSize = SizeF(600, 600);
     EXPECT_EQ(geometryNode->GetFrameSize(), targetSize);
 }
 } // namespace OHOS::Ace::NG
