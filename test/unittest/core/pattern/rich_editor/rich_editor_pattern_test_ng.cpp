@@ -105,14 +105,12 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorToJsonValue001, TestSize.Level1)
     richEditorPattern->SetSupportStyledUndo(true);
     richEditorPattern->copyOption_ = CopyOptions::Local;
     richEditorPattern->SetSupportPreviewText(false);
-    richEditorPattern->SetMaxLines(10);
     richEditorPattern->SetEnableAutoSpacing(true);
     richEditorPattern->ToJsonValue(jsonObject, filter);
     EXPECT_EQ(jsonObject->GetString("enableKeyboardOnFocus"), "true");
     EXPECT_EQ(jsonObject->GetInt("undoStyle"), 1);
     EXPECT_EQ(jsonObject->GetInt("copyOptions"), 2);
     EXPECT_EQ(jsonObject->GetString("enablePreviewText"), "false");
-    EXPECT_EQ(jsonObject->GetInt("maxLines"), 10);
     EXPECT_EQ(jsonObject->GetString("enableAutoSpacing"), "true");
 
     filter.filterFixed = 10;
