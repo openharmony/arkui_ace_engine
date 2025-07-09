@@ -25,12 +25,13 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { CustomBuilder, Rectangle, AnimateParam, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType } from "./common"
-import { DialogAlignment, LevelOrder } from "./alertDialog"
+import { DialogAlignment } from "./alertDialog"
 import { Offset, ResourceColor, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles } from "./units"
-import { Callback_DismissDialogAction_Void, DismissDialogAction, LevelMode, ImmersiveMode } from "./actionSheet"
+import { Callback_DismissDialogAction_Void, DismissDialogAction} from "./actionSheet"
 import { BorderStyle } from "./enums"
 import { LengthMetrics } from "../Graphics"
 import { ExtendableComponent } from "./extendableComponent";
+import { ImmersiveMode, LevelMode, LevelOrder } from "@ohos/promptAction"
 export class CustomDialogControllerInternal {
     public static fromPtr(ptr: KPointer): CustomDialogController {
         const obj : CustomDialogController = new CustomDialogController(undefined)

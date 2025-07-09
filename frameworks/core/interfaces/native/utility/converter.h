@@ -45,6 +45,7 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
+#include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -834,6 +835,7 @@ namespace Converter {
     template<>
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);
     template<> void AssignCast(std::optional<ShapePoint>& dst, const Opt_ShapePoint& src);
+    template<> void AssignCast(std::optional<double>& dst, const Opt_LevelOrder& src);
 
     template<typename From>
     std::optional<decltype(From().value)> GetOpt(const From& src)
