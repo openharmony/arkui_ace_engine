@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- #include "test/unittest/core/event/event_manager_test_ng.h"
+#include "test/unittest/core/event/event_manager_test_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -173,13 +173,13 @@ HWTEST_F(EventManagerTestNg, DispatchPenHoverEventNG005, TestSize.Level1)
         {},
         {{0, {hoverEventTarget1}}},
         {{eventId, {hoverEventTarget1}}},
-        {{eventId, {hoverEventTarget1, hoverEventTarget2}}}, 
+        {{eventId, {hoverEventTarget1, hoverEventTarget2}}},
         {{eventId, {hoverEventTarget1, hoverEventTarget2, hoverEventTarget3}}}
     };
     std::vector<std::unordered_map<int32_t, HoverTestResult>> curPenHoverResultsMap = {
         {{0, {hoverEventTarget1}}},
         {{eventId, {hoverEventTarget2}}},
-        {{eventId, {hoverEventTarget2, hoverEventTarget3}}}, 
+        {{eventId, {hoverEventTarget2, hoverEventTarget3}}},
         {{eventId, {hoverEventTarget2, hoverEventTarget3, hoverEventTarget4}}}
     };
     std::vector<int> lastPenHoverDispatchLength = {0, 1, 2, 3};

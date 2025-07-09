@@ -134,8 +134,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg006, TestSize.Level1) {
     NG::ViewStackProcessor::GetInstance()->Push(frameNode);
     RefPtr<GestureEventHub> gestureEventHub;
     gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    // auto gesture = AceType::MakeRefPtr<NG::TapGesture>(COUNT, FINGER_NUMBER);
-    // gestureEventHub->AddGesture(gesture);
     
     gestureModelNG.Finish();
     CHECK_NULL_VOID(gestureEventHub);
@@ -162,8 +160,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg007, TestSize.Level1) {
     NG::ViewStackProcessor::GetInstance()->Push(frameNode);
     RefPtr<GestureEventHub> gestureEventHub;
     gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    // auto gesture = AceType::MakeRefPtr<NG::TapGesture>(COUNT, FINGER_NUMBER);
-    // gestureEventHub->AddGesture(gesture);
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
@@ -200,8 +196,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg008, TestSize.Level1) {
     NG::ViewStackProcessor::GetInstance()->Push(frameNode);
     RefPtr<GestureEventHub> gestureEventHub;
     gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    // auto gesture = AceType::MakeRefPtr<NG::TapGesture>(COUNT, FINGER_NUMBER);
-    // gestureEventHub->AddGesture(gesture);
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
@@ -230,8 +224,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg009, TestSize.Level1) {
     NG::ViewStackProcessor::GetInstance()->Push(frameNode);
     RefPtr<GestureEventHub> gestureEventHub;
     gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    // auto gesture = AceType::MakeRefPtr<NG::TapGesture>(COUNT, FINGER_NUMBER);
-    // gestureEventHub->AddGesture(gesture);
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
@@ -266,8 +258,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg010, TestSize.Level1) {
     NG::ViewStackProcessor::GetInstance()->Push(frameNode);
     RefPtr<GestureEventHub> gestureEventHub;
     gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    // auto gesture = AceType::MakeRefPtr<NG::TapGesture>(COUNT, FINGER_NUMBER);
-    // gestureEventHub->AddGesture(gesture);
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
@@ -298,8 +288,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg011, TestSize.Level1) {
     NG::ViewStackProcessor::GetInstance()->Push(frameNode);
     RefPtr<GestureEventHub> gestureEventHub;
     gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    // auto gesture = AceType::MakeRefPtr<NG::TapGesture>(COUNT, FINGER_NUMBER);
-    // gestureEventHub->AddGesture(gesture);
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
@@ -329,7 +317,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg012, TestSize.Level1) {
     gestures.push_back(tapGesture);
     GestureGroup gestureGroup = GestureGroup(GestureMode::Sequence);
     gestureGroup.gestures_ = gestures;
-    // gestureProcessor->PushGestureNG(tapGesture);
     gestureProcessor->PushGestureNG(tapGesture);
 
     const int nodeId = 10008;
@@ -337,8 +324,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg012, TestSize.Level1) {
     NG::ViewStackProcessor::GetInstance()->Push(frameNode);
     RefPtr<GestureEventHub> gestureEventHub;
     gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    // auto gesture = AceType::MakeRefPtr<NG::TapGesture>(COUNT, FINGER_NUMBER);
-    // gestureEventHub->AddGesture(gesture);
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
@@ -367,8 +352,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg013, TestSize.Level1) {
     NG::ViewStackProcessor::GetInstance()->Push(frameNode);
     RefPtr<GestureEventHub> gestureEventHub;
     gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    // auto gesture = AceType::MakeRefPtr<NG::TapGesture>(COUNT, FINGER_NUMBER);
-    // gestureEventHub->AddGesture(gesture);
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
@@ -403,8 +386,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg014, TestSize.Level1) {
     NG::ViewStackProcessor::GetInstance()->Push(frameNode);
     RefPtr<GestureEventHub> gestureEventHub;
     gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    // auto gesture = AceType::MakeRefPtr<NG::TapGesture>(COUNT, FINGER_NUMBER);
-    // gestureEventHub->AddGesture(gesture);
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
@@ -456,7 +437,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg016, TestSize.Level1) {
 
     GestureEvent info;
     auto gesture = gestureProcessor->TopGestureNG();
-    // CHECK_NULL_VOID(gesture);
 
     gestureModelNG.SetOnActionFunc(testFunc, Ace::GestureEventAction::ACTION);
     (*(gesture->onActionId_))(info);
@@ -475,7 +455,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg016, TestSize.Level1) {
     EXPECT_EQ(doneId, 4);
 
     gestureModelNG.SetOnActionFunc(testFunc, Ace::GestureEventAction::CANCEL);
-    // (*(gesture->onActionCancelId_))(info);
     EXPECT_EQ(doneId, 4);
 }
 
@@ -494,7 +473,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg017, TestSize.Level1) {
     panDirection.type = PanDirection::VERTICAL;
     panGestureModelNG.Create(fingersNum, panDirection, distanceMap, false);
     auto panGestureNG = AceType::DynamicCast<NG::PanGesture>(gestureProcessor->TopGestureNG());
-    // EXPECT_EQ(panGestureNG->direction_, PanDirection::VERTICAL);
     EXPECT_EQ(panGestureNG->distanceMap_, distanceMap);
 }
 
@@ -528,8 +506,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg018, TestSize.Level1) {
     NG::ViewStackProcessor::GetInstance()->Push(frameNode);
     RefPtr<GestureEventHub> gestureEventHub;
     gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    // auto gesture = AceType::MakeRefPtr<NG::TapGesture>(COUNT, FINGER_NUMBER);
-    // gestureEventHub->AddGesture(gesture);
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
@@ -568,8 +544,6 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg019, TestSize.Level1) {
     NG::ViewStackProcessor::GetInstance()->Push(frameNode);
     RefPtr<GestureEventHub> gestureEventHub;
     gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    // auto gesture = AceType::MakeRefPtr<NG::TapGesture>(COUNT, FINGER_NUMBER);
-    // gestureEventHub->AddGesture(gesture);
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
