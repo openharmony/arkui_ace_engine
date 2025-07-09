@@ -506,11 +506,11 @@ class ShadowModifier extends ModifierWithKey {
     if (isNumber(this.value.shadowStyle)) {
       return true;
     }
-    return !(this.stageValue.radius === this.value.radius &&
+    return !(isBaseOrResourceEqual(this.stageValue.radius, this.value.radius) &&
       this.stageValue.type === this.value.type &&
-      this.stageValue.color === this.value.color &&
-      this.stageValue.offsetX === this.value.offsetX &&
-      this.stageValue.offsetY === this.value.offsetY &&
+      isBaseOrResourceEqual(this.stageValue.color, this.value.color) &&
+      isBaseOrResourceEqual(this.stageValue.offsetX, this.value.offsetX) &&
+      isBaseOrResourceEqual(this.stageValue.offsetY, this.value.offsetY) &&
       this.stageValue.fill === this.value.fill);
   }
 }
@@ -1228,12 +1228,7 @@ class ForegroundBlurStyleModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return !(this.stageValue.blurStyle === this.value.blurStyle &&
-      this.stageValue.colorMode === this.value.colorMode &&
-      this.stageValue.adaptiveColor === this.value.adaptiveColor &&
-      this.stageValue.scale === this.value.scale &&
-      this.stageValue.blurOptions === this.value.blurOptions &&
-      this.stageValue.disableSystemAdaptation === this.value.disableSystemAdaptation);
+    return true;
   }
 }
 ForegroundBlurStyleModifier.identity = Symbol('foregroundBlurStyle');
@@ -2854,7 +2849,7 @@ class BackgroundEffectModifier extends ModifierWithKey {
       isBaseOrResourceEqual(this.stageValue.color, this.value.color) &&
       this.value.adaptiveColor === this.stageValue.adaptiveColor &&
       this.value.policy === this.stageValue.policy &&
-      this.value.inactiveColor === this.stageValue.inactiveColor &&
+      isBaseOrResourceEqual(this.stageValue.inactiveColor, this.value.inactiveColor) &&
       this.value.type === this.stageValue.type &&
       ((_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale) === ((_b = this.stageValue.blurOptions) === null ||
       _b === void 0 ? void 0 : _b.grayscale) &&
