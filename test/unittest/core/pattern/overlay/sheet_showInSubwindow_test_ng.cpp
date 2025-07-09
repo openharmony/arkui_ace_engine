@@ -2348,4 +2348,28 @@ HWTEST_F(SheetShowInSubwindowTestNg, ContentCoverSheetLayoutAlgorithm2, TestSize
     EXPECT_FLOAT_EQ(buildGeometryNode->GetMarginFrameOffset().GetX(), 0.0f);
     EXPECT_FLOAT_EQ(buildGeometryNode->GetMarginFrameOffset().GetY(), padding.top.value_or(0.0f));
 }
+
+/**
+ * @tc.name: UpdateDragBarStatus001
+ * @tc.desc: UpdateDragBarStatus Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, UpdateDragBarStatus001, TestSize.Level1)
+{
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->sheetType_ = SheetType::SHEET_SIDE;
+    sheetPattern->InitSheetObject();
+    auto sheetDragBar = sheetPattern->GetDragBarNode();
+    CHECK_NULL_VOID(sheetDragBar);
+    auto dragBarLayoutProperty = sheetDragBar->GetLayoutProperty();
+    CHECK_NULL_VOID(dragBarLayoutProperty);
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    object->UpdateDragBarStatus();
+    EXPECT_EQ(dragBarLayoutProperty->propVisibility_, VisibleType::INVISIBLE);
+}
 } // namespace OHOS::Ace::NG
