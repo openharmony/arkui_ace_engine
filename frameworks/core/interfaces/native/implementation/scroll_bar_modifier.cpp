@@ -23,11 +23,6 @@ namespace ScrollBarModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // need check
-    // auto frameNode = ScrollBarModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 } // ScrollBarModifier
@@ -39,16 +34,9 @@ void SetScrollBarOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     if (value) {
         auto scrollerPeer = value->scroller;
-        // need check
-        // auto scrollProxy = ScrollBarModelNG::SetScrollBarProxy(frameNode, scrollerPeer->GetScrollBarProxy());
-        // scrollerPeer->SetScrollBarProxy(scrollProxy);
     }
     const auto direction = value ? Converter::OptConvert<Axis>(value->direction) : std::nullopt;
-    // need check
-    // ScrollBarModelNG::SetDirection(frameNode, direction);
     const auto state = value ? Converter::OptConvert<DisplayMode>(value->state) : std::nullopt;
-    // need check
-    // ScrollBarModelNG::SetState(frameNode, state);
 }
 } // ScrollBarInterfaceModifier
 namespace ScrollBarAttributeModifier {
@@ -59,8 +47,6 @@ void EnableNestedScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<bool>(*value);
-    // need check
-    // ScrollBarModelNG::SetEnableNestedScroll(frameNode, convValue);
 }
 } // ScrollBarAttributeModifier
 const GENERATED_ArkUIScrollBarModifier* GetScrollBarModifier()
