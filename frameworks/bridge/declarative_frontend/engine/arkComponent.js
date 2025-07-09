@@ -21290,6 +21290,48 @@ class ScrollEnableBouncesZoomModifier extends ModifierWithKey {
 }
 ScrollEnableBouncesZoomModifier.identity = Symbol('enableBouncesZoom');
 
+class ScrollOnDidZoomModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnDidZoom(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnDidZoom(node, this.value);
+    }
+  }
+}
+ScrollOnDidZoomModifier.identity = Symbol('scrollOnDidZoom');
+
+class ScrollOnZoomStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnZoomStart(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnZoomStart(node, this.value);
+    }
+  }
+}
+ScrollOnZoomStartModifier.identity = Symbol('scrollOnZoomStart');
+
+class ScrollOnZoomStopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnZoomStop(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnZoomStop(node, this.value);
+    }
+  }
+}
+ScrollOnZoomStopModifier.identity = Symbol('scrollOnZoomStop');
+
 class ArkScrollComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -21434,6 +21476,18 @@ class ArkScrollComponent extends ArkScrollable {
   }
   enableBouncesZoom(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollEnableBouncesZoomModifier.identity, ScrollEnableBouncesZoomModifier, value);
+    return this;
+  }
+  onDidZoom(callback) {
+    modifierWithKey(this._modifiersWithKeys, ScrollOnDidZoomModifier.identity, ScrollOnDidZoomModifier, callback);
+    return this;
+  }
+  onZoomStart(callback) {
+    modifierWithKey(this._modifiersWithKeys, ScrollOnZoomStartModifier.identity, ScrollOnZoomStartModifier, callback);
+    return this;
+  }
+  onZoomStop(callback) {
+    modifierWithKey(this._modifiersWithKeys, ScrollOnZoomStopModifier.identity, ScrollOnZoomStopModifier, callback);
     return this;
   }
 }
