@@ -169,6 +169,16 @@ public:
         return contentModifierNode_ != nullptr;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     void UpdateStrokeWidth(const CalcDimension& strokeWidth, bool isFirstLoad = false);
     void UpdateIndicatorIconPath(const std::string& iconPath, const std::string& bundleName,
         const std::string& moduleName, bool isFirstLoad = false);

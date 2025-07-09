@@ -165,6 +165,16 @@ public:
         isModifierInitiatedBgColor_ = value;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void UpdateGradientColor(const NG::Gradient& gradient, bool isFirstLoad);
     void UpdateColor(const Color& color, bool isFirstLoad);

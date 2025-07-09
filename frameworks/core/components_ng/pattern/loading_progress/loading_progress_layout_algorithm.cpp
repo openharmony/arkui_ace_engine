@@ -37,6 +37,12 @@ std::optional<SizeF> LoadingProgressLayoutAlgorithm::MeasureContent(
         }
         return std::nullopt;
     }
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && layoutPolicy->IsWrap()) {
+        return std::nullopt;
+    }
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>(host->GetThemeScopeId());

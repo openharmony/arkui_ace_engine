@@ -59,6 +59,12 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     auto progressTheme = pipeline->GetTheme<ProgressTheme>(host->GetThemeScopeId());
     auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && layoutPolicy->IsWrap()) {
+        return std::nullopt;
+    }
     type_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
     Dimension defaultThickness;
     if (progressTheme) {

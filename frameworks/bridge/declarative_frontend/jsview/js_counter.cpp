@@ -124,6 +124,22 @@ void JSCounter::JsOnDec(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
+static void UpdateLayoutPolicy(const JSCallbackInfo& args, bool isWidth)
+{
+    auto jsValue = args[0];
+    LayoutCalPolicy policy = LayoutCalPolicy::NO_MATCH;
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+        CHECK_NULL_VOID(!object->IsEmpty());
+        JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+        CHECK_NULL_VOID(!layoutPolicy->IsEmpty());
+        if (layoutPolicy->IsString()) {
+            policy = JSContainerBase::ParseLayoutPolicy(layoutPolicy->ToString());
+        }
+        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
+    }
+}
+
 void JSCounter::JSHeight(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
@@ -136,6 +152,7 @@ void JSCounter::JSHeight(const JSCallbackInfo& args)
         bool state = ConvertFromJSValue(args[0], value, heightResObj);
         CounterModel::GetInstance()->CreateWithResourceObj(JsCounterResourceType::Height, heightResObj);
         if (!state) {
+            UpdateLayoutPolicy(args, false);
             return;
         }
         if (LessNotEqual(value.Value(), 0.0)) {
@@ -145,6 +162,7 @@ void JSCounter::JSHeight(const JSCallbackInfo& args)
         args.ReturnSelf();
     } else {
         if (!ConvertFromJSValue(args[0], value)) {
+            UpdateLayoutPolicy(args, false);
             return;
         }
         if (LessNotEqual(value.Value(), 0.0)) {
@@ -167,6 +185,7 @@ void JSCounter::JSWidth(const JSCallbackInfo& args)
         bool state = ConvertFromJSValue(args[0], value, widthResObj);
         CounterModel::GetInstance()->CreateWithResourceObj(JsCounterResourceType::Width, widthResObj);
         if (!state) {
+            UpdateLayoutPolicy(args, true);
             return;
         }
         if (LessNotEqual(value.Value(), 0.0)) {
@@ -176,6 +195,7 @@ void JSCounter::JSWidth(const JSCallbackInfo& args)
         args.ReturnSelf();
     } else {
         if (!ConvertFromJSValue(args[0], value)) {
+            UpdateLayoutPolicy(args, true);
             return;
         }
         if (LessNotEqual(value.Value(), 0.0)) {
