@@ -562,16 +562,12 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             rsNode_ = Rosen::RSEffectNode::Create(false, isTextureExportNode, rsContext);
             break;
         case ContextType::INCREMENTAL_CANVAS: {
-#ifdef ACE_ENABLE_HYBRID_RENDER
-            if (RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
+            if (RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
                 rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode, rsContext);
                 rsNode_->SetHybridRenderCanvas(true);
             } else {
                 rsNode_ = Rosen::RSCanvasDrawingNode::Create(false, isTextureExportNode, rsContext);
             }
-#else
-            rsNode_ = Rosen::RSCanvasDrawingNode::Create(false, isTextureExportNode, rsContext);
-#endif
             break;
         }
         case ContextType::EXTERNAL:
@@ -1962,15 +1958,13 @@ void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scal
 
 bool RosenRenderContext::GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList)
 {
-#ifdef ACE_ENABLE_HYBRID_RENDER
-    if (RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
+    if (RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
         auto rsCanvasNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
         if (!rsCanvasNode || !rsCanvasNode->IsHybridRenderCanvas()) {
             return false;
         }
         return rsCanvasNode->GetBitmap(bitmap, drawCmdList);
     }
-#endif
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     if (!rsCanvasDrawingNode) {
         return false;
@@ -1981,15 +1975,13 @@ bool RosenRenderContext::GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdLi
 bool RosenRenderContext::GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
     std::shared_ptr<RSDrawCmdList> drawCmdList, Rosen::Drawing::Rect* rect)
 {
-#ifdef ACE_ENABLE_HYBRID_RENDER
-    if (RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
+    if (RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
         auto rsCanvasNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
         if (!rsCanvasNode || !rsCanvasNode->IsHybridRenderCanvas()) {
             return false;
         }
         return rsCanvasNode->GetPixelmap(pixelMap, drawCmdList, rect);
     }
-#endif
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     if (!rsCanvasDrawingNode) {
         return false;
@@ -7254,8 +7246,7 @@ int32_t RosenRenderContext::GetRotateDegree()
 
 void RosenRenderContext::ResetSurface(int width, int height)
 {
-#ifdef ACE_ENABLE_HYBRID_RENDER
-    if (RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
+    if (RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
         auto rsCanvasNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
         CHECK_NULL_VOID(rsCanvasNode);
         if (rsCanvasNode->IsHybridRenderCanvas()) {
@@ -7263,7 +7254,6 @@ void RosenRenderContext::ResetSurface(int width, int height)
         }
         return;
     }
-#endif
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     CHECK_NULL_VOID(rsCanvasDrawingNode);
     rsCanvasDrawingNode->ResetSurface(width, height);

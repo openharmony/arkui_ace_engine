@@ -2093,6 +2093,39 @@ HWTEST_F(ImageTestNg, ImagePatternCreateModifierContent001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ImageContentModifierOnDraw001
+ * @tc.desc: Test ImageContentModifier OnDraw with canvas is nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issueICK0X0
+ */
+HWTEST_F(ImageTestNg, ImageContentModifierOnDraw001, TestSize.Level0)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    frameNode->MarkModifyDone();
+    ASSERT_NE(imagePattern->loadingCtx_, nullptr);
+    ASSERT_NE(imagePattern->altLoadingCtx_, nullptr);
+    auto contentModifier = AceType::MakeRefPtr<ImageContentModifier>(WeakPtr(imagePattern));
+    ASSERT_NE(contentModifier, nullptr);
+
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
+    Testing::TestingCanvas* canvas = new Testing::TestingCanvas();
+    DrawingContext context { *canvas, WIDTH, HEIGHT };
+    canvas = nullptr;
+    auto canvasImage = AceType::MakeRefPtr<NG::MockCanvasImage>();
+    CanvasImageModifierWrapper wrapper;
+    wrapper.SetCanvasImage(canvasImage);
+    contentModifier->SetCanvasImageWrapper(wrapper);
+    ASSERT_NE(contentModifier->canvasImageWrapper_->Get().GetCanvasImage(), nullptr);
+    contentModifier->onDraw(context);
+    EXPECT_FALSE(contentModifier->sensitive_->Get());
+    delete canvas;
+}
+
+/**
  * @tc.name: ImageReset001
  * @tc.desc: Test ImageReset.
  * @tc.type: FUNC

@@ -17,8 +17,8 @@
 
 #include "base/utils/time_util.h"
 #include "core/components_ng/render/render_context.h"
-#ifdef ACE_ENABLE_HYBRID_RENDER
-#include "render_service_base/include/platform/common/rs_system_properties.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_ui_director.h"
 #include "2d_graphics/include/recording/draw_cmd_list.h"
 #endif
 
@@ -38,8 +38,8 @@ void CanvasModifier::onDraw(DrawingContext& drawingContext)
     CHECK_NULL_VOID(drawCmdList);
     auto rsDrawCmdList = static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList();
     CHECK_NULL_VOID(rsDrawCmdList);
-#ifdef ACE_ENABLE_HYBRID_RENDER
-    if (OHOS::Rosen::RSSystemProperties::GetHybridRenderSwitch(OHOS::Rosen::ComponentEnableSwitch::CANVAS)) {
+#ifdef ENABLE_ROSEN_BACKEND
+    if (Rosen::RSUIDirector::GetHybridRenderSwitch(OHOS::Rosen::ComponentEnableSwitch::CANVAS)) {
         rsDrawCmdList->SetHybridRenderType(RSHybridRenderType::CANVAS);
     }
 #endif
