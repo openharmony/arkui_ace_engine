@@ -4166,6 +4166,24 @@ void deserializeAndCallSyncCustomNodeBuilder(Ark_VMContext vmContext, KSerialize
     Callback_Pointer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
     _callSync(vmContext, _resourceId, parentNode, _continuation);
 }
+void deserializeAndCallDatePickerSelectedCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Date selected)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_Date selected = thisDeserializer.readInt64();
+    _call(_resourceId, selected);
+}
+void deserializeAndCallSyncDatePickerSelectedCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Date selected)>(thisDeserializer.readPointer());
+    Ark_Date selected = thisDeserializer.readInt64();
+    _callSync(vmContext, _resourceId, selected);
+}
 void deserializeAndCallDrawCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -6846,6 +6864,126 @@ void deserializeAndCallSyncTextPickerScrollStopCallback(Ark_VMContext vmContext,
     Ark_Union_Number_Array_Number index = static_cast<Ark_Union_Number_Array_Number>(index_buf);
     _callSync(vmContext, _resourceId, value, index);
 }
+void deserializeAndCallTextPickerSelectedCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_Number_Array_Number selected)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    const Ark_Int8 selected_buf_selector = thisDeserializer.readInt8();
+    Ark_Union_Number_Array_Number selected_buf = {};
+    selected_buf.selector = selected_buf_selector;
+    if (selected_buf_selector == 0) {
+        selected_buf.selector = 0;
+        selected_buf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    }
+    else if (selected_buf_selector == 1) {
+        selected_buf.selector = 1;
+        const Ark_Int32 selected_buf_u_length = thisDeserializer.readInt32();
+        Array_Number selected_buf_u = {};
+        thisDeserializer.resizeArray<std::decay<decltype(selected_buf_u)>::type,
+        std::decay<decltype(*selected_buf_u.array)>::type>(&selected_buf_u, selected_buf_u_length);
+        for (int selected_buf_u_i = 0; selected_buf_u_i < selected_buf_u_length; selected_buf_u_i++) {
+            selected_buf_u.array[selected_buf_u_i] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        }
+        selected_buf.value1 = selected_buf_u;
+    }
+    else {
+        INTEROP_FATAL("One of the branches for selected_buf has to be chosen through deserialisation.");
+    }
+    Ark_Union_Number_Array_Number selected = static_cast<Ark_Union_Number_Array_Number>(selected_buf);
+    _call(_resourceId, selected);
+}
+void deserializeAndCallSyncTextPickerSelectedCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_Number_Array_Number selected)>(thisDeserializer.readPointer());
+    const Ark_Int8 selected_buf_selector = thisDeserializer.readInt8();
+    Ark_Union_Number_Array_Number selected_buf = {};
+    selected_buf.selector = selected_buf_selector;
+    if (selected_buf_selector == 0) {
+        selected_buf.selector = 0;
+        selected_buf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    }
+    else if (selected_buf_selector == 1) {
+        selected_buf.selector = 1;
+        const Ark_Int32 selected_buf_u_length = thisDeserializer.readInt32();
+        Array_Number selected_buf_u = {};
+        thisDeserializer.resizeArray<std::decay<decltype(selected_buf_u)>::type,
+        std::decay<decltype(*selected_buf_u.array)>::type>(&selected_buf_u, selected_buf_u_length);
+        for (int selected_buf_u_i = 0; selected_buf_u_i < selected_buf_u_length; selected_buf_u_i++) {
+            selected_buf_u.array[selected_buf_u_i] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        }
+        selected_buf.value1 = selected_buf_u;
+    }
+    else {
+        INTEROP_FATAL("One of the branches for selected_buf has to be chosen through deserialisation.");
+    }
+    Ark_Union_Number_Array_Number selected = static_cast<Ark_Union_Number_Array_Number>(selected_buf);
+    _callSync(vmContext, _resourceId, selected);
+}
+void deserializeAndCallTextPickerValueCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    const Ark_Int8 value_buf_selector = thisDeserializer.readInt8();
+    Ark_Union_String_Array_String value_buf = {};
+    value_buf.selector = value_buf_selector;
+    if (value_buf_selector == 0) {
+        value_buf.selector = 0;
+        value_buf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+    }
+    else if (value_buf_selector == 1) {
+        value_buf.selector = 1;
+        const Ark_Int32 value_buf_u_length = thisDeserializer.readInt32();
+        Array_String value_buf_u = {};
+        thisDeserializer.resizeArray<std::decay<decltype(value_buf_u)>::type,
+        std::decay<decltype(*value_buf_u.array)>::type>(&value_buf_u, value_buf_u_length);
+        for (int value_buf_u_i = 0; value_buf_u_i < value_buf_u_length; value_buf_u_i++) {
+            value_buf_u.array[value_buf_u_i] = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        value_buf.value1 = value_buf_u;
+    }
+    else {
+        INTEROP_FATAL("One of the branches for value_buf has to be chosen through deserialisation.");
+    }
+    Ark_Union_String_Array_String value = static_cast<Ark_Union_String_Array_String>(value_buf);
+    _call(_resourceId, value);
+}
+void deserializeAndCallSyncTextPickerValueCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_String_Array_String value)>(thisDeserializer.readPointer());
+    const Ark_Int8 value_buf_selector = thisDeserializer.readInt8();
+    Ark_Union_String_Array_String value_buf = {};
+    value_buf.selector = value_buf_selector;
+    if (value_buf_selector == 0) {
+        value_buf.selector = 0;
+        value_buf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+    }
+    else if (value_buf_selector == 1) {
+        value_buf.selector = 1;
+        const Ark_Int32 value_buf_u_length = thisDeserializer.readInt32();
+        Array_String value_buf_u = {};
+        thisDeserializer.resizeArray<std::decay<decltype(value_buf_u)>::type,
+        std::decay<decltype(*value_buf_u.array)>::type>(&value_buf_u, value_buf_u_length);
+        for (int value_buf_u_i = 0; value_buf_u_i < value_buf_u_length; value_buf_u_i++) {
+            value_buf_u.array[value_buf_u_i] = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        value_buf.value1 = value_buf_u;
+    }
+    else {
+        INTEROP_FATAL("One of the branches for value_buf has to be chosen through deserialisation.");
+    }
+    Ark_Union_String_Array_String value = static_cast<Ark_Union_String_Array_String>(value_buf);
+    _callSync(vmContext, _resourceId, value);
+}
 void deserializeAndCallTextTimerAttribute_onTimer_event_type(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -6865,6 +7003,24 @@ void deserializeAndCallSyncTextTimerAttribute_onTimer_event_type(Ark_VMContext v
     Ark_Int64 utc = thisDeserializer.readInt64();
     Ark_Int64 elapsedTime = thisDeserializer.readInt64();
     _callSync(vmContext, _resourceId, utc, elapsedTime);
+}
+void deserializeAndCallTimePickerSelectedCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Date selected)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_Date selected = thisDeserializer.readInt64();
+    _call(_resourceId, selected);
+}
+void deserializeAndCallSyncTimePickerSelectedCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Date selected)>(thisDeserializer.readPointer());
+    Ark_Date selected = thisDeserializer.readInt64();
+    _callSync(vmContext, _resourceId, selected);
 }
 void deserializeAndCallTransitionFinishCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -7402,6 +7558,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case -2146044511/*Kind_ContentWillScrollCallback*/: return deserializeAndCallContentWillScrollCallback(thisArray, thisLength);
         case 260483890/*Kind_Context_getGroupDir_Callback*/: return deserializeAndCallContext_getGroupDir_Callback(thisArray, thisLength);
         case 1766817632/*Kind_CustomNodeBuilder*/: return deserializeAndCallCustomNodeBuilder(thisArray, thisLength);
+		case 459949440/*Kind_DatePickerSelectedCallback*/: return deserializeAndCallDatePickerSelectedCallback(thisArray, thisLength);
         case -177744805/*Kind_DrawCallback*/: return deserializeAndCallDrawCallback(thisArray, thisLength);
         case -1729563209/*Kind_EditableTextOnChangeCallback*/: return deserializeAndCallEditableTextOnChangeCallback(thisArray, thisLength);
         case -1936519453/*Kind_ErrorCallback*/: return deserializeAndCallErrorCallback(thisArray, thisLength);
@@ -7512,7 +7669,10 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case 18061455/*Kind_TextFieldValueCallback*/: return deserializeAndCallTextFieldValueCallback(thisArray, thisLength);
         case -202014218/*Kind_TextPickerEnterSelectedAreaCallback*/: return deserializeAndCallTextPickerEnterSelectedAreaCallback(thisArray, thisLength);
         case -1928298699/*Kind_TextPickerScrollStopCallback*/: return deserializeAndCallTextPickerScrollStopCallback(thisArray, thisLength);
+        case 1206573193/*Kind_TextPickerSelectedCallback*/: return deserializeAndCallTextPickerSelectedCallback(thisArray, thisLength);
+        case 1499304299/*Kind_TextPickerValueCallback*/: return deserializeAndCallTextPickerValueCallback(thisArray, thisLength);
         case 2057659801/*Kind_TextTimerAttribute_onTimer_event_type*/: return deserializeAndCallTextTimerAttribute_onTimer_event_type(thisArray, thisLength);
+        case 1873725025/*Kind_TimePickerSelectedCallback*/: return deserializeAndCallTimePickerSelectedCallback(thisArray, thisLength);
         case -1878458553/*Kind_TransitionFinishCallback*/: return deserializeAndCallTransitionFinishCallback(thisArray, thisLength);
         case 1044833488/*Kind_Type_NavigationAttribute_customNavContentTransition_delegate*/: return deserializeAndCallType_NavigationAttribute_customNavContentTransition_delegate(thisArray, thisLength);
         case -1078223620/*Kind_Type_TextPickerAttribute_onChange_callback*/: return deserializeAndCallType_TextPickerAttribute_onChange_callback(thisArray, thisLength);
@@ -7717,6 +7877,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case -2146044511/*Kind_ContentWillScrollCallback*/: return deserializeAndCallSyncContentWillScrollCallback(vmContext, thisArray, thisLength);
         case 260483890/*Kind_Context_getGroupDir_Callback*/: return deserializeAndCallSyncContext_getGroupDir_Callback(vmContext, thisArray, thisLength);
         case 1766817632/*Kind_CustomNodeBuilder*/: return deserializeAndCallSyncCustomNodeBuilder(vmContext, thisArray, thisLength);
+		case 459949440/*Kind_DatePickerSelectedCallback*/: return deserializeAndCallSyncDatePickerSelectedCallback(vmContext, thisArray, thisLength);
         case -177744805/*Kind_DrawCallback*/: return deserializeAndCallSyncDrawCallback(vmContext, thisArray, thisLength);
         case -1729563209/*Kind_EditableTextOnChangeCallback*/: return deserializeAndCallSyncEditableTextOnChangeCallback(vmContext, thisArray, thisLength);
         case -1936519453/*Kind_ErrorCallback*/: return deserializeAndCallSyncErrorCallback(vmContext, thisArray, thisLength);
@@ -7826,7 +7987,10 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case 18061455/*Kind_TextFieldValueCallback*/: return deserializeAndCallSyncTextFieldValueCallback(vmContext, thisArray, thisLength);
         case -202014218/*Kind_TextPickerEnterSelectedAreaCallback*/: return deserializeAndCallSyncTextPickerEnterSelectedAreaCallback(vmContext, thisArray, thisLength);
         case -1928298699/*Kind_TextPickerScrollStopCallback*/: return deserializeAndCallSyncTextPickerScrollStopCallback(vmContext, thisArray, thisLength);
+        case 1206573193/*Kind_TextPickerSelectedCallback*/: return deserializeAndCallSyncTextPickerSelectedCallback(vmContext, thisArray, thisLength);
+        case 1499304299/*Kind_TextPickerValueCallback*/: return deserializeAndCallSyncTextPickerValueCallback(vmContext, thisArray, thisLength);
         case 2057659801/*Kind_TextTimerAttribute_onTimer_event_type*/: return deserializeAndCallSyncTextTimerAttribute_onTimer_event_type(vmContext, thisArray, thisLength);
+        case 1873725025/*Kind_TimePickerSelectedCallback*/: return deserializeAndCallSyncTimePickerSelectedCallback(vmContext, thisArray, thisLength);
         case -1878458553/*Kind_TransitionFinishCallback*/: return deserializeAndCallSyncTransitionFinishCallback(vmContext, thisArray, thisLength);
         case 1044833488/*Kind_Type_NavigationAttribute_customNavContentTransition_delegate*/: return deserializeAndCallSyncType_NavigationAttribute_customNavContentTransition_delegate(vmContext, thisArray, thisLength);
         case -1078223620/*Kind_Type_TextPickerAttribute_onChange_callback*/: return deserializeAndCallSyncType_TextPickerAttribute_onChange_callback(vmContext, thisArray, thisLength);

@@ -3443,8 +3443,17 @@ export class TypeChecker {
     static isBindableNumber(value: Object | string | number | undefined): boolean {
         return value instanceof Bindable<number>
     }
+    static isBindableArrayNumber(value: Object | string | number | undefined): boolean {
+        return value instanceof Bindable<Array<number>>
+    }
     static isBindableString(value: Object | string | number | undefined): boolean {
         return value instanceof Bindable<string>
+    }
+    static isBindableArrayString(value: Object | string | number | undefined): boolean {
+        return value instanceof Bindable<Array<string>>
+    }
+    static isBindableDate(value: Object | string | number | undefined): boolean {
+        return value instanceof Bindable<Date>
     }
     static isBindableResource(value: Object | string | number | undefined): boolean {
         return value instanceof Bindable<Resource>
