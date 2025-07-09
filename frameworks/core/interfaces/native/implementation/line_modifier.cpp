@@ -77,8 +77,6 @@ void StartPointImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //LineModelNG::SetStartPoint(frameNode, convValue);
 }
 void EndPointImpl(Ark_NativePointer node,
                   const Array_Length* value)
@@ -86,8 +84,6 @@ void EndPointImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //LineModelNG::SetEndPoint(frameNode, convValue);
 }
 } // LineAttributeModifier
 const GENERATED_ArkUILineModifier* GetLineModifier()
