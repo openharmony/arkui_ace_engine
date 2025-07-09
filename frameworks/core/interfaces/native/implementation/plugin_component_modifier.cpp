@@ -56,10 +56,6 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
-    // auto frameNode = PluginModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return {};
 #else
     return {};
@@ -76,7 +72,6 @@ void SetPluginComponentOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
 
     auto optInfoData = Converter::OptConvert<PluginComponentOptions>(*options);
-    // PluginModelNG::SetRequestPluginInfo(frameNode, optInfoData ? optInfoData->requestPluginInfo : std::nullopt);
     LOGE("PluginComponentModifier::SetPluginComponentOptionsImpl setData into model isn't supported");
 #endif
 }
@@ -92,7 +87,6 @@ void OnCompleteImpl(Ark_NativePointer node,
     auto onComplete = [arkCallback = CallbackHelper(*value)](const std::string& param) -> void {
         arkCallback.Invoke();
     };
-    // PluginModelNG::SetOnComplete(frameNode, std::move(onComplete));
 #endif
 }
 void OnErrorImpl(Ark_NativePointer node,
@@ -110,7 +104,6 @@ void OnErrorImpl(Ark_NativePointer node,
         errorData.msg = Converter::ArkValue<Ark_String>(msg);
         arkCallback.Invoke(errorData);
     };
-    // PluginModelNG::SetOnError(frameNode, std::move(onError));
 #endif
 }
 } // PluginComponentAttributeModifier
