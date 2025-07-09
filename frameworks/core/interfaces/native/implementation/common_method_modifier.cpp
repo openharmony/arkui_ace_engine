@@ -205,14 +205,6 @@ auto g_onWillDismissPopup = [](
         },
         [&popupParam](const Callback_DismissPopupAction_Void& value) {
             auto callback = [arkCallback = CallbackHelper(value)](int32_t reason) {
-                Ark_DismissPopupAction parameter;
-                auto reasonOpt = Converter::ArkValue<Opt_DismissReason>(
-                    static_cast<BindSheetDismissReason>(reason));
-                parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
-                    .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-                const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstract::DismissPopup));
-                parameter.dismiss = keeper.ArkValue();
-                arkCallback.InvokeSync(parameter);
             };
             popupParam->SetOnWillDismiss(std::move(callback));
             popupParam->SetInteractiveDismiss(true);

@@ -20745,6 +20745,59 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // LetterSpacingStyleAccessor
+    namespace LevelOrderAccessor {
+    void DestroyPeerImpl(Ark_LevelOrder peer)
+    {
+        auto peerImpl = reinterpret_cast<LevelOrderPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_LevelOrder ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_LevelOrder ClampImpl(const Ark_Number* order)
+    {
+        return {};
+    }
+    Ark_Number GetOrderImpl(Ark_LevelOrder peer)
+    {
+        return {};
+    }
+    } // LevelOrderAccessor
+    namespace DismissPopupActionAccessor {
+    void DestroyPeerImpl(Ark_DismissPopupAction peer)
+    {
+        auto peerImpl = reinterpret_cast<DismissPopupActionPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_DismissPopupAction ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void DismissImpl(Ark_DismissPopupAction peer)
+    {
+    }
+    Ark_DismissReason GetReasonImpl(Ark_DismissPopupAction peer)
+    {
+        return {};
+    }
+    void SetReasonImpl(Ark_DismissPopupAction peer,
+                       Ark_DismissReason reason)
+    {
+    }
+    } // DismissPopupActionAccessor
     namespace TextShadowStyleAccessor {
     void DestroyPeerImpl(Ark_TextShadowStyle peer)
     {
@@ -24957,6 +25010,38 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct LetterSpacingStylePeer {
         virtual ~LetterSpacingStylePeer() = default;
     };
+
+    const GENERATED_ArkUILevelOrderAccessor* GetLevelOrderAccessor()
+    {
+        static const GENERATED_ArkUILevelOrderAccessor LevelOrderAccessorImpl {
+            LevelOrderAccessor::DestroyPeerImpl,
+            LevelOrderAccessor::ConstructImpl,
+            LevelOrderAccessor::GetFinalizerImpl,
+            LevelOrderAccessor::ClampImpl,
+            LevelOrderAccessor::GetOrderImpl,
+        };
+        return &LevelOrderAccessorImpl;
+    }
+
+    struct LevelOrderPeer {
+        virtual ~LevelOrderPeer() = default;
+    };
+    const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissPopupActionAccessor DismissPopupActionAccessorImpl {
+            DismissPopupActionAccessor::DestroyPeerImpl,
+            DismissPopupActionAccessor::ConstructImpl,
+            DismissPopupActionAccessor::GetFinalizerImpl,
+            DismissPopupActionAccessor::DismissImpl,
+            DismissPopupActionAccessor::GetReasonImpl,
+            DismissPopupActionAccessor::SetReasonImpl,
+        };
+        return &DismissPopupActionAccessorImpl;
+    }
+
+    struct DismissPopupActionPeer {
+        virtual ~DismissPopupActionPeer() = default;
+    };
     const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
     {
         static const GENERATED_ArkUITextShadowStyleAccessor TextShadowStyleAccessorImpl {
@@ -25385,6 +25470,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetDecorationStyleAccessor,
             GetBaselineOffsetStyleAccessor,
             GetLetterSpacingStyleAccessor,
+            GetLevelOrderAccessor,
+            GetDismissPopupActionAccessor,
             GetTextShadowStyleAccessor,
             GetBackgroundColorStyleAccessor,
             GetGestureStyleAccessor,

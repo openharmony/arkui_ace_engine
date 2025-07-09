@@ -32,6 +32,7 @@
 #include "core/interfaces/native/implementation/linear_gradient_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
+#include "core/interfaces/native/implementation/level_order_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -3126,6 +3127,18 @@ void AssignCast(std::optional<ShapePoint>& dst, const Opt_ShapePoint& src)
 {
     if (src.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         dst = Converter::Convert<ShapePoint>(src.value);
+    }
+}
+
+template<>
+void AssignCast(std::optional<double>& dst, const Opt_LevelOrder& src)
+{
+    dst = std::make_optional(NG::LevelOrder::ORDER_DEFAULT);
+    if (src.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto peer = reinterpret_cast<LevelOrderPeer*>(src.value);
+        if (peer && peer->levelOrder) {
+            dst = std::make_optional(peer->levelOrder->GetOrder());
+        }
     }
 }
 } // namespace OHOS::Ace::NG::Converter

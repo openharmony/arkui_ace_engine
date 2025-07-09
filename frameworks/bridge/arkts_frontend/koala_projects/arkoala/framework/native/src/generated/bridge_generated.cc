@@ -44577,6 +44577,46 @@ Ark_Number impl_LetterSpacingStyle_getLetterSpacing(Ark_NativePointer thisPtr) {
         return GetAccessors()->getLetterSpacingStyleAccessor()->getLetterSpacing(self);
 }
 KOALA_INTEROP_DIRECT_1(LetterSpacingStyle_getLetterSpacing, KInteropNumber, Ark_NativePointer)
+Ark_NativePointer impl_LevelOrder_construct() {
+        return GetAccessors()->getLevelOrderAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(LevelOrder_construct, Ark_NativePointer)
+Ark_NativePointer impl_LevelOrder_getFinalizer() {
+        return GetAccessors()->getLevelOrderAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(LevelOrder_getFinalizer, Ark_NativePointer)
+Ark_NativePointer impl_LevelOrder_clamp(KInteropNumber order) {
+        return GetAccessors()->getLevelOrderAccessor()->clamp((const Ark_Number*) (&order));
+}
+KOALA_INTEROP_DIRECT_1(LevelOrder_clamp, Ark_NativePointer, KInteropNumber)
+Ark_Number impl_LevelOrder_getOrder(Ark_NativePointer thisPtr) {
+        Ark_LevelOrder self = reinterpret_cast<Ark_LevelOrder>(thisPtr);
+        return GetAccessors()->getLevelOrderAccessor()->getOrder(self);
+}
+KOALA_INTEROP_DIRECT_1(LevelOrder_getOrder, KInteropNumber, Ark_NativePointer)
+Ark_NativePointer impl_DismissPopupAction_construct() {
+        return GetAccessors()->getDismissPopupActionAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(DismissPopupAction_construct, Ark_NativePointer)
+Ark_NativePointer impl_DismissPopupAction_getFinalizer() {
+        return GetAccessors()->getDismissPopupActionAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(DismissPopupAction_getFinalizer, Ark_NativePointer)
+void impl_DismissPopupAction_dismiss(Ark_NativePointer thisPtr) {
+        Ark_DismissPopupAction self = reinterpret_cast<Ark_DismissPopupAction>(thisPtr);
+        GetAccessors()->getDismissPopupActionAccessor()->dismiss(self);
+}
+KOALA_INTEROP_DIRECT_V1(DismissPopupAction_dismiss, Ark_NativePointer)
+Ark_Int32 impl_DismissPopupAction_getReason(Ark_NativePointer thisPtr) {
+        Ark_DismissPopupAction self = reinterpret_cast<Ark_DismissPopupAction>(thisPtr);
+        return GetAccessors()->getDismissPopupActionAccessor()->getReason(self);
+}
+KOALA_INTEROP_DIRECT_1(DismissPopupAction_getReason, Ark_Int32, Ark_NativePointer)
+void impl_DismissPopupAction_setReason(Ark_NativePointer thisPtr, Ark_Int32 reason) {
+        Ark_DismissPopupAction self = reinterpret_cast<Ark_DismissPopupAction>(thisPtr);
+        GetAccessors()->getDismissPopupActionAccessor()->setReason(self, static_cast<Ark_DismissReason>(reason));
+}
+KOALA_INTEROP_DIRECT_V2(DismissPopupAction_setReason, Ark_NativePointer, Ark_Int32)
 Ark_NativePointer impl_TextShadowStyle_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         const Ark_Int8 value_value_buf_selector = thisDeserializer.readInt8();

@@ -6954,6 +6954,24 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LetterSpacingStyle_getLetterSpacing(ptr: KPointer): number
     @ani.unsafe.Direct
+    native static _LevelOrder_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _LevelOrder_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _LevelOrder_clamp(order: number): KPointer
+    @ani.unsafe.Direct
+    native static _LevelOrder_getOrder(ptr: KPointer): number
+    @ani.unsafe.Direct
+    native static _DismissPopupAction_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissPopupAction_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissPopupAction_dismiss(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _DismissPopupAction_getReason(ptr: KPointer): int32
+    @ani.unsafe.Direct
+    native static _DismissPopupAction_setReason(ptr: KPointer, reason: KInt): void
+    @ani.unsafe.Direct
     native static _TextShadowStyle_ctor(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _TextShadowStyle_getFinalizer(): KPointer
