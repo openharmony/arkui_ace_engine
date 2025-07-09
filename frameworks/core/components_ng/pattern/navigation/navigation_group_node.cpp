@@ -29,6 +29,8 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -376,6 +378,17 @@ void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
         std::string subtitle = NavigationTitleUtil::GetSubtitleString(titleBarNode);
         json->PutExtAttr("title", title.c_str(), filter);
         json->PutExtAttr("subtitle", subtitle.c_str(), filter);
+        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+        if (titleBarPattern) {
+            titleBarPattern->GetTitleBarOptions().ToJsonValue(json, filter);
+        }
+    }
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarOrHomeDestNode->GetToolBarNode());
+    if (toolBarNode) {
+        auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
+        if (toolBarPattern) {
+            toolBarPattern->GetToolBarOptions().ToJsonValue(json, filter);
+        }
     }
     json->PutExtAttr("menus", navBarOrHomeDestNode->GetBarItemsString(true).c_str(), filter);
     json->PutExtAttr("toolBar", navBarOrHomeDestNode->GetBarItemsString(false).c_str(), filter);
