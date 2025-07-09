@@ -27,6 +27,7 @@
 
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/accessibility/hidumper/accessibility_hidumper.h"
 #include "core/accessibility/utils/accessibility_manager_utils.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 
@@ -69,16 +70,6 @@ struct CommonProperty {
     float_t scaleY = 1.0f;
 };
 
-struct ActionTable {
-    AceAction aceAction;
-    ActionType action;
-};
-
-struct ActionStrTable {
-    ActionType action;
-    std::string actionStr;
-};
-
 struct FillEventInfoParam {
     int64_t elementId = 0;
     int64_t stackNodeId = 0;
@@ -108,33 +99,6 @@ struct AccessibilityFocusInfo {
 
     explicit AccessibilityFocusInfo(int64_t nodeId = -1, int64_t parentId = -1)
         : currentFocusNodeId(nodeId), currentFocusVirtualNodeParentId(parentId) {}
-};
-
-enum class DumpMode {
-    TREE,
-    NODE,
-    HANDLE_EVENT,
-    HOVER_TEST,
-    EVENT_TEST,
-    INJECT_ACTION_TEST,
-    EMBED_SEARCH_TEST,
-    EMBED_HOVER_TEST,
-    SET_CHECKLIST_TEST,
-    GET_CHECKLIST_TEST,
-    SPECIFIC_SEARCH_TEST,
-};
-
-struct DumpInfoArgument {
-    bool useWindowId = false;
-    DumpMode mode = DumpMode::TREE;
-    bool isDumpSimplify = false;
-    bool verbose = false;
-    int64_t rootId = -1;
-    int32_t pointX = 0;
-    int32_t pointY = 0;
-    int64_t nodeId = -1;
-    int32_t action = 0;
-    int32_t eventId = -1;
 };
 
 struct GetInfoByNodeId {
