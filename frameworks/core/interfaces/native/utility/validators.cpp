@@ -183,33 +183,5 @@ void ValidatePickerDate(PickerDate& date)
         date = DATE_MIN;
     }
 }
-
-// void ValidateAnimationOption(AnimationOption& opt, bool isForm)
-// {
-//     // limit animation for ArkTS Form
-//     if (isForm) {
-//         auto duration = opt.GetDuration();
-//         auto delay = opt.GetDelay();
-//         auto iterations = opt.GetIteration();
-//         auto tempo = opt.GetTempo();
-
-//         if (duration > static_cast<int32_t>(DEFAULT_DURATION)) {
-//             duration = static_cast<int32_t>(DEFAULT_DURATION);
-//             opt.SetDuration(duration);
-//         }
-//         if (delay != 0) {
-//             delay = 0;
-//             opt.SetDelay(delay);
-//         }
-//         if (SystemProperties::IsFormAnimationLimited() && iterations != 1) {
-//             iterations = 1;
-//             opt.SetIteration(iterations);
-//         }
-//         if (!NearEqual(tempo, 1.0)) {
-//             tempo = 1.0;
-//             opt.SetTempo(tempo);
-//         }
-//     }
-// }
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
