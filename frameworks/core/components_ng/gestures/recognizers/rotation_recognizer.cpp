@@ -243,6 +243,7 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
                 return;
             }
             if (CheckLimitFinger()) {
+                extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
                 return;
             }
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
@@ -286,6 +287,7 @@ void RotationRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
 void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    extraInfo_ += "receive cancel event.";
     if (!IsActiveFinger(event.id)) {
         return;
     }
@@ -309,6 +311,7 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
+    extraInfo_ += "receive cancel event.";
     UpdateTouchPointWithAxisEvent(event);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);

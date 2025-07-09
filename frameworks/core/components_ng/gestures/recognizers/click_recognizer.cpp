@@ -102,7 +102,9 @@ ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distance
     }
     distanceThreshold_ = Dimension(
         Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
-    if (distanceThreshold_.ConvertToPx() <= 0) {
+
+    cusDistanceThreshold_ = distanceThreshold_.ConvertToPx();
+    if (cusDistanceThreshold_ <= 0) {
         distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
     }
 
@@ -116,7 +118,8 @@ ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, Dimension dista
         fingers_ = DEFAULT_TAP_FINGERS;
     }
     
-    if (distanceThreshold.ConvertToPx() <= 0) {
+    cusDistanceThreshold_ = distanceThreshold.ConvertToPx();
+    if (cusDistanceThreshold_ <= 0) {
         distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
     }
 
@@ -347,6 +350,7 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
         return;
     }
     if (CheckLimitFinger()) {
+        extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -382,6 +386,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         fingerDeadlineTimer_.Cancel();
         tappedCount_++;
         if (CheckLimitFinger()) {
+            extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
         if (tappedCount_ == count_) {
@@ -649,6 +654,7 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
     if (sysJudge_) {
+        TAG_LOGD(AceLogTag::ACE_GESTURE, "sysJudge");
         return sysJudge_(gestureInfo_, info);
     }
     if (gestureRecognizerJudgeFunc) {
@@ -700,6 +706,7 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
     std::stringstream oss;
     oss << "count: " << count_ << ", "
         << "fingers: " << fingers_ << ", "
+        << "cusDistanceThreshold_: " << cusDistanceThreshold_ << ", "
         << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;
