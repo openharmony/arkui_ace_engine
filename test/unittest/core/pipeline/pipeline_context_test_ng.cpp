@@ -1998,7 +1998,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
     context_->ChangeDarkModeBrightness();
     MockContainer::Current()->SetIsUIExtensionWindow(true);
     context_->ChangeDarkModeBrightness();
+    auto rsUIDirector = context_->GetRSUIDirector();
+    context_->RSTransactionBegin(rsUIDirector);
     context_->SetAppBgColor(Color::BLUE);
+    context_->RSTransactionCommit(rsUIDirector);
     context_->ChangeDarkModeBrightness();
     MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
     context_->ChangeDarkModeBrightness();
