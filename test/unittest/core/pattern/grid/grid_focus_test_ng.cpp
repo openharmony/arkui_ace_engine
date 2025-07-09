@@ -752,4 +752,26 @@ HWTEST_F(GridFocusTestNg, GetNextIndexByStep, TestSize.Level1)
     EXPECT_EQ(result.first, -1);
     EXPECT_EQ(result.second, -1);
 }
+
+/**
+ * @tc.name: FocusDependence001
+ * @tc.desc: Test Grid focusDependence when gridItem get focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridFocusTestNg, FocusDependence001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFocusableGridItems(20);
+    CreateDone();
+    FlushUITasks();
+    
+    auto focusHub = frameNode_->GetFocusHub();
+    EXPECT_NE(focusHub->GetFocusDependence(), FocusDependence::AUTO);
+    
+    RefPtr<FocusHub> currentFocusNode = GetChildFocusHub(frameNode_, 0);
+    currentFocusNode->RequestFocusImmediately();
+    FlushUITasks();
+    EXPECT_EQ(focusHub->GetFocusDependence(), FocusDependence::AUTO);
+}
 } // namespace OHOS::Ace::NG
