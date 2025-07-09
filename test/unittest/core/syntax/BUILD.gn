@@ -16,7 +16,17 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("lazy_for_each_syntax_test_ng") {
   type = "new"
   module_output = "syntaxs"
-  sources = [ "lazy_for_each_syntax_test_ng.cpp" ]
+  sources = [
+    "arkoala_lazy_node_test.cpp",
+    "lazy_for_each_syntax_test_ng.cpp",
+  ]
+}
+
+group("lazy_for_each_linux_test") {
+  testonly = true
+  deps = [
+    ":lazy_for_each_syntax_test_ng(${host_toolchain})",
+  ]
 }
 
 ace_unittest("lazy_for_each_builder_syntax_test_ng") {
