@@ -2195,6 +2195,113 @@ HWTEST_F(GestureEventHubTestNg, CheckLastInnerRecognizerCollected005, TestSize.L
 }
 
 /**
+ * @tc.name: CheckLastInnerRecognizerCollected006
+ * @tc.desc: Test CheckLastInnerRecognizerCollected
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CheckLastInnerRecognizerCollected006, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->SetIsSystemGesture(true);
+    auto groupClickRecognizerOne = AceType::MakeRefPtr<ClickRecognizer>();
+    auto groupClickRecognizerTwo = AceType::MakeRefPtr<ClickRecognizer>();
+    std::vector<RefPtr<NGGestureRecognizer>> groupSubRecognizers = { groupClickRecognizerOne, groupClickRecognizerTwo };
+    auto childExclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(groupSubRecognizers);
+    std::vector<RefPtr<NGGestureRecognizer>> subRecognizers = { nullptr, childExclusiveRecognizer, clickRecognizer };
+    auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(subRecognizers);
+    exclusiveRecognizer->recognizers_.emplace_front(nullptr);
+    gestureEventHub->externalExclusiveRecognizer_.clear();
+    gestureEventHub->externalExclusiveRecognizer_.push_back(exclusiveRecognizer);
+    auto res = gestureEventHub->CheckLastInnerRecognizerCollected(GesturePriority::High, parallelIndex_2);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: CheckLastInnerRecognizerCollected007
+ * @tc.desc: Test CheckLastInnerRecognizerCollected
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CheckLastInnerRecognizerCollected007, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->SetIsSystemGesture(true);
+    auto groupClickRecognizerOne = AceType::MakeRefPtr<ClickRecognizer>();
+    groupClickRecognizerOne->SetIsSystemGesture(true);
+    auto groupClickRecognizerTwo = AceType::MakeRefPtr<ClickRecognizer>();
+    std::vector<RefPtr<NGGestureRecognizer>> groupSubRecognizers = { groupClickRecognizerOne, groupClickRecognizerTwo };
+    auto childExclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(groupSubRecognizers);
+    auto clickRecognizerTwo = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizerTwo->node_ = frameNode;
+    std::vector<RefPtr<NGGestureRecognizer>> subRecognizers = { childExclusiveRecognizer, clickRecognizer,
+        clickRecognizerTwo };
+    auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(subRecognizers);
+    gestureEventHub->externalExclusiveRecognizer_.clear();
+    gestureEventHub->externalExclusiveRecognizer_.push_back(exclusiveRecognizer);
+    auto res = gestureEventHub->CheckLastInnerRecognizerCollected(GesturePriority::High, parallelIndex_2);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: CheckLastInnerRecognizerCollected008
+ * @tc.desc: Test CheckLastInnerRecognizerCollected
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CheckLastInnerRecognizerCollected008, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->SetIsSystemGesture(true);
+    std::vector<RefPtr<NGGestureRecognizer>> subRecognizers = { clickRecognizer };
+    auto parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(subRecognizers);
+    gestureEventHub->externalParallelRecognizer_.clear();
+    gestureEventHub->externalParallelRecognizer_.push_back(parallelRecognizer);
+    auto res = gestureEventHub->CheckLastInnerRecognizerCollected(GesturePriority::Parallel, parallelIndex_2);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: CheckLastInnerRecognizerCollected009
+ * @tc.desc: Test CheckLastInnerRecognizerCollected
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CheckLastInnerRecognizerCollected009, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->SetIsSystemGesture(true);
+    auto clickRecognizerTwo = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizerTwo->node_ = frameNode;
+    std::vector<RefPtr<NGGestureRecognizer>> subRecognizers = { clickRecognizer, clickRecognizerTwo };
+    auto parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(subRecognizers);
+    gestureEventHub->externalParallelRecognizer_.clear();
+    gestureEventHub->externalParallelRecognizer_.push_back(parallelRecognizer);
+    auto res = gestureEventHub->CheckLastInnerRecognizerCollected(GesturePriority::Parallel, parallelIndex_2);
+    EXPECT_FALSE(res);
+}
+
+/**
  * @tc.name: GestureEventHubSetPanEvent001
  * @tc.desc: Verify SetPanEvent (Dimension version) with new actuator creation
  * @tc.type: FUNC

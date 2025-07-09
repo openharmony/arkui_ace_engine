@@ -70,6 +70,27 @@ bool IsDifferentFrameNodeCollected(
     return true;
 }
 
+bool IsSystemRecognizerCollected(const RefPtr<NGGestureRecognizer>& current)
+{
+    CHECK_NULL_RETURN(current, false);
+    auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(current);
+    CHECK_NULL_RETURN(recognizerGroup, false);
+    auto recognizerList = recognizerGroup->GetGroupRecognizer();
+    for (const auto &recognizer : recognizerList) {
+        if (!recognizer) {
+            continue;
+        }
+        if (AceType::InstanceOf<RecognizerGroup>(recognizer) && IsSystemRecognizerCollected(recognizer)) {
+            return true;
+        } else {
+            if (recognizer->IsSystemGesture()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 GestureEventHub::GestureEventHub(const WeakPtr<EventHub>& eventHub) : eventHub_(eventHub) {}
 
 RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
@@ -321,12 +342,14 @@ bool GestureEventHub::CheckLastInnerRecognizerCollected(GesturePriority priority
         if (static_cast<int32_t>(externalParallelRecognizer_.size()) <= gestureGroupIndex) {
             return false;
         }
-        return IsDifferentFrameNodeCollected(externalParallelRecognizer_[gestureGroupIndex], host);
+        return !IsSystemRecognizerCollected(externalParallelRecognizer_[gestureGroupIndex]) &&
+               IsDifferentFrameNodeCollected(externalParallelRecognizer_[gestureGroupIndex], host);
     } else {
         if (static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= gestureGroupIndex) {
             return false;
         }
-        return IsDifferentFrameNodeCollected(externalExclusiveRecognizer_[gestureGroupIndex], host);
+        return !IsSystemRecognizerCollected(externalExclusiveRecognizer_[gestureGroupIndex]) &&
+               IsDifferentFrameNodeCollected(externalExclusiveRecognizer_[gestureGroupIndex], host);
     }
 }
 
