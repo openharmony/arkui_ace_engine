@@ -3986,6 +3986,12 @@ export class ArkUIGeneratedNativeModule {
     native static _UIContext_openBindSheet(ptr: KPointer, bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _UIContext_updateBindSheet(ptr: KPointer, bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _UIContext_closeBindSheet(ptr: KPointer, bindSheetContent: KPointer): void
+    @ani.unsafe.Quick
+    native static _PromptAction_openPopup(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _PromptAction_updatePopup(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _PromptAction_closePopup(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     native static _UIContext_clearResourceCache(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _UIContext_isFollowingSystemFontScale(ptr: KPointer): boolean

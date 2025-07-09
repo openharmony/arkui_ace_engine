@@ -126,15 +126,9 @@ public:
     void AniSerializer([[maybe_unused]] ani_env* env, ani_object& result, ani_long dragActionPtr)
     {
         ani_status status = ANI_OK;
-        static const char* namespaceName = "L@ohos/arkui/dragController/dragController;";
-        ani_namespace nns;
-        if ((status = env->FindNamespace(namespaceName, &nns)) != ANI_OK) {
-            LOGE("AceDrag, find dragController namespace fail. status = %{public}d", status);
-            return;
-        }
-        static const char* className = "LDragActionInner;";
+        static const char* className = "@ohos.arkui.dragController.dragController.DragActionInner";
         ani_class cls;
-        if ((status = env->Namespace_FindClass(nns, className, &cls)) != ANI_OK) {
+        if ((status = env->FindClass(className, &cls)) != ANI_OK) {
             LOGE("AceDrag, find DragAction calss fail. status = %{public}d", status);
             return;
         }
@@ -396,16 +390,10 @@ ani_enum_item GetDragBehavior(ani_env* env, const DragNotifyMsg& dragNotifyMsg)
     ani_status status = ANI_OK;
     ani_enum_item dragBehaviorItem {};
     CHECK_NULL_RETURN(env, dragBehaviorItem);
-    static const char* namespaceName = "L@ohos/arkui/dragController/dragController;";
-    ani_namespace nns;
-    if ((status = env->FindNamespace(namespaceName, &nns)) != ANI_OK) {
-        LOGI("AceDrag, find dragController namespace fail. status = %{public}d", status);
-        return dragBehaviorItem;
-    }
 
-    static const char* enumName = "LDragBehavior;";
+    static const char* enumName = "@ohos.arkui.dragController.dragController.DragBehavior";
     ani_enum enumType;
-    if ((status = env->Namespace_FindEnum(nns, enumName, &enumType)) != ANI_OK) {
+    if ((status = env->FindEnum(enumName, &enumType)) != ANI_OK) {
         LOGI("AceDrag, find DragBehavior enum fail. status = %{public}d", status);
         return dragBehaviorItem;
     }
@@ -421,15 +409,9 @@ ani_object CreateDragEventObject(ani_env* env, const DragNotifyMsg& dragNotifyMs
 {
     ani_object dragEventObj = {};
     CHECK_NULL_RETURN(env, dragEventObj);
-    static const char* namespaceName = "L@ohos/arkui/dragController/dragController;";
-    ani_namespace nns;
-    if (ANI_OK != env->FindNamespace(namespaceName, &nns)) {
-        LOGI("AceDrag, find dragController namespace fail.");
-        return dragEventObj;
-    }
-    static const char* className = "LDragEventInner;";
+    static const char* className = "@ohos.arkui.dragController.dragController.DragEventInner";
     ani_class cls;
-    if (ANI_OK != env->Namespace_FindClass(nns, className, &cls)) {
+    if (ANI_OK != env->FindClass(className, &cls)) {
         LOGE("AceDrag, find DragEventInner calss fail.");
         return dragEventObj;
     }
@@ -504,7 +486,7 @@ void CallBackJsFunction(
         LOGE("AceDrag, CreateLocalScope fail. status = %{public}d", status);
         return;
     }
-    static const char* namespaceName = "L@ohos/arkui/dragController/dragController;";
+    static const char* namespaceName = "@ohos.arkui.dragController.dragController";
     ani_namespace nns;
     if ((status = asyncCtx->env->FindNamespace(namespaceName, &nns)) != ANI_OK) {
         LOGE("AceDrag, find dragController namespace fail. status = %{public}d", status);
@@ -520,8 +502,8 @@ void CallBackJsFunction(
         asyncCtx->env->DestroyLocalScope();
         return;
     }
-    static const char* className1 = "LDragEventParamInner;";
-    static const char* className2 = "LDragAndDropInfoInner;";
+    const std::string className1 = std::string(namespaceName).append(".DragEventParamInner");
+    const std::string className2 = std::string(namespaceName).append(".DragAndDropInfoInner");
     ani_class cls;
     ani_method ctor;
     ani_object dragObj;
@@ -533,7 +515,7 @@ void CallBackJsFunction(
             asyncCtx->env->DestroyLocalScope();
             return;
         }
-        if (ANI_OK != asyncCtx->env->Namespace_FindClass(nns, className2, &cls)) {
+        if (ANI_OK != asyncCtx->env->FindClass(className2.c_str(), &cls)) {
             LOGE("AceDrag, find LDragAndDropInfoInner calss fail.");
             asyncCtx->env->DestroyLocalScope();
             return;
@@ -552,7 +534,7 @@ void CallBackJsFunction(
         }
     } else {
         LOGI("AceDrag, LDragEventParamInner;");
-        if (ANI_OK != asyncCtx->env->Namespace_FindClass(nns, className1, &cls)) {
+        if (ANI_OK != asyncCtx->env->FindClass(className1.c_str(), &cls)) {
             LOGE("AceDrag, find DragEventParamInner calss fail.");
             asyncCtx->env->DestroyLocalScope();
             return;

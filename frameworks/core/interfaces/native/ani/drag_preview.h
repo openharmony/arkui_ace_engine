@@ -127,15 +127,9 @@ public:
 
     void AniSerializer([[maybe_unused]] ani_env *env, ani_object& result)
     {
-        static const char *nameSpaceName = "L@ohos/arkui/dragController/dragController;";
-        ani_namespace nns;
-        if (ANI_OK != env->FindNamespace(nameSpaceName, &nns)) {
-            TAG_LOGE(AceLogTag::ACE_DRAG, "find dragController namespace failed.");
-            return;
-        }
-        static const char *className = "LDragPreviewInner;";
+        static const char *className = "@ohos.arkui.dragController.dragController.DragPreviewInner";
         ani_class cls;
-        if (ANI_OK != env->Namespace_FindClass(nns, className, &cls)) {
+        if (ANI_OK != env->FindClass(className, &cls)) {
             TAG_LOGE(AceLogTag::ACE_DRAG, "find DragPreviewInner calss fail");
             return;
         }

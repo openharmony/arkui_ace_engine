@@ -785,10 +785,75 @@ void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *c
     dst.type = Converter::ArkValue<Opt_Number>(src.GetType());
 }
 
+std::optional<OHOS::Ace::NG::MarginProperty> ParseMarginString(const std::string& ss)
+{
+    constexpr int32_t MARGIN_MIN_LENGTH = 2;
+    constexpr int32_t EXPECTED_MARGIN_VALUES = 4;
+    if (ss.size() < MARGIN_MIN_LENGTH || ss[0] != '[' || ss.back() != ']') {
+        LOGE("Unexpected MarginString:%{public}s", ss.c_str());
+        return std::nullopt;
+    }
+    std::string content = ss.substr(1, ss.size() - 2);
+    std::vector<std::string> values;
+    StringUtils::SplitStr(content, ",", values);
+    std::vector<std::optional<CalcLength>> lengths;
+    for (const auto& value : values) {
+        if (value == "NA") {
+            lengths.push_back(std::nullopt);
+        } else {
+            lengths.push_back(CalcLength::FromString(value));
+        }
+    }
+    if (lengths.size() != EXPECTED_MARGIN_VALUES) {
+        LOGE("Unexpected MarginString:%{public}s", ss.c_str());
+        return std::nullopt;
+    }
+    OHOS::Ace::NG::MarginProperty marginProp  = {
+        .left = lengths[0],
+        .right = lengths[1],
+        .top = lengths[2],
+        .bottom = lengths[3]
+    };
+    return marginProp;
+}
+
+std::optional<OHOS::Ace::NG::BorderRadiusProperty> ParseBorderRadiusString(const std::string& ss)
+{
+    CHECK_NULL_RETURN(!ss.empty(), std::nullopt);
+    OHOS::Ace::NG::BorderRadiusProperty borderRadius;
+    if (ss[0] >= '0' && ss[0] <= '9') {
+        borderRadius.SetRadius(Dimension::FromString(ss));
+        borderRadius.multiValued = false;
+    } else if (ss[0] == '{') {
+        auto json = JsonUtil::ParseJsonString(ss);
+        CHECK_NULL_RETURN(json && json->IsValid(), std::nullopt);
+        borderRadius.radiusTopLeft = Dimension::FromString(json->GetString("topLeft"));
+        borderRadius.radiusTopRight = Dimension::FromString(json->GetString("topRight"));
+        borderRadius.radiusBottomLeft = Dimension::FromString(json->GetString("bottomLeft"));
+        borderRadius.radiusBottomRight = Dimension::FromString(json->GetString("bottomRight"));
+    } else {
+        LOGE("Unexpected Border Radius String:%{public}s", ss.c_str());
+        return std::nullopt;
+    }
+    return borderRadius;
+}
+
 void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
 {
-    dst.margin = ArkUnion<Opt_Union_Dimension_Margin, Ark_Length>(src.margin);
-    dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Length>(src.borderRadius);
+    dst.margin = ArkUnion<Opt_Union_Dimension_Margin>(Ark_Empty());
+    if (auto marginProp = ParseMarginString(src.margin)) {
+        auto arkMargin = ArkValue<Ark_Padding>(marginProp.value());
+        dst.margin = ArkUnion<Opt_Union_Dimension_Margin, Ark_Padding>(arkMargin);
+    }
+    dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses>(Ark_Empty());
+    auto borderRadius = ParseBorderRadiusString(src.borderRadius);
+    CHECK_NULL_VOID(borderRadius.has_value());
+    if (borderRadius->multiValued) {
+        auto arkBorder = ArkValue<Ark_BorderRadiuses>(borderRadius.value());
+        dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(arkBorder);
+    } else {
+        dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Length>(borderRadius->radiusTopLeft);
+    }
 }
 
 void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleResult& src)

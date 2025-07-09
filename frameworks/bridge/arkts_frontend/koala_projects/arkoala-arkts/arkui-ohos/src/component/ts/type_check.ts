@@ -197,6 +197,12 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof AccessibilityHoverEvent")
         }
     }
+    static isTargetInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return true
+    }
+    static isPopupCommonOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean): boolean {
+        return true
+    }
     static isAccessibilityHoverType(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (AccessibilityHoverType.HOVER_ENTER)) {
             return true

@@ -154,18 +154,18 @@ bool GetInt32Param(ani_env* env, ani_object object, const char *name, int32_t& r
     return GetInt32Param(env, resultObj, result);
 }
 
-bool GetLongParam(ani_env* env, ani_object object, long& result)
+bool GetInt64Param(ani_env* env, ani_object object, int64_t& result)
 {
     ani_long resultValue;
     ani_status status = env->Object_CallMethodByName_Long(object, "unboxed", nullptr, &resultValue);
     if (status != ANI_OK) {
         return false;
     }
-    result = static_cast<long>(resultValue);
+    result = static_cast<int64_t>(resultValue);
     return true;
 }
 
-bool GetLongParam(ani_env* env, ani_object object, const char *name, long& result)
+bool GetInt64Param(ani_env* env, ani_object object, const char *name, int64_t& result)
 {
     ani_ref resultRef;
     ani_status status = env->Object_GetPropertyByName_Ref(object, name, &resultRef);
@@ -177,7 +177,7 @@ bool GetLongParam(ani_env* env, ani_object object, const char *name, long& resul
         return false;
     }
     ani_object resultObj = static_cast<ani_object>(resultRef);
-    return GetLongParam(env, resultObj, result);
+    return GetInt64Param(env, resultObj, result);
 }
 
 bool GetDoubleParam(ani_env* env, ani_object object, double& result)
@@ -244,9 +244,9 @@ bool GetFloatArrayParam(ani_env *env, ani_object object, const char *name, std::
         return false;
     }
 
-    ani_double length;
-    ani_object resultObj = static_cast<ani_object>(resultRef);
-    status = env->Object_GetPropertyByName_Double(resultObj, "length", &length);
+    ani_size length;
+    ani_array resultObj = static_cast<ani_array>(resultRef);
+    status = env->Array_GetLength(resultObj, &length);
     if (status != ANI_OK) {
         return false;
     }
@@ -254,7 +254,7 @@ bool GetFloatArrayParam(ani_env *env, ani_object object, const char *name, std::
     std::vector<float> floatArray;
     for (int i = 0; i < int(length); i++) {
         ani_ref itemRef;
-        status = env->Object_CallMethodByName_Ref(resultObj, "$_get", "I:Lstd/core/Object;", &itemRef, (ani_int)i);
+        status = env->Array_Get(resultObj, (ani_int)i, &itemRef);
         if (status != ANI_OK) {
             continue;
         }
@@ -331,9 +331,9 @@ bool GetStringArrayParam(ani_env *env, ani_object object, const char *name, std:
         return false;
     }
 
-    ani_double length;
-    ani_object resultObj = static_cast<ani_object>(resultRef);
-    status = env->Object_GetPropertyByName_Double(resultObj, "length", &length);
+    ani_size length;
+    ani_array resultObj = static_cast<ani_array>(resultRef);
+    status = env->Array_GetLength(resultObj, &length);
     if (status != ANI_OK) {
         return false;
     }
@@ -341,7 +341,7 @@ bool GetStringArrayParam(ani_env *env, ani_object object, const char *name, std:
     std::vector<std::string> stringArray;
     for (int i = 0; i < int(length); i++) {
         ani_ref itemRef;
-        status = env->Object_CallMethodByName_Ref(resultObj, "$_get", "I:Lstd/core/Object;", &itemRef, (ani_int)i);
+        status = env->Array_Get(resultObj, (ani_size)i, &itemRef);
         if (status != ANI_OK) {
             continue;
         }
@@ -563,7 +563,7 @@ bool GetDollarResource(
     return true;
 }
 
-void ProcessResourceType(ani_env *env, ani_object value, ani_ref paramsRef, size_t length, std::string resName)
+void ProcessResourceType(ani_env *env, ani_object value, ani_ref paramsRef, ani_size length, std::string resName)
 {
     ani_object paramsObj = static_cast<ani_object>(paramsRef);
     ani_status status;
@@ -626,11 +626,7 @@ void ModifyResourceParam(ani_env *env, ani_object object, const ResourceType& re
         return;
     }
 
-    if (IsUndefinedObject(env, paramsRef)) {
-        return;
-    }
-
-    if (!IsArrayObject(env, paramsRef)) {
+    if (IsUndefinedObject(env, paramsRef) || !IsArrayObject(env, paramsRef)) {
         return;
     }
 

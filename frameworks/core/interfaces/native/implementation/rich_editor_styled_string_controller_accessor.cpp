@@ -26,8 +26,10 @@ namespace OHOS::Ace::NG {
 void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeValue& src)
 {
     dst.replacementString = StyledStringPeer::Create(src.GetReplacementString());
-    dst.range.start = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().start);
-    dst.range.end = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().end);
+    dst.range.start = Converter::ArkValue<Opt_Number>(src.GetRangeBefore().start);
+    dst.range.end = Converter::ArkValue<Opt_Number>(src.GetRangeBefore().end);
+    dst.previewText = !src.GetPreviewText() ? Converter::ArkValue<Opt_StyledString>(Ark_Empty())
+        : Converter::ArkValue<Opt_StyledString>(StyledStringPeer::Create(src.GetPreviewText()));
 }
 } // namespace OHOS::Ace::NG
 
@@ -72,27 +74,37 @@ void OnContentChangedImpl(Ark_RichEditorStyledStringController peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(listener);
-
-    auto onWillChangeArk = Converter::OptConvert<Callback_StyledStringChangeValue_Boolean>(listener->onWillChange);
-    auto onWillChangeCapture = std::make_shared<Callback_StyledStringChangeValue_Boolean>(*onWillChangeArk);
-    auto onWillChange = [onWillChangeCapture, arkCallback = CallbackHelper(*onWillChangeCapture)](
+    // SetOnWillChange
+    do {
+        auto optValue = Converter::GetOpt(listener->onWillChange);
+        CHECK_NULL_BREAK(optValue.has_value());
+        auto onWillChangeArk = Converter::OptConvert<Callback_StyledStringChangeValue_Boolean>(optValue.value());
+        auto onWillChangeCapture = std::make_shared<Callback_StyledStringChangeValue_Boolean>(*onWillChangeArk);
+        auto onWillChange = [onWillChangeCapture, arkCallback = CallbackHelper(*onWillChangeCapture)](
         const StyledStringChangeValue& value) {
-        auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value);
-        Callback_Boolean_Void continuation;
-        arkCallback.Invoke(changeValue, continuation);
-        return true;
-    };
-    peer->SetOnWillChange(std::move(onWillChange));
-
-    auto onDidChangeArk = Converter::OptConvert<OnDidChangeCallback>(listener->onDidChange);
-    auto onDidChangeCapture = std::make_shared<OnDidChangeCallback>(*onDidChangeArk);
-    auto onDidChange = [onDidChangeCapture, arkCallback = CallbackHelper(*onDidChangeCapture)](
+            auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value);
+            auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(changeValue);
+            return Converter::Convert<bool>(result);
+        };
+        peer->SetOnWillChange(std::move(onWillChange));
+    } while (0);
+    
+    // SetOnDidChange
+    do {
+        auto optValue = Converter::GetOpt(listener->onDidChange);
+        CHECK_NULL_BREAK(optValue.has_value());
+        auto onDidChangeArk = Converter::OptConvert<OnDidChangeCallback>(optValue.value());
+        auto onDidChangeCapture = std::make_shared<OnDidChangeCallback>(*onDidChangeArk);
+        auto onDidChange = [onDidChangeCapture, arkCallback = CallbackHelper(*onDidChangeCapture)](
         const StyledStringChangeValue& value) {
-        auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value);
-        arkCallback.Invoke(changeValue.range, changeValue.range);
-        LOGW("RichEditorStyledStringControllerAccessor :: before range = after, that's temporary and will be fixed");
-    };
-    peer->SetOnDidChange(std::move(onDidChange));
+            TextRange inBefore = value.GetRangeBefore();
+            TextRange inAfter = value.GetRangeAfter();
+            Ark_TextRange rangeBefore = Converter::ArkValue<Ark_TextRange>(inBefore);
+            Ark_TextRange rangeAfter = Converter::ArkValue<Ark_TextRange>(inAfter);
+            arkCallback.Invoke(rangeBefore, rangeAfter);
+        };
+        peer->SetOnDidChange(std::move(onDidChange));
+    } while (0);
 }
 } // RichEditorStyledStringControllerAccessor
 const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyledStringControllerAccessor()

@@ -169,6 +169,7 @@ struct ArkUIAniDragControllerModifier {
 struct ArkUIAniImageSpanModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
     void (*setAltPixelMap)(ArkUINodeHandle node, void* pixelmap);
+    void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
 };
 struct ArkUIAniVideoModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);

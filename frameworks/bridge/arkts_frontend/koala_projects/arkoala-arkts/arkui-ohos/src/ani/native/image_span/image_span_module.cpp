@@ -16,6 +16,7 @@
 #include "image_span_module.h"
 
 #include "load.h"
+#include "log/log.h"
 #include "pixel_map_taihe_ani.h"
 #include "utils/convert_utils.h"
 
@@ -44,5 +45,23 @@ void SetImageSpanAltPixelMap([[maybe_unused]] ani_env* env, ani_object aniClass,
     // only pass pointer to smart pointer, and do not operate on C pointer
     auto pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapAni);
     modifier->getImageSpanAniModifier()->setAltPixelMap(arkNode, &pixelMap);
+}
+
+void SetImageSpanDrawingColorFilter(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node,
+    ani_object colorFilterAni)
+{
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !arkNode) {
+        return;
+    }
+    ani_long nativeObj = 0;
+    env->Object_GetPropertyByName_Long(colorFilterAni, "nativeObj", &nativeObj);
+    auto* colorFilter = reinterpret_cast<void*>(nativeObj);
+    if (colorFilter == nullptr) {
+        HILOGE("image colorFilter options is null");
+        return;
+    }
+    modifier->getImageSpanAniModifier()->setDrawingColorFilter(arkNode, colorFilter);
 }
 } // namespace OHOS::Ace::Ani

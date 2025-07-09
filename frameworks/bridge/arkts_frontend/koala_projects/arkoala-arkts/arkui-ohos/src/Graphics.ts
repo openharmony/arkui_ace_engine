@@ -232,13 +232,13 @@ export class ColorMetrics implements MaterializedBase {
         const blue_casted = blue as (number)
         let alpha_casted = alpha as (number | undefined);
         if (alpha !== undefined && alpha !== null) {
-            alpha_casted = alpha * MAX_CHANNEL_VALUE;
+            alpha_casted = Math.min(Math.max(alpha, 0), MAX_ALPHA_VALUE) * MAX_CHANNEL_VALUE;
         } else {
             alpha_casted = MAX_CHANNEL_VALUE;
         }
         let result = ColorMetrics.rgba_serialize(red_casted, green_casted, blue_casted, alpha_casted);
         if (alpha !== undefined) {
-            result.alpha_ = ColorMetrics.clamp(alpha! * MAX_CHANNEL_VALUE);
+            result.alpha_ = ColorMetrics.clamp(alpha_casted);
         }
         return result;
     }
@@ -283,9 +283,12 @@ export class ColorMetrics implements MaterializedBase {
             const green = chanels[2];
             const blue = chanels[3];
             const alpha = chanels[4];
-            const resourceId = chanels[5];
-            const colorMetrics = ColorMetrics.rgba(red, green, blue, alpha);
-            colorMetrics.setResourceId(resourceId);
+            let colorMetrics = ColorMetrics.rgba_serialize(red, green, blue, alpha);
+            colorMetrics.alpha_ = ColorMetrics.clamp(alpha);
+            if (chanels.length > 5) {
+                const resourceId = chanels[5];
+                colorMetrics.setResourceId(resourceId);
+            }
             return colorMetrics;
         } else if (typeof color === 'number') {
             return ColorMetrics.numeric(color as number);

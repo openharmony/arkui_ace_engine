@@ -22,11 +22,11 @@ import { CallbackKind } from "./CallbackKind"
 import { Serializer } from "./Serializer"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback, DividerStyle, BlendMode } from "./../common"
+import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback, DividerStyle, BlendMode, PopupCommonOptions } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
 import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme, Callback_CreateItem, LengthMetricsCustom } from "./../arkui-custom"
-import { UIContext } from "@ohos/arkui/UIContext"
+import { UIContext, TargetInfo } from "@ohos/arkui/UIContext"
 import { ContentDidScrollCallback, ContentWillScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperAnimationMode, SwiperAttribute, DotIndicator, DigitIndicator, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, SwiperContentWillScrollResult, AutoPlayOptions, ArrowStyle, SwiperAutoFill, SwiperContentTransitionProxy, SwiperContentTransitionProxyInternal, SwiperController, SwiperControllerInternal, Callback_SwiperContentTransitionProxy_Void, Indicator } from "./../swiper"
 import { CustomNodeBuilder } from "./../customBuilder"
 import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, TextMenuOptions, DecorationStyleResult } from "./../textCommon"
@@ -596,7 +596,7 @@ export class Deserializer extends DeserializerBase {
     }
     readOnProgressChangeEvent(): OnProgressChangeEvent {
         let valueDeserializer : Deserializer = this
-        const newProgress_result : number = (valueDeserializer.readNumber() as number)
+        const newProgress_result : int32 = (valueDeserializer.readInt32() as int32)
         let value : OnProgressChangeEvent = ({newProgress: newProgress_result} as OnProgressChangeEvent)
         return value
     }
@@ -6386,6 +6386,259 @@ export class Deserializer extends DeserializerBase {
         let value : BackgroundBrightnessOptions = ({rate: rate_result, lightUpDegree: lightUpDegree_result} as BackgroundBrightnessOptions)
         return value
     }
+
+    readTargetInfo(): TargetInfo {
+        let valueDeserializer : Deserializer = this
+        const id_buf_selector : int32 = valueDeserializer.readInt8()
+        let id_buf : string | number | undefined
+        if (id_buf_selector == 0) {
+            id_buf = (valueDeserializer.readString() as string)
+        }
+        else if (id_buf_selector == 1) {
+            id_buf = (valueDeserializer.readNumber() as number)
+        }
+        else {
+            throw new Error("One of the branches for id_buf has to be chosen through deserialisation.")
+        }
+        const id_result : string | number = (id_buf as string | number)
+        const componentId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let componentId_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (componentId_buf_runtimeType)) {
+            componentId_buf = (valueDeserializer.readNumber() as number)
+        }
+        const componentId_result : number | undefined = componentId_buf
+        let value : TargetInfo = ({id: id_result, componentId: componentId_result} as TargetInfo)
+        return value
+    }
+
+    readPopupCommonOptions(): PopupCommonOptions {
+        let valueDeserializer : Deserializer = this
+        const placement_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let placement_buf : Placement | undefined
+        if ((RuntimeType.UNDEFINED) != (placement_buf_runtimeType))
+        {
+            placement_buf = TypeChecker.Placement_FromNumeric(valueDeserializer.readInt32())
+        }
+        const placement_result : Placement | undefined = placement_buf
+        const popupColor_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let popupColor_buf : Color | string | Resource | number | undefined
+        if ((RuntimeType.UNDEFINED) != (popupColor_buf_runtimeType))
+        {
+            const popupColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let popupColor_buf_ : Color | string | Resource | number | undefined
+            if (popupColor_buf__selector == 0) {
+                popupColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (popupColor_buf__selector == 1) {
+                popupColor_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (popupColor_buf__selector == 2) {
+                popupColor_buf_ = valueDeserializer.readResource()
+            }
+            else if (popupColor_buf__selector == 3) {
+                popupColor_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else {
+                throw new Error("One of the branches for popupColor_buf_ has to be chosen through deserialisation.")
+            }
+            popupColor_buf = (popupColor_buf_ as Color | string | Resource | number)
+        }
+        const popupColor_result : Color | string | Resource | number | undefined = popupColor_buf
+        const enableArrow_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let enableArrow_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (enableArrow_buf_runtimeType))
+        {
+            enableArrow_buf = valueDeserializer.readBoolean()
+        }
+        const enableArrow_result : boolean | undefined = enableArrow_buf
+        const autoCancel_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let autoCancel_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (autoCancel_buf_runtimeType))
+        {
+            autoCancel_buf = valueDeserializer.readBoolean()
+        }
+        const autoCancel_result : boolean | undefined = autoCancel_buf
+        const onStateChange_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let onStateChange_buf : PopupStateChangeCallback | undefined
+        if ((RuntimeType.UNDEFINED) != (onStateChange_buf_runtimeType))
+        {
+            onStateChange_buf = valueDeserializer.readPopupStateChangeCallback()
+        }
+        const onStateChange_result : PopupStateChangeCallback | undefined = onStateChange_buf
+        const arrowOffset_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let arrowOffset_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (arrowOffset_buf_runtimeType))
+        {
+            arrowOffset_buf = (valueDeserializer.readLength() as Length)
+        }
+        const arrowOffset_result : Length | undefined = arrowOffset_buf
+        const showInSubWindow_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let showInSubWindow_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (showInSubWindow_buf_runtimeType))
+        {
+            showInSubWindow_buf = valueDeserializer.readBoolean()
+        }
+        const showInSubWindow_result : boolean | undefined = showInSubWindow_buf
+        const mask_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let mask_buf : boolean | PopupMaskType | undefined
+        if ((RuntimeType.UNDEFINED) != (mask_buf_runtimeType))
+        {
+            const mask_buf__selector : int32 = valueDeserializer.readInt8()
+            let mask_buf_ : boolean | PopupMaskType | undefined
+            if (mask_buf__selector == 0) {
+                mask_buf_ = valueDeserializer.readBoolean()
+            }
+            else if (mask_buf__selector == 1) {
+                const mask_buf__u_color_buf_selector : int32 = valueDeserializer.readInt8()
+                let mask_buf__u_color_buf : Color | number | string | Resource | undefined
+                if (mask_buf__u_color_buf_selector == 0) {
+                    mask_buf__u_color_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+                }
+                else if (mask_buf__u_color_buf_selector == 1) {
+                    mask_buf__u_color_buf = (valueDeserializer.readNumber() as number)
+                }
+                else if (mask_buf__u_color_buf_selector == 2) {
+                    mask_buf__u_color_buf = (valueDeserializer.readString() as string)
+                }
+                else if (mask_buf__u_color_buf_selector == 3) {
+                    mask_buf__u_color_buf = valueDeserializer.readResource()
+                }
+                else {
+                    throw new Error("One of the branches for mask_buf__u_color_buf has to be chosen through deserialisation.")
+                }
+                const mask_buf__u_color : ResourceColor = (mask_buf__u_color_buf as Color | number | string | Resource)
+                mask_buf_ = ({color: mask_buf__u_color} as PopupMaskType)
+            }
+            else {
+                throw new Error("One of the branches for mask_buf_ has to be chosen through deserialisation.")
+            }
+            mask_buf = (mask_buf_ as boolean | PopupMaskType)
+        }
+        const mask_result : boolean | PopupMaskType | undefined = mask_buf
+        const targetSpace_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let targetSpace_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (targetSpace_buf_runtimeType))
+        {
+            targetSpace_buf = (valueDeserializer.readLength() as Length)
+        }
+        const targetSpace_result : Length | undefined = targetSpace_buf
+        const offset_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let offset_buf : Position | undefined
+        if ((RuntimeType.UNDEFINED) != (offset_buf_runtimeType))
+        {
+            offset_buf = valueDeserializer.readPosition()
+        }
+        const offset_result : Position | undefined = offset_buf
+        const width_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let width_buf : Dimension | undefined
+        if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
+        {
+            width_buf = (valueDeserializer.readLength() as Dimension)
+        }
+        const width_result : Dimension | undefined = width_buf
+        const arrowPointPosition_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let arrowPointPosition_buf : ArrowPointPosition | undefined
+        if ((RuntimeType.UNDEFINED) != (arrowPointPosition_buf_runtimeType))
+        {
+            arrowPointPosition_buf = TypeChecker.ArrowPointPosition_FromNumeric(valueDeserializer.readInt32())
+        }
+        const arrowPointPosition_result : ArrowPointPosition | undefined = arrowPointPosition_buf
+        const arrowWidth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let arrowWidth_buf : Dimension | undefined
+        if ((RuntimeType.UNDEFINED) != (arrowWidth_buf_runtimeType))
+        {
+            arrowWidth_buf = (valueDeserializer.readLength() as Dimension)
+        }
+        const arrowWidth_result : Dimension | undefined = arrowWidth_buf
+        const arrowHeight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let arrowHeight_buf : Dimension | undefined
+        if ((RuntimeType.UNDEFINED) != (arrowHeight_buf_runtimeType))
+        {
+            arrowHeight_buf = (valueDeserializer.readLength() as Dimension)
+        }
+        const arrowHeight_result : Dimension | undefined = arrowHeight_buf
+        const radius_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let radius_buf : Dimension | undefined
+        if ((RuntimeType.UNDEFINED) != (radius_buf_runtimeType))
+        {
+            radius_buf = (valueDeserializer.readLength() as Dimension)
+        }
+        const radius_result : Dimension | undefined = radius_buf
+        const shadow_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let shadow_buf : ShadowOptions | ShadowStyle | undefined
+        if ((RuntimeType.UNDEFINED) != (shadow_buf_runtimeType))
+        {
+            const shadow_buf__selector : int32 = valueDeserializer.readInt8()
+            let shadow_buf_ : ShadowOptions | ShadowStyle | undefined
+            if (shadow_buf__selector == 0) {
+                shadow_buf_ = valueDeserializer.readShadowOptions()
+            }
+            else if (shadow_buf__selector == 1) {
+                shadow_buf_ = TypeChecker.ShadowStyle_FromNumeric(valueDeserializer.readInt32())
+            }
+            else {
+                throw new Error("One of the branches for shadow_buf_ has to be chosen through deserialisation.")
+            }
+            shadow_buf = (shadow_buf_ as ShadowOptions | ShadowStyle)
+        }
+        const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
+        const backgroundBlurStyle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let backgroundBlurStyle_buf : BlurStyle | undefined
+        if ((RuntimeType.UNDEFINED) != (backgroundBlurStyle_buf_runtimeType))
+        {
+            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
+        }
+        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
+        const focusable_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let focusable_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (focusable_buf_runtimeType))
+        {
+            focusable_buf = valueDeserializer.readBoolean()
+        }
+        const focusable_result : boolean | undefined = focusable_buf
+        const transition_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let transition_buf : TransitionEffect | undefined
+        if ((RuntimeType.UNDEFINED) != (transition_buf_runtimeType))
+        {
+            transition_buf = (valueDeserializer.readTransitionEffect() as TransitionEffect)
+        }
+        const transition_result : TransitionEffect | undefined = transition_buf
+        const onWillDismiss_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let onWillDismiss_buf : boolean | ((parameter: DismissPopupAction) => void) | undefined
+        if ((RuntimeType.UNDEFINED) != (onWillDismiss_buf_runtimeType))
+        {
+            const onWillDismiss_buf__selector : int32 = valueDeserializer.readInt8()
+            let onWillDismiss_buf_ : boolean | ((parameter: DismissPopupAction) => void) | undefined
+            if (onWillDismiss_buf__selector == 0) {
+                onWillDismiss_buf_ = valueDeserializer.readBoolean()
+            }
+            else if (onWillDismiss_buf__selector == 1) {
+                onWillDismiss_buf_ = valueDeserializer.readCallback_DismissPopupAction_Void()
+            }
+            else {
+                throw new Error("One of the branches for onWillDismiss_buf_ has to be chosen through deserialisation.")
+            }
+            onWillDismiss_buf = (onWillDismiss_buf_ as boolean | ((parameter: DismissPopupAction) => void))
+        }
+        const onWillDismiss_result : boolean | ((parameter: DismissPopupAction) => void) | undefined = onWillDismiss_buf
+        const enableHoverMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let enableHoverMode_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
+        {
+            enableHoverMode_buf = valueDeserializer.readBoolean()
+        }
+        const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
+        const followTransformOfTarget_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let followTransformOfTarget_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (followTransformOfTarget_buf_runtimeType))
+        {
+            followTransformOfTarget_buf = valueDeserializer.readBoolean()
+        }
+        const followTransformOfTarget_result : boolean | undefined = followTransformOfTarget_buf
+        let value : PopupCommonOptions = ({placement: placement_result, popupColor: popupColor_result, enableArrow: enableArrow_result, autoCancel: autoCancel_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, targetSpace: targetSpace_result, offset: offset_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, focusable: focusable_buf, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result} as PopupCommonOptions)
+        return value
+    }
+
     readBackgroundImageOptions(): BackgroundImageOptions {
         let valueDeserializer : Deserializer = this
         const syncLoad_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
