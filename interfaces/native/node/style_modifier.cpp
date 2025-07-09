@@ -7889,8 +7889,8 @@ int32_t SetTextFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     fontStruct.fontSizeNumber = size;
     fontStruct.fontSizeUnit = GetDefaultUnit(node, UNIT_FP);
     fontStruct.fontWeight = weight;
+    std::vector<const char*> fontFamilies;
     if (familyArray.size() > 0) {
-        std::vector<const char*> fontFamilies;
         for (const auto& element : familyArray) {
             fontFamilies.push_back(element.c_str());
         }

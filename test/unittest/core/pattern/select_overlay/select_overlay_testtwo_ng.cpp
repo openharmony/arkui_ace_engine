@@ -649,6 +649,33 @@ HWTEST_F(SelectOverlayTestTwoNg, AddCreateMenuExtensionMenuParams001, TestSize.L
 }
 
 /**
+ * @tc.name: AddCreateMenuExtensionMenuParams002
+ * @tc.desc: AddCreateMenuExtensionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, AddCreateMenuExtensionMenuParams002, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    SelectMenuCallback menuCallback;
+    menuCallback.onCut = []() {};
+    menuCallback.onCopy = []() {};
+    menuCallback.onAskCelia = []() {};
+    infoPtr->menuCallback = menuCallback;
+    auto menuOptionItems = GetMenuOptionItems();
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    selectOverlayNode->isMoreOrBackSymbolIcon_ = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    EXPECT_NE(selectOverlayNode, nullptr);
+    std::vector<OptionParam> params;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 1, params);
+    EXPECT_NE(params.size(), 0);
+}
+
+/**
  * @tc.name: UpdateMainWindowOffset001
  * @tc.desc: UpdateMainWindowOffset
  * @tc.type: FUNC
