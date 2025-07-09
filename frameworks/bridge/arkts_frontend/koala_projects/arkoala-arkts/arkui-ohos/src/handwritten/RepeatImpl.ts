@@ -207,7 +207,8 @@ function virtualRender<T>(
     repeatId: KoalaCallsiteKey,
 ): void {
     let dataSource = remember(() => new RepeatDataSource<T>(arr));
-    dataSource.updateData(arr, attributes.userDefinedTotal_ ?? arr.length);
+    const total = attributes.userDefinedTotal_ ?? arr.length;
+    dataSource.updateData(arr, (Number.isInteger(total) && total >= 0) ? total : arr.length);
     if (!attributes.onLazyLoading_ && dataSource.totalCount() > arr.length) {
         console.error(`(${repeatId}) totalCount must not exceed the array length without onLazyLoading callback.`);
     }
