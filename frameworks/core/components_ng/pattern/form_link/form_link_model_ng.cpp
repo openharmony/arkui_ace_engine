@@ -44,9 +44,6 @@ RefPtr<FrameNode> FormLinkModelNG::StsCreateFrameNode()
     }
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::FORM_LINK_ETS_TAG, nodeId);
-
-    LOGI("nodeId is %{public}d ", nodeId);
-
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::FORM_LINK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FormLinkPattern>(); });
     return frameNode;
