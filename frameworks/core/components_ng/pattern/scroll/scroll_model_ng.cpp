@@ -413,6 +413,13 @@ uint32_t ScrollModelNG::GetScrollBarColor(FrameNode* frameNode)
 
 void ScrollModelNG::SetScrollBarColor(const Color& color)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto scrollBar = pattern->GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+    scrollBar->SetForegroundColor(color);
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color);
 }
 
@@ -485,6 +492,12 @@ void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
 
 void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& color)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto scrollBar = pattern->GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+    scrollBar->SetForegroundColor(color);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color, frameNode);
 }
 
