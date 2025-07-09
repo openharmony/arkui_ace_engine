@@ -33,14 +33,6 @@ void ImageBitmapPeer::SetOptions(
     ContainerScope scope(Container::CurrentIdSafely());
     SetInstanceId(OHOS::Ace::Container::CurrentId());
     if (!textString.empty()) {
-        // auto context = PipelineBase::GetCurrentContext();
-        // CHECK_NULL_VOID(context);
-        // if (context->IsFormRender() && NotFormSupport(textString)) {
-        //     LOGE("ARKOALA ImageBitmapPeer::Constructor Not supported src : %{public}s when form render",
-        //         textString.c_str());
-        //     return;
-        // }
-        // LoadImage(textString);
     } else {
 #ifdef PIXEL_MAP_SUPPORTED
         CHECK_NULL_VOID(pixelMap);
