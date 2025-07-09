@@ -368,7 +368,12 @@ napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback
     size_t argc = 2;
     napi_value argv[2] = { nullptr };
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+    napi_status status = napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     if (argc < 1) {
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
