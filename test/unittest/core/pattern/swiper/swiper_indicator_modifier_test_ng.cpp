@@ -1203,11 +1203,49 @@ HWTEST_F(SwiperIndicatorModifierTestNg, AdjustPointCenterXForTouchBottom001, Tes
     paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
     paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
     paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    paintMethod->touchBottomPageRate_ = 0.2;
     pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
     paintMethod->AdjustPointCenterXForTouchBottom(
         pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex, selectedItemWidth, 0);
     EXPECT_EQ(pointCenter.startLongPointRightCenterX, endVectorBlackPointCenterX[0]);
     EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[0]);
+}
+
+/**
+ * @tc.name: AdjustPointCenterXForTouchBottomNew
+ * @tc.desc: Test AdjustPointCenterXForTouchBottomNew
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, AdjustPointCenterXForTouchBottomNew001, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    DotIndicatorPaintMethod::StarAndEndPointCenter pointCenter;
+    LinearVector<float> endVectorBlackPointCenterX;
+    for (int32_t i = 0; i < totalCount; ++i) {
+        endVectorBlackPointCenterX.emplace_back(static_cast<float>(i + 1));
+    }
+
+    int32_t endCurrentIndex = totalCount - 1;
+    float selectedItemWidth = 0.0f;
+
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    paintMethod->touchBottomPageRate_ = 0.2;
+    pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
+    paintMethod->touchBottomPageRate_ = 0;
+    EXPECT_TRUE(paintMethod->AdjustPointCenterXForTouchBottomNew(pointCenter, endVectorBlackPointCenterX,
+        endCurrentIndex, selectedItemWidth));
+
+    paintMethod->touchBottomPageRate_ = 0.2;
+    EXPECT_FALSE(paintMethod->AdjustPointCenterXForTouchBottomNew(pointCenter, endVectorBlackPointCenterX,
+        endCurrentIndex, selectedItemWidth));
 }
 
 /**
