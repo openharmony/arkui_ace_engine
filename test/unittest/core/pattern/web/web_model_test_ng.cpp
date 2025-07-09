@@ -4384,6 +4384,24 @@ HWTEST_F(WebModelTestNg, SetOnHttpAuthRequest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOnHttpAuthRequest003
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnHttpAuthRequest003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetOnHttpAuthRequest(nullptr, [&callbackCalled](const BaseEventInfo* info) {
+        callbackCalled = true;
+        return true;
+    });
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
+
+/**
  * @tc.name: SetGestureFocusMode001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC

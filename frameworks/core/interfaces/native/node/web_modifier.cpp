@@ -1062,7 +1062,10 @@ void SetJavaScriptOnDocumentStart(ArkUINodeHandle node, ArkUI_ScriptItemArray* v
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScriptItems SecriptInfos;
+    if (size <= 0) {
+        return;
+    }
+    ScriptItems scriptInfos;
     for (int32_t i = 0; i < size; ++i) {
         std::string script;
         ScriptItemsByOrder scriptRules;
@@ -1076,9 +1079,9 @@ void SetJavaScriptOnDocumentStart(ArkUINodeHandle node, ArkUI_ScriptItemArray* v
             tmp.push_back(sc);
         }
         scriptRules = tmp;
-        SecriptInfos.insert(std::make_pair(script, scriptRules));
+        scriptInfos.insert(std::make_pair(script, scriptRules));
     }
-    WebModelNG::JavaScriptOnDocumentStart(frameNode, SecriptInfos);
+    WebModelNG::JavaScriptOnDocumentStart(frameNode, scriptInfos);
 }
 
 void ResetJavaScriptOnDocumentStart(ArkUINodeHandle node)
@@ -1092,7 +1095,10 @@ void SetJavaScriptOnDocumentEnd(ArkUINodeHandle node, ArkUI_ScriptItemArray* val
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScriptItems SecriptInfos;
+    if (size <= 0) {
+        return;
+    }
+    ScriptItems scriptInfos;
     for (int32_t i = 0; i < size; ++i) {
         std::string script;
         ScriptItemsByOrder scriptRules;
@@ -1106,9 +1112,9 @@ void SetJavaScriptOnDocumentEnd(ArkUINodeHandle node, ArkUI_ScriptItemArray* val
             tmp.push_back(sc);
         }
         scriptRules = tmp;
-        SecriptInfos.insert(std::make_pair(script, scriptRules));
+        scriptInfos.insert(std::make_pair(script, scriptRules));
     }
-    WebModelNG::JavaScriptOnDocumentEnd(frameNode, SecriptInfos);
+    WebModelNG::JavaScriptOnDocumentEnd(frameNode, scriptInfos);
 }
 
 void ResetJavaScriptOnDocumentEnd(ArkUINodeHandle node)
