@@ -3957,25 +3957,28 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     json->PutExtAttr("caretColor", GetCaretColor().c_str(), filter);
     json->PutExtAttr("selectedBackgroundColor", GetSelectedBackgroundColor().c_str(), filter);
     json->PutExtAttr("enableHapticFeedback", isEnableHapticFeedback_ ? "true" : "false", filter);
-    json->PutExtAttr("shaderStyle", GetShaderStyleInJson().c_str(), filter);
+    json->PutExtAttr("shaderStyle", GetShaderStyleInJson(), filter);
 }
 
-std::string TextPattern::GetShaderStyleInJson() const
+std::unique_ptr<JsonValue> TextPattern::GetShaderStyleInJson() const
 {
+    auto resultJson = JsonUtil::Create(true);
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, "");
+    CHECK_NULL_RETURN(layoutProperty, resultJson);
     if (layoutProperty->HasGradientShaderStyle()) {
         auto propGradient = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
         auto type = propGradient.GetType();
         if (type == GradientType::LINEAR) {
-            return GradientJsonUtils::LinearGradientToJson(propGradient)->ToString();
+            return GradientJsonUtils::LinearGradientToJson(propGradient);
         } else if (type == GradientType::RADIAL) {
-            return GradientJsonUtils::RadialGradientToJson(propGradient)->ToString();
+            return GradientJsonUtils::RadialGradientToJson(propGradient);
         }
     } else if (layoutProperty->HasColorShaderStyle()) {
-        return layoutProperty->GetColorShaderStyle().value_or(Color::TRANSPARENT).ColorToString();
+        resultJson->Put(
+            "color", layoutProperty->GetColorShaderStyle().value_or(Color::TRANSPARENT).ColorToString().c_str());
+        return resultJson;
     }
-    return "";
+    return resultJson;
 }
 
 std::string TextPattern::GetBindSelectionMenuInJson() const

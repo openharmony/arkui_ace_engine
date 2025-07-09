@@ -2659,7 +2659,7 @@ HWTEST_F(TextTestThreeNg, TextModelGetShaderStyleInJson001, TestSize.Level1)
     linearGradient.angle = std::make_optional(2.00_vp);
     gradientLinear.SetLinearGradient(linearGradient);
     textLayoutProperty->UpdateGradientShaderStyle(gradientLinear);
-    std::string radialJson = pattern->GetShaderStyleInJson().c_str();
+    std::string radialJson = pattern->GetShaderStyleInJson()->ToString();
     EXPECT_EQ(radialJson,
         "{\"angle\":\"2.00vp\",\"direction\":\"GradientDirection.None\",\"colors\":[],\"repeating\":\"false\"}");
 
@@ -2673,7 +2673,7 @@ HWTEST_F(TextTestThreeNg, TextModelGetShaderStyleInJson001, TestSize.Level1)
     radialGradient.radialCenterY = std::make_optional(25.0_vp);
     gradientRadial.SetRadialGradient(radialGradient);
     textLayoutProperty->UpdateGradientShaderStyle(gradientRadial);
-    std::string linearJson = pattern->GetShaderStyleInJson().c_str();
+    std::string linearJson = pattern->GetShaderStyleInJson()->ToString();
     EXPECT_EQ(linearJson, "{\"center\":[\"25.00vp\",\"25.00vp\"],\"colors\":[],\"repeating\":\"false\"}");
 
     /**
@@ -2682,7 +2682,15 @@ HWTEST_F(TextTestThreeNg, TextModelGetShaderStyleInJson001, TestSize.Level1)
     Color color = Color::RED;
     textLayoutProperty->ResetGradientShaderStyle();
     textLayoutProperty->UpdateColorShaderStyle(color);
-    std::string colorJson = pattern->GetShaderStyleInJson().c_str();
-    EXPECT_EQ(colorJson, "#FFFF0000");
+    std::string colorJson = pattern->GetShaderStyleInJson()->ToString();
+    EXPECT_EQ(colorJson, "{\"color\":\"#FFFF0000\"}");
+
+    /**
+     * @tc.steps: step5. Set type == null.
+     */
+    Gradient gradient = Gradient();
+    textLayoutProperty->UpdateGradientShaderStyle(gradient);
+    std::string json = pattern->GetShaderStyleInJson()->ToString();
+    EXPECT_EQ(json, "{}");
 }
 } // namespace OHOS::Ace::NG
