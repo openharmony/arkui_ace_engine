@@ -56,9 +56,7 @@ function makeCacheCompilerHost(
             return fileCache.get(fileName);
         }
 
-        const sourceFile = originalGetSourceFile.call(this, fileName, ...rest);
-        // fileCache.set(fileName, sourceFile); // Seems to be unnecessary
-  
+        const sourceFile = originalGetSourceFile.call(this, fileName, ...rest);  
         return sourceFile;
       },
       fileCache
@@ -78,7 +76,6 @@ export default function programTransformer(
 ) {
     // TODO transform per-module
     if (process.env.aceModuleRoot) {
-        // debug("ENV", process.env);
         console.trace = () => {};
 
         let root = (extras.ts as any).normalizePath(process.env.aceModuleRoot)
@@ -102,7 +99,6 @@ function transformMemoCode(program: ts.Program, compilerHost: CacheCompilerHost,
     const compilerOptions = program.getCompilerOptions()
     const rootFiles: string[] = program.getRootFileNames().map((extras.ts as any).normalizePath)
     const rootFileSet = new Set(rootFiles)
-    // debug(["Memo transform program roots:", ...rootFiles].join("\n  - "))
 
     const fileFilter = options.filter ?? (fileName => rootFileSet.has(fileName))
     const sourceFiles = program.getSourceFiles().filter(file => {
@@ -118,7 +114,6 @@ function transformMemoCode(program: ts.Program, compilerHost: CacheCompilerHost,
         debug("Nothing to memo transform");
         return program;
     }
-    // debug(["Memo transform source files:", ...program.getSourceFiles().map(f => f.fileName)].join("\n  - "))
     debug(["Memo transform for:", ...sourceFiles.map(f => f.fileName).sort()].join("\n  - "))
     const transformers = [
         memoPlugin(program as any, {
@@ -128,12 +123,6 @@ function transformMemoCode(program: ts.Program, compilerHost: CacheCompilerHost,
     ]
     const transformResult = extras.ts.transform(sourceFiles, transformers, { ...compilerOptions, noEmit: true });
     const transformedSources = transformResult.transformed
-
-    // for (const diag of transformResult.diagnostics ?? []) {
-    //     debug("Memo error in " + diag.file.fileName)
-    //     debug(diag.source ?? program.getSourceFile(diag.file.fileName))
-    //     debug()
-    // }
 
     !DISABLE_CACHE && globalMemoFileCache.forEach((v, k) => compilerHost.fileCache.set(k, v));
     let { printFile } = extras.ts.createPrinter({ removeComments: false });
@@ -146,7 +135,6 @@ function transformMemoCode(program: ts.Program, compilerHost: CacheCompilerHost,
         compilerHost.fileCache.set(fileName, transformedFile)
         !DISABLE_CACHE && globalMemoFileCache.set(fileName, transformedFile)
         debug("Transformed memo in file: " + fileName + ", size = " + transformedFile.end + ", version = " + languageVersion)
-        // debug(printFile(sourceFile))
     }
 
     let prog = extras.ts.createProgram(rootFiles, compilerOptions, compilerHost, program)
@@ -170,7 +158,6 @@ function transformETSCode(program: ts.Program, compilerHost: CacheCompilerHost, 
     }
 
     const rootFileSet = new Set(rootFiles)
-    // debug(["Ets transform program roots:", ...rootFiles].join("\n  - "))
 
     const fileFilter = options.filter ?? (fileName => rootFileSet.has(fileName))
     const sourceFiles = program.getSourceFiles().filter(file => {
@@ -186,7 +173,6 @@ function transformETSCode(program: ts.Program, compilerHost: CacheCompilerHost, 
         debug("Nothing to ETS transform");
         return program;
     }
-    // debug(["Ets transform source files:", ...program.getSourceFiles().map(f => f.fileName)].join("\n  - "))
     debug(["Ets transform for:", ...sourceFiles.map(f => f.fileName).sort()].join("\n  - "))
     const transformers = [
         makeEtsExpander(program.getTypeChecker() as any, {
@@ -198,12 +184,6 @@ function transformETSCode(program: ts.Program, compilerHost: CacheCompilerHost, 
     const transformResult = extras.ts.transform(sourceFiles, transformers, { ...compilerOptions, noEmit: true });
     const transformedSources = transformResult.transformed
 
-    // for (const diag of transformResult.diagnostics ?? []) {
-    //     debug("Ets error in " + diag.file.fileName)
-    //     debug(diag.source ?? program.getSourceFile(diag.file.fileName))
-    //     debug()
-    // }
-
     !DISABLE_CACHE && globalEtsFileCache.forEach((v, k) => compilerHost.fileCache.set(k, v));
     let { printFile } = extras.ts.createPrinter({ removeComments: false });
     for (const sourceFile of transformedSources) {
@@ -214,7 +194,6 @@ function transformETSCode(program: ts.Program, compilerHost: CacheCompilerHost, 
         !DISABLE_CACHE && globalEtsFileCache.set(fileName, transformedFile)
         compilerHost.fileCache.set(fileName, transformedFile)
         debug("Transformed ets in file: " + fileName + ", size = " + transformedFile.end + ", version = " + languageVersion)
-        // debug(printFile(sourceFile))
     }
     let prog = extras.ts.createProgram(rootFiles, compilerOptions, compilerHost, program)
     return prog;

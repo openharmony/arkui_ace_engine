@@ -709,41 +709,6 @@ export class GestureGroupInterfaceInternal implements MaterializedBase,GestureGr
             const gesture_element : GestureType = gesture[i]
             let gesture_element_type : int32 = RuntimeType.UNDEFINED
             gesture_element_type = runtimeType(gesture_element)
-            // if (TypeChecker.isTapGestureInterface(gesture_element)) {
-            //     thisSerializer.writeInt8(0 as int32)
-            //     const gesture_element_0  = gesture_element as TapGestureInterface
-            //     thisSerializer.writeTapGestureInterface(gesture_element_0)
-            // }
-            // else if (TypeChecker.isLongPressGestureInterface(gesture_element)) {
-            //     thisSerializer.writeInt8(1 as int32)
-            //     const gesture_element_1  = gesture_element as LongPressGestureInterface
-            //     thisSerializer.writeLongPressGestureInterface(gesture_element_1)
-            // }
-            // else if (TypeChecker.isPanGestureInterface(gesture_element)) {
-            //     thisSerializer.writeInt8(2 as int32)
-            //     const gesture_element_2  = gesture_element as PanGestureInterface
-            //     thisSerializer.writePanGestureInterface(gesture_element_2)
-            // }
-            // else if (TypeChecker.isPinchGestureInterface(gesture_element)) {
-            //     thisSerializer.writeInt8(3 as int32)
-            //     const gesture_element_3  = gesture_element as PinchGestureInterface
-            //     thisSerializer.writePinchGestureInterface(gesture_element_3)
-            // }
-            // else if (TypeChecker.isSwipeGestureInterface(gesture_element)) {
-            //     thisSerializer.writeInt8(4 as int32)
-            //     const gesture_element_4  = gesture_element as SwipeGestureInterface
-            //     thisSerializer.writeSwipeGestureInterface(gesture_element_4)
-            // }
-            // else if (TypeChecker.isRotationGestureInterface(gesture_element)) {
-            //     thisSerializer.writeInt8(5 as int32)
-            //     const gesture_element_5  = gesture_element as RotationGestureInterface
-            //     thisSerializer.writeRotationGestureInterface(gesture_element_5)
-            // }
-            // else if (TypeChecker.isGestureGroupInterface(gesture_element)) {
-            //     thisSerializer.writeInt8(6 as int32)
-            //     const gesture_element_6  = gesture_element as GestureGroupInterface
-            //     thisSerializer.writeGestureGroupInterface(gesture_element_6)
-            // }
         }
         const retval  = ArkUIGeneratedNativeModule._GestureGroupInterface_ctor(TypeChecker.GestureMode_ToNumeric(mode), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
