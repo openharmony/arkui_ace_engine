@@ -23,7 +23,7 @@ import { AnimateParam, AnimationExtender, KeyframeAnimateParam, KeyframeState } 
 import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from "@ohos/animator"
 import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
-    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo }
+    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId }
     from "@ohos/arkui/UIContext"
 import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry } from '@koalaui/runtime'
 import { Context, PointerStyle, PixelMap } from "#external"
@@ -742,7 +742,7 @@ export class PromptActionImpl extends PromptAction {
 
     //@ts-ignore
     showDialog(options: promptAction.ShowDialogOptions,
-        callback?: AsyncCallback<promptAction.ShowDialogSuccessResponse>): void {
+        callback: AsyncCallback<promptAction.ShowDialogSuccessResponse>): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         promptAction.showDialog1(options, callback);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -758,7 +758,7 @@ export class PromptActionImpl extends PromptAction {
 
     //@ts-ignore
     showActionMenu(options: promptAction.ActionMenuOptions,
-        callback?: AsyncCallback<promptAction.ActionMenuSuccessResponse>): void {
+        callback: AsyncCallback<promptAction.ActionMenuSuccessResponse>): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         promptAction.showActionMenu1(options, callback);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -781,16 +781,17 @@ export class PromptActionImpl extends PromptAction {
         }
 
         let optionsInternal: promptAction.DialogOptionsInternal = {};
-        if (options != undefined) {
-            if (options.transition !== undefined && options.transition!.getPeer() !== undefined) {
-                optionsInternal.transition = options.transition!.getPeer()!.ptr;
-            }
-            if (options.dialogTransition !== undefined && options.dialogTransition!.getPeer() !== undefined) {
-                optionsInternal.dialogTransition = options.dialogTransition!.getPeer()!.ptr;
-            }
-            if (options.maskTransition !== undefined && options.maskTransition!.getPeer() !== undefined) {
-                optionsInternal.maskTransition = options.maskTransition!.getPeer()!.ptr;
-            }
+        const transition = options?.transition?.getPeer?.();
+        if (transition !== undefined) {
+            optionsInternal.transition = transition.ptr;
+        }
+        const dialogTransition = options?.dialogTransition?.getPeer?.();
+        if (dialogTransition !== undefined) {
+            optionsInternal.dialogTransition = dialogTransition.ptr;
+        }
+        const maskTransition = options?.maskTransition?.getPeer?.();
+        if (maskTransition !== undefined) {
+            optionsInternal.maskTransition = maskTransition.ptr;
         }
         const retval = promptAction.openCustomDialog1(contentPtr, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -806,16 +807,17 @@ export class PromptActionImpl extends PromptAction {
         let builderPtr = peerNode.peer.ptr;
 
         let optionsInternal: promptAction.DialogOptionsInternal = {};
-        if (options != undefined) {
-            if (options.transition !== undefined && options.transition!.getPeer() !== undefined) {
-                optionsInternal.transition = options.transition!.getPeer()!.ptr;
-            }
-            if (options.dialogTransition !== undefined && options.dialogTransition!.getPeer() !== undefined) {
-                optionsInternal.dialogTransition = options.dialogTransition!.getPeer()!.ptr;
-            }
-            if (options.maskTransition !== undefined && options.maskTransition!.getPeer() !== undefined) {
-                optionsInternal.maskTransition = options.maskTransition!.getPeer()!.ptr;
-            }
+        const transition = options?.transition?.getPeer?.();
+        if (transition !== undefined) {
+            optionsInternal.transition = transition.ptr;
+        }
+        const dialogTransition = options?.dialogTransition?.getPeer?.();
+        if (dialogTransition !== undefined) {
+            optionsInternal.dialogTransition = dialogTransition.ptr;
+        }
+        const maskTransition = options?.maskTransition?.getPeer?.();
+        if (maskTransition !== undefined) {
+            optionsInternal.maskTransition = maskTransition.ptr;
         }
         const retval = promptAction.openCustomDialog(builderPtr, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -850,6 +852,61 @@ export class PromptActionImpl extends PromptAction {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         promptAction.closeCustomDialog(dialogId);
         ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    openCustomDialogWithController(content: ComponentContent, controller: promptAction.DialogController,
+        options?: promptAction.BaseDialogOptions): Promise<void> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let contentPtr: KPointer = 0
+        if (content.getNodePtr() !== undefined) {
+            contentPtr = content.getNodePtr() as (KPointer)
+        }
+
+        let optionsInternal: promptAction.DialogOptionsInternal = {};
+        const transition = options?.transition?.getPeer?.();
+        if (transition !== undefined) {
+            optionsInternal.transition = transition.ptr;
+        }
+        const dialogTransition = options?.dialogTransition?.getPeer?.();
+        if (dialogTransition !== undefined) {
+            optionsInternal.dialogTransition = dialogTransition.ptr;
+        }
+        const maskTransition = options?.maskTransition?.getPeer?.();
+        if (maskTransition !== undefined) {
+            optionsInternal.maskTransition = maskTransition.ptr;
+        }
+        const retval = promptAction.openCustomDialogWithController(contentPtr, controller, options, optionsInternal);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return retval;
+    }
+
+    presentCustomDialog(builder: CustomBuilder | CustomBuilderWithId, controller?: promptAction.DialogController,
+        options?: promptAction.DialogOptions): Promise<number> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let builderPtr: KPointer = 0;
+        if (builder instanceof CustomBuilder) {
+            const peerNode = createUiDetachedRoot((): PeerNode => {
+                return ArkComponentRootPeer.create(undefined);
+            }, builder, this.instanceId_);
+            builderPtr = peerNode.peer.ptr;
+        }
+
+        let optionsInternal: promptAction.DialogOptionsInternal = {};
+        const transition = options?.transition?.getPeer?.();
+        if (transition !== undefined) {
+            optionsInternal.transition = transition.ptr;
+        }
+        const dialogTransition = options?.dialogTransition?.getPeer?.();
+        if (dialogTransition !== undefined) {
+            optionsInternal.dialogTransition = dialogTransition.ptr;
+        }
+        const maskTransition = options?.maskTransition?.getPeer?.();
+        if (maskTransition !== undefined) {
+            optionsInternal.maskTransition = maskTransition.ptr;
+        }
+        const retval = promptAction.presentCustomDialog(builderPtr, controller, options, optionsInternal);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return retval;
     }
 
     openPopup(content: ComponentContent, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {

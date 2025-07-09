@@ -22,6 +22,7 @@
 #include "prompt_action_params.h"
 #include "toast_params.h"
 #include "dialog_params.h"
+#include "prompt_action_controller.h"
 
 #include "frameworks/base/error/error_code.h"
 #include "frameworks/base/utils/utils.h"
@@ -93,9 +94,9 @@ static void CloseToast(ani_env* env, ani_int toastId)
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] closeToast enter.");
 }
 
-static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_fn_object callback)
+static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_object callback)
 {
-    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] showDialog1 enter.");
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] ShowDialogWithCallback enter.");
     OHOS::Ace::DialogProperties dialogProps;
     if (!GetShowDialogOptions(env, options, dialogProps)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show dialog options fail.");
@@ -105,7 +106,9 @@ static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_fn_obje
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
-    asyncContext->callback = callback;
+    ani_ref globalRef;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(callback), &globalRef);
+    asyncContext->callback = reinterpret_cast<ani_fn_object>(globalRef);
 
     std::function<void(int32_t, int32_t)> finishCallback = GetShowDialogCallback(asyncContext);
     if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
@@ -119,7 +122,7 @@ static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_fn_obje
 
 static ani_object ShowDialog(ani_env* env, ani_object options)
 {
-    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] showDialog enter.");
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] ShowDialog enter.");
     OHOS::Ace::DialogProperties dialogProps;
     if (!GetShowDialogOptions(env, options, dialogProps)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show dialog options fail.");
@@ -146,9 +149,9 @@ static ani_object ShowDialog(ani_env* env, ani_object options)
     return result;
 }
 
-static void ShowActionMenuWithCallback(ani_env* env, ani_object options, ani_fn_object callback)
+static void ShowActionMenuWithCallback(ani_env* env, ani_object options, ani_object callback)
 {
-    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] showActionMenu1 enter.");
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] ShowActionMenuWithCallback enter.");
     OHOS::Ace::DialogProperties dialogProps;
     if (!GetActionMenuOptions(env, options, dialogProps)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show action menu options fail.");
@@ -158,7 +161,9 @@ static void ShowActionMenuWithCallback(ani_env* env, ani_object options, ani_fn_
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
-    asyncContext->callback = callback;
+    ani_ref globalRef;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(callback), &globalRef);
+    asyncContext->callback = reinterpret_cast<ani_fn_object>(globalRef);
 
     std::function<void(int32_t, int32_t)> finishCallback = GetShowActionMenuCallback(asyncContext);
     if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
@@ -172,7 +177,7 @@ static void ShowActionMenuWithCallback(ani_env* env, ani_object options, ani_fn_
 
 static ani_object ShowActionMenu(ani_env* env, ani_object options)
 {
-    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] showActionMenu enter.");
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] ShowActionMenu enter.");
     OHOS::Ace::DialogProperties dialogProps;
     if (!GetActionMenuOptions(env, options, dialogProps)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show action menu options fail.");
@@ -202,14 +207,14 @@ static ani_object ShowActionMenu(ani_env* env, ani_object options)
 static ani_object OpenCustomDialogContent(ani_env* env, ani_long content, ani_object options,
     ani_object optionsInternal)
 {
-    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] openCustomDialog1 enter.");
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] OpenCustomDialogContent enter.");
     OHOS::Ace::DialogProperties dialogProps;
     GetBaseDialogOptions(env, options, dialogProps);
     GetDialogOptionsInternal(env, optionsInternal, dialogProps);
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    dialogProps.contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::Referenced::RawPtr(frameNode));
+    dialogProps.contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
@@ -233,7 +238,7 @@ static ani_object OpenCustomDialogContent(ani_env* env, ani_long content, ani_ob
 
 static ani_object OpenCustomDialog(ani_env* env, ani_long builder, ani_object options, ani_object optionsInternal)
 {
-    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] openCustomDialog enter.");
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] OpenCustomDialog enter.");
     OHOS::Ace::DialogProperties dialogProps;
     if (!GetCustomDialogOptions(env, options, dialogProps)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse open custom dialog options fail.");
@@ -265,7 +270,7 @@ static ani_object OpenCustomDialog(ani_env* env, ani_long builder, ani_object op
 
 static ani_object UpdateCustomDialog(ani_env* env, ani_long content, ani_object options)
 {
-    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] updateCustomDialog enter.");
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] UpdateCustomDialog enter.");
     OHOS::Ace::DialogProperties dialogProps;
     if (!GetBaseDialogOptions(env, options, dialogProps)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse open custom dialog options fail.");
@@ -274,7 +279,7 @@ static ani_object UpdateCustomDialog(ani_env* env, ani_long content, ani_object 
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::Referenced::RawPtr(frameNode));
+    auto contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
@@ -305,11 +310,11 @@ static ani_object UpdateCustomDialog(ani_env* env, ani_long content, ani_object 
 
 static ani_object CloseCustomDialogContent(ani_env* env, ani_long content)
 {
-    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] closeCustomDialog1 enter.");
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] CloseCustomDialogContent enter.");
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::Referenced::RawPtr(frameNode));
+    auto contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
@@ -332,7 +337,7 @@ static ani_object CloseCustomDialogContent(ani_env* env, ani_long content)
 
 static void CloseCustomDialog(ani_env* env, ani_double dialogId)
 {
-    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] closeCustomDialog enter.");
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] CloseCustomDialog enter.");
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
     asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
@@ -346,18 +351,84 @@ static void CloseCustomDialog(ani_env* env, ani_double dialogId)
     }
 }
 
+static ani_object OpenCustomDialogWithController(ani_env* env, ani_long content, ani_object controller,
+    ani_object options, ani_object optionsInternal)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] OpenCustomDialogWithController enter.");
+    OHOS::Ace::DialogProperties dialogProps;
+    GetBaseDialogOptions(env, options, dialogProps);
+    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    dialogProps.contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
+    if (!OHOS::Ace::Ani::GetDialogController(env, controller, dialogProps.dialogCallback)) {
+        return nullptr;
+    }
+
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    ani_object result;
+    ani_status status = env->Promise_New(&asyncContext->deferred, &result);
+    if (status != ANI_OK) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+    }
+
+    std::function<void(int32_t)> finishCallback = GetCustomDialogContentPromise(asyncContext);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
+        OHOS::Ace::NG::DialogManagerStatic::OpenCustomDialogStatic(dialogProps, std::move(finishCallback),
+            OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->OpenCustomDialogStatic(dialogProps, std::move(finishCallback));
+    }
+    return result;
+}
+
+static ani_object PresentCustomDialog(ani_env* env, ani_long builder, ani_object controller, ani_object options,
+    ani_object optionsInternal)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] PresentCustomDialog enter.");
+    OHOS::Ace::DialogProperties dialogProps;
+    GetDialogOptions(env, options, dialogProps);
+    dialogProps.customBuilder = GetCustomBuilder(env, builder);
+    dialogProps.isUserCreatedDialog = true;
+    OHOS::Ace::Ani::GetDialogController(env, controller, dialogProps.dialogCallback);
+
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    ani_object result;
+    ani_status status = env->Promise_New(&asyncContext->deferred, &result);
+    if (status != ANI_OK) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+    }
+
+    std::function<void(int32_t)> finishCallback = GetOpenCustomDialogPromise(asyncContext);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
+        && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
+        OHOS::Ace::NG::DialogManagerStatic::OpenCustomDialogStatic(dialogProps, std::move(finishCallback),
+            OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->OpenCustomDialogStatic(dialogProps, std::move(finishCallback));
+    }
+    return result;
+}
+
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
-    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] ANI_Constructor start.");
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "PromptAction ANI_Constructor start.");
     ani_env *env;
     ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
     if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "PromptAction GetEnv fail. status: %{public}d", status);
         return ANI_ERROR;
     }
 
     ani_namespace ns;
     status = env->FindNamespace("L@ohos/promptAction/promptAction;", &ns);
     if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "PromptAction FindNamespace fail. status: %{public}d", status);
         return ANI_ERROR;
     }
 
@@ -374,13 +445,24 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"updateCustomDialog", nullptr, reinterpret_cast<void *>(UpdateCustomDialog)},
         ani_native_function {"closeCustomDialog1", nullptr, reinterpret_cast<void *>(CloseCustomDialogContent)},
         ani_native_function {"closeCustomDialog", nullptr, reinterpret_cast<void *>(CloseCustomDialog)},
+        ani_native_function {"openCustomDialogWithController", nullptr,
+            reinterpret_cast<void *>(OpenCustomDialogWithController)},
+        ani_native_function {"presentCustomDialog", nullptr, reinterpret_cast<void *>(PresentCustomDialog)},
     };
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
     if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "PromptAction BindFunctions fail. status: %{public}d", status);
+        return ANI_ERROR;
+    }
+
+    status = OHOS::Ace::Ani::BindDialogController(env);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY,
+            "PromptAction BindDialogController fail. status: %{public}d", status);
         return ANI_ERROR;
     }
 
     *result = ANI_VERSION_1;
-    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] ANI_Constructor end.");
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "PromptAction ANI_Constructor end.");
     return ANI_OK;
 }
