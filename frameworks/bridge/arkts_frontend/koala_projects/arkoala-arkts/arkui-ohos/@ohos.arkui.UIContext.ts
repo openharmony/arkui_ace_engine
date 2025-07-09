@@ -246,6 +246,11 @@ export interface OverlayManagerOptions {
     enableBackPressedEvent?: boolean;
 }
 
+class OverlayManagerOptionsInner implements OverlayManagerOptions {
+    renderRootOverlay?: boolean = true;
+    enableBackPressedEvent?: boolean = false;
+}
+
 export class ContextMenuController {
     public close(): void {
         throw Error("close not implemented in ContextMenuController!")
@@ -359,6 +364,14 @@ export class PromptAction {
     presentCustomDialog(builder: CustomBuilder | CustomBuilderWithId, controller?: promptAction.DialogController,
         options?: promptAction.DialogOptions): Promise<number> {
         throw Error("presentCustomDialog not implemented in PromptAction!")
+    }
+
+    getTopOrder(): LevelOrder {
+        throw Error("getTopOrder not implemented in PromptAction!")
+    }
+
+    getBottomOrder(): LevelOrder {
+        throw Error("getBottomOrder not implemented in PromptAction!")
     }
 
     openPopup(content: ComponentContent, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
