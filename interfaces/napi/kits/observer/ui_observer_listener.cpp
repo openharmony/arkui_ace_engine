@@ -404,6 +404,7 @@ void UIObserverListener::OnWillClick(
     AddGestureEventInfoOne(objValueClickEvent, gestureEventInfo);
     AddGestureEventInfoTwo(objValueClickEvent, gestureEventInfo);
     AddGestureEventInfoThree(objValueClickEvent, gestureEventInfo);
+    AddTapLocationInfo(objValueClickEvent, gestureEventInfo);
     AddClickEventInfoOne(objValueClickEvent, clickInfo);
     AddClickEventInfoTwo(objValueClickEvent, clickInfo);
 
@@ -440,6 +441,7 @@ void UIObserverListener::OnDidClick(
     AddGestureEventInfoOne(objValueClickEvent, gestureEventInfo);
     AddGestureEventInfoTwo(objValueClickEvent, gestureEventInfo);
     AddGestureEventInfoThree(objValueClickEvent, gestureEventInfo);
+    AddTapLocationInfo(objValueClickEvent, gestureEventInfo);
     AddClickEventInfoOne(objValueClickEvent, clickInfo);
     AddClickEventInfoTwo(objValueClickEvent, clickInfo);
 
@@ -520,6 +522,11 @@ void UIObserverListener::OnGestureStateChange(NG::GestureListenerType gestureLis
     AddGestureEventInfoOne(objValueGestureEvent, gestureEventInfo);
     AddGestureEventInfoTwo(objValueGestureEvent, gestureEventInfo);
     AddGestureEventInfoThree(objValueGestureEvent, gestureEventInfo);
+    bool canGetTap = gestureEventInfo.GetGestureTypeName() == GestureTypeName::TAP_GESTURE ||
+                     gestureEventInfo.GetGestureTypeName() == GestureTypeName::CLICK;
+    if (canGetTap) {
+        AddTapLocationInfo(objValueGestureEvent, gestureEventInfo);
+    }
     AddGestureEventInfoFour(objValueGestureEvent, gestureEventInfo);
     AddTargetObject(objValueGestureEvent, gestureEventInfo);
     GestureObserverListener::AddGestureRecognizerInfo(env_, objValueGestureRecognizer, current, gestureListenerType);
@@ -786,7 +793,6 @@ void UIObserverListener::AddGestureEventInfoThree(napi_value objValueEvent, cons
     napi_set_named_property(env_, objValueEvent, "targetDisplayId", napiTargetDisplayId);
     AddFingerInfosInfo(objValueEvent, gestureEventInfo);
     AddFingerListInfo(objValueEvent, gestureEventInfo);
-    AddTapLocationInfo(objValueEvent, gestureEventInfo);
     napi_close_handle_scope(env_, scope);
 }
 
