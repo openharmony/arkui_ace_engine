@@ -123,8 +123,11 @@ RefPtr<ScrollProxy> ScrollModelNG::CreateScrollBarProxy()
 int32_t ScrollModelNG::GetAxis(FrameNode *frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    int32_t value = 0;
     auto layoutProperty = frameNode->GetLayoutProperty<ScrollLayoutProperty>();
+    if (layoutProperty->GetAxis() == Axis::FREE) {
+        return ArkUI_ScrollDirection::ARKUI_SCROLL_DIRECTION_FREE;
+    }
+    int32_t value = 0;
     if (layoutProperty->GetAxis()) {
         value = static_cast<int32_t>(layoutProperty->GetAxisValue());
     }
