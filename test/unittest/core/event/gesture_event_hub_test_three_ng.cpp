@@ -852,19 +852,35 @@ HWTEST_F(GestureEventHubTestNg, GetBadgeNumber_001, TestSize.Level1)
     /**
      * @tc.steps: step3. call GetBadgeNumber.
      */
-    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     ASSERT_NE(dragEvent, nullptr);
+    RefPtr<MockUnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    ASSERT_NE(unifiedData, nullptr);
+    dragEvent->SetData(unifiedData);
+    EXPECT_CALL(*unifiedData, GetSize()).WillRepeatedly(testing::Return(5));
     dragEvent->SetUseDataLoadParams(false);
     auto ret1 = guestureEventHub->GetBadgeNumber(dragEvent);
-    EXPECT_NE(ret1, 0);
+    EXPECT_EQ(ret1, 5);
 
     dragEvent->SetUseDataLoadParams(true);
     RefPtr<MockDataLoadParams> mockDataLoadParams = AceType::MakeRefPtr<MockDataLoadParams>();
     ASSERT_NE(mockDataLoadParams, nullptr);
-    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(10));
+    dragEvent->SetDataLoadParams(mockDataLoadParams);
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(-1));
     auto ret2 = guestureEventHub->GetBadgeNumber(dragEvent);
-    EXPECT_NE(ret2, 10);
+    EXPECT_EQ(ret2, 1);
+
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(0));
+    auto ret3 = guestureEventHub->GetBadgeNumber(dragEvent);
+    EXPECT_EQ(ret3, 1);
+
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(INT32_MAX + 1));
+    auto ret4 = guestureEventHub->GetBadgeNumber(dragEvent);
+    EXPECT_EQ(ret4, 1);
+
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(10));
+    auto ret5 = guestureEventHub->GetBadgeNumber(dragEvent);
+    EXPECT_EQ(ret5, 10);
 }
 
 /**
