@@ -25209,6 +25209,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void RegisterDragPreviewImpl(Ark_NativePointer node,
+                                 const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
+                                 const Opt_PreviewConfiguration* config)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("registerDragPreview(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, preview);
+        out.append(", ");
+        WriteToString(&out, config);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void RegisterOnDropImpl(Ark_NativePointer node,
+                            const Opt_OnDragEventCallback* eventCallback,
+                            const Opt_DropOptions* dropOptions)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("registerOnDrop(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, eventCallback);
+        out.append(", ");
+        WriteToString(&out, dropOptions);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // DragDropOpsAccessor
     namespace StateStylesOpsAccessor {
     void OnStateStyleChangeImpl(Ark_NativePointer node,

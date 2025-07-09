@@ -24027,6 +24027,12 @@ typedef struct GENERATED_ArkUIUIContextAccessor {
 typedef struct GENERATED_ArkUIDragDropOpsAccessor {
     void (*registerOnDragStart)(Ark_NativePointer node,
                                 const Callback_onDragStart* onDragStart);
+    void (*registerDragPreview)(Ark_NativePointer node,
+        const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
+        const Opt_PreviewConfiguration* config);
+    void (*registerOnDrop)(Ark_NativePointer node,
+                            const Opt_OnDragEventCallback* eventCallback,
+                            const Opt_DropOptions* dropOptions);
 } GENERATED_ArkUIDragDropOpsAccessor;
 
 typedef struct GENERATED_ArkUIStateStylesOpsAccessor {
