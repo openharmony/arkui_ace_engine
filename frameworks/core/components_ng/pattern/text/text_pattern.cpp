@@ -50,10 +50,7 @@
 #include "core/components_ng/render/render_property.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
-#endif
-
-#ifdef ACE_ENABLE_VK
-#include "render_service_base/include/platform/common/rs_system_properties.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -163,8 +160,8 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     if (fontManager) {
         fontManager->UnRegisterCallbackNG(frameNode);
         fontManager->RemoveVariationNodeNG(frameNode);
-#ifdef ACE_ENABLE_VK
-        if (Rosen::RSSystemProperties::GetHybridRenderEnabled()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        if (Rosen::RSUIDirector::IsHybridRenderEnabled()) {
             fontManager->RemoveHybridRenderNode(frameNode);
         }
 #endif

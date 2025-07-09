@@ -2153,6 +2153,86 @@ HWTEST_F(RosenRenderContextTest, ClearModifiers001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetBitmapTest001
+ * @tc.desc: Test RosenRenderContext GetBitmap with rsNode_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: issueICK0X0
+ */
+HWTEST_F(RosenRenderContextTest, GetBitmapTest001, TestSize.Level1)
+{
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    RenderContext::ContextParam contextParam;
+    contextParam.type = RenderContext::ContextType::CANVAS;
+    contextParam.surfaceName.emplace("test");
+
+    rosenRenderContext->rsNode_ = nullptr;
+    RSBitmap bitmap;
+    bool ret = rosenRenderContext->GetBitmap(bitmap, nullptr);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetBitmapTest002
+ * @tc.desc: Test RosenRenderContext GetBitmap with rsNode_ is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: issueICK0X0
+ */
+HWTEST_F(RosenRenderContextTest, GetBitmapTest002, TestSize.Level1)
+{
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    RenderContext::ContextParam contextParam;
+    contextParam.type = RenderContext::ContextType::CANVAS;
+    contextParam.surfaceName.emplace("test");
+    std::optional<RenderContext::ContextParam> contextParamValue = std::make_optional(contextParam);
+    rosenRenderContext->InitContext(true, contextParamValue);
+    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
+
+    RSBitmap bitmap;
+    bool ret = rosenRenderContext->GetBitmap(bitmap, nullptr);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetPixelMapTest001
+ * @tc.desc: Test RosenRenderContext GetPixelMap with rsNode_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: issueICK0X0
+ */
+HWTEST_F(RosenRenderContextTest, GetPixelMapTest001, TestSize.Level1)
+{
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    RenderContext::ContextParam contextParam;
+    contextParam.type = RenderContext::ContextType::CANVAS;
+    contextParam.surfaceName.emplace("test");
+
+    rosenRenderContext->rsNode_ = nullptr;
+    RSBitmap bitmap;
+    bool ret = rosenRenderContext->GetPixelMap(nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetPixelMapTest002
+ * @tc.desc: Test RosenRenderContext GetPixelMap with rsNode_ is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: issueICK0X0
+ */
+HWTEST_F(RosenRenderContextTest, GetPixelMapTest002, TestSize.Level1)
+{
+    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
+    RenderContext::ContextParam contextParam;
+    contextParam.type = RenderContext::ContextType::CANVAS;
+    contextParam.surfaceName.emplace("test");
+    std::optional<RenderContext::ContextParam> contextParamValue = std::make_optional(contextParam);
+    rosenRenderContext->InitContext(true, contextParamValue);
+    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
+
+    RSBitmap bitmap;
+    bool ret = rosenRenderContext->GetPixelMap(nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: RemoveFromTreeTest001
  * @tc.desc: Test RosenRenderContext RemoveFromTree
  * @tc.type: FUNC

@@ -529,7 +529,6 @@ void FontManager::StartAbilityOnCalendar(const std::map<std::string, std::string
     }
 }
 
-#ifdef ACE_ENABLE_VK
 void FontManager::AddHybridRenderNode(const WeakPtr<NG::UINode>& node)
 {
     std::lock_guard<std::mutex> lock(hybridRenderNodesMutex_);
@@ -559,5 +558,4 @@ void FontManager::UpdateHybridRenderNodes()
         }
     }
 }
-#endif
 } // namespace OHOS::Ace

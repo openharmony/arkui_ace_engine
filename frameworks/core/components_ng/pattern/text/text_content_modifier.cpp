@@ -30,8 +30,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/adapter/animated_image.h"
 #include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"
-#ifdef ACE_ENABLE_VK
-#include "render_service_base/include/platform/common/rs_system_properties.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_ui_director.h"
 #include "2d_graphics/include/recording/draw_cmd_list.h"
 #endif
 
@@ -412,9 +412,7 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
     ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s]", host->GetId(), paintOffset_.GetX(),
         paintOffset_.GetY(), contentRect.ToString().c_str());
 
-#ifdef ACE_ENABLE_VK
     SetHybridRenderTypeIfNeeded(drawingContext, textPattern, pManager, host);
-#endif
     PropertyChangeFlag flag = 0;
     if (NeedMeasureUpdate(flag)) {
         host->MarkDirtyNode(flag);
@@ -460,20 +458,20 @@ void TextContentModifier::DrawActualText(DrawingContext& drawingContext, const R
     canvas.Restore();
 }
 
-#ifdef ACE_ENABLE_VK
 void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext,
     const RefPtr<TextPattern>& textPattern, const RefPtr<ParagraphManager>& pManager, RefPtr<FrameNode>& host)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&drawingContext.canvas);
     if (recordingCanvas != nullptr && recordingCanvas->GetDrawCmdList() != nullptr) {
         if (host->IsAtomicNode()) {
-            if (Rosen::RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::HMSYMBOL)) {
+            if (Rosen::RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::HMSYMBOL)) {
                 recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::HMSYMBOL);
             }
         } else {
-            if (Rosen::RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::TEXTBLOB) != 0 &&
+            if (Rosen::RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::TEXTBLOB) &&
                 static_cast<uint32_t>(pManager->GetLineCount()) >=
-                Rosen::RSSystemProperties::GetHybridRenderTextBlobLenCount()) {
+                Rosen::RSUIDirector::GetHybridRenderTextBlobLenCount()) {
                 recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::TEXT);
                 auto baselineOffset = LessOrEqual(textPattern->GetBaselineOffset(), 0.0) ?
                     std::fabs(textPattern->GetBaselineOffset()) : 0.0;
@@ -484,8 +482,8 @@ void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingCon
             }
         }
     }
-}
 #endif
+}
 
 void TextContentModifier::DrawText(RSCanvas& canvas, RefPtr<ParagraphManager> pManager)
 {
