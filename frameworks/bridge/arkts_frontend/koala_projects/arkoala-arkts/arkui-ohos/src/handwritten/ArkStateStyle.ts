@@ -18,12 +18,12 @@ import { contextNode, remember, scheduleCallback } from "@koalaui/runtime"
 import { PeerNode, PeerNodeType } from "../PeerNode"
 import { rememberMutableState } from '@koalaui/runtime';
 import { KPointer } from "@koalaui/interop"
-import { ArkCommonMethodPeer, StateStyles, CommonMethod, StateStylesOps } from '../component'
+import { ArkCommonMethodComponent, StateStyles, CommonMethod, StateStylesOps } from '../component'
 import { InteropNativeModule } from "@koalaui/interop"
 import { ArkCommonAttributeSet } from "./modifiers/ArkCommonModifier";
 
-export function hookStateStyleImpl(node: ArkCommonMethodPeer, stateStyle: StateStyles | undefined): void {
-    let currentState = node.getOrCreateStateStyleMutable()
+export function hookStateStyleImpl(node: ArkCommonMethodComponent, stateStyle: StateStyles | undefined): void {
+    let currentState = node.getPeer()?.getOrCreateStateStyleMutable()
     if (currentState === undefined) {
         return;
     }
@@ -51,5 +51,5 @@ export function hookStateStyleImpl(node: ArkCommonMethodPeer, stateStyle: StateS
     if (currentState.value & UI_STATE_SELECTED) {
         stateStyle?.selected?.(cm)
     }
-    cm.applyModifierPatch(node)
+    cm.applyModifierPatch(node.getPeer())
 }

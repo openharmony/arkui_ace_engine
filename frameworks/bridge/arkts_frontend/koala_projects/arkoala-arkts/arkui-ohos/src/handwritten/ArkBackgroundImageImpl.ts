@@ -18,7 +18,7 @@ import { contextNode, remember, scheduleCallback } from "@koalaui/runtime"
 import { PeerNode, PeerNodeType } from "../PeerNode"
 import { rememberMutableState } from '@koalaui/runtime';
 import { KPointer } from "@koalaui/interop"
-import { ArkCommonMethodPeer, ResourceStr, CommonMethod, StateStylesOps } from '../component'
+import { ArkCommonMethodComponent, ResourceStr, CommonMethod, StateStylesOps } from '../component'
 import { InteropNativeModule } from "@koalaui/interop"
 import { ArkCommonAttributeSet } from "./modifiers/ArkCommonModifier";
 import { PointerStyle, UnifiedData, Summary, PixelMap } from "#external"
@@ -27,7 +27,7 @@ import { TypeChecker } from "#components"
 import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { ArkUIAniModule } from "arkui.ani"
 
-export function hookBackgroundImageImpl(node: ArkCommonMethodPeer, src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): void {
+export function hookBackgroundImageImpl(node: ArkCommonMethodComponent, src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): void {
     const src_type = runtimeType(src)
     const repeat_type = runtimeType(repeat)
     if (((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.UNDEFINED == src_type)) && ((RuntimeType.NUMBER == repeat_type) || (RuntimeType.OBJECT == repeat_type))) {
@@ -42,10 +42,10 @@ export function hookBackgroundImageImpl(node: ArkCommonMethodPeer, src: Resource
                 const repeat_value = (repeat as ImageRepeat)
                 repeatValue = TypeChecker.ImageRepeat_ToNumeric(repeat_value)
             }
-            ArkUIAniModule._BackgroundImage_PixelMap(node.peer.ptr, src_0, repeatValue)
+            ArkUIAniModule._BackgroundImage_PixelMap(node.getPeer().getPeerPtr(), src_0, repeatValue)
             return
         } else {
-            node.backgroundImage0Attribute(src_casted, repeat_casted)
+            node.getPeer()?.backgroundImage0Attribute(src_casted, repeat_casted)
         }
     }
 }
