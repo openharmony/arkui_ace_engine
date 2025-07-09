@@ -163,6 +163,12 @@ constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
 static std::atomic<bool> g_isDynamicVsync = false;
 static bool g_isDragging = false;
 
+enum class WindowChangeType {
+    RECT_CHANGE,
+    FOLD_STATUS_CHANGE,
+    DISPLAY_ID_CHANGE
+};
+
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
 #define UICONTENT_IMPL_PTR(name) _##name->uiContent_
 #define UICONTENT_IMPL_HELPER_GUARD(name, ifInvalid...) \
@@ -515,7 +521,7 @@ void UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
     AvoidAreasUpdateOnUIExtension(context, avoidAreas);
 }
 
-void ClearAllMenuPopup(int32_t instanceId)
+void ClearAllMenuPopup(int32_t instanceId, WindowChangeType type)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId);
     CHECK_NULL_VOID(container);
@@ -523,8 +529,11 @@ void ClearAllMenuPopup(int32_t instanceId)
     CHECK_NULL_VOID(pipeline);
     auto overlay = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    overlay->HideAllMenusWithoutAnimation(false);
-    overlay->HideAllPopupsWithoutAnimation();
+    // The non-subwindow menu and popup disappear when the window area changes, and do not follow the current logic.
+    if (type != WindowChangeType::RECT_CHANGE) {
+        overlay->HideAllMenusWithoutAnimation(false);
+        overlay->HideAllPopupsWithoutAnimation();
+    }
     SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
 }
 
@@ -902,7 +911,7 @@ public:
                 auto aceFoldStatus = static_cast<FoldStatus>(static_cast<uint32_t>(foldStatus));
                 context->OnFoldStatusChanged(aceFoldStatus);
                 if (SystemProperties::IsSuperFoldDisplayDevice()) {
-                    ClearAllMenuPopup(instanceId);
+                    ClearAllMenuPopup(instanceId, WindowChangeType::FOLD_STATUS_CHANGE);
                 }
             },
             TaskExecutor::TaskType::UI, "ArkUIFoldStatusChanged");
@@ -1004,7 +1013,7 @@ public:
             [instanceId = instanceId_, isWindowSizeChanged] {
                 CHECK_EQUAL_VOID(isWindowSizeChanged, false);
                 ContainerScope scope(instanceId);
-                ClearAllMenuPopup(instanceId);
+                ClearAllMenuPopup(instanceId, WindowChangeType::RECT_CHANGE);
             },
             TaskExecutor::TaskType::UI, "ArkUIWindowRectChange");
     }
@@ -1035,7 +1044,7 @@ public:
         taskExecutor->PostTask(
             [instanceId = instanceId_] {
                 ContainerScope scope(instanceId);
-                ClearAllMenuPopup(instanceId);
+                ClearAllMenuPopup(instanceId, WindowChangeType::DISPLAY_ID_CHANGE);
             },
             TaskExecutor::TaskType::UI, "ArkUIDisplayIdChange");
     }
