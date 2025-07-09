@@ -60,7 +60,6 @@ void ReplaceStringImpl(Ark_VMContext vmContext,
     const auto convLength = Converter::Convert<int32_t>(*length);
     if (mutableString->CheckRange(convStart, convLength)) {
         const auto string = Converter::Convert<std::string>(*other);
-        // mutableString->ReplaceString(convStart, convLength, string);
     } else {
         // throw exception.
         LOGE("MutableStyledStringAccessor::ReplaceStringImpl CheckBoundary failed: start:%d length:%d",
@@ -79,7 +78,6 @@ void InsertStringImpl(Ark_VMContext vmContext,
     const auto convStart = Converter::Convert<int32_t>(*start);
     if (convStart >= 0 && convStart <= strLength) {
         const auto string = Converter::Convert<std::string>(*other);
-        // mutableString->InsertString(convStart, string);
     } else {
         // throw exception.
         LOGE("MutableStyledStringAccessor::InsertStringImpl CheckBoundary failed: start:%d length:%d",
