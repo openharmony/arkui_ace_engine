@@ -24,13 +24,13 @@ OneStepDragParam::OneStepDragParam(const Builder& builder, const SelectMenuParam
     menuBuilder = builder;
     onAppear = [onAppearFunc = selectMenuParam.onAppear, onMenuShowFunc = selectMenuParam.onMenuShow](
                    int32_t start, int32_t end) {
-        onAppearFunc(start, end);
-        onMenuShowFunc(start, end);
+        IF_TRUE(onAppearFunc, onAppearFunc(start, end));
+        IF_TRUE(onMenuShowFunc, onMenuShowFunc(start, end));
     };
     onDisappear = [onDisappearFunc = selectMenuParam.onDisappear, onMenuHideFunc = selectMenuParam.onMenuHide](
                       int32_t start, int32_t end) {
-        onMenuHideFunc(start, end);
-        onDisappearFunc();
+        IF_TRUE(onMenuHideFunc, onMenuHideFunc(start, end));
+        IF_TRUE(onDisappearFunc, onDisappearFunc());
     };
     menuParam.previewMode = MenuPreviewMode::IMAGE;
     menuParam.type = MenuType::CONTEXT_MENU;
