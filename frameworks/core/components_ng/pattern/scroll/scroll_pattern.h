@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/pattern/scroll/free_scroll_controller.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_2d.h"
 #include "core/components_ng/pattern/scroll/scroll_accessibility_property.h"
@@ -470,7 +471,7 @@ public:
     /**
      * @return Pan gesture recognizer configured for Axis::FREE mode
      */
-    RefPtr<NGGestureRecognizer> GetOverrideRecognizer() const;
+    RefPtr<NGGestureRecognizer> GetOverrideRecognizer();
     RefPtr<ScrollBar2D> Get2DScrollBar() const
     {
         return scrollBar2d_;
@@ -483,6 +484,7 @@ public:
     void FreeScrollTo(const ScrollControllerBase::ScrollToParam& param) final;
 
 private:
+    RefPtr<ParallelRecognizer> gestureGroup_;
     RefPtr<FreeScrollController> freeScroll_;
     RefPtr<ScrollBar2D> scrollBar2d_;
     /* ============================================================================== */

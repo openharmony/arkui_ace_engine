@@ -58,8 +58,8 @@ public:
         const auto& controller = pattern_->zoomCtrl_;
         auto gesture = MakePinchGesture(scale);
         ASSERT_TRUE(controller && controller->pinchGesture_);
-        ASSERT_TRUE(controller->pinchGesture_->onActionStartId_);
-        auto&& func = *(controller->pinchGesture_->onActionStartId_);
+        ASSERT_TRUE(controller->pinchGesture_->onActionStart_);
+        auto&& func = *(controller->pinchGesture_->onActionStart_);
         func(gesture);
     }
     void PinchUpdate(float scale, const Offset& center = { 0, 0 })
@@ -67,8 +67,8 @@ public:
         const auto& controller = pattern_->zoomCtrl_;
         auto gesture = MakePinchGesture(scale, center);
         ASSERT_TRUE(controller && controller->pinchGesture_);
-        ASSERT_TRUE(controller->pinchGesture_->onActionUpdateId_);
-        auto&& func = *(controller->pinchGesture_->onActionUpdateId_);
+        ASSERT_TRUE(controller->pinchGesture_->onActionUpdate_);
+        auto&& func = *(controller->pinchGesture_->onActionUpdate_);
         func(gesture);
     }
     void PinchEnd(const Offset& center = { 0, 0 })
@@ -76,8 +76,8 @@ public:
         const auto& controller = pattern_->zoomCtrl_;
         auto gesture = MakePinchGesture(1.0, center);
         ASSERT_TRUE(controller && controller->pinchGesture_);
-        ASSERT_TRUE(controller->pinchGesture_->onActionEndId_);
-        auto&& func = *(controller->pinchGesture_->onActionEndId_);
+        ASSERT_TRUE(controller->pinchGesture_->onActionEnd_);
+        auto&& func = *(controller->pinchGesture_->onActionEnd_);
         func(gesture);
     }
 };
@@ -325,5 +325,29 @@ TEST_F(ScrollZoomTest,  ZoomCenterTest001)
     PinchUpdate(1.5f, { 1000.0, 1000.0 }); /* 1000.0: center offset */
     FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, -500.0); /* -500.0: current offset */
+}
+
+/**
+ * @tc.name: CollectScrollableTouchTarget001
+ * @tc.desc: Test CollectScrollableTouchTarget
+ * @tc.type: FUNC
+ */
+TEST_F(ScrollZoomTest, CollectScrollableTouchTarget001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    model.SetMinZoomScale(0.5f);
+    model.SetMaxZoomScale(2.5f);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+
+    TouchTestResult res;
+    ResponseLinkResult link;
+    auto scrollHandler = pattern_->GetScrollableEvent();
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1);
+    EXPECT_EQ(link.size(), 2); /* 2: result count */
+    EXPECT_EQ(res.size(), 1);
+    EXPECT_EQ(*res.begin(), pattern_->gestureGroup_);
 }
 } // namespace OHOS::Ace::NG

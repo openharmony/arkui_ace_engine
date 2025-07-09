@@ -134,8 +134,13 @@ void FreeScrollController::HandlePanStart(const GestureEvent& event)
 
 void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
 {
-    const auto dx = static_cast<float>(event.GetDelta().GetX());
-    const auto dy = static_cast<float>(event.GetDelta().GetY());
+    size_t fingers = event.GetFingerList().size();
+    auto dx = static_cast<float>(event.GetDelta().GetX());
+    auto dy = static_cast<float>(event.GetDelta().GetY());
+    if (fingers > 1) {
+        dx /= fingers;
+        dy /= fingers;
+    }
     const float newX = offset_->Get().GetX() + dx;
     const float newY = offset_->Get().GetY() + dy;
     const auto scrollableArea = pattern_.GetViewPortExtent() - pattern_.GetViewSize();
@@ -278,6 +283,9 @@ void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset, const
         enableScroll_ = props->GetScrollEnabled().value_or(true);
     } else {
         enableScroll_ = props->GetScrollEnabled().value_or(true) && pattern_.GetAlwaysEnabled();
+    }
+    if (freePanGesture_) {
+        freePanGesture_->SetEnabled(enableScroll_);
     }
 }
 
