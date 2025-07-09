@@ -149,7 +149,8 @@ TouchLocationInfo TouchEventActuator::CreateChangedTouchInfo(const TouchEvent& l
 {
     TouchLocationInfo changedInfo("onTouch", lastPoint.GetOriginalReCovertId());
     PointF lastLocalPoint(lastPoint.x, lastPoint.y);
-    NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
+    NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
+        isPostEventResult_ || event.passThrough, event.postEventNodeId);
     auto localX = static_cast<float>(lastLocalPoint.GetX());
     auto localY = static_cast<float>(lastLocalPoint.GetY());
     changedInfo.SetLocalLocation(Offset(localX, localY));
@@ -182,7 +183,8 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
     double globalDisplayX = pointItem.globalDisplayX;
     double globalDisplayY = pointItem.globalDisplayY;
     PointF localPoint(globalX, globalY);
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
+    NGGestureRecognizer::Transform(
+        localPoint, GetAttachedNode(), false, isPostEventResult_ || event.passThrough, event.postEventNodeId);
     auto localX = static_cast<float>(localPoint.GetX());
     auto localY = static_cast<float>(localPoint.GetY());
     TouchLocationInfo info("onTouch", pointItem.GetOriginalReCovertId());
@@ -215,7 +217,8 @@ TouchLocationInfo TouchEventActuator::CreateHistoryTouchItemInfo(const TouchEven
     double globalDisplayX = eventItem.globalDisplayX;
     double globalDisplayY = eventItem.globalDisplayY;
     PointF localPoint(globalX, globalY);
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
+    NGGestureRecognizer::Transform(
+        localPoint, GetAttachedNode(), false, isPostEventResult_ || event.passThrough, event.postEventNodeId);
     auto localX = static_cast<float>(localPoint.GetX());
     auto localY = static_cast<float>(localPoint.GetY());
     TouchLocationInfo historyInfo("onTouch", eventItem.GetOriginalReCovertId());
