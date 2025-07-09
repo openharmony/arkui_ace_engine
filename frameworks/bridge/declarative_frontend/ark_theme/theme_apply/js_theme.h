@@ -345,9 +345,9 @@ private:
     JSThemeColors colors_;
     JSThemeColors darkColors_;
     static bool IsDarkMode()
-     {
-         return OHOS::Ace::TokenTheme::IsDarkMode();
-     }
+    {
+        return OHOS::Ace::TokenTheme::IsDarkMode();
+    }
 };
 
 class JSThemeScope {

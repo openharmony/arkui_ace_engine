@@ -59,7 +59,6 @@ void JSWithTheme::SendThemeToNative(const JSCallbackInfo& info)
     if (!jsThemeScopeId->IsNumber()) {
         return;
     }
-    // auto jsColorsArray = JSRef<JSArray>::Cast(jsColors);
     auto themeScopeId = jsThemeScopeId->ToNumber<int32_t>();
 
     auto colors = JSThemeColors();

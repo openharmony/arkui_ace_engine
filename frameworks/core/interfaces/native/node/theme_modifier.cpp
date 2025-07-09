@@ -110,9 +110,9 @@ void SetDefaultTheme(const ArkUI_Uint32* colors, ArkUI_Bool isDark)
     TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "WithTheme SetDefaultTheme isDark:%{public}d", isDark);
     auto themeColors = ConvertColorArrayToTokenColors(colors);
     auto theme = AceType::MakeRefPtr<TokenTheme>(0);
-    if(isDark){
+    if (isDark) {
         theme->SetDarkColors(themeColors);
-    }else{
+    } else {
         theme->SetColors(themeColors);
     }
     auto colorMode = isDark ? ColorMode::DARK : ColorMode::LIGHT;

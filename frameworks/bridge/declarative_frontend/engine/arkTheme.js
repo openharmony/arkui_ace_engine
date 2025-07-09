@@ -209,7 +209,7 @@ class ArkThemeCache {
         let keys2 = Object.keys(theme2.colors);
         let darkKeys1 = Object.keys(theme1.darkColors);
         let darkKeys2 = Object.keys(theme2.darkColors);
-        if (keys1.length !== keys2.length && darkKeys1.length !== darkKeys2.length) {
+        if (keys1.length !== keys2.length || darkKeys1.length !== darkKeys2.length) {
             return false;
         }
         for (let key of keys1) {

@@ -14,19 +14,20 @@
  */
 
 #include "ui/view/theme/token_theme.h"
-#include "frameworks/core/pipeline_ng/pipeline_context.h"
+
 #include "frameworks/core/common/container.h"
+#include "frameworks/core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace {
 bool TokenTheme::IsDarkMode()
-    {
-        auto pipelineContext = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
-        if (pipelineContext) {
-            auto localMode = pipelineContext->GetLocalColorMode();
-            auto systemMode = OHOS::Ace::Container::CurrentColorMode();
-            auto mode = (localMode == OHOS::Ace::ColorMode::COLOR_MODE_UNDEFINED) ? systemMode : localMode;
-            return mode == OHOS::Ace::ColorMode::DARK;
-        }
-        // fallback
-        return OHOS::Ace::Container::CurrentColorMode() == OHOS::Ace::ColorMode::DARK;
+{
+    auto pipelineContext = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        auto localMode = pipelineContext->GetLocalColorMode();
+        auto systemMode = OHOS::Ace::Container::CurrentColorMode();
+        auto mode = (localMode == OHOS::Ace::ColorMode::COLOR_MODE_UNDEFINED) ? systemMode : localMode;
+        return mode == OHOS::Ace::ColorMode::DARK;
     }
+    // fallback
+    return OHOS::Ace::Container::CurrentColorMode() == OHOS::Ace::ColorMode::DARK;
 }
+} // namespace OHOS::Ace
