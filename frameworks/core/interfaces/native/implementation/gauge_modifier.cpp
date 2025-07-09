@@ -120,10 +120,6 @@ namespace GaugeModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = GaugeModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 } // GaugeModifier
@@ -291,8 +287,6 @@ void ContentModifierImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //GaugeModelNG::SetContentModifier(frameNode, convValue);
 }
 } // GaugeAttributeModifier
 const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()
