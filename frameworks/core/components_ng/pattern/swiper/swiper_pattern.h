@@ -915,9 +915,8 @@ protected:
 
     PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate) override;
 
-    bool ChildTentativelyLayouted(IgnoreStrategy& strategy) override
+    bool ChildTentativelyLayouted() override
     {
-        strategy = IgnoreStrategy::SCROLLABLE_AXIS;
         return true;
     }
 
