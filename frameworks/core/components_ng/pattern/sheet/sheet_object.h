@@ -130,6 +130,8 @@ public:
         return true;
     }
 
+    virtual void FireHeightDidChange();
+
     void SetCurrentOffset(float value)
     {
         currentOffset_ = value;

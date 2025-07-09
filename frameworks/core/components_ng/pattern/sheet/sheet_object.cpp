@@ -214,7 +214,9 @@ void SheetObject::SetFinishEventForAnimationOption(
             const auto& overlay = pattern->GetOverlayManager();
             CHECK_NULL_VOID(overlay);
             pattern->FireOnDetentsDidChange(overlay->GetSheetHeight());
-            pattern->FireOnHeightDidChange();
+            auto sheetObject = pattern->GetSheetObject();
+            CHECK_NULL_VOID(sheetObject);
+            sheetObject->FireHeightDidChange();
         });
     } else {
         option.SetOnFinishEvent([sheetWK = WeakClaim(RawPtr(sheetNode))] {
@@ -683,4 +685,12 @@ void SheetObject::AvoidKeyboard(bool forceAvoid)
     CHECK_NULL_VOID(sheetPattern);
     sheetPattern->AvoidKeyboard(forceAvoid);
 }
+
+void SheetObject::FireHeightDidChange()
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->FireOnHeightDidChange();
+}
+
 } // namespace OHOS::Ace::NG

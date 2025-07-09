@@ -4913,4 +4913,45 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage006, TestSize.Level1)
     EXPECT_TRUE(scrollNode->GetParent() == sheetNode->GetPattern()->frameNode_.Upgrade());
     EXPECT_EQ(operationColumn->GetChildren().size(), 1);
 }
+
+/**
+ * @tc.name: PlaySheetTransition001
+ * @tc.desc: Test PlaySheetTransition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, PlaySheetTransition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,  nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    /**
+     * @tc.steps: step. set sheetHeight_ is 0.0f, PlaySheetTransition.
+     * @tc.expected: NearZero(overlayManager->sheetHeight_) is true.
+     */
+    overlayManager->sheetHeight_ = 0.0f;
+    overlayManager->PlaySheetTransition(sheetNode, true, true);
+    EXPECT_TRUE(NearZero(overlayManager->sheetHeight_));
+}
 }

@@ -46,18 +46,23 @@ void SheetContentCoverObject::DirtyLayoutProcess(const RefPtr<LayoutAlgorithmWra
 {
     auto pattern = GetPattern();
     CHECK_NULL_VOID(pattern);
-    pattern->InitialLayoutProps();
-    pattern->UpdateDragBarStatus();
-    ClipSheetNode();
-
     auto sheetNode = pattern->GetHost();
     CHECK_NULL_VOID(sheetNode);
     auto context = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    if (!pattern->IsOnAppearing()
-        && !pattern->IsOnDisappearing() && !pattern->IsDragging()) {
+
+    // update sheetHeight_ for FireHeightDidChange
+    auto contentCoverSheetLayoutAlgorithm =
+        AceType::DynamicCast<SheetContentCoverLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(contentCoverSheetLayoutAlgorithm);
+    if (GreatNotEqual(contentCoverSheetLayoutAlgorithm->GetSheetHeight(), 0.0f)) {
+        SetSheetHeight(contentCoverSheetLayoutAlgorithm->GetSheetHeight());
+    }
+
+    // update position
+    if (!pattern->IsOnAppearing() && !pattern->IsOnDisappearing()) {
         pattern->FireOnWidthDidChange();
-        pattern->FireOnHeightDidChange();
+        FireHeightDidChange();
         context->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     }
 }
@@ -77,7 +82,7 @@ void SheetContentCoverObject::InitScrollProps()
 
 void SheetContentCoverObject::ClipSheetNode()
 {
-    // not support border radius and clip shape
+    // not support border radius, clip shape and shadow
     auto pattern = GetPattern();
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
@@ -111,10 +116,11 @@ void SheetContentCoverObject::SetFinishEventForAnimationOption(
                 CHECK_NULL_VOID(pattern);
                 pattern->OnAppear();
                 pattern->AvoidAiBar();
-                const auto& overlay = pattern->GetOverlayManager();
-                CHECK_NULL_VOID(overlay);
+                pattern->FireOnTypeDidChange();
                 pattern->FireOnWidthDidChange();
-                pattern->FireOnHeightDidChange();
+                auto sheetObject = pattern->GetSheetObject();
+                CHECK_NULL_VOID(sheetObject);
+                sheetObject->FireHeightDidChange();
             });
     } else {
         option.SetOnFinishEvent(
@@ -243,5 +249,17 @@ std::function<void()> SheetContentCoverObject::GetAnimationPropertyCallForOverla
                 }
             };
     }
+}
+
+void SheetContentCoverObject::FireHeightDidChange()
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto preDidHeight = pattern->GetPreDidHeight();
+    if (NearEqual(preDidHeight, sheetHeight_)) {
+        return;
+    }
+    pattern->OnHeightDidChange(sheetHeight_);
+    pattern->SetPreDidHeight(sheetHeight_);
 }
 } // namespace OHOS::Ace::NG
