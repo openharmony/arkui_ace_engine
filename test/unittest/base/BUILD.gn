@@ -42,6 +42,7 @@ ace_unittest("util_test") {
     "uobject_test.cpp",
     "utf_helper_test_ng.cpp",
     "utf_helper_testone_ng.cpp",
+    "utf_test.cpp",
   ]
 
   external_deps = [
