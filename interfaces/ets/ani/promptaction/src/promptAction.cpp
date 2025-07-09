@@ -22,6 +22,7 @@
 #include "prompt_action_params.h"
 #include "toast_params.h"
 #include "dialog_params.h"
+#include "prompt_action_utils.h"
 #include "prompt_action_controller.h"
 
 #include "frameworks/base/error/error_code.h"
@@ -85,13 +86,62 @@ static void ShowToast(ani_env* env, ani_object options)
 static ani_object OpenToast(ani_env* env, ani_object options)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] openToast enter.");
+    auto toastInfo =
+        OHOS::Ace::NG::ToastInfo { .duration = -1, .showMode = OHOS::Ace::NG::ToastShowMode::DEFAULT, .alignment = -1 };
+    if (!GetShowToastOptions(env, options, toastInfo)) {
+        return nullptr;
+    }
+    auto asyncContext = std::make_shared<PromptActionAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = OHOS::Ace::Container::CurrentIdSafely();
     ani_object result = {};
+    ani_status status = env->Promise_New(&asyncContext->deferred, &result);
+    if (status != ANI_OK) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Create promise object fail.");
+    }
+    std::function<void(int32_t)> toastCallback = GetToastPromise(asyncContext);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService()) &&
+        !OHOS::Ace::NG::ContainerIsScenceBoard() && toastInfo.showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
+        OHOS::Ace::NG::DialogManagerStatic::ShowToastStatic(
+            toastInfo, std::move(toastCallback), OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->ShowToastStatic(toastInfo, std::move(toastCallback));
+    }
     return result;
 }
 
-static void CloseToast(ani_env* env, ani_int toastId)
+static void CloseToast(ani_env* env, ani_double toastId)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] closeToast enter.");
+    std::function<void(int32_t)> toastCloseCallback = nullptr;
+    toastCloseCallback = [env](int32_t errorCode) mutable {
+        if (errorCode != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+            OHOS::Ace::Ani::AniThrow(env, "The toastId is invalid.", errorCode);
+        };
+    };
+    if (!toastId) {
+        toastCloseCallback(OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    if (toastId < 0 || toastId > INT32_MAX) {
+        toastCloseCallback(OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    int32_t showModeVal = static_cast<int32_t>(static_cast<uint32_t>(toastId) & 0b111);
+    int32_t id = static_cast<int32_t>(static_cast<uint32_t>(toastId) >> 3);
+    if (id < 0 || showModeVal < 0 ||
+        showModeVal > static_cast<int32_t>(OHOS::Ace::NG::ToastShowMode::SYSTEM_TOP_MOST)) {
+        toastCloseCallback(OHOS::Ace::ERROR_CODE_TOAST_NOT_FOUND);
+        return;
+    }
+    auto showMode = static_cast<OHOS::Ace::NG::ToastShowMode>(showModeVal);
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService()) &&
+        !OHOS::Ace::NG::ContainerIsScenceBoard() && showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
+        OHOS::Ace::NG::DialogManagerStatic::CloseToastStatic(
+            id, std::move(toastCloseCallback), OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->CloseToastStatic(id, showMode, std::move(toastCloseCallback));
+    }
 }
 
 static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_object callback)

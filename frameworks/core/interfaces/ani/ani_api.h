@@ -113,6 +113,9 @@ struct ArkUIAniContentSlotModifier {
     ArkUIContentSlot (*construct)(ArkUI_Int32 id);
     void (*setContentSlotOptions)(ArkUIContentSlot node, ArkUINodeContent value);
 };
+struct ArkUIAniLazyForEachNodeModifier {
+    ani_long (*constructLazyForEachNode)(ani_int);
+};
 struct ArkUIAniWaterFlowModifier {
     void (*setWaterFlowOptions)(ani_env* env, ani_long ptr, ani_object fnObj);
 };
@@ -190,6 +193,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniDragModifier* (*getDragAniModifier) ();
     const ArkUIAniCommonModifier* (*getCommonAniModifier)();
     const ArkUIAniCustomNodeModifier* (*getCustomNodeAniModifier)();
+    const ArkUIAniLazyForEachNodeModifier* (*getLazyForEachNodeAniModifier)();
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();

@@ -21,7 +21,7 @@ import { int32, int64, float32, float64, unsafeCast } from "@koalaui/common"
 import { CallbackKind } from "./CallbackKind"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityFocusCallback, Bindable, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, Literal_String_value_Callback_Void_action, ScrollResult, PopupMaskType, DividerStyle, BlendMode, PopupCommonOptions } from "./../common"
+import { AccessibilityCallback, AccessibilityFocusCallback, Bindable, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, Literal_String_value_Callback_Void_action, ScrollResult, PopupMaskType, DividerStyle, BlendMode, PopupCommonOptions, PopupButton } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
 import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme } from "./../arkui-custom"
@@ -92,7 +92,7 @@ import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ShapeClip, RoundRect,
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, LinearGradient, LinearGradientInternal, ColorStop, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, Callback_DatePickerResult_Void, DatePickerResult, DatePickerOptions, LunarSwitchStyle, DatePickerDialogOptions } from "./../datePicker"
-import { DialogAlignment, DialogButtonDirection, LevelOrder, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
+import { DialogAlignment, DialogButtonDirection, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater } from "./../particle"
 import { DpiFollowStrategy, UIExtensionProxy, UIExtensionProxyInternal, Callback_UIExtensionProxy_Void, WindowModeFollowStrategy, Callback_Literal_Number_code__want_Void, Literal_Number_code__want, Callback_Map_String_Object_Void, UIExtensionOptions } from "./../uiExtensionComponent"
 import { EditMode, ListItemStyle, Sticky, SwipeActionState, SwipeEdgeEffect, Callback_SwipeActionState_Void, ListItemOptions, SwipeActionItem, SwipeActionOptions } from "./../listItem"
@@ -141,7 +141,7 @@ import { ToggleType, ToggleOptions, SwitchStyle } from "./../toggle"
 import { UniformDataType } from "./../arkui-uniformtypedescriptor"
 import { WindowSceneAttribute } from "./../windowScene"
 import { Callback_Array_String_Void, Callback_Array_TextMenuItem_Void, Callback_Buffer_Void, Callback_ComputedBarAttribute_Void, Callback_CustomBuilder_Void, Callback_GestureJudgeResult_Void, Callback_GestureRecognizer_Void, Callback_HitTestMode_Void, Callback_Literal_Number_offsetRemain_Void, Callback_OffsetResult_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_Opt_Array_NavDestinationTransition_Void, Callback_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Pointer_Void, Callback_StyledStringMarshallingValue_Void, Callback_TouchResult_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_Tuple_Number_Number_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_WebKeyboardOptions_Void, Callback_WebResourceResponse_Void, Callback_WithThemeAttribute_Void } from "./../generatorSynthetic"
-import { Callback_DismissDialogAction_Void, DismissDialogAction, ImmersiveMode, LevelMode, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions } from "./../actionSheet"
+import { Callback_DismissDialogAction_Void, DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions } from "./../actionSheet"
 import { Want } from "./../ohos.app.ability"
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./../embeddedComponent"
 import { BusinessError } from "#external"
@@ -172,6 +172,7 @@ import { MenuItemOptions } from "./../menuItem"
 import { TextBackgroundStyle } from "./../span"
 import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
 import promptAction from '@ohos/promptAction'
+import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos/promptAction"
 import { PointerStyle, DataSyncOptions } from '#external'
 export class Serializer extends SerializerBase {
     private static pool?: Array<Serializer> | undefined = undefined
@@ -2574,10 +2575,11 @@ export class Serializer extends SerializerBase {
     }
     writeDismissPopupAction(value: DismissPopupAction): void {
         let valueSerializer : Serializer = this
-        const value_dismiss  = value.dismiss
-        valueSerializer.holdAndWriteCallback(value_dismiss)
-        const value_reason  = value.reason
-        valueSerializer.writeInt32(TypeChecker.DismissReason_ToNumeric(value_reason))
+        valueSerializer.writePointer(toPeerPtr(value))
+        // const value_dismiss  = value.dismiss
+        // valueSerializer.holdAndWriteCallback(value_dismiss)
+        // const value_reason  = value.reason
+        // valueSerializer.writeInt32(TypeChecker.DismissReason_ToNumeric(value_reason))
     }
     writeDismissSheetAction(value: DismissSheetAction): void {
         let valueSerializer : Serializer = this
@@ -3779,11 +3781,6 @@ export class Serializer extends SerializerBase {
         const value_height  = value.height
         valueSerializer.writeNumber(value_height)
     }
-    writeImmersiveMode(value: ImmersiveMode): void {
-        let valueSerializer : Serializer = this
-        const value__ImmersiveModeStub  = value._ImmersiveModeStub
-        valueSerializer.writeString(value__ImmersiveModeStub)
-    }
     writeInputCounterOptions(value: InputCounterOptions): void {
         let valueSerializer : Serializer = this
         const value_thresholdPercentage  = value.thresholdPercentage
@@ -3928,15 +3925,9 @@ export class Serializer extends SerializerBase {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
     }
-    writeLevelMode(value: LevelMode): void {
-        let valueSerializer : Serializer = this
-        const value__LevelModeStub  = value._LevelModeStub
-        valueSerializer.writeString(value__LevelModeStub)
-    }
     writeLevelOrder(value: LevelOrder): void {
         let valueSerializer : Serializer = this
-        const value__LevelOrderStub  = value._LevelOrderStub
-        valueSerializer.writeString(value__LevelOrderStub)
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLinearGradient_common(value: LinearGradient_common): void {
         let valueSerializer : Serializer = this
@@ -18173,8 +18164,8 @@ export class Serializer extends SerializerBase {
         value_levelMode_type = runtimeType(value_levelMode)
         valueSerializer.writeInt8(value_levelMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_levelMode_type)) {
-            const value_levelMode_value  = value_levelMode!
-            valueSerializer.writeLevelMode(value_levelMode_value)
+            const value_levelMode_value  = (value_levelMode as LevelMode)
+            valueSerializer.writeInt32(TypeChecker.LevelMode_ToNumeric(value_levelMode_value))
         }
         const value_levelUniqueId  = value.levelUniqueId
         let value_levelUniqueId_type : int32 = RuntimeType.UNDEFINED
@@ -18190,7 +18181,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_immersiveMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_immersiveMode_type)) {
             const value_immersiveMode_value  = value_immersiveMode!
-            valueSerializer.writeImmersiveMode(value_immersiveMode_value)
+            valueSerializer.writeInt32(TypeChecker.ImmersiveMode_ToNumeric(value_immersiveMode_value))
         }
         const value_levelOrder  = value.levelOrder
         let value_levelOrder_type : int32 = RuntimeType.UNDEFINED
@@ -18595,8 +18586,8 @@ export class Serializer extends SerializerBase {
         value_levelMode_type = runtimeType(value_levelMode)
         valueSerializer.writeInt8(value_levelMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_levelMode_type)) {
-            const value_levelMode_value  = value_levelMode!
-            valueSerializer.writeLevelMode(value_levelMode_value)
+            const value_levelMode_value  = (value_levelMode as LevelMode)
+            valueSerializer.writeInt32(TypeChecker.LevelMode_ToNumeric(value_levelMode_value))
         }
         const value_levelUniqueId  = value.levelUniqueId
         let value_levelUniqueId_type : int32 = RuntimeType.UNDEFINED
@@ -18611,8 +18602,8 @@ export class Serializer extends SerializerBase {
         value_immersiveMode_type = runtimeType(value_immersiveMode)
         valueSerializer.writeInt8(value_immersiveMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_immersiveMode_type)) {
-            const value_immersiveMode_value  = value_immersiveMode!
-            valueSerializer.writeImmersiveMode(value_immersiveMode_value)
+            const value_immersiveMode_value  = (value_immersiveMode as ImmersiveMode)
+            valueSerializer.writeInt32(TypeChecker.ImmersiveMode_ToNumeric(value_immersiveMode_value))
         }
         const value_levelOrder  = value.levelOrder
         let value_levelOrder_type : int32 = RuntimeType.UNDEFINED
@@ -19021,8 +19012,8 @@ export class Serializer extends SerializerBase {
         value_levelMode_type = runtimeType(value_levelMode)
         valueSerializer.writeInt8(value_levelMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_levelMode_type)) {
-            const value_levelMode_value  = value_levelMode!
-            valueSerializer.writeLevelMode(value_levelMode_value)
+            const value_levelMode_value  = (value_levelMode as LevelMode)
+            valueSerializer.writeInt32(TypeChecker.LevelMode_ToNumeric(value_levelMode_value))
         }
         const value_levelUniqueId  = value.levelUniqueId
         let value_levelUniqueId_type : int32 = RuntimeType.UNDEFINED
@@ -19037,8 +19028,8 @@ export class Serializer extends SerializerBase {
         value_immersiveMode_type = runtimeType(value_immersiveMode)
         valueSerializer.writeInt8(value_immersiveMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_immersiveMode_type)) {
-            const value_immersiveMode_value  = value_immersiveMode!
-            valueSerializer.writeImmersiveMode(value_immersiveMode_value)
+            const value_immersiveMode_value  = (value_immersiveMode as ImmersiveMode)
+            valueSerializer.writeInt32(TypeChecker.ImmersiveMode_ToNumeric(value_immersiveMode_value))
         }
         const value_levelOrder  = value.levelOrder
         let value_levelOrder_type : int32 = RuntimeType.UNDEFINED
@@ -19451,8 +19442,8 @@ export class Serializer extends SerializerBase {
         value_levelMode_type = runtimeType(value_levelMode)
         valueSerializer.writeInt8(value_levelMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_levelMode_type)) {
-            const value_levelMode_value  = value_levelMode!
-            valueSerializer.writeLevelMode(value_levelMode_value)
+            const value_levelMode_value  = (value_levelMode as LevelMode)
+            valueSerializer.writeInt32(TypeChecker.LevelMode_ToNumeric(value_levelMode_value))
         }
         const value_levelUniqueId  = value.levelUniqueId
         let value_levelUniqueId_type : int32 = RuntimeType.UNDEFINED
@@ -19467,8 +19458,8 @@ export class Serializer extends SerializerBase {
         value_immersiveMode_type = runtimeType(value_immersiveMode)
         valueSerializer.writeInt8(value_immersiveMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_immersiveMode_type)) {
-            const value_immersiveMode_value  = value_immersiveMode!
-            valueSerializer.writeImmersiveMode(value_immersiveMode_value)
+            const value_immersiveMode_value  = (value_immersiveMode as ImmersiveMode)
+            valueSerializer.writeInt32(TypeChecker.ImmersiveMode_ToNumeric(value_immersiveMode_value))
         }
         const value_levelOrder  = value.levelOrder
         let value_levelOrder_type : int32 = RuntimeType.UNDEFINED
@@ -20631,8 +20622,8 @@ export class Serializer extends SerializerBase {
         value_levelMode_type = runtimeType(value_levelMode)
         valueSerializer.writeInt8(value_levelMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_levelMode_type)) {
-            const value_levelMode_value  = value_levelMode!
-            valueSerializer.writeLevelMode(value_levelMode_value)
+            const value_levelMode_value  = (value_levelMode as LevelMode)
+            valueSerializer.writeInt32(TypeChecker.LevelMode_ToNumeric(value_levelMode_value))
         }
         const value_levelUniqueId  = value.levelUniqueId
         let value_levelUniqueId_type : int32 = RuntimeType.UNDEFINED
@@ -20647,8 +20638,8 @@ export class Serializer extends SerializerBase {
         value_immersiveMode_type = runtimeType(value_immersiveMode)
         valueSerializer.writeInt8(value_immersiveMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_immersiveMode_type)) {
-            const value_immersiveMode_value  = value_immersiveMode!
-            valueSerializer.writeImmersiveMode(value_immersiveMode_value)
+            const value_immersiveMode_value  = (value_immersiveMode as ImmersiveMode)
+            valueSerializer.writeInt32(TypeChecker.ImmersiveMode_ToNumeric(value_immersiveMode_value))
         }
         const value_levelOrder  = value.levelOrder
         let value_levelOrder_type : int32 = RuntimeType.UNDEFINED
@@ -24508,6 +24499,13 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeBoolean(value_hideItemValue_value)
         }
     }
+    public writePopupButton(value: PopupButton): void {
+        let valueSerializer : Serializer = this
+        const value_value  = value.value
+        valueSerializer.writeString(value_value)
+        const value_action  = value.action
+        valueSerializer.holdAndWriteCallback(value_action)
+    }
     writePopupOptions(value: PopupOptions): void {
         let valueSerializer : Serializer = this
         const value_message  = value.message
@@ -24524,24 +24522,18 @@ export class Serializer extends SerializerBase {
         const value_primaryButton  = value.primaryButton
         let value_primaryButton_type : int32 = RuntimeType.UNDEFINED
         value_primaryButton_type = runtimeType(value_primaryButton)
-        valueSerializer.writeInt8(value_primaryButton_type as int32)
+        valueSerializer.writeInt8(value_primaryButton_type)
         if ((RuntimeType.UNDEFINED) != (value_primaryButton_type)) {
             const value_primaryButton_value  = value_primaryButton!
-            const value_primaryButton_value_value  = value_primaryButton_value.value
-            valueSerializer.writeString(value_primaryButton_value_value)
-            const value_primaryButton_value_action  = value_primaryButton_value.action
-            valueSerializer.holdAndWriteCallback(value_primaryButton_value_action)
+            valueSerializer.writePopupButton(value_primaryButton_value)
         }
         const value_secondaryButton  = value.secondaryButton
         let value_secondaryButton_type : int32 = RuntimeType.UNDEFINED
         value_secondaryButton_type = runtimeType(value_secondaryButton)
-        valueSerializer.writeInt8(value_secondaryButton_type as int32)
+        valueSerializer.writeInt8(value_secondaryButton_type)
         if ((RuntimeType.UNDEFINED) != (value_secondaryButton_type)) {
             const value_secondaryButton_value  = value_secondaryButton!
-            const value_secondaryButton_value_value  = value_secondaryButton_value.value
-            valueSerializer.writeString(value_secondaryButton_value_value)
-            const value_secondaryButton_value_action  = value_secondaryButton_value.action
-            valueSerializer.holdAndWriteCallback(value_secondaryButton_value_action)
+            valueSerializer.writePopupButton(value_secondaryButton_value)
         }
         const value_onStateChange  = value.onStateChange
         let value_onStateChange_type : int32 = RuntimeType.UNDEFINED

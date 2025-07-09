@@ -421,6 +421,8 @@ const GENERATED_ArkUITextStyle_styled_stringAccessor* GetTextStyle_styled_string
 const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor();
 const GENERATED_ArkUIBaselineOffsetStyleAccessor* GetBaselineOffsetStyleAccessor();
 const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor();
+const GENERATED_ArkUILevelOrderAccessor* GetLevelOrderAccessor();
+const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor();
 const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor();
 const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccessor();
 const GENERATED_ArkUIGestureStyleAccessor* GetGestureStyleAccessor();
@@ -780,6 +782,8 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetDecorationStyleAccessor,
         GetBaselineOffsetStyleAccessor,
         GetLetterSpacingStyleAccessor,
+        GetLevelOrderAccessor,
+        GetDismissPopupActionAccessor,
         GetTextShadowStyleAccessor,
         GetBackgroundColorStyleAccessor,
         GetGestureStyleAccessor,

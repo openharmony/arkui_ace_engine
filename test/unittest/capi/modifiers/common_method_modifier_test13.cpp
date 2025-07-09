@@ -1702,13 +1702,13 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsOnWillDismiss
 {
     MockPipelineContext::GetCurrent()->SetTaskExecutor(AceType::MakeRefPtr<MockTaskExecutor>(false));
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    struct CheckEvent { int32_t resourceId; std::optional<DismissReason> reason; };
+    struct CheckEvent { int32_t resourceId; std::optional<Ark_DismissPopupAction> action; };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     void (*checkCallback)(const Ark_Int32, const Ark_DismissPopupAction) =
         [](const Ark_Int32 resourceId, const Ark_DismissPopupAction action) {
             checkEvent = {
                 .resourceId = resourceId,
-                .reason = static_cast<DismissReason>(action.reason)
+                .action = action
             };
         };
 
@@ -1742,9 +1742,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsOnWillDismiss
     pattern->CallOnWillDismiss(static_cast<int32_t>(DismissReason::TOUCH_OUTSIDE));
 
     ASSERT_TRUE(checkEvent.has_value());
-    ASSERT_TRUE(checkEvent.value().reason.has_value());
+    ASSERT_TRUE(checkEvent.value().action.has_value());
     EXPECT_EQ(checkEvent.value().resourceId, TEST_RESOURCE_ID_1);
-    EXPECT_EQ(checkEvent.value().reason.value(), DismissReason::TOUCH_OUTSIDE);
+    EXPECT_NE(checkEvent.value().action.value(), nullptr);
 }
 
 /*

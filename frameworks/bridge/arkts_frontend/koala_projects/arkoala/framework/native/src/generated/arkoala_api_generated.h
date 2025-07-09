@@ -1842,7 +1842,8 @@ typedef struct Ark_DismissContentCoverAction Ark_DismissContentCoverAction;
 typedef struct Opt_DismissContentCoverAction Opt_DismissContentCoverAction;
 typedef struct Ark_DismissDialogAction Ark_DismissDialogAction;
 typedef struct Opt_DismissDialogAction Opt_DismissDialogAction;
-typedef struct Ark_DismissPopupAction Ark_DismissPopupAction;
+typedef struct DismissPopupActionPeer DismissPopupActionPeer;
+typedef struct DismissPopupActionPeer* Ark_DismissPopupAction;
 typedef struct Opt_DismissPopupAction Opt_DismissPopupAction;
 typedef struct Ark_DismissSheetAction Ark_DismissSheetAction;
 typedef struct Opt_DismissSheetAction Opt_DismissSheetAction;
@@ -1964,8 +1965,6 @@ typedef struct Ark_ShapePoint Ark_ShapePoint;
 typedef struct Opt_ShapePoint Opt_ShapePoint;
 typedef struct Ark_ImageSourceSize Ark_ImageSourceSize;
 typedef struct Opt_ImageSourceSize Opt_ImageSourceSize;
-typedef struct Ark_ImmersiveMode Ark_ImmersiveMode;
-typedef struct Opt_ImmersiveMode Opt_ImmersiveMode;
 typedef struct Ark_InputCounterOptions Ark_InputCounterOptions;
 typedef struct Opt_InputCounterOptions Opt_InputCounterOptions;
 typedef struct Ark_InsertValue Ark_InsertValue;
@@ -1995,9 +1994,8 @@ typedef struct Opt_LengthMetricsCustom Opt_LengthMetricsCustom;
 typedef struct LetterSpacingStylePeer LetterSpacingStylePeer;
 typedef struct LetterSpacingStylePeer* Ark_LetterSpacingStyle;
 typedef struct Opt_LetterSpacingStyle Opt_LetterSpacingStyle;
-typedef struct Ark_LevelMode Ark_LevelMode;
-typedef struct Opt_LevelMode Opt_LevelMode;
-typedef struct Ark_LevelOrder Ark_LevelOrder;
+typedef struct LevelOrderPeer LevelOrderPeer;
+typedef struct LevelOrderPeer* Ark_LevelOrder;
 typedef struct Opt_LevelOrder Opt_LevelOrder;
 typedef struct Ark_LinearGradient_common Ark_LinearGradient_common;
 typedef struct Opt_LinearGradient_common Opt_LinearGradient_common;
@@ -12519,10 +12517,6 @@ typedef struct Opt_DismissDialogAction {
     Ark_Tag tag;
     Ark_DismissDialogAction value;
 } Opt_DismissDialogAction;
-typedef struct Ark_DismissPopupAction {
-    Callback_Void dismiss;
-    Ark_DismissReason reason;
-} Ark_DismissPopupAction;
 typedef struct Opt_DismissPopupAction {
     Ark_Tag tag;
     Ark_DismissPopupAction value;
@@ -13067,8 +13061,9 @@ typedef struct Opt_ImageSourceSize {
     Ark_Tag tag;
     Ark_ImageSourceSize value;
 } Opt_ImageSourceSize;
-typedef struct Ark_ImmersiveMode {
-    Ark_String _ImmersiveModeStub;
+typedef enum Ark_ImmersiveMode {
+    ARK_IMMERSIVE_MODE_DEFAULT = 0,
+    ARK_IMMERSIVE_MODE_EXTEND = 1,
 } Ark_ImmersiveMode;
 typedef struct Opt_ImmersiveMode {
     Ark_Tag tag;
@@ -13172,16 +13167,14 @@ typedef struct Opt_LetterSpacingStyle {
     Ark_Tag tag;
     Ark_LetterSpacingStyle value;
 } Opt_LetterSpacingStyle;
-typedef struct Ark_LevelMode {
-    Ark_String _LevelModeStub;
+typedef enum Ark_LevelMode {
+    ARK_LEVEL_MODE_OVERLAY = 0,
+    ARK_LEVEL_MODE_EMBEDDED = 1,
 } Ark_LevelMode;
 typedef struct Opt_LevelMode {
     Ark_Tag tag;
     Ark_LevelMode value;
 } Opt_LevelMode;
-typedef struct Ark_LevelOrder {
-    Ark_String _LevelOrderStub;
-} Ark_LevelOrder;
 typedef struct Opt_LevelOrder {
     Ark_Tag tag;
     Ark_LevelOrder value;
@@ -27299,6 +27292,23 @@ typedef struct GENERATED_ArkUILetterSpacingStyleAccessor {
     Ark_Number (*getLetterSpacing)(Ark_LetterSpacingStyle peer);
 } GENERATED_ArkUILetterSpacingStyleAccessor;
 
+typedef struct GENERATED_ArkUILevelOrderAccessor {
+    void (*destroyPeer)(Ark_LevelOrder peer);
+    Ark_LevelOrder (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_LevelOrder (*clamp)(const Ark_Number* order);
+    Ark_Number (*getOrder)(Ark_LevelOrder peer);
+} GENERATED_ArkUILevelOrderAccessor;
+
+typedef struct GENERATED_ArkUIDismissPopupActionAccessor {
+    void (*destroyPeer)(Ark_DismissPopupAction peer);
+    Ark_DismissPopupAction (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*dismiss)(Ark_DismissPopupAction peer);
+    Ark_DismissReason (*getReason)(Ark_DismissPopupAction peer);
+    void (*setReason)(Ark_DismissPopupAction peer, Ark_DismissReason reason);
+} GENERATED_ArkUIDismissPopupActionAccessor;
+
 typedef struct GENERATED_ArkUITextShadowStyleAccessor {
     void (*destroyPeer)(Ark_TextShadowStyle peer);
     Ark_TextShadowStyle (*ctor)(const Ark_Union_ShadowOptions_Array_ShadowOptions* value);
@@ -27838,6 +27848,8 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIDecorationStyleAccessor* (*getDecorationStyleAccessor)();
     const GENERATED_ArkUIBaselineOffsetStyleAccessor* (*getBaselineOffsetStyleAccessor)();
     const GENERATED_ArkUILetterSpacingStyleAccessor* (*getLetterSpacingStyleAccessor)();
+    const GENERATED_ArkUILevelOrderAccessor* (*getLevelOrderAccessor)();
+    const GENERATED_ArkUIDismissPopupActionAccessor* (*getDismissPopupActionAccessor)();
     const GENERATED_ArkUITextShadowStyleAccessor* (*getTextShadowStyleAccessor)();
     const GENERATED_ArkUIBackgroundColorStyleAccessor* (*getBackgroundColorStyleAccessor)();
     const GENERATED_ArkUIGestureStyleAccessor* (*getGestureStyleAccessor)();

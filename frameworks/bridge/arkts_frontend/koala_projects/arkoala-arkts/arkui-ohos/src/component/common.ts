@@ -7648,8 +7648,54 @@ export enum DismissReason {
     SLIDE_DOWN = 3
 }
 export interface DismissPopupAction {
-    dismiss: (() => void);
+    dismiss(): void;
     reason: DismissReason;
+}
+
+export class DismissPopupActionInternal implements MaterializedBase, DismissPopupAction {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    get reason(): DismissReason {
+        return this.getReason()
+    }
+    set reason(reason: DismissReason) {
+        this.setReason(reason)
+    }
+    constructor(peerPtr?: KPointer) {
+        if (!peerPtr) {
+            peerPtr = ArkUIGeneratedNativeModule._DismissPopupAction_construct()
+        }
+        this.peer = new Finalizable(peerPtr!, DismissPopupActionInternal.getFinalizer())
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._DismissPopupAction_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): DismissPopupActionInternal {
+        return new DismissPopupActionInternal(ptr)
+    }
+    public dismiss(): void {
+        this.dismiss_serialize()
+        return
+    }
+    private getReason(): DismissReason {
+        return this.getReason_serialize()
+    }
+    private setReason(reason: DismissReason): void {
+        const reason_casted = reason as DismissReason
+        this.setReason_serialize(reason_casted)
+    }
+    private dismiss_serialize(): void {
+        ArkUIGeneratedNativeModule._DismissPopupAction_dismiss(this.peer!.ptr)
+    }
+    private getReason_serialize(): DismissReason {
+        const retval = ArkUIGeneratedNativeModule._DismissPopupAction_getReason(this.peer!.ptr)
+        return DismissReason.fromValue(retval)
+    }
+    private setReason_serialize(reason: DismissReason): void {
+        ArkUIGeneratedNativeModule._DismissPopupAction_setReason(this.peer!.ptr, reason.valueOf())
+    }
 }
 export interface PopupStateChangeParam {
     isVisible: boolean;

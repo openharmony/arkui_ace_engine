@@ -29,6 +29,7 @@
 #include "video_ani_modifier.h"
 #include "shape_ani_modifier.h"
 #include "xcomponent_ani_modifier.h"
+#include "lazy_for_each_node_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -40,6 +41,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getDragAniModifier = OHOS::Ace::NG::GetDragAniModifier,
         .getCommonAniModifier = OHOS::Ace::NG::GetCommonAniModifier,
         .getCustomNodeAniModifier = OHOS::Ace::NG::GetCustomNodeAniModifier,
+        .getLazyForEachNodeAniModifier = OHOS::Ace::NG::GetLazyForEachNodeAniModifier,
         .getContentSlotAniModifier = OHOS::Ace::NG::GetContentSlotAniModifier,
         .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,
         .getArkUIAniWaterFlowModifier = OHOS::Ace::NG::GetArkUIAniWaterFlowModifier,

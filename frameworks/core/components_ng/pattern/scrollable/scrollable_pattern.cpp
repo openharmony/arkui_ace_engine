@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
@@ -4139,7 +4140,7 @@ void ScrollablePattern::GetRepeatCountInfo(
             repeatDifference += repeatVirtualCount - repeatRealCount;
             totalChildCount += repeatRealCount;
         } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
-                   AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child)) {
+                   AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) || AceType::InstanceOf<ArkoalaLazyNode>(child)) {
             totalChildCount += child->FrameCount();
         } else {
             GetRepeatCountInfo(child, repeatDifference, firstRepeatCount, totalChildCount);

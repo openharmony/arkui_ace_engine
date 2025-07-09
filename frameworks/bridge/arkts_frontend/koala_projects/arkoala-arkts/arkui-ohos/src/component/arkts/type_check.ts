@@ -59,7 +59,7 @@ import { DrawContext, Rect, LengthUnit, ShapeClip, ColorMetrics, RoundRect, Circ
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, DatePickerOptions, DatePickerResult, LunarSwitchStyle, DatePickerDialogOptions, Callback_DatePickerResult_Void } from "./../datePicker"
-import { DialogAlignment, DialogButtonDirection, LevelOrder, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
+import { DialogAlignment, DialogButtonDirection, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater } from "./../particle"
 import { DpiFollowStrategy, UIExtensionProxy, Callback_UIExtensionProxy_Void, WindowModeFollowStrategy, UIExtensionOptions, Literal_Number_code__want } from "./../uiExtensionComponent"
 import { EditMode, ListItemStyle, Sticky, SwipeActionState, SwipeEdgeEffect, ListItemOptions, SwipeActionItem, Callback_SwipeActionState_Void, SwipeActionOptions } from "./../listItem"
@@ -133,7 +133,7 @@ import { CircleOptions } from "./../circle"
 import { ColumnOptions, ColumnOptionsV2 } from "./../column"
 import { ColumnSplitDividerStyle } from "./../columnSplit"
 import { DateTimeOptions } from "./../arkui-intl"
-import { DismissDialogAction, ImmersiveMode, LevelMode, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions, Callback_DismissDialogAction_Void } from "./../actionSheet"
+import { DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions, Callback_DismissDialogAction_Void } from "./../actionSheet"
 import { DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish } from "./../animationExtender"
 import { EllipseOptions } from "./../ellipse"
 import { FormLinkOptions } from "./../formLink"
@@ -162,6 +162,7 @@ import { OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
 import promptAction from '@ohos/promptAction'
+import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos/promptAction"
 import { PointerStyle, UniformDataType} from '#external'
 export class TypeChecker {
     static typeInstanceOf<T>(value: Object, prop: string): boolean {
@@ -1298,7 +1299,7 @@ export class TypeChecker {
     static isImageSpanAlignment(value: Object | string | number | undefined): boolean {
         return value instanceof ImageSpanAlignment
     }
-    static isImmersiveMode(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isImmersiveMode(value: Object | string | number | undefined): boolean {
         return value instanceof ImmersiveMode
     }
     static isIndexerAlign(value: Object | string | number | undefined): boolean {
@@ -1427,10 +1428,10 @@ export class TypeChecker {
     static isLetterSpacingStyle(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof LetterSpacingStyle
     }
-    static isLevelMode(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isLevelMode(value: Object | string | number | undefined): boolean {
         return value instanceof LevelMode
     }
-    static isLevelOrder(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isLevelOrder(value: Object | string | number | undefined): boolean {
         return value instanceof LevelOrder
     }
     static isLightSource(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
@@ -4213,6 +4214,18 @@ export class TypeChecker {
     }
     static HoverModeAreaType_FromNumeric(ordinal: int32): HoverModeAreaType {
         return HoverModeAreaType.fromValue(ordinal)
+    }
+    static LevelMode_ToNumeric(value: LevelMode): int32 {
+        return value.valueOf()
+    }
+    static LevelMode_FromNumeric(ordinal: int32): LevelMode {
+        return LevelMode.fromValue(ordinal)
+    }
+    static ImmersiveMode_ToNumeric(value: ImmersiveMode): int32 {
+        return value.valueOf()
+    }
+    static ImmersiveMode_FromNumeric(ordinal: int32): ImmersiveMode {
+        return ImmersiveMode.fromValue(ordinal)
     }
     static IlluminatedType_ToNumeric(value: IlluminatedType): int32 {
         return value.valueOf()

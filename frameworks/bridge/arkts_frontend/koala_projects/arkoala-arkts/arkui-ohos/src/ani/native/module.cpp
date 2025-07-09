@@ -21,6 +21,7 @@
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
 #include "custom_node/custom_node_module.h"
+#include "lazy_for_each_module.h"
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "dragController/drag_controller_module.h"
 #include "image_span/image_span_module.h"
@@ -114,6 +115,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_CustomNode_Construct",
             "ILarkui/ArkCustomComponent/ArkCustomComponent;:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructCustomNode)
+        },
+        ani_native_function {
+            "_LazyForEachNode_Construct",
+            "I:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructLazyForEachNode)
         },
         ani_native_function {
             "_BuilderProxyNode_Construct",

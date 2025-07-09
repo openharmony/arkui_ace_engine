@@ -91,6 +91,9 @@ class RepeatDataSource<T> implements IDataSource<T> {
     }
 
     updateData(newArr: RepeatArray<T>, totalCount: number) {
+        if (this.total_ != totalCount) {
+            this.listener_?.update(Math.min(this.total_, totalCount), Number.POSITIVE_INFINITY, totalCount - this.total_);
+        }
         this.total_ = totalCount;
         // Compare array references first
         if (this.arr_ === newArr) {
@@ -98,14 +101,14 @@ class RepeatDataSource<T> implements IDataSource<T> {
         }
         // Shallow compare: check length and each element by reference
         if (this.arr_.length !== newArr.length) {
-            this.arr_ = newArr;
             this.listener_?.update(0, Number.POSITIVE_INFINITY, this.arr_.length - newArr.length);
+            this.arr_ = newArr;
             return;
         }
         for (let i = 0; i < newArr.length; i++) {
             if (this.arr_[i] !== newArr[i]) {
-                this.arr_ = newArr;
                 this.listener_?.update(i, Number.POSITIVE_INFINITY, 0);
+                this.arr_ = newArr;
                 return;
             }
         }
