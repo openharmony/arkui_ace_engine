@@ -144,33 +144,11 @@ export function hookDragPreview(node: ArkCommonMethodComponent, preview: CustomB
             return
         }
     }
-
-    if ((RuntimeType.OBJECT == config_type)) {
-        const preview_casted = preview as (CustomBuilder | DragItemInfo | string | undefined)
-        const config_casted = config as (PreviewConfiguration)
-        node.getPeer()?.dragPreview1Attribute(preview_casted, config_casted)
-        return
-    } else {
-        const value_casted = preview as (CustomBuilder | DragItemInfo | string | undefined)
-        node.getPeer()?.dragPreview0Attribute(value_casted)
-        return
-    }
+    DragDropOps.registerDragPreview(node.getPeer().getPeerPtr(), preview, config)
 }
 
 export function hookOnDrop(node: ArkCommonMethodComponent, eventCallback: ((event: DragEvent,extraParams?: string) => void) | OnDragEventCallback | undefined, dropOptions?: DropOptions) {
-    const eventCallback_type = runtimeType(eventCallback)
-    const dropOptions_type = runtimeType(dropOptions)
-    if ((RuntimeType.FUNCTION === eventCallback_type) && (RuntimeType.UNDEFINED === dropOptions_type)) {
-        const value_casted = eventCallback as (((event: DragEvent,extraParams?: string) => void) | undefined)
-        node.getPeer()?.onDrop0Attribute(value_casted)
-        return
-    }
-    if ((RuntimeType.FUNCTION === eventCallback_type) || (RuntimeType.UNDEFINED !== dropOptions_type)) {
-        const eventCallback_casted = eventCallback as (OnDragEventCallback | undefined)
-        const dropOptions_casted = dropOptions as (DropOptions)
-        node.getPeer()?.onDrop1Attribute(eventCallback_casted, dropOptions_casted)
-        return
-    }
+    DragDropOps.registerOnDrop(node.getPeer().getPeerPtr(), eventCallback, dropOptions)
 }
 
 export function hookDragEventStartDataLoading(node: KPointer, options: DataSyncOptions): string {
