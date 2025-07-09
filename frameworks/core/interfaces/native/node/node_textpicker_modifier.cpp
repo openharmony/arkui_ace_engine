@@ -691,6 +691,8 @@ void ResetTextPickerDividerNull(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::ItemDivider divider;
+    divider.isNull = true;
+    TextPickerModelNG::TextPickerRemoveResObj(frameNode, "textPicker.divider");
     TextPickerModelNG::SetDivider(frameNode, divider);
 }
 

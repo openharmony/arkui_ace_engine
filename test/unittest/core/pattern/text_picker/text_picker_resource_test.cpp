@@ -263,4 +263,97 @@ HWTEST_F(TextPickerResourceTest, ParseSingleIconTextResourceObj002, TestSize.Lev
     }
 }
 
+/**
+ * @tc.name: ParseDividerResObj001
+ * @tc.desc: Test ParseDividerResObj when divider is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, ParseDividerResObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call ParseDividerResObj to register the resourceObject callback function.
+     * @tc.expected: Dut to divider is null, the value will not be changed.
+     */
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    NG::ItemDivider newDivider;
+    newDivider.isNull = true;
+    newDivider.strokeWidth = 0.0_vp;
+    TextPickerModelNG::ParseDividerResObj(frameNode, newDivider);
+    pattern->resourceMgr_->ReloadResources();
+    NG::ItemDivider curDivider = textPickerPattern->GetDivider();
+    EXPECT_NE(curDivider.strokeWidth, theme->GetDividerThickness());
+    EXPECT_EQ(curDivider.strokeWidth, newDivider.strokeWidth);
+}
+
+/**
+ * @tc.name: ParseDividerResObj002
+ * @tc.desc: Test ParseDividerResObj when divider is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, ParseDividerResObj002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call ParseDividerResObj to register the resourceObject callback function.
+     * @tc.expected: Dut to divider is not null, the value will be changed.
+     */
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    NG::ItemDivider newDivider;
+    newDivider.isNull = false;
+    newDivider.strokeWidth = 0.0_vp;
+    TextPickerModelNG::ParseDividerResObj(frameNode, newDivider);
+    pattern->resourceMgr_->ReloadResources();
+    NG::ItemDivider curDivider = textPickerPattern->GetDivider();
+    EXPECT_EQ(curDivider.strokeWidth, theme->GetDividerThickness());
+}
+
 } // namespace OHOS::Ace::NG

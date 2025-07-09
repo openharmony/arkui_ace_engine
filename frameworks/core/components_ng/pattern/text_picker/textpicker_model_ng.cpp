@@ -1613,6 +1613,10 @@ void TextPickerModelNG::ParseDividerResObj(FrameNode* frameNode, const NG::ItemD
     CHECK_NULL_VOID(textPickerPattern);
 
     auto&& updateFunc = [frameNode, divider](const RefPtr<ResourceObject>& resObj) {
+        if (divider.isNull == true) {
+            return;
+        }
+
         auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
         CHECK_NULL_VOID(textPickerPattern);
         auto context = frameNode->GetContext();
@@ -1654,6 +1658,7 @@ void TextPickerModelNG::ParseDividerResObj(FrameNode* frameNode, const NG::ItemD
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, curDivider, frameNode);
     };
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    textPickerPattern->RemoveResObj("textPicker.divider");
     textPickerPattern->AddResObj("textPicker.divider", resObj, std::move(updateFunc));
 }
 
