@@ -40,7 +40,7 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     ) {
         super('Provide', owningView, varName, watchFunc);
         if (isDynamicObject(initValue)) {
-            initValue = getObservedObject(initValue);
+            initValue = getObservedObject(initValue, this);
         }
         this.provideAlias_ = provideAliasName;
         this.allowOverride_ = allowOverride ? allowOverride : false;
@@ -60,6 +60,13 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         const value = this.backing_.get(false);
         if (value === newValue) {
             return;
+        }
+        // for interop
+        if (isDynamicObject(newValue)) {
+            newValue = getObservedObject(newValue, this);
+        }
+        if (typeof this.setProxyValue === 'function') {
+            this.setProxyValue!(newValue);
         }
         if (this.backing_.set(UIUtils.makeObserved(newValue) as T)) {
             this.unregisterWatchFromObservedObjectChanges(value);
