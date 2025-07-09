@@ -763,7 +763,7 @@ let ScrollDirection;
   ScrollDirection[ScrollDirection.Horizontal = 1] = 'Horizontal';
   ScrollDirection[ScrollDirection.Free = 2] = 'Free';
   ScrollDirection[ScrollDirection.None = 3] = 'None';
-  ScrollDirection[ScrollDirection.FREE = 5] = 'FREE';
+  ScrollDirection[ScrollDirection.FREE = 4] = 'FREE';
 })(ScrollDirection || (ScrollDirection = {}));
 
 let Sticky;

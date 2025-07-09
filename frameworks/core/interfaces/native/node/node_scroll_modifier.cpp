@@ -233,6 +233,10 @@ void SetScrollScrollable(ArkUINodeHandle node, ArkUI_Int32 scrollDirection)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (scrollDirection == ArkUI_ScrollDirection::ARKUI_SCROLL_DIRECTION_FREE) {
+        ScrollModelNG::SetAxis(frameNode, Axis::FREE);
+        return;
+    }
     ScrollModelNG::SetAxis(frameNode, static_cast<Axis>(scrollDirection));
 }
 
