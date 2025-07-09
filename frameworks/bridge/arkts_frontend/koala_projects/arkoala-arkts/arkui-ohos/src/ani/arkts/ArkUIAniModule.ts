@@ -57,6 +57,7 @@ export class ArkUIAniModule {
     native static _Invalidate(ptr: KPointer): void
     native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
+    native static _LazyForEachNode_Construct(id: KInt): KPointer
 
     // for Drag
     native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
@@ -118,6 +119,8 @@ export class ArkUIAniModule {
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
     native static _ImageSpan_SetAlt_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
+    native static _ImageSpan_Set_DrawingColorFilter(ptr: KPointer, value: drawing.ColorFilter): void
+
     native static _SetCustomCallback(ptr: KPointer,
         measureCallback: ((width1: number, height1: number, width2: number, height2: number, width3: number,
         height3: number) => void), layoutCallback: ((x: number, y: number) => void)): void

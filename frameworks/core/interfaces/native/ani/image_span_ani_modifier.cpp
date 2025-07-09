@@ -15,10 +15,12 @@
 
 #include "image_ani_modifier.h"
 
+#include "base/image/drawing_color_filter.h"
 #include "base/image/pixel_map.h"
 #include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_model_static.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/image/image_source_info.h"
 #include "core/image/image_source_info.h"
@@ -53,11 +55,19 @@ void SetAltPixelMap(ArkUINodeHandle node, void* pixelmap)
     }
 }
 
+void SetImageSpanColorFilter(ArkUINodeHandle node, void* aniColorFilter)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto colorFilter = DrawingColorFilter::CreateDrawingColorFilterFromAni(aniColorFilter);
+    ImageModelStatic::SetDrawingColorFilter(frameNode, colorFilter);
+}
+
 const ArkUIAniImageSpanModifier* GetImageSpanAniModifier()
 {
     static const ArkUIAniImageSpanModifier impl = {
         .setPixelMap = OHOS::Ace::NG::SetImageSpanPixelMap,
-        .setAltPixelMap = OHOS::Ace::NG::SetAltPixelMap
+        .setAltPixelMap = OHOS::Ace::NG::SetAltPixelMap,
+        .setDrawingColorFilter = OHOS::Ace::NG::SetImageSpanColorFilter
     };
     return &impl;
 }

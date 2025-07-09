@@ -22,11 +22,11 @@ import { CallbackKind } from "./CallbackKind"
 import { Serializer } from "./Serializer"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback, DividerStyle, BlendMode } from "./../common"
+import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback, DividerStyle, BlendMode, PopupCommonOptions, DismissPopupActionInternal } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
 import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme, Callback_CreateItem, LengthMetricsCustom } from "./../arkui-custom"
-import { UIContext } from "@ohos/arkui/UIContext"
+import { UIContext, TargetInfo } from "@ohos/arkui/UIContext"
 import { ContentDidScrollCallback, ContentWillScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperAnimationMode, SwiperAttribute, DotIndicator, DigitIndicator, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, SwiperContentWillScrollResult, AutoPlayOptions, ArrowStyle, SwiperAutoFill, SwiperContentTransitionProxy, SwiperContentTransitionProxyInternal, SwiperController, SwiperControllerInternal, Callback_SwiperContentTransitionProxy_Void, Indicator } from "./../swiper"
 import { CustomNodeBuilder } from "./../customBuilder"
 import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, TextMenuOptions, DecorationStyleResult } from "./../textCommon"
@@ -104,7 +104,7 @@ import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ColorMetrics, ColorMe
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, LinearGradient, LinearGradientInternal, ColorStop, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, Callback_DatePickerResult_Void, DatePickerResult, DatePickerOptions, LunarSwitchStyle, DatePickerDialogOptions } from "./../datePicker"
-import { DialogAlignment, DialogButtonDirection, LevelOrder, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
+import { DialogAlignment, DialogButtonDirection, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater } from "./../particle"
 import { DpiFollowStrategy, UIExtensionProxy, UIExtensionProxyInternal, Callback_UIExtensionProxy_Void, WindowModeFollowStrategy, Callback_Literal_Number_code__want_Void, Literal_Number_code__want, Callback_Map_String_Object_Void, UIExtensionOptions } from "./../uiExtensionComponent"
 import { EditMode, ListItemStyle, Sticky, SwipeActionState, SwipeEdgeEffect, Callback_SwipeActionState_Void, ListItemOptions, SwipeActionItem, SwipeActionOptions } from "./../listItem"
@@ -151,7 +151,7 @@ import { ToggleType, ToggleOptions, SwitchStyle } from "./../toggle"
 import { UniformDataType } from "./../arkui-uniformtypedescriptor"
 import { WindowSceneAttribute } from "./../windowScene"
 import { Callback_Array_String_Void, Callback_Array_TextMenuItem_Void, Callback_Buffer_Void, Callback_ComputedBarAttribute_Void, Callback_CustomBuilder_Void, Callback_GestureJudgeResult_Void, Callback_GestureRecognizer_Void, Callback_HitTestMode_Void, Callback_Literal_Number_offsetRemain_Void, Callback_OffsetResult_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_Opt_Array_NavDestinationTransition_Void, Callback_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Pointer_Void, Callback_StyledStringMarshallingValue_Void, Callback_TouchResult_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_Tuple_Number_Number_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_WebKeyboardOptions_Void, Callback_WebResourceResponse_Void, Callback_WithThemeAttribute_Void } from "./../generatorSynthetic"
-import { Callback_DismissDialogAction_Void, DismissDialogAction, ImmersiveMode, LevelMode, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions } from "./../actionSheet"
+import { Callback_DismissDialogAction_Void, DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions } from "./../actionSheet"
 import { Want } from "./../ohos.app.ability"
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./../embeddedComponent"
 import { BusinessError } from "#external"
@@ -184,6 +184,7 @@ import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
 import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
 import { drawing } from "@ohos/graphics/drawing"
 import promptAction from '@ohos/promptAction'
+import { LevelOrderInternal, LevelMode, ImmersiveMode, LevelOrder } from "@ohos/promptAction"
 import { PointerStyle, DataSyncOptions } from '#external'
 import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 export class Deserializer extends DeserializerBase {
@@ -596,7 +597,7 @@ export class Deserializer extends DeserializerBase {
     }
     readOnProgressChangeEvent(): OnProgressChangeEvent {
         let valueDeserializer : Deserializer = this
-        const newProgress_result : number = (valueDeserializer.readNumber() as number)
+        const newProgress_result : int32 = (valueDeserializer.readInt32() as int32)
         let value : OnProgressChangeEvent = ({newProgress: newProgress_result} as OnProgressChangeEvent)
         return value
     }
@@ -6386,6 +6387,259 @@ export class Deserializer extends DeserializerBase {
         let value : BackgroundBrightnessOptions = ({rate: rate_result, lightUpDegree: lightUpDegree_result} as BackgroundBrightnessOptions)
         return value
     }
+
+    readTargetInfo(): TargetInfo {
+        let valueDeserializer : Deserializer = this
+        const id_buf_selector : int32 = valueDeserializer.readInt8()
+        let id_buf : string | number | undefined
+        if (id_buf_selector == 0) {
+            id_buf = (valueDeserializer.readString() as string)
+        }
+        else if (id_buf_selector == 1) {
+            id_buf = (valueDeserializer.readNumber() as number)
+        }
+        else {
+            throw new Error("One of the branches for id_buf has to be chosen through deserialisation.")
+        }
+        const id_result : string | number = (id_buf as string | number)
+        const componentId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let componentId_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (componentId_buf_runtimeType)) {
+            componentId_buf = (valueDeserializer.readNumber() as number)
+        }
+        const componentId_result : number | undefined = componentId_buf
+        let value : TargetInfo = ({id: id_result, componentId: componentId_result} as TargetInfo)
+        return value
+    }
+
+    readPopupCommonOptions(): PopupCommonOptions {
+        let valueDeserializer : Deserializer = this
+        const placement_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let placement_buf : Placement | undefined
+        if ((RuntimeType.UNDEFINED) != (placement_buf_runtimeType))
+        {
+            placement_buf = TypeChecker.Placement_FromNumeric(valueDeserializer.readInt32())
+        }
+        const placement_result : Placement | undefined = placement_buf
+        const popupColor_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let popupColor_buf : Color | string | Resource | number | undefined
+        if ((RuntimeType.UNDEFINED) != (popupColor_buf_runtimeType))
+        {
+            const popupColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let popupColor_buf_ : Color | string | Resource | number | undefined
+            if (popupColor_buf__selector == 0) {
+                popupColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (popupColor_buf__selector == 1) {
+                popupColor_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (popupColor_buf__selector == 2) {
+                popupColor_buf_ = valueDeserializer.readResource()
+            }
+            else if (popupColor_buf__selector == 3) {
+                popupColor_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else {
+                throw new Error("One of the branches for popupColor_buf_ has to be chosen through deserialisation.")
+            }
+            popupColor_buf = (popupColor_buf_ as Color | string | Resource | number)
+        }
+        const popupColor_result : Color | string | Resource | number | undefined = popupColor_buf
+        const enableArrow_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let enableArrow_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (enableArrow_buf_runtimeType))
+        {
+            enableArrow_buf = valueDeserializer.readBoolean()
+        }
+        const enableArrow_result : boolean | undefined = enableArrow_buf
+        const autoCancel_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let autoCancel_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (autoCancel_buf_runtimeType))
+        {
+            autoCancel_buf = valueDeserializer.readBoolean()
+        }
+        const autoCancel_result : boolean | undefined = autoCancel_buf
+        const onStateChange_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let onStateChange_buf : PopupStateChangeCallback | undefined
+        if ((RuntimeType.UNDEFINED) != (onStateChange_buf_runtimeType))
+        {
+            onStateChange_buf = valueDeserializer.readPopupStateChangeCallback()
+        }
+        const onStateChange_result : PopupStateChangeCallback | undefined = onStateChange_buf
+        const arrowOffset_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let arrowOffset_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (arrowOffset_buf_runtimeType))
+        {
+            arrowOffset_buf = (valueDeserializer.readLength() as Length)
+        }
+        const arrowOffset_result : Length | undefined = arrowOffset_buf
+        const showInSubWindow_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let showInSubWindow_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (showInSubWindow_buf_runtimeType))
+        {
+            showInSubWindow_buf = valueDeserializer.readBoolean()
+        }
+        const showInSubWindow_result : boolean | undefined = showInSubWindow_buf
+        const mask_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let mask_buf : boolean | PopupMaskType | undefined
+        if ((RuntimeType.UNDEFINED) != (mask_buf_runtimeType))
+        {
+            const mask_buf__selector : int32 = valueDeserializer.readInt8()
+            let mask_buf_ : boolean | PopupMaskType | undefined
+            if (mask_buf__selector == 0) {
+                mask_buf_ = valueDeserializer.readBoolean()
+            }
+            else if (mask_buf__selector == 1) {
+                const mask_buf__u_color_buf_selector : int32 = valueDeserializer.readInt8()
+                let mask_buf__u_color_buf : Color | number | string | Resource | undefined
+                if (mask_buf__u_color_buf_selector == 0) {
+                    mask_buf__u_color_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+                }
+                else if (mask_buf__u_color_buf_selector == 1) {
+                    mask_buf__u_color_buf = (valueDeserializer.readNumber() as number)
+                }
+                else if (mask_buf__u_color_buf_selector == 2) {
+                    mask_buf__u_color_buf = (valueDeserializer.readString() as string)
+                }
+                else if (mask_buf__u_color_buf_selector == 3) {
+                    mask_buf__u_color_buf = valueDeserializer.readResource()
+                }
+                else {
+                    throw new Error("One of the branches for mask_buf__u_color_buf has to be chosen through deserialisation.")
+                }
+                const mask_buf__u_color : ResourceColor = (mask_buf__u_color_buf as Color | number | string | Resource)
+                mask_buf_ = ({color: mask_buf__u_color} as PopupMaskType)
+            }
+            else {
+                throw new Error("One of the branches for mask_buf_ has to be chosen through deserialisation.")
+            }
+            mask_buf = (mask_buf_ as boolean | PopupMaskType)
+        }
+        const mask_result : boolean | PopupMaskType | undefined = mask_buf
+        const targetSpace_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let targetSpace_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (targetSpace_buf_runtimeType))
+        {
+            targetSpace_buf = (valueDeserializer.readLength() as Length)
+        }
+        const targetSpace_result : Length | undefined = targetSpace_buf
+        const offset_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let offset_buf : Position | undefined
+        if ((RuntimeType.UNDEFINED) != (offset_buf_runtimeType))
+        {
+            offset_buf = valueDeserializer.readPosition()
+        }
+        const offset_result : Position | undefined = offset_buf
+        const width_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let width_buf : Dimension | undefined
+        if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
+        {
+            width_buf = (valueDeserializer.readLength() as Dimension)
+        }
+        const width_result : Dimension | undefined = width_buf
+        const arrowPointPosition_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let arrowPointPosition_buf : ArrowPointPosition | undefined
+        if ((RuntimeType.UNDEFINED) != (arrowPointPosition_buf_runtimeType))
+        {
+            arrowPointPosition_buf = TypeChecker.ArrowPointPosition_FromNumeric(valueDeserializer.readInt32())
+        }
+        const arrowPointPosition_result : ArrowPointPosition | undefined = arrowPointPosition_buf
+        const arrowWidth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let arrowWidth_buf : Dimension | undefined
+        if ((RuntimeType.UNDEFINED) != (arrowWidth_buf_runtimeType))
+        {
+            arrowWidth_buf = (valueDeserializer.readLength() as Dimension)
+        }
+        const arrowWidth_result : Dimension | undefined = arrowWidth_buf
+        const arrowHeight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let arrowHeight_buf : Dimension | undefined
+        if ((RuntimeType.UNDEFINED) != (arrowHeight_buf_runtimeType))
+        {
+            arrowHeight_buf = (valueDeserializer.readLength() as Dimension)
+        }
+        const arrowHeight_result : Dimension | undefined = arrowHeight_buf
+        const radius_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let radius_buf : Dimension | undefined
+        if ((RuntimeType.UNDEFINED) != (radius_buf_runtimeType))
+        {
+            radius_buf = (valueDeserializer.readLength() as Dimension)
+        }
+        const radius_result : Dimension | undefined = radius_buf
+        const shadow_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let shadow_buf : ShadowOptions | ShadowStyle | undefined
+        if ((RuntimeType.UNDEFINED) != (shadow_buf_runtimeType))
+        {
+            const shadow_buf__selector : int32 = valueDeserializer.readInt8()
+            let shadow_buf_ : ShadowOptions | ShadowStyle | undefined
+            if (shadow_buf__selector == 0) {
+                shadow_buf_ = valueDeserializer.readShadowOptions()
+            }
+            else if (shadow_buf__selector == 1) {
+                shadow_buf_ = TypeChecker.ShadowStyle_FromNumeric(valueDeserializer.readInt32())
+            }
+            else {
+                throw new Error("One of the branches for shadow_buf_ has to be chosen through deserialisation.")
+            }
+            shadow_buf = (shadow_buf_ as ShadowOptions | ShadowStyle)
+        }
+        const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
+        const backgroundBlurStyle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let backgroundBlurStyle_buf : BlurStyle | undefined
+        if ((RuntimeType.UNDEFINED) != (backgroundBlurStyle_buf_runtimeType))
+        {
+            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
+        }
+        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
+        const focusable_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let focusable_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (focusable_buf_runtimeType))
+        {
+            focusable_buf = valueDeserializer.readBoolean()
+        }
+        const focusable_result : boolean | undefined = focusable_buf
+        const transition_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let transition_buf : TransitionEffect | undefined
+        if ((RuntimeType.UNDEFINED) != (transition_buf_runtimeType))
+        {
+            transition_buf = (valueDeserializer.readTransitionEffect() as TransitionEffect)
+        }
+        const transition_result : TransitionEffect | undefined = transition_buf
+        const onWillDismiss_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let onWillDismiss_buf : boolean | ((parameter: DismissPopupAction) => void) | undefined
+        if ((RuntimeType.UNDEFINED) != (onWillDismiss_buf_runtimeType))
+        {
+            const onWillDismiss_buf__selector : int32 = valueDeserializer.readInt8()
+            let onWillDismiss_buf_ : boolean | ((parameter: DismissPopupAction) => void) | undefined
+            if (onWillDismiss_buf__selector == 0) {
+                onWillDismiss_buf_ = valueDeserializer.readBoolean()
+            }
+            else if (onWillDismiss_buf__selector == 1) {
+                onWillDismiss_buf_ = valueDeserializer.readCallback_DismissPopupAction_Void()
+            }
+            else {
+                throw new Error("One of the branches for onWillDismiss_buf_ has to be chosen through deserialisation.")
+            }
+            onWillDismiss_buf = (onWillDismiss_buf_ as boolean | ((parameter: DismissPopupAction) => void))
+        }
+        const onWillDismiss_result : boolean | ((parameter: DismissPopupAction) => void) | undefined = onWillDismiss_buf
+        const enableHoverMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let enableHoverMode_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
+        {
+            enableHoverMode_buf = valueDeserializer.readBoolean()
+        }
+        const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
+        const followTransformOfTarget_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let followTransformOfTarget_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (followTransformOfTarget_buf_runtimeType))
+        {
+            followTransformOfTarget_buf = valueDeserializer.readBoolean()
+        }
+        const followTransformOfTarget_result : boolean | undefined = followTransformOfTarget_buf
+        let value : PopupCommonOptions = ({placement: placement_result, popupColor: popupColor_result, enableArrow: enableArrow_result, autoCancel: autoCancel_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, targetSpace: targetSpace_result, offset: offset_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, focusable: focusable_buf, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result} as PopupCommonOptions)
+        return value
+    }
+
     readBackgroundImageOptions(): BackgroundImageOptions {
         let valueDeserializer : Deserializer = this
         const syncLoad_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -7399,10 +7653,12 @@ export class Deserializer extends DeserializerBase {
     }
     readDismissPopupAction(): DismissPopupAction {
         let valueDeserializer : Deserializer = this
-        const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
-        const reason_result : DismissReason = TypeChecker.DismissReason_FromNumeric(valueDeserializer.readInt32())
-        let value : DismissPopupAction = ({dismiss: dismiss_result, reason: reason_result} as DismissPopupAction)
-        return value
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return DismissPopupActionInternal.fromPtr(ptr)
+        // const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
+        // const reason_result : DismissReason = TypeChecker.DismissReason_FromNumeric(valueDeserializer.readInt32())
+        // let value : DismissPopupAction = ({dismiss: dismiss_result, reason: reason_result} as DismissPopupAction)
+        // return value
     }
     readDismissSheetAction(): DismissSheetAction {
         let valueDeserializer : Deserializer = this
@@ -8504,12 +8760,6 @@ export class Deserializer extends DeserializerBase {
         let value : ImageSourceSize = ({width: width_result, height: height_result} as ImageSourceSize)
         return value
     }
-    readImmersiveMode(): ImmersiveMode {
-        let valueDeserializer : Deserializer = this
-        const _ImmersiveModeStub_result : string = (valueDeserializer.readString() as string)
-        let value : ImmersiveMode = ({_ImmersiveModeStub: _ImmersiveModeStub_result} as ImmersiveMode)
-        return value
-    }
     readInputCounterOptions(): InputCounterOptions {
         let valueDeserializer : Deserializer = this
         const thresholdPercentage_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -8666,17 +8916,10 @@ export class Deserializer extends DeserializerBase {
         let ptr : KPointer = valueDeserializer.readPointer()
         return LetterSpacingStyleInternal.fromPtr(ptr)
     }
-    readLevelMode(): LevelMode {
-        let valueDeserializer : Deserializer = this
-        const _LevelModeStub_result : string = (valueDeserializer.readString() as string)
-        let value : LevelMode = ({_LevelModeStub: _LevelModeStub_result} as LevelMode)
-        return value
-    }
     readLevelOrder(): LevelOrder {
         let valueDeserializer : Deserializer = this
-        const _LevelOrderStub_result : string = (valueDeserializer.readString() as string)
-        let value : LevelOrder = ({_LevelOrderStub: _LevelOrderStub_result} as LevelOrder)
-        return value
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return LevelOrderInternal.fromPtr(ptr)
     }
     readLinearGradient_common(): LinearGradient_common {
         let valueDeserializer : Deserializer = this
@@ -21578,7 +21821,7 @@ export class Deserializer extends DeserializerBase {
         let levelMode_buf : LevelMode | undefined
         if ((RuntimeType.UNDEFINED) != (levelMode_buf_runtimeType))
         {
-            levelMode_buf = valueDeserializer.readLevelMode()
+            levelMode_buf = TypeChecker.LevelMode_FromNumeric(valueDeserializer.readInt32())
         }
         const levelMode_result : LevelMode | undefined = levelMode_buf
         const levelUniqueId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -21592,14 +21835,14 @@ export class Deserializer extends DeserializerBase {
         let immersiveMode_buf : ImmersiveMode | undefined
         if ((RuntimeType.UNDEFINED) != (immersiveMode_buf_runtimeType))
         {
-            immersiveMode_buf = valueDeserializer.readImmersiveMode()
+            immersiveMode_buf = TypeChecker.ImmersiveMode_FromNumeric(valueDeserializer.readInt32())
         }
         const immersiveMode_result : ImmersiveMode | undefined = immersiveMode_buf
         const levelOrder_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let levelOrder_buf : LevelOrder | undefined
         if ((RuntimeType.UNDEFINED) != (levelOrder_buf_runtimeType))
         {
-            levelOrder_buf = valueDeserializer.readLevelOrder()
+            levelOrder_buf = (valueDeserializer.readLevelOrder() as LevelOrder)
         }
         const levelOrder_result : LevelOrder | undefined = levelOrder_buf
         let value : ActionSheetOptions = ({title: title_result, subtitle: subtitle_result, message: message_result, confirm: confirm_result, cancel: cancel_result, sheets: sheets_result, autoCancel: autoCancel_result, alignment: alignment_result, offset: offset_result, maskRect: maskRect_result, showInSubWindow: showInSubWindow_result, isModal: isModal_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, onWillDismiss: onWillDismiss_result, transition: transition_result, cornerRadius: cornerRadius_result, width: width_result, height: height_result, borderWidth: borderWidth_result, borderColor: borderColor_result, borderStyle: borderStyle_result, shadow: shadow_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result, onDidAppear: onDidAppear_result, onDidDisappear: onDidDisappear_result, onWillAppear: onWillAppear_result, onWillDisappear: onWillDisappear_result, levelMode: levelMode_result, levelUniqueId: levelUniqueId_result, immersiveMode: immersiveMode_result, levelOrder: levelOrder_result} as ActionSheetOptions)
@@ -22103,7 +22346,7 @@ export class Deserializer extends DeserializerBase {
         let levelMode_buf : LevelMode | undefined
         if ((RuntimeType.UNDEFINED) != (levelMode_buf_runtimeType))
         {
-            levelMode_buf = valueDeserializer.readLevelMode()
+            levelMode_buf = TypeChecker.LevelMode_FromNumeric(valueDeserializer.readInt32())
         }
         const levelMode_result : LevelMode | undefined = levelMode_buf
         const levelUniqueId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -22117,14 +22360,14 @@ export class Deserializer extends DeserializerBase {
         let immersiveMode_buf : ImmersiveMode | undefined
         if ((RuntimeType.UNDEFINED) != (immersiveMode_buf_runtimeType))
         {
-            immersiveMode_buf = valueDeserializer.readImmersiveMode()
+            immersiveMode_buf = TypeChecker.ImmersiveMode_FromNumeric(valueDeserializer.readInt32())
         }
         const immersiveMode_result : ImmersiveMode | undefined = immersiveMode_buf
         const levelOrder_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let levelOrder_buf : LevelOrder | undefined
         if ((RuntimeType.UNDEFINED) != (levelOrder_buf_runtimeType))
         {
-            levelOrder_buf = valueDeserializer.readLevelOrder()
+            levelOrder_buf = (valueDeserializer.readLevelOrder() as LevelOrder)
         }
         const levelOrder_result : LevelOrder | undefined = levelOrder_buf
         const primaryButton_result : AlertDialogButtonBaseOptions = valueDeserializer.readAlertDialogButtonBaseOptions()
@@ -22480,7 +22723,7 @@ export class Deserializer extends DeserializerBase {
         let levelMode_buf : LevelMode | undefined
         if ((RuntimeType.UNDEFINED) != (levelMode_buf_runtimeType))
         {
-            levelMode_buf = valueDeserializer.readLevelMode()
+            levelMode_buf = TypeChecker.LevelMode_FromNumeric(valueDeserializer.readInt32())
         }
         const levelMode_result : LevelMode | undefined = levelMode_buf
         const levelUniqueId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -22494,14 +22737,14 @@ export class Deserializer extends DeserializerBase {
         let immersiveMode_buf : ImmersiveMode | undefined
         if ((RuntimeType.UNDEFINED) != (immersiveMode_buf_runtimeType))
         {
-            immersiveMode_buf = valueDeserializer.readImmersiveMode()
+            immersiveMode_buf = TypeChecker.ImmersiveMode_FromNumeric(valueDeserializer.readInt32())
         }
         const immersiveMode_result : ImmersiveMode | undefined = immersiveMode_buf
         const levelOrder_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let levelOrder_buf : LevelOrder | undefined
         if ((RuntimeType.UNDEFINED) != (levelOrder_buf_runtimeType))
         {
-            levelOrder_buf = valueDeserializer.readLevelOrder()
+            levelOrder_buf = (valueDeserializer.readLevelOrder() as LevelOrder)
         }
         const levelOrder_result : LevelOrder | undefined = levelOrder_buf
         const confirm_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -22862,7 +23105,7 @@ export class Deserializer extends DeserializerBase {
         let levelMode_buf : LevelMode | undefined
         if ((RuntimeType.UNDEFINED) != (levelMode_buf_runtimeType))
         {
-            levelMode_buf = valueDeserializer.readLevelMode()
+            levelMode_buf = TypeChecker.LevelMode_FromNumeric(valueDeserializer.readInt32())
         }
         const levelMode_result : LevelMode | undefined = levelMode_buf
         const levelUniqueId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -22876,14 +23119,14 @@ export class Deserializer extends DeserializerBase {
         let immersiveMode_buf : ImmersiveMode | undefined
         if ((RuntimeType.UNDEFINED) != (immersiveMode_buf_runtimeType))
         {
-            immersiveMode_buf = valueDeserializer.readImmersiveMode()
+            immersiveMode_buf = TypeChecker.ImmersiveMode_FromNumeric(valueDeserializer.readInt32())
         }
         const immersiveMode_result : ImmersiveMode | undefined = immersiveMode_buf
         const levelOrder_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let levelOrder_buf : LevelOrder | undefined
         if ((RuntimeType.UNDEFINED) != (levelOrder_buf_runtimeType))
         {
-            levelOrder_buf = valueDeserializer.readLevelOrder()
+            levelOrder_buf = (valueDeserializer.readLevelOrder() as LevelOrder)
         }
         const levelOrder_result : LevelOrder | undefined = levelOrder_buf
         const buttons_buf_length : int32 = valueDeserializer.readInt32()
@@ -23926,7 +24169,7 @@ export class Deserializer extends DeserializerBase {
         let levelMode_buf : LevelMode | undefined
         if ((RuntimeType.UNDEFINED) != (levelMode_buf_runtimeType))
         {
-            levelMode_buf = valueDeserializer.readLevelMode()
+            levelMode_buf = TypeChecker.LevelMode_FromNumeric(valueDeserializer.readInt32())
         }
         const levelMode_result : LevelMode | undefined = levelMode_buf
         const levelUniqueId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -23940,14 +24183,14 @@ export class Deserializer extends DeserializerBase {
         let immersiveMode_buf : ImmersiveMode | undefined
         if ((RuntimeType.UNDEFINED) != (immersiveMode_buf_runtimeType))
         {
-            immersiveMode_buf = valueDeserializer.readImmersiveMode()
+            immersiveMode_buf = TypeChecker.ImmersiveMode_FromNumeric(valueDeserializer.readInt32())
         }
         const immersiveMode_result : ImmersiveMode | undefined = immersiveMode_buf
         const levelOrder_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let levelOrder_buf : LevelOrder | undefined
         if ((RuntimeType.UNDEFINED) != (levelOrder_buf_runtimeType))
         {
-            levelOrder_buf = valueDeserializer.readLevelOrder()
+            levelOrder_buf = (valueDeserializer.readLevelOrder() as LevelOrder)
         }
         const levelOrder_result : LevelOrder | undefined = levelOrder_buf
         const focusable_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -27169,6 +27412,16 @@ export class Deserializer extends DeserializerBase {
         let value : NavigationToolbarOptions = ({backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, moreButtonOptions: moreButtonOptions_result, barStyle: barStyle_result, hideItemValue: hideItemValue_result} as NavigationToolbarOptions)
         return value
     }
+    public readPopupButton(): PopupButton {
+        let valueDeserializer : Deserializer = this
+        const value_result : string = (valueDeserializer.readString() as string)
+        const action_result : (() => void) = valueDeserializer.readCallback_Void()
+        let value : PopupButton = ({
+            value: value_result,
+            action: action_result
+        } as PopupButton)
+        return value
+    }
     readPopupOptions(): PopupOptions {
         let valueDeserializer : Deserializer = this
         const message_result : string = (valueDeserializer.readString() as string)
@@ -27183,18 +27436,14 @@ export class Deserializer extends DeserializerBase {
         let primaryButton_buf : PopupButton | undefined
         if ((RuntimeType.UNDEFINED) != (primaryButton_buf_runtimeType))
         {
-            const primaryButton_buf__value : string = (valueDeserializer.readString() as string)
-            const primaryButton_buf__action : (() => void) = valueDeserializer.readCallback_Void()
-            primaryButton_buf = ({value: primaryButton_buf__value, action: primaryButton_buf__action} as PopupButton)
+            primaryButton_buf = valueDeserializer.readPopupButton()
         }
         const primaryButton_result : PopupButton | undefined = primaryButton_buf
         const secondaryButton_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let secondaryButton_buf : PopupButton | undefined
         if ((RuntimeType.UNDEFINED) != (secondaryButton_buf_runtimeType))
         {
-            const secondaryButton_buf__value : string = (valueDeserializer.readString() as string)
-            const secondaryButton_buf__action : (() => void) = valueDeserializer.readCallback_Void()
-            secondaryButton_buf = ({value: secondaryButton_buf__value, action: secondaryButton_buf__action} as PopupButton)
+            secondaryButton_buf = valueDeserializer.readPopupButton()
         }
         const secondaryButton_result : PopupButton | undefined = secondaryButton_buf
         const onStateChange_buf_runtimeType  = (valueDeserializer.readInt8() as int32)

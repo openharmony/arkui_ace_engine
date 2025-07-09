@@ -735,7 +735,9 @@ void TextFieldPattern::ProcessDefaultStyleAndBehaviorsMultiThread()
     auto renderContext = frameNode->GetRenderContext();
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto radius = textFieldTheme->GetBorderRadius();
-    textfieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
+    if (!textfieldPaintProperty->GetCaretColorFlagByUserValue(false)) {
+        textfieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
+    }
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
     auto dragDropManager = pipeline->GetDragDropManager();

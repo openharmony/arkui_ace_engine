@@ -27,7 +27,8 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { DialogButtonStyle, WordBreak, BorderStyle } from "./enums"
 import { ResourceStr, ResourceColor, VoidCallback, Offset, Dimension, BorderRadiuses, LocalizedBorderRadiuses, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, EdgeStyles } from "./units"
 import { Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, TransitionEffect, ShadowOptions, ShadowStyle, HoverModeAreaType } from "./common"
-import { Callback_DismissDialogAction_Void, DismissDialogAction, LevelMode, ImmersiveMode } from "./actionSheet"
+import { Callback_DismissDialogAction_Void, DismissDialogAction } from "./actionSheet"
+import { ImmersiveMode, LevelMode, LevelOrder } from "@ohos/promptAction"
 export class AlertDialog {
     public static show(value: AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions): undefined {
         const value_casted = value as (AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions)
@@ -98,9 +99,6 @@ export interface AlertDialogButtonOptions extends AlertDialogButtonBaseOptions {
 }
 export interface TextStyle_alert_dialog {
     wordBreak?: WordBreak;
-}
-export interface LevelOrder {
-    _LevelOrderStub: string;
 }
 export interface AlertDialogParam {
     title?: ResourceStr;

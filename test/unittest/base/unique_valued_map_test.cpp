@@ -159,4 +159,75 @@ HWTEST_F(UniqueValuedMapTest, RemoveIfFunction, TestSize.Level1)
     EXPECT_TRUE(map.ContainsKey(1));
     EXPECT_TRUE(map.ContainsValue("one"));
 }
+
+HWTEST_F(UniqueValuedMapTest, SwapFunction, TestSize.Level1)
+{
+    // Swap two existing keys
+    map.Put(1, "one");
+    map.Put(2, "two");
+    map.Swap(1, 2);
+    auto v1 = map.Get(1);
+    auto v2 = map.Get(2);
+    ASSERT_TRUE(v1.has_value());
+    ASSERT_TRUE(v2.has_value());
+    EXPECT_EQ(v1.value(), "two");
+    EXPECT_EQ(v2.value(), "one");
+    auto k1 = map.GetKey("one");
+    auto k2 = map.GetKey("two");
+    ASSERT_TRUE(k1.has_value());
+    ASSERT_TRUE(k2.has_value());
+    EXPECT_EQ(k1.value(), 2);
+    EXPECT_EQ(k2.value(), 1);
+
+    // Swap back
+    map.Swap(1, 2);
+    v1 = map.Get(1);
+    v2 = map.Get(2);
+    ASSERT_TRUE(v1.has_value());
+    ASSERT_TRUE(v2.has_value());
+    EXPECT_EQ(v1.value(), "one");
+    EXPECT_EQ(v2.value(), "two");
+
+    // Swap with self (should be no-op)
+    map.Swap(1, 1);
+    v1 = map.Get(1);
+    v2 = map.Get(2);
+    ASSERT_TRUE(v1.has_value());
+    ASSERT_TRUE(v2.has_value());
+    EXPECT_EQ(v1.value(), "one");
+    EXPECT_EQ(v2.value(), "two");
+
+    // Swap with non-existent key (should be no-op)
+    map.Swap(1, 3);
+    v1 = map.Get(1);
+    v2 = map.Get(2);
+    auto v3 = map.Get(3);
+    ASSERT_TRUE(v1.has_value());
+    ASSERT_TRUE(v2.has_value());
+    EXPECT_EQ(v1.value(), "one");
+    EXPECT_EQ(v2.value(), "two");
+    EXPECT_EQ(v3, std::nullopt);
+
+    // Swap when both keys do not exist (should be no-op)
+    map.Swap(4, 5); // 4 and 5 are not present
+    EXPECT_EQ(map.Get(4), std::nullopt);
+    EXPECT_EQ(map.Get(5), std::nullopt);
+
+    // Swap when values are the same
+    map.Put(3, "two"); // This will remove key 2
+    map.Put(2, "three");
+    map.Swap(2, 3);
+    auto v2b = map.Get(2);
+    auto v3b = map.Get(3);
+    ASSERT_TRUE(v2b.has_value());
+    ASSERT_TRUE(v3b.has_value());
+    EXPECT_EQ(v2b.value(), "two");
+    EXPECT_EQ(v3b.value(), "three");
+    auto k2b = map.GetKey("two");
+    auto k3b = map.GetKey("three");
+    ASSERT_TRUE(k2b.has_value());
+    ASSERT_TRUE(k3b.has_value());
+    EXPECT_EQ(k2b.value(), 2);
+    EXPECT_EQ(k3b.value(), 3);
+}
 } // namespace OHOS::Ace

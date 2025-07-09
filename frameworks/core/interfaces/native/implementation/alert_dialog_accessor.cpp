@@ -27,6 +27,8 @@ struct DialogPropsForUpdate {
     Opt_DialogAlignment alignment;
     Opt_Boolean autoCancel;
     Opt_BlurStyle backgroundBlurStyle;
+    Opt_BackgroundBlurStyleOptions blurStyleOption;
+    Opt_BackgroundEffectOptions effectOption;
     Opt_ResourceColor backgroundColor;
     Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors borderColor;
     Opt_Union_BorderStyle_EdgeStyles borderStyle;
@@ -79,11 +81,14 @@ ButtonInfo Convert(const Ark_AlertDialogButtonOptions& src)
     info.enabled = Converter::OptConvert<bool>(src.enabled).value_or(info.enabled);
     info.defaultFocus = Converter::OptConvert<bool>(src.defaultFocus).value_or(info.defaultFocus);
     info.dlgButtonStyle = Converter::OptConvert<DialogButtonStyle>(src.style);
-    info.fontColor = Converter::OptConvert<Color>(src.fontColor);
+    auto textColor = Converter::OptConvert<Color>(src.fontColor);
+    if (textColor) {
+        info.textColor = textColor.value().ColorToString();
+    }
     auto backgroundColor = Converter::OptConvert<Color>(src.backgroundColor);
     if (backgroundColor) {
         info.isBgColorSetted = true;
-        info.backgroundColor = backgroundColor;
+        info.bgColor = backgroundColor.value();
     }
     auto arkCallbackOpt = Converter::OptConvert<VoidCallback>(src.action);
     if (arkCallbackOpt) {
@@ -102,11 +107,14 @@ ButtonInfo Convert(const Ark_AlertDialogButtonBaseOptions& src)
     info.enabled = Converter::OptConvert<bool>(src.enabled).value_or(info.enabled);
     info.defaultFocus = Converter::OptConvert<bool>(src.defaultFocus).value_or(info.defaultFocus);
     info.dlgButtonStyle = Converter::OptConvert<DialogButtonStyle>(src.style);
-    info.fontColor = Converter::OptConvert<Color>(src.fontColor);
+    auto textColor = Converter::OptConvert<Color>(src.fontColor);
+    if (textColor) {
+        info.textColor = textColor.value().ColorToString();
+    }
     auto backgroundColor = Converter::OptConvert<Color>(src.backgroundColor);
     if (backgroundColor) {
         info.isBgColorSetted = true;
-        info.backgroundColor = backgroundColor;
+        info.bgColor = backgroundColor.value();
     }
     auto arkCallbackOpt = Converter::OptConvert<VoidCallback>(src.action);
     if (arkCallbackOpt) {
@@ -130,11 +138,11 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const DialogPr
     dialogProps.borderColor = Converter::OptConvert<BorderColorProperty>(props.borderColor);
     dialogProps.borderRadius = Converter::OptConvert<BorderRadiusProperty>(props.cornerRadius);
     dialogProps.borderStyle = Converter::OptConvert<BorderStyleProperty>(props.borderStyle);
-    dialogProps.alignment = Converter::OptConvert<DialogAlignment>(
-        props.alignment).value_or(DialogAlignment::BOTTOM);
+    dialogProps.alignment = Converter::OptConvert<DialogAlignment>(props.alignment).value_or(DialogAlignment::DEFAULT);
     dialogProps.offset = Converter::OptConvert<DimensionOffset>(props.offset).value_or(dialogProps.offset);
     dialogProps.maskRect = Converter::OptConvert<DimensionRect>(props.maskRect);
-    if (auto textStyle = Converter::OptConvert<Ark_TextStyle_alert_dialog>(props.textStyle); textStyle) {
+    auto textStyle = Converter::OptConvert<Ark_TextStyle_alert_dialog>(props.textStyle);
+    if (textStyle) {
         dialogProps.wordBreak = Converter::OptConvert<WordBreak>(textStyle->wordBreak).value_or(dialogProps.wordBreak);
     }
     auto transition = Converter::OptConvert<RefPtr<NG::ChainedTransitionEffect>>(props.transition);
@@ -148,7 +156,9 @@ DialogProperties CreateDialogProperties(const DialogPropsForUpdate props)
     UpdateDynamicDialogProperties(dialogProps, props);
     dialogProps.gridCount = Converter::OptConvert<int32_t>(props.gridCount).value_or(dialogProps.gridCount);
     dialogProps.backgroundBlurStyle = static_cast<int32_t>(
-        Converter::OptConvert<BlurStyle>(props.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
+        Converter::OptConvert<BlurStyle>(props.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_ULTRA_THICK));
+    dialogProps.blurStyleOption = Converter::OptConvert<BlurStyleOption>(props.blurStyleOption);
+    dialogProps.effectOption = Converter::OptConvert<EffectOption>(props.effectOption);
     dialogProps.backgroundColor = Converter::OptConvert<Color>(props.backgroundColor);
     dialogProps.enableHoverMode =
         Converter::OptConvert<bool>(props.enableHoverMode).value_or(dialogProps.enableHoverMode);
@@ -178,6 +188,8 @@ DialogPropsForUpdate GetPropsWithConfirm(const Ark_AlertDialogParamWithConfirm p
         .alignment = params.alignment,
         .autoCancel = params.autoCancel,
         .backgroundBlurStyle = params.backgroundBlurStyle,
+        .blurStyleOption = params.backgroundBlurStyleOptions,
+        .effectOption = params.backgroundEffect,
         .backgroundColor = params.backgroundColor,
         .borderColor = params.borderColor,
         .borderStyle = params.borderStyle,
@@ -244,6 +256,8 @@ DialogPropsForUpdate GetPropsWithButtons(const Ark_AlertDialogParamWithButtons p
         .alignment = params.alignment,
         .autoCancel = params.autoCancel,
         .backgroundBlurStyle = params.backgroundBlurStyle,
+        .blurStyleOption = params.backgroundBlurStyleOptions,
+        .effectOption = params.backgroundEffect,
         .backgroundColor = params.backgroundColor,
         .borderColor = params.borderColor,
         .borderStyle = params.borderStyle,
@@ -300,6 +314,8 @@ DialogPropsForUpdate GetPropsWithOptions(const Ark_AlertDialogParamWithOptions p
         .alignment = params.alignment,
         .autoCancel = params.autoCancel,
         .backgroundBlurStyle = params.backgroundBlurStyle,
+        .blurStyleOption = params.backgroundBlurStyleOptions,
+        .effectOption = params.backgroundEffect,
         .backgroundColor = params.backgroundColor,
         .borderColor = params.borderColor,
         .borderStyle = params.borderStyle,

@@ -136,6 +136,26 @@ public:
         ViewAbstract::BindTips(param, AceType::Claim(targetNode), spanString);
     }
 
+    static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode)
+    {
+        return ViewAbstract::OpenPopup(param, customNode);
+    }
+
+    static int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode)
+    {
+        return ViewAbstract::GetPopupParam(param, customNode);
+    }
+
+    static int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode)
+    {
+        return ViewAbstract::UpdatePopup(param, customNode);
+    }
+
+    static int32_t ClosePopup(const RefPtr<UINode>& customNode)
+    {
+        return ViewAbstract::ClosePopup(customNode);
+    }
+
     static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
     static void DisableOnAccessibilityHover(FrameNode* frameNode);
     static void SetOnAccessibilityHover(FrameNode* frameNode, OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);

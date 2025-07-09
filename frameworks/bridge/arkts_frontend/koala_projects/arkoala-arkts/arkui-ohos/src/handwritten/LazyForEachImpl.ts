@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from "@koalaui/runtime";
-import { InteropNativeModule, nullptr, pointer } from "@koalaui/interop";
-import { PeerNode } from "../PeerNode";
-import { InternalListener } from "../DataChangeListener";
-import { setNeedCreate } from "../ArkComponentRoot";
-import { int32 } from "@koalaui/common";
-import { IDataSource } from "../component/lazyForEach";
-import { LazyForEachOps } from "../component";
-import { LazyItemNode } from "./LazyItemNode";
-import { CustomComponent } from "../component/customComponent";
+import { __id, NodeAttach, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from "@koalaui/runtime"
+import { InteropNativeModule, nullptr, pointer } from "@koalaui/interop"
+import { PeerNode } from "../PeerNode"
+import { InternalListener } from "../DataChangeListener"
+import { setNeedCreate } from "../ArkComponentRoot"
+import { int32 } from "@koalaui/common"
+import { IDataSource } from "../component/lazyForEach"
+import { LazyForEachOps } from "../component"
+import { LazyItemNode } from "./LazyItemNode"
+import { ArkUIAniModule } from "../ani/arkts/ArkUIAniModule"
+import { CustomComponent } from "@component_handwritten/customComponent"
 
 let globalLazyItems: Set<ComputableState<LazyItemNode>> = new Set<ComputableState<LazyItemNode>>()
 export function updateLazyItems() {
@@ -37,18 +38,19 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
 ) {
-    const parent = contextNode<PeerNode>()
-    let pool = rememberDisposable(() => new LazyItemPool(parent, CustomComponent.current), (pool?: LazyItemPool) => {
+    const node = createLazyNode()
+
+    let pool = rememberDisposable(() => new LazyItemPool(node, CustomComponent.current), (pool?: LazyItemPool) => {
         pool?.dispose()
     })
     let changeCounter = rememberMutableState(0)
     changeCounter.value //subscribe
     let listener = remember(() => {
-        let res = new InternalListener(parent.peer.ptr, changeCounter)
+        let res = new InternalListener(changeCounter)
         dataSource.registerDataChangeListener(res)
         return res
     })
-    const changeIndex = listener.flush(0) // first item index that's affected by DataChange
+    const changeIndex = listener.flush(node.getPeerPtr()) // first item index that's affected by DataChange
     if (changeIndex < Number.POSITIVE_INFINITY) {
         scheduleCallback(() => {
             pool.pruneBy((index: int32) => index >= changeIndex)
@@ -66,7 +68,35 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
             return nullptr
         }
     }
-    LazyForEachOps.Sync(parent.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
+    LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
+}
+
+class NodeHolder {
+    node?: PeerNode
+}
+
+/** @memo:intrinsic */
+function createLazyNode(): PeerNode {
+    /**
+     *  We don't want cache behavior with LazyForEach (to support Repeat's non-memo data updates),
+     *  therefore LazyForEach implementation is outside NodeAttach, and LazyForEachNode is provided through a remembered NodeHolder.
+     */
+    let nodeHolder = remember(() => new NodeHolder())
+    NodeAttach(
+        () => {
+            const peerId = PeerNode.nextId()
+            const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId)
+            if (!_peerPtr) {
+                throw new Error("create LazyForEachNode failed")
+            }
+            const _peer = new PeerNode(_peerPtr, peerId, "LazyForEach", 0)
+            return _peer
+        },
+        (node: PeerNode) => {
+            nodeHolder.node = node
+        }
+    )
+    return nodeHolder.node!
 }
 
 class LazyItemCompositionContext {

@@ -25,8 +25,11 @@ import {
     PropDecoratedVariable,
     LinkDecoratedVariable, 
     ConsumeDecoratedVariable, 
+    WatchFunc,
+    UIUtils,
+    IObservedObject
 } from '../stateManagement';
-import { IDecoratedV1Variable } from '../stateManagement/decorator';
+import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 
 export class CompatiblePeerNode extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
@@ -52,22 +55,17 @@ export function compatibleComponent(
     init: () => CompatibleComponentInfo,
     update: (instance: ESValue) => void
 ): void {
-    let firstUpdate: boolean = false;
     NodeAttach<CompatiblePeerNode>((): CompatiblePeerNode => {
         let global = ESValue.getGlobal();
         const ptr = ArkUIAniModule._CreateViewStackProcessor();
         openInterop(global);
         const result = init();
-        closeInterop(global);
         const realComponent = result.component;
         const nodePtr = ArkUIAniModule._PopViewStackProcessor();
         ArkUIAniModule._DeleteViewStackProcessor(ptr);
-        firstUpdate = true;
         return CompatiblePeerNode.create(nodePtr, realComponent);
     }, (node: CompatiblePeerNode) => {
-        if (!firstUpdate) {
-          update(node.view);
-        }
+        update(node.view);
     });
 }
 
@@ -75,6 +73,8 @@ export function compatibleComponent(
 function openInterop(global: ESValue): void {
     let openInterop = global.getProperty('openInterop');
     openInterop.invoke();
+    registerCreateWatchFuncCallback();
+    registerCreateStaticObservedCallback();
 }
 
 function closeInterop(global: ESValue): void {
@@ -85,6 +85,7 @@ function closeInterop(global: ESValue): void {
 
 export type CompatibleStateChangeCallback<T> = (value: T) => void;
 
+type StateUnion<T> = StateDecoratedVariable<T> | ProvideDecoratedVariable<T> | PropDecoratedVariable<T>
 
 export function bindCompatibleProvideCallback(staticComponent: ExtendableComponent,
     createState: ESValue, setCallback: ESValue, component?: ESValue): void {
@@ -98,10 +99,7 @@ export function bindCompatibleProvideCallback(staticComponent: ExtendableCompone
             let setSource = ((value: Object) => {
                 state!.set(value);
             });
-            let fireChangeCallback = () => {
-                state.fireChange();
-            };
-            let proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChangeCallback));
+            let proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource));
             state.setProxy(proxy);
             let setProxy = ((value: Object) => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
@@ -140,10 +138,7 @@ export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>, crea
             let setSource = ((value: T) => {
                 state.set(value);
             });
-            let fireChangeCallback = () => {
-                state.fireChange();
-            };
-            let proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChangeCallback));
+            let proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource));
             state.setProxy(proxy);
             let setProxyValue = ((value: T) => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
@@ -161,10 +156,7 @@ export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>, crea
             let setSource = ((value: T) => {
                 state.set(value);
             });
-            let fireChangeCallback = () => {
-                state.fireChange();
-            };
-            let proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChangeCallback));
+            let proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource));
             state.setProxy(proxy);
             let setProxyValue = ((value: T) => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
@@ -182,10 +174,7 @@ export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>, crea
             let setSource = ((value: T) => {
                 state.set(value);
             });
-            let fireChangeCallback = () => {
-                state.fireChange();
-            };
-            let proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChangeCallback));
+            let proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource));
             state.setProxy(proxy);
             let setProxyValue = ((value: T) => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
@@ -205,8 +194,34 @@ export function isDynamicObject<T>(value: T): boolean {
     return ESValue.wrap(value).isECMAObject();
 }
 
-export function getObservedObject<T>(value: T): T {
+export function getObservedObject<T>(value: T, staticState: StateUnion<T>): T {
+    const callback = (): void => {
+        staticState.fireChange();
+    };
     let global = ESValue.getGlobal();
-    let createObservedObject = global.getProperty('createObservedObject');
-    return createObservedObject.invoke(ESValue.wrap(value)).unwrap()! as Object as T;
+    let staticStateBindObservedObject = global.getProperty('staticStateBindObservedObject');
+    return staticStateBindObservedObject.invoke(ESValue.wrap(value), ESValue.wrap(callback)).unwrap()! as Object as T;
+}
+
+export function registerCreateWatchFuncCallback(): void {
+    const createWatchFuncCallback = (callback: WatchFuncType, value: Object): WatchIdType => {
+        const watchFunc = new WatchFunc(callback);
+        const watchFuncId = watchFunc.id();
+        (value as IObservedObject).addWatchSubscriber(watchFuncId);
+        return watchFuncId;
+    }
+    let global = ESValue.getGlobal();
+    let registerCallback = global.getProperty('registerCallbackForCreateWatchID');
+    registerCallback.invoke(createWatchFuncCallback);
+    return;
+}
+
+export function registerCreateStaticObservedCallback(): void {
+    const makeObservedcallback = (value: Object): Object => {
+        return UIUtils.makeObserved(value) as Object;
+    }
+    let global = ESValue.getGlobal();
+    let registerCallback = global.getProperty('registerCallbackForMakeObserved');
+    registerCallback.invoke(makeObservedcallback);
+    return;
 }

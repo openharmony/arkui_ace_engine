@@ -32766,6 +32766,45 @@ void impl_UIContext_closeBindSheet(KVMContext vmContext, Ark_NativePointer thisP
         GetAccessors()->getUIContextAccessor()->closeBindSheet(reinterpret_cast<Ark_VMContext>(vmContext), self, static_cast<Ark_ComponentContent>(bindSheetContent));
 }
 KOALA_INTEROP_CTX_V2(UIContext_closeBindSheet, Ark_NativePointer, Ark_NativePointer)
+void impl_PromptAction_openPopup(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_NativePointer content, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_PromptAction self = reinterpret_cast<Ark_PromptAction>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_TargetInfo target_value = thisDeserializer.readTargetInfo();
+        const auto options_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_PopupCommonOptions options_value_buf = {};
+        options_value_buf.tag = options_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (options_value_buf_runtimeType))
+        {
+            options_value_buf.value = thisDeserializer.readPopupCommonOptions();
+        }
+        Opt_PopupCommonOptions options_value = options_value_buf;;
+        Callback_Opt_Array_String_Void outputArgumentForReturningPromise_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_Array_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_Array_String_Void))))};;
+        GetAccessors()->getPromptActionAccessor()->openPopup(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), self, content, (const Ark_TargetInfo*)&target_value, (const Opt_PopupCommonOptions*)&options_value, (const Callback_Opt_Array_String_Void*)&outputArgumentForReturningPromise_value);
+}
+KOALA_INTEROP_CTX_V4(PromptAction_openPopup, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_PromptAction_updatePopup(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_NativePointer content, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_PromptAction self = reinterpret_cast<Ark_PromptAction>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_PopupCommonOptions options_value = thisDeserializer.readPopupCommonOptions();
+        const auto partialUpdate_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean partialUpdate_value_buf = {};
+        partialUpdate_value_buf.tag = partialUpdate_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (partialUpdate_value_buf_runtimeType))
+        {
+            partialUpdate_value_buf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean partialUpdate_value = partialUpdate_value_buf;;
+        Callback_Opt_Array_String_Void outputArgumentForReturningPromise_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_Array_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_Array_String_Void))))};;
+        GetAccessors()->getPromptActionAccessor()->updatePopup(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), self, content, (const Ark_PopupCommonOptions*)&options_value, (const Opt_Boolean*)&partialUpdate_value, (const Callback_Opt_Array_String_Void*)&outputArgumentForReturningPromise_value);
+}
+KOALA_INTEROP_CTX_V4(PromptAction_updatePopup, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_PromptAction_closePopup(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_NativePointer content, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_PromptAction self = reinterpret_cast<Ark_PromptAction>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_Opt_Array_String_Void outputArgumentForReturningPromise_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_Array_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_Array_String_Void))))};;
+        GetAccessors()->getPromptActionAccessor()->closePopup(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), self, content, (const Callback_Opt_Array_String_Void*)&outputArgumentForReturningPromise_value);
+}
+KOALA_INTEROP_CTX_V4(PromptAction_closePopup, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_UIContext_clearResourceCache(KVMContext vmContext, Ark_NativePointer thisPtr) {
         Ark_UIContext self = reinterpret_cast<Ark_UIContext>(thisPtr);
         GetAccessors()->getUIContextAccessor()->clearResourceCache(reinterpret_cast<Ark_VMContext>(vmContext), self);
@@ -44538,6 +44577,46 @@ Ark_Number impl_LetterSpacingStyle_getLetterSpacing(Ark_NativePointer thisPtr) {
         return GetAccessors()->getLetterSpacingStyleAccessor()->getLetterSpacing(self);
 }
 KOALA_INTEROP_DIRECT_1(LetterSpacingStyle_getLetterSpacing, KInteropNumber, Ark_NativePointer)
+Ark_NativePointer impl_LevelOrder_construct() {
+        return GetAccessors()->getLevelOrderAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(LevelOrder_construct, Ark_NativePointer)
+Ark_NativePointer impl_LevelOrder_getFinalizer() {
+        return GetAccessors()->getLevelOrderAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(LevelOrder_getFinalizer, Ark_NativePointer)
+Ark_NativePointer impl_LevelOrder_clamp(KInteropNumber order) {
+        return GetAccessors()->getLevelOrderAccessor()->clamp((const Ark_Number*) (&order));
+}
+KOALA_INTEROP_DIRECT_1(LevelOrder_clamp, Ark_NativePointer, KInteropNumber)
+Ark_Number impl_LevelOrder_getOrder(Ark_NativePointer thisPtr) {
+        Ark_LevelOrder self = reinterpret_cast<Ark_LevelOrder>(thisPtr);
+        return GetAccessors()->getLevelOrderAccessor()->getOrder(self);
+}
+KOALA_INTEROP_DIRECT_1(LevelOrder_getOrder, KInteropNumber, Ark_NativePointer)
+Ark_NativePointer impl_DismissPopupAction_construct() {
+        return GetAccessors()->getDismissPopupActionAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(DismissPopupAction_construct, Ark_NativePointer)
+Ark_NativePointer impl_DismissPopupAction_getFinalizer() {
+        return GetAccessors()->getDismissPopupActionAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(DismissPopupAction_getFinalizer, Ark_NativePointer)
+void impl_DismissPopupAction_dismiss(Ark_NativePointer thisPtr) {
+        Ark_DismissPopupAction self = reinterpret_cast<Ark_DismissPopupAction>(thisPtr);
+        GetAccessors()->getDismissPopupActionAccessor()->dismiss(self);
+}
+KOALA_INTEROP_DIRECT_V1(DismissPopupAction_dismiss, Ark_NativePointer)
+Ark_Int32 impl_DismissPopupAction_getReason(Ark_NativePointer thisPtr) {
+        Ark_DismissPopupAction self = reinterpret_cast<Ark_DismissPopupAction>(thisPtr);
+        return GetAccessors()->getDismissPopupActionAccessor()->getReason(self);
+}
+KOALA_INTEROP_DIRECT_1(DismissPopupAction_getReason, Ark_Int32, Ark_NativePointer)
+void impl_DismissPopupAction_setReason(Ark_NativePointer thisPtr, Ark_Int32 reason) {
+        Ark_DismissPopupAction self = reinterpret_cast<Ark_DismissPopupAction>(thisPtr);
+        GetAccessors()->getDismissPopupActionAccessor()->setReason(self, static_cast<Ark_DismissReason>(reason));
+}
+KOALA_INTEROP_DIRECT_V2(DismissPopupAction_setReason, Ark_NativePointer, Ark_Int32)
 Ark_NativePointer impl_TextShadowStyle_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         const Ark_Int8 value_value_buf_selector = thisDeserializer.readInt8();

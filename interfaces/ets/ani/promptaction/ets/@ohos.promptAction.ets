@@ -67,7 +67,7 @@ class DismissDialogActionInner implements DismissDialogAction {
 }
 
 export default namespace promptAction {
-    loadLibrary("promptAction_ani");
+    static { loadLibrary("promptAction_ani"); }
 
     export enum ToastShowMode {
         DEFAULT = 0,
@@ -205,6 +205,70 @@ export default namespace promptAction {
         shadow?: ShadowOptions | ShadowStyle;
     }
 
+    class Cleaner {
+        private ptr: long = 0
+        constructor(ptr: long) {
+            this.ptr = ptr
+        }
+        native clean(): void
+    }
+
+    export function callback(cleaner: Cleaner): void {
+        cleaner.clean()
+    }
+
+    let destroyRegister = new FinalizationRegistry<Cleaner>(callback)
+    let unregisterToken = new object()
+
+    export class CommonController {
+        constructor() {}
+        native close(): void;
+    }
+
+    export class DialogController extends CommonController {
+        static { loadLibrary("promptAction_ani"); }
+
+        private nativePtr: long = 0;
+        private cleaner: Cleaner | null = null;
+
+        constructor() {
+            if (this.nativePtr == 0) {
+                this.nativePtr = this.createPtr();
+            }
+            this.registerCleaner(this.nativePtr);
+        }
+
+        registerCleaner(ptr: long): void {
+            this.cleaner = new Cleaner(ptr);
+            destroyRegister.register(this, this.cleaner!, unregisterToken);
+        }
+
+        unregisterCleaner(): void {
+            destroyRegister.unregister(unregisterToken);
+        }
+
+        native createPtr(): long;
+        native close(): void;
+    }
+
+    export type DialogOptionsCornerRadius = Dimension | BorderRadiuses;
+    export type DialogOptionsBorderWidth = Dimension | EdgeWidths;
+    export type DialogOptionsBorderColor = ResourceColor | EdgeColors;
+    export type DialogOptionsBorderStyle = BorderStyle | EdgeStyles;
+    export type DialogOptionsShadow = ShadowOptions | ShadowStyle;
+
+    export interface DialogOptions extends BaseDialogOptions {
+        backgroundColor?: ResourceColor;
+        cornerRadius?: DialogOptionsCornerRadius;
+        width?: Dimension;
+        height?: Dimension;
+        borderWidth?: DialogOptionsBorderWidth;
+        borderColor?: DialogOptionsBorderColor;
+        borderStyle?: DialogOptionsBorderStyle;
+        backgroundBlurStyle?: BlurStyle;
+        shadow?: DialogOptionsShadow;
+    }
+
     export native function showToast(options: ShowToastOptions): void;
 
     export native function openToast(options: ShowToastOptions): Promise<number>;
@@ -212,12 +276,12 @@ export default namespace promptAction {
     export native function closeToast(toastId: number): void;
 
     export native function showDialog1(options: ShowDialogOptions,
-        callback?: AsyncCallback<ShowDialogSuccessResponse>): void;
+        callback: AsyncCallback<ShowDialogSuccessResponse>): void;
 
     export native function showDialog(options: ShowDialogOptions): Promise<ShowDialogSuccessResponse>;
 
     export native function showActionMenu1(options: ActionMenuOptions,
-        callback?: AsyncCallback<ActionMenuSuccessResponse>): void;
+        callback: AsyncCallback<ActionMenuSuccessResponse>): void;
 
     export native function showActionMenu(options: ActionMenuOptions): Promise<ActionMenuSuccessResponse>;
 
@@ -232,4 +296,10 @@ export default namespace promptAction {
     export native function closeCustomDialog1(content: long): Promise<void>;
 
     export native function closeCustomDialog(dialogId: number): void;
+
+    export native function openCustomDialogWithController(content: long, controller: DialogController,
+        options?: BaseDialogOptions, optionsInternal?: DialogOptionsInternal): Promise<void>;
+
+    export native function presentCustomDialog(builder: long, controller?: DialogController, options?: DialogOptions,
+        optionsInternal?: DialogOptionsInternal): Promise<number>;
 }

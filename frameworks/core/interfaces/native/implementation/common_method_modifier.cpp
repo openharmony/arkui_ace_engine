@@ -205,14 +205,6 @@ auto g_onWillDismissPopup = [](
         },
         [&popupParam](const Callback_DismissPopupAction_Void& value) {
             auto callback = [arkCallback = CallbackHelper(value)](int32_t reason) {
-                Ark_DismissPopupAction parameter;
-                auto reasonOpt = Converter::ArkValue<Opt_DismissReason>(
-                    static_cast<BindSheetDismissReason>(reason));
-                parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
-                    .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-                const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstract::DismissPopup));
-                parameter.dismiss = keeper.ArkValue();
-                arkCallback.InvokeSync(parameter);
             };
             popupParam->SetOnWillDismiss(std::move(callback));
             popupParam->SetInteractiveDismiss(true);
@@ -426,6 +418,8 @@ auto g_bindMenuOptionsParam = [](
         OptConvert<HapticFeedbackMode>(menuOptions.hapticFeedbackMode).value_or(menuParam.hapticFeedbackMode);
     menuParam.outlineColor = OptConvert<BorderColorProperty>(menuOptions.outlineColor);
     menuParam.outlineWidth = OptConvert<BorderWidthProperty>(menuOptions.outlineWidth);
+    menuParam.effectOption = OptConvert<EffectOption>(menuOptions.backgroundEffect);
+    menuParam.blurStyleOption = OptConvert<BlurStyleOption>(menuOptions.backgroundBlurStyleOptions);
 };
 
 auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,

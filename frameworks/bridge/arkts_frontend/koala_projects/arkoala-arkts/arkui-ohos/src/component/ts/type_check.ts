@@ -58,7 +58,7 @@ import { DrawContext, Rect, LengthUnit, ShapeClip, RoundRect, Circle, CommandPat
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, DatePickerOptions, DatePickerResult, LunarSwitchStyle, DatePickerDialogOptions, Callback_DatePickerResult_Void } from "./../datePicker"
-import { DialogAlignment, DialogButtonDirection, LevelOrder, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
+import { DialogAlignment, DialogButtonDirection, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater } from "./../particle"
 import { DpiFollowStrategy, UIExtensionProxy, Callback_UIExtensionProxy_Void, WindowModeFollowStrategy, UIExtensionOptions, Literal_Number_code__want } from "./../uiExtensionComponent"
 import { EditMode, ListItemStyle, Sticky, SwipeActionState, SwipeEdgeEffect, ListItemOptions, SwipeActionItem, Callback_SwipeActionState_Void, SwipeActionOptions } from "./../listItem"
@@ -130,7 +130,7 @@ import { CircleOptions } from "./../circle"
 import { ColumnOptions, ColumnOptionsV2 } from "./../column"
 import { ColumnSplitDividerStyle } from "./../columnSplit"
 import { DateTimeOptions } from "./../arkui-intl"
-import { DismissDialogAction, ImmersiveMode, LevelMode, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions, Callback_DismissDialogAction_Void } from "./../actionSheet"
+import { DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions, Callback_DismissDialogAction_Void } from "./../actionSheet"
 import { DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish } from "./../animationExtender"
 import { EllipseOptions } from "./../ellipse"
 import { FormLinkOptions } from "./../formLink"
@@ -160,6 +160,7 @@ import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
 import { PointerStyle, UniformDataType, DataSyncOptions} from '#external'
 import promptAction from "@ohos/promptAction"
+import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos/promptAction"
 
 export class TypeChecker {
     static typeInstanceOf<T>(value: Object, prop: string): boolean {
@@ -196,6 +197,12 @@ export class TypeChecker {
         else {
             throw new Error("Can not discriminate value typeof AccessibilityHoverEvent")
         }
+    }
+    static isTargetInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return true
+    }
+    static isPopupCommonOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean): boolean {
+        return true
     }
     static isAccessibilityHoverType(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (AccessibilityHoverType.HOVER_ENTER)) {
@@ -6955,8 +6962,11 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof ImageSpanAlignment")
         }
     }
-    static isImmersiveMode(value: Object | string | number | undefined | boolean, duplicated__ImmersiveModeStub: boolean): boolean {
-        if ((!duplicated__ImmersiveModeStub) && (value?.hasOwnProperty("_ImmersiveModeStub"))) {
+    static isImmersiveMode(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (ImmersiveMode.DEFAULT)) {
+            return true
+        }
+        else if ((value) === (ImmersiveMode.EXTEND)) {
             return true
         }
         else {
@@ -7620,21 +7630,19 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof LetterSpacingStyle")
         }
     }
-    static isLevelMode(value: Object | string | number | undefined | boolean, duplicated__LevelModeStub: boolean): boolean {
-        if ((!duplicated__LevelModeStub) && (value?.hasOwnProperty("_LevelModeStub"))) {
+    static isLevelMode(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (LevelMode.OVERLAY)) {
+            return true
+        }
+        else if ((value) === (LevelMode.EMBEDDED)) {
             return true
         }
         else {
             throw new Error("Can not discriminate value typeof LevelMode")
         }
     }
-    static isLevelOrder(value: Object | string | number | undefined | boolean, duplicated__LevelOrderStub: boolean): boolean {
-        if ((!duplicated__LevelOrderStub) && (value?.hasOwnProperty("_LevelOrderStub"))) {
-            return true
-        }
-        else {
-            throw new Error("Can not discriminate value typeof LevelOrder")
-        }
+    static isLevelOrder(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof LevelOrder")
     }
     static isLightSource(value: Object | string | number | undefined | boolean, duplicated_positionX: boolean, duplicated_positionY: boolean, duplicated_positionZ: boolean, duplicated_intensity: boolean, duplicated_color: boolean): boolean {
         if ((!duplicated_positionX) && (value?.hasOwnProperty("positionX"))) {
@@ -20206,6 +20214,18 @@ export class TypeChecker {
     }
     static HoverModeAreaType_FromNumeric(ordinal: int32): HoverModeAreaType {
         return ordinal as HoverModeAreaType
+    }
+    static LevelMode_ToNumeric(value: LevelMode): int32 {
+        return value as int32
+    }
+    static LevelMode_FromNumeric(ordinal: int32): LevelMode {
+        return ordinal as LevelMode
+    }
+    static ImmersiveMode_ToNumeric(value: ImmersiveMode): int32 {
+        return value as int32
+    }
+    static ImmersiveMode_FromNumeric(ordinal: int32): ImmersiveMode {
+        return ordinal as ImmersiveMode
     }
     static IlluminatedType_ToNumeric(value: IlluminatedType): int32 {
         return value as int32

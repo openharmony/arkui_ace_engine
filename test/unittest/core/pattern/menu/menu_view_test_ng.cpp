@@ -74,6 +74,7 @@ constexpr float ONE = 1.0f;
 constexpr float TWO = 2.0f;
 constexpr float FIVE = 5.0f;
 constexpr float TEN = 10.0f;
+constexpr float TWENTY = 20.0f;
 
 } // namespace
 class MenuViewTestNg : public testing::Test {
@@ -309,7 +310,33 @@ HWTEST_F(MenuViewTestNg, ResetLayoutConstraintMinWidth001, TestSize.Level1)
     auto frameNode =
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
     RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
     layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    LayoutConstraintF layoutConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    EXPECT_EQ(algorithm->ResetLayoutConstraintMinWidth(layoutWrapper, layoutConstraint).selfIdealSize.width_, ONE);
+}
+
+/**
+ * @tc.name: ResetLayoutConstraintMinWidth002
+ * @tc.desc: Verify ResetLayoutConstraintMinWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ResetLayoutConstraintMinWidth002, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_->selfIdealSize =
+        std::make_optional<CalcSize>(std::nullopt, CalcLength(TWENTY));
     LayoutConstraintF layoutConstraint = {
         .minSize = { ONE, ONE },
         .maxSize = { TEN, TEN },

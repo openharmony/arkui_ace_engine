@@ -155,13 +155,13 @@ void ParseArrayNumber(Color& color, std::vector<uint32_t>& indexes, bool result)
     indexes.clear();
     if (result) {
         indexes.emplace_back(1);
+        indexes.emplace_back(color.GetRed());
+        indexes.emplace_back(color.GetGreen());
+        indexes.emplace_back(color.GetBlue());
+        indexes.emplace_back(color.GetAlpha());
     } else {
         indexes.emplace_back(0);
     }
-    indexes.emplace_back(color.GetRed());
-    indexes.emplace_back(color.GetGreen());
-    indexes.emplace_back(color.GetBlue());
-    indexes.emplace_back(color.GetAlpha());
 }
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {

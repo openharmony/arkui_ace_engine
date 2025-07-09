@@ -19,7 +19,7 @@
 import { KBoolean, KStringPtr, NativeBuffer, MaterializedBase } from "@koalaui/interop"
 import { int32 } from "@koalaui/common"
 import { AccessibilityHoverType, Alignment, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, Color, ColoringStrategy, CopyOptions, CrownAction, CrownSensitivity, Curve, DialogButtonStyle, Direction, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FocusDrawLevel, FoldStatus, FontStyle, FontWeight, FunctionKey, GradientDirection, HeightBreakpoint, HitTestMode, HorizontalAlign, HoverEffect, IlluminatedType, ImageFit, ImageRepeat, ImageSize, ImageSpanAlignment, InteractionHand, ItemAlign, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, ModifierKey, MouseAction, MouseButton, NestedScrollMode, ObscuredReasons, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, RenderFit, ResponseType, ScrollSource, TextAlign, SharedTransitionEffectType, TextOverflow, TextContentStyle, TextHeightAdaptivePolicy, WordBreak, TextCase, TextSelectableMode, TextDecorationStyle, TextDecorationType, TitleHeight, TouchType, TransitionType, VerticalAlign, Visibility, Week, WidthBreakpoint, XComponentType } from "./../enums"
-import { AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, Bindable, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, RectResult, Literal_Boolean_isVisible, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PopupStateChangeParam, PreDragStatus, ProgressMask, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, Callback_ClickEvent_Void, ClickEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, HoverCallback, HoverEvent, Callback_MouseEvent_Void, MouseEvent, SizeChangeCallback, VisibleAreaEventOptions, VisibleAreaChangeCallback, SheetOptions, View, Callback_KeyEvent_Boolean, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, CrownEvent, DateRange, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, DragInteractionOptions, DragItemInfo, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, Tuple_ResourceColor_Number, LinearGradient_common, FractionStop, LinearGradientBlurOptions, LinearGradientOptions, BackgroundOptions, Literal_Number_offset_span, HorizontalAlignOptions, VerticalAlignOptions, Literal_String_value_Callback_Void_action, Literal_TransitionEffect_appear_disappear, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, SheetDismiss, SpringBackAction, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, TouchResult, AlignRuleOption, BlurStyleOptions, ContentCoverOptions, BindOptions, Callback_DismissContentCoverAction_Void, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, FocusAxisEvent, BaseEvent, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, Literal_ResourceColor_color, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, ReuseIdCallback, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, AccessibilityHoverEvent, AxisEvent, BorderImageOption, CustomPopupOptions, Callback_Literal_Boolean_isVisible_Void, Callback_DismissPopupAction_Void, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, Callback_SheetDismiss_Void, Callback_DismissSheetAction_Void, Callback_SpringBackAction_Void, Callback_SheetType_Void, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, NavDestinationInfo, NavigationInfo, RouterPageInfo, Theme, PromptActionDialogController, LayoutChild, Layoutable, PopupButton, PopupMaskType, DividerStyle, BlendMode } from "./../common"
+import { AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, Bindable, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, RectResult, Literal_Boolean_isVisible, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PopupStateChangeParam, PreDragStatus, ProgressMask, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, Callback_ClickEvent_Void, ClickEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, HoverCallback, HoverEvent, Callback_MouseEvent_Void, MouseEvent, SizeChangeCallback, VisibleAreaEventOptions, VisibleAreaChangeCallback, SheetOptions, View, Callback_KeyEvent_Boolean, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, CrownEvent, DateRange, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, DragInteractionOptions, DragItemInfo, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, Tuple_ResourceColor_Number, LinearGradient_common, FractionStop, LinearGradientBlurOptions, LinearGradientOptions, BackgroundOptions, Literal_Number_offset_span, HorizontalAlignOptions, VerticalAlignOptions, Literal_String_value_Callback_Void_action, Literal_TransitionEffect_appear_disappear, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, SheetDismiss, SpringBackAction, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, TouchResult, AlignRuleOption, BlurStyleOptions, ContentCoverOptions, BindOptions, Callback_DismissContentCoverAction_Void, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, FocusAxisEvent, BaseEvent, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, Literal_ResourceColor_color, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, ReuseIdCallback, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, AccessibilityHoverEvent, AxisEvent, BorderImageOption, CustomPopupOptions, Callback_Literal_Boolean_isVisible_Void, Callback_DismissPopupAction_Void, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, Callback_SheetDismiss_Void, Callback_DismissSheetAction_Void, Callback_SpringBackAction_Void, Callback_SheetType_Void, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, NavDestinationInfo, NavigationInfo, RouterPageInfo, Theme, PromptActionDialogController, LayoutChild, Layoutable, PopupButton, PopupMaskType, DividerStyle, BlendMode, PopupCommonOptions } from "./../common"
 import { Affinity, TextBox, LineMetrics, RunMetrics, TextDirection } from "./../arkui-graphics-text"
 import { AlphabetIndexerAttribute, Callback_Number_Void, OnAlphabetIndexerSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerPopupSelectCallback, IndexerAlign, Callback_Opt_Number_Void, AlphabetIndexerOptions } from "./../alphabetIndexer"
 import { ResourceColor, Font, Position, Length, SizeOptions, Offset, ColorFilter, ResourceStr, Dimension, LengthConstrain, VoidCallback, DividerStyleOptions, ConstraintSizeOptions, AccessibilityOptions, Bias, BorderRadiuses, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeOutlineWidths, EdgeWidths, OutlineRadiuses, Padding, VP, Area, EdgeColors, PX, LPX, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MarkStyle, BorderOptions, OutlineOptions, EdgeStyles } from "./../units"
@@ -50,7 +50,7 @@ import { ColorContent, DynamicRangeMode, ImageContent, ImageInterpolation, Image
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
 import { BuilderNodeOps, BuilderNodeOptions, ComponentContent, UnifiedData, SystemBarStyle, Scene, Context, WorkerEventListener, Event, BaseContext, Context_getGroupDir_Callback, ErrorEvent, MessageEvents, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, CustomTheme } from "./../arkui-custom"
-import { UIContext } from "@ohos/arkui/UIContext"
+import { UIContext, TargetInfo } from "@ohos/arkui/UIContext"
 import { ContentModifier, WrappedBuilder, CommonConfiguration, Callback_WrappedBuilder_Args_Void } from "./../arkui-wrapper-builder"
 import { ContentType, EnterKeyType, InputType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback, TextInputAttribute, OnSubmitCallback, TextInputStyle, PasswordIcon, UnderlineColor, TextInputController, TextInputOptions } from "./../textInput"
 import { CustomDialogController, CustomDialogControllerOptions } from "./../customDialogController"
@@ -59,7 +59,7 @@ import { DrawContext, Rect, LengthUnit, ShapeClip, ColorMetrics, RoundRect, Circ
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, DatePickerOptions, DatePickerResult, LunarSwitchStyle, DatePickerDialogOptions, Callback_DatePickerResult_Void } from "./../datePicker"
-import { DialogAlignment, DialogButtonDirection, LevelOrder, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
+import { DialogAlignment, DialogButtonDirection, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater } from "./../particle"
 import { DpiFollowStrategy, UIExtensionProxy, Callback_UIExtensionProxy_Void, WindowModeFollowStrategy, UIExtensionOptions, Literal_Number_code__want } from "./../uiExtensionComponent"
 import { EditMode, ListItemStyle, Sticky, SwipeActionState, SwipeEdgeEffect, ListItemOptions, SwipeActionItem, Callback_SwipeActionState_Void, SwipeActionOptions } from "./../listItem"
@@ -132,7 +132,7 @@ import { CircleOptions } from "./../circle"
 import { ColumnOptions, ColumnOptionsV2 } from "./../column"
 import { ColumnSplitDividerStyle } from "./../columnSplit"
 import { DateTimeOptions } from "./../arkui-intl"
-import { DismissDialogAction, ImmersiveMode, LevelMode, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions, Callback_DismissDialogAction_Void } from "./../actionSheet"
+import { DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions, Callback_DismissDialogAction_Void } from "./../actionSheet"
 import { DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish } from "./../animationExtender"
 import { EllipseOptions } from "./../ellipse"
 import { FormLinkOptions } from "./../formLink"
@@ -161,6 +161,7 @@ import { OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
 import promptAction from '@ohos/promptAction'
+import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos/promptAction"
 import { PointerStyle, UniformDataType} from '#external'
 export class TypeChecker {
     static typeInstanceOf<T>(value: Object, prop: string): boolean {
@@ -294,6 +295,12 @@ export class TypeChecker {
     }
     static isBackgroundBrightnessOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof BackgroundBrightnessOptions
+    }
+    static isTargetInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof TargetInfo
+    }
+    static isPopupCommonOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean): boolean {
+        return value instanceof PopupCommonOptions
     }
     static isBackgroundColorStyle(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof BackgroundColorStyle
@@ -1291,7 +1298,7 @@ export class TypeChecker {
     static isImageSpanAlignment(value: Object | string | number | undefined): boolean {
         return value instanceof ImageSpanAlignment
     }
-    static isImmersiveMode(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isImmersiveMode(value: Object | string | number | undefined): boolean {
         return value instanceof ImmersiveMode
     }
     static isIndexerAlign(value: Object | string | number | undefined): boolean {
@@ -1420,10 +1427,10 @@ export class TypeChecker {
     static isLetterSpacingStyle(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof LetterSpacingStyle
     }
-    static isLevelMode(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isLevelMode(value: Object | string | number | undefined): boolean {
         return value instanceof LevelMode
     }
-    static isLevelOrder(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isLevelOrder(value: Object | string | number | undefined): boolean {
         return value instanceof LevelOrder
     }
     static isLightSource(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
@@ -4206,6 +4213,18 @@ export class TypeChecker {
     }
     static HoverModeAreaType_FromNumeric(ordinal: int32): HoverModeAreaType {
         return HoverModeAreaType.fromValue(ordinal)
+    }
+    static LevelMode_ToNumeric(value: LevelMode): int32 {
+        return value.valueOf()
+    }
+    static LevelMode_FromNumeric(ordinal: int32): LevelMode {
+        return LevelMode.fromValue(ordinal)
+    }
+    static ImmersiveMode_ToNumeric(value: ImmersiveMode): int32 {
+        return value.valueOf()
+    }
+    static ImmersiveMode_FromNumeric(ordinal: int32): ImmersiveMode {
+        return ImmersiveMode.fromValue(ordinal)
     }
     static IlluminatedType_ToNumeric(value: IlluminatedType): int32 {
         return value.valueOf()

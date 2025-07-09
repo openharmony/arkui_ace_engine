@@ -28,7 +28,8 @@ import { Resource } from "global.resource"
 import { VoidCallback, ResourceStr, ResourceColor, Dimension, BorderRadiuses, LocalizedBorderRadiuses, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, EdgeStyles } from "./units"
 import { DismissReason, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, TransitionEffect, ShadowOptions, ShadowStyle, HoverModeAreaType } from "./common"
 import { DialogButtonStyle, BorderStyle } from "./enums"
-import { DialogAlignment, LevelOrder } from "./alertDialog"
+import { DialogAlignment } from "./alertDialog"
+import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos/promptAction"
 export class ActionSheet {
     public static show(value: ActionSheetOptions): undefined {
         const value_casted = value as (ActionSheetOptions)
@@ -61,12 +62,6 @@ export interface ActionSheetButtonOptions {
 export interface ActionSheetOffset {
     dx: number | string | Resource;
     dy: number | string | Resource;
-}
-export interface LevelMode {
-    _LevelModeStub: string;
-}
-export interface ImmersiveMode {
-    _ImmersiveModeStub: string;
 }
 export type Callback_DismissDialogAction_Void = (parameter: DismissDialogAction) => void;
 export interface ActionSheetOptions {
