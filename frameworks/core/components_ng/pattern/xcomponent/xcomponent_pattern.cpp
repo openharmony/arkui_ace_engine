@@ -47,6 +47,10 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "feature/anco_manager/rs_ext_node_operation.h"
 #include "transaction/rs_interfaces.h"
+#include "transaction/rs_transaction.h"
+#include "transaction/rs_transaction_handler.h"
+#include "ui/rs_ui_context.h"
+#include "ui/rs_ui_director.h"
 #endif
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/components_ng/render/adapter/render_surface_impl.h"
@@ -1338,6 +1342,8 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     auto renderContext = host->GetRenderContext();
     renderContext->ClearChildren();
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
+    auto pipeline = host->GetContext();
+    handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
     handlingSurfaceRenderContext_->SetBounds(
         paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
     host->MarkModifyDone();
@@ -1371,6 +1377,22 @@ XComponentControllerErrorCode XComponentPattern::SetExtController(const RefPtr<X
     return XCOMPONENT_CONTROLLER_NO_ERROR;
 }
 
+std::shared_ptr<Rosen::RSUIContext> XComponentPattern::GetRSUIContext(const RefPtr<FrameNode>& frameNode)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_RETURN(window, nullptr);
+    auto rsUIDirector = window->GetRSUIDirector();
+    CHECK_NULL_RETURN(rsUIDirector, nullptr);
+    auto rsUIContext = rsUIDirector->GetRSUIContext();
+    return rsUIContext;
+#endif
+    return nullptr;
+}
+
 XComponentControllerErrorCode XComponentPattern::ResetExtController(const RefPtr<XComponentPattern>& extPattern)
 {
     if (!extPattern) {
@@ -1380,8 +1402,30 @@ XComponentControllerErrorCode XComponentPattern::ResetExtController(const RefPtr
     if (!curExtPattern || curExtPattern != extPattern) {
         return XCOMPONENT_CONTROLLER_RESET_ERROR;
     }
+#ifdef ENABLE_ROSEN_BACKEND
+    auto host = GetHost();
+    auto rsUIContext = GetRSUIContext(host);
+    auto extHost = extPattern->GetHost();
+    auto extRsUIContext = GetRSUIContext(extHost);
+    auto rsTransHandler = rsUIContext ? rsUIContext->GetRSTransaction() : nullptr;
+    auto extRsTransHandler = extRsUIContext ? extRsUIContext->GetRSTransaction() : nullptr;
+    if (rsTransHandler) {
+        rsTransHandler->Begin();
+    }
+    if (extRsTransHandler) {
+        extRsTransHandler->Begin();
+    }
+#endif
     RestoreHandlingRenderContextForSurface();
     extPattern->RestoreHandlingRenderContextForSurface();
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransHandler) {
+        rsTransHandler->Commit();
+    }
+    if (extRsTransHandler) {
+        extRsTransHandler->Commit();
+    }
+#endif
     extPattern_.Reset();
     return XCOMPONENT_CONTROLLER_NO_ERROR;
 }
