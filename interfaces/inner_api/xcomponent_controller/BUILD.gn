@@ -55,13 +55,9 @@ ohos_shared_library("ace_xcomponent_controller") {
 
   external_deps = [
     "c_utils:utils",
+    "ets_runtime:libark_jsruntime",
     "napi:ace_napi",
   ]
-  if (defined(ark_hybrid) && ark_hybrid) {
-    external_deps += [ "runtime_core:libarkruntime" ]
-  } else {
-    external_deps += [ "ets_runtime:libark_jsruntime" ]
-  }
   public_external_deps = [ "hilog:libhilog" ]
 
   subsystem_name = ace_engine_subsystem
