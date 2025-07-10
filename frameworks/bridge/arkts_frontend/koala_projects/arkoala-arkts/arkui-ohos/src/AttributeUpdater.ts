@@ -13,28 +13,18 @@
  * limitations under the License.
  */
 
-import { AttributeModifier, ArkCommonMethodPeer } from "./component/common";
+import { AttributeModifier, ArkCommonMethodPeer } from "arkui/component/common";
 
-export type Initializer<T> = (...params:Object[]) => T;
+export type Initializer<T> = (...params:FixedArray<Object>) => T;
 
-export class AttributeUpdater<T, C = Initializer<T>> implements AttributeModifier<T> {
+export class AttributeUpdater<T> implements AttributeModifier<T> {
 
-    applyNormalAttribute(instance: T): void {
-    }
-    applyPressedAttribute(instance: T): void {
-    }
-    applyFocusedAttribute(instance: T): void {
-    }
-    applyDisabledAttribute(instance: T): void {
-    }
-    applySelectedAttribute(instance: T): void {
-    }
     initializeModifier(instance: T): void {
     }
     onComponentChanged(component: T): void {
     }
     private value: T | undefined = undefined;
-    private constructorParams: C | undefined = undefined;
+    private constructorParams: Initializer<T> | undefined = undefined;
     public peerNode_?: ArkCommonMethodPeer;
 
     public set attribute(value: T) {
@@ -43,10 +33,10 @@ export class AttributeUpdater<T, C = Initializer<T>> implements AttributeModifie
     public get attribute(): T {
         return this.value!
     }
-    public set updateConstructorParams(constructorParams: C) {
+    public set updateConstructorParams(constructorParams: Initializer<T>) {
         this.constructorParams = constructorParams;
     }
-    public get updateConstructorParams(): C {
+    public get updateConstructorParams(): Initializer<T> {
         return this.constructorParams!;
     }
 }
