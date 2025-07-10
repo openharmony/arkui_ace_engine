@@ -58,7 +58,8 @@ private:
     bool IsLastNode(const RefPtr<FrameNode>& host) const;
 
     void UpdateHeaderAndFooterMargin(LayoutWrapper* layoutWrapper) const;
-
+    void RemoveParentRestrictionsForFixIdeal(
+        const RefPtr<LayoutProperty> layoutProperty, LayoutConstraintF& childConstraint);
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;
     int32_t itemStartIndex_ = 0;

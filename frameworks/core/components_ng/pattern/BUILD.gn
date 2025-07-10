@@ -244,6 +244,7 @@ build_component_ng("pattern_ng") {
     "menu/menu_divider/menu_divider_modifier.cpp",
     "menu/menu_divider/menu_divider_paint_method.cpp",
     "menu/menu_divider/menu_divider_pattern.cpp",
+    "menu/menu_item/custom_menu_item_layout_algorithm.cpp",
     "menu/menu_item/menu_item_accessibility_property.cpp",
     "menu/menu_item/menu_item_layout_algorithm.cpp",
     "menu/menu_item/menu_item_model_ng.cpp",

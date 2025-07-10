@@ -106,12 +106,7 @@ public:
         return IsMultiMenu();
     }
 
-    bool IsChildColumnLayout() override
-    {
-        return IsMultiMenu();
-    }
-
-    bool IsChildComponentContent() override
+    bool IsEnabledContentForFixIdeal()
     {
         return IsMultiMenu();
     }

@@ -39,13 +39,37 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
 
-    auto layoutConstraint = props->GetLayoutConstraint();
-    CHECK_NULL_VOID(layoutConstraint);
-
+    auto curLayoutConstraint = props->GetLayoutConstraint();
+    CHECK_NULL_VOID(curLayoutConstraint);
+    std::optional<LayoutConstraintF> layoutConstraint;
+    auto layoutPolicyProperty = props->GetLayoutPolicyProperty();
+    if (layoutPolicyProperty.has_value() && layoutPolicyProperty.value().IsFix()) {
+        std::optional<LayoutConstraintF> newLayoutConstraint = curLayoutConstraint;
+        RemoveParentRestrictionsForFixIdeal(props, newLayoutConstraint.value());
+        layoutConstraint = newLayoutConstraint;
+    } else {
+        layoutConstraint = curLayoutConstraint;
+    }
     if (isOption_ && !showDefaultSelectedIcon_) {
         MeasureOption(layoutWrapper, theme, props, layoutConstraint);
     } else {
         MeasureMenuItem(layoutWrapper, theme, props, layoutConstraint);
+    }
+}
+
+void MenuItemLayoutAlgorithm::RemoveParentRestrictionsForFixIdeal(
+    const RefPtr<LayoutProperty> layoutProperty, LayoutConstraintF& layoutConstraint)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicyProperty.has_value()) {
+        auto& layoutPolicy = layoutPolicyProperty.value();
+        if (layoutPolicy.IsWidthFix()) {
+            layoutConstraint.maxSize.SetWidth(std::numeric_limits<float>::infinity());
+        }
+        if (layoutPolicy.IsHeightFix()) {
+            layoutConstraint.maxSize.SetHeight(std::numeric_limits<float>::infinity());
+        }
     }
 }
 
