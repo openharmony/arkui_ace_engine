@@ -104,14 +104,14 @@ void RadioPattern::OnModifyDone()
     FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
     if (!makeFunc_.has_value() && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateIndicatorType();
     }
     UpdateState();
-    auto* pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto radioTheme = pipeline->GetTheme<RadioTheme>();
-    CHECK_NULL_VOID(radioTheme);
     hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = radioTheme->GetHotZoneVerticalPadding();
     InitDefaultMargin();
@@ -265,13 +265,13 @@ void RadioPattern::ImageNodeCreate()
     CHECK_NULL_VOID(radioPaintProperty);
     auto imageProperty = builderChildNode_->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageProperty);
-    imageProperty->UpdateUserDefinedIdealSize(GetChildContentSize());
-    auto imageSourceInfo = GetImageSourceInfoFromTheme(radioPaintProperty->GetRadioIndicator().value_or(0));
-    UpdateInternalResource(imageSourceInfo);
-    auto* pipeline = host->GetContextWithCheck();
+    auto* pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
+    imageProperty->UpdateUserDefinedIdealSize(GetChildContentSize(radioTheme));
+    auto imageSourceInfo = GetImageSourceInfoFromTheme(radioPaintProperty->GetRadioIndicator().value_or(0), radioTheme);
+    UpdateInternalResource(imageSourceInfo);
     auto indicatorColor = radioPaintProperty->GetRadioIndicatorColor().value_or(Color(radioTheme->GetPointColor()));
     auto imageRenderProperty = builderChildNode_->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(imageRenderProperty);
@@ -682,14 +682,9 @@ void RadioPattern::startExitAnimation()
     }
 }
 
-ImageSourceInfo RadioPattern::GetImageSourceInfoFromTheme(int32_t RadioIndicator)
+ImageSourceInfo RadioPattern::GetImageSourceInfoFromTheme(int32_t RadioIndicator, const RefPtr<RadioTheme>& radioTheme)
 {
     ImageSourceInfo imageSourceInfo;
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, imageSourceInfo);
-    auto* pipeline = host->GetContextWithCheck();
-    CHECK_NULL_RETURN(pipeline, imageSourceInfo);
-    auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_RETURN(radioTheme, imageSourceInfo);
     switch (RadioIndicator) {
         case static_cast<int32_t>(RadioIndicatorType::TICK):
@@ -710,12 +705,10 @@ void RadioPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     CHECK_NULL_VOID(sourceInfo.IsInternalResource());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
+    auto* pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
-    auto radioTheme = pipeline->GetTheme<RadioTheme>();
-    CHECK_NULL_VOID(radioTheme);
     auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
     if (iconPath.empty()) {
         return;
@@ -749,25 +742,13 @@ void RadioPattern::LoadBuilder()
     }
 }
 
-void RadioPattern::InitializeParam(
-    Dimension& defaultWidth, Dimension& defaultHeight, Dimension& horizontalPadding, Dimension& verticalPadding)
+CalcSize RadioPattern::GetChildContentSize(const RefPtr<RadioTheme>& radioTheme)
 {
+    CHECK_NULL_RETURN(radioTheme, CalcSize());
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto radioTheme = pipeline->GetTheme<RadioTheme>();
-    CHECK_NULL_VOID(radioTheme);
-    defaultWidth = radioTheme->GetWidth();
-    defaultHeight = radioTheme->GetHeight();
-    horizontalPadding = radioTheme->GetDefaultPaddingSize();
-    verticalPadding = radioTheme->GetDefaultPaddingSize();
-}
-
-CalcSize RadioPattern::GetChildContentSize()
-{
-    auto host = GetHost();
+    CHECK_NULL_RETURN(host, CalcSize());
     auto layoutProperty = host->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, CalcSize());
     auto &&layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (layoutConstraint && layoutConstraint->selfIdealSize) {
         auto selfIdealSize = layoutConstraint->selfIdealSize;
@@ -786,11 +767,10 @@ CalcSize RadioPattern::GetChildContentSize()
             return CalcSize(NG::CalcLength(height), NG::CalcLength(height));
         }
     }
-    Dimension defaultWidth;
-    Dimension defaultHeight;
-    Dimension horizontalPadding;
-    Dimension verticalPadding;
-    InitializeParam(defaultWidth, defaultHeight, horizontalPadding, verticalPadding);
+    Dimension defaultWidth = radioTheme->GetWidth();
+    Dimension defaultHeight = radioTheme->GetHeight();
+    Dimension horizontalPadding = radioTheme->GetDefaultPaddingSize();
+    Dimension verticalPadding = radioTheme->GetDefaultPaddingSize();
     auto width = (defaultWidth - horizontalPadding * RADIO_PADDING_COUNT) * DEFAULT_RADIO_IMAGE_SCALE;
     auto height = (defaultHeight - verticalPadding * RADIO_PADDING_COUNT) * DEFAULT_RADIO_IMAGE_SCALE;
     return CalcSize(NG::CalcLength(width), NG::CalcLength(height));
@@ -868,7 +848,7 @@ void RadioPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
+    auto* pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);

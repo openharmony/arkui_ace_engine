@@ -223,9 +223,7 @@ private:
     void InitTouchEvent();
     void InitMouseEvent();
     void OnClick();
-    CalcSize GetChildContentSize();
-    void InitializeParam(
-        Dimension& defaultWidth, Dimension& defaultHeight, Dimension& horizontalPadding, Dimension& verticalPadding);
+    CalcSize GetChildContentSize(const RefPtr<RadioTheme>& radioTheme);
     void LoadBuilder();
     void SetBuilderState();
     void UpdateIndicatorType();
@@ -257,7 +255,7 @@ private:
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
     void OnIsFocusActiveUpdate(bool isFocusAcitve);
-    ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator);
+    ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator, const RefPtr<RadioTheme>& radioTheme);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
     void SetPrePageIdToLastPageId();
     void InitDefaultMargin();

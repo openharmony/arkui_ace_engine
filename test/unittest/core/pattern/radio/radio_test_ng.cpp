@@ -1163,7 +1163,10 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest003, TestSize.Level1)
     layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
     layoutProperty->calcLayoutConstraint_->selfIdealSize->Reset();
     layoutProperty->calcLayoutConstraint_->selfIdealSize->width_ = CalcLength(COMPONENT_WIDTH);
-    pattern->GetChildContentSize();
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    pattern->GetChildContentSize(theme);
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(size.value(), SizeF(COMPONENT_WIDTH, COMPONENT_WIDTH));
 }
