@@ -220,7 +220,7 @@ void MultiMenuLayoutAlgorithm::UpdateMenuDefaultConstraintByDevice(const RefPtr<
 }
 
 void MultiMenuLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(
-    const RefPtr<LayoutWrapper>& childLayoutWrapper, OffsetF& translate, bool isEmbed, OffsetF embedCorrect)
+    const RefPtr<LayoutWrapper>& childLayoutWrapper, OffsetF& translate, bool isEmbed, OffsetF& embedCorrect)
 {
     CHECK_NULL_VOID(childLayoutWrapper);
     auto childNode = childLayoutWrapper->GetHostNode();
