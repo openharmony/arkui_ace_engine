@@ -44,7 +44,8 @@ private:
         LayoutConstraintF& childConstraint, float paddingWidth, std::optional<LayoutConstraintF>& layoutConstraint,
         bool idealSizeHasVal);
     bool UpdateSelectOverlayMenuMinWidth(const RefPtr<MenuPattern>& pattern, const RefPtr<GridColumnInfo>& columnInfo);
-
+    void UpdateChildPositionWidthIgnoreLayoutSafeArea(
+        const RefPtr<LayoutWrapper>& childLayoutWrapper, OffsetF& originOffset, bool isEmbed, OffsetF& embedCorrect);
     float userHeight_ = 0.0f;
     
     ACE_DISALLOW_COPY_AND_MOVE(MultiMenuLayoutAlgorithm);
