@@ -20,6 +20,7 @@
 #include "ui/view/frame_node.h"
 
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
@@ -1863,6 +1864,209 @@ HWTEST_F(SearchTestTwoNg, MaxFontScale001, TestSize.Level1)
      * @tc.step: step3. test maxFontScale
      */
     EXPECT_EQ(textFieldLayoutProperty->GetMaxFontScale(), 2.0);
+}
+
+/**
+ * @tc.name: searchModelStatic001
+ * @tc.desc: test search ModelStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchModelStatic001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    Font font;
+    std::vector<std::string> fontFamilies { "Georgia", "Serif" };
+    Font otherFont { FontWeight::W200, Dimension(12), OHOS::Ace::FontStyle::ITALIC, fontFamilies };
+    SearchModelStatic::SetPlaceholderFont(frameNode, std::make_optional(otherFont));
+    EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderFontWeight(), FontWeight::W200);
+
+    SearchModelStatic::SetPlaceholderFont(frameNode, std::nullopt);
+    EXPECT_FALSE(textFieldLayoutProperty->GetPlaceholderFontSize().has_value());
+}
+
+/**
+ * @tc.name: searchModelStatic002
+ * @tc.desc: test search ModelStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchModelStatic002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    SearchModelStatic::SetAdaptMinFontSize(frameNode, std::make_optional(1.0_fp));
+    EXPECT_EQ(textFieldLayoutProperty->GetAdaptMinFontSize().value(), 1.0_fp);
+
+    SearchModelStatic::SetAdaptMinFontSize(frameNode, std::nullopt);
+    EXPECT_FALSE(textFieldLayoutProperty->GetAdaptMinFontSize().has_value());
+}
+
+/**
+ * @tc.name: searchModelStatic003
+ * @tc.desc: test search ModelStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchModelStatic003, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    SearchModelStatic::SetAdaptMaxFontSize(frameNode, std::make_optional(2.0_fp));
+    EXPECT_EQ(textFieldLayoutProperty->GetAdaptMaxFontSize().value(), 2.0_fp);
+
+    SearchModelStatic::SetAdaptMaxFontSize(frameNode, std::nullopt);
+    EXPECT_FALSE(textFieldLayoutProperty->GetAdaptMaxFontSize().has_value());
+}
+
+/**
+ * @tc.name: searchModelStatic004
+ * @tc.desc: test search ModelStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchModelStatic004, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    SearchModelStatic::SetTextAlign(frameNode, std::make_optional(TextAlign::RIGHT));
+    EXPECT_EQ(textFieldLayoutProperty->GetTextAlign().value(), TextAlign::RIGHT);
+
+    SearchModelStatic::SetTextAlign(frameNode, std::nullopt);
+    EXPECT_FALSE(textFieldLayoutProperty->GetTextAlign().has_value());
+}
+
+/**
+ * @tc.name: searchModelStatic005
+ * @tc.desc: test search ModelStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchModelStatic005, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    SearchModelStatic::SetTextColor(frameNode, std::make_optional(Color::BLACK));
+    EXPECT_EQ(textFieldLayoutProperty->GetTextColor().value(), Color::BLACK);
+
+    SearchModelStatic::SetTextColor(frameNode, std::nullopt);
+    EXPECT_FALSE(textFieldLayoutProperty->GetTextColor().has_value());
+}
+
+/**
+ * @tc.name: searchModelStatic006
+ * @tc.desc: test search ModelStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchModelStatic006, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    SearchModelStatic::SetTextIndent(frameNode, std::make_optional(TEXT_INDENT));
+    EXPECT_EQ(textFieldLayoutProperty->GetTextIndent().value(), TEXT_INDENT);
+
+    SearchModelStatic::SetTextIndent(frameNode, std::nullopt);
+    EXPECT_FALSE(textFieldLayoutProperty->GetTextIndent().has_value());
+}
+
+/**
+ * @tc.name: searchModelStatic007
+ * @tc.desc: test search ModelStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchModelStatic007, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    SearchModelStatic::SetPlaceholderColor(frameNode, std::make_optional(Color::GRAY));
+    EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderTextColor().value(), Color::GRAY);
+
+    SearchModelStatic::SetPlaceholderColor(frameNode, std::nullopt);
+    EXPECT_FALSE(textFieldLayoutProperty->GetPlaceholderTextColor().has_value());
+}
+
+/**
+ * @tc.name: searchModelStatic008
+ * @tc.desc: test search ModelStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchModelStatic008, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    SearchModelStatic::SetCopyOption(frameNode, std::make_optional(CopyOptions::Distributed));
+    EXPECT_EQ(textFieldLayoutProperty->GetCopyOptions().value(), CopyOptions::Distributed);
+
+    SearchModelStatic::SetCopyOption(frameNode, std::nullopt);
+    EXPECT_FALSE(textFieldLayoutProperty->GetCopyOptions().has_value());
+}
+
+/**
+ * @tc.name: searchModelStatic009
+ * @tc.desc: test search ModelStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchModelStatic009, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    SearchModelStatic::SetLetterSpacing(frameNode, std::make_optional(LETTER_SPACING));
+    EXPECT_EQ(textFieldLayoutProperty->GetLetterSpacing().value(), LETTER_SPACING);
+
+    SearchModelStatic::SetLetterSpacing(frameNode, std::nullopt);
+    EXPECT_FALSE(textFieldLayoutProperty->GetLetterSpacing().has_value());
+}
+
+/**
+ * @tc.name: searchModelStatic010
+ * @tc.desc: test search ModelStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchModelStatic010, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    SearchModelStatic::SetTextAlign(frameNode, std::make_optional(TextAlign::RIGHT));
+    EXPECT_EQ(textFieldLayoutProperty->GetTextAlign().value(), TextAlign::RIGHT);
+
+    SearchModelStatic::SetTextAlign(frameNode, std::nullopt);
+    EXPECT_FALSE(textFieldLayoutProperty->GetTextAlign().has_value());
 }
 
 /**
