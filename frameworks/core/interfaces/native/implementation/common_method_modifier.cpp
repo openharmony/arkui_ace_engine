@@ -840,25 +840,6 @@ BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)
 }
 
 template<>
-OverlayOptions Convert(const Ark_OverlayOptions& src)
-{
-    OverlayOptions dst;
-    auto align = Converter::OptConvert<Alignment>(src.align);
-    if (align) {
-        dst.align = align.value();
-    }
-    auto x = Converter::OptConvert<Dimension>(src.offset.value.x);
-    if (x) {
-        dst.x = x.value();
-    }
-    auto y = Converter::OptConvert<Dimension>(src.offset.value.y);
-    if (y) {
-        dst.y = y.value();
-    }
-    return dst;
-}
-
-template<>
 BorderRadiusProperty Convert(const Ark_OutlineRadiuses& src)
 {
     BorderRadiusProperty dst;

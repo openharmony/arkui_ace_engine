@@ -5705,6 +5705,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _OffscreenCanvasRenderingContext2D_transferToImageBitmap(ptr: KPointer): KPointer
     @ani.unsafe.Direct
+    native static _OverlayOps_setOverlayAttribute(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _OffscreenCanvas_ctor(width: number, height: number): KPointer
     @ani.unsafe.Direct
     native static _OffscreenCanvas_getFinalizer(): KPointer
