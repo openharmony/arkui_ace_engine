@@ -301,4 +301,10 @@ void AniGraphicsModule::OnLayoutInnerLayout(ani_env* env, ani_long ptr)
     CHECK_NULL_VOID(layoutAlgorithm);
     layoutAlgorithm->Layout(AceType::RawPtr(frameNode));
 }
+void AniGraphicsModule::FrameNodeMarkDirtyNode(ani_env* env, ani_long ptr)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_DIFF);
+}
 } // namespace OHOS::Ace::Framework

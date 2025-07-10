@@ -35,6 +35,7 @@ public:
     static void SetCustomCallback(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
     static void OnMeasureInnerMeasure(ani_env* env, ani_long ptr);
     static void OnLayoutInnerLayout(ani_env* env, ani_long ptr);
+    static void FrameNodeMarkDirtyNode(ani_env* env, ani_long ptr);
 
 private:
     static ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context);

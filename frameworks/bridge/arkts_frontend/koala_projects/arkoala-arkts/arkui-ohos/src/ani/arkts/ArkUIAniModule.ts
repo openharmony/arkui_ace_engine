@@ -153,4 +153,5 @@ export class ArkUIAniModule {
     native static _IsDebugMode(id: KInt): KBoolean
     native static _OnMeasure_InnerMeasure(ptr: KPointer): void
     native static _OnLayout_InnerLayout(ptr: KPointer): void
+    native static _FrameNode_MarkDirtyNode(ptr: KPointer): void
 }

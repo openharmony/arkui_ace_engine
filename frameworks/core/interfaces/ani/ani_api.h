@@ -102,6 +102,7 @@ struct ArkUIAniCommonModifier {
     ani_boolean (*isDebugMode)(ArkUI_Int32 id);
     void (*onMeasureInnerMeasure)(ani_env* env, ani_long ptr);
     void (*onLayoutInnerLayout)(ani_env* env, ani_long ptr);
+    void (*frameNodeMarkDirtyNode)(ani_env* env, ani_long ptr);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);

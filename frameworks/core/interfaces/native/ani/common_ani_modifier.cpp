@@ -171,6 +171,11 @@ void OnLayoutInnerLayout(ani_env* env, ani_long ptr)
     Framework::AniGraphicsModule::OnLayoutInnerLayout(env, ptr);
 }
 
+void FrameNodeMarkDirtyNode(ani_env* env, ani_long ptr)
+{
+    Framework::AniGraphicsModule::FrameNodeMarkDirtyNode(env, ptr);
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -188,7 +193,8 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .checkIsUIThread = OHOS::Ace::NG::CheckIsUIThread,
         .isDebugMode =  OHOS::Ace::NG::IsDebugMode,
         .onMeasureInnerMeasure = OHOS::Ace::NG::OnMeasureInnerMeasure,
-        .onLayoutInnerLayout = OHOS::Ace::NG::OnLayoutInnerLayout };
+        .onLayoutInnerLayout = OHOS::Ace::NG::OnLayoutInnerLayout,
+        .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode };
     return &impl;
 }
 
