@@ -1744,6 +1744,13 @@ ScopeFocusAlgorithm GridPattern::GetScopeFocusAlgorithm()
 void GridPattern::HandleOnItemFocus(int32_t index)
 {
     focusHandler_.SetFocusIndex(index);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(host);
+    if (focusHub->GetFocusDependence() != FocusDependence::AUTO) {
+        focusHub->SetFocusDependence(FocusDependence::AUTO);
+    }
 }
 
 void GridPattern::ReportOnItemGridEvent(const std::string& event)
