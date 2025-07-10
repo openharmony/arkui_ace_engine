@@ -517,16 +517,12 @@ void MenuItemContentModifier0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SelectModelNG::SetMenuItemContentModifier0(frameNode, convValue);
 }
 void MenuItemContentModifier1Impl(Ark_NativePointer node,
                                   const Opt_ContentModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SelectModelNG::SetMenuItemContentModifier1(frameNode, convValue);
 }
 void DividerImpl(Ark_NativePointer node,
                  const Opt_DividerOptions* value)
@@ -570,32 +566,24 @@ void TextModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SelectModelNG::SetTextModifier(frameNode, convValue);
 }
 void ArrowModifierImpl(Ark_NativePointer node,
                        const Opt_SymbolGlyphModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SelectModelNG::SetArrowModifier(frameNode, convValue);
 }
 void OptionTextModifierImpl(Ark_NativePointer node,
                             const Opt_TextModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SelectModelNG::SetOptionTextModifier(frameNode, convValue);
 }
 void SelectedOptionTextModifierImpl(Ark_NativePointer node,
                                     const Opt_TextModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SelectModelNG::SetSelectedOptionTextModifier(frameNode, convValue);
 }
 void DividerStyleImpl(Ark_NativePointer node,
                       const Opt_DividerStyleOptions* value)
