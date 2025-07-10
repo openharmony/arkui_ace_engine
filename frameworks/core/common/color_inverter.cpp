@@ -37,7 +37,7 @@ void ColorInvertFuncManager::DeleteInvertFunc(const std::string& nodeTag)
     colorInvertFuncMap_.erase(nodeTag);
 }
 
-ColorInvertFunc ColorInvertFuncManager::GetInvertFunc(const std::string& nodeTag)
+ColorInvertFunc ColorInvertFuncManager::GetInvertFunc(const std::string& nodeTag) const
 {
     auto iter = colorInvertFuncMap_.find(nodeTag);
     if (iter == colorInvertFuncMap_.end()) {
@@ -60,6 +60,7 @@ RefPtr<ColorInvertFuncManager> ColorInverter::GetOrCreateManager(int32_t instanc
 
 void ColorInverter::EnableColorInvert(int32_t instanceId, const std::string& nodeTag, ColorInvertFunc&& func)
 {
+    std::unique_lock<std::shared_mutex> lock(mutex_);
     auto manager = GetOrCreateManager(instanceId);
     if (manager) {
         manager->SetInvertFunc(nodeTag, std::move(func));
@@ -68,6 +69,7 @@ void ColorInverter::EnableColorInvert(int32_t instanceId, const std::string& nod
 
 void ColorInverter::DisableColorInvert(int32_t instanceId, const std::string& nodeTag)
 {
+    std::unique_lock<std::shared_mutex> lock(mutex_);
     if (nodeTag == V2::UNDEFINED_NODE_ETS_TAG) {
         colorInvertFuncManagerMap_.erase(instanceId);
     } else {
@@ -77,8 +79,9 @@ void ColorInverter::DisableColorInvert(int32_t instanceId, const std::string& no
     }
 }
 
-ColorInvertFunc ColorInverter::GetInvertFunc(int32_t instanceId, const std::string& nodeTag) const
+ColorInvertFunc ColorInverter::GetInvertFunc(int32_t instanceId, const std::string& nodeTag)
 {
+    std::shared_lock<std::shared_mutex> lock(mutex_);
     auto manager = GetManager(instanceId);
     if (!manager) {
         manager = GetManager(PROCESS_LEVEL_ID);

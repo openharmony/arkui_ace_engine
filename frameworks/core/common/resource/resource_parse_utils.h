@@ -78,9 +78,8 @@ public:
 
     static bool IsNumberType(int32_t type)
     {
-        return type == static_cast<int32_t>(ResourceType::FLOAT) ||
-            type == static_cast<int32_t>(ResourceType::PLURAL) ||
-            type == static_cast<int32_t>(ResourceType::INTEGER);
+        return type == static_cast<int32_t>(ResourceObjectParamType::FLOAT) ||
+            type == static_cast<int32_t>(ResourceObjectParamType::INT);
     }
 
     template<typename T>

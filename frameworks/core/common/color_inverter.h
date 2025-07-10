@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_COLOR_INVERTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_COLOR_INVERTER_H
 #include <functional>
+#include <mutex>
+#include <shared_mutex>
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
@@ -43,7 +45,7 @@ public:
 
     void DeleteInvertFunc(const std::string& nodeTag);
 
-    ColorInvertFunc GetInvertFunc(const std::string& nodeTag);
+    ColorInvertFunc GetInvertFunc(const std::string& nodeTag) const;
 
 private:
     std::unordered_map<std::string, ColorInvertFunc> colorInvertFuncMap_;
@@ -57,12 +59,13 @@ public:
 
     void EnableColorInvert(int32_t instanceId, const std::string& nodeTag, ColorInvertFunc&& func);
     void DisableColorInvert(int32_t instanceId, const std::string& nodeTag);
-    ColorInvertFunc GetInvertFunc(int32_t instanceId, const std::string& nodeTag) const;
+    ColorInvertFunc GetInvertFunc(int32_t instanceId, const std::string& nodeTag);
     static Color Invert(Color color, int32_t instanceId, const std::string& nodeTag);
-    RefPtr<ColorInvertFuncManager> GetManager(int32_t instanceId) const; // for user
 
 private:
+    std::shared_mutex mutex_;
     RefPtr<ColorInvertFuncManager> GetOrCreateManager(int32_t instanceId); // for setter
+    RefPtr<ColorInvertFuncManager> GetManager(int32_t instanceId) const; // for user
     std::unordered_map<int32_t, RefPtr<ColorInvertFuncManager>> colorInvertFuncManagerMap_;
 };
 

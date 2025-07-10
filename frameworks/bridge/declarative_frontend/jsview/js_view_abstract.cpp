@@ -6966,8 +6966,8 @@ bool JSViewAbstract::CheckDarkResource(const RefPtr<ResourceObject>& resObj)
     int32_t resId = resObj->GetId();
     bool hasDarkRes = false;
     auto params = resObj->GetParams();
-    if (resId == -1 && (params.size() > 0)) {
-        hasDarkRes = resourceAdapter->ExistDarkResByName(params[params.size() - 1].value.value(),
+    if (resId == -1 && !params.empty() && params.back().value.has_value()) {
+        hasDarkRes = resourceAdapter->ExistDarkResByName(params.back().value.value(),
             std::to_string(resObj->GetType()));
     } else {
         hasDarkRes = resourceAdapter->ExistDarkResById(std::to_string(resId));

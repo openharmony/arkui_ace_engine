@@ -100,6 +100,7 @@ bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;
 bool g_isResourceDecoupling = true;
 bool g_isConfigChangePerform = false;
+bool g_isMultiInstanceEnabled = false;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 
@@ -136,11 +137,12 @@ bool SystemProperties::GetIsUseMemoryMonitor()
 
 bool SystemProperties::GetMultiInstanceEnabled()
 {
-    return multiInstanceEnabled_;
+    return g_isMultiInstanceEnabled || multiInstanceEnabled_;
 }
 
 void SystemProperties::SetMultiInstanceEnabled(bool enabled)
 {
+    g_isMultiInstanceEnabled = enabled;
     multiInstanceEnabled_ = enabled;
 }
 
