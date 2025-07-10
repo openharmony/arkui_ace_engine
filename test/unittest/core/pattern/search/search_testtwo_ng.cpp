@@ -3362,6 +3362,138 @@ HWTEST_F(SearchTestTwoNg, searchMeasureTest01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SearchTextFieldPatternTest
+ * @tc.desc: Test SearchTextFieldPattern function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, SearchTextFieldPatternTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto searchTextFieldPattern = AceType::DynamicCast<SearchTextFieldPattern>(textFieldPattern);
+    ASSERT_NE(searchTextFieldPattern, nullptr);
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto textFieldRenderContext = textFieldFrameNode->GetRenderContext();
+    ASSERT_NE(textFieldRenderContext, nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
+    textFieldTheme->bgColor_ = Color::FromString("#ff182431");
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly([textFieldTheme = textFieldTheme](ThemeType type) -> RefPtr<Theme> {
+            if (type == ScrollBarTheme::TypeId()) {
+                return AceType::MakeRefPtr<ScrollBarTheme>();
+            }
+            return textFieldTheme;
+        });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([textFieldTheme = textFieldTheme](ThemeType type, int themeScopeId) -> RefPtr<Theme> {
+            if (type == ScrollBarTheme::TypeId()) {
+                return AceType::MakeRefPtr<ScrollBarTheme>();
+            }
+            return textFieldTheme;
+        });
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
+
+    textFieldRenderContext->ResetBackgroundColor();
+    searchTextFieldPattern->ApplyNormalTheme();
+    textFieldRenderContext->UpdateBackgroundColor(Color::RED);
+    searchTextFieldPattern->ApplyNormalTheme();
+    EXPECT_EQ(textFieldRenderContext->GetBackgroundColor(), Color::RED);
+
+    themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
+    auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
+    searchTheme->iconHeight_ = 24.0_px;
+    searchTheme->height_ = 60.0_px;
+    searchTheme->searchButtonTextColor_ = Color::RED;
+    searchTheme->placeholderColor_ = Color::RED;
+    searchTheme->symbolIconHeight_ = 16.0_fp;
+    textFieldTheme->bgColor_ = Color::RED;
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+        if (type == SearchTheme::TypeId()) {
+            return searchTheme;
+        }
+        if (type == IconTheme::TypeId()) {
+            return iconTheme;
+        }
+        return textFieldTheme;
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+
+    renderContext->UpdateOpacity(0.0f);
+    EXPECT_EQ(searchTextFieldPattern->IsTextEditableForStylus(), false);
+    renderContext->UpdateOpacity(1.0f);
+    EXPECT_EQ(searchTextFieldPattern->IsTextEditableForStylus(), true);
+
+
+    searchTextFieldPattern->ProcessSelection();
+    EXPECT_EQ(searchTextFieldPattern->SelectOverlayIsOn(), false);
+
+    TouchEventInfo info("type");
+    TouchLocationInfo location(1);
+    Offset pos;
+    pos.deltaX_ = 10.0;
+    pos.deltaY_ = 10.0;
+    location.SetLocalLocation(pos);
+    info.touches_.emplace_back(location);
+    auto offset = info.GetTouches().front().GetLocalLocation();
+
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    manager->selectOverlayHolder_ = holder;
+    searchTextFieldPattern->selectOverlay_->OnBind(manager);
+    Ace::NG::SelectOverlayInfo soi;
+    soi.enableHandleLevel = true;
+    manager->CreateSelectOverlay(soi, true);
+    searchTextFieldPattern->moveCaretState_.isMoveCaret = false;
+    searchTextFieldPattern->moveCaretState_.touchDownOffset = Offset(0, 0);
+    searchTextFieldPattern->HandleTouchMove(location);
+    searchTextFieldPattern->ProcessSelection();
+    EXPECT_EQ(searchTextFieldPattern->SelectOverlayIsOn(), true);
+
+    auto focushHub = searchTextFieldPattern->GetFocusHub();
+    focushHub->currentFocus_ = true;
+    searchTextFieldPattern->HandleFocusEvent();
+    searchTextFieldPattern->ProcessSelection();
+    searchTextFieldPattern->searchRequestStopTwinkling_ = false;
+    EXPECT_EQ(searchTextFieldPattern->SelectOverlayIsOn(), true);
+
+    EXPECT_EQ(searchTextFieldPattern->GetRequestKeyboardId(), -1);
+
+    auto dimension = Dimension(0.0f, DimensionUnit::VP);
+    EXPECT_EQ(searchTextFieldPattern->FontSizeConvertToPx(dimension), 0.0f);
+    dimension = Dimension(0.0f, DimensionUnit::FP);
+    EXPECT_EQ(searchTextFieldPattern->FontSizeConvertToPx(dimension), 0.0f);
+
+    EXPECT_NE(searchTextFieldPattern->GetIMEClientInfo().nodeId, 0);
+
+    EXPECT_EQ(pattern->NeedToRequestKeyboardOnFocus(), false);
+}
+
+/**
  * @tc.name: GetIMEClientInfo001
  * @tc.desc: Test search GetIMEClientInfo
  * @tc.type: FUNC
