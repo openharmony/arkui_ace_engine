@@ -8711,8 +8711,8 @@ void JSViewAbstract::JsAdvancedBlendMode(const JSCallbackInfo& info)
             blendMode = BlendMode::BACK_COMPAT_SOURCE_IN;
         }
     } else if (info[0]->IsObject()) {
-        auto blender = CreateRSBrightnessBlenderFromNapiValue(info[0]);
-        ViewAbstractModel::GetInstance()->SetBrightnessBlender(blender);
+        auto blender = CreateRSBlenderFromNapiValue(info[0]);
+        ViewAbstractModel::GetInstance()->SetBlender(blender);
     }
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto blendApplyTypeNum = info[1]->ToNumber<int32_t>();
