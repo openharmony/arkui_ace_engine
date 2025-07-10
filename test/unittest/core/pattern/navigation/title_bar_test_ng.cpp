@@ -2822,14 +2822,14 @@ HWTEST_F(TitleBarTestNg, CreateOrUpdateMainTitle1, TestSize.Level1)
 HWTEST_F(TitleBarTestNg, CreateOrUpdateMainTitle2, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create titleBarNode
+     * @tc.steps: step1. create titleBarNode.
      */
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     ASSERT_NE(titleBarNode, nullptr);
 
     /**
-     * @tc.steps: step2. createtitle and check it
+     * @tc.steps: step2. createtitle and check it.
      */
     NG::NavigationTitleInfo info = { false, true, "sub", "main" };
 

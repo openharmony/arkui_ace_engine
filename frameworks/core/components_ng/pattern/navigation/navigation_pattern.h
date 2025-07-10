@@ -567,6 +567,7 @@ public:
         NavDestinationActiveReason reason = NavDestinationActiveReason::TRANSITION);
 
 private:
+    void ClearNavigationCustomTransition();
     bool IsDestinationNeedHideInPush(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavDestinationGroupNode>& destNode) const;
     void FirePrimaryNodesLifecycle(NavDestinationLifecycle lifecycle);
