@@ -483,6 +483,9 @@ void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
+    if (axis == Axis::FREE || pattern->GetAxis() == Axis::FREE) {
+        return; // calling SetAxis would disrupt the axisChanged signal in ::OnModifyDone and initialization of FreeScroll
+    }
     pattern->SetAxis(axis);
 }
 
