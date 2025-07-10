@@ -1463,6 +1463,11 @@ bool NG::PipelineContext::CheckSourceTypeChange(SourceType currentSourceType)
     return ret;
 }
 
+const RefPtr<NG::PostEventManager>& NG::PipelineContext::GetPostEventManager()
+{
+    return postEventManager_;
+}
+
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
 } // namespace OHOS::Ace

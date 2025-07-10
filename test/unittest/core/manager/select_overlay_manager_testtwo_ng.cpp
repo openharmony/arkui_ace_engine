@@ -281,7 +281,7 @@ HWTEST_F(SelectOverlayManagerTestTwoNg, HandleSelectionEvent001, TestSize.Level1
     auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
     HoldSelectionInfo holdSelectionInfo_;
     holdSelectionInfo_ = {};
-    std::function<bool(const PointF&)> checkTouchInArea = [](const PointF& point) { return false; };
+    std::function<bool(const PointF&, bool)> checkTouchInArea = [](const PointF& point, bool) { return false; };
     std::function<void()> resetSelectionCallback = []() {};
     holdSelectionInfo_.checkTouchInArea = std::move(checkTouchInArea);
     holdSelectionInfo_.resetSelectionCallback = std::move(resetSelectionCallback);
@@ -321,7 +321,7 @@ HWTEST_F(SelectOverlayManagerTestTwoNg, HandleSelectionEvent002, TestSize.Level1
     auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
     HoldSelectionInfo holdSelectionInfo_;
     holdSelectionInfo_ = {};
-    std::function<bool(const PointF&)> checkTouchInArea = [](const PointF& point) { return true; };
+    std::function<bool(const PointF&, bool)> checkTouchInArea = [](const PointF& point, bool) { return true; };
     std::function<void()> resetSelectionCallback = []() {};
     holdSelectionInfo_.checkTouchInArea = std::move(checkTouchInArea);
     holdSelectionInfo_.resetSelectionCallback = std::move(resetSelectionCallback);
@@ -375,7 +375,7 @@ HWTEST_F(SelectOverlayManagerTestTwoNg, HandleSelectionEvent003, TestSize.Level1
     auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
     HoldSelectionInfo holdSelectionInfo_;
     holdSelectionInfo_ = {};
-    std::function<bool(const PointF&)> checkTouchInArea = [](const PointF& point) { return false; };
+    std::function<bool(const PointF&, bool)> checkTouchInArea = [](const PointF& point, bool) { return false; };
     std::function<void()> resetSelectionCallback = []() {};
     holdSelectionInfo_.checkTouchInArea = std::move(checkTouchInArea);
     holdSelectionInfo_.resetSelectionCallback = std::move(resetSelectionCallback);
@@ -626,6 +626,115 @@ HWTEST_F(SelectOverlayManagerTestTwoNg, ConvertPointRelativeToNode001, TestSize.
      * @tc.steps: step3. call ConvertPointRelativeToNode
      */
     PointF point = PointF(0.0, 0.0);
+    content.ConvertPointRelativeToNode(frameNode, point);
+    EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: ConvertPointRelativeToNode002
+ * @tc.desc: test select_content_overlay_manager.cpp ConvertPointRelativeToNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestTwoNg, ConvertPointRelativeToNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = true;
+    selectInfo.menuInfo.showCut = true;
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(content.shareOverlayInfo_);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. mount menuNode to root node
+     */
+    frameNode->SetParent(root_);
+
+    /**
+     * @tc.steps: step3. call ConvertPointRelativeToNode
+     */
+    PointF point = PointF(0.0, 0.0);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->postEventManager_ = AceType::MakeRefPtr<PostEventManager>();
+    pipeline->postEventManager_->targetNode_ = root_;
+    content.ConvertPointRelativeToNode(frameNode, point);
+    EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: ConvertPointRelativeToNode003
+ * @tc.desc: test select_content_overlay_manager.cpp ConvertPointRelativeToNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestTwoNg, ConvertPointRelativeToNode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = true;
+    selectInfo.menuInfo.showCut = true;
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(content.shareOverlayInfo_);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. mount menuNode to root node
+     */
+    frameNode->SetParent(root_);
+
+    /**
+     * @tc.steps: step3. call ConvertPointRelativeToNode
+     */
+    PointF point = PointF(0.0, 0.0);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    pipeline = nullptr;
+    content.ConvertPointRelativeToNode(frameNode, point);
+    EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: ConvertPointRelativeToNode004
+ * @tc.desc: test select_content_overlay_manager.cpp ConvertPointRelativeToNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestTwoNg, ConvertPointRelativeToNode004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = true;
+    selectInfo.menuInfo.showCut = true;
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(content.shareOverlayInfo_);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. mount menuNode to root node
+     */
+    frameNode->SetParent(root_);
+
+    /**
+     * @tc.steps: step3. call ConvertPointRelativeToNode
+     */
+    PointF point = PointF(0.0, 0.0);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->postEventManager_ = AceType::MakeRefPtr<PostEventManager>();
+    pipeline->postEventManager_->targetNode_ = nullptr;
     content.ConvertPointRelativeToNode(frameNode, point);
     EXPECT_EQ(content.selectionHoldId_, -1);
 }
