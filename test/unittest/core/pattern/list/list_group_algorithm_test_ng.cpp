@@ -92,6 +92,52 @@ void ListGroupAlgTestNg::CreateGroupOnlyBigItem(
 }
 
 /**
+ * @tc.name: CheckReMeasureTest001
+ * @tc.desc: check recycledItemPosition while re-measure
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ListGroupAlgTestNg, CheckReMeasureTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create ListItemGroup and get layoutAlgorithm
+    * @tc.expected: layoutAlgorithm not null
+    */
+    auto model = CreateList();
+    CreateGroupWithHeader(1, V2::ListItemGroupStyle::NONE, 10);
+    CreateDone();
+    auto listProps = AceType::DynamicCast<ListLayoutProperty>(frameNode_->GetLayoutProperty());
+    ASSERT_TRUE(listProps);
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    ASSERT_TRUE(groupNode);
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(groupNode->GetLayoutAlgorithm());
+    ASSERT_TRUE(layoutAlgorithmWrapper);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_TRUE(layoutAlgorithm);
+
+    /**
+    * @tc.steps: step2. set itemPosition
+    * @tc.expected: after first measure, itemPosition_.size() == 10, recycledItem.size() == 0
+    */
+    layoutAlgorithm->listLayoutProperty_ = listProps;
+    layoutAlgorithm->childLayoutConstraint_ = listProps->CreateChildConstraint();
+    layoutAlgorithm->Measure(AceType::RawPtr(groupNode));
+    layoutAlgorithm->itemPosition_.clear();
+    for (int32_t i = 0; i < 10; i++) {
+        layoutAlgorithm->itemPosition_.emplace(std::make_pair(i, ListItemGroupInfo()));
+    }
+    ASSERT_EQ(static_cast<int32_t>(layoutAlgorithm->recycledItemPosition_.size()), 0);
+
+    /**
+    * @tc.steps: step3. re measure listitemgroup
+    * @tc.expected: recycledItem.size() != 0
+    */
+    layoutAlgorithm->Measure(AceType::RawPtr(groupNode));
+    ASSERT_NE(static_cast<int32_t>(layoutAlgorithm->recycledItemPosition_.size()), 0);
+}
+
+/**
  * @tc.name: BigJumpAccuracyTest001
  * @tc.desc: jump with big offset and check position
  * @tc.type: FUNC
