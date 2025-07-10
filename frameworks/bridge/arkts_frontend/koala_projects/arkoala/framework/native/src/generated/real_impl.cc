@@ -21032,7 +21032,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_ImageAttachment CtorImpl(const Ark_ImageAttachmentInterface* value)
+    Ark_ImageAttachment CtorImpl(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value)
     {
         return new ImageAttachmentPeer(value);
     }

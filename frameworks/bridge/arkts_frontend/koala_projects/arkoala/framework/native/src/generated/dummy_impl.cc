@@ -43342,7 +43342,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_ImageAttachment CtorImpl(const Ark_ImageAttachmentInterface* value)
+    Ark_ImageAttachment CtorImpl(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value)
     {
         if (!needGroupedLog(1))
             return (Ark_ImageAttachment) 100;
