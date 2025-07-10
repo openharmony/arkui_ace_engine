@@ -4966,11 +4966,11 @@ void RosenRenderContext::OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyTyp
     RequestNextFrame();
 }
 
-void RosenRenderContext::UpdateBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+void RosenRenderContext::UpdateBlender(const OHOS::Rosen::Blender* blender)
 {
     CHECK_NULL_VOID(rsNode_);
-    CHECK_NULL_VOID(brightnessBlender);
-    rsNode_->SetBlender(brightnessBlender);
+    CHECK_NULL_VOID(blender);
+    rsNode_->SetBlender(blender);
     RequestNextFrame();
 }
 
