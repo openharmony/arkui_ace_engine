@@ -627,33 +627,6 @@ void ParseJsLengthMetricsToDimension(const JSRef<JSObject>& obj, Dimension& resu
     return;
 }
 
-bool CheckLengthMetrics(const JSRef<JSObject>& object)
-{
-    if (object->HasProperty(static_cast<int32_t>(ArkUIIndex::START)) ||
-        object->HasProperty(static_cast<int32_t>(ArkUIIndex::END)) ||
-        object->HasProperty(static_cast<int32_t>(ArkUIIndex::TOP_START)) ||
-        object->HasProperty(static_cast<int32_t>(ArkUIIndex::TOP_END)) ||
-        object->HasProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM_START)) ||
-        object->HasProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM_END))) {
-        return true;
-    }
-    auto jsTop = object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
-    if (jsTop->IsObject()) {
-        JSRef<JSObject> topObj = JSRef<JSObject>::Cast(jsTop);
-        if (topObj->HasProperty(static_cast<int32_t>(ArkUIIndex::VALUE))) {
-            return true;
-        }
-    }
-    auto jsBottom = object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM));
-    if (jsBottom->IsObject()) {
-        JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(jsBottom);
-        if (bottomObj->HasProperty(static_cast<int32_t>(ArkUIIndex::VALUE))) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool ParseLocalizedEdges(const JSRef<JSObject>& LocalizeEdgesObj, EdgesParam& edges)
 {
     bool useLocalizedEdges = false;
@@ -1553,7 +1526,7 @@ void ParseLocalizedEdgeWidthsProps(const JSRef<JSObject>& object, LocalizedCalcD
 
 bool ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension, bool notNegative)
 {
-    if (CheckLengthMetrics(object)) {
+    if (JSViewAbstract::CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseLocalizedEdgeWidths(object, localizedCalcDimension, notNegative);
         commonCalcDimension.top = localizedCalcDimension.top;
@@ -1570,7 +1543,7 @@ bool ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& c
 
 bool ParseCommonEdgeWidthsForDashParams(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
-    if (CheckLengthMetrics(object)) {
+    if (JSViewAbstract::CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseLocalizedEdgeWidths(object, localizedCalcDimension, false);
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -1586,7 +1559,7 @@ bool ParseCommonEdgeWidthsForDashParams(const JSRef<JSObject>& object, CommonCal
 
 void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
-    if (CheckLengthMetrics(object)) {
+    if (JSViewAbstract::CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseLocalizedEdgeWidthsProps(object, localizedCalcDimension);
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -13595,4 +13568,32 @@ void JSViewAbstract::SetBorderRadiusWithCheck(std::optional<NG::BorderRadiusProp
         result = borderRadius;
     }
 }
+
+bool JSViewAbstract::CheckLengthMetrics(const JSRef<JSObject>& object)
+{
+    if (object->HasProperty(static_cast<int32_t>(ArkUIIndex::START)) ||
+        object->HasProperty(static_cast<int32_t>(ArkUIIndex::END)) ||
+        object->HasProperty(static_cast<int32_t>(ArkUIIndex::TOP_START)) ||
+        object->HasProperty(static_cast<int32_t>(ArkUIIndex::TOP_END)) ||
+        object->HasProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM_START)) ||
+        object->HasProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM_END))) {
+        return true;
+    }
+    auto jsTop = object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
+    if (jsTop->IsObject()) {
+        JSRef<JSObject> topObj = JSRef<JSObject>::Cast(jsTop);
+        if (topObj->HasProperty(static_cast<int32_t>(ArkUIIndex::VALUE))) {
+            return true;
+        }
+    }
+    auto jsBottom = object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM));
+    if (jsBottom->IsObject()) {
+        JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(jsBottom);
+        if (bottomObj->HasProperty(static_cast<int32_t>(ArkUIIndex::VALUE))) {
+            return true;
+        }
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace::Framework
