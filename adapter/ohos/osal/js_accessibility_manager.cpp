@@ -3868,7 +3868,7 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     }
     AccessibilityEventInfo eventInfoNew = eventInfo;
     if (isDynamicRender) {
-        auto focusedContainer = Container::GetFoucsed();
+        auto focusedContainer = Container::GetFocused();
         if (focusedContainer) {
             eventInfoNew.SetWindowId(focusedContainer->GetWindowId());
         }
