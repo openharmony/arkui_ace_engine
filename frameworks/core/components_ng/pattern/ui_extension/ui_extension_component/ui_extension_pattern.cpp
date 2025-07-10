@@ -1014,8 +1014,7 @@ void UIExtensionPattern::InitKeyEventOnKeyEvent(const RefPtr<FocusHub>& focusHub
         auto pattern = wp.Upgrade();
         if (pattern) {
             if (event.IsPreIme()) {
-                TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-                    "KeyEvent Internal preIme %{public}s.", event.ToString().c_str());
+                TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "KeyEvent Internal preIme.");
                 return pattern->HandleKeyEvent(event);
             }
             auto host = pattern->GetHost();
@@ -1027,8 +1026,8 @@ void UIExtensionPattern::InitKeyEventOnKeyEvent(const RefPtr<FocusHub>& focusHub
             bool forceProcessKeyEvent = pattern->GetForceProcessOnKeyEventInternal();
             bool sendKey = !isBypassInner || forceProcessKeyEvent;
             TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-                "KeyEvent Internal will %{public}s send %{public}s, bypass[%{public}d], isForce[%{public}d].",
-                sendKey ? "" : "not", event.ToString().c_str(), isBypassInner, forceProcessKeyEvent);
+                "KeyEvent Internal will %{public}s send, bypass[%{public}d], isForce[%{public}d].",
+                sendKey ? "" : "not", isBypassInner, forceProcessKeyEvent);
             if (sendKey) {
                 pattern->SetForceProcessOnKeyEventInternal(false);
                 return pattern->HandleKeyEvent(event);
