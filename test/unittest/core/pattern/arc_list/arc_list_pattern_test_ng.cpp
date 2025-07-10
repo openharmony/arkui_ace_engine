@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
@@ -365,5 +366,27 @@ HWTEST_F(ArcListPatternTestNg, HandleScrollBarOutBoundary002, TestSize.Level1)
      */
     pattern_->HandleScrollBarOutBoundary();
     EXPECT_EQ(pattern_->scrollBarOutBoundaryExtent_, -1);
+}
+
+/**
+ * @tc.name: CreateAnalyzerOverlay
+ * @tc.desc: Test ArcListPattern CreateAnalyzerOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListPatternTestNg, CreateAnalyzerOverlay, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model = CreateList();
+    CalcDimension fadingEdgeLength = Dimension(32.0, DimensionUnit::VP);
+    NG::ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    paintProperty_->UpdateDefaultFadingEdge(true);
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto overlayNode = host->GetOverlayNode();
+    EXPECT_NE(overlayNode, nullptr);
 }
 } // namespace OHOS::Ace::NG
