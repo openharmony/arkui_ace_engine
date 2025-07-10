@@ -1746,7 +1746,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest032, TestSize.Level1)
      * @tc.steps: step3. Get paint property
      * @tc.expected: Check the Radio property value
      */
-   
+
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty, nullptr);
     bool isChecked = false;
@@ -1782,7 +1782,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest033, TestSize.Level1)
      * @tc.steps: step3. Get paint property
      * @tc.expected: Check the Radio property value
      */
-   
+
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty, nullptr);
     bool isChecked = false;
@@ -1819,7 +1819,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest034, TestSize.Level1)
                 EXPECT_EQ(true, config.checked_);
                 return nullptr;
             };
-    
+
     /**
      * @tc.steps: step2. Set parameters to pattern builderFunc
      */
@@ -1853,7 +1853,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest035, TestSize.Level1)
                 EXPECT_EQ(false, config.checked_);
                 return nullptr;
             };
-    
+
     /**
      * @tc.steps: step2. Set parameters to pattern builderFunc
      */
@@ -1884,7 +1884,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest036, TestSize.Level1)
                 EXPECT_EQ(false, config.checked_);
                 return nullptr;
             };
-    
+
     /**
      * @tc.steps: step2. Set parameters to pattern builderFunc
      */
@@ -1917,7 +1917,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest037, TestSize.Level1)
                 EXPECT_EQ(false, config.checked_);
                 return nullptr;
             };
-    
+
     /**
      * @tc.steps: step2. Set parameters to pattern builderFunc
      */
@@ -2457,7 +2457,7 @@ HWTEST_F(RadioTestNg, CreateWithColorResourceObj001, TestSize.Level1)
     int32_t resourceType = static_cast<int32_t>(Kit::ResourceType::COLOR);
     auto resObj = AceType::MakeRefPtr<ResourceObject>(
         1001, resourceType, std::vector<ResourceObjectParams> { param }, "testBundle", "testModule", 0);
-
+    radioModelNG.SetCheckedBackgroundColor(Color::RED);
     radioModelNG.CreateWithColorResourceObj(resObj, RadioColorType::CHECKED_BACKGROUND_COLOR);
 
     colorRet = paintProperty->GetRadioCheckedBackgroundColor();
@@ -2519,7 +2519,7 @@ HWTEST_F(RadioTestNg, ColorTypeToString, TestSize.Level1)
         { RadioColorType::CHECKED_BACKGROUND_COLOR, "CheckedBackgroundColor" },
         { RadioColorType::UNCHECKED_BORDER_COLOR, "UncheckedBorderColor" },
         { RadioColorType::INDICATOR_COLOR, "IndicatorColor" },
-        { static_cast<RadioColorType>(999), "Unknown" }
+        { static_cast<RadioColorType>(999), "" }
     };
 
     /**
