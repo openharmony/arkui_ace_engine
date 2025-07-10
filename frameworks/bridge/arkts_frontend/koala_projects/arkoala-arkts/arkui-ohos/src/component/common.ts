@@ -36,7 +36,7 @@ import { TextRange } from "./textCommon"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ResizableOptions } from "./image"
-import { VisualEffect, Filter, BrightnessBlender } from "./arkui-uieffect"
+import { Filter, VisualEffect, BrightnessBlender } from "#external"
 import { FocusBoxStyle, FocusPriority } from "./focus"
 import { TransformationMatrix } from "./arkui-common"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup, GestureGroupHandler } from "./gesture"
@@ -61,7 +61,7 @@ import { rememberMutableState } from '@koalaui/runtime'
 import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl, hookOnDrop, hookDragEventStartDataLoading } from "../handwritten/ArkDragDrop"
 import { ArkUIAniModule } from "arkui.ani"
 import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType, DataSyncOptions } from "#external"
-import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl, hookCommonMethodPriorityGestureImpl } from "../handwritten/CommonHandWritten"
+import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl, hookCommonMethodPriorityGestureImpl, hookCommonMethodVisualEffectImpl, hookCommonMethodBackgroundFilterImpl, hookCommonMethodForegroundFilterImpl, hookCommonMethodCompositingFilterImpl, hookCommonMethodAdvancedBlendModeImpl } from "../handwritten/CommonHandWritten"
 export interface ICurve {
     interpolate(fraction: number): number
 }
@@ -7648,8 +7648,54 @@ export enum DismissReason {
     SLIDE_DOWN = 3
 }
 export interface DismissPopupAction {
-    dismiss: (() => void);
+    dismiss(): void;
     reason: DismissReason;
+}
+
+export class DismissPopupActionInternal implements MaterializedBase, DismissPopupAction {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    get reason(): DismissReason {
+        return this.getReason()
+    }
+    set reason(reason: DismissReason) {
+        this.setReason(reason)
+    }
+    constructor(peerPtr?: KPointer) {
+        if (!peerPtr) {
+            peerPtr = ArkUIGeneratedNativeModule._DismissPopupAction_construct()
+        }
+        this.peer = new Finalizable(peerPtr!, DismissPopupActionInternal.getFinalizer())
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._DismissPopupAction_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): DismissPopupActionInternal {
+        return new DismissPopupActionInternal(ptr)
+    }
+    public dismiss(): void {
+        this.dismiss_serialize()
+        return
+    }
+    private getReason(): DismissReason {
+        return this.getReason_serialize()
+    }
+    private setReason(reason: DismissReason): void {
+        const reason_casted = reason as DismissReason
+        this.setReason_serialize(reason_casted)
+    }
+    private dismiss_serialize(): void {
+        ArkUIGeneratedNativeModule._DismissPopupAction_dismiss(this.peer!.ptr)
+    }
+    private getReason_serialize(): DismissReason {
+        const retval = ArkUIGeneratedNativeModule._DismissPopupAction_getReason(this.peer!.ptr)
+        return DismissReason.fromValue(retval)
+    }
+    private setReason_serialize(reason: DismissReason): void {
+        ArkUIGeneratedNativeModule._DismissPopupAction_setReason(this.peer!.ptr, reason.valueOf())
+    }
 }
 export interface PopupStateChangeParam {
     isVisible: boolean;
@@ -9488,33 +9534,26 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public visualEffect(value: VisualEffect | undefined): this {
         if (this.checkPriority("visualEffect")) {
-            const value_casted = value as (VisualEffect | undefined)
-            this.getPeer()?.visualEffectAttribute(value_casted)
+            hookCommonMethodVisualEffectImpl(this, value)
             return this
         }
         return this
     }
     public backgroundFilter(value: Filter | undefined): this {
         if (this.checkPriority("backgroundFilter")) {
-            const value_casted = value as (Filter | undefined)
-            this.getPeer()?.backgroundFilterAttribute(value_casted)
-            return this
+            hookCommonMethodBackgroundFilterImpl(this, value)
         }
         return this
     }
     public foregroundFilter(value: Filter | undefined): this {
         if (this.checkPriority("foregroundFilter")) {
-            const value_casted = value as (Filter | undefined)
-            this.getPeer()?.foregroundFilterAttribute(value_casted)
-            return this
+            hookCommonMethodForegroundFilterImpl(this, value)
         }
         return this
     }
     public compositingFilter(value: Filter | undefined): this {
         if (this.checkPriority("compositingFilter")) {
-            const value_casted = value as (Filter | undefined)
-            this.getPeer()?.compositingFilterAttribute(value_casted)
-            return this
+            hookCommonMethodCompositingFilterImpl(this, value)
         }
         return this
     }
@@ -11276,10 +11315,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public advancedBlendMode(effect: BlendMode | BrightnessBlender | undefined, type?: BlendApplyType): this {
         if (this.checkPriority("advancedBlendMode")) {
-            const effect_casted = effect as (BlendMode | BrightnessBlender | undefined)
-            const type_casted = type as (BlendApplyType)
-            this.getPeer()?.advancedBlendModeAttribute(effect_casted, type_casted)
-            return this
+            hookCommonMethodAdvancedBlendModeImpl(this, effect, type)
         }
         return this
     }

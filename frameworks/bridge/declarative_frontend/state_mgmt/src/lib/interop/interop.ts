@@ -24,12 +24,15 @@ function isStaticProxy<T extends Object>(obj: T): boolean {
 }
 
 class SubscribeInterop implements ISinglePropertyChangeSubscriber<Object>{
+    private id_: number;
     constructor(callback: () => void) {
         this.notifyInterop = callback;
+        this.id_ = SubscriberManager.MakeStateVariableId();
+        SubscriberManager.Add(this);
     }
     
     public id__(): number {
-        return 0;
+        return this.id_;
     }
 
     public aboutToBeDeleted(owningView?: IPropertySubscriber): void {
@@ -41,19 +44,24 @@ class SubscribeInterop implements ISinglePropertyChangeSubscriber<Object>{
     }
 
     public notifyInterop: () => void
+
+    // @Observed no @Track   set to ObservedObject
+    onTrackedObjectPropertyCompatModeHasChangedPU<T>(sourceObject: ObservedObject<T>, changedPropertyName: string)  {
+        this.notifyInterop();
+    }
     
-    public syncPeerHasChanged<T>(eventSource : ObservedPropertyAbstractPU<T>) : void {
+    // @Observed has @Track
+    onTrackedObjectPropertyHasChangedPU<T>(sourceObject: ObservedObject<T>, changedPropertyName: string) {
         this.notifyInterop();
     }
 }
 
 type setValue<T> = (value: T) => void;
+type WatchFuncType = (propertyName: string) => void;
 
-function createStateVariable<T>(value: T, callback: setValue<T>, notifyCallback: () => void): ObservedPropertyPU<T> {
+function createStateVariable<T>(value: T, callback: setValue<T>): ObservedPropertyPU<T> {
     const proxy = new ObservedPropertyPU(value, undefined, 'proxy');
     proxy._setInteropValueForStaticState = callback;
-    const subscirbe_Interop = new SubscribeInterop(notifyCallback);
-    proxy.addSubscriber(subscirbe_Interop);
     return proxy;
 }
 
@@ -81,6 +89,19 @@ function viewPUCreate(component: ViewPU): void {
     ViewPU.create(component);
 }
 
-function createObservedObject(value: Object): Object {
-    return ObservedObject.createNew(value, null);
+function staticStateBindObservedObject(value: Object, staticCallback: () => void): Object {
+    if (!ObservedObject.IsObservedObject(value)) {
+        value = ObservedObject.createNew(value, null);
+    }
+    const subscirbeInterop = new SubscribeInterop(staticCallback);
+    ObservedObject.addOwningProperty(value, subscirbeInterop);
+    return value;
+}
+
+function registerCallbackForCreateWatchID(callback: () => any) {
+    InteropExtractorModule.createWatchFunc = callback;
+}
+
+function registerCallbackForMakeObserved(callback: (value: Object) => Object) {
+    InteropExtractorModule.makeObserved = callback;
 }

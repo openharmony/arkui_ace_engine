@@ -221,8 +221,7 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
     }
     public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
         if (this.checkPriority("colorFilter")) {
-            const value_casted = value as (ColorFilter | drawing.ColorFilter | undefined)
-            this.getPeer()?.colorFilterAttribute(value_casted)
+            hookSetColorFilter(this, value);
             return this
         }
         return this

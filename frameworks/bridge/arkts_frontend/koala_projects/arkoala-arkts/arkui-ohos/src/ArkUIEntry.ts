@@ -317,7 +317,6 @@ export class Application {
         // Ensure all current state updates took effect.
         manager.syncChanges()
         manager.updateSnapshot()
-        // this.computeRoot()
         let detachedRoots = getDetachedRootsByInstanceId(this.instanceId);
         for (const detachedRoot of detachedRoots.values()) {
             detachedRoot.entry.value

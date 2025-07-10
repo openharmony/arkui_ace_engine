@@ -63,6 +63,7 @@ template("js_pa_engine_ark") {
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",
+      "ets_runtime:libark_jsruntime",
       "eventhandler:libeventhandler",
       "ffrt:libffrt",
       "form_fwk:form_manager",
@@ -77,12 +78,6 @@ template("js_pa_engine_ark") {
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
     ]
-
-    if (defined(ark_hybrid) && ark_hybrid) {
-      external_deps += [ "runtime_core:libarkruntime" ]
-    } else {
-      external_deps += [ "ets_runtime:libark_jsruntime" ]
-    }
 
     if (is_standard_system) {
       defines += [ "ENABLE_HITRACE" ]

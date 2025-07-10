@@ -24,6 +24,7 @@ ani_object GetSharedLocalStorage([[maybe_unused]] ani_env* env);
 void SyncInstanceId(ani_env* env, ani_object obj, ani_int id);
 void RestoreInstanceId(ani_env* env);
 ani_int GetCurrentInstanceId(ani_env* env);
+ani_int GetFocusedInstanceId(ani_env* env);
 void SetDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn_object fnObj);
 void SetDrawModifier(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_int flag, ani_object drawModifier);

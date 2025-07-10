@@ -92,6 +92,7 @@ struct ArkUIAniCommonModifier {
     void (*restoreInstanceId)();
     void (*setDrawCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObj);
     ArkUI_Int32 (*getCurrentInstanceId)();
+    ArkUI_Int32 (*getFocusedInstanceId)();
     ani_long (*builderProxyNodeConstruct)(ArkUI_Int32 id);
     ani_ref (*getSharedLocalStorage)();
     void (*setBackgroundImagePixelMap)(ani_env* env, ArkUINodeHandle node, ani_ref pixelMapPtr, ArkUI_Int32 repeat);
@@ -112,6 +113,9 @@ struct ArkUIAniDrawModifier {
 struct ArkUIAniContentSlotModifier {
     ArkUIContentSlot (*construct)(ArkUI_Int32 id);
     void (*setContentSlotOptions)(ArkUIContentSlot node, ArkUINodeContent value);
+};
+struct ArkUIAniLazyForEachNodeModifier {
+    ani_long (*constructLazyForEachNode)(ani_int);
 };
 struct ArkUIAniWaterFlowModifier {
     void (*setWaterFlowOptions)(ani_env* env, ani_long ptr, ani_object fnObj);
@@ -169,12 +173,26 @@ struct ArkUIAniDragControllerModifier {
 struct ArkUIAniImageSpanModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
     void (*setAltPixelMap)(ArkUINodeHandle node, void* pixelmap);
+    void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
 };
 struct ArkUIAniVideoModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
 };
 struct ArkUIAniShapeModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
+};
+struct ArkUIAniStateMgmtModifier {
+    std::string (*persistentStorageGet)(std::string key);
+    void (*persistentStorageSet)(std::string key, std::string value);
+    bool (*persistentStorageHas)(std::string key);
+    void (*persistentStorageDelete)(std::string key);
+    void (*persistentStorageClear)();
+    int32_t (*getColorMode)();
+    float (*getFontWeightScale)();
+    float (*getFontScale)();
+    bool (*getAccessibilityEnabled)();
+    std::string (*getLayoutDirection)();
+    std::string (*getLanguageCode)();
 };
 struct ArkUIAniXComponentModifier {
     void (*setXComponentControllerCallback)(ArkUINodeHandle node,
@@ -189,6 +207,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniDragModifier* (*getDragAniModifier) ();
     const ArkUIAniCommonModifier* (*getCommonAniModifier)();
     const ArkUIAniCustomNodeModifier* (*getCustomNodeAniModifier)();
+    const ArkUIAniLazyForEachNodeModifier* (*getLazyForEachNodeAniModifier)();
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
@@ -200,6 +219,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
     const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
     const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();
+    const ArkUIAniStateMgmtModifier* (*getStateMgmtAniModifier)();
     const ArkUIAniXComponentModifier* (*getArkUIAniXComponentModifier)();
 };
 

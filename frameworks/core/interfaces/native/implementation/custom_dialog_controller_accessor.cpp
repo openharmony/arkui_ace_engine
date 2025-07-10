@@ -57,6 +57,18 @@ Ark_CustomDialogController CtorImpl(const Ark_CustomDialogControllerOptions* val
     peer->SetKeyboardAvoidMode(value->keyboardAvoidMode);
     peer->SetEnableHoverMode(value->enableHoverMode);
     peer->SetHoverModeArea(value->hoverModeArea);
+    peer->SetBackgroundBlurStyleOptions(value->backgroundBlurStyleOptions);
+    peer->SetBackgroundEffect(value->backgroundEffect);
+    peer->SetOnDidAppear(value->onDidAppear, peer);
+    peer->SetOnDidDisappear(value->onDidDisappear, peer);
+    peer->SetOnWillAppear(value->onWillAppear, peer);
+    peer->SetOnWillDisappear(value->onWillDisappear, peer);
+    peer->SetKeyboardAvoidDistance(value->keyboardAvoidDistance);
+    peer->SetLevelMode(value->levelMode);
+    peer->SetLevelUniqueId(value->levelUniqueId);
+    peer->SetImersiveMode(value->immersiveMode);
+    peer->SetLevelOrder(value->levelOrder);
+    peer->SetFocusable(value->focusable);
 
     return AceType::RawPtr(peer);
 }

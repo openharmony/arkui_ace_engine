@@ -64,7 +64,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
     constructor(owningView: ExtendableComponent | null, varName: string, initValue: T, watchFunc?: WatchFuncType) {
         super('@Prop', owningView, varName, watchFunc);
         if (isDynamicObject(initValue)) {
-            initValue = getObservedObject(initValue);
+            initValue = getObservedObject(initValue, this);
         }
         const deepCopyValue = deepCopy<T>(initValue);
         this.__localValue = new DecoratorBackingValue<T>(varName, deepCopyValue);
@@ -89,6 +89,9 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
         const value = this.__localValue.get(false);
         if (value !== newValue) {
             // for interop
+            if (isDynamicObject(newValue)) {
+                newValue = getObservedObject(newValue, this);
+            }
             if (typeof this.setProxyValue === 'function') {
                 this.setProxyValue!(newValue);
             }

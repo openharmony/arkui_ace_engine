@@ -21,6 +21,7 @@
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
 #include "custom_node/custom_node_module.h"
+#include "lazy_for_each_module.h"
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "dragController/drag_controller_module.h"
 #include "image_span/image_span_module.h"
@@ -33,6 +34,7 @@
 #include "interop/interop_module.h"
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
+#include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
 #include "xcomponent/xcomponent_module_methods.h"
 
@@ -111,9 +113,19 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetCurrentInstanceId)
         },
         ani_native_function {
+            "_Common_GetFocused_InstanceId",
+            ":I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetFocusedInstanceId)
+        },
+        ani_native_function {
             "_CustomNode_Construct",
             "ILarkui/ArkCustomComponent/ArkCustomComponent;:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructCustomNode)
+        },
+        ani_native_function {
+            "_LazyForEachNode_Construct",
+            "I:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructLazyForEachNode)
         },
         ani_native_function {
             "_BuilderProxyNode_Construct",
@@ -321,6 +333,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetImageSpanAltPixelMap)
         },
         ani_native_function {
+            "_ImageSpan_Set_DrawingColorFilter",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetImageSpanDrawingColorFilter)
+        },
+        ani_native_function {
             "_SetCustomCallback",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallback)
@@ -339,6 +356,61 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Shape_Transfer_PixelMap",
             "JL@ohos/multimedia/image/image/PixelMap;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetShapePixelMap)
+        },
+        ani_native_function {
+            "_PersistentStorage_Get",
+            "Lstd/core/String;:Lstd/core/String;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Get)
+        },
+        ani_native_function {
+            "_PersistentStorage_Set",
+            "Lstd/core/String;Lstd/core/String;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Set)
+        },
+        ani_native_function {
+            "_PersistentStorage_Has",
+            "Lstd/core/String;:Z",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Has)
+        },
+        ani_native_function {
+            "_PersistentStorage_Clear",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Clear)
+        },
+        ani_native_function {
+            "_PersistentStorage_Delete",
+            "Lstd/core/String;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Delete)
+        },
+        ani_native_function {
+            "_Env_GetColorMode",
+            ":I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetColorMode)
+        },
+        ani_native_function {
+            "_Env_GetFontScale",
+            ":F",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetFontScale)
+        },
+        ani_native_function {
+            "_Env_GetFontWeightScale",
+            ":F",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetFontWeightScale)
+        },
+        ani_native_function {
+            "_Env_GetAccessibilityEnabled",
+            ":Z",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetAccessibilityEnabled)
+        },
+        ani_native_function {
+            "_Env_GetLayoutDirection",
+            ":Lstd/core/String;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetLayoutDirection)
+        },
+        ani_native_function {
+            "_Env_GetLanguageCode",
+            ":Lstd/core/String;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetLanguageCode)
         },
         ani_native_function {
             "_XComponent_SetSurfaceCallback",

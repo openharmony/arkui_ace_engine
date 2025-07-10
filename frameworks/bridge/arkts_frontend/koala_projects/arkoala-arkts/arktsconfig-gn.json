@@ -40,6 +40,9 @@
             "@koalaui/runtime/annotations": [
                 "../../incremental/runtime/annotations"
             ],
+            "@component_handwritten/*": [
+                "./arkui/component/*"
+            ],
             "@ohos/animator": [
                 "@ohos.animator.ets"
             ],

@@ -313,6 +313,7 @@ class RouterImpl implements Router {
 
     getState(): router.RouterState {
         let curPage = this.visiblePages.at(this.showingPageIndex)
+        // routerState index is started from 1. 
         let state: router.RouterState = {
             index: this.showingPageIndex + 1,
             name: curPage.url,
@@ -340,6 +341,7 @@ class RouterImpl implements Router {
         let retVal: Array<router.RouterState> = new Array<router.RouterState>()
         this.visiblePages.value.forEach((element, index) => {
             if (element.url === url) {
+                // routerState index is started from 1. 
                 let state: router.RouterState = {
                     index: index + 1,
                     name: element.url,

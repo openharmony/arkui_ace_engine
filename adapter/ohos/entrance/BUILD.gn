@@ -125,6 +125,7 @@ template("ace_ohos_standard_source_set") {
       "bundle_framework:appexecfwk_core",
       "common_event_service:cesfwk_innerkits",
       "data_share:datashare_consumer",
+      "ets_runtime:libark_jsruntime",
       "eventhandler:libeventhandler",
       "graphic_2d:2d_graphics",
       "graphic_2d:librender_service_client",
@@ -148,11 +149,6 @@ template("ace_ohos_standard_source_set") {
       "window_manager:screen_session_manager_client",
       "zlib:shared_libz",
     ]
-    if (defined(ark_hybrid) && ark_hybrid) {
-      external_deps += [ "runtime_core:libarkruntime" ]
-    } else {
-      external_deps += [ "ets_runtime:libark_jsruntime" ]
-    }
     defines += [ "INDEXER_SUPPORT_VIBRATOR" ]
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       external_deps += [ "graphic_2d:librender_service_base" ]

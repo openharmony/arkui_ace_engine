@@ -136,6 +136,26 @@ public:
         ViewAbstract::BindTips(param, AceType::Claim(targetNode), spanString);
     }
 
+    static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode)
+    {
+        return ViewAbstract::OpenPopup(param, customNode);
+    }
+
+    static int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode)
+    {
+        return ViewAbstract::GetPopupParam(param, customNode);
+    }
+
+    static int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode)
+    {
+        return ViewAbstract::UpdatePopup(param, customNode);
+    }
+
+    static int32_t ClosePopup(const RefPtr<UINode>& customNode)
+    {
+        return ViewAbstract::ClosePopup(customNode);
+    }
+
     static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
     static void DisableOnAccessibilityHover(FrameNode* frameNode);
     static void SetOnAccessibilityHover(FrameNode* frameNode, OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
@@ -186,6 +206,12 @@ public:
         ViewAbstract::SetFrontBlur(frameNode, radiusPX, blurOption.value_or(BlurOption()),
             sysOptions.value_or(DEFAULT_SYS_OPTIONS));
     }
+
+    static void SetVisualEffect(FrameNode* frameNode, const OHOS::Rosen::VisualEffect* visualEffect);
+    static void SetBackgroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* backgroundFilter);
+    static void SetForegroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* foregroundFilter);
+    static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter);
+    static void SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender);
 
     static void BindBackground(FrameNode* frameNode,
         std::function<RefPtr<UINode>()>&& buildFunc, const std::optional<Alignment>& align);

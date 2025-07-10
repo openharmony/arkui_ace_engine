@@ -14,6 +14,7 @@
  */
 
 #include "dialog_params.h"
+#include "prompt_action_utils.h"
 
 #include "frameworks/base/error/error_code.h"
 #include "frameworks/base/i18n/localization.h"
@@ -23,43 +24,7 @@
 #include "frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/transition_effect_peer_impl.h"
 
-namespace OHOS::Ace::NG {
-static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MSG {
-    { ERROR_CODE_PERMISSION_DENIED, "Permission denied. " },
-    { ERROR_CODE_PARAM_INVALID, "Parameter error. " },
-    { ERROR_CODE_SYSTEMCAP_ERROR, "Capability not supported. " },
-    { ERROR_CODE_INTERNAL_ERROR, "Internal error. " },
-    { ERROR_CODE_URI_ERROR, "Uri error. " },
-    { ERROR_CODE_PAGE_STACK_FULL, "Page stack error. " },
-    { ERROR_CODE_URI_ERROR_LITE, "Uri error. " },
-    { ERROR_CODE_DIALOG_CONTENT_ERROR, "Dialog content error. " },
-    { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "Dialog content already exist. " },
-    { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "Dialog content not found. " },
-    { ERROR_CODE_TOAST_NOT_FOUND, "Toast not found. " }
-};
-
-std::string ErrorToMessage(int32_t code)
-{
-    auto iter = ERROR_CODE_TO_MSG.find(code);
-    return (iter != ERROR_CODE_TO_MSG.end()) ? iter->second : "";
-}
-
-std::string GetErrorMsg(int32_t errorCode)
-{
-    std::string strMsg;
-    if (errorCode == ERROR_CODE_DIALOG_CONTENT_ERROR) {
-        strMsg = ErrorToMessage(ERROR_CODE_DIALOG_CONTENT_ERROR) + "The ComponentContent is incorrect.";
-    } else if (errorCode == ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST) {
-        strMsg = ErrorToMessage(ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST) +
-            "The ComponentContent has already been opened.";
-    } else if (errorCode == ERROR_CODE_DIALOG_CONTENT_NOT_FOUND) {
-        strMsg = ErrorToMessage(ERROR_CODE_DIALOG_CONTENT_NOT_FOUND) + "The ComponentContent cannot be found.";
-    } else {
-        strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Build custom dialog failed.";
-    }
-    return strMsg;
-}
-} // OHOS::Ace::NG
+constexpr int32_t CALLBACK_PARAM_LENGTH = 2;
 
 bool GetButtonInfo(ani_env* env, ani_ref resultRef, OHOS::Ace::ButtonInfo& result)
 {
@@ -89,13 +54,13 @@ bool GetButtonArray(ani_env *env, ani_object object, const char *name, std::vect
         return false;
     }
 
-    if (IsUndefinedObject(env, resultRef)) {
+    if (IsUndefinedObject(env, resultRef) || !IsArrayObject(env, resultRef)) {
         return false;
     }
 
-    ani_double length;
-    ani_object resultObj = static_cast<ani_object>(resultRef);
-    status = env->Object_GetPropertyByName_Double(resultObj, "length", &length);
+    ani_size length;
+    ani_array resultObj = static_cast<ani_array>(resultRef);
+    status = env->Array_GetLength(resultObj, &length);
     if (status != ANI_OK) {
         return false;
     }
@@ -103,14 +68,13 @@ bool GetButtonArray(ani_env *env, ani_object object, const char *name, std::vect
     std::vector<OHOS::Ace::ButtonInfo> buttonArray;
     for (int i = 0; i < int(length); i++) {
         ani_ref itemRef;
-        status = env->Object_CallMethodByName_Ref(resultObj, "$_get", "I:Lstd/core/Object;", &itemRef, (ani_int)i);
+        status = env->Array_Get(resultObj, (ani_size)i, &itemRef);
         if (status != ANI_OK) {
             continue;
         }
 
         OHOS::Ace::ButtonInfo button;
-        ani_object itemObj = static_cast<ani_object>(itemRef);
-        if (GetButtonInfo(env, itemObj, button)) {
+        if (GetButtonInfo(env, itemRef, button)) {
             buttonArray.emplace_back(button);
         }
     }
@@ -376,8 +340,8 @@ ani_ref CreateShowDialogSuccessResponse(ani_env* env, int32_t index)
         return nullptr;
     }
 
-    ani_int indexInt = static_cast<ani_int>(index);
-    status = env->Object_SetPropertyByName_Int(responseObj, "index", indexInt);
+    ani_double aniIndex = static_cast<ani_double>(index);
+    status = env->Object_SetPropertyByName_Double(responseObj, "index", aniIndex);
     if (status != ANI_OK) {
         return nullptr;
     }
@@ -386,7 +350,7 @@ ani_ref CreateShowDialogSuccessResponse(ani_env* env, int32_t index)
 
 std::function<void(int32_t, int32_t)> GetShowDialogCallback(std::shared_ptr<PromptActionAsyncContext>& asyncContext)
 {
-    auto callback = [asyncContext](int32_t callbackType, int32_t successIndex) mutable {
+    auto callback = [asyncContext](int32_t errorCode, int32_t successIndex) mutable {
         if (!asyncContext) {
             return;
         }
@@ -401,7 +365,7 @@ std::function<void(int32_t, int32_t)> GetShowDialogCallback(std::shared_ptr<Prom
             return;
         }
 
-        auto task = [asyncContext, successIndex]() {
+        auto task = [asyncContext, errorCode, successIndex]() {
             if (asyncContext == nullptr) {
                 return;
             }
@@ -412,10 +376,15 @@ std::function<void(int32_t, int32_t)> GetShowDialogCallback(std::shared_ptr<Prom
                 return;
             }
 
-            ani_ref reponseRef = CreateShowDialogSuccessResponse(asyncContext->env, successIndex);
-            if (reponseRef) {
-                status = asyncContext->env->FunctionalObject_Call(asyncContext->callback, 1, &reponseRef, nullptr);
+            std::vector<ani_ref> args(CALLBACK_PARAM_LENGTH);
+            if (errorCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
+                args[0] = CreateBusinessError(asyncContext->env, 0, "");
+            } else {
+                args[0] = CreateBusinessError(asyncContext->env, errorCode, "cancel");
             }
+            args[1] = CreateShowDialogSuccessResponse(asyncContext->env, successIndex);
+            status = asyncContext->env->FunctionalObject_Call(
+                asyncContext->callback, args.size(), args.data(), nullptr);
             status = asyncContext->env->DestroyLocalScope();
         };
         taskExecutor->PostTask(
@@ -494,9 +463,9 @@ bool GetActionMenuButtons(ani_env *env, ani_object object, std::vector<OHOS::Ace
         return false;
     }
 
-    ani_double length;
-    ani_object resultObj = static_cast<ani_object>(resultRef);
-    status = env->Object_GetPropertyByName_Double(resultObj, "length", &length);
+    ani_size length;
+    ani_tuple_value resultObj = static_cast<ani_tuple_value>(resultRef);
+    status = env->TupleValue_GetNumberOfItems(resultObj, &length);
     if (status != ANI_OK) {
         return false;
     }
@@ -504,14 +473,13 @@ bool GetActionMenuButtons(ani_env *env, ani_object object, std::vector<OHOS::Ace
     std::vector<OHOS::Ace::ButtonInfo> buttonArray;
     for (int i = 0; i < int(length); i++) {
         ani_ref itemRef;
-        status = env->Object_CallMethodByName_Ref(resultObj, "$_get", "I:Lstd/core/Object;", &itemRef, (ani_int)i);
+        status = env->Object_GetFieldByName_Ref(resultObj, ("$" + std::to_string(i)).c_str(), &itemRef);
         if (status != ANI_OK) {
             continue;
         }
 
         OHOS::Ace::ButtonInfo button;
-        ani_object itemObj = static_cast<ani_object>(itemRef);
-        if (GetButtonInfo(env, itemObj, button)) {
+        if (GetButtonInfo(env, itemRef, button)) {
             buttonArray.emplace_back(button);
         }
     }
@@ -572,8 +540,8 @@ ani_ref CreateActionMenuSuccessResponse(ani_env* env, int32_t index)
         return nullptr;
     }
 
-    ani_int indexInt = static_cast<ani_int>(index);
-    status = env->Object_SetPropertyByName_Int(responseObj, "index", indexInt);
+    ani_double aniIndex = static_cast<ani_double>(index);
+    status = env->Object_SetPropertyByName_Double(responseObj, "index", aniIndex);
     if (status != ANI_OK) {
         return nullptr;
     }
@@ -583,7 +551,7 @@ ani_ref CreateActionMenuSuccessResponse(ani_env* env, int32_t index)
 std::function<void(int32_t, int32_t)> GetShowActionMenuCallback(
     std::shared_ptr<PromptActionAsyncContext>& asyncContext)
 {
-    auto callback = [asyncContext](int32_t callbackType, int32_t successIndex) mutable {
+    auto callback = [asyncContext](int32_t errorCode, int32_t successIndex) mutable {
         if (!asyncContext) {
             return;
         }
@@ -598,7 +566,7 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuCallback(
             return;
         }
 
-        auto task = [asyncContext, successIndex]() {
+        auto task = [asyncContext, errorCode, successIndex]() {
             if (asyncContext == nullptr) {
                 return;
             }
@@ -609,10 +577,15 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuCallback(
                 return;
             }
 
-            ani_ref reponseRef = CreateActionMenuSuccessResponse(asyncContext->env, successIndex);
-            if (reponseRef) {
-                status = asyncContext->env->FunctionalObject_Call(asyncContext->callback, 1, &reponseRef, nullptr);
+            std::vector<ani_ref> args(CALLBACK_PARAM_LENGTH);
+            if (errorCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
+                args[0] = CreateBusinessError(asyncContext->env, 0, "");
+            } else {
+                args[0] = CreateBusinessError(asyncContext->env, errorCode, "cancel");
             }
+            args[1] = CreateActionMenuSuccessResponse(asyncContext->env, successIndex);
+            status = asyncContext->env->FunctionalObject_Call(
+                asyncContext->callback, args.size(), args.data(), nullptr);
             status = asyncContext->env->DestroyLocalScope();
         };
         taskExecutor->PostTask(
@@ -763,15 +736,14 @@ bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
 bool GetTransitionEffectParam(ani_env* env, ani_object object, const char *name,
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ChainedTransitionEffect>& result)
 {
-    long transitionEffectPtr;
-    if (!GetLongParam(env, object, name, transitionEffectPtr)) {
+    int64_t transitionEffectPtr;
+    if (!GetInt64Param(env, object, name, transitionEffectPtr)) {
         return false;
     }
 
     Ark_TransitionEffect transitionEffect = (Ark_TransitionEffect)transitionEffectPtr;
-    if (!transitionEffect->handler) {
-        return false;
-    }
+    CHECK_NULL_RETURN(transitionEffect, false);
+    CHECK_NULL_RETURN(transitionEffect->handler, false);
     result = transitionEffect->handler;
     return true;
 }
@@ -1069,7 +1041,7 @@ std::function<void(int32_t)> GetOpenCustomDialogPromise(std::shared_ptr<PromptAc
                 }
             } else {
                 int32_t errorCode = OHOS::Ace::ERROR_CODE_INTERNAL_ERROR;
-                std::string errorMsg = OHOS::Ace::NG::GetErrorMsg(errorCode);
+                std::string errorMsg = OHOS::Ace::Ani::GetErrorMsg(errorCode);
                 ani_ref errorRef = CreateBusinessError(asyncContext->env, errorCode, errorMsg);
                 ani_error error = static_cast<ani_error>(errorRef);
                 ani_status status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
@@ -1126,7 +1098,7 @@ std::function<void(int32_t)> GetCustomDialogContentPromise(std::shared_ptr<Promp
                     TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] PromiseResolver_Resolve fail.");
                 }
             } else {
-                std::string strMsg = OHOS::Ace::NG::GetErrorMsg(errorCode);
+                std::string strMsg = OHOS::Ace::Ani::GetErrorMsg(errorCode);
                 ani_ref errorRef = CreateBusinessError(asyncContext->env, errorCode, strMsg);
                 ani_error error = static_cast<ani_error>(errorRef);
                 ani_status status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
@@ -1141,4 +1113,27 @@ std::function<void(int32_t)> GetCustomDialogContentPromise(std::shared_ptr<Promp
         asyncContext = nullptr;
     };
     return callback;
+}
+
+bool GetDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps)
+{
+    if (IsUndefinedObject(env, object)) {
+        return false;
+    }
+
+    if (!IsClassObject(env, object, "L@ohos/promptAction/promptAction/DialogOptions;")) {
+        return false;
+    }
+
+    GetBaseDialogOptions(env, object, dialogProps);
+    GetResourceColorParamOpt(env, object, "backgroundColor", dialogProps.backgroundColor);
+    GetCornerRadius(env, object, dialogProps.borderRadius);
+    GetDimesionParamOpt(env, object, "width", dialogProps.width);
+    GetDimesionParamOpt(env, object, "height", dialogProps.height);
+    GetBorderWidth(env, object, dialogProps.borderWidth);
+    GetBorderColor(env, object, dialogProps.borderColor);
+    GetBorderStyle(env, object, dialogProps.borderStyle);
+    GetBackgroundBlurStyleParamOpt(env, object, dialogProps.backgroundBlurStyle);
+    GetShadowParamOpt(env, object, dialogProps.shadow);
+    return true;
 }

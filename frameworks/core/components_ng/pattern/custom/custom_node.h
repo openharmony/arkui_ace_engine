@@ -151,8 +151,9 @@ public:
 
     void FireOnPageShow()
     {
-        if (onPageShowFunc_) {
-            onPageShowFunc_();
+        auto callback = onPageShowFunc_;
+        if (callback) {
+            callback();
         }
     }
 
@@ -163,8 +164,9 @@ public:
 
     void FireOnPageHide()
     {
-        if (onPageHideFunc_) {
-            onPageHideFunc_();
+        auto callback = onPageHideFunc_;
+        if (callback) {
+            callback();
         }
     }
 
@@ -175,8 +177,9 @@ public:
 
     bool FireOnBackPressed()
     {
-        if (onBackPressFunc_) {
-            return onBackPressFunc_();
+        auto callback = onBackPressFunc_;
+        if (callback) {
+            return callback();
         }
         return false;
     }
@@ -188,8 +191,9 @@ public:
 
     void FirePageTransition()
     {
-        if (pageTransitionFunc_) {
-            pageTransitionFunc_();
+        auto callback = pageTransitionFunc_;
+        if (callback) {
+            callback();
         }
     }
 

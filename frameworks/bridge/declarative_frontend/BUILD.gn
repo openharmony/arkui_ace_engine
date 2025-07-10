@@ -40,12 +40,14 @@ template("declarative_frontend") {
         "ng/declarative_frontend_ng.cpp",
         "ng/frontend_delegate_declarative_ng.cpp",
         "ng/page_router_manager.cpp",
+        "ng/page_router_manager_static.cpp",
       ]
     } else {
       sources = [
         "declarative_frontend.cpp",
         "frontend_delegate_declarative.cpp",
         "ng/page_router_manager.cpp",
+        "ng/page_router_manager_static.cpp",
       ]
     }
 
@@ -68,12 +70,10 @@ template("declarative_frontend") {
         "//foundation/arkui/napi:ace_napi",
       ]
     }
-    external_deps = [ "napi:ace_napi" ]
-    if (defined(ark_hybrid) && ark_hybrid) {
-      external_deps += [ "runtime_core:libarkruntime" ]
-    } else {
-      external_deps += [ "ets_runtime:libark_jsruntime" ]
-    }
+    external_deps = [
+      "ets_runtime:libark_jsruntime",
+      "napi:ace_napi",
+    ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
@@ -697,14 +697,10 @@ template("declarative_js_engine") {
       }
     } else {
       external_deps += [
+        "ets_runtime:libark_jsruntime",
         "graphic_2d:librender_service_client",
         "napi:ace_napi",
       ]
-      if (defined(ark_hybrid) && ark_hybrid) {
-        external_deps += [ "runtime_core:libarkruntime" ]
-      } else {
-        external_deps += [ "ets_runtime:libark_jsruntime" ]
-      }
     }
 
     if (platform == "windows" || platform == "mac" || platform == "linux") {
@@ -1158,14 +1154,10 @@ template("declarative_js_engine_ng") {
       }
     } else {
       external_deps += [
+        "ets_runtime:libark_jsruntime",
         "graphic_2d:librender_service_client",
         "napi:ace_napi",
       ]
-      if (defined(ark_hybrid) && ark_hybrid) {
-        external_deps += [ "runtime_core:libarkruntime" ]
-      } else {
-        external_deps += [ "ets_runtime:libark_jsruntime" ]
-      }
     }
 
     if (defined(config.enable_drag_framework) && config.enable_drag_framework &&

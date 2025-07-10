@@ -237,6 +237,7 @@ const GENERATED_ArkUIColorMetricsAccessor* GetColorMetricsAccessor();
 const GENERATED_ArkUIWebviewControllerAccessor* GetWebviewControllerAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* GetGlobalScope_ohos_arkui_componentSnapshotAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor* GetGlobalScope_ohos_arkui_performanceMonitorAccessor();
+const GENERATED_ArkUICommonMethodOpsAccessor* GetCommonMethodOpsAccessor();
 const GENERATED_ArkUICommonShapeAccessor* GetCommonShapeAccessor();
 const GENERATED_ArkUIBaseShapeAccessor* GetBaseShapeAccessor();
 const GENERATED_ArkUIRectShapeAccessor* GetRectShapeAccessor();
@@ -420,6 +421,8 @@ const GENERATED_ArkUITextStyle_styled_stringAccessor* GetTextStyle_styled_string
 const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor();
 const GENERATED_ArkUIBaselineOffsetStyleAccessor* GetBaselineOffsetStyleAccessor();
 const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor();
+const GENERATED_ArkUILevelOrderAccessor* GetLevelOrderAccessor();
+const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor();
 const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor();
 const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccessor();
 const GENERATED_ArkUIGestureStyleAccessor* GetGestureStyleAccessor();
@@ -431,6 +434,7 @@ const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor();
 const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor();
 const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorControllerAccessor();
 const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor();
+const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor();
 const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor();
 const GENERATED_ArkUIStateModifier* GetUIStateModifier();
 const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
@@ -594,6 +598,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetWebviewControllerAccessor,
         GetGlobalScope_ohos_arkui_componentSnapshotAccessor,
         GetGlobalScope_ohos_arkui_performanceMonitorAccessor,
+        GetCommonMethodOpsAccessor,
         GetCommonShapeAccessor,
         GetBaseShapeAccessor,
         GetRectShapeAccessor,
@@ -777,6 +782,8 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetDecorationStyleAccessor,
         GetBaselineOffsetStyleAccessor,
         GetLetterSpacingStyleAccessor,
+        GetLevelOrderAccessor,
+        GetDismissPopupActionAccessor,
         GetTextShadowStyleAccessor,
         GetBackgroundColorStyleAccessor,
         GetGestureStyleAccessor,
@@ -788,6 +795,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetCustomSpanAccessor,
         GetLinearIndicatorControllerAccessor,
         GetGlobalScopeAccessor,
+        GetPromptActionAccessor,
         GetRouterExtenderAccessor,
     };
     return &accessorsImpl;

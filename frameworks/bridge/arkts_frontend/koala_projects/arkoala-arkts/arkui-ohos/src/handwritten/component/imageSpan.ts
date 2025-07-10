@@ -25,3 +25,13 @@ function hookSetAlt(imageSpanComponent: ArkImageSpanComponent, value: PixelMap |
         }
     }
 }
+
+function hookSetColorFilter(component: ArkImageSpanComponent,
+                            value: ColorFilter | drawing.ColorFilter | undefined): void {
+    if (value !== undefined && value instanceof drawing.ColorFilter) {
+        const value_casted  = value as drawing.ColorFilter
+        ArkUIAniModule._ImageSpan_Set_DrawingColorFilter(component.getPeer().getPeerPtr(), value_casted)
+        return
+    }
+    component.getPeer()?.colorFilterAttribute(value)
+}
