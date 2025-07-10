@@ -173,6 +173,12 @@ void CheckBoxModelNG::SetSelectedColor(FrameNode* frameNode, const Color& color)
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColorFlagByUser, true, frameNode);
 }
 
+void CheckBoxModelNG::SetSelectedColorFlagByUser(FrameNode* frameNode, const bool isByUser)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColorFlagByUser, isByUser, frameNode);
+}
+
 void CheckBoxModelNG::SetUnSelectedColor(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, color, frameNode);

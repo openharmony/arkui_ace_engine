@@ -535,6 +535,9 @@ void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<C
         }
         CheckBoxModelNG checkBoxModelNG;
         checkBoxModelNG.SetSelectedColor(frameNode, color);
+        if (SystemProperties::ConfigChangePerform() && !selectedColor.has_value()) {
+            checkBoxModelNG.SetSelectedColorFlagByUser(frameNode, false);
+        }
         return;
     }
 
@@ -546,6 +549,9 @@ void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<C
             color = theme->GetCheckedColor();
         }
         ToggleButtonModelNG::SetSelectedColor(frameNode, color);
+        if (SystemProperties::ConfigChangePerform() && !selectedColor.has_value()) {
+            ToggleButtonModelNG::SetSelectedColorSetByUser(frameNode, false);
+        }
         return;
     }
 
