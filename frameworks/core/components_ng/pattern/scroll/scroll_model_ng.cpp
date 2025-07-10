@@ -123,8 +123,11 @@ RefPtr<ScrollProxy> ScrollModelNG::CreateScrollBarProxy()
 int32_t ScrollModelNG::GetAxis(FrameNode *frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    int32_t value = 0;
     auto layoutProperty = frameNode->GetLayoutProperty<ScrollLayoutProperty>();
+    if (layoutProperty->GetAxis() == Axis::FREE) {
+        return ArkUI_ScrollDirection::ARKUI_SCROLL_DIRECTION_FREE;
+    }
+    int32_t value = 0;
     if (layoutProperty->GetAxis()) {
         value = static_cast<int32_t>(layoutProperty->GetAxisValue());
     }
@@ -487,6 +490,9 @@ void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
+    if (axis == Axis::FREE || pattern->GetAxis() == Axis::FREE) {
+        return; // calling SetAxis would disrupt the axisChanged signal in ::OnModifyDone and initialization of FreeScroll
+    }
     pattern->SetAxis(axis);
 }
 

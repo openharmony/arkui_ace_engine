@@ -5902,7 +5902,7 @@ const ArkUI_AttributeItem* GetScrollScrollable(ArkUI_NodeHandle node)
 int32_t SetScrollScrollable(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || !InRegion(NUM_0, NUM_3, item->value[0].i32)) {
+    if (actualSize < 0 || !InRegion(ARKUI_SCROLL_DIRECTION_VERTICAL, ARKUI_SCROLL_DIRECTION_FREE, item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
