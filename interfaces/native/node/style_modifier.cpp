@@ -6483,6 +6483,118 @@ const ArkUI_AttributeItem* GetScrollBarMargin(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetMaxZoomScale(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size < 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    float scale = item->value[0].f32;
+    GetFullImpl()->getNodeModifiers()->getScrollModifier()->setMaxZoomScale(node->uiNodeHandle, scale);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetMaxZoomScale(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!node || !fullImpl) {
+        return;
+    }
+    GetFullImpl()->getNodeModifiers()->getScrollModifier()->resetMaxZoomScale(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetMaxZoomScale(ArkUI_NodeHandle node)
+{
+    float scale = GetFullImpl()->getNodeModifiers()->getScrollModifier()->getMaxZoomScale(node->uiNodeHandle);
+    g_numberValues[0].f32 = scale;
+    g_attributeItem.size = 1;
+    return &g_attributeItem;
+}
+
+int32_t SetMinZoomScale(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size < 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    float scale = item->value[0].f32;
+    GetFullImpl()->getNodeModifiers()->getScrollModifier()->setMinZoomScale(node->uiNodeHandle, scale);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetMinZoomScale(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!node || !fullImpl) {
+        return;
+    }
+    GetFullImpl()->getNodeModifiers()->getScrollModifier()->resetMinZoomScale(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetMinZoomScale(ArkUI_NodeHandle node)
+{
+    float scale = GetFullImpl()->getNodeModifiers()->getScrollModifier()->getMinZoomScale(node->uiNodeHandle);
+    g_numberValues[0].f32 = scale;
+    g_attributeItem.size = 1;
+    return &g_attributeItem;
+}
+
+int32_t SetZoomScale(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size < 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    float scale = item->value[0].f32;
+    GetFullImpl()->getNodeModifiers()->getScrollModifier()->setZoomScale(node->uiNodeHandle, scale);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetZoomScale(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!node || !fullImpl) {
+        return;
+    }
+    fullImpl->getNodeModifiers()->getScrollModifier()->resetZoomScale(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetZoomScale(ArkUI_NodeHandle node)
+{
+    float scale = GetFullImpl()->getNodeModifiers()->getScrollModifier()->getZoomScale(node->uiNodeHandle);
+    g_numberValues[0].f32 = scale;
+    g_attributeItem.size = 1;
+    return &g_attributeItem;
+}
+
+int32_t SetEnableBouncesZoom(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size < 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    bool enable = static_cast<bool>(item->value[0].i32);
+    GetFullImpl()->getNodeModifiers()->getScrollModifier()->setEnableBouncesZoom(node->uiNodeHandle, enable);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetEnableBouncesZoom(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!node || !fullImpl) {
+        return;
+    }
+    fullImpl->getNodeModifiers()->getScrollModifier()->resetEnableBouncesZoom(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetEnableBouncesZoom(ArkUI_NodeHandle node)
+{
+    bool enable = GetFullImpl()->getNodeModifiers()->getScrollModifier()->getEnableBouncesZoom(node->uiNodeHandle);
+    g_numberValues[0].i32 = enable;
+    g_attributeItem.size = 1;
+    return &g_attributeItem;
+}
+
 const ArkUI_AttributeItem* GetListDirection(ArkUI_NodeHandle node)
 {
     auto value = GetFullImpl()->getNodeModifiers()->getListModifier()->getListDirection(node->uiNodeHandle);
@@ -16814,7 +16926,8 @@ int32_t SetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetScrollScrollable, SetScrollEdgeEffect, SetScrollEnableScrollInteraction, SetScrollFriction,
         SetScrollScrollSnap, SetScrollNestedScroll, SetScrollTo, SetScrollEdge, SetScrollEnablePaging, SetScrollPage,
         SetScrollBy, SetScrollFling, SetScrollFadingEdge, nullptr, SetContentStartOffset, SetContentEndOffset,
-        SetFlingSpeedLimit, SetScrollContentClip, SetScrollBackToTop, SetScrollBarMargin };
+        SetFlingSpeedLimit, SetScrollContentClip, SetScrollBackToTop, SetScrollBarMargin, SetMaxZoomScale,
+        SetMinZoomScale, SetZoomScale, SetEnableBouncesZoom };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "scroll node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -16828,7 +16941,8 @@ const ArkUI_AttributeItem* GetScrollAttribute(ArkUI_NodeHandle node, int32_t sub
         GetScrollScrollable, GetScrollEdgeEffect, GetScrollEnableScrollInteraction, GetScrollFriction,
         GetScrollScrollSnap, GetScrollNestedScroll, GetScrollOffset, GetScrollEdge, GetScrollEnablePaging, nullptr,
         nullptr, nullptr, GetScrollFadingEdge, GetScrollContentSize, GetContentStartOffset, GetContentEndOffset,
-        GetFlingSpeedLimit, GetScrollContentClip, GetScrollBackToTop, GetScrollBarMargin };
+        GetFlingSpeedLimit, GetScrollContentClip, GetScrollBackToTop, GetScrollBarMargin, GetMaxZoomScale,
+        GetMinZoomScale, GetZoomScale, GetEnableBouncesZoom };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -16843,7 +16957,8 @@ void ResetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetScrollScrollable, ResetScrollEdgeEffect, ResetScrollEnableScrollInteraction, ResetScrollFriction,
         ResetScrollScrollSnap, ResetScrollNestedScroll, ResetScrollTo, ResetScrollEdge, ResetScrollEnablePaging,
         nullptr, nullptr, nullptr, ResetScrollFadingEdge, nullptr, ResetContentStartOffset, ResetContentEndOffset,
-        ResetFlingSpeedLimit, ResetScrollContentClip, ResetScrollBackToTop, ResetScrollBarMargin };
+        ResetFlingSpeedLimit, ResetScrollContentClip, ResetScrollBackToTop, ResetScrollBarMargin, ResetMaxZoomScale,
+        ResetMinZoomScale, ResetZoomScale, ResetEnableBouncesZoom };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

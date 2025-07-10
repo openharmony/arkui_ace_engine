@@ -31,6 +31,9 @@ void SetOnScrollStop(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollEdge(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollReachStart(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollReachEnd(ArkUINodeHandle node, void* extraParam);
+void SetOnDidZoom(ArkUINodeHandle node, void* extraParam);
+void SetOnZoomStart(ArkUINodeHandle node, void* extraParam);
+void SetOnZoomStop(ArkUINodeHandle node, void* extraParam);
 
 void ResetOnScroll(ArkUINodeHandle node);
 void ResetOnScrollFrameBegin(ArkUINodeHandle node);
@@ -41,6 +44,10 @@ void ResetOnScrollStop(ArkUINodeHandle node);
 void ResetOnScrollEdge(ArkUINodeHandle node);
 void ResetOnScrollReachStart(ArkUINodeHandle node);
 void ResetOnScrollReachEnd(ArkUINodeHandle node);
+void ResetOnDidZoom(ArkUINodeHandle node);
+void ResetOnZoomStart(ArkUINodeHandle node);
+void ResetOnZoomStop(ArkUINodeHandle node);
+
 void SetScrollOnScrollStart(ArkUINodeHandle node, void* callback);
 void ResetScrollOnScrollStart(ArkUINodeHandle node);
 void SetScrollOnScrollEnd(ArkUINodeHandle node, void* callback);

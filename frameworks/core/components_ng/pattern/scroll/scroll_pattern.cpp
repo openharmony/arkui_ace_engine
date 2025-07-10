@@ -1595,6 +1595,11 @@ void ScrollPattern::SetMaxZoomScale(float scale)
     }
 }
 
+float ScrollPattern::GetMaxZoomScale() const
+{
+    return maxZoomScale_;
+}
+
 void ScrollPattern::SetMinZoomScale(float scale)
 {
     if (scale > 0) {
@@ -1604,8 +1609,16 @@ void ScrollPattern::SetMinZoomScale(float scale)
     }
 }
 
+float ScrollPattern::GetMinZoomScale() const
+{
+    return minZoomScale_;
+}
+
 void ScrollPattern::SetZoomScale(std::optional<float> scale)
 {
+    if (scale.has_value() && scale.value() <= 0.0f) {
+        scale = 1.0f;
+    }
     if (scale != zoomScale_) {
         zoomScale_ = scale;
         auto host = GetHost();
@@ -1614,6 +1627,11 @@ void ScrollPattern::SetZoomScale(std::optional<float> scale)
         CHECK_NULL_VOID(prop);
         prop->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+float ScrollPattern::GetZoomScale() const
+{
+    return zoomScale_.value_or(1.0f);
 }
 
 void ScrollPattern::UpdateZoomScale(float scale)
@@ -1630,6 +1648,16 @@ void ScrollPattern::UpdateZoomScale(float scale)
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnZoomScaleChange(scale);
     }
+}
+
+void ScrollPattern::SetEnableBouncesZoom(bool enable)
+{
+    enableBouncesZoom_ = enable;
+}
+
+bool ScrollPattern::GetEnableBouncesZoom() const
+{
+    return enableBouncesZoom_;
 }
 
 void ScrollPattern::SetChildScale(std::optional<float> scale)
