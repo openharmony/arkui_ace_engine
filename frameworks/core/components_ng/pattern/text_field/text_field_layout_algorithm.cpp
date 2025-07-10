@@ -364,6 +364,7 @@ SizeF TextFieldLayoutAlgorithm::PlaceHolderMeasureContent(const LayoutConstraint
 
     auto contentHeight = std::min(contentConstraint.maxSize.Height(), height);
 
+    isPlaceHolderOverSize_ = height > contentConstraint.maxSize.Height();
     textRect_.SetSize(SizeF(GetVisualTextWidth(), paragraph_->GetHeight()));
 
     return SizeF(contentWidth, contentHeight);
