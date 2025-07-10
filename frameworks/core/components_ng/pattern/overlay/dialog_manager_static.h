@@ -49,6 +49,7 @@ public:
         std::function<void(int32_t)>&& callback);
     static void CloseCustomDialogStatic(const int32_t dialogId, const int32_t containerId);
     static void CloseCustomDialogStatic(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
+    static void RemoveCustomDialog(int32_t instanceId);
 
     void SetDismissDialogInfo(int32_t id, const std::string& name)
     {

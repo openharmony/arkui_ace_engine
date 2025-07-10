@@ -20,6 +20,7 @@
 #include "prompt_action_controller.h"
 #include "prompt_action_params.h"
 
+#include "frameworks/core/components_ng/pattern/overlay/dialog_manager_static.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Ani {
@@ -134,6 +135,98 @@ bool GetDialogController(ani_env* env, ani_object object,
         }
     };
     return true;
+}
+
+void DismissDialogAction::Dismiss()
+{
+    int32_t instanceId = Container::CurrentIdSafely();
+    if (instanceId_ != INSTANCE_ID_UNDEFINED) {
+        instanceId = instanceId_;
+    }
+    NG::DialogManagerStatic::RemoveCustomDialog(instanceId_);
+}
+
+void ANIDismissDialog(ani_env* env, ani_object object)
+{
+    ani_long nativePtr;
+    ani_status status = env->Object_GetFieldByName_Long(object, "nativePtr", &nativePtr);
+    if (status != ANI_OK) {
+        return;
+    }
+
+    auto dismissDialogAction = reinterpret_cast<DismissDialogAction *>(nativePtr);
+    CHECK_NULL_VOID(dismissDialogAction);
+    dismissDialogAction->Dismiss();
+}
+
+ani_status BindDismissDialogAction(ani_env* env)
+{
+    static const char *className = "L@ohos/promptAction/DismissDialogActionInner;";
+    ani_class cls;
+    ani_status status = env->FindClass(className, &cls);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "DismissDialogAction FindClass fail. status: %{public}d", status);
+        return ANI_ERROR;
+    }
+
+    std::array methods = {
+        ani_native_function {"dismiss", nullptr, reinterpret_cast<void *>(ANIDismissDialog)},
+    };
+    status = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "DismissDialogAction BindMethods fail. status: %{public}d", status);
+        return ANI_ERROR;
+    }
+    return ANI_OK;
+}
+
+ani_object ANICreateDismissDialogAction(ani_env* env, const int32_t reason, const int32_t instanceId)
+{
+    ani_object result = {};
+    static const char *className = "L@ohos/promptAction/DismissDialogActionInner;";
+    ani_class cls;
+    ani_status status = env->FindClass(className, &cls);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "DismissDialogAction FindClass fail. status: %{public}d", status);
+        return result;
+    }
+
+    ani_method ctor;
+    status = env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "DismissDialogAction FindMethod fail. status: %{public}d", status);
+        return result;
+    }
+
+    auto dismissDialogAction = new DismissDialogAction();
+    dismissDialogAction->SetInstanceId(instanceId);
+    ani_long nativePtr = reinterpret_cast<ani_long>(dismissDialogAction);
+    status = env->Object_New(cls, ctor, &result, nativePtr);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "DismissDialogAction NewObject fail. status: %{public}d", status);
+        return result;
+    }
+
+    ani_enum enumType;
+    status = env->FindEnum("Larkui/component/common/DismissReason;", &enumType);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "DismissReason FindEnum fail. status: %{public}d", status);
+        return result;
+    }
+
+    ani_enum_item enumItem;
+    status = env->Enum_GetEnumItemByIndex(enumType, ani_size(reason), &enumItem);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "DismissReason GetEnumItem fail. status: %{public}d", status);
+        return result;
+    }
+
+    status = env->Object_SetPropertyByName_Ref(result, "reason", static_cast<ani_ref>(enumItem));
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "DismissDialogAction SetReason fail. status: %{public}d", status);
+        return result;
+    }
+    return result;
 }
 
 } // OHOS::Ace::Ani

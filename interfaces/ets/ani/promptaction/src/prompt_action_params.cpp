@@ -206,6 +206,16 @@ bool GetDoubleParam(ani_env* env, ani_object object, const char *name, double& r
     return GetDoubleParam(env, resultObj, result);
 }
 
+bool GetDoubleParamOpt(ani_env *env, ani_object object, const char *name, std::optional<double>& result)
+{
+    double resultValue;
+    if (!GetDoubleParam(env, object, name, resultValue)) {
+        return false;
+    }
+    result = std::make_optional<double>(resultValue);
+    return true;
+}
+
 bool GetFloatParam(ani_env* env, ani_object object, float& result)
 {
     ani_float resultValue;
@@ -438,7 +448,12 @@ bool GetFunctionParam(ani_env *env, ani_ref ref, std::function<void()>& result)
     result = [env, ref]() {
         if (ref) {
             ani_fn_object func = static_cast<ani_fn_object>(ref);
-            env->FunctionalObject_Call(func, 0, nullptr, nullptr);
+            std::vector<ani_ref> args;
+            ani_ref fnReturnVal {};
+            ani_status status = env->FunctionalObject_Call(func, args.size(), args.data(), &fnReturnVal);
+            if (status != ANI_OK) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
+            }
         }
     };
     return true;

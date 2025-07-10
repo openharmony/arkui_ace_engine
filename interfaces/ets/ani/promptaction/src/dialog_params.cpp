@@ -14,6 +14,7 @@
  */
 
 #include "dialog_params.h"
+#include "prompt_action_controller.h"
 #include "prompt_action_utils.h"
 
 #include "frameworks/base/error/error_code.h"
@@ -318,6 +319,20 @@ bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     return true;
 }
 
+bool GetShowDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps)
+{
+    if (IsUndefinedObject(env, object)) {
+        return false;
+    }
+
+    if (!IsClassObject(env, object, "L@ohos/promptAction/promptAction/ShowDialogOptionsInternal;")) {
+        return false;
+    }
+
+    GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
+    return true;
+}
+
 ani_ref CreateShowDialogSuccessResponse(ani_env* env, int32_t index)
 {
     ani_class responseCls;
@@ -383,8 +398,9 @@ std::function<void(int32_t, int32_t)> GetShowDialogCallback(std::shared_ptr<Prom
                 args[0] = CreateBusinessError(asyncContext->env, errorCode, "cancel");
             }
             args[1] = CreateShowDialogSuccessResponse(asyncContext->env, successIndex);
+            ani_ref fnReturnVal {};
             status = asyncContext->env->FunctionalObject_Call(
-                asyncContext->callback, args.size(), args.data(), nullptr);
+                asyncContext->callback, args.size(), args.data(), &fnReturnVal);
             status = asyncContext->env->DestroyLocalScope();
         };
         taskExecutor->PostTask(
@@ -584,8 +600,9 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuCallback(
                 args[0] = CreateBusinessError(asyncContext->env, errorCode, "cancel");
             }
             args[1] = CreateActionMenuSuccessResponse(asyncContext->env, successIndex);
+            ani_ref fnReturnVal {};
             status = asyncContext->env->FunctionalObject_Call(
-                asyncContext->callback, args.size(), args.data(), nullptr);
+                asyncContext->callback, args.size(), args.data(), &fnReturnVal);
             status = asyncContext->env->DestroyLocalScope();
         };
         taskExecutor->PostTask(
@@ -652,6 +669,36 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuPromise(std::shared_ptr<P
     return callback;
 }
 
+bool GetOnWillDismiss(ani_env* env, ani_object object,
+    std::function<void(const int32_t& reason, const int32_t& instanceId)>& result)
+{
+    ani_ref resultRef;
+    ani_status status = env->Object_GetPropertyByName_Ref(object, "onWillDismiss", &resultRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    if (IsUndefinedObject(env, resultRef)) {
+        return false;
+    }
+
+    result = [env, resultRef](const int32_t reason, const int32_t instanceId) {
+        TAG_LOGI(OHOS::Ace::AceLogTag::ACE_DIALOG,
+            "Dissmiss dialog enter. reason: %{public}d, instanceId: %{public}d", reason, instanceId);
+        if (resultRef) {
+            ani_object dismissDialogAction = OHOS::Ace::Ani::ANICreateDismissDialogAction(env, reason, instanceId);
+            ani_ref actionRef = static_cast<ani_ref>(dismissDialogAction);
+            ani_fn_object func = static_cast<ani_fn_object>(resultRef);
+            ani_ref fnReturnVal {};
+            ani_status status = env->FunctionalObject_Call(func, 1, &actionRef, &fnReturnVal);
+            if (status != ANI_OK) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "Dissmiss dialog fail. status: %{public}d", status);
+            }
+        }
+    };
+    return true;
+}
+
 bool GetKeyboardAvoidMode(ani_env* env, ani_object object, OHOS::Ace::KeyboardAvoidMode& result)
 {
     ani_int resultInt;
@@ -716,6 +763,7 @@ bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetBoolParam(env, object, "isModal", dialogProps.isModal);
     GetBoolParam(env, object, "autoCancel", dialogProps.autoCancel);
     GetResourceColorParamOpt(env, object, "maskColor", dialogProps.maskColor);
+    GetOnWillDismiss(env, object, dialogProps.onWillDismiss);
     GetFunctionParam(env, object, "onDidAppear", dialogProps.onDidAppear);
     GetFunctionParam(env, object, "onDidDisappear", dialogProps.onDidDisappear);
     GetFunctionParam(env, object, "onWillAppear", dialogProps.onWillAppear);
@@ -761,6 +809,7 @@ bool GetDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::Dialog
     GetTransitionEffectParam(env, object, "transition", dialogProps.transitionEffect);
     GetTransitionEffectParam(env, object, "dialogTransition", dialogProps.dialogTransitionEffect);
     GetTransitionEffectParam(env, object, "maskTransition", dialogProps.maskTransitionEffect);
+    GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
     return true;
 }
 
