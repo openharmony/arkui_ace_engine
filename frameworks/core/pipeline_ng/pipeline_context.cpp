@@ -1438,15 +1438,13 @@ void PipelineContext::SetupRootElement()
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<Rosen::RSUIDirector> rsUIDirector;
     if (!IsJsCard() && !isFormRender_) {
-        auto window = GetWindow();
-        if (window) {
-            rsUIDirector = window->GetRSUIDirector();
-            if (rsUIDirector) {
-                rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-            }
+        rsUIDirector = GetRSUIDirector();
+        if (rsUIDirector) {
+            RSTransactionBegin(rsUIDirector);
+            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            RSTransactionCommit(rsUIDirector);
         }
     }
-    FlushImplicitTransaction(rsUIDirector);
 #endif
     accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
     stageManager_ = ViewAdvancedRegister::GetInstance()->GenerateStageManager(stageNode);
@@ -1511,20 +1509,32 @@ void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback)
         }, TaskExecutor::TaskType::UI, "ArkUISetOnWindowFocusedCallback");
 }
 
-void PipelineContext::FlushImplicitTransaction(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector)
+void PipelineContext::RSTransactionBegin(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetMultiInstanceEnabled() && rsUIDirector) {
         auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
-        if (surfaceNode) {
-            auto rsUIContext = surfaceNode->GetRSUIContext();
-            if (rsUIContext) {
-                auto rsTransaction = rsUIContext->GetRSTransaction();
-                if (rsTransaction) {
-                    rsTransaction->FlushImplicitTransaction();
-                }
-            }
-        }
+        CHECK_NULL_VOID(surfaceNode);
+        auto rsUIContext = surfaceNode->GetRSUIContext();
+        CHECK_NULL_VOID(rsUIContext);
+        auto rsTransaction = rsUIContext->GetRSTransaction();
+        CHECK_NULL_VOID(rsTransaction);
+        rsTransaction->Begin();
+    }
+#endif
+}
+
+void PipelineContext::RSTransactionCommit(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetMultiInstanceEnabled() && rsUIDirector) {
+        auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
+        CHECK_NULL_VOID(surfaceNode);
+        auto rsUIContext = surfaceNode->GetRSUIContext();
+        CHECK_NULL_VOID(rsUIContext);
+        auto rsTransaction = rsUIContext->GetRSTransaction();
+        CHECK_NULL_VOID(rsTransaction);
+        rsTransaction->Commit();
     }
 #endif
 }
@@ -1556,15 +1566,13 @@ void PipelineContext::SetupSubRootElement()
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<Rosen::RSUIDirector> rsUIDirector;
     if (!IsJsCard()) {
-        auto window = GetWindow();
-        if (window) {
-            rsUIDirector = window->GetRSUIDirector();
-            if (rsUIDirector) {
-                rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-            }
+        rsUIDirector = GetRSUIDirector();
+        if (rsUIDirector) {
+            RSTransactionBegin(rsUIDirector);
+            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            RSTransactionCommit(rsUIDirector);
         }
     }
-    FlushImplicitTransaction(rsUIDirector);
 #endif
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
@@ -4601,15 +4609,13 @@ void PipelineContext::SetAppBgColor(const Color& color)
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<Rosen::RSUIDirector> rsUIDirector;
     if (!IsJsCard()) {
-        auto window = GetWindow();
-        if (window) {
-            rsUIDirector = window->GetRSUIDirector();
-            if (rsUIDirector) {
-                rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-            }
+        rsUIDirector = GetRSUIDirector();
+        if (rsUIDirector) {
+            RSTransactionBegin(rsUIDirector);
+            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            RSTransactionCommit(rsUIDirector);
         }
     }
-    FlushImplicitTransaction(rsUIDirector);
 #endif
     CHECK_NULL_VOID(stageManager_);
     auto stage = stageManager_->GetStageNode();
