@@ -70,8 +70,8 @@ ArkUINodeHandle GetWithThemeNode(ArkUI_Int32 id)
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(withThemeNode));
 }
 
-ArkUINodeHandle CreateTheme(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, const ArkUI_Uint32* darkColors, ArkUI_Int32 colorMode,
-    const void* lightResObjs, const void* darkResObjs)
+ArkUINodeHandle CreateTheme(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, const ArkUI_Uint32* darkColors,
+    ArkUI_Int32 colorMode, const void* lightResObjs, const void* darkResObjs)
 {
     auto theme = TokenThemeStorage::GetInstance()->CacheGet(themeId);
     if (!theme) {

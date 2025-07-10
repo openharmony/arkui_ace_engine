@@ -33,8 +33,8 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
     Local<JSValueRef> onThemeScopeDestroyArg = runtimeCallInfo->GetCallArgRef(5); // 5: destroy callback arg index
 
     // check all argument valid
-    if (!themeScopeIdArg->IsNumber() || !themeIdArg->IsNumber() || !colorsArg->IsArray(vm) || !darkColorsArg->IsArray(vm) ||
-        !colorModeArg->IsNumber() || !onThemeScopeDestroyArg->IsFunction(vm)) {
+    if (!themeScopeIdArg->IsNumber() || !themeIdArg->IsNumber() || !colorsArg->IsArray(vm) ||
+        !darkColorsArg->IsArray(vm) || !colorModeArg->IsNumber() || !onThemeScopeDestroyArg->IsFunction(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     ArkUI_Int32 themeScopeId = static_cast<ArkUI_Int32>(themeScopeIdArg->Int32Value(vm));
@@ -66,7 +66,8 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
 
     // execute C-API
     auto themeModifier = GetArkUINodeModifiers()->getThemeModifier();
-    auto theme = themeModifier->createTheme(themeId, lightColors.data(), darkColors.data(), colorMode, static_cast<void*>(&lightResObjs), static_cast<void*>(&darkResObjs));
+    auto theme = themeModifier->createTheme(themeId, lightColors.data(), darkColors.data(), colorMode,
+        static_cast<void*>(&lightResObjs), static_cast<void*>(&darkResObjs));
     CHECK_NULL_RETURN(theme, panda::NativePointerRef::New(vm, nullptr));
     ArkUINodeHandle node = themeModifier->getWithThemeNode(themeScopeId);
     if (!node) {
