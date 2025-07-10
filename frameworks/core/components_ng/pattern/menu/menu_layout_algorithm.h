@@ -373,6 +373,8 @@ private:
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;
 
+    std::optional<OffsetF> anchorPosition_;
+
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
