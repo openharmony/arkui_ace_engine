@@ -34,23 +34,28 @@ ArkResourcesHelper.COLOR = 10001;
 ArkResourcesHelper.FLOAT = 10002;
 class ArkThemeNativeHelper {
     static sendThemeToNative(theme, elmtId) {
-        WithTheme.sendThemeToNative(ArkThemeNativeHelper.convertThemeToColorArray(theme), elmtId);
+        const lightColorArray = ArkThemeNativeHelper.convertColorsToArray(theme.colors);
+        const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme.darkColors);
+        WithTheme.sendThemeToNative(lightColorArray, darkColorArray, elmtId);
     }
     static createInternal(themeScopeId, themeId, theme, colorMode, onThemeScopeDestroy) {
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
             ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
         }
-        getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId, ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.colors), colorMode, onThemeScopeDestroy);
+        const lightColorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.colors);
+        const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.darkColors);
+        getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId, lightColorArray, darkColorArray, colorMode, onThemeScopeDestroy );
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
             ArkThemeScopeManager.getInstance().onExitLocalColorMode();
         }
     }
     static setDefaultTheme(theme) {
         const colorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.colors);
+        const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.darkColors);
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.LIGHT);
         getUINativeModule().theme.setDefaultTheme(colorArray, false);
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.DARK);
-        getUINativeModule().theme.setDefaultTheme(colorArray, true);
+        getUINativeModule().theme.setDefaultTheme(darkColorArray, true);
         ArkThemeScopeManager.getInstance().onExitLocalColorMode();
     }
     static convertThemeToColorArray(theme) {
@@ -194,15 +199,17 @@ class ArkThemeCache {
         if (!theme1 || !theme2) {
             return false;
         }
-        if (theme1.colors === theme2.colors) {
+        if (theme1.colors === theme2.colors && theme1.darkColors === theme2.darkColors) {
             return true;
         }
-        if (!theme1.colors || !theme2.colors) {
+        if (!theme1.colors || !theme2.colors || !theme1.darkColors || !theme2.darkColors) {
             return false;
         }
         let keys1 = Object.keys(theme1.colors);
         let keys2 = Object.keys(theme2.colors);
-        if (keys1.length !== keys2.length) {
+        let darkKeys1 = Object.keys(theme1.darkColors);
+        let darkKeys2 = Object.keys(theme2.darkColors);
+        if (keys1.length !== keys2.length || darkKeys1.length !== darkKeys2.length) {
             return false;
         }
         for (let key of keys1) {
@@ -215,12 +222,22 @@ class ArkThemeCache {
                 return false;
             }
         }
+        for (let key of darkKeys1) {
+            if (!darkKeys2.includes(key)) {
+                return false;
+            }
+            let value1 = theme1.darkColors[key];
+            let value2 = theme2.darkColors[key];
+            if (value1 !== value2) {
+                return false;
+            }
+        }
         return true;
     }
 }
 let themeCounter = 0;
 class ArkThemeBase {
-    constructor(parentId, customTheme, colorMode, colors, shapes, typography) {
+    constructor(parentId, customTheme, colorMode, colors, darkColors, shapes, typography) {
         this.scopesCounter = 0;
         this.bindedThemeScopesIds = [];
         this.isJustCreated = true;
@@ -230,6 +247,7 @@ class ArkThemeBase {
         this.customTheme = ArkThemeBase.copyCustomTheme(customTheme);
         this.colorMode = colorMode;
         this.colors = colors;
+        this.darkColors = darkColors;
         this.shapes = shapes;
         this.typography = typography;
     }
@@ -276,6 +294,16 @@ class ArkThemeBase {
             copyTheme.colors = {};
             Object.assign(copyTheme.colors, customTheme.colors);
         }
+        if (customTheme.darkColors) {
+            copyTheme.darkColors = {};
+            // For properties missing in darkColors, use the values from colors
+            Object.assign(copyTheme.darkColors, customTheme?.colors, customTheme.darkColors);
+        } else if (customTheme.colors) {
+            // If the user does not provide darkColors, use the values from colors
+            copyTheme.darkColors = {};
+            Object.assign(copyTheme.darkColors, customTheme.colors);
+        }
+        
         if (customTheme.shapes) {
             copyTheme.shapes = {};
             Object.assign(copyTheme.shapes, customTheme.shapes);
@@ -486,7 +514,7 @@ class ArkSystemTypography {
 }
 class ArkSystemTheme extends ArkThemeBase {
     constructor() {
-        super(-1, undefined, ThemeColorMode.SYSTEM, new ArkSystemColors(), new ArkSystemShapes(), new ArkSystemTypography());
+        super(-1, undefined, ThemeColorMode.SYSTEM, new ArkSystemColors(), new ArkSystemColors(), new ArkSystemShapes(), new ArkSystemTypography());
     }
 }
 if (globalThis.WithTheme !== undefined) {
@@ -682,10 +710,10 @@ class ArkTypographyImpl {
 class ArkThemeImpl extends ArkThemeBase {
     constructor(customTheme, colorMode, baselineTheme) {
         if (!customTheme) {
-            super(baselineTheme.id, undefined, colorMode, new ArkColorsImpl(undefined, baselineTheme.colors), new ArkShapesImpl(undefined, baselineTheme.shapes), new ArkTypographyImpl(undefined, baselineTheme.typography));
+            super(baselineTheme.id, undefined, colorMode, new ArkColorsImpl(undefined, baselineTheme.colors), new ArkColorsImpl(undefined, baselineTheme.colors), new ArkShapesImpl(undefined, baselineTheme.shapes), new ArkTypographyImpl(undefined, baselineTheme.typography));
             return;
         }
-        super(baselineTheme.id, customTheme, colorMode, new ArkColorsImpl(customTheme.colors, baselineTheme.colors), new ArkShapesImpl(customTheme.shapes, baselineTheme.shapes), new ArkTypographyImpl(customTheme.typography, baselineTheme.typography));
+        super(baselineTheme.id, customTheme, colorMode, new ArkColorsImpl(customTheme.colors, baselineTheme.colors), new ArkColorsImpl(customTheme.darkColors, baselineTheme.colors), new ArkShapesImpl(customTheme.shapes, baselineTheme.shapes), new ArkTypographyImpl(customTheme.typography, baselineTheme.typography));
     }
 }
 class ArkThemeScopeItem {
@@ -1020,6 +1048,9 @@ class ArkThemeScopeManager {
         const theme = ArkThemeBase.copyCustomTheme(customTheme);
         if (theme === null || theme === void 0 ? void 0 : theme.colors) {
             ArkColorsImpl.expandByBrandColor(theme.colors);
+        }
+        if (theme === null || theme === void 0 ? void 0 : theme.darkColors) {
+            ArkColorsImpl.expandByBrandColor(theme.darkColors);
         }
         return theme;
     }
