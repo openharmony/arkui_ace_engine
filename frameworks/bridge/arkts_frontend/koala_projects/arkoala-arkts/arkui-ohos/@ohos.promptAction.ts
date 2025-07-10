@@ -144,6 +144,11 @@ declare namespace promptAction {
         levelMode?: LevelMode;
         levelUniqueId?: number;
         immersiveMode?: ImmersiveMode;
+        levelOrder?: LevelOrder;
+    }
+
+    export interface ShowDialogOptionsInternal {
+        levelOrder?: number;
     }
 
     export interface ShowDialogSuccessResponse {
@@ -199,6 +204,7 @@ declare namespace promptAction {
         levelMode?: LevelMode;
         levelUniqueId?: number;
         immersiveMode?: ImmersiveMode;
+        levelOrder?: LevelOrder;
         focusable?: boolean;
     }
 
@@ -206,6 +212,7 @@ declare namespace promptAction {
         transition?: KPointer;
         dialogTransition?: KPointer;
         maskTransition?: KPointer;
+        levelOrder?: number;
     }
 
     export interface CustomDialogOptions extends BaseDialogOptions {
@@ -247,9 +254,11 @@ declare namespace promptAction {
 
     export function closeToast(toastId: number): void;
 
-    export function showDialog1(options: ShowDialogOptions, callback: AsyncCallback<ShowDialogSuccessResponse>): void;
+    export function showDialog1(options: ShowDialogOptions, callback: AsyncCallback<ShowDialogSuccessResponse>,
+        optionsInternal?: ShowDialogOptionsInternal): void;
 
-    export function showDialog(options: ShowDialogOptions): Promise<ShowDialogSuccessResponse>;
+    export function showDialog(options: ShowDialogOptions,
+        optionsInternal?: ShowDialogOptionsInternal): Promise<ShowDialogSuccessResponse>;
 
     export function showActionMenu1(options: ActionMenuOptions,
         callback: AsyncCallback<ActionMenuSuccessResponse>): void;

@@ -378,4 +378,11 @@ void DialogManagerStatic::CloseCustomDialogStatic(const WeakPtr<NG::UINode>& nod
     };
     context->GetTaskExecutor()->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog");
 }
+
+void DialogManagerStatic::RemoveCustomDialog(int32_t instanceId)
+{
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "Dismiss custom dialog, instanceId: %{public}d", instanceId);
+    ContainerScope scope(instanceId);
+    NG::ViewAbstract::DismissDialog();
+}
 } // namespace OHOS::Ace::NG

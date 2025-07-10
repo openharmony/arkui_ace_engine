@@ -146,7 +146,7 @@ static void CloseToast(ani_env* env, ani_double toastId)
     }
 }
 
-static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_object callback)
+static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_object callback, ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] ShowDialogWithCallback enter.");
     OHOS::Ace::DialogProperties dialogProps;
@@ -154,6 +154,7 @@ static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_object 
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show dialog options fail.");
         return;
     }
+    GetShowDialogOptionsInternal(env, optionsInternal, dialogProps);
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
@@ -172,7 +173,7 @@ static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_object 
     }
 }
 
-static ani_object ShowDialog(ani_env* env, ani_object options)
+static ani_object ShowDialog(ani_env* env, ani_object options, ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] ShowDialog enter.");
     OHOS::Ace::DialogProperties dialogProps;
@@ -180,6 +181,7 @@ static ani_object ShowDialog(ani_env* env, ani_object options)
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show dialog options fail.");
         return nullptr;
     }
+    GetShowDialogOptionsInternal(env, optionsInternal, dialogProps);
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
@@ -409,6 +411,7 @@ static ani_object OpenCustomDialogWithController(ani_env* env, ani_long content,
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] OpenCustomDialogWithController enter.");
     OHOS::Ace::DialogProperties dialogProps;
     GetBaseDialogOptions(env, options, dialogProps);
+    GetDialogOptionsInternal(env, optionsInternal, dialogProps);
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -443,6 +446,7 @@ static ani_object PresentCustomDialog(ani_env* env, ani_long builder, ani_object
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] PresentCustomDialog enter.");
     OHOS::Ace::DialogProperties dialogProps;
     GetDialogOptions(env, options, dialogProps);
+    GetDialogOptionsInternal(env, optionsInternal, dialogProps);
     dialogProps.customBuilder = GetCustomBuilder(env, builder);
     dialogProps.isUserCreatedDialog = true;
     OHOS::Ace::Ani::GetDialogController(env, controller, dialogProps.dialogCallback);

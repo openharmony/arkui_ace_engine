@@ -744,14 +744,24 @@ export class PromptActionImpl extends PromptAction {
     showDialog(options: promptAction.ShowDialogOptions,
         callback: AsyncCallback<promptAction.ShowDialogSuccessResponse>): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        promptAction.showDialog1(options, callback);
+        let optionsInternal: promptAction.ShowDialogOptionsInternal = {};
+        const levelOrder = options?.levelOrder?.getOrder?.();
+        if (levelOrder !== undefined) {
+            optionsInternal.levelOrder = levelOrder as number;
+        }
+        promptAction.showDialog1(options, callback, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     //@ts-ignore
     showDialog(options: promptAction.ShowDialogOptions): Promise<promptAction.ShowDialogSuccessResponse> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        const retval = promptAction.showDialog(options);
+        let optionsInternal: promptAction.ShowDialogOptionsInternal = {};
+        const levelOrder = options?.levelOrder?.getOrder?.();
+        if (levelOrder !== undefined) {
+            optionsInternal.levelOrder = levelOrder as number;
+        }
+        const retval = promptAction.showDialog(options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
     }
@@ -793,6 +803,10 @@ export class PromptActionImpl extends PromptAction {
         if (maskTransition !== undefined) {
             optionsInternal.maskTransition = maskTransition.ptr;
         }
+        const levelOrder = options?.levelOrder?.getOrder?.();
+        if (levelOrder !== undefined) {
+            optionsInternal.levelOrder = levelOrder as number;
+        }
         const retval = promptAction.openCustomDialog1(contentPtr, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
@@ -818,6 +832,10 @@ export class PromptActionImpl extends PromptAction {
         const maskTransition = options?.maskTransition?.getPeer?.();
         if (maskTransition !== undefined) {
             optionsInternal.maskTransition = maskTransition.ptr;
+        }
+        const levelOrder = options?.levelOrder?.getOrder?.();
+        if (levelOrder !== undefined) {
+            optionsInternal.levelOrder = levelOrder as number;
         }
         const retval = promptAction.openCustomDialog(builderPtr, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -875,6 +893,10 @@ export class PromptActionImpl extends PromptAction {
         if (maskTransition !== undefined) {
             optionsInternal.maskTransition = maskTransition.ptr;
         }
+        const levelOrder = options?.levelOrder?.getOrder?.();
+        if (levelOrder !== undefined) {
+            optionsInternal.levelOrder = levelOrder as number;
+        }
         const retval = promptAction.openCustomDialogWithController(contentPtr, controller, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
@@ -903,6 +925,10 @@ export class PromptActionImpl extends PromptAction {
         const maskTransition = options?.maskTransition?.getPeer?.();
         if (maskTransition !== undefined) {
             optionsInternal.maskTransition = maskTransition.ptr;
+        }
+        const levelOrder = options?.levelOrder?.getOrder?.();
+        if (levelOrder !== undefined) {
+            optionsInternal.levelOrder = levelOrder as number;
         }
         const retval = promptAction.presentCustomDialog(builderPtr, controller, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
