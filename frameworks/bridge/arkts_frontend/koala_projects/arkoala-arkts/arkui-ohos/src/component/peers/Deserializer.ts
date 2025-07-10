@@ -13285,7 +13285,7 @@ export class Deserializer extends DeserializerBase {
                 curve_buf_ = (valueDeserializer.readString() as string)
             }
             else if (curve_buf__selector == 2) {
-                curve_buf_ = (valueDeserializer.readICurve() as ICurve)
+                curve_buf_ = (valueDeserializer.readInt64() as Object as ICurve)
             }
             else {
                 throw new Error("One of the branches for curve_buf_ has to be chosen through deserialisation.")

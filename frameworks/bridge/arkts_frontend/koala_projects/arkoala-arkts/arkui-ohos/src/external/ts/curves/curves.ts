@@ -13,13 +13,5 @@
  * limitations under the License.
  */
 
-export * from "./multimedia/image"
-export * from "./ui_extension/ui_extension"
-export * from "./web/webview"
-export * from "./curves/curves"
-export * from "./application/context"
-export * from "./base/base"
-export * from "./multimodalInput/pointer"
-export * from "./drag_and_drop/drag_and_drop"
-export * from "./arkui/drawableDescriptor"
-export * from "./filter/filter"
+export type ICurve = any;
+export type Curve = any;

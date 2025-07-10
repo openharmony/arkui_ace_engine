@@ -8566,7 +8566,7 @@ export class Serializer extends SerializerBase {
             else if (RuntimeType.OBJECT == value_curve_value_type) {
                 valueSerializer.writeInt8(2 as int32)
                 const value_curve_value_2  = value_curve_value as ICurve
-                valueSerializer.writeICurve(value_curve_value_2)
+                valueSerializer.writeInt64(Object.values(value_curve_value_2)[0] as int64)
             }
         }
         const value_delay  = value.delay
