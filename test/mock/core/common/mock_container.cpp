@@ -190,7 +190,7 @@ std::vector<Rect> Container::GetCurrentFoldCreaseRegion()
     return {};
 }
 
-RefPtr<Container> Container::GetFoucsed()
+RefPtr<Container> Container::GetFocused()
 {
     RefPtr<Container> foucsContainer;
     AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
