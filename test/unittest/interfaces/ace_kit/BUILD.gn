@@ -176,6 +176,7 @@ ohos_unittest("ace_kit_test") {
     "frame_node_test.cpp",
     "property_test.cpp",
     "resource_parser_test.cpp",
+    "token_theme_test.cpp",
     "view_stack_processor_test.cpp",
     "view_test.cpp",
     "ui_context_impl_test.cpp",
