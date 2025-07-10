@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt, KLong, KBoolean } from "@koalaui/interop"
+import { KPointer, KInt, KLong, KBoolean, KFloat } from "@koalaui/interop"
 import { drawing } from "@ohos/graphics/drawing"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
@@ -61,23 +61,14 @@ export class ArkUIAniModule {
 
     // for Drag
     native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
-
     native static _DragEvent_Get_Data(ptr: KLong) : unifiedDataChannel.UnifiedData
-
     native static _DragEvent_Get_Summary(ptr: KLong) : unifiedDataChannel.Summary
-
     native static _DragEvent_Start_Data_Loading(ptr: KLong, data : unifiedDataChannel.GetDataParams) : string
-
     native static _DragEvent_Set_PixelMap(ptr: KLong, pixelMap: image.PixelMap) : void
-
     native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
-
     native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void
-
     native static _Drag_Set_AllowDrop_Null(ptr: KLong) : void
-
     native static _Drag_Set_AllowDrop(ptr: KPointer, thisArray: Array<string>, thisLength: KInt): void
-
     native static _Drag_Set_DragPreview(ptr: KPointer, dragInfo: HookDragInfo): void
 
     // for componentSnapshot
@@ -95,25 +86,17 @@ export class ArkUIAniModule {
     native static _DragController_executeDragWithCallback(custom: DragItemInfo, builder: KPointer,
         destroyCallback: () => void, dragInfo: dragController.DragInfo,
         callback: AsyncCallback<dragController.DragEventParam>): void
-
     native static _DragController_executeDragWithPromise(custom: DragItemInfo, builder: KPointer,
         destroyCallback: () => void, dragInfo: dragController.DragInfo): Promise<dragController.DragEventParam>
-    
     native static _DragController_createDragAction(customArray: Array<DragItemInfo>, builderArray: Array<KPointer>,
         destroyCallback: () => void, dragInfo: dragController.DragInfo): dragController.DragAction
-
     native static _DragController_startDrag(dragActionPtr: KPointer): Promise<void>
-
     native static _DragController_on(type: string, callback: Callback<dragController.DragAndDropInfo>,
         dragActionPtr: KPointer): void
-
     native static _DragController_off(type: string, callback: Callback<dragController.DragAndDropInfo> | undefined,
         dragActionPtr: KPointer): void
-
     native static _DragController_setDragEventStrictReportingEnabled(enable: boolean): void
-
     native static _DragController_cancelDataLoading(key: string): void
-
     native static _DragController_notifyDragStartReques(requestStatus: dragController.DragStartRequestStatus): void
 
     native static _DragController_getDragPreview(): dragController.DragPreview
@@ -149,6 +132,19 @@ export class ArkUIAniModule {
     // for Shape
     native static _Shape_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void;
 
+    // for  stateMgmt
+    native static _PersistentStorage_Get(key: string): string
+    native static _PersistentStorage_Set(key: string, value: string): void
+    native static _PersistentStorage_Has(key: string): boolean
+    native static _PersistentStorage_Clear(): void
+    native static _PersistentStorage_Delete(key: string): void
+    native static _Env_GetColorMode(): KInt
+    native static _Env_GetFontScale(): KFloat
+    native static _Env_GetFontWeightScale(): KFloat
+    native static _Env_GetAccessibilityEnabled(): boolean
+    native static _Env_GetLayoutDirection(): string
+    native static _Env_GetLanguageCode(): string
+    
     // for XComponent
     native static _XComponent_SetSurfaceCallback(ptr: KPointer, callback: XComponentControllerCallbackInternal): void;
 

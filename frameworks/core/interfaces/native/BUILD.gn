@@ -152,6 +152,7 @@ template("ace_core_interfaces_native_node") {
       "ani/waterflow_ani_modifier.cpp",
       "ani/video_ani_modifier.cpp",
       "ani/shape_ani_modifier.cpp",
+      "ani/stateMgmt_ani_modifier.cpp",
       "ani/xcomponent_ani_modifier.cpp",
       "ani/list_ani_modifier.cpp",
     ]

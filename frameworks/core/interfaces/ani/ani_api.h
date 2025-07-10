@@ -180,6 +180,19 @@ struct ArkUIAniVideoModifier {
 struct ArkUIAniShapeModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
 };
+struct ArkUIAniStateMgmtModifier {
+    std::string (*persistentStorageGet)(std::string key);
+    void (*persistentStorageSet)(std::string key, std::string value);
+    bool (*persistentStorageHas)(std::string key);
+    void (*persistentStorageDelete)(std::string key);
+    void (*persistentStorageClear)();
+    int32_t (*getColorMode)();
+    float (*getFontWeightScale)();
+    float (*getFontScale)();
+    bool (*getAccessibilityEnabled)();
+    std::string (*getLayoutDirection)();
+    std::string (*getLanguageCode)();
+};
 struct ArkUIAniXComponentModifier {
     void (*setXComponentControllerCallback)(ArkUINodeHandle node,
         std::function<void(const std::string&)>&& onSurfaceCreated,
@@ -205,6 +218,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
     const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
     const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();
+    const ArkUIAniStateMgmtModifier* (*getStateMgmtAniModifier)();
     const ArkUIAniXComponentModifier* (*getArkUIAniXComponentModifier)();
 };
 

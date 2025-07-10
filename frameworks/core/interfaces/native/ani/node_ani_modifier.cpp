@@ -28,6 +28,7 @@
 #include "drag_controller_ani_modifier.h"
 #include "video_ani_modifier.h"
 #include "shape_ani_modifier.h"
+#include "stateMgmt_ani_modifier.h"
 #include "xcomponent_ani_modifier.h"
 #include "lazy_for_each_node_ani_modifier.h"
 
@@ -53,6 +54,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
         .getArkUIAniVideoModifier = OHOS::Ace::NG::GetVideoAniModifier,
         .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,
+        .getStateMgmtAniModifier = OHOS::Ace::NG::GetStateMgmtAniModifier,
         .getArkUIAniXComponentModifier = OHOS::Ace::NG::GetXComponentAniModifier,
     };
     return &impl;

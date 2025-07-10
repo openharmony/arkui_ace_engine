@@ -34,6 +34,7 @@
 #include "interop/interop_module.h"
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
+#include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
 #include "xcomponent/xcomponent_module_methods.h"
 
@@ -350,6 +351,61 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Shape_Transfer_PixelMap",
             "JL@ohos/multimedia/image/image/PixelMap;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetShapePixelMap)
+        },
+        ani_native_function {
+            "_PersistentStorage_Get",
+            "Lstd/core/String;:Lstd/core/String;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Get)
+        },
+        ani_native_function {
+            "_PersistentStorage_Set",
+            "Lstd/core/String;Lstd/core/String;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Set)
+        },
+        ani_native_function {
+            "_PersistentStorage_Has",
+            "Lstd/core/String;:Z",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Has)
+        },
+        ani_native_function {
+            "_PersistentStorage_Clear",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Clear)
+        },
+        ani_native_function {
+            "_PersistentStorage_Delete",
+            "Lstd/core/String;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Delete)
+        },
+        ani_native_function {
+            "_Env_GetColorMode",
+            ":I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetColorMode)
+        },
+        ani_native_function {
+            "_Env_GetFontScale",
+            ":F",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetFontScale)
+        },
+        ani_native_function {
+            "_Env_GetFontWeightScale",
+            ":F",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetFontWeightScale)
+        },
+        ani_native_function {
+            "_Env_GetAccessibilityEnabled",
+            ":Z",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetAccessibilityEnabled)
+        },
+        ani_native_function {
+            "_Env_GetLayoutDirection",
+            ":Lstd/core/String;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetLayoutDirection)
+        },
+        ani_native_function {
+            "_Env_GetLanguageCode",
+            ":Lstd/core/String;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetLanguageCode)
         },
         ani_native_function {
             "_XComponent_SetSurfaceCallback",
