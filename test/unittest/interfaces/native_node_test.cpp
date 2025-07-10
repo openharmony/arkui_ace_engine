@@ -1033,9 +1033,9 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_DID_ZOOM, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_DID_ZOOM));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_ZOOM_START, nodeType);
-    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_ZOOM_START));
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_ZOOM_START));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_ZOOM_STOP, nodeType);
-    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_ZOOM_STOP));
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_ZOOM_STOP));
 
     nodeType = static_cast<int32_t>(ARKUI_NODE_LIST);
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_SCROLL, nodeType);
