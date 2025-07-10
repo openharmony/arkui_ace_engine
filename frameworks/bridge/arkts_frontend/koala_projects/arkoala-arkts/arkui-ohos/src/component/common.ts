@@ -25,7 +25,8 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { DrawContext } from "./../Graphics"
 import { LengthMetrics } from "../Graphics"
-import { ComponentContent, Context, ContextInternal, StateStylesOps } from "./arkui-custom"
+import { Context, ContextInternal, StateStylesOps } from "./arkui-custom"
+import { ComponentContent } from 'arkui/ComponentContent'
 import { UIContext } from "@ohos/arkui/UIContext"
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
 import { CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
@@ -5945,41 +5946,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_dragPreviewOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    overlayAttribute(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.FUNCTION == value_value_type) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as CustomBuilder
-                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_1))
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
-                thisSerializer.writeInt8(2 as int32)
-                const value_value_2  = value_value as ComponentContent
-                thisSerializer.writeComponentContent(value_value_2)
-            }
-        }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8(options_type as int32)
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
-            thisSerializer.writeOverlayOptions(options_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_overlay(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     blendMode0Attribute(value: BlendMode | undefined, type?: BlendApplyType): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -11278,10 +11244,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this {
         if (this.checkPriority("overlay")) {
-            const value_casted = value as (string | CustomBuilder | ComponentContent | undefined)
-            const options_casted = options as (OverlayOptions)
-            this.getPeer()?.overlayAttribute(value_casted, options_casted)
-            return this
+            hookOverlayImpl(this, value, options)
         }
         return this
     }

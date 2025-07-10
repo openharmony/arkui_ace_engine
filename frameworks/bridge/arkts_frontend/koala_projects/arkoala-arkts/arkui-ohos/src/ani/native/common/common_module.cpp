@@ -206,4 +206,72 @@ void SetParallelScoped(ani_env* env, ani_object obj, ani_boolean parallel)
     }
     modifier->getCommonAniModifier()->setParallelScoped(parallel);
 }
+
+void GetAlignmentEnum(ani_env* env, ani_object align, AniOverlayOptions& opt)
+{
+    ani_enum enumType;
+    if (ANI_OK != env->FindEnum("Larkui/component/enums/Alignment;", &enumType)) {
+        return;
+    }
+
+    ani_boolean isAlignment = ANI_FALSE;
+    if (ANI_OK != env->Object_InstanceOf(align, enumType, &isAlignment)) {
+        return;
+    }
+
+    if (!isAlignment) {
+        return;
+    }
+
+    ani_enum_item enumItem = static_cast<ani_enum_item>(align);
+    ani_int value;
+    if (ANI_OK != env->EnumItem_GetValue_Int(enumItem, &value)) {
+        return;
+    }
+    opt.alignment = static_cast<int32_t>(value);
+}
+
+void ParseOverlayOptions(ani_env* env, ani_object options, AniOverlayOptions& opt)
+{
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(options, &isUndefined);
+    if (isUndefined) {
+        return;
+    }
+    ani_ref align;
+    env->Object_GetPropertyByName_Ref(options, "align", &align);
+    env->Reference_IsUndefined(align, &isUndefined);
+    if (!isUndefined) {
+        GetAlignmentEnum(env, static_cast<ani_object>(align), opt);
+    }
+    ani_ref overlayOffset;
+    env->Object_GetPropertyByName_Ref(options, "offset", &overlayOffset);
+    env->Reference_IsUndefined(overlayOffset, &isUndefined);
+    if (!isUndefined) {
+        ani_object offset = static_cast<ani_object>(overlayOffset);
+        ani_ref x;
+        if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "x", &x)) {
+            ani_double param_value;
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "unboxed", ":D", &param_value);
+            opt.x = static_cast<float>(param_value);
+        }
+        ani_ref y;
+        if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "y", &y)) {
+            ani_double param_value;
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "unboxed", ":D", &param_value);
+            opt.y = static_cast<float>(param_value);
+        }
+    }
+}
+
+void SetOverlayComponentContent(ani_env* env, ani_object obj, ani_long ptr, ani_long buildNodePtr, ani_object options)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!env || !modifier) {
+        return;
+    }
+    AniOverlayOptions opt;
+    ParseOverlayOptions(env, options, opt);
+    modifier->getCommonAniModifier()->setOverlayComponent(ptr, buildNodePtr, opt);
+}
 } // namespace OHOS::Ace::Ani

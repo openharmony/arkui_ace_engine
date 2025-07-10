@@ -35100,6 +35100,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return (Ark_ImageBitmap) 300;
     }
     } // OffscreenCanvasRenderingContext2DAccessor
+    namespace OverlayOpsAccessor {
+    void SetOverlayAttributeImpl(Ark_NativePointer node,
+                                    const Opt_Union_String_CustomBuilder* value,
+                                    const Opt_OverlayOptions* options)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setOverlayAttribute(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // OverlayOpsAccessor
     namespace OffscreenCanvasAccessor {
     void DestroyPeerImpl(Ark_OffscreenCanvas peer)
     {
@@ -44203,6 +44220,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DragDropOpsAccessor::RegisterOnDragStartImpl,
         };
         return &DragDropOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUIOverlayOpsAccessor* GetOverlayOpsAccessor()
+    {
+        static const GENERATED_ArkUIOverlayOpsAccessor OverlayOpsAccessorImpl {
+            OverlayOpsAccessor::SetOverlayAttributeImpl,
+        };
+        return &OverlayOpsAccessorImpl;
     }
 
     const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor()

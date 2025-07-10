@@ -16,13 +16,13 @@
 import { int32 } from "@koalaui/common"
 import { PeerNode } from "arkui/PeerNode"
 import { KPointer } from "@koalaui/interop"
-import { ArkCommonMethodComponent, DragDropOps, DragEvent, CustomBuilder, DragItemInfo, PreviewConfiguration, OnDragEventCallback, DropOptions } from '../component'
+import { ArkCommonMethodComponent, DragDropOps, DragEvent, CustomBuilder, DragItemInfo, PreviewConfiguration,
+    OnDragEventCallback, DropOptions } from '../component'
 import { InteropNativeModule, runtimeType, RuntimeType, toPeerPtr} from "@koalaui/interop"
 import { ArkUIAniModule } from "arkui.ani"
 import { createUiDetachedRoot } from "arkui/ArkUIEntry"
-import { ArkComponentRootPeer } from "arkui/component";
+import { ArkComponentRootPeer } from "arkui/component"
 import { PixelMap, UniformDataType, DataSyncOptions} from "#external"
-
 export class HookDragInfo {
     pixelMap?: PixelMap;
     id?: string;
@@ -47,7 +47,6 @@ export class HookDragInfo {
         }
     }
 }
-
 
 export function hookRegisterOnDragStartImpl(node: ArkCommonMethodComponent, onDragStartCallback: (((event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo) | undefined)): void {
     DragDropOps.registerOnDragStart(node.getPeer().getPeerPtr(), (node: KPointer, dragEvent: DragEvent, extraParam: string) => {

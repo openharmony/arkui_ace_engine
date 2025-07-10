@@ -17241,6 +17241,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // OffscreenCanvasRenderingContext2DAccessor
+    namespace OverlayOpsAccessor {
+    void SetOverlayAttributeImpl(Ark_NativePointer node,
+                                    const Opt_Union_String_CustomBuilder* value,
+                                    const Opt_OverlayOptions* options)
+    {
+    }
+    } // OverlayOpsAccessor
     namespace OffscreenCanvasAccessor {
     void DestroyPeerImpl(Ark_OffscreenCanvas peer)
     {

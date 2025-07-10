@@ -63,6 +63,12 @@ struct ArkUIDragInfo {
     bool delayCreating = false;
 };
 
+struct AniOverlayOptions {
+    int32_t alignment = 0;
+    float x = 0.0f;
+    float y = 0.0f;
+};
+
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
     void (*setDrawableDescriptor)(ArkUINodeHandle node, void* drawablem, int type);
@@ -133,6 +139,7 @@ struct ArkUIAniCommonModifier {
     void (*onMeasureInnerMeasure)(ani_env* env, ani_long ptr);
     void (*onLayoutInnerLayout)(ani_env* env, ani_long ptr);
     void (*setParallelScoped)(ani_boolean parallel);
+    void (*setOverlayComponent)(ani_long node, ani_long builderPtr, AniOverlayOptions options);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);

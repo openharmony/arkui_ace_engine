@@ -41,7 +41,7 @@ import { CircleShape, EllipseShape, PathShape, RectShape } from "../../component
 import { FocusBoxStyle, FocusPriority } from "../../component/focus"
 import { TransformationMatrix } from "../../component/arkui-common"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "../../component/gesture"
-import { ComponentContent } from "../../component/arkui-custom"
+import { ComponentContent } from 'arkui/ComponentContent'
 import { BlendMode } from "../../component/common"
 import { InteropNativeModule } from '@koalaui/interop';
 

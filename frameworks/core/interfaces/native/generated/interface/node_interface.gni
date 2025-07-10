@@ -206,6 +206,7 @@ generated_sources = [
   "implementation/node_content_accessor.cpp",
   "implementation/offscreen_canvas_accessor.cpp",
   "implementation/offscreen_canvas_rendering_context2d_accessor.cpp",
+  "implementation/overlay_accessor.cpp",
   "implementation/pan_gesture_event_accessor.cpp",
   "implementation/pan_gesture_interface_accessor.cpp",
   "implementation/pan_gesture_options_accessor.cpp",
