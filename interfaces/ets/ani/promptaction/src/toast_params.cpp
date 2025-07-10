@@ -15,8 +15,6 @@
 
 #include "toast_params.h"
 
-#include "prompt_action_utils.h"
-
 std::unordered_map<std::string, int> alignmentMap = {
     {"TopStart", 0},
     {"Top", 1},
@@ -29,7 +27,7 @@ std::unordered_map<std::string, int> alignmentMap = {
     {"BottomEnd", 8}
 };
 
-bool GetToastBottom(ani_env* env, ani_object object, std::string& result)
+bool GetToastBottom(ani_env *env, ani_object object, std::string& result)
 {
     ani_ref resultRef;
     ani_status status = env->Object_GetPropertyByName_Ref(object, "bottom", &resultRef);
@@ -54,7 +52,7 @@ bool GetToastBottom(ani_env* env, ani_object object, std::string& result)
     return false;
 }
 
-bool GetToastShowMode(ani_env* env, ani_object object, OHOS::Ace::NG::ToastShowMode& result)
+bool GetToastShowMode(ani_env *env, ani_object object, OHOS::Ace::NG::ToastShowMode& result)
 {
     int32_t resultInt;
     if (!GetEnumInt(env, object, "showMode", "L@ohos/promptAction/promptAction/ToastShowMode;", resultInt)) {
@@ -64,7 +62,7 @@ bool GetToastShowMode(ani_env* env, ani_object object, OHOS::Ace::NG::ToastShowM
     return true;
 }
 
-bool GetToastAlignment(ani_env* env, ani_object object, int32_t& result)
+bool GetToastAlignment(ani_env *env, ani_object object, int32_t& result)
 {
     std::string resultStr;
     if (!GetEnumString(env, object, "alignment", "Larkui/component/enums/Alignment;", resultStr)) {
@@ -80,7 +78,7 @@ bool GetToastAlignment(ani_env* env, ani_object object, int32_t& result)
     return false;
 }
 
-bool GetToastShadow(ani_env* env, ani_object object, std::optional<OHOS::Ace::Shadow>& result, bool& isTypeStyleShadow)
+bool GetToastShadow(ani_env *env, ani_object object, std::optional<OHOS::Ace::Shadow>& result, bool& isTypeStyleShadow)
 {
     ani_ref resultRef;
     ani_status status = env->Object_GetPropertyByName_Ref(object, "shadow", &resultRef);
@@ -119,9 +117,7 @@ bool GetShowToastOptions(ani_env* env, ani_object object, OHOS::Ace::NG::ToastIn
     }
 
     GetResourceStrParam(env, object, "message", result.message);
-    double duration = 0;
-    GetDoubleParam(env, object, "duration", duration);
-    result.duration = static_cast<int32_t>(duration);
+    GetInt32Param(env, object, "duration", result.duration);
     GetToastBottom(env, object, result.bottom);
     GetToastShowMode(env, object, result.showMode);
     GetToastAlignment(env, object, result.alignment);
@@ -133,54 +129,4 @@ bool GetShowToastOptions(ani_env* env, ani_object object, OHOS::Ace::NG::ToastIn
     GetBoolParam(env, object, "enableHoverMode", result.enableHoverMode);
     GetHoverModeAreaParam(env, object, result.hoverModeArea);
     return true;
-}
-
-std::function<void(int32_t)> GetToastPromise(std::shared_ptr<PromptActionAsyncContext>& asyncContext)
-{
-    auto callback = [asyncContext](int32_t toastId) mutable {
-        if (!asyncContext) {
-            return;
-        }
-        auto container = OHOS::Ace::AceEngine::Get().GetContainer(asyncContext->instanceId);
-        if (!container) {
-            return;
-        }
-        auto taskExecutor = container->GetTaskExecutor();
-        if (!taskExecutor) {
-            return;
-        }
-        auto task = [asyncContext, toastId]() {
-            if (asyncContext == nullptr || !asyncContext->deferred || asyncContext->env == nullptr) {
-                return;
-            }
-            ani_size nrRefs = 16;
-            asyncContext->env->CreateLocalScope(nrRefs);
-            if (!nrRefs) {
-                return;
-            }
-            if (toastId > 0) {
-                double returnToastId = static_cast<double>(toastId);
-                ani_object toastIdObj = CreateANIDoubleObject(asyncContext->env, returnToastId);
-                ani_ref toastRef = static_cast<ani_ref>(toastIdObj);
-                ani_status status = asyncContext->env->PromiseResolver_Resolve(asyncContext->deferred, toastRef);
-                if (status != ANI_OK) {
-                    TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] PromiseResolver_Resolve fail.");
-                }
-            } else {
-                int32_t errorCode = OHOS::Ace::ERROR_CODE_INTERNAL_ERROR;
-                std::string errorMsg = OHOS::Ace::Ani::GetErrorMsg(errorCode);
-                ani_ref errorRef = CreateBusinessError(asyncContext->env, errorCode, errorMsg);
-                ani_error error = static_cast<ani_error>(errorRef);
-                ani_status status = asyncContext->env->PromiseResolver_Reject(asyncContext->deferred, error);
-                if (status != ANI_OK) {
-                    TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] PromiseResolver_Reject fail.");
-                }
-            }
-            asyncContext->env->DestroyLocalScope();
-        };
-        taskExecutor->PostTask(
-            std::move(task), OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomToastIdCallback");
-        asyncContext = nullptr;
-    };
-    return callback;
 }
