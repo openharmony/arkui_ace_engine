@@ -188,6 +188,8 @@ ArkUINativeModuleValue CounterBridge::SetCounterSize(ArkUIRuntimeCallInfo* runti
         auto widthRawPtr = AceType::RawPtr(widthResObj);
         GetArkUINodeModifiers()->getCounterModifier()->setCounterWidthRes(
             nativeNode, width.Value(), static_cast<int>(width.Unit()), widthRawPtr);
+    } else {
+        GetArkUINodeModifiers()->getCounterModifier()->resetCounterWidth(nativeNode);
     }
     CalcDimension height;
     RefPtr<ResourceObject> heightResObj;
@@ -196,6 +198,8 @@ ArkUINativeModuleValue CounterBridge::SetCounterSize(ArkUIRuntimeCallInfo* runti
         auto heightRawPtr = AceType::RawPtr(heightResObj);
         GetArkUINodeModifiers()->getCounterModifier()->setCounterHeightRes(
             nativeNode, height.Value(), static_cast<int>(height.Unit()), heightRawPtr);
+    } else {
+        GetArkUINodeModifiers()->getCounterModifier()->resetCounterHeight(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
