@@ -117,8 +117,6 @@ void ParamsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //NavigatorModelNG::SetParams(frameNode, convValue);
     LOGE("NavigatorAttributeModifier::ParamsImpl - the CustomObjects is not implemented yet!");
 }
 } // NavigatorAttributeModifier
