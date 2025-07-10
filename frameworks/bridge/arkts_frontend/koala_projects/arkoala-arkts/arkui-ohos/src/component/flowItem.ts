@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -45,16 +45,12 @@ export class ArkFlowItemPeer extends ArkCommonMethodPeer {
 export type FlowItemInterface = () => FlowItemAttribute;
 export interface FlowItemAttribute extends CommonMethod {
 }
-export interface UIFlowItemAttribute extends UICommonMethod {
-}
 export class ArkFlowItemStyle extends ArkCommonMethodStyle implements FlowItemAttribute {
 }
-/** @memo:stable */
-export class ArkFlowItemComponent extends ArkCommonMethodComponent implements UIFlowItemAttribute {
+export class ArkFlowItemComponent extends ArkCommonMethodComponent implements FlowItemAttribute {
     getPeer(): ArkFlowItemPeer {
         return (this.peer as ArkFlowItemPeer)
     }
-    /** @memo */
     public setFlowItemOptions(): this {
         if (this.checkPriority("setFlowItemOptions")) {
             this.getPeer()?.setFlowItemOptionsAttribute()
@@ -71,7 +67,7 @@ export class ArkFlowItemComponent extends ArkCommonMethodComponent implements UI
 /** @memo */
 export function FlowItem(
     /** @memo */
-    style: ((attributes: UIFlowItemAttribute) => void) | undefined,
+    style: ((attributes: FlowItemAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

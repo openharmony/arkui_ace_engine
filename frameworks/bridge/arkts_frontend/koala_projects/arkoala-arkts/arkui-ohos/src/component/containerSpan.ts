@@ -58,23 +58,16 @@ export type ContainerSpanInterface = () => ContainerSpanAttribute;
 export interface ContainerSpanAttribute {
     textBackgroundStyle(value: TextBackgroundStyle | undefined): this
 }
-export interface UIContainerSpanAttribute {
-    /** @memo */
-    textBackgroundStyle(value: TextBackgroundStyle | undefined): this
-    /** @memo */
-}
 export class ArkContainerSpanStyle implements ContainerSpanAttribute {
     textBackgroundStyle_value?: TextBackgroundStyle | undefined
     public textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
         return this
         }
 }
-/** @memo:stable */
-export class ArkContainerSpanComponent extends ComponentBase implements UIContainerSpanAttribute {
+export class ArkContainerSpanComponent extends ComponentBase implements ContainerSpanAttribute {
     getPeer(): ArkContainerSpanPeer {
         return (this.peer as ArkContainerSpanPeer)
     }
-    /** @memo */
     public setContainerSpanOptions(): this {
         if (this.checkPriority("setContainerSpanOptions")) {
             this.getPeer()?.setContainerSpanOptionsAttribute()
@@ -82,7 +75,6 @@ export class ArkContainerSpanComponent extends ComponentBase implements UIContai
         }
         return this
     }
-    /** @memo */
     public textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
         if (this.checkPriority("textBackgroundStyle")) {
             const value_casted = value as (TextBackgroundStyle | undefined)
@@ -100,7 +92,7 @@ export class ArkContainerSpanComponent extends ComponentBase implements UIContai
 /** @memo */
 export function ContainerSpan(
     /** @memo */
-    style: ((attributes: UIContainerSpanAttribute) => void) | undefined,
+    style: ((attributes: ContainerSpanAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
@@ -164,19 +164,6 @@ export interface RadioAttribute extends CommonMethod {
     contentModifier(value: ContentModifier | undefined): this
     _onChangeEvent_checked(callback: ((select: boolean | undefined) => void)): void
 }
-export interface UIRadioAttribute extends UICommonMethod {
-    /** @memo */
-    checked(value: boolean | undefined): this
-    /** @memo */
-    onChange(value: ((isVisible: boolean) => void) | undefined | OnRadioChangeCallback | undefined): this
-    /** @memo */
-    radioStyle(value: RadioStyle | undefined): this
-    /** @memo */
-    contentModifier(value: ContentModifier | undefined): this
-    /** @memo */
-    _onChangeEvent_checked(callback: ((select: boolean | undefined) => void)): void
-    /** @memo */
-}
 export class ArkRadioStyle extends ArkCommonMethodStyle implements RadioAttribute {
     checked_value?: boolean | undefined
     onChange_value?: ((isVisible: boolean) => void) | undefined
@@ -203,12 +190,10 @@ export interface RadioConfiguration extends CommonConfiguration {
     checked: boolean;
     triggerChange: ((isVisible: boolean) => void);
 }
-/** @memo:stable */
-export class ArkRadioComponent extends ArkCommonMethodComponent implements UIRadioAttribute {
+export class ArkRadioComponent extends ArkCommonMethodComponent implements RadioAttribute {
     getPeer(): ArkRadioPeer {
         return (this.peer as ArkRadioPeer)
     }
-    /** @memo */
     public setRadioOptions(options: RadioOptions): this {
         if (this.checkPriority("setRadioOptions")) {
             const options_casted = options as (RadioOptions)
@@ -217,7 +202,6 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements UIRad
         }
         return this
     }
-    /** @memo */
     public checked(value: boolean | undefined): this {
         if (this.checkPriority("checked")) {
             const value_type = runtimeType(value)
@@ -235,7 +219,6 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements UIRad
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((isVisible: boolean) => void) | undefined | OnRadioChangeCallback | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_type = runtimeType(value)
@@ -253,7 +236,6 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements UIRad
         }
         return this
     }
-    /** @memo */
     public radioStyle(value: RadioStyle | undefined): this {
         if (this.checkPriority("radioStyle")) {
             const value_casted = value as (RadioStyle | undefined)
@@ -262,7 +244,6 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements UIRad
         }
         return this
     }
-    /** @memo */
     public contentModifier(value: ContentModifier | undefined): this {
         if (this.checkPriority("contentModifier")) {
             const value_type = runtimeType(value)
@@ -280,7 +261,6 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements UIRad
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_checked(callback: ((select: boolean | undefined) => void)): void {
         if (this.checkPriority("_onChangeEvent_checked")) {
             const callback_casted = callback as (((select: boolean | undefined) => void))
@@ -298,7 +278,7 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements UIRad
 /** @memo */
 export function Radio(
     /** @memo */
-    style: ((attributes: UIRadioAttribute) => void) | undefined,
+    style: ((attributes: RadioAttribute) => void) | undefined,
     options: RadioOptions,
     /** @memo */
     content_?: (() => void) | undefined,

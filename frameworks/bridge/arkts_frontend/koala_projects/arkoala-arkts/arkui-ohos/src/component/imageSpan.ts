@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkBaseSpanPeer, BaseSpan, ArkBaseSpanComponent, ArkBaseSpanStyle, UIBaseSpan } from "./span"
+import { ArkBaseSpanPeer, BaseSpan, ArkBaseSpanComponent, ArkBaseSpanStyle } from "./span"
 import { ImageSpanAlignment, ImageFit } from "./enums"
 import { ColorFilter, ResourceStr } from "./units"
 import { DrawingColorFilter } from "./arkui-drawing"
@@ -33,7 +33,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
-import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
 export class ArkImageSpanPeer extends ArkBaseSpanPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -166,21 +166,6 @@ export interface ImageSpanAttribute extends BaseSpan {
     onError(value: ImageErrorCallback | undefined): this
     alt(value: PixelMap | undefined): this
 }
-export interface UIImageSpanAttribute extends UIBaseSpan {
-    /** @memo */
-    verticalAlign(value: ImageSpanAlignment | undefined): this
-    /** @memo */
-    colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this
-    /** @memo */
-    objectFit(value: ImageFit | undefined): this
-    /** @memo */
-    onComplete(value: ImageCompleteCallback | undefined): this
-    /** @memo */
-    onError(value: ImageErrorCallback | undefined): this
-    /** @memo */
-    alt(value: PixelMap | undefined): this
-    /** @memo */
-}
 export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttribute {
     verticalAlign_value?: ImageSpanAlignment | undefined
     colorFilter_value?: ColorFilter | DrawingColorFilter | undefined
@@ -219,12 +204,10 @@ export interface ImageLoadResult {
     contentOffsetX: number;
     contentOffsetY: number;
 }
-/** @memo:stable */
-export class ArkImageSpanComponent extends ArkBaseSpanComponent implements UIImageSpanAttribute {
+export class ArkImageSpanComponent extends ArkBaseSpanComponent implements ImageSpanAttribute {
     getPeer(): ArkImageSpanPeer {
         return (this.peer as ArkImageSpanPeer)
     }
-    /** @memo */
     public setImageSpanOptions(value: ResourceStr | PixelMap): this {
         if (this.checkPriority("setImageSpanOptions")) {
             const value_casted = value as (ResourceStr | PixelMap)
@@ -233,7 +216,6 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public verticalAlign(value: ImageSpanAlignment | undefined): this {
         if (this.checkPriority("verticalAlign")) {
             const value_casted = value as (ImageSpanAlignment | undefined)
@@ -242,7 +224,6 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
         if (this.checkPriority("colorFilter")) {
             const value_casted = value as (ColorFilter | DrawingColorFilter | undefined)
@@ -251,7 +232,6 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public objectFit(value: ImageFit | undefined): this {
         if (this.checkPriority("objectFit")) {
             const value_casted = value as (ImageFit | undefined)
@@ -260,7 +240,6 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public onComplete(value: ImageCompleteCallback | undefined): this {
         if (this.checkPriority("onComplete")) {
             const value_casted = value as (ImageCompleteCallback | undefined)
@@ -269,7 +248,6 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public onError(value: ImageErrorCallback | undefined): this {
         if (this.checkPriority("onError")) {
             const value_casted = value as (ImageErrorCallback | undefined)
@@ -278,7 +256,6 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements UIIma
         }
         return this
     }
-    /** @memo */
     public alt(value: PixelMap | undefined): this {
         if (this.checkPriority("alt")) {
             const value_casted = value as (PixelMap | undefined)
@@ -296,7 +273,7 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements UIIma
 /** @memo */
 export function ImageSpan(
     /** @memo */
-    style: ((attributes: UIImageSpanAttribute) => void) | undefined,
+    style: ((attributes: ImageSpanAttribute) => void) | undefined,
     value: ResourceStr | PixelMap,
     /** @memo */
     content_?: (() => void) | undefined,

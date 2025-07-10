@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, UICommonShapeMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
 import { Point } from "./point"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -81,23 +81,16 @@ export type PolygonInterface = (options?: PolygonOptions) => PolygonAttribute;
 export interface PolygonAttribute extends CommonShapeMethod {
     points(value: Array<ShapePoint> | undefined): this
 }
-export interface UIPolygonAttribute extends UICommonShapeMethod {
-    /** @memo */
-    points(value: Array<ShapePoint> | undefined): this
-    /** @memo */
-}
 export class ArkPolygonStyle extends ArkCommonShapeMethodStyle implements PolygonAttribute {
     points_value?: Array<ShapePoint> | undefined
     public points(value: Array<ShapePoint> | undefined): this {
         return this
         }
 }
-/** @memo:stable */
-export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implements UIPolygonAttribute {
+export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implements PolygonAttribute {
     getPeer(): ArkPolygonPeer {
         return (this.peer as ArkPolygonPeer)
     }
-    /** @memo */
     public setPolygonOptions(options?: PolygonOptions): this {
         if (this.checkPriority("setPolygonOptions")) {
             const options_casted = options as (PolygonOptions | undefined)
@@ -106,7 +99,6 @@ export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implement
         }
         return this
     }
-    /** @memo */
     public points(value: Array<ShapePoint> | undefined): this {
         if (this.checkPriority("points")) {
             const value_casted = value as (Array<ShapePoint> | undefined)
@@ -124,7 +116,7 @@ export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implement
 /** @memo */
 export function Polygon(
     /** @memo */
-    style: ((attributes: UIPolygonAttribute) => void) | undefined,
+    style: ((attributes: PolygonAttribute) => void) | undefined,
     options?: PolygonOptions,
     /** @memo */
     content_?: (() => void) | undefined,

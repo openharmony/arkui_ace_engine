@@ -516,6 +516,12 @@ export class ArkCommonAttributeSet implements CommonAttribute {
   public focusBox(value: FocusBoxStyle | undefined): this {
       return this
   }
+  public animationStart(value: AnimateParam | undefined): this {
+    return this
+  }
+  public animationStop(value: AnimateParam | undefined): this {
+    return this
+  }
   public animation(value: AnimateParam | undefined): this {
       return this
   }
@@ -934,7 +940,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
       }
       return this;
    }
-   onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+   onClick(event: ((event: ClickEvent) => void) | undefined): this {
       if (event) {
          modifierWithKey(this._modifiersWithKeys, OnClickModifier.identity, OnClickModifier.factory, event);
       } else {
@@ -942,8 +948,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
       }
       return this;
    }
-   attributeModifier(modifier: AttributeModifier<CommonMethod> | undefined): this {
-      return this;
-   }
-
+    public attributeModifier<T>(value: AttributeModifier<T>): this {
+        return this
+    }
 }

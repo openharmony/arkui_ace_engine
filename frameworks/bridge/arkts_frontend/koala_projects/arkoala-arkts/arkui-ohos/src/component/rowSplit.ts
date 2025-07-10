@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -58,23 +58,16 @@ export type RowSplitInterface = () => RowSplitAttribute;
 export interface RowSplitAttribute extends CommonMethod {
     resizeable(value: boolean | undefined): this
 }
-export interface UIRowSplitAttribute extends UICommonMethod {
-    /** @memo */
-    resizeable(value: boolean | undefined): this
-    /** @memo */
-}
 export class ArkRowSplitStyle extends ArkCommonMethodStyle implements RowSplitAttribute {
     resizeable_value?: boolean | undefined
     public resizeable(value: boolean | undefined): this {
         return this
         }
 }
-/** @memo:stable */
-export class ArkRowSplitComponent extends ArkCommonMethodComponent implements UIRowSplitAttribute {
+export class ArkRowSplitComponent extends ArkCommonMethodComponent implements RowSplitAttribute {
     getPeer(): ArkRowSplitPeer {
         return (this.peer as ArkRowSplitPeer)
     }
-    /** @memo */
     public setRowSplitOptions(): this {
         if (this.checkPriority("setRowSplitOptions")) {
             this.getPeer()?.setRowSplitOptionsAttribute()
@@ -82,7 +75,6 @@ export class ArkRowSplitComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public resizeable(value: boolean | undefined): this {
         if (this.checkPriority("resizeable")) {
             const value_casted = value as (boolean | undefined)
@@ -100,7 +92,7 @@ export class ArkRowSplitComponent extends ArkCommonMethodComponent implements UI
 /** @memo */
 export function RowSplit(
     /** @memo */
-    style: ((attributes: UIRowSplitAttribute) => void) | undefined,
+    style: ((attributes: RowSplitAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

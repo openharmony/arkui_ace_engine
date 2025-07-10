@@ -27,7 +27,6 @@ import { PanDirection, SwipeDirection, GestureMode, Callback_GestureEvent_Void, 
 import { ResourceStr, Font, ResourceColor } from "./units"
 import { Resource } from "global/resource"
 import { SourceTool, AnimateParam, SheetOptions, KeyEvent } from "./common"
-import { Callback_Void } from "./abilityComponent"
 import { TextPickerDialogOptions } from "./textPicker"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Frame } from "../Graphics"

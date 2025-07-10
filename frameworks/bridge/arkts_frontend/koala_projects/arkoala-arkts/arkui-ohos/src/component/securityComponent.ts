@@ -755,77 +755,6 @@ export interface SecurityComponentMethod {
     enabled(value: boolean | undefined): this
     chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this
 }
-export interface UISecurityComponentMethod {
-    /** @memo */
-    iconSize(value: Dimension | undefined): this
-    /** @memo */
-    layoutDirection(value: SecurityComponentLayoutDirection | undefined): this
-    /** @memo */
-    position(value: Position | undefined): this
-    /** @memo */
-    markAnchor(value: Position | undefined): this
-    /** @memo */
-    offset(value: Position | Edges | LocalizedEdges | undefined): this
-    /** @memo */
-    fontSize(value: Dimension | undefined): this
-    /** @memo */
-    fontStyle(value: FontStyle | undefined): this
-    /** @memo */
-    fontWeight(value: number | FontWeight | string | undefined): this
-    /** @memo */
-    fontFamily(value: string | Resource | undefined): this
-    /** @memo */
-    fontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    iconColor(value: ResourceColor | undefined): this
-    /** @memo */
-    backgroundColor(value: ResourceColor | undefined): this
-    /** @memo */
-    borderStyle(value: BorderStyle | undefined): this
-    /** @memo */
-    borderWidth(value: Dimension | undefined): this
-    /** @memo */
-    borderColor(value: ResourceColor | undefined): this
-    /** @memo */
-    borderRadius(value: Dimension | undefined | Dimension | BorderRadiuses | undefined): this
-    /** @memo */
-    padding(value: Padding | Dimension | undefined): this
-    /** @memo */
-    textIconSpace(value: Dimension | undefined): this
-    /** @memo */
-    key(value: string | undefined): this
-    /** @memo */
-    width(value: Length | undefined): this
-    /** @memo */
-    height(value: Length | undefined): this
-    /** @memo */
-    size(value: SizeOptions | undefined): this
-    /** @memo */
-    constraintSize(value: ConstraintSizeOptions | undefined): this
-    /** @memo */
-    align(value: Alignment | undefined): this
-    /** @memo */
-    alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this
-    /** @memo */
-    id(value: string | undefined): this
-    /** @memo */
-    minFontScale(value: number | Resource | undefined): this
-    /** @memo */
-    maxFontScale(value: number | Resource | undefined): this
-    /** @memo */
-    maxLines(value: number | undefined): this
-    /** @memo */
-    minFontSize(value: number | string | Resource | undefined): this
-    /** @memo */
-    maxFontSize(value: number | string | Resource | undefined): this
-    /** @memo */
-    heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this
-    /** @memo */
-    enabled(value: boolean | undefined): this
-    /** @memo */
-    chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this
-    /** @memo */
-}
 export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod {
     iconSize_value?: Dimension | undefined
     layoutDirection_value?: SecurityComponentLayoutDirection | undefined
@@ -963,12 +892,10 @@ export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod 
         return this
         }
 }
-/** @memo:stable */
-export class ArkSecurityComponentMethodComponent extends ComponentBase implements UISecurityComponentMethod {
+export class ArkSecurityComponentMethodComponent extends ComponentBase implements SecurityComponentMethod {
     getPeer(): ArkSecurityComponentMethodPeer {
         return (this.peer as ArkSecurityComponentMethodPeer)
     }
-    /** @memo */
     public iconSize(value: Dimension | undefined): this {
         if (this.checkPriority("iconSize")) {
             const value_casted = value as (Dimension | undefined)
@@ -977,7 +904,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public layoutDirection(value: SecurityComponentLayoutDirection | undefined): this {
         if (this.checkPriority("layoutDirection")) {
             const value_casted = value as (SecurityComponentLayoutDirection | undefined)
@@ -986,7 +912,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public position(value: Position | undefined): this {
         if (this.checkPriority("position")) {
             const value_casted = value as (Position | undefined)
@@ -995,7 +920,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public markAnchor(value: Position | undefined): this {
         if (this.checkPriority("markAnchor")) {
             const value_casted = value as (Position | undefined)
@@ -1004,7 +928,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public offset(value: Position | Edges | LocalizedEdges | undefined): this {
         if (this.checkPriority("offset")) {
             const value_casted = value as (Position | Edges | LocalizedEdges | undefined)
@@ -1013,7 +936,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public fontSize(value: Dimension | undefined): this {
         if (this.checkPriority("fontSize")) {
             const value_casted = value as (Dimension | undefined)
@@ -1022,7 +944,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public fontStyle(value: FontStyle | undefined): this {
         if (this.checkPriority("fontStyle")) {
             const value_casted = value as (FontStyle | undefined)
@@ -1031,7 +952,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public fontWeight(value: number | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
             const value_casted = value as (number | FontWeight | string | undefined)
@@ -1040,7 +960,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public fontFamily(value: string | Resource | undefined): this {
         if (this.checkPriority("fontFamily")) {
             const value_casted = value as (string | Resource | undefined)
@@ -1049,7 +968,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public fontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("fontColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1058,7 +976,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public iconColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("iconColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1067,7 +984,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public backgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("backgroundColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1076,7 +992,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public borderStyle(value: BorderStyle | undefined): this {
         if (this.checkPriority("borderStyle")) {
             const value_casted = value as (BorderStyle | undefined)
@@ -1085,7 +1000,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public borderWidth(value: Dimension | undefined): this {
         if (this.checkPriority("borderWidth")) {
             const value_casted = value as (Dimension | undefined)
@@ -1094,7 +1008,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public borderColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("borderColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1103,7 +1016,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public borderRadius(value: Dimension | undefined | Dimension | BorderRadiuses | undefined): this {
         if (this.checkPriority("borderRadius")) {
             const value_type = runtimeType(value)
@@ -1121,7 +1033,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public padding(value: Padding | Dimension | undefined): this {
         if (this.checkPriority("padding")) {
             const value_casted = value as (Padding | Dimension | undefined)
@@ -1130,7 +1041,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public textIconSpace(value: Dimension | undefined): this {
         if (this.checkPriority("textIconSpace")) {
             const value_casted = value as (Dimension | undefined)
@@ -1139,7 +1049,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public key(value: string | undefined): this {
         if (this.checkPriority("key")) {
             const value_casted = value as (string | undefined)
@@ -1148,7 +1057,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public width(value: Length | undefined): this {
         if (this.checkPriority("width")) {
             const value_casted = value as (Length | undefined)
@@ -1157,7 +1065,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public height(value: Length | undefined): this {
         if (this.checkPriority("height")) {
             const value_casted = value as (Length | undefined)
@@ -1166,7 +1073,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public size(value: SizeOptions | undefined): this {
         if (this.checkPriority("size")) {
             const value_casted = value as (SizeOptions | undefined)
@@ -1175,7 +1081,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public constraintSize(value: ConstraintSizeOptions | undefined): this {
         if (this.checkPriority("constraintSize")) {
             const value_casted = value as (ConstraintSizeOptions | undefined)
@@ -1184,7 +1089,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public align(value: Alignment | undefined): this {
         if (this.checkPriority("align")) {
             const value_casted = value as (Alignment | undefined)
@@ -1193,7 +1097,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this {
         if (this.checkPriority("alignRules")) {
             const value_type = runtimeType(value)
@@ -1211,7 +1114,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public id(value: string | undefined): this {
         if (this.checkPriority("id")) {
             const value_casted = value as (string | undefined)
@@ -1220,7 +1122,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public minFontScale(value: number | Resource | undefined): this {
         if (this.checkPriority("minFontScale")) {
             const value_casted = value as (number | Resource | undefined)
@@ -1229,7 +1130,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public maxFontScale(value: number | Resource | undefined): this {
         if (this.checkPriority("maxFontScale")) {
             const value_casted = value as (number | Resource | undefined)
@@ -1238,7 +1138,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public maxLines(value: number | undefined): this {
         if (this.checkPriority("maxLines")) {
             const value_casted = value as (number | undefined)
@@ -1247,7 +1146,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public minFontSize(value: number | string | Resource | undefined): this {
         if (this.checkPriority("minFontSize")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -1256,7 +1154,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public maxFontSize(value: number | string | Resource | undefined): this {
         if (this.checkPriority("maxFontSize")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -1265,7 +1162,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
         if (this.checkPriority("heightAdaptivePolicy")) {
             const value_casted = value as (TextHeightAdaptivePolicy | undefined)
@@ -1274,7 +1170,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public enabled(value: boolean | undefined): this {
         if (this.checkPriority("enabled")) {
             const value_casted = value as (boolean | undefined)
@@ -1283,7 +1178,6 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
     public chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
         if (this.checkPriority("chainMode")) {
             const direction_casted = direction as (Axis | undefined)

@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, UICommonShapeMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -58,16 +58,12 @@ export interface EllipseOptions {
 export type EllipseInterface = (options?: EllipseOptions) => EllipseAttribute;
 export interface EllipseAttribute extends CommonShapeMethod {
 }
-export interface UIEllipseAttribute extends UICommonShapeMethod {
-}
 export class ArkEllipseStyle extends ArkCommonShapeMethodStyle implements EllipseAttribute {
 }
-/** @memo:stable */
-export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implements UIEllipseAttribute {
+export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implements EllipseAttribute {
     getPeer(): ArkEllipsePeer {
         return (this.peer as ArkEllipsePeer)
     }
-    /** @memo */
     public setEllipseOptions(options?: EllipseOptions): this {
         if (this.checkPriority("setEllipseOptions")) {
             const options_casted = options as (EllipseOptions | undefined)
@@ -85,7 +81,7 @@ export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implement
 /** @memo */
 export function Ellipse(
     /** @memo */
-    style: ((attributes: UIEllipseAttribute) => void) | undefined,
+    style: ((attributes: EllipseAttribute) => void) | undefined,
     options?: EllipseOptions,
     /** @memo */
     content_?: (() => void) | undefined,

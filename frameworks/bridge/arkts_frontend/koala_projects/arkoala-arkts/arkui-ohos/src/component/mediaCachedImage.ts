@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkImagePeer, ImageAttribute, ArkImageComponent, ArkImageStyle, UIImageAttribute } from "./image"
+import { ArkImagePeer, ImageAttribute, ArkImageComponent, ArkImageStyle } from "./image"
 import { PixelMap } from "./arkui-pixelmap"
 import { ResourceStr } from "./units"
 import { DrawableDescriptor } from "./arkui-drawabledescriptor"
@@ -31,7 +31,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
-import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
 export class ArkMediaCachedImagePeer extends ArkImagePeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -89,17 +89,12 @@ export interface ASTCResource {
 export type MediaCachedImageInterface = (src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource) => MediaCachedImageAttribute;
 export interface MediaCachedImageAttribute extends ImageAttribute {
 }
-export interface UIMediaCachedImageAttribute extends UIImageAttribute {
-    /** @memo */
-}
 export class ArkMediaCachedImageStyle extends ArkImageStyle implements MediaCachedImageAttribute {
 }
-/** @memo:stable */
-export class ArkMediaCachedImageComponent extends ArkImageComponent implements UIMediaCachedImageAttribute {
+export class ArkMediaCachedImageComponent extends ArkImageComponent implements MediaCachedImageAttribute {
     getPeer(): ArkMediaCachedImagePeer {
         return (this.peer as ArkMediaCachedImagePeer)
     }
-    /** @memo */
     public setMediaCachedImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): this {
         if (this.checkPriority("setMediaCachedImageOptions")) {
             const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor | ASTCResource)
@@ -117,7 +112,7 @@ export class ArkMediaCachedImageComponent extends ArkImageComponent implements U
 /** @memo */
 export function MediaCachedImage(
     /** @memo */
-    style: ((attributes: UIMediaCachedImageAttribute) => void) | undefined,
+    style: ((attributes: MediaCachedImageAttribute) => void) | undefined,
     src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource,
     /** @memo */
     content_?: (() => void) | undefined,

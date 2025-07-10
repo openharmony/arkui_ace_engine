@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { LengthMetrics } from "../Graphics"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -96,13 +96,6 @@ export interface LazyGridLayoutAttribute extends CommonMethod {
     rowsGap(value: LengthMetrics | undefined): this
     columnsGap(value: LengthMetrics | undefined): this
 }
-export interface UILazyGridLayoutAttribute extends UICommonMethod {
-    /** @memo */
-    rowsGap(value: LengthMetrics | undefined): this
-    /** @memo */
-    columnsGap(value: LengthMetrics | undefined): this
-    /** @memo */
-}
 export class ArkLazyGridLayoutStyle extends ArkCommonMethodStyle implements LazyGridLayoutAttribute {
     rowsGap_value?: LengthMetrics | undefined
     columnsGap_value?: LengthMetrics | undefined
@@ -116,23 +109,16 @@ export class ArkLazyGridLayoutStyle extends ArkCommonMethodStyle implements Lazy
 export interface LazyVGridLayoutAttribute extends LazyGridLayoutAttribute {
     columnsTemplate(value: string | undefined): this
 }
-export interface UILazyVGridLayoutAttribute extends UILazyGridLayoutAttribute {
-    /** @memo */
-    columnsTemplate(value: string | undefined): this
-    /** @memo */
-}
 export class ArkLazyVGridLayoutStyle extends ArkLazyGridLayoutStyle implements LazyVGridLayoutAttribute {
     columnsTemplate_value?: string | undefined
     public columnsTemplate(value: string | undefined): this {
         return this
         }
 }
-/** @memo:stable */
-export class ArkLazyGridLayoutComponent extends ArkCommonMethodComponent implements UILazyGridLayoutAttribute {
+export class ArkLazyGridLayoutComponent extends ArkCommonMethodComponent implements LazyGridLayoutAttribute {
     getPeer(): ArkLazyGridLayoutPeer {
         return (this.peer as ArkLazyGridLayoutPeer)
     }
-    /** @memo */
     public rowsGap(value: LengthMetrics | undefined): this {
         if (this.checkPriority("rowsGap")) {
             const value_casted = value as (LengthMetrics | undefined)
@@ -141,7 +127,6 @@ export class ArkLazyGridLayoutComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public columnsGap(value: LengthMetrics | undefined): this {
         if (this.checkPriority("columnsGap")) {
             const value_casted = value as (LengthMetrics | undefined)
@@ -156,12 +141,10 @@ export class ArkLazyGridLayoutComponent extends ArkCommonMethodComponent impleme
         super.applyAttributesFinish()
     }
 }
-/** @memo:stable */
-export class ArkLazyVGridLayoutComponent extends ArkLazyGridLayoutComponent implements UILazyVGridLayoutAttribute {
+export class ArkLazyVGridLayoutComponent extends ArkLazyGridLayoutComponent implements LazyVGridLayoutAttribute {
     getPeer(): ArkLazyVGridLayoutPeer {
         return (this.peer as ArkLazyVGridLayoutPeer)
     }
-    /** @memo */
     public setLazyVGridLayoutOptions(): this {
         if (this.checkPriority("setLazyVGridLayoutOptions")) {
             this.getPeer()?.setLazyVGridLayoutOptionsAttribute()
@@ -169,7 +152,6 @@ export class ArkLazyVGridLayoutComponent extends ArkLazyGridLayoutComponent impl
         }
         return this
     }
-    /** @memo */
     public columnsTemplate(value: string | undefined): this {
         if (this.checkPriority("columnsTemplate")) {
             const value_casted = value as (string | undefined)
@@ -187,7 +169,7 @@ export class ArkLazyVGridLayoutComponent extends ArkLazyGridLayoutComponent impl
 /** @memo */
 export function LazyVGridLayout(
     /** @memo */
-    style: ((attributes: UILazyVGridLayoutAttribute) => void) | undefined,
+    style: ((attributes: LazyVGridLayoutAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

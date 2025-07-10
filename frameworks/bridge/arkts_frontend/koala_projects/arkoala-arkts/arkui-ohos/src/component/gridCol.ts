@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -139,15 +139,6 @@ export interface GridColAttribute extends CommonMethod {
     gridColOffset(value: number | GridColColumnOption | undefined): this
     order(value: number | GridColColumnOption | undefined): this
 }
-export interface UIGridColAttribute extends UICommonMethod {
-    /** @memo */
-    span(value: number | GridColColumnOption | undefined): this
-    /** @memo */
-    gridColOffset(value: number | GridColColumnOption | undefined): this
-    /** @memo */
-    order(value: number | GridColColumnOption | undefined): this
-    /** @memo */
-}
 export class ArkGridColStyle extends ArkCommonMethodStyle implements GridColAttribute {
     span_value?: number | GridColColumnOption | undefined
     gridColOffset_value?: number | GridColColumnOption | undefined
@@ -162,12 +153,10 @@ export class ArkGridColStyle extends ArkCommonMethodStyle implements GridColAttr
         return this
         }
 }
-/** @memo:stable */
-export class ArkGridColComponent extends ArkCommonMethodComponent implements UIGridColAttribute {
+export class ArkGridColComponent extends ArkCommonMethodComponent implements GridColAttribute {
     getPeer(): ArkGridColPeer {
         return (this.peer as ArkGridColPeer)
     }
-    /** @memo */
     public setGridColOptions(option?: GridColOptions): this {
         if (this.checkPriority("setGridColOptions")) {
             const option_casted = option as (GridColOptions | undefined)
@@ -176,7 +165,6 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements UIG
         }
         return this
     }
-    /** @memo */
     public span(value: number | GridColColumnOption | undefined): this {
         if (this.checkPriority("span")) {
             const value_casted = value as (number | GridColColumnOption | undefined)
@@ -185,7 +173,6 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements UIG
         }
         return this
     }
-    /** @memo */
     public gridColOffset(value: number | GridColColumnOption | undefined): this {
         if (this.checkPriority("gridColOffset")) {
             const value_casted = value as (number | GridColColumnOption | undefined)
@@ -194,7 +181,6 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements UIG
         }
         return this
     }
-    /** @memo */
     public order(value: number | GridColColumnOption | undefined): this {
         if (this.checkPriority("order")) {
             const value_casted = value as (number | GridColColumnOption | undefined)
@@ -212,7 +198,7 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements UIG
 /** @memo */
 export function GridCol(
     /** @memo */
-    style: ((attributes: UIGridColAttribute) => void) | undefined,
+    style: ((attributes: GridColAttribute) => void) | undefined,
     option?: GridColOptions,
     /** @memo */
     content_?: (() => void) | undefined,

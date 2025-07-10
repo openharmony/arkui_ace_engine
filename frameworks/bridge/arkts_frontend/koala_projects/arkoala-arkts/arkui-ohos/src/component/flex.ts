@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -81,23 +81,16 @@ export type FlexInterface = (value?: FlexOptions) => FlexAttribute;
 export interface FlexAttribute extends CommonMethod {
     pointLight(value: PointLightStyle | undefined): this
 }
-export interface UIFlexAttribute extends UICommonMethod {
-    /** @memo */
-    pointLight(value: PointLightStyle | undefined): this
-    /** @memo */
-}
 export class ArkFlexStyle extends ArkCommonMethodStyle implements FlexAttribute {
     pointLight_value?: PointLightStyle | undefined
     public pointLight(value: PointLightStyle | undefined): this {
         return this
         }
 }
-/** @memo:stable */
-export class ArkFlexComponent extends ArkCommonMethodComponent implements UIFlexAttribute {
+export class ArkFlexComponent extends ArkCommonMethodComponent implements FlexAttribute {
     getPeer(): ArkFlexPeer {
         return (this.peer as ArkFlexPeer)
     }
-    /** @memo */
     public setFlexOptions(value?: FlexOptions): this {
         if (this.checkPriority("setFlexOptions")) {
             const value_casted = value as (FlexOptions | undefined)
@@ -106,7 +99,6 @@ export class ArkFlexComponent extends ArkCommonMethodComponent implements UIFlex
         }
         return this
     }
-    /** @memo */
     public pointLight(value: PointLightStyle | undefined): this {
         if (this.checkPriority("pointLight")) {
             const value_casted = value as (PointLightStyle | undefined)
@@ -124,7 +116,7 @@ export class ArkFlexComponent extends ArkCommonMethodComponent implements UIFlex
 /** @memo */
 export function Flex(
     /** @memo */
-    style: ((attributes: UIFlexAttribute) => void) | undefined,
+    style: ((attributes: FlexAttribute) => void) | undefined,
     value?: FlexOptions,
     /** @memo */
     content_?: (() => void) | undefined,

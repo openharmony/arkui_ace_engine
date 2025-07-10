@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -129,17 +129,6 @@ export interface NavigatorAttribute extends CommonMethod {
     target(value: string | undefined): this
     params(value: Object | undefined): this
 }
-export interface UINavigatorAttribute extends UICommonMethod {
-    /** @memo */
-    active(value: boolean | undefined): this
-    /** @memo */
-    type(value: NavigationType | undefined): this
-    /** @memo */
-    target(value: string | undefined): this
-    /** @memo */
-    params(value: Object | undefined): this
-    /** @memo */
-}
 export class ArkNavigatorStyle extends ArkCommonMethodStyle implements NavigatorAttribute {
     active_value?: boolean | undefined
     type_value?: NavigationType | undefined
@@ -158,12 +147,10 @@ export class ArkNavigatorStyle extends ArkCommonMethodStyle implements Navigator
         return this
         }
 }
-/** @memo:stable */
-export class ArkNavigatorComponent extends ArkCommonMethodComponent implements UINavigatorAttribute {
+export class ArkNavigatorComponent extends ArkCommonMethodComponent implements NavigatorAttribute {
     getPeer(): ArkNavigatorPeer {
         return (this.peer as ArkNavigatorPeer)
     }
-    /** @memo */
     public setNavigatorOptions(value?: Literal_String_target_NavigationType_type): this {
         if (this.checkPriority("setNavigatorOptions")) {
             const value_type = runtimeType(value)
@@ -172,7 +159,6 @@ export class ArkNavigatorComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public active(value: boolean | undefined): this {
         if (this.checkPriority("active")) {
             const value_casted = value as (boolean | undefined)
@@ -181,7 +167,6 @@ export class ArkNavigatorComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public type(value: NavigationType | undefined): this {
         if (this.checkPriority("type")) {
             const value_casted = value as (NavigationType | undefined)
@@ -190,7 +175,6 @@ export class ArkNavigatorComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public target(value: string | undefined): this {
         if (this.checkPriority("target")) {
             const value_casted = value as (string | undefined)
@@ -199,7 +183,6 @@ export class ArkNavigatorComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public params(value: Object | undefined): this {
         if (this.checkPriority("params")) {
             const value_casted = value as (Object | undefined)
@@ -217,7 +200,7 @@ export class ArkNavigatorComponent extends ArkCommonMethodComponent implements U
 /** @memo */
 export function Navigator(
     /** @memo */
-    style: ((attributes: UINavigatorAttribute) => void) | undefined,
+    style: ((attributes: NavigatorAttribute) => void) | undefined,
     value?: Literal_String_target_NavigationType_type,
     /** @memo */
     content_?: (() => void) | undefined,

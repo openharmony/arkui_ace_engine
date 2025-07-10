@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Resource } from "global/resource"
 import { ResourceColor } from "./units"
 import { FontWeight, Color } from "./enums"
@@ -453,25 +453,6 @@ export interface SymbolGlyphAttribute extends CommonMethod {
     maxFontScale(value: number | Resource | undefined): this
     symbolEffect(symbolEffect: SymbolEffect | undefined, isActive?: boolean | number): this
 }
-export interface UISymbolGlyphAttribute extends UICommonMethod {
-    /** @memo */
-    fontSize(value: number | string | Resource | undefined): this
-    /** @memo */
-    fontColor(value: Array<ResourceColor> | undefined): this
-    /** @memo */
-    fontWeight(value: number | FontWeight | string | undefined): this
-    /** @memo */
-    effectStrategy(value: SymbolEffectStrategy | undefined): this
-    /** @memo */
-    renderingStrategy(value: SymbolRenderingStrategy | undefined): this
-    /** @memo */
-    minFontScale(value: number | Resource | undefined): this
-    /** @memo */
-    maxFontScale(value: number | Resource | undefined): this
-    /** @memo */
-    symbolEffect(symbolEffect: SymbolEffect | undefined, isActive?: boolean | number): this
-    /** @memo */
-}
 export class ArkSymbolGlyphStyle extends ArkCommonMethodStyle implements SymbolGlyphAttribute {
     fontSize_value?: number | string | Resource | undefined
     fontColor_value?: Array<ResourceColor> | undefined
@@ -505,12 +486,10 @@ export class ArkSymbolGlyphStyle extends ArkCommonMethodStyle implements SymbolG
         return this
         }
 }
-/** @memo:stable */
-export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements UISymbolGlyphAttribute {
+export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements SymbolGlyphAttribute {
     getPeer(): ArkSymbolGlyphPeer {
         return (this.peer as ArkSymbolGlyphPeer)
     }
-    /** @memo */
     public setSymbolGlyphOptions(value?: Resource): this {
         if (this.checkPriority("setSymbolGlyphOptions")) {
             const value_casted = value as (Resource | undefined)
@@ -519,7 +498,6 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public fontSize(value: number | string | Resource | undefined): this {
         if (this.checkPriority("fontSize")) {
             const value_casted = value as (number | string | Resource | undefined)
@@ -528,7 +506,6 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public fontColor(value: Array<ResourceColor> | undefined): this {
         if (this.checkPriority("fontColor")) {
             const value_casted = value as (Array<ResourceColor> | undefined)
@@ -537,7 +514,6 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public fontWeight(value: number | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
             const value_casted = value as (number | FontWeight | string | undefined)
@@ -546,7 +522,6 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public effectStrategy(value: SymbolEffectStrategy | undefined): this {
         if (this.checkPriority("effectStrategy")) {
             const value_casted = value as (SymbolEffectStrategy | undefined)
@@ -555,7 +530,6 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
         if (this.checkPriority("renderingStrategy")) {
             const value_casted = value as (SymbolRenderingStrategy | undefined)
@@ -564,7 +538,6 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public minFontScale(value: number | Resource | undefined): this {
         if (this.checkPriority("minFontScale")) {
             const value_casted = value as (number | Resource | undefined)
@@ -573,7 +546,6 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public maxFontScale(value: number | Resource | undefined): this {
         if (this.checkPriority("maxFontScale")) {
             const value_casted = value as (number | Resource | undefined)
@@ -582,7 +554,6 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public symbolEffect(symbolEffect: SymbolEffect | undefined, isActive?: boolean | number | undefined): this {
         if (this.checkPriority("symbolEffect")) {
             const symbolEffect_type = runtimeType(symbolEffect)
@@ -612,7 +583,7 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
 /** @memo */
 export function SymbolGlyph(
     /** @memo */
-    style: ((attributes: UISymbolGlyphAttribute) => void) | undefined,
+    style: ((attributes: SymbolGlyphAttribute) => void) | undefined,
     value?: Resource,
     /** @memo */
     content_?: (() => void) | undefined,
