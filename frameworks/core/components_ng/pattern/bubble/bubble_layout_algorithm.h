@@ -276,6 +276,7 @@ private:
         OffsetF& bottomPosition, const SizeF& childSize);
     void GetPositionWithPlacement(
         OffsetF& childPosition, OffsetF& arrowPosition, const SizeF& childSize, Placement placement);
+    void UpdateContentPositionRange(float& xMin, float& xMax, float& yMin, float& yMax);
     ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
     OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
     SizeF GetPopupMaxWidthAndHeight(bool showInSubWindow, const RefPtr<FrameNode>& frameNode);
