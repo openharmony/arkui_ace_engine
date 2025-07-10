@@ -49,6 +49,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/CommonModifier.ets",
   "arkui-preprocessed/arkui/ComponentBase.ets",
   "arkui-preprocessed/arkui/ComponentContent.ets",
+  "arkui-preprocessed/arkui/component/commonOps.ets",
   "arkui-preprocessed/arkui/Content.ets",
   "arkui-preprocessed/arkui/DataChangeListener.ets",
   "arkui-preprocessed/arkui/DividerModifier.ets",

@@ -24174,6 +24174,23 @@ typedef struct GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor 
                                  Ark_Int64 time);
 } GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor;
 
+typedef struct GENERATED_ArkUICommonMethodOpsAccessor {
+    void (*VisualEffectHandWrittenImpl)(Ark_NativePointer node,
+                                        Ark_Int64 value);
+    void (*BackgroundFilterHandWrittenImpl)(Ark_NativePointer node,
+                                            Ark_Int64 value);
+    void (*ForegroundFilterHandWrittenImpl)(Ark_NativePointer node,
+                                            Ark_Int64 value);
+    void (*CompositingFilterHandWrittenImpl)(Ark_NativePointer node,
+                                             Ark_Int64 value);
+    void (*AdvancedBlendModeObjectImpl)(Ark_NativePointer node,
+                                        Ark_Int64 effect,
+                                        const Opt_BlendApplyType* type);
+    void (*AdvancedBlendModeEnumImpl)(Ark_NativePointer node,
+                                      const Opt_BlendMode* effect,
+                                      const Opt_BlendApplyType* type);
+} GENERATED_ArkUICommonMethodOpsAccessor;
+
 typedef struct GENERATED_ArkUICommonShapeAccessor {
     void (*destroyPeer)(Ark_CommonShape peer);
     Ark_CommonShape (*ctor)();
@@ -27647,6 +27664,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIWebviewControllerAccessor* (*getWebviewControllerAccessor)();
     const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* (*getGlobalScope_ohos_arkui_componentSnapshotAccessor)();
     const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor* (*getGlobalScope_ohos_arkui_performanceMonitorAccessor)();
+    const GENERATED_ArkUICommonMethodOpsAccessor* (*getCommonMethodOpsAccessor)();
     const GENERATED_ArkUICommonShapeAccessor* (*getCommonShapeAccessor)();
     const GENERATED_ArkUIBaseShapeAccessor* (*getBaseShapeAccessor)();
     const GENERATED_ArkUIRectShapeAccessor* (*getRectShapeAccessor)();

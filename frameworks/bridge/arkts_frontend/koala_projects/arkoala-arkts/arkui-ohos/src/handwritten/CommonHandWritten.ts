@@ -13,7 +13,12 @@
  * limitations under the License.
  */
 
-import { ArkCommonMethodComponent, Gesture, GestureGroup, GestureMask, GestureModifier, GestureType, AnimateParam, AnimationExtender } from "../component"
+import { ArkCommonMethodComponent, Gesture, GestureGroup, GestureMask, GestureModifier, GestureType, BlendMode, BlendApplyType, AnimateParam, AnimationExtender } from "../component"
+import { commonMethodOps} from 'arkui/component'
+import { Filter, VisualEffect, BrightnessBlender } from "#external"
+import { KPointer, RuntimeType, runtimeType } from "@koalaui/interop"
+import {ArkUIGeneratedNativeModule } from "#components"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 
 export function hookCommonMethodGestureImpl(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
     if (gesture instanceof Gesture) {
@@ -55,6 +60,65 @@ export function hookCommonMethodGestureModifierImpl(commonMethod: ArkCommonMetho
     value_casted.applyGesture(gestureEvent);
 }
 
+export function hookCommonMethodVisualEffectImpl(commonMethod: ArkCommonMethodComponent, value: VisualEffect | undefined) {
+    if (value === undefined) {
+        return;
+    }
+    if (commonMethod.getPeer()) {
+        const node_casted = commonMethod.getPeer().peer.ptr as (KPointer)
+        const value_casted = Object.values(value)[0] as (int64)
+        commonMethodOps.VisualEffectHandWrittenImpl(node_casted, value_casted)
+    }
+}
+
+export function hookCommonMethodBackgroundFilterImpl(commonMethod: ArkCommonMethodComponent, value: Filter | undefined) {
+    if (value === undefined) {
+        return;
+    }
+    if (commonMethod.getPeer()) {
+        const node_casted = commonMethod.getPeer().peer.ptr as (KPointer)
+        const value_casted = Object.values(value)[0] as (int64)
+        commonMethodOps.BackgroundFilterHandWrittenImpl(node_casted, value_casted)
+    }
+}
+
+export function hookCommonMethodForegroundFilterImpl(commonMethod: ArkCommonMethodComponent, value: Filter | undefined) {
+    if (value === undefined) {
+        return;
+    }
+    if (commonMethod.getPeer()) {
+        const node_casted = commonMethod.getPeer().peer.ptr as (KPointer)
+        const value_casted = Object.values(value)[0] as (int64)
+        commonMethodOps.ForegroundFilterHandWrittenImpl(node_casted, value_casted)
+    }
+}
+
+export function hookCommonMethodCompositingFilterImpl(commonMethod: ArkCommonMethodComponent, value: Filter | undefined) {
+    if (value === undefined) {
+        return;
+    }
+    if (commonMethod.getPeer()) {
+        const node_casted = commonMethod.getPeer().peer.ptr as (KPointer)
+        const value_casted = Object.values(value)[0] as (int64)
+        commonMethodOps.CompositingFilterHandWrittenImpl(node_casted, value_casted)
+    }
+}
+
+export function hookCommonMethodAdvancedBlendModeImpl(commonMethod: ArkCommonMethodComponent, effect: BlendMode | BrightnessBlender | undefined, type?: BlendApplyType) {
+    if (effect === undefined) {
+        return;
+    }
+    const node_casted = commonMethod.getPeer().peer.ptr as (KPointer)
+    const type_casted = type as (BlendApplyType | undefined)
+    if (runtimeType(effect) == RuntimeType.OBJECT) {
+        const value_casted = Object.values(effect)[0] as (int64)
+        commonMethodOps.AdvancedBlendModeObjectImpl(node_casted, value_casted, type_casted)
+    } else {
+        const value_casted = effect as (BlendMode | undefined)
+        commonMethodOps.AdvancedBlendModeEnumImpl(node_casted, value_casted, type_casted)
+    }
+    return
+}
 
 export class CommonMethodHandWritten {
     static hookCommonMethodAnimateToImmediatelyImpl(value: AnimateParam, event: (() => void)): void {

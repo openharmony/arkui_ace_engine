@@ -33291,6 +33291,56 @@ Ark_NativePointer impl_CommonShape_getFinalizer() {
         return GetAccessors()->getCommonShapeAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(CommonShape_getFinalizer, Ark_NativePointer)
+void impl_commonMethodOps_VisualEffectHandWrittenImpl(Ark_NativePointer node, KLong value) {
+        GetAccessors()->getCommonMethodOpsAccessor()->VisualEffectHandWrittenImpl(node, value);
+}
+KOALA_INTEROP_DIRECT_V2(commonMethodOps_VisualEffectHandWrittenImpl, Ark_NativePointer, KLong)
+void impl_commonMethodOps_BackgroundFilterHandWrittenImpl(Ark_NativePointer node, KLong value) {
+        GetAccessors()->getCommonMethodOpsAccessor()->BackgroundFilterHandWrittenImpl(node, value);
+}
+KOALA_INTEROP_DIRECT_V2(commonMethodOps_BackgroundFilterHandWrittenImpl, Ark_NativePointer, KLong)
+void impl_commonMethodOps_ForegroundFilterHandWrittenImpl(Ark_NativePointer node, KLong value) {
+        GetAccessors()->getCommonMethodOpsAccessor()->ForegroundFilterHandWrittenImpl(node, value);
+}
+KOALA_INTEROP_DIRECT_V2(commonMethodOps_ForegroundFilterHandWrittenImpl, Ark_NativePointer, KLong)
+void impl_commonMethodOps_CompositingFilterHandWrittenImpl(Ark_NativePointer node, KLong value) {
+        GetAccessors()->getCommonMethodOpsAccessor()->CompositingFilterHandWrittenImpl(node, value);
+}
+KOALA_INTEROP_DIRECT_V2(commonMethodOps_CompositingFilterHandWrittenImpl, Ark_NativePointer, KLong)
+void impl_commonMethodOps_AdvancedBlendModeObjectImpl(Ark_NativePointer node, KLong effect, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto type_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_BlendApplyType type_value_buf = {};
+        type_value_buf.tag = type_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (type_value_buf_runtimeType))
+        {
+            type_value_buf.value = static_cast<Ark_BlendApplyType>(thisDeserializer.readInt32());
+        }
+        Opt_BlendApplyType type_value = type_value_buf;;
+        GetAccessors()->getCommonMethodOpsAccessor()->AdvancedBlendModeObjectImpl(node, effect, (const Opt_BlendApplyType*)&type_value);
+}
+KOALA_INTEROP_DIRECT_V4(commonMethodOps_AdvancedBlendModeObjectImpl, Ark_NativePointer, KLong, KSerializerBuffer, int32_t)
+void impl_commonMethodOps_AdvancedBlendModeEnumImpl(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto effect_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_BlendMode effect_value_buf = {};
+        effect_value_buf.tag = effect_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (effect_value_buf_runtimeType))
+        {
+            effect_value_buf.value = static_cast<Ark_BlendMode>(thisDeserializer.readInt32());
+        }
+        Opt_BlendMode effect_value = effect_value_buf;;
+        const auto type_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_BlendApplyType type_value_buf = {};
+        type_value_buf.tag = type_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (type_value_buf_runtimeType))
+        {
+            type_value_buf.value = static_cast<Ark_BlendApplyType>(thisDeserializer.readInt32());
+        }
+        Opt_BlendApplyType type_value = type_value_buf;;
+        GetAccessors()->getCommonMethodOpsAccessor()->AdvancedBlendModeEnumImpl(node, (const Opt_BlendMode*)&effect_value, (const Opt_BlendApplyType*)&type_value);
+}
+KOALA_INTEROP_DIRECT_V3(commonMethodOps_AdvancedBlendModeEnumImpl, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_CommonShape_offset(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_CommonShape self = reinterpret_cast<Ark_CommonShape>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);

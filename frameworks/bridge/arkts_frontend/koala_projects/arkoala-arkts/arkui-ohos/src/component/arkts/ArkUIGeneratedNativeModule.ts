@@ -4100,6 +4100,18 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GlobalScope_ohos_arkui_performanceMonitor_recordInputEventTime(actionType: KInt, sourceType: KInt, time: KLong): void
     @ani.unsafe.Direct
+    native static _commonMethodOps_VisualEffectHandWrittenImpl(node: KPointer, value: KLong): void
+    @ani.unsafe.Direct
+    native static _commonMethodOps_BackgroundFilterHandWrittenImpl(node: KPointer, value: KLong): void
+    @ani.unsafe.Direct
+    native static _commonMethodOps_ForegroundFilterHandWrittenImpl(node: KPointer, value: KLong): void
+    @ani.unsafe.Direct
+    native static _commonMethodOps_CompositingFilterHandWrittenImpl(node: KPointer, value: KLong): void
+    @ani.unsafe.Direct
+    native static _commonMethodOps_AdvancedBlendModeObjectImpl(node: KPointer, effect: KLong, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _commonMethodOps_AdvancedBlendModeEnumImpl(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _CommonShape_ctor(): KPointer
     @ani.unsafe.Direct
     native static _CommonShape_getFinalizer(): KPointer

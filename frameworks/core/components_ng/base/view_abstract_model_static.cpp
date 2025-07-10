@@ -681,6 +681,37 @@ void ViewAbstractModelStatic::SetOnAccessibilityHover(FrameNode* frameNode,
     eventHub->SetAccessibilityHoverEvent(std::move(onAccessibilityHoverEventFunc));
 }
 
+void ViewAbstractModelStatic::SetVisualEffect(FrameNode* frameNode,
+    const OHOS::Rosen::VisualEffect* visualEffect)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(VisualEffect, visualEffect, frameNode);
+}
+
+void ViewAbstractModelStatic::SetBackgroundFilter(FrameNode* frameNode,
+    const OHOS::Rosen::Filter* backgroundFilter)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundFilter, backgroundFilter, frameNode);
+}
+
+void ViewAbstractModelStatic::SetForegroundFilter(FrameNode* frameNode,
+    const OHOS::Rosen::Filter* foregroundFilter)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundFilter, foregroundFilter, frameNode);
+}
+
+void ViewAbstractModelStatic::SetCompositingFilter(FrameNode* frameNode,
+    const OHOS::Rosen::Filter* compositingFilter)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(CompositingFilter, compositingFilter, frameNode);
+}
+
+void ViewAbstractModelStatic::SetBrightnessBlender(FrameNode* frameNode,
+    const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender, frameNode);
+}
+
 void ViewAbstractModelStatic::SetBloom(FrameNode *frameNode, const std::optional<float>& value,
     const RefPtr<ThemeConstants>& themeConstants)
 {
