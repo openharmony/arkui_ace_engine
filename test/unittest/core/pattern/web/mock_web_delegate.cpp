@@ -1189,6 +1189,10 @@ bool WebDelegate::OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NW
 {
     return false;
 }
+bool WebDelegate::OnSetFaviconCallback(std::shared_ptr<FaviconReceivedEvent> param)
+{
+    return false;
+}
 std::string WebDelegate::GetCanonicalEncodingName(const std::string& alias_name) const
 {
     return "";

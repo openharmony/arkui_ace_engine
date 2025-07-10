@@ -1657,6 +1657,25 @@ HWTEST_F(WebModelTestNg, JavaScriptOnHeadReady032, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOpenAppLinkFunction026
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetFaviconFunction001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    WebModelNG webModelNG;
+    auto SetFaviconFunction = [&callCount](const std::shared_ptr<BaseEventInfo>& info) { callCount++; };
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    webModelNG.SetFaviconFunction(std::move(SetFaviconFunction));
+    webPattern->setFaviconCallback_(nullptr);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
  * @tc.name: SetFirstMeaningfulPaintId001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC

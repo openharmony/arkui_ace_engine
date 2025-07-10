@@ -3928,9 +3928,13 @@ ArkUINativeModuleValue WebBridge::SetOnFaviconReceived(ArkUIRuntimeCallInfo* run
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         const char* keys[] = { "favicon" };
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateFaviconReceivedHandler(event);
+        if (handlerObj.IsEmpty()) {
+            return;
+        }
         Local<JSValueRef> values[] = { handlerObj->GetLocalHandle() };
 
-        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        Local<panda::ObjectRef> eventObject = panda::ObjectRef::NewWithNamedProperties(
+            vm, ArraySize(keys), keys, values);
         eventObject->SetNativePointerFieldCount(vm, CALL_ARG_1);
         eventObject->SetNativePointerField(vm, CALL_ARG_0, static_cast<void*>(&event));
         panda::Local<panda::JSValueRef> params[1] = { eventObject };
