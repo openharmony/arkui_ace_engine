@@ -582,6 +582,7 @@ bool PanRecognizer::HandlePanAccept()
         return true;
     }
     if (CheckLimitFinger()) {
+        extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
         return false;
     }
     if (IsBridgeMode()) {
@@ -594,6 +595,7 @@ bool PanRecognizer::HandlePanAccept()
 
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    extraInfo_ += "cancel received.";
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
                                                                   : static_cast<int32_t>(MouseAction::CANCEL);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
@@ -614,6 +616,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
+    extraInfo_ += "cancel received.";
     isTouchEventFinished_ = false;
     lastAction_ = static_cast<int32_t>(AxisAction::CANCEL);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
@@ -834,6 +837,14 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type)
 {
     std::string callbackName = GetCallbackName(callback);
+    if (type == GestureCallbackType::START || type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
+        std::string callbackTypeStr = (type == GestureCallbackType::START) ? "START" :
+            (type == GestureCallbackType::END) ? "END" : "CANCEL";
+        extraInfo_ += " " + callbackTypeStr
+            + " cBk: " + std::to_string((callback && *callback))
+            + " isE: "  + std::to_string(IsEnabled())
+            + " gIn: " + std::to_string((!gestureInfo_ || !gestureInfo_->GetDisposeTag()));
+    }
     ACE_SCOPED_TRACE("PanRecognizer %s, mainDelta: %f", callbackName.c_str(), mainDelta_);
     if ((type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) && !IsEnabled()) {
         if (panEndOnDisableState_ && *panEndOnDisableState_ && (!gestureInfo_ || !gestureInfo_->GetDisposeTag())) {

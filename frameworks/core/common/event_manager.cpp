@@ -965,6 +965,8 @@ void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
         for (auto stateHistory : stateHistorys) {
             if (stateHistory.procedure.find("Down") != std::string::npos) {
                 gestureLog += ", prcd: Down";
+            } else if (stateHistory.procedure.find("Move") != std::string::npos) {
+                gestureLog += ", prcd: Move";
             } else {
                 gestureLog += ", prcd: Up";
             }

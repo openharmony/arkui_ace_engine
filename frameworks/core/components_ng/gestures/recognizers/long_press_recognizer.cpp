@@ -312,6 +312,7 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
         return;
     }
     if (CheckLimitFinger()) {
+        extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
