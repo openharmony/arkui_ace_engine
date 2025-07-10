@@ -825,6 +825,7 @@ public:
 
     void MarkScrollBarProxyDirty();
 protected:
+    void SuggestOpIncGroup(bool flag);
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     RefPtr<ScrollBar> GetScrollBar() const
