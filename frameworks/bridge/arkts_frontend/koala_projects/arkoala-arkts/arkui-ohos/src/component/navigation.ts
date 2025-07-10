@@ -190,13 +190,6 @@ export class NavPathStack implements MaterializedBase {
         const param_type = runtimeType(param)
         const onPop_type = runtimeType(onPop)
         const animated_type = runtimeType(animated)
-        // if (((RuntimeType.BOOLEAN == onPop_type) || (RuntimeType.UNDEFINED == onPop_type)) && (RuntimeType.UNDEFINED == animated_type)) {
-        //     const name_casted = name as (string)
-        //     const param_casted = param as (Object)
-        //     const animated_unknown = onPop as (unknown)
-        //     const animated_casted = animated_unknown as (boolean | undefined)
-        //     return this.pushDestinationByName0_serialize(name_casted, param_casted, animated_casted)
-        // }
         if ((RuntimeType.FUNCTION == onPop_type) && ((RuntimeType.BOOLEAN == animated_type) || (RuntimeType.UNDEFINED == animated_type))) {
             const name_casted = name as (string)
             const param_casted = param as (Object)
@@ -1903,22 +1896,6 @@ export function Navigation(
                     receiver.updateNeedSync(true)
                 })
             })
-            // NavExtender.setOnPopCallback(pathInfos!, (id: string) => {
-            //     const result = PathStackUtils.result
-            //     if (runtimeType(result) === RuntimeType.UNDEFINED) {
-            //         return
-            //     }
-            //     const info = PathStackUtils.getNavPathInfoById(id)
-            //     if (runtimeType(info) === RuntimeType.UNDEFINED) {
-            //         return
-            //     }
-            //     const onPop = info!.onPop
-            //     if (runtimeType(onPop) === RuntimeType.UNDEFINED) {
-            //         return;
-            //     }
-            //     const popInfo: PopInfo = {result: result!, info: info!}
-            //     onPop!(popInfo)
-            // })
         }
         receiver.applyAttributesFinish()
     })

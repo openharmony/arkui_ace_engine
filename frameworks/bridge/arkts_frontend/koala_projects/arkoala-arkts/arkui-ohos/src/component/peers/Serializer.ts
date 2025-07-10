@@ -1871,7 +1871,6 @@ export class Serializer extends SerializerBase {
             const value_style_value  = (value_style as CancelButtonStyle)
             valueSerializer.writeInt32(TypeChecker.CancelButtonStyle_ToNumeric(value_style_value))
         }
-        // const value_icon  = value.icon
         /* when symbol modifier implemented, please remove undefined */
         const value_icon  = undefined
         let value_icon_type : int32 = RuntimeType.UNDEFINED
@@ -13942,14 +13941,6 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_icon_value_1)
             }
         }
-        // const value_symbolIcon  = value.symbolIcon
-        // let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        // value_symbolIcon_type = runtimeType(value_symbolIcon)
-        // valueSerializer.writeInt8(value_symbolIcon_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_symbolIcon_type)) {
-        //     const value_symbolIcon_value  = value_symbolIcon!
-        //     valueSerializer.writeSymbolGlyphModifier(value_symbolIcon_value)
-        // }
         const value_enabled  = value.enabled
         let value_enabled_type : int32 = RuntimeType.UNDEFINED
         value_enabled_type = runtimeType(value_enabled)
@@ -14049,14 +14040,6 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_startIcon_value_1)
             }
         }
-        // const value_symbolStartIcon  = value.symbolStartIcon
-        // let value_symbolStartIcon_type : int32 = RuntimeType.UNDEFINED
-        // value_symbolStartIcon_type = runtimeType(value_symbolStartIcon)
-        // valueSerializer.writeInt8(value_symbolStartIcon_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_symbolStartIcon_type)) {
-        //     const value_symbolStartIcon_value  = value_symbolStartIcon!
-        //     valueSerializer.writeSymbolGlyphModifier(value_symbolStartIcon_value)
-        // }
         const value_content  = value.content
         let value_content_type : int32 = RuntimeType.UNDEFINED
         value_content_type = runtimeType(value_content)
@@ -14095,14 +14078,6 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_endIcon_value_1)
             }
         }
-        // const value_symbolEndIcon  = value.symbolEndIcon
-        // let value_symbolEndIcon_type : int32 = RuntimeType.UNDEFINED
-        // value_symbolEndIcon_type = runtimeType(value_symbolEndIcon)
-        // valueSerializer.writeInt8(value_symbolEndIcon_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_symbolEndIcon_type)) {
-        //     const value_symbolEndIcon_value  = value_symbolEndIcon!
-        //     valueSerializer.writeSymbolGlyphModifier(value_symbolEndIcon_value)
-        // }
         const value_labelInfo  = value.labelInfo
         let value_labelInfo_type : int32 = RuntimeType.UNDEFINED
         value_labelInfo_type = runtimeType(value_labelInfo)
@@ -14326,14 +14301,8 @@ export class Serializer extends SerializerBase {
             }
         }
         // TBD: Symbol cannot be realized at present.
-        // const value_symbolIcon  = value.symbolIcon
         let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        // value_symbolIcon_type = runtimeType(value_symbolIcon)
         valueSerializer.writeInt8(value_symbolIcon_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_symbolIcon_type)) {
-        //     const value_symbolIcon_value  = value_symbolIcon!
-        //     valueSerializer.writeSymbolGlyphModifier(value_symbolIcon_value)
-        // }
         const value_isEnabled  = value.isEnabled
         let value_isEnabled_type : int32 = RuntimeType.UNDEFINED
         value_isEnabled_type = runtimeType(value_isEnabled)
@@ -15898,14 +15867,8 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_icon_value_1)
             }
         }
-        // const value_symbolIcon  = value.symbolIcon
         let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        // value_symbolIcon_type = runtimeType(value_symbolIcon)
         valueSerializer.writeInt8(value_symbolIcon_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_symbolIcon_type)) {
-        //     const value_symbolIcon_value  = value_symbolIcon!
-        //     valueSerializer.writeSymbolGlyphModifier(value_symbolIcon_value)
-        // }
     }
     writeShadowOptions(value: ShadowOptions): void {
         let valueSerializer : Serializer = this
@@ -17216,14 +17179,8 @@ export class Serializer extends SerializerBase {
             }
         }
         // TBD: Symbol cannot be realized at present.
-        // const value_symbolIcon  = value.symbolIcon
         let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        // value_symbolIcon_type = runtimeType(value_symbolIcon)
         valueSerializer.writeInt8(value_symbolIcon_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_symbolIcon_type)) {
-        //     const value_symbolIcon_value  = value_symbolIcon!
-        //     valueSerializer.writeSymbolGlyphModifier(value_symbolIcon_value)
-        // }
         const value_action  = value.action
         let value_action_type : int32 = RuntimeType.UNDEFINED
         value_action_type = runtimeType(value_action)
@@ -17259,14 +17216,8 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_activeIcon_value_1)
             }
         }
-        // const value_activeSymbolIcon  = value.activeSymbolIcon
         let value_activeSymbolIcon_type : int32 = RuntimeType.UNDEFINED
-        // value_activeSymbolIcon_type = runtimeType(value_activeSymbolIcon)
         valueSerializer.writeInt8(value_activeSymbolIcon_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_activeSymbolIcon_type)) {
-        //     const value_activeSymbolIcon_value  = value_activeSymbolIcon!
-        //     valueSerializer.writeSymbolGlyphModifier(value_activeSymbolIcon_value)
-        // }
     }
     writeTouchEvent(value: TouchEvent): void {
         let valueSerializer : Serializer = this
@@ -21779,31 +21730,6 @@ export class Serializer extends SerializerBase {
             const value_paddingEnd_value  = value_paddingEnd!
             valueSerializer.writeLengthMetrics(value_paddingEnd_value)
         }
-        // TBD: Modifier is not implemented yet
-        // const value_mainTitleModifier  = value.mainTitleModifier
-        // let value_mainTitleModifier_type : int32 = RuntimeType.UNDEFINED
-        // value_mainTitleModifier_type = runtimeType(value_mainTitleModifier)
-        // valueSerializer.writeInt8(value_mainTitleModifier_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_mainTitleModifier_type)) {
-        //     const value_mainTitleModifier_value  = value_mainTitleModifier!
-        //     valueSerializer.writeTextModifier(value_mainTitleModifier_value)
-        // }
-        // const value_subTitleModifier  = value.subTitleModifier
-        // let value_subTitleModifier_type : int32 = RuntimeType.UNDEFINED
-        // value_subTitleModifier_type = runtimeType(value_subTitleModifier)
-        // valueSerializer.writeInt8(value_subTitleModifier_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_subTitleModifier_type)) {
-        //     const value_subTitleModifier_value  = value_subTitleModifier!
-        //     valueSerializer.writeTextModifier(value_subTitleModifier_value)
-        // }
-        // const value_enableHoverMode  = value.enableHoverMode
-        // let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
-        // value_enableHoverMode_type = runtimeType(value_enableHoverMode)
-        // valueSerializer.writeInt8(value_enableHoverMode_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_enableHoverMode_type)) {
-        //     const value_enableHoverMode_value  = value_enableHoverMode!
-        //     valueSerializer.writeBoolean(value_enableHoverMode_value)
-        // }
     }
     writeOutlineOptions(value: OutlineOptions): void {
         let valueSerializer : Serializer = this
