@@ -65,8 +65,8 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
     }
 
     public set(newValue: T): void {
-        const value = this.backing_.get(false);
-        if (value === newValue) {
+        const oldValue = this.backing_.get(false);
+        if (oldValue === newValue) {
             return;
         }
         // for interop
@@ -76,13 +76,14 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         if (typeof this.setProxyValue === 'function') {
             this.setProxyValue!(newValue);
         }
-        if (this.backing_.set(UIUtils.makeObserved(newValue) as T)) {
+        const value = UIUtils.makeObserved(newValue);
+        if (this.backing_.set(value)) {
             // @Watch
             // if new value is object, register so that property changes trigger
             // Watch function exec
             // unregister if old value is an object
-            this.unregisterWatchFromObservedObjectChanges(value);
-            this.registerWatchForObservedObjectChanges(newValue);
+            this.unregisterWatchFromObservedObjectChanges(oldValue);
+            this.registerWatchForObservedObjectChanges(value);
             // TODO unregister Watch from old value object, add to new value object
             this.execWatchFuncs();
         }
