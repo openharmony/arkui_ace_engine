@@ -13,9 +13,8 @@
         "name": "ace_engine",
         "subsystem": "arkui",
         "syscap": [
-            "SystemCapability.ArkUI.ArkUI.Full",
-            "SystemCapability.ArkUI.ArkUI.Lite",
-            "SystemCapability.ArkUI.ArkUI.Circle"
+            "SystemCapability.ArkUI.ArkUI.Circle",
+            "SystemCapability.ArkUI.ArkUI.Full"
         ],
         "features": [
             "ace_engine_feature_enable_accessibility",
@@ -261,7 +260,8 @@
                 }
             ],
             "test": [
-                "//foundation/arkui/ace_engine/test/unittest:unittest"
+                "//foundation/arkui/ace_engine/test/unittest:unittest",
+                "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/test/unittest:statemgmt_ut_hap"
             ]
         }
     }
