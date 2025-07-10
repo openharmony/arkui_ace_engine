@@ -315,7 +315,6 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return new drawing.Canvas()
-        // return DrawingCanvasInternal.fromPtr(ptr)
     }
     readDrawingColorFilter(): DrawingColorFilter {
         let valueDeserializer : Deserializer = this
@@ -1126,9 +1125,6 @@ export class Deserializer extends DeserializerBase {
         return UICommonEventInternal.fromPtr(ptr)
     }
     readUIContext(): UIContext {
-        // let valueDeserializer : Deserializer = this
-        // let ptr : KPointer = valueDeserializer.readPointer()
-        // return UIContextInternal.fromPtr(ptr)
         return new UIContext(100000)
     }
     readUIExtensionProxy(): UIExtensionProxy {
@@ -24387,27 +24383,6 @@ export class Deserializer extends DeserializerBase {
             paddingEnd_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
         }
         const paddingEnd_result : LengthMetrics | undefined = paddingEnd_buf
-        // const mainTitleModifier_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        // let mainTitleModifier_buf : TextModifier | undefined
-        // if ((RuntimeType.UNDEFINED) != (mainTitleModifier_buf_runtimeType))
-        // {
-        //     mainTitleModifier_buf = valueDeserializer.readTextModifier()
-        // }
-        // const mainTitleModifier_result : TextModifier | undefined = mainTitleModifier_buf
-        // const subTitleModifier_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        // let subTitleModifier_buf : TextModifier | undefined
-        // if ((RuntimeType.UNDEFINED) != (subTitleModifier_buf_runtimeType))
-        // {
-        //     subTitleModifier_buf = valueDeserializer.readTextModifier()
-        // }
-        // const subTitleModifier_result : TextModifier | undefined = subTitleModifier_buf
-        // const enableHoverMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        // let enableHoverMode_buf : boolean | undefined
-        // if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
-        // {
-        //     enableHoverMode_buf = valueDeserializer.readBoolean()
-        // }
-        // const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
         let value : NavigationTitleOptions = ({backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, barStyle: barStyle_result, paddingStart: paddingStart_result, paddingEnd: paddingEnd_result} as NavigationTitleOptions)
         return value
     }

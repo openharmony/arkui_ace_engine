@@ -86,18 +86,6 @@ export function TestOperators(): void {
     Log('Panda Test[S2D]: Failed the test for funcAccessArrElement!');
   }
 
-//  if (man["name"] as string == "John") { compile error
-//    Log('Panda Test[S2D]: Passed the test for funcAccessObjValByKey!');
-//  } else {
-//    Log('Panda Test[S2D]: Failed the test for funcAccessObjValByKey!');
-//  }
-
-//  if (myMap[name] as string == "Alice") { compile error
-//    Log('Panda Test[S2D]: Passed the test for funcAccessMapValByKey!');
-//  } else {
-//    Log('Panda Test[S2D]: Failed the test for funcAccessMapValByKey!');
-//  }
-
   let p = new Person('Doe', 30);
   if (p.name as string == "Doe") {
     Log('Panda Test[S2D]: Passed the test for funcAccessClassInstanceAttr!');
@@ -184,10 +172,6 @@ const PI: double = 3.14;
 
 const jsonString: string = '{"name": "John", "age": 30, "city": "New York"}';
 
-// export function TestNewConstructor(age: number) :void {
-//   this.age = age;
-// }
-
 export class TestOperatorClass {
   name: string;
   arr: number[] = [1, 2, 3];
@@ -199,8 +183,6 @@ export class TestOperatorClass {
   };
   constructor(name: string) {
     this.name = name
-    // this.map = new Map();
-    // this.map["aaa"] = 2;
   }
   myMethod(): number {
     return 10;
@@ -208,12 +190,6 @@ export class TestOperatorClass {
   static getPI(): double {
     return PI;
   }
-  // myAnonymous() {
-  //   let a = function(arg) {
-  //     return arg
-  //   }
-  //   return a;
-  // }
 }
 
 enum Color {
@@ -235,8 +211,6 @@ export class ConversionsClass {
   stsBoolean: boolean = true;
   stsString: string = "hello";
   stsBigint: bigint = 10n;
-  // stsEnum: enum = Color.Green;
-  // stsLiteral: literal = etsInt;
   stsUndefined: undefined = undefined;
   stsNull: null = null;
   constructor(name: string) {
@@ -246,7 +220,6 @@ export class ConversionsClass {
 
 export function ErrorFunc(): number {
   throw new Error('Panda: throw new error in sts!');
-  // return 2;
 }
 
 export class CustomError extends Error {
@@ -260,7 +233,6 @@ export class CustomError extends Error {
 
 export function CustomErrorFunc(): number {
   throw new CustomError("Panda: Something went wrong!", 1001);
-  // return 3;
 }
 
 export function nullArgFunc(arg: null): null {
@@ -383,13 +355,6 @@ export class TestMyClass {
   bigintRetValMethod(): bigint {
     return 0n;
   }
-  // enumRetValMethod(): enum {
-  //   return Color.Green;
-  // }
-  // literalRetValMethod(): literal {
-  //   const etsInt = 1;
-  //   return etsInt;
-  // }
   nullRetValMethod(): null {
     return null;
   }
@@ -437,34 +402,6 @@ export function TestMethodCallReturnType(): void {
   } else {
     Log('Panda Test[S2D]: Failed the test for method call with return type string!');
   }
-
-  // if (inst.symbolRetValMethod() as ESObject == "id") { TODO
-  //   Log('Panda Test[S2D]: Passed the test for method call with return type symbol!');
-  // } else {
-  //   Log('Panda Test[S2D]: Failed the test for method call with return type symbol!');
-  // }
-
-  // compile error -> cannot find type 'ESObject'
-  // let jsInst: ESObject = inst.classInstRetValMethod() as ESObject;
-  // if (jsInst.num as number == 123) {
-  //   Log('Panda Test[S2D]: Passed the test for method call with return type class instance!');
-  // } else {
-  //   Log('Panda Test[S2D]: Failed the test for method call with return type class instance!');
-  // }
-
-  // let obj: ESObject = inst.objRetValMethod() as ESObject;
-  // if (obj.a as string == '123') {
-  //   Log('Panda Test[S2D]: Passed the test for method call with return type array!');
-  // } else {
-  //   Log('Panda Test[S2D]: Failed the test for method call with return type array!');
-  // }
-
-  // let arr: ESObject = inst.funcReturnTypeArr() as ESObject;
-  // if (arr[0] as number == 1) {
-  //   Log('Panda Test[S2D]: Passed the test for method call with return type array!');
-  // } else {
-  //   Log('Panda Test[S2D]: Failed the test for method call with return type array!');
-  // }
 }
 
 export function TestMethodCallArg(): void {
@@ -548,24 +485,6 @@ export function TestMethodCallArg(): void {
     Log('Panda Test[S2D]: Failed the test for method call with parameter type bigint!');
   }
 
-  // enum Color { runtime error
-  //   Green = 'green',
-  //   Red = 'red'
-  // }
-  // if (inst.argTypeMethod(Color.Green) as string == "green") {
-  //   Log('Panda Test[S2D]: Passed the test for method call with parameter type enum!');
-  // } else {
-  //   Log('Panda Test[S2D]: Failed the test for method call with parameter type enum!');
-  // }
-
-  // const etsInt = 1; compile error -> cannot find type 'literal'
-  // let arg12: literal = etsInt;
-  // if (inst.argTypeMethod(arg12) as literal == etsInt) {
-  //   Log('Panda Test[S2D]: Passed the test for method call with parameter type literal!');
-  // } else {
-  //   Log('Panda Test[S2D]: Failed the test for method call with parameter type literal!');
-  // }
-
   let arg13: undefined = undefined;
   if (inst.argTypeMethod(arg13) as undefined == undefined) {
     Log('Panda Test[S2D]: Passed the test for method call with parameter type undefined!');
@@ -583,22 +502,6 @@ export function TestMethodCallArg(): void {
 
 export function TestConversion(): void {
   Log('Panda Test[S2D]: ================== test conversion begin ==================');
-
-  // test-conversions-null compile error
-  // let stsNull: null = jsNull;
-  // if (typeof stsNull == 'object') { // null?
-  //   Log('Panda Test[S2D]: Passed the test to convert jsNull to stsNull!');
-  // } else {
-  //   Log('Panda Test[S2D]: Failed the test to convert jsNull to stsNull!');
-  // }
-
-  // test-conversions-undefined compile error
-  // let stsUndefined: undefined = jsUndefined;
-  // if (typeof stsUndefined == 'undefined') {
-  //   Log('Panda Test[S2D]: Passed the test to convert jsUndefined to stsUndefined!');
-  // } else {
-  //   Log('Panda Test[S2D]: Failed the test to convert jsUndefined to stsUndefined!');
-  // }
 
   // test-conversions-boolean
   let stsBoolean: boolean = jsBoolean;
@@ -631,14 +534,6 @@ export function TestConversion(): void {
   } else {
     Log('Panda Test[S2D]: Failed the test to convert jsString to stsString!');
   }
-
-  // test-conversions-symbol
-  // let stsSymbol: ESObejct = jsSymbol; TODO
-  // if (typeof stsSymbol == 'ESObejct') {
-  //   Log('Panda Test[S2D]: Passed the test to convert jsSymbol to stsSymbol!');
-  // } else {
-  //   Log('Panda Test[S2D]: Failed the test to convert jsSymbol to stsSymbol!');
-  // }
 
   // test-conversions: a.v
   try {
@@ -707,27 +602,6 @@ export function TestFuncCallReturnType(): void {
   } else {
     Log('Panda Test[S2D]: Failed the test for function call with return type string!');
   }
-
-  // if (funcReturnTypeSymbol() as ESObject == "hello") { TODO
-  //   Log('Panda Test[S2D]: Passed the test for function call with return type symbol!');
-  // } else {
-  //   Log('Panda Test[S2D]: Failed the test for function call with return type symbol!');
-  // }
-
-  // compile error -> cannot find type 'ESObject'
-  // let inst: ESObject = funcReturnTypeClassInst() as ESObject;
-  // if (inst.num as number == 123) {
-  //   Log('Panda Test[S2D]: Passed the test for function call with return type class instance!');
-  // } else {
-  //   Log('Panda Test[S2D]: Failed the test for function call with return type class instance!');
-  // }
-
-  // let arr: ESObject = funcReturnTypeArr() as ESObject;
-  // if (arr[0] as number == 1) {
-  //   Log('Panda Test[S2D]: Passed the test for function call with return type array!');
-  // } else {
-  //   Log('Panda Test[S2D]: Failed the test for function call with return type array!');
-  // }
 }
 
 export function TestFuncCallArg(): void {
@@ -808,24 +682,6 @@ export function TestFuncCallArg(): void {
   } else {
     Log('Panda Test[S2D]: Failed the test for function call with parameter type bigint!');
   }
-
-  // enum Color { runtime error
-  //   Green = 'green',
-  //   Red = 'red'
-  // }
-  // if (funcArgType(Color.Green) as string == "green") {
-  //   Log('Panda Test[S2D]: Passed the test for function call with parameter type enum!');
-  // } else {
-  //   Log('Panda Test[S2D]: Failed the test for function call with parameter type enum!');
-  // }
-
-  // const etsInt = 1; compile error -> cannot find type 'literal'
-  // let arg12: literal = etsInt;
-  // if (funcArgType(arg12) as literal == etsInt) {
-  //   Log('Panda Test[S2D]: Passed the test for function call with parameter type literal!');
-  // } else {
-  //   Log('Panda Test[S2D]: Failed the test for function call with parameter type literal!');
-  // }
 
   let arg13: undefined = undefined;
   if (funcArgType(arg13) as undefined == undefined) {
