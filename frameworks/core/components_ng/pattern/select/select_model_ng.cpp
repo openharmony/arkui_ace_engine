@@ -56,6 +56,7 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params)
     if (props) {
         props->ResetFontColorSetByUser();
         props->ResetSelectedOptionBgColorSetByUser();
+        props->ResetOptionBgColorSetByUser();
         props->ResetSelectedOptionFontColorSetByUser();
         props->ResetOptionFontColorSetByUser();
         props->ResetBackgroundColorSetByUser();
@@ -121,7 +122,6 @@ void SelectModelNG::SetSelectedOptionBgColor(const Color& color)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedOptionBgColor(color);
-    ACE_UPDATE_PAINT_PROPERTY(SelectPaintProperty, SelectedOptionBgColorSetByUser, true);
 }
 
 void SelectModelNG::SetSelectedOptionFontSize(const Dimension& value)
@@ -157,7 +157,6 @@ void SelectModelNG::SetSelectedOptionFontColor(const Color& color)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedOptionFontColor(color);
-    ACE_UPDATE_PAINT_PROPERTY(SelectPaintProperty, SelectedOptionFontColorSetByUser, true);
 }
 
 void SelectModelNG::SetOptionBgColor(const Color& color)
@@ -579,7 +578,7 @@ void SelectModelNG::ResetComponentColor(FrameNode* frameNode, const SelectColorT
             pattern->SetOptionFontColor(selectTheme->GetMenuFontColor());
             break;
         case SelectColorType::MENU_BACKGROUND_COLOR: {
-            if (!props->GetMenuBackgroundColorSetByUserValue(false)) {
+            if (props->GetMenuBackgroundColorSetByUserValue(false)) {
                 pattern->SetMenuBackgroundColor(Color::TRANSPARENT);
             } else {
                 pattern->SetMenuBackgroundColor(selectTheme->GetBackgroundColor());
@@ -916,7 +915,6 @@ void SelectModelNG::SetSelectedOptionBgColor(FrameNode* frameNode, const Color& 
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedOptionBgColor(color);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, SelectedOptionBgColorSetByUser, true, frameNode);
 }
 
 void SelectModelNG::SetOptionFontSize(FrameNode* frameNode, const Dimension& value)
@@ -959,7 +957,6 @@ void SelectModelNG::SetSelectedOptionFontColor(FrameNode* frameNode, const Color
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedOptionFontColor(color);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, SelectedOptionFontColorSetByUser, true, frameNode);
 }
 
 void SelectModelNG::SetSelectedOptionFontSize(FrameNode* frameNode, const Dimension& value)
@@ -1276,5 +1273,50 @@ void SelectModelNG::SetMenuBackgroundColorByUser(FrameNode* frameNode, bool isFr
     auto paintProperty = frameNode->GetPaintProperty<SelectPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateMenuBackgroundColorSetByUser(isFromModifier);
+}
+
+void SelectModelNG::SetSelectedOptionFontColorByUser(bool isValidValue)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetSelectedOptionFontColorByUser(frameNode, isValidValue);
+}
+
+void SelectModelNG::SetSelectedOptionFontColorByUser(FrameNode* frameNode, bool isValidValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SelectPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateSelectedOptionFontColorSetByUser(isValidValue);
+}
+
+void SelectModelNG::SetOptionBgColorByUser(bool isValidValue)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetOptionBgColorByUser(frameNode, isValidValue);
+}
+
+void SelectModelNG::SetOptionBgColorByUser(FrameNode* frameNode, bool isValidValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SelectPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateOptionBgColorSetByUser(isValidValue);
+}
+
+void SelectModelNG::SetSelectedOptionBgColorByUser(bool isValidValue)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetSelectedOptionBgColorByUser(frameNode, isValidValue);
+}
+
+void SelectModelNG::SetSelectedOptionBgColorByUser(FrameNode* frameNode, bool isValidValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SelectPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateSelectedOptionBgColorSetByUser(isValidValue);
 }
 } // namespace OHOS::Ace::NG
