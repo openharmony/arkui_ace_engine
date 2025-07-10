@@ -287,13 +287,12 @@ void RotationRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
 void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    extraInfo_ += "receive cancel event.";
+    extraInfo_ += "cancel received.";
     if (!IsActiveFinger(event.id)) {
         return;
     }
     touchPoints_[event.id] = event;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
-        extraInfo_ += "receive cancel event.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -311,7 +310,7 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
-    extraInfo_ += "receive cancel event.";
+    extraInfo_ += "cancel received.";
     UpdateTouchPointWithAxisEvent(event);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);

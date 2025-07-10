@@ -103,8 +103,8 @@ ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distance
     distanceThreshold_ = Dimension(
         Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
 
-    cusDistanceThreshold_ = distanceThreshold_.ConvertToPx();
-    if (cusDistanceThreshold_ <= 0) {
+    userDT_ = distanceThreshold_.ConvertToPx();
+    if (userDT_ <= 0) {
         distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
     }
 
@@ -118,8 +118,8 @@ ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, Dimension dista
         fingers_ = DEFAULT_TAP_FINGERS;
     }
     
-    cusDistanceThreshold_ = distanceThreshold.ConvertToPx();
-    if (cusDistanceThreshold_ <= 0) {
+    userDT_ = distanceThreshold.ConvertToPx();
+    if (userDT_ <= 0) {
         distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
     }
 
@@ -437,7 +437,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    extraInfo_ += "receive cancel event.";
+    extraInfo_ += "cancel received.";
     if (IsRefereeFinished()) {
         return;
     }
@@ -706,7 +706,7 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
     std::stringstream oss;
     oss << "count: " << count_ << ", "
         << "fingers: " << fingers_ << ", "
-        << "cusDistanceThreshold_: " << cusDistanceThreshold_ << ", "
+        << "userDT: " << userDT_ << ", "
         << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;

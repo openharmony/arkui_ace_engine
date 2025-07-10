@@ -115,7 +115,7 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg005, TestSize.Level1) {
     gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
 
     gestureModelNG.Finish();
-    CHECK_NULL_VOID(gestureEventHub);
+    EXPECT_NE(gestureEventHub, nullptr);
     EXPECT_FALSE(gestureEventHub->IsGestureEmpty());
 }
 
@@ -136,7 +136,7 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg006, TestSize.Level1) {
     gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     
     gestureModelNG.Finish();
-    CHECK_NULL_VOID(gestureEventHub);
+    EXPECT_NE(gestureEventHub, nullptr);
     EXPECT_FALSE(gestureEventHub->IsGestureEmpty());
 }
 
@@ -163,8 +163,8 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg007, TestSize.Level1) {
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
-    CHECK_NULL_VOID(gestureEventHub);
-    CHECK_NULL_VOID(focusHub);
+    EXPECT_NE(gestureEventHub, nullptr);
+    EXPECT_NE(focusHub, nullptr);
     EXPECT_FALSE(gestureEventHub->IsGestureEmpty());
     EXPECT_NE(focusHub->GetOnClickCallback(), nullptr);
 }
@@ -199,8 +199,8 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg008, TestSize.Level1) {
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
-    CHECK_NULL_VOID(gestureEventHub);
-    CHECK_NULL_VOID(focusHub);
+    EXPECT_NE(gestureEventHub, nullptr);
+    EXPECT_NE(focusHub, nullptr);
     EXPECT_FALSE(gestureEventHub->IsGestureEmpty());
     EXPECT_NE(focusHub->GetOnClickCallback(), nullptr);
 }
@@ -227,8 +227,8 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg009, TestSize.Level1) {
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
-    CHECK_NULL_VOID(gestureEventHub);
-    CHECK_NULL_VOID(focusHub);
+    EXPECT_NE(gestureEventHub, nullptr);
+    EXPECT_NE(focusHub, nullptr);
     EXPECT_FALSE(gestureEventHub->IsGestureEmpty());
     EXPECT_NE(focusHub->GetOnClickCallback(), nullptr);
 }
@@ -261,8 +261,8 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg010, TestSize.Level1) {
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
-    CHECK_NULL_VOID(gestureEventHub);
-    CHECK_NULL_VOID(focusHub);
+    EXPECT_NE(gestureEventHub, nullptr);
+    EXPECT_NE(focusHub, nullptr);
     EXPECT_FALSE(gestureEventHub->IsGestureEmpty());
     EXPECT_NE(focusHub->GetOnClickCallback(), nullptr);
 }
@@ -291,8 +291,8 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg011, TestSize.Level1) {
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
-    CHECK_NULL_VOID(gestureEventHub);
-    CHECK_NULL_VOID(focusHub);
+    EXPECT_NE(gestureEventHub, nullptr);
+    EXPECT_NE(focusHub, nullptr);
     EXPECT_FALSE(gestureEventHub->IsGestureEmpty());
     EXPECT_NE(focusHub->GetOnClickCallback(), nullptr);
 }
@@ -327,8 +327,8 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg012, TestSize.Level1) {
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
-    CHECK_NULL_VOID(gestureEventHub);
-    CHECK_NULL_VOID(focusHub);
+    EXPECT_NE(gestureEventHub, nullptr);
+    EXPECT_NE(focusHub, nullptr);
     EXPECT_FALSE(gestureEventHub->IsGestureEmpty());
     EXPECT_NE(focusHub->GetOnClickCallback(), nullptr);
 }
@@ -355,8 +355,8 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg013, TestSize.Level1) {
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
-    CHECK_NULL_VOID(gestureEventHub);
-    CHECK_NULL_VOID(focusHub);
+    EXPECT_NE(gestureEventHub, nullptr);
+    EXPECT_NE(focusHub, nullptr);
     EXPECT_FALSE(gestureEventHub->IsGestureEmpty());
     EXPECT_NE(focusHub->GetOnClickCallback(), nullptr);
 }
@@ -389,8 +389,8 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg014, TestSize.Level1) {
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
-    CHECK_NULL_VOID(gestureEventHub);
-    CHECK_NULL_VOID(focusHub);
+    EXPECT_NE(gestureEventHub, nullptr);
+    EXPECT_NE(focusHub, nullptr);
     EXPECT_FALSE(gestureEventHub->IsGestureEmpty());
     EXPECT_NE(focusHub->GetOnClickCallback(), nullptr);
 }
@@ -414,8 +414,8 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg015, TestSize.Level1) {
 
     GestureEvent info;
     auto gesture = gestureProcessor->TopGestureNG();
-    CHECK_NULL_VOID(gesture);
-    CHECK_NULL_VOID((gesture->onActionCancelId_));
+    EXPECT_NE(gesture, nullptr);
+    EXPECT_NE((gesture->onActionCancelId_), nullptr);
     (*(gesture->onActionCancelId_))(info);
     EXPECT_EQ(doneId, 1);
 }
@@ -509,8 +509,8 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg018, TestSize.Level1) {
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
-    CHECK_NULL_VOID(gestureEventHub);
-    CHECK_NULL_VOID(focusHub);
+    EXPECT_NE(gestureEventHub, nullptr);
+    EXPECT_NE(focusHub, nullptr);
     EXPECT_FALSE(gestureEventHub->IsGestureEmpty());
     EXPECT_NE(focusHub->GetOnClickCallback(), nullptr);
 }
@@ -547,8 +547,8 @@ HWTEST_F(GestureModelTestNg, GestureModelTestNg019, TestSize.Level1) {
     auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
 
     gestureModelNG.Finish();
-    CHECK_NULL_VOID(gestureEventHub);
-    CHECK_NULL_VOID(focusHub);
+    EXPECT_NE(gestureEventHub, nullptr);
+    EXPECT_NE(focusHub, nullptr);
     EXPECT_FALSE(gestureEventHub->IsGestureEmpty());
     EXPECT_NE(focusHub->GetOnClickCallback(), nullptr);
 }
