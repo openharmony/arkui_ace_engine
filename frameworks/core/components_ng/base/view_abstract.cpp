@@ -1076,7 +1076,7 @@ void ViewAbstract::SetDisplayIndex(int32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, DisplayIndex, value);
 }
 
-void ViewAbstract::CheckLocalizedPadding(PaddingProperty& value, const TextDirection& direction)
+void ViewAbstract::CheckLocalizedMarginOrPadding(PaddingProperty& value, const TextDirection& direction)
 {
     PaddingProperty padding = value;
     if (padding.start.has_value()) {
@@ -1109,103 +1109,7 @@ void ViewAbstract::CheckLocalizedPadding(PaddingProperty& value, const TextDirec
     }
 }
 
-void ViewAbstract::CheckLocalizedMargin(MarginProperty& value, const TextDirection& direction)
-{
-    MarginProperty margin = value;
-    if (margin.start.has_value()) {
-        value.start = margin.start;
-        if (direction == TextDirection::RTL) {
-            value.right = margin.start;
-        } else {
-            value.left = margin.start;
-        }
-    }
-    if (margin.end.has_value()) {
-        value.end = margin.end;
-        if (direction == TextDirection::RTL) {
-            value.left = margin.end;
-        } else {
-            value.right = margin.end;
-        }
-    }
-    if (margin.top.has_value()) {
-        value.top = margin.top;
-    }
-    if (margin.bottom.has_value()) {
-        value.bottom = margin.bottom;
-    }
-    if (value.left.has_value() && !value.right.has_value()) {
-        value.right = std::optional<CalcLength>(CalcLength(0));
-    }
-    if (!value.left.has_value() && value.right.has_value()) {
-        value.left = std::optional<CalcLength>(CalcLength(0));
-    }
-}
-
-void ViewAbstract::CheckLocalizedSafeAreaPadding(PaddingProperty& value, const TextDirection& direction)
-{
-    PaddingProperty safeAreaPadding = value;
-    if (safeAreaPadding.start.has_value()) {
-        value.start = safeAreaPadding.start;
-        if (direction == TextDirection::RTL) {
-            value.right = safeAreaPadding.start;
-        } else {
-            value.left = safeAreaPadding.start;
-        }
-    }
-    if (safeAreaPadding.end.has_value()) {
-        value.end = safeAreaPadding.end;
-        if (direction == TextDirection::RTL) {
-            value.left = safeAreaPadding.end;
-        } else {
-            value.right = safeAreaPadding.end;
-        }
-    }
-    if (safeAreaPadding.top.has_value()) {
-        value.top = safeAreaPadding.top;
-    }
-    if (safeAreaPadding.bottom.has_value()) {
-        value.bottom = safeAreaPadding.bottom;
-    }
-    if (value.left.has_value() && !value.right.has_value()) {
-        value.right = std::optional<CalcLength>(CalcLength(0));
-    }
-    if (!value.left.has_value() && value.right.has_value()) {
-        value.left = std::optional<CalcLength>(CalcLength(0));
-    }
-}
-
-void ViewAbstract::CheckPositionLocalizedEdges(EdgesParam& value, TextDirection layoutDirection)
-{
-    EdgesParam edges = value;
-    if (!edges.start.has_value() && !edges.end.has_value()) {
-        return;
-    }
-    if (edges.top.has_value()) {
-        value.SetTop(edges.top.value_or(Dimension(0.0)));
-    }
-    if (edges.bottom.has_value()) {
-        value.SetBottom(edges.bottom.value_or(Dimension(0.0)));
-    }
-    if (edges.start.has_value()) {
-        value.start = edges.start.value();
-        if (layoutDirection == TextDirection::RTL) {
-            value.SetRight(edges.start.value_or(Dimension(0.0)));
-        } else {
-            value.SetLeft(edges.start.value_or(Dimension(0.0)));
-        }
-    }
-    if (edges.end.has_value()) {
-        value.end = edges.end.value();
-        if (layoutDirection == TextDirection::RTL) {
-            value.SetLeft(edges.end.value_or(Dimension(0.0)));
-        } else {
-            value.SetRight(edges.end.value_or(Dimension(0.0)));
-        }
-    }
-}
-
-void ViewAbstract::CheckOffsetLocalizedEdges(EdgesParam& value, TextDirection layoutDirection)
+void ViewAbstract::CheckPositionOrOffsetLocalizedEdges(EdgesParam& value, TextDirection layoutDirection)
 {
     EdgesParam edges = value;
     if (!edges.start.has_value() && !edges.end.has_value()) {
@@ -1264,7 +1168,7 @@ void ViewAbstract::SetPadding(const PaddingProperty& value)
             auto layoutProperty = frameNode->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-            CheckLocalizedPadding(padding, layoutDirection);
+            CheckLocalizedMarginOrPadding(padding, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding, frameNode);
             if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG || frameNode->GetTag() ==V2::TEXTINPUT_ETS_TAG) {
                 ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, padding, frameNode);
@@ -1348,7 +1252,7 @@ void ViewAbstract::SetSafeAreaPadding(const PaddingProperty& value)
             auto layoutProperty = frameNode->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-            CheckLocalizedSafeAreaPadding(padding, layoutDirection);
+            CheckLocalizedMarginOrPadding(padding, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding, frameNode);
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
@@ -1389,7 +1293,7 @@ void ViewAbstract::SetSafeAreaPadding(FrameNode* frameNode, const PaddingPropert
             auto layoutProperty = frameNode->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-            CheckLocalizedSafeAreaPadding(padding, layoutDirection);
+            CheckLocalizedMarginOrPadding(padding, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding, frameNode);
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
@@ -1434,7 +1338,7 @@ void ViewAbstract::SetMargin(const MarginProperty& value)
             auto layoutProperty = frameNode->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-            CheckLocalizedMargin(margin, layoutDirection);
+            CheckLocalizedMarginOrPadding(margin, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin, frameNode);
             auto pattern = frameNode->GetPattern<Pattern>();
             CHECK_NULL_VOID(pattern);
@@ -1587,7 +1491,7 @@ void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
             auto layoutProperty = frameNode->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-            CheckLocalizedOuterBorderColor(borderColor, layoutDirection);
+            CheckLocalizedBorderColor(borderColor, layoutDirection);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
             auto pattern = frameNode->GetPattern<Pattern>();
             CHECK_NULL_VOID(pattern);
@@ -3297,7 +3201,7 @@ void ViewAbstract::SetPositionEdges(const EdgesParam& value)
             auto layoutProperty = frameNode->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-            CheckPositionLocalizedEdges(edges, layoutDirection);
+            CheckPositionOrOffsetLocalizedEdges(edges, layoutDirection);
             auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
             CHECK_NULL_VOID(parentNode);
             if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
@@ -3442,7 +3346,7 @@ void ViewAbstract::SetOffsetEdges(const EdgesParam& value)
             auto layoutProperty = frameNode->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-            CheckOffsetLocalizedEdges(edges, layoutDirection);
+            CheckPositionOrOffsetLocalizedEdges(edges, layoutDirection);
             ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Offset, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(OffsetEdges, edges, frameNode);
         };
@@ -5924,7 +5828,7 @@ void ViewAbstract::SetBorderColor(FrameNode* frameNode, const BorderColorPropert
             auto layoutProperty = frameNode->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-            CheckLocalizedOuterBorderColor(borderColor, layoutDirection);
+            CheckLocalizedBorderColor(borderColor, layoutDirection);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
             frameNode->MarkModifyDone();
         };
@@ -6187,7 +6091,7 @@ void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& valu
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-        CheckPositionLocalizedEdges(edges, layoutDirection);
+        CheckPositionOrOffsetLocalizedEdges(edges, layoutDirection);
         auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parentNode);
         if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
@@ -6943,7 +6847,7 @@ void ViewAbstract::SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value)
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-        CheckOffsetLocalizedEdges(edges, layoutDirection);
+        CheckPositionOrOffsetLocalizedEdges(edges, layoutDirection);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Offset, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(OffsetEdges, edges, frameNode);
     };
@@ -7056,7 +6960,7 @@ void ViewAbstract::CheckLocalizedEdgeWidths(BorderWidthProperty& value, const Te
     value.multiValued = true;
 }
 
-void ViewAbstract::CheckLocalizedOuterBorderColor(NG::BorderColorProperty& value, const TextDirection& direction)
+void ViewAbstract::CheckLocalizedBorderColor(NG::BorderColorProperty& value, const TextDirection& direction)
 {
     NG::BorderColorProperty borderColors = value;
     borderColors.multiValued = true;
@@ -7173,7 +7077,7 @@ void ViewAbstract::SetPadding(FrameNode* frameNode, const PaddingProperty& value
             auto layoutProperty = frameNode->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-            CheckLocalizedPadding(padding, layoutDirection);
+            CheckLocalizedMarginOrPadding(padding, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding, frameNode);
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
@@ -7205,7 +7109,7 @@ void ViewAbstract::SetMargin(FrameNode* frameNode, const PaddingProperty& value)
             auto layoutProperty = frameNode->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-            CheckLocalizedMargin(margin, layoutDirection);
+            CheckLocalizedMarginOrPadding(margin, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin, frameNode);
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
