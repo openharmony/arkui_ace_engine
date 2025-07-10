@@ -2018,6 +2018,8 @@ OffsetF BubbleLayoutAlgorithm::GetBubblePosition(const OffsetF& position, float 
         } else if (GetSimplePlacement(placement_) == Placement::RIGHT) {
             positionX -= BUBBLE_ARROW_HEIGHT.ConvertToPx();
         }
+    } else {
+        UpdateContentPositionRange(xMin, xMax, yMin, yMax);
     }
     auto x = std::clamp(positionX, xMin, xMax);
     auto y = std::clamp(positionY, yMin, yMax);
@@ -2044,6 +2046,17 @@ OffsetF BubbleLayoutAlgorithm::GetBubblePosition(const OffsetF& position, float 
         }
     }
     return OffsetF(x, y);
+}
+
+void BubbleLayoutAlgorithm::UpdateContentPositionRange(float& xMin, float& xMax, float& yMin, float& yMax)
+{
+    if (GetSimplePlacement(placement_) == Placement::BOTTOM) {
+        yMin += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        yMax += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+    } else if (GetSimplePlacement(placement_) == Placement::RIGHT) {
+        xMin += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        xMax += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+    }
 }
 
 void BubbleLayoutAlgorithm::CheckArrowPosition(OffsetF& position, float width, float height)
