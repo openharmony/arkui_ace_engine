@@ -1894,6 +1894,7 @@ void NavigationPattern::StartDefaultAnimation(const RefPtr<NavDestinationGroupNo
     auto currentProxy = GetTopNavigationProxy();
     if (currentProxy) {
         currentProxy->SetIsFinished(true);
+        RemoveProxyById(currentProxy->GetProxyId());
     }
     ClearRecoveryList();
     bool isPreDialog = preTopNavDestination &&
