@@ -92,6 +92,7 @@ struct ArkUIAniCommonModifier {
     void (*restoreInstanceId)();
     void (*setDrawCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObj);
     ArkUI_Int32 (*getCurrentInstanceId)();
+    ArkUI_Int32 (*getFocusedInstanceId)();
     ani_long (*builderProxyNodeConstruct)(ArkUI_Int32 id);
     ani_ref (*getSharedLocalStorage)();
     void (*setBackgroundImagePixelMap)(ani_env* env, ArkUINodeHandle node, ani_ref pixelMapPtr, ArkUI_Int32 repeat);

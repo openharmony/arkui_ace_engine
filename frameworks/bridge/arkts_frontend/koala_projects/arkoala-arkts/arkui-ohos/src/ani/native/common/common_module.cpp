@@ -65,6 +65,15 @@ ani_int GetCurrentInstanceId([[maybe_unused]] ani_env* env)
     return modifier->getCommonAniModifier()->getCurrentInstanceId();
 }
 
+ani_int GetFocusedInstanceId([[maybe_unused]] ani_env* env)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return -1;
+    }
+    return modifier->getCommonAniModifier()->getFocusedInstanceId();
+}
+
 void SetDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn_object fnObj)
 {
     const auto* modifier = GetNodeAniModifier();

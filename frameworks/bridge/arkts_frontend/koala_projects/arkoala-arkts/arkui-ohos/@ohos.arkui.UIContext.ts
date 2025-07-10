@@ -48,6 +48,8 @@ import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
 import { ComputableState } from '@koalaui/runtime'
 import { PeerNode } from 'arkui/PeerNode'
+import { ArkUIAniModule } from 'arkui.ani';
+import { UIContextUtil } from 'arkui/handwritten/UIContextUtil';
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver {
@@ -384,6 +386,13 @@ export class CursorController {
 
 export class UIContext {
     constructor() {
+    }
+    static getFocusedUIContext(): UIContext | undefined {
+        const instanceId = ArkUIAniModule._Common_GetFocused_InstanceId();
+        if (instanceId === -1) {
+            return undefined;
+        }
+        return UIContextUtil.getOrCreateUIContextById(instanceId);
     }
     public getFont() : Font {
         throw Error("getFont not implemented in UIContext!")
