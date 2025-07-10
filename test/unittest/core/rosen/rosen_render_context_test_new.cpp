@@ -347,6 +347,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew011, TestSize.Level1)
     rosenRenderContext->SetBackgroundColor(SHAPE_MASK_DEFAULT_COLOR);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetBackgroundColor(),
         OHOS::Rosen::RSColor::FromArgbInt(SHAPE_MASK_DEFAULT_COLOR));
+
     rosenRenderContext->SetScale(1.0, 0.0);
     rosenRenderContext->PaintPixmapBgImage();
     rosenRenderContext->PaintRSBgImage();
