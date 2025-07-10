@@ -244,6 +244,14 @@ public:
         inputEvents_.remove(inputEvent);
     }
 
+    void RemoveAllTipsEvents()
+    {
+        inputEvents_.remove_if([](const RefPtr<InputEvent>& event) {
+            CHECK_NULL_RETURN(event, false);
+            return event->GetIstips();
+        });
+    }
+
     void OnCollectMouseEvent(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result);
 

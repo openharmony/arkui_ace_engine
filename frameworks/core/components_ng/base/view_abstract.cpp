@@ -3965,7 +3965,8 @@ void ViewAbstract::AddHoverEventForTips(
     CHECK_NULL_VOID(inputHub);
     auto hoverTask = [targetNode, targetId, tipsInfo, param, overlayManager, showInSubWindow, popupId, popupNode,
                          containerId](bool isHover) {
-        if (!overlayManager->GetPopupInfo(targetId).isTips && overlayManager->GetPopupInfo(targetId).popupNode) {
+        if (isHover && !overlayManager->GetPopupInfo(targetId).isTips &&
+            overlayManager->GetPopupInfo(targetId).popupNode) {
             return;
         }
         if (isHover) {
@@ -3988,6 +3989,7 @@ void ViewAbstract::AddHoverEventForTips(
     };
     auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask));
     hoverEvent->SetIstips(true);
+    inputHub->RemoveAllTipsHoverEvents();
     inputHub->AddOnHoverEvent(hoverEvent);
     if (param->GetAnchorType() == TipsAnchorType::CURSOR) {
         AddMouseEventForTips(targetNode, tipsInfo);
@@ -4012,6 +4014,7 @@ void ViewAbstract::AddMouseEventForTips(const RefPtr<FrameNode>& targetNode, Pop
     auto mouseEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
     mouseEvent->SetIstips(true);
     mouseEvent->SetTipsFollowCursor(true);
+    inputHub->RemoveAllTipsMouseEvents();
     inputHub->AddOnMouseEvent(mouseEvent);
 }
 
