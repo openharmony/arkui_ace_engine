@@ -1329,6 +1329,15 @@ void GestureEventHub::AddPanEvent(
     panEventActuator_->AddPanEvent(panEvent);
 }
 
+void GestureEventHub::AddPanEvent(const RefPtr<PanEvent>& panEvent,
+    PanDirection direction, int32_t fingers, const PanDistanceMapDimension& distanceMap)
+{
+    if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
+        panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distanceMap);
+    }
+    panEventActuator_->AddPanEvent(panEvent);
+}
+
 void GestureEventHub::RemovePanEvent(const RefPtr<PanEvent>& panEvent)
 {
     if (!panEventActuator_) {
