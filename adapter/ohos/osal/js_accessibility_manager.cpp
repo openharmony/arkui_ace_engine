@@ -7937,7 +7937,6 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
                     jsAccessibilityManager->UpdateEventWhiteList(needEvents);
                 }
                 auto pipelineRef = jsAccessibilityManager->GetPipelineContext().Upgrade();
-                CHECK_NULL_VOID(pipelineRef);
                 if (jsAccessibilityManager->ShouldSkipAccessibilityStateChange(pipelineRef)) {
                     return;
                 }
@@ -7989,9 +7988,9 @@ void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearch(
 
 bool JsAccessibilityManager::ShouldSkipAccessibilityStateChange(const RefPtr<PipelineBase>& pipelineRef)
 {
-    CHECK_NULL_RETURN(pipelineRef, true);
+    CHECK_NULL_RETURN(pipelineRef, false);
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineRef);
-    CHECK_NULL_RETURN(pipelineContext, true);
+    CHECK_NULL_RETURN(pipelineContext, false);
     auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
     if (container != nullptr && container->IsDynamicRender()) {
         return true;
