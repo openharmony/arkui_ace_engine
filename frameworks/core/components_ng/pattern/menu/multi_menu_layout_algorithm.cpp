@@ -225,12 +225,13 @@ void MultiMenuLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(
     CHECK_NULL_VOID(childLayoutWrapper);
     auto childNode = childLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(childNode);
-    CHECK_NULL_VOID(childNode->GetLayoutProperty());
-    if (!childNode->GetLayoutProperty()->IsIgnoreOptsValid()) {
+    auto property = childNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    if (!property->IsIgnoreOptsValid()) {
         return;
     };
     auto saeCorrect = translate;
-    IgnoreLayoutSafeAreaOpts& opts = *(childNode->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts());
+    IgnoreLayoutSafeAreaOpts& opts = *(property->GetIgnoreLayoutSafeAreaOpts());
     auto sae = childNode->GetAccumulatedSafeAreaExpand(false, opts);
     auto offsetX = sae.left.value_or(0.0f);
     auto offsetY = sae.top.value_or(0.0f);
