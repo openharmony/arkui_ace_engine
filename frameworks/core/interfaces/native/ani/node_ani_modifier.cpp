@@ -15,6 +15,7 @@
 
 #include "animation_ani_modifier.h"
 #include "common_ani_modifier.h"
+#include "component_content_ani_modifier.h"
 #include "component_snapshot_ani_modifier.h"
 #include "content_slot_ani_modifier.h"
 #include "image_ani_modifier.h"
@@ -58,6 +59,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getStateMgmtAniModifier = OHOS::Ace::NG::GetStateMgmtAniModifier,
         .getArkUIAniXComponentModifier = OHOS::Ace::NG::GetXComponentAniModifier,
         .getArkUIAniConditionScopeModifier = OHOS::Ace::NG::GetConditionScopeAniModifier,
+        .getArkUIAniComponentConentModifier = OHOS::Ace::NG::GetArkUIAniComponentConentModifier,
     };
     return &impl;
 }

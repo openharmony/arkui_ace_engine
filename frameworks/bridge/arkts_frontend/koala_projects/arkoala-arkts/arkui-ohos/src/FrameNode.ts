@@ -19,12 +19,11 @@
 import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextImpl } from "arkui/handwritten/UIContextImpl"
 import { Position, Edges, Size, LengthMetrics, SizeT } from "./Graphics"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
+import { ArkUIGeneratedNativeModule } from "#components"
 import {
-    Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer,
-    MaterializedBase, NativeBuffer, nullptr, pointer, KSerializerBuffer, KUint8ArrayPtr
+    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, KSerializerBuffer, KUint8ArrayPtr, InteropNativeModule
 } from "@koalaui/interop"
-import { unsafeCast, int32, float32 } from "@koalaui/common"
+import { int32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { ArkUIAniModule } from "arkui.ani"
 import { RenderNode, RenderNodeInternal } from "./RenderNode"
@@ -69,6 +68,7 @@ import { DrawContext } from './Graphics';
 import { JSBuilderNode } from "./BuilderNode"
 import { BusinessError } from '#external';
 import { Resource } from 'global.resource';
+
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
@@ -226,20 +226,26 @@ export class FrameNode implements MaterializedBase {
         }
         const instanceId = this.instanceId_!.toInt();
         ArkUIAniModule._Common_Sync_InstanceId(instanceId);
-        this.appendChild(content.getFrameNode()!);
+        let node = content.getNodeWithoutProxy();
+        if (this.peer?.ptr && node) {
+            ArkUIAniModule._AddComponent_ToFrameNode(this.peer!.ptr, node!);
+            content.setAttachedParent(new WeakRef<FrameNode>(this));
+        }
         ArkUIAniModule._Common_Restore_InstanceId();
-        content.setAttachedParent(new WeakRef<FrameNode>(this));
     }
     public removeComponentContent<T = undefined>(content: ComponentContent<T>) {
-        if (content === undefined || content === null || content.getFrameNode() == undefined ||
-            content.getFrameNode() == null || content.getNodePtr() == undefined) {
+        if (content === undefined || content === null || content.getFrameNode() === undefined ||
+            content.getFrameNode() === null || content.getNodeWithoutProxy() === undefined || content.getNodeWithoutProxy() === nullptr) {
             return;
         }
         const instanceId = this.instanceId_!.toInt();
         ArkUIAniModule._Common_Sync_InstanceId(instanceId);
-        this.removeChild(content.getFrameNode()!);
+        let node = content.getNodeWithoutProxy();
+        if (this.peer?.ptr && node) {
+            ArkUIAniModule._RemoveComponent_FromFrameNode(this.peer!.ptr, node!);
+            content.setAttachedParent(undefined);
+        }
         ArkUIAniModule._Common_Restore_InstanceId();
-        content.setAttachedParent(undefined);
     }
     public insertChildAfter(child: FrameNode, sibling: FrameNode | null): void {
         if (child === undefined || child === null) {
