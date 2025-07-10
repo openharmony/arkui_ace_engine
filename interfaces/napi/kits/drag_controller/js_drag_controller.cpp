@@ -790,9 +790,10 @@ int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::st
     if (asyncCtx->dataLoadParams) {
         ret = UdmfClient::GetInstance()->SetDelayInfo(asyncCtx->dataLoadParams, udKey);
         if (ret != 0) {
-            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf setDelayInfo failed, return value is %{public}d", ret);
+            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set delayInfo failed, return value is %{public}d", ret);
         }
-        dataSize = static_cast<int32_t>(asyncCtx->dataLoadParams->GetRecordCount());
+        auto recodeCount = asyncCtx->dataLoadParams->GetRecordCount();
+        dataSize = (recodeCount == 0 || recodeCount > INT32_MAX) ? 1 : static_cast<int32_t>(recodeCount);
     }
     if (asyncCtx->unifiedData) {
         ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
@@ -1151,32 +1152,6 @@ void ExecuteHandleOnDragStart(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     }
 }
 
-void GetParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& dataSize, std::string& udKey,
-    std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary)
-{
-    CHECK_NULL_VOID(asyncCtx);
-    if (asyncCtx->unifiedData) {
-        int32_t ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
-        if (ret != 0) {
-            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set data failed, return value is %{public}d", ret);
-        } else {
-            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
-            if (ret != 0) {
-                TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
-            }
-        }
-        dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
-    }
-    if (asyncCtx->dataLoadParams) {
-        UdmfClient::GetInstance()->SetDelayInfo(asyncCtx->dataLoadParams, udKey);
-        dataSize = static_cast<int32_t>(asyncCtx->dataLoadParams->GetRecordCount());
-    }
-    auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
-    if (badgeNumber.has_value()) {
-        dataSize = badgeNumber.value();
-    }
-}
-
 bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     Msdp::DeviceStatus::DragData& dragData, Msdp::DeviceStatus::ShadowInfo& shadowInfo)
 {
@@ -1186,7 +1161,11 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     std::string udKey;
     std::map<std::string, int64_t> summary;
     std::map<std::string, int64_t> detailedSummary;
-    GetParams(asyncCtx, dataSize, udKey, summary, detailedSummary);
+    dataSize = SetUnifiedData(asyncCtx, udKey, summary, detailedSummary);
+    auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
+    if (badgeNumber.has_value()) {
+        dataSize = badgeNumber.value();
+    }
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_RETURN(container, false);
     if (!container->GetLastMovingPointerPosition(asyncCtx->dragPointerEvent)) {
