@@ -15,7 +15,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("window_scene_test") {
   type = "new"
-  module_out_path = pattern_test_output_path
+  module_out_path = "window_manager/window_manager/window_scene/window_pattern"
   render = true
   sources = [
     # mock
