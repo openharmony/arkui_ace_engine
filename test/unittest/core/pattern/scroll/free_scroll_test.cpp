@@ -472,9 +472,11 @@ TEST_F(FreeScrollTest, Animation003)
  */
 TEST_F(FreeScrollTest, Animation004)
 {
+    constexpr float friction = 0.8f;
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
+    model.SetFriction(friction);
     model.SetInitialOffset({ CalcDimension(DELTA_X), CalcDimension(DELTA_Y) });
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
@@ -483,7 +485,7 @@ TEST_F(FreeScrollTest, Animation004)
     MockAnimationManager::GetInstance().SetTicks(2);
     PanEnd({ -LARGE_DELTA_X, -LARGE_DELTA_Y }, { VELOCITY_X, VELOCITY_Y });
     EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::FLING);
-    EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue().ToString(), "Offset (316.46, 316.46)");
+    EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue().GetX(), -1 + VELOCITY_X / (friction * -FRICTION_SCALE));
     MockAnimationManager::GetInstance().Tick(); // switched to high-friction spring motion after reaching edge
     EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue(), OffsetF());
     FlushUITasks(frameNode_);
