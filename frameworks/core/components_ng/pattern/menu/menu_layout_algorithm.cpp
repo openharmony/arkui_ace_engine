@@ -631,9 +631,7 @@ uint32_t MenuLayoutAlgorithm::GetBottomBySafeAreaManager(const RefPtr<SafeAreaMa
     auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(menuPattern->GetHost());
     auto bottom = safeAreaInsets.bottom_.Length();
     CHECK_NULL_RETURN(safeAreaManager, 0);
-    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
-    keyboardInsert = safeAreaManager->GetKeyboardWebInset().Combine(keyboardInsert);
-    auto keyboardHeight = keyboardInsert.Length();
+    auto keyboardHeight = safeAreaManager->GetKeyboardInsetImpl().Length();
     if ((menuPattern->IsSelectOverlayExtensionMenu() || menuPattern->IsSelectOverlayRightClickMenu()) &&
         GreatNotEqual(keyboardHeight, 0)) {
         bottom = keyboardHeight;

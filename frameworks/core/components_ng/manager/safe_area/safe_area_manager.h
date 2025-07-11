@@ -356,6 +356,16 @@ public:
         return useCutout_;
     }
 
+    SafeAreaInsets::Inset GetKeyboardInsetImpl()
+    {
+        return getKeyboardInset ? getKeyboardInset(this) : GetKeyboardInset();
+    }
+
+    void SetKeyboardInsetImpl(std::function<SafeAreaInsets::Inset(SafeAreaManager*)> method)
+    {
+        getKeyboardInset = method;
+    }
+
 private:
     bool isAtomicService_ = false;
 
@@ -439,6 +449,8 @@ private:
 
     uint32_t keyboardHeightConsideringUIExtension_ = 0;
     std::unordered_map<int32_t, std::function<void()>> keyboardChangeCbsConsideringUIExt_;
+
+    std::function<SafeAreaInsets::Inset(SafeAreaManager*)> getKeyboardInset = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(SafeAreaManager);
 };

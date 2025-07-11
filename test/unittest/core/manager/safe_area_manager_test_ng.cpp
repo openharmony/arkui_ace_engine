@@ -1435,4 +1435,23 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
         EXPECT_EQ(safeAreaManager_->IsModeResize(), expectedRes[i].second);
     }
 }
+
+/**
+ * @tc.name: SetAndGetKeyboardInsetImplTest
+ * @tc.desc: test Set And GetKeyboardInsetImplTest interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, SetAndGetKeyboardInsetImplTest, TestSize.Level1)
+{
+    safeAreaManager_->SetKeyboardInsetImpl([](SafeAreaManager* manager) { return manager->GetKeyboardWebInset(); });
+    EXPECT_NE(safeAreaManager_->getKeyboardInset, nullptr);
+    auto ret = safeAreaManager_->GetKeyboardInsetImpl();
+    auto compare = safeAreaManager_->GetKeyboardWebInset();
+    EXPECT_EQ(ret, compare);
+    safeAreaManager_->SetKeyboardInsetImpl(std::function<SafeAreaInsets::Inset(SafeAreaManager*)>());
+    EXPECT_EQ(safeAreaManager_->getKeyboardInset, nullptr);
+    ret = safeAreaManager_->GetKeyboardInsetImpl();
+    compare = safeAreaManager_->GetKeyboardInset();
+    EXPECT_EQ(ret, compare);
+}
 } // namespace OHOS::Ace::NG
