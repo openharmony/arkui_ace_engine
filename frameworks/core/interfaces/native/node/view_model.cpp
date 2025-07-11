@@ -16,6 +16,7 @@
 #include "core/interfaces/native/node/view_model.h"
 
 #include "base/memory/ace_type.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
@@ -80,7 +81,6 @@
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.h"
 
 namespace OHOS::Ace::NG::ViewModel {
 
@@ -140,7 +140,6 @@ void* createToggleNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
     auto toggleParams = static_cast<const ArkUI_Toggle_Params*>(&params);
     CHECK_NULL_RETURN(toggleParams, nullptr);
     auto frameNode = ToggleModelNG::CreateFrameNode(nodeId, toggleParams->toggleType, toggleParams->isOn);
-    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -314,18 +313,6 @@ void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& par
 }
 #endif
 
-#ifdef WINDOW_SCENE_SUPPORTED
-void* createEmbeddedComponent(ArkUI_Int32 nodeId)
-{
-    RefPtr<OHOS::Ace::WantWrap> want = nullptr;
-    auto frameNode = UIExtensionAdapter::CreateEmbeddedComponent(nodeId, want);
-    if (frameNode) {
-        frameNode->IncRefCount();
-    }
-    return AceType::RawPtr(frameNode);
-}
-#endif
-
 void* createListItemGroupNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ListItemGroupModelNG::CreateFrameNode(nodeId);
@@ -393,7 +380,6 @@ void* createCustomNode(ArkUI_Int32 nodeId)
 void* createNavigationNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = NavigationModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -511,7 +497,6 @@ void* createGridColNode(ArkUI_Int32 nodeId)
 void* createImageAnimatorNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ImageAnimatorModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -535,7 +520,6 @@ void* createSelectNode(ArkUI_Int32 nodeId)
 void* createTabContentNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TabContentModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -621,6 +605,14 @@ void* GetOrCreateCustomNode(ArkUI_CharPtr tag)
     return AceType::RawPtr(frameNode);
 }
 
+void* CreateCustomNodeByNodeId(ArkUI_CharPtr tag, ArkUI_Int32 nodeId)
+{
+    auto frameNode = CustomNodeExtModelNG::CreateFrameNode(std::string(tag), nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 
 static createArkUIFrameNode* createArkUIFrameNodes[] = {
@@ -671,8 +663,13 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
 #endif
     createGridItemNode,
     createCustomNode,
+#ifndef ARKUI_WEARABLE
     createWaterFlowNode,
     createFlowItemNode,
+#else
+    nullptr, // createWaterFlowNode
+    nullptr, // createFlowItemNode
+#endif
     createRelativeContainerNode,
     createBlankNode,
     createDividerNode,
@@ -680,7 +677,11 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createSearchNode,
     createGridRowNode,
     createGridColNode,
+#ifndef ARKUI_WEARABLE
     createSelectNode,
+#else
+    nullptr, // createSelectNode
+#endif
     createImageAnimatorNode,
     createCircleNode,
     createTabContentNode,
@@ -704,11 +705,6 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     nullptr,
 #endif
     createArcAlphabetIndexerNode,
-#ifdef WINDOW_SCENE_SUPPORTED
-    createEmbeddedComponent,
-#else
-    nullptr,
-#endif
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
@@ -782,6 +778,8 @@ void RemoveChild(void* parentNode, void* childNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(parent, RemoveChild, parentNode, childNode);
     child->MarkRemoving();
     parent->RemoveChild(AceType::Claim(child), true);
 }

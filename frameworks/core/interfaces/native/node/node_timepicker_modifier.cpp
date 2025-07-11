@@ -29,57 +29,7 @@ constexpr int32_t POS_2 = 2;
 constexpr int NUM_3 = 3;
 const char DEFAULT_DELIMITER = '|';
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
-std::string g_strValue;
-
-ArkUI_Bool GetPickerThemeByFrameNode(FrameNode* frameNode, RefPtr<PickerTheme>& theme)
-{
-    CHECK_NULL_RETURN(frameNode, false);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, false);
-    theme = themeManager->GetTheme<PickerTheme>();
-    CHECK_NULL_RETURN(theme, false);
-    return true;
-}
-
-void InitTimePickerTextStyle(const char* fontInfo, uint32_t color, int32_t style, NG::PickerTextStyle& textStyle)
-{
-    std::vector<std::string> res;
-    std::string fontValues = std::string(fontInfo);
-    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
-    if (res.size() != NUM_3) {
-        return;
-    }
-    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
-    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
-        textStyle.fontStyle = FONT_STYLES[style];
-    } else {
-        textStyle.fontStyle = FONT_STYLES[0];
-    }
-    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
-    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
-    textStyle.textColor = Color(color);
-}
-
-void SetTimePickerTextStyleResObj(NG::PickerTextStyle& textStyle, void* fontSizeRawPtr, void* fontFamilyRawPtr,
-    void* textColorRawPtr)
-{
-    auto* fontSizePtr = reinterpret_cast<ResourceObject*>(fontSizeRawPtr);
-    if (fontSizePtr) {
-        textStyle.fontSizeResObj = AceType::Claim(fontSizePtr);
-    }
-
-    auto* fontFamilyPtr = reinterpret_cast<ResourceObject*>(fontFamilyRawPtr);
-    if (fontFamilyPtr) {
-        textStyle.fontFamilyResObj = AceType::Claim(fontFamilyPtr);
-    }
-
-    auto* textColorPtr = reinterpret_cast<ResourceObject*>(textColorRawPtr);
-    if (textColorPtr) {
-        textStyle.textColorResObj = AceType::Claim(textColorPtr);
-    }
-}
+thread_local std::string g_strValue;
 
 void SetTimepickerSelected(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute)
 {
@@ -150,31 +100,31 @@ void SetTimepickerTextStyle(ArkUINodeHandle node, uint32_t color, const char* fo
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    RefPtr<PickerTheme> theme;
-    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+
+    NG::PickerTextStyle textStyle;
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    if (res.size() != NUM_3) {
         return;
     }
-    NG::PickerTextStyle textStyle;
-    InitTimePickerTextStyle(fontInfo, color, style, textStyle);
-    TimePickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
-}
-
-void SetTimepickerTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPickerTextStyleStruct* textStyleStruct)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    RefPtr<PickerTheme> theme;
-    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
-        return;
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
     }
-    NG::PickerTextStyle textStyle;
-    InitTimePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
-        textStyle);
-    SetTimePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
-        textStyleStruct->textColorRawPtr);
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
     TimePickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
 }
-
 
 void ResetTimepickerTextStyle(ArkUINodeHandle node)
 {
@@ -194,29 +144,28 @@ void SetTimepickerSelectedTextStyle(ArkUINodeHandle node, uint32_t color, const 
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    RefPtr<PickerTheme> theme;
-    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    NG::PickerTextStyle textStyle;
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    if (res.size() != NUM_3) {
         return;
     }
-    NG::PickerTextStyle textStyle;
-    InitTimePickerTextStyle(fontInfo, color, style, textStyle);
-    TimePickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
-}
-
-void SetTimepickerSelectedTextStyleWithResObj(ArkUINodeHandle node,
-    const struct ArkUIPickerTextStyleStruct* textStyleStruct)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    RefPtr<PickerTheme> theme;
-    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
-        return;
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
     }
-    NG::PickerTextStyle textStyle;
-    InitTimePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
-        textStyle);
-    SetTimePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
-        textStyleStruct->textColorRawPtr);
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
     TimePickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
 }
 
@@ -238,29 +187,29 @@ void SetTimepickerDisappearTextStyle(ArkUINodeHandle node, uint32_t color, const
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    RefPtr<PickerTheme> theme;
-    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
-        return;
-    }
-    NG::PickerTextStyle textStyle;
-    InitTimePickerTextStyle(fontInfo, color, style, textStyle);
-    TimePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
-}
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
 
-void SetTimepickerDisappearTextStyleWithResObj(ArkUINodeHandle node,
-    const struct ArkUIPickerTextStyleStruct* textStyleStruct)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    RefPtr<PickerTheme> theme;
-    if (!GetPickerThemeByFrameNode(frameNode, theme)) {
+    NG::PickerTextStyle textStyle;
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    if (res.size() != NUM_3) {
         return;
     }
-    NG::PickerTextStyle textStyle;
-    InitTimePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
-        textStyle);
-    SetTimePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
-        textStyleStruct->textColorRawPtr);
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
+    }
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
     TimePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
 }
 
@@ -542,13 +491,10 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         .setTimepickerBackgroundColor = SetTimepickerBackgroundColor,
         .getTimepickerDisappearTextStyle = GetTimepickerDisappearTextStyle,
         .setTimepickerDisappearTextStyle = SetTimepickerDisappearTextStyle,
-        .setTimepickerDisappearTextStyleWithResObj = SetTimepickerDisappearTextStyleWithResObj,
         .getTimepickerTextStyle = GetTimepickerTextStyle,
         .setTimepickerTextStyle = SetTimepickerTextStyle,
-        .setTimepickerTextStyleWithResObj = SetTimepickerTextStyleWithResObj,
         .getTimepickerSelectedTextStyle = GetTimepickerSelectedTextStyle,
         .setTimepickerSelectedTextStyle = SetTimepickerSelectedTextStyle,
-        .setTimepickerSelectedTextStyleWithResObj = SetTimepickerSelectedTextStyleWithResObj,
         .resetTimepickerDisappearTextStyle = ResetTimepickerDisappearTextStyle,
         .resetTimepickerTextStyle = ResetTimepickerTextStyle,
         .resetTimepickerSelectedTextStyle = ResetTimepickerSelectedTextStyle,

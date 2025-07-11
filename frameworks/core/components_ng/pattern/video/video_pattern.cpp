@@ -440,13 +440,11 @@ void VideoPattern::ResetMediaPlayerOnBg()
             return;
         }
 
-        uiTaskExecutor.PostSyncTask([weak, id] {
+        uiTaskExecutor.PostSyncTask([weak] {
             auto videoPattern = weak.Upgrade();
             CHECK_NULL_VOID(videoPattern);
-            ContainerScope scope(id);
             videoPattern->PrepareSurface();
             }, "ArkUIVideoPrepareSurface");
-
         mediaPlayer->SetRenderFirstFrame(showFirstFrame);
         if (mediaPlayer->PrepareAsync() != 0) {
             TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");

@@ -717,9 +717,9 @@ void IndexerModelNG::SetFontWeight(FrameNode* frameNode, const FontWeight weight
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, FontWeight, weight, frameNode);
 }
 
-void IndexerModelNG::SetSelectedFont(FrameNode* frameNode, std::optional<Dimension>& fontSize,
-    std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
-    std::optional<OHOS::Ace::FontStyle>& fontStyle)
+void IndexerModelNG::SetSelectedFont(FrameNode* frameNode, const std::optional<Dimension>& fontSize,
+    const std::optional<FontWeight>& fontWeight, const std::optional<std::vector<std::string>>& fontFamily,
+    const std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -734,9 +734,9 @@ void IndexerModelNG::SetSelectedFont(FrameNode* frameNode, std::optional<Dimensi
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, SelectedFont, textStyle, frameNode);
 }
 
-void IndexerModelNG::SetPopupFont(FrameNode* frameNode, std::optional<Dimension>& fontSize,
-    std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
-    std::optional<OHOS::Ace::FontStyle>& fontStyle)
+void IndexerModelNG::SetPopupFont(FrameNode* frameNode, const std::optional<Dimension>& fontSize,
+    const std::optional<FontWeight>& fontWeight, const std::optional<std::vector<std::string>>& fontFamily,
+    const std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -751,9 +751,9 @@ void IndexerModelNG::SetPopupFont(FrameNode* frameNode, std::optional<Dimension>
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupFont, textStyle, frameNode);
 }
 
-void IndexerModelNG::SetFont(FrameNode* frameNode, std::optional<Dimension>& fontSize,
-    std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
-    std::optional<OHOS::Ace::FontStyle>& fontStyle)
+void IndexerModelNG::SetFont(FrameNode* frameNode, const std::optional<Dimension>& fontSize,
+    const std::optional<FontWeight>& fontWeight, const std::optional<std::vector<std::string>>& fontFamily,
+    const std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);

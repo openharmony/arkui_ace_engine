@@ -390,6 +390,11 @@ void UIObserverHandler::SetHandleDensityChangeFunc(DensityHandleFunc func)
     densityHandleFunc_ = func;
 }
 
+void UIObserverHandler::SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func)
+{
+    densityHandleFuncForAni_ = func;
+}
+
 void UIObserverHandler::SetDrawCommandSendHandleFunc(DrawCommandSendHandleFunc func)
 {
     drawCommandSendHandleFunc_ = func;

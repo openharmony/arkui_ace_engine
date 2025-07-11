@@ -43,14 +43,8 @@ static void DragActionConvert(
     } else {
         internalDragAction->previewOption.isShowBadge = dragAction->dragPreviewOption.isShowBadge;
     }
-    if (!dragAction->useDataLoadParams) {
-        RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedDataForNative(dragAction->unifiedData);
-        internalDragAction->unifiedData = udData;
-    } else {
-        RefPtr<DataLoadParams> udDataLoadParams =
-            UdmfClient::GetInstance()->TransformDataLoadParamsForNative(dragAction->dataLoadParams);
-        internalDragAction->dataLoadParams = udDataLoadParams;
-    }
+    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedDataForNative(dragAction->unifiedData);
+    internalDragAction->unifiedData = udData;
     internalDragAction->instanceId = dragAction->instanceId;
     internalDragAction->touchPointX = dragAction->touchPointX;
     internalDragAction->touchPointY = dragAction->touchPointY;
@@ -90,13 +84,7 @@ ArkUI_Int32 StartDrag(ArkUIDragAction* dragAction)
     }
     internalDragAction->callback = callbacks;
     DragActionConvert(dragAction, internalDragAction);
-    auto ret = OHOS::Ace::NG::DragDropFuncWrapper::StartDragAction(internalDragAction);
-    if (ret == -1) {
-        DragNotifyMsg dragNotifyMsg;
-        dragNotifyMsg.result = DragRet::DRAG_CANCEL;
-        OHOS::Ace::NG::DragDropFuncWrapper::HandleCallback(internalDragAction,
-            dragNotifyMsg, NG::DragAdapterStatus::ENDED);
-    }
+    OHOS::Ace::NG::DragDropFuncWrapper::StartDragAction(internalDragAction);
     return 0;
 }
 
@@ -155,11 +143,6 @@ void SetDragEventStrictReportingEnabledWithContext(ArkUI_Int32 instanceId, bool 
     NG::ViewAbstract::SetDragEventStrictReportingEnabled(instanceId, enabled);
 }
 
-void EnableDropDisallowedBadge(bool enabled)
-{
-    NG::ViewAbstract::EnableDropDisallowedBadge(enabled);
-}
-
 ArkUI_Int32 RequestDragEndPending()
 {
     return NG::DragDropFuncWrapper::RequestDragEndPending();
@@ -190,8 +173,7 @@ const ArkUIDragAdapterAPI* GetDragAdapterAPI()
         .setDragEventStrictReportingEnabledWithContext = SetDragEventStrictReportingEnabledWithContext,
         .requestDragEndPending = RequestDragEndPending,
         .notifyDragResult = NotifyDragResult,
-        .notifyDragEndPendingDone = NotifyDragEndPendingDone,
-        .enableDropDisallowedBadge = EnableDropDisallowedBadge,
+        .notifyDragEndPendingDone = NotifyDragEndPendingDone
     };
     CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;

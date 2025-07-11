@@ -17,48 +17,125 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ErrorCallback } from "./ohos.base"
+import { BusinessError } from "#external"
+import { Want } from "./ohos.app.ability"
+import { EmbeddedType } from "./enums"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Want, ErrorCallback } from "./../generated/ArkArkuiExternalInterfaces"
-import { EmbeddedType, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Resource } from "global/resource";
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { ArkEmbeddedComponentComponent } from "./../generated/ArkEmbeddedComponent"
-import { ArkEmbeddedComponentPeer } from "./../generated/peers/ArkEmbeddedComponentPeer"
+
+export class ArkEmbeddedComponentPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkEmbeddedComponentPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._EmbeddedComponent_construct(peerId, flags)
+        const _peer  = new ArkEmbeddedComponentPeer(_peerPtr, peerId, "EmbeddedComponent", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setEmbeddedComponentOptionsAttribute(loader: Want, type: EmbeddedType): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeWant(loader)
+        ArkUIGeneratedNativeModule._EmbeddedComponentInterface_setEmbeddedComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length(), TypeChecker.EmbeddedType_ToNumeric(type))
+        thisSerializer.release()
+    }
+    onTerminatedAttribute(value: ((parameter: TerminationInfo) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._EmbeddedComponentAttribute_onTerminated(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onErrorAttribute(value: ErrorCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._EmbeddedComponentAttribute_onError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export type EmbeddedComponentInterface = (loader: Want, type: EmbeddedType) => EmbeddedComponentAttribute;
 export interface TerminationInfo {
     code: number;
     want?: Want;
 }
-export type Callback_TerminationInfo_Void = (parameter: TerminationInfo) => void;
-/** @memo:stable */
 export interface EmbeddedComponentAttribute extends CommonMethod {
-    /** @memo */
-    setEmbeddedComponentOptions(loader: Want, type: EmbeddedType): this
-    /** @memo */
-    onTerminated(value: ((parameter: TerminationInfo) => void)): this
-    /** @memo */
-    onError(value: ErrorCallback): this
+    onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this
+    onError(value: ErrorCallback | undefined): this
+}
+export class ArkEmbeddedComponentStyle extends ArkCommonMethodStyle implements EmbeddedComponentAttribute {
+    onTerminated_value?: ((parameter: TerminationInfo) => void) | undefined
+    onError_value?: ErrorCallback | undefined
+    public onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this {
+        return this
+    }
+    public onError(value: ErrorCallback | undefined): this {
+        return this
+        }
+}
+export type Callback_TerminationInfo_Void = (parameter: TerminationInfo) => void;
+export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent implements EmbeddedComponentAttribute {
+    getPeer(): ArkEmbeddedComponentPeer {
+        return (this.peer as ArkEmbeddedComponentPeer)
+    }
+    public setEmbeddedComponentOptions(loader: Want, type: EmbeddedType): this {
+        if (this.checkPriority("setEmbeddedComponentOptions")) {
+            const loader_casted = loader as (Want)
+            const type_casted = type as (EmbeddedType)
+            this.getPeer()?.setEmbeddedComponentOptionsAttribute(loader_casted, type_casted)
+            return this
+        }
+        return this
+    }
+    public onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this {
+        if (this.checkPriority("onTerminated")) {
+            const value_casted = value as (((parameter: TerminationInfo) => void) | undefined)
+            this.getPeer()?.onTerminatedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onError(value: ErrorCallback | undefined): this {
+        if (this.checkPriority("onError")) {
+            const value_casted = value as (ErrorCallback | undefined)
+            this.getPeer()?.onErrorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function EmbeddedComponent(
-  /** @memo */
-  style: ((attributes: EmbeddedComponentAttribute) => void) | undefined,
-  loader: Want, type: EmbeddedType, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: EmbeddedComponentAttribute) => void) | undefined,
+    loader: Want, type: EmbeddedType,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkEmbeddedComponentComponent()
     })

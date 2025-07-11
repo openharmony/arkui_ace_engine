@@ -18,50 +18,16 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 
-void SetCanvasOnReady(ArkUINodeHandle node, void* callback)
+void SetCanvasOnReady(ArkUINodeHandle node, void* extraParam)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (callback) {
-        auto onReady = reinterpret_cast<std::function<void()>*>(callback);
-        CanvasModelNG::SetOnReady(frameNode, std::move(*onReady));
-    } else {
-        CanvasModelNG::SetOnReady(frameNode, nullptr);
-    }
-}
-
-void ResetCanvasOnReady(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CanvasModelNG::SetOnReady(frameNode, nullptr);
-}
-
-void SetCanvasEnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CanvasModelNG::EnableAnalyzer(frameNode, static_cast<bool>(value));
-}
-
-void ResetCanvasEnableAnalyzer(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CanvasModelNG::EnableAnalyzer(frameNode, false);
-}
-
-const ArkUICanvasModifier* GetCanvasModifier()
-{
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUICanvasModifier modifier = {
-        .setCanvasOnReady = SetCanvasOnReady,
-        .resetCanvasOnReady = ResetCanvasOnReady,
-        .setCanvasEnableAnalyzer = SetCanvasEnableAnalyzer,
-        .resetCanvasEnableAnalyzer = ResetCanvasEnableAnalyzer,
+    auto onChange = []() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.componentAsyncEvent.subKind = ON_CANVAS_READY;
+        SendArkUISyncEvent(&event);
     };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    CanvasModelNG::SetOnReady(frameNode, std::move(onChange));
 }
 } // namespace OHOS::Ace::NG::NodeModifier

@@ -33,14 +33,14 @@ void ImageBitmapPeer::SetOptions(
     ContainerScope scope(Container::CurrentIdSafely());
     SetInstanceId(OHOS::Ace::Container::CurrentId());
     if (!textString.empty()) {
-        // auto context = PipelineBase::GetCurrentContext();
-        // CHECK_NULL_VOID(context);
-        // if (context->IsFormRender() && NotFormSupport(textString)) {
-        //     LOGE("ARKOALA ImageBitmapPeer::Constructor Not supported src : %{public}s when form render",
-        //         textString.c_str());
-        //     return;
-        // }
-        // LoadImage(textString);
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        if (context->IsFormRender() && NotFormSupport(textString)) {
+            LOGE("ARKOALA ImageBitmapPeer::Constructor Not supported src : %{public}s when form render",
+                textString.c_str());
+            return;
+        }
+        LoadImage(textString);
     } else {
 #ifdef PIXEL_MAP_SUPPORTED
         CHECK_NULL_VOID(pixelMap);
@@ -140,8 +140,7 @@ void ImageBitmapPeer::LoadImage(const OHOS::Ace::ImageSourceInfo& sourceInfo)
         CHECK_NULL_VOID(jsRenderImage);
         jsRenderImage->OnImageLoadSuccess();
     };
-    auto loadFailCallback = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo,
-        const std::string& errorMsg, ImageErrorInfo /* errorInfo */) {
+    auto loadFailCallback = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
         auto jsRenderImage = weak.Upgrade();
         CHECK_NULL_VOID(jsRenderImage);
         jsRenderImage->OnImageLoadFail(errorMsg);

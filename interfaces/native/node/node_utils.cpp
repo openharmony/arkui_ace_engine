@@ -20,7 +20,6 @@
 
 #include "base/utils/utils.h"
 #include "base/error/error_code.h"
-#include "core/common/container_consts.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 #ifdef __cplusplus
@@ -77,20 +76,6 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkU
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToScreen(node->uiNodeHandle, &tempOffset, false);
     screenOffset->x = tempOffset[0];
     screenOffset->y = tempOffset[1];
-
-    return OHOS::Ace::ERROR_CODE_NO_ERROR;
-}
-
-int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(ArkUI_NodeHandle node, ArkUI_IntOffset* offset)
-{
-    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(offset, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    ArkUI_Float32 tempOffset[2];
-    impl->getNodeModifiers()->getFrameNodeModifier()->getGlobalPositionOnDisplay(
-        node->uiNodeHandle, &tempOffset, false);
-    offset->x = tempOffset[0];
-    offset->y = tempOffset[1];
 
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
@@ -229,7 +214,7 @@ float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontSty
 
 void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* name, const char* value)
 {
-    if (node == nullptr || !OHOS::Ace::NodeModel::CheckIsCNode(node)) {
+    if (node == nullptr) {
         return;
     }
     if (name == nullptr || value == nullptr) {
@@ -408,33 +393,6 @@ int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeH
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-int32_t OH_ArkUI_NodeUtils_GetNodeHandleByUniqueId(const uint32_t uniqueId, ArkUI_NodeHandle* node)
-{
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
-    auto nodePtr = impl->getNodeModifiers()->getFrameNodeModifier()->getFrameNodeByUniqueId(uniqueId);
-    *node = OHOS::Ace::NodeModel::GetArkUINode(nodePtr);
-    CHECK_NULL_RETURN(*node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    return ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-int32_t OH_ArkUI_NodeUtils_GetNodeUniqueId(ArkUI_NodeHandle node, int32_t* uniqueId)
-{
-    if (node == nullptr) {
-        *uniqueId = -1;
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
-    auto id = impl->getNodeModifiers()->getFrameNodeModifier()->getIdByNodePtr(node->uiNodeHandle);
-    *uniqueId = id;
-    if (*uniqueId < 0) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    return ARKUI_ERROR_CODE_NO_ERROR;
-}
-
 int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option)
 {
     if (node == nullptr || option == nullptr || node->cNode == false) {
@@ -555,54 +513,6 @@ int32_t OH_ArkUI_NodeUtils_GetPositionToParent(ArkUI_NodeHandle node, ArkUI_IntO
     globalOffset->y = tempOffset[1];
 
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
-}
-
-int32_t OH_ArkUI_RunTaskInScope(ArkUI_ContextHandle uiContext, void* userData, void(*callback)(void* userData))
-{
-    CHECK_NULL_RETURN(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
-    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
-    CHECK_NULL_RETURN(callback, ARKUI_ERROR_CODE_CALLBACK_INVALID);
-    auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
-    impl->getNodeModifiers()->getFrameNodeModifier()->runScopedTask(context->id, userData, callback);
-    return ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_ErrorCode OH_ArkUI_AddSupportedUIStates(ArkUI_NodeHandle node, int32_t uiStates,
-    void (statesChangeHandler)(int32_t currentStates, void* userData), bool excludeInner, void* userData)
-{
-    if (node == nullptr) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    impl->getNodeModifiers()->getFrameNodeModifier()->addSupportedUIStates(node->uiNodeHandle, uiStates,
-        reinterpret_cast<void*>(statesChangeHandler), excludeInner, userData);
-    return ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_ErrorCode OH_ArkUI_RemoveSupportedUIStates(ArkUI_NodeHandle node, int32_t uiStates)
-{
-    if (node == nullptr) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    impl->getNodeModifiers()->getFrameNodeModifier()->removeSupportedUIStates(node->uiNodeHandle, uiStates);
-    return ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-int32_t OH_ArkUI_SetForceDarkConfig(
-    ArkUI_ContextHandle uiContext, bool forceDark, ArkUI_NodeType nodeType, uint32_t (*colorInvertFunc)(uint32_t color))
-{
-    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    int32_t instanceId = OHOS::Ace::INSTANCE_ID_UNDEFINED;
-    if (uiContext) {
-        auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
-        instanceId = context->id;
-    }
-    int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->setForceDarkConfig(
-        instanceId, forceDark, OHOS::Ace::NodeModel::ConvertNodeTypeToTag(nodeType).c_str(), colorInvertFunc);
-    return errorCode;
 }
 
 #ifdef __cplusplus

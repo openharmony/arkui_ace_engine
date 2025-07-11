@@ -23,8 +23,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HttpAuthHandlerAccessor {
 void DestroyPeerImpl(Ark_HttpAuthHandler peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_HttpAuthHandler CtorImpl()
@@ -70,7 +68,4 @@ const GENERATED_ArkUIHttpAuthHandlerAccessor* GetHttpAuthHandlerAccessor()
     return &HttpAuthHandlerAccessorImpl;
 }
 
-struct HttpAuthHandlerPeer {
-    virtual ~HttpAuthHandlerPeer() = default;
-};
 }

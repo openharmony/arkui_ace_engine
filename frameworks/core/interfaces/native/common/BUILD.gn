@@ -49,9 +49,7 @@ template("ace_core_interfaces_native") {
     if (ace_engine_feature_enable_point_light) {
       defines += [ "POINT_LIGHT_ENABLE" ]
     }
-    if (ace_engine_feature_enable_upgrade_skia) {
-      defines += [ "USE_NEW_SKIA" ]
-    }
+
     # add common source file needed by all product platform here
     sources = []
     sources += rebased_common_sources
@@ -61,6 +59,9 @@ template("ace_core_interfaces_native") {
       external_deps += [
         "ability_runtime:app_context",
         "webview:libnweb",
+        "image_framework:image_ani",
+        "image_framework:image_native",
+        "runtime_core:ani",
       ]
     }
     if (include_generated_sources) {

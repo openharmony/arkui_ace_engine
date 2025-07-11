@@ -85,13 +85,27 @@ Matrix4 ConvertToMatrix([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
     if (inputSize != MATRIX_LENGTH) {
         return result;
     }
+
+    ani_class doubleClass = nullptr;
+    if (ANI_OK != env->FindClass("Lstd/core/Double;", &doubleClass)) {
+        return result;
+    }
+    ani_method doubleUnbox = nullptr;
+    if (ANI_OK != env->Class_FindMethod(doubleClass, "unboxed", ":D", &doubleUnbox)) {
+        return result;
+    }
+
     // in column order
-    ani_array_double doubleArray = static_cast<ani_array_double>(inputArray);
+    ani_array doubleArray = inputArray;
     for (int32_t i = 0; i < Matrix4::DIMENSION; i++) {
         for (int32_t j = 0; j < Matrix4::DIMENSION; j++) {
-            ani_double value;
             auto index = static_cast<ani_size>(i * Matrix4::DIMENSION + j);
-            if (ANI_OK != env->Array_GetRegion_Double(doubleArray, index, 1, &value)) {
+            ani_ref val {};
+            if (ANI_OK != env->Array_Get(doubleArray, index, &val)) {
+                return result;
+            }
+            ani_double value;
+            if (ANI_OK != env->Object_CallMethod_Double(reinterpret_cast<ani_object>(val), doubleUnbox, &value)) {
                 return result;
             }
             auto ret = static_cast<double>(value);
@@ -172,7 +186,7 @@ bool ParseOption(ani_env* env, ani_object options, double& input, const char* pr
     }
     ani_double propertyValue;
     if (ANI_OK != env->Object_CallMethodByName_Double(static_cast<ani_object>(property_ref),
-        "doubleValue", nullptr, &propertyValue)) {
+        "unboxed", nullptr, &propertyValue)) {
         return false;
     }
     input = static_cast<int32_t>(propertyValue);

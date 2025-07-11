@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/stepper/stepper_model_ng.h"
+#include "core/components_ng/pattern/stepper/stepper_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -25,12 +25,10 @@ namespace StepperModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // need check
-    // auto frameNode = StepperModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = StepperModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // StepperModifier
 namespace StepperInterfaceModifier {
@@ -45,66 +43,80 @@ void SetStepperOptionsImpl(Ark_NativePointer node,
         convValue = Converter::OptConvert<int>(arkConvValue->index);
         Validator::ValidateNonNegative(convValue);
     }
-    // need check
-    // StepperModelNG::SetIndex(frameNode, convValue);
+    StepperModelStatic::SetIndex(frameNode, convValue);
 }
 } // StepperInterfaceModifier
 namespace StepperAttributeModifier {
 void OnFinishImpl(Ark_NativePointer node,
-                  const Callback_Void* value)
+                  const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onFinish = [arkCallback = CallbackHelper(*value)]() { arkCallback.Invoke(); };
-    // need check
-    // StepperModelNG::SetOnFinish(frameNode, std::move(onFinish));
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onFinish = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
+    StepperModelStatic::SetOnFinish(frameNode, std::move(onFinish));
 }
 void OnSkipImpl(Ark_NativePointer node,
-                const Callback_Void* value)
+                const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onSkip = [arkCallback = CallbackHelper(*value)]() { arkCallback.Invoke(); };
-    // need check
-    // StepperModelNG::SetOnSkip(frameNode, std::move(onSkip));
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onSkip = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
+    StepperModelStatic::SetOnSkip(frameNode, std::move(onSkip));
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Callback_Number_Number_Void* value)
+                  const Opt_Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onChange = [arkCallback = CallbackHelper(*value)](int32_t prevIndex, int32_t index) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onChange = [arkCallback = CallbackHelper(*optValue)](int32_t prevIndex, int32_t index) {
         arkCallback.Invoke(Converter::ArkValue<Ark_Number>(prevIndex), Converter::ArkValue<Ark_Number>(index));
     };
-    // need check
-    // StepperModelNG::SetOnChange(frameNode, std::move(onChange));
+    StepperModelStatic::SetOnChange(frameNode, std::move(onChange));
 }
 void OnNextImpl(Ark_NativePointer node,
-                const Callback_Number_Number_Void* value)
+                const Opt_Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onNext = [arkCallback = CallbackHelper(*value)](int32_t index, int32_t pendingIndex) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onNext = [arkCallback = CallbackHelper(*optValue)](int32_t index, int32_t pendingIndex) {
         arkCallback.Invoke(Converter::ArkValue<Ark_Number>(index), Converter::ArkValue<Ark_Number>(pendingIndex));
     };
-    // need check
-    // StepperModelNG::SetOnNext(frameNode, std::move(onNext));
+    StepperModelStatic::SetOnNext(frameNode, std::move(onNext));
 }
 void OnPreviousImpl(Ark_NativePointer node,
-                    const Callback_Number_Number_Void* value)
+                    const Opt_Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onPrevious = [arkCallback = CallbackHelper(*value)](int32_t index, int32_t pendingIndex) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onPrevious = [arkCallback = CallbackHelper(*optValue)](int32_t index, int32_t pendingIndex) {
         arkCallback.Invoke(Converter::ArkValue<Ark_Number>(index), Converter::ArkValue<Ark_Number>(pendingIndex));
     };
-    // need check
-    // StepperModelNG::SetOnPrevious(frameNode, std::move(onPrevious));
+    StepperModelStatic::SetOnPrevious(frameNode, std::move(onPrevious));
 }
 void _onChangeEvent_indexImpl(Ark_NativePointer node,
                               const Callback_Number_Void* callback)
@@ -117,8 +129,7 @@ void _onChangeEvent_indexImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
     };
-    // need check
-    // StepperModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
+    StepperModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // StepperAttributeModifier
 const GENERATED_ArkUIStepperModifier* GetStepperModifier()

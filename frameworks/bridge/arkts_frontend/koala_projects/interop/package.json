@@ -42,8 +42,9 @@
     "scripts": {
         "clean": "rimraf dist build types",
         "compile": "ets-tsc -b .",
+        "build:interop:gn": "npm run build:interop:inc",
         "build:interop": "npm run build:interop:inc",
-        "build:interop:inc": "fast-arktsc --input-files ./arktsconfig.json --output-dir ./build --compiler ../incremental/tools/panda/arkts/arktsc --link-name interop && ninja ${NINJA_OPTIONS} -f build/build.ninja",
+        "build:interop:inc": "node ../ui2abc/fast-arktsc --config ./arktsconfig.json --output-dir ./build --compiler ../incremental/tools/panda/arkts/ui2abc --link-name build/interop.abc && ninja ${NINJA_OPTIONS} -f build/abc/build.ninja",
         "clean:interop": "npm run clean",
         "lint": "eslint src test components",
         "test:wasm:coverage": "NODE_OPTIONS='--conditions browser --no-experimental-fetch' nyc mocha",
@@ -66,7 +67,7 @@
         "eslint": "^8.13.0",
         "eslint-plugin-unused-imports": "^2.0.0",
         "source-map-support": "^0.5.21",
-        "@koalaui/fast-arktsc": "file:../incremental/tools/fast-arktsc",
+        "@koalaui/fast-arktsc": "file:../ui2abc/fast-arktsc",
         "@koalaui/ets-tsc": "file:../incremental/tools/ets-tsc"
     }
 }

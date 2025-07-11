@@ -840,6 +840,11 @@ public:
         return targetIndex_;
     }
 
+    float GetStartPos() const
+    {
+        return startMainPos_ - currentDelta_;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);

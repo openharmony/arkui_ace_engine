@@ -14,7 +14,6 @@
  */
 #include "core/interfaces/native/node/render_node_modifier.h"
 
-#include "core/common/builder_util.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -55,18 +54,6 @@ RefPtr<RenderContext> GetRenderContext(UINode* node)
     return context;
 }
 
-void AddBuilderNode(ArkUINodeHandle node, ArkUINodeHandle child)
-{
-    auto* currentNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(currentNode);
-    auto* childNode = reinterpret_cast<UINode*>(child);
-    CHECK_NULL_VOID(childNode);
-    auto childRef = Referenced::Claim<UINode>(childNode);
-    std::list<RefPtr<UINode>> nodes;
-    BuilderUtils::GetBuilderNodes(childRef, nodes);
-    BuilderUtils::AddBuilderToParent(childRef, nodes);
-}
-
 void AppendChild(ArkUINodeHandle node, ArkUINodeHandle child)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -87,32 +74,12 @@ void InsertChildAfter(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHand
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
-void RemoveBuilderNode(ArkUINodeHandle node, ArkUINodeHandle child)
-{
-    auto* currentNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(currentNode);
-    auto* childNode = reinterpret_cast<UINode*>(child);
-    CHECK_NULL_VOID(childNode);
-    auto childRef = Referenced::Claim<UINode>(childNode);
-    std::list<RefPtr<UINode>> nodes;
-    BuilderUtils::GetBuilderNodes(childRef, nodes);
-    BuilderUtils::RemoveBuilderFromParent(childRef, nodes);
-}
-
 void RemoveChild(ArkUINodeHandle node, ArkUINodeHandle child)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto* childNode = reinterpret_cast<UINode*>(child);
     currentNode->RemoveChild(Referenced::Claim<UINode>(childNode));
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
-}
-
-void ClearBuilderNode(ArkUINodeHandle node)
-{
-    auto* currentNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(currentNode);
-    auto currentRef = Referenced::Claim<UINode>(currentNode);
-    BuilderUtils::ClearBuilder(currentRef);
 }
 
 void ClearChildren(ArkUINodeHandle node)
@@ -572,24 +539,14 @@ void SetTransformScale(ArkUINodeHandle node, ArkUI_Float32 xF, ArkUI_Float32 yF)
     renderContext->RequestNextFrame();
 }
 
-ArkUI_CharPtr GetNodeTypeInRenderNode(ArkUINodeHandle node)
-{
-    auto* currentNode = reinterpret_cast<NG::FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, "");
-    return currentNode->GetTag().c_str();
-}
-
 namespace NodeModifier {
 const ArkUIRenderNodeModifier* GetRenderNodeModifier()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIRenderNodeModifier modifier = {
-        .addBuilderNode = AddBuilderNode,
         .appendChild = AppendChild,
         .insertChildAfter = InsertChildAfter,
-        .removeBuilderNode = RemoveBuilderNode,
         .removeChild = RemoveChild,
-        .clearBuilderNode = ClearBuilderNode,
         .clearChildren = ClearChildren,
         .setClipToFrame = SetClipToFrame,
         .setRotation = SetRotation,
@@ -624,7 +581,6 @@ const ArkUIRenderNodeModifier* GetRenderNodeModifier()
         .setPosition = SetPosition,
         .setMarkNodeGroup = SetMarkNodeGroup,
         .setTransformScale = SetTransformScale,
-        .getNodeType = GetNodeTypeInRenderNode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

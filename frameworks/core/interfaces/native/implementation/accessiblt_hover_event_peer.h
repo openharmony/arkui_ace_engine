@@ -20,5 +20,8 @@
 
 struct AccessibilityHoverEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::AccessibilityHoverInfo> {
+protected:
+    AccessibilityHoverEventPeer() = default;
     ~AccessibilityHoverEventPeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

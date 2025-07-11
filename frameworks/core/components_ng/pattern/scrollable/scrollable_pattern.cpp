@@ -228,6 +228,11 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     } else {
         json->PutExtAttr("friction", GetFriction(), filter);
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    json->PutExtAttr("digitCrownSensitivity",
+        (std::to_string(static_cast<int32_t>(crownSensitivity_))).c_str(), filter);
+#endif
+    json->PutExtAttr("backToTop", backToTop_, filter);
 }
 
 void ScrollablePattern::SetAxis(Axis axis)
@@ -284,7 +289,10 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
         FireOnScrollStart();
         return true;
     }
-    SuggestOpIncGroup(true);
+    auto host = GetHost();
+    if (host) {
+        host->SuggestOpIncGroup(GetAxis());
+    }
     return UpdateCurrentOffset(offset, source);
 }
 
@@ -1824,7 +1832,10 @@ void ScrollablePattern::HandleDragStart(const GestureEvent& info)
     auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
     mouseOffsetX -= info.GetOffsetX();
     mouseOffsetY -= info.GetOffsetY();
-    SuggestOpIncGroup(true);
+    auto host = GetHost();
+    if (host) {
+        host->SuggestOpIncGroup(GetAxis());
+    }
     if (!IsItemSelected(static_cast<float>(info.GetGlobalLocation().GetX()) - info.GetOffsetX(),
         static_cast<float>(info.GetGlobalLocation().GetY()) - info.GetOffsetY())) {
         ClearMultiSelect();
@@ -2861,7 +2872,7 @@ void ScrollablePattern::FireOnScrollStart(bool withPerfMonitor)
     CHECK_NULL_VOID(host);
     auto hub = host->GetOrCreateEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
-    SuggestOpIncGroup(true);
+    host->SuggestOpIncGroup(GetAxis());
     if (scrollStop_ && !GetScrollAbort()) {
         OnScrollStop(hub->GetOnScrollStop(), hub->GetJSFrameNodeOnScrollStop());
     }
@@ -3027,27 +3038,27 @@ void ScrollablePattern::FireObserverOnScrollerAreaChange(float finalOffset)
     obsMgr->HandleOnScrollerAreaChangeEvent(offsetVP, source, isAtTop, isAtBottom);
 }
 
-void ScrollablePattern::SuggestOpIncGroup(bool flag)
-{
-    if (!SystemProperties::IsOpIncEnable() || !isVertical()) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (host->GetSuggestOpIncActivatedOnce()) {
-        return;
-    }
-    auto parent = host->GetParent();
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-    while (parent) {
-        if (frameNode && frameNode->GetSuggestOpIncMarked()) {
-            frameNode->MarkSuggestOpIncGroup(false, false);
-        }
-        parent = parent->GetParent();
-        frameNode = AceType::DynamicCast<FrameNode>(parent);
-    }
-    host->SetSuggestOpIncActivatedOnce();
-}
+// void ScrollablePattern::SuggestOpIncGroup(bool flag)
+// {
+//     if (!SystemProperties::IsOpIncEnable() || !isVertical()) {
+//         return;
+//     }
+//     auto host = GetHost();
+//     CHECK_NULL_VOID(host);
+//     if (host->GetSuggestOpIncActivatedOnce()) {
+//         return;
+//     }
+//     auto parent = host->GetParent();
+//     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+//     while (parent) {
+//         if (frameNode && frameNode->GetSuggestOpIncMarked()) {
+//             frameNode->MarkSuggestOpIncGroup(false, false);
+//         }
+//         parent = parent->GetParent();
+//         frameNode = AceType::DynamicCast<FrameNode>(parent);
+//     }
+//     host->SetSuggestOpIncActivatedOnce();
+// }
 
 void ScrollablePattern::OnScrollStop(
     const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop)

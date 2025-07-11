@@ -17,12 +17,10 @@
 #include "interfaces/native/node/dialog_model.h"
 
 #include "base/error/error_code.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "frameworks/core/components/dialog/dialog_properties.h"
 #include "frameworks/core/components/theme/shadow_theme.h"
-#include "frameworks/core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG::CustomDialog {
@@ -112,13 +110,10 @@ ArkUIDialogHandle CreateDialog()
         .heightValue = std::optional<ArkUI_Float32>(),
         .heightUnit = DimensionUnit::VP,
         .blurStyle = ARKUI_BLUR_STYLE_COMPONENT_ULTRA_THICK,
-        .blurStyleOption = std::nullopt,
-        .effectOption = std::nullopt,
         .keyboardAvoidMode = OHOS::Ace::KeyboardAvoidMode::DEFAULT,
-        .enableHoverMode = std::nullopt,
+        .enableHoverMode = false,
         .hoverModeAreaType = OHOS::Ace::HoverModeAreaType::TOP_SCREEN,
         .focusable = true,
-        .dialogState = nullptr,
     });
 }
 
@@ -127,10 +122,6 @@ void DisposeDialog(ArkUIDialogHandle controllerHandler)
     CHECK_NULL_VOID(controllerHandler);
     auto* dialog = reinterpret_cast<FrameNode*>(controllerHandler->dialogHandle);
     if (dialog) {
-        auto dialogPattern = dialog->GetPattern<DialogPattern>();
-        if (dialogPattern) {
-            dialogPattern->SetIsDialogDisposed(true);
-        }
         dialog->DecRefCount();
     }
     controllerHandler->dialogHandle = nullptr;
@@ -328,28 +319,26 @@ void ParseDialogBorderStyle(DialogProperties& dialogProperties, ArkUIDialogHandl
 void ParseDialogWidth(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
-    if (!controllerHandler->widthValue) {
-        return;
-    }
-    auto unitEnum = controllerHandler->widthUnit;
-    if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
-        dialogProperties.width = Dimension(controllerHandler->widthValue.value(), OHOS::Ace::DimensionUnit::VP);
-    } else {
-        dialogProperties.width = Dimension(controllerHandler->widthValue.value(), unitEnum);
+    if (!dialogProperties.width.has_value() && controllerHandler->widthValue.has_value()) {
+        auto unitEnum = controllerHandler->widthUnit;
+        if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
+            dialogProperties.width = Dimension(controllerHandler->widthValue.value(), OHOS::Ace::DimensionUnit::VP);
+        } else {
+            dialogProperties.width = Dimension(controllerHandler->widthValue.value(), unitEnum);
+        }
     }
 }
 
 void ParseDialogHeight(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
-    if (!controllerHandler->heightValue) {
-        return;
-    }
-    auto unitEnum = controllerHandler->heightUnit;
-    if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
-        dialogProperties.height = Dimension(controllerHandler->heightValue.value(), OHOS::Ace::DimensionUnit::VP);
-    } else {
-        dialogProperties.height = Dimension(controllerHandler->heightValue.value(), unitEnum);
+    if (!dialogProperties.height.has_value() && controllerHandler->heightValue.has_value()) {
+        auto unitEnum = controllerHandler->heightUnit;
+        if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
+            dialogProperties.height = Dimension(controllerHandler->heightValue.value(), OHOS::Ace::DimensionUnit::VP);
+        } else {
+            dialogProperties.height = Dimension(controllerHandler->heightValue.value(), unitEnum);
+        }
     }
 }
 
@@ -369,9 +358,8 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.dialogLevelUniqueId = controllerHandler->levelUniqueId;
     dialogProperties.dialogImmersiveMode = static_cast<ImmersiveMode>(controllerHandler->immersiveMode);
     dialogProperties.backgroundBlurStyle = controllerHandler->blurStyle;
-    dialogProperties.blurStyleOption = controllerHandler->blurStyleOption;
-    dialogProperties.effectOption = controllerHandler->effectOption;
     dialogProperties.keyboardAvoidMode = controllerHandler->keyboardAvoidMode;
+    dialogProperties.enableHoverMode = controllerHandler->enableHoverMode;
     dialogProperties.hoverModeArea = controllerHandler->hoverModeAreaType;
     if (controllerHandler->customShadow.has_value()) {
         dialogProperties.shadow = controllerHandler->customShadow;
@@ -434,9 +422,7 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
         AnimationOption animation;
         dialogProperties.closeAnimation = animation;
     }
-    if (controllerHandler->enableHoverMode.has_value()) {
-        dialogProperties.enableHoverMode = controllerHandler->enableHoverMode.value();
-    }
+
     ParseDialogKeyboardAvoidDistance(dialogProperties, controllerHandler);
     ParseDialogBorderWidth(dialogProperties, controllerHandler);
     ParseDialogBorderColor(dialogProperties, controllerHandler);
@@ -445,8 +431,31 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     ParseDialogHeight(dialogProperties, controllerHandler);
 }
 
-void ParsePartialDialogPropertiesFromProps(const DialogProperties& dialogProps, PromptDialogAttr& dialogAttr)
+PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties &dialogProps)
 {
+    PromptDialogAttr dialogAttr = {
+        .autoCancel = dialogProps.autoCancel, .customStyle = dialogProps.customStyle,
+        .customOnWillDismiss = dialogProps.onWillDismiss, .maskColor = dialogProps.maskColor,
+        .backgroundColor = dialogProps.backgroundColor, .borderRadius = dialogProps.borderRadius,
+        .showInSubWindow = dialogProps.isShowInSubWindow, .isModal = dialogProps.isModal,
+        .enableHoverMode = dialogProps.enableHoverMode, .customBuilder = dialogProps.customBuilder,
+        .customBuilderWithId = dialogProps.customBuilderWithId, .borderWidth = dialogProps.borderWidth,
+        .borderColor = dialogProps.borderColor, .borderStyle = dialogProps.borderStyle, .shadow = dialogProps.shadow,
+        .width = dialogProps.width, .height = dialogProps.height, .maskRect = dialogProps.maskRect,
+        .transitionEffect = dialogProps.transitionEffect, .contentNode = dialogProps.contentNode,
+        .onDidAppear = dialogProps.onDidAppear, .onDidDisappear = dialogProps.onDidDisappear,
+        .onWillAppear = dialogProps.onWillAppear, .onWillDisappear = dialogProps.onWillDisappear,
+        .keyboardAvoidMode = dialogProps.keyboardAvoidMode, .dialogCallback = dialogProps.dialogCallback,
+        .keyboardAvoidDistance = dialogProps.keyboardAvoidDistance,
+        .levelOrder = dialogProps.levelOrder,
+        .dialogLevelMode = dialogProps.dialogLevelMode,
+        .dialogLevelUniqueId = dialogProps.dialogLevelUniqueId,
+        .isUserCreatedDialog = dialogProps.isUserCreatedDialog,
+        .dialogImmersiveMode = dialogProps.dialogImmersiveMode,
+        .blurStyleOption = dialogProps.blurStyleOption,
+        .effectOption = dialogProps.effectOption,
+        .customCNode = dialogProps.customCNode
+    };
 #if defined(PREVIEW)
     if (dialogAttr.showInSubWindow) {
         LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
@@ -464,46 +473,6 @@ void ParsePartialDialogPropertiesFromProps(const DialogProperties& dialogProps, 
             dialogAttr.backgroundBlurStyle = dialogProps.backgroundBlurStyle;
         }
     }
-}
-
-PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties& dialogProps)
-{
-    PromptDialogAttr dialogAttr = { .autoCancel = dialogProps.autoCancel,
-        .showInSubWindow = dialogProps.isShowInSubWindow,
-        .isModal = dialogProps.isModal,
-        .enableHoverMode = dialogProps.enableHoverMode,
-        .isUserCreatedDialog = dialogProps.isUserCreatedDialog,
-        .customBuilder = dialogProps.customBuilder,
-        .customBuilderWithId = dialogProps.customBuilderWithId,
-        .customOnWillDismiss = dialogProps.onWillDismiss,
-        .maskRect = dialogProps.maskRect,
-        .backgroundColor = dialogProps.backgroundColor,
-        .blurStyleOption = dialogProps.blurStyleOption,
-        .effectOption = dialogProps.effectOption,
-        .borderWidth = dialogProps.borderWidth,
-        .borderColor = dialogProps.borderColor,
-        .borderStyle = dialogProps.borderStyle,
-        .borderRadius = dialogProps.borderRadius,
-        .shadow = dialogProps.shadow,
-        .width = dialogProps.width,
-        .height = dialogProps.height,
-        .contentNode = dialogProps.contentNode,
-        .customStyle = dialogProps.customStyle,
-        .maskColor = dialogProps.maskColor,
-        .transitionEffect = dialogProps.transitionEffect,
-        .onDidAppear = dialogProps.onDidAppear,
-        .onDidDisappear = dialogProps.onDidDisappear,
-        .onWillAppear = dialogProps.onWillAppear,
-        .onWillDisappear = dialogProps.onWillDisappear,
-        .keyboardAvoidMode = dialogProps.keyboardAvoidMode,
-        .dialogCallback = dialogProps.dialogCallback,
-        .keyboardAvoidDistance = dialogProps.keyboardAvoidDistance,
-        .levelOrder = dialogProps.levelOrder,
-        .dialogLevelMode = dialogProps.dialogLevelMode,
-        .dialogLevelUniqueId = dialogProps.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogProps.dialogImmersiveMode,
-        .customCNode = dialogProps.customCNode };
-    ParsePartialDialogPropertiesFromProps(dialogProps, dialogAttr);
     return dialogAttr;
 }
 
@@ -551,24 +520,22 @@ int32_t ConvertBlurStyle(int32_t originBlurStyle)
 void openCustomDialogWithNewPipeline(std::function<void(int32_t)>&& callback)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog IsCurrentUseNewPipeline.");
-    auto dialogProperties = g_dialogProperties;
-    dialogProperties.customCNode = g_dialogProperties.customCNode;
-    auto task = [callback, dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+    auto task = [callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
         CHECK_NULL_VOID(overlayManager);
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "open custom dialog isShowInSubWindow %{public}d",
-            dialogProperties.isShowInSubWindow);
-        if (dialogProperties.isShowInSubWindow) {
-            SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProperties, std::move(callback));
-            if (dialogProperties.isModal) {
+            g_dialogProperties.isShowInSubWindow);
+        if (g_dialogProperties.isShowInSubWindow) {
+            SubwindowManager::GetInstance()->OpenCustomDialogNG(g_dialogProperties, std::move(callback));
+            if (g_dialogProperties.isModal) {
                 TAG_LOGW(AceLogTag::ACE_OVERLAY, "temporary not support isShowInSubWindow and isModal");
             }
         } else {
-            overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
+            overlayManager->OpenCustomDialog(g_dialogProperties, std::move(callback));
         }
     };
-    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+    if (g_dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
         NG::DialogManager::ShowInEmbeddedOverlay(
-            std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
+            std::move(task), "ArkUIOverlayShowDialog", g_dialogProperties.dialogLevelUniqueId);
     } else {
         MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog", nullptr);
     }
@@ -727,15 +694,6 @@ ArkUI_Int32 RegisterOnWillDialogDismissWithUserData(
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 GetDialogState(ArkUIDialogHandle controllerHandler, ArkUI_Int32* dialogState)
-{
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    auto* dialogNode = reinterpret_cast<FrameNode*>(controllerHandler->dialogHandle);
-    CHECK_NULL_RETURN(dialogNode, ERROR_CODE_PARAM_INVALID);
-    *dialogState = static_cast<int32_t>(CustomDialogControllerModelNG::GetStateWithNode(dialogNode));
-    return ERROR_CODE_NO_ERROR;
-}
-
 ArkUI_Int32 SetKeyboardAvoidDistance(
     ArkUIDialogHandle controllerHandler, float distance, ArkUI_Int32 unit)
 {
@@ -812,10 +770,6 @@ ArkUI_Int32 RegisterOnDidDisappearDialog(
 ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId))
 {
     CHECK_NULL_RETURN(handle, ERROR_CODE_PARAM_INVALID);
-    g_dialogProperties.maskRect = std::nullopt;
-    g_dialogProperties.borderRadius = std::nullopt;
-    g_dialogProperties.width = std::nullopt;
-    g_dialogProperties.height = std::nullopt;
     ParseDialogProperties(g_dialogProperties, handle);
     g_dialogProperties.customCNode = reinterpret_cast<FrameNode*>(handle->contentHandle);
     auto promptDialogAttr = ParseDialogPropertiesFromProps(g_dialogProperties);
@@ -857,7 +811,6 @@ ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_
         if (promptDialogAttr.offset.has_value()) {
             g_dialogProperties.offset = promptDialogAttr.offset.value();
         }
-        g_dialogProperties.customCNode = reinterpret_cast<FrameNode*>(handle->contentHandle);
         auto node = g_dialogProperties.customCNode;
         auto nodePtr = node.Upgrade();
         CHECK_NULL_RETURN(nodePtr, ERROR_CODE_PARAM_INVALID);
@@ -869,11 +822,11 @@ ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_
                 auto overlayManager = weak.Upgrade();
                 CHECK_NULL_VOID(overlayManager);
                 TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to update custom dialog.");
-                overlayManager->UpdateCustomDialogWithNode(node, g_dialogProperties, std::move(callback));
+                overlayManager->UpdateCustomDialog(node, g_dialogProperties, std::move(callback));
             },
             TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog");
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->UpdateCustomDialogNGWithNode(
+        SubwindowManager::GetInstance()->UpdateCustomDialogNG(
             g_dialogProperties.customCNode, promptDialogAttr, std::move(callback));
     }
     return ERROR_CODE_NO_ERROR;
@@ -1030,49 +983,6 @@ ArkUI_Int32 SetFocusable(ArkUIDialogHandle controllerHandler, bool focusable)
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->focusable = focusable;
-    return ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle controllerHandler, ArkUI_Int32 (*intArray)[3],
-    ArkUI_Float32 scale, ArkUI_Uint32 (*uintArray)[3], ArkUI_Bool isValidColor)
-{
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    BlurStyleOption blurStyleOption;
-    blurStyleOption.colorMode = static_cast<ThemeColorMode>((*intArray)[NUM_0]);
-    blurStyleOption.adaptiveColor = static_cast<AdaptiveColor>((*intArray)[NUM_1]);
-    blurStyleOption.policy = static_cast<BlurStyleActivePolicy>((*intArray)[NUM_2]);
-    blurStyleOption.scale = scale;
-    std::vector<float> greyVec = { (*uintArray)[NUM_0], (*uintArray)[NUM_1] };
-    blurStyleOption.blurOption.grayscale = greyVec;
-    blurStyleOption.inactiveColor = Color((*uintArray)[NUM_2]);
-    blurStyleOption.isValidColor = isValidColor;
-    if (!controllerHandler->blurStyleOption.has_value()) {
-        controllerHandler->blurStyleOption.emplace();
-    }
-    controllerHandler->blurStyleOption.value() = blurStyleOption;
-    return ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle controllerHandler, ArkUI_Float32 (*floatArray)[3],
-    ArkUI_Int32 (*intArray)[2], ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool isValidColor)
-{
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    CalcDimension radius((*floatArray)[NUM_0], DimensionUnit::VP);
-    EffectOption effectOption;
-    effectOption.radius = radius;
-    effectOption.saturation = (*floatArray)[NUM_1];
-    effectOption.brightness = (*floatArray)[NUM_2];
-    effectOption.adaptiveColor = static_cast<AdaptiveColor>((*intArray)[NUM_0]);
-    effectOption.policy = static_cast<BlurStyleActivePolicy>((*intArray)[NUM_1]);
-    effectOption.color = Color((*uintArray)[NUM_0]);
-    std::vector<float> greyVec = { (*uintArray)[NUM_0], (*uintArray)[NUM_1] };
-    effectOption.blurOption.grayscale = greyVec;
-    effectOption.inactiveColor = Color((*uintArray)[NUM_3]);
-    effectOption.isValidColor = isValidColor;
-    if (!controllerHandler->effectOption.has_value()) {
-        controllerHandler->effectOption.emplace();
-    }
-    controllerHandler->effectOption.value() = effectOption;
     return ERROR_CODE_NO_ERROR;
 }
 

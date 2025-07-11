@@ -345,15 +345,17 @@ RefPtr<ScrollControllerBase> GetController(ArkUINodeHandle node)
         return ScrollModelNG::GetOrCreateController(frameNode);
     } else if (frameNode->GetTag() == V2::LIST_ETS_TAG) {
         return ListModelNG::GetOrCreateController(frameNode);
+#ifndef ARKUI_WEARABLE
     } else if (frameNode->GetTag() == V2::WATERFLOW_ETS_TAG) {
         return WaterFlowModelNG::GetOrCreateController(frameNode);
+#endif
     } else if (frameNode->GetTag() == V2::GRID_ETS_TAG) {
         return GridModelNG::GetOrCreateController(frameNode);
     }
     return nullptr;
 }
 
-void SetScrollToCJUI(ArkUINodeHandle node, const ArkUI_Float32 (*values)[8])
+void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32 (*values)[8])
 {
     RefPtr<ScrollControllerBase> scrollControllerBase = GetController(node);
     CHECK_NULL_VOID(scrollControllerBase);
@@ -369,27 +371,6 @@ void SetScrollToCJUI(ArkUINodeHandle node, const ArkUI_Float32 (*values)[8])
     auto canOverScroll = static_cast<bool>((*values)[7]);
     auto direction = scrollControllerBase->GetScrollDirection();
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
-    scrollControllerBase->AnimateTo(position, duration, curve, smooth, canOverScroll);
-}
-
-void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32 (*values)[9])
-{
-    RefPtr<ScrollControllerBase> scrollControllerBase = GetController(node);
-    CHECK_NULL_VOID(scrollControllerBase);
-    Dimension xOffset((*values)[0], static_cast<OHOS::Ace::DimensionUnit>((*values)[1]));
-    Dimension yOffset((*values)[2], static_cast<OHOS::Ace::DimensionUnit>((*values)[3]));
-    float duration = (*values)[4];
-    RefPtr<Curve> curve = Curves::EASE;
-    if (static_cast<int>((*values)[SCROLL_TO_INDEX_CURVE]) < static_cast<int>(CurvesVector.size())) {
-        curve = CurvesVector[static_cast<int>((*values)[SCROLL_TO_INDEX_CURVE])];
-    }
-    auto smooth = static_cast<bool>((*values)[6]);
-    //index 7 is canOverScroll
-    auto canOverScroll = static_cast<bool>((*values)[7]);
-    auto canStayOverScroll = static_cast<bool>((*values)[8]);
-    auto direction = scrollControllerBase->GetScrollDirection();
-    auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
-    scrollControllerBase->SetCanStayOverScroll(canStayOverScroll);
     scrollControllerBase->AnimateTo(position, duration, curve, smooth, canOverScroll);
 }
 
@@ -413,7 +394,7 @@ void SetScrollEdge(ArkUINodeHandle node, ArkUI_Int32 value)
 
 void ResetScrollTo(ArkUINodeHandle node)
 {
-    const ArkUI_Float32 values[9] = { DEFAULT_OFFSET_VALUE };
+    const ArkUI_Float32 values[8] = { DEFAULT_OFFSET_VALUE };
     SetScrollTo(node, &values);
 }
 
@@ -594,22 +575,6 @@ void GetScrollContentSize(ArkUINodeHandle node, ArkUI_Float32 (*values)[2])
     (*values)[0] = Dimension(size.Width(), DimensionUnit::PX).ConvertToVp();
     (*values)[1] = Dimension(size.Height(), DimensionUnit::PX).ConvertToVp();
 }
-
-void CreateWithResourceObjFriction(ArkUINodeHandle node, void* resObj)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
-    ScrollModelNG::CreateWithResourceObjFriction(frameNode, AceType::Claim(resourceObj));
-}
-
-void CreateWithResourceObjSnapPaginations(ArkUINodeHandle node, void* resObjs)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto* resourceObj = reinterpret_cast<std::vector<RefPtr<ResourceObject>>*>(resObjs);
-    ScrollModelNG::CreateWithResourceObjSnapPaginations(frameNode, *resourceObj);
-}
 } // namespace
 
 namespace NodeModifier {
@@ -685,8 +650,6 @@ const ArkUIScrollModifier* GetScrollModifier()
         .getScrollFadingEdge = GetScrollFadingEdge,
         .setScrollFling = SetScrollFling,
         .getScrollContentSize = GetScrollContentSize,
-        .createWithResourceObjFriction = CreateWithResourceObjFriction,
-        .createWithResourceObjSnapPaginations = CreateWithResourceObjSnapPaginations,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     /* clang-format on */
@@ -726,7 +689,7 @@ const CJUIScrollModifier* GetCJUIScrollModifier()
         .getEnableScrollInteraction = GetEnableScrollInteraction,
         .setEnableScrollInteraction = SetEnableScrollInteraction,
         .resetEnableScrollInteraction = ResetEnableScrollInteraction,
-        .setScrollTo = SetScrollToCJUI,
+        .setScrollTo = SetScrollTo,
         .setScrollEdge = SetScrollEdge,
         .resetScrollTo = ResetScrollTo,
         .resetScrollEdge = ResetScrollEdge,

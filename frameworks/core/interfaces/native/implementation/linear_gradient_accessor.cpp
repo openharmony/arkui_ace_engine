@@ -44,7 +44,4 @@ const GENERATED_ArkUILinearGradientAccessor* GetLinearGradientAccessor()
     return &LinearGradientAccessorImpl;
 }
 
-struct LinearGradientPeer {
-    virtual ~LinearGradientPeer() = default;
-};
 }

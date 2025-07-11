@@ -17,8 +17,13 @@
 
 #include "core/gestures/gesture_event.h"
 #include "frameworks/core/components_ng/pattern/text/span/span_object.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
-struct GestureStylePeer {
-    virtual ~GestureStylePeer() = default;
+struct GestureStylePeer final {
     OHOS::Ace::RefPtr<OHOS::Ace::GestureSpan> span;
+
+protected:
+    GestureStylePeer() = default;
+    ~GestureStylePeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

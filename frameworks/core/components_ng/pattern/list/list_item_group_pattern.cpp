@@ -1329,4 +1329,10 @@ void ListItemGroupPattern::MappingPropertiesFromLayoutAlgorithm(
     }
 }
 
+void ListItemGroupPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutExtAttr("itemGroupStyle", GetListItemGroupStyle() == V2::ListItemGroupStyle::NONE ?
+        "ListItemGroupStyle.NONE" : "ListItemGroupStyle.CARD", filter);
+}
+
 } // namespace OHOS::Ace::NG

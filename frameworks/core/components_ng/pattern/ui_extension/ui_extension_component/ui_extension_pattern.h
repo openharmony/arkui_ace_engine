@@ -111,6 +111,7 @@ public:
     }
     void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     void UpdateWant(const AAFwk::Want& want);
+    void UpdateSessionWraper(bool isTransferringCaller);
 
     void OnWindowShow() override;
     void OnWindowHide() override;
@@ -154,6 +155,7 @@ public:
     void FireAsyncCallbacks();
     void SetBindModalCallback(const std::function<void()>&& callback);
     void FireBindModalCallback();
+    void SetIsTransferringCaller(bool isTransferringCaller);
     void SetDensityDpi(bool densityDpi);
     bool GetDensityDpi();
     bool IsCompatibleOldVersion();
@@ -164,6 +166,7 @@ public:
     void NotifyBackground(bool isHandleError = true);
     void NotifyDestroy();
     int32_t GetInstanceId() const;
+    bool GetIsTransferringCaller();
     int32_t GetSessionId() const;
     int32_t GetNodeId() const;
     int32_t GetUiExtensionId() override;
@@ -230,6 +233,12 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpOthers();
+    void UpdateSessionType(SessionType type)
+    {
+        sessionType_ = type;
+        UpdateSessionWraper(isTransferringCaller_);
+    }
+
     int32_t GetInstanceIdFromHost() const;
     bool SendBusinessDataSyncReply(UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply,
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT);
@@ -445,6 +454,7 @@ private:
     std::map<UIContentBusinessCode, BusinessDataUECConsumeReplyCallback> businessDataUECConsumeReplyCallbacks_;
 
     bool isWindowModeFollowHost_ = false;
+    bool hasAttachContext_ = false;
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
 
     ContainerModalAvoidInfo avoidInfo_;

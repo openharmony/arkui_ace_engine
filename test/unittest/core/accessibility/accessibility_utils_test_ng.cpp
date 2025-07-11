@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <climits>
+
 #include "gtest/gtest.h"
 
 #define private public

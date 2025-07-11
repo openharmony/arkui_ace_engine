@@ -2640,7 +2640,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
         }
     }
-    if (runtime_ && storageWrapper.napiStorage_.has_value()) {
+    if (runtime_ && storageWrapper.napiStorage_.has_value()) { // 1.1 SetLocalStorage
         auto storage = storageWrapper.napiStorage_.value();
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
         if (!storage) {

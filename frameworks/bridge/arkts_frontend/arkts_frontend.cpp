@@ -22,6 +22,7 @@
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
+#include "bridge/arkts_frontend/ani_context_module.h"
 
 namespace OHOS::Ace {
 UIContentErrorCode ArktsFrontend::RunPage(
@@ -223,6 +224,10 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
 void ArktsFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     pipeline_ = DynamicCast<NG::PipelineContext>(context);
+    if (accessibilityManager_) {
+        accessibilityManager_->SetPipelineContext(context);
+        accessibilityManager_->InitializeCallback();
+    }
 }
 
 void* ArktsFrontend::GetShared(int32_t id)
@@ -266,5 +271,11 @@ ani_object ArktsFrontend::CallGetUIContextFunc()
         return result;
     }
     return result;
+}
+
+void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)
+{
+    std::shared_ptr<ani_ref> shared_ptr(context);
+    Framework::AniContextModule::AddAniContext(instanceId, shared_ptr);
 }
 } // namespace OHOS::Ace

@@ -23,17 +23,21 @@
 namespace {
 const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Checkbox", "CheckboxGroup",
     "Rating", "Radio", "Toggle", "Hyperlink" };
+
+const int32_t HAND_NONE = 0;
+const int32_t HAND_LEFT = 1;
+const int32_t HAND_RIGHT = 2;
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClickEventAccessor {
 void DestroyPeerImpl(Ark_ClickEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_ClickEvent CtorImpl()
 {
-    return new ClickEventPeer();
+    return PeerUtils::CreatePeer<ClickEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -201,6 +205,35 @@ void SetYImpl(Ark_ClickEvent peer,
     offset.SetY(newY, animation);
     info->SetLocalLocation(offset);
 }
+Opt_InteractionHand GetHandImpl(Ark_ClickEvent peer)
+{
+    auto errorValue = Converter::ArkValue<Opt_InteractionHand>();
+    CHECK_NULL_RETURN(peer, errorValue);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errorValue);
+
+    int32_t left = 0;
+    int32_t right = 0;
+    for (const FingerInfo& fingerInfo : info->GetFingerList()) {
+        if (fingerInfo.operatingHand_ == HAND_LEFT) {
+            ++left;
+        } else if (fingerInfo.operatingHand_ == HAND_RIGHT) {
+            ++right;
+        }
+    }
+    Ark_InteractionHand retVal = ARK_INTERACTION_HAND_NONE;
+    if (left > right) {
+        retVal = ARK_INTERACTION_HAND_LEFT;
+    } else if (right > left) {
+        retVal = ARK_INTERACTION_HAND_RIGHT;
+    }
+    return Converter::ArkValue<Opt_InteractionHand>(retVal);
+}
+void SetHandImpl(Ark_ClickEvent peer,
+                 Ark_InteractionHand hand)
+{
+    LOGE("ClickEventAccessor::SetHandImpl we can only GET hand");
+}
 Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
 {
     CHECK_NULL_RETURN(peer, {});
@@ -219,6 +252,7 @@ Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
 void SetPreventDefaultImpl(Ark_ClickEvent peer,
                            const Callback_Void* preventDefault)
 {
+    LOGE("ClickEventAccessor::SetPreventDefaultImpl we can only GET preventDefault callback");
 }
 } // ClickEventAccessor
 const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
@@ -243,9 +277,12 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
         ClickEventAccessor::SetXImpl,
         ClickEventAccessor::GetYImpl,
         ClickEventAccessor::SetYImpl,
+        ClickEventAccessor::GetHandImpl,
+        ClickEventAccessor::SetHandImpl,
         ClickEventAccessor::GetPreventDefaultImpl,
         ClickEventAccessor::SetPreventDefaultImpl,
     };
     return &ClickEventAccessorImpl;
 }
+
 }

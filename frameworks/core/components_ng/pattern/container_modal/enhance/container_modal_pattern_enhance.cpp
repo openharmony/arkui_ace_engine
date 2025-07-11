@@ -362,7 +362,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
         controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         auto buttonPopupDistance =
             floatTitleMgr_ ? 0.0f : ((titlePopupDistance - CONTAINER_TITLE_HEIGHT.ConvertToPx()) / 2);
-        AnimationUtils::Animate(option, [buttonsContext, titlePopupDistance, height, buttonPopupDistance]() {
+        AnimationUtils::Animate(option, [buttonsContext, height, buttonPopupDistance]() {
             auto rect = buttonsContext->GetPaintRectWithoutTransform();
             buttonsContext->OnTransformTranslateUpdate(
                 { 0.0f, static_cast<float>(height - buttonPopupDistance - rect.GetY()), 0.0f });

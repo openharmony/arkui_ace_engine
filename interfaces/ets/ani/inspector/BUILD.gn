@@ -24,12 +24,15 @@ group("ani_inspector_group") {
 
 #构建ANI库
 ohos_shared_library("inspector_ani") {
-  deps = [ "$ace_root/build:libace_compatible" ]
+  deps = [ 
+    "$ace_root/build:libace_compatible",
+    "$ace_root/frameworks/core:ace_container_scope"
+  ]
   include_dirs = [ "$ace_root/frameworks" ]
   sources = [ "./src/inspector.cpp" ]
   external_deps = [
     "napi:ace_napi",
-    "runtime_core:ani",
+    "runtime_core:ani"
   ]
   configs = [ "$ace_root:ace_config" ]
   part_name = "ace_engine"

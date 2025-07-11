@@ -1,0 +1,47 @@
+{
+    "name": "ui2abc",
+    "private": true,
+    "workspaces": [
+        "./annotate",
+        "./libarkts",
+        "./fast-arktsc",
+        "./memo-plugin",
+        "./ui-plugins",
+        "./tests-memo",
+        "../incremental/build-common",
+        "../interop",
+        "../incremental/harness",
+        "../incremental/common",
+        "../incremental/compat"
+    ],
+    "devDependencies": {
+        "@koalaui/ets-tsc": "4.9.5-r5",
+        "@types/chai": "^4.3.1",
+        "@types/mocha": "^9.1.0",
+        "bin-links": "^4.0.4",
+        "chai": "^4.3.6",
+        "chalk": "^4.1.2",
+        "copy-webpack-plugin": "^10.2.4",
+        "minimist": "1.2.8",
+        "mocha": "^9.2.2",
+        "node-addon-api": "8.0.0",
+        "node-api-headers": "0.0.5",
+        "read-package-json-fast": "^3.0.2",
+        "rimraf": "^6.0.1",
+        "ts-loader": "^9.2.8",
+        "ts-node": "^10.7.0",
+        "tslib": "^2.3.1",
+        "typescript": "4.9.5",
+        "webpack": "^5.93.0",
+        "webpack-cli": "^5.1.4",
+        "tsconfig-paths": "^4.2.0",
+        "commander": "^13.1.0"
+    },
+    "scripts": {
+        "clean:all": "npm run clean --prefix libarkts && npm run clean:plugins --prefix libarkts && npm run clean --prefix memo-plugin && npm run runtime:clean --prefix memo-plugin && npm run clean --prefix memo-plugin/demo && npm run clean --prefix ../arkoala-arkts/trivial/user",
+        "build:all": "npm run compile --prefix fast-arktsc && npm run compile --prefix libarkts && npm run compile:plugins --prefix libarkts && npm run compile --prefix memo-plugin && npm run runtime:prepare --prefix memo-plugin && npm run compile --prefix ui-plugins",
+        "test:all": "npm run build:harness --prefix ../incremental/harness && npm run test --prefix libarkts && npm run demo:run --prefix memo-plugin && npm run test:all --prefix memo-plugin",
+        "all": "npm run clean:all && npm run build:all && npm run test:all"
+    }
+}
+

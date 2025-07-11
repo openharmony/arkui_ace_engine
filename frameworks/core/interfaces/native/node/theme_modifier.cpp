@@ -48,12 +48,6 @@ RefPtr<TokenColors> ConvertColorArrayToTokenColors(const ArkUI_Uint32* colorsArr
     themeColors->SetColors(std::move(colors));
     return themeColors;
 }
-
-std::vector<RefPtr<ResourceObject>> ConvertResObjArray(const void* resObjs)
-{
-    auto resourceObjs = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(resObjs));
-    return resourceObjs;
-}
 } // namespace
 
 ArkUINodeHandle CreateWithThemeNode(ArkUI_Int32 id)
@@ -70,8 +64,7 @@ ArkUINodeHandle GetWithThemeNode(ArkUI_Int32 id)
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(withThemeNode));
 }
 
-ArkUINodeHandle CreateTheme(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, ArkUI_Int32 colorMode,
-    const void* resObjs)
+ArkUINodeHandle CreateTheme(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, ArkUI_Int32 colorMode)
 {
     auto theme = TokenThemeStorage::GetInstance()->CacheGet(themeId);
     if (!theme) {
@@ -82,8 +75,6 @@ ArkUINodeHandle CreateTheme(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, Ark
         theme = AceType::MakeRefPtr<TokenTheme>(themeId);
         theme->SetColors(themeColors);
         theme->SetColorMode(themeScopeColorMode);
-        auto resourceObjs = ConvertResObjArray(resObjs);
-        theme->SetResObjs(std::move(resourceObjs));
         TokenThemeStorage::GetInstance()->CacheSet(theme);
     }
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(theme));
@@ -135,13 +126,6 @@ void SetOnThemeScopeDestroy(ArkUINodeHandle node, void* callback)
         withThemeNode->SetOnThemeScopeDestroy(std::move(*cb));
     }
 }
-
-ArkUI_Int32 GetThemeScopeId(ArkUINodeHandle node)
-{
-    auto ui_node = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_RETURN(ui_node, 0);
-    return ui_node->GetThemeScopeId();
-}
 } // namespace ThemeModifier
 namespace NodeModifier {
 const ArkUIThemeModifier* GetThemeModifier()
@@ -155,7 +139,6 @@ const ArkUIThemeModifier* GetThemeModifier()
         .setDefaultTheme = ThemeModifier::SetDefaultTheme,
         .removeFromCache = ThemeModifier::RemoveFromCache,
         .setOnThemeScopeDestroy = ThemeModifier::SetOnThemeScopeDestroy,
-        .getThemeScopeId = ThemeModifier::GetThemeScopeId,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

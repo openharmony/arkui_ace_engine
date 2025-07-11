@@ -1,0 +1,17 @@
+{
+	"inputDir": "./arkui-ohos",
+	"outputDir": "./arkui-preprocessed",
+	"include": [
+        "./arkui-ohos/**/*.ts", "./arkui-ohos/*.ts"
+    ],
+	"exclude": [
+		"./arkui-ohos/src/ani/ts/*.ts",
+		"./arkui-ohos/src/peers/*.ts",
+		"./arkui-ohos/src/component/ts/*.ts",
+		"./arkui-ohos/src/stateManagement/runtime/index-ts.ts",
+		"./arkui-ohos/src/external/ts/**/*.ts",
+		"./arkui-ohos/build/**/*.ts",
+		"./arkui-ohos/src/stateManagement/tools/ts/*.ts"
+	],
+	"fileExtension": ".ets"
+}

@@ -187,8 +187,6 @@ ArkUI_NativeDialogAPI_3 dialogImpl_3 = {
     OHOS::Ace::DialogModel::EnableHoverMode,
     OHOS::Ace::DialogModel::SetHoverModeArea,
     OHOS::Ace::DialogModel::SetFocusable,
-    OHOS::Ace::DialogModel::SetBackgroundBlurStyleOptions,
-    OHOS::Ace::DialogModel::SetBackgroundEffect,
 };
 
 constexpr int32_t CURRENT_NATIVE_GESTURE_API_VERSION = 1;

@@ -243,20 +243,6 @@ typedef struct ArkUI_ProgressLinearStyleOption ArkUI_ProgressLinearStyleOption;
 typedef struct ArkUI_CrossLanguageOption ArkUI_CrossLanguageOption;
 
 /**
- * @brief Declares the Ability base want.
- *
- * @since 20
- */
-typedef struct AbilityBase_Want AbilityBase_Want;
-
-/**
- * @brief Define the EmbeddedComponentOption for the EmbeddedComponent.
- *
- * @since 20
- */
-typedef struct ArkUI_EmbeddedComponentOption ArkUI_EmbeddedComponentOption;
-
-/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -379,22 +365,6 @@ typedef enum {
 } ArkUI_TextAlignment;
 
 /**
- * @brief 定义文本垂直对齐样式枚举值。
- *
- * @since 20
- */
-typedef enum {
-    /** 基线对齐。 */
-    ARKUI_TEXT_VERTICAL_ALIGNMENT_BASELINE = 0,
-    /** 底部对齐。 */
-    ARKUI_TEXT_VERTICAL_ALIGNMENT_BOTTOM,
-    /** 居中对齐。 */
-    ARKUI_TEXT_VERTICAL_ALIGNMENT_CENTER,
-    /** 顶部对齐。 */
-    ARKUI_TEXT_VERTICAL_ALIGNMENT_TOP,
-} ArkUI_TextVerticalAlignment;
-
-/**
  * @brief Enumerates the types of the Enter key for a single-line text box.
  *
  * @since 12
@@ -442,11 +412,6 @@ typedef enum {
     ARKUI_TEXTINPUT_TYPE_NEW_PASSWORD = 11,
     /** Number input mode with a decimal point. */
     ARKUI_TEXTINPUT_TYPE_NUMBER_DECIMAL = 12,
-    /**
-     * One time code input mode.
-     * @since 18
-     */
-    ARKUI_TEXTINPUT_TYPE_ONE_TIME_CODE = 14,
 } ArkUI_TextInputType;
 
 /**
@@ -463,11 +428,6 @@ typedef enum {
     ARKUI_TEXTAREA_TYPE_PHONE_NUMBER = 3,
     /** Email address input mode. */
     ARKUI_TEXTAREA_TYPE_EMAIL = 5,
-    /**
-     * One time code input mode.
-     * @since 18
-     */
-    ARKUI_TEXTAREA_TYPE_ONE_TIME_CODE = 14,
 } ArkUI_TextAreaType;
 
 /**
@@ -844,18 +804,7 @@ typedef enum {
      */
     ARKUI_HIT_TEST_MODE_TRANSPARENT,
     /** The node does not respond to the hit test of a touch event. */
-    ARKUI_HIT_TEST_MODE_NONE,
-    /**
-     * Blocks all lower priority siblings and parents node from receiving the event.
-     * @since 20
-     */
-    ARKUI_HIT_TEST_MODE_BLOCK_HIERARCHY,
-    /**
-     * Self not respond to the hit test for touch events,
-     * and all descebdants (children, grandchildren, etc.) not respond to the hit test for touch events too.
-     * @since 20
-     */
-    ARKUI_HIT_TEST_MODE_BLOCK_DESCENDANTS,
+    ARKUI_HIT_TEST_MODE_NONE
 } ArkUI_HitTestMode;
 
 /**
@@ -1199,21 +1148,6 @@ typedef enum {
 } ArkUI_ColorMode;
 
 /**
- * @brief Enumerates the activation policies for the background blur effect.
- *
- * @since 19
- */
-typedef enum {
-    /** The blur effect changes according to the window's focus state;
-     *  it is inactive when the window is not in focus and active when the window is in focus. */
-    ARKUI_BLUR_STYLE_ACTIVE_POLICY_FOLLOWS_WINDOW_ACTIVE_STATE = 0,
-    /** The blur effect is always active. */
-    ARKUI_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE,
-    /** The blur effect is always inactive. */
-    ARKUI_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE,
-} ArkUI_BlurStyleActivePolicy;
-
-/**
  * @brief Enumerates the system color modes.
  *
  * @since 12
@@ -1317,8 +1251,6 @@ typedef enum {
     ARKUI_IMAGE_SPAN_ALIGNMENT_CENTER,
     /** The image is top aligned with the text. */
     ARKUI_IMAGE_SPAN_ALIGNMENT_TOP,
-    /** The image follow with the text's alignment. */
-    ARKUI_IMAGE_SPAN_ALIGNMENT_FOLLOW_PARAGRAPH,
 } ArkUI_ImageSpanAlignment;
 
 /**
@@ -2171,7 +2103,7 @@ typedef enum {
     ARKUI_BUTTON_TYPE_CIRCLE,
     /**
      * Rounded rectangle button.
-     * @since 19
+     * @since 18
      */
     ARKUI_BUTTON_ROUNDED_RECTANGLE = 8
 } ArkUI_ButtonType;
@@ -2297,11 +2229,6 @@ typedef enum {
      */
     ARKUI_ERROR_CODE_NODE_ON_INVALID_THREAD = 106204,
     /**
-     * @error Force dark config is invalid.
-     * @since 20
-     */
-    ARKUI_ERROR_CODE_FORCE_DARK_CONFIG_INVALID = 106205,
-    /**
      * @error The node requesting focus is not focusable.
      * @since 15
      */
@@ -2335,11 +2262,6 @@ typedef enum {
      * @since 15
      */
     ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT = 180005,
-    /**
-     * @error input event type is not supported.
-     * @since 20
-     */
-    ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT = 180006,
     /** invalid styled string */
     ARKUI_ERROR_CODE_INVALID_STYLED_STRING = 180101,
     /**
@@ -2353,7 +2275,7 @@ typedef enum {
     ARKUI_ERROR_CODE_CALLBACK_INVALID = 190002,
     /**
      * @error operation is not allowed for current drag drop phase.
-     * @since 19
+     * @since 16
      */
     ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED = 190004,
     /**
@@ -2398,7 +2320,7 @@ typedef enum {
 /**
  * @brief Enumerates the keyboard avoidance modes.
  *
- * @since 15
+ * @since 18
  */
 typedef enum {
     /** Automatically avoids the soft keyboard and compresses the height when reaching the maximum limit. */
@@ -2410,7 +2332,7 @@ typedef enum {
 /**
  * @brief Enumerates the types of display areas for the hover mode.
  *
- * @since 15
+ * @since 18
  */
 typedef enum {
     /** Upper half screen. */
@@ -2450,28 +2372,6 @@ typedef enum {
 } ArkUI_ExpandMode;
 
 /**
- * @brief Defines the navigation point indicator style of the <b><Swiper></b> component.
- * @brief Enumerates the UI states of a component, used for handling state-specific styles.
- *
- * @since 20
- */
-typedef enum {
-    /** Normal state. */
-    UI_STATE_NORMAL = 0,
-    /** Pressed state. */
-    UI_STATE_PRESSED = 1 << 0,
-    /** Focused state. */
-    UI_STATE_FOCUSED = 1 << 1,
-    /** Disabled state. */
-    UI_STATE_DISABLED = 1 << 2,
-    /**
-     * Selected state. This state is supported only by specific component types:
-     * <b>Checkbox</b>, <b>Radio</b>, <b>Toggle</b>, <b>List</b>, <b>Grid</b>, and <b>MenuItem</b>.
-     */
-    UI_STATE_SELECTED = 1 << 3,
-} ArkUI_UIState;
-
-/**
  * @brief Define an enum for the focus movement directions.
  *
  * @since 18
@@ -2508,14 +2408,14 @@ typedef struct ArkUI_SnapshotOptions ArkUI_SnapshotOptions;
 /**
   * @brief TextPicker single column selector, supports mixing text and images.
   *
-  * @since 19
+  * @since 18
   */
 typedef struct ArkUI_TextPickerRangeContentArray ArkUI_TextPickerRangeContentArray;
 
  /**
    * @brief TextPicker multi column selector, supports mixing text and images.
    *
-   * @since 19
+   * @since 18
    */
 typedef struct ArkUI_TextCascadePickerRangeContentArray ArkUI_TextCascadePickerRangeContentArray;
 
@@ -4896,7 +4796,7 @@ bool OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(ArkUI_CrossLanguageO
 /**
  * @brief Defines the parameters for visible area change events.
  *
- * @since 17
+ * @since 18
  */
 typedef struct ArkUI_VisibleAreaEventOptions ArkUI_VisibleAreaEventOptions;
 
@@ -4904,7 +4804,7 @@ typedef struct ArkUI_VisibleAreaEventOptions ArkUI_VisibleAreaEventOptions;
 * @brief Creates an instance of visible area change event parameters
 *
 * @return Returns the created instance of visible area change event parameters.
-* @since 17
+* @since 18
 */
 ArkUI_VisibleAreaEventOptions* OH_ArkUI_VisibleAreaEventOptions_Create();
 
@@ -4912,7 +4812,7 @@ ArkUI_VisibleAreaEventOptions* OH_ArkUI_VisibleAreaEventOptions_Create();
 * @brief Disposes of an instance of visible area change event parameters.
 *
 * @param option Instance to be destroyed.
-* @since 17
+* @since 18
 */
 void OH_ArkUI_VisibleAreaEventOptions_Dispose(ArkUI_VisibleAreaEventOptions* option);
 
@@ -4930,7 +4830,7 @@ void OH_ArkUI_VisibleAreaEventOptions_Dispose(ArkUI_VisibleAreaEventOptions* opt
 *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 *         If an error code is returned, it may be due to a failure in parameter validation;
 *         the parameter must not be null.
-* @since 17
+* @since 18
 */
 int32_t OH_ArkUI_VisibleAreaEventOptions_SetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t size);
 
@@ -4944,7 +4844,7 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetRatios(ArkUI_VisibleAreaEventOptions
 *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 *         If an error code is returned, it may be due to a failure in parameter validation;
 *         the parameter must not be null.
-* @since 17
+* @since 18
 */
 int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(
     ArkUI_VisibleAreaEventOptions *option, int32_t value);
@@ -4961,7 +4861,7 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(
  *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the provided buffer size is insufficient.
  *         If an error code is returned, it may be due to a failure in parameter validation;
  *         the parameter must not be null.
- * @since 17
+ * @since 18
  */
 int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t* size);
 
@@ -4970,7 +4870,7 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions
  *
  * @param option Instance of visible area change event parameters.
  * @return Returns the expected update interval, in ms.  Default value: <b>1000</b>.
- * @since 17
+ * @since 18
  */
 int32_t OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(ArkUI_VisibleAreaEventOptions* option);
 
@@ -4979,7 +4879,7 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(ArkUI_Visible
  *
  *@param length The length of the picker array.
  *@return Returns a <b>TextPickerRangeContent</b> instance.
- *@since 19
+ *@since 18
  */
 ArkUI_TextPickerRangeContentArray* OH_ArkUI_TextPickerRangeContentArray_Create(int32_t length);
 
@@ -4989,7 +4889,7 @@ ArkUI_TextPickerRangeContentArray* OH_ArkUI_TextPickerRangeContentArray_Create(i
  *@param handle The TextPickerRangeContent instance for obtaining information.
  *@param icon Icon address.
  *@param index The index position of the value to be obtained.
- *@since 19
+ *@since 18
  */
 void OH_ArkUI_TextPickerRangeContentArray_SetIconAtIndex(
     ArkUI_TextPickerRangeContentArray* handle, char* icon, int32_t index);
@@ -5000,7 +4900,7 @@ void OH_ArkUI_TextPickerRangeContentArray_SetIconAtIndex(
  *@param handle The TextPickerRangeContent instance for obtaining information.
  *@param text Text content.
  *@param index The index position of the value to be obtained.
- *@since 19
+ *@since 18
  */
 void OH_ArkUI_TextPickerRangeContentArray_SetTextAtIndex(
     ArkUI_TextPickerRangeContentArray* handle, char* text, int32_t index);
@@ -5009,7 +4909,7 @@ void OH_ArkUI_TextPickerRangeContentArray_SetTextAtIndex(
  *@brief Destroys the TextPickerRangeContent instance.
  *
  *@param handle The TextPickerRangeContent instance for obtaining information.
- *@since 19
+ *@since 18
  */
 void OH_ArkUI_TextPickerRangeContentArray_Destroy(ArkUI_TextPickerRangeContentArray* handle);
 
@@ -5018,7 +4918,7 @@ void OH_ArkUI_TextPickerRangeContentArray_Destroy(ArkUI_TextPickerRangeContentAr
  *
  *@param length The length of the picker arry.
  *@return Returns a <b>TextCascadePickerRangeContent</b> instance.
- *@since 19
+ *@since 18
  */
 ArkUI_TextCascadePickerRangeContentArray* OH_ArkUI_TextCascadePickerRangeContentArray_Create(int32_t length);
 
@@ -5028,7 +4928,7 @@ ArkUI_TextCascadePickerRangeContentArray* OH_ArkUI_TextCascadePickerRangeContent
  *@param handle The TextCascadePickerRangeContent instance for obtaining information.
  *@param text text content.
  *@param index The index position of the value to be obtained.
- *@since 19
+ *@since 18
  */
 void OH_ArkUI_TextCascadePickerRangeContentArray_SetTextAtIndex(
     ArkUI_TextCascadePickerRangeContentArray* handle, char* text, int32_t index);
@@ -5039,7 +4939,7 @@ void OH_ArkUI_TextCascadePickerRangeContentArray_SetTextAtIndex(
  *@param handle The TextCascadePickerRangeContent instance for obtaining information.
  *@param child The child instance.
  *@param index The index position of the value to be obtained.
- *@since 19
+ *@since 18
  */
 void OH_ArkUI_TextCascadePickerRangeContentArray_SetChildAtIndex(
     ArkUI_TextCascadePickerRangeContentArray* handle, ArkUI_TextCascadePickerRangeContentArray* child, int32_t index);
@@ -5048,48 +4948,9 @@ void OH_ArkUI_TextCascadePickerRangeContentArray_SetChildAtIndex(
  *@brief Destroys the TextCascadePickerRangeContent instance.
  *
  *@param handle The TextCascadePickerRangeContent instance for obtaining information.
- *@since 19
+ *@since 18
  */
 void OH_ArkUI_TextCascadePickerRangeContentArray_Destroy(ArkUI_TextCascadePickerRangeContentArray* handle);
-
-/**
- * @brief Create an object for the EmbeddedComponent option.
- *
- * @return A pointer to the object of the EmbeddedComponent option.
- * @since 20
- */
-ArkUI_EmbeddedComponentOption* OH_ArkUI_EmbeddedComponentOption_Create();
-
-/**
- * @brief Destroy the object by EmbeddedComponent option.
- *
- * @param option Pointer to the object by the EmbeddeComponent to be destroyed.
- * @since 20
- */
-void OH_ArkUI_EmbeddedComponentOption_Dispose(ArkUI_EmbeddedComponentOption* option);
-
-/**
- * @brief Set the onError of EmbeddedComponent.
- *
- * @param option Pointer to the object option by the EmbeddedComponent.
- * @param code Common error information about the API invoking failure.
- * @param name Common error name information about the API invoking failure.
- * @param message Common error message information about the API invoking failure.
- * @since 20
- */
-void OH_ArkUI_EmbeddedComponentOption_SetOnError(
-    ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, const char* name, const char* message));
-
-/**
- * @brief Set the onTerminated of EmbeddedComponent.
- *
- * @param option Pointer to the object option by the EmbeddedComponent.
- * @param code Result code returned when the EmbeddedUIExtensionAbility exits.
- * @param want Data returned when the EmbeddedUIExtensionAbility exits.
- * @since 20
- */
-void OH_ArkUI_EmbeddedComponentOption_SetOnTerminated(
-    ArkUI_EmbeddedComponentOption* option, void (*callback)(int32_t code, AbilityBase_Want* want));
 #ifdef __cplusplus
 };
 #endif

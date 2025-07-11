@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG {
 
 void RecycleManager::Push(int32_t elmtId, WeakPtr<CustomNodeBase> &&node)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->GetRecycleManager()->PushNode(elmtId, std::move(node));
 }
@@ -35,21 +35,21 @@ void RecycleManager::ClearAll()
 
 void RecycleManager::Pop(int32_t elmtId)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->GetRecycleManager()->PopNode(elmtId);
 }
 
 void RecycleManager::Erase(int32_t elmtId)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->GetRecycleManager()->EraseNode(elmtId);
 }
 
 void RecycleManager::Notify(const ConfigurationChange &config)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->GetRecycleManager()->NotifyConfigurationChange(config);
 }

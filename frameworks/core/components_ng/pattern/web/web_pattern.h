@@ -237,6 +237,17 @@ public:
         }
     }
 
+    void SetWebSrcStatic(const std::string& webSrc)
+    {
+        if (webSrc_ != webSrc) {
+            webSrc_ = webSrc;
+            OnWebSrcUpdate();
+        }
+        if (webPaintProperty_) {
+            webPaintProperty_->SetWebPaintData(webSrc);
+        }
+    }
+
     const std::optional<std::string>& GetWebSrc() const
     {
         return webSrc_;

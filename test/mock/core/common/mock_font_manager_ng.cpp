@@ -29,6 +29,7 @@ const std::vector<std::string>& FontManager::GetFontNames() const
 bool FontManager::RegisterCallbackNG(
     const WeakPtr<NG::UINode>& node, const std::string& familyName, const std::function<void()>& callback)
 {
+    registerCallback_ = {familyName, callback};
     return false;
 }
 
@@ -37,7 +38,10 @@ bool FontManager::IsDefaultFontChanged()
     return false;
 }
 
-void FontManager::UnRegisterCallbackNG(const WeakPtr<NG::UINode>& node) {}
+void FontManager::UnRegisterCallbackNG(const WeakPtr<NG::UINode>& node)
+{
+    registerCallback_ = {};
+}
 
 void FontManager::AddFontNodeNG(const WeakPtr<NG::UINode>& node)
 {
@@ -74,4 +78,25 @@ void FontManager::RemoveHybridRenderNode(const WeakPtr<NG::UINode>& node) {}
 void FontManager::UpdateHybridRenderNodes() {}
 void FontManager::StartAbilityOnInstallAppInStore(const std::string& appName) const {}
 void FontManager::OnPreviewMenuOptionClick(TextDataDetectType type, const std::string& content) {}
+void FontManager::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const RefPtr<PipelineBase>& context, const std::string& bundleName, const std::string& moduleName)
+{
+    if (std::find(std::begin(fontNames_), std::end(fontNames_), familyName) == std::end(fontNames_)) {
+        fontNames_.emplace_back(familyName);
+    }
+    if (registerCallback_.first == familyName) {
+        registerCallback_.second();
+    }
+}
+
+void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    fontList = fontNames_;
+}
+
+bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    fontInfo.fullName = fontName;
+    return false;
+}
 } // namespace OHOS::Ace

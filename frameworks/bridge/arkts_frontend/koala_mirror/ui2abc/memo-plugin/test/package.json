@@ -1,0 +1,11 @@
+{
+    "scripts": {
+        "run": "../../../incremental/tools/panda/arkts/ui2abc --arktsconfig ./arktsconfig-golden.json --output ./build/test.abc ./test.ets",
+        "clean": "rm -rf out",
+        "test": "npm run clean && (npm run run 2> /dev/null || true) && diff golden/test.ets out/test.ets",
+        "test:debug": "npm run clean && npm run run",
+        "TODO": "get rid of old rewrite tests",
+        "test:mocha": "npm run compile --prefix ../../../incremental/harness && mocha",
+        "test:mocha:golden": "npm run compile --prefix ../../../incremental/harness && TEST_GOLDEN=1 mocha"
+    }
+}

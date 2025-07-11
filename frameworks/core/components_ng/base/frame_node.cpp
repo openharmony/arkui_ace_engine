@@ -815,6 +815,10 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("LayoutRect: ").append(layoutProperty_->GetLayoutRect().value().ToString().c_str()));
     }
+    if (GetSuggestOpIncMarked()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("SuggestOpIncMarked: ").append(std::to_string(static_cast<int32_t>(GetSuggestOpIncMarked()))));
+    }
     DumpExtensionHandlerInfo();
     DumpSafeAreaInfo();
     if (layoutProperty_->GetCalcLayoutConstraint()) {
@@ -2529,7 +2533,7 @@ void FrameNode::MarkModifyDoneUnsafely()
     renderContext_->OnModifyDone();
 #if (defined(__aarch64__) || defined(__x86_64__))
     if (Recorder::IsCacheAvaliable()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakPtr(pattern_)]() {
             auto pattern = weak.Upgrade();
@@ -5247,7 +5251,7 @@ bool FrameNode::ReachResponseDeadline() const
 OffsetF FrameNode::GetOffsetInScreen()
 {
     auto frameOffset = GetPaintRectOffset(false, true);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, OffsetF(0.0f, 0.0f));
     auto window = pipelineContext->GetWindow();
     CHECK_NULL_RETURN(window, OffsetF(0.0f, 0.0f));
@@ -6343,6 +6347,26 @@ void FrameNode::MarkAndCheckNewOpIncNode(Axis axis)
     }
 }
 
+void FrameNode::SuggestOpIncGroup(Axis axis)
+{
+    if (!SystemProperties::IsOpIncEnable() || axis != Axis::VERTICAL) {
+        return;
+    }
+    if (GetSuggestOpIncActivatedOnce()) {
+        return;
+    }
+    auto parent = GetParent();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+    while (parent) {
+        if (frameNode && frameNode->GetSuggestOpIncMarked()) {
+            frameNode->MarkSuggestOpIncGroup(false, false);
+        }
+        parent = parent->GetParent();
+        frameNode = AceType::DynamicCast<FrameNode>(parent);
+    }
+    SetSuggestOpIncActivatedOnce();
+}
+
 int FrameNode::GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh)
 {
     CHECK_NULL_RETURN(host, 0);
@@ -6704,6 +6728,9 @@ void FrameNode::BuildLayoutInfo(std::unique_ptr<JsonValue>& json)
     }
     if (layoutProperty_->GetLayoutRect()) {
         json->Put("LayoutRect", layoutProperty_->GetLayoutRect().value().ToString().c_str());
+    }
+    if (static_cast<int32_t>(GetSuggestOpIncMarked()) != 0) {
+        json->Put("SuggestOpIncMarked", static_cast<int32_t>(GetSuggestOpIncMarked()));
     }
 }
 

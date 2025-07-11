@@ -72,26 +72,18 @@ ArkUI_Int32 GetColumnAlignItems(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(ColumnModelNG::GetAlignItems(frameNode));
 }
 
-void SetColumnSpace(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* spaceRawPtr)
+void SetColumnSpace(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ColumnModelNG::ResetResObj(frameNode, "column.space");
-    if (SystemProperties::ConfigChangePerform() && spaceRawPtr) {
-        auto* space = reinterpret_cast<ResourceObject*>(spaceRawPtr);
-        auto spaceResObj = AceType::Claim(space);
-        ColumnModelNG::SetSpace(frameNode, spaceResObj);
-    } else {
-        const auto space = CalcDimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
-        ColumnModelNG::SetSpace(frameNode, space);
-    }
+    const auto space = CalcDimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    ColumnModelNG::SetSpace(frameNode, space);
 }
 
 void ResetColumnSpace(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ColumnModelNG::ResetResObj(frameNode, "column.space");
     const auto space = CalcDimension(0.0, DimensionUnit::PX);
     ColumnModelNG::SetSpace(frameNode, space);
 }

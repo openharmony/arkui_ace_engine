@@ -9433,7 +9433,8 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     changeValueInfo.oldContent = GetBodyTextValue();
     changeValueInfo.rangeBefore = TextRange { GetPreviewTextStart(), GetPreviewTextStart() };
     changeValueInfo.rangeAfter = TextRange { GetPreviewTextStart(), GetPreviewTextStart() };
-    bool hasInsertValue = false;
+    // variable 'hasInsertValue' set but not used
+    // bool hasInsertValue = false;
     auto originLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) - (end - start);
     auto attemptInsertLength = static_cast<int32_t>(info.text.length()) - (end - start);
     if (layoutProperty->HasMaxLength() &&
@@ -9441,7 +9442,7 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
         static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()))) {
         isPreviewTextOverCount_ = true;
     }
-    hasInsertValue = contentController_->ReplaceSelectedValue(start, end, info.text);
+    // hasInsertValue = contentController_->ReplaceSelectedValue(start, end, info.text);
     int32_t caretMoveLength = abs(static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) -
         originLength);
 

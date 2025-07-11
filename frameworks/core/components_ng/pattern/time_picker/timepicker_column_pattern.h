@@ -170,7 +170,7 @@ private:
     void GetAnimationColor(uint32_t index, uint32_t showCount, Color& color, bool selectedMark = false);
     void UpdateAnimationColor(const RefPtr<PickerTheme>& pickerTheme);
 #ifdef SUPPORT_DIGITAL_CROWN
-    void HandleCrownMoveEvent(const CrownEvent& event);
+    void HandleCrownMoveEvent(const CrownEvent& event) override;
 #endif
     void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty, uint32_t index,
         uint32_t showCount, bool isDown, double scale) override;

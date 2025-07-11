@@ -14,17 +14,16 @@
  */
 #include "core/interfaces/native/node/frame_node_modifier.h"
 #include <cstdlib>
-#include <unistd.h>
 #include <vector>
 
 #include "base/error/error_code.h"
-#include "core/common/builder_util.h"
-#include "core/common/color_inverter.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/frame_node_modifier_multi_thread.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "bridge/common/utils/engine_helper.h"
 
@@ -33,10 +32,6 @@ enum class ExpandMode : uint32_t {
     NOT_EXPAND = 0,
     EXPAND,
     LAZY_EXPAND,
-};
-
-enum EventQueryType {
-    ON_CLICK = 0,
 };
 
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
@@ -81,18 +76,6 @@ RefPtr<FrameNode> GetParentNode(UINode* node)
                ? nullptr : AceType::DynamicCast<FrameNode>(parent);
 }
 
-void AddBuilderNodeInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
-{
-    auto* currentNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(currentNode);
-    auto* childNode = reinterpret_cast<UINode*>(child);
-    CHECK_NULL_VOID(childNode);
-    auto childRef = Referenced::Claim<UINode>(childNode);
-    std::list<RefPtr<UINode>> nodes;
-    BuilderUtils::GetBuilderNodes(childRef, nodes);
-    BuilderUtils::AddBuilderToParent(childRef, nodes);
-}
-
 ArkUI_Bool AppendChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -125,18 +108,6 @@ ArkUI_Bool InsertChildAfterInFrameNode(ArkUINodeHandle node, ArkUINodeHandle chi
     return true;
 }
 
-void RemoveBuilderNodeInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
-{
-    auto* currentNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(currentNode);
-    auto* childNode = reinterpret_cast<UINode*>(child);
-    CHECK_NULL_VOID(childNode);
-    auto childRef = Referenced::Claim<UINode>(childNode);
-    std::list<RefPtr<UINode>> nodes;
-    BuilderUtils::GetBuilderNodes(childRef, nodes);
-    BuilderUtils::RemoveBuilderFromParent(childRef, nodes);
-}
-
 void RemoveChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -146,17 +117,11 @@ void RemoveChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
-void ClearBuilderNodeInFrameNode(ArkUINodeHandle node)
-{
-    auto* currentNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(currentNode);
-    auto currentRef = Referenced::Claim<UINode>(currentNode);
-    BuilderUtils::ClearBuilder(currentRef);
-}
-
 void ClearChildrenInFrameNode(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(currentNode, ClearChildrenInFrameNode, node);
     CHECK_NULL_VOID(currentNode);
     currentNode->Clean();
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
@@ -332,20 +297,6 @@ void GetPositionToWindow(ArkUINodeHandle node, ArkUI_Float32 (*windowOffset)[2],
     } else {
         (*windowOffset)[0] = offset.GetX();
         (*windowOffset)[1] = offset.GetY();
-    }
-}
-
-void GetGlobalPositionOnDisplay(ArkUINodeHandle node, ArkUI_Float32 (*globalDisplayPosition)[2], ArkUI_Bool useVp)
-{
-    auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(currentNode);
-    auto offset = currentNode->GetGlobalPositionOnDisplay();
-    if (useVp) {
-        (*globalDisplayPosition)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-        (*globalDisplayPosition)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
-    } else {
-        (*globalDisplayPosition)[0] = offset.GetX();
-        (*globalDisplayPosition)[1] = offset.GetY();
     }
 }
 
@@ -639,16 +590,9 @@ ArkUI_Int32 SetCrossLanguageOptions(ArkUINodeHandle node, bool attributeSetting)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
-    static const std::vector<const char*> nodeTypeArray = { OHOS::Ace::V2::SCROLL_ETS_TAG,
-        OHOS::Ace::V2::SWIPER_ETS_TAG, OHOS::Ace::V2::LIST_ETS_TAG, OHOS::Ace::V2::LIST_ITEM_ETS_TAG,
-        OHOS::Ace::V2::LIST_ITEM_GROUP_ETS_TAG, OHOS::Ace::V2::WATERFLOW_ETS_TAG, OHOS::Ace::V2::FLOW_ITEM_ETS_TAG,
-        OHOS::Ace::V2::GRID_ETS_TAG, OHOS::Ace::V2::GRID_ITEM_ETS_TAG, OHOS::Ace::V2::TEXT_ETS_TAG,
-        OHOS::Ace::V2::TEXTINPUT_ETS_TAG, OHOS::Ace::V2::TEXTAREA_ETS_TAG, OHOS::Ace::V2::COLUMN_ETS_TAG,
-        OHOS::Ace::V2::ROW_ETS_TAG, OHOS::Ace::V2::STACK_ETS_TAG, OHOS::Ace::V2::FLEX_ETS_TAG,
-        OHOS::Ace::V2::RELATIVE_CONTAINER_ETS_TAG, OHOS::Ace::V2::PROGRESS_ETS_TAG,
-        OHOS::Ace::V2::LOADING_PROGRESS_ETS_TAG, OHOS::Ace::V2::IMAGE_ETS_TAG, OHOS::Ace::V2::BUTTON_ETS_TAG,
-        OHOS::Ace::V2::CHECKBOX_ETS_TAG, OHOS::Ace::V2::RADIO_ETS_TAG, OHOS::Ace::V2::SLIDER_ETS_TAG,
-        OHOS::Ace::V2::TOGGLE_ETS_TAG, OHOS::Ace::V2::XCOMPONENT_ETS_TAG };
+    static const std::vector<const char*> nodeTypeArray = {
+        OHOS::Ace::V2::SCROLL_ETS_TAG,
+    };
     auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), currentNode->GetTag());
     if (pos == nodeTypeArray.end()) {
         return ERROR_CODE_PARAM_INVALID;
@@ -669,28 +613,6 @@ ArkUI_Bool CheckIfCanCrossLanguageAttributeSetting(ArkUINodeHandle node)
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(currentNode, false);
     return currentNode -> IsCNode() ? currentNode->isCrossLanguageAttributeSetting() : false;
-}
-
-EventBindingInfo GetInteractionEventBindingInfo(ArkUINodeHandle node, int eventType)
-{
-    auto* currentNode = reinterpret_cast<UINode*>(node);
-    EventBindingInfo bindingInfo {};
-    CHECK_NULL_RETURN(currentNode, bindingInfo);
-    if (eventType != EventQueryType::ON_CLICK) {
-        return bindingInfo;
-    }
-    auto info = currentNode->GetInteractionEventBindingInfo();
-    bindingInfo.baseEventRegistered = info.baseEventRegistered;
-    bindingInfo.nodeEventRegistered = info.nodeEventRegistered;
-    bindingInfo.nativeEventRegistered= info.nativeEventRegistered;
-    bindingInfo.builtInEventRegistered= info.builtInEventRegistered;
-    return bindingInfo;
-}
-
-void RunScopedTask(ArkUI_Int32 instanceId, void* userData, void (*callback)(void* userData))
-{
-    ContainerScope scope(instanceId);
-    callback(userData);
 }
 
 ArkUI_Int32 SetSystemFontStyleChangeEvent(ArkUINodeHandle node, void* userData, void* onFontStyleChange)
@@ -721,7 +643,7 @@ ArkUI_Uint32 GetCustomPropertyCapiByKey(ArkUINodeHandle node, ArkUI_CharPtr key,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0);
     std::string capiCustomProperty;
-    if (!frameNode->IsCNode() || !frameNode->GetCapiCustomProperty(key, capiCustomProperty)) {
+    if (!frameNode->GetCapiCustomProperty(key, capiCustomProperty)) {
         return 0;
     }
     *size = capiCustomProperty.size();
@@ -738,17 +660,14 @@ void FreeCustomPropertyCharPtr(char* value, ArkUI_Uint32 size)
     value = nullptr;
 }
 
-void SetCustomPropertyModiferByKey(ArkUINodeHandle node, void* callback, void* getCallback,
-    void* getCustomPropertyMap)
+void SetCustomPropertyModiferByKey(ArkUINodeHandle node, void* callback, void* getCallback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::function<bool()>* func = reinterpret_cast<std::function<bool()>*>(callback);
     std::function<std::string(const std::string&)>* getFunc =
         reinterpret_cast<std::function<std::string(const std::string&)>*>(getCallback);
-    std::function<std::string()>* getMapFunc =
-        reinterpret_cast<std::function<std::string()>*>(getCustomPropertyMap);
-    frameNode->SetJSCustomProperty(*func, *getFunc, std::move(*getMapFunc));
+    frameNode->SetJSCustomProperty(*func, *getFunc);
 }
 
 void AddCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, ArkUI_CharPtr value)
@@ -992,59 +911,6 @@ void SetKeyProcessingMode(ArkUI_Int32 instanceId, ArkUI_Int32 mode)
     delegate->SetKeyProcessingMode(mode);
 }
 
-void UpdateConfiguration(ArkUINodeHandle node)
-{
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    uiNode->UpdateConfigurationUpdate();
-}
-
-void AddSupportedUIStates(
-    ArkUINodeHandle node, int32_t state, void* statesChangeHandler, bool isExcludeInner, void* userData)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    std::function<void(uint64_t)> onStatesChange = [userData, statesChangeHandler](uint64_t currentState) {
-        using FuncType = float (*)(int32_t, void*);
-        FuncType func = reinterpret_cast<FuncType>(statesChangeHandler);
-        func(static_cast<int32_t >(currentState), userData);
-    };
-    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), onStatesChange, false, isExcludeInner);
-}
-
-void RemoveSupportedUIStates(ArkUINodeHandle node, int32_t state)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
-}
-
-ArkUI_Int32 SetForceDarkConfig(
-    ArkUI_Int32 instanceId, bool forceDark, ArkUI_CharPtr nodeTag, uint32_t (*colorInvertFunc)(uint32_t color))
-{
-#ifdef OHOS_PLATFORM
-    if (getpid() != gettid()) {
-        LOGF_ABORT("SetForceDarkConfig doesn't run on UI thread");
-    }
-#endif
-    if (!forceDark && colorInvertFunc) {
-        return ERROR_CODE_NATIVE_IMPL_FORCE_DARK_CONFIG_INVALID;
-    }
-    if (forceDark) {
-        auto invertFunc = [colorInvertFunc](uint32_t color) {
-            return colorInvertFunc ? colorInvertFunc(color) : ColorInverter::DefaultInverter(color);
-        };
-        ColorInverter::GetInstance().EnableColorInvert(instanceId, nodeTag, std::move(invertFunc));
-    } else {
-        ColorInverter::GetInstance().DisableColorInvert(instanceId, nodeTag);
-    }
-    return ERROR_CODE_NO_ERROR;
-}
-
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -1053,12 +919,9 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .isModifiable = IsModifiable,
         .createFrameNode = CreateFrameNode,
         .invalidate = InvalidateInFrameNode,
-        .addBuilderNode = AddBuilderNodeInFrameNode,
         .appendChild = AppendChildInFrameNode,
         .insertChildAfter = InsertChildAfterInFrameNode,
-        .removeBuilderNode = RemoveBuilderNodeInFrameNode,
         .removeChild = RemoveChildInFrameNode,
-        .clearBuilderNode = ClearBuilderNodeInFrameNode,
         .clearChildren = ClearChildrenInFrameNode,
         .getChildrenCount = GetChildrenCount,
         .getChild = GetChild,
@@ -1072,7 +935,6 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .getPositionToParent = GetPositionToParent,
         .getPositionToScreen = GetPositionToScreen,
         .getPositionToWindow = GetPositionToWindow,
-        .getGlobalPositionOnDisplay = GetGlobalPositionOnDisplay,
         .getPositionToParentWithTransform = GetPositionToParentWithTransform,
         .getPositionToScreenWithTransform = GetPositionToScreenWithTransform,
         .getPositionToWindowWithTransform = GetPositionToWindowWithTransform,
@@ -1125,12 +987,6 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .getCrossLanguageOptions = GetCrossLanguageOptions,
         .checkIfCanCrossLanguageAttributeSetting = CheckIfCanCrossLanguageAttributeSetting,
         .setKeyProcessingMode = SetKeyProcessingMode,
-        .getInteractionEventBindingInfo = GetInteractionEventBindingInfo,
-        .runScopedTask = RunScopedTask,
-        .updateConfiguration = UpdateConfiguration,
-        .addSupportedUIStates = AddSupportedUIStates,
-        .removeSupportedUIStates = RemoveSupportedUIStates,
-        .setForceDarkConfig = SetForceDarkConfig,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1159,7 +1015,6 @@ const CJUIFrameNodeModifier* GetCJUIFrameNodeModifier()
         .getPositionToParent = GetPositionToParent,
         .getPositionToScreen = GetPositionToScreen,
         .getPositionToWindow = GetPositionToWindow,
-        .getGlobalPositionOnDisplay = GetGlobalPositionOnDisplay,
         .getPositionToParentWithTransform = GetPositionToParentWithTransform,
         .getPositionToScreenWithTransform = GetPositionToScreenWithTransform,
         .getPositionToWindowWithTransform = GetPositionToWindowWithTransform,

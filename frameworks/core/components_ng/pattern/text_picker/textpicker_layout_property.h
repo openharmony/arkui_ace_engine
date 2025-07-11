@@ -142,10 +142,34 @@ public:
         }
         json->PutExtAttr("values", jsonArrayValue, filter);
 
+        SetFonts(json, filter);
+
+        auto canLoop = GetCanLoopValue(true);
+        json->PutExtAttr("canLoop", canLoop ? "true" : "false", filter);
+    }
+
+    void SetFonts(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+    {
+        Color defaultDisappearColor = Color::BLACK;
+        Color defaultNormalColor = Color::BLACK;
+        Color defaultSelectColor = Color::BLACK;
+        auto pipeline = PipelineBase::GetCurrentContext();
+        auto frameNode = GetHost();
+        if (pipeline && frameNode) {
+            auto pickerTheme = pipeline->GetTheme<PickerTheme>(frameNode->GetThemeScopeId());
+            if (pickerTheme) {
+                defaultDisappearColor = pickerTheme->GetDisappearOptionStyle().GetTextColor();
+                defaultNormalColor = pickerTheme->GetOptionStyle(false, false).GetTextColor();
+                defaultSelectColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+            }
+        }
         auto disappearFont = JsonUtil::Create(true);
         disappearFont->Put("size", GetDisappearFontSizeValue(Dimension(0)).ToString().c_str());
         disappearFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
             GetDisappearWeight().value_or(FontWeight::NORMAL)).c_str());
+        disappearFont->Put("family", V2::ConvertFontFamily(GetDisappearFontFamilyValue({})).c_str());
+        disappearFont->Put("style", GetDisappearFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+            ? "FontStyle.Normal" : "FontStyle.Italic");
         auto disappearTextStyle = JsonUtil::Create(true);
         disappearTextStyle->Put("color", GetDisappearColor().value_or(defaultDisappearColor).ColorToString().c_str());
         disappearTextStyle->Put("font", disappearFont);
@@ -154,6 +178,9 @@ public:
         auto normalFont = JsonUtil::Create(true);
         normalFont->Put("size", GetFontSizeValue(Dimension(0)).ToString().c_str());
         normalFont->Put("weight", V2::ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
+        normalFont->Put("family", V2::ConvertFontFamily(GetFontFamilyValue({})).c_str());
+        normalFont->Put("style", GetFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+            ? "FontStyle.Normal" : "FontStyle.Italic");
         auto normalTextStyle = JsonUtil::Create(true);
         normalTextStyle->Put("color", GetColor().value_or(defaultNormalColor).ColorToString().c_str());
         normalTextStyle->Put("font", normalFont);
@@ -163,12 +190,13 @@ public:
         selectedFont->Put("size", GetSelectedFontSizeValue(Dimension(0)).ToString().c_str());
         selectedFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
             GetSelectedWeight().value_or(FontWeight::NORMAL)).c_str());
+        selectedFont->Put("family", V2::ConvertFontFamily(GetSelectedFontFamilyValue({})).c_str());
+        selectedFont->Put("style", GetSelectedFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+            ? "FontStyle.Normal" : "FontStyle.Italic");
         auto selectedTextStyle = JsonUtil::Create(true);
         selectedTextStyle->Put("color", GetSelectedColor().value_or(defaultSelectColor).ColorToString().c_str());
         selectedTextStyle->Put("font", selectedFont);
         json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
-        auto canLoop = GetCanLoopValue();
-        json->PutExtAttr("canLoop", canLoop ? "true" : "false", filter);
 
         auto isDisableTextStyleAnimation = GetDisableTextStyleAnimation().value_or(false);
         json->PutExtAttr("disableTextStyleAnimation", isDisableTextStyleAnimation ? "true" : "false", filter);
@@ -177,6 +205,8 @@ public:
         defaultFont->Put("size", GetDefaultFontSizeValue(Dimension(0)).ToString().c_str());
         defaultFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
             GetDefaultWeight().value_or(FontWeight::NORMAL)).c_str());
+        defaultFont->Put("style", GetDefaultFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+            ? "FontStyle.Normal" : "FontStyle.Italic");
         auto defaultTextStyle = JsonUtil::Create(true);
         defaultTextStyle->Put("color", GetDefaultColor().value_or(Color::BLACK).ColorToString().c_str());
         defaultTextStyle->Put("minFontSize", GetDefaultMinFontSize().value_or(Dimension()).ToString().c_str());
@@ -188,12 +218,6 @@ public:
         auto crownSensitivity = GetDigitalCrownSensitivity();
         json->PutExtAttr("digitalCrownSensitivity",
             std::to_string(crownSensitivity.value_or(DEFAULT_CROWNSENSITIVITY)).c_str(), filter);
-        auto selectedBackgroundStyle = JsonUtil::Create(true);
-        selectedBackgroundStyle->Put("color", GetSelectedBackgroundColor().value_or(
-            defaultSelectedBgColor).ColorToString().c_str());
-        selectedBackgroundStyle->Put("borderRadius", GetSelectedBorderRadius().value_or(
-        NG::BorderRadiusProperty(defaultSelectedBorderRadius)).ToString().c_str());
-        json->PutExtAttr("selectedBackgroundStyle", selectedBackgroundStyle, filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultPickerItemHeight, Dimension, PROPERTY_UPDATE_MEASURE);

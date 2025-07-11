@@ -49,20 +49,6 @@ void resetScrollBarEnableNestedScroll(ArkUINodeHandle node)
     ScrollBarModelNG::SetEnableNestedScroll(frameNode, false);
 }
 
-void SetScrollBarScrollBarColor(ArkUINodeHandle node, ArkUI_Int32 color)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ScrollBarModelNG::SetScrollBarColor(frameNode, Color(color));
-}
-
-void ResetScrollBarScrollBarColor(ArkUINodeHandle node)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ScrollBarModelNG::ResetScrollBarColor(frameNode);
-}
-
 namespace NodeModifier {
 const ArkUIScrollBarModifier* GetScrollBarModifier()
 {
@@ -75,8 +61,6 @@ const ArkUIScrollBarModifier* GetScrollBarModifier()
         .setScrollBarScroller = nullptr,
         .setScrollBarEnableNestedScroll = setScrollBarEnableNestedScroll,
         .resetScrollBarEnableNestedScroll = resetScrollBarEnableNestedScroll,
-        .setScrollBarScrollBarColor = SetScrollBarScrollBarColor,
-        .resetScrollBarScrollBarColor = ResetScrollBarScrollBarColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -95,8 +79,6 @@ const CJUIScrollBarModifier* GetCJUIScrollBarModifier()
         .setScrollBarScroller = nullptr,
         .setScrollBarEnableNestedScroll = setScrollBarEnableNestedScroll,
         .resetScrollBarEnableNestedScroll = resetScrollBarEnableNestedScroll,
-        .setScrollBarScrollBarColor = SetScrollBarScrollBarColor,
-        .resetScrollBarScrollBarColor = ResetScrollBarScrollBarColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

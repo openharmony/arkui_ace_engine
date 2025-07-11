@@ -223,7 +223,7 @@ void SheetSideObject::SetFinishEventForAnimationOption(
     CHECK_NULL_VOID(sheetNode);
     if (isTransitionIn) {
         option.SetOnFinishEvent(
-            [sheetWK = WeakClaim(RawPtr(sheetNode)), isFirst = isFirstTransition] {
+            [sheetWK = WeakClaim(RawPtr(sheetNode))] {
                 auto sheetNode = sheetWK.Upgrade();
                 CHECK_NULL_VOID(sheetNode);
                 auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();

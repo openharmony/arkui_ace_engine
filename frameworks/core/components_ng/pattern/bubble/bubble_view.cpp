@@ -62,7 +62,7 @@ OffsetF GetDisplayWindowRectOffset(int32_t popupNodeId)
 
 RefPtr<PopupTheme> GetPopupTheme()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, nullptr);
@@ -401,13 +401,9 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     if (param->HasEnableHoverMode()) {
         layoutProps->UpdateEnableHoverMode(param->EnableHoverMode());
     } else {
-        layoutProps->ResetEnableHoverMode();
     }
     
     if (param->GetArrowHeight().has_value()) {
-        layoutProps->UpdateArrowHeight(param->GetArrowHeight().value());
-    }
-    if (param->GetArrowWidth().has_value()) {
         layoutProps->UpdateArrowWidth(param->GetArrowWidth().value());
     }
     if (param->GetRadius().has_value()) {

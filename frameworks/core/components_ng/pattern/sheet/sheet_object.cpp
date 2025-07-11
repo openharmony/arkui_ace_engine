@@ -537,7 +537,8 @@ void SheetObject::ModifyFireSheetTransition(float dragVelocity)
         dragVelocity / SHEET_VELOCITY_THRESHOLD, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto offset = sheetPattern->UpdateSheetTransitionOffset();
+    // unused
+    // auto offset = sheetPattern->UpdateSheetTransitionOffset();
     CreatePropertyCallback();
     auto property = sheetPattern->GetProperty();
     CHECK_NULL_VOID(property);
@@ -565,7 +566,7 @@ void SheetObject::ModifyFireSheetTransition(float dragVelocity)
     property->Set(sheetPattern->GetStartProp());
     sheetPattern->SetBottomStyleHotAreaInSubwindow();
     std::shared_ptr<AnimationUtils::Animation> animation = AnimationUtils::StartAnimation(option,
-        [weak = AceType::WeakClaim(RawPtr(sheetPattern)), renderContext, offset]() {
+        [weak = AceType::WeakClaim(RawPtr(sheetPattern)), renderContext]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
             if (renderContext) {

@@ -232,5 +232,4 @@ bool CheckBetterRect(const Rect& nodeRect, const int direction, const Rect& item
             GetWeightedDistanceFor(
                 MajorAxisDistance(nodeRect, tempBest, direction), MinorAxisDistance(nodeRect, tempBest, direction)));
 }
-
 }  // namespace OHOS::Ace

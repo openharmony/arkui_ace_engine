@@ -48,6 +48,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/lazy_compose_adapter.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/base/lazy_compose_adapter.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
@@ -322,7 +323,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetPatternTypeName(), T::TypeName());
         }
-        return reinterpret_cast<T*>(RawPtr(pattern_));
+        return static_cast<T*>(RawPtr(pattern_));
     }
 
     template<typename T>
@@ -346,7 +347,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetLayoutPropertyTypeName(), T::TypeName());
         }
-        return reinterpret_cast<T*>(RawPtr(layoutProperty_));
+        return static_cast<T*>(RawPtr(layoutProperty_));
     }
 
     template<typename T>
@@ -364,7 +365,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetPaintPropertyTypeName(), T::TypeName());
         }
-        return reinterpret_cast<T*>(RawPtr(paintProperty_));
+        return static_cast<T*>(RawPtr(paintProperty_));
     }
 
     template<typename T>
@@ -1178,7 +1179,8 @@ public:
     bool GetOpIncGroupCheckedThrough();
     void SetOpIncCheckedOnce();
     bool GetOpIncCheckedOnce();
-    void MarkAndCheckNewOpIncNode(Axis axis);
+    void MarkAndCheckNewOpIncNode(Axis axis) override;
+    void SuggestOpIncGroup(Axis axis);
     ChildrenListWithGuard GetAllChildren();
     OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth, Axis axis);
     void GetInspectorValue() override;

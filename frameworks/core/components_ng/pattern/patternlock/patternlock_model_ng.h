@@ -62,6 +62,18 @@ public:
     static void SetActiveCircleColorByUser(FrameNode* frameNode, bool isByuserSet);
     static void SetActiveCircleRadius(FrameNode* frameNode, const Dimension& activeCircleRadius);
     static void SetEnableWaveEffect(FrameNode* frameNode, bool enableWaveEffect);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetActiveColor(FrameNode* frameNode, const std::optional<Color>& activeColor);
+    static void SetCircleRadius(FrameNode* frameNode, const std::optional<Dimension>& radius);
+    static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
+    static void SetSideLength(FrameNode* frameNode, const std::optional<Dimension>& sideLength);
+    static void SetAutoReset(FrameNode* frameNode, const std::optional<bool>& isAutoReset);
+    static void SetStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& lineWidth);
+    static void SetRegularColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetPathColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetActiveCircleColor(FrameNode* frameNode, const std::optional<Color>& activeCircleColor);
+    static void SetActiveCircleRadius(FrameNode* frameNode, const std::optional<Dimension>& activeCircleRadius);
+    static void SetEnableWaveEffect(FrameNode* frameNode, const std::optional<bool>& enableWaveEffect);
     static void SetEnableForeground(FrameNode* frameNode, bool enableForeground);
     static void SetSkipUnselectedPoint(FrameNode* frameNode, bool isSkipUnselectedPoint);
     static void SetPatternComplete(FrameNode* frameNode, NG::PatternLockCompleteEvent&& onComplete);
@@ -75,6 +87,8 @@ public:
     static void HandleCircleRadiusResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void HandleSideLengthResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void HandleActiveCircleColorResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+
+    static const RefPtr<V2::PatternLockController> GetController(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

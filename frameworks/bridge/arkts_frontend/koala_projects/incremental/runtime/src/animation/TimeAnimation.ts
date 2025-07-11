@@ -248,7 +248,7 @@ class TimeAnimationImpl<Value> implements TimeAnimation<Value> {
     private lastValue: Value
     private readonly compute: (time: int64) => Value
 
-    running = false
+    running: boolean = false
 
     constructor(compute: (time: int64) => Value, initial: int64 = 0) {
         this.lastState = initial
@@ -296,7 +296,7 @@ class PeriodicAnimationImpl<Value> implements TimeAnimation<Value> {
     private readonly period: uint32
     private readonly delay: int32
 
-    running = false
+    running: boolean = false
 
     constructor(delay: int32, period: uint32, compute: (count: int64) => Value, initial: int64 = 0) {
         this.lastState = initial
@@ -353,7 +353,7 @@ class ConstAnimationImpl<Value> implements TimeAnimation<Value> {
         this.lastValue = value
     }
 
-    readonly running: boolean = false
+    running: boolean = false
 
     getValue(time: int64): Value {
         return this.lastValue
@@ -374,7 +374,7 @@ class FrameAnimationImpl<Value> implements TimeAnimation<Value> {
     private readonly compute: (time: int64) => Value
     private readonly time: ReadonlyArray<uint32>
 
-    running = false
+    running: boolean = false
 
     constructor(time: ReadonlyArray<uint32>, compute: (time: int64) => Value) {
         this.lastState = 0
@@ -440,7 +440,7 @@ class AnimationImpl<Value> implements TimeAnimation<Value> {
     private readonly compute: AnimationRange<Value>
     private isPauseRequested = false
 
-    running = false
+    running: boolean = false
 
     constructor(
         duration: uint32,

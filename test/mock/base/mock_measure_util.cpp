@@ -22,13 +22,13 @@ namespace {
 }
 
 namespace OHOS::Ace {
-Size MeasureUtil::MeasureTextSize(const MeasureContext& context)
-{
-    return Size(TEXT_SIZE_WIDTH, TEXT_SIZE_HEIGHT);
-}
 double MeasureUtil::MeasureText(const MeasureContext& context)
 {
     return TEXT_SIZE_WIDTH;
+}
+Size MeasureUtil::MeasureTextSize(const MeasureContext& context)
+{
+    return Size(TEXT_SIZE_WIDTH, TEXT_SIZE_HEIGHT);
 }
 double MeasureUtil::MeasureTextWidth(const TextStyle& textStyle, const std::string& text)
 {

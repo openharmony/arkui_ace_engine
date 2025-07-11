@@ -14,8 +14,9 @@
  */
 
 #include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
-#include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/peer_utils.h"
+#include "core/interfaces/native/utility/promise_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "canvas_rendering_context2d_peer_impl.h"
 #include "image_bitmap_peer_impl.h"
@@ -126,49 +127,42 @@ void CanvasRenderingContext2DPeerImpl::Off(CallbackHelper<Callback_Void> &&callb
 {
     DeleteCallbackFromList(callback, type);
 }
-void CanvasRenderingContext2DPeerImpl::StartImageAnalyzer(const Ark_ImageAnalyzerConfig* config,
-    const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+void CanvasRenderingContext2DPeerImpl::StartImageAnalyzer(Ark_VMContext vmContext, Ark_AsyncWorkerPtr asyncWorker,
+    const Ark_ImageAnalyzerConfig* config, const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    CHECK_NULL_VOID(renderingContext2DModel_);
+    CHECK_NULL_VOID(asyncWorker);
     CHECK_NULL_VOID(config);
-    CHECK_NULL_VOID(outputArgumentForReturningPromise);
-    auto onError = [arkCallback = CallbackHelper(*outputArgumentForReturningPromise)]
-        (std::vector<std::string> error) -> void {
-        if (!error.empty()) {
-            Converter::ArkArrayHolder<Array_String> stringHolder(error);
-            Array_String stringArrayValues = stringHolder.ArkValue();
-            auto arkError = Converter::ArkValue<Opt_Array_String>(stringArrayValues);
-            arkCallback.Invoke(arkError);
-        } else {
-            auto arkEmptyMessage = Converter::ArkValue<Opt_Array_String>(Ark_Empty());
-            arkCallback.Invoke(arkEmptyMessage);
-        }
-    };
-
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
     if (isImageAnalyzing_) {
-        auto error = PeerUtils::CreateAIError(ImageAnalyzerState::ONGOING);
-        onError(error);
+        promise->Reject(PeerUtils::CreateAIError(ImageAnalyzerState::ONGOING));
         return;
     }
+    isImageAnalyzing_ = true;
 
+    auto onAnalyzed = [peer = Claim(this), promise](ImageAnalyzerState state) {
+        peer->isImageAnalyzing_ = false;
+        auto error = PeerUtils::CreateAIError(state);
+        if (error.empty()) {
+            promise->Resolve();
+        } else {
+            promise->Reject(error);
+        }
+    };
     auto vectorIATypes = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
     std::set<ImageAnalyzerType> types(vectorIATypes.begin(), vectorIATypes.end());
-    config_.types = std::move(types);
-    void* aceConfig = reinterpret_cast<void*>(&config_);
-
-    OnAnalyzedCallback onAnalyzed = [weakCtx = WeakClaim(this),
-        callback = std::move(onError)](ImageAnalyzerState state) -> void {
-        auto ctx = weakCtx.Upgrade();
-        CHECK_NULL_VOID(ctx);
-        auto error = PeerUtils::CreateAIError(state);
-        callback(error);
-        ctx->isImageAnalyzing_ = false;
+    config_ = {
+        .types = std::move(types)
     };
 
-    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    isImageAnalyzing_ = true;
-    canvasRenderingContext2DModel->StartImageAnalyzer(aceConfig, onAnalyzed);
+    promise->StartAsync(vmContext, *asyncWorker, [peer = Claim(this), onAnalyzed = std::move(onAnalyzed)]() {
+        auto model = AceType::DynamicCast<CanvasRenderingContext2DModel>(peer->renderingContext2DModel_);
+        if (model) {
+            OnAnalyzedCallback optOnAnalyzed = std::move(onAnalyzed);
+            model->StartImageAnalyzer(reinterpret_cast<void*>(&peer->config_), optOnAnalyzed);
+        } else {
+            onAnalyzed(ImageAnalyzerState::STOPPED);
+        }
+    });
 }
 void CanvasRenderingContext2DPeerImpl::StopImageAnalyzer()
 {

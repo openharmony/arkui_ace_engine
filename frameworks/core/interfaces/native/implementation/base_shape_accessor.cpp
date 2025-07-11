@@ -59,7 +59,4 @@ const GENERATED_ArkUIBaseShapeAccessor* GetBaseShapeAccessor()
     return &BaseShapeAccessorImpl;
 }
 
-struct BaseShapePeer {
-    virtual ~BaseShapePeer() = default;
-};
 }

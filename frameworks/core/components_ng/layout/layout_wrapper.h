@@ -273,6 +273,7 @@ public:
     {
         return ignoreLayoutProcess_;
     }
+    virtual void MarkAndCheckNewOpIncNode(Axis axis) {};
 
 protected:
     void CreateRootConstraint();

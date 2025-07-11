@@ -45,6 +45,16 @@ public:
     MOCK_METHOD1(SetTransparentLayer, void(bool));
     MOCK_METHOD1(SetClipToBounds, void(bool));
 
+    void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) override
+    {
+        chainedTransitionEffect_ = effect;
+    }
+
+    const RefPtr<NG::ChainedTransitionEffect> GetChainedTransitionEffect()
+    {
+        return chainedTransitionEffect_;
+    }
+
     void SetVisible(bool visible) override
     {
         isVisible_ = visible;
@@ -89,6 +99,11 @@ public:
         return paintRect_;
     }
 
+    void SetTransitionUserCallback(TransitionFinishCallback&& callback) override
+    {
+        transitionUserCallback_ = std::move(callback);
+    }
+
 #ifdef ENHANCED_ANIMATION
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) override;
     void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) override {}
@@ -99,41 +114,93 @@ public:
 #endif
 
     void UpdateBackBlurStyle(
-        const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions())
+        const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions()) override
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
 
+    void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
+    {
+        const auto& groupProperty = GetOrCreateBackground();
+        groupProperty->propBlurRadius = radius;
+        // see ./components_ng/render/adapter/rosen_render_context.cpp
+        // RosenRenderContext::UpdateBackBlur
+        backdropBlurOption = blurOption;
+    }
+
     void UpdateBackgroundEffect(
-        const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions = SysOptions())
+        const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions = SysOptions()) override
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propEffectOption = effectOption;
     }
 
-    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
+    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override
     {
         const auto& groupProperty = GetOrCreateForeground();
         groupProperty->propMotionBlur = motionBlurOption;
     }
 
-    int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
+    void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
+    {
+        const auto& groupProperty = GetOrCreateForeground();
+        groupProperty->propBlurRadius = radius;
+        foregroundBlurOption = blurOption;
+    }
+
+    void UpdateTransition(const TransitionOptions& options) override
+    {
+        const auto& groupPropertyA = GetOrCreateTransitionAppearing();
+        if (options.Type == TransitionType::APPEARING || options.Type == TransitionType::ALL) {
+            groupPropertyA->Type = options.Type;
+            if (options.HasOpacity()) {
+                groupPropertyA->UpdateOpacity(options.GetOpacityValue());
+            }
+            if (options.HasTranslate()) {
+                groupPropertyA->UpdateTranslate(options.GetTranslateValue());
+            }
+            if (options.HasScale()) {
+                groupPropertyA->UpdateScale(options.GetScaleValue());
+            }
+            if (options.HasRotate()) {
+                groupPropertyA->UpdateRotate(options.GetRotateValue());
+            }
+        }
+        const auto& groupPropertyD = GetOrCreateTransitionDisappearing();
+        if (options.Type == TransitionType::DISAPPEARING || options.Type == TransitionType::ALL) {
+            groupPropertyD->Type = options.Type;
+            if (options.HasOpacity()) {
+                groupPropertyD->UpdateOpacity(options.GetOpacityValue());
+            }
+            if (options.HasTranslate()) {
+                groupPropertyD->UpdateTranslate(options.GetTranslateValue());
+            }
+            if (options.HasScale()) {
+                groupPropertyD->UpdateScale(options.GetScaleValue());
+            }
+            if (options.HasRotate()) {
+                groupPropertyD->UpdateRotate(options.GetRotateValue());
+            }
+        }
+    }
+
+    int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override
     {
         return 0;
     }
 
-    void SetOpacityMultiplier(float opacity)
+    void SetOpacityMultiplier(float opacity) override
     {
         opacityMultiplier_ = opacity;
     }
 
-    bool HasDisappearTransition() const
+    bool HasDisappearTransition() const override
     {
         return hasDisappearTransition_;
     }
 
-    void SetTransitionOutCallback(std::function<void()>&& callback)
+    void SetTransitionOutCallback(std::function<void()>&& callback) override
     {
         transitionOutCallback_ = std::move(callback);
     }
@@ -165,6 +232,10 @@ public:
 
 private:
     size_t animationsCount_ = 0;
+    BlurOption backdropBlurOption;
+    BlurOption foregroundBlurOption;
+    RefPtr<NG::ChainedTransitionEffect> chainedTransitionEffect_ = nullptr;
+    TransitionFinishCallback transitionUserCallback_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
