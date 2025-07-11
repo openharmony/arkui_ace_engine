@@ -57,8 +57,8 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         return value;
     }
     public set(newValue: T): void {
-        const value = this.backing_.get(false);
-        if (value === newValue) {
+        const oldValue = this.backing_.get(false);
+        if (oldValue === newValue) {
             return;
         }
         // for interop
@@ -68,9 +68,10 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         if (typeof this.setProxyValue === 'function') {
             this.setProxyValue!(newValue);
         }
-        if (this.backing_.set(UIUtils.makeObserved(newValue) as T)) {
-            this.unregisterWatchFromObservedObjectChanges(value);
-            this.registerWatchForObservedObjectChanges(newValue);
+        const value = UIUtils.makeObserved(newValue);
+        if (this.backing_.set(value)) {
+            this.unregisterWatchFromObservedObjectChanges(oldValue);
+            this.registerWatchForObservedObjectChanges(value);
             this.execWatchFuncs();
         }
     }

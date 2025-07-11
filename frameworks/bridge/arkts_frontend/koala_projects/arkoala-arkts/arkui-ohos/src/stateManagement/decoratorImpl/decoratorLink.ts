@@ -18,6 +18,7 @@ import { IDecoratedV1Variable, WatchFuncType } from '../decorator';
 import { ILinkDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
+import { UIUtils } from '../utils';
 
 /**
  * implementation of V1 @Link
@@ -79,20 +80,21 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
     }
 
     public set(newValue: T): void {
-        const value = this.sourceGet_();
-        if (value !== newValue) {
+        const oldValue = this.sourceGet_();
+        if (oldValue !== newValue) {
             if (this.sourceSet_ === undefined) {
                 throw new Error(`${this.getInfo()}: Can not set @Link value. @Link source is immutable error.`);
             }
+            const value = UIUtils.makeObserved(newValue);
             // @Watch
             // if new value is object, register so that property changes trigger
             // Watch function exec
             // unregister if old value is an object
-            this.unregisterWatchFromObservedObjectChanges(value);
-            this.registerWatchForObservedObjectChanges(newValue);
+            this.unregisterWatchFromObservedObjectChanges(oldValue);
+            this.registerWatchForObservedObjectChanges(value);
             // a @Link set  truggers a meta.fireChange on the source XXXDecoratedVariable
             // set also get above.
-            this.sourceSet_!(newValue); // makeObserved should be called in source
+            this.sourceSet_!(value);
         }
     }
 
