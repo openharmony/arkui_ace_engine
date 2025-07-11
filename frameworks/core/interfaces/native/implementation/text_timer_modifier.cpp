@@ -19,7 +19,7 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/interfaces/native/implementation/text_timer_controller_peer_impl.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {

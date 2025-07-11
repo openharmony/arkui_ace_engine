@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 namespace OHOS::Ace::NG {
 struct RectOptions {
