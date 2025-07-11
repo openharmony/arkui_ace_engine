@@ -379,7 +379,7 @@ TEST_F(FreeScrollTest, Animation001)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     ASSERT_TRUE(pattern_->freeScroll_);
-    EXPECT_LT(GetChildX(frameNode_, 0), -DELTA_X); // triggered low response spring
+    EXPECT_LT(GetChildX(frameNode_, 0), -DELTA_X); // triggered high response spring
     EXPECT_EQ(GetChildY(frameNode_, 0), 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
     EXPECT_EQ(controller->state_, ScrollState::IDLE);
