@@ -78,7 +78,8 @@ public:
     bool Put(const char* key, bool value) override;
     virtual bool Put(const char* key, const std::unique_ptr<JsonValue>& value);
     bool Put(const std::unique_ptr<JsonValue>& value);
-
+    bool Put(const std::shared_ptr<JsonValue>& value);
+    bool Put(const char* key, const std::shared_ptr<JsonValue>& value);
     bool PutFixedAttr(const char* key, const char* value, const NG::InspectorFilter& filter, NG::FixedAttrBit attr);
     bool PutFixedAttr(const char* key, size_t value, const NG::InspectorFilter& filter, NG::FixedAttrBit attr);
     bool PutFixedAttr(const char* key, int32_t value, const NG::InspectorFilter& filter, NG::FixedAttrBit attr);
@@ -100,7 +101,7 @@ public:
     JsonObject* ReleaseJsonObject();
     bool PutRef(const char* key, std::unique_ptr<JsonValue>&& value);
     bool PutRef(std::unique_ptr<JsonValue>&& value);
-
+    bool PutRef(std::shared_ptr<JsonValue>&& value);
     // replace functions
     bool Replace(const char* key, const char* value);
     bool Replace(const char* key, int32_t value);
@@ -126,6 +127,7 @@ public:
     static std::unique_ptr<JsonValue> ParseJsonData(const char* data, const char** parseEnd = nullptr);
     static std::unique_ptr<JsonValue> ParseJsonString(const std::string& content, const char** parseEnd = nullptr);
     static std::unique_ptr<JsonValue> Create(bool isRoot = true);
+    static std::shared_ptr<JsonValue> CreateSharedPtrJson(bool isRoot = true);
     static std::unique_ptr<JsonValue> CreateArray(bool isRoot = true);
 };
 

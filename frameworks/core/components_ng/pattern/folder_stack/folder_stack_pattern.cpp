@@ -298,7 +298,7 @@ void FolderStackPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("rotation", static_cast<int32_t>(rotation));
 }
 
-void FolderStackPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+void FolderStackPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(displayInfo_);
     auto rotation = displayInfo_->GetRotation();

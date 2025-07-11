@@ -203,7 +203,7 @@ void BadgePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("badgeBorderWidth", badgeBorderWidth.value().ToString().c_str());
 }
 
-void BadgePattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+void BadgePattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);

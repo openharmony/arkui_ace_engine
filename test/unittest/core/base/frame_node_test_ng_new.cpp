@@ -2808,7 +2808,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfo, TestSize.Level1)
      * @tc.steps: step2. create json.
      * @tc.expected: expect is nullptr.
      */
-    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    std::shared_ptr<JsonValue> json = JsonUtil::CreateSharedPtrJson(true);
     EXPECT_NE(json, nullptr);
 
     /**

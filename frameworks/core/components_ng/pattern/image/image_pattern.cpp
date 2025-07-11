@@ -2768,11 +2768,6 @@ void ImagePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("enableAnalyzer", isEnableAnalyzer_);
 }
 
-void ImagePattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
-{
-    DumpInfo(json);
-}
-
 void ImagePattern::DumpLayoutInfo(std::unique_ptr<JsonValue>& json)
 {
     auto layoutProp = GetLayoutProperty<ImageLayoutProperty>();

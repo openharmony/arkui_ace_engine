@@ -357,7 +357,7 @@ private:
     void ApplyTitleModifier(const RefPtr<FrameNode>& textNode,
         const TextStyleApplyFunc& applyFunc, bool needCheckFontSizeIsSetted);
     void DumpInfo() override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
 
     void HandleLongPress(const RefPtr<FrameNode>& backButtonNode);
     void HandleLongPressActionEnd();

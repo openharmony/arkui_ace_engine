@@ -1043,7 +1043,7 @@ HWTEST_F(BadgeTestNg, BadgeDumpSimplifyInfoTest001, TestSize.Level1)
     textNode->MountToParent(frameNode_);
     pattern_->OnModifyDone();
 
-    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    std::shared_ptr<JsonValue> json = std::make_shared<JsonValue>();
     pattern_->DumpSimplifyInfo(json);
 
     // update badge layoutProperty and go to different branch

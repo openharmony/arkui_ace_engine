@@ -244,7 +244,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump004, Te
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<DialogPattern>();
     ASSERT_NE(pattern, nullptr);
-    std::unique_ptr<JsonValue> jsonPtr = JsonUtil::Create(false);
+    std::shared_ptr<JsonValue> jsonPtr = JsonUtil::CreateSharedPtrJson(false);
     ASSERT_NE(jsonPtr, nullptr);
     /**
      * @tc.steps: step2. Invoke Dump functions.
