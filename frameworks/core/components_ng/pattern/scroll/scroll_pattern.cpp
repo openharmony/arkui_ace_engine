@@ -1196,8 +1196,19 @@ Rect ScrollPattern::GetItemRect(int32_t index) const
     CHECK_NULL_RETURN(item, Rect());
     auto itemGeometry = item->GetGeometryNode();
     CHECK_NULL_RETURN(itemGeometry, Rect());
-    return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
-        itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+    float scale = GetZoomScale();
+    if (scale == 1.0f) {
+        return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
+            itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+    } else {
+        auto rect = itemGeometry->GetFrameRect();
+        auto cx = rect.Left() + rect.Width() / 2;
+        auto cy = rect.Top() + rect.Height() / 2;
+        auto left = cx - (cx - rect.Left()) * scale;
+        auto top = cy - (cy - rect.Top()) * scale;
+        auto size = itemGeometry->GetFrameSize() * scale;
+        return Rect(left, top, size.Width(), size.Height());
+    }
 }
 
 float ScrollPattern::GetSelectScrollWidth()
