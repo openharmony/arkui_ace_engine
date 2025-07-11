@@ -134,7 +134,13 @@ void AnimationUtils::AnimateWithCurrentOptions(
 void AnimationUtils::AnimateWithCurrentCallback(
     const AnimationOption& option, const PropertyCallback& callback,
     const RefPtr<PipelineBase>& context)
-{}
+{
+#ifdef ENHANCED_ANIMATION
+    AnimManager::GetInstance().OpenAnimation();
+    callback();
+    AnimManager::GetInstance().CloseAnimation();
+#endif
+}
 
 std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const AnimationOption& option,
     const PropertyCallback& callback, const FinishCallback& finishCallback,

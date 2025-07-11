@@ -175,7 +175,7 @@ void FreeScrollController::HandlePanEndOrCancel(const GestureEvent& event)
 void FreeScrollController::Fling(const OffsetF& velocity)
 {
     const bool outOfBounds = ClampPosition(offset_->Get()) != offset_->Get();
-    const float friction = outOfBounds ? GetFriction(pattern_) : EDGE_FRICTION;
+    const float friction = outOfBounds ? EDGE_FRICTION : GetFriction(pattern_);
     if (NearZero(friction)) {
         TAG_LOGW(AceLogTag::ACE_SCROLL, "Fling called with zero friction, skipping fling animation.");
         return;
@@ -185,7 +185,7 @@ void FreeScrollController::Fling(const OffsetF& velocity)
     if (outOfBounds) {
         finalPos = ClampPosition(finalPos);
     } // when not out of bounds, finalPos doesn't need clamping because we would clamp it later during the
-      // animation through ChangeFlingFriction
+      // animation when we reach edge and increase friction.
 
     if (finalPos == offset_->Get()) {
         // No movement, no need to animate.

@@ -466,6 +466,39 @@ TEST_F(FreeScrollTest, Animation003)
 }
 
 /**
+ * @tc.name: Animation004
+ * @tc.desc: Test switching friction during animation
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Animation004)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    model.SetInitialOffset({ CalcDimension(DELTA_X), CalcDimension(DELTA_Y) });
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    PanStart({});
+    PanUpdate({ DELTA_X - 1, DELTA_Y - 1 });
+    MockAnimationManager::GetInstance().SetTicks(2);
+    PanEnd({ -LARGE_DELTA_X, -LARGE_DELTA_Y }, { VELOCITY_X, VELOCITY_Y });
+    EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::FLING);
+    EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue().ToString(), "Offset (316.46, 316.46)");
+    MockAnimationManager::GetInstance().Tick(); // switched to high-friction spring motion after reaching edge
+    EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue(), OffsetF());
+    FlushUITasks(frameNode_);
+    EXPECT_GT(GetChildX(frameNode_, 0), 0);
+    EXPECT_GT(GetChildY(frameNode_, 0), 0);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+
+    MockAnimationManager::GetInstance().SetTicks(1);
+}
+
+/**
  * @tc.name: Events001
  * @tc.desc: Test scroll events
  * @tc.type: FUNC
