@@ -638,6 +638,58 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest042, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ViewAbstractBackground001
+ * @tc.desc: Test the background of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractBackground001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a FrameNode.
+     */
+    const RefPtr<FrameNode> node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto instance = ViewStackProcessor::GetInstance();
+    instance->Push(node);
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pattern = node->GetPattern<Pattern>();
+    ASSERT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_TRUE(pattern->resourceMgr_);
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+    /**
+     * @tc.steps: step2. Set background options.
+     * @tc.expected: Options are set successfully.
+     */
+    Alignment align = Alignment::TOP_CENTER;
+    ViewAbstract::SetBackgroundAlign(node.GetRawPtr(), align);
+    auto backgroundAlign = renderContext->GetBackgroundAlign().value_or(Alignment::BOTTOM_CENTER);
+    EXPECT_EQ(backgroundAlign, align);
+
+    Color color = Color::RED;
+    ViewAbstract::SetBackgroundColor(node.GetRawPtr(), color);
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), color);
+
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    ViewAbstract::SetCustomBackgroundColorWithResourceObj(node.GetRawPtr(), BLUE, resourceObject);
+    EXPECT_TRUE(pattern->resourceMgr_->resMap_.find("customBackgroundColor") != pattern->resourceMgr_->resMap_.end());
+
+    LayoutSafeAreaEdge edge = LAYOUT_SAFE_AREA_EDGE_START;
+    ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(node.GetRawPtr(), edge);
+    ASSERT_NE(node->GetLayoutProperty(), nullptr);
+    EXPECT_EQ(node->GetLayoutProperty()->GetBackgroundIgnoresLayoutSafeAreaEdges(), edge);
+    EXPECT_EQ(renderContext->GetBackgroundIgnoresLayoutSafeAreaEdges().value_or(LAYOUT_SAFE_AREA_EDGE_NONE), edge);
+
+    ViewAbstract::SetIsTransitionBackground(node.GetRawPtr(), true);
+    EXPECT_TRUE(renderContext->GetIsTransitionBackground().value_or(false));
+
+    ViewAbstract::SetIsBuilderBackground(node.GetRawPtr(), true);
+    EXPECT_TRUE(renderContext->GetBuilderBackgroundFlag().value_or(false));
+}
+
+
+/**
  * @tc.name: ViewAbstractOffsetEdges001
  * @tc.desc: test offset attribute, use Edges type.
  * @tc.type: FUNC

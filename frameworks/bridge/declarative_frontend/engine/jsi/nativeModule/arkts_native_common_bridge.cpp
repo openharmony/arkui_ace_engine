@@ -49,6 +49,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr uint32_t ALIGNMENT_TOP_LEFT = 0;
+constexpr uint32_t ALIGNMENT_CENTER = 4;
+constexpr int32_t DEFAULT_LAYOUT_SAFE_AREA_EDGE_FOR_COLOR_BACKGROUND = 6;
 constexpr float DEFAULT_PROGRESS_TOTAL = 100.0f;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -1579,6 +1581,50 @@ const std::vector<AccessibilitySamePageMode> PAGE_MODE_TYPE = { AccessibilitySam
     AccessibilitySamePageMode::FULL_SILENT };
 const std::vector<FocusDrawLevel> FOCUS_DRAW_LEVEL = { FocusDrawLevel::SELF, FocusDrawLevel::TOP };
 } // namespace
+
+ArkUINativeModuleValue CommonBridge::SetBackground(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+
+    // Parse color background
+    Color color;
+    RefPtr<ResourceObject> backgroundColorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, backgroundColorResObj, nodeInfo)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ArkUIBackgroundContent content;
+    content.color = color.GetValue();
+    content.bgColorRawPtr = AceType::RawPtr(backgroundColorResObj);
+
+    ArkUIBackgroundOptions options;
+    options.align = ALIGNMENT_CENTER;
+    // Parse ignoresLayoutSafeAreaEdges
+    std::vector<ArkUI_Int32> edges;
+    if (!ArkTSUtils::ParseJsIgnoresLayoutSafeAreaEdges(vm, fourthArg, edges)) {
+        edges.emplace_back(DEFAULT_LAYOUT_SAFE_AREA_EDGE_FOR_COLOR_BACKGROUND);
+    }
+    options.ignoresLayoutSafeAreaEdges = edges.data();
+    options.ignoresLayoutSafeAreaEdgesSize = edges.size();
+    
+    GetArkUINodeModifiers()->getCommonModifier()->setBackground(nativeNode, &content, &options);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBackground(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetBackground(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 
 ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
