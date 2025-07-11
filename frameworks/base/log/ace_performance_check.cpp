@@ -39,6 +39,7 @@ constexpr char CHECK_RESULT[] = "{\"message_type\": \"SendArkPerformanceCheckRes
 
 std::unique_ptr<JsonValue> AcePerformanceCheck::performanceInfo_ = nullptr;
 std::string AceScopedPerformanceCheck::currentPath_;
+std::string AceScopedPerformanceCheck::recordPath_;
 std::vector<std::pair<int64_t, std::string>> AceScopedPerformanceCheck::records_;
 void AcePerformanceCheck::Start()
 {
@@ -155,6 +156,16 @@ bool AceScopedPerformanceCheck::CheckPage(const CodeInfo& codeInfo, const std::s
     return false;
 }
 
+void AceScopedPerformanceCheck::UpdateRecordPath(const std::string& path)
+{
+    recordPath_ = path;
+}
+
+void AceScopedPerformanceCheck::ReportAllRecord()
+{
+    RecordFunctionTimeout();
+}
+
 void AceScopedPerformanceCheck::RecordPerformanceCheckData(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout,
     std::string path, std::string fromPath, std::string moduleName, bool isNavigation)
 {
@@ -242,16 +253,13 @@ void AceScopedPerformanceCheck::RecordFunctionTimeout()
             continue;
         }
         auto codeInfo = GetCodeInfo(1, 1);
-        if (!codeInfo.sources.empty()) {
-            continue;
-        }
         CheckIsRuleContainsPage("9902", codeInfo.sources);
         auto eventTime = GetCurrentTime();
         CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
         auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9902");
         auto pageJson = JsonUtil::Create(true);
         pageJson->Put("eventTime", eventTime.c_str());
-        pageJson->Put("pagePath", codeInfo.sources.c_str());
+        pageJson->Put("pagePath", recordPath_.c_str());
         pageJson->Put("functionName", record.second.c_str());
         pageJson->Put("costTime", record.first);
         ruleJson->Put(pageJson);
