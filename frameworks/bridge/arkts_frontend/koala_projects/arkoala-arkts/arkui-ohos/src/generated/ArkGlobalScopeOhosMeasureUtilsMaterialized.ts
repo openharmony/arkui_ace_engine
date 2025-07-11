@@ -46,7 +46,7 @@ export class GlobalScope_ohos_measure_utils {
         thisSerializer.writeMeasureOptions(options)
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_measure_utils_measureTextSize(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : SizeOptions = retvalDeserializer.readSizeOptions()
         return returnResult
     }

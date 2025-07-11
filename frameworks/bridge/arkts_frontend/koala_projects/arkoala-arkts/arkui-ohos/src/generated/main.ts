@@ -299,7 +299,7 @@ function enqueueCallback(
     serializer.release()
 
     /* libace calls stored callback */
-    const deserializer = new Deserializer(buffer, buffer.length)
+    const deserializer = new Deserializer(buffer, buffer.length as int32)
     readAndCallCallback(deserializer)
     /* libace released resource */
     InteropNativeModule._ReleaseCallbackResource(resourceId)

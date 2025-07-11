@@ -219,8 +219,8 @@ class RouterImpl implements Router {
     pushOrReplace(url: string, push: boolean, params?: Map<string, Object>): Promise<void> {
         return new Promise<void>((
             resolve: (value: undefined) => void,
-            reject: (reason: string | undefined) => void
-        ): Promise<void> | undefined => {
+            reject: (reason: Error) => void
+        ): void => {
             let entry = this.registry.get(url)
             console.log(push ? "push" : "replace", url, entry)
             if (entry) {
@@ -240,12 +240,11 @@ class RouterImpl implements Router {
                             }
                             this.activate(new RouterRegistryEntry(url, page), push ? RouteType_Push : RouteType_None, params, () => resolve(undefined))
                         })
-                        .catch<void>((error: string | undefined): void => reject(error))
+                        .catch<void>((error: Error): void => reject(error))
                 }
                 // console.error(`${url} is not registered`)
                 reject(`${url} is not registered`)
             }
-            return undefined
         })
     }
 
@@ -342,7 +341,7 @@ class RouterImpl implements Router {
     back(url?: string, params?: Map<string, Object>): Promise<void> {
         return new Promise<void>((
             resolve: () => void,
-            reject: (reason: string | undefined) => void
+            reject: (reason: Error) => void
         ): void => {
             let entry: RouterStackEntry | undefined = undefined
             if (url) {
@@ -365,7 +364,7 @@ class RouterImpl implements Router {
                     resolve
                 )
             } else {
-                reject(`history is empty`)
+                reject(new Error(`history is empty`))
             }
         })
     }

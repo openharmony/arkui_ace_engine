@@ -198,13 +198,13 @@ export class Matrix44 {
 
     public scale(options: ScaleOptions): Matrix44 {
         const scaled = new Matrix44()
-        scaled.array[0] = options.x ?? 1.0 as float32
-        scaled.array[5] = options.y ?? 1.0 as float32
-        scaled.array[10] = options.z ?? 1.0 as float32
+        scaled.array[0] = options.x ?? (1.0).toFloat()
+        scaled.array[5] = options.y ?? (1.0).toFloat()
+        scaled.array[10] = options.z ?? (1.0).toFloat()
 
         this.translate(new TranslateOptionsImpl(
-            -(options.pivotX ?? 0.0 as float32) * (options.x ?? 1.0 as float32) + (options.pivotX ?? 0.0 as float32),
-            -(options.pivotY ?? 0.0 as float32) * (options.y ?? 1.0 as float32) + (options.pivotY ?? 0.0 as float32),
+            -(options.pivotX ?? (0.0).toFloat()) * (options.x ?? (1.0).toFloat()) + (options.pivotX ?? (0.0).toFloat()),
+            -(options.pivotY ?? (0.0).toFloat()) * (options.y ?? (1.0).toFloat()) + (options.pivotY ?? (0.0).toFloat()),
             undefined
         )).concat(scaled)
 
@@ -213,18 +213,18 @@ export class Matrix44 {
 
     public rotate(options: RotateOptions): Matrix44 {
         const translationToPivot = mat44().translate(new TranslateOptionsImpl(
-             (options.pivotX ?? 0.0 as float32),
-             (options.pivotY ?? 0.0 as float32),
-             (options.pivotZ ?? 0.0 as float32),
+             (options.pivotX ?? (0.0).toFloat()),
+             (options.pivotY ?? (0.0).toFloat()),
+             (options.pivotZ ?? (0.0).toFloat()),
         ))
         const translationToBack = mat44().translate(new TranslateOptionsImpl(
-            -(options.pivotX ?? 0.0 as float32),
-            -(options.pivotY ?? 0.0 as float32),
-            -(options.pivotZ ?? 0.0 as float32),
+            -(options.pivotX ?? (0.0).toFloat()),
+            -(options.pivotY ?? (0.0).toFloat()),
+            -(options.pivotZ ?? (0.0).toFloat()),
         ))
 
-        const vec = new Point3(options.x ?? 0.0 as float32, options.y ?? 0.0 as float32, options.z ?? 0.0 as float32).normalize()
-        const rads = (options.angle ?? 0.0 as float32) * Math.PI / 180
+        const vec = new Point3(options.x ?? (0.0).toFloat(), options.y ?? (0.0).toFloat(), options.z ?? (0.0).toFloat()).normalize()
+        const rads = (options.angle ?? (0.0).toFloat()) * Math.PI / 180
         let c = Math.cos(rads)
         let s = Math.sin(rads)
         const tolerance = (1.0 / (1 << 12))
@@ -259,9 +259,9 @@ export class Matrix44 {
     }
 
     public translate(options: TranslateOptions): Matrix44 {
-        this.array[3] = options.x ?? 0.0 as float32
-        this.array[7] = options.y ?? 0.0 as float32
-        this.array[11] = options.z ?? 0.0 as float32
+        this.array[3] = options.x ?? (0.0).toFloat()
+        this.array[7] = options.y ?? (0.0).toFloat()
+        this.array[11] = options.z ?? (0.0).toFloat()
         return this
     }
 
@@ -374,8 +374,8 @@ export class Matrix44 {
     }
 
     public skew(x?: float32, y?: float32): Matrix44 {
-        this.array[1] += x ?? 0.0 as float32
-        this.array[4] += y ?? 0.0 as float32
+        this.array[1] = this.array[1] + (x ?? (0.0).toFloat())
+        this.array[4] = this.array[4] + (y ?? (0.0).toFloat())
         return this
     }
 }

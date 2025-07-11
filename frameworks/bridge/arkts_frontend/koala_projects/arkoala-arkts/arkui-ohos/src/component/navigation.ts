@@ -704,7 +704,7 @@ export class NavPathStack implements MaterializedBase {
     }
     private getAllPathName_serialize(): Array<string> {
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_getAllPathName(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -719,7 +719,7 @@ export class NavPathStack implements MaterializedBase {
     }
     private getParamByName_serialize(name: string): Array<object> {
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_getParamByName(this.peer!.ptr, name)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<object> = new Array<object>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -730,7 +730,7 @@ export class NavPathStack implements MaterializedBase {
     }
     private getIndexByName_serialize(name: string): Array<number> {
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_getIndexByName(this.peer!.ptr, name)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<number> = new Array<number>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -848,7 +848,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
     }
     private getFrom_serialize(): NavContentInfo {
         const retval  = ArkUIGeneratedNativeModule._NavigationTransitionProxy_getFrom(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : NavContentInfo = retvalDeserializer.readNavContentInfo()
         return returnResult
     }
@@ -860,7 +860,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
     }
     private getTo_serialize(): NavContentInfo {
         const retval  = ArkUIGeneratedNativeModule._NavigationTransitionProxy_getTo(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : NavContentInfo = retvalDeserializer.readNavContentInfo()
         return returnResult
     }

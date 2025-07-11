@@ -144,7 +144,7 @@ export class StyledString implements MaterializedBase {
         }
         const retval  = ArkUIGeneratedNativeModule._StyledString_getStyles(this.peer!.ptr, start, length, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<SpanStyle> = new Array<SpanStyle>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -184,7 +184,7 @@ export class StyledString implements MaterializedBase {
     }
     private static marshalling_serialize(styledString: StyledString): NativeBuffer {
         const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling(toPeerPtr(styledString))
-        return new Deserializer(retval, retval.length).readBuffer()
+        return new Deserializer(retval, retval.length as int32).readBuffer()
     }
     private static unmarshalling_serialize(buffer: NativeBuffer): Promise<StyledString> {
         const thisSerializer : Serializer = Serializer.hold()
@@ -468,7 +468,7 @@ export class TextShadowStyle implements MaterializedBase {
     }
     private getTextShadow_serialize(): Array<ShadowOptions> {
         const retval  = ArkUIGeneratedNativeModule._TextShadowStyle_getTextShadow(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<ShadowOptions> = new Array<ShadowOptions>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -515,7 +515,7 @@ export class BackgroundColorStyle implements MaterializedBase {
     }
     private getTextBackgroundStyle_serialize(): TextBackgroundStyle {
         const retval  = ArkUIGeneratedNativeModule._BackgroundColorStyle_getTextBackgroundStyle(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : TextBackgroundStyle = retvalDeserializer.readTextBackgroundStyle()
         return returnResult
     }
@@ -910,7 +910,7 @@ export class ImageAttachment implements MaterializedBase {
     }
     private getSize_serialize(): SizeOptions {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getSize(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : SizeOptions = retvalDeserializer.readSizeOptions()
         return returnResult
     }
@@ -924,7 +924,7 @@ export class ImageAttachment implements MaterializedBase {
     }
     private getLayoutStyle_serialize(): ImageAttachmentLayoutStyle {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getLayoutStyle(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : ImageAttachmentLayoutStyle = retvalDeserializer.readImageAttachmentLayoutStyle()
         return returnResult
     }
@@ -971,7 +971,7 @@ export class CustomSpan implements MaterializedBase {
         thisSerializer.writeCustomSpanMeasureInfo(measureInfo)
         const retval  = ArkUIGeneratedNativeModule._CustomSpan_onMeasure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : CustomSpanMetrics = retvalDeserializer.readCustomSpanMetrics()
         return returnResult
     }
