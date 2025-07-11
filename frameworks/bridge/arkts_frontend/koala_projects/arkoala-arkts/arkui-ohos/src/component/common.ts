@@ -10722,9 +10722,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public stateStyles(value: StateStyles | undefined): this {
         if (this.checkPriority("stateStyles")) {
-            const value_casted = value as (StateStyles | undefined)
-            hookStateStyleImpl(this.getPeer(), value_casted)
-            return this
+            hookStateStyleImpl(this, value)
         }
         return this
     }
@@ -11088,9 +11086,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
         if (this.checkPriority("backgroundImage")) {
-            const src_casted = src as (ResourceStr | PixelMap | undefined)
-            const repeat_casted = repeat as (ImageRepeat | undefined)
-            hookBackgroundImageImpl(this.getPeer(), src_casted, repeat_casted)
+            hookBackgroundImageImpl(this, src, repeat)
         }
         return this
     }
