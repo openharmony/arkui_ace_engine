@@ -262,7 +262,7 @@ struct SpanItem : public AceType {
     DECLARE_ACE_TYPE(SpanItem, AceType);
 
 public:
-    SpanItem() = default;
+    SpanItem() : nodeId_(ElementRegister::GetInstance()->MakeUniqueId()) {}
     virtual ~SpanItem()
     {
         children.clear();
