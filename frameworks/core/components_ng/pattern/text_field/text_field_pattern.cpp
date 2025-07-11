@@ -11849,7 +11849,9 @@ void TextFieldPattern::SetBackBorderRadius()
     CHECK_NULL_VOID(layoutProperty);
 
     bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    auto radius = renderContext->GetBorderRadius().value();
+    auto borderRadiusProperty = renderContext->GetBorderRadius();
+    CHECK_NULL_VOID(borderRadiusProperty);
+    auto radius = borderRadiusProperty.value();
 
     radius.radiusTopLeft = radius.radiusTopLeft.has_value() ? radius.radiusTopLeft :
         (isRTL ? radius.radiusTopEnd : radius.radiusTopStart);
