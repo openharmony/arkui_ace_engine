@@ -100,6 +100,30 @@ HWTEST_F(WaterFlowSWTest, SyncLoad001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SyncLoad001
+ * @tc.desc: test load items frame by frame
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, SyncLoad002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    model.SetSyncLoad(false);
+    CreateRandomWaterFlowItems(50);
+    CreateDone();
+
+    // @tc.steps: limit the number of frame-by-frame loads.
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    // @tc.steps: scrollby large offset to trigger jump in waterflow
+    ScrollBy(0, 800 * 3);
+    // @tc.expected: fill current page in one frame
+    // The height of the child components is randomly set between 50 and 250. Therefore, we can only determine that the
+    // number of layout child nodes is greater than the limit.
+    EXPECT_GE(info_->endIndex_ - info_->startIndex_, 2);
+}
+
+/**
  * @tc.name: Footer001
  * @tc.desc: Put empty [if] to footer, test the NotifyDataChange.
  * @tc.type: FUNC
