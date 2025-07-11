@@ -89,8 +89,9 @@ private:
 
     /**
      * @brief Check if the new offset would reach any edges. If so, fire corresponding user callbacks.
+     * @return true if any edge is reached, false otherwise.
      */
-    void CheckCrashEdge(const OffsetF& newOffset, const SizeF& scrollableArea) const;
+    bool CheckCrashEdge(const OffsetF& newOffset, const SizeF& scrollableArea) const;
 
     /**
      * @brief triggers onWillScroll user callback
@@ -101,6 +102,8 @@ private:
     void FireOnScrollStart() const;
     void FireOnScrollEnd() const;
     void FireOnScrollEdge(const std::vector<ScrollEdge>& edges) const;
+
+    void SwitchToLowResponse();
 
     ScrollPattern& pattern_;
     RefPtr<NodeAnimatablePropertyOffsetF> offset_;

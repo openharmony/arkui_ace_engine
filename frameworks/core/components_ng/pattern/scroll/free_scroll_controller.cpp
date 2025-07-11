@@ -18,13 +18,17 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 void FreeScrollController::HandleAnimationUpdate(const OffsetF& currentValue)
 {
     // todo: figure out how to modify offset_ without disrupting animation
     FireOnWillScroll(currentValue - prevOffset_, ScrollState::FLING, ScrollSource::FLING);
-    CheckCrashEdge(currentValue, pattern_.GetViewPortExtent() - pattern_.GetViewSize());
+    bool reachedEdge = CheckCrashEdge(currentValue, pattern_.GetViewPortExtent() - pattern_.GetViewSize());
+    if (reachedEdge) {
+        SwitchToLowResponse();
+    }
     pattern_.MarkDirty();
 }
 
@@ -392,9 +396,9 @@ void FreeScrollController::FireOnScrollEdge(const std::vector<ScrollEdge>& edges
     pattern_.AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_EDGE);
 }
 
-void FreeScrollController::CheckCrashEdge(const OffsetF& newOffset, const SizeF& scrollableArea) const
+bool FreeScrollController::CheckCrashEdge(const OffsetF& newOffset, const SizeF& scrollableArea) const
 {
-    CHECK_NULL_VOID(offset_);
+    CHECK_NULL_RETURN(offset_, false);
     std::vector<ScrollEdge> edges;
     const auto checkEdge = [&](float prev, float curr, float minVal, ScrollEdge edgeMin, ScrollEdge edgeMax) {
         if (Negative(prev) && NonNegative(curr)) {
@@ -409,7 +413,9 @@ void FreeScrollController::CheckCrashEdge(const OffsetF& newOffset, const SizeF&
 
     if (!edges.empty()) {
         FireOnScrollEdge(edges);
+        return true;
     }
+    return false;
 }
 
 using std::optional;
@@ -442,5 +448,22 @@ void FreeScrollController::ScrollTo(OffsetF finalPos, const optional<float>& vel
         });
     state_ = ScrollState::FLING;
     FireOnScrollStart();
+}
+
+void FreeScrollController::SwitchToLowResponse()
+{
+    constexpr float friction = 10;
+    const auto curve = MakeRefPtr<ResponsiveSpringMotion>(fabs(2 * ACE_PI / friction), 1.0f, 0.0f);
+    AnimationOption option(curve, CUSTOM_SPRING_ANIMATION_DURATION);
+    option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
+
+    OffsetF finalPos = offset_->Get();
+    ClampPosition(finalPos);
+    state_ = ScrollState::FLING;
+    AnimationUtils::AnimateWithCurrentCallback(option, [weak = WeakPtr(offset_), finalPos]() {
+        auto prop = weak.Upgrade();
+        CHECK_NULL_VOID(prop);
+        prop->Set(finalPos);
+    });
 }
 } // namespace OHOS::Ace::NG
