@@ -131,19 +131,6 @@ AnimationOption CreateSpringOption(float friction)
 }
 
 constexpr float EDGE_FRICTION = 10;
-
-/**
- * @brief Change friction of the spring animation midway.
- *
- */
-void ChangeFlingFriction(const WeakPtr<NodeAnimatablePropertyOffsetF>& offset, float newFriction)
-{
-    AnimationUtils::AnimateWithCurrentCallback(CreateSpringOption(newFriction), [weak = offset]() {
-        auto prop = weak.Upgrade();
-        CHECK_NULL_VOID(prop);
-        prop->Set(prop->GetStagingValue());
-    });
-}
 } // namespace
 
 void FreeScrollController::HandlePanStart(const GestureEvent& event)
@@ -187,14 +174,18 @@ void FreeScrollController::HandlePanEndOrCancel(const GestureEvent& event)
 
 void FreeScrollController::Fling(const OffsetF& velocity)
 {
-    const float friction = (ClampPosition(offset_->Get()) == offset_->Get()) ? GetFriction(pattern_) : EDGE_FRICTION;
+    const bool outOfBounds = ClampPosition(offset_->Get()) != offset_->Get();
+    const float friction = outOfBounds ? GetFriction(pattern_) : EDGE_FRICTION;
     if (NearZero(friction)) {
         TAG_LOGW(AceLogTag::ACE_SCROLL, "Fling called with zero friction, skipping fling animation.");
         return;
     }
 
     OffsetF finalPos = offset_->Get() + velocity / friction;
-    finalPos = ClampPosition(finalPos);
+    if (outOfBounds) {
+        finalPos = ClampPosition(finalPos);
+    } // when not out of bounds, finalPos doesn't need clamping because we would clamp it later during the
+      // animation through ChangeFlingFriction
 
     if (finalPos == offset_->Get()) {
         // No movement, no need to animate.
@@ -215,7 +206,14 @@ void FreeScrollController::HandleAnimationUpdate(const OffsetF& currentValue)
     FireOnWillScroll(currentValue - prevOffset_, ScrollState::FLING, ScrollSource::FLING);
     bool reachedEdge = CheckCrashEdge(currentValue, pattern_.GetViewPortExtent() - pattern_.GetViewSize());
     if (reachedEdge) {
-        ChangeFlingFriction(WeakPtr(offset_), EDGE_FRICTION);
+        // change friction during animation
+        const auto finalPos = ClampPosition(offset_->GetStagingValue());
+        AnimationUtils::AnimateWithCurrentCallback(
+            CreateSpringOption(EDGE_FRICTION), [weak = WeakPtr(offset_), finalPos]() {
+                auto prop = weak.Upgrade();
+                CHECK_NULL_VOID(prop);
+                prop->Set(finalPos);
+            });
     }
     pattern_.MarkDirty();
 }
