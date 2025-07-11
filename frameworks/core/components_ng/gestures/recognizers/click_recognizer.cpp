@@ -675,6 +675,7 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
     info->SetTargetDisplayId(touchPoint.targetDisplayId);
+    info->SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
     if (sysJudge_) {
         TAG_LOGD(AceLogTag::ACE_GESTURE, "sysJudge");
         return sysJudge_(gestureInfo_, info);

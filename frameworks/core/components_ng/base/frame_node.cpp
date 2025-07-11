@@ -6000,6 +6000,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     EventTarget eventTarget;
     eventTarget.id = GetInspectorId().value_or("").c_str();
     event.SetTarget(eventTarget);
+    event.SetPressedKeyCodes(touchEvent.pressedKeyCodes_);
     auto result = onTouchIntercept(event);
     SetHitTestMode(result);
     return result;
