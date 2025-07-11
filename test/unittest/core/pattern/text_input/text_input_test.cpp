@@ -2458,4 +2458,45 @@ HWTEST_F(TextFieldUXTest, TextInputMaxFontScale001, TestSize.Level1)
      */
     EXPECT_EQ(layoutProperty_->GetMaxFontScale(), 2.0);
 }
+
+/**
+ * @tc.name: AutoCapTypeToString001
+ * @tc.desc: test testInput AutoCapTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, AutoCapTypeToString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set NONE
+     */
+    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::NONE);
+    frameNode_->MarkModifyDone();
+    EXPECT_STREQ(pattern_->AutoCapTypeToString().c_str(), "AutoCapitalizationMode.NONE");
+
+    /**
+     * @tc.step: step3. Set WORDS
+     */
+    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::WORDS);
+    frameNode_->MarkModifyDone();
+    EXPECT_STREQ(pattern_->AutoCapTypeToString().c_str(), "AutoCapitalizationMode.WORDS");
+
+    /**
+     * @tc.step: step4. Set SENTENCES
+     */
+    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::SENTENCES);
+    frameNode_->MarkModifyDone();
+    EXPECT_STREQ(pattern_->AutoCapTypeToString().c_str(), "AutoCapitalizationMode.SENTENCES");
+
+    /**
+     * @tc.step: step5. Set ALL_CHARACTERS
+     */
+    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::ALL_CHARACTERS);
+    frameNode_->MarkModifyDone();
+    EXPECT_STREQ(pattern_->AutoCapTypeToString().c_str(), "AutoCapitalizationMode.ALL_CHARACTERS");
+}
 } // namespace OHOS::Ace::NG

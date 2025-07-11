@@ -1247,7 +1247,7 @@ ArkUI_Float32 GetTextAreaLineHeight(ArkUINodeHandle node)
     return TextFieldModelNG::GetLineHeight(frameNode).Value();
 }
 
-ArkUI_Int32 GetgetTextAreaMaxLines(ArkUINodeHandle node)
+ArkUI_Int32 GetTextAreaMaxLines(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
@@ -2400,7 +2400,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .getTextAreaAdaptMinFontSize = GetTextAreaAdaptMinFontSize,
         .getTextAreaAdaptMaxFontSize = GetTextAreaAdaptMaxFontSize,
         .getTextAreaLineHeight = GetTextAreaLineHeight,
-        .getTextAreaMaxLines = GetgetTextAreaMaxLines,
+        .getTextAreaMaxLines = GetTextAreaMaxLines,
         .getTextAreaMinLines = GetTextAreaMinLines,
         .setTextAreaPadding = SetTextAreaPadding,
         .resetTextAreaPadding = ResetTextAreaPadding,
@@ -2464,8 +2464,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .resetTextAreaWidth = ResetTextAreaWidth,
         .setTextAreaEnableHapticFeedback = SetTextAreaEnableHapticFeedback,
         .resetTextAreaEnableHapticFeedback = ResetTextAreaEnableHapticFeedback,
-        .setTextAreAutoCapitalizationMode = SetTextAreaAutoCapitalizationMode,
-        .resetTextAreAutoCapitalizationMode = ResetTextAreaAutoCapitalizationMode,
+        .setTextAreaAutoCapitalizationMode = SetTextAreaAutoCapitalizationMode,
+        .resetTextAreaAutoCapitalizationMode = ResetTextAreaAutoCapitalizationMode,
         .getTextAreaLetterSpacing = GetTextAreaLetterSpacing,
         .getTextAreaEnablePreviewText = GetTextAreaEnablePreviewText,
         .setEllipsisMode = SetEllipsisMode,
@@ -2583,7 +2583,7 @@ const CJUITextAreaModifier* GetCJUITextAreaModifier()
         .getTextAreaAdaptMinFontSize = GetTextAreaAdaptMinFontSize,
         .getTextAreaAdaptMaxFontSize = GetTextAreaAdaptMaxFontSize,
         .getTextAreaLineHeight = GetTextAreaLineHeight,
-        .getTextAreaMaxLines = GetgetTextAreaMaxLines,
+        .getTextAreaMaxLines = GetTextAreaMaxLines,
         .setTextAreaPadding = SetTextAreaPadding,
         .resetTextAreaPadding = ResetTextAreaPadding,
         .getTextAreaFontFeature = GetTextAreaFontFeature,

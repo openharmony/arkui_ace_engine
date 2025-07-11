@@ -2634,4 +2634,23 @@ HWTEST_F(SearchTestNg, ProcessSelection, TestSize.Level1)
     textFieldPattern->ProcessSelection();
     EXPECT_EQ(manager->shareOverlayInfo_->handlerColor, Color::RED);
 }
+
+/**
+ * @tc.name: SetAutoCapitalizationMode001
+ * @tc.desc: test SetAutoCapitalizationMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetAutoCapitalizationMode001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_FALSE(frameNode->GetChildren().empty());
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    searchModelInstance.SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::NONE);
+    EXPECT_EQ(AutoCapitalizationMode::NONE, pattern->GetAutoCapitalizationMode());
+}
 } // namespace OHOS::Ace::NG
