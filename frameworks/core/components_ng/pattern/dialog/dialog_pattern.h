@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,11 @@ public:
     void SetOnWillDismiss(const std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss)
     {
         onWillDismiss_ = onWillDismiss;
+    }
+
+    void SetOnWillDismissRelease(const std::function<void()>& onWillDismissRelease)
+    {
+        onWillDismissRelease_ = onWillDismissRelease;
     }
 
     bool ShouldDismiss() const
@@ -476,6 +481,7 @@ private:
     std::string title_;
     std::string subtitle_;
     std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss_;
+    std::function<void()> onWillDismissRelease_;
     std::function<bool(const int32_t& info)> onWillDismissByNDK_;
 
     DialogProperties dialogProperties_;

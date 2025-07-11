@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3250,6 +3250,8 @@ void OverlayManager::RegisterDialogLifeCycleCallback(
     dialogPattern->RegisterDialogWillAppearCallback(std::move(onWillAppearEvent));
     auto onWillDisappearEvent = dialogProps.onWillDisappear;
     dialogPattern->RegisterDialogWillDisappearCallback(std::move(onWillDisappearEvent));
+    auto onWillDismissRelease = dialogProps.onWillDismissRelease;
+    dialogPattern->SetOnWillDismissRelease(std::move(onWillDismissRelease));
 }
 
 void OverlayManager::CustomDialogRecordEvent(const DialogProperties& dialogProps)
