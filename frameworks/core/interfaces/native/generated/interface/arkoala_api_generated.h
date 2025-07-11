@@ -1436,6 +1436,8 @@ typedef struct Context_getGroupDir_Callback Context_getGroupDir_Callback;
 typedef struct Opt_Context_getGroupDir_Callback Opt_Context_getGroupDir_Callback;
 typedef struct CustomNodeBuilder CustomNodeBuilder;
 typedef struct Opt_CustomNodeBuilder Opt_CustomNodeBuilder;
+typedef struct DatePickerSelectedCallback DatePickerSelectedCallback;
+typedef struct Opt_DatePickerSelectedCallback Opt_DatePickerSelectedCallback;
 typedef struct EditableTextOnChangeCallback EditableTextOnChangeCallback;
 typedef struct Opt_EditableTextOnChangeCallback Opt_EditableTextOnChangeCallback;
 typedef struct ErrorCallback ErrorCallback;
@@ -1672,8 +1674,14 @@ typedef struct TextPickerEnterSelectedAreaCallback TextPickerEnterSelectedAreaCa
 typedef struct Opt_TextPickerEnterSelectedAreaCallback Opt_TextPickerEnterSelectedAreaCallback;
 typedef struct TextPickerScrollStopCallback TextPickerScrollStopCallback;
 typedef struct Opt_TextPickerScrollStopCallback Opt_TextPickerScrollStopCallback;
+typedef struct TextPickerSelectedCallback TextPickerSelectedCallback;
+typedef struct Opt_TextPickerSelectedCallback Opt_TextPickerSelectedCallback;
+typedef struct TextPickerValueCallback TextPickerValueCallback;
+typedef struct Opt_TextPickerValueCallback Opt_TextPickerValueCallback;
 typedef struct TextTimerAttribute_onTimer_event_type TextTimerAttribute_onTimer_event_type;
 typedef struct Opt_TextTimerAttribute_onTimer_event_type Opt_TextTimerAttribute_onTimer_event_type;
+typedef struct TimePickerSelectedCallback TimePickerSelectedCallback;
+typedef struct Opt_TimePickerSelectedCallback Opt_TimePickerSelectedCallback;
 typedef struct TransitionFinishCallback TransitionFinishCallback;
 typedef struct Opt_TransitionFinishCallback Opt_TransitionFinishCallback;
 typedef struct Type_NavigationAttribute_customNavContentTransition_delegate Type_NavigationAttribute_customNavContentTransition_delegate;
@@ -10773,6 +10781,15 @@ typedef struct Opt_CustomNodeBuilder {
     Ark_Tag tag;
     CustomNodeBuilder value;
 } Opt_CustomNodeBuilder;
+typedef struct DatePickerSelectedCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Date selected);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Date selected);
+} DatePickerSelectedCallback;
+typedef struct Opt_DatePickerSelectedCallback {
+    Ark_Tag tag;
+    DatePickerSelectedCallback value;
+} Opt_DatePickerSelectedCallback;
 typedef struct EditableTextOnChangeCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_String value, const Opt_PreviewText previewText, const Opt_TextChangeOptions options);
@@ -11833,6 +11850,24 @@ typedef struct Opt_TextPickerScrollStopCallback {
     Ark_Tag tag;
     TextPickerScrollStopCallback value;
 } Opt_TextPickerScrollStopCallback;
+typedef struct TextPickerSelectedCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Union_Number_Array_Number selected);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Union_Number_Array_Number selected);
+} TextPickerSelectedCallback;
+typedef struct Opt_TextPickerSelectedCallback {
+    Ark_Tag tag;
+    TextPickerSelectedCallback value;
+} Opt_TextPickerSelectedCallback;
+typedef struct TextPickerValueCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Union_String_Array_String value);
+} TextPickerValueCallback;
+typedef struct Opt_TextPickerValueCallback {
+    Ark_Tag tag;
+    TextPickerValueCallback value;
+} Opt_TextPickerValueCallback;
 typedef struct TextTimerAttribute_onTimer_event_type {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Int64 utc, const Ark_Int64 elapsedTime);
@@ -11842,6 +11877,15 @@ typedef struct Opt_TextTimerAttribute_onTimer_event_type {
     Ark_Tag tag;
     TextTimerAttribute_onTimer_event_type value;
 } Opt_TextTimerAttribute_onTimer_event_type;
+typedef struct TimePickerSelectedCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Date selected);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Date selected);
+} TimePickerSelectedCallback;
+typedef struct Opt_TimePickerSelectedCallback {
+    Ark_Tag tag;
+    TimePickerSelectedCallback value;
+} Opt_TimePickerSelectedCallback;
 typedef struct TransitionFinishCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Boolean transitionIn);
@@ -24702,6 +24746,12 @@ typedef struct GENERATED_ArkUIVisualEffectAccessor {
                                                const Ark_BrightnessBlender* blender);
 } GENERATED_ArkUIVisualEffectAccessor;
 
+typedef struct GENERATED_ArkUIDatePickerSelectedOpsAccessor {
+    Ark_NativePointer (*registerDatePickerSelectedCallback)(Ark_NativePointer node,
+                                                            const Ark_Int64 selected,
+                                                            const DatePickerSelectedCallback* callback);
+} GENERATED_ArkUIDatePickerSelectedOpsAccessor;
+
 typedef struct GENERATED_ArkUINavigationOpsAccessor {
     Ark_NativePointer (*registerNavBarWidthCallback)(Ark_NativePointer node,
                                                      const Ark_Length* value,
@@ -24871,6 +24921,24 @@ typedef struct GENERATED_ArkUITextFieldOpsAccessor {
     Ark_NativePointer (*textFieldOpsSetBackgroundColor)(Ark_NativePointer node,
                                                             const Opt_ResourceColor* value);
 } GENERATED_ArkUITextFieldOpsAccessor;
+
+typedef struct GENERATED_ArkUITextPickerSelectedOpsAccessor {
+    Ark_NativePointer (*registerTextPickerSelectedCallback)(Ark_NativePointer node,
+                                                            const Ark_Union_Number_Array_Number* selected,
+                                                            const TextPickerSelectedCallback* callback);
+} GENERATED_ArkUITextPickerSelectedOpsAccessor;
+
+typedef struct GENERATED_ArkUITextPickerValueOpsAccessor {
+    Ark_NativePointer (*registerTextPickerValueCallback)(Ark_NativePointer node,
+                                                         const Ark_Union_String_Array_String* value,
+                                                         const TextPickerValueCallback* callback);
+} GENERATED_ArkUITextPickerValueOpsAccessor;
+
+typedef struct GENERATED_ArkUITimePickerSelectedOpsAccessor {
+    Ark_NativePointer (*registerTimePickerSelectedCallback)(Ark_NativePointer node,
+                                                            const Ark_Int64 selected,
+                                                            const TimePickerSelectedCallback* callback);
+} GENERATED_ArkUITimePickerSelectedOpsAccessor;
 
 typedef struct GENERATED_ArkUIActionSheetAccessor {
     void (*show)(const Ark_ActionSheetOptions* value);
@@ -27704,6 +27772,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIGridItemOpsAccessor* (*getGridItemOpsAccessor)();
     const GENERATED_ArkUIFilterAccessor* (*getFilterAccessor)();
     const GENERATED_ArkUIVisualEffectAccessor* (*getVisualEffectAccessor)();
+	const GENERATED_ArkUIDatePickerSelectedOpsAccessor* (*getDatePickerSelectedOpsAccessor)();
     const GENERATED_ArkUINavigationOpsAccessor* (*getNavigationOpsAccessor)();
     const GENERATED_ArkUICheckboxGroupOpsAccessor* (*getCheckboxGroupOpsAccessor)();
     const GENERATED_ArkUICheckboxOpsAccessor* (*getCheckboxOpsAccessor)();
@@ -27719,6 +27788,9 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIStepperOpsAccessor* (*getStepperOpsAccessor)();
     const GENERATED_ArkUIEventEmulatorAccessor* (*getEventEmulatorAccessor)();
     const GENERATED_ArkUITextFieldOpsAccessor* (*getTextFieldOpsAccessor)();
+    const GENERATED_ArkUITextPickerSelectedOpsAccessor* (*getTextPickerSelectedOpsAccessor)();
+    const GENERATED_ArkUITextPickerValueOpsAccessor* (*getTextPickerValueOpsAccessor)();
+    const GENERATED_ArkUITimePickerSelectedOpsAccessor* (*getTimePickerSelectedOpsAccessor)();
     const GENERATED_ArkUIActionSheetAccessor* (*getActionSheetAccessor)();
     const GENERATED_ArkUIAlertDialogAccessor* (*getAlertDialogAccessor)();
     const GENERATED_ArkUISpringPropAccessor* (*getSpringPropAccessor)();

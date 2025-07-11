@@ -50,4 +50,12 @@ void TimePickerModelStatic::SetChangeEvent(FrameNode* frameNode, TimeChangeEvent
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
 }
+
+void TimePickerModelStatic::SetSelectedTime(FrameNode* frameNode, const PickerTime& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetSelectedTime(value);
+}
 } // namespace OHOS::Ace::NG

@@ -34,5 +34,10 @@ void DatePickerModelStatic::SetChangeEvent(FrameNode* frameNode, DateChangeEvent
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
 }
+
+void DatePickerModelStatic::SetSelectedDate(FrameNode* frameNode, const PickerDate& value)
+{
+    DatePickerModelNG::SetSelectedDate(frameNode, value);
+}
 } // namespace OHOS::Ace::NG
  
