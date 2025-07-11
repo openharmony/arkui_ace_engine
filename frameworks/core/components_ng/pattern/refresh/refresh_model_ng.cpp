@@ -194,14 +194,6 @@ void RefreshModelNG::SetCustomBuilder(FrameNode* frameNode, FrameNode* customBui
     pattern->AddCustomBuilderNode(AceType::Claim<UINode>(customBuilder));
 }
 
-void RefreshModelNG::SetCustomBuilder(FrameNode* frameNode, const RefPtr<NG::UINode>& customBuilder)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<RefreshPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->AddCustomBuilderNode(customBuilder);
-}
-
 void RefreshModelNG::SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange)
 {
     CHECK_NULL_VOID(frameNode);
@@ -246,18 +238,9 @@ bool RefreshModelNG::GetRefreshing(FrameNode* frameNode)
     return value;
 }
 
-void RefreshModelNG::SetLoadingText(FrameNode* frameNode, const std::string& loadingText)
+void RefreshModelNG::SetRefreshOffset(FrameNode* frameNode, const Dimension& offset)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, loadingText, frameNode);
-}
-
-void RefreshModelNG::SetRefreshOffset(FrameNode* frameNode, const std::optional<Dimension>& offset)
-{
-    if (offset) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, offset.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, offset, frameNode);
 }
 
 void RefreshModelNG::SetPullToRefresh(FrameNode* frameNode, bool pullToRefresh)
@@ -284,11 +267,6 @@ bool RefreshModelNG::GetPullToRefresh(FrameNode* frameNode)
     bool value = true;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, PullToRefresh, value, frameNode, value);
     return value;
-}
-
-void RefreshModelNG::SetIsCustomBuilderExist(FrameNode* frameNode, bool isCustomBuilderExist)
-{
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsCustomBuilderExist, isCustomBuilderExist, frameNode);
 }
 
 void RefreshModelNG::SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& changeEvent)
