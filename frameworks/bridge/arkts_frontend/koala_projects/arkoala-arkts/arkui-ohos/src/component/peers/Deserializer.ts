@@ -152,7 +152,7 @@ import { ToggleType, ToggleOptions, SwitchStyle } from "./../toggle"
 import { UniformDataType } from "./../arkui-uniformtypedescriptor"
 import { WindowSceneAttribute } from "./../windowScene"
 import { Callback_Array_String_Void, Callback_Array_TextMenuItem_Void, Callback_Buffer_Void, Callback_ComputedBarAttribute_Void, Callback_CustomBuilder_Void, Callback_GestureJudgeResult_Void, Callback_GestureRecognizer_Void, Callback_HitTestMode_Void, Callback_Literal_Number_offsetRemain_Void, Callback_OffsetResult_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_Opt_Array_NavDestinationTransition_Void, Callback_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Pointer_Void, Callback_StyledStringMarshallingValue_Void, Callback_TouchResult_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_Tuple_Number_Number_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_WebKeyboardOptions_Void, Callback_WebResourceResponse_Void, Callback_WithThemeAttribute_Void } from "./../generatorSynthetic"
-import { Callback_DismissDialogAction_Void, DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions } from "./../actionSheet"
+import { Callback_DismissDialogAction_Void, DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions, DismissDialogActionInternal } from "./../actionSheet"
 import { Want } from "./../ohos.app.ability"
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./../embeddedComponent"
 import { BusinessError } from "#external"
@@ -7639,10 +7639,8 @@ export class Deserializer extends DeserializerBase {
     }
     readDismissDialogAction(): DismissDialogAction {
         let valueDeserializer : Deserializer = this
-        const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
-        const reason_result : DismissReason = TypeChecker.DismissReason_FromNumeric(valueDeserializer.readInt32())
-        let value : DismissDialogAction = ({dismiss: dismiss_result, reason: reason_result} as DismissDialogAction)
-        return value
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return DismissDialogActionInternal.fromPtr(ptr)
     }
     readDismissPopupAction(): DismissPopupAction {
         let valueDeserializer : Deserializer = this
@@ -24124,33 +24122,33 @@ export class Deserializer extends DeserializerBase {
         }
         const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
         const onDidAppear_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onDidAppear_buf : (() => void) | undefined
+        let onDidAppear_buf : ((data: undefined) => void) | undefined
         if ((RuntimeType.UNDEFINED) != (onDidAppear_buf_runtimeType))
         {
-            onDidAppear_buf = valueDeserializer.readCallback_Void()
+            onDidAppear_buf = CallbackTransformer.transfromFromCallbackVoid(valueDeserializer.readCallback_Void())
         }
-        const onDidAppear_result : (() => void) | undefined = onDidAppear_buf
+        const onDidAppear_result : ((data: undefined) => void) | undefined = onDidAppear_buf
         const onDidDisappear_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onDidDisappear_buf : (() => void) | undefined
+        let onDidDisappear_buf : ((data: undefined) => void) | undefined
         if ((RuntimeType.UNDEFINED) != (onDidDisappear_buf_runtimeType))
         {
-            onDidDisappear_buf = valueDeserializer.readCallback_Void()
+            onDidDisappear_buf = CallbackTransformer.transfromFromCallbackVoid(valueDeserializer.readCallback_Void())
         }
-        const onDidDisappear_result : (() => void) | undefined = onDidDisappear_buf
+        const onDidDisappear_result : ((data: undefined) => void) | undefined = onDidDisappear_buf
         const onWillAppear_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onWillAppear_buf : (() => void) | undefined
+        let onWillAppear_buf : ((data: undefined) => void) | undefined
         if ((RuntimeType.UNDEFINED) != (onWillAppear_buf_runtimeType))
         {
-            onWillAppear_buf = valueDeserializer.readCallback_Void()
+            onWillAppear_buf = CallbackTransformer.transfromFromCallbackVoid(valueDeserializer.readCallback_Void())
         }
-        const onWillAppear_result : (() => void) | undefined = onWillAppear_buf
+        const onWillAppear_result : ((data: undefined) => void) | undefined = onWillAppear_buf
         const onWillDisappear_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onWillDisappear_buf : (() => void) | undefined
+        let onWillDisappear_buf : ((data: undefined) => void) | undefined
         if ((RuntimeType.UNDEFINED) != (onWillDisappear_buf_runtimeType))
         {
-            onWillDisappear_buf = valueDeserializer.readCallback_Void()
+            onWillDisappear_buf = CallbackTransformer.transfromFromCallbackVoid(valueDeserializer.readCallback_Void())
         }
-        const onWillDisappear_result : (() => void) | undefined = onWillDisappear_buf
+        const onWillDisappear_result : ((data: undefined) => void) | undefined = onWillDisappear_buf
         const keyboardAvoidDistance_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let keyboardAvoidDistance_buf : LengthMetrics | undefined
         if ((RuntimeType.UNDEFINED) != (keyboardAvoidDistance_buf_runtimeType))

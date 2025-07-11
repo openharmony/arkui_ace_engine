@@ -169,22 +169,22 @@ class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         content?: () => void,
         initializers?: T_Options
     ): void {
-        if (this.instance instanceof BaseCustomComponent<T_Options>) {
-            const component = this.instance as BaseCustomComponent<T_Options>;
-            component.__initializeStruct(initializers, content);
+        if (this.instance instanceof OptionsCallback<T_Options>) {
+            const optionsCallback = this.instance as OptionsCallback<T_Options>;
+            optionsCallback.__initializeStruct(initializers, content);
         } else {
-            throw new Error("not an custom component");
+            throw new Error("not an options callback");
         }
     }
 
     protected __updateStruct(
         initializers?: T_Options
     ): void {
-        if (this.instance instanceof BaseCustomComponent<T_Options>) {
-            const component = this.instance as BaseCustomComponent<T_Options>;
-            component.__updateStruct(initializers);
+        if (this.instance instanceof OptionsCallback<T_Options>) {
+            const optionsCallback = this.instance as OptionsCallback<T_Options>;
+            optionsCallback.__updateStruct(initializers);
         } else {
-            throw new Error("not an custom component");
+            throw new Error("not an options callback");
         }
     }
 
@@ -202,7 +202,7 @@ class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 }
 
-function createInstance<T extends BaseCustomComponent<T_Options>, T_Options>(
+function createInstance<T extends ExtendableComponent, T_Options>(
     uiContext: UIContext | undefined,
     factory: () => T,
     initializers?: T_Options
@@ -210,12 +210,7 @@ function createInstance<T extends BaseCustomComponent<T_Options>, T_Options>(
     return new CustomDelegate<T, T_Options>(uiContext, factory());
 }
 
-export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent {
-    constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
-        super(useSharedStorage, storage);
-    }
-    aboutToRecycle(): void {}
-
+interface OptionsCallback<T_Options> {
     __initializeStruct(
         initializers?: T_Options,
         /** @memo */
@@ -225,6 +220,34 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
     __updateStruct(
         initializers?: T_Options
     ): void {}
+}
+
+export abstract class BaseCustomDialog<T extends BaseCustomDialog<T, T_Options>, T_Options> extends ExtendableComponent implements OptionsCallback<T_Options> {
+    constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
+        super(useSharedStorage, storage);
+    }
+    /** @memo */
+    static _instantiateImpl(
+        /** @memo */
+        style: ((instance: T) => void) | undefined,
+        factory: () => T,
+        initializers?: T_Options,
+        /** @memo */
+        content?: () => void
+    ): void {
+        const context: StateManager = __context() as StateManager;
+        const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
+        const uiContext = data?.uiContext;
+        CustomDelegate._instantiate(
+            () => createInstance(uiContext, factory, initializers), content, initializers);
+    }
+}
+
+export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent implements OptionsCallback<T_Options> {
+    constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
+        super(useSharedStorage, storage);
+    }
+    aboutToRecycle(): void {}
 
     __toRecord(param: object): Record<string, object> { return {} }
 }

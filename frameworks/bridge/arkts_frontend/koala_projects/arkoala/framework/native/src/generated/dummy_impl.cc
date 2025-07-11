@@ -42827,8 +42827,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // DismissPopupActionAccessor
-    namespace DissmissDialogActionNewAccessor {
-    void DestroyPeerImpl(Ark_DissmissDialogActionNew peer)
+    namespace DismissDialogActionAccessor {
+    void DestroyPeerImpl(Ark_DismissDialogAction peer)
     {
         if (!needGroupedLog(1))
             return;
@@ -42836,15 +42836,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_DissmissDialogActionNew ConstructImpl()
+    Ark_DismissDialogAction ConstructImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_DissmissDialogActionNew) 100;
-        string out("new DissmissDialogActionNew(");
+            return (Ark_DismissDialogAction) 100;
+        string out("new DismissDialogAction(");
         out.append(") \n");
-        out.append("[return (Ark_DissmissDialogActionNew) 100] \n");
+        out.append("[return (Ark_DismissDialogAction) 100] \n");
         appendGroupedLog(1, out);
-        return (Ark_DissmissDialogActionNew) 100;
+        return (Ark_DismissDialogAction) 100;
     }
     Ark_NativePointer GetFinalizerImpl()
     {
@@ -42856,7 +42856,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    void DismissImpl(Ark_DissmissDialogActionNew peer)
+    void DismissImpl(Ark_DismissDialogAction peer)
     {
         if (!needGroupedLog(1))
             return;
@@ -42864,7 +42864,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_DismissReasonNew GetReasonImpl(Ark_DissmissDialogActionNew peer)
+    Ark_DismissReason GetReasonImpl(Ark_DismissDialogAction peer)
     {
         if (!needGroupedLog(1))
             return {};
@@ -42874,8 +42874,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    void SetReasonImpl(Ark_DissmissDialogActionNew peer,
-                       Ark_DismissReasonNew reason)
+    void SetReasonImpl(Ark_DismissDialogAction peer,
+                       Ark_DismissReason reason)
     {
         if (!needGroupedLog(1))
             return;
@@ -42884,7 +42884,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    } // DissmissDialogActionNewAccessor
+    } // DismissDialogActionAccessor
     namespace TextShadowStyleAccessor {
     void DestroyPeerImpl(Ark_TextShadowStyle peer)
     {
@@ -47612,6 +47612,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DismissPopupActionPeer {
         virtual ~DismissPopupActionPeer() = default;
     };
+
+    const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissDialogActionAccessor DismissDialogActionAccessorImpl {
+            DismissDialogActionAccessor::DestroyPeerImpl,
+            DismissDialogActionAccessor::ConstructImpl,
+            DismissDialogActionAccessor::GetFinalizerImpl,
+            DismissDialogActionAccessor::DismissImpl,
+            DismissDialogActionAccessor::GetReasonImpl,
+            DismissDialogActionAccessor::SetReasonImpl,
+        };
+        return &DismissDialogActionAccessorImpl;
+    }
+
+    struct DismissDialogActionPeer {
+        virtual ~DismissDialogActionPeer() = default;
+    };
     const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
     {
         static const GENERATED_ArkUITextShadowStyleAccessor TextShadowStyleAccessorImpl {
@@ -48031,6 +48048,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLetterSpacingStyleAccessor,
             GetLevelOrderAccessor,
             GetDismissPopupActionAccessor,
+            GetDismissDialogActionAccessor,
             GetTextShadowStyleAccessor,
             GetBackgroundColorStyleAccessor,
             GetGestureStyleAccessor,
