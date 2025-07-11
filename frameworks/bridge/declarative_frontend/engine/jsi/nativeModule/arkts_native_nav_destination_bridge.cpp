@@ -159,7 +159,7 @@ ArkUINativeModuleValue NavDestinationBridge::SetToolBarConfiguration(ArkUIRuntim
     NG::NavigationToolbarOptions options;
     NavDestinationModelNG::ResetResObj(
         frameNode, NavDestinationPatternType::NAV_DESTINATION, "navigation.navigationToolbarOptions");
-    JSNavigationUtils::ParseToolbarOptions(info, options);
+    JSNavigationUtils::ParseToolbarOptions(info, options, NUM_2);
     NavDestinationModel::GetInstance()->SetToolBarOptions(std::move(options));
     return panda::JSValueRef::Undefined(vm);
 }
