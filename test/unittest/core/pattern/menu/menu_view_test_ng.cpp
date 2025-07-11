@@ -1575,13 +1575,23 @@ HWTEST_F(MenuViewTestNg, ReloadMenuParam001, TestSize.Level1)
         g_isConfigChangePerform = true;
     }
     MenuView::ReloadMenuParam(menuFrameNode_, menuParam);
-    g_isConfigChangePerform = data;
 
     /**
      * @tc.steps3: Verify MenuParam values
      * @tc.expected: All properties match initial settings
      */
     MenuParam& menuParamValue = const_cast<MenuParam&>(menuParam);
+    EXPECT_EQ(menuParamValue.borderRadius, NG::BorderRadiusProperty(0.0_vp));
+    EXPECT_EQ(menuParam.previewBorderRadius, NG::BorderRadiusProperty(0.0_vp));
+    EXPECT_EQ(menuParamValue.outlineColor, NG::BorderColorProperty());
+    EXPECT_EQ(menuParamValue.outlineWidth, NG::BorderWidthProperty());
+
+    ResourceParseUtils::SetIsReloading(true);
+    MenuView::ReloadMenuParam(menuFrameNode_, menuParam);
+    g_isConfigChangePerform = data;
+    ResourceParseUtils::SetIsReloading(false);
+
+    menuParamValue = const_cast<MenuParam&>(menuParam);
     EXPECT_EQ(menuParamValue.borderRadius, NG::BorderRadiusProperty(0.0_vp));
     EXPECT_EQ(menuParam.previewBorderRadius, NG::BorderRadiusProperty(0.0_vp));
     EXPECT_EQ(menuParamValue.outlineColor, NG::BorderColorProperty());
