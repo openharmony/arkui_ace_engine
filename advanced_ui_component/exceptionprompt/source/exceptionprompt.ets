@@ -17,6 +17,7 @@ import { common, EnvironmentCallback } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { LengthMetrics, SymbolGlyphModifier } from '@kit.ArkUI';
+import { i18n } from '@kit.LocalizationKit';
 
 const START_TIME = 250;
 const END_TIME = 200;
@@ -92,6 +93,7 @@ export struct ExceptionPrompt {
           .maxLines(2)
           .margin({ start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_end')) })
           .flexShrink(1)
+          .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
       }
       .padding({ right: $r('sys.float.ohos_id_default_padding_end') })
       .width('100%')
@@ -114,6 +116,7 @@ export struct ExceptionPrompt {
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .flexShrink(1)
               .textAlign(TextAlign.End)
+              .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
             SymbolGlyph($r('sys.symbol.chevron_right'))
               .fontSize(`${(this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE) * SYMBOL_SIZE}vp`)
               .fontColor([$r('sys.color.ohos_id_color_tertiary')])

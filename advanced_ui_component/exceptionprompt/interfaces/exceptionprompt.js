@@ -20,6 +20,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 const curves = requireNativeModule('ohos.curves');
 const hilog = requireNapi('hilog');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const i18n = requireNapi('i18n');
 
 const i14 = 250;
 const j14 = 200;
@@ -129,10 +130,7 @@ export class ExceptionPrompt extends ViewPU {
 
     TextBuilder(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Flex.create({
-                justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign
-                    .Center
-            });
+            Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
             Flex.padding({
                 left: {
                     'id': -1,
@@ -276,6 +274,7 @@ export class ExceptionPrompt extends ViewPU {
                 })
             });
             Text.flexShrink(1);
+            Text.direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr);
         }, Text);
         Text.pop();
         Row.pop();
@@ -347,6 +346,7 @@ export class ExceptionPrompt extends ViewPU {
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.flexShrink(1);
                         Text.textAlign(TextAlign.End);
+                        Text.direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr);
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
