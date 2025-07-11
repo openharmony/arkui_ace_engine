@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/custom/custom_node.h"
 
+#include "base/log/ace_checker.h"
+#include "base/log/ace_performance_check.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/dump_log.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -84,6 +86,13 @@ bool CustomNode::Render(int64_t deadline)
     }
     {
         FireRecycleRenderFunc();
+    }
+    if (AceChecker::IsPerformanceCheckEnabled()) {
+        auto child = GetFirstChild();
+        if (child) {
+            AceScopedPerformanceCheck::UpdateRecordPath(child->GetFilePath());
+            AceScopedPerformanceCheck::ReportAllRecord();
+        }
     }
     needMarkParent_ = needMarkParentBak;
     return true;
