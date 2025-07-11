@@ -382,7 +382,7 @@ TEST_F(FreeScrollTest, Animation001)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     ASSERT_TRUE(pattern_->freeScroll_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X - VELOCITY_X / (friction * -FRICTION_SCALE));
+    EXPECT_LT(GetChildX(frameNode_, 0), -DELTA_X); // triggered high response spring
     EXPECT_EQ(GetChildY(frameNode_, 0), 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
     EXPECT_EQ(controller->state_, ScrollState::IDLE);
@@ -466,6 +466,41 @@ TEST_F(FreeScrollTest, Animation003)
     EXPECT_EQ(GetChildX(frameNode_, 0), WIDTH - CONTENT_W);
     EXPECT_EQ(GetChildY(frameNode_, 0), HEIGHT - CONTENT_H);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+}
+
+/**
+ * @tc.name: Animation004
+ * @tc.desc: Test switching friction during animation
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Animation004)
+{
+    constexpr float friction = 0.8f;
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    model.SetFriction(friction);
+    model.SetInitialOffset({ CalcDimension(DELTA_X), CalcDimension(DELTA_Y) });
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    PanStart({});
+    PanUpdate({ DELTA_X - 1, DELTA_Y - 1 });
+    MockAnimationManager::GetInstance().SetTicks(2);
+    PanEnd({ -LARGE_DELTA_X, -LARGE_DELTA_Y }, { VELOCITY_X, VELOCITY_Y });
+    EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::FLING);
+    EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue().GetX(), -1 + VELOCITY_X / (friction * -FRICTION_SCALE));
+    MockAnimationManager::GetInstance().Tick(); // switched to high-friction spring motion after reaching edge
+    EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue(), OffsetF());
+    FlushUITasks(frameNode_);
+    EXPECT_GT(GetChildX(frameNode_, 0), 0);
+    EXPECT_GT(GetChildY(frameNode_, 0), 0);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+
+    MockAnimationManager::GetInstance().SetTicks(1);
 }
 
 /**
