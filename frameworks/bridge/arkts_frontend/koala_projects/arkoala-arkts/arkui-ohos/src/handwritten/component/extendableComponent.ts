@@ -40,11 +40,12 @@ export abstract class ExtendableComponent implements LifeCycle {
     private providedVars_: Map<string, IProvideDecoratedVariable<object>> = new Map<string, IProvideDecoratedVariable<object>>();
     private delegate_?: IExtendableComponent;
     private localStoragebackStore_?: LocalStorage | undefined = undefined;
+    private backlocalStorage_?: LocalStorage | undefined = undefined;
     private useSharedStorage_?: boolean | undefined = undefined;;
 
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         this.useSharedStorage_ = useSharedStorage;
-        this.localStoragebackStore_ = storage;
+        this.backlocalStorage_ = storage;
         this.parent_ = ExtendableComponent.current as (ExtendableComponent | undefined);
     }
 
@@ -88,7 +89,7 @@ export abstract class ExtendableComponent implements LifeCycle {
                 this.localStoragebackStore_ = this.getUIContext().getSharedLocalStorage();
             }
             if (!this.localStoragebackStore_) {
-                this.localStoragebackStore_ = new LocalStorage();
+                this.localStoragebackStore_ = this.backlocalStorage_ ? this.backlocalStorage_ : new LocalStorage();
             }
         }
 

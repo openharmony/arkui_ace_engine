@@ -91,10 +91,10 @@ class Environment {
             return false; // Invalid key
         }
         const ttype = Environment.getOrCreate().ttypeMap_.get(key)!;
-        return Environment.getOrCreate().envProp1<T>(key, value, ttype);
+        return Environment.getOrCreate().envPropInternal<T>(key, value, ttype);
     }
 
-    private envProp1<T>(key: string, value: T, ttype: Type): boolean {
+    private envPropInternal<T>(key: string, value: T, ttype: Type): boolean {
         if (AppStorage.has(key, ttype)) {
             return false;
         }
@@ -146,10 +146,10 @@ class Environment {
     }
 
     public static keys(): Array<string> {
-        return Environment.getOrCreate().keys1();
+        return Environment.getOrCreate().keysInternal();
     }
 
-    public keys1(): Array<string> {
+    public keysInternal(): Array<string> {
         return Array.from(Environment.getOrCreate().props_.keys());
     }
 }
