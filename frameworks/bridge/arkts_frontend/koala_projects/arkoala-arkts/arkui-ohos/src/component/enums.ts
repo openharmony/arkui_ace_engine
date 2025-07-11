@@ -19,6 +19,9 @@
 import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { Curve as Curve_} from "#external"
+
+export type Curve = Curve_;
 export enum CheckBoxShape {
     CIRCLE = 0,
     ROUNDED_SQUARE = 1
@@ -144,34 +147,7 @@ export enum AnimationStatus {
     STOPPED = 3,
     Stopped = 3
 }
-export enum Curve {
-    LINEAR = 0,
-    Linear = 0,
-    EASE = 1,
-    Ease = 1,
-    EASE_IN = 2,
-    EaseIn = 2,
-    EASE_OUT = 3,
-    EaseOut = 3,
-    EASE_IN_OUT = 4,
-    EaseInOut = 4,
-    FAST_OUT_SLOW_IN = 5,
-    FastOutSlowIn = 5,
-    LINEAR_OUT_SLOW_IN = 6,
-    LinearOutSlowIn = 6,
-    FAST_OUT_LINEAR_IN = 7,
-    FastOutLinearIn = 7,
-    EXTREME_DECELERATION = 8,
-    ExtremeDeceleration = 8,
-    SHARP = 9,
-    Sharp = 9,
-    RHYTHM = 10,
-    Rhythm = 10,
-    SMOOTH = 11,
-    Smooth = 11,
-    FRICTION = 12,
-    Friction = 12
-}
+
 export enum FillMode {
     NONE = 0,
     None = 0,

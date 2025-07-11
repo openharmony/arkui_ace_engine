@@ -63,9 +63,8 @@ import { ArkUIAniModule } from "arkui.ani"
 import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType, DataSyncOptions } from "#external"
 import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl, hookCommonMethodPriorityGestureImpl, hookCommonMethodVisualEffectImpl, hookCommonMethodBackgroundFilterImpl, hookCommonMethodForegroundFilterImpl, hookCommonMethodCompositingFilterImpl, hookCommonMethodAdvancedBlendModeImpl } from "../handwritten/CommonHandWritten"
 import { CommonMethodModifier } from "../CommonMethodModifier"
-export interface ICurve {
-    interpolate(fraction: number): number
-}
+import { ICurve as ICurve_} from "#external"
+export type ICurve = ICurve_
 export class ICurveInternal implements MaterializedBase,ICurve {
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
