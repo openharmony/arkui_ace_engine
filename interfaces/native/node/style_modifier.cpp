@@ -9932,7 +9932,7 @@ int32_t SetTextPickerDisappearTextStyle(ArkUI_NodeHandle node, const ArkUI_Attri
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
     fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerDisappearTextStyle(
-        node->uiNodeHandle, color, fontInfo.c_str(), style);
+        node->uiNodeHandle, color, fontInfo.c_str(), style, nullptr, nullptr, 1);
 
     return ERROR_CODE_NO_ERROR;
 }
@@ -9974,7 +9974,7 @@ int32_t SetTextPickerTextStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
     fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerTextStyle(
-        node->uiNodeHandle, color, fontInfo.c_str(), style);
+        node->uiNodeHandle, color, fontInfo.c_str(), style, nullptr, nullptr, 1);
 
     return ERROR_CODE_NO_ERROR;
 }
@@ -10016,7 +10016,7 @@ int32_t SetTextPickerSelectedTextStyle(ArkUI_NodeHandle node, const ArkUI_Attrib
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
 
     fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerSelectedTextStyle(
-        node->uiNodeHandle, color, fontInfo.c_str(), style);
+        node->uiNodeHandle, color, fontInfo.c_str(), style, nullptr, nullptr, 1);
 
     return ERROR_CODE_NO_ERROR;
 }

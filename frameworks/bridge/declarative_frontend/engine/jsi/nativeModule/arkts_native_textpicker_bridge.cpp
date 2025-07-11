@@ -234,6 +234,7 @@ ArkUINativeModuleValue TextPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(FONT_WEIGHT_ARG_INDEX);
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(FONT_FAMILY_ARG_INDEX);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(FONT_STYLE_ARG_INDEX);
+    Local<JSValueRef> overflowArg = runtimeCallInfo->GetCallArgRef(OVER_FLOW_ARG_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     RefPtr<ResourceObject> textColorResObj;
@@ -257,16 +258,31 @@ ArkUINativeModuleValue TextPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
         styleVal = fontStyleArg->Int32Value(vm);
     }
 
+    RefPtr<ResourceObject> minFontSizeResObj;
+    std::string minSize = ParseFontSize(vm, runtimeCallInfo, MIN_FONT_SIZE_ARG_INDEX, minFontSizeResObj);
+
+    RefPtr<ResourceObject> maxFontSizeResObj;
+    std::string maxSize = ParseFontSize(vm, runtimeCallInfo, MAX_FONT_SIZE_ARG_INDEX, maxFontSizeResObj);
+
+    int32_t overflowVal = 0;
+    if (!overflowArg->IsNull() && !overflowArg->IsUndefined() && overflowArg->IsNumber()) {
+        overflowVal = overflowArg->Int32Value(vm);
+    }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
     ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = textColor.GetValue();
     textStyleStruct.fontStyle = styleVal;
+    textStyleStruct.textOverflow = overflowVal;
     textStyleStruct.fontInfo = fontInfo.c_str();
+    textStyleStruct.minFontSize = minSize.c_str();
+    textStyleStruct.maxFontSize = maxSize.c_str();
     textStyleStruct.fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
     textStyleStruct.fontFamilyRawPtr = AceType::RawPtr(fontFamilyResObj);
     textStyleStruct.textColorRawPtr = AceType::RawPtr(textColorResObj);
+    textStyleStruct.minFontSizeRawPtr = AceType::RawPtr(minFontSizeResObj);
+    textStyleStruct.maxFontSizeRawPtr = AceType::RawPtr(maxFontSizeResObj);
     GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerTextStyleWithResObj(nativeNode, &textStyleStruct);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -279,6 +295,7 @@ ArkUINativeModuleValue TextPickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(FONT_WEIGHT_ARG_INDEX);
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(FONT_FAMILY_ARG_INDEX);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(FONT_STYLE_ARG_INDEX);
+    Local<JSValueRef> overflowArg = runtimeCallInfo->GetCallArgRef(OVER_FLOW_ARG_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     RefPtr<ResourceObject> textColorResObj;
@@ -301,16 +318,31 @@ ArkUINativeModuleValue TextPickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
         styleVal = fontStyleArg->Int32Value(vm);
     }
 
+    RefPtr<ResourceObject> minFontSizeResObj;
+    std::string minSize = ParseFontSize(vm, runtimeCallInfo, MIN_FONT_SIZE_ARG_INDEX, minFontSizeResObj);
+
+    RefPtr<ResourceObject> maxFontSizeResObj;
+    std::string maxSize = ParseFontSize(vm, runtimeCallInfo, MAX_FONT_SIZE_ARG_INDEX, maxFontSizeResObj);
+
+    int32_t overflowVal = 0;
+    if (!overflowArg->IsNull() && !overflowArg->IsUndefined() && overflowArg->IsNumber()) {
+        overflowVal = overflowArg->Int32Value(vm);
+    }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
     ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = textColor.GetValue();
     textStyleStruct.fontStyle = styleVal;
+    textStyleStruct.textOverflow = overflowVal;
     textStyleStruct.fontInfo = fontInfo.c_str();
+    textStyleStruct.minFontSize = minSize.c_str();
+    textStyleStruct.maxFontSize = maxSize.c_str();
     textStyleStruct.fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
     textStyleStruct.fontFamilyRawPtr = AceType::RawPtr(fontFamilyResObj);
     textStyleStruct.textColorRawPtr = AceType::RawPtr(textColorResObj);
+    textStyleStruct.minFontSizeRawPtr = AceType::RawPtr(minFontSizeResObj);
+    textStyleStruct.maxFontSizeRawPtr = AceType::RawPtr(maxFontSizeResObj);
     GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerSelectedTextStyleWithResObj(nativeNode,
         &textStyleStruct);
     return panda::JSValueRef::Undefined(vm);
@@ -324,6 +356,7 @@ ArkUINativeModuleValue TextPickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(FONT_WEIGHT_ARG_INDEX);
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(FONT_FAMILY_ARG_INDEX);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(FONT_STYLE_ARG_INDEX);
+    Local<JSValueRef> overflowArg = runtimeCallInfo->GetCallArgRef(OVER_FLOW_ARG_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     RefPtr<ResourceObject> textColorResObj;
@@ -347,16 +380,31 @@ ArkUINativeModuleValue TextPickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
         styleVal = fontStyleArg->Int32Value(vm);
     }
 
+    RefPtr<ResourceObject> minFontSizeResObj;
+    std::string minSize = ParseFontSize(vm, runtimeCallInfo, MIN_FONT_SIZE_ARG_INDEX, minFontSizeResObj);
+
+    RefPtr<ResourceObject> maxFontSizeResObj;
+    std::string maxSize = ParseFontSize(vm, runtimeCallInfo, MAX_FONT_SIZE_ARG_INDEX, maxFontSizeResObj);
+
+    int32_t overflowVal = 0;
+    if (!overflowArg->IsNull() && !overflowArg->IsUndefined() && overflowArg->IsNumber()) {
+        overflowVal = overflowArg->Int32Value(vm);
+    }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
     ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = textColor.GetValue();
     textStyleStruct.fontStyle = styleVal;
+    textStyleStruct.textOverflow = overflowVal;
     textStyleStruct.fontInfo = fontInfo.c_str();
+    textStyleStruct.minFontSize = minSize.c_str();
+    textStyleStruct.maxFontSize = maxSize.c_str();
     textStyleStruct.fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
     textStyleStruct.fontFamilyRawPtr = AceType::RawPtr(fontFamilyResObj);
     textStyleStruct.textColorRawPtr = AceType::RawPtr(textColorResObj);
+    textStyleStruct.minFontSizeRawPtr = AceType::RawPtr(minFontSizeResObj);
+    textStyleStruct.maxFontSizeRawPtr = AceType::RawPtr(maxFontSizeResObj);
     GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerDisappearTextStyleWithResObj(nativeNode,
         &textStyleStruct);
     return panda::JSValueRef::Undefined(vm);
