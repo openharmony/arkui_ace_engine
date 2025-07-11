@@ -1061,7 +1061,7 @@ bool CheckBoxPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 void CheckBoxPattern::SetPrePageIdToLastPageId()
 {
     if (!Container::IsInSubContainer()) {
-        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto stageManager = pipelineContext->GetStageManager();
         CHECK_NULL_VOID(stageManager);
