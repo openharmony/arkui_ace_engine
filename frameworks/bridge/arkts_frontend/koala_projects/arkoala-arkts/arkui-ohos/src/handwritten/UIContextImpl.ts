@@ -25,7 +25,9 @@ import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, Con
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId }
     from "@ohos/arkui/UIContext"
-import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry } from '@koalaui/runtime'
+import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry,
+    IncrementalNode }
+    from '@koalaui/runtime'
 import { Context, PointerStyle, PixelMap } from "#external"
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyEvent, PopupCommonOptions } from "arkui/component/common"
@@ -58,7 +60,7 @@ import { GlobalScope } from "arkui/component/GlobalScope"
 import { mediaquery } from '@ohos/mediaquery'
 import { AsyncCallback, CustomBuilder, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/component'
 import { createUiDetachedRoot, destroyUiDetachedRoot } from "arkui/ArkUIEntry"
-import { PeerNode } from 'arkui/PeerNode'
+import { PeerNode, findPeerNode } from 'arkui/PeerNode'
 import { Deserializer } from "arkui/component/peers/Deserializer"
 import { Serializer } from "arkui/component/peers/Serializer"
 import { KBuffer } from "@koalaui/interop"
@@ -1025,10 +1027,23 @@ export class CursorControllerImpl extends CursorController {
     }
 }
 
-export class DetachedRootEntry {
-    entry: ComputableState<PeerNode>;
-    constructor(entry: ComputableState<PeerNode>) {
+export interface DetachedRootEntry {
+    compute(): void;
+    dispose(): void;
+}
+
+export class DetachedRootEntryImpl<T extends IncrementalNode> implements DetachedRootEntry {
+    entry: ComputableState<T>;
+    constructor(entry: ComputableState<T>) {
         this.entry = entry
+    }
+
+    compute(): void {
+        this.entry.value;
+    }
+
+    dispose(): void {
+        this.entry.dispose();
     }
 }
 
@@ -1061,8 +1076,37 @@ export class DetachedRootEntryManager {
             ArkUIAniModule._Common_Restore_InstanceId();
             manager.frozen = frozen
         })
-        this.detachedRoots_.set(node.value.peer.ptr, new DetachedRootEntry(node))
+        this.detachedRoots_.set(node.value.peer.ptr, new DetachedRootEntryImpl<PeerNode>(node))
         return node.value
+    }
+
+    public createUiDetachedFreeRoot(
+        nodeFactory: () => IncrementalNode,
+        /** @memo */
+        builder: () => void
+    ): PeerNode | undefined {
+        let manager = this.uicontext_.stateMgr;
+        if (manager === undefined) {
+            manager = GlobalStateManager.instance;
+        }
+        const node = manager.updatableNode<IncrementalNode>(nodeFactory(), (context: StateContext) => {
+            const frozen = manager.frozen
+            manager.frozen = true
+            ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
+            memoEntry<void>(context, 0, builder)
+            ArkUIAniModule._Common_Restore_InstanceId();
+            manager.frozen = frozen
+        })
+
+        const inc = node.value;
+        const peerNode = findPeerNode(inc);
+        if (peerNode === undefined) {
+            node.dispose()
+            return undefined
+        }
+
+        this.detachedRoots_.set(peerNode.peer.ptr, new DetachedRootEntryImpl<IncrementalNode>(node))
+        return peerNode
     }
 
     public destroyUiDetachedRoot(ptr: KPointer): boolean {
@@ -1072,7 +1116,7 @@ export class DetachedRootEntryManager {
 
         const root = this.detachedRoots_.get(ptr)!
         this.detachedRoots_.delete(ptr)
-        root.entry.dispose()
+        root.dispose()
         return true;
     }
 }
@@ -1328,16 +1372,16 @@ export class UIContextImpl extends UIContext {
     }
       public getWindowName(): string | undefined {
         return  this.getWindowName_serialize();
-       
+
     }
     public getWindowWidthBreakpoint(): WidthBreakpoint {
-       
+
         return this.getWindowWidthBreakpoint_serialize() as WidthBreakpoint;
-     
+
     }
     public getWindowHeightBreakpoint(): HeightBreakpoint {
       return this.getWindowHeightBreakpoint_serialize() as HeightBreakpoint;
-       
+
     }
     public vp2px(value: number): number {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
@@ -1375,7 +1419,7 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
         return result;
     }
-  
+
     private getWindowName_serialize(): string | undefined {
         return ArkUIGeneratedNativeModule._UIContext_getWindowName(this.instanceId_);
     }
@@ -1383,7 +1427,7 @@ export class UIContextImpl extends UIContext {
         const widthBreakpoint = ArkUIGeneratedNativeModule._UIContext_getWindowWidthBreakpoint(this.instanceId_);
         let widthBreakpointEnum = widthBreakpoint  as int32 as WidthBreakpoint;
         return widthBreakpointEnum;
-   
+
     }
     private getWindowHeightBreakpoint_serialize(): HeightBreakpoint {
         const heightBreakpoint = ArkUIGeneratedNativeModule._UIContext_getWindowHeightBreakpoint(this.instanceId_);
@@ -1487,7 +1531,7 @@ export class UIContextImpl extends UIContext {
         ActionSheet.show(options);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
-    
+
     // @ts-ignore
     public freezeUINode(id: number, isFrozen: boolean): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
