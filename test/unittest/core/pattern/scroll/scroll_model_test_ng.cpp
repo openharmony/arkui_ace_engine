@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,12 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "scroll_test_ng.h"
 #include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "ui/base/ace_type.h"
 
 #include "base/memory/ace_type.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -562,5 +566,281 @@ HWTEST_F(ScrollModelNGTestNg, ScrollModelNGTestNg014, TestSize.Level1)
 
     ResetMockResourceData();
     g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: GetOnScrollEdge001
+ * @tc.desc: Test ScrollModelNG GetOnScrollEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+
+    /**
+     * @tc.steps: step2. Set axis to VERTICAL
+     * and Change the value of the list member variable to make the IsAtTop of ListPattern function return true
+     */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->SetAxis(Axis::VERTICAL);
+    auto scrollNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, scrollablePattern);
+    ASSERT_NE(scrollNode, nullptr);
+    scrollablePattern->isStackFromEnd_ = false;
+    scrollablePattern->startIndex_ = 0;
+    scrollablePattern->startMainPos_ = 18.0f;
+    scrollablePattern->endMainPos_ = 20.0f;
+    scrollablePattern->currentDelta_ = 2.0f;
+    scrollablePattern->contentStartOffset_ = 4.0f;
+    scrollablePattern->canStayOverScroll_ = false;
+    ListItemGroupLayoutInfo itemGroupInfo = { true, true };
+    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+
+    /**
+     * @tc.steps: step3. Calling the GetOnScrollEdge function
+     * @tc.expected: The result of calling the function returns SCROLL_TOP
+     */
+    auto result = scrollModelNG.GetOnScrollEdge(AceType::RawPtr(scrollNode));
+    EXPECT_EQ(result, ScrollEdgeType::SCROLL_TOP);
+}
+
+/**
+ * @tc.name: GetOnScrollEdge002
+ * @tc.desc: Test ScrollModelNG GetOnScrollEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+
+    /**
+     * @tc.steps: step2. Set axis to VERTICAL
+     * and Change the value of the list member variable to make the IsAtBottom of ListPattern function return true
+     */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->SetAxis(Axis::VERTICAL);
+    auto scrollNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, scrollablePattern);
+    ASSERT_NE(scrollNode, nullptr);
+    scrollablePattern->isStackFromEnd_ = false;
+    scrollablePattern->startIndex_ = 2;
+    scrollablePattern->endIndex_ = 4;
+    scrollablePattern->maxListItemIndex_ = 4;
+    scrollablePattern->startMainPos_ = 18.0f;
+    scrollablePattern->endMainPos_ = 20.0f;
+    scrollablePattern->currentDelta_ = 25.0f;
+    scrollablePattern->contentStartOffset_ = 4.0f;
+    scrollablePattern->canStayOverScroll_ = false;
+    ListItemGroupLayoutInfo itemGroupInfo = { false, true };
+    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+
+    /**
+     * @tc.steps: step3. Calling the GetOnScrollEdge function
+     * @tc.expected: The result of calling the function returns SCROLL_BOTTOM
+     */
+    auto result = scrollModelNG.GetOnScrollEdge(AceType::RawPtr(scrollNode));
+    EXPECT_EQ(result, ScrollEdgeType::SCROLL_BOTTOM);
+}
+
+/**
+ * @tc.name: GetOnScrollEdge003
+ * @tc.desc: Test ScrollModelNG GetOnScrollEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+
+    /**
+     * @tc.steps: step2. Set axis to HORIZONTAL
+     * and Change the value of the list member variable to make the IsAtTop of ListPattern function return true
+     */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->SetAxis(Axis::HORIZONTAL);
+    auto scrollNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(scrollNode, nullptr);
+    scrollablePattern->isStackFromEnd_ = false;
+    scrollablePattern->startIndex_ = 0;
+    scrollablePattern->startMainPos_ = 18.0f;
+    scrollablePattern->endMainPos_ = 20.0f;
+    scrollablePattern->currentDelta_ = 2.0f;
+    scrollablePattern->contentStartOffset_ = 4.0f;
+    scrollablePattern->canStayOverScroll_ = false;
+    ListItemGroupLayoutInfo itemGroupInfo = { true, true };
+    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+
+    /**
+     * @tc.steps: step3. Calling the GetOnScrollEdge function
+     * @tc.expected: The result of calling the function returns SCROLL_LEFT
+     */
+    auto result = scrollModelNG.GetOnScrollEdge(AceType::RawPtr(scrollNode));
+    EXPECT_EQ(result, ScrollEdgeType::SCROLL_LEFT);
+}
+
+/**
+ * @tc.name: GetOnScrollEdge004
+ * @tc.desc: Test ScrollModelNG GetOnScrollEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+
+    /**
+     * @tc.steps: step2. Set axis to HORIZONTAL
+     * and Change the value of the list member variable to make the IsAtBottom of ListPattern function return true
+     */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->SetAxis(Axis::HORIZONTAL);
+    auto scrollNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, scrollablePattern);
+    ASSERT_NE(scrollNode, nullptr);
+    scrollablePattern->isStackFromEnd_ = false;
+    scrollablePattern->startIndex_ = 2;
+    scrollablePattern->endIndex_ = 4;
+    scrollablePattern->maxListItemIndex_ = 4;
+    scrollablePattern->startMainPos_ = 18.0f;
+    scrollablePattern->endMainPos_ = 20.0f;
+    scrollablePattern->currentDelta_ = 25.0f;
+    scrollablePattern->contentStartOffset_ = 4.0f;
+    scrollablePattern->canStayOverScroll_ = false;
+    ListItemGroupLayoutInfo itemGroupInfo = { false, true };
+    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+
+    /**
+     * @tc.steps: step3. Calling the GetOnScrollEdge function
+     * @tc.expected: The result of calling the function returns SCROLL_RIGHT
+     */
+    auto result = scrollModelNG.GetOnScrollEdge(AceType::RawPtr(scrollNode));
+    EXPECT_EQ(result, ScrollEdgeType::SCROLL_RIGHT);
+}
+
+/**
+ * @tc.name: GetOnScrollEdge005
+ * @tc.desc: Test ScrollModelNG GetOnScrollEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+
+    /**
+     * @tc.steps: step2. Set axis to FREE
+     * and Change the value of the list member variable to make the IsAtBottom of ListPattern function return true
+     */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->SetAxis(Axis::FREE);
+    auto scrollNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, scrollablePattern);
+    ASSERT_NE(scrollNode, nullptr);
+    scrollablePattern->isStackFromEnd_ = false;
+    scrollablePattern->startIndex_ = 2;
+    scrollablePattern->endIndex_ = 4;
+    scrollablePattern->maxListItemIndex_ = 4;
+    scrollablePattern->startMainPos_ = 18.0f;
+    scrollablePattern->endMainPos_ = 20.0f;
+    scrollablePattern->currentDelta_ = 25.0f;
+    scrollablePattern->contentStartOffset_ = 4.0f;
+    scrollablePattern->canStayOverScroll_ = false;
+    ListItemGroupLayoutInfo itemGroupInfo = { false, true };
+    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+
+    /**
+     * @tc.steps: step3. Calling the GetOnScrollEdge function
+     * @tc.expected: The result of calling the function returns SCROLL_NONE
+     */
+    auto result = scrollModelNG.GetOnScrollEdge(AceType::RawPtr(scrollNode));
+    EXPECT_EQ(result, ScrollEdgeType::SCROLL_NONE);
+}
+
+/**
+ * @tc.name: GetOnScrollEdge006
+ * @tc.desc: Test ScrollModelNG GetOnScrollEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+
+    /**
+     * @tc.steps: step2. Set axis to VERTICAL
+     * and Change the value of the list member variable to make the IsAtBottom of ListPattern function return false
+     */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->SetAxis(Axis::VERTICAL);
+    auto scrollNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, scrollablePattern);
+    ASSERT_NE(scrollNode, nullptr);
+    scrollablePattern->isStackFromEnd_ = false;
+    scrollablePattern->startIndex_ = 2;
+    scrollablePattern->endIndex_ = 4;
+    scrollablePattern->maxListItemIndex_ = 4;
+    scrollablePattern->startMainPos_ = 18.0f;
+    scrollablePattern->endMainPos_ = 20.0f;
+    scrollablePattern->currentDelta_ = 25.0f;
+    scrollablePattern->contentStartOffset_ = 4.0f;
+    scrollablePattern->canStayOverScroll_ = false;
+    ListItemGroupLayoutInfo itemGroupInfo = { false, false };
+    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+
+    /**
+     * @tc.steps: step3. Calling the GetOnScrollEdge function
+     * @tc.expected: The result of calling the function returns SCROLL_NONE
+     */
+    auto result = scrollModelNG.GetOnScrollEdge(AceType::RawPtr(scrollNode));
+    EXPECT_EQ(result, ScrollEdgeType::SCROLL_NONE);
+}
+
+/**
+ * @tc.name: GetOnScrollEdge007
+ * @tc.desc: Test ScrollModelNG GetOnScrollEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+
+    /**
+     * @tc.steps: step2. Set axis to HORIZONTAL
+     * and Change the value of the list member variable to make the IsAtBottom of ListPattern function return false
+     */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->SetAxis(Axis::HORIZONTAL);
+    auto scrollNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, scrollablePattern);
+    ASSERT_NE(scrollNode, nullptr);
+    scrollablePattern->isStackFromEnd_ = false;
+    scrollablePattern->startIndex_ = 2;
+    scrollablePattern->endIndex_ = 4;
+    scrollablePattern->maxListItemIndex_ = 4;
+    scrollablePattern->startMainPos_ = 18.0f;
+    scrollablePattern->endMainPos_ = 20.0f;
+    scrollablePattern->currentDelta_ = 25.0f;
+    scrollablePattern->contentStartOffset_ = 4.0f;
+    scrollablePattern->canStayOverScroll_ = false;
+    ListItemGroupLayoutInfo itemGroupInfo = { false, false };
+    scrollablePattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 0.0f, itemGroupInfo };
+
+    /**
+     * @tc.steps: step3. Calling the GetOnScrollEdge function
+     * @tc.expected: The result of calling the function returns SCROLL_NONE
+     */
+    auto result = scrollModelNG.GetOnScrollEdge(AceType::RawPtr(scrollNode));
+    EXPECT_EQ(result, ScrollEdgeType::SCROLL_NONE);
 }
 } // namespace OHOS::Ace::NG
