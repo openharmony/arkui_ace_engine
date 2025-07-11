@@ -49,6 +49,8 @@
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetVsyncModeTraceEnabled(), fmt, ##__VA_ARGS__)
 #define ACE_EVENT_SCOPED_TRACE(fmt, ...) \
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetTraceInputEventEnabled(), fmt, ##__VA_ARGS__)
+#define ACE_REUSE_DETECTION_SCOPED_TRACE(fmt, ...) \
+    AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetDynamicDetectionTraceEnabled(), fmt, ##__VA_ARGS__)
 #ifdef ACE_DEBUG
 #define ACE_DEBUG_SCOPED_TRACE(fmt, ...) AceScopedTrace aceScopedTrace(fmt, ##__VA_ARGS__)
 #else
