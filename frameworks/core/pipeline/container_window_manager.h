@@ -21,6 +21,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/system_bar/system_bar_style.h"
+#include "core/common/window.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
@@ -45,6 +46,8 @@ using SetRequestedOrientationCallback = std::function<void(std::optional<Orienta
 using GetRequestedOrientationCallback = std::function<Orientation(void)>;
 using IsFullScreenWindowCallback = std::function<bool(void)>;
 using IsPcOrPadFreeMultiWindowModeCallback = std::function<bool(void)>;
+using GetHeightBreakpoint = std::function<HeightBreakpoint(void)>;
+using GetWidthBreakpoint = std::function<WidthBreakpoint(void)>;
 
 struct DecorButtonStyle {
     int32_t colorMode;
@@ -412,6 +415,32 @@ public:
         }
     }
 
+    void SetHeightBreakpointCallback(GetHeightBreakpoint&& callback)
+    {
+        getHeightBreakpointCallback_ = std::move(callback);
+    }
+
+    void SetWidthBreakpointCallback(GetWidthBreakpoint&& callback)
+    {
+        getWidthBreakpointCallback_ = std::move(callback);
+    }
+
+    HeightBreakpoint GetHeightBreakpointCallback() const
+    {
+        if (getHeightBreakpointCallback_) {
+            return getHeightBreakpointCallback_();
+        }
+        return HeightBreakpoint::HEIGHT_SM;
+    }
+
+    WidthBreakpoint GetWidthBreakpointCallback() const
+    {
+        if (getWidthBreakpointCallback_) {
+            return getWidthBreakpointCallback_();
+        }
+        return WidthBreakpoint::WIDTH_SM;
+    }
+
 private:
     int32_t appLabelId_ = 0;
     int32_t appIconId_ = 0;
@@ -443,6 +472,8 @@ private:
     GetFreeMultiWindowModeEnabledStateCallback getFreeMultiWindowModeEnabledStateCallback_;
     WindowCallNativeCallback callNativeCallback_;
     std::function<void(bool)> useImplicitAnimationCallback_;
+    GetHeightBreakpoint getHeightBreakpointCallback_;
+    GetWidthBreakpoint getWidthBreakpointCallback_;
 };
 
 } // namespace OHOS::Ace
