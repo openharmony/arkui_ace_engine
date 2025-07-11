@@ -31,4 +31,16 @@ export class CallbackTransformer {
     static transformToCustomBuilder(value: CustomNodeBuilder): CustomBuilder {
         throw new Error("Not implemented")
     }
+
+    static transfromToCallbackVoid(value: (data: undefined) => void): (() => void) {
+        return () => {
+            return value(undefined)
+        }
+    }
+
+    static transfromFromCallbackVoid(value: () => void): ((data: undefined) => void) {
+        return (data: undefined) => {
+            return value()
+        }
+    }
 }

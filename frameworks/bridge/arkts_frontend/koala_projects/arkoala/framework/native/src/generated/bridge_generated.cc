@@ -44808,6 +44808,29 @@ void impl_DismissPopupAction_setReason(Ark_NativePointer thisPtr, Ark_Int32 reas
         GetAccessors()->getDismissPopupActionAccessor()->setReason(self, static_cast<Ark_DismissReason>(reason));
 }
 KOALA_INTEROP_DIRECT_V2(DismissPopupAction_setReason, Ark_NativePointer, Ark_Int32)
+Ark_NativePointer impl_DismissDialogAction_construct() {
+        return GetAccessors()->getDismissDialogActionAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(DismissDialogAction_construct, Ark_NativePointer)
+Ark_NativePointer impl_DismissDialogAction_getFinalizer() {
+        return GetAccessors()->getDismissDialogActionAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(DismissDialogAction_getFinalizer, Ark_NativePointer)
+void impl_DismissDialogAction_dismiss(Ark_NativePointer thisPtr) {
+        Ark_DismissDialogAction self = reinterpret_cast<Ark_DismissDialogAction>(thisPtr);
+        GetAccessors()->getDismissDialogActionAccessor()->dismiss(self);
+}
+KOALA_INTEROP_DIRECT_V1(DismissDialogAction_dismiss, Ark_NativePointer)
+Ark_Int32 impl_DismissDialogAction_getReason(Ark_NativePointer thisPtr) {
+        Ark_DismissDialogAction self = reinterpret_cast<Ark_DismissDialogAction>(thisPtr);
+        return GetAccessors()->getDismissDialogActionAccessor()->getReason(self);
+}
+KOALA_INTEROP_DIRECT_1(DismissDialogAction_getReason, Ark_Int32, Ark_NativePointer)
+void impl_DismissDialogAction_setReason(Ark_NativePointer thisPtr, Ark_Int32 reason) {
+        Ark_DismissDialogAction self = reinterpret_cast<Ark_DismissDialogAction>(thisPtr);
+        GetAccessors()->getDismissDialogActionAccessor()->setReason(self, static_cast<Ark_DismissReason>(reason));
+}
+KOALA_INTEROP_DIRECT_V2(DismissDialogAction_setReason, Ark_NativePointer, Ark_Int32)
 Ark_NativePointer impl_TextShadowStyle_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         const Ark_Int8 value_value_buf_selector = thisDeserializer.readInt8();
