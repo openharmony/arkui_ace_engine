@@ -5224,7 +5224,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
     if (arkoalaLazyAdapter_) {
-        return ArkoalaGetOrCreateChild(index);
+        return ArkoalaGetOrCreateChild(index, addToRenderTree);
     }
     auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
@@ -5345,7 +5345,7 @@ void FrameNode::ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cac
     arkoalaLazyAdapter_->SetActiveRange(liveStart, liveEnd);
 }
 
-RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index)
+RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index, bool active)
 {
     CHECK_NULL_RETURN(arkoalaLazyAdapter_, nullptr);
     if (auto node = arkoalaLazyAdapter_->GetChild(index)) {
@@ -5354,7 +5354,7 @@ RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index)
     auto node = arkoalaLazyAdapter_->GetOrCreateChild(index);
     CHECK_NULL_RETURN(node, nullptr);
     AddChild(node);
-    node->SetActive(true);
+    node->SetActive(active);
     return node;
 }
 /* ============================== Arkoala LazyForEach adapter section END ================================*/
