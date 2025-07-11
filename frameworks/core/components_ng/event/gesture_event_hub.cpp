@@ -267,8 +267,7 @@ void GestureEventHub::ProcessParallelPriorityGesture(const Offset& offset, int32
         parallelIndex++;
     } else if (static_cast<int32_t>(externalParallelRecognizer_.size()) > parallelIndex) {
         externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
-        current = externalParallelRecognizer_[parallelIndex];
-        parallelIndex++;
+        current = *recognizers.begin();
     } else if (recognizers.size() == 1) {
         current = *recognizers.begin();
     }
