@@ -1539,6 +1539,9 @@ void MenuView::ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuPara
     auto isCurDarkMode = colorMode == ColorMode::DARK;
     MenuParam& menuParamValue = const_cast<MenuParam&>(menuParam);
     if (SystemProperties::ConfigChangePerform() && menuParam.isDarkMode != isCurDarkMode && !menuParam.isWithTheme) {
+        //Because the Menu is created outside the light/dark mode switching process,
+        //it is necessary to manually set the reloading state to trigger the color inversion process.
+        ResourceParseUtils::SetIsReloading(true);
         menuParamValue.ReloadResources();
         if (menuParamValue.borderRadius) {
             menuParamValue.borderRadius->ReloadResources();
@@ -1553,6 +1556,7 @@ void MenuView::ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuPara
             menuParamValue.outlineWidth->ReloadResources();
         }
         menuParamValue.isDarkMode = !menuParamValue.isDarkMode;
+        ResourceParseUtils::SetIsReloading(false);
     }
 }
 
