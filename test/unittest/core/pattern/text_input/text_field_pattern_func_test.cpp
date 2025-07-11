@@ -15,6 +15,7 @@
 
 #include "text_input_base.h"
 #include "test/mock/core/common/mock_container.h"
+#include "frameworks/core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1768,6 +1769,29 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc088, TestSize.Level1)
     pipeline->safeAreaManager_ = safeAreaManager;
     pattern->SetKeyboardAreaChange(false);
     EXPECT_EQ(pipeline->safeAreaManager_->GetRawKeyboardHeight(), 5.0f);
+}
+
+/**
+ * @tc.name: KeyboardPatternFunc01
+ * @tc.desc: test KeyboardPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, KeyboardPatternFunc01, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->BeforeCreateLayoutWrapper();
+    pattern->DumpInfo();
+    auto spanNode = AceType::MakeRefPtr<NG::SpanNode>(3);
+    keyboard->AddChild(spanNode);
+    pattern->BeforeCreateLayoutWrapper();
+    pattern->GetKeyboardHeight();
+    JsonValue jsonValue(nullptr);
+    std::unique_ptr<JsonValue> ret = jsonValue.GetChild();
+    pattern->DumpInfo(ret);
+    EXPECT_EQ(pattern->keyboardHeight_, 0.0f);
 }
 
 /**
