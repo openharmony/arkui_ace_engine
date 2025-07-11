@@ -15,6 +15,7 @@
 
 
 import { int32 } from "@koalaui/common"
+import { __memo_context_type , __memo_id_type  } from "arkui.stateManagement.runtime";
 import {
     MutableState,
     contextLocal,
@@ -24,13 +25,15 @@ import {
     RepeatByArray,
     arrayState,
     RunEffect,
+    __context, 
+    __id,
 } from "@koalaui/runtime"
 import { ArkUINativeModule } from "#components"
 import { runtimeType, RuntimeType } from "@koalaui/interop"
-import router from "../../ohos.router"
+import router from "@ohos/router"
 import { EntryPoint, UserView, UserViewBuilder } from "../UserView"
 import { InteropNativeModule, nullptr } from "@koalaui/interop"
-import { PeerNode } from "../../src/PeerNode"
+import { PeerNode } from "../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Visibility } from "../component"
 import { Serializer } from "../component/peers/Serializer"
@@ -520,9 +523,11 @@ export function Routed(
     RunEffect<((dummy: undefined) => void) | undefined>(routerState.resolve, (resolve?: (dummy: undefined) => void): void => { resolve?.(undefined) })
     contextLocalScope(CURRENT_ROUTER, routerImp, () => {
         RepeatByArray(
+            __context(),
+            __id(),
             routerState.visiblePages.value,
             (page: VisiblePage, index: int32): int32 => { return page.version },
-            (page: VisiblePage, index: int32): void => {
+            (__memo_context: __memo_context_type, __memo_id: __memo_id_type,page: VisiblePage, index: int32): void => {
                 WithRouterTransitionState(page.transition, () => {
                     page.page()
                 })

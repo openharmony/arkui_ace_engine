@@ -1,0 +1,11 @@
+{
+	"inputDir": "./src",
+	"outputDir": "./ets-processed",
+	"include": [
+        "./src/**/*"
+    ],
+	"exclude": [
+	],
+	"fileExtension": ".ets",
+	"memoTypeImport": "arkui.stateManagement.runtime"
+}

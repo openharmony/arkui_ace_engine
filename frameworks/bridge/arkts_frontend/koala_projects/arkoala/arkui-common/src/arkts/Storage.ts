@@ -610,7 +610,7 @@ interface EntryObject {
 
 class StorageEntry<T> extends SubscribedAbstractProperty<T> implements EntryObject {
     readonly state: MutableState<T>
-    readonly mutable: boolean
+    mutable: boolean
 
     constructor(state: MutableState<T>, mutable: boolean = true) {
         super()
