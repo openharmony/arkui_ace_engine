@@ -85,7 +85,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * @returns The number of milliseconds between 1 January 1970 00:00:00 UTC and the given date.
      * @throws InvalidDate - Throws if Date object is invalid (@link{isDateValid} is `false`).
      */
-    public override valueOf(): number {
+    public override valueOf(): long {
         this.conditionalAddRef();
         return this.store_.valueOf();
     }
@@ -138,7 +138,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * @see ECMA-262, 21.4.4.2
      * @returns An integer number, between 1 and 31, representing the day of the month for the given date according to local time.
      */
-    public override getDate(): number {
+    public override getDate(): int {
         this.conditionalAddRef();
         return this.store_.getDate();
     }
@@ -148,18 +148,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new day.
      */
-    public override setDate(value: byte): void {
-        this.store_.setDate(value);
-        this.meta_.fireChange();
-        this.executeOnSubscribingWatches('setDate');
-    }
-
-    /**
-     * Changes the day of the month of a given Date instance, based on local time.
-     *
-     * @param value new day.
-     */
-    public override setDate(value: number): number {
+    public override setDate(value: int): long {
         const result = this.store_.setDate(value);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setDate');
@@ -167,22 +156,11 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
     }
 
     /**
-     * Alias to @link{setDate} and left for compatibility with ECMA-262.
-     *
-     * @param value new day.
-     */
-    public override setDay(value: byte): void {
-        this.store_.setDay(value);
-        this.meta_.fireChange();
-        this.executeOnSubscribingWatches('setDate');
-    }
-
-    /**
      * Returns the day of the month (from 1 to 31) in the specified date according to universal time.
      *
      * @returns An integer number, between 1 and 31, representing the day of the month for the given date according to local time.
      */
-    public override getUTCDate(): number {
+    public override getUTCDate(): int {
         this.conditionalAddRef();
         return this.store_.getUTCDate();
     }
@@ -192,18 +170,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new day.
      */
-    public override setUTCDate(value: byte): void {
-        this.store_.setUTCDate(value);
-        this.meta_.fireChange();
-        this.executeOnSubscribingWatches('setUTCDate');
-    }
-
-    /**
-     * Changes the day of the month of a given Date instance, based on UTC time.
-     *
-     * @param value new day.
-     */
-    public override setUTCDate(value: number): number {
+    public override setUTCDate(value: int): long {
         const result = this.store_.setUTCDate(value);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setUTCDate');
@@ -215,18 +182,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new day.
      */
-    public override setUTCDay(value: byte): void {
-        this.store_.setUTCDay(value);
-        this.meta_.fireChange();
-        this.executeOnSubscribingWatches('setUTCDay');
-    }
-
-    /**
-     * Changes the day of the month of a given Date instance, based on UTC time.
-     *
-     * @param value new day.
-     */
-    public override setUTCDay(value: number): number {
+    public override setUTCDay(value: int): long {
         const result = this.store_.setUTCDay(value);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setUTCDay');
@@ -241,7 +197,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * @returns An integer number, between 0 and 6, corresponding to the day of the week
      * for the given date, according to local time: 0 for Sunday, 1 for Monday, 2 for Tuesday, and so on.
      */
-    public override getDay(): number {
+    public override getDay(): int {
         this.conditionalAddRef();
         return this.store_.getDay();
     }
@@ -252,7 +208,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * @returns An integer number, between 0 and 6, corresponding to the day of the week
      * for the given date, according to local time: 0 for Sunday, 1 for Monday, 2 for Tuesday, and so on.
      */
-    public override getUTCDay(): number {
+    public override getUTCDay(): int {
         this.conditionalAddRef();
         return this.store_.getUTCDay();
     }
@@ -278,7 +234,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * for example, 1995. Use this function to make sure a year is compliant with years after 2000.
      * @returns year
      */
-    public override getUTCFullYear(): number {
+    public override getUTCFullYear(): int {
         this.conditionalAddRef();
         return this.store_.getUTCFullYear();
     }
@@ -297,7 +253,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * const year = today.getYearFull();
      * ```
      */
-    public override getFullYear(): number {
+    public override getFullYear(): int {
         this.conditionalAddRef();
         return this.store_.getFullYear();
     }
@@ -307,8 +263,8 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new year
      */
-    public override setUTCFullYear(value: number, month?: number, date?: number): number {
-        const result = this.store_.setUTCFullYear(value, month, date);
+    public override setUTCFullYear(value: int): long {
+        const result = this.store_.setUTCFullYear(value);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setUTCFullYear');
         return result;
@@ -319,21 +275,23 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new year
      */
-    public override setUTCFullYear(value: int): void {
-        this.store_.setUTCFullYear(value);
+    public override setUTCFullYear(value: int, month: int): long {
+        const result = this.store_.setUTCFullYear(value, month);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setUTCFullYear');
+        return result;
     }
 
     /**
-     * This function is an alias to @link{setFullYear} and left for compatibility with ECMA-262.
+     * Sets the full year for a specified date according to universal time.
      *
      * @param value new year
      */
-    public override setYear(value: number): void {
-        this.store_.setYear(value);
+    public override setUTCFullYear(value: int, month: int, date: int): long {
+        const result = this.store_.setUTCFullYear(value, month, date);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches('setYear');
+        this.executeOnSubscribingWatches('setUTCFullYear');
+        return result;
     }
 
     /**
@@ -352,8 +310,8 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new year
      */
-    public override setFullYear(value: number, month?: Number, date?: Number): number {
-        const result = this.store_.setFullYear(value, month, date);
+    public override setFullYear(value: int): long {
+        const result = this.store_.setFullYear(value);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setFullYear');
         return result;
@@ -364,10 +322,23 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new year
      */
-    public override setFullYear(value: int): void {
-        this.store_.setFullYear(value);
+    public override setFullYear(value: int, month: int): long {
+        const result = this.store_.setFullYear(value, month);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setFullYear');
+        return result;
+    }
+
+    /**
+     * Sets the full year for a specified date according to local time.
+     *
+     * @param value new year
+     */
+    public override setFullYear(value: int, month: int, date: int): long {
+        const result = this.store_.setFullYear(value, month, date);
+        this.meta_.fireChange();
+        this.executeOnSubscribingWatches('setFullYear');
+        return result;
     }
 
     /**
@@ -381,7 +352,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * const hours = today.getHour();
      * ```
      */
-    public override getHours(): number {
+    public override getHours(): int {
         this.conditionalAddRef();
         return this.store_.getHours();
     }
@@ -391,7 +362,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @returns An integer number, between 0 and 23, representing the hour for the given date according to UTC time.
      */
-    public override getUTCHours(): number {
+    public override getUTCHours(): int {
         this.conditionalAddRef();
         return this.store_.getUTCHours();
     }
@@ -401,10 +372,11 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new hours
      */
-    public override setHours(value: byte): void {
-        this.store_.setHours(value);
+    public override setHours(value: int): long {
+        const result = this.store_.setHours(value);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setHours');
+        return result;
     }
 
     /**
@@ -412,7 +384,31 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new hours
      */
-    public override setHours(value: number, min?: number, sec?: number, ms?: number): number {
+    public override setHours(value: int, min: int): long {
+        const result = this.store_.setHours(value, min);
+        this.meta_.fireChange();
+        this.executeOnSubscribingWatches('setHours');
+        return result;
+    }
+
+    /**
+     * Sets the hours for a specified date according to local time.
+     *
+     * @param value new hours
+     */
+    public override setHours(value: int, min: int, sec: int): long {
+        const result = this.store_.setHours(value, min, sec);
+        this.meta_.fireChange();
+        this.executeOnSubscribingWatches('setHours');
+        return result;
+    }
+
+    /**
+     * Sets the hours for a specified date according to local time.
+     *
+     * @param value new hours
+     */
+    public override setHours(value: int, min: int, sec: int, ms: int): long {
         const result = this.store_.setHours(value, min, sec, ms);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setHours');
@@ -424,10 +420,11 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new hours
      */
-    public override setUTCHours(value: byte): void {
-        this.store_.setUTCHours(value);
+    public override setUTCHours(value: int): long {
+        const result = this.store_.setUTCHours(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches('setHours');
+        this.executeOnSubscribingWatches('setUTCHours');
+        return result;
     }
 
     /**
@@ -435,7 +432,31 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new hours
      */
-    public override setUTCHours(value: number, min?: number, sec?: number, ms?: number): number {
+    public override setUTCHours(value: int, min: int): long {
+        const result = this.store_.setUTCHours(value, min);
+        this.meta_.fireChange();
+        this.executeOnSubscribingWatches('setUTCHours');
+        return result;
+    }
+
+    /**
+     * Sets the hour for a specified date according to universal time.
+     *
+     * @param value new hours
+     */
+    public override setUTCHours(value: int, min: int, sec: int): long {
+        const result = this.store_.setUTCHours(value, min, sec);
+        this.meta_.fireChange();
+        this.executeOnSubscribingWatches('setUTCHours');
+        return result;
+    }
+
+    /**
+     * Sets the hour for a specified date according to universal time.
+     *
+     * @param value new hours
+     */
+    public override setUTCHours(value: int, min: int, sec: int, ms: int): long {
         const result = this.store_.setUTCHours(value, min, sec, ms);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setUTCHours');
@@ -453,7 +474,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * const milliseconds = today.getMilliseconds();
      * ```
      */
-    public override getMilliseconds(): number {
+    public override getMilliseconds(): int {
         this.conditionalAddRef();
         return this.store_.getMilliseconds();
     }
@@ -463,7 +484,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @returns the milliseconds portion of the time object's value according to universal time.
      */
-    public override getUTCMilliseconds(): number {
+    public override getUTCMilliseconds(): int {
         this.conditionalAddRef();
         return this.store_.getUTCMilliseconds();
     }
@@ -473,18 +494,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new ms
      */
-    public override setMilliseconds(value: short): void {
-        this.store_.setMilliseconds(value);
-        this.meta_.fireChange();
-        this.executeOnSubscribingWatches('setMilliseconds');
-    }
-
-    /**
-     * Sets the milliseconds for a specified date according to local time.
-     *
-     * @param value new ms
-     */
-    public override setMilliseconds(value: number): number {
+    public override setMilliseconds(value: int): long {
         const result = this.store_.setMilliseconds(value);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setMilliseconds');
@@ -496,18 +506,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new ms
      */
-    public override setUTCMilliseconds(value: short): void {
-        this.store_.setUTCMilliseconds(value);
-        this.meta_.fireChange();
-        this.executeOnSubscribingWatches('setUTCMilliseconds');
-    }
-
-    /**
-     * Sets the milliseconds for a specified date according to universal time.
-     *
-     * @param value new ms
-     */
-    public override setUTCMilliseconds(value: number): number {
+    public override setUTCMilliseconds(value: int): long {
         const result = this.store_.setUTCMilliseconds(value);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setUTCMilliseconds');
@@ -525,7 +524,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * const seconds = today.getSeconds();
      * ```
      */
-    public override getSeconds(): number {
+    public override getSeconds(): int {
         this.conditionalAddRef();
         return this.store_.getSeconds();
     }
@@ -535,7 +534,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @returns the seconds in the specified date according to universal time.
      */
-    public override getUTCSeconds(): number {
+    public override getUTCSeconds(): int {
         this.conditionalAddRef();
         return this.store_.getUTCSeconds();
     }
@@ -545,8 +544,8 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new seconds
      */
-    public override setSeconds(value: number, ms?: number): number {
-        const result = this.store_.setSeconds(value, ms);
+    public override setSeconds(value: int): long {
+        const result = this.store_.setSeconds(value);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setSeconds');
         return result;
@@ -557,10 +556,11 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new seconds
      */
-    public override setSeconds(value: byte): void {
-        this.store_.setSeconds(value);
+    public override setSeconds(value: int, ms: int): long {
+        const result = this.store_.setSeconds(value, ms);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setSeconds');
+        return result;
     }
 
     /**
@@ -568,10 +568,11 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new seconds
      */
-    public override setUTCSeconds(value: byte): void {
-        this.store_.setUTCSeconds(value);
+    public override setUTCSeconds(value: int): long {
+        const result = this.store_.setUTCSeconds(value);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setUTCSeconds');
+        return result;
     }
 
     /**
@@ -579,7 +580,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new seconds
      */
-    public override setUTCSeconds(value: number, ms?: number): number {
+    public override setUTCSeconds(value: int, ms: int): long {
         const result = this.store_.setUTCSeconds(value, ms);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setUTCSeconds');
@@ -597,7 +598,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * const minutes = today.getMinutes();
      * ```
      */
-    public override getMinutes(): number {
+    public override getMinutes(): int {
         this.conditionalAddRef();
         return this.store_.getMinutes();
     }
@@ -607,10 +608,11 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new minutes
      */
-    public override setUTCMinutes(value: byte): void {
-        this.store_.setUTCMinutes(value);
+    public override setUTCMinutes(value: int): long {
+        const result = this.store_.setUTCMinutes(value);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setUTCMinutes');
+        return result;
     }
 
     /**
@@ -618,7 +620,19 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new minutes
      */
-    public override setUTCMinutes(value: number, sec?: Number, ms?: Number): number {
+    public override setUTCMinutes(value: int, sec: int): long {
+        const result = this.store_.setUTCMinutes(value, sec);
+        this.meta_.fireChange();
+        this.executeOnSubscribingWatches('setUTCMinutes');
+        return result;
+    }
+
+    /**
+     * Sets the minutes for a specified date according to universal time.
+     *
+     * @param value new minutes
+     */
+    public override setUTCMinutes(value: int, sec: int, ms: int): long {
         const result = this.store_.setUTCMinutes(value, sec, ms);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setUTCMinutes');
@@ -630,7 +644,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @returns the minutes in the specified date according to universal time.
      */
-    public override getUTCMinutes(): number {
+    public override getUTCMinutes(): int {
         this.conditionalAddRef();
         return this.store_.getUTCMinutes();
     }
@@ -640,10 +654,11 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new minutes
      */
-    public override setMinutes(value: byte): void {
-        this.store_.setMinutes(value);
+    public override setMinutes(value: int): long {
+        const result = this.store_.setMinutes(value);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setUTCMinutes');
+        return result;
     }
 
     /**
@@ -651,7 +666,19 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new minutes
      */
-    public override setMinutes(value: number, sec?: number, ms?: number): number {
+    public override setMinutes(value: int, sec: int): long {
+        const result = this.store_.setMinutes(value, sec);
+        this.meta_.fireChange();
+        this.executeOnSubscribingWatches('setUTCMinutes');
+        return result;
+    }
+
+    /**
+     * Sets the minutes for a specified date according to local time.
+     *
+     * @param value new minutes
+     */
+    public override setMinutes(value: int, sec: int, ms: int): long {
         const result = this.store_.setMinutes(value, sec, ms);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setUTCMinutes');
@@ -671,7 +698,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * const month = today.getMonth();
      * ```
      */
-    public override getMonth(): number {
+    public override getMonth(): int {
         this.conditionalAddRef();
         return this.store_.getMonth();
     }
@@ -682,7 +709,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * @returns  An integer number, between 0 and 11, representing the month in the given date according to UTC time.
      * 0 corresponds to January, 1 to February, and so on.
      */
-    public override getUTCMonth(): number {
+    public override getUTCMonth(): int {
         this.conditionalAddRef();
         return this.store_.getUTCMonth();
     }
@@ -692,8 +719,8 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param month new month
      */
-    public override setMonth(month: number, date?: number): number {
-        const result = this.store_.setMonth(month, date);
+    public override setMonth(month: int): long {
+        const result = this.store_.setMonth(month);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setMonth');
         return result;
@@ -704,10 +731,11 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param month new month
      */
-    public override setMonth(month: int): void {
-        this.store_.setMonth(month);
+    public override setMonth(month: int, date: int): long {
+        const result = this.store_.setMonth(month, date);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setMonth');
+        return result;
     }
 
     /**
@@ -715,8 +743,8 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param month new month
      */
-    public override setUTCMonth(month: number, date?: number): number {
-        const result = this.store_.setUTCMonth(month, date);
+    public override setUTCMonth(month: int): long {
+        const result = this.store_.setUTCMonth(month);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setUTCMonth');
         return result;
@@ -727,10 +755,11 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param month new month
      */
-    public override setUTCMonth(month: int): void {
-        this.store_.setUTCMonth(month);
+    public override setUTCMonth(month: int, date: int): long {
+        const result = this.store_.setUTCMonth(month, date);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setUTCMonth');
+        return result;
     }
 
     /**
@@ -740,7 +769,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * @see ECMA-262, 21.4.4.10
      * @returns A number representing the milliseconds elapsed between 1 January 1970 00:00:00 UTC and the given date.
      */
-    public override getTime(): number {
+    public override getTime(): long {
         this.conditionalAddRef();
         return this.store_.getTime();
     }
@@ -753,21 +782,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * @see ECMA-262, 21.4.4.10
      * @returns A number representing the milliseconds elapsed between 1 January 1970 00:00:00 UTC and the given date.
      */
-    public override setTime(value: long): void {
-        this.store_.setTime(value);
-        this.meta_.fireChange();
-        this.executeOnSubscribingWatches('setTime');
-    }
-
-    /**
-     * Sets the number of milliseconds since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     *
-     * @param value new ms
-     * @see ECMA-262, 21.4.4.10
-     * @returns A number representing the milliseconds elapsed between 1 January 1970 00:00:00 UTC and the given date.
-     */
-    public override setTime(value: number): number {
+    public override setTime(value: long): long {
         const result = this.store_.setTime(value);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setTime');
@@ -781,7 +796,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      * @returns the difference, in minutes, between a date as
      * evaluated in the UTC time zone, and the same date as evaluated in the local time zone.
      */
-    public override getTimezoneOffset(): number {
+    public override getTimezoneOffset(): long {
         this.conditionalAddRef();
         return this.store_.getTimezoneOffset();
     }
@@ -792,7 +807,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
      *
      * @param value new timezone offset
      */
-    public override setTimezoneOffset(value: number): number {
+    public override setTimezoneOffset(value: int): long {
         const result = this.store_.setTimezoneOffset(value);
         this.meta_.fireChange();
         this.executeOnSubscribingWatches('setTime');
