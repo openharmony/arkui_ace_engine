@@ -89,14 +89,17 @@ ArkUINativeModuleValue DatePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     }
     Color color;
     RefPtr<ResourceObject> textColorResObj;
+    ArkUIPickerTextStyleStruct textStyleStruct;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color, textColorResObj, nodeInfo)) {
         Color::ParseColorString("#ff0a59f7", color);
+        textStyleStruct.textColorSetByUser = false;
+    } else {
+        textStyleStruct.textColorSetByUser = true;
     }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = color.GetValue();
     textStyleStruct.fontStyle = fontStyle;
     textStyleStruct.fontInfo = fontInfo.c_str();
@@ -131,7 +134,7 @@ ArkUINativeModuleValue DatePickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
 
     if (textColorArgs->IsUndefined() && fontSizeArgs->IsUndefined() && fontWeightArgs->IsUndefined() &&
         fontFamilyArgs->IsUndefined() && fontStyleArgs->IsUndefined()) {
-        GetArkUINodeModifiers()->getDatePickerModifier()->resetSelectedTextStyle(nativeNode);
+        GetArkUINodeModifiers()->getDatePickerModifier()->resetDatePickerTextStyle(nativeNode);
     }
 
     RefPtr<ResourceObject> fontSizeResObj;
@@ -151,14 +154,17 @@ ArkUINativeModuleValue DatePickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     }
     Color color;
     RefPtr<ResourceObject> textColorResObj;
+    ArkUIPickerTextStyleStruct textStyleStruct;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color, textColorResObj, nodeInfo)) {
         Color::ParseColorString("#ff182431", color);
+        textStyleStruct.textColorSetByUser = false;
+    } else {
+        textStyleStruct.textColorSetByUser = true;
     }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = color.GetValue();
     textStyleStruct.fontStyle = fontStyle;
     textStyleStruct.fontInfo = fontInfo.c_str();
@@ -193,7 +199,7 @@ ArkUINativeModuleValue DatePickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
 
     if (textColorArgs->IsUndefined() && fontSizeArgs->IsUndefined() && fontWeightArgs->IsUndefined() &&
         fontFamilyArgs->IsUndefined() && fontStyleArgs->IsUndefined()) {
-        GetArkUINodeModifiers()->getDatePickerModifier()->resetSelectedTextStyle(nativeNode);
+        GetArkUINodeModifiers()->getDatePickerModifier()->resetDisappearTextStyle(nativeNode);
     }
 
     RefPtr<ResourceObject> fontSizeResObj;
@@ -213,14 +219,17 @@ ArkUINativeModuleValue DatePickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     }
     Color color;
     RefPtr<ResourceObject> textColorResObj;
+    ArkUIPickerTextStyleStruct textStyleStruct;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color, textColorResObj, nodeInfo)) {
         Color::ParseColorString("#ff182431", color);
+        textStyleStruct.textColorSetByUser = false;
+    } else {
+        textStyleStruct.textColorSetByUser = true;
     }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = color.GetValue();
     textStyleStruct.fontStyle = fontStyle;
     textStyleStruct.fontInfo = fontInfo.c_str();

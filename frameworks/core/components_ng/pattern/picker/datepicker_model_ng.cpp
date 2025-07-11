@@ -468,6 +468,7 @@ void DatePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, 
         DataPickerRowLayoutProperty, DisappearFontFamily, value.fontFamily.value_or(disappearStyle.GetFontFamilies()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, DisappearFontStyle, value.fontStyle.value_or(disappearStyle.GetFontStyle()));
+    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, DisappearTextColorSetByUser, value.textColorSetByUser);
 }
 
 PickerTextStyle DatePickerModelNG::getNormalTextStyle(FrameNode* frameNode)
@@ -520,6 +521,7 @@ void DatePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, con
         DataPickerRowLayoutProperty, FontFamily, value.fontFamily.value_or(normalStyle.GetFontFamilies()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, FontStyle, value.fontStyle.value_or(normalStyle.GetFontStyle()));
+    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, NormalTextColorSetByUser, value.textColorSetByUser);
 }
 
 PickerTextStyle DatePickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
@@ -572,6 +574,7 @@ void DatePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
         DataPickerRowLayoutProperty, SelectedFontFamily, value.fontFamily.value_or(selectedStyle.GetFontFamilies()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()));
+    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedTextColorSetByUser, value.textColorSetByUser);
 }
 
 void DatePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme)
@@ -849,6 +852,8 @@ void DatePickerModelNG::SetSelectedTextStyle(
         value.fontFamily.value_or(selectedStyle.GetFontFamilies()), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedFontStyle,
         value.fontStyle.value_or(selectedStyle.GetFontStyle()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedTextColorSetByUser,
+        value.textColorSetByUser, frameNode);
 }
 
 void DatePickerModelNG::SetNormalTextStyle(
@@ -874,6 +879,8 @@ void DatePickerModelNG::SetNormalTextStyle(
         DataPickerRowLayoutProperty, FontFamily, value.fontFamily.value_or(normalStyle.GetFontFamilies()), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, FontStyle, value.fontStyle.value_or(normalStyle.GetFontStyle()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, NormalTextColorSetByUser, value.textColorSetByUser, frameNode);
 }
 
 void DatePickerModelNG::SetDisappearTextStyle(
@@ -901,6 +908,8 @@ void DatePickerModelNG::SetDisappearTextStyle(
         value.fontFamily.value_or(disappearStyle.GetFontFamilies()), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, DisappearFontStyle,
         value.fontStyle.value_or(disappearStyle.GetFontStyle()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, DisappearTextColorSetByUser,
+        value.textColorSetByUser, frameNode);
 }
 
 void DatePickerModelNG::SetShowLunar(FrameNode* frameNode, bool lunar)
@@ -1020,6 +1029,11 @@ void DatePickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, c
 
     auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
+
+    if (!textStyleOpt.textColorResObj && !textStyleOpt.fontSizeResObj && !textStyleOpt.fontFamilyResObj) {
+        pickerPattern->RemoveResObj(textStyleType);
+        return;
+    }
 
     auto&& updateFunc = [textStyleOpt, frameNode, updateTextStyleFunc](const RefPtr<ResourceObject> resObj) {
         PickerTextStyle textStyle;

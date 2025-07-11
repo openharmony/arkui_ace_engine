@@ -25,8 +25,8 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
-#include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 
 #undef private
 #undef protected
@@ -39,7 +39,7 @@ namespace {
 constexpr double TEST_FONT_SIZE = 10.0;
 }
 
-class DatePickerResourceTest : public testing::Test {
+class TimePickerResourceTest : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -72,19 +72,19 @@ public:
     ~TestNode() override = default;
 };
 
-void DatePickerResourceTest::SetUpTestSuite()
+void TimePickerResourceTest::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
 }
 
-void DatePickerResourceTest::TearDownTestSuite()
+void TimePickerResourceTest::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
 
-void DatePickerResourceTest::SetUp()
+void TimePickerResourceTest::SetUp()
 {
     iconThem_ = AceType::MakeRefPtr<IconTheme>();
     dialogTheme_ = AceType::MakeRefPtr<DialogTheme>();
@@ -101,13 +101,13 @@ void DatePickerResourceTest::SetUp()
         .WillRepeatedly([this](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {return GetThemeByType(type);});
 }
 
-void DatePickerResourceTest::TearDown()
+void TimePickerResourceTest::TearDown()
 {
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     ViewStackProcessor::GetInstance()->ClearStack();
 }
 
-RefPtr<Theme> DatePickerResourceTest::GetThemeByType(ThemeType type)
+RefPtr<Theme> TimePickerResourceTest::GetThemeByType(ThemeType type)
 {
     if (type == IconTheme::TypeId()) {
         return iconThem_;
@@ -124,13 +124,13 @@ RefPtr<Theme> DatePickerResourceTest::GetThemeByType(ThemeType type)
 
 /**
  * @tc.name: UpdateDisappearTextStyle001
- * @tc.desc: Test DatePickerPattern UpdateDisappearTextStyle.
+ * @tc.desc: Test TimePickerRowPattern UpdateDisappearTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerResourceTest, UpdateDisappearTextStyle001, TestSize.Level1)
+HWTEST_F(TimePickerResourceTest, UpdateDisappearTextStyle001, TestSize.Level1)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -140,18 +140,18 @@ HWTEST_F(DatePickerResourceTest, UpdateDisappearTextStyle001, TestSize.Level1)
     PickerTextStyle textStyle;
     textStyle.textColor = Color::RED;
     textStyle.fontSize = Dimension(TEST_FONT_SIZE);
-    DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+    TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 
-    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_EQ(pickerProperty->GetDisappearColor().value(), Color::RED);
     EXPECT_EQ(pickerProperty->GetDisappearFontSize().value(), Dimension(TEST_FONT_SIZE));
 
     textStyle.textColor = Color::GREEN;
     textStyle.fontSize = Dimension(TEST_FONT_SIZE + 1);
-    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-    ASSERT_NE(datePickerPattern, nullptr);
-    datePickerPattern->UpdateDisappearTextStyle(textStyle);
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->UpdateDisappearTextStyle(textStyle);
 
     EXPECT_EQ(pickerProperty->GetDisappearColor().value(), Color::GREEN);
     EXPECT_EQ(pickerProperty->GetDisappearFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
@@ -159,13 +159,13 @@ HWTEST_F(DatePickerResourceTest, UpdateDisappearTextStyle001, TestSize.Level1)
 
 /**
  * @tc.name: UpdateNormalTextStyle001
- * @tc.desc: Test DatePickerPattern UpdateNormalTextStyle.
+ * @tc.desc: Test TimePickerRowPattern UpdateNormalTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerResourceTest, UpdateNormalTextStyle001, TestSize.Level1)
+HWTEST_F(TimePickerResourceTest, UpdateNormalTextStyle001, TestSize.Level1)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -175,18 +175,18 @@ HWTEST_F(DatePickerResourceTest, UpdateNormalTextStyle001, TestSize.Level1)
     PickerTextStyle textStyle;
     textStyle.textColor = Color::RED;
     textStyle.fontSize = Dimension(TEST_FONT_SIZE);
-    DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+    TimePickerModelNG::GetInstance()->SetNormalTextStyle(theme, textStyle);
 
-    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_EQ(pickerProperty->GetColor().value(), Color::RED);
     EXPECT_EQ(pickerProperty->GetFontSize().value(), Dimension(TEST_FONT_SIZE));
 
     textStyle.textColor = Color::GREEN;
     textStyle.fontSize = Dimension(TEST_FONT_SIZE + 1);
-    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-    ASSERT_NE(datePickerPattern, nullptr);
-    datePickerPattern->UpdateNormalTextStyle(textStyle);
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->UpdateNormalTextStyle(textStyle);
 
     EXPECT_EQ(pickerProperty->GetColor().value(), Color::GREEN);
     EXPECT_EQ(pickerProperty->GetFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
@@ -194,13 +194,13 @@ HWTEST_F(DatePickerResourceTest, UpdateNormalTextStyle001, TestSize.Level1)
 
 /**
  * @tc.name: UpdateSelectedTextStyle001
- * @tc.desc: Test DatePickerPattern UpdateSelectedTextStyle.
+ * @tc.desc: Test TimePickerRowPattern UpdateSelectedTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerResourceTest, UpdateSelectedTextStyle001, TestSize.Level1)
+HWTEST_F(TimePickerResourceTest, UpdateSelectedTextStyle001, TestSize.Level1)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -210,18 +210,18 @@ HWTEST_F(DatePickerResourceTest, UpdateSelectedTextStyle001, TestSize.Level1)
     PickerTextStyle textStyle;
     textStyle.textColor = Color::RED;
     textStyle.fontSize = Dimension(TEST_FONT_SIZE);
-    DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    TimePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 
-    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_EQ(pickerProperty->GetSelectedColor().value(), Color::RED);
     EXPECT_EQ(pickerProperty->GetSelectedFontSize().value(), Dimension(TEST_FONT_SIZE));
 
     textStyle.textColor = Color::GREEN;
     textStyle.fontSize = Dimension(TEST_FONT_SIZE + 1);
-    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-    ASSERT_NE(datePickerPattern, nullptr);
-    datePickerPattern->UpdateSelectedTextStyle(textStyle);
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->UpdateSelectedTextStyle(textStyle);
 
     EXPECT_EQ(pickerProperty->GetSelectedColor().value(), Color::GREEN);
     EXPECT_EQ(pickerProperty->GetSelectedFontSize().value(), Dimension(TEST_FONT_SIZE + 1));

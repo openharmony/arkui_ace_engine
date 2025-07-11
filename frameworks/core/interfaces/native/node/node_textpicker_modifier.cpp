@@ -225,6 +225,7 @@ void SetTextPickerTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPi
         return;
     }
     NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
     InitTextPickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
         textStyle);
     SetTextPickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
@@ -268,6 +269,7 @@ void SetTextPickerSelectedTextStyleWithResObj(ArkUINodeHandle node,
         return;
     }
     NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
     InitTextPickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
         textStyle);
     SetTextPickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
@@ -312,6 +314,7 @@ void SetTextPickerDisappearTextStyleWithResObj(ArkUINodeHandle node,
         return;
     }
     NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
     InitTextPickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
         textStyle);
     SetTextPickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
@@ -789,6 +792,7 @@ void SetTextPickerDefaultTextStyleWithResObj(ArkUINodeHandle node,
     CHECK_NULL_VOID(theme);
 
     NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
     InitTextPickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
         textStyle);
     textStyle.minFontSize = StringUtils::StringToCalcDimension(textStyleStruct->minFontSize, false, DimensionUnit::FP);

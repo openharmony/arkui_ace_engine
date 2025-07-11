@@ -1261,6 +1261,20 @@ void CalendarPickerPattern::OnWindowSizeChanged(int32_t width, int32_t height, W
 
 void CalendarPickerPattern::OnColorConfigurationUpdate()
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pickerProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
+        CHECK_NULL_VOID(pickerProperty);
+        if (!pickerProperty->GetNormalTextColorSetByUser().value_or(false)) {
+            auto pipelineContext = host->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>(host->GetThemeScopeId());
+            CHECK_NULL_VOID(calendarTheme);
+            pickerProperty->UpdateColor(calendarTheme->GetEntryFontColor());
+        }
+    }
+
     if (IsDialogShow()) {
         return;
     }
@@ -1480,7 +1494,8 @@ void CalendarPickerPattern::UpdateTextStyle(const PickerTextStyle& textStyle)
     CHECK_NULL_VOID(pickerProperty);
 
     if (pipelineContext->IsSystmColorChange()) {
-        pickerProperty->UpdateColor(textStyle.textColor.value_or(calendarTheme->GetEntryFontColor()));
+        Color defaultColor = pickerProperty->GetColor().value_or(calendarTheme->GetEntryFontColor());
+        pickerProperty->UpdateColor(textStyle.textColor.value_or(defaultColor));
 
         Dimension fontSize = calendarTheme->GetEntryFontSize();
         if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
