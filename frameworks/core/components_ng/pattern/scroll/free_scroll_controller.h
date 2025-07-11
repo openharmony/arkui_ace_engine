@@ -85,7 +85,7 @@ private:
     /**
      * @brief clamp position to be within the scrollable area.
      */
-    void ClampPosition(OffsetF& finalPos) const;
+    OffsetF ClampPosition(const OffsetF& finalPos) const;
 
     /**
      * @brief Check if the new offset would reach any edges. If so, fire corresponding user callbacks.
@@ -102,8 +102,6 @@ private:
     void FireOnScrollStart() const;
     void FireOnScrollEnd() const;
     void FireOnScrollEdge(const std::vector<ScrollEdge>& edges) const;
-
-    void SwitchToLowResponse();
 
     ScrollPattern& pattern_;
     RefPtr<NodeAnimatablePropertyOffsetF> offset_;
