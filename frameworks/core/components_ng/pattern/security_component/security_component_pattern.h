@@ -110,6 +110,8 @@ protected:
     void InitOnClick(RefPtr<FrameNode>& secCompNode, RefPtr<FrameNode>& icon,
         RefPtr<FrameNode>& text, RefPtr<FrameNode>& button);
     void InitAppearCallback(RefPtr<FrameNode>& frameNode);
+    void ToJsonValueBorderRadius(const std::optional<BorderRadiusProperty>& borderRadius,
+    const RefPtr<SecurityComponentTheme>& theme, std::unique_ptr<JsonValue>& borderRadiusJson) const;
     void ToJsonValueIconNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& iconNode,
         const InspectorFilter& filter) const;
     void ToJsonValueSymbolIconNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& symbolIconNode,
@@ -117,6 +119,8 @@ protected:
     void ToJsonValueTextNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& textNode,
         const InspectorFilter& filter) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void ToJsonValuePadding(const RefPtr<SecurityComponentTheme>& theme,
+        const RefPtr<SecurityComponentLayoutProperty>& layoutProperty, std::unique_ptr<JsonValue>& paddingJson) const;
     void ToJsonValueRect(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     bool IsParentMenu(RefPtr<FrameNode>& secCompNode);
 private:
