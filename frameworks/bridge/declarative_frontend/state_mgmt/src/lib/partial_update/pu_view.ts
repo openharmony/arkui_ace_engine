@@ -665,14 +665,29 @@ abstract class ViewPU extends PUV2ViewBase
     this.providedVars_.set(providedPropName, store);
   }
 
+  static _findProvide_ViewPU_Interop?: (providedPropName: string) => any;
+
+  findProvideInterop?: (providedPropName: string) => any;
+
   /*
     findProvidePU__ finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
     if 'this' ViewPU has a @Provide('providedPropName') return it, otherwise ask from its parent ViewPU.
   */
-  public findProvidePU__(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
-    return this.providedVars_.get(providedPropName) ||
-    (this.parent_ && this.parent_.findProvidePU__(providedPropName)) ||
-    (this.__parentViewBuildNode__ && this.__parentViewBuildNode__.findProvidePU__(providedPropName));
+  public findProvidePU(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
+    // for interop
+    if (InteropConfigureStateMgmt.instance.needsInterop()) {
+      return this.providedVars_.get(providedPropName) || (this.parent_ && this.parent_.findProvidePU(providedPropName)) ||
+      (this.findProvideInterop !== undefined && typeof this.findProvideInterop === 'function' ? this.findProvideInterop(providedPropName) : undefined) ||
+      (ViewPU._findProvide_ViewPU_Interop !== undefined && typeof ViewPU._findProvide_ViewPU_Interop === 'function' ?
+      ViewPU._findProvide_ViewPU_Interop(providedPropName) : undefined);
+    } 
+    return this.providedVars_.get(providedPropName) || (this.parent_ && this.parent_.findProvidePU(providedPropName));
+  }
+
+  static _resetFindProvide_ViewPU_Interop() {
+    if (typeof ViewPU._findProvide_ViewPU_Interop === 'function') {
+      ViewPU._findProvide_ViewPU_Interop = undefined;
+    }
   }
 
   /**

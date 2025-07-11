@@ -24,6 +24,7 @@
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/log/log.h"
 #include "base/utils/measure_util.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/font_manager.h"
@@ -57,6 +58,55 @@ constexpr float FONTWEIGHT = 0.5f;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr uint32_t NEXT_COLOUM_DIFF = 1;
 } // namespace
+
+void DatePickerColumnPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode); // picker multi-thread security
+
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    tossAnimationController_->SetPipelineContext(context);
+    tossAnimationController_->SetColumn(AceType::WeakClaim(this));
+    jumpInterval_ = pickerTheme->GetJumpInterval().ConvertToPx();
+    CreateAnimation();
+    InitPanEvent(gestureHub);
+    host->GetRenderContext()->SetClipToFrame(true);
+    InitHapticController();
+    RegisterWindowStateChangedCallback();
+}
+
+void DatePickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode); // picker multi-thread security
+
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+    UnregisterWindowStateChangedCallback(frameNode);
+}
+
+void DatePickerColumnPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree); // picker multi-thread security
+}
+
+void DatePickerColumnPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree); // picker multi-thread security
+}
 
 void DatePickerColumnPattern::OnModifyDone()
 {

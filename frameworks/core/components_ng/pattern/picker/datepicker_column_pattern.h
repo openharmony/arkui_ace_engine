@@ -106,6 +106,17 @@ public:
 
 private:
     void OnModifyDone() override;
+    void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+
+    void OnAttachToFrameNodeMultiThread() {}
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
+
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetDividerHeight(uint32_t showOptionCount);
     void InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme);
     void UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty);
@@ -128,12 +139,22 @@ private:
         const RefPtr<TextLayoutProperty>& textLayoutProperty,
         const RefPtr<PickerLayoutProperty>& pickerLayoutProperty) override;
     void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty, uint32_t index,
-        uint32_t showCount, bool isDown, double scale) override;
-    void InitTextFontFamily() override;
-    uint32_t GetOptionCount() const override;
-    bool GetOptionItemCount(uint32_t& itemCounts) override;
-    bool IsLanscape(uint32_t itemCount) override;
+        uint32_t showCount, bool isDown, double scale);
+    void FlushAnimationTextProperties(bool isDown);
+    Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
+    void SetAccessibilityAction();
+    DimensionRect CalculateHotZone(int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight);
+    void AddHotZoneRectToText();
+    void InitTextFontFamily();
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void RegisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback(FrameNode* frameNode);
+    void OnWindowHide() override;
+    void OnWindowShow() override;
 
+    float localDownDistance_ = 0.0f;
+    RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<InputEvent> mouseEvent_;
     std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>> options_;
     int32_t currentChildIndex_ = 0;
     float gradientHeight_ = 0.0f;

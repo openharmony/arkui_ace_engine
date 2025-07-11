@@ -34,7 +34,7 @@ import { Es2pandaTokenType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class AssignmentExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 159)
+        assertValidPeer(pointer, 161)
         super(pointer)
     }
     static create1AssignmentExpression(type: Es2pandaAstNodeType, left: Expression | undefined, right: Expression | undefined, assignmentOperator: Es2pandaTokenType): AssignmentExpression {
@@ -92,6 +92,7 @@ export class AssignmentExpression extends Expression {
         global.generatedEs2panda._AssignmentExpressionCompilePatternConst(global.context, this.peer, passNode(pg))
         return this
     }
+    protected readonly brandAssignmentExpression: undefined
 }
 export function isAssignmentExpression(node: object | undefined): node is AssignmentExpression {
     return node instanceof AssignmentExpression

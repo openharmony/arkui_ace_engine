@@ -32,6 +32,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
+#include "bridge/js_frontend/engine/common/js_engine.h"
 #ifdef WINDOWS_PLATFORM
 #include <algorithm>
 #endif
@@ -480,6 +481,7 @@ std::shared_mutex JsiDeclarativeEngineInstance::globalRuntimeMutex_;
 // for async task callback executed after this instance has been destroyed.
 thread_local void* cardRuntime_;
 thread_local shared_ptr<JsRuntime> localRuntime_;
+thread_local void* g_declarativeRuntime = nullptr;
 
 // ArkTsCard start
 thread_local bool isUnique_ = false;
@@ -807,6 +809,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
     localRuntime_ = arkRuntime;
     cardRuntime_ = runtime;
+    g_declarativeRuntime = runtime;
 }
 
 void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtime)
@@ -1447,6 +1450,12 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     ACE_DCHECK(delegate);
     NG::UIContextHelper::RegisterRemoveUIContextFunc();
     engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate);
+    if (hybridType == JsEngineHybridType::DYNAMIC_HYBRID_STATIC) {
+        runtime_ = g_declarativeRuntime;
+    }
+    if (!g_declarativeRuntime && hybridType == JsEngineHybridType::DYNAMIC_HYBRID_STATIC) {
+        LOGE("JsiDeclarativeEngine::Initialize, g_declarativeRuntime is null");
+    }
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime_);
     std::shared_ptr<ArkJSRuntime> arkRuntime;
     EcmaVM* vm = nullptr;
@@ -2420,7 +2429,7 @@ bool JsiDeclarativeEngine::ExecuteJsForFastPreview(const std::string& jsCode, co
 }
 
 void JsiDeclarativeEngine::SetHspBufferTrackerCallback(
-    std::function<bool(const std::string&, bool, uint8_t**, size_t*, std::string&)>&& callback)
+    std::function<bool(const std::string&, uint8_t**, size_t*, std::string&)>&& callback)
 {
     CHECK_NULL_VOID(engineInstance_);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());

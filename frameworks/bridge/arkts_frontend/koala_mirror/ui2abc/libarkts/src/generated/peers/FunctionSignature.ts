@@ -58,4 +58,5 @@ export class FunctionSignature extends ArktsObject {
     get hasReceiver(): boolean {
         return global.generatedEs2panda._FunctionSignatureHasReceiverConst(global.context, this.peer)
     }
+    protected readonly brandFunctionSignature: undefined
 }

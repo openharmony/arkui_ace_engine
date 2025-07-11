@@ -18,7 +18,6 @@
 #include "draw/core_canvas.h"
 #include "lattice_napi/js_lattice.h"
 
-#include "base/image/drawing_lattice.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
@@ -34,6 +33,11 @@ RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromNative(void* sptr
     CHECK_NULL_RETURN(sptrAddr, nullptr);
     auto* lattice = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::Lattice>*>(sptrAddr);
     return AceType::MakeRefPtr<DrawingLatticePreview>(*lattice);
+}
+
+RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromAni(void* aniAddr)
+{
+    return nullptr;
 }
 
 void* DrawingLatticePreview::GetDrawingLatticeSptrAddr()

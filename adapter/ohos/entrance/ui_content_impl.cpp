@@ -1413,7 +1413,7 @@ ani_object UIContentImpl::GetUIAniContext()
     CHECK_NULL_RETURN(frontend, result);
     auto arktsFrontend = AceType::DynamicCast<ArktsFrontend>(frontend);
     CHECK_NULL_RETURN(arktsFrontend, result);
-    result = arktsFrontend->CallGetUIContextFunc();
+    result = arktsFrontend->CallGetUIContextFunc(instanceId_);
     return result;
 }
 
@@ -1509,6 +1509,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
             AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
             AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
             AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
+            AceApplicationInfo::GetInstance().SetDebugForParallel(context->GetApplicationInfo()->debug);
             AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
             AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
             CapabilityRegistry::Register();
@@ -2020,6 +2021,60 @@ void UIContentImpl::SetFontScaleAndWeightScale(const RefPtr<Platform::AceContain
     container->SetFontWeightScale(instanceId, fontWeightScale);
 }
 
+UIContentErrorCode UIContentImpl::CommonInitialize(
+    OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storageWrapper, uint32_t focusWindowId)
+{
+    auto errorCode = UIContentErrorCode::NO_ERRORS;
+    window_ = window;
+    CHECK_NULL_RETURN(window_, UIContentErrorCode::NULL_WINDOW);
+    auto windowName = window->GetWindowName();
+    ACE_SCOPED_TRACE_COMMERCIAL("UI Initialize:%s", windowName.c_str());
+    startUrl_ = contentInfo;
+    if (StringUtils::StartWith(windowName, SUBWINDOW_TOAST_DIALOG_PREFIX)) {
+        InitializeSubWindow(window_, true);
+        return errorCode;
+    }
+    if (StringUtils::StartWith(windowName, SUBWINDOW_PREFIX)) {
+        InitializeSubWindow(window_);
+        return errorCode;
+    }
+    auto context = context_.lock();
+    CHECK_NULL_RETURN(context, UIContentErrorCode::NULL_POINTER);
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, [&context]() {
+        SetHwIcuDirectory();
+        Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+        auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
+        if (abilityContext) {
+            int32_t missionId = -1;
+            abilityContext->GetMissionId(missionId);
+            AceApplicationInfo::GetInstance().SetMissionId(missionId);
+        }
+        AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
+        AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
+        AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
+        AceApplicationInfo::GetInstance().SetApiTargetVersion(context->GetApplicationInfo()->apiTargetVersion);
+        AceApplicationInfo::GetInstance().SetAppVersionName(context->GetApplicationInfo()->versionName);
+        AceApplicationInfo::GetInstance().SetAppVersionCode(context->GetApplicationInfo()->versionCode);
+        AceApplicationInfo::GetInstance().SetDebugForParallel(context->GetApplicationInfo()->debug);
+        AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
+        AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
+        CapabilityRegistry::Register();
+        ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
+        ImageFileCache::GetInstance().SetCacheFileInfo();
+        XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
+
+    auto task = [] {
+        std::unordered_map<std::string, std::string> payload;
+        std::unordered_map<std::string, std::string> reply;
+        payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
+        payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
+        g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
+        ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", g_isDynamicVsync.load());
+        OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(g_isDynamicVsync);
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(task);
+}
 void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
 {
     SetHwIcuDirectory();
@@ -2359,6 +2414,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     if (vmType_ == VMType::ARK_NATIVE) {
         frontendType = FrontendType::ARK_TS;
+    }
+    if (appInfo->codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_HYBRID) {
+        if (vmType_ == VMType::ARK_NATIVE) {
+            frontendType = FrontendType::STATIC_HYBRID_DYNAMIC;
+        } else {
+            frontendType = FrontendType::DYNAMIC_HYBRID_STATIC;
+        }
     }
     auto container = CreateContainer(info, frontendType, useNewPipe);
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);

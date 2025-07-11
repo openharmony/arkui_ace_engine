@@ -188,7 +188,7 @@ suite("[ARKTS+MEMO PLUGIN] Functions with receiver", () => {
         )
     })
 
-    test.expectFailure("conditional expectFailure", "Lambda function with receiver", () => {
+    test.expectFailure("TODO: fails in runtime, probably a bug in call AST", "Lambda function with receiver", () => {
         const instance = new TestLambdaWithReceiver()
         const root = testRoot(instance.test)
         assertResultArray(instance.log,

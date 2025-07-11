@@ -227,17 +227,17 @@ HWTEST_F(PathModifierTest, setCommandsTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(PathModifierTest, setCommandsTestValidValues, TestSize.Level1)
 {
-    Ark_String inputValueCommands;
+    Opt_String inputValueCommands;
     std::string resultStr;
 
     // Initial setup/verification
-    inputValueCommands = Converter::ArkValue<Ark_String>(PATH_CMD);
+    inputValueCommands = Converter::ArkValue<Opt_String>(PATH_CMD);
     modifier_->setCommands(node_, &inputValueCommands);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
     EXPECT_EQ(resultStr, PATH_CMD);
 
     // Verifying attribute's other values
-    inputValueCommands = Converter::ArkValue<Ark_String>("abc");
+    inputValueCommands = Converter::ArkValue<Opt_String>("abc");
     modifier_->setCommands(node_, &inputValueCommands);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
     EXPECT_EQ(resultStr, "abc");
@@ -250,11 +250,11 @@ HWTEST_F(PathModifierTest, setCommandsTestValidValues, TestSize.Level1)
  */
 HWTEST_F(PathModifierTest, setCommandsTestInvalidValues, TestSize.Level1)
 {
-    Ark_String inputValueCommands;
+    Opt_String inputValueCommands;
     std::string resultStr;
 
     // Verifying attribute's valid values
-    inputValueCommands = Converter::ArkValue<Ark_String>(PATH_CMD);
+    inputValueCommands = Converter::ArkValue<Opt_String>(PATH_CMD);
     modifier_->setCommands(node_, &inputValueCommands);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
     EXPECT_EQ(resultStr, PATH_CMD);
@@ -265,13 +265,13 @@ HWTEST_F(PathModifierTest, setCommandsTestInvalidValues, TestSize.Level1)
     EXPECT_EQ(resultStr, PATH_CMD); // nothing changes in invalid case
 
     // Verifying attribute's valid values
-    inputValueCommands = Converter::ArkValue<Ark_String>(PATH_CMD);
+    inputValueCommands = Converter::ArkValue<Opt_String>(PATH_CMD);
     modifier_->setCommands(node_, &inputValueCommands);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
     EXPECT_EQ(resultStr, PATH_CMD);
 
     // Verifying attribute's empty values
-    inputValueCommands = Converter::ArkValue<Ark_String>("");
+    inputValueCommands = Converter::ArkValue<Opt_String>("");
     modifier_->setCommands(node_, &inputValueCommands);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_COMMANDS_DEFAULT_VALUE); // reset value

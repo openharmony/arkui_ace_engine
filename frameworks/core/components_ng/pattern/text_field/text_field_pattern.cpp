@@ -28,6 +28,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/event_report.h"
 #include "base/memory/type_info_base.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "core/common/ime/constant.h"
 #include "core/components/common/properties/text_style.h"
@@ -1194,6 +1195,9 @@ void TextFieldPattern::ProcessFocusStyle()
 
 void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, HandleSetSelection,
+        start, end, showHandle);  // call HandleSetSelectionMultiThread() by multi thread
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleSetSelection %{public}d, %{public}d, showOverlay:%{public}d", start, end,
         showHandle);
     StopTwinkling();
@@ -1204,7 +1208,6 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showH
         CloseSelectOverlay();
     }
     UpdateCaretInfoToController();
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -3382,8 +3385,9 @@ void TextFieldPattern::UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldThem
 
 void TextFieldPattern::OnModifyDone()
 {
-    Pattern::OnModifyDone();
     auto host = GetHost();
+    FREE_NODE_CHECK(host, OnModifyDone);  // call OnModifyDoneMultiThread() by multi thread
+    Pattern::OnModifyDone();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
@@ -6193,6 +6197,7 @@ void TextFieldPattern::InitSurfaceChangedCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, InitSurfaceChangedCallback);  // call InitSurfaceChangedCallbackMultiThread() by multi thread
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
@@ -6212,6 +6217,8 @@ void TextFieldPattern::InitSurfacePositionChangedCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host,
+        InitSurfacePositionChangedCallback);  // call InitSurfacePositionChangedCallbackMultiThread() by multi thread
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfacePositionChangedCallback()) {
@@ -6719,6 +6726,8 @@ void TextFieldPattern::HandleSelectionParagraghEnd()
 
 void TextFieldPattern::SetCaretPosition(int32_t position, bool moveContent)
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, SetCaretPosition, position, moveContent);  // call SetCaretPositionMultiThread() by multi thread
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM, true, moveContent);
     UpdateCaretInfoToController();
@@ -6742,6 +6751,9 @@ bool TextFieldPattern::SetCaretOffset(int32_t caretPostion)
 void TextFieldPattern::SetSelectionFlag(
     int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, SetSelectionFlag, selectionStart,
+        selectionEnd, options, isForward);  // call SetSelectionFlagMultiThread() by multi thread
     if (!HasFocus() || GetIsPreviewText()) {
         return;
     }
@@ -6781,7 +6793,6 @@ void TextFieldPattern::SetSelectionFlag(
         }
     }
     TriggerAvoidWhenCaretGoesDown();
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -8088,10 +8099,11 @@ void TextFieldPattern::SetAccessibilityErrotText()
 
 void TextFieldPattern::StopEditing()
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, StopEditing);  // call StopEditingMultiThread() by multi thread
     if (!HasFocus()) {
         return;
     }
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     ContainerScope scope(host->GetInstanceId());
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Stop Editing", host->GetId());
@@ -8481,6 +8493,7 @@ void TextFieldPattern::OnAttachToFrameNode()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
+    THREAD_SAFE_NODE_CHECK(frameNode, OnAttachToFrameNode);  // call OnAttachToFrameNodeMultiThread() by multi thread
     StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode, WeakClaim(this));
 
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -9034,6 +9047,20 @@ void TextFieldPattern::CleanNodeResponseKeyEvent()
     }
 }
 
+void TextFieldPattern::RegisterWindowSizeCallback()
+{
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, RegisterWindowSizeCallback);  // call RegisterWindowSizeCallbackMultiThread() by multi thread
+    if (isOritationListenerRegisted_) {
+        return;
+    }
+    isOritationListenerRegisted_ = true;
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowSizeChangeCallback(host->GetId());
+}
+
 void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     if (selectOverlay_) {
@@ -9402,6 +9429,7 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetPreviewTextOperation, info);  // call SetPreviewTextOperationMultiThread() by multi thread
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!hasPreviewText_) {
@@ -9479,11 +9507,13 @@ void TextFieldPattern::FinishTextPreview()
 
 void TextFieldPattern::FinishTextPreviewOperation(bool triggerOnWillChange)
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, FinishTextPreviewOperation,
+        triggerOnWillChange);  // call FinishTextPreviewOperationMultiThread() by multi thread
     if (!hasPreviewText_) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "input state now is not at previewing text");
         return;
     }
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -9685,6 +9715,8 @@ void TextFieldPattern::ResetPreviewTextState()
 
 void TextFieldPattern::SetShowKeyBoardOnFocus(bool value)
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, SetShowKeyBoardOnFocus, value);  // call SetShowKeyBoardOnFocusMultiThread() by multi thread
     if (showKeyBoardOnFocus_ == value) {
         return;
     }
@@ -10291,8 +10323,9 @@ void TextFieldPattern::SetDragMovingScrollback()
 
 void TextFieldPattern::OnAttachToMainTree()
 {
-    isDetachFromMainTree_ = false;
     auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);  // call OnAttachToMainTreeMultiThread() by multi thread
+    isDetachFromMainTree_ = false;
     CHECK_NULL_VOID(host);
     auto autoFillContainerNode = host->GetFirstAutoFillContainerNode();
     CHECK_NULL_VOID(autoFillContainerNode);
@@ -10302,6 +10335,8 @@ void TextFieldPattern::OnAttachToMainTree()
 
 void TextFieldPattern::OnDetachFromMainTree()
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);  // call OnDetachFromMainTreeMultiThread() by multi thread
     isDetachFromMainTree_ = true;
     RemoveTextFieldInfo();
     RemoveFillContentMap();
@@ -11181,6 +11216,9 @@ void TextFieldPattern::SetCustomKeyboard(const std::function<void()>&& keyboardB
 
 void TextFieldPattern::SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder)
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, SetCustomKeyboardWithNode,
+        keyboardBuilder);  // call SetCustomKeyboardWithNodeMultiThread() by multi thread
     if (customKeyboard_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
         // close customKeyboard and request system keyboard
         CloseCustomKeyboard();

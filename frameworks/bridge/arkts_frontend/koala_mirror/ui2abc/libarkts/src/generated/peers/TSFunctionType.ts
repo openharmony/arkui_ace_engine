@@ -35,7 +35,7 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 export class TSFunctionType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 125)
+        assertValidPeer(pointer, 127)
         super(pointer)
     }
     static createTSFunctionType(signature?: FunctionSignature): TSFunctionType {
@@ -58,6 +58,7 @@ export class TSFunctionType extends TypeNode {
         global.generatedEs2panda._TSFunctionTypeSetNullable(global.context, this.peer, nullable)
         return this
     }
+    protected readonly brandTSFunctionType: undefined
 }
 export function isTSFunctionType(node: object | undefined): node is TSFunctionType {
     return node instanceof TSFunctionType

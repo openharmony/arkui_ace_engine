@@ -34,7 +34,7 @@ import { Identifier } from "./Identifier"
 import { TypeNode } from "./TypeNode"
 export class ETSTypeReference extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 72)
+        assertValidPeer(pointer, 74)
         super(pointer)
     }
     static createETSTypeReference(part?: ETSTypeReferencePart): ETSTypeReference {
@@ -49,6 +49,7 @@ export class ETSTypeReference extends TypeNode {
     get baseName(): Identifier | undefined {
         return unpackNode(global.generatedEs2panda._ETSTypeReferenceBaseNameConst(global.context, this.peer))
     }
+    protected readonly brandETSTypeReference: undefined
 }
 export function isETSTypeReference(node: object | undefined): node is ETSTypeReference {
     return node instanceof ETSTypeReference

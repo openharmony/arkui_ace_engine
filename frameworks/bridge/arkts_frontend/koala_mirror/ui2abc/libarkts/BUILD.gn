@@ -25,7 +25,6 @@ node_modules_dir = "../node_modules"
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
-
 os_define = "KOALA_LINUX"
 
 shared_library("es2panda_lib") {
@@ -64,7 +63,7 @@ shared_library("es2panda_lib") {
     ]
 
     deps = [
-        "$ui2abc_path:install"
+        "$ui2abc_path:ui2abc_install"
     ]
 
     configs -= [ "//build/config/compiler:compiler" ]
@@ -88,7 +87,7 @@ action("es2panda_copy_lib") {
         "$target_out_dir/es2panda.node"
     ]
     deps = [
-        ":es2panda_lib(${toolchain_linux})"
+       ":es2panda_lib(${toolchain_linux})"
     ]
     args = [
         "--from-path", rebase_path(root_out_dir),
@@ -96,17 +95,30 @@ action("es2panda_copy_lib") {
     ]
 }
 
+action("libarkts_install") {
+    script = "../../gn/command/npm_util.py"
+    outputs = [
+        "$target_out_dir/libarkts_install"
+    ]
+    args = [
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--install",
+        "--install-path", rebase_path("..")
+    ]
+}
+
 action("es2panda.js") {
-    script = "gn/command/npm.py"
+    script = "../../gn/command/npm_util.py"
     outputs = [
         "$target_out_dir/es2panda.js"
     ]
     deps = [
         ":es2panda_copy_lib",
-        "$ui2abc_path:panda_sdk"
+        "$ui2abc_path:ui2abc_panda_sdk",
+        ":libarkts_install"
     ]
     args = [
-        "--root-path", rebase_path(".."),
         "--project-path", rebase_path("."),
         "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
         "--npm-args", "run", "compile:gn"

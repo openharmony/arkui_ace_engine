@@ -91,6 +91,15 @@ void CreateImageBackButton(RefPtr<FrameNode>& backButtonNode, RefPtr<TitleBarNod
     backButtonImageNode->MarkModifyDone();
     backButtonNode->MarkModifyDone();
 }
+
+void SetNeedResetTitleProperty(const RefPtr<FrameNode>& titleBarNode)
+{
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetNeedResetMainTitleProperty(true);
+    titleBarPattern->SetNeedResetSubTitleProperty(true);
+}
 } // namespace
 
 void NavDestinationModelStatic::SetBackButtonIcon(FrameNode* frameNode,
@@ -595,5 +604,27 @@ void NavDestinationModelStatic::SetTitleHeight(FrameNode* frameNode, const Dimen
     } else {
         titleBarLayoutProperty->ResetTitleHeight();
     }
+}
+
+void NavDestinationModelStatic::SetHideBackButton(FrameNode* frameNode, bool hideBackButton)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    if (!navDestinationLayoutProperty->HasHideBackButton() ||
+        (hideBackButton != navDestinationLayoutProperty->GetHideBackButtonValue())) {
+        SetNeedResetTitleProperty(AceType::DynamicCast<FrameNode>(navDestinationGroupNode->GetTitleBarNode()));
+    }
+    navDestinationLayoutProperty->UpdateHideBackButton(hideBackButton);
+}
+
+void NavDestinationModelStatic::SetEnableStatusBar(
+    FrameNode* frameNode, const std::optional<std::pair<bool, bool>>& statusBar)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetStatusBarConfig(statusBar);
 }
 } // namespace OHOS::Ace::NG

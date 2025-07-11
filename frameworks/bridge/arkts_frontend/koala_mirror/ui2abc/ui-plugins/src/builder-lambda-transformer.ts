@@ -14,7 +14,11 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { styledInstance, uiAttributeName } from "./utils"
+import { getCustomComponentOptionsName, styledInstance, uiAttributeName } from "./utils"
+import { StructDescriptor, StructsResolver } from "./struct-recorder"
+import { DecoratorNames } from "./property-translators/utils"
+import { fieldOf } from "./property-transformers"
+import { backingField } from "./common/arkts-utils"
 
 function isBuilderLambdaAnnotation(annotation: arkts.AnnotationUsage): boolean {
     if (annotation.expr === undefined) {
@@ -91,7 +95,7 @@ export function builderLambdaFunctionName(node: arkts.CallExpression): string | 
  */
 function inferType(node: arkts.CallExpression): arkts.Identifier | undefined {
     if (arkts.isIdentifier(node.callee)) {
-        const component = node.callee.name
+        const component = node.callee.name.replace("Impl", "")
         return arkts.factory.createIdentifier(uiAttributeName(component))
     }
     const decl = arkts.getDecl(node.callee!)
@@ -159,17 +163,80 @@ function builderLambdaCallee(name: string) {
     )
 }
 
-function transformBuilderLambdaCall(node: arkts.CallExpression): arkts.CallExpression {
+function isOptionsType(type: arkts.TypeNode): type is arkts.ETSTypeReference {
+    return arkts.isETSTypeReference(type) && arkts.isIdentifier(type.part?.name) && (type.part?.name?.name?.startsWith("__Options") ?? false)
+}
+
+function maybeFieldRewrite(struct: StructDescriptor, property: arkts.Property): arkts.Expression {
+    const value = property.value as arkts.MemberExpression
+    if (!arkts.isIdentifier(property.key)) return property.value!
+    if (arkts.isThisExpression(value.object) && arkts.isIdentifier(value.property)) {
+        let targetName = property.key.name
+        let localName = value.property.name
+        // Hack to work around the fact that $-conversion already made transition to backing field,
+        // let's rework.
+        if (struct.hasDecorator(targetName, DecoratorNames.LINK) && !localName.startsWith("__backing")) {
+            return fieldOf(arkts.factory.createThisExpression(), backingField(localName))
+        }
+    }
+    return value
+}
+
+function rewriteOptionsParameter(expression: arkts.Expression, type: arkts.TypeNode, struct: StructDescriptor): arkts.Expression {
+    if (!arkts.isObjectExpression(expression) || !struct) return expression
+    return arkts.factory.createTSAsExpression(
+        arkts.factory.updateObjectExpression(
+            expression,
+            expression.properties.map(value => {
+                if (arkts.isProperty(value) && arkts.isMemberExpression(value.value)) {
+                    return arkts.factory.updateProperty(
+                        value,
+                        arkts.Es2pandaPropertyKind.PROPERTY_KIND_INIT,
+                        value.key,
+                        maybeFieldRewrite(struct, value), false, false
+                    )
+                } else {
+                    return value
+                }
+            })),
+        type, false
+    )
+}
+
+function transformBuilderLambdaCall(resolver: StructsResolver | undefined, node: arkts.CallExpression): arkts.CallExpression {
     const implFunction = builderLambdaFunctionName(node)
     if (implFunction === undefined) {
         return node
+    }
+    const callee = getScriptFunction(node)
+    let optionsIndex = -1
+    let optionsType: arkts.ETSTypeReference | undefined = undefined
+    let struct: StructDescriptor | undefined = undefined
+    if (callee) {
+        callee.params.forEach((it, index) => {
+            if (arkts.isETSParameterExpression(it)) {
+                let type = it.typeAnnotation
+                if (arkts.isETSUnionType(type) && isOptionsType(type.types[0])) {
+                    optionsIndex = index
+                    optionsType = type.types[0] as arkts.ETSTypeReference
+                    struct = resolver?.findStructByOptions(optionsType.baseName!)
+                }
+            }
+        })
     }
     return arkts.factory.updateCallExpression(
         node,
         builderLambdaCallee(implFunction),
         [
             createBuilderLambdaInstanceLambda(node),
-            ...node.arguments.slice(1)
+            ...node.arguments.slice(1).map((it, index) => {
+                // Workaround for type inference bug!
+                if (index == optionsIndex) {
+                    return rewriteOptionsParameter(it, optionsType!, struct!)
+                } else {
+                    return it
+                }
+            })
         ],
         node.typeParams,
         node.isOptional,
@@ -183,19 +250,25 @@ function transformBuilderLambdaCall(node: arkts.CallExpression): arkts.CallExpre
 // in theory we don't add new files to import here,
 // only the new names from the same file,
 // to it should be okay.
-function transformETSImportDeclaration(node: arkts.ETSImportDeclaration): arkts.ETSImportDeclaration {
+function transformETSImportDeclaration(resolver: StructsResolver | undefined, node: arkts.ETSImportDeclaration): arkts.ETSImportDeclaration {
     const additionalNames: string[] = []
     node.specifiers.forEach(it => {
-        const name = (it as arkts.ImportSpecifier).imported
-        const scriptFunction = name ? getIdentifierScriptFunction(name) : undefined
-        if (scriptFunction) {
-            const target = builderLambdaTargetFunctionName(scriptFunction)
-            if (target) {
-                // TODO: The type name here should not be explicitly manipulated
-                // but the type checker of the compiler is still incapable
-                // to infer the proper lambda argument types
-                additionalNames.push(uiAttributeName(name?.name!))
-                additionalNames.push(target)
+        if (arkts.isImportSpecifier(it)) {
+            const name = it.imported
+            const struct = resolver?.findStruct(it.imported!)
+            if (struct) {
+                additionalNames.push(getCustomComponentOptionsName(name?.name!))
+            }
+            const scriptFunction = name ? getIdentifierScriptFunction(name) : undefined
+            if (scriptFunction) {
+                const target = builderLambdaTargetFunctionName(scriptFunction)
+                if (target) {
+                    // TODO: The type name here should not be explicitly manipulated
+                    // but the type checker of the compiler is still incapable
+                    // to infer the proper lambda argument types
+                    additionalNames.push(uiAttributeName(name?.name!))
+                    additionalNames.push(target)
+                }
             }
         }
     })
@@ -204,11 +277,11 @@ function transformETSImportDeclaration(node: arkts.ETSImportDeclaration): arkts.
     return arkts.factory.updateETSImportDeclaration(
         node,
         node.source,
-        [   ...node.specifiers,
-            ...additionalNames.map(it => arkts.factory.createImportSpecifier(
-                arkts.factory.createIdentifier(it),
-                arkts.factory.createIdentifier(it)
-            ))
+        [...node.specifiers,
+        ...additionalNames.map(it => arkts.factory.createImportSpecifier(
+            arkts.factory.createIdentifier(it),
+            arkts.factory.createIdentifier(it)
+        ))
         ],
         node.isTypeKind ? arkts.Es2pandaImportKinds.IMPORT_KINDS_TYPES : arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL
     )
@@ -216,14 +289,17 @@ function transformETSImportDeclaration(node: arkts.ETSImportDeclaration): arkts.
 
 
 export class BuilderLambdaTransformer extends arkts.AbstractVisitor {
+    constructor(private resolver: StructsResolver | undefined) {
+        super()
+    }
     visitor(beforeChildren: arkts.AstNode): arkts.AstNode {
         const node = this.visitEachChild(beforeChildren)
 
         if (arkts.isCallExpression(node)) {
-            return transformBuilderLambdaCall(node)
+            return transformBuilderLambdaCall(this.resolver, node)
         }
         if (arkts.isETSImportDeclaration(node)) {
-            return transformETSImportDeclaration(node)
+            return transformETSImportDeclaration(this.resolver, node)
         }
 
         return node

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 
@@ -54,6 +55,8 @@ void GridItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, bool
 
 RefPtr<FrameNode> GridItemModelNG::CreateFrameNode(int32_t nodeId)
 {
+    // call CreateFrameNodeMultiThread by multi thread
+    THREAD_SAFE_NODE_SCOPE_CHECK(CreateFrameNode, nodeId);
     auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::GRID_ITEM_ETS_TAG, nodeId,
         [itemStyle = GridItemStyle::NONE]() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, itemStyle); });
 

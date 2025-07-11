@@ -35,7 +35,7 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 export class TSMethodSignature extends AstNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 106)
+        assertValidPeer(pointer, 108)
         super(pointer)
     }
     static createTSMethodSignature(key: Expression | undefined, signature: FunctionSignature | undefined, computed: boolean, optional_arg: boolean): TSMethodSignature {
@@ -62,6 +62,7 @@ export class TSMethodSignature extends AstNode {
     get optional(): boolean {
         return global.generatedEs2panda._TSMethodSignatureOptionalConst(global.context, this.peer)
     }
+    protected readonly brandTSMethodSignature: undefined
 }
 export function isTSMethodSignature(node: object | undefined): node is TSMethodSignature {
     return node instanceof TSMethodSignature

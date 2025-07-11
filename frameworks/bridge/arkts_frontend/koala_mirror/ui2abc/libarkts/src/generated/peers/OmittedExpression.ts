@@ -41,6 +41,7 @@ export class OmittedExpression extends Expression {
     static updateOmittedExpression(original?: OmittedExpression): OmittedExpression {
         return new OmittedExpression(global.generatedEs2panda._UpdateOmittedExpression(global.context, passNode(original)))
     }
+    protected readonly brandOmittedExpression: undefined
 }
 export function isOmittedExpression(node: object | undefined): node is OmittedExpression {
     return node instanceof OmittedExpression

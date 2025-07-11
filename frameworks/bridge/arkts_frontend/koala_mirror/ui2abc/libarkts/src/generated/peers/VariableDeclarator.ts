@@ -34,7 +34,7 @@ import { Expression } from "./Expression"
 import { TypedStatement } from "./TypedStatement"
 export class VariableDeclarator extends TypedStatement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 151)
+        assertValidPeer(pointer, 153)
         super(pointer)
     }
     static create1VariableDeclarator(flag: Es2pandaVariableDeclaratorFlag, ident?: Expression, init?: Expression): VariableDeclarator {
@@ -60,6 +60,7 @@ export class VariableDeclarator extends TypedStatement {
     get flag(): Es2pandaVariableDeclaratorFlag {
         return global.generatedEs2panda._VariableDeclaratorFlag(global.context, this.peer)
     }
+    protected readonly brandVariableDeclarator: undefined
 }
 export function isVariableDeclarator(node: object | undefined): node is VariableDeclarator {
     return node instanceof VariableDeclarator

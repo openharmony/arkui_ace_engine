@@ -1591,6 +1591,10 @@ public:
     {
         return configurationChange_;
     }
+    void SetAsyncEventsHookListener(const std::function<void()>& asyncEventsExecution)
+    {
+        asyncEventsHookListener_ = asyncEventsExecution;
+    }
 
 protected:
     virtual bool MaybeRelease() override;
@@ -1747,6 +1751,8 @@ protected:
 
     SerializedGesture serializedGesture_;
     RefPtr<NG::THPExtraManager> thpExtraMgr_;
+    // add for arkola frontend loops, called at the tail of vsync
+    std::function<void()> asyncEventsHookListener_;
 private:
     void DumpFrontend() const;
     double ModifyKeyboardHeight(double keyboardHeight) const;

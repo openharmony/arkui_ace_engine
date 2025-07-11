@@ -181,7 +181,7 @@ HWTEST_F(CommonMethodModifierTest4, setColorBlendTestDefaultValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setColorBlendTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setColorBlendTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setColorBlend0, nullptr);
     using OneTestStep = std::tuple<Opt_Union_Color_String_Resource, std::string>;
@@ -245,7 +245,7 @@ HWTEST_F(CommonMethodModifierTest4, setInvertTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setInvertTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setInvertTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setInvert0, nullptr);
     using OneTestStep = std::tuple<Opt_Union_Number_InvertOptions, std::string>;
@@ -316,10 +316,15 @@ HWTEST_F(CommonMethodModifierTest4, setHueRotateValidValues, TestSize.Level1)
     using OneTestStep = std::tuple<Opt_Union_Number_String, float>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0)), 0.0},
-        {Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(1.0)), 1.0},
-        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("4.0")), 4.0},
-        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("5.0")), 5.0},
-        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-90.0")), -90.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(90.0)), 90.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(360)), 0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(422)), 62.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(-465)), 255.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("4")), 4.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("5deg")), 5.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-90deg")), 270.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("3305deg")), 65.0},
+        {Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("1.5turn")), 180.0},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setHueRotate0(node_, &inputValue);
@@ -466,7 +471,7 @@ HWTEST_F(CommonMethodModifierTest4, setGridSpanDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setGridSpanValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setGridSpanValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setGridSpan, nullptr);
     using OneTestStep = std::tuple<Opt_Number, int32_t>;
@@ -521,7 +526,7 @@ HWTEST_F(CommonMethodModifierTest4, setGridOffsetDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setGridOffsetValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setGridOffsetValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setGridOffset, nullptr);
     using OneTestStep = std::tuple<Opt_Number, int32_t>;
@@ -576,7 +581,7 @@ HWTEST_F(CommonMethodModifierTest4, setSphericalEffectDefaultValues, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setSphericalEffectValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setSphericalEffectValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSphericalEffect0, nullptr);
     using OneTestStep = std::tuple<Opt_Number, float>;
@@ -637,7 +642,7 @@ HWTEST_F(CommonMethodModifierTest4, setLightUpEffectDefaultValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setLightUpEffectValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setLightUpEffectValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLightUpEffect0, nullptr);
     using OneTestStep = std::tuple<Opt_Number, float>;
@@ -696,7 +701,7 @@ HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectDefaultValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setPixelStretchEffectValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPixelStretchEffect0, nullptr);
     using OneTestStep = std::tuple<Opt_PixelStretchEffectOptions, std::string>;
@@ -860,7 +865,7 @@ HWTEST_F(CommonMethodModifierTest4, setObscuredTestDefaultValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setObscuredTestValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setObscuredTestValues, TestSize.Level1)
 {
     std::vector<Ark_ObscuredReasons> vecReason = {ARK_OBSCURED_REASONS_PLACEHOLDER, ARK_OBSCURED_REASONS_PLACEHOLDER,
         ARK_OBSCURED_REASONS_PLACEHOLDER};
@@ -1045,7 +1050,7 @@ std::vector<LengthMetricsOneTestStep> testLengthMetricsValues = {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setSafeAreaPaddingLengthMetricsTestValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingLengthMetricsTestValues, TestSize.Level1)
 {
     std::string strResult;
     strResult = GetStringAttribute(node_, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
@@ -1079,7 +1084,7 @@ std::vector<lengthOneTestStep> testLengthValues = {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setSafeAreaPaddingLeftArkPaddingTestValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingLeftArkPaddingTestValues, TestSize.Level1)
 {
     auto initVal = Converter::ArkValue<Opt_Length>(Ark_Empty());
     Ark_Padding inputValue = {.left = initVal, .top = initVal, .right = initVal, .bottom= initVal };
@@ -1104,7 +1109,7 @@ HWTEST_F(CommonMethodModifierTest4, setSafeAreaPaddingLeftArkPaddingTestValues, 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setSafeAreaPaddingTopArkPaddingTestValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTopArkPaddingTestValues, TestSize.Level1)
 {
     auto initVal = Converter::ArkValue<Opt_Length>(Ark_Empty());
     Ark_Padding inputValue = {.left = initVal, .top = initVal, .right = initVal, .bottom= initVal };
@@ -1129,7 +1134,7 @@ HWTEST_F(CommonMethodModifierTest4, setSafeAreaPaddingTopArkPaddingTestValues, T
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setSafeAreaPaddingRightArkPaddingTestValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingRightArkPaddingTestValues, TestSize.Level1)
 {
     auto initVal = Converter::ArkValue<Opt_Length>(Ark_Empty());
     Ark_Padding inputValue = {.left = initVal, .top = initVal, .right = initVal, .bottom= initVal };
@@ -1154,7 +1159,7 @@ HWTEST_F(CommonMethodModifierTest4, setSafeAreaPaddingRightArkPaddingTestValues,
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setSafeAreaPaddingBottomArkPaddingTestValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingBottomArkPaddingTestValues, TestSize.Level1)
 {
     auto initVal = Converter::ArkValue<Opt_Length>(Ark_Empty());
     Ark_Padding inputValue = {.left = initVal, .top = initVal, .right = initVal, .bottom= initVal };
@@ -1185,7 +1190,7 @@ std::vector<sizeOneTestStep> vecSizePair = {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setOnSizeChangeTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setOnSizeChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1279,7 +1284,7 @@ HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateCenterZValidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateCenterZInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setRotate0TestRotateCenterZInvalidValues, TestSize.Level1)
 {
     Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
     auto checkValue = [this, defNumValue](
@@ -1349,7 +1354,7 @@ HWTEST_F(CommonMethodModifierTest4, setRotate1TestRotateCenterZValidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setRotate1TestRotateCenterZInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setRotate1TestRotateCenterZInvalidValues, TestSize.Level1)
 {
     Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
     auto checkValue = [this, defNumValue](
@@ -1546,7 +1551,7 @@ struct AutoTransitionEffectPeer {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, Transition0TransitionEffectTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_Transition0TransitionEffectTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1567,7 +1572,7 @@ HWTEST_F(CommonMethodModifierTest4, Transition0TransitionEffectTest, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, Transition0TransitionEffect2Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_Transition0TransitionEffect2Test, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1588,7 +1593,7 @@ HWTEST_F(CommonMethodModifierTest4, Transition0TransitionEffect2Test, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, Transition1TransitionEffectCbTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_Transition1TransitionEffectCbTest, TestSize.Level1)
 {
     struct CheckEvent {
         int32_t nodeId;

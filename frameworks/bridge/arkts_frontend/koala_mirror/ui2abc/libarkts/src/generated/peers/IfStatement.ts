@@ -45,6 +45,11 @@ export class IfStatement extends Statement {
     get test(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._IfStatementTest(global.context, this.peer))
     }
+    /** @deprecated */
+    setTest(test?: Expression): this {
+        global.generatedEs2panda._IfStatementSetTest(global.context, this.peer, passNode(test))
+        return this
+    }
     get consequent(): Statement | undefined {
         return unpackNode(global.generatedEs2panda._IfStatementConsequent(global.context, this.peer))
     }
@@ -56,6 +61,7 @@ export class IfStatement extends Statement {
         global.generatedEs2panda._IfStatementSetAlternate(global.context, this.peer, passNode(alternate))
         return this
     }
+    protected readonly brandIfStatement: undefined
 }
 export function isIfStatement(node: object | undefined): node is IfStatement {
     return node instanceof IfStatement

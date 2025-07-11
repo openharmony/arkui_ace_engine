@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { Identifier } from "./Identifier"
 export class TSQualifiedName extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 129)
+        assertValidPeer(pointer, 131)
         super(pointer)
     }
     static createTSQualifiedName(left?: Expression, right?: Identifier): TSQualifiedName {
@@ -54,6 +54,7 @@ export class TSQualifiedName extends Expression {
     get resolveLeftMostQualifiedName(): TSQualifiedName | undefined {
         return unpackNode(global.generatedEs2panda._TSQualifiedNameResolveLeftMostQualifiedName(global.context, this.peer))
     }
+    protected readonly brandTSQualifiedName: undefined
 }
 export function isTSQualifiedName(node: object | undefined): node is TSQualifiedName {
     return node instanceof TSQualifiedName

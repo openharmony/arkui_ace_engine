@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/pattern/image_animator/controlled_animator.h"
@@ -400,12 +401,20 @@ void ImageAnimatorPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToFrame(true);
 
     UpdateBorderRadius();
     RegisterVisibleAreaChange();
+}
+
+void ImageAnimatorPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
 void ImageAnimatorPattern::UpdateEventCallback()

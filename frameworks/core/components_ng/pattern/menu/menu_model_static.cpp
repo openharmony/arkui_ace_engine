@@ -63,9 +63,9 @@ void MenuModelStatic::SetItemGroupDivider(FrameNode* frameNode, const std::optio
         ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, frameNode);
     }
     if (mode.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, mode.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDividerMode, mode.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDividerMode, frameNode);
     }
 }
 

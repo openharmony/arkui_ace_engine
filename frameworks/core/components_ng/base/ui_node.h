@@ -141,7 +141,7 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
-    void DetachFromMainTree(bool recursive = false, bool isRoot = true);
+    void DetachFromMainTree(bool recursive = false, bool needCheckThreadSafeNodeTree = false);
     virtual void FireCustomDisappear();
     // Traverse downwards to update system environment variables.
     void UpdateConfigurationUpdate();
@@ -1078,6 +1078,14 @@ public:
             }
         }
         return true;
+    bool IsThreadSafeNode() const
+    {
+        return isThreadSafeNode_;
+    }
+
+    bool IsFree() const
+    {
+        return isFree_;
     }
 
     void PostAfterAttachMainTreeTask(std::function<void()>&& task)
@@ -1173,6 +1181,28 @@ protected:
     int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
     const static std::set<std::string> layoutTags_;
 
+private:
+    void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
+        bool addDefaultTransition = false);
+    bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
+    void ExecuteAfterAttachMainTreeTasks()
+    {
+        for (auto& task : afterAttachMainTreeTasks_) {
+            if (task) {
+                task();
+            }
+        }
+        afterAttachMainTreeTasks_.clear();
+    }
+    bool CheckThreadSafeNodeTree(bool needCheck);
+    virtual bool MaybeRelease() override;
+
+    std::list<RefPtr<UINode>> children_;
+    // disappearingChild、index、branchId
+    std::list<std::tuple<RefPtr<UINode>, uint32_t, int32_t>> disappearingChildren_;
+    std::unique_ptr<PerformanceCheckNode> nodeInfo_;
+    WeakPtr<UINode> parent_; // maybe wrong when not on the tree
+    WeakPtr<UINode> ancestor_; // always correct parent ptr, used to remove duplicates when inserting child nodes
     std::string tag_ = "UINode";
     int32_t depth_ = Infinity<int32_t>();
     int32_t hostRootId_ = 0;
@@ -1220,6 +1250,8 @@ private:
     bool onMainTree_ = false;
     bool isFreeNode_ = false;
     bool isFreeState_ = false; // the free node in free state can be operated by non UI threads
+    bool isThreadSafeNode_ = false;
+    bool isFree_ = false; // the thread safe node in free state can be operated by non UI threads
     std::vector<std::function<void()>> afterAttachMainTreeTasks_;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;

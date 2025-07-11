@@ -23,7 +23,7 @@ ohos_shared_library("componentSnapshot_ani") {
   sources = [ "./src/componentSnapshot.cpp" ]
   external_deps = [
     "image_framework:image",
-    "image_framework:image_taihe",
+    #"image_framework:image_taihe",
     "napi:ace_napi",
     "runtime_core:ani",
     "runtime_core:ani_helpers",

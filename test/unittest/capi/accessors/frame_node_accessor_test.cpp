@@ -13,15 +13,19 @@
  * limitations under the License.
  */
 
+#include "accessor_test_base.h"
+#include "gmock/gmock.h"
+#include "node_api.h"
+#include "ui/base/geometry/dimension.h"
+
+#include "base/geometry/dimension_offset.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
-#include "accessor_test_base.h"
-#include "node_api.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "gmock/gmock.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 
@@ -42,9 +46,8 @@ const Ark_Boolean ARK_TRUE = Converter::ArkValue<Ark_Boolean>(true);
 
 } // namespace
 
-class FrameNodeAccessorTest
-    : public AccessorTestCtorBase<GENERATED_ArkUIFrameNodeAccessor,
-        &GENERATED_ArkUIAccessors::getFrameNodeAccessor, FrameNodePeer> {
+class FrameNodeAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIFrameNodeAccessor,
+                                  &GENERATED_ArkUIAccessors::getFrameNodeAccessor, FrameNodePeer> {
 public:
     void* CreatePeerInstance() override
     {
@@ -88,8 +91,8 @@ HWTEST_F(FrameNodeAccessorTest, IsModifiableTestNull, TestSize.Level1)
 HWTEST_F(FrameNodeAccessorTest, IsModifiableTestNotCustomNode, TestSize.Level1)
 {
     ASSERT_NE(accessor_->isModifiable, nullptr);
-    peer_->node = NG::FrameNode::CreateFrameNode("page",
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    peer_->node = NG::FrameNode::CreateFrameNode(
+        "page", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     EXPECT_EQ(ARK_FALSE, accessor_->isModifiable(peer_));
 }
 
@@ -101,8 +104,8 @@ HWTEST_F(FrameNodeAccessorTest, IsModifiableTestNotCustomNode, TestSize.Level1)
 HWTEST_F(FrameNodeAccessorTest, IsModifiableTestNotCustomNode2, TestSize.Level1)
 {
     ASSERT_NE(accessor_->isModifiable, nullptr);
-    peer_->node = NG::FrameNode::CreateFrameNode("CustomFrameNode",
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    peer_->node = NG::FrameNode::CreateFrameNode(
+        "CustomFrameNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     EXPECT_EQ(ARK_TRUE, accessor_->isModifiable(peer_));
 }
 
@@ -189,7 +192,7 @@ HWTEST_F(FrameNodeAccessorTest, InsertChildAfterTest2, TestSize.Level1)
     EXPECT_EQ(childList.size(), CHILD_COUNT_1);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef1), POS_0);
     EXPECT_EQ(currentUINodeRef->GetChildIndex(childUINodeRef2), POS_INVALID);
-    
+
     accessor_->insertChildAfter(peer_, childPeer3, childPeer2);
     childList = peer_->node->GetChildren();
     EXPECT_EQ(childList.size(), CHILD_COUNT_2);
@@ -610,7 +613,7 @@ HWTEST_F(FrameNodeAccessorTest, DisposeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getParent, nullptr);
     ASSERT_NE(accessor_->dispose, nullptr);
-    
+
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peer_->node);
 
     auto rootPeer = CreatePeer();
@@ -740,5 +743,235 @@ HWTEST_F(FrameNodeAccessorTest, RecycleImplTest001, TestSize.Level1)
     EXPECT_EQ(childPeer->node->GetParentFrameNode(), nullptr);
     accessor_->recycle(peer_);
     DestroyPeer(childPeer);
+}
+
+/**
+ * @tc.name: GetPositionToParent001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetPositionToParent001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getPositionToParent, nullptr);
+    auto peer = CreatePeer();
+    auto offset = accessor_->getPositionToParent(peer);
+    auto value = Converter::Convert<DimensionOffset>(offset);
+    DimensionOffset target(Dimension(0, DimensionUnit::VP), Dimension(0, DimensionUnit::VP));
+    EXPECT_EQ(value, target);
+    DestroyPeer(peer);
+}
+
+/**
+ * @tc.name: GetPositionToScreen001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetPositionToScreen001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getPositionToScreen, nullptr);
+    auto peer = CreatePeer();
+    auto offset = accessor_->getPositionToScreen(peer);
+    auto value = Converter::Convert<DimensionOffset>(offset);
+    DimensionOffset target(Dimension(0, DimensionUnit::VP), Dimension(0, DimensionUnit::VP));
+    EXPECT_EQ(value, target);
+    DestroyPeer(peer);
+}
+
+/**
+ * @tc.name: GetPositionToWindow001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetPositionToWindow001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getPositionToWindow, nullptr);
+    auto peer = CreatePeer();
+    auto offset = accessor_->getPositionToWindow(peer);
+    auto value = Converter::Convert<DimensionOffset>(offset);
+    DimensionOffset target(Dimension(0, DimensionUnit::VP), Dimension(0, DimensionUnit::VP));
+    EXPECT_EQ(value, target);
+    DestroyPeer(peer);
+}
+
+/**
+ * @tc.name: GetPositionToParentWithTransform001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetPositionToParentWithTransform001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getPositionToParentWithTransform, nullptr);
+    auto peer = CreatePeer();
+    auto offset = accessor_->getPositionToParentWithTransform(peer);
+    auto value = Converter::Convert<DimensionOffset>(offset);
+    DimensionOffset target(Dimension(0, DimensionUnit::VP), Dimension(0, DimensionUnit::VP));
+    EXPECT_EQ(value, target);
+    DestroyPeer(peer);
+}
+
+/**
+ * @tc.name: GetPositionToScreenWithTransform001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetPositionToScreenWithTransform001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getPositionToScreenWithTransform, nullptr);
+    auto peer = CreatePeer();
+    auto offset = accessor_->getPositionToScreenWithTransform(peer);
+    auto value = Converter::Convert<DimensionOffset>(offset);
+    DimensionOffset target(Dimension(0, DimensionUnit::VP), Dimension(0, DimensionUnit::VP));
+    EXPECT_EQ(value, target);
+    DestroyPeer(peer);
+}
+
+/**
+ * @tc.name: GetPositionToWindowWithTransform1Impl001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransform1Impl001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getPositionToWindowWithTransform1, nullptr);
+    auto peer = CreatePeer();
+    auto offset = accessor_->getPositionToWindowWithTransform1(peer);
+    auto value = Converter::Convert<DimensionOffset>(offset);
+    DimensionOffset target(Dimension(0, DimensionUnit::VP), Dimension(0, DimensionUnit::VP));
+    EXPECT_EQ(value, target);
+    DestroyPeer(peer);
+}
+
+/**
+ * @tc.name: GetMeasuredSizeImpl001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetMeasuredSizeImpl001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getMeasuredSize, nullptr);
+    auto peer = CreatePeer();
+    auto size = accessor_->getMeasuredSize(peer);
+    SizeF value(Converter::Convert<float>(size.width), Converter::Convert<float>(size.height));
+
+    SizeF target(0.0f, 0.0f);
+    EXPECT_EQ(value, target);
+    DestroyPeer(peer);
+}
+
+/**
+ * @tc.name: GetLayoutPositionImpl001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetLayoutPositionImpl001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getLayoutPosition, nullptr);
+    auto peer = CreatePeer();
+    auto offset = accessor_->getLayoutPosition(peer);
+    auto value = Converter::Convert<DimensionOffset>(offset);
+    DimensionOffset target(Dimension(0, DimensionUnit::VP), Dimension(0, DimensionUnit::VP));
+    EXPECT_EQ(value, target);
+    DestroyPeer(peer);
+}
+
+/**
+ * @tc.name: GetUserConfigBorderWidthImpl001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetUserConfigBorderWidthImpl001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getUserConfigBorderWidth, nullptr);
+    auto peer = CreatePeer();
+    auto offset = accessor_->getUserConfigBorderWidth(peer);
+    BorderWidthProperty value { .leftDimen = Converter::OptConvert<Dimension>(offset.left),
+        .rightDimen = Converter::OptConvert<Dimension>(offset.right),
+        .topDimen = Converter::OptConvert<Dimension>(offset.top),
+        .bottomDimen = Converter::OptConvert<Dimension>(offset.bottom) };
+    std::cout << "FZY GetUserConfigBorderWidthImpl001 " << value.ToString() << std::endl;
+
+    BorderWidthProperty target;
+    target.SetBorderWidth(Dimension(0, DimensionUnit::VP));
+
+    EXPECT_EQ(value, target);
+    DestroyPeer(peer);
+}
+
+/**
+ * @tc.name: GetUserConfigPaddingImpl001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetUserConfigPaddingImpl001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getUserConfigPadding, nullptr);
+    auto peer = CreatePeer();
+    auto padding = accessor_->getUserConfigPadding(peer);
+    PaddingProperty value {
+        .left = std::make_optional<CalcLength>(
+            Converter::OptConvert<Dimension>(padding.left).value_or(Dimension(0, DimensionUnit::VP))),
+        .right = std::make_optional<CalcLength>(
+            Converter::OptConvert<Dimension>(padding.left).value_or(Dimension(0, DimensionUnit::VP))),
+        .top = std::make_optional<CalcLength>(
+            Converter::OptConvert<Dimension>(padding.left).value_or(Dimension(0, DimensionUnit::VP))),
+        .bottom = std::make_optional<CalcLength>(
+            Converter::OptConvert<Dimension>(padding.left).value_or(Dimension(0, DimensionUnit::VP)))
+    };
+
+    PaddingProperty target;
+    target.SetEdges(CalcLength(0, DimensionUnit::VP));
+
+    EXPECT_EQ(value, target);
+    DestroyPeer(peer);
+}
+
+/**
+ * @tc.name: GetUserConfigMarginImpl001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetUserConfigMarginImpl001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getUserConfigMargin, nullptr);
+    auto peer = CreatePeer();
+    auto padding = accessor_->getUserConfigMargin(peer);
+    MarginProperty value {
+        .left = std::make_optional<CalcLength>(
+            Converter::OptConvert<Dimension>(padding.left).value_or(Dimension(0, DimensionUnit::VP))),
+        .right = std::make_optional<CalcLength>(
+            Converter::OptConvert<Dimension>(padding.right).value_or(Dimension(0, DimensionUnit::VP))),
+        .top = std::make_optional<CalcLength>(
+            Converter::OptConvert<Dimension>(padding.top).value_or(Dimension(0, DimensionUnit::VP))),
+        .bottom = std::make_optional<CalcLength>(
+            Converter::OptConvert<Dimension>(padding.bottom).value_or(Dimension(0, DimensionUnit::VP)))
+    };
+
+    MarginProperty target;
+    target.SetEdges(CalcLength(0, DimensionUnit::VP));
+
+    EXPECT_EQ(value, target);
+    DestroyPeer(peer);
+}
+
+/**
+ * @tc.name: GetUserConfigSizeI001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeAccessorTest, GetUserConfigSizeImpl001, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getUserConfigSize, nullptr);
+    auto peer = CreatePeer();
+    auto size = accessor_->getUserConfigSize(peer);
+    auto width = std::make_optional<CalcLength>(
+        Converter::OptConvert<Dimension>(size.width).value_or(Dimension(0, DimensionUnit::VP)));
+    auto height = std::make_optional<CalcLength>(
+        Converter::OptConvert<Dimension>(size.height).value_or(Dimension(0, DimensionUnit::VP)));
+    CalcSize value(width, height);
+
+    CalcSize target(CalcLength(0, DimensionUnit::VP), CalcLength(0, DimensionUnit::VP));
+
+    EXPECT_EQ(value, target);
+    DestroyPeer(peer);
 }
 } // namespace OHOS::Ace::NG

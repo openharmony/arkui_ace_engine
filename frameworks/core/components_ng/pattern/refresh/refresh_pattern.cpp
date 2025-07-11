@@ -19,6 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
@@ -74,12 +75,21 @@ Dimension RefreshPattern::GetTriggerRefreshDisTance()
 void RefreshPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
+    // call OnAttachToFrameNodeMultiThread by multi thread
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(true);
     host->GetRenderContext()->UpdateClipEdge(true);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     isHigherVersion_ =  context->GetMinPlatformVersion() >= static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN);
+}
+
+void RefreshPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    // call OnAttachToMainTreeMultiThread by multi thread
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
 bool RefreshPattern::OnDirtyLayoutWrapperSwap(

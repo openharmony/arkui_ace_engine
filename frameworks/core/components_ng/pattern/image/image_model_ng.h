@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
+    void Create(const RefPtr<AceDrawableDescriptor>& drawable) override;
     void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) override;
     void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) override;
     void ResetImage() override;

@@ -212,6 +212,10 @@
       OHOS::Ace::RecycleViewModel::*;
       OHOS::Ace::NG::RecycleDummyNode::*;
       OHOS::Ace::XComponentModel::*;
+      OHOS::Ace::DrawableDescriptor::*;
+      OHOS::Ace::PixelMapDrawableDescriptor::*;
+      OHOS::Ace::LayeredDrawableDescriptor::*;
+      OHOS::Ace::AnimatedDrawableDescriptor::*;
 
       OHOS::Ace::Framework::JsAcePage::*;
       OHOS::Ace::TextPickerModel::*;
@@ -225,6 +229,7 @@
       OHOS::Ace::Framework::ManifestParser::*;
       OHOS::Ace::NG::PipelineContext::*;
       OHOS::Ace::NG::OverlayManager::*;
+      OHOS::Ace::NG::DialogManagerStatic::*;
       OHOS::Ace::PipelineBase::PostAsyncEvent*;
       "OHOS::Ace::PipelineBase::GetFrontend() const";
       OHOS::Ace::NG::UINode::*;
@@ -276,6 +281,9 @@
       OHOS::Ace::PipelineBase::GetImageCache*;
       OHOS::Ace::PipelineBase::ConvertPxToVp*;
       OHOS::Ace::ImageCache::ClearCacheImgObj*;
+      OHOS::Ace::PipelineBase::CurrentThemeManager*;
+      OHOS::Ace::PipelineBase::GetCurrentContext*;
+
       OHOS::Ace::NG::ViewAbstract::*;
       OHOS::Ace::NG::Inspector::*;
       OHOS::Ace::V2::Inspector::*;
@@ -323,6 +331,8 @@
       OHOS::Ace::ImageAnalyzerMgr::Release*;
       OHOS::Ace::ImageAnalyzerMgr::UpdateOverlayStatus*;
       "OHOS::Ace::NG::GeometryNode::SetMarginFrameOffset(OHOS::Ace::NG::OffsetT<float> const&)";
+      "OHOS::Ace::NG::GeometryNode::GetFrameRect(bool) const";
+      OHOS::Ace::NG::GeometryNode::*;
 
       OHOS::Ace::NG::InspectorFilter::*;
       OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
@@ -408,6 +418,10 @@
       VTT?for?OHOS::Ace::NG::ViewAdvancedRegister;
       VTT?for?OHOS::Ace::NG::ContainerModalView;
       VTT?for?OHOS::Ace::NG::Pattern;
+      VTT?for?OHOS::Ace::DrawableDescriptor;
+      VTT?for?OHOS::Ace::LayeredDrawableDescriptor;
+      VTT?for?OHOS::Ace::PixelMapDrawableDescriptor;
+      VTT?for?OHOS::Ace::AnimatedDrawableDescriptor;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -485,6 +499,7 @@
       OHOS::Ace::Kit::FrameNode::*;
       OHOS::Ace::NG::NavigationStack::*;
       OHOS::Ace::NG::CustomNode::*;
+      OHOS::Ace::NG::CustomNodeStatic::*;
       OHOS::Ace::NG::NavigationGroupNode::*;
       OHOS::Ace::NavDestinationModel::*;
       OHOS::Ace::NavDestinationModelNG::*;
@@ -494,6 +509,17 @@
       OHOS::Ace::RegistAppBarNodeBuilder*;
       OHOS::Ace::RegisterBeforeCreateLayoutBuilder*;
       OHOS::Ace::Kit::FrameNode::*;
+      OHOS::Ace::NG::MeasureLayoutParam::*;
+      OHOS::Ace::NG::MeasureLayoutParam::~MeasureLayoutParam*;
+      virtual?thunk?to?OHOS::Ace::NG::MeasureLayoutParam::*;
+      OHOS::Ace::NG::MeasureLayoutChild::*;
+      OHOS::Ace::V2::COMMON_VIEW_ETS_TAG*;
+      OHOS::Ace::NG::ScaleProperty::*;
+      OHOS::Ace::NG::ConvertToPx*;
+
+      OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
+      "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";
+
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
@@ -551,6 +577,10 @@
       vtable?for?OHOS::Ace::NavDestinationModel;
       vtable?for?OHOS::Ace::SystemBarStyle;
       vtable?for?OHOS::Ace::NG::NavDestinationModelNG;
+      vtable?for?OHOS::Ace::DrawableDescriptor;
+      vtable?for?OHOS::Ace::LayeredDrawableDescriptor;
+      vtable?for?OHOS::Ace::PixelMapDrawableDescriptor;
+      vtable?for?OHOS::Ace::AnimatedDrawableDescriptor;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;

@@ -66,6 +66,7 @@ void RadioModelStatic::SetBuilder(FrameNode* frameNode, std::function<void()>&& 
     auto radioPattern = frameNode->GetPattern<RadioPattern>();
     CHECK_NULL_VOID(radioPattern);
     radioPattern->SetBuilder(std::move(builder));
+    frameNode->MarkModifyDone();
 }
 
 void RadioModelStatic::SetOnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChangeEvent)

@@ -33,6 +33,7 @@ export class ETSDynamicFunctionType extends ETSFunctionType {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandETSDynamicFunctionType: undefined
 }
 export function isETSDynamicFunctionType(node: object | undefined): node is ETSDynamicFunctionType {
     return node instanceof ETSDynamicFunctionType

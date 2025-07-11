@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class ETSNewArrayInstanceExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 76)
+        assertValidPeer(pointer, 78)
         super(pointer)
     }
     static createETSNewArrayInstanceExpression(typeReference?: TypeNode, dimension?: Expression): ETSNewArrayInstanceExpression {
@@ -58,6 +58,7 @@ export class ETSNewArrayInstanceExpression extends Expression {
         global.generatedEs2panda._ETSNewArrayInstanceExpressionClearPreferredType(global.context, this.peer)
         return this
     }
+    protected readonly brandETSNewArrayInstanceExpression: undefined
 }
 export function isETSNewArrayInstanceExpression(node: object | undefined): node is ETSNewArrayInstanceExpression {
     return node instanceof ETSNewArrayInstanceExpression

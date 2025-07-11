@@ -23,6 +23,7 @@ ace_unittest("text_test_ng") {
     "span_string_test_two_ng.cpp",
     "span_sub_test_ng.cpp",
     "span_test_ng.cpp",
+    "text_arkoala_test.cpp",
     "text_base.cpp",
     "text_pattern_test_ng.cpp",
     "text_test_ng.cpp",

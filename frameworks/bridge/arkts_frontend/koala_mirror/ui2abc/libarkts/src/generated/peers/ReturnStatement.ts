@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 export class ReturnStatement extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 58)
+        assertValidPeer(pointer, 59)
         super(pointer)
     }
     static create1ReturnStatement(argument?: Expression): ReturnStatement {
@@ -56,6 +56,7 @@ export class ReturnStatement extends Statement {
     get isAsyncImplReturn(): boolean {
         return global.generatedEs2panda._ReturnStatementIsAsyncImplReturnConst(global.context, this.peer)
     }
+    protected readonly brandReturnStatement: undefined
 }
 export function isReturnStatement(node: object | undefined): node is ReturnStatement {
     return node instanceof ReturnStatement

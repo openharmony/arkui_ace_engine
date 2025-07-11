@@ -96,6 +96,7 @@ export class CallExpression extends MaybeOptionalExpression {
     get isETSConstructorCall(): boolean {
         return global.generatedEs2panda._CallExpressionIsETSConstructorCallConst(global.context, this.peer)
     }
+    protected readonly brandCallExpression: undefined
 }
 export function isCallExpression(node: object | undefined): node is CallExpression {
     return node instanceof CallExpression

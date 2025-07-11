@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/system_properties.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
@@ -734,6 +735,8 @@ bool WaterFlowModelNG::GetScrollEnabled(FrameNode* frameNode)
 
 void WaterFlowModelNG::SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment)
 {
+    // call SetScrollToIndexMultiThread by multi thread
+    FREE_NODE_CHECK(frameNode, SetScrollToIndex, frameNode, index, animation, alignment);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);

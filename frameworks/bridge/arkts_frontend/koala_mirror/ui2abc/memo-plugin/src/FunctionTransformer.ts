@@ -50,13 +50,13 @@ function mayAddLastReturn(node: arkts.BlockStatement): boolean {
     )
 }
 
-function dropUntrackableParameters(parameters: readonly arkts.ETSParameterExpression[]) {
-    return parameters.filter((it, index) => isTrackableParam(it, index + 1 == parameters.length))
+function dropUntrackableParameters(parameters: readonly arkts.ETSParameterExpression[], trackContentParam: boolean) {
+    return parameters.filter((it, index) => isTrackableParam(it, index + 1 == parameters.length, trackContentParam))
 }
 
-function getMemoParameterIdentifiers(parameters: readonly arkts.ETSParameterExpression[]) {
+function getMemoParameterIdentifiers(parameters: readonly arkts.ETSParameterExpression[], trackContentParam: boolean) {
     return [
-        ...dropUntrackableParameters(parameters).map(it => {
+        ...dropUntrackableParameters(parameters, trackContentParam).map(it => {
             return { ident: it.ident!, param: it }
         })
     ]
@@ -92,6 +92,7 @@ function updateFunctionBody(
     stableThis: boolean,
     hash: arkts.Expression,
     addLogging: boolean,
+    trackContentParam: boolean,
 ): [
     arkts.BlockStatement,
     ParamInfo[],
@@ -99,7 +100,7 @@ function updateFunctionBody(
     arkts.ReturnStatement | arkts.BlockStatement | undefined,
 ] {
     const shouldCreateMemoThisParam = needThisRewrite(hasReceiver, isStatic, stableThis) && !parametersBlockHasReceiver(parameters)
-    const parameterIdentifiers = getMemoParameterIdentifiers(parameters)
+    const parameterIdentifiers = getMemoParameterIdentifiers(parameters, trackContentParam)
     const gensymParamsCount = fixGensymParams(parameterIdentifiers, node)
     const parameterNames = [...(shouldCreateMemoThisParam ? [RuntimeNames.THIS.valueOf()] : []), ...parameterIdentifiers.map(it => it.ident.name)]
     const scopeDeclaration = factory.createScopeDeclaration(
@@ -109,7 +110,9 @@ function updateFunctionBody(
     const memoParametersDeclaration = parameterNames.length ? factory.createMemoParameterDeclaration(parameterNames) : undefined
     const syntheticReturnStatement = factory.createSyntheticReturnStatement(returnTypeAnnotation)
     const unchangedCheck = [factory.createIfStatementWithSyntheticReturnStatement(syntheticReturnStatement)]
-    const thisParamSubscription = (arkts.isTSThisType(returnTypeAnnotation) && !stableThis) ? [factory.createMemoParameterAccess("=t")] : []
+    const thisParamSubscription = (arkts.isTSThisType(returnTypeAnnotation) && !stableThis)
+        ? [arkts.factory.createExpressionStatement(factory.createMemoParameterAccess("=t"))]
+        : []
     return [
         arkts.factory.updateBlockStatement(
             node,
@@ -145,6 +148,7 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
         private parameterTransformer: ParameterTransformer,
         private returnTransformer: ReturnTransformer,
         private addLogging: boolean,
+        private trackContentParam: boolean,
     ) {
         super()
     }
@@ -217,7 +221,8 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
             isStatic,
             isStableThis,
             this.positionalIdTracker.id(name),
-            this.addLogging
+            this.addLogging,
+            this.trackContentParam,
         )
         const afterParameterTransformer = this.parameterTransformer
             .withThis(needThisRewrite(hasReceiver, isStatic, isStableThis))
@@ -269,7 +274,11 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
 
         const params = getParams(decl)
         const updatedArguments = node.arguments.map((it, index) => {
-            if (shouldWrap(params[index], index + 1 == params.length, it)) {
+            if (!params[index]) return it
+            // TODO: this is not quite correct.
+            // This code is too dependent on the availability of parameter declaration and its type
+            // Most of the decisions should be taken basing on the fact that this is a memo call
+            if (shouldWrap(params[index], index + 1 == params.length, this.trackContentParam, it)) {
                 return factory.createComputeExpression(this.positionalIdTracker.id(getName(decl)), this.fixObjectArg(it, params[index]))
             }
             return this.fixObjectArg(it, params[index])

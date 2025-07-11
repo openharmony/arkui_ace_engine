@@ -86,11 +86,6 @@ export class MethodDefinition extends ClassElement {
         return this
     }
     /** @deprecated */
-    clearOverloads(): this {
-        global.generatedEs2panda._MethodDefinitionClearOverloads(global.context, this.peer)
-        return this
-    }
-    /** @deprecated */
     addOverload(overload?: MethodDefinition): this {
         global.generatedEs2panda._MethodDefinitionAddOverload(global.context, this.peer, passNode(overload))
         return this
@@ -101,8 +96,8 @@ export class MethodDefinition extends ClassElement {
         return this
     }
     /** @deprecated */
-    setAsyncPairMethod(method?: MethodDefinition): this {
-        global.generatedEs2panda._MethodDefinitionSetAsyncPairMethod(global.context, this.peer, passNode(method))
+    setAsyncPairMethod(asyncPairMethod?: MethodDefinition): this {
+        global.generatedEs2panda._MethodDefinitionSetAsyncPairMethod(global.context, this.peer, passNode(asyncPairMethod))
         return this
     }
     get function(): ScriptFunction | undefined {
@@ -113,6 +108,22 @@ export class MethodDefinition extends ClassElement {
         global.generatedEs2panda._MethodDefinitionInitializeOverloadInfo(global.context, this.peer)
         return this
     }
+    /** @deprecated */
+    emplaceOverloads(overloads?: MethodDefinition): this {
+        global.generatedEs2panda._MethodDefinitionEmplaceOverloads(global.context, this.peer, passNode(overloads))
+        return this
+    }
+    /** @deprecated */
+    clearOverloads(): this {
+        global.generatedEs2panda._MethodDefinitionClearOverloads(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueOverloads(overloads: MethodDefinition | undefined, index: number): this {
+        global.generatedEs2panda._MethodDefinitionSetValueOverloads(global.context, this.peer, passNode(overloads), index)
+        return this
+    }
+    protected readonly brandMethodDefinition: undefined
 }
 export function isMethodDefinition(node: object | undefined): node is MethodDefinition {
     return node instanceof MethodDefinition

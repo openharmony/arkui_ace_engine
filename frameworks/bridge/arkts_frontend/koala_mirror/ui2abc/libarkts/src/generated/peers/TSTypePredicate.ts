@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class TSTypePredicate extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 121)
+        assertValidPeer(pointer, 123)
         super(pointer)
     }
     static createTSTypePredicate(parameterName: Expression | undefined, typeAnnotation: TypeNode | undefined, asserts: boolean): TSTypePredicate {
@@ -51,6 +51,7 @@ export class TSTypePredicate extends TypeNode {
     get asserts(): boolean {
         return global.generatedEs2panda._TSTypePredicateAssertsConst(global.context, this.peer)
     }
+    protected readonly brandTSTypePredicate: undefined
 }
 export function isTSTypePredicate(node: object | undefined): node is TSTypePredicate {
     return node instanceof TSTypePredicate

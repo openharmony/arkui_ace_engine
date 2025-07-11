@@ -43,15 +43,34 @@ export class ImportDeclaration extends Statement {
     static updateImportDeclaration(original: ImportDeclaration | undefined, source: StringLiteral | undefined, specifiers: readonly AstNode[], importKinds: Es2pandaImportKinds): ImportDeclaration {
         return new ImportDeclaration(global.generatedEs2panda._UpdateImportDeclaration(global.context, passNode(original), passNode(source), passNodeArray(specifiers), specifiers.length, importKinds))
     }
+    /** @deprecated */
+    emplaceSpecifiers(source?: AstNode): this {
+        global.generatedEs2panda._ImportDeclarationEmplaceSpecifiers(global.context, this.peer, passNode(source))
+        return this
+    }
+    /** @deprecated */
+    clearSpecifiers(): this {
+        global.generatedEs2panda._ImportDeclarationClearSpecifiers(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueSpecifiers(source: AstNode | undefined, index: number): this {
+        global.generatedEs2panda._ImportDeclarationSetValueSpecifiers(global.context, this.peer, passNode(source), index)
+        return this
+    }
+    get specifiersForUpdate(): readonly AstNode[] {
+        return unpackNodeArray(global.generatedEs2panda._ImportDeclarationSpecifiersForUpdate(global.context, this.peer))
+    }
     get source(): StringLiteral | undefined {
         return unpackNode(global.generatedEs2panda._ImportDeclarationSource(global.context, this.peer))
     }
     get specifiers(): readonly AstNode[] {
-        return unpackNodeArray(global.generatedEs2panda._ImportDeclarationSpecifiers(global.context, this.peer))
+        return unpackNodeArray(global.generatedEs2panda._ImportDeclarationSpecifiersConst(global.context, this.peer))
     }
     get isTypeKind(): boolean {
         return global.generatedEs2panda._ImportDeclarationIsTypeKindConst(global.context, this.peer)
     }
+    protected readonly brandImportDeclaration: undefined
 }
 export function isImportDeclaration(node: object | undefined): node is ImportDeclaration {
     return node instanceof ImportDeclaration

@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class TSNonNullExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 100)
+        assertValidPeer(pointer, 102)
         super(pointer)
     }
     static createTSNonNullExpression(expr?: Expression): TSNonNullExpression {
@@ -49,6 +49,7 @@ export class TSNonNullExpression extends Expression {
         global.generatedEs2panda._TSNonNullExpressionSetExpr(global.context, this.peer, passNode(expr))
         return this
     }
+    protected readonly brandTSNonNullExpression: undefined
 }
 export function isTSNonNullExpression(node: object | undefined): node is TSNonNullExpression {
     return node instanceof TSNonNullExpression

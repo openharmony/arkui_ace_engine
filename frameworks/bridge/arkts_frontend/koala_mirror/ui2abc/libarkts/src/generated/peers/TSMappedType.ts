@@ -34,7 +34,7 @@ import { TSTypeParameter } from "./TSTypeParameter"
 import { TypeNode } from "./TypeNode"
 export class TSMappedType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 114)
+        assertValidPeer(pointer, 116)
         super(pointer)
     }
     static createTSMappedType(typeParameter: TSTypeParameter | undefined, typeAnnotation: TypeNode | undefined, readonly_arg: Es2pandaMappedOption, optional_arg: Es2pandaMappedOption): TSMappedType {
@@ -55,6 +55,7 @@ export class TSMappedType extends TypeNode {
     get optional(): Es2pandaMappedOption {
         return global.generatedEs2panda._TSMappedTypeOptional(global.context, this.peer)
     }
+    protected readonly brandTSMappedType: undefined
 }
 export function isTSMappedType(node: object | undefined): node is TSMappedType {
     return node instanceof TSMappedType

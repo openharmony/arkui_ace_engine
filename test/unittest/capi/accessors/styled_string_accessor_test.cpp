@@ -20,6 +20,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
+#include "core/interfaces/native/implementation/custom_span_peer.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
@@ -35,6 +36,7 @@
 #include "adapter/ohos/capability/html/html_to_span.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/capi/utils/async_work_test_helper.h"
 #include "core/common/ace_engine.h"
 
 #include "gmock/gmock.h"
@@ -220,16 +222,6 @@ struct StyleOptionsKeeper {
 
     void TearDown()
     {
-        GeneratedModifier::GetTextStyle_styled_stringAccessor()->destroyPeer(peerTextStyle);
-        GeneratedModifier::GetDecorationStyleAccessor()->destroyPeer(decorationStylePeer);
-        GeneratedModifier::GetBaselineOffsetStyleAccessor()->destroyPeer(peerBaselineOffsetStyle);
-        GeneratedModifier::GetLetterSpacingStyleAccessor()->destroyPeer(peerLetterSpacingStyle);
-        GeneratedModifier::GetTextShadowStyleAccessor()->destroyPeer(peerTextShadowStyle);
-        GeneratedModifier::GetLineHeightStyleAccessor()->destroyPeer(peerLineHeightStyle);
-        GeneratedModifier::GetBackgroundColorStyleAccessor()->destroyPeer(peerBackgroundColorStyle);
-        GeneratedModifier::GetUrlStyleAccessor()->destroyPeer(peerUrlStyle);
-        GeneratedModifier::GetParagraphStyleAccessor()->destroyPeer(peerParagraphStyle);
-        GeneratedModifier::GetParagraphStyleAccessor()->destroyPeer(peerParagraphStylePM);
         while (!lengthMetrics.empty()) {
             auto item = lengthMetrics.back();
             lengthMetrics.pop_back();
@@ -428,12 +420,23 @@ struct StyledStringUnionImageAttachment {
         return &value;
     }
     Opt_Array_StyleOptions* Styles() { return nullptr; }
-    void TearDown()
-    {
-        GeneratedModifier::GetImageAttachmentAccessor()->destroyPeer(peer);
-    }
+    void TearDown() {}
 private:
     ImageAttachmentPeer* peer = nullptr;
+};
+
+struct StyledStringUnionCustomSpan {
+    Ark_Union_String_ImageAttachment_CustomSpan* Union()
+    {
+        peer = PeerUtils::CreatePeer<CustomSpanPeer>(AceType::MakeRefPtr<CustomSpan>());
+        static Ark_Union_String_ImageAttachment_CustomSpan value = Converter::ArkUnion<
+            Ark_Union_String_ImageAttachment_CustomSpan, Ark_CustomSpan>(peer);
+        return &value;
+    }
+    Opt_Array_StyleOptions* Styles() { return nullptr; }
+    void TearDown() {}
+private:
+    CustomSpanPeer* peer = nullptr;
 };
 
 template <typename V1>
@@ -492,7 +495,6 @@ public:
     }
 
     Ark_VMContext vmContext_ = nullptr;
-    Ark_AsyncWorkerPtr asyncWorker_ = nullptr;
 private:
     V1 settings;
 };
@@ -500,6 +502,7 @@ private:
 using StyledStringAccessorUnionNullTest = StyledStringAccessorTest<StyledStringUnionNull>;
 using StyledStringAccessorUnionStringTest = StyledStringAccessorTest<StyledStringUnionString>;
 using StyledStringAccessorUnionImageAttachmentTest = StyledStringAccessorTest<StyledStringUnionImageAttachment>;
+using StyledStringAccessorUnionCustomSpanTest = StyledStringAccessorTest<StyledStringUnionCustomSpan>;
 
 /**
  * @tc.name: peerSucceeded
@@ -877,61 +880,89 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringSubStyledStri
 }
 
 /**
- * @tc.name: styledStringFromHtml
+ * @tc.name: styledStringFromHtmlTestValid
  * @tc.desc: converting html to StyledString
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, styledStringFromHtml, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringFromHtmlTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->fromHtml, nullptr);
-    SpanToHtml toHtml;
-    auto htmlFromSpan = toHtml.ToHtml(*peer_->spanString);
 
     struct CheckEvent {
         int32_t nodeId;
-        std::optional<StyledStringPeer*> value;
-        std::optional<StringArray> errors;
+        RefPtr<MutableSpanString> spanString;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onFromHtmlFunc = [](const Ark_Int32 resourceId, const Opt_StyledString value, const Opt_Array_String error) {
+    auto onFromHtmlFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
+            const Opt_StyledString value, const Opt_Array_String error) {
+        EXPECT_FALSE(Converter::GetOpt(error).has_value());
+        const std::optional<StyledStringPeer*> optPeer = Converter::GetOpt(value);
+        ASSERT_TRUE(optPeer.has_value());
+        StyledStringPeer* peer = optPeer.value();
+        ASSERT_NE(peer, nullptr);
         checkEvent = {
             .nodeId = resourceId,
-            .value = Converter::OptConvert<Ark_StyledString>(value),
-            .errors = Converter::OptConvert<StringArray>(error)
+            .spanString = peer->GetMutableString(),
         };
     };
+    auto arkCallback = Converter::ArkValue<Callback_Opt_StyledString_Opt_Array_String_Void>(
+        onFromHtmlFunc, EXPECTED_NODE_ID);
+    auto htmlFromSpan = SpanToHtml().ToHtml(*peer_->spanString);
+    auto arkStr = Converter::ArkValue<Ark_String>(htmlFromSpan);
 
+    accessor_->fromHtml(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), &arkStr, &arkCallback);
+    ASSERT_TRUE(AsyncWorkTestHelper::HasWorkCreated());
+    EXPECT_FALSE(checkEvent.has_value());
+
+    AsyncWorkTestHelper::DoExeceute();
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, EXPECTED_NODE_ID);
+    ASSERT_NE(checkEvent->spanString, nullptr);
+
+    auto styledString = HtmlToSpan().ToSpanString(htmlFromSpan);
+        ASSERT_NE(styledString, nullptr);
+        auto baseString = styledString->GetString();
+    auto outString = checkEvent->spanString->GetString();
+        EXPECT_EQ(outString, baseString);
+    EXPECT_TRUE(IsSpanItemSame(checkEvent->spanString->GetSpanItems(), peer_->spanString->GetSpanItems()));
+
+    AsyncWorkTestHelper::DoComplete();
+    }
+
+/**
+ * @tc.name: styledStringFromHtmlTestInvalid
+ * @tc.desc: converting html to StyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringFromHtmlTestInvalid, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->fromHtml, nullptr);
+
+    static std::optional<int32_t> checkEventId;
+    auto onFromHtmlFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
+            const Opt_StyledString value, const Opt_Array_String error) {
+        EXPECT_FALSE(Converter::GetOpt(value).has_value());
+        const std::optional<StringArray> optErrors = Converter::OptConvert<StringArray>(error);
+        ASSERT_TRUE(optErrors.has_value());
+        ASSERT_EQ(optErrors->size(), 1);
+        EXPECT_EQ(optErrors->front(), "html is empty");
+        checkEventId = resourceId;
+    };
     auto arkCallback = Converter::ArkValue<Callback_Opt_StyledString_Opt_Array_String_Void>(
         onFromHtmlFunc, EXPECTED_NODE_ID);
 
-    auto arkStr = Converter::ArkValue<Ark_String>(htmlFromSpan);
+    const auto emptyString = Converter::ArkValue<Ark_String>("");
+    const std::initializer_list<const Ark_String*> badStrings {&emptyString, nullptr};
 
-    EXPECT_FALSE(checkEvent.has_value());
-    accessor_->fromHtml(vmContext_, asyncWorker_, &arkStr, &arkCallback);
-    ASSERT_TRUE(checkEvent.has_value());
-
-    EXPECT_EQ(checkEvent->nodeId, EXPECTED_NODE_ID);
-    ASSERT_TRUE(checkEvent->errors.has_value());
-    StringArray errors = checkEvent->errors.value();
-    if (errors.size() > 0) {
-        for (const auto& error : errors) { EXPECT_EQ(error, ""); }
-    } else {
-        EXPECT_EQ(checkEvent->errors.value().size(), 0);
-        ASSERT_TRUE(checkEvent->value.has_value());
-        StyledStringPeer* mss = checkEvent->value.value();
-        ASSERT_NE(mss, nullptr);
-        auto mSpanString = mss->GetMutableString();
-        ASSERT_NE(mSpanString, nullptr);
-
-        HtmlToSpan hts;
-        auto styledString = hts.ToSpanString(htmlFromSpan);
-        ASSERT_NE(styledString, nullptr);
-        auto baseString = styledString->GetString();
-        auto outString = mSpanString->GetString();
-        EXPECT_EQ(outString, baseString);
-
-        EXPECT_TRUE(IsSpanItemSame(mSpanString->GetSpanItems(), peer_->spanString->GetSpanItems()));
+    for (const Ark_String* arkStr : badStrings) {
+        checkEventId = std::nullopt;
+        accessor_->fromHtml(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), arkStr, &arkCallback);
+        EXPECT_FALSE(AsyncWorkTestHelper::HasWorkCreated());
+        ASSERT_TRUE(checkEventId.has_value());
+        EXPECT_EQ(checkEventId, EXPECTED_NODE_ID);
     }
+
+    AsyncWorkTestHelper::DoComplete();
 }
 
 /**
@@ -969,11 +1000,21 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringMarshalling, TestSize.
 }
 
 /**
- * @tc.name: styledStringUnmarshallingTest
+ * @tc.name: styledStringUnmarshalling0Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshalling1Test, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringUnmarshalling0Test, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->unmarshalling0, nullptr);
+}
+
+/**
+ * @tc.name: styledStringUnmarshalling1TestValid
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshalling1TestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->unmarshalling1, nullptr);
 
@@ -990,30 +1031,68 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshalling1Test, Te
         std::string value;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onUnmarshalling = [](const Ark_Int32 resourceId,
+    auto onUnmarshalling = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Opt_StyledString value, const Opt_Array_String error) {
-        auto arkPeer = Converter::OptConvert<Ark_StyledString>(value);
+        EXPECT_FALSE(Converter::GetOpt(error).has_value());
+        auto arkPeer = Converter::GetOpt(value);
         ASSERT_TRUE(arkPeer.has_value());
         auto peer = arkPeer.value();
         ASSERT_NE(peer, nullptr);
-        auto accessor = GeneratedModifier::GetStyledStringAccessor();
-        ASSERT_NE(accessor, nullptr);
+        ASSERT_NE(peer->spanString, nullptr);
         checkEvent = {
             .nodeId = resourceId,
             .value = peer->spanString->GetString()
         };
-        accessor->destroyPeer(peer);
     };
-
     auto arkCallback = Converter::ArkValue<
         Callback_Opt_StyledString_Opt_Array_String_Void>(onUnmarshalling, EXPECTED_NODE_ID);
     auto akrBuffer = Converter::ArkValue<Ark_Buffer>(testBuffer, nullptr);
 
+    accessor_->unmarshalling1(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), &akrBuffer, &arkCallback);
+    EXPECT_TRUE(AsyncWorkTestHelper::HasWorkCreated());
     EXPECT_FALSE(checkEvent.has_value());
-    accessor_->unmarshalling1(vmContext_, asyncWorker_, &akrBuffer, &arkCallback);
+
+    AsyncWorkTestHelper::DoExeceute();
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, EXPECTED_NODE_ID);
-    EXPECT_EQ(peer_->spanString->GetString(), checkEvent->value);
+    EXPECT_EQ(checkEvent->value, peer_->spanString->GetString());
+
+    AsyncWorkTestHelper::DoComplete();
+}
+
+/**
+ * @tc.name: styledStringUnmarshalling1TestInvalid
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshalling1TestInvalid, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->unmarshalling1, nullptr);
+
+    static std::optional<int32_t> checkEventId;
+    auto onUnmarshalling = [](Ark_VMContext context, const Ark_Int32 resourceId,
+            const Opt_StyledString value, const Opt_Array_String error) {
+        EXPECT_FALSE(Converter::GetOpt(value).has_value());
+        const std::optional<StringArray> optErrors = Converter::OptConvert<StringArray>(error);
+        ASSERT_TRUE(optErrors.has_value());
+        ASSERT_EQ(optErrors->size(), 1);
+        EXPECT_EQ(optErrors->front(), "buffer is empty");
+        checkEventId = resourceId;
+    };
+    auto arkCallback = Converter::ArkValue<
+        Callback_Opt_StyledString_Opt_Array_String_Void>(onUnmarshalling, EXPECTED_NODE_ID);
+
+    auto emptyBuffer = Converter::ArkValue<Ark_Buffer>("", nullptr);
+    const std::initializer_list<const Ark_Buffer*> badBuffer {&emptyBuffer, nullptr};
+    for (const Ark_Buffer* arkBuffer : badBuffer) {
+        checkEventId = std::nullopt;
+        accessor_->unmarshalling1(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), arkBuffer, &arkCallback);
+        EXPECT_FALSE(AsyncWorkTestHelper::HasWorkCreated());
+        ASSERT_TRUE(checkEventId.has_value());
+        EXPECT_EQ(checkEventId, EXPECTED_NODE_ID);
+    }
+
+    AsyncWorkTestHelper::DoComplete();
 }
 
 /**
@@ -1051,5 +1130,24 @@ HWTEST_F(StyledStringAccessorUnionImageAttachmentTest, ctorImageAttachmentTest, 
     ASSERT_TRUE(imageAttribute.value().paddingProp.has_value());
     auto paddingStr = imageAttribute.value().paddingProp.value().ToString();
     EXPECT_EQ(paddingStr, TEST_LENGTHMETRICS_STR);
+}
+
+/**
+ * @tc.name: ctorCustomSpanTest
+ * @tc.desc: CustomSpan check
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionCustomSpanTest, ctorCustomSpanTest, TestSize.Level1)
+{
+    ASSERT_NE(peer_->spanString, nullptr);
+    auto spans = peer_->spanString->GetSpans(0, 1);
+    ASSERT_EQ(spans.size(), 1);
+    auto customSpan = AceType::DynamicCast<CustomSpan>(spans[0]);
+    ASSERT_NE(customSpan, nullptr);
+    EXPECT_EQ(customSpan->ToString(), "CustomSpan [0:1]");
+    EXPECT_EQ(customSpan->GetLength(), 1);
+    EXPECT_EQ(customSpan->GetStartIndex(), 0);
+    EXPECT_EQ(customSpan->GetEndIndex(), 1);
+    EXPECT_EQ(customSpan->GetSpanType(), SpanType::CustomSpan);
 }
 } // namespace OHOS::Ace::NG

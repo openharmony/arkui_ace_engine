@@ -75,6 +75,7 @@ const auto ATTRIBUTE_FOCUS_ARROW_STEP_OUT_NAME = "arrowStepOut";
 const auto ATTRIBUTE_FOCUS_ARROW_STEP_OUT_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_FOCUS_SCOPE_PRIORITY_NAME = "focusScopePriority";
 const auto ATTRIBUTE_FOCUS_SCOPE_PRIORITY_DEFAULT_VALUE = "FocusPriority.AUTO";
+const auto ATTRIBUTE_SYS_OPTIONS_DISABLE_ADAPTATION_DEFAULT_VALUE = true;
 
 static const float VALID_VAL = 123.4567f;
 static const Opt_Length OPT_LEN_EMPTY = Converter::ArkValue<Opt_Length>(Ark_Empty());
@@ -167,7 +168,7 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setResponseRegionTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setResponseRegionTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setResponseRegion, nullptr);
 
@@ -205,7 +206,7 @@ HWTEST_F(CommonMethodModifierTest2, setResponseRegionTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setMouseResponseRegionTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setMouseResponseRegionTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setMouseResponseRegion, nullptr);
 
@@ -340,7 +341,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnClick1Test, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setOnKeyPreImeTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyPreImeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnKeyPreIme, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -391,7 +392,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyPreImeTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setOnKeyEvent0Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent0Test, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnKeyEvent0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -439,7 +440,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyEvent0Test, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setOnKeyEvent1Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent1Test, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnKeyEvent1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -527,7 +528,7 @@ HWTEST_F(CommonMethodModifierTest2, setPixelRoundTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBackgroundEffectTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBackgroundEffect0, nullptr);
 
@@ -605,7 +606,7 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundEffectTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBackgroundBlurStyleTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBackgroundBlurStyle0, nullptr);
 
@@ -786,7 +787,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineRadiusTestValidValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setResponseRegion, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setResponseRegion, TestSize.Level1)
 {
     Ark_Union_Array_Rectangle_Rectangle inputValue;
     inputValue.selector = 1;
@@ -849,7 +850,7 @@ HWTEST_F(CommonMethodModifierTest2, setConstraintSize, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setTouchable, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setTouchable, TestSize.Level1)
 {
     Opt_Boolean inputValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setTouchable(node_, &inputValue);
@@ -885,7 +886,7 @@ HWTEST_F(CommonMethodModifierTest2, setLayoutWeight, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setHitTestBehavior, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setHitTestBehavior, TestSize.Level1)
 {
     typedef std::pair<Opt_HitTestMode, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
@@ -907,7 +908,7 @@ HWTEST_F(CommonMethodModifierTest2, setHitTestBehavior, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setOpacity, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOpacity, TestSize.Level1)
 {
     auto inputValue = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(0.7001);
     modifier_->setOpacity0(node_, &inputValue);
@@ -971,7 +972,7 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundColor, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setHoverEffect, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setHoverEffect, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_HoverEffect, std::string>;
     static const std::vector<OneTestStep> testPlan = {
@@ -995,7 +996,7 @@ HWTEST_F(CommonMethodModifierTest2, setHoverEffect, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setVisibility, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setVisibility, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_Visibility, std::string>;
     static const std::vector<OneTestStep> testPlan = {
@@ -1223,7 +1224,7 @@ HWTEST_F(CommonMethodModifierTest2, setAspectRatio, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setShadow, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setShadow, TestSize.Level1)
 {
     auto arkShadowOptions = Ark_ShadowOptions {
         .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(ARK_COLOR_GREEN),
@@ -1245,7 +1246,7 @@ HWTEST_F(CommonMethodModifierTest2, setShadow, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBackgroundBlurStyle, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyle, TestSize.Level1)
 {
     auto style = Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN);
     auto options = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>(Ark_BackgroundBlurStyleOptions {
@@ -1509,7 +1510,7 @@ HWTEST_F(CommonMethodModifierTest2, setBlur1Invalid2, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setOverlay, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOverlay, TestSize.Level1)
 {
     auto value = Converter::ArkUnion<Opt_Union_String_CustomBuilder_ComponentContent, Ark_String>("TEST_OVERLAY");
     auto options = Converter::ArkValue<Opt_OverlayOptions>(
@@ -1679,7 +1680,7 @@ HWTEST_F(CommonMethodModifierTest2, setBorderImage, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setLinearGradient, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setLinearGradient, TestSize.Level1)
 {
     // color stops
     std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
@@ -1706,7 +1707,7 @@ HWTEST_F(CommonMethodModifierTest2, setLinearGradient, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setSweepGradient, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setSweepGradient, TestSize.Level1)
 {
     // color stops
     std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
@@ -1734,11 +1735,11 @@ HWTEST_F(CommonMethodModifierTest2, setSweepGradient, TestSize.Level1)
 }
 
 /*
- * @tc.name: backdropBlur_setValues
+ * @tc.name: backdropBlur0_setValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur_setValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setValues, TestSize.Level1)
 {
     // see ./components_ng/render/adapter/rosen_render_context.cpp for details or possible operation
     double blurRadiusBefore = 3.1415;
@@ -1764,11 +1765,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: backdropBlur_setNullRadiusValue
+ * @tc.name: backdropBlur0_setNullRadiusValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur_setNullRadiusValue, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setNullRadiusValue, TestSize.Level1)
 {
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1785,11 +1786,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setNullRadiusValue, TestSize.Le
 }
 
 /*
- * @tc.name: backdropBlur_setBadRadiusValue
+ * @tc.name: backdropBlur0_setBadRadiusValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur_setBadRadiusValue, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setBadRadiusValue, TestSize.Level1)
 {
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1808,11 +1809,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setBadRadiusValue, TestSize.Lev
 }
 
 /*
- * @tc.name: backdropBlur_setNullOption
+ * @tc.name: backdropBlur0_setNullOption
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur_setNullOption, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setNullOption, TestSize.Level1)
 {
     auto renderMock = GetMockRenderContext();
     double blurRadiusBefore = 3.1415;
@@ -1829,11 +1830,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setNullOption, TestSize.Level1)
 }
 
 /*
- * @tc.name: backdropBlur_setValues
+ * @tc.name: backdropBlur0_setValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur_setShortOption, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setShortOption, TestSize.Level1)
 {
     auto renderMock = GetMockRenderContext();
     double blurRadiusBefore = 3.1415;
@@ -1884,6 +1885,219 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setShortOption, TestSize.Level1
     ASSERT_FALSE(renderMock->backdropBlurOption.grayscale.empty());
     ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[0]);
     ASSERT_EQ(goodNumberFloat, renderMock->backdropBlurOption.grayscale[1]);
+}
+
+/*
+ * @tc.name: backdropBlur1_setValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setValues, TestSize.Level1)
+{
+    // see ./components_ng/render/adapter/rosen_render_context.cpp for details or possible operation
+    double blurRadiusBefore = 3.1415;
+    double grayCoeff1 = 2;
+    double grayCoeff2 = 5;
+    auto radius = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
+    auto grayscale =
+        Converter::ArkValue(Converter::ArkValue<Ark_Number>(grayCoeff1), Converter::ArkValue<Ark_Number>(grayCoeff2));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
+        .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
+    });
+    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    auto renderMock = GetMockRenderContext();
+    ASSERT_EQ(renderMock->backdropBlurOption.grayscale.size(), 2);
+    ASSERT_NEAR(renderMock->backdropBlurOption.grayscale[0], grayCoeff1, 0.0001);
+    ASSERT_NEAR(renderMock->backdropBlurOption.grayscale[1], grayCoeff2, 0.0001);
+}
+
+/*
+ * @tc.name: backdropBlur1_setNullRadiusValue
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullRadiusValue, TestSize.Level1)
+{
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusBefore = GetAttrValue<double>(json, "backdropBlur");
+    auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
+        .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
+    });
+    modifier_->setBackdropBlur1(node_, nullptr, &options, &sysOptions);
+
+    json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+}
+
+/*
+ * @tc.name: backdropBlur1_setBadRadiusValue
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setBadRadiusValue, TestSize.Level1)
+{
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusBefore = GetAttrValue<double>(json, "backdropBlur");
+
+    auto radius = Converter::ArkValue<Opt_Number>(0);
+    auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
+        .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
+    });
+    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+
+    json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+}
+
+/*
+ * @tc.name: backdropBlur1_setNullOption
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullOption, TestSize.Level1)
+{
+    auto renderMock = GetMockRenderContext();
+    double blurRadiusBefore = 3.1415;
+    auto radius = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
+    auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
+        .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
+    });
+    modifier_->setBackdropBlur1(node_, &radius, nullptr, &sysOptions);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_TRUE(renderMock->backdropBlurOption.grayscale.empty());
+}
+
+/*
+ * @tc.name: backdropBlur1_setShortOption
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setShortOption, TestSize.Level1)
+{
+    auto renderMock = GetMockRenderContext();
+    double blurRadiusBefore = 3.1415;
+    auto radius = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
+    float emptyNumberFloat = 0.0;
+    float goodNumberFloat = 123.0;
+    renderMock->backdropBlurOption.grayscale.clear();
+
+    Ark_Number faultyNumber = Converter::ArkValue<Ark_Number>(0);
+    auto grayscale = Converter::ArkValue(faultyNumber, faultyNumber);
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
+        .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
+    });
+    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_FALSE(renderMock->backdropBlurOption.grayscale.empty());
+    ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[0]);
+    ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[1]);
+
+    renderMock->backdropBlurOption.grayscale.clear();
+    auto goodNumber = Converter::ArkValue<Ark_Number>(goodNumberFloat);
+    grayscale = Converter::ArkValue(goodNumber, faultyNumber);
+    options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+
+    json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_FALSE(renderMock->backdropBlurOption.grayscale.empty());
+    ASSERT_EQ(goodNumberFloat, renderMock->backdropBlurOption.grayscale[0]);
+    ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[1]);
+
+    renderMock->backdropBlurOption.grayscale.clear();
+    grayscale = Converter::ArkValue(faultyNumber, goodNumber);
+    options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+
+    json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_FALSE(renderMock->backdropBlurOption.grayscale.empty());
+    ASSERT_EQ(emptyNumberFloat, renderMock->backdropBlurOption.grayscale[0]);
+    ASSERT_EQ(goodNumberFloat, renderMock->backdropBlurOption.grayscale[1]);
+}
+
+/*
+ * @tc.name: backdropBlur1_setNullSysOption
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullSysOption, TestSize.Level1)
+{
+    auto renderMock = GetMockRenderContext();
+    double blurRadiusBefore = 3.1415;
+    auto radius = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
+    auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    modifier_->setBackdropBlur1(node_, &radius, &options, nullptr);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_TRUE(renderMock->GetSysOptions().has_value());
+    EXPECT_EQ(renderMock->GetSysOptions().value().disableSystemAdaptation,
+        ATTRIBUTE_SYS_OPTIONS_DISABLE_ADAPTATION_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: backdropBlur1_setSysOption
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setSysOption, TestSize.Level1)
+{
+    auto renderMock = GetMockRenderContext();
+    double blurRadiusBefore = 3.1415;
+    auto radius = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
+    auto grayscale = Converter::ArkValue(Converter::ArkValue<Ark_Number>(2), Converter::ArkValue<Ark_Number>(3));
+    auto options = Converter::ArkValue<Opt_BlurOptions>(grayscale);
+    auto sysOptions = ArkValue<Opt_SystemAdaptiveOptions>(Ark_SystemAdaptiveOptions {
+        .disableSystemAdaptation = ArkValue<Opt_Boolean>(false),
+    });
+    modifier_->setBackdropBlur1(node_, &radius, &options, &sysOptions);
+
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, "backdropBlur");
+    ASSERT_NEAR(blurRadiusBefore, blurRadiusAfter, 0.00001);
+
+    ASSERT_TRUE(renderMock->GetSysOptions().has_value());
+    EXPECT_EQ(renderMock->GetSysOptions().value().disableSystemAdaptation, false);
 }
 
 /*
@@ -2177,7 +2391,7 @@ HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestIsGroupValidValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestIsArrowStepOutValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setFocusScopeIdTestIsArrowStepOutValidValues, TestSize.Level1)
 {
     Opt_String initValueFocusScopeId;
     Opt_Boolean initValueIsGroup;

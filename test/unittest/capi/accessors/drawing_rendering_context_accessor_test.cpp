@@ -31,16 +31,21 @@ namespace {
 const auto DEFAULT_SETTING_UNITS = Converter::ArkValue<Opt_LengthMetricsUnit>(ARK_LENGTH_METRICS_UNIT_PX);
 const double DEFAULT_VALUE = -1;
 const double DEFAULT_DENSITY = 1.0;
-#ifdef WRONG_GEN
 const double DENSITY_1_25 = 1.25;
 const double FLT_PRECISION = 0.001;
-#endif
+
 const std::vector<std::pair<double, double>> floatNumberTestPlan = {
     { 100, 100 },
     { 0, 0 },
     { -100, -100 },
     { 12.34, 12.34 },
     { -56.73, -56.73 },
+};
+const std::vector<std::tuple<std::string, Opt_LengthMetricsUnit, OHOS::Ace::CanvasUnit>> optCanvasUnitTestPlan = {
+    { "default", Converter::ArkValue<Opt_LengthMetricsUnit>(CanvasUnit::DEFAULT), CanvasUnit::DEFAULT },
+    { "px", Converter::ArkValue<Opt_LengthMetricsUnit>(CanvasUnit::PX), CanvasUnit::PX },
+    { "invalid", Converter::ArkValue<Opt_LengthMetricsUnit>(static_cast<CanvasUnit>(-1)), CanvasUnit::DEFAULT },
+    { "undefined", Converter::ArkValue<Opt_LengthMetricsUnit>(Ark_Empty()), CanvasUnit::DEFAULT },
 };
 
 class MockCanvasPattern : public CanvasPattern {
@@ -76,9 +81,14 @@ public:
         mockPattern_ = nullptr;
     }
 
+    DrawingRenderingContextPeer* CreatePeerInstanceT(const Opt_LengthMetricsUnit* value)
+    {
+        return accessor_->ctor(value);
+    }
+
     void* CreatePeerInstance() override
     {
-        return accessor_->ctor(&DEFAULT_SETTING_UNITS);
+        return CreatePeerInstanceT(&DEFAULT_SETTING_UNITS);
     }
 
     void ChangeDensity(const double density)
@@ -86,11 +96,41 @@ public:
         auto pipelineContext =
             AceType::DynamicCast<NG::MockPipelineContext>(NG::MockPipelineContext::GetCurrentContext());
         pipelineContext->SetDensity(density);
+        if (peer_) {
+            auto peerImpl = reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl*>(peer_);
+            peerImpl->SetUnit(Ace::CanvasUnit::DEFAULT);
+        }
     }
 
     MockCanvasPattern* mockPattern_ = nullptr;
     RefPtr<MockCanvasPattern> mockPatternKeeper_ = nullptr;
 };
+
+/**
+ * @tc.name: ctorRenderingContextSettingsPeerTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawingRenderingContextAccessorTest, ctorTest, TestSize.Level1)
+{
+    for (const auto& [input, value, expected] : optCanvasUnitTestPlan) {
+        auto peer = CreatePeerInstanceT(&value);
+        auto result = reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl*>(peer)->GetUnit();
+        finalyzer_(peer);
+        std::optional<CanvasUnit> units = Converter::OptConvert<Ace::CanvasUnit>(result);
+        ASSERT_NE(units, std::nullopt);
+        EXPECT_EQ(units.value(), expected) <<
+            "Input value is: " << input << ", method: GetRepeat";
+    }
+    // nullptr
+    auto peer = CreatePeerInstanceT(nullptr);
+    auto result = reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl*>(peer)->GetUnit();
+    finalyzer_(peer);
+    std::optional<CanvasUnit> units = Converter::OptConvert<Ace::CanvasUnit>(result);
+    ASSERT_NE(units, std::nullopt);
+    EXPECT_EQ(units.value(), Ace::CanvasUnit::DEFAULT) <<
+        "Input value is: nullptr, method: GetRepeat";
+}
 
 /**
  * @tc.name: invalidateTest
@@ -117,9 +157,8 @@ HWTEST_F(DrawingRenderingContextAccessorTest, invalidateTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DrawingRenderingContextAccessorTest, DISABLED_getSizeTest, TestSize.Level1)
+HWTEST_F(DrawingRenderingContextAccessorTest, getSizeTest, TestSize.Level1)
 {
-#ifdef WRONG_GEN
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_NE(accessor_->getSize, nullptr);
@@ -159,7 +198,6 @@ HWTEST_F(DrawingRenderingContextAccessorTest, DISABLED_getSizeTest, TestSize.Lev
         }
     }
     holder->TearDown();
-#endif
 }
 /**
  * @tc.name: getCanvasTest

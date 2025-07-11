@@ -127,6 +127,7 @@ public:
         // see ./components_ng/render/adapter/rosen_render_context.cpp
         // RosenRenderContext::UpdateBackBlur
         backdropBlurOption = blurOption;
+        sysOptions_ = sysOptions;
     }
 
     void UpdateBackgroundEffect(
@@ -134,6 +135,16 @@ public:
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propEffectOption = effectOption;
+    }
+
+    void SetOuterBorderWidth(const BorderWidthProperty& value) override
+    {
+        GetOrCreateOuterBorder()->propOuterBorderWidth = value;
+    };
+
+    void SetOuterBorderColor(const BorderColorProperty& value) override
+    {
+        GetOrCreateOuterBorder()->propOuterBorderColor = value;
     }
 
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override
@@ -220,6 +231,11 @@ public:
         animationsCount_ = count;
     }
 
+    const std::optional<SysOptions>& GetSysOptions() const
+    {
+        return sysOptions_;
+    }
+
     bool isVisible_ = true;
     bool hasDisappearTransition_ = false;
     RectF rect_;
@@ -236,6 +252,10 @@ private:
     BlurOption foregroundBlurOption;
     RefPtr<NG::ChainedTransitionEffect> chainedTransitionEffect_ = nullptr;
     TransitionFinishCallback transitionUserCallback_;
+    std::optional<SysOptions> sysOptions_;
+
+private:
+    size_t animationsCount_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

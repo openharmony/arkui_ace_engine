@@ -34,7 +34,7 @@ import { TSTypeParameterInstantiation } from "./TSTypeParameterInstantiation"
 import { TypeNode } from "./TypeNode"
 export class TSImportType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 112)
+        assertValidPeer(pointer, 114)
         super(pointer)
     }
     static createTSImportType(param: Expression | undefined, typeParams: TSTypeParameterInstantiation | undefined, qualifier: Expression | undefined, isTypeof: boolean): TSImportType {
@@ -55,6 +55,7 @@ export class TSImportType extends TypeNode {
     get isTypeof(): boolean {
         return global.generatedEs2panda._TSImportTypeIsTypeofConst(global.context, this.peer)
     }
+    protected readonly brandTSImportType: undefined
 }
 export function isTSImportType(node: object | undefined): node is TSImportType {
     return node instanceof TSImportType

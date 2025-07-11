@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class TSTypeQuery extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 137)
+        assertValidPeer(pointer, 139)
         super(pointer)
     }
     static createTSTypeQuery(exprName?: Expression): TSTypeQuery {
@@ -45,6 +45,7 @@ export class TSTypeQuery extends TypeNode {
     get exprName(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._TSTypeQueryExprNameConst(global.context, this.peer))
     }
+    protected readonly brandTSTypeQuery: undefined
 }
 export function isTSTypeQuery(node: object | undefined): node is TSTypeQuery {
     return node instanceof TSTypeQuery

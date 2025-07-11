@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 export class TSModuleDeclaration extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 123)
+        assertValidPeer(pointer, 125)
         super(pointer)
     }
     static createTSModuleDeclaration(name: Expression | undefined, body: Statement | undefined, declare: boolean, _global: boolean): TSModuleDeclaration {
@@ -54,6 +54,7 @@ export class TSModuleDeclaration extends Statement {
     get isExternalOrAmbient(): boolean {
         return global.generatedEs2panda._TSModuleDeclarationIsExternalOrAmbientConst(global.context, this.peer)
     }
+    protected readonly brandTSModuleDeclaration: undefined
 }
 export function isTSModuleDeclaration(node: object | undefined): node is TSModuleDeclaration {
     return node instanceof TSModuleDeclaration

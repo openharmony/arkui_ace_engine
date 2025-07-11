@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { int32, KoalaCallsiteKey, UniqueId, asArray } from "@koalaui/common"
+import { charToInt, KoalaCallsiteKey, UniqueId, asArray } from "@koalaui/common"
 import { Assert } from "@koalaui/harness"
 import { GlobalStateManager, MutableState } from "@koalaui/runtime"
 
@@ -36,7 +36,7 @@ export enum Language {
     ArkTS
 }
 
-let TRANSFORM_PLUGIN: TransformPlugin = TransformPlugin.COMPILER_PLUGIN 
+let TRANSFORM_PLUGIN: TransformPlugin = TransformPlugin.COMPILER_PLUGIN
 
 export function setTransformPlugin(plugin: TransformPlugin) {
     TRANSFORM_PLUGIN = plugin
@@ -68,7 +68,7 @@ export function key(name: string): KoalaCallsiteKey {
     if (isArktsTest()) {
         let key: KoalaCallsiteKey = 0
         for (let i = 0; i < name.length; i++) {
-            key = (key << 3) | (key >> 29) ^ (name[i] as int32)
+            key = (key << 3) | (key >> 29) ^ (charToInt(name[i]))
         }
         return key
     } else {

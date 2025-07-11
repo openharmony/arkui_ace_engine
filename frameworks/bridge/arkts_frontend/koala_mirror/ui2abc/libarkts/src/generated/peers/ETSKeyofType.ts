@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class ETSKeyofType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 75)
+        assertValidPeer(pointer, 77)
         super(pointer)
     }
     static createETSKeyofType(type?: TypeNode): ETSKeyofType {
@@ -44,6 +44,7 @@ export class ETSKeyofType extends TypeNode {
     get typeRef(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._ETSKeyofTypeGetTypeRefConst(global.context, this.peer))
     }
+    protected readonly brandETSKeyofType: undefined
 }
 export function isETSKeyofType(node: object | undefined): node is ETSKeyofType {
     return node instanceof ETSKeyofType

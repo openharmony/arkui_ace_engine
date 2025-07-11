@@ -22,6 +22,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -101,6 +102,9 @@ TextClockPattern::TextClockPattern()
 
 void TextClockPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     InitTextClockController();
     InitUpdateTimeTextCallBack();
     auto* eventProxy = TimeEventProxy::GetInstance();
@@ -111,9 +115,24 @@ void TextClockPattern::OnAttachToFrameNode()
 
 void TextClockPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+}
+
+void TextClockPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+
+void TextClockPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
 
 void TextClockPattern::UpdateTextLayoutProperty(RefPtr<TextClockLayoutProperty>& layoutProperty,

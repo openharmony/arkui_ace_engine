@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class TSNamedTupleMember extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 135)
+        assertValidPeer(pointer, 137)
         super(pointer)
     }
     static createTSNamedTupleMember(label: Expression | undefined, elementType: TypeNode | undefined, optional_arg: boolean): TSNamedTupleMember {
@@ -51,6 +51,7 @@ export class TSNamedTupleMember extends TypeNode {
     get isOptional(): boolean {
         return global.generatedEs2panda._TSNamedTupleMemberIsOptionalConst(global.context, this.peer)
     }
+    protected readonly brandTSNamedTupleMember: undefined
 }
 export function isTSNamedTupleMember(node: object | undefined): node is TSNamedTupleMember {
     return node instanceof TSNamedTupleMember

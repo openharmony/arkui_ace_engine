@@ -775,6 +775,9 @@ public:
     virtual void UpdateColorMode(uint32_t colorMode) {};
 
     virtual void TriggerModuleSerializer() {};
+    // Get the subFrontend of container
+    virtual RefPtr<Frontend> GetSubFrontend() const { return nullptr; }
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::vector<std::string> GetFontFamilyName(const std::string& path);

@@ -34,7 +34,7 @@ import { TSTypeParameterInstantiation } from "./TSTypeParameterInstantiation"
 import { TemplateLiteral } from "./TemplateLiteral"
 export class TaggedTemplateExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 141)
+        assertValidPeer(pointer, 143)
         super(pointer)
     }
     static createTaggedTemplateExpression(tag?: Expression, quasi?: TemplateLiteral, typeParams?: TSTypeParameterInstantiation): TaggedTemplateExpression {
@@ -52,6 +52,7 @@ export class TaggedTemplateExpression extends Expression {
     get typeParams(): TSTypeParameterInstantiation | undefined {
         return unpackNode(global.generatedEs2panda._TaggedTemplateExpressionTypeParamsConst(global.context, this.peer))
     }
+    protected readonly brandTaggedTemplateExpression: undefined
 }
 export function isTaggedTemplateExpression(node: object | undefined): node is TaggedTemplateExpression {
     return node instanceof TaggedTemplateExpression

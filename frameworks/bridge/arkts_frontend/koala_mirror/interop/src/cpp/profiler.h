@@ -68,7 +68,11 @@ class InteropProfiler {
             auto ns = a.second.time;
             auto count = a.second.count;
             char buffer[1024];
-            snprintf(buffer, sizeof buffer, "for %s[%lld]: %.01f%% (%lld)\n", a.first.c_str(), (long long)count, (double)ns / total * 100.0, (long long)ns);
+            #ifdef __STDC_LIB_EXT1__ 
+                snprintf_s(buffer, sizeof buffer, "for %s[%lld]: %.01f%% (%lld)\n", a.first.c_str(), (long long)count, (double)ns / total * 100.0, (long long)ns);
+            #else
+                snprintf(buffer, sizeof buffer, "for %s[%lld]: %.01f%% (%lld)\n", a.first.c_str(), (long long)count, (double)ns / total * 100.0, (long long)ns);
+            #endif
             result += buffer;
         });
         return result;

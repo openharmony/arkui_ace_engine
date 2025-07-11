@@ -32,4 +32,5 @@ export class ScriptFunctionData extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandScriptFunctionData: undefined
 }

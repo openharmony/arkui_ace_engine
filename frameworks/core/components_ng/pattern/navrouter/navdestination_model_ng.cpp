@@ -1085,13 +1085,6 @@ void NavDestinationModelNG::SetNavDestinationMode(FrameNode* frameNode, NavDesti
     navDestinationNode->SetNavDestinationMode(mode);
 }
 
-void NavDestinationModelNG::SetNavDestinationMode(FrameNode* frameNode, const std::optional<NavDestinationMode>& mode)
-{
-    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navDestinationNode);
-    navDestinationNode->SetNavDestinationMode(mode.value_or(NavDestinationMode::STANDARD));
-}
-
 void NavDestinationModelNG::SetNavDestinationMode(NavDestinationMode mode)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1106,13 +1099,6 @@ void NavDestinationModelNG::SetRecoverable(FrameNode* frameNode, bool recoverabl
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
     navDestination->SetRecoverable(recoverable);
-}
-
-void NavDestinationModelNG::SetRecoverable(FrameNode* frameNode, const std::optional<bool>&recoverable)
-{
-    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navDestinationNode);
-    navDestinationNode->SetRecoverable(recoverable.value_or(true));
 }
 
 void NavDestinationModelNG::SetRecoverable(bool recoverable)
@@ -1363,6 +1349,7 @@ void NavDestinationModelNG::SetOnWillDisAppear(FrameNode* frameNode, std::functi
 // }
 
 void NavDestinationModelNG::SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts)
+void NavDestinationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

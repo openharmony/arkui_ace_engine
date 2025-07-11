@@ -599,6 +599,7 @@ RefPtr<FrameNode> StageManager::GetLastPageWithTransition() const
         return nullptr;
     }
     auto lastChildFrame = DynamicCast<FrameNode>(children.back());
+    CHECK_NULL_RETURN(lastChildFrame, nullptr);
     auto pagePattern = lastChildFrame->GetPattern<PagePattern>();
     if (pagePattern && pagePattern->GetPageInTransition()) {
         return DynamicCast<FrameNode>(destPageNode_.Upgrade());

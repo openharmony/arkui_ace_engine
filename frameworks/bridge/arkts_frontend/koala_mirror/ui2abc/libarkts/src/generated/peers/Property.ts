@@ -34,7 +34,7 @@ import { Expression } from "./Expression"
 import { ValidationInfo } from "./ValidationInfo"
 export class Property extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 55)
+        assertValidPeer(pointer, 56)
         super(pointer)
     }
     static create1Property(kind: Es2pandaPropertyKind, key: Expression | undefined, value: Expression | undefined, isMethod: boolean, isComputed: boolean): Property {
@@ -73,6 +73,7 @@ export class Property extends Expression {
     get validateExpression(): ValidationInfo | undefined {
         return new ValidationInfo(global.generatedEs2panda._PropertyValidateExpression(global.context, this.peer))
     }
+    protected readonly brandProperty: undefined
 }
 export function isProperty(node: object | undefined): node is Property {
     return node instanceof Property

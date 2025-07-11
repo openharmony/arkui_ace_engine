@@ -24,6 +24,8 @@
 
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/subwindow/subwindow.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
@@ -57,6 +59,14 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+enum class WidthBreakpoint { WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL };
+enum class HeightBreakpoint { HEIGHT_SM, HEIGHT_MD, HEIGHT_LG };
+constexpr double WIDTH_BREAKPOINT_320VP = 320.0; // window width threshold
+constexpr double WIDTH_BREAKPOINT_600VP = 600.0;
+constexpr double WIDTH_BREAKPOINT_840VP = 840.0;
+constexpr double WIDTH_BREAKPOINT_1440VP = 1440.0;
+constexpr double HEIGHT_ASPECTRATIO_THRESHOLD1 = 0.8; // window height/width = 0.8
+constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 constexpr double FULL_DIMENSION = 100.0;
 
 std::string PropertyVectorToString(const std::vector<AnimationPropertyType>& vec)
@@ -5511,6 +5521,45 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
     }
 }
 
+void ViewAbstract::SetOverlayBuilder(FrameNode* frameNode, const RefPtr<NG::UINode>& customNode,
+    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+    const std::optional<Dimension>& offsetY)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess() || !frameNode || !customNode) {
+        return;
+    }
+    auto overlayNode = AceType::DynamicCast<FrameNode>(customNode);
+    if (!overlayNode && customNode) {
+        auto* stack = ViewStackProcessor::GetInstance();
+        auto nodeId = stack->ClaimNodeId();
+        auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
+        if (stackNode) {
+            stackNode->AddChild(customNode);
+        }
+        overlayNode = stackNode;
+    }
+    if (overlayNode == nullptr) {
+        frameNode->SetOverlayNode(nullptr);
+        return;
+    }
+    frameNode->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(frameNode));
+    overlayNode->SetActive(true);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetIsOverlayNode(true);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
+    layoutProperty->SetOverlayOffset(offsetX, offsetY);
+    auto renderContext = overlayNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateZIndex(INT32_MAX);
+    auto focusHub = overlayNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
+}
+
 void ViewAbstract::SetOverlayComponentContent(const RefPtr<NG::FrameNode>& contentNode,
     const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
     const std::optional<Dimension>& offsetY)
@@ -6444,7 +6493,7 @@ void ViewAbstract::ReSetMagnifier(FrameNode* frameNode)
 void ViewAbstract::UpdateBackgroundBlurStyle(
     FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions)
 {
-    CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetBackgroundBlurStyle, frameNode, bgBlurStyle, sysOptions);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (bgBlurStyle.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
@@ -7495,6 +7544,7 @@ void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::set<std::string
 
 void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::string& inspectorId)
 {
+    FREE_NODE_CHECK(frameNode, SetInspectorId, frameNode, inspectorId);
     if (frameNode) {
         if (frameNode->GetInspectorId().has_value() && frameNode->GetInspectorIdValue() != inspectorId) {
             ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
@@ -7800,6 +7850,7 @@ void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()> &&onD
 void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
     const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
 {
+    FREE_NODE_CHECK(frameNode, SetOnAreaChanged, frameNode, std::move(onAreaChanged));
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -7968,6 +8019,7 @@ NG::OverlayOptions ViewAbstract::GetOverlay(FrameNode* frameNode)
 void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetNeedFocus, frameNode, value);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (value) {
@@ -9140,6 +9192,7 @@ bool ViewAbstract::GetRenderGroup(FrameNode* frameNode)
 void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)>&& onVisibleChange,
     const std::vector<double> &ratioList)
 {
+    FREE_NODE_CHECK(frameNode, SetOnVisibleChange, frameNode, std::move(onVisibleChange), ratioList);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -9151,6 +9204,8 @@ void ViewAbstract::SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
     const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
     int32_t expectedUpdateInterval)
 {
+    FREE_NODE_CHECK(frameNode, SetOnVisibleAreaApproximateChange, frameNode, std::move(onVisibleChange),
+        ratioList, expectedUpdateInterval);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -9200,6 +9255,7 @@ Color ViewAbstract::GetColorBlend(FrameNode* frameNode)
 
 void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
 {
+    FREE_NODE_CHECK(frameNode, ResetAreaChanged, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -9209,6 +9265,7 @@ void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
 
 void ViewAbstract::ResetVisibleChange(FrameNode* frameNode)
 {
+    FREE_NODE_CHECK(frameNode, ResetVisibleChange, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -9780,5 +9837,56 @@ void ViewAbstract::ResetResObj(const std::string& key)
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj(key);
+int32_t ViewAbstract::GetWindowWidthBreakpoint()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, -1);
+    auto window = container->GetWindow();
+    CHECK_NULL_RETURN(window, -1);
+    double density = PipelineBase::GetCurrentDensity();
+    double width = 0.0;
+    if (NearZero(density)) {
+        width = window->GetCurrentWindowRect().Width();
+    } else {
+        width = window->GetCurrentWindowRect().Width() / density;
+    }
+    WidthBreakpoint breakpoint;
+    if (width < WIDTH_BREAKPOINT_320VP) {
+        breakpoint = WidthBreakpoint::WIDTH_XS;
+    } else if (width < WIDTH_BREAKPOINT_600VP) {
+        breakpoint = WidthBreakpoint::WIDTH_SM;
+    } else if (width < WIDTH_BREAKPOINT_840VP) {
+        breakpoint = WidthBreakpoint::WIDTH_MD;
+    } else if (width < WIDTH_BREAKPOINT_1440VP) {
+        breakpoint = WidthBreakpoint::WIDTH_LG;
+    } else {
+        breakpoint = WidthBreakpoint::WIDTH_XL;
+    }
+    return static_cast<uint32_t>(breakpoint);
+}
+
+int32_t ViewAbstract::GetWindowHeightBreakpoint()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, -1);
+    auto window = container->GetWindow();
+    CHECK_NULL_RETURN(window, -1);
+    auto width = window->GetCurrentWindowRect().Width();
+    auto height = window->GetCurrentWindowRect().Height();
+    auto aspectRatio = 0.0;
+    if (NearZero(width)) {
+        aspectRatio = 0.0;
+    } else {
+        aspectRatio = height / width;
+    }
+    HeightBreakpoint breakpoint;
+    if (aspectRatio < HEIGHT_ASPECTRATIO_THRESHOLD1) {
+        breakpoint = HeightBreakpoint::HEIGHT_SM;
+    } else if (aspectRatio < HEIGHT_ASPECTRATIO_THRESHOLD2) {
+        breakpoint = HeightBreakpoint::HEIGHT_MD;
+    } else {
+        breakpoint = HeightBreakpoint::HEIGHT_LG;
+    }
+    return static_cast<uint32_t>(breakpoint);
 }
 } // namespace OHOS::Ace::NG

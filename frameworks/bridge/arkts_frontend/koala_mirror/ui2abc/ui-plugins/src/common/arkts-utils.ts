@@ -15,10 +15,9 @@
 
 import * as arkts from "@koalaui/libarkts"
 
-export function annotation(name: string): arkts.AnnotationUsage {
-    const ident: arkts.Identifier = arkts.factory.createIdentifier(name, undefined).setAnnotationUsage()
-    const annotation: arkts.AnnotationUsage = arkts.factory.createAnnotationUsage(ident, [])
-
+export function annotation(name: string, params?: arkts.AstNode[]): arkts.AnnotationUsage {
+    const ident: arkts.Identifier = arkts.factory.createIdentifier(name).setAnnotationUsage()
+    const annotation: arkts.AnnotationUsage = arkts.factory.createAnnotationUsage(ident, params ?? [])
     annotation.modifierFlags = arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_ANNOTATION_USAGE
     ident.parent = annotation
 
@@ -76,4 +75,10 @@ export function classMethods(clazz: arkts.ClassDeclaration, predicate?: (method:
     const body = clazz.definition?.body ?? []
     const methods = body.filter(arkts.isMethodDefinition)
     return predicate ? methods.filter(predicate) : methods
+}
+
+export function classProperties(clazz: arkts.ClassDeclaration, predicate?: (prop: arkts.ClassProperty) => boolean): arkts.ClassProperty[] {
+    const body = clazz.definition?.body ?? []
+    const props = body.filter(arkts.isClassProperty)
+    return predicate ? props.filter(predicate) : props
 }

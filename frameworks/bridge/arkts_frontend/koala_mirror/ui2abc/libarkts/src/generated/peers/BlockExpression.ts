@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 export class BlockExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 155)
+        assertValidPeer(pointer, 157)
         super(pointer)
     }
     static createBlockExpression(statements: readonly Statement[]): BlockExpression {
@@ -55,6 +55,7 @@ export class BlockExpression extends Expression {
         global.generatedEs2panda._BlockExpressionAddStatement(global.context, this.peer, passNode(statement))
         return this
     }
+    protected readonly brandBlockExpression: undefined
 }
 export function isBlockExpression(node: object | undefined): node is BlockExpression {
     return node instanceof BlockExpression

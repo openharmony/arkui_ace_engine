@@ -13,15 +13,21 @@
  * limitations under the License.
  */
 
+#undef UNITEST_FRIEND_CLASS
+#define UNITEST_FRIEND_CLASS friend class SwiperModifierTest2
+
 #include "swiper_modifier_test.h"
 #include "modifier_test_base.h"
 
+#include "core/interfaces/native/implementation/indicator_component_controller_peer.h"
 #include "core/interfaces/native/implementation/swiper_controller_modifier_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,6 +36,9 @@ using namespace testing::ext;
 
 namespace {
     static const auto ATTRIBUTE_PAGE_FLIP_MODE_DEFAULT_VALUE = 0;
+    constexpr int32_t TEST_WSCROLL_CINDEX = 0;
+    constexpr int32_t TEST_WSCROLL_COMINGINDEX = 10;
+    constexpr int32_t TEST_WSCROLL_OFFSET = 1;
 }
 
 namespace Converter {
@@ -49,6 +58,36 @@ void AssignArkValue(Opt_PageFlipMode& dst, const PageFlipMode& src, ConvContext 
 
 class SwiperModifierTest2 : public ModifierTestBase<GENERATED_ArkUISwiperModifier,
     &GENERATED_ArkUINodeModifiers::getSwiperModifier, GENERATED_ARKUI_SWIPER> {
+public:
+    std::optional<bool> OnContentWillScroll(FrameNode* node,
+        int32_t currentIndex, int32_t comingIndex, float offset) const
+    {
+        CHECK_NULL_RETURN(node, std::nullopt);
+        auto pattern = node->GetPattern<SwiperPattern>();
+        CHECK_NULL_RETURN(pattern, std::nullopt);
+        return pattern->OnContentWillScroll(currentIndex, comingIndex, offset);
+    }
+
+    Ark_NodeHandle CreateIndicatorComponent(Ark_IndicatorComponentController controller)
+    {
+        auto indicatorModifier = (*(nodeModifiers_->getIndicatorComponentModifier))();
+        CHECK_NULL_RETURN(indicatorModifier, nullptr);
+        auto indicatorNode = indicatorModifier->construct(GetId(), 0);
+        auto optValue = Converter::ArkValue<Opt_IndicatorComponentController>(controller);
+        indicatorModifier->setIndicatorComponentOptions(indicatorNode, &optValue);
+        return static_cast<Ark_NodeHandle>(indicatorNode);
+    }
+
+    Ark_NodeHandle GetBoundSwiperNodeFromIndicator(Ark_NodeHandle indicatorNode)
+    {
+        auto frameNode = reinterpret_cast<FrameNode*>(indicatorNode);
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        auto pattern = frameNode->GetPattern<IndicatorPattern>();
+        CHECK_NULL_RETURN(pattern, nullptr);
+        auto swiperNode = pattern->GetBindSwiperNode();
+        CHECK_NULL_RETURN(swiperNode, nullptr);
+        return reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(swiperNode));
+    }
 };
 
 /**
@@ -151,5 +190,180 @@ HWTEST_F(SwiperModifierTest2, setPageFlipModeTestInvalidValue, TestSize.Level1)
         modifier_->setPageFlipMode(node_, &inputValue);
         EXPECT_EQ(pattern->GetPageFlipMode(), expectedValue) << "Passed value is: " << expectedValue;
     }
+}
+
+/*
+ * @tc.name: setOnSelectedTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest2, setOnSelectedTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnSelected, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        int32_t value;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Number parameter) {
+        checkEvent = {
+            .nodeId = resourceId,
+            .value = Converter::Convert<int32_t>(parameter)
+        };
+    };
+
+    Callback_Number_Void arkCallback = Converter::ArkValue<Callback_Number_Void>(checkCallback, contextId);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Void>(arkCallback);
+
+    modifier_->setOnSelected(node_, &optCallback);
+
+    ASSERT_EQ(checkEvent.has_value(), false);
+    eventHub->FireSelectedEvent(1);
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value, 1);
+    eventHub->FireSelectedEvent(2);
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value, 2);
+}
+
+/*
+ * @tc.name: setOnUnselectedTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest2, setOnUnselectedTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnUnselected, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        int32_t value;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Number parameter) {
+        checkEvent = {
+            .nodeId = resourceId,
+            .value = Converter::Convert<int32_t>(parameter)
+        };
+    };
+
+    Callback_Number_Void arkCallback = Converter::ArkValue<Callback_Number_Void>(checkCallback, contextId);
+    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Void>(arkCallback);
+
+    modifier_->setOnUnselected(node_, &optCallback);
+
+    ASSERT_EQ(checkEvent.has_value(), false);
+    eventHub->FireUnselectedEvent(1);
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value, 1);
+    eventHub->FireUnselectedEvent(2);
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->value, 2);
+}
+
+/*
+ * @tc.name: setOnContentWillScrollTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest2, setOnContentWillScrollTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnContentWillScroll, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto result0 = OnContentWillScroll(frameNode, TEST_WSCROLL_CINDEX, TEST_WSCROLL_COMINGINDEX, TEST_WSCROLL_OFFSET);
+    EXPECT_FALSE(result0.has_value());
+
+    struct CheckEvent {
+        int32_t nodeId;
+        int32_t currentIndex;
+        int32_t comingIndex;
+        int32_t offset;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    static auto callResult = false;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_SwiperContentWillScrollResult result, const Callback_Boolean_Void continuation) {
+            checkEvent = {
+                .nodeId = resourceId,
+                .currentIndex = Converter::Convert<int32_t>(result.currentIndex),
+                .comingIndex = Converter::Convert<int32_t>(result.comingIndex),
+                .offset = Converter::Convert<int32_t>(result.offset)
+            };
+            CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(callResult));
+    };
+    auto arkCallback = Converter::ArkValue<ContentWillScrollCallback>(checkCallback, contextId);
+    auto optCallback = Converter::ArkValue<Opt_ContentWillScrollCallback>(arkCallback);
+
+    ASSERT_FALSE(checkEvent.has_value());
+    modifier_->setOnContentWillScroll(node_, &optCallback);
+    auto result1 = OnContentWillScroll(frameNode, TEST_WSCROLL_CINDEX, TEST_WSCROLL_COMINGINDEX, TEST_WSCROLL_OFFSET);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->currentIndex, TEST_WSCROLL_CINDEX);
+    EXPECT_EQ(checkEvent->comingIndex, TEST_WSCROLL_COMINGINDEX);
+    EXPECT_EQ(checkEvent->offset, TEST_WSCROLL_OFFSET);
+    ASSERT_TRUE(result1.has_value());
+    EXPECT_FALSE(result1.value());
+    callResult = true;
+    checkEvent.reset();
+    modifier_->setOnContentWillScroll(node_, &optCallback);
+    auto result2 = OnContentWillScroll(frameNode, TEST_WSCROLL_CINDEX, TEST_WSCROLL_COMINGINDEX, TEST_WSCROLL_OFFSET);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->currentIndex, TEST_WSCROLL_CINDEX);
+    EXPECT_EQ(checkEvent->comingIndex, TEST_WSCROLL_COMINGINDEX);
+    EXPECT_EQ(checkEvent->offset, TEST_WSCROLL_OFFSET);
+    ASSERT_TRUE(result2.has_value());
+    EXPECT_TRUE(result2.value());
+}
+
+/**
+ * @tc.name: setIndicator1TestController
+ * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Boolean type
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest2, setIndicator1TestController, TestSize.Level1)
+{
+    using namespace Converter;
+    ASSERT_NE(modifier_->setIndicator1, nullptr);
+
+    // create the external IndicatorComponentController
+    auto peer = PeerUtils::CreatePeer<IndicatorComponentControllerPeer>();
+    ASSERT_NE(peer, nullptr);
+
+    // it should be attached to separate IndicatorComponent node
+    auto indicatorNode = CreateIndicatorComponent(peer);
+
+    // check initial state
+    EXPECT_EQ(GetBoundSwiperNodeFromIndicator(indicatorNode), nullptr);
+
+    // attach this modifier to external IndicatorComponentController
+    auto optIndicator = ArkUnion<Opt_Type_SwiperAttribute_indicator_indicator, Ark_IndicatorComponentController>(peer);
+    modifier_->setIndicator1(node_, &optIndicator);
+
+    // check the expected state
+    EXPECT_EQ(GetBoundSwiperNodeFromIndicator(indicatorNode), node_);
+
+    DisposeNode(indicatorNode);
 }
 } // namespace OHOS::Ace::NG

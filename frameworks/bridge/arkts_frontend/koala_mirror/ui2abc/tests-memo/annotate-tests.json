@@ -7,6 +7,7 @@
         "./test/ts/**/*.ts",
         "./test/unmemoized/**/*.ts",
         "./test/ets/**/*.ts",
-        "./test/arkts_run.ts"
+        "./test/arkts_run.ts",
+        "./test/ts_run.ts"
     ]
 }

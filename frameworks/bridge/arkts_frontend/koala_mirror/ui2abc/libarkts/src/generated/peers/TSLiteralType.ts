@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class TSLiteralType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 109)
+        assertValidPeer(pointer, 111)
         super(pointer)
     }
     static createTSLiteralType(literal?: Expression): TSLiteralType {
@@ -45,6 +45,7 @@ export class TSLiteralType extends TypeNode {
     get literal(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._TSLiteralTypeLiteralConst(global.context, this.peer))
     }
+    protected readonly brandTSLiteralType: undefined
 }
 export function isTSLiteralType(node: object | undefined): node is TSLiteralType {
     return node instanceof TSLiteralType

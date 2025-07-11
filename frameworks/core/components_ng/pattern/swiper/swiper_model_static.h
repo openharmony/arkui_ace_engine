@@ -54,7 +54,10 @@ public:
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe);
     static void SetNestedScroll(FrameNode* frameNode, const int32_t nestedOpt);
     static void SetCustomContentTransition(FrameNode* frameNode, SwiperContentAnimatedTransition& transition);
+    static void SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected);
+    static void SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected);
     static void SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll);
+    static void SetOnContentWillScroll(FrameNode* frameNode, ContentWillScrollEvent&& onContentWillScroll);
     static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
     static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
     static void SetHoverShow(FrameNode* frameNode, bool hoverShow);
@@ -69,6 +72,7 @@ public:
         const std::optional<bool> &ignoreBlank = false);
     static void SetOnChangeEvent(FrameNode* frameNode,
         std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
+    static void SetBindIndicator(FrameNode* frameNode, bool bind);
 };
 } // namespace OHOS::Ace::NG
 

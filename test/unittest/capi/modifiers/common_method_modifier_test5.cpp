@@ -76,16 +76,16 @@ HWTEST_F(CommonMethodModifierTest5, setLinearGradientBlurTestDefaultValues, Test
 HWTEST_F(CommonMethodModifierTest5, setLinearGradientBlurTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLinearGradientBlur0, nullptr);
-    using OneTestStep = std::tuple<Ark_Number, Ark_LinearGradientBlurOptions, std::string>;
+    using OneTestStep = std::tuple<Opt_Number, Opt_LinearGradientBlurOptions, std::string>;
     std::vector<FractionStop> val1 = {{1.1f, 2.2f}, {3.3f, 4.4f}, {5.5f, 6.6f}};
     Converter::ArkArrayHolder<Array_FractionStop> frac(val1);
     static const std::vector<OneTestStep> testPlan = {
         {
-            Converter::ArkValue<Ark_Number>(12),
-            {
+            Converter::ArkValue<Opt_Number>(12),
+            Converter::ArkValue<Opt_LinearGradientBlurOptions>(Ark_LinearGradientBlurOptions {
                 .direction = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_BOTTOM,
                 .fractionStops = frac.ArkValue()
-            },
+            }),
             "{\"value\":\"12.00vp\",\"options\":{\"direction\":\"BOTTOM\","
             "\"fractionStops\":[\"1.100000,2.200000\",\"3.300000,4.400000\",\"5.500000,6.600000\"]}}"
         },
@@ -163,38 +163,38 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestDefaultValues, TestSize.Leve
 HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues1, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBlendMode0, nullptr);
-    using OneTestStep = std::tuple<Ark_BlendMode, Opt_BlendApplyType, std::string>;
+    using OneTestStep = std::tuple<Opt_BlendMode, Opt_BlendApplyType, std::string>;
     auto blendType = Converter::ArkValue<Opt_BlendApplyType>(ARK_BLEND_APPLY_TYPE_FAST);
     static const std::vector<OneTestStep> testPlan = {
-        {Ark_BlendMode::ARK_BLEND_MODE_CLEAR, blendType, "1"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC, blendType, "2"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST, blendType, "3"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_OVER, blendType, "4"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_OVER, blendType, "5"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_IN, blendType, "6"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_IN, blendType, "7"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_OUT, blendType, "8"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_OUT, blendType, "9"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_ATOP, blendType, "10"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_ATOP, blendType, "11"},
-        {Ark_BlendMode::ARK_BLEND_MODE_XOR, blendType, "12"},
-        {Ark_BlendMode::ARK_BLEND_MODE_PLUS, blendType, "13"},
-        {Ark_BlendMode::ARK_BLEND_MODE_MODULATE, blendType, "14"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SCREEN, blendType, "15"},
-        {Ark_BlendMode::ARK_BLEND_MODE_OVERLAY, blendType, "16"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DARKEN, blendType, "17"},
-        {Ark_BlendMode::ARK_BLEND_MODE_LIGHTEN, blendType, "18"},
-        {Ark_BlendMode::ARK_BLEND_MODE_COLOR_DODGE, blendType, "19"},
-        {Ark_BlendMode::ARK_BLEND_MODE_COLOR_BURN, blendType, "20"},
-        {Ark_BlendMode::ARK_BLEND_MODE_HARD_LIGHT, blendType, "21"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SOFT_LIGHT, blendType, "22"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DIFFERENCE, blendType, "23"},
-        {Ark_BlendMode::ARK_BLEND_MODE_EXCLUSION, blendType, "24"},
-        {Ark_BlendMode::ARK_BLEND_MODE_MULTIPLY, blendType, "25"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SCREEN, blendType, "15"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_CLEAR), blendType, "1"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SRC), blendType, "2"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_DST), blendType, "3"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SRC_OVER), blendType, "4"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_DST_OVER), blendType, "5"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SRC_IN), blendType, "6"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_DST_IN), blendType, "7"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SRC_OUT), blendType, "8"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_DST_OUT), blendType, "9"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SRC_ATOP), blendType, "10"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_DST_ATOP), blendType, "11"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_XOR), blendType, "12"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_PLUS), blendType, "13"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_MODULATE), blendType, "14"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SCREEN), blendType, "15"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_OVERLAY), blendType, "16"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_DARKEN), blendType, "17"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_LIGHTEN), blendType, "18"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_COLOR_DODGE), blendType, "19"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_COLOR_BURN), blendType, "20"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_HARD_LIGHT), blendType, "21"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SOFT_LIGHT), blendType, "22"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_DIFFERENCE), blendType, "23"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_EXCLUSION), blendType, "24"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_MULTIPLY), blendType, "25"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SCREEN), blendType, "15"},
     };
     for (auto [inputValueMode, inputValueType, expectedValue]: testPlan) {
-        modifier_->setBlendMode0(node_, inputValueMode, &inputValueType);
+        modifier_->setBlendMode0(node_, &inputValueMode, &inputValueType);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BLEND_MODE_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -209,38 +209,38 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues1, TestSize.Level
 HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues2, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBlendMode0, nullptr);
-    using OneTestStep = std::tuple<Ark_BlendMode, Opt_BlendApplyType, std::string>;
+    using OneTestStep = std::tuple<Opt_BlendMode, Opt_BlendApplyType, std::string>;
     auto blendType = Converter::ArkValue<Opt_BlendApplyType>(ARK_BLEND_APPLY_TYPE_OFFSCREEN);
     static const std::vector<OneTestStep> testPlan = {
-        {Ark_BlendMode::ARK_BLEND_MODE_CLEAR, blendType, "1"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC, blendType, "2"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST, blendType, "3"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_OVER, blendType, "4"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_OVER, blendType, "5"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_IN, blendType, "6"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_IN, blendType, "7"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_OUT, blendType, "8"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_OUT, blendType, "9"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SRC_ATOP, blendType, "10"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DST_ATOP, blendType, "11"},
-        {Ark_BlendMode::ARK_BLEND_MODE_XOR, blendType, "12"},
-        {Ark_BlendMode::ARK_BLEND_MODE_PLUS, blendType, "13"},
-        {Ark_BlendMode::ARK_BLEND_MODE_MODULATE, blendType, "14"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SCREEN, blendType, "15"},
-        {Ark_BlendMode::ARK_BLEND_MODE_OVERLAY, blendType, "16"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DARKEN, blendType, "17"},
-        {Ark_BlendMode::ARK_BLEND_MODE_LIGHTEN, blendType, "18"},
-        {Ark_BlendMode::ARK_BLEND_MODE_COLOR_DODGE, blendType, "19"},
-        {Ark_BlendMode::ARK_BLEND_MODE_COLOR_BURN, blendType, "20"},
-        {Ark_BlendMode::ARK_BLEND_MODE_HARD_LIGHT, blendType, "21"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SOFT_LIGHT, blendType, "22"},
-        {Ark_BlendMode::ARK_BLEND_MODE_DIFFERENCE, blendType, "23"},
-        {Ark_BlendMode::ARK_BLEND_MODE_EXCLUSION, blendType, "24"},
-        {Ark_BlendMode::ARK_BLEND_MODE_MULTIPLY, blendType, "25"},
-        {Ark_BlendMode::ARK_BLEND_MODE_SCREEN, blendType, "15"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_CLEAR), blendType, "1"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SRC), blendType, "2"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_DST), blendType, "3"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SRC_OVER), blendType, "4"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_DST_OVER), blendType, "5"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SRC_IN), blendType, "6"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_DST_IN), blendType, "7"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SRC_OUT), blendType, "8"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_DST_OUT), blendType, "9"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SRC_ATOP), blendType, "10"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_DST_ATOP), blendType, "11"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_XOR), blendType, "12"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_PLUS), blendType, "13"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_MODULATE), blendType, "14"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SCREEN), blendType, "15"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_OVERLAY), blendType, "16"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_DARKEN), blendType, "17"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_LIGHTEN), blendType, "18"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_COLOR_DODGE), blendType, "19"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_COLOR_BURN), blendType, "20"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_HARD_LIGHT), blendType, "21"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SOFT_LIGHT), blendType, "22"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_DIFFERENCE), blendType, "23"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_EXCLUSION), blendType, "24"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_MULTIPLY), blendType, "25"},
+        {Converter::ArkValue<Opt_BlendMode>(ARK_BLEND_MODE_SCREEN), blendType, "15"},
     };
     for (auto [inputValueMode, inputValueType, expectedValue]: testPlan) {
-        modifier_->setBlendMode0(node_, inputValueMode, &inputValueType);
+        modifier_->setBlendMode0(node_, &inputValueMode, &inputValueType);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BLEND_MODE_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -250,13 +250,15 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues2, TestSize.Level
 HWTEST_F(CommonMethodModifierTest5, setBlendModeTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBlendMode0, nullptr);
-    using OneTestStep = std::tuple<Ark_BlendMode, Opt_BlendApplyType, std::string>;
+    using OneTestStep = std::tuple<Opt_BlendMode, Opt_BlendApplyType, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {static_cast<Ark_BlendMode>(-1), Converter::ArkValue<Opt_BlendApplyType>(ARK_BLEND_APPLY_TYPE_FAST), "0"},
-        {static_cast<Ark_BlendMode>(999), Converter::ArkValue<Opt_BlendApplyType>(ARK_BLEND_APPLY_TYPE_FAST), "0"},
+        {Converter::ArkValue<Opt_BlendMode>(static_cast<Ark_BlendMode>(-1)),
+            Converter::ArkValue<Opt_BlendApplyType>(ARK_BLEND_APPLY_TYPE_FAST), "0"},
+        {Converter::ArkValue<Opt_BlendMode>(static_cast<Ark_BlendMode>(999)),
+            Converter::ArkValue<Opt_BlendApplyType>(ARK_BLEND_APPLY_TYPE_FAST), "0"},
     };
     for (const auto& [blendMode, applyType, expectedValue] : testPlan) {
-        modifier_->setBlendMode0(node_, blendMode, &applyType);
+        modifier_->setBlendMode0(node_, &blendMode, &applyType);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BLEND_MODE_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Invalid value should not change the blend mode";

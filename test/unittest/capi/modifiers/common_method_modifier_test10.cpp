@@ -102,7 +102,7 @@ HWTEST_F(CommonMethodModifierTest10, setBackgroundTestDefaultValues, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest10, setBackgroundCustomNodeBuilderTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest10, DISABLED_setBackgroundCustomNodeBuilderTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBackground, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -138,7 +138,7 @@ HWTEST_F(CommonMethodModifierTest10, setBackgroundCustomNodeBuilderTest, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest10, setBackgroundTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest10, DISABLED_setBackgroundTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBackground, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

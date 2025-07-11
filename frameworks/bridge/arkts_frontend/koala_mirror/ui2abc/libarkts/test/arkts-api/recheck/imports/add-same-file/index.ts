@@ -18,7 +18,7 @@ import * as arkts from "../../../../../src/arkts-api"
 export function addImportSameFile(program: arkts.Program, options: arkts.CompilationOptions) {
     if (options.isMainProgram) {
         arkts.updateETSModuleByStatements(
-            program.astNode,
+            program.ast as arkts.ETSModule,
             [
                 arkts.factory.createETSImportDeclaration(
                     arkts.factory.createStringLiteral(
@@ -36,7 +36,7 @@ export function addImportSameFile(program: arkts.Program, options: arkts.Compila
                     ],
                     arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL
                 ),
-                ...program.astNode.statements,
+                ...program.ast.statements,
             ]
         )
     }

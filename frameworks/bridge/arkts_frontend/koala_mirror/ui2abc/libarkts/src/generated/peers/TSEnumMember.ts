@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 export class TSEnumMember extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 88)
+        assertValidPeer(pointer, 90)
         super(pointer)
     }
     static create1TSEnumMember(key: Expression | undefined, init: Expression | undefined, isGenerated: boolean): TSEnumMember {
@@ -57,6 +57,7 @@ export class TSEnumMember extends Statement {
     get name(): string {
         return unpackString(global.generatedEs2panda._TSEnumMemberNameConst(global.context, this.peer))
     }
+    protected readonly brandTSEnumMember: undefined
 }
 export function isTSEnumMember(node: object | undefined): node is TSEnumMember {
     return node instanceof TSEnumMember

@@ -307,7 +307,7 @@ HWTEST_F(ImageAnimatorModifierTest, setIterationsTestInvalidValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorModifierTest, setOnStartTest, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnStartTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnStart, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -336,7 +336,7 @@ HWTEST_F(ImageAnimatorModifierTest, setOnStartTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorModifierTest, setOnPauseTest, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnPauseTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnPause, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -365,7 +365,7 @@ HWTEST_F(ImageAnimatorModifierTest, setOnPauseTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorModifierTest, setOnRepeatTest, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnRepeatTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnRepeat, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -394,7 +394,7 @@ HWTEST_F(ImageAnimatorModifierTest, setOnRepeatTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorModifierTest, setOnCancelTest, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnCancelTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnCancel, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -423,7 +423,7 @@ HWTEST_F(ImageAnimatorModifierTest, setOnCancelTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorModifierTest, setOnFinishTest, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnFinishTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnFinish, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

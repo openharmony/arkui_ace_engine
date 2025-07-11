@@ -37,7 +37,7 @@ import { SpreadElement } from "./SpreadElement"
 import { TypeNode } from "./TypeNode"
 export class ETSParameterExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 80)
+        assertValidPeer(pointer, 82)
         super(pointer)
     }
     static createETSParameterExpression(identOrSpread: AnnotatedExpression | undefined, isOptional: boolean): ETSParameterExpression {
@@ -70,8 +70,8 @@ export class ETSParameterExpression extends Expression {
         return unpackNode(global.generatedEs2panda._ETSParameterExpressionInitializer(global.context, this.peer))
     }
     /** @deprecated */
-    setLexerSaved(s: string): this {
-        global.generatedEs2panda._ETSParameterExpressionSetLexerSaved(global.context, this.peer, s)
+    setLexerSaved(savedLexer: string): this {
+        global.generatedEs2panda._ETSParameterExpressionSetLexerSaved(global.context, this.peer, savedLexer)
         return this
     }
     get lexerSaved(): string {
@@ -105,18 +105,47 @@ export class ETSParameterExpression extends Expression {
         return global.generatedEs2panda._ETSParameterExpressionGetRequiredParamsConst(global.context, this.peer)
     }
     /** @deprecated */
-    setRequiredParams(value: number): this {
-        global.generatedEs2panda._ETSParameterExpressionSetRequiredParams(global.context, this.peer, value)
+    setRequiredParams(extraValue: number): this {
+        global.generatedEs2panda._ETSParameterExpressionSetRequiredParams(global.context, this.peer, extraValue)
         return this
+    }
+    /** @deprecated */
+    emplaceAnnotations(source?: AnnotationUsage): this {
+        global.generatedEs2panda._ETSParameterExpressionEmplaceAnnotations(global.context, this.peer, passNode(source))
+        return this
+    }
+    /** @deprecated */
+    clearAnnotations(): this {
+        global.generatedEs2panda._ETSParameterExpressionClearAnnotations(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueAnnotations(source: AnnotationUsage | undefined, index: number): this {
+        global.generatedEs2panda._ETSParameterExpressionSetValueAnnotations(global.context, this.peer, passNode(source), index)
+        return this
+    }
+    get annotationsForUpdate(): readonly AnnotationUsage[] {
+        return unpackNodeArray(global.generatedEs2panda._ETSParameterExpressionAnnotationsForUpdate(global.context, this.peer))
     }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._ETSParameterExpressionAnnotations(global.context, this.peer))
     }
     /** @deprecated */
-    setAnnotations(annotations: readonly AnnotationUsage[]): this {
-        global.generatedEs2panda._ETSParameterExpressionSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+    setAnnotations(annotationList: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._ETSParameterExpressionSetAnnotations(global.context, this.peer, passNodeArray(annotationList), annotationList.length)
         return this
     }
+    /** @deprecated */
+    setAnnotations1(annotationList: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._ETSParameterExpressionSetAnnotations1(global.context, this.peer, passNodeArray(annotationList), annotationList.length)
+        return this
+    }
+    /** @deprecated */
+    addAnnotations(annotations?: AnnotationUsage): this {
+        global.generatedEs2panda._ETSParameterExpressionAddAnnotations(global.context, this.peer, passNode(annotations))
+        return this
+    }
+    protected readonly brandETSParameterExpression: undefined
 }
 export function isETSParameterExpression(node: object | undefined): node is ETSParameterExpression {
     return node instanceof ETSParameterExpression

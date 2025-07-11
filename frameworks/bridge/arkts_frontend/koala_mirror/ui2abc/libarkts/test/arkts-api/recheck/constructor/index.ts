@@ -48,5 +48,5 @@ class ConstructorWithOverload extends arkts.AbstractVisitor {
 }
 
 export function constructorWithOverload(program: arkts.Program) {
-    return (new ConstructorWithOverload()).visitor(program.astNode)
+    return new ConstructorWithOverload().visitor(program.ast as arkts.ETSModule)
 }

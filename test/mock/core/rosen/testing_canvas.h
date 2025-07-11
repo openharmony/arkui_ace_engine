@@ -98,6 +98,10 @@ public:
         return std::shared_ptr<T>();
     }
 
+    virtual bool ReadPixels(const TestingImageInfo& info, void* dstPixels, size_t dstRowBytes, int32_t srcX, int32_t srcY)
+    {
+        return true;
+    }
     virtual void Save() {}
     virtual void Restore() {}
     virtual void DrawCircle(const TestingPoint& center, float radius) {}

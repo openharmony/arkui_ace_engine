@@ -43,7 +43,7 @@ const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_poi
 // constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
 constexpr char KEY_MENU[] = "Menu";
 
-void StartVirator(const MenuParam& menuParam, bool isMenu, const std::string& menuHapticFeedback)
+void StartVibrator(const MenuParam& menuParam, bool isMenu, const std::string& menuHapticFeedback)
 {
     if (menuParam.hapticFeedbackMode == HapticFeedbackMode::ENABLED) {
         VibratorUtils::StartViratorDirectly(menuHapticFeedback);
@@ -92,7 +92,7 @@ void ViewAbstractModelStatic::BindMenuGesture(FrameNode* targetNode,
             CHECK_NULL_VOID(menuTheme);
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-            StartVirator(menuParam, true, menuTheme->GetMenuHapticFeedback());
+            StartVibrator(menuParam, true, menuTheme->GetMenuHapticFeedback());
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuPosition, menuParam);
         };
     } else if (buildFunc) {
@@ -109,7 +109,7 @@ void ViewAbstractModelStatic::BindMenuGesture(FrameNode* targetNode,
             CHECK_NULL_VOID(menuTheme);
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-            StartVirator(menuParam, true, menuTheme->GetMenuHapticFeedback());
+            StartVibrator(menuParam, true, menuTheme->GetMenuHapticFeedback());
             std::function<void()> previewBuildFunc;
             NG::ViewAbstract::BindMenuWithCustomNode(
                 std::move(builderFunc), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
@@ -218,7 +218,7 @@ void ViewAbstractModelStatic::BindMenu(FrameNode* frameNode,
         CHECK_NULL_VOID(pipelineContext);
         auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
         CHECK_NULL_VOID(menuTheme);
-        StartVirator(menuParam, true, menuTheme->GetMenuHapticFeedback());
+        StartVibrator(menuParam, true, menuTheme->GetMenuHapticFeedback());
         if (!params.empty()) {
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
         } else if (buildFunc) {
@@ -266,23 +266,23 @@ void ViewAbstractModelStatic::BindMenu(FrameNode* frameNode,
 void ViewAbstractModelStatic::CreateCustomMenuWithPreview(FrameNode* targetNode,
     std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc)
 {
-    // CHECK_NULL_VOID(targetNode);
-    // if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::IMAGE) {
-    //     auto context = targetNode->GetRenderContext();
-    //     CHECK_NULL_VOID(context);
-    //     auto gestureHub = targetNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
-    //     CHECK_NULL_VOID(gestureHub);
-    //     auto pixelMap = context->GetThumbnailPixelMap();
-    //     gestureHub->SetPixelMap(pixelMap);
-    // }
-    // auto refTargetNode = AceType::Claim<NG::FrameNode>(targetNode);
-    // auto pipelineContext = targetNode->GetContext();
-    // CHECK_NULL_VOID(pipelineContext);
-    // auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
-    // CHECK_NULL_VOID(menuTheme);
-    // StartVirator(menuParam, false, menuTheme->GetMenuHapticFeedback());
-    // NG::ViewAbstract::BindMenuWithCustomNode(
-    //     std::move(buildFunc), refTargetNode, menuParam.positionOffset, menuParam, std::move(previewBuildFunc));
+    CHECK_NULL_VOID(targetNode);
+    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::IMAGE) {
+        auto context = targetNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        auto gestureHub = targetNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        auto pixelMap = context->GetThumbnailPixelMap();
+        gestureHub->SetPixelMap(pixelMap);
+    }
+    auto refTargetNode = AceType::Claim<NG::FrameNode>(targetNode);
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
+    NG::ViewAbstract::BindMenuWithCustomNode(
+        std::move(buildFunc), refTargetNode, menuParam.positionOffset, menuParam, std::move(previewBuildFunc));
 }
 
 void ViewAbstractModelStatic::BindContextMenuSingle(FrameNode* targetNode,
@@ -337,101 +337,110 @@ void ViewAbstractModelStatic::BindContextMenuSingle(FrameNode* targetNode,
 void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& targetNode, ResponseType type,
     std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc)
 {
-    // CHECK_NULL_VOID(targetNode);
-    // auto targetId = targetNode->GetId();
-    // auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
-    // if (subwindow) {
-    //     auto childContainerId = subwindow->GetChildContainerId();
-    //     auto childContainer = AceEngine::Get().GetContainer(childContainerId);
-    //     CHECK_NULL_VOID(childContainer);
-    //     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
-    //     CHECK_NULL_VOID(pipeline);
-    //     auto overlayManager = pipeline->GetOverlayManager();
-    //     CHECK_NULL_VOID(overlayManager);
-    //     auto menuNode = overlayManager->GetMenuNode(targetId);
-    //     if (menuNode) {
-    //         TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
-    //         auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
-    //         CHECK_NULL_VOID(menuWrapperPattern);
-    //         menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
-    //         menuWrapperPattern->RegisterMenuStateChangeCallback(menuParam.onStateChange);
-    //     }
-    // }
-    // if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
-    //     BindContextMenuSingle(AceType::RawPtr(targetNode), std::move(buildFunc), menuParam,
-    //         std::move(previewBuildFunc));
-    // } else {
-    //     auto hub = targetNode->GetOrCreateGestureEventHub();
-    //     CHECK_NULL_VOID(hub);
-    //     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
-    //     if (type == ResponseType::RIGHT_CLICK) {
-    //         OnMouseEventFunc event = [builderF = buildFunc, weakTarget, menuParam](MouseInfo& info) mutable {
-    //             TAG_LOGI(AceLogTag::ACE_MENU, "Execute rightClick task for menu");
-    //             auto containerId = Container::CurrentId();
-    //             auto taskExecutor = Container::CurrentTaskExecutor();
-    //             CHECK_NULL_VOID(taskExecutor);
-    //             if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-    //                 info.SetStopPropagation(true);
-    //             }
-    //             taskExecutor->PostTask(
-    //                 [containerId, builder = builderF, weakTarget, menuParam, info]() mutable {
-    //                     auto targetNode = weakTarget.Upgrade();
-    //                     CHECK_NULL_VOID(targetNode);
-    //                     NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
-    //                         info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-    //                     if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-    //                         std::function<void()> previewBuildFunc;
-    //                         NG::ViewAbstract::BindMenuWithCustomNode(
-    //                             std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
-    //                     }
-    //                 },
-    //                 TaskExecutor::TaskType::PLATFORM, "ArkUIRightClickCreateCustomMenu");
-    //         };
-    //         auto inputHub = targetNode->GetOrCreateInputEventHub();
-    //         CHECK_NULL_VOID(inputHub);
-    //         inputHub->BindContextMenu(std::move(event));
-    //     } else if (type == ResponseType::LONG_PRESS) {
-    //         auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
-    //         CHECK_NULL_VOID(gestureHub);
-    //         gestureHub->SetPreviewMode(menuParam.previewMode.value_or(MenuPreviewMode::NONE));
-    //         // create or show menu on long press
-    //         auto event =
-    //             [builderF = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
-    //             TAG_LOGI(AceLogTag::ACE_MENU, "Trigger longPress event for menu");
-    //             auto containerId = Container::CurrentId();
-    //             auto taskExecutor = Container::CurrentTaskExecutor();
-    //             CHECK_NULL_VOID(taskExecutor);
-    //             taskExecutor->PostTask(
-    //                 [containerId, builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
-    //                     TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
-    //                     auto targetNode = weakTarget.Upgrade();
-    //                     CHECK_NULL_VOID(targetNode);
-    //                     auto pipelineContext = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
-    //                     CHECK_NULL_VOID(pipelineContext);
-    //                     if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
-    //                         auto context = targetNode->GetRenderContext();
-    //                         CHECK_NULL_VOID(context);
-    //                         auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
-    //                         CHECK_NULL_VOID(gestureHub);
-    //                         auto pixelMap = context->GetThumbnailPixelMap();
-    //                         gestureHub->SetPixelMap(pixelMap);
-    //                     }
-    //                     NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
-    //                         info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-    //                     NG::ViewAbstract::BindMenuWithCustomNode(
-    //                         std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
-    //                 },
-    //                 TaskExecutor::TaskType::PLATFORM, "ArkUILongPressCreateCustomMenu");
-    //         };
-    //         auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
-    //         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, targetNode);
-    //         auto longPressDuration = menuParam.isShowHoverImage ? HOVER_IMAGE_LONG_PRESS_DURATION : LONG_PRESS_DURATION;
-    //         hub->SetLongPressEvent(longPress, false, true, longPressDuration);
-    //     } else {
-    //         return;
-    //     }
-    //     RegisterContextMenuKeyEvent(targetNode, buildFunc, menuParam);
-    // }
+    CHECK_NULL_VOID(targetNode);
+    auto targetId = targetNode->GetId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+    if (subwindow) {
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_VOID(childContainer);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        auto menuNode = overlayManager->GetMenuNode(targetId);
+        if (menuNode) {
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
+            auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
+            CHECK_NULL_VOID(menuWrapperPattern);
+            menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
+            menuWrapperPattern->RegisterMenuStateChangeCallback(menuParam.onStateChange);
+        }
+    }
+    if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
+        BindContextMenuSingle(AceType::RawPtr(targetNode), std::move(buildFunc), menuParam,
+            std::move(previewBuildFunc));
+    } else {
+        auto hub = targetNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(hub);
+        auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
+        if (type == ResponseType::RIGHT_CLICK) {
+            OnMouseEventFunc event = [builderF = buildFunc, weakTarget, menuParam,
+                                         previewBuildFunc = std::move(previewBuildFunc)](MouseInfo& info) mutable {
+                TAG_LOGI(AceLogTag::ACE_MENU, "Execute rightClick task for menu");
+                auto containerId = Container::CurrentId();
+                auto taskExecutor = Container::CurrentTaskExecutor();
+                CHECK_NULL_VOID(taskExecutor);
+                if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+                    info.SetStopPropagation(true);
+                }
+                taskExecutor->PostTask(
+                    [containerId, builder = builderF, weakTarget, menuParam, info,
+                        previewBuildFunc = std::move(previewBuildFunc)]() mutable {
+                        auto targetNode = weakTarget.Upgrade();
+                        CHECK_NULL_VOID(targetNode);
+                        NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                            info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+                        if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+                            auto pipelineContext = targetNode->GetContext();
+                            CHECK_NULL_VOID(pipelineContext);
+                            auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+                            CHECK_NULL_VOID(menuTheme);
+                            StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
+                            NG::ViewAbstract::BindMenuWithCustomNode(
+                                std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
+                        }
+                    },
+                    TaskExecutor::TaskType::PLATFORM, "ArkUIRightClickCreateCustomMenu");
+            };
+            auto inputHub = targetNode->GetOrCreateInputEventHub();
+            CHECK_NULL_VOID(inputHub);
+            inputHub->BindContextMenu(std::move(event));
+        } else if (type == ResponseType::LONG_PRESS) {
+            auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
+            CHECK_NULL_VOID(gestureHub);
+            gestureHub->SetPreviewMode(menuParam.previewMode.value_or(MenuPreviewMode::NONE));
+            // create or show menu on long press
+            auto event =
+                [builderF = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
+                TAG_LOGI(AceLogTag::ACE_MENU, "Trigger longPress event for menu");
+                auto containerId = Container::CurrentId();
+                auto taskExecutor = Container::CurrentTaskExecutor();
+                CHECK_NULL_VOID(taskExecutor);
+                taskExecutor->PostTask(
+                    [containerId, builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
+                        TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
+                        auto targetNode = weakTarget.Upgrade();
+                        CHECK_NULL_VOID(targetNode);
+                        auto pipelineContext = targetNode->GetContext();
+                        CHECK_NULL_VOID(pipelineContext);
+                        if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
+                            auto context = targetNode->GetRenderContext();
+                            CHECK_NULL_VOID(context);
+                            auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
+                            CHECK_NULL_VOID(gestureHub);
+                            auto pixelMap = context->GetThumbnailPixelMap();
+                            gestureHub->SetPixelMap(pixelMap);
+                        }
+                        NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                            info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+                        auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+                        CHECK_NULL_VOID(menuTheme);
+                        StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
+                        NG::ViewAbstract::BindMenuWithCustomNode(
+                            std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
+                    },
+                    TaskExecutor::TaskType::PLATFORM, "ArkUILongPressCreateCustomMenu");
+            };
+            auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, targetNode);
+            auto longPressDuration = menuParam.isShowHoverImage ? HOVER_IMAGE_LONG_PRESS_DURATION : LONG_PRESS_DURATION;
+            hub->SetLongPressEvent(longPress, false, true, longPressDuration);
+        } else {
+            return;
+        }
+        RegisterContextMenuKeyEvent(targetNode, buildFunc, menuParam);
+    }
 
     // // delete menu when target node destroy
     // auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
@@ -655,6 +664,52 @@ void ViewAbstractModelStatic::SetAccessibilityVirtualNode(FrameNode* frameNode,
     virtualFrameNode->SetFirstAccessibilityVirtualNode();
     frameNode->HasAccessibilityVirtualNode(true);
     accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
+}
+
+void ViewAbstractModelStatic::DisableOnAccessibilityHover(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAccessibilityHover();
+}
+
+void ViewAbstractModelStatic::SetOnAccessibilityHover(FrameNode* frameNode,
+    OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAccessibilityHoverEvent(std::move(onAccessibilityHoverEventFunc));
+}
+
+void ViewAbstractModelStatic::SetVisualEffect(FrameNode* frameNode,
+    const OHOS::Rosen::VisualEffect* visualEffect)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(VisualEffect, visualEffect, frameNode);
+}
+
+void ViewAbstractModelStatic::SetBackgroundFilter(FrameNode* frameNode,
+    const OHOS::Rosen::Filter* backgroundFilter)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundFilter, backgroundFilter, frameNode);
+}
+
+void ViewAbstractModelStatic::SetForegroundFilter(FrameNode* frameNode,
+    const OHOS::Rosen::Filter* foregroundFilter)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundFilter, foregroundFilter, frameNode);
+}
+
+void ViewAbstractModelStatic::SetCompositingFilter(FrameNode* frameNode,
+    const OHOS::Rosen::Filter* compositingFilter)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(CompositingFilter, compositingFilter, frameNode);
+}
+
+void ViewAbstractModelStatic::SetBrightnessBlender(FrameNode* frameNode,
+    const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender, frameNode);
 }
 
 void ViewAbstractModelStatic::SetBloom(FrameNode *frameNode, const std::optional<float>& value,
@@ -1239,6 +1294,133 @@ void ViewAbstractModelStatic::SetFocusScopePriority(
     focusHub->SetFocusScopePriority(focusScopeId, proirity);
 }
 
+void ViewAbstractModelStatic::SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale)
+{
+    if (grayScale.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontGrayScale, grayScale.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontGrayScale, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetColorBlend(FrameNode* frameNode, const std::optional<Color>& colorBlend)
+{
+    if (colorBlend.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontColorBlend, colorBlend.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontColorBlend, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetUseShadowBatching(FrameNode* frameNode, std::optional<bool> useShadowBatching)
+{
+    if (useShadowBatching.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseShadowBatching, useShadowBatching.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseShadowBatching, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetUseEffect(FrameNode* frameNode, std::optional<bool> useEffect)
+{
+    if (useEffect.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffect, useEffect.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseEffect, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDrawModifier(drawModifier);
+}
+
+void ViewAbstractModelStatic::SetFreeze(FrameNode* frameNode, std::optional<bool> freeze)
+{
+    if (freeze.has_value()) {
+        ACE_UPDATE_RENDER_CONTEXT(Freeze, freeze.value());
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_RENDER_CONTEXT(target, Freeze);
+    }
+}
+
+void ViewAbstractModelStatic::SetClickEffectLevel(FrameNode* frameNode,
+    const std::optional<ClickEffectLevel>& level, std::optional<float> scaleValue)
+{
+    if (level.has_value() || scaleValue.has_value()) {
+        ClickEffectInfo clickEffectInfo;
+        if (level.has_value()) {
+            clickEffectInfo.level = level.value();
+        }
+        if (scaleValue.has_value()) {
+            clickEffectInfo.scaleNumber = scaleValue.value();
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, ClickEffectLevel, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetBrightness(FrameNode* frameNode,
+    const std::optional<Dimension>& brightness)
+{
+    if (brightness.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontBrightness, brightness.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontBrightness, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetContrast(FrameNode* frameNode,
+    const std::optional<Dimension>& contrast)
+{
+    if (contrast.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontContrast, contrast.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontContrast, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetSphericalEffect(FrameNode* frameNode, std::optional<double> radio)
+{
+    if (radio.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(SphericalEffect, radio.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, SphericalEffect, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetLightUpEffect(FrameNode* frameNode, std::optional<double> radio)
+{
+    if (radio.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(LightUpEffect, radio.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, LightUpEffect, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetPixelStretchEffect(FrameNode* frameNode,
+    const std::optional<PixStretchEffectOption>& option)
+{
+    if (option.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, option.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, PixelStretchEffect, frameNode);
+    }
+}
+
 void ViewAbstractModelStatic::SetBlendApplyType(
     FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType)
 {
@@ -1276,56 +1458,6 @@ void ViewAbstractModelStatic::SetOnGestureRecognizerJudgeBegin(
     gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
 }
 
-void ViewAbstractModelStatic::SetBrightness(FrameNode* frameNode,
-    const std::optional<Dimension>& brightness)
-{
-    if (brightness.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontBrightness, brightness.value(), frameNode);
-    } else {
-        auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontBrightness, frameNode);
-    }
-}
-
-void ViewAbstractModelStatic::SetContrast(FrameNode* frameNode,
-    const std::optional<Dimension>& contrast)
-{
-    if (contrast.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontContrast, contrast.value(), frameNode);
-    } else {
-        auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontContrast, frameNode);
-    }
-}
-
-void ViewAbstractModelStatic::SetLightUpEffect(FrameNode* frameNode, std::optional<double> radio)
-{
-    if (radio.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(LightUpEffect, radio.value(), frameNode);
-    } else {
-        auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, LightUpEffect, frameNode);
-    }
-}
-
-void ViewAbstractModelStatic::SetClickEffectLevel(FrameNode* frameNode,
-    const std::optional<ClickEffectLevel>& level, std::optional<float> scaleValue)
-{
-    if (level.has_value() || scaleValue.has_value()) {
-        ClickEffectInfo clickEffectInfo;
-        if (level.has_value()) {
-            clickEffectInfo.level = level.value();
-        }
-        if (scaleValue.has_value()) {
-            clickEffectInfo.scaleNumber = scaleValue.value();
-        }
-        ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
-    } else {
-        auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, ClickEffectLevel, frameNode);
-    }
-}
-
 void ViewAbstractModelStatic::SetOuterBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, value, frameNode);
@@ -1344,5 +1476,46 @@ void ViewAbstractModelStatic::SetOuterBorderColor(FrameNode* frameNode, const Bo
 void ViewAbstractModelStatic::SetOuterBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderStyle, value, frameNode);
+}
+
+void ViewAbstractModelStatic::SetAllowDrop(FrameNode* frameNode,
+    const std::optional<std::set<std::string>>& allowDrop)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDisallowDropForcedly(!allowDrop.has_value());
+    frameNode->SetAllowDrop(allowDrop.value_or(std::set<std::string>{}));
+}
+
+void ViewAbstractModelStatic::SetDragPreview(FrameNode* frameNode,
+    const std::optional<DragDropInfo>& DragDropInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (DragDropInfo.has_value()) {
+        frameNode->SetDragPreview(DragDropInfo.value());
+    } else {
+        //Reset
+        NG::DragDropInfo dragPreviewInfo;
+        frameNode->SetDragPreview(dragPreviewInfo);
+    }
+}
+
+void ViewAbstractModelStatic::SetBackgroundImage(FrameNode* frameNode,
+    const std::optional<ImageSourceInfo>& src)
+{
+    if (src) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImage, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetBackgroundImageRepeat(FrameNode* frameNode,
+    const std::optional<ImageRepeat>& imageRepeat)
+{
+    if (imageRepeat) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImageRepeat, frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG

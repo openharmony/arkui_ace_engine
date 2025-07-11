@@ -35,7 +35,7 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 export class TSConstructorType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 126)
+        assertValidPeer(pointer, 128)
         super(pointer)
     }
     static createTSConstructorType(signature: FunctionSignature | undefined, abstract: boolean): TSConstructorType {
@@ -56,6 +56,7 @@ export class TSConstructorType extends TypeNode {
     get abstract(): boolean {
         return global.generatedEs2panda._TSConstructorTypeAbstractConst(global.context, this.peer)
     }
+    protected readonly brandTSConstructorType: undefined
 }
 export function isTSConstructorType(node: object | undefined): node is TSConstructorType {
     return node instanceof TSConstructorType

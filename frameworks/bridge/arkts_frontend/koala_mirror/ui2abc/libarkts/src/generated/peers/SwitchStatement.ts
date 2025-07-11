@@ -34,7 +34,7 @@ import { Statement } from "./Statement"
 import { SwitchCaseStatement } from "./SwitchCaseStatement"
 export class SwitchStatement extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 86)
+        assertValidPeer(pointer, 88)
         super(pointer)
     }
     static createSwitchStatement(discriminant: Expression | undefined, cases: readonly SwitchCaseStatement[]): SwitchStatement {
@@ -54,6 +54,7 @@ export class SwitchStatement extends Statement {
     get cases(): readonly SwitchCaseStatement[] {
         return unpackNodeArray(global.generatedEs2panda._SwitchStatementCases(global.context, this.peer))
     }
+    protected readonly brandSwitchStatement: undefined
 }
 export function isSwitchStatement(node: object | undefined): node is SwitchStatement {
     return node instanceof SwitchStatement

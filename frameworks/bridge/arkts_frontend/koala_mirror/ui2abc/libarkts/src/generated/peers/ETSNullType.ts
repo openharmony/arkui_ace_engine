@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class ETSNullType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 63)
+        assertValidPeer(pointer, 64)
         super(pointer)
     }
     static createETSNullType(): ETSNullType {
@@ -41,6 +41,7 @@ export class ETSNullType extends TypeNode {
     static updateETSNullType(original?: ETSNullType): ETSNullType {
         return new ETSNullType(global.generatedEs2panda._UpdateETSNullType(global.context, passNode(original)))
     }
+    protected readonly brandETSNullType: undefined
 }
 export function isETSNullType(node: object | undefined): node is ETSNullType {
     return node instanceof ETSNullType

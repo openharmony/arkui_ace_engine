@@ -35,7 +35,7 @@ import { LabelPair } from "./LabelPair"
 import { Statement } from "./Statement"
 export class TryStatement extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 147)
+        assertValidPeer(pointer, 149)
         super(pointer)
     }
     static createTryStatement(block: BlockStatement | undefined, catchClauses: readonly CatchClause[], finalizer: BlockStatement | undefined, finalizerInsertionsLabelPair: readonly LabelPair[], finalizerInsertionsStatement: readonly Statement[]): TryStatement {
@@ -70,6 +70,7 @@ export class TryStatement extends Statement {
         global.generatedEs2panda._TryStatementSetFinallyCanCompleteNormally(global.context, this.peer, finallyCanCompleteNormally)
         return this
     }
+    protected readonly brandTryStatement: undefined
 }
 export function isTryStatement(node: object | undefined): node is TryStatement {
     return node instanceof TryStatement

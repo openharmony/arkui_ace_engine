@@ -65,7 +65,7 @@ public:
     void SetOnPop(std::function<void(const RefPtr<NavPathInfo>&)>&& popCallback) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
     void SetHideToolBar(bool hideToolBar, bool animated) override;
-    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated = false);
+    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, MoreButtonOptions&& opt) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
@@ -74,7 +74,7 @@ public:
     void SetToolbarMorebuttonOptions(MoreButtonOptions&& opt) override;
     void SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady) override;
     RefPtr<AceType> CreateEmpty() override;
-    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated = false);
+    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated);
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild = true);
     static void SetBackButtonIcon(FrameNode* frameNode, const std::string& src,
@@ -82,7 +82,6 @@ public:
     static void SetBackButtonIcon(FrameNode* frameNode, bool noPixMap, RefPtr<PixelMap>& pixMap,
         const RefPtr<ResourceObject>& backButtonIconResObj);
     static void SetNavDestinationMode(FrameNode* frameNode, NavDestinationMode mode);
-    static void SetNavDestinationMode(FrameNode* frameNode,  const std::optional<NavDestinationMode>& mode);
     static void SetRecoverable(FrameNode* frameNode, bool recoverable);
     static void SetRecoverable(FrameNode* frameNode, const std::optional<bool>&recoverable);
     // static void SetOnBackPressed(FrameNode* frameNode, std::function<bool()>&& onBackPressed);

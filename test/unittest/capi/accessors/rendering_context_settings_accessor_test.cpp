@@ -80,6 +80,7 @@ HWTEST_F(RenderingContextSettingsAccessorTest, ctorRenderingContextSettingsPeerT
  */
 HWTEST_F(RenderingContextSettingsAccessorTest, getAntialiasTest, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->getAntialias, nullptr);
     for (const auto& [input, expected, value] : AccessorTestFixtures::testFixtureBooleanValues) {
         peer_->antialias = value;
         auto result = Converter::GetOpt(accessor_->getAntialias(peer_));
@@ -95,6 +96,7 @@ HWTEST_F(RenderingContextSettingsAccessorTest, getAntialiasTest, TestSize.Level1
  */
 HWTEST_F(RenderingContextSettingsAccessorTest, setAntialiasTest, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->setAntialias, nullptr);
     for (const auto& [input, value, expected] : AccessorTestFixtures::testFixtureBooleanValues) {
         accessor_->setAntialias(peer_, value);
         auto result = peer_->antialias;

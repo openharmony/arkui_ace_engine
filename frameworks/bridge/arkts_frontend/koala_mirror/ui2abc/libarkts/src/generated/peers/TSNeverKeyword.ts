@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class TSNeverKeyword extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 99)
+        assertValidPeer(pointer, 101)
         super(pointer)
     }
     static createTSNeverKeyword(): TSNeverKeyword {
@@ -41,6 +41,7 @@ export class TSNeverKeyword extends TypeNode {
     static updateTSNeverKeyword(original?: TSNeverKeyword): TSNeverKeyword {
         return new TSNeverKeyword(global.generatedEs2panda._UpdateTSNeverKeyword(global.context, passNode(original)))
     }
+    protected readonly brandTSNeverKeyword: undefined
 }
 export function isTSNeverKeyword(node: object | undefined): node is TSNeverKeyword {
     return node instanceof TSNeverKeyword

@@ -36,7 +36,7 @@ import { TypeNode } from "./TypeNode"
 import { ValidationInfo } from "./ValidationInfo"
 export class ObjectExpression extends AnnotatedExpression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 161)
+        assertValidPeer(pointer, 163)
         super(pointer)
     }
     static createObjectExpression(nodeType: Es2pandaAstNodeType, properties: readonly Expression[], trailingComma: boolean): ObjectExpression {
@@ -81,6 +81,7 @@ export class ObjectExpression extends AnnotatedExpression {
         global.generatedEs2panda._ObjectExpressionSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
         return this
     }
+    protected readonly brandObjectExpression: undefined
 }
 export function isObjectExpression(node: object | undefined): node is ObjectExpression {
     return node instanceof ObjectExpression

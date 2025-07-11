@@ -30,7 +30,6 @@ import {
 
 import { AnnotationUsage } from "./AnnotationUsage"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
-import { Es2pandaModifierFlags } from "./../Es2pandaEnums"
 import { Es2pandaScriptFunctionFlags } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 import { FunctionSignature } from "./FunctionSignature"
@@ -40,7 +39,7 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 export class ScriptFunction extends AstNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 59)
+        assertValidPeer(pointer, 60)
         super(pointer)
     }
     static createScriptFunction(databody: AstNode | undefined, datasignature: FunctionSignature | undefined, datafuncFlags: number, dataflags: number): ScriptFunction {
@@ -57,6 +56,9 @@ export class ScriptFunction extends AstNode {
     }
     get returnStatements(): readonly ReturnStatement[] {
         return unpackNodeArray(global.generatedEs2panda._ScriptFunctionReturnStatements(global.context, this.peer))
+    }
+    get returnStatementsForUpdate(): readonly ReturnStatement[] {
+        return unpackNodeArray(global.generatedEs2panda._ScriptFunctionReturnStatementsForUpdate(global.context, this.peer))
     }
     get typeParams(): TSTypeParameterDeclaration | undefined {
         return unpackNode(global.generatedEs2panda._ScriptFunctionTypeParams(global.context, this.peer))
@@ -148,11 +150,8 @@ export class ScriptFunction extends AstNode {
     get hasThrowStatement(): boolean {
         return global.generatedEs2panda._ScriptFunctionHasThrowStatementConst(global.context, this.peer)
     }
-    get isThrowing(): boolean {
-        return global.generatedEs2panda._ScriptFunctionIsThrowingConst(global.context, this.peer)
-    }
-    get isRethrowing(): boolean {
-        return global.generatedEs2panda._ScriptFunctionIsRethrowingConst(global.context, this.peer)
+    get isTrailingLambda(): boolean {
+        return global.generatedEs2panda._ScriptFunctionIsTrailingLambdaConst(global.context, this.peer)
     }
     get isDynamic(): boolean {
         return global.generatedEs2panda._ScriptFunctionIsDynamicConst(global.context, this.peer)
@@ -181,30 +180,79 @@ export class ScriptFunction extends AstNode {
         global.generatedEs2panda._ScriptFunctionClearFlag(global.context, this.peer, flags)
         return this
     }
-    /** @deprecated */
-    addModifier(flags: Es2pandaModifierFlags): this {
-        global.generatedEs2panda._ScriptFunctionAddModifier(global.context, this.peer, flags)
-        return this
-    }
     get formalParamsLength(): number {
         return global.generatedEs2panda._ScriptFunctionFormalParamsLengthConst(global.context, this.peer)
     }
     /** @deprecated */
-    setIsolatedDeclgenReturnType(type: string): this {
-        global.generatedEs2panda._ScriptFunctionSetIsolatedDeclgenReturnType(global.context, this.peer, type)
+    emplaceReturnStatements(returnStatements?: ReturnStatement): this {
+        global.generatedEs2panda._ScriptFunctionEmplaceReturnStatements(global.context, this.peer, passNode(returnStatements))
         return this
     }
-    get isolatedDeclgenReturnType(): string {
-        return unpackString(global.generatedEs2panda._ScriptFunctionGetIsolatedDeclgenReturnTypeConst(global.context, this.peer))
+    /** @deprecated */
+    clearReturnStatements(): this {
+        global.generatedEs2panda._ScriptFunctionClearReturnStatements(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueReturnStatements(returnStatements: ReturnStatement | undefined, index: number): this {
+        global.generatedEs2panda._ScriptFunctionSetValueReturnStatements(global.context, this.peer, passNode(returnStatements), index)
+        return this
+    }
+    /** @deprecated */
+    emplaceParams(params?: Expression): this {
+        global.generatedEs2panda._ScriptFunctionEmplaceParams(global.context, this.peer, passNode(params))
+        return this
+    }
+    /** @deprecated */
+    clearParams(): this {
+        global.generatedEs2panda._ScriptFunctionClearParams(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueParams(params: Expression | undefined, index: number): this {
+        global.generatedEs2panda._ScriptFunctionSetValueParams(global.context, this.peer, passNode(params), index)
+        return this
+    }
+    get paramsForUpdate(): readonly Expression[] {
+        return unpackNodeArray(global.generatedEs2panda._ScriptFunctionParamsForUpdate(global.context, this.peer))
+    }
+    /** @deprecated */
+    emplaceAnnotations(source?: AnnotationUsage): this {
+        global.generatedEs2panda._ScriptFunctionEmplaceAnnotations(global.context, this.peer, passNode(source))
+        return this
+    }
+    /** @deprecated */
+    clearAnnotations(): this {
+        global.generatedEs2panda._ScriptFunctionClearAnnotations(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueAnnotations(source: AnnotationUsage | undefined, index: number): this {
+        global.generatedEs2panda._ScriptFunctionSetValueAnnotations(global.context, this.peer, passNode(source), index)
+        return this
+    }
+    get annotationsForUpdate(): readonly AnnotationUsage[] {
+        return unpackNodeArray(global.generatedEs2panda._ScriptFunctionAnnotationsForUpdate(global.context, this.peer))
     }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._ScriptFunctionAnnotations(global.context, this.peer))
     }
     /** @deprecated */
-    setAnnotations(annotations: readonly AnnotationUsage[]): this {
-        global.generatedEs2panda._ScriptFunctionSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+    setAnnotations(annotationList: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._ScriptFunctionSetAnnotations(global.context, this.peer, passNodeArray(annotationList), annotationList.length)
         return this
     }
+    /** @deprecated */
+    setAnnotations1(annotationList: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._ScriptFunctionSetAnnotations1(global.context, this.peer, passNodeArray(annotationList), annotationList.length)
+        return this
+    }
+    /** @deprecated */
+    addAnnotations(annotations?: AnnotationUsage): this {
+        global.generatedEs2panda._ScriptFunctionAddAnnotations(global.context, this.peer, passNode(annotations))
+        return this
+    }
+    protected readonly brandScriptFunction: undefined
 }
 export function isScriptFunction(node: object | undefined): node is ScriptFunction {
     return node instanceof ScriptFunction

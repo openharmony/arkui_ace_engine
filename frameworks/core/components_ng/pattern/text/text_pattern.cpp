@@ -28,6 +28,7 @@
 #include "base/geometry/offset.h"
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
@@ -118,6 +119,7 @@ void TextPattern::OnWindowShow()
 void TextPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);  // call OnAttachToFrameNodeMultiThread() by multi thread
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -146,6 +148,8 @@ void TextPattern::OnAttachToFrameNode()
 
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)
 {
+    THREAD_SAFE_NODE_CHECK(node, OnDetachFromFrameNode,
+        node);  // call OnDetachFromFrameNodeMultiThread() by multi thread
     dataDetectorAdapter_->aiDetectDelayTask_.Cancel();
     selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
     auto pipeline = pipeline_.Upgrade();
@@ -173,6 +177,20 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveVisibleAreaChangeNode(node->GetId());
     pipeline->RemoveWindowSizeChangeCallback(node->GetId());
     RemoveFormVisibleChangeCallback(node->GetId());
+}
+
+void TextPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);  // call OnAttachToMainTreeMultiThread() by multi thread
+    isDetachFromMainTree_ = false;
+}
+
+void TextPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);  // call OnDetachFromMainTreeMultiThread() by multi thread
+    isDetachFromMainTree_ = true;
 }
 
 void TextPattern::CloseSelectOverlay()
@@ -3670,6 +3688,8 @@ void TextPattern::LogForFormRender(const std::string& logTag)
 
 void TextPattern::OnModifyDone()
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, OnModifyDone);  // call OnModifyDoneMultiThread() by multi thread
     Pattern::OnModifyDone();
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -5385,6 +5405,7 @@ void TextPattern::RemoveAreaChangeInner()
 void TextPattern::SetTextDetectEnable(bool enable)
 {
     auto host = GetHost();
+    FREE_NODE_CHECK(host, SetTextDetectEnable, enable);  // call SetTextDetectEnableMultiThread() by multi thread
     CHECK_NULL_VOID(host);
     dataDetectorAdapter_->frameNode_ = host;
     if (enable == textDetectEnable_) {
@@ -5721,9 +5742,11 @@ ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t 
 
 void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay)
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, SetStyledString, value,
+        closeSelectOverlay);  // call SetStyledStringMultiThread() by multi thread
     AllocStyledString();
     isSpanStringMode_ = true;
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (closeSelectOverlay) {
         CloseSelectOverlay();
@@ -5876,6 +5899,8 @@ Offset TextPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
 
 void TextPattern::SetExternalSpanItem(const std::list<RefPtr<SpanItem>>& spans)
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, SetExternalSpanItem, spans);  // call SetExternalSpanItemMultiThread() by multi thread
     isSpanStringMode_ = !spans.empty();
     if (isSpanStringMode_) {
         AllocStyledString();

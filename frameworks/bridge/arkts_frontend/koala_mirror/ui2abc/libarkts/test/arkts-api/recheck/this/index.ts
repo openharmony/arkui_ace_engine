@@ -14,6 +14,7 @@
  */
  
 import * as arkts from "../../../../src/arkts-api"
+import { ETSModule } from "../../../../src/arkts-api"
 
 class AddThisReference extends arkts.AbstractVisitor {
     visitor(beforeChildren: arkts.ETSModule): arkts.ETSModule
@@ -46,5 +47,5 @@ class AddThisReference extends arkts.AbstractVisitor {
 }
 
 export function addThisReference(program: arkts.Program) {
-    return (new AddThisReference()).visitor(program.astNode)
+    return new AddThisReference().visitor(program.ast as ETSModule)
 }

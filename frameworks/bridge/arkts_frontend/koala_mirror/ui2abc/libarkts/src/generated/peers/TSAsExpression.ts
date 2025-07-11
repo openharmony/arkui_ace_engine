@@ -34,7 +34,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class TSAsExpression extends AnnotatedExpression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 138)
+        assertValidPeer(pointer, 140)
         super(pointer)
     }
     static createTSAsExpression(expression: Expression | undefined, typeAnnotation: TypeNode | undefined, isConst: boolean): TSAsExpression {
@@ -67,6 +67,7 @@ export class TSAsExpression extends AnnotatedExpression {
         global.generatedEs2panda._TSAsExpressionSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
         return this
     }
+    protected readonly brandTSAsExpression: undefined
 }
 export function isTSAsExpression(node: object | undefined): node is TSAsExpression {
     return node instanceof TSAsExpression

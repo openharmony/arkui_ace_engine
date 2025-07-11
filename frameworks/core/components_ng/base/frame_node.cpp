@@ -40,6 +40,7 @@
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
@@ -1813,18 +1814,9 @@ RectF FrameNode::GetRectWithRender()
     return currFrameRect;
 }
 
-bool FrameNode::CheckAncestorPageShow()
-{
-    auto pageNode = GetPageNode();
-    if (!pageNode) {
-        return true;
-    }
-    return pageNode->GetPattern<PagePattern>()->IsOnShow();
-}
-
 void FrameNode::TriggerOnSizeChangeCallback()
 {
-    if (!IsActive() || !CheckAncestorPageShow()) {
+    if (!IsActive()) {
         return;
     }
     if (eventHub_ && (eventHub_->HasOnSizeChanged() || eventHub_->HasInnerOnSizeChanged()) && lastFrameNodeRect_) {
@@ -2464,6 +2456,8 @@ void FrameNode::UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstrai
 
 void FrameNode::RebuildRenderContextTree()
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, RebuildRenderContextTree);
     if (!needSyncRenderTree_) {
         return;
     }
@@ -2501,6 +2495,8 @@ void FrameNode::RebuildRenderContextTree()
 
 void FrameNode::MarkModifyDoneUnsafely()
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, MarkModifyDone);
     pattern_->OnModifyDone();
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     if (pipeline) {
@@ -2559,6 +2555,8 @@ void FrameNode::MarkModifyDone()
 
 [[deprecated("using AfterMountToParent")]] void FrameNode::OnMountToParentDone()
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, OnMountToParentDone);
     pattern_->OnMountToParentDone();
 }
 
@@ -2576,6 +2574,8 @@ void FrameNode::FlushUpdateAndMarkDirty()
 
 void FrameNode::MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag)
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, MarkDirtyNode, extraFlag);
     if (IsFreeze()) {
         // store the flag.
         layoutProperty_->UpdatePropertyChangeFlag(extraFlag);
@@ -2691,6 +2691,8 @@ void FrameNode::MarkNeedRenderOnly()
 
 void FrameNode::MarkNeedRender(bool isRenderBoundary)
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, MarkNeedRender, isRenderBoundary);
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     // If it has dirtyLayoutBox, need to mark dirty after layout done.
@@ -4357,6 +4359,11 @@ RefPtr<NodeAnimatablePropertyBase> FrameNode::GetAnimatablePropertyFloat(const s
         return nullptr;
     }
     return iter->second;
+}
+
+bool FrameNode::HasAnimatableProperty(const std::string& propertyName) const
+{
+    return nodeAnimatablePropertyMap_.find(propertyName) != nodeAnimatablePropertyMap_.end();
 }
 
 RefPtr<FrameNode> FrameNode::FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName)

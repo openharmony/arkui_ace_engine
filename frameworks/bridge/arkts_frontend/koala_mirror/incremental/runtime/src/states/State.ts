@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Array_from_set, className, int32, KoalaCallsiteKey, KoalaCallsiteKeys, KoalaProfiler, markableQueue, Observable, ObservableHandler, refEqual, uint32 } from "@koalaui/common"
+import { Array_from_set, className, float64ToInt, int32, KoalaCallsiteKey, KoalaCallsiteKeys, KoalaProfiler, MarkableQueue, markableQueue, Observable, ObservableHandler, refEqual, uint32 } from "@koalaui/common"
 import { Dependencies, Dependency } from "./Dependency"
 import { Disposable, disposeContent, disposeContentBackward } from "./Disposable"
 import { Changes, Journal } from "./Journal"
@@ -228,8 +228,8 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
     protected manager: StateManagerImpl | undefined = undefined
     private dependencies: Dependencies | undefined = undefined
     protected snapshot: Value
-    protected myModified = false
-    protected myUpdated = true
+    protected myModified: boolean = false
+    protected myUpdated: boolean = true
     private readonly myGlobal: boolean
     protected equivalent: Equivalent<Value> | undefined = undefined
     private tracker: ValueTracker<Value> | undefined = undefined
@@ -362,7 +362,7 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
 class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<Item> {
     constructor(manager: StateManagerImpl, initial: Array<Item>, global: boolean, equivalent?: Equivalent<Item>) {
         super(manager, initial, global, (oldArray: Array<Item>, newArray: Array<Item>): boolean => {
-            let i = oldArray.length
+            let i: number = oldArray.length
             if (i != newArray.length) return false
             while (0 < i--) {
                 if (isModified<Item>(oldArray[i], newArray[i], equivalent)) return false
@@ -454,7 +454,7 @@ class ParameterImpl<Value> implements MutableState<Value> {
     private dependencies: Dependencies | undefined = undefined
     private name: string | undefined = undefined
     private _value: Value
-    private _modified = false
+    private _modified: boolean = false
 
     /**
      * @param manager - current state manager to register with
@@ -516,15 +516,15 @@ class ParameterImpl<Value> implements MutableState<Value> {
 
 class StateManagerImpl implements StateManager {
     private stateCreating: string | undefined = undefined
-    private readonly statesNamed = new Map<string, Disposable>()
-    private readonly statesCreated = new Set<ManagedState>()
-    private readonly dirtyScopes = new Set<ManagedScope>()
+    private readonly statesNamed: Map<string, Disposable> = new Map<string, Disposable>()
+    private readonly statesCreated: Set<ManagedState> = new Set<ManagedState>()
+    private readonly dirtyScopes: Set<ManagedScope> = new Set<ManagedScope>()
     current: ManagedScope | undefined = undefined
     external: Dependency | undefined = undefined
-    updateNeeded = false
+    updateNeeded: boolean = false
     frozen: boolean = false
-    private readonly callbacks = markableQueue()
-    readonly journal = new Journal()
+    private readonly callbacks: MarkableQueue = markableQueue()
+    readonly journal: Journal = new Journal()
 
     constructor() {
     }
@@ -566,7 +566,8 @@ class StateManagerImpl implements StateManager {
         let modified: uint32 = 0
         // try to update snapshot for every state, except for parameter states
         const changes = this.journal.getChanges()
-        const created = this.statesCreated.size as int32 // amount of created states to update
+        // TODO: use compat here (toInt cast)
+        const created = float64ToInt(this.statesCreated.size) // amount of created states to update
         if (created > 0) {
             const it = this.statesCreated.keys()
             while (true) {
@@ -789,8 +790,8 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
     private myCompute: (() => Value) | undefined = undefined
     private myCleanup: ((value: Value | undefined) => void) | undefined = undefined
     private myValue: Value | undefined = undefined
-    private myModified = false
-    private myComputed = false
+    private myModified: boolean = false
+    private myComputed: boolean = false
 
     private params: Array<Disposable | undefined> | undefined = undefined
     private statesNamed: Map<string, Disposable> | undefined = undefined

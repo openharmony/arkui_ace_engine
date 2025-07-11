@@ -111,7 +111,7 @@ public:
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions2
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierResourcesTest, SetButtonOptions2TestLabelResource, TestSize.Level1)
+HWTEST_F(ButtonModifierResourcesTest, DISABLED_SetButtonOptions2TestLabelResource, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;

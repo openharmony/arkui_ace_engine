@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 export class ETSPackageDeclaration extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 70)
+        assertValidPeer(pointer, 72)
         super(pointer)
     }
     static createETSPackageDeclaration(name?: Expression): ETSPackageDeclaration {
@@ -42,6 +42,7 @@ export class ETSPackageDeclaration extends Statement {
     static updateETSPackageDeclaration(original?: ETSPackageDeclaration, name?: Expression): ETSPackageDeclaration {
         return new ETSPackageDeclaration(global.generatedEs2panda._UpdateETSPackageDeclaration(global.context, passNode(original), passNode(name)))
     }
+    protected readonly brandETSPackageDeclaration: undefined
 }
 export function isETSPackageDeclaration(node: object | undefined): node is ETSPackageDeclaration {
     return node instanceof ETSPackageDeclaration

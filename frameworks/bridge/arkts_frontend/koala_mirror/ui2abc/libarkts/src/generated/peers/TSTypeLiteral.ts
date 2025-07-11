@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class TSTypeLiteral extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 104)
+        assertValidPeer(pointer, 106)
         super(pointer)
     }
     static createTSTypeLiteral(members: readonly AstNode[]): TSTypeLiteral {
@@ -44,6 +44,7 @@ export class TSTypeLiteral extends TypeNode {
     get members(): readonly AstNode[] {
         return unpackNodeArray(global.generatedEs2panda._TSTypeLiteralMembersConst(global.context, this.peer))
     }
+    protected readonly brandTSTypeLiteral: undefined
 }
 export function isTSTypeLiteral(node: object | undefined): node is TSTypeLiteral {
     return node instanceof TSTypeLiteral

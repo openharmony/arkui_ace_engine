@@ -376,6 +376,13 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
             textPattern->SetStyledString(spanString, false);
         }
     }
+    if (spanString) {
+        auto messageNode = bubblePattern->GetMessageNode();
+        if (messageNode) {
+            auto textPattern = messageNode->GetPattern<TextPattern>();
+            textPattern->SetStyledString(spanString, false);
+        }
+    }
     child->MountToParent(popupNode);
     return popupNode;
 }

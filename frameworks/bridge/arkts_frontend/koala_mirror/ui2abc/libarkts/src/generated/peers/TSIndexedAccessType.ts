@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class TSIndexedAccessType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 130)
+        assertValidPeer(pointer, 132)
         super(pointer)
     }
     static createTSIndexedAccessType(objectType?: TypeNode, indexType?: TypeNode): TSIndexedAccessType {
@@ -47,6 +47,7 @@ export class TSIndexedAccessType extends TypeNode {
     get indexType(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._TSIndexedAccessTypeIndexTypeConst(global.context, this.peer))
     }
+    protected readonly brandTSIndexedAccessType: undefined
 }
 export function isTSIndexedAccessType(node: object | undefined): node is TSIndexedAccessType {
     return node instanceof TSIndexedAccessType

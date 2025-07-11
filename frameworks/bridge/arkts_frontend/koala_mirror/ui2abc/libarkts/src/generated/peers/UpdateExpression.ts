@@ -33,7 +33,7 @@ import { Es2pandaTokenType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class UpdateExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 149)
+        assertValidPeer(pointer, 151)
         super(pointer)
     }
     static createUpdateExpression(argument: Expression | undefined, updateOperator: Es2pandaTokenType, isPrefix: boolean): UpdateExpression {
@@ -51,6 +51,7 @@ export class UpdateExpression extends Expression {
     get isPrefix(): boolean {
         return global.generatedEs2panda._UpdateExpressionIsPrefixConst(global.context, this.peer)
     }
+    protected readonly brandUpdateExpression: undefined
 }
 export function isUpdateExpression(node: object | undefined): node is UpdateExpression {
     return node instanceof UpdateExpression

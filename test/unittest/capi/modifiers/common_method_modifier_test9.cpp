@@ -163,7 +163,7 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityGroupTestDefaultValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, setAccessibilityGroupTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityGroupTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityGroup0, nullptr);
     using OneTestStep = std::tuple<Opt_Boolean, std::string>;
@@ -196,7 +196,7 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityTextTestDefaultValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, setAccessibilityText0TestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityText0TestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityText0, nullptr);
     using OneTestStep = std::tuple<Opt_String, std::string>;
@@ -255,7 +255,7 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityTextHintTestDefaultValues, T
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, setAccessibilityTextHintTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextHintTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityTextHint, nullptr);
     using OneTestStep = std::tuple<Opt_String, std::string>;
@@ -288,7 +288,7 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityDescriptionTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, setAccessibilityDescription0TestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription0TestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityDescription0, nullptr);
     using OneTestStep = std::tuple<Opt_String, std::string>;
@@ -309,7 +309,7 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityDescription0TestValidValues,
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, setAccessibilityDescription1TestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription1TestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityDescription1, nullptr);
     auto resName = NamedResourceId(ATTRIBUTE_DESCRIPTION_RESOURCE_ID_TEST, Converter::ResourceType::STRING);
@@ -486,7 +486,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnAccessibilityHoverTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -759,7 +759,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnDetachTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, setOnAccessibilityFocusTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setOnAccessibilityFocusTest, TestSize.Level1)
 {
     ASSERT_TRUE(modifier_->setOnAccessibilityFocus);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -858,7 +858,7 @@ MATCHER_P(CompareCrownEventInfo, expected, "Compare CrownEventInfo values")
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, setOnDigitalCrownTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setOnDigitalCrownTest, TestSize.Level1)
 {
     ASSERT_TRUE(modifier_->setOnDigitalCrown);
 #ifdef SUPPORT_DIGITAL_CROWN

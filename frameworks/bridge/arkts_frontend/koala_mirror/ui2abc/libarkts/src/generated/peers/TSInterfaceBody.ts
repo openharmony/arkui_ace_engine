@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class TSInterfaceBody extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 132)
+        assertValidPeer(pointer, 134)
         super(pointer)
     }
     static createTSInterfaceBody(body: readonly AstNode[]): TSInterfaceBody {
@@ -44,6 +44,7 @@ export class TSInterfaceBody extends Expression {
     get body(): readonly AstNode[] {
         return unpackNodeArray(global.generatedEs2panda._TSInterfaceBodyBody(global.context, this.peer))
     }
+    protected readonly brandTSInterfaceBody: undefined
 }
 export function isTSInterfaceBody(node: object | undefined): node is TSInterfaceBody {
     return node instanceof TSInterfaceBody

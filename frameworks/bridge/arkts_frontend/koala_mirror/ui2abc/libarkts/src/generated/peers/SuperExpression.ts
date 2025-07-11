@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class SuperExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 83)
+        assertValidPeer(pointer, 85)
         super(pointer)
     }
     static createSuperExpression(): SuperExpression {
@@ -41,6 +41,7 @@ export class SuperExpression extends Expression {
     static updateSuperExpression(original?: SuperExpression): SuperExpression {
         return new SuperExpression(global.generatedEs2panda._UpdateSuperExpression(global.context, passNode(original)))
     }
+    protected readonly brandSuperExpression: undefined
 }
 export function isSuperExpression(node: object | undefined): node is SuperExpression {
     return node instanceof SuperExpression

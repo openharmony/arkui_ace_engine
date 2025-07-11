@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class TSBooleanKeyword extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 93)
+        assertValidPeer(pointer, 95)
         super(pointer)
     }
     static createTSBooleanKeyword(): TSBooleanKeyword {
@@ -41,6 +41,7 @@ export class TSBooleanKeyword extends TypeNode {
     static updateTSBooleanKeyword(original?: TSBooleanKeyword): TSBooleanKeyword {
         return new TSBooleanKeyword(global.generatedEs2panda._UpdateTSBooleanKeyword(global.context, passNode(original)))
     }
+    protected readonly brandTSBooleanKeyword: undefined
 }
 export function isTSBooleanKeyword(node: object | undefined): node is TSBooleanKeyword {
     return node instanceof TSBooleanKeyword

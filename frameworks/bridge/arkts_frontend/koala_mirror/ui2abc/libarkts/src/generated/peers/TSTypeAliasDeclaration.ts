@@ -37,7 +37,7 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 export class TSTypeAliasDeclaration extends AnnotatedStatement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 127)
+        assertValidPeer(pointer, 129)
         super(pointer)
     }
     static createTSTypeAliasDeclaration(id?: Identifier, typeParams?: TSTypeParameterDeclaration, typeAnnotation?: TypeNode): TSTypeAliasDeclaration {
@@ -64,12 +64,53 @@ export class TSTypeAliasDeclaration extends AnnotatedStatement {
         return this
     }
     get annotations(): readonly AnnotationUsage[] {
-        return unpackNodeArray(global.generatedEs2panda._TSTypeAliasDeclarationAnnotations(global.context, this.peer))
+        return unpackNodeArray(global.generatedEs2panda._TSTypeAliasDeclarationAnnotationsConst(global.context, this.peer))
     }
     /** @deprecated */
     setAnnotations(annotations: readonly AnnotationUsage[]): this {
         global.generatedEs2panda._TSTypeAliasDeclarationSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
         return this
+    }
+    /** @deprecated */
+    emplaceAnnotations(annotations?: AnnotationUsage): this {
+        global.generatedEs2panda._TSTypeAliasDeclarationEmplaceAnnotations(global.context, this.peer, passNode(annotations))
+        return this
+    }
+    /** @deprecated */
+    clearAnnotations(): this {
+        global.generatedEs2panda._TSTypeAliasDeclarationClearAnnotations(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueAnnotations(annotations: AnnotationUsage | undefined, index: number): this {
+        global.generatedEs2panda._TSTypeAliasDeclarationSetValueAnnotations(global.context, this.peer, passNode(annotations), index)
+        return this
+    }
+    get annotationsForUpdate(): readonly AnnotationUsage[] {
+        return unpackNodeArray(global.generatedEs2panda._TSTypeAliasDeclarationAnnotationsForUpdate(global.context, this.peer))
+    }
+    /** @deprecated */
+    clearTypeParamterTypes(): this {
+        global.generatedEs2panda._TSTypeAliasDeclarationClearTypeParamterTypes(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    emplaceDecorators(decorators?: Decorator): this {
+        global.generatedEs2panda._TSTypeAliasDeclarationEmplaceDecorators(global.context, this.peer, passNode(decorators))
+        return this
+    }
+    /** @deprecated */
+    clearDecorators(): this {
+        global.generatedEs2panda._TSTypeAliasDeclarationClearDecorators(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueDecorators(decorators: Decorator | undefined, index: number): this {
+        global.generatedEs2panda._TSTypeAliasDeclarationSetValueDecorators(global.context, this.peer, passNode(decorators), index)
+        return this
+    }
+    get decoratorsForUpdate(): readonly Decorator[] {
+        return unpackNodeArray(global.generatedEs2panda._TSTypeAliasDeclarationDecoratorsForUpdate(global.context, this.peer))
     }
     get typeAnnotation(): TypeNode {
         return unpackNonNullableNode(global.generatedEs2panda._TSTypeAliasDeclarationTypeAnnotationConst(global.context, this.peer))
@@ -79,6 +120,7 @@ export class TSTypeAliasDeclaration extends AnnotatedStatement {
         global.generatedEs2panda._TSTypeAliasDeclarationSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
         return this
     }
+    protected readonly brandTSTypeAliasDeclaration: undefined
 }
 export function isTSTypeAliasDeclaration(node: object | undefined): node is TSTypeAliasDeclaration {
     return node instanceof TSTypeAliasDeclaration

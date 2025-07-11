@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class TSUnionType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 103)
+        assertValidPeer(pointer, 105)
         super(pointer)
     }
     static createTSUnionType(types: readonly TypeNode[]): TSUnionType {
@@ -44,6 +44,7 @@ export class TSUnionType extends TypeNode {
     get types(): readonly TypeNode[] {
         return unpackNodeArray(global.generatedEs2panda._TSUnionTypeTypesConst(global.context, this.peer))
     }
+    protected readonly brandTSUnionType: undefined
 }
 export function isTSUnionType(node: object | undefined): node is TSUnionType {
     return node instanceof TSUnionType

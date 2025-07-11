@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class TSArrayType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 102)
+        assertValidPeer(pointer, 104)
         super(pointer)
     }
     static createTSArrayType(elementType?: TypeNode): TSArrayType {
@@ -44,6 +44,7 @@ export class TSArrayType extends TypeNode {
     get elementType(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._TSArrayTypeElementTypeConst(global.context, this.peer))
     }
+    protected readonly brandTSArrayType: undefined
 }
 export function isTSArrayType(node: object | undefined): node is TSArrayType {
     return node instanceof TSArrayType

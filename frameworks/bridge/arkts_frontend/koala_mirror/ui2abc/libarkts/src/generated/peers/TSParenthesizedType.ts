@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class TSParenthesizedType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 108)
+        assertValidPeer(pointer, 110)
         super(pointer)
     }
     static createTSParenthesizedType(type?: TypeNode): TSParenthesizedType {
@@ -45,6 +45,7 @@ export class TSParenthesizedType extends TypeNode {
     get type(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._TSParenthesizedTypeTypeConst(global.context, this.peer))
     }
+    protected readonly brandTSParenthesizedType: undefined
 }
 export function isTSParenthesizedType(node: object | undefined): node is TSParenthesizedType {
     return node instanceof TSParenthesizedType

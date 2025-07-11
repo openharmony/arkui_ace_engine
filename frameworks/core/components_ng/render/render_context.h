@@ -937,6 +937,7 @@ protected:
     virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
 
 private:
+    void RequestNextFrameMultiThread() const;
     friend class ViewAbstract;
     friend class ViewAbstractModelStatic;
     std::function<void()> requestFrame_;

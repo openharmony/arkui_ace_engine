@@ -117,6 +117,7 @@ public:
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& ScrollFrameBegin);
     static void SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
     static void SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment);
+    static void SetScrollToIndexMultiThread(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetWaterflowFooter(FrameNode* frameNode, FrameNode* footerNode);

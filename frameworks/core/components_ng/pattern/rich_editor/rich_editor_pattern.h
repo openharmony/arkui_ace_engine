@@ -530,6 +530,11 @@ public:
         TextPattern::OnAttachToMainTree();
     }
 
+    void OnDetachFromMainTree() override
+    {
+        TextPattern::OnDetachFromMainTree();
+    }
+    
     void RegisterCaretChangeListener(std::function<void(int32_t)>&& listener)
     {
         caretChangeListener_ = listener;

@@ -32,4 +32,5 @@ export class ScopeFindResult extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandScopeFindResult: undefined
 }

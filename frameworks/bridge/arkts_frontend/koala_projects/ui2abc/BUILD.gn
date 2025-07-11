@@ -68,9 +68,9 @@ action("ui2abc_build") {
 }
 
 group("build_es2panda_lib") {
-    external_deps = ets2abc_build_deps
-    external_deps += static_linker_build_deps
-    external_deps += [ "ets_frontend:libes2panda_public(${host_toolchain})" ]
+    #external_deps = ets2abc_build_deps
+    #external_deps += static_linker_build_deps
+    #external_deps += [ "ets_frontend:libes2panda_public(${host_toolchain})" ]
 }
 
 action("ui2abc_panda_sdk") {

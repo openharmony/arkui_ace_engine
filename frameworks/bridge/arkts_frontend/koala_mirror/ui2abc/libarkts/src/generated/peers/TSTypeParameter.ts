@@ -36,7 +36,7 @@ import { Identifier } from "./Identifier"
 import { TypeNode } from "./TypeNode"
 export class TSTypeParameter extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 118)
+        assertValidPeer(pointer, 120)
         super(pointer)
     }
     static create1TSTypeParameter(name: Identifier | undefined, constraint: TypeNode | undefined, defaultType: TypeNode | undefined, flags: Es2pandaModifierFlags): TSTypeParameter {
@@ -67,14 +67,43 @@ export class TSTypeParameter extends Expression {
         global.generatedEs2panda._TSTypeParameterSetDefaultType(global.context, this.peer, passNode(defaultType))
         return this
     }
+    /** @deprecated */
+    emplaceAnnotations(source?: AnnotationUsage): this {
+        global.generatedEs2panda._TSTypeParameterEmplaceAnnotations(global.context, this.peer, passNode(source))
+        return this
+    }
+    /** @deprecated */
+    clearAnnotations(): this {
+        global.generatedEs2panda._TSTypeParameterClearAnnotations(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueAnnotations(source: AnnotationUsage | undefined, index: number): this {
+        global.generatedEs2panda._TSTypeParameterSetValueAnnotations(global.context, this.peer, passNode(source), index)
+        return this
+    }
+    get annotationsForUpdate(): readonly AnnotationUsage[] {
+        return unpackNodeArray(global.generatedEs2panda._TSTypeParameterAnnotationsForUpdate(global.context, this.peer))
+    }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._TSTypeParameterAnnotations(global.context, this.peer))
     }
     /** @deprecated */
-    setAnnotations(annotations: readonly AnnotationUsage[]): this {
-        global.generatedEs2panda._TSTypeParameterSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+    setAnnotations(annotationList: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._TSTypeParameterSetAnnotations(global.context, this.peer, passNodeArray(annotationList), annotationList.length)
         return this
     }
+    /** @deprecated */
+    setAnnotations1(annotationList: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._TSTypeParameterSetAnnotations1(global.context, this.peer, passNodeArray(annotationList), annotationList.length)
+        return this
+    }
+    /** @deprecated */
+    addAnnotations(annotations?: AnnotationUsage): this {
+        global.generatedEs2panda._TSTypeParameterAddAnnotations(global.context, this.peer, passNode(annotations))
+        return this
+    }
+    protected readonly brandTSTypeParameter: undefined
 }
 export function isTSTypeParameter(node: object | undefined): node is TSTypeParameter {
     return node instanceof TSTypeParameter

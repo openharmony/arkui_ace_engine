@@ -34,7 +34,7 @@ import { LoopStatement } from "./LoopStatement"
 import { Statement } from "./Statement"
 export class WhileStatement extends LoopStatement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 152)
+        assertValidPeer(pointer, 154)
         super(pointer)
     }
     static createWhileStatement(test?: Expression, body?: Statement): WhileStatement {
@@ -46,9 +46,15 @@ export class WhileStatement extends LoopStatement {
     get test(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._WhileStatementTest(global.context, this.peer))
     }
+    /** @deprecated */
+    setTest(test?: Expression): this {
+        global.generatedEs2panda._WhileStatementSetTest(global.context, this.peer, passNode(test))
+        return this
+    }
     get body(): Statement | undefined {
         return unpackNode(global.generatedEs2panda._WhileStatementBody(global.context, this.peer))
     }
+    protected readonly brandWhileStatement: undefined
 }
 export function isWhileStatement(node: object | undefined): node is WhileStatement {
     return node instanceof WhileStatement

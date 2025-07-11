@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class YieldExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 153)
+        assertValidPeer(pointer, 155)
         super(pointer)
     }
     static createYieldExpression(argument: Expression | undefined, isDelegate: boolean): YieldExpression {
@@ -47,6 +47,7 @@ export class YieldExpression extends Expression {
     get argument(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._YieldExpressionArgumentConst(global.context, this.peer))
     }
+    protected readonly brandYieldExpression: undefined
 }
 export function isYieldExpression(node: object | undefined): node is YieldExpression {
     return node instanceof YieldExpression

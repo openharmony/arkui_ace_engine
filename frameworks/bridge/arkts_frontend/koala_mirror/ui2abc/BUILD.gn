@@ -16,22 +16,61 @@ import("//build/ohos.gni")
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
+incremental_root = "../incremental"
 libarkts_root = "./libarkts"
 
-action("install") {
-    script = "gn/command/install.py"
+build_root = "//build"
+toolchain_linux = "$build_root/toolchain/linux:clang_x64"
+
+action("fast_arktsc_build") {
+    script = "../gn/command/npm_util.py"
 
     outputs = [
-        "$target_out_dir/install"
+        "$target_out_dir/fast_arktsc_build"
+    ]
+
+    args = [
+        "--project-path", rebase_path("./fast-arktsc"),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--install",
+        "--npm-args", "run", "compile"
+    ]
+}
+
+action("ui2abc_install") {
+    script = "../gn/command/npm_util.py"
+    outputs = [
+        "$target_out_dir/ui2abc_install"
+    ]
+    args = [
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--install"
+    ]
+}
+
+action("ui2abc_build") {
+    script = "../gn/command/npm_util.py"
+
+    outputs = [
+        "$target_out_dir/MemoTransformer.js"
+    ]
+
+    deps = [
+        "$incremental_root:incremental_install",
+        ":ui2abc_install",
+        ":fast_arktsc_build",
+        "$libarkts_root:es2panda"
     ]
 
     args = [
         "--project-path", rebase_path("."),
-        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin")
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--npm-args", "run", "build:gn"
     ]
 }
 
-action("panda_sdk") {
+action("ui2abc_panda_sdk") {
     script = "gn/command/gen_sdk.py"
 
     outputs = [
@@ -39,7 +78,7 @@ action("panda_sdk") {
     ]
 
     external_deps = [
-        "ets_frontend:libes2panda_public",
+        "ets_frontend:libes2panda_public(${toolchain_linux})",
     ]
 
     args = [
@@ -52,6 +91,6 @@ action("panda_sdk") {
 
 group("ui2abc") {
     deps = [
-        "$libarkts_root:es2panda"
+        ":ui2abc_build"
     ]
 }

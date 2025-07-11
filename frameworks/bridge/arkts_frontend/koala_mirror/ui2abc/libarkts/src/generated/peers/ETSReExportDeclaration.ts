@@ -33,7 +33,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Statement } from "./Statement"
 export class ETSReExportDeclaration extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 57)
+        assertValidPeer(pointer, 58)
         super(pointer)
     }
     get eTSImportDeclarations(): ETSImportDeclaration | undefined {
@@ -42,6 +42,7 @@ export class ETSReExportDeclaration extends Statement {
     get programPath(): string {
         return unpackString(global.generatedEs2panda._ETSReExportDeclarationGetProgramPathConst(global.context, this.peer))
     }
+    protected readonly brandETSReExportDeclaration: undefined
 }
 export function isETSReExportDeclaration(node: object | undefined): node is ETSReExportDeclaration {
     return node instanceof ETSReExportDeclaration

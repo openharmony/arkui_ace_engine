@@ -18,8 +18,7 @@
 
 using std::string, std::cout, std::endl, std::vector;
 
-static es2panda_Impl *impl = nullptr;
-
+es2panda_Impl *es2pandaImplementation = nullptr;
 static thread_local StageArena currentArena;
 
 StageArena* StageArena::instance()
@@ -93,22 +92,43 @@ void* StageArena::alloc(size_t size)
 
 const char* DEFAULT_SDK_PATH = "../../../incremental/tools/panda/node_modules/@panda/sdk" ;
 const char* NAME = LIB_PREFIX "es2panda-public" LIB_SUFFIX;
+const char* LIB_ES2PANDA_PUBLIC = LIB_PREFIX "es2panda_public" LIB_SUFFIX;
+
+#ifdef KOALA_WINDOWS
+    const char *SEPARATOR = "\\";
+#else
+    const char *SEPARATOR = "/";
+#endif
+const char *LIB_DIR = "lib";
+
+static std::string ES2PANDA_LIB_PATH = "";
+
+void impl_SetUpSoPath(KStringPtr &soPath)
+{
+    ES2PANDA_LIB_PATH = std::string(soPath.c_str());
+}
+KOALA_INTEROP_V1(SetUpSoPath, KStringPtr);
 
 void* FindLibrary()
 {
-    char* envValue = getenv("PANDA_SDK_PATH");
-    if (!envValue) {
-        std::cout << "PANDA_SDK_PATH not specified, assuming " << DEFAULT_SDK_PATH << std::endl;
+    std::string libraryName;
+    if (!ES2PANDA_LIB_PATH.empty()) {
+        libraryName = ES2PANDA_LIB_PATH + SEPARATOR + LIB_DIR + SEPARATOR + LIB_ES2PANDA_PUBLIC;
+    } else {
+        char* envValue = getenv("PANDA_SDK_PATH");
+        if (!envValue) {
+            std::cout << "PANDA_SDK_PATH not specified, assuming " << DEFAULT_SDK_PATH << std::endl;
+        }
+        std::string prefix = envValue ? std::string(envValue) : DEFAULT_SDK_PATH;
+        libraryName = prefix + ("/" PLUGIN_DIR "/lib/") + NAME;
     }
-    std::string prefix = envValue ? std::string(envValue) : DEFAULT_SDK_PATH;
-    std::string libraryName = prefix + ("/" PLUGIN_DIR "/lib/") + NAME;
     return loadLibrary(libraryName);
 }
 
-es2panda_Impl *GetImpl()
+es2panda_Impl *GetImplSlow()
 {
-    if (impl) {
-        return impl;
+    if (es2pandaImplementation) {
+        return es2pandaImplementation;
     }
     auto library = FindLibrary();
     if (!library) {
@@ -120,8 +140,8 @@ es2panda_Impl *GetImpl()
         printf("no entry point");
         abort();
     }
-    impl = reinterpret_cast<es2panda_Impl *(*)(int)>(symbol)(ES2PANDA_LIB_VERSION);
-    return impl;
+    es2pandaImplementation = reinterpret_cast<es2panda_Impl *(*)(int)>(symbol)(ES2PANDA_LIB_VERSION);
+    return es2pandaImplementation;
 }
 
 es2panda_ContextState intToState(KInt state)
@@ -137,24 +157,6 @@ string getString(KStringPtr ptr)
 char* getStringCopy(KStringPtr& ptr)
 {
     return StageArena::strdup(ptr.c_str() ? ptr.c_str() : "");
-}
-
-inline KUInt unpackUInt(const KByte* bytes)
-{
-    const KUInt BYTE_0 = 0;
-    const KUInt BYTE_1 = 1;
-    const KUInt BYTE_2 = 2;
-    const KUInt BYTE_3 = 3;
-
-    const KUInt BYTE_1_SHIFT = 8;
-    const KUInt BYTE_2_SHIFT = 16;
-    const KUInt BYTE_3_SHIFT = 24;
-    return (
-        bytes[BYTE_0]
-        | (bytes[BYTE_1] << BYTE_1_SHIFT)
-        | (bytes[BYTE_2] << BYTE_2_SHIFT)
-        | (bytes[BYTE_3] << BYTE_3_SHIFT)
-    );
 }
 
 KNativePointer impl_CreateConfig(KInt argc, KStringArray argvPtr) {
@@ -180,13 +182,12 @@ KNativePointer impl_DestroyConfig(KNativePointer configPtr) {
 }
 KOALA_INTEROP_1(DestroyConfig, KNativePointer, KNativePointer)
 
-KNativePointer impl_DestroyContext(KNativePointer contextPtr) {
+void impl_DestroyContext(KNativePointer contextPtr) {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
     GetImpl()->DestroyContext(context);
     StageArena::instance()->cleanup();
-    return nullptr;
 }
-KOALA_INTEROP_1(DestroyContext, KNativePointer, KNativePointer)
+KOALA_INTEROP_V1(DestroyContext, KNativePointer)
 
 KNativePointer impl_UpdateCallExpression(
     KNativePointer contextPtr,
@@ -290,3 +291,72 @@ KOALA_INTEROP_2(AstNodeChildren, KNativePointer, KNativePointer, KNativePointer)
 /*
 -----------------------------------------------------------------------------------------------------------------------------
 */
+
+// From koala-wrapper
+// TODO check if some code should be generated
+
+void impl_MemInitialize()
+{
+    GetImpl()->MemInitialize();
+}
+KOALA_INTEROP_V0(MemInitialize)
+
+void impl_MemFinalize()
+{
+    GetImpl()->MemFinalize();
+}
+KOALA_INTEROP_V0(MemFinalize)
+
+constexpr const char* IS_UI_FLAG = "IS_UI_FLAG";
+constexpr const char* NOT_UI_FLAG = "NOT_UI_FLAG";
+const string MODULE_SUFFIX = ".d.ets";
+const string ARKUI = "arkui";
+
+static bool isUIHeaderFile(es2panda_Context* context, es2panda_Program* program)
+{
+    auto result = GetImpl()->ProgramFileNameWithExtensionConst(context, program);
+    string fileNameWithExtension(result);
+    result = GetImpl()->ProgramModuleNameConst(context, program);
+    string moduleName(result);
+
+    return fileNameWithExtension.length() >= MODULE_SUFFIX.length()
+        && fileNameWithExtension.substr(fileNameWithExtension.length() - MODULE_SUFFIX.length()) == MODULE_SUFFIX
+        && moduleName.find(ARKUI) != std::string::npos;
+}
+
+KBoolean impl_ProgramCanSkipPhases(KNativePointer context, KNativePointer program)
+{
+    KStringPtr isUiFlag(IS_UI_FLAG);
+    KStringPtr notUiFlag(NOT_UI_FLAG);
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _program = reinterpret_cast<es2panda_Program*>(program);
+    if (isUIHeaderFile(_context, _program)) {
+        return false;
+    }
+    std::size_t sourceLen;
+    const auto externalSources = reinterpret_cast<es2panda_ExternalSource **>
+        (GetImpl()->ProgramExternalSources(_context, _program, &sourceLen));
+    for (std::size_t i = 0; i < sourceLen; ++i) {
+        std::size_t programLen;
+        auto programs = GetImpl()->ExternalSourcePrograms(externalSources[i], &programLen);
+        for (std::size_t j = 0; j < programLen; ++j) {
+            if (isUIHeaderFile(_context, programs[j])) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+KOALA_INTEROP_2(ProgramCanSkipPhases, KBoolean, KNativePointer, KNativePointer)
+
+KNativePointer impl_AstNodeProgram(KNativePointer contextPtr, KNativePointer instancePtr)
+{
+    auto _context = reinterpret_cast<es2panda_Context*>(contextPtr);
+    auto _receiver = reinterpret_cast<es2panda_AstNode*>(instancePtr);
+
+    if (GetImpl()->AstNodeIsProgramConst(_context, _receiver)) {
+        return GetImpl()->ETSModuleProgram(_context, _receiver);
+    }
+    return impl_AstNodeProgram(_context, GetImpl()->AstNodeParent(_context, _receiver));
+}
+KOALA_INTEROP_2(AstNodeProgram, KNativePointer, KNativePointer, KNativePointer)

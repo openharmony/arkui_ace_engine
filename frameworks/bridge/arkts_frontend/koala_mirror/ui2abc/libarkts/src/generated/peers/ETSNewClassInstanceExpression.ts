@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class ETSNewClassInstanceExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 78)
+        assertValidPeer(pointer, 80)
         super(pointer)
     }
     static createETSNewClassInstanceExpression(typeReference: Expression | undefined, _arguments: readonly Expression[]): ETSNewClassInstanceExpression {
@@ -60,6 +60,7 @@ export class ETSNewClassInstanceExpression extends Expression {
         global.generatedEs2panda._ETSNewClassInstanceExpressionAddToArgumentsFront(global.context, this.peer, passNode(expr))
         return this
     }
+    protected readonly brandETSNewClassInstanceExpression: undefined
 }
 export function isETSNewClassInstanceExpression(node: object | undefined): node is ETSNewClassInstanceExpression {
     return node instanceof ETSNewClassInstanceExpression

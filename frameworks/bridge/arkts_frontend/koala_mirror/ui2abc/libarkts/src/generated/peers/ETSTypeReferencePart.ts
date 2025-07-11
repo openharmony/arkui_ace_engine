@@ -35,7 +35,7 @@ import { TSTypeParameterInstantiation } from "./TSTypeParameterInstantiation"
 import { TypeNode } from "./TypeNode"
 export class ETSTypeReferencePart extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 73)
+        assertValidPeer(pointer, 75)
         super(pointer)
     }
     static createETSTypeReferencePart(name?: Expression, typeParams?: TSTypeParameterInstantiation, prev?: ETSTypeReferencePart): ETSTypeReferencePart {
@@ -59,6 +59,7 @@ export class ETSTypeReferencePart extends TypeNode {
     get ident(): Identifier | undefined {
         return unpackNode(global.generatedEs2panda._ETSTypeReferencePartGetIdent(global.context, this.peer))
     }
+    protected readonly brandETSTypeReferencePart: undefined
 }
 export function isETSTypeReferencePart(node: object | undefined): node is ETSTypeReferencePart {
     return node instanceof ETSTypeReferencePart

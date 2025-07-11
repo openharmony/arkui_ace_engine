@@ -19,6 +19,7 @@
 
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "base/utils/multi_thread.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/base/geometry/ng/offset_t.h"
 #include "frameworks/base/i18n/localization.h"
@@ -229,6 +230,8 @@ void RefreshModelNG::SetIsCustomBuilderExist(bool isCustomBuilderExist)
 
 void RefreshModelNG::SetCustomBuilder(FrameNode* frameNode, FrameNode* customBuilder)
 {
+    // call SetCustomBuilderMultiThread by multi thread
+    FREE_NODE_CHECK(frameNode, SetCustomBuilder, frameNode, customBuilder);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RefreshPattern>();
     CHECK_NULL_VOID(pattern);

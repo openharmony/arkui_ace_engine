@@ -76,7 +76,8 @@ HWTEST_F(RefreshModifierTest, setOnStateChangeTest, TestSize.Level1)
         },
         .call = onStateChange
     };
-    modifier_->setOnStateChange(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_RefreshStatus_Void>(func);
+    modifier_->setOnStateChange(node_, &optFunc);
 
     for (const auto& testValue : STATE_CHANGE_EVENT_TEST_PLAN) {
         eventHub->FireOnStateChange(testValue.first);
@@ -111,7 +112,8 @@ HWTEST_F(RefreshModifierTest, setOnRefreshingTest, TestSize.Level1)
         },
         .call = onRefreshing
     };
-    modifier_->setOnRefreshing(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_Void>(func);
+    modifier_->setOnRefreshing(node_, &optFunc);
 
     eventHub->FireOnRefreshing();
 
@@ -161,7 +163,8 @@ HWTEST_F(RefreshModifierTest, setRefreshOffsetTestValidValues, TestSize.Level1)
     inputValueRefreshOffset = initValueRefreshOffset;
     for (auto&& value: refreshOffsetRefreshOffsetValidValues) {
         inputValueRefreshOffset = std::get<1>(value);
-        modifier_->setRefreshOffset(node_, &inputValueRefreshOffset);
+        auto optInputValueRefreshOffset = Converter::ArkValue<Opt_Number>(inputValueRefreshOffset);
+        modifier_->setRefreshOffset(node_, &optInputValueRefreshOffset);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REFRESH_OFFSET_NAME);
         expectedStr = std::get<2>(value);
@@ -209,7 +212,8 @@ HWTEST_F(RefreshModifierTest, setPullToRefreshTestValidValues, TestSize.Level1)
     inputValuePullToRefresh = initValuePullToRefresh;
     for (auto&& value: pullToRefreshPullToRefreshValidValues) {
         inputValuePullToRefresh = std::get<1>(value);
-        modifier_->setPullToRefresh(node_, inputValuePullToRefresh);
+        auto optInputValuePullToRefresh = Converter::ArkValue<Opt_Boolean>(inputValuePullToRefresh);
+        modifier_->setPullToRefresh(node_, &optInputValuePullToRefresh);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PULL_TO_REFRESH_NAME);
         expectedStr = std::get<2>(value);
@@ -244,7 +248,8 @@ HWTEST_F(RefreshModifierTest, setOnOffsetChangeTest, TestSize.Level1)
         },
         .call = onOffsetChange
     };
-    modifier_->setOnOffsetChange(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_Number_Void>(func);
+    modifier_->setOnOffsetChange(node_, &optFunc);
 
     for (const auto& testValue : OFFSET_CHANGE_EVENT_TEST_PLAN) {
         eventHub->FireOnOffsetChange(testValue);

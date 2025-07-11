@@ -262,6 +262,15 @@ public:
     virtual void SetNodeId(int32_t nodeId) = 0;
     virtual int32_t GetNodeId() const = 0;
 
+    // ArkTS 1.2
+    virtual void ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) = 0;
+    virtual void CloseToastStatic(const int32_t toastId, std::function<void(int32_t)>&& callback) = 0;
+    virtual void ShowDialogStatic(DialogProperties& dialogProps, std::function<void(int32_t, int32_t)>&& callback) = 0;
+    virtual void ShowActionMenuStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback) = 0;
+    virtual void OpenCustomDialogStatic(DialogProperties &dialogProps,
+        std::function<void(int32_t)> &&callback) = 0;
+
 private:
     int32_t subwindowId_ = 0;
     int32_t uiExtensionHostWindowId_ = 0;

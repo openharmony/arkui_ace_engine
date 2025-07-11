@@ -17,6 +17,7 @@
 
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/slider/slider_event_hub.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"

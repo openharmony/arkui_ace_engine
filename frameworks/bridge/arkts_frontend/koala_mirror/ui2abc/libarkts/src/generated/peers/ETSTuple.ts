@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class ETSTuple extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 81)
+        assertValidPeer(pointer, 83)
         super(pointer)
     }
     static createETSTuple(): ETSTuple {
@@ -64,6 +64,7 @@ export class ETSTuple extends TypeNode {
         global.generatedEs2panda._ETSTupleSetTypeAnnotationsList(global.context, this.peer, passNodeArray(typeNodeList), typeNodeList.length)
         return this
     }
+    protected readonly brandETSTuple: undefined
 }
 export function isETSTuple(node: object | undefined): node is ETSTuple {
     return node instanceof ETSTuple

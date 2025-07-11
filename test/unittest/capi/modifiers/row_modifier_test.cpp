@@ -77,11 +77,11 @@ HWTEST_F(RowModifierTest, setAlignItemsTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_VerticalAlign inputValueAlignItems;
+    Opt_VerticalAlign inputValueAlignItems;
 
     // Verifying attribute's  values
-    inputValueAlignItems = Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_BOTTOM);
-    modifier_->setAlignItems(node_, inputValueAlignItems);
+    inputValueAlignItems = Converter::ArkValue<Opt_VerticalAlign>(ARK_VERTICAL_ALIGN_BOTTOM);
+    modifier_->setAlignItems(node_, &inputValueAlignItems);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_ITEMS_NAME);
     expectedStr = "VerticalAlign.Bottom";
@@ -103,19 +103,19 @@ HWTEST_F(RowModifierTest, setJustifyContentTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'justifyContent' of method 'justifyContent'
-static std::vector<std::tuple<std::string, enum Ark_FlexAlign, std::string>>
+static std::vector<std::tuple<std::string, Opt_FlexAlign, std::string>>
     justifyContentJustifyContentValidValues = {
-    {"ARK_FLEX_ALIGN_START", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_START),
+    {"ARK_FLEX_ALIGN_START", Converter::ArkValue<Opt_FlexAlign>(ARK_FLEX_ALIGN_START),
         "FlexAlign.Start"},
-    {"ARK_FLEX_ALIGN_CENTER", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_CENTER),
+    {"ARK_FLEX_ALIGN_CENTER", Converter::ArkValue<Opt_FlexAlign>(ARK_FLEX_ALIGN_CENTER),
         "FlexAlign.Center"},
-    {"ARK_FLEX_ALIGN_END", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_END),
+    {"ARK_FLEX_ALIGN_END", Converter::ArkValue<Opt_FlexAlign>(ARK_FLEX_ALIGN_END),
         "FlexAlign.End"},
-    {"ARK_FLEX_ALIGN_SPACE_BETWEEN", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_SPACE_BETWEEN),
+    {"ARK_FLEX_ALIGN_SPACE_BETWEEN", Converter::ArkValue<Opt_FlexAlign>(ARK_FLEX_ALIGN_SPACE_BETWEEN),
         "FlexAlign.SpaceBetween"},
-    {"ARK_FLEX_ALIGN_SPACE_AROUND", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_SPACE_AROUND),
+    {"ARK_FLEX_ALIGN_SPACE_AROUND", Converter::ArkValue<Opt_FlexAlign>(ARK_FLEX_ALIGN_SPACE_AROUND),
         "FlexAlign.SpaceAround"},
-    {"ARK_FLEX_ALIGN_SPACE_EVENLY", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_SPACE_EVENLY),
+    {"ARK_FLEX_ALIGN_SPACE_EVENLY", Converter::ArkValue<Opt_FlexAlign>(ARK_FLEX_ALIGN_SPACE_EVENLY),
         "FlexAlign.SpaceEvenly"},
 };
 
@@ -129,13 +129,13 @@ HWTEST_F(RowModifierTest, setJustifyContentTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_FlexAlign inputValueJustifyContent;
+    Opt_FlexAlign inputValueJustifyContent;
 
     // Verifying attribute's values
     inputValueJustifyContent = std::get<1>(justifyContentJustifyContentValidValues[0]);
     for (auto&& value: justifyContentJustifyContentValidValues) {
         inputValueJustifyContent = std::get<1>(value);
-        modifier_->setJustifyContent(node_, inputValueJustifyContent);
+        modifier_->setJustifyContent(node_, &inputValueJustifyContent);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JUSTIFY_CONTENT_NAME);
         expectedStr = std::get<2>(value);
@@ -170,7 +170,8 @@ HWTEST_F(RowModifierTest, DISABLED_setPointLightValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string resultStr2;
-    Ark_PointLightStyle inputValuePointLight;
+    Opt_PointLightStyle optPointLight;
+    Ark_PointLightStyle& inputValuePointLight = WriteTo(optPointLight);
     Ark_LightSource arkLightSource;
     arkLightSource = {
         .color =
@@ -183,8 +184,9 @@ HWTEST_F(RowModifierTest, DISABLED_setPointLightValidValues, TestSize.Level1)
     inputValuePointLight.lightSource = Converter::ArkValue<Opt_LightSource>(arkLightSource);
     inputValuePointLight.bloom = Converter::ArkValue<Opt_Number>(3);
     inputValuePointLight.illuminated = Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BORDER_CONTENT);
-
-    modifier_->setPointLight(node_, &inputValuePointLight);
+    
+    
+    modifier_->setPointLight(node_, &optPointLight);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
     resultStr2 = GetAttrValue<std::string>(resultStr, ATTRIBUTE_LIGHT_INTENSITY_NAME);
@@ -285,7 +287,8 @@ HWTEST_F(RowModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionXValidValues, TestSize.Level1)
 {
-    Ark_PointLightStyle initValuePointLight;
+    Opt_PointLightStyle optPointLight;
+    Ark_PointLightStyle& initValuePointLight = WriteTo(optPointLight);
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
@@ -301,11 +304,11 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionXValidVa
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
-    auto checkValue = [this, &initValuePointLight](
+    auto checkValue = [this, &optPointLight](
                           const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+        Opt_PointLightStyle inputValuePointLight = optPointLight;
 
-        WriteTo(inputValuePointLight.lightSource).positionX = value;
+        WriteTo(WriteTo(inputValuePointLight).lightSource).positionX = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
@@ -328,7 +331,8 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionXValidVa
  */
 HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionYValidValues, TestSize.Level1)
 {
-    Ark_PointLightStyle initValuePointLight;
+    Opt_PointLightStyle optPointLight;
+    Ark_PointLightStyle& initValuePointLight = WriteTo(optPointLight);
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
@@ -344,11 +348,11 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionYValidVa
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
-    auto checkValue = [this, &initValuePointLight](
+    auto checkValue = [this, &optPointLight](
                           const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+        Opt_PointLightStyle inputValuePointLight = optPointLight;
 
-        WriteTo(inputValuePointLight.lightSource).positionY = value;
+        WriteTo(WriteTo(inputValuePointLight).lightSource).positionY = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
@@ -371,7 +375,8 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionYValidVa
  */
 HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionZValidValues, TestSize.Level1)
 {
-    Ark_PointLightStyle initValuePointLight;
+    Opt_PointLightStyle optPointLight;
+    Ark_PointLightStyle& initValuePointLight = WriteTo(optPointLight);
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
@@ -387,11 +392,11 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionZValidVa
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
-    auto checkValue = [this, &initValuePointLight](
+    auto checkValue = [this, &optPointLight](
                           const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+        Opt_PointLightStyle inputValuePointLight = optPointLight;
 
-        WriteTo(inputValuePointLight.lightSource).positionZ = value;
+        WriteTo(WriteTo(inputValuePointLight).lightSource).positionZ = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
@@ -414,7 +419,8 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionZValidVa
  */
 HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceIntensity, TestSize.Level1)
 {
-    Ark_PointLightStyle initValuePointLight;
+    Opt_PointLightStyle optPointLight;
+    Ark_PointLightStyle& initValuePointLight = WriteTo(optPointLight);
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
@@ -430,11 +436,11 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceIntensity, TestS
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
-    auto checkValue = [this, &initValuePointLight](
+    auto checkValue = [this, &optPointLight](
                           const std::string& input, const double& expected, const Ark_Number& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+        Opt_PointLightStyle inputValuePointLight = optPointLight;
 
-        WriteTo(inputValuePointLight.lightSource).intensity = value;
+        WriteTo(WriteTo(inputValuePointLight).lightSource).intensity = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
@@ -462,7 +468,8 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceIntensity, TestS
  */
 HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceColorValidValues, TestSize.Level1)
 {
-    Ark_PointLightStyle initValuePointLight;
+    Opt_PointLightStyle optPointLight;
+    Ark_PointLightStyle& initValuePointLight = WriteTo(optPointLight);
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
@@ -478,11 +485,11 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceColorValidValues
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
-    auto checkValue = [this, &initValuePointLight](
+    auto checkValue = [this, &optPointLight](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+        Opt_PointLightStyle inputValuePointLight = optPointLight;
 
-        WriteTo(inputValuePointLight.lightSource).color = value;
+        WriteTo(WriteTo(inputValuePointLight).lightSource).color = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
@@ -516,7 +523,8 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceColorValidValues
  */
 HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceColorInvalidValues, TestSize.Level1)
 {
-    Ark_PointLightStyle initValuePointLight;
+    Opt_PointLightStyle optPointLight;
+    Ark_PointLightStyle& initValuePointLight = WriteTo(optPointLight);
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
@@ -532,11 +540,11 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceColorInvalidValu
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
-    auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_ResourceColor& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+    auto checkValue = [this, &optPointLight](const std::string& input, const Opt_ResourceColor& value) {
+        Opt_PointLightStyle inputValuePointLight = optPointLight;
 
         modifier_->setPointLight(node_, &inputValuePointLight);
-        WriteTo(inputValuePointLight.lightSource).color = value;
+        WriteTo(WriteTo(inputValuePointLight).lightSource).color = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
@@ -565,7 +573,8 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceColorInvalidValu
  */
 HWTEST_F(RowModifierTest, setPointLightTestPointLightIlluminatedValidValues, TestSize.Level1)
 {
-    Ark_PointLightStyle initValuePointLight;
+    Opt_PointLightStyle optPointLight;
+    Ark_PointLightStyle& initValuePointLight = WriteTo(optPointLight);
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
@@ -581,11 +590,11 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightIlluminatedValidValues, Tes
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
-    auto checkValue = [this, &initValuePointLight](
+    auto checkValue = [this, &optPointLight](
                           const std::string& input, const std::string& expectedStr, const Opt_IlluminatedType& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+        Opt_PointLightStyle inputValuePointLight = optPointLight;
 
-        inputValuePointLight.illuminated = value;
+        WriteTo(inputValuePointLight).illuminated = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
@@ -606,7 +615,8 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightIlluminatedValidValues, Tes
  */
 HWTEST_F(RowModifierTest, setPointLightTestPointLightIlluminatedInvalidValues, TestSize.Level1)
 {
-    Ark_PointLightStyle initValuePointLight;
+    Opt_PointLightStyle optPointLight;
+    Ark_PointLightStyle& initValuePointLight = WriteTo(optPointLight);
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
@@ -622,9 +632,9 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightIlluminatedInvalidValues, T
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
-    auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_IlluminatedType& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
-        inputValuePointLight.illuminated = value;
+    auto checkValue = [this, &optPointLight](const std::string& input, const Opt_IlluminatedType& value) {
+        Opt_PointLightStyle inputValuePointLight = optPointLight;
+        WriteTo(inputValuePointLight).illuminated = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
@@ -645,7 +655,8 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightIlluminatedInvalidValues, T
  */
 HWTEST_F(RowModifierTest, setPointLightTestPointLightBloomValidValues, TestSize.Level1)
 {
-    Ark_PointLightStyle initValuePointLight;
+    Opt_PointLightStyle optPointLight;
+    Ark_PointLightStyle& initValuePointLight = WriteTo(optPointLight);
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
@@ -661,11 +672,11 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightBloomValidValues, TestSize.
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
-    auto checkValue = [this, &initValuePointLight](
+    auto checkValue = [this, &optPointLight](
                           const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+        Opt_PointLightStyle inputValuePointLight = optPointLight;
 
-        inputValuePointLight.bloom = value;
+        WriteTo(inputValuePointLight).bloom = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
@@ -691,7 +702,8 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightBloomValidValues, TestSize.
  */
 HWTEST_F(RowModifierTest, setPointLightTestPointLightBloomInvalidValues, TestSize.Level1)
 {
-    Ark_PointLightStyle initValuePointLight;
+    Opt_PointLightStyle optPointLight;
+    Ark_PointLightStyle& initValuePointLight = WriteTo(optPointLight);
 
     // Initial setup
     WriteTo(initValuePointLight.lightSource).positionX =
@@ -707,11 +719,11 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightBloomInvalidValues, TestSiz
         ArkValue<Opt_IlluminatedType>(std::get<1>(testFixtureEnumIlluminatedTypeValidValues[0]));
     initValuePointLight.bloom = ArkValue<Opt_Number>(std::get<1>(testFixtureBloomValidValues[0]));
 
-    auto checkValue = [this, &initValuePointLight](const std::string& input, const Opt_Number& value) {
-        Ark_PointLightStyle inputValuePointLight = initValuePointLight;
+    auto checkValue = [this, &optPointLight](const std::string& input, const Opt_Number& value) {
+        Opt_PointLightStyle inputValuePointLight = optPointLight;
 
         modifier_->setPointLight(node_, &inputValuePointLight);
-        inputValuePointLight.bloom = value;
+        WriteTo(inputValuePointLight).bloom = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =

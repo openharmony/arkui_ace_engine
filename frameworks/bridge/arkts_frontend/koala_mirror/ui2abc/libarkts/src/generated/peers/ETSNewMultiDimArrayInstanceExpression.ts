@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class ETSNewMultiDimArrayInstanceExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 77)
+        assertValidPeer(pointer, 79)
         super(pointer)
     }
     static createETSNewMultiDimArrayInstanceExpression(typeReference: TypeNode | undefined, dimensions: readonly Expression[]): ETSNewMultiDimArrayInstanceExpression {
@@ -56,6 +56,7 @@ export class ETSNewMultiDimArrayInstanceExpression extends Expression {
         global.generatedEs2panda._ETSNewMultiDimArrayInstanceExpressionClearPreferredType(global.context, this.peer)
         return this
     }
+    protected readonly brandETSNewMultiDimArrayInstanceExpression: undefined
 }
 export function isETSNewMultiDimArrayInstanceExpression(node: object | undefined): node is ETSNewMultiDimArrayInstanceExpression {
     return node instanceof ETSNewMultiDimArrayInstanceExpression

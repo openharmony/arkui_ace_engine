@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TemplateElement } from "./TemplateElement"
 export class TemplateLiteral extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 143)
+        assertValidPeer(pointer, 145)
         super(pointer)
     }
     static createTemplateLiteral(quasis: readonly TemplateElement[], expressions: readonly Expression[], multilineString: string): TemplateLiteral {
@@ -51,6 +51,7 @@ export class TemplateLiteral extends Expression {
     get multilineString(): string {
         return unpackString(global.generatedEs2panda._TemplateLiteralGetMultilineStringConst(global.context, this.peer))
     }
+    protected readonly brandTemplateLiteral: undefined
 }
 export function isTemplateLiteral(node: object | undefined): node is TemplateLiteral {
     return node instanceof TemplateLiteral

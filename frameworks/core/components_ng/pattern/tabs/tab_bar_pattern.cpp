@@ -1216,7 +1216,8 @@ void TabBarPattern::AddTabBarEventCallback()
         CHECK_NULL_VOID(gestureHub);
         auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+        if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
+            tabBarPattern->scrollableEvent_) {
             gestureHub->AddScrollableEvent(tabBarPattern->scrollableEvent_);
         }
         for (const auto& childNode : host->GetChildren()) {

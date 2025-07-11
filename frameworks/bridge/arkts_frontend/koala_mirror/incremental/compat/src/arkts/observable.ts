@@ -14,9 +14,8 @@
  */
 
 export function getObservableTarget(proxy: Object): Object {
-    if (PROXY_DISABLED) return proxy
     try {
-        return Proxy.tryGetTarget(proxy) ?? proxy
+        return (proxy.Proxy.tryGetTarget(proxy) as Object|undefined|null) ?? proxy
     } catch (error) {
         return proxy
     }
@@ -178,8 +177,6 @@ export function observableProxyArray<Value>(...value: Value[]): Array<Value> {
     return observableProxy(Array.of<Value>(...value))
 }
 
-const PROXY_DISABLED = true // because of ArkTS Reflection performance
-
 /** @internal */
 export function observableProxy<Value>(value: Value, parent?: ObservableHandler, observed?: boolean, strict: boolean = true): Value {
     if (value instanceof ObservableHandler) return value as Value // do not proxy a marker itself
@@ -210,12 +207,25 @@ export function observableProxy<Value>(value: Value, parent?: ObservableHandler,
     } else if (value instanceof Date) {
         return ObservableDate(value, parent, observed) as Value
     }
-    if (PROXY_DISABLED) return value as Value
-    // TODO: proxy the given object
-    return Proxy.create(value as Object, new CustomProxyHandler<Object>()) as Value
+
+    // TODO: Fatal error on using proxy with generic types
+    // see: panda issue #26492
+
+    // const valueType = Type.of(value)
+    // if (valueType instanceof ClassType && !(value instanceof BaseEnum)) {
+    //     if (valueType.hasEmptyConstructor()) {
+    //         const result = Proxy.create(value as Object, new CustomProxyHandler<Object>()) as Value
+    //         ObservableHandler.installOn(result as Object, new ObservableHandler(parent))
+    //         return result
+    //     } else {
+    //         throw new Error(`Class '${valueType.getName()}' must contain a default constructor`)
+    //     }
+    // }
+
+    return value as Value
 }
 
-class CustomProxyHandler<T extends Object> extends DefaultProxyHandler<T> {
+class CustomProxyHandler<T extends Object> extends proxy.DefaultProxyHandler<T> {
     override get(target: T, name: string): NullishType {
         const observable = ObservableHandler.find(target)
         if (observable) observable.onAccess()

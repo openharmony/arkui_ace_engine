@@ -34,7 +34,7 @@ import { Identifier } from "./Identifier"
 import { Statement } from "./Statement"
 export class TSImportEqualsDeclaration extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 124)
+        assertValidPeer(pointer, 126)
         super(pointer)
     }
     static createTSImportEqualsDeclaration(id: Identifier | undefined, moduleReference: Expression | undefined, isExport: boolean): TSImportEqualsDeclaration {
@@ -52,6 +52,7 @@ export class TSImportEqualsDeclaration extends Statement {
     get isExport(): boolean {
         return global.generatedEs2panda._TSImportEqualsDeclarationIsExportConst(global.context, this.peer)
     }
+    protected readonly brandTSImportEqualsDeclaration: undefined
 }
 export function isTSImportEqualsDeclaration(node: object | undefined): node is TSImportEqualsDeclaration {
     return node instanceof TSImportEqualsDeclaration

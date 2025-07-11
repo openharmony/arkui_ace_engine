@@ -33,7 +33,7 @@ import { Es2pandaRegExpFlags } from "./../Es2pandaEnums"
 import { Literal } from "./Literal"
 export class RegExpLiteral extends Literal {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 56)
+        assertValidPeer(pointer, 57)
         super(pointer)
     }
     static createRegExpLiteral(pattern: string, flags: Es2pandaRegExpFlags, flagsStr: string): RegExpLiteral {
@@ -48,6 +48,7 @@ export class RegExpLiteral extends Literal {
     get flags(): Es2pandaRegExpFlags {
         return global.generatedEs2panda._RegExpLiteralFlagsConst(global.context, this.peer)
     }
+    protected readonly brandRegExpLiteral: undefined
 }
 export function isRegExpLiteral(node: object | undefined): node is RegExpLiteral {
     return node instanceof RegExpLiteral

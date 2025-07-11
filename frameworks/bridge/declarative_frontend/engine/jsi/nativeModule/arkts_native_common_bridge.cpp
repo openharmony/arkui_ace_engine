@@ -101,8 +101,11 @@ constexpr double DEFAULT_MAX_ROTATION_ANGLE = 360.0;
 const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
 const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
 const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
+<<<<<<< HEAD
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
+=======
+>>>>>>> 6a3a87ad3dd (add other)
 enum ParseResult { LENGTHMETRICS_SUCCESS, DIMENSION_SUCCESS, FAIL };
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
@@ -4031,7 +4034,10 @@ void ParseTipsParam(const RefPtr<PopupParam>& tipsParam, const ArkUIBindTipsOpti
     tipsParam->SetErrorArrowHeight(setArrowHeightError);
     tipsParam->SetBlockEvent(false);
     tipsParam->SetTipsFlag(true);
+<<<<<<< HEAD
     tipsParam->SetAnchorType(static_cast<TipsAnchorType>(arrowOptions.showAtAnchor));
+=======
+>>>>>>> 6a3a87ad3dd (add other)
 }
 
 ArkUINativeModuleValue CommonBridge::SetBindTips(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -4078,7 +4084,8 @@ ArkUINativeModuleValue CommonBridge::SetBindTips(ArkUIRuntimeCallInfo* runtimeCa
     if (styledString) {
         auto tipsParam = AceType::MakeRefPtr<PopupParam>();
         ParseTipsParam(tipsParam, timeOptions, arrowOptions);
-        ViewAbstract::BindTips(tipsParam, AceType::Claim(reinterpret_cast<FrameNode*>(nativeNode)), styledString);
+        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode), styledString);
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->setBindTips(
             nativeNode, message.c_str(), timeOptions, arrowOptions);
@@ -10018,6 +10025,7 @@ ArkUINativeModuleValue CommonBridge::GetWindowWidthBreakpoint(ArkUIRuntimeCallIn
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+<<<<<<< HEAD
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
     auto window = container->GetWindow();
@@ -10027,12 +10035,20 @@ ArkUINativeModuleValue CommonBridge::GetWindowWidthBreakpoint(ArkUIRuntimeCallIn
     WidthBreakpoint breakpoint = window->GetWidthBreakpoint(layoutBreakpoints);
 
     return panda::IntegerRef::NewFromUnsigned(vm, static_cast<uint32_t>(breakpoint));
+=======
+    int32_t widthBreahkPoint = NG::ViewAbstract::GetWindowWidthBreakpoint();
+    if (widthBreahkPoint == -1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    return panda::IntegerRef::NewFromUnsigned(vm, static_cast<uint32_t>(widthBreahkPoint));
+>>>>>>> 6a3a87ad3dd (add other)
 }
 
 ArkUINativeModuleValue CommonBridge::GetWindowHeightBreakpoint(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+<<<<<<< HEAD
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
     auto window = container->GetWindow();
@@ -10042,6 +10058,13 @@ ArkUINativeModuleValue CommonBridge::GetWindowHeightBreakpoint(ArkUIRuntimeCallI
     HeightBreakpoint breakpoint = window->GetHeightBreakpoint(layoutBreakpoints);
 
     return panda::IntegerRef::NewFromUnsigned(vm, static_cast<uint32_t>(breakpoint));
+=======
+    int32_t heightBreakpoint = NG::ViewAbstract::GetWindowHeightBreakpoint();
+    if (heightBreakpoint == -1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    return panda::IntegerRef::NewFromUnsigned(vm, heightBreakpoint);
+>>>>>>> 6a3a87ad3dd (add other)
 }
 
 ArkUINativeModuleValue CommonBridge::FreezeUINodeById(ArkUIRuntimeCallInfo* runtimeCallInfo)

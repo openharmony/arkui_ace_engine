@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -28,10 +29,19 @@ namespace OHOS::Ace::NG {
 void ListItemGroupPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
+    // call OnAttachToFrameNodeMultiThread by multi thread
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     CHECK_NULL_VOID(host);
     if (listItemGroupStyle_ == V2::ListItemGroupStyle::CARD) {
         SetListItemGroupDefaultAttributes(host);
     }
+}
+
+void ListItemGroupPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    // call OnAttachToMainTreeMulti by multi thread
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
 void ListItemGroupPattern::OnColorConfigurationUpdate()

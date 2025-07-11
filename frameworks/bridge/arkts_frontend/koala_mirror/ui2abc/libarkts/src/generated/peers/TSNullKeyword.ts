@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 export class TSNullKeyword extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 101)
+        assertValidPeer(pointer, 103)
         super(pointer)
     }
     static createTSNullKeyword(): TSNullKeyword {
@@ -41,6 +41,7 @@ export class TSNullKeyword extends TypeNode {
     static updateTSNullKeyword(original?: TSNullKeyword): TSNullKeyword {
         return new TSNullKeyword(global.generatedEs2panda._UpdateTSNullKeyword(global.context, passNode(original)))
     }
+    protected readonly brandTSNullKeyword: undefined
 }
 export function isTSNullKeyword(node: object | undefined): node is TSNullKeyword {
     return node instanceof TSNullKeyword

@@ -37,7 +37,7 @@ shared_library("es2panda_lib") {
     ]
 
     include_dirs = [
-        "//third_party/node/src",
+        #"//third_party/node/src",
         "$ui2abc_path/build/sdk/linux_host_tools/include/tools/es2panda/public",
         "$ui2abc_path/build/sdk/linux_host_tools/include/tools/es2panda",
 

@@ -39,5 +39,8 @@ void* PixelMap::GetReleaseContext(const RefPtr<PixelMap>& pixelMap)
 
 void PixelMap::ReleaseProc(const void* /* pixels */, void* context)
 {
+RefPtr<PixelMap> PixelMap::Create(const InitializationOptions& opts)
+{
+    return AceType::MakeRefPtr<::testing::NiceMock<MockPixelMap>>();
 }
 } // namespace OHOS::Ace

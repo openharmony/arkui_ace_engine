@@ -114,8 +114,7 @@ public:
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetNavigationStack(FrameNode* frameNode);
-    static void SetNavigationStack(FrameNode* frameNode, const RefPtr<NG::NavigationStack>& navigationStack);
-    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated = false);
+    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
     static void SetEnableModeChangeAnimation(FrameNode* frameNode, bool isEnable);
     static void SetSplitPlaceholder(FrameNode* frameNode, FrameNode* splitPlaceholder);
     static void ResetSplitPlaceholder(FrameNode* frameNode);
@@ -138,15 +137,14 @@ public:
     static void SetBackButtonIcon(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
         const ImageSourceInfo& imageSourceInfo, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap);
     static void SetHideNavBar(FrameNode* frameNode, bool hideNavBar);
-    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated = false);
+    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated);
     static void SetSubtitle(FrameNode* frameNode, const std::string& subtitle);
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
-    static void SetTitleMode(FrameNode* frameNode, const std::optional<NG::NavigationTitleMode>& mode);
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
     static void SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange);
     static void SetOnNavigationModeChange(FrameNode* frameNode,
         std::function<void(NG::NavigationMode)>&& onModeChange);
-    static void SetRecoverable(FrameNode* frameNode, const std::optional<bool>& recoverable);
+    static void SetRecoverable(FrameNode* frameNode, bool recoverable);
     static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
     static void SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable);
 

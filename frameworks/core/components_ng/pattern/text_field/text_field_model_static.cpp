@@ -48,6 +48,7 @@ void TextFieldModelStatic::SetShowUnit(FrameNode* frameNode, std::function<RefPt
     }
     CHECK_NULL_VOID(unitNode);
     pattern->SetUnitNode(unitNode);
+    pattern->ProcessResponseArea();
 }
 
 void TextFieldModelStatic::SetShowCounterBorder(FrameNode* frameNode, const std::optional<bool>& optValue)

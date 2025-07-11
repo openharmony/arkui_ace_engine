@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 export class ThrowStatement extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 146)
+        assertValidPeer(pointer, 148)
         super(pointer)
     }
     static createThrowStatement(argument?: Expression): ThrowStatement {
@@ -45,6 +45,7 @@ export class ThrowStatement extends Statement {
     get argument(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._ThrowStatementArgumentConst(global.context, this.peer))
     }
+    protected readonly brandThrowStatement: undefined
 }
 export function isThrowStatement(node: object | undefined): node is ThrowStatement {
     return node instanceof ThrowStatement
