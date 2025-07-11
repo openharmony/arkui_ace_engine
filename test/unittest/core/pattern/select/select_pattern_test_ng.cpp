@@ -2912,4 +2912,34 @@ HWTEST_F(SelectPatternTestNg, SetModifierByUser002, TestSize.Level1)
     selectPattern->SetModifierByUser(selectTheme, props);
     ASSERT_NE(selectPattern->fontColor_, Color::GREEN);
 }
+
+/**
+ * @tc.name: SetOptionBgColorByUser001
+ * @tc.desc: Test SetOptionBgColorByUser func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetOptionBgColorByUser001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select pattern and gesture hub
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+    selectPattern->options_.push_back(option);
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto paintProperty = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateOptionBgColorSetByUser(true);
+    selectPattern->SetOptionBgColorByUser(Color::BLACK, paintProperty);
+    ASSERT_NE(selectPattern->options_[0], nullptr);
+    auto itemPaintProperty = selectPattern->options_[0]->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(itemPaintProperty, nullptr);
+    ASSERT_EQ(itemPaintProperty->GetOptionBgColor().has_value(), false);
+}
 } // namespace OHOS::Ace::NG

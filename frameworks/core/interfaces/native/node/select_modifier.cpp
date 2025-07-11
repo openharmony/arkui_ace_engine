@@ -156,8 +156,8 @@ void SetOptionBgColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, void* optionB
     SetOptionBgColor(node, color);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
-        SelectModelNG::SetOptionBgColorByUser(frameNode, false);
         CHECK_NULL_VOID(frameNode);
+        SelectModelNG::SetOptionBgColorByUser(frameNode);
         if (optionBgColorRawPtr) {
             auto* bgColor = reinterpret_cast<ResourceObject*>(optionBgColorRawPtr);
             auto bgColorResObj = AceType::Claim(bgColor);
@@ -677,7 +677,7 @@ void SetMenuBgColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, void* menuBgCol
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        SelectModelNG::SetMenuBackgroundColorByUser(frameNode, false);
+        SelectModelNG::SetMenuBackgroundColorByUser(frameNode);
         if (menuBgColorRawPtr) {
             auto* menuBgColor = reinterpret_cast<ResourceObject*>(menuBgColorRawPtr);
             auto menuBgColorResObj = AceType::Claim(menuBgColor);

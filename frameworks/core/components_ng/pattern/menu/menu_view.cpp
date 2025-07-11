@@ -370,7 +370,7 @@ void UpdateOpacityInFinishEvent(const RefPtr<FrameNode>& previewNode, const RefP
     CHECK_NULL_VOID(previewNode);
     auto previewContext = previewNode->GetRenderContext();
     CHECK_NULL_VOID(previewContext);
-    
+
     imageContext->UpdateOpacity(1.0);
     previewContext->UpdateOpacity(0.0);
     AnimationUtils::Animate(
@@ -555,7 +555,7 @@ void ShowHoverImageAnimationProc(const RefPtr<FrameNode>& hoverImageStackNode, c
     auto scaleAfter = previewPattern->GetHoverImageScaleTo();
     auto scaleTo =
         LessOrEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
-    
+
     previewPattern->SetIsHoverImageScalePlaying(true);
     // when the scaling start and end sizes are the same, the end callback method should not be relied on
     AnimationOption scaleOption = AnimationOption();
@@ -1360,10 +1360,10 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
     CHECK_NULL_RETURN(wrapperNode && menuNode, nullptr);
+    ReloadMenuParam(menuNode, menuParam);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    ReloadMenuParam(menuNode, menuParam);
     if (!menuParam.title.empty()) {
         CreateTitleNode(menuParam.title, column);
     }
@@ -1472,11 +1472,11 @@ void MenuView::ContextMenuChildMountProc(const RefPtr<FrameNode>& targetNode, co
         CHECK_NULL_VOID(previewRenderContext);
         previewRenderContext->UpdateOpacity(0.0);
     }
-    
+
     if (menuNode) {
         SetPreviewInfoToMenu(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }
-    
+
     if (menuParam.previewMode == MenuPreviewMode::CUSTOM) {
         previewNode->MountToParent(menuParam.isShowHoverImage ? hoverImageStackNode : wrapperNode);
         previewNode->MarkModifyDone();
