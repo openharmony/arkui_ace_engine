@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { Dimension, PX, VP, FP, LPX, Percentage, ResourceColor, Offset } from "./units"
 import { CrownSensitivity, TextOverflow } from "./enums"
 import { Resource } from "global.resource"
@@ -463,8 +463,8 @@ export interface TextCascadePickerRangeContent {
 }
 export interface TextPickerOptions {
     range: Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent>;
-    value?: string | Array<string>;
-    selected?: number | Array<number>;
+    value?: string | Array<string> | Bindable<string> | Bindable<Array<string>>;
+    selected?: number | Array<number> | Bindable<number> | Bindable<Array<number>>;
     columnWidths?: Array<LengthMetrics>;
 }
 export type TextPickerInterface = (options?: TextPickerOptions) => TextPickerAttribute;

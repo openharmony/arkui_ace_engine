@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_ANIMATED_DRAWABLE_DESCRIPTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_ANIMATED_DRAWABLE_DESCRIPTOR_H
 
+#include <memory>
 #include <vector>
 
 #include "core/drawable/drawable_descriptor.h"
@@ -37,9 +38,10 @@ public:
         return DrawableType::ANIMATED;
     }
 
-    void SetRawData(const std::vector<uint8_t>& data)
+    void SetRawData(uint8_t* data, size_t len)
     {
-        rawData_ = data;
+        rawData_.data.reset(data);
+        rawData_.len = len;
     }
 
     std::vector<RefPtr<PixelMap>> GetPixelMapList()
@@ -70,7 +72,7 @@ public:
 private:
     int32_t totalDuration_ = -1;
     int32_t iterations_ = 1;
-    std::vector<uint8_t> rawData_;
+    MediaData rawData_;
     std::vector<int32_t> durations_;
     std::vector<RefPtr<PixelMap>> pixelMapList_;
 };

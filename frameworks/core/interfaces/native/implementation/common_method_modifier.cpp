@@ -195,23 +195,6 @@ auto g_isPopupCreated = [](FrameNode* frameNode) -> bool {
     return true;
 };
 
-auto g_onWillDismissPopup = [](
-    const Opt_Union_Boolean_Callback_DismissPopupAction_Void& param, RefPtr<PopupParam>& popupParam) {
-    CHECK_NULL_VOID(popupParam);
-    Converter::VisitUnion(param,
-        [&popupParam](const Ark_Boolean& value) {
-            popupParam->SetInteractiveDismiss(Converter::Convert<bool>(value));
-            popupParam->SetOnWillDismiss(nullptr);
-        },
-        [&popupParam](const Callback_DismissPopupAction_Void& value) {
-            auto callback = [arkCallback = CallbackHelper(value)](int32_t reason) {
-            };
-            popupParam->SetOnWillDismiss(std::move(callback));
-            popupParam->SetInteractiveDismiss(true);
-        },
-        []() {});
-};
-
 auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     CHECK_NULL_VOID(popupParam);
     popupParam->SetEnableHoverMode(OptConvert<bool>(src.enableHoverMode).value_or(popupParam->EnableHoverMode()));
@@ -467,6 +450,7 @@ const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor();
 const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor();
 const GENERATED_ArkUISwipeRecognizerAccessor* GetSwipeRecognizerAccessor();
 const GENERATED_ArkUIRotationRecognizerAccessor* GetRotationRecognizerAccessor();
+const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor();
 
 namespace CommonMethodModifier {
 void BackgroundEffect1Impl(
@@ -5497,20 +5481,42 @@ void BindPopupImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optShow = Converter::OptConvert<bool>(*show);
+    auto onWillDismissPopup = [](
+        const Opt_Union_Boolean_Callback_DismissPopupAction_Void& param, RefPtr<PopupParam>& popupParam) {
+        CHECK_NULL_VOID(popupParam);
+        Converter::VisitUnion(param,
+            [&popupParam](const Ark_Boolean& value) {
+                popupParam->SetInteractiveDismiss(Converter::Convert<bool>(value));
+                popupParam->SetOnWillDismiss(nullptr);
+            },
+            [&popupParam](const Callback_DismissPopupAction_Void& value) {
+                auto callback = [arkCallback = CallbackHelper(value)](int32_t reason) {
+                    Ark_DismissPopupAction parameter = GetDismissPopupActionAccessor()->construct();
+                    auto reasonValue = Converter::ArkValue<Ark_DismissReason>(
+                        static_cast<BindSheetDismissReason>(reason));
+                    GetDismissPopupActionAccessor()->setReason(parameter, reasonValue);
+                    arkCallback.InvokeSync(parameter);
+                    GetDismissPopupActionAccessor()->destroyPeer(parameter);
+                };
+                popupParam->SetOnWillDismiss(std::move(callback));
+                popupParam->SetInteractiveDismiss(true);
+            },
+            []() {});
+    };
     Converter::VisitUnion(*popup,
-        [frameNode, optShow](const Ark_PopupOptions& value) {
+        [frameNode, optShow, onWillDismissPopup](const Ark_PopupOptions& value) {
             auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
             CHECK_NULL_VOID(popupParam);
-            g_onWillDismissPopup(value.onWillDismiss, popupParam);
+            onWillDismissPopup(value.onWillDismiss, popupParam);
             if (optShow) {
                 popupParam->SetIsShow(*optShow);
             }
            ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
         },
-        [frameNode, node, optShow](const Ark_CustomPopupOptions& value) {
+        [frameNode, node, optShow, onWillDismissPopup](const Ark_CustomPopupOptions& value) {
             auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
             CHECK_NULL_VOID(popupParam);
-            g_onWillDismissPopup(value.onWillDismiss, popupParam);
+            onWillDismissPopup(value.onWillDismiss, popupParam);
             if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
                 if (optShow) {
                     popupParam->SetIsShow(*optShow);

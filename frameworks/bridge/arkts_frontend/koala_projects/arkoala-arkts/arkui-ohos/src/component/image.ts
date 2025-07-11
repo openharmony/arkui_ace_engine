@@ -980,31 +980,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
-    public attributeModifier<T>(value: AttributeModifier<T>): this {
-        let peerNode = this.getPeer()
-        if (!peerNode._attributeSet) {
-            let isImageModifier: boolean = (value instanceof ImageModifier)
-            if (isImageModifier) {
-                let imageModifier = value as object as ImageModifier
-                peerNode._attributeSet = imageModifier.attribute
-            } else {
-                peerNode._attributeSet = new ArkCommonAttributeSet()
-            }
-        }
-        applyUIAttributes(value, peerNode)
-        let isAttributeUpdater: boolean = (value instanceof AttributeUpdater)
-        if (isAttributeUpdater) {
-            let attributeUpdater = value as object as AttributeUpdater<ImageAttribute, ImageInterface>
-            attributeUpdater.updateConstructorParams = (...params: Object[]) => {
-                const node = this.getModifierHost()! as ArkImageNode
-                this.getModifierHost()!.constructParam(params)
-                return node
-            }
-        }
-        peerNode._attributeSet!.applyModifierPatch(peerNode)
-        return this
-    }
-
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

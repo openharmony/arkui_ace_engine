@@ -35,10 +35,10 @@ RefPtr<PixelMap> PixelMapDrawableDescriptor::GetPixelMap()
 
 void PixelMapDrawableDescriptor::CreatePixelMap()
 {
-    if (rawData_.empty()) {
+    if (rawData_.len == 0 && rawData_.data == nullptr) {
         return;
     }
-    auto imageSource = ImageSource::Create(rawData_.data(), rawData_.size());
+    auto imageSource = ImageSource::Create(rawData_.data.get(), rawData_.len);
     if (!imageSource) {
         return;
     }
@@ -50,12 +50,13 @@ void PixelMapDrawableDescriptor::CreatePixelMap()
 
 } // namespace OHOS::Ace
 
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PixelMapDrawableDescriptor_SetRawData(
-    void* object, uint8_t* data, size_t len)
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PixelMapDrawableDescriptor_SetRawData(void* object, uint8_t* data, size_t len)
 {
+    if (len == 0 || data == nullptr) {
+        return;
+    }
     auto* drawable = reinterpret_cast<OHOS::Ace::PixelMapDrawableDescriptor*>(object);
     if (drawable) {
-        std::vector<uint8_t> result(data, data + len);
-        drawable->SetRawData(result);
+        drawable->SetRawData(data, len);
     }
 }

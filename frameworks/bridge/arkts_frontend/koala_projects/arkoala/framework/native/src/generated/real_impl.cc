@@ -12777,6 +12777,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         //auto convValue = Converter::OptConvert<type>(node); // for enums
         //undefinedModelNG::SetRegisterOnDragStart(frameNode, convValue);
     }
+    void RegisterDragPreviewImpl(Ark_NativePointer node,
+                                 const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
+                                 const Opt_PreviewConfiguration* config)
+    {
+    }
+    void RegisterOnDropImpl(Ark_NativePointer node,
+                            const Opt_OnDragEventCallback* eventCallback,
+                            const Opt_DropOptions* dropOptions)
+    {
+    }
     } // DragDropOpsAccessor
     namespace UIContextAtomicServiceBarAccessor {
     Ark_Frame GetBarRectImpl()
@@ -14269,6 +14279,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // CheckboxOpsAccessor
+    namespace DatePickerSelectedOpsAccessor {
+    Ark_NativePointer RegisterDatePickerSelectedCallbackImpl(Ark_NativePointer node,
+                                                             const Ark_Int64 selected,
+                                                             const DatePickerSelectedCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterDatePickerSelectedCallback(frameNode, convValue);
+        return {};
+    }
+    } // DatePickerSelectedOpsAccessor
     namespace MenuItemOpsAccessor {
     Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
                                                    Ark_Boolean value,
@@ -14709,6 +14732,45 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // TextFieldOpsAccessor
+    namespace TextPickerSelectedOpsAccessor {
+    Ark_NativePointer RegisterTextPickerSelectedCallbackImpl(Ark_NativePointer node,
+                                                             const Ark_Union_Number_Array_Number* selected,
+                                                             const TextPickerSelectedCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterTextPickerSelectedCallback(frameNode, convValue);
+        return {};
+    }
+    } // TextPickerSelectedOpsAccessor
+    namespace TextPickerValueOpsAccessor {
+    Ark_NativePointer RegisterTextPickerValueCallbackImpl(Ark_NativePointer node,
+                                                          const Ark_Union_String_Array_String* value,
+                                                          const TextPickerValueCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterTextPickerValueCallback(frameNode, convValue);
+        return {};
+    }
+    } // TextPickerValueOpsAccessor
+    namespace TimePickerSelectedOpsAccessor {
+    Ark_NativePointer RegisterTimePickerSelectedCallbackImpl(Ark_NativePointer node,
+                                                             Ark_Int64 selected,
+                                                             const TimePickerSelectedCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterTimePickerSelectedCallback(frameNode, convValue);
+        return {};
+    }
+    } // TimePickerSelectedOpsAccessor
     namespace ActionSheetAccessor {
     void ShowImpl(const Ark_ActionSheetOptions* value)
     {
@@ -20798,6 +20860,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // DismissPopupActionAccessor
+    namespace DismissDialogActionAccessor {
+    void DestroyPeerImpl(Ark_DismissDialogAction peer)
+    {
+        auto peerImpl = reinterpret_cast<DismissDialogActionPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_DismissDialogAction ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void DismissImpl(Ark_DismissDialogAction peer)
+    {
+    }
+    Ark_DismissReason GetReasonImpl(Ark_DismissDialogAction peer)
+    {
+        return {};
+    }
+    void SetReasonImpl(Ark_DismissDialogAction peer,
+                       Ark_DismissReason reason)
+    {
+    }
+    } // DismissDialogActionAccessor
     namespace TextShadowStyleAccessor {
     void DestroyPeerImpl(Ark_TextShadowStyle peer)
     {
@@ -22219,6 +22309,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &CheckboxOpsAccessorImpl;
     }
 
+    const GENERATED_ArkUIDatePickerSelectedOpsAccessor* GetDatePickerSelectedOpsAccessor()
+    {
+        static const GENERATED_ArkUIDatePickerSelectedOpsAccessor DatePickerSelectedOpsAccessorImpl {
+            DatePickerSelectedOpsAccessor::RegisterDatePickerSelectedCallbackImpl,
+        };
+        return &DatePickerSelectedOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUIMenuItemOpsAccessor* GetMenuItemOpsAccessor()
     {
         static const GENERATED_ArkUIMenuItemOpsAccessor MenuItemOpsAccessorImpl {
@@ -22348,6 +22446,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextFieldOpsAccessor::TextFieldOpsSetBackgroundColorImpl,
         };
         return &TextFieldOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUITextPickerSelectedOpsAccessor* GetTextPickerSelectedOpsAccessor()
+    {
+        static const GENERATED_ArkUITextPickerSelectedOpsAccessor TextPickerSelectedOpsAccessorImpl {
+            TextPickerSelectedOpsAccessor::RegisterTextPickerSelectedCallbackImpl,
+        };
+        return &TextPickerSelectedOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUITextPickerValueOpsAccessor* GetTextPickerValueOpsAccessor()
+    {
+        static const GENERATED_ArkUITextPickerValueOpsAccessor TextPickerValueOpsAccessorImpl {
+            TextPickerValueOpsAccessor::RegisterTextPickerValueCallbackImpl,
+        };
+        return &TextPickerValueOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUITimePickerSelectedOpsAccessor* GetTimePickerSelectedOpsAccessor()
+    {
+        static const GENERATED_ArkUITimePickerSelectedOpsAccessor TimePickerSelectedOpsAccessorImpl {
+            TimePickerSelectedOpsAccessor::RegisterTimePickerSelectedCallbackImpl,
+        };
+        return &TimePickerSelectedOpsAccessorImpl;
     }
 
     const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
@@ -25042,6 +25164,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DismissPopupActionPeer {
         virtual ~DismissPopupActionPeer() = default;
     };
+
+    const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissDialogActionAccessor DismissDialogActionAccessorImpl {
+            DismissDialogActionAccessor::DestroyPeerImpl,
+            DismissDialogActionAccessor::ConstructImpl,
+            DismissDialogActionAccessor::GetFinalizerImpl,
+            DismissDialogActionAccessor::DismissImpl,
+            DismissDialogActionAccessor::GetReasonImpl,
+            DismissDialogActionAccessor::SetReasonImpl,
+        };
+        return &DismissDialogActionAccessorImpl;
+    }
+
+    struct DismissDialogActionPeer {
+        virtual ~DismissDialogActionPeer() = default;
+    };
     const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
     {
         static const GENERATED_ArkUITextShadowStyleAccessor TextShadowStyleAccessorImpl {
@@ -25322,12 +25461,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetSelectOpsAccessor,
             GetSliderOpsAccessor,
             GetToggleOpsAccessor,
+			GetDatePickerSelectedOpsAccessor,
             GetNavExtenderAccessor,
             GetSearchOpsAccessor,
             GetSideBarContainerOpsAccessor,
             GetStepperOpsAccessor,
             GetEventEmulatorAccessor,
             GetTextFieldOpsAccessor,
+            GetTextPickerSelectedOpsAccessor,
+            GetTextPickerValueOpsAccessor,
+            GetTimePickerSelectedOpsAccessor,
             GetActionSheetAccessor,
             GetAlertDialogAccessor,
             GetPromptActionAccessor,
@@ -25472,6 +25615,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLetterSpacingStyleAccessor,
             GetLevelOrderAccessor,
             GetDismissPopupActionAccessor,
+            GetDismissDialogActionAccessor,
             GetTextShadowStyleAccessor,
             GetBackgroundColorStyleAccessor,
             GetGestureStyleAccessor,

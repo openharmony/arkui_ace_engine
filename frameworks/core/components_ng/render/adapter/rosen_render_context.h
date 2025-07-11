@@ -581,6 +581,7 @@ protected:
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
+    void SetPositionToRSNodeMultiThread();
 
     // Convert BorderRadiusProperty to Rosen::Vector4f
     static inline void ConvertRadius(const BorderRadiusProperty& value, Rosen::Vector4f& cornerRadius);

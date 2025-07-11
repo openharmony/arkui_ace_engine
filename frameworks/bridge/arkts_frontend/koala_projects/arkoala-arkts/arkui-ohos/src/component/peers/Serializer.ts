@@ -28,6 +28,7 @@ import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_on
 import { UIContext, TargetInfo } from "@ohos/arkui/UIContext"
 import { ContentDidScrollCallback, ContentWillScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperAnimationMode, SwiperAttribute, DotIndicator, DigitIndicator, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, SwiperContentWillScrollResult, AutoPlayOptions, ArrowStyle, SwiperAutoFill, SwiperContentTransitionProxy, SwiperContentTransitionProxyInternal, SwiperController, SwiperControllerInternal, Callback_SwiperContentTransitionProxy_Void, Indicator } from "./../swiper"
 import { CustomNodeBuilder } from "./../customBuilder"
+import { DatePickerSelectedCallback } from "./../datepickerselectedops"
 import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, TextMenuOptions, DecorationStyleResult } from "./../textCommon"
 import { ErrorCallback } from "./../ohos.base"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, WaterFlowSections, WaterFlowSectionsInternal, SectionOptions, WaterFlowOptions } from "./../waterFlow"
@@ -70,6 +71,9 @@ import { SliderTriggerChangeCallback, SliderAttribute, Callback_Number_SliderCha
 import { StyledStringMarshallCallback, StyledStringUnmarshallCallback, CustomSpan, CustomSpanInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInternal, GestureStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, ImageAttachment, ImageAttachmentInternal, StyleOptions, StyledStringKey, SpanStyle, UserDataSpan, DecorationStyleInterface, UrlStyle, UrlStyleInternal, BaselineOffsetStyle, BaselineOffsetStyleInternal, LetterSpacingStyle, LetterSpacingStyleInternal, LineHeightStyle, LineHeightStyleInternal, TextShadowStyle, TextShadowStyleInternal, DecorationStyle, DecorationStyleInternal, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInternal, ParagraphStyleInterface, TextStyle, TextStyle_styled_stringInternal, TextStyleInterface, BackgroundColorStyle, BackgroundColorStyleInternal, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
 import { TextAreaSubmitCallback, TextAreaAttribute, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, TextAreaType, Callback_ResourceStr_Void, TextAreaController, TextAreaControllerInternal, TextAreaOptions } from "./../textArea"
 import { TextFieldValueCallback } from "./../textfieldops"
+import { TextPickerSelectedCallback } from "./../textpickerselectedops"
+import { TextPickerValueCallback } from "./../textpickervalueops"
+import { TimePickerSelectedCallback } from "./../timepickerselectedops"
 import { VoidCallback, ResourceColor, Font, Position, Length, SizeOptions, Offset, ColorFilter, ColorFilterInternal, ResourceStr, Dimension, PX, VP, FP, LPX, Percentage, LengthConstrain, DividerStyleOptions, ConstraintSizeOptions, Area, AccessibilityOptions, Bias, BorderRadiuses, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeOutlineWidths, EdgeWidths, OutlineRadiuses, Padding, EdgeColors, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MarkStyle, BorderOptions, OutlineOptions, EdgeStyles, Edges } from "./../units"
 import { WithThemeInterface, WithThemeAttribute, WithThemeOptions } from "./../withTheme"
 import { AccessibilityHoverType, Alignment, Color, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, ColoringStrategy, CopyOptions, CrownAction, CrownSensitivity, Curve, DialogButtonStyle, Direction, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FocusDrawLevel, FoldStatus, FontStyle, FontWeight, FunctionKey, GradientDirection, HeightBreakpoint, HitTestMode, HorizontalAlign, HoverEffect, IlluminatedType, ImageFit, ImageRepeat, ImageSize, ImageSpanAlignment, InteractionHand, ItemAlign, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, ModifierKey, MouseAction, MouseButton, NestedScrollMode, ObscuredReasons, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, RenderFit, ResponseType, ScrollSource, TextAlign, SharedTransitionEffectType, TextOverflow, TextContentStyle, TextHeightAdaptivePolicy, WordBreak, TextCase, TextSelectableMode, TextDecorationStyle, TextDecorationType, TitleHeight, TouchType, TransitionType, VerticalAlign, Visibility, Week, WidthBreakpoint, XComponentType } from "./../enums"
@@ -1871,7 +1875,6 @@ export class Serializer extends SerializerBase {
             const value_style_value  = (value_style as CancelButtonStyle)
             valueSerializer.writeInt32(TypeChecker.CancelButtonStyle_ToNumeric(value_style_value))
         }
-        // const value_icon  = value.icon
         /* when symbol modifier implemented, please remove undefined */
         const value_icon  = undefined
         let value_icon_type : int32 = RuntimeType.UNDEFINED
@@ -2322,8 +2325,10 @@ export class Serializer extends SerializerBase {
         value_selected_type = runtimeType(value_selected)
         valueSerializer.writeInt8(value_selected_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_selected_type)) {
-            const value_selected_value  = value_selected!
-            valueSerializer.writeInt64((value_selected_value.getTime() as int64))
+            if (!TypeChecker.isBindableDate(value_selected)) {
+                const value_selected_value  = value_selected! as Date
+                valueSerializer.writeInt64((value_selected_value.getTime() as int64))
+            }
         }
         const value_mode  = value.mode
         let value_mode_type : int32 = RuntimeType.UNDEFINED
@@ -2568,10 +2573,7 @@ export class Serializer extends SerializerBase {
     }
     writeDismissDialogAction(value: DismissDialogAction): void {
         let valueSerializer : Serializer = this
-        const value_dismiss  = value.dismiss
-        valueSerializer.holdAndWriteCallback(value_dismiss)
-        const value_reason  = value.reason
-        valueSerializer.writeInt32(TypeChecker.DismissReason_ToNumeric(value_reason))
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeDismissPopupAction(value: DismissPopupAction): void {
         let valueSerializer : Serializer = this
@@ -7396,8 +7398,10 @@ export class Serializer extends SerializerBase {
         value_selected_type = runtimeType(value_selected)
         valueSerializer.writeInt8(value_selected_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_selected_type)) {
-            const value_selected_value  = value_selected!
-            valueSerializer.writeInt64((value_selected_value.getTime() as int64))
+            if (!TypeChecker.isBindableDate(value_selected)) {
+                const value_selected_value  = value_selected! as Date
+                valueSerializer.writeInt64((value_selected_value.getTime() as int64))
+            }
         }
         const value_format  = value.format
         let value_format_type : int32 = RuntimeType.UNDEFINED
@@ -13942,14 +13946,6 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_icon_value_1)
             }
         }
-        // const value_symbolIcon  = value.symbolIcon
-        // let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        // value_symbolIcon_type = runtimeType(value_symbolIcon)
-        // valueSerializer.writeInt8(value_symbolIcon_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_symbolIcon_type)) {
-        //     const value_symbolIcon_value  = value_symbolIcon!
-        //     valueSerializer.writeSymbolGlyphModifier(value_symbolIcon_value)
-        // }
         const value_enabled  = value.enabled
         let value_enabled_type : int32 = RuntimeType.UNDEFINED
         value_enabled_type = runtimeType(value_enabled)
@@ -14049,14 +14045,6 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_startIcon_value_1)
             }
         }
-        // const value_symbolStartIcon  = value.symbolStartIcon
-        // let value_symbolStartIcon_type : int32 = RuntimeType.UNDEFINED
-        // value_symbolStartIcon_type = runtimeType(value_symbolStartIcon)
-        // valueSerializer.writeInt8(value_symbolStartIcon_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_symbolStartIcon_type)) {
-        //     const value_symbolStartIcon_value  = value_symbolStartIcon!
-        //     valueSerializer.writeSymbolGlyphModifier(value_symbolStartIcon_value)
-        // }
         const value_content  = value.content
         let value_content_type : int32 = RuntimeType.UNDEFINED
         value_content_type = runtimeType(value_content)
@@ -14095,14 +14083,6 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_endIcon_value_1)
             }
         }
-        // const value_symbolEndIcon  = value.symbolEndIcon
-        // let value_symbolEndIcon_type : int32 = RuntimeType.UNDEFINED
-        // value_symbolEndIcon_type = runtimeType(value_symbolEndIcon)
-        // valueSerializer.writeInt8(value_symbolEndIcon_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_symbolEndIcon_type)) {
-        //     const value_symbolEndIcon_value  = value_symbolEndIcon!
-        //     valueSerializer.writeSymbolGlyphModifier(value_symbolEndIcon_value)
-        // }
         const value_labelInfo  = value.labelInfo
         let value_labelInfo_type : int32 = RuntimeType.UNDEFINED
         value_labelInfo_type = runtimeType(value_labelInfo)
@@ -14326,14 +14306,8 @@ export class Serializer extends SerializerBase {
             }
         }
         // TBD: Symbol cannot be realized at present.
-        // const value_symbolIcon  = value.symbolIcon
         let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        // value_symbolIcon_type = runtimeType(value_symbolIcon)
         valueSerializer.writeInt8(value_symbolIcon_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_symbolIcon_type)) {
-        //     const value_symbolIcon_value  = value_symbolIcon!
-        //     valueSerializer.writeSymbolGlyphModifier(value_symbolIcon_value)
-        // }
         const value_isEnabled  = value.isEnabled
         let value_isEnabled_type : int32 = RuntimeType.UNDEFINED
         value_isEnabled_type = runtimeType(value_isEnabled)
@@ -15898,14 +15872,8 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_icon_value_1)
             }
         }
-        // const value_symbolIcon  = value.symbolIcon
         let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        // value_symbolIcon_type = runtimeType(value_symbolIcon)
         valueSerializer.writeInt8(value_symbolIcon_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_symbolIcon_type)) {
-        //     const value_symbolIcon_value  = value_symbolIcon!
-        //     valueSerializer.writeSymbolGlyphModifier(value_symbolIcon_value)
-        // }
     }
     writeShadowOptions(value: ShadowOptions): void {
         let valueSerializer : Serializer = this
@@ -16870,6 +16838,9 @@ export class Serializer extends SerializerBase {
                 const value_value_value_0  = value_value_value as string
                 valueSerializer.writeString(value_value_value_0)
             }
+            else if (TypeChecker.isBindableString(value_value) || TypeChecker.isBindableArrayString(value_value)) {
+                valueSerializer.writeInt8(3 as int32)
+            }
             else if (RuntimeType.OBJECT == value_value_value_type) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_value_value_1  = value_value_value as Array<string>
@@ -16892,6 +16863,9 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(0 as int32)
                 const value_selected_value_0  = value_selected_value as number
                 valueSerializer.writeNumber(value_selected_value_0)
+            }
+            else if (TypeChecker.isBindableNumber(value_value) || TypeChecker.isBindableArrayNumber(value_value)) {
+                valueSerializer.writeInt8(3 as int32)
             }
             else if (RuntimeType.OBJECT == value_selected_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -17216,14 +17190,8 @@ export class Serializer extends SerializerBase {
             }
         }
         // TBD: Symbol cannot be realized at present.
-        // const value_symbolIcon  = value.symbolIcon
         let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        // value_symbolIcon_type = runtimeType(value_symbolIcon)
         valueSerializer.writeInt8(value_symbolIcon_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_symbolIcon_type)) {
-        //     const value_symbolIcon_value  = value_symbolIcon!
-        //     valueSerializer.writeSymbolGlyphModifier(value_symbolIcon_value)
-        // }
         const value_action  = value.action
         let value_action_type : int32 = RuntimeType.UNDEFINED
         value_action_type = runtimeType(value_action)
@@ -17259,14 +17227,8 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_activeIcon_value_1)
             }
         }
-        // const value_activeSymbolIcon  = value.activeSymbolIcon
         let value_activeSymbolIcon_type : int32 = RuntimeType.UNDEFINED
-        // value_activeSymbolIcon_type = runtimeType(value_activeSymbolIcon)
         valueSerializer.writeInt8(value_activeSymbolIcon_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_activeSymbolIcon_type)) {
-        //     const value_activeSymbolIcon_value  = value_activeSymbolIcon!
-        //     valueSerializer.writeSymbolGlyphModifier(value_activeSymbolIcon_value)
-        // }
     }
     writeTouchEvent(value: TouchEvent): void {
         let valueSerializer : Serializer = this
@@ -20583,7 +20545,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_onDidAppear_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_onDidAppear_type)) {
             const value_onDidAppear_value  = value_onDidAppear!
-            valueSerializer.holdAndWriteCallback(value_onDidAppear_value)
+            valueSerializer.holdAndWriteCallback(CallbackTransformer.transfromToCallbackVoid(value_onDidAppear_value))
         }
         const value_onDidDisappear  = value.onDidDisappear
         let value_onDidDisappear_type : int32 = RuntimeType.UNDEFINED
@@ -20591,7 +20553,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_onDidDisappear_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_onDidDisappear_type)) {
             const value_onDidDisappear_value  = value_onDidDisappear!
-            valueSerializer.holdAndWriteCallback(value_onDidDisappear_value)
+            valueSerializer.holdAndWriteCallback(CallbackTransformer.transfromToCallbackVoid(value_onDidDisappear_value))
         }
         const value_onWillAppear  = value.onWillAppear
         let value_onWillAppear_type : int32 = RuntimeType.UNDEFINED
@@ -20599,7 +20561,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_onWillAppear_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_onWillAppear_type)) {
             const value_onWillAppear_value  = value_onWillAppear!
-            valueSerializer.holdAndWriteCallback(value_onWillAppear_value)
+            valueSerializer.holdAndWriteCallback(CallbackTransformer.transfromToCallbackVoid(value_onWillAppear_value))
         }
         const value_onWillDisappear  = value.onWillDisappear
         let value_onWillDisappear_type : int32 = RuntimeType.UNDEFINED
@@ -20607,7 +20569,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_onWillDisappear_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_onWillDisappear_type)) {
             const value_onWillDisappear_value  = value_onWillDisappear!
-            valueSerializer.holdAndWriteCallback(value_onWillDisappear_value)
+            valueSerializer.holdAndWriteCallback(CallbackTransformer.transfromToCallbackVoid(value_onWillDisappear_value))
         }
         const value_keyboardAvoidDistance  = value.keyboardAvoidDistance
         let value_keyboardAvoidDistance_type : int32 = RuntimeType.UNDEFINED
@@ -21779,31 +21741,6 @@ export class Serializer extends SerializerBase {
             const value_paddingEnd_value  = value_paddingEnd!
             valueSerializer.writeLengthMetrics(value_paddingEnd_value)
         }
-        // TBD: Modifier is not implemented yet
-        // const value_mainTitleModifier  = value.mainTitleModifier
-        // let value_mainTitleModifier_type : int32 = RuntimeType.UNDEFINED
-        // value_mainTitleModifier_type = runtimeType(value_mainTitleModifier)
-        // valueSerializer.writeInt8(value_mainTitleModifier_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_mainTitleModifier_type)) {
-        //     const value_mainTitleModifier_value  = value_mainTitleModifier!
-        //     valueSerializer.writeTextModifier(value_mainTitleModifier_value)
-        // }
-        // const value_subTitleModifier  = value.subTitleModifier
-        // let value_subTitleModifier_type : int32 = RuntimeType.UNDEFINED
-        // value_subTitleModifier_type = runtimeType(value_subTitleModifier)
-        // valueSerializer.writeInt8(value_subTitleModifier_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_subTitleModifier_type)) {
-        //     const value_subTitleModifier_value  = value_subTitleModifier!
-        //     valueSerializer.writeTextModifier(value_subTitleModifier_value)
-        // }
-        // const value_enableHoverMode  = value.enableHoverMode
-        // let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
-        // value_enableHoverMode_type = runtimeType(value_enableHoverMode)
-        // valueSerializer.writeInt8(value_enableHoverMode_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (value_enableHoverMode_type)) {
-        //     const value_enableHoverMode_value  = value_enableHoverMode!
-        //     valueSerializer.writeBoolean(value_enableHoverMode_value)
-        // }
     }
     writeOutlineOptions(value: OutlineOptions): void {
         let valueSerializer : Serializer = this
@@ -23803,8 +23740,10 @@ export class Serializer extends SerializerBase {
         value_selected_type = runtimeType(value_selected)
         valueSerializer.writeInt8(value_selected_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_selected_type)) {
-            const value_selected_value  = value_selected!
-            valueSerializer.writeInt64((value_selected_value.getTime() as int64))
+            if (!TypeChecker.isBindableDate(value_selected)) {
+                const value_selected_value = value_selected! as Date
+                valueSerializer.writeInt64((value_selected_value.getTime() as int64))
+            }
         }
         const value_mode  = value.mode
         let value_mode_type : int32 = RuntimeType.UNDEFINED
@@ -25227,6 +25166,9 @@ export class Serializer extends SerializerBase {
                 const value_value_value_0  = value_value_value as string
                 valueSerializer.writeString(value_value_value_0)
             }
+            else if (TypeChecker.isBindableString(value_value) || TypeChecker.isBindableArrayString(value_value)) {
+                valueSerializer.writeInt8(3 as int32)
+            }
             else if (RuntimeType.OBJECT == value_value_value_type) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_value_value_1  = value_value_value as Array<string>
@@ -25249,6 +25191,9 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(0 as int32)
                 const value_selected_value_0  = value_selected_value as number
                 valueSerializer.writeNumber(value_selected_value_0)
+            }
+            else if (TypeChecker.isBindableNumber(value_value) || TypeChecker.isBindableArrayNumber(value_value)) {
+                valueSerializer.writeInt8(3 as int32)
             }
             else if (RuntimeType.OBJECT == value_selected_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -25555,8 +25500,10 @@ export class Serializer extends SerializerBase {
         value_selected_type = runtimeType(value_selected)
         valueSerializer.writeInt8(value_selected_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_selected_type)) {
-            const value_selected_value  = value_selected!
-            valueSerializer.writeInt64((value_selected_value.getTime() as int64))
+            if (!TypeChecker.isBindableDate(value_selected)) {
+                const value_selected_value  = value_selected! as Date
+                valueSerializer.writeInt64((value_selected_value.getTime() as int64))
+            }
         }
         const value_format  = value.format
         let value_format_type : int32 = RuntimeType.UNDEFINED

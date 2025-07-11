@@ -67,30 +67,6 @@ export class ArkRowSplitStyle extends ArkCommonMethodStyle implements RowSplitAt
         }
 }
 export class ArkRowSplitComponent extends ArkCommonMethodComponent implements RowSplitAttribute {
-    protected _modifierHost: ArkRowSplitNode | undefined;
-    setModifierHost(value: ArkRowSplitNode): void {
-        this._modifierHost = value;
-    }
-    getModifierHost(): ArkRowSplitNode {
-        if (this._modifierHost === undefined || this._modifierHost === null) {
-            this._modifierHost = new ArkRowSplitNode()
-            this._modifierHost!.setPeer(this.getPeer());
-        }
-        return this._modifierHost!;
-    }
-    getAttributeSet(): ArkRowSplitAttributeSet  {
-        return this.getPeer()._attributeSet as ArkRowSplitAttributeSet;
-    }
- 
-    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
-        let isCommonModifier: boolean = modifier instanceof RowSplitModifier;
-        if (isCommonModifier) {
-            let commonModifier = modifier as object as RowSplitModifier;
-            this.getPeer()._attributeSet = commonModifier.attributeSet;
-        } else if (this.getPeer()._attributeSet == null) {
-            this.getPeer()._attributeSet = new ArkRowSplitAttributeSet();
-        }
-    }
     getPeer(): ArkRowSplitPeer {
         return (this.peer as ArkRowSplitPeer)
     }

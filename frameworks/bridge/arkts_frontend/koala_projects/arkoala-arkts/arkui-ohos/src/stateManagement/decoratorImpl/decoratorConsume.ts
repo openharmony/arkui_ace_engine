@@ -20,6 +20,7 @@ import { WatchFuncType } from '../decorator';
 import { IConsumeDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
+import { UIUtils } from '../utils';
 export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IConsumeDecoratedVariable<T> {
     provideAliasName: string;
     sourceProvide_: IProvideDecoratedVariable<T> | null;
@@ -44,11 +45,12 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     }
 
     public set(newValue: T): void {
-        const value = this.sourceProvide_!.get();
-        if (value !== newValue) {
-            this.unregisterWatchFromObservedObjectChanges(value);
-            this.registerWatchForObservedObjectChanges(newValue);
-            this.sourceProvide_!.set(newValue); // makeObserved should be called in source
+        const oldValue = this.sourceProvide_!.get();
+        if (oldValue !== newValue) {
+            const value = UIUtils.makeObserved(newValue);
+            this.unregisterWatchFromObservedObjectChanges(oldValue);
+            this.registerWatchForObservedObjectChanges(value);
+            this.sourceProvide_!.set(value);
         }
     }
 

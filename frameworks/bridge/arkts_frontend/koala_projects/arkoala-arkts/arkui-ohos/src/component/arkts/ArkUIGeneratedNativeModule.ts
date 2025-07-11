@@ -4001,6 +4001,10 @@ export class ArkUIGeneratedNativeModule {
     native static _StateStylesOps_onStateStyleChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _DragDropOps_registerOnDragStart(node: KPointer,  thisArray: KSerializerBuffer, thisLength: int32) : void
+    @ani.unsafe.Direct
+    native static _DragDropOps_registerDragPreview(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DragDropOps_registerOnDrop(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _UIContextAtomicServiceBar_getBarRect(): KInteropReturnBuffer
     @ani.unsafe.Direct
@@ -4705,6 +4709,14 @@ export class ArkUIGeneratedNativeModule {
     native static _EventEmulator_emitTextInputEvent(node: KPointer, text: KStringPtr): void
     @ani.unsafe.Direct
     native static _TextFieldOps_registerTextFieldValueCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _DatePickerSelectedOps_registerDatePickerSelectedCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextPickerSelectedOps_registerTextPickerSelectedCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextPickerValueOps_registerTextPickerValueCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TimePickerSelectedOps_registerTimePickerSelectedCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _TextFieldOps_textFieldOpsSetWidth(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -6983,6 +6995,16 @@ export class ArkUIGeneratedNativeModule {
     native static _DismissPopupAction_getReason(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _DismissPopupAction_setReason(ptr: KPointer, reason: KInt): void
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_dismiss(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_getReason(ptr: KPointer): int32
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_setReason(ptr: KPointer, reason: KInt): void
     @ani.unsafe.Direct
     native static _TextShadowStyle_ctor(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct

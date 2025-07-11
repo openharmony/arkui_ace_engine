@@ -204,6 +204,9 @@ export class PeerNode extends IncrementalNode {
         super.dispose()
     }
 
+    public getStateStyleMutable(): MutableState<int32> | undefined {
+        return this._uiStateStyle;
+    }
     public getOrCreateStateStyleMutable(): MutableState<int32> | undefined {
         if (this._uiStateStyle !== undefined) {
             return this._uiStateStyle!;

@@ -139,8 +139,6 @@ void OnScrollImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ScrollableCommonMethodModelNG::SetOnScroll(frameNode, convValue);
     LOGE("ScrollableCommonMethodModifier::OnScrollImpl is not implemented");
 }
 void OnWillScrollImpl(Ark_NativePointer node,
@@ -177,8 +175,6 @@ void OnDidScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollableCommonMethodModelNG::SetOnDidScroll(frameNode, convValue);
     LOGE("ScrollableCommonMethodModifier::OnDidScrollImpl is not implemented");
 }
 void OnReachStartImpl(Ark_NativePointer node,

@@ -17,6 +17,7 @@
 #include "base/error/error_code.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "frameworks/core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager_static.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
@@ -375,5 +376,12 @@ void DialogManagerStatic::CloseCustomDialogStatic(const WeakPtr<NG::UINode>& nod
         overlayManager->CloseCustomDialog(node, std::move(callback));
     };
     context->GetTaskExecutor()->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog");
+}
+
+void DialogManagerStatic::RemoveCustomDialog(int32_t instanceId)
+{
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "Dismiss custom dialog, instanceId: %{public}d", instanceId);
+    ContainerScope scope(instanceId);
+    NG::ViewAbstract::DismissDialog();
 }
 } // namespace OHOS::Ace::NG

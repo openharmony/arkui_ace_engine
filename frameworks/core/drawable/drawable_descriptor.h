@@ -26,6 +26,11 @@ enum class DrawableType {
     PIXELMAP,
 };
 
+struct MediaData {
+    std::unique_ptr<uint8_t[]> data;
+    size_t len = 0;
+};
+
 class ACE_FORCE_EXPORT DrawableDescriptor : public AceType {
 public:
     DrawableDescriptor() = default;

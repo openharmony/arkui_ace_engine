@@ -23,7 +23,6 @@ import { UserView, UserViewBuilder, EntryPoint } from "./UserView"
 import { ClickEvent, ClickEventInternal } from "./component"
 import { checkEvents, setCustomEventsChecker } from "./component/Events"
 import { checkArkoalaCallbacks } from "./component/peers/CallbacksChecker"
-import { setUIDetachedRootCreator } from "./component/peers/CallbackTransformer"
 import { enterForeignContext, leaveForeignContext } from "./handwritten"
 import { wrapSystemCallback, KUint8ArrayPtr } from "@koalaui/interop"
 import { deserializeAndCallCallback } from "./component/peers/CallbackDeserializeCall"
@@ -114,7 +113,6 @@ export function createUiDetachedRoot(
     let uicontext = getUicontextByInstanceId(instanceId);
     return uicontext.getDetachedRootEntryManager().createUiDetachedRoot(peerFactory, builder);
 }
-setUIDetachedRootCreator(createUiDetachedRoot)
 
 export function destroyUiDetachedRoot(ptr: KPointer, instanceId: int32): boolean {
     if (instanceId < 0) {
@@ -319,7 +317,7 @@ export class Application {
         manager.updateSnapshot()
         let detachedRoots = getDetachedRootsByInstanceId(this.instanceId);
         for (const detachedRoot of detachedRoots.values()) {
-            detachedRoot.entry.value
+            detachedRoot.compute()
         }
         updateLazyItems()
         flushBuilderRootNode()
@@ -339,7 +337,7 @@ export class Application {
                 try {
                     root.value
                     for (const detachedRoot of detachedRoots.values()) {
-                        detachedRoot.entry.value
+                        detachedRoot.compute()
                     }
                 } catch (error) {
                     InteropNativeModule._NativeLog('has error in partialUpdates')

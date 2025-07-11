@@ -32832,6 +32832,66 @@ void impl_DragDropOps_registerOnDragStart(Ark_NativePointer node, KSerializerBuf
     GetAccessors()->getDragDropOpsAccessor()->registerOnDragStart(node, (const Callback_onDragStart*)&onDragStart_value);
 }
 KOALA_INTEROP_DIRECT_V3(DragDropOps_registerOnDragStart, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_DragDropOps_registerDragPreview(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+    Deserializer thisDeserializer(thisArray, thisLength);
+    const auto preview_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Union_CustomBuilder_DragItemInfo_String preview_value_buf = {};
+    preview_value_buf.tag = preview_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (preview_value_buf_runtimeType))
+    {
+        const Ark_Int8 preview_value_buf__selector = thisDeserializer.readInt8();
+        Ark_Union_CustomBuilder_DragItemInfo_String preview_value_buf_ = {};
+        preview_value_buf_.selector = preview_value_buf__selector;
+        if (preview_value_buf__selector == 0) {
+            preview_value_buf_.selector = 0;
+            preview_value_buf_.value0 = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
+        }
+        else if (preview_value_buf__selector == 1) {
+            preview_value_buf_.selector = 1;
+            preview_value_buf_.value1 = thisDeserializer.readDragItemInfo();
+        }
+        else if (preview_value_buf__selector == 2) {
+            preview_value_buf_.selector = 2;
+            preview_value_buf_.value2 = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        else {
+            INTEROP_FATAL("One of the branches for preview_value_buf_ has to be chosen through deserialisation.");
+        }
+        preview_value_buf.value = static_cast<Ark_Union_CustomBuilder_DragItemInfo_String>(preview_value_buf_);
+    }
+    Opt_Union_CustomBuilder_DragItemInfo_String preview_value = preview_value_buf;;
+    const auto config_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_PreviewConfiguration config_value_buf = {};
+    config_value_buf.tag = config_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (config_value_buf_runtimeType))
+    {
+        config_value_buf.value = thisDeserializer.readPreviewConfiguration();
+    }
+    Opt_PreviewConfiguration config_value = config_value_buf;;
+    GetAccessors()->getDragDropOpsAccessor()->registerDragPreview(node, (const Opt_Union_CustomBuilder_DragItemInfo_String*)&preview_value, (const Opt_PreviewConfiguration*)&config_value);
+}
+KOALA_INTEROP_DIRECT_V3(DragDropOps_registerDragPreview, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_DragDropOps_registerOnDrop(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+    Deserializer thisDeserializer(thisArray, thisLength);
+    const auto eventCallback_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_OnDragEventCallback eventCallback_value_buf = {};
+    eventCallback_value_buf.tag = eventCallback_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (eventCallback_value_buf_runtimeType))
+    {
+        eventCallback_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DragEvent event, const Opt_String extraParams)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnDragEventCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DragEvent event, const Opt_String extraParams)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnDragEventCallback))))};
+    }
+    Opt_OnDragEventCallback eventCallback_value = eventCallback_value_buf;;
+    const auto dropOptions_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_DropOptions dropOptions_value_buf = {};
+    dropOptions_value_buf.tag = dropOptions_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (dropOptions_value_buf_runtimeType))
+    {
+        dropOptions_value_buf.value = thisDeserializer.readDropOptions();
+    }
+    Opt_DropOptions dropOptions_value = dropOptions_value_buf;;
+    GetAccessors()->getDragDropOpsAccessor()->registerOnDrop(node, (const Opt_OnDragEventCallback*)&eventCallback_value, (const Opt_DropOptions*)&dropOptions_value);
+}
+KOALA_INTEROP_DIRECT_V3(DragDropOps_registerOnDrop, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_UIContextAtomicServiceBar_getBarRect() {
         const auto &retValue = GetAccessors()->getUIContextAtomicServiceBarAccessor()->getBarRect();
         Serializer _retSerializer {};
@@ -35443,6 +35503,14 @@ Ark_NativePointer impl_MenuItemOps_registerSelectedCallback(Ark_NativePointer no
         return GetAccessors()->getMenuItemOpsAccessor()->registerSelectedCallback(node, value, (const MenuSelectedCallback*)&callback_value);
 }
 KOALA_INTEROP_DIRECT_4(MenuItemOps_registerSelectedCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_DatePickerSelectedOps_registerDatePickerSelectedCallback(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 selected_value_buf_selector = thisDeserializer.readInt8();
+        const Ark_Int64 selected_value = (selected_value_buf_selector == 1) ? thisDeserializer.readInt64() : 0;
+        DatePickerSelectedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Date selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_DatePickerSelectedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Date selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_DatePickerSelectedCallback))))};;
+        return GetAccessors()->getDatePickerSelectedOpsAccessor()->registerDatePickerSelectedCallback(node, selected_value, (const DatePickerSelectedCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_3(DatePickerSelectedOps_registerDatePickerSelectedCallback, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_ToggleOps_registerIsOnCallback(Ark_NativePointer node, Ark_Boolean isOn, KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         IsOnCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean isOn)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_IsOnCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean isOn)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_IsOnCallback))))};;
@@ -35996,6 +36064,70 @@ Ark_NativePointer impl_TextFieldOps_textFieldOpsSetBackgroundColor(Ark_NativePoi
         return GetAccessors()->getTextFieldOpsAccessor()->textFieldOpsSetBackgroundColor(node, (const Opt_ResourceColor*)&value_value);
 }
 KOALA_INTEROP_DIRECT_3(TextFieldOps_textFieldOpsSetBackgroundColor, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TextPickerSelectedOps_registerTextPickerSelectedCallback(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 selected_value_buf_selector = thisDeserializer.readInt8();
+        Ark_Union_Number_Array_Number selected_value_buf = {};
+        selected_value_buf.selector = selected_value_buf_selector;
+        if (selected_value_buf_selector == 0) {
+            selected_value_buf.selector = 0;
+            selected_value_buf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        }
+        else if (selected_value_buf_selector == 1) {
+            selected_value_buf.selector = 1;
+            const Ark_Int32 selected_value_buf_u_length = thisDeserializer.readInt32();
+            Array_Number selected_value_buf_u = {};
+            thisDeserializer.resizeArray<std::decay<decltype(selected_value_buf_u)>::type,
+        std::decay<decltype(*selected_value_buf_u.array)>::type>(&selected_value_buf_u, selected_value_buf_u_length);
+            for (int selected_value_buf_u_i = 0; selected_value_buf_u_i < selected_value_buf_u_length; selected_value_buf_u_i++) {
+                selected_value_buf_u.array[selected_value_buf_u_i] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            }
+            selected_value_buf.value1 = selected_value_buf_u;
+        }
+        else {
+            INTEROP_FATAL("One of the branches for selected_value_buf has to be chosen through deserialisation.");
+        }
+        Ark_Union_Number_Array_Number selected_value = static_cast<Ark_Union_Number_Array_Number>(selected_value_buf);;
+        TextPickerSelectedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_Number_Array_Number selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TextPickerSelectedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_Number_Array_Number selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TextPickerSelectedCallback))))};;
+        return GetAccessors()->getTextPickerSelectedOpsAccessor()->registerTextPickerSelectedCallback(node, (const Ark_Union_Number_Array_Number*)&selected_value, (const TextPickerSelectedCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_3(TextPickerSelectedOps_registerTextPickerSelectedCallback, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TextPickerValueOps_registerTextPickerValueCallback(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 value_value_buf_selector = thisDeserializer.readInt8();
+        Ark_Union_String_Array_String value_value_buf = {};
+        value_value_buf.selector = value_value_buf_selector;
+        if (value_value_buf_selector == 0) {
+            value_value_buf.selector = 0;
+            value_value_buf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        else if (value_value_buf_selector == 1) {
+            value_value_buf.selector = 1;
+            const Ark_Int32 value_value_buf_u_length = thisDeserializer.readInt32();
+            Array_String value_value_buf_u = {};
+            thisDeserializer.resizeArray<std::decay<decltype(value_value_buf_u)>::type,
+        std::decay<decltype(*value_value_buf_u.array)>::type>(&value_value_buf_u, value_value_buf_u_length);
+            for (int value_value_buf_u_i = 0; value_value_buf_u_i < value_value_buf_u_length; value_value_buf_u_i++) {
+                value_value_buf_u.array[value_value_buf_u_i] = static_cast<Ark_String>(thisDeserializer.readString());
+            }
+            value_value_buf.value1 = value_value_buf_u;
+        }
+        else {
+            INTEROP_FATAL("One of the branches for value_value_buf has to be chosen through deserialisation.");
+        }
+        Ark_Union_String_Array_String value_value = static_cast<Ark_Union_String_Array_String>(value_value_buf);;
+        TextPickerValueCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_String_Array_String value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TextPickerValueCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_String_Array_String value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TextPickerValueCallback))))};;
+        return GetAccessors()->getTextPickerValueOpsAccessor()->registerTextPickerValueCallback(node, (const Ark_Union_String_Array_String*)&value_value, (const TextPickerValueCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_3(TextPickerValueOps_registerTextPickerValueCallback, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TimePickerSelectedOps_registerTimePickerSelectedCallback(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 selected_value_buf_selector = thisDeserializer.readInt8();
+        const Ark_Int64 selected_value = (selected_value_buf_selector == 1) ? thisDeserializer.readInt64() : 0;
+        TimePickerSelectedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Date selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TimePickerSelectedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Date selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TimePickerSelectedCallback))))};;
+        return GetAccessors()->getTimePickerSelectedOpsAccessor()->registerTimePickerSelectedCallback(node, selected_value, (const TimePickerSelectedCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_3(TimePickerSelectedOps_registerTimePickerSelectedCallback, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ActionSheet_show(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         Ark_ActionSheetOptions value_value = thisDeserializer.readActionSheetOptions();;
@@ -44667,6 +44799,29 @@ void impl_DismissPopupAction_setReason(Ark_NativePointer thisPtr, Ark_Int32 reas
         GetAccessors()->getDismissPopupActionAccessor()->setReason(self, static_cast<Ark_DismissReason>(reason));
 }
 KOALA_INTEROP_DIRECT_V2(DismissPopupAction_setReason, Ark_NativePointer, Ark_Int32)
+Ark_NativePointer impl_DismissDialogAction_construct() {
+        return GetAccessors()->getDismissDialogActionAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(DismissDialogAction_construct, Ark_NativePointer)
+Ark_NativePointer impl_DismissDialogAction_getFinalizer() {
+        return GetAccessors()->getDismissDialogActionAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(DismissDialogAction_getFinalizer, Ark_NativePointer)
+void impl_DismissDialogAction_dismiss(Ark_NativePointer thisPtr) {
+        Ark_DismissDialogAction self = reinterpret_cast<Ark_DismissDialogAction>(thisPtr);
+        GetAccessors()->getDismissDialogActionAccessor()->dismiss(self);
+}
+KOALA_INTEROP_DIRECT_V1(DismissDialogAction_dismiss, Ark_NativePointer)
+Ark_Int32 impl_DismissDialogAction_getReason(Ark_NativePointer thisPtr) {
+        Ark_DismissDialogAction self = reinterpret_cast<Ark_DismissDialogAction>(thisPtr);
+        return GetAccessors()->getDismissDialogActionAccessor()->getReason(self);
+}
+KOALA_INTEROP_DIRECT_1(DismissDialogAction_getReason, Ark_Int32, Ark_NativePointer)
+void impl_DismissDialogAction_setReason(Ark_NativePointer thisPtr, Ark_Int32 reason) {
+        Ark_DismissDialogAction self = reinterpret_cast<Ark_DismissDialogAction>(thisPtr);
+        GetAccessors()->getDismissDialogActionAccessor()->setReason(self, static_cast<Ark_DismissReason>(reason));
+}
+KOALA_INTEROP_DIRECT_V2(DismissDialogAction_setReason, Ark_NativePointer, Ark_Int32)
 Ark_NativePointer impl_TextShadowStyle_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         const Ark_Int8 value_value_buf_selector = thisDeserializer.readInt8();

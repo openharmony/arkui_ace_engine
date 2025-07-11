@@ -57,17 +57,6 @@ KNativePointer impl_AnnotationAllowedAnnotationsConst(KNativePointer contextPtr,
 }
 KOALA_INTEROP_3(AnnotationAllowedAnnotationsConst, KNativePointer, KNativePointer, KNativePointer, KNativePointer)
 
-/*
-KNativePointer impl_AstNodeVariableConst(KNativePointer contextPtr, KNativePointer nodePtr)
-{
-    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
-    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-
-    return GetImpl()->AstNodeVariableConst(context, node);
-}
-KOALA_INTEROP_2(AstNodeVariableConst, KNativePointer, KNativePointer, KNativePointer)
-*/
-
 KNativePointer impl_VariableDeclaration(KNativePointer contextPtr, KNativePointer variablePtr)
 {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
@@ -86,15 +75,6 @@ KNativePointer impl_DeclNode(KNativePointer contextPtr, KNativePointer declPtr)
 }
 KOALA_INTEROP_2(DeclNode, KNativePointer, KNativePointer, KNativePointer)
 
-/*
-KNativePointer impl_AstNodeScopeConst(KNativePointer contextPtr, KNativePointer nodePtr)
-{
-    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
-    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-    return GetImpl()->AstNodeScopeConst(context, node);
-}
-KOALA_INTEROP_2(AstNodeScopeConst, KNativePointer, KNativePointer, KNativePointer)
-*/
 KNativePointer impl_ScopeSetParent(KNativePointer contextPtr, KNativePointer nodePtr, KNativePointer parentPtr)
 {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
@@ -104,16 +84,6 @@ KNativePointer impl_ScopeSetParent(KNativePointer contextPtr, KNativePointer nod
     return node;
 }
 KOALA_INTEROP_3(ScopeSetParent, KNativePointer, KNativePointer, KNativePointer, KNativePointer)
-
-/*
-KNativePointer impl_CreateNumberLiteral(KNativePointer contextPtr, KDouble value)
-{
-    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
-
-    return GetImpl()->CreateNumberLiteral(context, value);
-}
-KOALA_INTEROP_2(CreateNumberLiteral, KNativePointer, KNativePointer, KDouble)
-*/
 
 KNativePointer impl_ETSParserCreateExpression(KNativePointer contextPtr, KStringPtr& sourceCodePtr, KInt flagsT)
 {
@@ -190,16 +160,6 @@ KNativePointer impl_ContextErrorMessage(KNativePointer contextPtr)
 }
 KOALA_INTEROP_1(ContextErrorMessage, KNativePointer, KNativePointer)
 
-/*
-KNativePointer impl_CallExpressionSignature(KNativePointer context, KNativePointer classInstance)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _classInstance = reinterpret_cast<es2panda_AstNode*>(classInstance);
-    const auto result = GetImpl()->CallExpressionSignature(_context, _classInstance);
-    return result;
-}
-KOALA_INTEROP_2(CallExpressionSignature, KNativePointer, KNativePointer, KNativePointer)
-*/
 KNativePointer impl_SignatureFunction(KNativePointer context, KNativePointer classInstance)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);

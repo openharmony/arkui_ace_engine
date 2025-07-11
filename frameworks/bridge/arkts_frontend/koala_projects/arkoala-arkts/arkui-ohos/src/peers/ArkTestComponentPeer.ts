@@ -13,38 +13,3 @@
 //  * limitations under the License.
 //  */
 
-// import { int32 } from "@koalaui/common"
-// import { InteropNativeModule, KPointer } from "@koalaui/interop"
-// import { ComponentBase } from "../ComponentBase"
-// import { ArkUIGeneratedNativeModule } from "#components"
-// import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "../component/peers/ArkCommonPeer"
-// import { PeerNode } from "../PeerNode"
-// import { TestComponentOptions } from "../ArkTestComponent"
-
-// export class ArkTestComponentPeer extends ArkCommonMethodPeer {
-//     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
-//         super(peerPtr, id, name, flags)
-//     }
-//     public static create(component?: ComponentBase, flags: int32 = 0): ArkTestComponentPeer {
-//         const peerId  = PeerNode.nextId()
-//         const _peerPtr  = ArkUIGeneratedNativeModule._Blank_construct(peerId, flags)
-//         const _peer  = new ArkTestComponentPeer(_peerPtr, peerId, "Blank", flags)
-//         component?.setPeer(_peer)
-//         return _peer
-//     }
-//     setTestComponentOptionsAttribute(option?: TestComponentOptions): void {
-//         if (option !== undefined) {
-//             this.setId(option!.id! as int32)
-//         }
-//     }
-//     onChangeCallback: Function0<void> | undefined = undefined
-//     onChangeAttribute(callback: Function0<void>): void {
-//         this.onChangeCallback = callback
-//     }
-//     logAttribute(message: string): void {
-//         InteropNativeModule._AppendGroupedLog(0, message + "\n")
-//     }
-// }
-// export interface ArkTestComponentAttributes extends ArkCommonMethodAttributes {
-//     onChange?: Function0<void>
-// }

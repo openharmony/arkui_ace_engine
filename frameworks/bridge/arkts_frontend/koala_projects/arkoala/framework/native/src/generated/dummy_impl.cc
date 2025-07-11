@@ -85,7 +85,6 @@ void busyWait(Ark_Int64 nsDelay) {
             std::next_permutation(buf.begin(), buf.end());
         }
     }
-    //ARKOALA_LOG("Requested wait %f ms, actual %f ms\n", nsDelay/1000000.0f, (now - start).count()/1000000.0f);
 }
 
 const int MAX_NODE_TYPE = 200;
@@ -25209,6 +25208,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void RegisterDragPreviewImpl(Ark_NativePointer node,
+                                 const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
+                                 const Opt_PreviewConfiguration* config)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("registerDragPreview(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, preview);
+        out.append(", ");
+        WriteToString(&out, config);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void RegisterOnDropImpl(Ark_NativePointer node,
+                            const Opt_OnDragEventCallback* eventCallback,
+                            const Opt_DropOptions* dropOptions)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("registerOnDrop(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, eventCallback);
+        out.append(", ");
+        WriteToString(&out, dropOptions);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // DragDropOpsAccessor
     namespace StateStylesOpsAccessor {
     void OnStateStyleChangeImpl(Ark_NativePointer node,
@@ -28540,6 +28569,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return nullptr;
     }
     } // CheckboxOpsAccessor
+    namespace DatePickerSelectedOpsAccessor {
+    Ark_NativePointer RegisterDatePickerSelectedCallbackImpl(Ark_NativePointer node,
+                                                             const Ark_Int64 selected,
+                                                             const DatePickerSelectedCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerDatePickerSelectedCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, selected);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // DatePickerSelectedOpsAccessor
     namespace MenuItemOpsAccessor {
     Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
                                                    Ark_Boolean value,
@@ -29242,6 +29290,63 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return nullptr;
     }
     } // TextFieldOpsAccessor
+    namespace TextPickerSelectedOpsAccessor {
+    Ark_NativePointer RegisterTextPickerSelectedCallbackImpl(Ark_NativePointer node,
+                                                             const Ark_Union_Number_Array_Number* selected,
+                                                             const TextPickerSelectedCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerTextPickerSelectedCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, selected);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // TextPickerSelectedOpsAccessor
+    namespace TextPickerValueOpsAccessor {
+    Ark_NativePointer RegisterTextPickerValueCallbackImpl(Ark_NativePointer node,
+                                                          const Ark_Union_String_Array_String* value,
+                                                          const TextPickerValueCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerTextPickerValueCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // TextPickerValueOpsAccessor
+    namespace TimePickerSelectedOpsAccessor {
+    Ark_NativePointer RegisterTimePickerSelectedCallbackImpl(Ark_NativePointer node,
+                                                             Ark_Int64 selected,
+                                                             const TimePickerSelectedCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerTimePickerSelectedCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, selected);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // TimePickerSelectedOpsAccessor
     namespace ActionSheetAccessor {
     void ShowImpl(const Ark_ActionSheetOptions* value)
     {
@@ -42798,8 +42903,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // DismissPopupActionAccessor
-    namespace DissmissDialogActionNewAccessor {
-    void DestroyPeerImpl(Ark_DissmissDialogActionNew peer)
+    namespace DismissDialogActionAccessor {
+    void DestroyPeerImpl(Ark_DismissDialogAction peer)
     {
         if (!needGroupedLog(1))
             return;
@@ -42807,15 +42912,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_DissmissDialogActionNew ConstructImpl()
+    Ark_DismissDialogAction ConstructImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_DissmissDialogActionNew) 100;
-        string out("new DissmissDialogActionNew(");
+            return (Ark_DismissDialogAction) 100;
+        string out("new DismissDialogAction(");
         out.append(") \n");
-        out.append("[return (Ark_DissmissDialogActionNew) 100] \n");
+        out.append("[return (Ark_DismissDialogAction) 100] \n");
         appendGroupedLog(1, out);
-        return (Ark_DissmissDialogActionNew) 100;
+        return (Ark_DismissDialogAction) 100;
     }
     Ark_NativePointer GetFinalizerImpl()
     {
@@ -42827,7 +42932,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    void DismissImpl(Ark_DissmissDialogActionNew peer)
+    void DismissImpl(Ark_DismissDialogAction peer)
     {
         if (!needGroupedLog(1))
             return;
@@ -42835,7 +42940,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_DismissReasonNew GetReasonImpl(Ark_DissmissDialogActionNew peer)
+    Ark_DismissReason GetReasonImpl(Ark_DismissDialogAction peer)
     {
         if (!needGroupedLog(1))
             return {};
@@ -42845,8 +42950,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    void SetReasonImpl(Ark_DissmissDialogActionNew peer,
-                       Ark_DismissReasonNew reason)
+    void SetReasonImpl(Ark_DismissDialogAction peer,
+                       Ark_DismissReason reason)
     {
         if (!needGroupedLog(1))
             return;
@@ -42855,7 +42960,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    } // DissmissDialogActionNewAccessor
+    } // DismissDialogActionAccessor
     namespace TextShadowStyleAccessor {
     void DestroyPeerImpl(Ark_TextShadowStyle peer)
     {
@@ -44889,6 +44994,38 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextFieldOpsAccessor::TextFieldOpsSetBackgroundColorImpl,
         };
         return &TextFieldOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUIDatePickerSelectedOpsAccessor* GetDatePickerSelectedOpsAccessor()
+    {
+        static const GENERATED_ArkUIDatePickerSelectedOpsAccessor DatePickerSelectedOpsAccessorImpl {
+            DatePickerSelectedOpsAccessor::RegisterDatePickerSelectedCallbackImpl,
+        };
+        return &DatePickerSelectedOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUITextPickerSelectedOpsAccessor* GetTextPickerSelectedOpsAccessor()
+    {
+        static const GENERATED_ArkUITextPickerSelectedOpsAccessor TextPickerSelectedOpsAccessorImpl {
+            TextPickerSelectedOpsAccessor::RegisterTextPickerSelectedCallbackImpl,
+        };
+        return &TextPickerSelectedOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUITextPickerValueOpsAccessor* GetTextPickerValueOpsAccessor()
+    {
+        static const GENERATED_ArkUITextPickerValueOpsAccessor TextPickerValueOpsAccessorImpl {
+            TextPickerValueOpsAccessor::RegisterTextPickerValueCallbackImpl,
+        };
+        return &TextPickerValueOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUITimePickerSelectedOpsAccessor* GetTimePickerSelectedOpsAccessor()
+    {
+        static const GENERATED_ArkUITimePickerSelectedOpsAccessor TimePickerSelectedOpsAccessorImpl {
+            TimePickerSelectedOpsAccessor::RegisterTimePickerSelectedCallbackImpl,
+        };
+        return &TimePickerSelectedOpsAccessorImpl;
     }
 
     const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
@@ -47583,6 +47720,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DismissPopupActionPeer {
         virtual ~DismissPopupActionPeer() = default;
     };
+
+    const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissDialogActionAccessor DismissDialogActionAccessorImpl {
+            DismissDialogActionAccessor::DestroyPeerImpl,
+            DismissDialogActionAccessor::ConstructImpl,
+            DismissDialogActionAccessor::GetFinalizerImpl,
+            DismissDialogActionAccessor::DismissImpl,
+            DismissDialogActionAccessor::GetReasonImpl,
+            DismissDialogActionAccessor::SetReasonImpl,
+        };
+        return &DismissDialogActionAccessorImpl;
+    }
+
+    struct DismissDialogActionPeer {
+        virtual ~DismissDialogActionPeer() = default;
+    };
     const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
     {
         static const GENERATED_ArkUITextShadowStyleAccessor TextShadowStyleAccessorImpl {
@@ -47854,10 +48008,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetIUIContextAccessor,
             GetFilterAccessor,
             GetVisualEffectAccessor,
+            GetDatePickerSelectedOpsAccessor,
             GetNavExtenderAccessor,
             GetSearchOpsAccessor,
             GetEventEmulatorAccessor,
             GetTextFieldOpsAccessor,
+            GetTextPickerSelectedOpsAccessor,
+            GetTextPickerValueOpsAccessor,
+            GetTimePickerSelectedOpsAccessor,
             GetActionSheetAccessor,
             GetAlertDialogAccessor,
             GetPromptActionAccessor,
@@ -48002,6 +48160,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLetterSpacingStyleAccessor,
             GetLevelOrderAccessor,
             GetDismissPopupActionAccessor,
+            GetDismissDialogActionAccessor,
             GetTextShadowStyleAccessor,
             GetBackgroundColorStyleAccessor,
             GetGestureStyleAccessor,
