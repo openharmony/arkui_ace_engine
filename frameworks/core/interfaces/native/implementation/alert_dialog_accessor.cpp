@@ -27,8 +27,8 @@ struct DialogPropsForUpdate {
     Opt_DialogAlignment alignment;
     Opt_Boolean autoCancel;
     Opt_BlurStyle backgroundBlurStyle;
-    Opt_BackgroundBlurStyleOptions blurStyleOption;
-    Opt_BackgroundEffectOptions effectOption;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+    Opt_BackgroundEffectOptions backgroundEffect;
     Opt_ResourceColor backgroundColor;
     Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors borderColor;
     Opt_Union_BorderStyle_EdgeStyles borderStyle;
@@ -44,6 +44,10 @@ struct DialogPropsForUpdate {
     Ark_ResourceStr message;
     Opt_Offset offset;
     Opt_Callback_DismissDialogAction_Void onWillDismiss;
+    Opt_Callback_Void onDidAppear;
+    Opt_Callback_Void onDidDisappear;
+    Opt_Callback_Void onWillAppear;
+    Opt_Callback_Void onWillDisappear;
     Opt_Union_ShadowOptions_ShadowStyle shadow;
     Opt_Boolean showInSubWindow;
     Opt_ResourceStr subtitle;
@@ -51,6 +55,10 @@ struct DialogPropsForUpdate {
     Opt_TextStyle_alert_dialog textStyle;
     Opt_TransitionEffect transition;
     Opt_Length width;
+    Opt_LevelMode levelMode;
+    Opt_Number levelUniqueId;
+    Opt_ImmersiveMode immersiveMode;
+    Opt_LevelOrder levelOrder;
 };
 } // namespace OHOS::Ace::NG
 
@@ -77,9 +85,18 @@ template<>
 ButtonInfo Convert(const Ark_AlertDialogButtonOptions& src)
 {
     ButtonInfo info;
-    info.text = Converter::OptConvert<std::string>(src.value).value_or("");
-    info.enabled = Converter::OptConvert<bool>(src.enabled).value_or(info.enabled);
-    info.defaultFocus = Converter::OptConvert<bool>(src.defaultFocus).value_or(info.defaultFocus);
+    auto text = Converter::OptConvert<std::string>(src.value);
+    if (text) {
+        info.text = text.value();
+    }
+    auto enabled = Converter::OptConvert<bool>(src.enabled);
+    if (enabled) {
+        info.enabled = enabled.value();
+    }
+    auto defaultFocus = Converter::OptConvert<bool>(src.defaultFocus);
+    if (defaultFocus) {
+        info.defaultFocus = defaultFocus.value();
+    }
     info.dlgButtonStyle = Converter::OptConvert<DialogButtonStyle>(src.style);
     auto textColor = Converter::OptConvert<Color>(src.fontColor);
     if (textColor) {
@@ -103,9 +120,18 @@ template<>
 ButtonInfo Convert(const Ark_AlertDialogButtonBaseOptions& src)
 {
     ButtonInfo info;
-    info.text = Converter::OptConvert<std::string>(src.value).value_or("");
-    info.enabled = Converter::OptConvert<bool>(src.enabled).value_or(info.enabled);
-    info.defaultFocus = Converter::OptConvert<bool>(src.defaultFocus).value_or(info.defaultFocus);
+    auto text = Converter::OptConvert<std::string>(src.value);
+    if (text) {
+        info.text = text.value();
+    }
+    auto  enabled = Converter::OptConvert<bool>(src.enabled);
+    if (enabled) {
+        info.enabled = enabled.value();
+    }
+    auto defaultFocus = Converter::OptConvert<bool>(src.defaultFocus);
+    if (defaultFocus) {
+        info.defaultFocus = defaultFocus.value();
+    }
     info.dlgButtonStyle = Converter::OptConvert<DialogButtonStyle>(src.style);
     auto textColor = Converter::OptConvert<Color>(src.fontColor);
     if (textColor) {
@@ -128,49 +154,163 @@ ButtonInfo Convert(const Ark_AlertDialogButtonBaseOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AlertDialogAccessor {
+void UpdateDialogAlignmentForRtl(DialogAlignment& alignment)
+{
+    switch (alignment) {
+        case DialogAlignment::TOP_START:
+            alignment = DialogAlignment::TOP_END;
+            break;
+        case DialogAlignment::TOP_END:
+            alignment = DialogAlignment::TOP_START;
+            break;
+        case DialogAlignment::CENTER_START:
+            alignment = DialogAlignment::CENTER_END;
+            break;
+        case DialogAlignment::CENTER_END:
+            alignment = DialogAlignment::CENTER_START;
+            break;
+        case DialogAlignment::BOTTOM_START:
+            alignment = DialogAlignment::BOTTOM_END;
+            break;
+        case DialogAlignment::BOTTOM_END:
+            alignment = DialogAlignment::BOTTOM_START;
+            break;
+        default:
+            break;
+    }
+}
 void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const DialogPropsForUpdate props)
 {
-    dialogProps.title = Converter::OptConvert<std::string>(props.title).value_or("");
-    dialogProps.subtitle = Converter::OptConvert<std::string>(props.subtitle).value_or("");
-    dialogProps.content = Converter::OptConvert<std::string>(props.message).value_or("");
+    auto title = Converter::OptConvert<std::string>(props.title);
+    if (title) {
+        dialogProps.title = title.value();
+    }
+    auto subtitle = Converter::OptConvert<std::string>(props.subtitle);
+    if (subtitle) {
+        dialogProps.subtitle = subtitle.value();
+    }
+    auto message = Converter::OptConvert<std::string>(props.message);
+    if (message) {
+        dialogProps.content = message.value();
+    }
     dialogProps.shadow = Converter::OptConvert<Shadow>(props.shadow);
     dialogProps.borderWidth = Converter::OptConvert<BorderWidthProperty>(props.borderWidth);
-    dialogProps.borderColor = Converter::OptConvert<BorderColorProperty>(props.borderColor);
+    if (dialogProps.borderWidth) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(Color::BLACK);
+        dialogProps.borderColor = Converter::OptConvert<BorderColorProperty>(props.borderColor).value_or(borderColor);
+        BorderStyleProperty borderStyle;
+        borderStyle.SetBorderStyle(BorderStyle::SOLID);
+        dialogProps.borderStyle = Converter::OptConvert<BorderStyleProperty>(props.borderStyle).value_or(borderStyle);
+    }
     dialogProps.borderRadius = Converter::OptConvert<BorderRadiusProperty>(props.cornerRadius);
-    dialogProps.borderStyle = Converter::OptConvert<BorderStyleProperty>(props.borderStyle);
-    dialogProps.alignment = Converter::OptConvert<DialogAlignment>(props.alignment).value_or(DialogAlignment::DEFAULT);
-    dialogProps.offset = Converter::OptConvert<DimensionOffset>(props.offset).value_or(dialogProps.offset);
-    dialogProps.maskRect = Converter::OptConvert<DimensionRect>(props.maskRect);
+    auto alignment = Converter::OptConvert<DialogAlignment>(props.alignment);
+    if (alignment) {
+        dialogProps.alignment = alignment.value();
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        if (isRtl) {
+            UpdateDialogAlignmentForRtl(dialogProps.alignment);
+        }
+    }
+    auto offset = Converter::OptConvert<DimensionOffset>(props.offset);
+    if (offset) {
+        dialogProps.offset = offset.value();
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        Dimension offsetX = isRtl ? dialogProps.offset.GetX() * (-1) : dialogProps.offset.GetX();
+        dialogProps.offset.SetX(offsetX);
+    }
+    auto maskRect = Converter::OptConvert<DimensionRect>(props.maskRect);
+    if (maskRect) {
+        dialogProps.maskRect = maskRect.value();
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        auto offset = maskRect.value().GetOffset();
+        Dimension offsetX = isRtl ? offset.GetX() * (-1) : offset.GetX();
+        offset.SetX(offsetX);
+        dialogProps.maskRect->SetOffset(offset);
+    }
     auto textStyle = Converter::OptConvert<Ark_TextStyle_alert_dialog>(props.textStyle);
     if (textStyle) {
-        dialogProps.wordBreak = Converter::OptConvert<WordBreak>(textStyle->wordBreak).value_or(dialogProps.wordBreak);
+        auto wordBreak = Converter::OptConvert<WordBreak>(textStyle.value().wordBreak);
+        if (wordBreak) {
+            dialogProps.wordBreak = wordBreak.value();
+        }
     }
-    auto transition = Converter::OptConvert<RefPtr<NG::ChainedTransitionEffect>>(props.transition);
-    if (transition) {
-        dialogProps.transitionEffect = *transition;
+    auto transitionEffect = Converter::OptConvert<RefPtr<NG::ChainedTransitionEffect>>(props.transition);
+    if (transitionEffect) {
+        dialogProps.transitionEffect = transitionEffect.value();
+    }
+    auto dialogLevelMode = Converter::OptConvert<LevelMode>(props.levelMode);
+    if (!Converter::OptConvert<bool>(props.showInSubWindow).value_or(false) && dialogLevelMode) {
+        dialogProps.dialogLevelMode = dialogLevelMode.value();
+    }
+    auto dialogLevelUniqueId = Converter::OptConvert<int32_t>(props.levelUniqueId);
+    if (dialogLevelUniqueId) {
+        dialogProps.dialogLevelUniqueId = dialogLevelUniqueId.value();
+    }
+    auto dialogImmersiveMode = Converter::OptConvert<ImmersiveMode>(props.immersiveMode);
+    if (dialogImmersiveMode) {
+        dialogProps.dialogImmersiveMode = dialogImmersiveMode.value();
     }
 }
 DialogProperties CreateDialogProperties(const DialogPropsForUpdate props)
 {
     DialogProperties dialogProps { .type = DialogType::ALERT_DIALOG };
     UpdateDynamicDialogProperties(dialogProps, props);
-    dialogProps.gridCount = Converter::OptConvert<int32_t>(props.gridCount).value_or(dialogProps.gridCount);
-    dialogProps.backgroundBlurStyle = static_cast<int32_t>(
-        Converter::OptConvert<BlurStyle>(props.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_ULTRA_THICK));
-    dialogProps.blurStyleOption = Converter::OptConvert<BlurStyleOption>(props.blurStyleOption);
-    dialogProps.effectOption = Converter::OptConvert<EffectOption>(props.effectOption);
+    auto gridCount = Converter::OptConvert<int32_t>(props.gridCount);
+    if (gridCount) {
+        dialogProps.gridCount = gridCount.value();
+    }
+    auto backgroundBlurStyle = Converter::OptConvert<BlurStyle>(props.backgroundBlurStyle);
+    if (backgroundBlurStyle) {
+        dialogProps.backgroundBlurStyle = static_cast<int32_t>(backgroundBlurStyle.value());
+    }
+    dialogProps.blurStyleOption = Converter::OptConvert<BlurStyleOption>(props.backgroundBlurStyleOptions);
+    dialogProps.effectOption = Converter::OptConvert<EffectOption>(props.backgroundEffect);
     dialogProps.backgroundColor = Converter::OptConvert<Color>(props.backgroundColor);
-    dialogProps.enableHoverMode =
-        Converter::OptConvert<bool>(props.enableHoverMode).value_or(dialogProps.enableHoverMode);
+    auto enableHoverMode = Converter::OptConvert<bool>(props.enableHoverMode);
+    if (enableHoverMode) {
+        dialogProps.enableHoverMode = enableHoverMode.value();
+    }
     dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(props.hoverModeArea);
-    dialogProps.autoCancel = Converter::OptConvert<bool>(props.autoCancel).value_or(dialogProps.autoCancel);
-    dialogProps.isModal = Converter::OptConvert<bool>(props.isModal).value_or(dialogProps.isModal);
-    dialogProps.isShowInSubWindow =
-        Converter::OptConvert<bool>(props.showInSubWindow).value_or(dialogProps.isShowInSubWindow);
+    auto autoCancel = Converter::OptConvert<bool>(props.autoCancel);
+    if (autoCancel) {
+        dialogProps.autoCancel = autoCancel.value();
+    }
+    auto isModal = Converter::OptConvert<bool>(props.isModal);
+    if (isModal) {
+        dialogProps.isModal = isModal.value();
+    }
+    auto isShowInSubWindow = Converter::OptConvert<bool>(props.showInSubWindow);
+    if (isShowInSubWindow) {
+#if defined(PREVIEW)
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+#else
+        dialogProps.isShowInSubWindow = isShowInSubWindow.value();
+#endif
+    }
     dialogProps.width = Converter::OptConvert<CalcDimension>(props.width);
     dialogProps.height = Converter::OptConvert<CalcDimension>(props.height);
 
     AddOnWillDismiss(dialogProps, props.onWillDismiss);
+    auto onDidAppear = Converter::OptConvert<Callback_Void>(props.onDidAppear);
+    if (onDidAppear) {
+        dialogProps.onDidAppear = [arkCallback = CallbackHelper(onDidAppear.value())]() { arkCallback.InvokeSync(); };
+    }
+    auto onDidDisappear = Converter::OptConvert<Callback_Void>(props.onDidDisappear);
+    if (onDidDisappear) {
+        dialogProps.onDidDisappear = [arkCallback = CallbackHelper(onDidDisappear.value())]() { arkCallback.Invoke(); };
+    }
+    auto onWillAppear = Converter::OptConvert<Callback_Void>(props.onWillAppear);
+    if (onWillAppear) {
+        dialogProps.onWillAppear = [arkCallback = CallbackHelper(onWillAppear.value())]() { arkCallback.Invoke(); };
+    }
+    auto onWillDisappear = Converter::OptConvert<Callback_Void>(props.onWillDisappear);
+    if (onWillDisappear) {
+        dialogProps.onWillDisappear = [arkCallback = CallbackHelper(onWillDisappear.value())]() {
+            arkCallback.Invoke();
+        };
+    }
     auto cancelCallbackOpt = Converter::OptConvert<VoidCallback>(props.cancel);
     if (cancelCallbackOpt) {
         auto cancelFunc = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
@@ -180,6 +320,11 @@ DialogProperties CreateDialogProperties(const DialogPropsForUpdate props)
         DialogProperties& dialogProps) {
         updateDialogProperties(dialogProps, props);
     };
+    dialogProps.levelOrder = std::make_optional(LevelOrder::ORDER_DEFAULT);
+    auto levelOrder = Converter::OptConvert<double>(props.levelOrder);
+    if (!dialogProps.isShowInSubWindow && levelOrder) {
+        dialogProps.levelOrder = levelOrder.value();
+    }
     return dialogProps;
 }
 DialogPropsForUpdate GetPropsWithConfirm(const Ark_AlertDialogParamWithConfirm params)
@@ -188,8 +333,8 @@ DialogPropsForUpdate GetPropsWithConfirm(const Ark_AlertDialogParamWithConfirm p
         .alignment = params.alignment,
         .autoCancel = params.autoCancel,
         .backgroundBlurStyle = params.backgroundBlurStyle,
-        .blurStyleOption = params.backgroundBlurStyleOptions,
-        .effectOption = params.backgroundEffect,
+        .backgroundBlurStyleOptions = params.backgroundBlurStyleOptions,
+        .backgroundEffect = params.backgroundEffect,
         .backgroundColor = params.backgroundColor,
         .borderColor = params.borderColor,
         .borderStyle = params.borderStyle,
@@ -205,13 +350,21 @@ DialogPropsForUpdate GetPropsWithConfirm(const Ark_AlertDialogParamWithConfirm p
         .message = params.message,
         .offset = params.offset,
         .onWillDismiss = params.onWillDismiss,
+        .onDidAppear = params.onDidAppear,
+        .onDidDisappear = params.onDidDisappear,
+        .onWillAppear = params.onWillAppear,
+        .onWillDisappear = params.onWillDisappear,
         .shadow = params.shadow,
         .showInSubWindow = params.showInSubWindow,
         .subtitle = params.subtitle,
         .title = params.title,
         .textStyle = params.textStyle,
         .transition = params.transition,
-        .width = params.width
+        .width = params.width,
+        .levelMode = params.levelMode,
+        .levelUniqueId = params.levelUniqueId,
+        .immersiveMode = params.immersiveMode,
+        .levelOrder = params.levelOrder
     };
 }
 void UpdateConfirmButton(DialogProperties& dialogProps, const Ark_AlertDialogParamWithConfirm params)
@@ -256,8 +409,8 @@ DialogPropsForUpdate GetPropsWithButtons(const Ark_AlertDialogParamWithButtons p
         .alignment = params.alignment,
         .autoCancel = params.autoCancel,
         .backgroundBlurStyle = params.backgroundBlurStyle,
-        .blurStyleOption = params.backgroundBlurStyleOptions,
-        .effectOption = params.backgroundEffect,
+        .backgroundBlurStyleOptions = params.backgroundBlurStyleOptions,
+        .backgroundEffect = params.backgroundEffect,
         .backgroundColor = params.backgroundColor,
         .borderColor = params.borderColor,
         .borderStyle = params.borderStyle,
@@ -273,13 +426,21 @@ DialogPropsForUpdate GetPropsWithButtons(const Ark_AlertDialogParamWithButtons p
         .message = params.message,
         .offset = params.offset,
         .onWillDismiss = params.onWillDismiss,
+        .onDidAppear = params.onDidAppear,
+        .onDidDisappear = params.onDidDisappear,
+        .onWillAppear = params.onWillAppear,
+        .onWillDisappear = params.onWillDisappear,
         .shadow = params.shadow,
         .showInSubWindow = params.showInSubWindow,
         .subtitle = params.subtitle,
         .title = params.title,
         .textStyle = params.textStyle,
         .transition = params.transition,
-        .width = params.width
+        .width = params.width,
+        .levelMode = params.levelMode,
+        .levelUniqueId = params.levelUniqueId,
+        .immersiveMode = params.immersiveMode,
+        .levelOrder = params.levelOrder
     };
 }
 void ShowWithButtons(const Ark_AlertDialogParamWithButtons params)
@@ -305,8 +466,10 @@ void UpdateOptionsButtons(DialogProperties& dialogProps, const Ark_AlertDialogPa
             dialogProps.buttons.emplace_back(button);
         }
     }
-    dialogProps.buttonDirection =
-        Converter::OptConvert<DialogButtonDirection>(params.buttonDirection).value_or(dialogProps.buttonDirection);
+    auto buttonDirection = Converter::OptConvert<DialogButtonDirection>(params.buttonDirection);
+    if (buttonDirection) {
+        dialogProps.buttonDirection = buttonDirection.value();
+    }
 }
 DialogPropsForUpdate GetPropsWithOptions(const Ark_AlertDialogParamWithOptions params)
 {
@@ -314,8 +477,8 @@ DialogPropsForUpdate GetPropsWithOptions(const Ark_AlertDialogParamWithOptions p
         .alignment = params.alignment,
         .autoCancel = params.autoCancel,
         .backgroundBlurStyle = params.backgroundBlurStyle,
-        .blurStyleOption = params.backgroundBlurStyleOptions,
-        .effectOption = params.backgroundEffect,
+        .backgroundBlurStyleOptions = params.backgroundBlurStyleOptions,
+        .backgroundEffect = params.backgroundEffect,
         .backgroundColor = params.backgroundColor,
         .borderColor = params.borderColor,
         .borderStyle = params.borderStyle,
@@ -331,13 +494,21 @@ DialogPropsForUpdate GetPropsWithOptions(const Ark_AlertDialogParamWithOptions p
         .message = params.message,
         .offset = params.offset,
         .onWillDismiss = params.onWillDismiss,
+        .onDidAppear = params.onDidAppear,
+        .onDidDisappear = params.onDidDisappear,
+        .onWillAppear = params.onWillAppear,
+        .onWillDisappear = params.onWillDisappear,
         .shadow = params.shadow,
         .showInSubWindow = params.showInSubWindow,
         .subtitle = params.subtitle,
         .title = params.title,
         .textStyle = params.textStyle,
         .transition = params.transition,
-        .width = params.width
+        .width = params.width,
+        .levelMode = params.levelMode,
+        .levelUniqueId = params.levelUniqueId,
+        .immersiveMode = params.immersiveMode,
+        .levelOrder = params.levelOrder
     };
 }
 void ShowWithOptions(const Ark_AlertDialogParamWithOptions params)
