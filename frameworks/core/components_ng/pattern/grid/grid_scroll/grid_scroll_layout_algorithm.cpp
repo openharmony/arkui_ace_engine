@@ -314,7 +314,10 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 SyncGeometry(wrapper);
             }
-            wrapper->MarkAndCheckNewOpIncNode(axis_);
+            auto frameNode = DynamicCast<FrameNode>(wrapper);
+            if (frameNode) {
+                frameNode->MarkAndCheckNewOpIncNode();
+            }
             auto gridItemProp = DynamicCast<GridItemLayoutProperty>(wrapper->GetLayoutProperty());
             CHECK_NULL_CONTINUE(gridItemProp);
             gridItemProp->UpdateIndex(itemIdex);
