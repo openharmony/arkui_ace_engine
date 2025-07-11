@@ -794,6 +794,14 @@ void ScrollModelNG::SetMaxZoomScale(FrameNode* frameNode, float scale)
     pattern->SetMaxZoomScale(scale);
 }
 
+float ScrollModelNG::GetMaxZoomScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, 1.0f);
+    return pattern->GetMaxZoomScale();
+}
+
 void ScrollModelNG::SetMinZoomScale(float scale)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -806,6 +814,14 @@ void ScrollModelNG::SetMinZoomScale(FrameNode* frameNode, float scale)
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMinZoomScale(scale);
+}
+
+float ScrollModelNG::GetMinZoomScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, 1.0f);
+    return pattern->GetMinZoomScale();
 }
 
 void ScrollModelNG::SetZoomScale(float scale)
@@ -836,6 +852,14 @@ void ScrollModelNG::ResetZoomScale(FrameNode* frameNode)
     pattern->SetZoomScale(std::nullopt);
 }
 
+float ScrollModelNG::GetZoomScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, 1.0f);
+    return pattern->GetZoomScale();
+}
+
 void ScrollModelNG::SetZoomScaleChangeEvent(std::function<void(float)>&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -857,6 +881,14 @@ void ScrollModelNG::SetEnableBouncesZoom(FrameNode* frameNode, bool enable)
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableBouncesZoom(enable);
+}
+
+bool ScrollModelNG::GetEnableBouncesZoom(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    return pattern->GetEnableBouncesZoom();
 }
 
 void ScrollModelNG::SetOnDidZoom(std::function<void(float)>&& event)

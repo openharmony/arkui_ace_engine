@@ -1239,6 +1239,10 @@ enum ArkUIEventSubKind {
     ON_SCROLL_EDGE,
     ON_SCROLL_REACH_START,
     ON_SCROLL_REACH_END,
+    ON_SCROLL_WILL_STOP_DRAGGING,
+    ON_SCROLL_DID_ZOOM,
+    ON_SCROLL_ZOOM_START,
+    ON_SCROLL_ZOOM_STOP,
 
     ON_TABS_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TABS,
     ON_NAVIGATOR_CLICK = ARKUI_MAX_EVENT_NUM * ARKUI_NAVIGATOR,
@@ -3875,12 +3879,16 @@ struct ArkUIScrollModifier {
         ArkUI_Int32 paginationSize, const ArkUI_Int32* paginationParam, void* resObjs);
     void (*setMaxZoomScale)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*resetMaxZoomScale)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getMaxZoomScale)(ArkUINodeHandle node);
     void (*setMinZoomScale)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*resetMinZoomScale)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getMinZoomScale)(ArkUINodeHandle node);
     void (*setZoomScale)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*resetZoomScale)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getZoomScale)(ArkUINodeHandle node);
     void (*setEnableBouncesZoom)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableBouncesZoom)(ArkUINodeHandle node);
+    ArkUI_Bool (*getEnableBouncesZoom)(ArkUINodeHandle node);
     void (*setScrollOnDidZoom)(ArkUINodeHandle node, void* callback);
     void (*setScrollOnZoomStart)(ArkUINodeHandle node, void* callback);
     void (*setScrollOnZoomStop)(ArkUINodeHandle node, void* callback);

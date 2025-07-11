@@ -116,10 +116,14 @@ public:
     static void CreateWithResourceObjSnapPaginations(FrameNode* frameNode,
         const std::vector<Dimension>& snapPaginations, std::vector<RefPtr<ResourceObject>>& resObjs);
     static void SetMaxZoomScale(FrameNode* frameNode, float scale);
+    static float GetMaxZoomScale(FrameNode* frameNode);
     static void SetMinZoomScale(FrameNode* frameNode, float scale);
+    static float GetMinZoomScale(FrameNode* frameNode);
     static void SetZoomScale(FrameNode* frameNode, float scale);
     static void ResetZoomScale(FrameNode* frameNode);
+    static float GetZoomScale(FrameNode* frameNode);
     static void SetEnableBouncesZoom(FrameNode* frameNode, bool enable);
+    static bool GetEnableBouncesZoom(FrameNode* frameNode);
     static void SetOnDidZoom(FrameNode* frameNode, std::function<void(float)>&& event);
     static void SetOnZoomStart(FrameNode* frameNode, std::function<void()>&& event);
     static void SetOnZoomStop(FrameNode* frameNode, std::function<void()>&& event);

@@ -442,17 +442,14 @@ private:
     /* ============================= zoom Enhancements ============================= */
 public:
     void SetMaxZoomScale(float scale);
+    float GetMaxZoomScale() const;
     void SetMinZoomScale(float scale);
+    float GetMinZoomScale() const;
     void SetZoomScale(std::optional<float> scale);
-    float GetZoomScale() const
-    {
-        return zoomScale_.value_or(1.0f);
-    }
+    float GetZoomScale() const;
     void UpdateZoomScale(float scale);
-    void SetEnableBouncesZoom(bool enable)
-    {
-        enableBouncesZoom_ = enable;
-    }
+    void SetEnableBouncesZoom(bool enable);
+    bool GetEnableBouncesZoom() const;
     void ProcessZoomScale();
     void SetChildScale(std::optional<float> scale);
 private:
