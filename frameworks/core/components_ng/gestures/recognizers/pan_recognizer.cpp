@@ -572,6 +572,10 @@ bool PanRecognizer::HandlePanAccept()
             return true;
         }
     }
+    if (CheckLimitFinger()) {
+        extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
+        return false;
+    }
     if (TriggerGestureJudgeCallback() == GestureJudgeResult::REJECT) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         if (gestureInfo_ && gestureInfo_->GetType() == GestureTypeName::DRAG) {
@@ -580,10 +584,6 @@ bool PanRecognizer::HandlePanAccept()
             dragEventActuator->SetIsDragUserReject(true);
         }
         return true;
-    }
-    if (CheckLimitFinger()) {
-        extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
-        return false;
     }
     if (IsBridgeMode()) {
         OnAccepted();

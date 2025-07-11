@@ -194,13 +194,13 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
             return;
         }
-        auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
-        if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+        if (CheckLimitFinger()) {
+            extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return;
         }
-        if (CheckLimitFinger()) {
-            extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
+        auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
+        if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return;
         }
