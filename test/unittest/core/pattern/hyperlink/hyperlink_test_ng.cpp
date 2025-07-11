@@ -31,6 +31,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
+#include "test/mock/core/common/mock_font_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #undef private
 #undef protected
@@ -588,4 +589,121 @@ HWTEST_F(HyperlinkTestNg, SetColor002, TestSize.Level1)
     hyperlinkModelNG.SetColor(frameNode, Color::RED);
     EXPECT_EQ(LayoutProperty->GetTextColor().value(), Color::RED);
 }
+
+/**
+ * @tc.name: OnAttachToFrameNode001
+ * @tc.desc: Test OnAttachToFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, OnAttachToFrameNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
+     */
+    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
+    ASSERT_NE(hyperlinkNode, nullptr);
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
+    auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
+    ASSERT_NE(hyperlinkPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnAttachToFrameNode.
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<HyperlinkTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->textColor_ = Color::RED;
+    theme->textLinkedColor_ = Color::GREEN;
+    theme->textUnSelectedDecoration_ = TextDecoration::UNDERLINE;
+    auto hyperlinkLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(hyperlinkLayoutProperty, nullptr);
+    hyperlinkLayoutProperty->UpdateTextDecorationColor(Color::BLACK);
+    hyperlinkPattern->isLinked_ = true;
+
+    MockPipelineContext::GetCurrent()->fontManager_ = AceType::MakeRefPtr<MockFontManager>();
+    hyperlinkPattern->OnAttachToFrameNode(); // Exam branch
+    EXPECT_TRUE(MockPipelineContext::GetCurrent()->fontManager_);
+}
+
+
+/**
+ * @tc.name: HyperlinkDrag002
+ * @tc.desc: Test HyperlinkPattern::EnableDrag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, HyperlinkDrag002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::HYPERLINK_ETS_TAG);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(HYPERLINK_CONTENT);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
+    frameNode->SetDraggable(true);
+    frameNode->MarkModifyDone();
+    auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
+    ASSERT_NE(hyperlinkPattern, nullptr);
+    hyperlinkPattern->EnableDrag();
+    // emulate drag event
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    ASSERT_NE(eventHub->GetDefaultOnDragStart(), nullptr);
+    auto extraParams =
+        eventHub->GetDragExtraParams(std::string(), Point(RADIUS_DEFAULT, RADIUS_DEFAULT), DragEventType::START);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto dragDropInfo = (eventHub->GetDefaultOnDragStart())(dragEvent, extraParams);
+
+    /**
+     * @tc.steps: step2. Call getDefaultOnDragStart.
+     */
+    hyperlinkPattern->textForDisplay_ = u"";
+    auto getDefaultOnDragStart = eventHub->GetDefaultOnDragStart();
+    EXPECT_TRUE(getDefaultOnDragStart);
+    getDefaultOnDragStart(dragEvent, "123");
+    EXPECT_TRUE(getDefaultOnDragStart);
+}
+
+/**
+ * @tc.name: UpdatePropertyImpl001
+ * @tc.desc: Test UpdatePropertyImpl.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, UpdatePropertyImpl001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::HYPERLINK_ETS_TAG);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(HYPERLINK_CONTENT);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
+    frameNode->SetDraggable(true);
+    frameNode->MarkModifyDone();
+    auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
+    ASSERT_NE(hyperlinkPattern, nullptr);
+    /**
+     * @tc.steps: step2. Call UpdatePropertyImpl with different key.
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    hyperlinkPattern->UpdatePropertyImpl("key", value);
+    hyperlinkPattern->UpdatePropertyImpl("Address", value);
+    hyperlinkPattern->UpdatePropertyImpl("Content", value);
+    frameNode->shouldRerender_ = true;
+    hyperlinkPattern->UpdatePropertyImpl("Color", value);
+    EXPECT_TRUE(MockPipelineContext::GetCurrent()->fontManager_);
+}
+
 } // namespace OHOS::Ace::NG
