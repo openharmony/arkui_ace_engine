@@ -449,6 +449,7 @@ void JSDatePicker::ParseTextStyle(
     Color textColor;
     if (JSViewAbstract::ParseJsColor(fontColor, textColor, textStyle.textColorResObj)) {
         textStyle.textColor = textColor;
+        textStyle.textColorSetByUser = true;
     }
 
     if (!fontOptions->IsObject()) {

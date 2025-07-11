@@ -1075,6 +1075,7 @@ void JSTextPickerParser::ParseTextStyle(
     Color textColor;
     if (ParseJsColor(fontColor, textColor, textStyle.textColorResObj)) {
         textStyle.textColor = textColor;
+        textStyle.textColorSetByUser = true;
     }
 
     ParseDefaultTextStyle(paramObj, textStyle);

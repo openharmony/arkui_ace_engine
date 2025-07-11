@@ -1017,6 +1017,7 @@ struct ArkUIPickerTextStyleStruct {
     void* textColorRawPtr;
     void* minFontSizeRawPtr;
     void* maxFontSizeRawPtr;
+    ArkUI_Bool textColorSetByUser;
 };
 
 struct ArkUIPickerDividerResObjStruct {

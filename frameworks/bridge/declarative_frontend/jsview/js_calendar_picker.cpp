@@ -556,6 +556,7 @@ void JSCalendarPicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Picke
     Color color;
     if (ParseJsColor(fontColor, color, textStyle.textColorResObj)) {
         textStyle.textColor = color;
+        textStyle.textColorSetByUser = true;
     }
 
     if (!fontStyle->IsObject()) {
