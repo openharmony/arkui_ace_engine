@@ -133,14 +133,14 @@ RefPtr<Container> Container::GetDefault()
 
 RefPtr<Container> Container::GetFocused()
 {
-    RefPtr<Container> foucsContainer;
-    AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
+    RefPtr<Container> focusContainer;
+    AceEngine::Get().NotifyContainers([&focusContainer](const RefPtr<Container>& container) {
         auto pipeline = container->GetPipelineContext();
         if (pipeline && pipeline->IsWindowFocused()) {
-            foucsContainer = container;
+            focusContainer = container;
         }
     });
-    return foucsContainer;
+    return focusContainer;
 }
 
 RefPtr<Container> Container::GetByWindowId(uint32_t windowId)

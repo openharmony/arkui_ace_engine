@@ -400,7 +400,7 @@ HWTEST_F(FocusHierarchicalPageTestNG, FocusLostFocusToViewRootTest001, TestSize.
     focusManager->lastFocusView_ = AceType::WeakClaim(AceType::RawPtr(focusView));
 
     /**
-     * @tc.steps: step2. lostfocus and anewfoucs focus on root.
+     * @tc.steps: step2. lostfocus and anewfocus focus on root.
      * @tc.expected: root and focusHub not null.
      */
     focusManager->FocusViewShow(focusView);
@@ -424,7 +424,7 @@ HWTEST_F(FocusHierarchicalPageTestNG, FocusGetfocusleafTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create pageNode and focusHub and focusview.
-     * @tc.expected: pageNode and focusHub and foucsview not null.
+     * @tc.expected: pageNode and focusHub and focusview not null.
      */
     std::list<int32_t> emptyList;
     auto pageNode = CreateFocusViewWithFocusPattern("pageNode", emptyList, FocusType::SCOPE, true);
@@ -602,7 +602,7 @@ HWTEST_F(FocusHierarchicalPageTestNG, TabFocusTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Out of focus and then regain focus as TAB buttonFocusHub2.
-     * @tc.expected: Press tab foucs is buttonFocusHub2.
+     * @tc.expected: Press tab focus is buttonFocusHub2.
      */
     focusManager->FocusViewShow(focusView);
     buttonFocusHub2->RequestFocusImmediately();
