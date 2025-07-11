@@ -67,6 +67,7 @@ const uint32_t QR_CODE_VALUE_MAX_LENGTH = 256;
 const uint32_t QR_CODE_VALUE_MAX_LENGTH_NEW = 512;
 constexpr int32_t PLATFORM_VERSION_10 = 10;
 constexpr int32_t PLATFORM_VERSION_11 = 11;
+constexpr int32_t PLATFORM_VERSION_12 = 12;
 const Dimension DEFAULT_SIZE(240.0, DimensionUnit::VP);
 } // namespace
 
@@ -1126,5 +1127,54 @@ HWTEST_F(QRCodeTestNg, QRCodeCreateWithResourceObjTest001, TestSize.Level1)
     qrCodeModelNG.CreateWithResourceObj(jsResourceType, resObjWithId);
     pattern->OnColorModeChange(colorMode);
     EXPECT_EQ(paintProperty->GetOpacity(), opacity);
+}
+
+/**
+ * @tc.name: QRCodeModifierOnDraw003
+ * @tc.desc: test onDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create qrCodeModel and set api version 12
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_12);
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto qrCodePattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(qrCodePattern, nullptr);
+    auto qrCodePaintMethod = AceType::DynamicCast<QRCodePaintMethod>(qrCodePattern->CreateNodePaintMethod());
+    ASSERT_NE(qrCodePaintMethod, nullptr);
+    auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    qrcodePaintProperty->UpdateColor(Color::RED);
+    qrcodePaintProperty->UpdateValue(CREATE_VALUE);
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    renderContext->propForegroundColor_ = Color::RED;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, qrcodePaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).Times(1).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).Times(1).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(1).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).Times(1).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, DrawImage(_, _, _, _)).Times(1).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Restore()).Times(1).WillOnce(Return());
+    DrawingContext context = { rsCanvas, 10.0f, 10.0f };
+    qrCodePaintMethod->qrCodeSize_ = 100.0f;
+
+    /**
+     * @tc.steps: steps2. onDraw
+     * @tc.expected: steps2. Check the result of onDraw
+     */
+    qrCodePaintMethod->UpdateContentModifier(paintWrapper);
+    auto qrCodeModifier = AceType::DynamicCast<QRCodeModifier>(qrCodePaintMethod->GetContentModifier(paintWrapper));
+    qrCodeModifier->onDraw(context);
+    EXPECT_EQ(qrCodeModifier->color_->Get(), Color::RED);
 }
 } // namespace OHOS::Ace::NG
