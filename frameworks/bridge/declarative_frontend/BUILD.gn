@@ -40,12 +40,14 @@ template("declarative_frontend") {
         "ng/declarative_frontend_ng.cpp",
         "ng/frontend_delegate_declarative_ng.cpp",
         "ng/page_router_manager.cpp",
+        "ng/page_router_manager_static.cpp",
       ]
     } else {
       sources = [
         "declarative_frontend.cpp",
         "frontend_delegate_declarative.cpp",
         "ng/page_router_manager.cpp",
+        "ng/page_router_manager_static.cpp",
       ]
     }
 

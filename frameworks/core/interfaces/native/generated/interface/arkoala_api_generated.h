@@ -27589,11 +27589,14 @@ typedef struct GENERATED_ArkUIPromptActionAccessor {
 } GENERATED_ArkUIPromptActionAccessor;
 
 typedef struct GENERATED_ArkUIRouterExtenderAccessor {
-    Ark_NativePointer (*push)(const Ark_String* url);
-    Ark_NativePointer (*replace)(const Ark_String* url, const Opt_Callback_Void* finishCallback);
+    Ark_NativePointer (*push)(const Ark_String* url, const Opt_Boolean* recover,
+        Ark_NativePointer jsView, const Opt_Callback_Void* finishCallback);
+    Ark_NativePointer (*replace)(const Ark_String* url, const Opt_Boolean* recover, Ark_NativePointer jsView,
+        const Opt_Callback_Void* enterFinishCallback, const Opt_Callback_Void* exitFinishCallback);
     void (*moveCommonUnderPageNode)(Ark_NativePointer commonNode, Ark_NativePointer pageNode);
     void (*back)();
-    Ark_NativePointer (*runPage)(const Ark_String* url);
+    Ark_NativePointer (*runPage)(const Ark_String* url, const Opt_Boolean* recover,
+        Ark_NativePointer jsView, const Opt_Callback_Void* finishCallback);
     void (*clear)();
 } GENERATED_ArkUIRouterExtenderAccessor;
 

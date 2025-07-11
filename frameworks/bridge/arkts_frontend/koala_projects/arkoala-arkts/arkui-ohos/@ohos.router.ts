@@ -2,7 +2,7 @@ import { InteropNativeModule } from "@koalaui/interop/InteropNativeModule"
 import { Router } from "arkui/handwritten"
 import { PeerNode } from "arkui/PeerNode"
 import { UserViewBuilder } from "arkui/UserView"
-import { ComputableState, State } from "@koalaui/runtime"
+import { ComputableState, State, IncrementalNode } from "@koalaui/runtime"
 import { UIContextImpl } from "arkui/handwritten/UIContextImpl";
 import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 
@@ -10,6 +10,7 @@ namespace router {
     export interface RouterOptions {
         url: string
         params?: Object
+        recoverable?: boolean
     }
     
     export enum RouterMode {
@@ -110,7 +111,7 @@ namespace router {
         globalRouterImp!.UpdateVisiblePagePeerNode(node, index);
     }
 
-    export function getStateRoot(): ComputableState<PeerNode> {
+    export function getStateRoot(): ComputableState<IncrementalNode> {
         let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
         const globalRouterImp = uiContext.getRouter().getRouter();
         return globalRouterImp!.getEntryRootValue();
