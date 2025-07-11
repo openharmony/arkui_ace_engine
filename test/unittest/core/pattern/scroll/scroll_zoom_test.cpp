@@ -135,6 +135,9 @@ TEST_F(ScrollZoomTest, ZoomScaleTest002)
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
     ASSERT_NE(pattern_->zoomCtrl_, nullptr);
+    ASSERT_NE(pattern_->zoomCtrl_->pinchGesture_, nullptr);
+    EXPECT_EQ(pattern_->zoomCtrl_->pinchGesture_->GetRecognizerType(), GestureTypeName::PINCH_GESTURE);
+    EXPECT_TRUE(pattern_->zoomCtrl_->pinchGesture_->IsSystemGesture());
 
     /**
      * @tc.step: step2. pinch update;
@@ -152,6 +155,34 @@ TEST_F(ScrollZoomTest, ZoomScaleTest002)
     ScrollModelNG::SetZoomScale(AceType::RawPtr(frameNode_), 1.0f);
     FlushUITasks();
     EXPECT_EQ(currScale, 2.0f);
+}
+/**
+ * @tc.name: ZoomScaleTest003
+ * @tc.desc: Test GetItemRect
+ * @tc.type: FUNC
+ */
+TEST_F(ScrollZoomTest, ZoomScaleTest003)
+{
+    /**
+     * @tc.step: step1. Create Scroll, set zoomScale to 2.0f;
+     * @tc.expected: scrollPattern zoomScale is 2.0f;
+     */
+    constexpr float margin = 100;
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    model.SetZoomScale(2.0f);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    ViewAbstract::SetMargin(CalcLength(margin));
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->zoomScale_.value(), 2.0f);
+    EXPECT_EQ(pattern_->viewPortExtent_.Height(), (CONTENT_H + margin + margin) * 2.0f);
+    EXPECT_EQ(pattern_->viewPortExtent_.Width(), (CONTENT_W + margin + margin) * 2.0f);
+    auto rect = pattern_->GetItemRect(0);
+    EXPECT_EQ(rect.Height(), CONTENT_H * 2.0f);
+    EXPECT_EQ(rect.Width(), CONTENT_W * 2.0f);
+    EXPECT_EQ(rect.Left(), margin * 2.0f);
+    EXPECT_EQ(rect.Top(), margin * 2.0f);
 }
 
 /**

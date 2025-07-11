@@ -1106,7 +1106,7 @@ void SetOnZoomStart(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_SCROLL_ZOOM_START;
         SendArkUISyncEvent(&event);
     };
-    ScrollModelNG::SetOnScrollStart(frameNode, std::move(onZoomStart));
+    ScrollModelNG::SetOnZoomStart(frameNode, std::move(onZoomStart));
 }
 
 void SetOnZoomStop(ArkUINodeHandle node, void* extraParam)
@@ -1121,7 +1121,7 @@ void SetOnZoomStop(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_SCROLL_ZOOM_STOP;
         SendArkUISyncEvent(&event);
     };
-    ScrollModelNG::SetOnScrollStart(frameNode, std::move(onZoomStop));
+    ScrollModelNG::SetOnZoomStop(frameNode, std::move(onZoomStop));
 }
 
 void ResetOnScroll(ArkUINodeHandle node)

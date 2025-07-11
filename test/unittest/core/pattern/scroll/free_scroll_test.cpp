@@ -135,6 +135,8 @@ TEST_F(FreeScrollTest, RecognizerOverride001)
     CreateScrollDone();
     const auto& controller = pattern_->freeScroll_;
     ASSERT_TRUE(controller->freePanGesture_);
+    EXPECT_EQ(controller->freePanGesture_->GetRecognizerType(), GestureTypeName::PAN_GESTURE);
+    EXPECT_TRUE(controller->freePanGesture_->IsSystemGesture());
 
     TouchTestResult res;
     ResponseLinkResult link;
