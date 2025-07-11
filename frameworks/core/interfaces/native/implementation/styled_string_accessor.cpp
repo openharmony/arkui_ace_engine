@@ -99,6 +99,7 @@ RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
             result = peer->span;
             CHECK_NULL_VOID(result);
             auto start = Converter::OptConvert<int32_t>(src.start).value_or(0);
+            start = std::max(0, start);
             auto end = Converter::OptConvert<int32_t>(src.length).value_or(0) + start;
             result->UpdateStartIndex(start);
             result->UpdateEndIndex(end);
