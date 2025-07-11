@@ -5462,8 +5462,15 @@ void UIContentImpl::SetForceSplitEnable(
 
 void UIContentImpl::ProcessDestructCallbacks()
 {
-    std::shared_lock<std::shared_mutex> reportLock(destructMutex_);
-    for (auto& [_, callback] : destructCallbacks_) {
+    std::vector<std::function<void()>> tempCallbacks;
+    {
+        std::shared_lock<std::shared_mutex> reportLock(destructMutex_);
+        tempCallbacks.reserve(destructCallbacks_.size());
+        for (auto& [_, callback] : destructCallbacks_) {
+            tempCallbacks.emplace_back(callback);
+        }
+    }
+    for (auto& callback : tempCallbacks) {
         callback();
     }
 }
