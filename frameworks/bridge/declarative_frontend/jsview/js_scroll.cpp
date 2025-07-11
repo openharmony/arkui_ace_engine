@@ -115,12 +115,6 @@ void JSScroll::Create(const JSCallbackInfo& info)
             ScrollModel::GetInstance()->SetScrollBarProxy(proxy);
         }
     }
-    // init scroll bar
-    std::pair<bool, Color> barColor;
-    barColor.first = false;
-    std::pair<bool, Dimension> barWidth;
-    barWidth.first = false;
-    ScrollModel::GetInstance()->InitScrollBar(GetTheme<ScrollBarTheme>(), barColor, barWidth, EdgeEffect::NONE);
     JSScrollTheme::ApplyTheme();
 }
 
