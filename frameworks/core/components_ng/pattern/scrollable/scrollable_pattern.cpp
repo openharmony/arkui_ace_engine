@@ -1214,6 +1214,7 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
                 scrollBar_->FlushBarWidth();
             }
         }
+        scrollBar_->MarkNeedRender();
     }
 }
 
