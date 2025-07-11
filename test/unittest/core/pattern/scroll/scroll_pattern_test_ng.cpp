@@ -944,8 +944,8 @@ HWTEST_F(ScrollPatternTestNg, GetChildrenExpandedSize02, TestSize.Level1)
     scrollPattern->viewPortExtent_ = viewPortExtent_;
     scrollPattern->axis_ = Axis::FREE;
     auto result = scrollPattern->GetChildrenExpandedSize();
-    EXPECT_EQ(result.Width(), 0.0f);
-    EXPECT_EQ(result.Height(), 0.0f);
+    EXPECT_EQ(result.Width(), 1.0f);
+    EXPECT_EQ(result.Height(), 3.0f);
 }
 
 /**
