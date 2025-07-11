@@ -489,6 +489,19 @@ HWTEST_F(RichEditorStyleTestNg, SetTypingStyle003, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UpdateCaretStyleByTypingStyleTest001
+ * @tc.desc: test SetTypingStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, UpdateCaretStyleByTypingStyleTest001, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->UpdateCaretStyleByTypingStyle(false);
+    richEditorPattern->UpdateCaretStyleByTypingStyle(true);
+}
+
+/**
  * @tc.name: HasSameTypingStyle001
  * @tc.desc: test HasSameTypingStyle
  * @tc.type: FUNC

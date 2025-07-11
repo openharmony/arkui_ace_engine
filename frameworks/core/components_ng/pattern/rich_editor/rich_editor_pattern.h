@@ -1371,7 +1371,7 @@ public:
     RefPtr<FrameNode> GetContentHost() const override;
 
     float GetCaretWidth();
-    void UpdateCaretStyleByTypingStyle();
+    void UpdateCaretStyleByTypingStyle(bool isReset);
     void MarkAISpanStyleChanged() override;
     void HandleOnAskCelia() override;
 

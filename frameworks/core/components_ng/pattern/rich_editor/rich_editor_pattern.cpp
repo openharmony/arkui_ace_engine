@@ -2253,12 +2253,12 @@ void RichEditorPattern::HandleOnAskCelia()
     }
 }
 
-void RichEditorPattern::UpdateCaretStyleByTypingStyle()
+void RichEditorPattern::UpdateCaretStyleByTypingStyle(bool isReset)
 {
     bool empty = spans_.empty();
     bool hasPreviewContent = !previewTextRecord_.previewContent.empty();
     bool lastNewLine = !empty && styleManager_->HasTypingParagraphStyle() && spans_.back()->content.back() == u'\n';
-    CHECK_NULL_VOID(empty || hasPreviewContent || lastNewLine);
+    CHECK_NULL_VOID(empty || hasPreviewContent || lastNewLine || isReset);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -2268,6 +2268,7 @@ void RichEditorPattern::SetTypingStyle(std::optional<struct UpdateSpanStyle> typ
     std::optional<TextStyle> textStyle)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetTypingStyle, %{public}d", typingStyle.has_value());
+    bool isReset = typingStyle_.has_value() && !typingStyle.has_value();
     typingStyle_ = typingStyle;
     typingTextStyle_ = textStyle;
     styleManager_->SetTypingStyle(typingStyle, textStyle);
@@ -2280,14 +2281,15 @@ void RichEditorPattern::SetTypingStyle(std::optional<struct UpdateSpanStyle> typ
             typingTextStyle_->SetTextBackgroundStyle(textBackgroundStyle);
         }
     }
-    UpdateCaretStyleByTypingStyle();
+    UpdateCaretStyleByTypingStyle(isReset);
 }
 
 void RichEditorPattern::SetTypingParagraphStyle(std::optional<struct UpdateParagraphStyle> typingParagraphStyle)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetTypingParagraphStyle, %{public}d", typingParagraphStyle.has_value());
+    bool isReset = styleManager_->HasTypingParagraphStyle() && !typingParagraphStyle.has_value();
     styleManager_->SetTypingParagraphStyle(typingParagraphStyle);
-    UpdateCaretStyleByTypingStyle();
+    UpdateCaretStyleByTypingStyle(isReset);
 }
 
 std::optional<struct UpdateSpanStyle> RichEditorPattern::GetTypingStyle()
