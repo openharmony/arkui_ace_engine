@@ -1511,19 +1511,27 @@ bool TextPickerModelNG::GetEnableHapticFeedback(FrameNode* frameNode)
 
 void TextPickerModelNG::SetSelectedBackgroundStyle(const NG::PickerBackgroundStyle& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor,
-        value.color.value());
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBorderRadius,
-        value.borderRadius.value());
+    if (value.color.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor,
+            value.color.value());
+    }
+    if (value.borderRadius.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBorderRadius,
+            value.borderRadius.value());
+    }
 }
 
 void TextPickerModelNG::SetSelectedBackgroundStyle(FrameNode* frameNode, const NG::PickerBackgroundStyle& value)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor,
-        value.color.value(), frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBorderRadius,
-        value.borderRadius.value(), frameNode);
+    if (value.color.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor,
+            value.color.value(), frameNode);
+    }
+    if (value.borderRadius.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBorderRadius,
+            value.borderRadius.value(), frameNode);
+    }
 }
 
 PickerBackgroundStyle TextPickerModelNG::GetSelectedBackgroundStyle(FrameNode* frameNode)
