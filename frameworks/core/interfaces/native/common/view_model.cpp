@@ -670,10 +670,6 @@ void* createContainerSpanNode(ArkUI_Int32 nodeId)
 
 void* createCounterNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = CounterModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
@@ -695,10 +691,6 @@ void* createEffectComponentNode(ArkUI_Int32 nodeId)
 
 void* createEllipseNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = EllipseModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
@@ -716,10 +708,6 @@ void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
 
 void* createFolderStackNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = FolderStackModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
@@ -737,10 +725,6 @@ void* createFormComponentNode(ArkUI_Int32 nodeId)
 
 void* createFormLinkNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = FormLinkModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
@@ -767,10 +751,6 @@ void* createHyperlinkNode(ArkUI_Int32 nodeId)
 
 void* createLineNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = LineModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
@@ -850,10 +830,6 @@ void* createPasteButtonNode(ArkUI_Int32 nodeId)
 
 void* createPathNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = PathModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
@@ -879,28 +855,16 @@ void* createPluginComponentNode(ArkUI_Int32 nodeId)
 
 void* createPolygonNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = PolygonModelNG::CreateFrameNode(nodeId, true);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
 void* createPolylineNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = PolygonModelNG::CreateFrameNode(nodeId, false);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
 void* createRectNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = RectModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
@@ -970,10 +934,6 @@ void* createSecurityComponentMethodNode(ArkUI_Int32 nodeId)
 
 void* createShapeNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = ShapeModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
@@ -1019,10 +979,6 @@ void* createSymbolSpanNode(ArkUI_Int32 nodeId)
 
 void* createVideoNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = VideoModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
