@@ -1055,4 +1055,35 @@ HWTEST_F(GestureRecognizerTestNg, HandleGestureAcceptTest007, TestSize.Level1)
     UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(endCallbackError);
     panRecognizerPtr->SendCallbackMsg(panRecognizerPtr->onActionEnd_, GestureCallbackType::UPDATE);
 }
+
+/**
+ * @tc.name: HandleGestureAcceptTest008
+ * @tc.desc: Test function: HandleGestureAccept for ClickRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, HandleGestureAcceptTest008, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(1, 1, false);
+    ASSERT_NE(clickRecognizerPtr, nullptr);
+    clickRecognizerPtr->AttachFrameNode(frameNode);
+    GestureEvent info;
+    auto start = [](GestureEvent& info) {};
+    auto action = [](GestureEvent& info) {};
+    auto end = [](GestureEvent& info) {};
+    clickRecognizerPtr->SetOnActionStart(start);
+    clickRecognizerPtr->SetOnAction(action);
+    clickRecognizerPtr->SetOnActionEnd(end);
+    clickRecognizerPtr->SetRecognizerType(GestureTypeName::CLICK);
+
+    auto startCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                             const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                             GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::UNKNOWN);
+        EXPECT_NE(gestureListenerType, GestureListenerType::TAP);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(startCallback);
+    clickRecognizerPtr->SendCallbackMsg(clickRecognizerPtr->onActionStart_, GestureCallbackType::START);
+}
 } // namespace OHOS::Ace::NG
