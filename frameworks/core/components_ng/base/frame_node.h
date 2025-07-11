@@ -1265,15 +1265,6 @@ public:
         dragHitTestBlock_ = dragHitTestBlock;
     }
 
-    void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
-
-    /* ============================== Arkoala LazyForEach adapter section START ==============================*/
-    void ArkoalaSynchronize(
-        LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount);
-
-    void ArkoalaRemoveItemsOnChange(int32_t changeIndex);
-    /* ============================== Arkoala LazyForEach adapter section END ==============================*/
-
     void SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper);
     /**
      * @description: this callback triggered by ai assistant by ui_session proxy.
@@ -1284,8 +1275,16 @@ public:
      */
     uint32_t CallAIFunction(const std::string& functionName, const std::string& params);
 
+    void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
+
+    /* ============================== Arkoala LazyForEach adapter section START ==============================*/
+    void ArkoalaSynchronize(
+        LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount);
+
+    void ArkoalaRemoveItemsOnChange(int32_t changeIndex);
+
 private:
-    RefPtr<LayoutWrapper> ArkoalaGetOrCreateChild(uint32_t index);
+    RefPtr<LayoutWrapper> ArkoalaGetOrCreateChild(uint32_t index, bool active);
     void ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached);
 
     /* temporary adapter to provide LazyForEach feature in Arkoala */
