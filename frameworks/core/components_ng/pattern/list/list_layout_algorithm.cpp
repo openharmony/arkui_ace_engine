@@ -263,7 +263,7 @@ void ListLayoutAlgorithm::LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int
     CHECK_NULL_VOID(listPattern);
     auto focusIndex = listPattern->GetFocusIndex();
     CHECK_NULL_VOID(focusIndex.has_value());
-    if (focusIndex.value() >= start && focusIndex.value() <= end) {
+    if (focusIndex.value() >= start - itemStartIndex_ && focusIndex.value() <= end) {
         return;
     }
     int32_t indexInList = -1;
