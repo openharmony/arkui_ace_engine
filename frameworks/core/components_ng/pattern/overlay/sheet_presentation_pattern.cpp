@@ -3050,7 +3050,8 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     bool isCurrentFocus = host->GetFocusHub()->IsCurrentFocus();
-    if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE || !isCurrentFocus) {
+    if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE || !isCurrentFocus ||
+        keyboardAvoidMode_ == SheetKeyboardAvoidMode::POPUP_SHEET) {
         TAG_LOGD(AceLogTag::ACE_SHEET,
             "Sheet will not avoid keyboard.keyboardAvoidMode:%{public}d, isCurrentFocus:%{public}d.",
             keyboardAvoidMode_, isCurrentFocus);
@@ -3065,8 +3066,7 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
     keyboardHeight_ = manager->GetKeyboardInset().Length();
 
     if (isDismissProcess_) {
-        TAG_LOGD(AceLogTag::ACE_SHEET,
-            "The sheet will disappear, so there's no need to handle canceling keyboard avoidance here.");
+        TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet will disappear, not need to handle canceling keyboard avoidance here.");
         return;
     }
     StopModifySheetTransition();

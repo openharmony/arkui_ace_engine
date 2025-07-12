@@ -778,6 +778,14 @@ HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode002, TestSize.Level
     EXPECT_NE(sheetPattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::NONE);
     EXPECT_EQ(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
     sheetPattern->AvoidKeyboardBySheetMode();
+    safeAreaManager->keyboardInset_ = SafeAreaInsets::Inset();
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::POPUP_SHEET;
+    host->GetFocusHub()->currentFocus_ = true;
+    sheetPattern->AvoidKeyboardBySheetMode();
+    EXPECT_EQ(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::RESIZE_ONLY;
+    sheetPattern->AvoidKeyboardBySheetMode();
+    EXPECT_EQ(sheetPattern->keyboardHeight_, 0);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
