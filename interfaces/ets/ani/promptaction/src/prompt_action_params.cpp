@@ -445,9 +445,11 @@ bool GetEnumStringOpt(ani_env* env, ani_object object, const char *name, const c
 
 bool GetFunctionParam(ani_env *env, ani_ref ref, std::function<void()>& result)
 {
-    result = [env, ref]() {
-        if (ref) {
-            ani_fn_object func = static_cast<ani_fn_object>(ref);
+    ani_ref globalRef;
+    env->GlobalReference_Create(ref, &globalRef);
+    result = [env, globalRef]() {
+        if (globalRef) {
+            ani_fn_object func = static_cast<ani_fn_object>(globalRef);
             std::vector<ani_ref> args;
             ani_ref fnReturnVal {};
             ani_status status = env->FunctionalObject_Call(func, args.size(), args.data(), &fnReturnVal);

@@ -686,13 +686,15 @@ bool GetOnWillDismiss(ani_env* env, ani_object object,
         return false;
     }
 
-    result = [env, resultRef](const int32_t reason, const int32_t instanceId) {
+    ani_ref globalRef;
+    env->GlobalReference_Create(resultRef, &globalRef);
+    result = [env, globalRef](const int32_t reason, const int32_t instanceId) {
         TAG_LOGI(OHOS::Ace::AceLogTag::ACE_DIALOG,
             "Dissmiss dialog enter. reason: %{public}d, instanceId: %{public}d", reason, instanceId);
-        if (resultRef) {
+        if (globalRef) {
             ani_object dismissDialogAction = OHOS::Ace::Ani::ANICreateDismissDialogAction(env, reason, instanceId);
             ani_ref actionRef = static_cast<ani_ref>(dismissDialogAction);
-            ani_fn_object func = static_cast<ani_fn_object>(resultRef);
+            ani_fn_object func = static_cast<ani_fn_object>(globalRef);
             ani_ref fnReturnVal {};
             ani_status status = env->FunctionalObject_Call(func, 1, &actionRef, &fnReturnVal);
             if (status != ANI_OK) {

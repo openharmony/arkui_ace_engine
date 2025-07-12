@@ -20,6 +20,7 @@ import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, Rectangle, Tr
     DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions } from 'arkui.component.common'
 import { CustomBuilder } from 'arkui.component.builder'
 import { DialogAlignment } from 'arkui.component.alertDialog'
+import { DismissDialogAction } from 'arkui.component.actionSheet'
 import { BorderStyle, Alignment } from 'arkui.component.enums'
 import { Resource } from 'global.resource'
 import { LengthMetrics } from 'arkui.Graphics'
@@ -32,11 +33,6 @@ export enum LevelMode {
 export enum ImmersiveMode {
     DEFAULT = 0,
     EXTEND = 1,
-}
-
-export interface DismissDialogAction {
-    dismiss(): void;
-    reason: DismissReason;
 }
 
 class DismissDialogActionInner implements DismissDialogAction {
