@@ -100,8 +100,8 @@ TEST_F(ScrollZoomTest, ZoomScaleTest001)
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
     EXPECT_EQ(pattern_->zoomScale_.value(), 2.0f);
-    EXPECT_EQ(pattern_->viewPortExtent_.Height(), CONTENT_H * 2.0f);
-    EXPECT_EQ(pattern_->viewPortExtent_.Width(), CONTENT_W * 2.0f);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize().Height(), CONTENT_H * 2.0f);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize().Width(), CONTENT_W * 2.0f);
 
     /**
      * @tc.step: step2. Create Scroll, reset zoomScale;

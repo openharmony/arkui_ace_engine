@@ -1701,6 +1701,8 @@ SizeF ScrollPattern::GetChildrenExpandedSize()
         return SizeF(viewPort_.Width(), viewPortExtent_.Height());
     } else if (axis == Axis::HORIZONTAL) {
         return SizeF(viewPortExtent_.Width(), viewPort_.Height());
+    } else if (axis == Axis::FREE) {
+        return SizeF(viewPortExtent_.Width(), viewPortExtent_.Height());
     }
     return SizeF();
 }
