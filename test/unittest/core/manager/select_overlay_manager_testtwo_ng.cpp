@@ -968,4 +968,75 @@ HWTEST_F(SelectOverlayManagerTestTwoNg, DestroySelectOverlayNode, TestSize.Level
     content.DestroySelectOverlayNode(menuNode);
     EXPECT_TRUE(menuNode->IsInDestroying());
 }
+
+/**
+ * @tc.name: DestroySelectOverlayNode001
+ * @tc.desc: test select_content_overlay_manager.cpp DestroySelectOverlayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestTwoNg, DestroySelectOverlayNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo selectInfo;
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+
+    /**
+     * @tc.steps: step2. CreateSelectOverlayNode
+     */
+    auto menuNode = SelectOverlayNode::CreateSelectOverlayNode(content.shareOverlayInfo_, SelectOverlayMode::MENU_ONLY);
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(root_);
+    auto selectOverlayPattern = menuNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(selectOverlayPattern, nullptr);
+    selectOverlayPattern->SetIsMenuShowInSubWindow(true);
+
+    /**
+     * @tc.steps: step3. call DestroySelectOverlayNode
+     */
+    content.DestroySelectOverlayNode(menuNode);
+    EXPECT_TRUE(menuNode->IsInDestroying());
+}
+
+/**
+ * @tc.name: DestroySelectOverlayNode002
+ * @tc.desc: test select_content_overlay_manager.cpp DestroySelectOverlayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestTwoNg, DestroySelectOverlayNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = false;
+    selectInfo.isUsingMouse = true;
+    selectInfo.isUseOverlayNG = true;
+
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+
+    /**
+     * @tc.steps: step2. CreateSelectOverlayNode
+     */
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(root_);
+    auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetIsSelectOverlaySubWindowWrapper(true);
+
+    /**
+     * @tc.steps: step3. call DestroySelectOverlayNode
+     */
+    content.DestroySelectOverlayNode(menuNode);
+    EXPECT_TRUE(content.shareOverlayInfo_->isUsingMouse);
+}
 } // namespace OHOS::Ace::NG
