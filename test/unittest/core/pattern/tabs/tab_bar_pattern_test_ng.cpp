@@ -1665,6 +1665,29 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternSetTabBarTranslateAndOpacityTest001, 
 }
 
 /**
+ * @tc.name: SetTabBarTranslate001
+ * @tc.desc: test SetTabBarTranslate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, SetTabBarTranslate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build tabbar.
+     */
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2.Set translate, test function SetTabBarTranslate.
+     * @tc.expected: userDefinedTranslateY_ is 10.
+     */
+    auto options = TranslateOptions(0.0f, 10.f, 0.0f);
+    tabBarPattern_->SetTabBarTranslate(options, true);
+    EXPECT_EQ(tabBarPattern_->userDefinedTranslateY_, 10.f);
+}
+
+/**
  * @tc.name: StartShowTabBar001
  * @tc.desc: test StartShowTabBar
  * @tc.type: FUNC
