@@ -93,6 +93,7 @@ protected:
     std::u16string StringOutBoundProtection(int32_t position, int32_t length, std::u16string wTextForAI);
     bool IsNeedParagraphReLayout() const override;
     double GetIndentMaxWidth(double width) const override;
+    void MeasureWidthLayoutCalPolicy(LayoutWrapper* layoutWrapper) override;
 
 private:
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
@@ -137,6 +138,8 @@ private:
     bool IsFixIdealSizeAndNoMaxSize(LayoutWrapper* layoutWrapper, bool isWidth);
     LayoutConstraintF CalcContentConstraint(const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
     std::optional<float> GetCalcLayoutConstraintLength(LayoutWrapper* layoutWrapper, bool isMax, bool isWidth);
+    void MeasureWithFixAtIdealSize(LayoutWrapper* layoutWrapper);
+    void MeasureWithMatchParent(LayoutWrapper* layoutWrapper);
     RefPtr<PropertyBool> showSelect_;
     std::optional<LayoutConstraintF> cachedCalcContentConstraint_;
     bool isFixIdealSizeAndNoMaxWidth_ = false;
