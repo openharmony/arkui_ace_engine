@@ -136,9 +136,6 @@ void SelectedFontImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto fontOpt = Converter::OptConvert<Font>(*value);
     if (fontOpt.has_value()) {
-        // need check
-        // IndexerModelNG::SetSelectedFont(frameNode, fontOpt.value().fontSize, fontOpt.value().fontWeight,
-        //     fontOpt.value().fontFamilies, fontOpt.value().fontStyle);
     }
 }
 void PopupFontImpl(Ark_NativePointer node,
@@ -149,9 +146,6 @@ void PopupFontImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto fontOpt = Converter::OptConvert<Font>(*value);
     if (fontOpt.has_value()) {
-        // need check
-        // IndexerModelNG::SetPopupFont(frameNode, fontOpt.value().fontSize, fontOpt.value().fontWeight,
-        //     fontOpt.value().fontFamilies, fontOpt.value().fontStyle);
     }
 }
 void PopupItemFontImpl(Ark_NativePointer node,
@@ -175,8 +169,6 @@ void ItemSizeImpl(Ark_NativePointer node,
     auto size = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(size);
     Validator::ValidateNonPercent(size);
-    // need check
-    // IndexerModelNG::SetItemSize(frameNode, size.value_or(DEFAULT_ITEM_SIZE));
 }
 void FontImpl(Ark_NativePointer node,
               const Ark_Font* value)
@@ -186,9 +178,6 @@ void FontImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto fontOpt = Converter::OptConvert<Font>(*value);
     if (fontOpt.has_value()) {
-        // need check
-        // IndexerModelNG::SetFont(frameNode, fontOpt.value().fontSize, fontOpt.value().fontWeight,
-        //     fontOpt.value().fontFamilies, fontOpt.value().fontStyle);
     }
 }
 void OnSelectImpl(Ark_NativePointer node,
@@ -261,39 +250,10 @@ void AutoCollapseImpl(Ark_NativePointer node,
 void PopupItemBorderRadiusImpl(Ark_NativePointer node,
                                const Ark_Number* value)
 {
-    // need check
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // float radius = ZERO_RADIUS;
-    // if (value) {
-    //     auto radiusValue = Converter::Convert<float>(*value);
-    //     if (radiusValue >= 0) {
-    //         radius = radiusValue + RADIUS_OFFSET;
-    //     }
-    // } else {
-    //     radius = POPUP_ITEM_DEFAULT_RADIUS + RADIUS_OFFSET;
-    // }
-    // IndexerModelNG::SetPopupItemBorderRadius(frameNode, Dimension(radius, DimensionUnit::VP));
-    // IndexerModelNG::SetPopupBorderRadius(frameNode, Dimension(radius, DimensionUnit::VP));
 }
 void ItemBorderRadiusImpl(Ark_NativePointer node,
                           const Ark_Number* value)
 {
-    // need check
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // float radius = ZERO_RADIUS;
-    // if (value) {
-    //     auto radiusValue = Converter::Convert<float>(*value);
-    //     if (radiusValue >= 0) {
-    //         radius = radiusValue + RADIUS_OFFSET;
-    //     }
-    // } else {
-    //     radius = ITEM_DEFAULT_RADIUS + RADIUS_OFFSET;
-    // }
-    // IndexerModelNG::SetItemBorderRadius(frameNode, Dimension(radius, DimensionUnit::VP));
-    // IndexerModelNG::SetIndexerBorderRadius(frameNode, Dimension(radius, DimensionUnit::VP));
 }
 void PopupBackgroundBlurStyleImpl(Ark_NativePointer node,
                                   Ark_BlurStyle value)

@@ -39,11 +39,6 @@ void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     DetachRenderContext();
 }
 
-void CanvasPattern::OnDetachFromMainTree()
-{
-    DetachRenderContext();
-}
-
 void CanvasPattern::AttachRenderContext()
 {
     isAttached_ = true;
@@ -99,6 +94,7 @@ void CanvasPattern::OnAttachToFrameNode()
     renderCtx->SetClipToBounds(false);
     renderCtx->SetUsingContentRectForRenderFrame(true);
     renderCtx->SetFrameGravity(Rosen::Gravity::RESIZE_ASPECT_FILL);
+    renderCtx->SetNeedUseCmdlistDrawRegion(true);
     if (!contentModifier_) {
         contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
     }
@@ -919,7 +915,6 @@ void CanvasPattern::CreateAnalyzerOverlay()
     auto pixelMap = context->GetThumbnailPixelMap();
     CHECK_NULL_VOID(pixelMap);
     if (IsSupportImageAnalyzerFeature()) {
-        CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
     }
 }

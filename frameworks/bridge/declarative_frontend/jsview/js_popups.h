@@ -54,6 +54,8 @@ public:
     static void ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuModalMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuoffsetParam(const JSRef<JSObject>& offsetObj, NG::MenuParam& menuParam);
+    static void InitMenuParamColorMode(NG::MenuParam& menuParam);
+    static void ParseMenuPreviewBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
 private:
     static void ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam,
         NG::BorderColorProperty& outlineColor);
@@ -71,6 +73,13 @@ private:
         const RefPtr<ResourceObject>& bottomResObj, NG::BorderWidthProperty& outlineWidth);
     static void ParseMenuBorderRadiusWithResourceObj(const RefPtr<ResourceObject>& borderRadiusResObj,
         NG::BorderRadiusProperty& menuBorderRadius);
+    static bool ParseMenuPreviewBorderRadiusObject(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
+    static void ParseMenuPreviewBorderRadiusMultiObject(const JSRef<JSObject>& object, NG::BorderRadiusProperty& props);
+    static void SetBorderRadiusProps(const CalcDimension& dim, NG::BorderRadiusProperty& props, const char* propName);
+    static void ParseBorderRadiusProps(
+        const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props);
+    static void ParseBorderRadiusPropsByLengthMetrics(
+        const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props);
 };
 } // namespace OHOS::Ace::Framework
 

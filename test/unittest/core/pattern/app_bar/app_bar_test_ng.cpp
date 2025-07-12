@@ -1089,4 +1089,46 @@ HWTEST_F(AppBarTestNg, TestOnBackPressedCallback032, TestSize.Level1)
      */
     EXPECT_FALSE(pattern->onBackPressedConsumed_.has_value());
 }
+
+/**
+ * @tc.name: TestCreateServicePanel033
+ * @tc.desc: Test CreateServicePanel with bundleName
+ * @tc.type: FUNC
+ */
+ HWTEST_F(AppBarTestNg, TestCreateServicePanel033, TestSize.Level1)
+{
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    std::string bundleName = "com.hmos.asde";
+    std::string abilityName = "PanelAbility";
+    std::map<std::string, std::string> params = {
+        {"bundleName", "com.hmos.asde"},
+        {"abilityName", "MainAbility"},
+        {"module", "entry"},
+        {"pageName", "DETAIL"},
+        {"ability.want.params.uiExtensionType", "sysDialog/atomicServicePanel"},
+        {"TopNavPathInfo", ""},
+    };
+    appBar->CreateServicePanel(bundleName, abilityName, params);
+    EXPECT_EQ(appBar->sessionId_, 0);
+}
+
+/**
+ * @tc.name: BuildAppbar001
+ * @tc.desc: Test BuildAppbar
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, BuildAppbar001, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    AppBarView::BuildAppbar(pipeline);
+    EXPECT_EQ(atom, appBar->atomicService_.Upgrade());
+}
 } // namespace OHOS::Ace::NG

@@ -55,11 +55,11 @@ void ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors)
 }
 
 bool ConvertResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, OHOS::Ace::NG::Gradient& gradient,
-    size_t index, std::vector<RefPtr<ResourceObject>>& resObjs)
+    size_t index, std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo)
 {
     Color color;
     RefPtr<ResourceObject> resObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, item, color, resObj)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, item, color, resObj, nodeInfo)) {
         return false;
     }
     resObjs.push_back(resObj);
@@ -75,15 +75,15 @@ bool ConvertResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, OHOS:
 }
 
 bool ConvertGradientColor(const EcmaVM* vm, const Local<JSValueRef>& itemParam, OHOS::Ace::NG::Gradient& gradient,
-    size_t index, std::vector<RefPtr<ResourceObject>>& resObjs)
+    size_t index, std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo)
 {
     if (!itemParam->IsObject(vm)) {
-        return ConvertResourceColor(vm, itemParam, gradient, index, resObjs);
+        return ConvertResourceColor(vm, itemParam, gradient, index, resObjs, nodeInfo);
     }
     Framework::JSLinearGradient* jsLinearGradient =
         static_cast<Framework::JSLinearGradient*>(itemParam->ToObject(vm)->GetNativePointerField(vm, 0));
     if (!jsLinearGradient) {
-        return ConvertResourceColor(vm, itemParam, gradient, index, resObjs);
+        return ConvertResourceColor(vm, itemParam, gradient, index, resObjs, nodeInfo);
     }
 
     size_t colorLength = jsLinearGradient->GetGradient().size();
@@ -143,7 +143,8 @@ ArkUINativeModuleValue DataPanelBridge::SetValueColors(ArkUIRuntimeCallInfo* run
         for (size_t i = 0; i < colorsArray->Length(vm); ++i) {
             auto item = colorsArray->GetValueAt(vm, colors, i);
             OHOS::Ace::NG::Gradient gradient;
-            if (!ConvertGradientColor(vm, item, gradient, i, colorVectorResObj)) {
+            auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+            if (!ConvertGradientColor(vm, item, gradient, i, colorVectorResObj, nodeInfo)) {
                 shadowColors.clear();
                 ConvertThemeColor(shadowColors);
                 break;
@@ -244,7 +245,8 @@ void ParseTrackShadowColors(EcmaVM* vm, const Local<panda::ObjectRef>& obj,
         for (size_t i = 0; i < colorsArray->Length(vm); ++i) {
             auto item = colorsArray->GetValueAt(vm, colors, i);
             OHOS::Ace::NG::Gradient gradient;
-            if (!ConvertGradientColor(vm, item, gradient, i, colorVectorResObj)) {
+            NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
+            if (!ConvertGradientColor(vm, item, gradient, i, colorVectorResObj, nodeInfo)) {
                 shadowColors.clear();
                 ConvertThemeColor(shadowColors);
                 break;
@@ -297,7 +299,8 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
         for (size_t i = 0; i < colorsArray->Length(vm); ++i) {
             auto item = colorsArray->GetValueAt(vm, colors, i);
             OHOS::Ace::NG::Gradient gradient;
-            if (!ConvertGradientColor(vm, item, gradient, i, colorVectorResObj)) {
+            auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+            if (!ConvertGradientColor(vm, item, gradient, i, colorVectorResObj, nodeInfo)) {
                 shadowColors.clear();
                 ConvertThemeColor(shadowColors);
                 break;
@@ -361,7 +364,8 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelTrackBackgroundColor(ArkUIRu
 
     Color color;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
         color = theme->GetBackgroundColor();
     }

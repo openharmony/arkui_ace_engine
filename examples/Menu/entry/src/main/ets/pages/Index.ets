@@ -1,62 +1,36 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import router from '@ohos.router';
 
-interface Categories {
+interface ListCategories {
   title:string,
-  url:string
+  utl:string
 }
 
 @Entry
 @Component
-struct Index {
-  private items: Categories[] = [
-    { title: "示例1：弹出普通菜单", url: "pages/MenuItemDemo" },
-    { title: "示例2：弹出自定义菜单", url: "pages/MenuBuilder" },
-    { title: "示例3：长按弹出菜单", url: "pages/MenuLongPress" },
-    { title: "示例4：右键弹出指向型菜单", url: "pages/MenuRightClick" },
-    { title: "示例5：长按弹出菜单的截图预览样式", url: "pages/MenuImagePreview" },
-    { title: "示例6：长按弹出菜单的自定义预览样式", url: "pages/MenuBuilderPreview" },
-    { title: "示例7：设置状态变量弹出菜单", url: "pages/ContextMenuIsShown" },
-    { title: "示例8：设置菜单和预览的动效", url: "pages/ContextMenuTransition" },
-    { title: "示例9：设置symbol类型图标", url: "pages/MenuSymbolIcon" },
-    { title: "示例10：设置一镜到底动效", url: "pages/MenuHoverScale" },
-    { title: "示例11：菜单基本功能_0_bM内容/自定义尺寸", url: "pages/MenuTestLevel0_0" },
-    { title: "示例12：菜单基本功能_1_bCM内容/自定义尺寸", url: "pages/MenuTestLevel0_1" },
-    { title: "示例13：菜单基本功能_2_标题/subwindow", url: "pages/MenuTestLevel0_2" },
-    { title: "示例14：菜单基本功能_3_位置", url: "pages/MenuTestLevel0_3" },
+struct RotationIndex {
+
+  private items : ListCategories[] = [
+    {title: "Menu示例代码",utl: "pages/Examples/Index" },
+    {title: "Menu生命周期",utl:"pages/LifeCycle/Index"},
+    {title: "Menu拖拽相关测试",utl:"pages/Drag/Index"},
+    {title: "bindContextMenu菜单UX规格",utl:"pages/BindContextMenu/Index"},
   ]
 
   build() {
     Column() {
-      Text('菜单控制示例代码').fontSize(22)
-      List({ space: '10vp' }) {
-        ForEach(this.items, (item: Categories) => {
+      Text('Menu测试用例')
+        .fontSize(22).fontColor(0xFFFFFF).fontWeight(FontWeight.Bold).textAlign(TextAlign.Center)
+        .width('100%').height(50).backgroundColor('#2ebd82')
+      List({space:'10vp'}) {
+        ForEach(this.items,(item : ListCategories) => {
           ListItem() {
             Text(item.title).fontSize(16).fontWeight(FontWeight.Bold)
-          }
-          .width('90%')
-          .height('40vp')
-          .backgroundColor('#ff53ecd9')
-          .borderRadius(10)
+          }.width('90%').height('40vp').backgroundColor('#ff53ecd9').borderRadius(10)
           .onClick(() => {
-            router.pushUrl({ url: item.url })
+            router.pushUrl({url:item.utl})
           })
         })
-      }.alignListItem(ListItemAlign.Center).margin(({ top: '10vp' })).width('100%').height('70%')
+      }.alignListItem(ListItemAlign.Center).margin({top:'10vp'}).width('100%').height('80%')
     }.width('100%').height('100%')
   }
 }

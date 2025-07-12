@@ -16,6 +16,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_LAYOUT_ALGORITHM_H
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/property/layout_policy_property.h"
 
 namespace OHOS::Ace::NG {
 // DividerLayoutAlgorithm acts as the underlying divider layout.
@@ -33,6 +34,8 @@ public:
     float GetDividerLength() const;
     bool GetVertical() const;
     bool GetStrokeWidthLimitation() const;
+    void UpdateConstraintSizeByLayoutPolicy(
+        NG::LayoutPolicyProperty& layoutPolicy, SizeF& constrainSize, Dimension& strokeWidth);
 
 private:
     float constrainStrokeWidth_ = 0;

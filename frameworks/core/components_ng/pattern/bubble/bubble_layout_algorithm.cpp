@@ -289,6 +289,7 @@ BubbleLayoutAlgorithm::BubbleLayoutAlgorithm(int32_t id, const std::string& tag,
 
 void BubbleLayoutAlgorithm::UpdateBubbleMaxSize(LayoutWrapper* layoutWrapper, bool showInSubWindow)
 {
+    CHECK_EQUAL_VOID(isTips_, true);
     CHECK_NULL_VOID(layoutWrapper);
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
@@ -822,7 +823,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     showArrow_ = false;
     minHeight_ = popupTheme->GetMinHeight();
     maxColumns_ = popupTheme->GetMaxColumns();
-    expandDisplay_ = DialogManager::GetInstance().IfNeedAvoidDock(layoutWrapper->GetHostNode());
+    expandDisplay_ = DialogManager::GetInstance().IsPcOrFreeMultiWindow(layoutWrapper->GetHostNode());
     InitWrapperRect(layoutWrapper, layoutProp);
     if (!useCustom_) {
         UpdateScrollHeight(layoutWrapper, showInSubWindow);
@@ -2018,6 +2019,8 @@ OffsetF BubbleLayoutAlgorithm::GetBubblePosition(const OffsetF& position, float 
         } else if (GetSimplePlacement(placement_) == Placement::RIGHT) {
             positionX -= BUBBLE_ARROW_HEIGHT.ConvertToPx();
         }
+    } else {
+        UpdateContentPositionRange(xMin, xMax, yMin, yMax);
     }
     auto x = std::clamp(positionX, xMin, xMax);
     auto y = std::clamp(positionY, yMin, yMax);
@@ -2044,6 +2047,17 @@ OffsetF BubbleLayoutAlgorithm::GetBubblePosition(const OffsetF& position, float 
         }
     }
     return OffsetF(x, y);
+}
+
+void BubbleLayoutAlgorithm::UpdateContentPositionRange(float& xMin, float& xMax, float& yMin, float& yMax)
+{
+    if (GetSimplePlacement(placement_) == Placement::BOTTOM) {
+        yMin += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        yMax += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+    } else if (GetSimplePlacement(placement_) == Placement::RIGHT) {
+        xMin += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        xMax += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+    }
 }
 
 void BubbleLayoutAlgorithm::CheckArrowPosition(OffsetF& position, float width, float height)
@@ -2327,7 +2341,8 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
         auto displayWindowOffset = OffsetF(pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetX(),
             pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetY());
         targetOffset_ += displayWindowOffset;
-        auto currentSubwindow = SubwindowManager::GetInstance()->GetCurrentWindow();
+        auto currentSubwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+            pipelineContext->GetInstanceId(), SubwindowType::TYPE_POPUP);
         if (currentSubwindow) {
             auto subwindowRect = currentSubwindow->GetRect();
             targetOffset_ -= subwindowRect.GetOffset();

@@ -36,6 +36,7 @@ std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
     auto qrcodeTheme = pipeline->GetTheme<QrcodeTheme>();
     CHECK_NULL_RETURN(qrcodeTheme, std::nullopt);
     Dimension defaultSize = qrcodeTheme->GetQrcodeDefaultSize();
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_11) {
         auto topPadding = 0.0f;
         auto bottomPadding = 0.0f;
@@ -48,19 +49,42 @@ std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
             leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
             rightPadding = padding->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
         }
-        auto width = defaultSize.ConvertToPx() - leftPadding - rightPadding;
+        auto defaultWidth = defaultSize.ConvertToPx() - leftPadding - rightPadding;
+        auto width = defaultWidth;
         if (Negative(width)) {
             width = 0.0f;
         }
         if (contentConstraint.selfIdealSize.Width().has_value()) {
             width = contentConstraint.selfIdealSize.Width().value();
         }
-        auto height = defaultSize.ConvertToPx() - topPadding - bottomPadding;
+        auto defaultHeight = defaultSize.ConvertToPx() - topPadding - bottomPadding;
+        auto height = defaultHeight;
         if (Negative(height)) {
             height = 0.0f;
         }
         if (contentConstraint.selfIdealSize.Height().has_value()) {
             height = contentConstraint.selfIdealSize.Height().value();
+        }
+        if (layoutPolicy.has_value()) {
+            if (layoutPolicy->IsWidthMatch()) {
+                width = contentConstraint.parentIdealSize.Width().value();
+            }
+            if (layoutPolicy->IsWidthWrap()) {
+                width = std::min(defaultWidth, static_cast<double>(contentConstraint.parentIdealSize.Width().value()));
+            }
+            if (layoutPolicy->IsWidthFix()) {
+                width = defaultWidth;
+            }
+            if (layoutPolicy->IsHeightMatch()) {
+                height = contentConstraint.parentIdealSize.Height().value();
+            }
+            if (layoutPolicy->IsHeightWrap()) {
+                height =
+                    std::min(defaultHeight, static_cast<double>(contentConstraint.parentIdealSize.Height().value()));
+            }
+            if (layoutPolicy->IsHeightFix()) {
+                height = defaultHeight;
+            }
         }
         auto qrCodeSize = std::min(width, height);
         qrCodeSize_ = qrCodeSize;
@@ -74,6 +98,39 @@ std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
         }
         qrCodeSize_ = idealSize.Width();
         return idealSize;
+    }
+}
+
+void QRCodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && layoutPolicy->IsFix()) {
+        auto contentConstraint = layoutProperty->GetLayoutConstraint();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto qrcodeTheme = pipeline->GetTheme<QrcodeTheme>();
+        CHECK_NULL_VOID(qrcodeTheme);
+        Dimension defaultSize = qrcodeTheme->GetQrcodeDefaultSize();
+        auto defaultHeight = defaultSize.ConvertToPx();
+        OptionalSizeF qrcodeFrameSize = { defaultHeight, defaultHeight };
+        if (contentConstraint->selfIdealSize.Width().has_value()) {
+            qrcodeFrameSize.SetWidth(contentConstraint->selfIdealSize.Width().value());
+        }
+        if (contentConstraint->selfIdealSize.Height().has_value()) {
+            qrcodeFrameSize.SetHeight(contentConstraint->selfIdealSize.Height().value());
+        }
+        if (layoutPolicy->IsWidthWrap()) {
+            qrcodeFrameSize.SetWidth(defaultHeight);
+        }
+        if (layoutPolicy->IsHeightWrap()) {
+            qrcodeFrameSize.SetHeight(defaultHeight);
+        }
+        layoutWrapper->GetGeometryNode()->SetFrameSize(qrcodeFrameSize.ConvertToSizeT());
+    } else {
+        BoxLayoutAlgorithm::Measure(layoutWrapper);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -59,10 +59,13 @@ globalThis.__AddToNodeControllerMap__ = function __AddToNodeControllerMap__(cont
   NodeControllerRegisterProxy.__NodeControllerMap__.set(containerId, nodeController);
 }
 
-globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeControllerMap__(containerId: number) {
-  let nodeController: NodeController = NodeControllerRegisterProxy.__NodeControllerMap__.get(containerId);
-  nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
-  NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
+globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeControllerMap__(containerId: number): void {
+  let nodeController = NodeControllerRegisterProxy.__NodeControllerMap__.get(containerId);
+  if (nodeController) {
+    nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
+    nodeController._nodeContainerId._value = -1;
+    NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
+  }
 }
 
 globalThis.__viewPuStack__ = new Array<ViewPU>();

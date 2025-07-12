@@ -27,41 +27,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 #ifdef WINDOW_SCENE_SUPPORTED
-// need check
-// AAFwk::Want CreateWant(const Ark_Want* want)
-// {
-//     AAFwk::Want aaFwkWant;
-//     CHECK_NULL_RETURN(want, aaFwkWant);
-//     auto bundleName = Converter::OptConvert<std::string>(want->bundleName);
-//     auto abilityName = Converter::OptConvert<std::string>(want->abilityName);
-//     auto deviceId = Converter::OptConvert<std::string>(want->deviceId);
-//     auto moduleName = Converter::OptConvert<std::string>(want->moduleName);
-//     aaFwkWant.SetElementName(
-//         deviceId.value_or(""), bundleName.value_or(""), abilityName.value_or(""), moduleName.value_or(""));
-//     auto uri = Converter::OptConvert<std::string>(want->uri);
-//     if (uri) {
-//         aaFwkWant.SetUri(uri.value());
-//     }
-//     auto type = Converter::OptConvert<std::string>(want->type);
-//     if (type) {
-//         aaFwkWant.SetType(type.value());
-//     }
-//     auto flags = Converter::OptConvert<int32_t>(want->flags);
-//     if (flags) {
-//         aaFwkWant.SetFlags(flags.value());
-//     }
-//     auto action = Converter::OptConvert<std::string>(want->action);
-//     if (action) {
-//         aaFwkWant.SetAction(action.value());
-//     }
-//     LOGE("CreateWant - 'want->parameters' is not supported");
-//     auto entitiesArray = Converter::OptConvert<Array_String>(want->entities);
-//     if (entitiesArray) {
-//         auto entities = Converter::Convert<std::vector<std::string>>(entitiesArray.value());
-//         aaFwkWant.SetEntities(entities);
-//     }
-//     return aaFwkWant;
-// }
 #endif //WINDOW_SCENE_SUPPORTED
 }
 }
@@ -72,11 +37,6 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-    // need check
-    // auto frameNode = UIExtensionModelNG::CreateEmbeddedFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return {};
 #else
     return {};

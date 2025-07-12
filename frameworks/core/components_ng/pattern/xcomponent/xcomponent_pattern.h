@@ -472,6 +472,7 @@ private:
     void RegisterTransformHintCallback(PipelineContext* context);
     void RegisterSurfaceRenderContext();
     void UnregisterSurfaceRenderContext();
+    std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(const RefPtr<FrameNode>& frameNode);
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);

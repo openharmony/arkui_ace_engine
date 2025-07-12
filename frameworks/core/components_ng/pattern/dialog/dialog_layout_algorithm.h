@@ -148,6 +148,7 @@ private:
     float embeddedDialogOffsetY_ = 0.0f;
     float stackRootDialogOffsetY_ = 0.0f;
     float safeAreaBottomLength_ = 0.0f;
+    float floatButtonsHeight_ = 0.0f;
 
     WeakPtr<PipelineContext> context_ = nullptr;
 

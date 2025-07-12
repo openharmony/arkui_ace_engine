@@ -164,6 +164,11 @@ public:
     void StartImplicitAnimation(const AnimationOption& operation, const RefPtr<Curve>& curve,
         const std::function<void()>& finishCallback = nullptr, const std::optional<int32_t>& count = std::nullopt);
 
+    bool HasPendingAnimation() const
+    {
+        return !pendingFrontendAnimation_.empty();
+    }
+
     void PrepareCloseImplicitAnimation();
 
     bool CloseImplicitAnimation();
@@ -1434,6 +1439,8 @@ public:
 
     virtual void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
 
+    virtual void DisableNotifyResponseRegionChanged() {};
+
     void SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr)
     {
         thpExtraMgr_ = thpExtraMgr;
@@ -1488,6 +1495,11 @@ public:
     virtual bool IsDirtyPropertyNodesEmpty() const
     {
         return true;
+    }
+
+    virtual void SetFlushTSUpdates(std::function<bool(int32_t)>&& flushTSUpdates)
+    {
+        /* only implemented in PipelineContext for NG */
     }
 
     void SetUIExtensionEventCallback(std::function<void(uint32_t)>&& callback);

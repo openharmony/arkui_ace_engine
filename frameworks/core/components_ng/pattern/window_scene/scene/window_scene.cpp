@@ -219,6 +219,10 @@ void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(session_);
     session_->SetUINodeId(0);
     session_->SetAttachState(false, initWindowMode_);
+    auto surfaceNode = session_->GetSurfaceNode();
+    if (surfaceNode) {
+        surfaceNode->SetVisible(true);
+    }
     CHECK_NULL_VOID(frameNode);
     auto windowName = IsMainWindow() ? session_->GetSessionInfo().bundleName_ : session_->GetWindowName();
     ACE_SCOPED_TRACE("OnDetachFromFrameNode[id:%d][self:%d][type:%d][name:%s]",
@@ -316,6 +320,11 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     host->GetGeometryNode()->SetFrameSize(SizeF(windowRect.width_, windowRect.height_));
 
     CHECK_NULL_VOID(session_);
+    if (session_->GetShowRecent()) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnBoundsChanged in recent %{public}d, rect:%{public}s",
+            session_->GetPersistentId(), windowRect.ToString().c_str());
+        return;
+    }
     Rosen::WSRectF originBounds = {
         .posX_ = bounds.x_,
         .posY_ = bounds.y_,
@@ -710,7 +719,6 @@ void WindowScene::OnLayoutFinished()
             self->BufferAvailableCallback();
             return;
         }
-        CHECK_EQUAL_VOID(self->session_->IsAnco(), true);
         if (self->session_->GetBufferAvailableCallbackEnable()) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "buffer available callback enable is true, no need remove blank.");
             return;
@@ -734,10 +742,6 @@ void WindowScene::OnDrawingCompleted()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
-        if (self->blankWindow_) {
-            self->BufferAvailableCallbackForBlank(true);
-            return;
-        }
         CHECK_NULL_VOID(self->snapshotWindow_);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
@@ -887,6 +891,7 @@ void WindowScene::OnPreLoadStartingWindowFinished()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         auto imageLayoutProperty = self->startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
         const auto& sessionInfo = self->session_->GetSessionInfo();
         auto preLoadPixelMap = Rosen::SceneSessionManager::GetInstance().GetPreLoadStartingWindow(sessionInfo);
         CHECK_NULL_VOID(preLoadPixelMap);

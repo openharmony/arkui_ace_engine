@@ -17,6 +17,7 @@
   "modelVersion": "5.0.3",
   "description": "Please describe the basic information.",
   "dependencies": {
+    "@ohos/apng": "1.1.2-rc.4"
   },
   "devDependencies": {
     "@ohos/hypium": "1.0.21",

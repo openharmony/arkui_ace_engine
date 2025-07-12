@@ -567,7 +567,7 @@ public:
         std::optional<double> levelOrder = std::nullopt);
     void MountToParentWithOrder(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node,
         std::optional<double> levelOrder = std::nullopt);
-    void OnMainWindowSizeChange(int32_t instanceId);
+    void OnMainWindowSizeChange(int32_t instanceId, WindowSizeChangeReason reason);
 
     void CleanSheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey);
 
@@ -707,6 +707,7 @@ public:
     void TriggerCustomKeyboardAvoid(int32_t targetId, float safeHeight);
     void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
     void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode);
+    void ExecuteFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode);
     void EraseMenuInfo(int32_t targetId)
     {
         if (menuMap_.find(targetId) != menuMap_.end()) {
@@ -748,6 +749,8 @@ public:
         return overlayInfo_;
     }
 
+    void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle);
+
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
     BorderRadiusProperty GetPrepareDragFrameNodeBorderRadius() const;
@@ -764,6 +767,7 @@ public:
     bool CheckSkipMenuShow(int32_t targetId);
     bool IsTopOrder(std::optional<double> levelOrder);
     std::optional<double> GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
+    void PopToast(int32_t targetId);
 
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
@@ -803,7 +807,7 @@ private:
         std::function<void()>&& sheetSpringBack = nullptr);
     SheetStyle UpdateSheetStyle(
         const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate);
-    void UpdateSheetProperty(
+    void UpdateSheetRenderProperty(
         const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& currentStyle, bool isPartialUpdate);
     void UpdateSheetMaskBackgroundColor(const RefPtr<FrameNode>& maskNode,
         const RefPtr<RenderContext>& maskRenderContext, const SheetStyle& sheetStyle);
@@ -816,7 +820,6 @@ private:
         }
     }
     void CleanInvalidModalNode(const WeakPtr<FrameNode>& invalidNode);
-    void PopToast(int32_t targetId);
 
     // toast should contain id to avoid multiple delete.
     std::unordered_map<int32_t, WeakPtr<FrameNode>> toastMap_;
@@ -919,6 +922,9 @@ private:
     void OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration);
     void OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<OverlayManager> weak,
         int32_t instanceId);
+    void HandleMenuDisappearCallback(const RefPtr<FrameNode>& menu);
+    bool CheckSelectSubWindowToClose(
+        const RefPtr<FrameNode>& menu, const RefPtr<OverlayManager>& overlayManager, bool expandDisplay);
     void OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<UINode> rootWeak,
         const WeakPtr<OverlayManager> weak, int32_t instanceId);
     void UpdateMenuVisibility(const RefPtr<FrameNode>& menu);
@@ -972,6 +978,7 @@ private:
     void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode, const RefPtr<PipelineContext>& pipeline);
     void CallMenuDisappearWithStatus(const RefPtr<FrameNode>& menuWrapperNode);
     void CallMenuDisappearOnlyNewLifeCycle(const RefPtr<FrameNode>& menuWrapperNode);
+    void EraseMenuInfoFromWrapper(const RefPtr<FrameNode>& menuWrapperNode);
     void SetDragNodeNeedClean();
     void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
@@ -1023,6 +1030,7 @@ private:
 
     std::function<void()> onHideDialogCallback_ = nullptr;
     CancelableCallback<void()> continuousTask_;
+    CancelableCallback<void()> previewFilterTask_;
     std::function<bool()> backPressEvent_ = nullptr;
 
     std::set<WeakPtr<UINode>> windowSceneSet_;

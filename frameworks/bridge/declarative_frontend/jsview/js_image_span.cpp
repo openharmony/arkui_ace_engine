@@ -129,9 +129,15 @@ void JSImageSpan::SetBaselineOffset(const JSCallbackInfo& info)
         return;
     }
     NG::CalcLength value;
-    if (ConvertFromJSValueNG(info[0], value) &&
+    RefPtr<ResourceObject> resObj;
+    UnRegisterResource("BaselineOffset");
+    if (ConvertFromJSValueNG(info[0], value, resObj) &&
         value.GetDimensionContainsNegative().Unit() != DimensionUnit::PERCENT) {
         NG::ImageSpanView::SetBaselineOffset(value.GetDimensionContainsNegative());
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            RegisterResource<CalcDimension>("BaselineOffset", resObj,
+                value.GetDimensionContainsNegative());
+        }
         return;
     }
     value.Reset();

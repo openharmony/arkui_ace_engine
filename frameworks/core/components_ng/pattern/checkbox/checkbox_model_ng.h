@@ -59,6 +59,7 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetSelect(FrameNode* frameNode, bool isSelected);
     static void SetSelectedColor(FrameNode* frameNode, const Color& color);
+    static void SetSelectedColorFlagByUser(FrameNode* frameNode, const bool isByUser);
     static void SetUnSelectedColor(FrameNode* frameNode, const Color& color);
     static void SetWidth(FrameNode* frameNode, const Dimension& width);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
@@ -88,9 +89,10 @@ public:
     static std::string GetCheckboxGroup(FrameNode* frameNode);
 
     static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
-    static void UpdateComponentColor(FrameNode* frameNode, const CheckBoxColorType checkBoxColorType);
+    static void ResetComponentColor(FrameNode* frameNode, const CheckBoxColorType type);
+    static void UpdateComponentColor(FrameNode* frameNode, const CheckBoxColorType type, const Color& color);
     static void CreateWithResourceObj(
-        FrameNode* frameNode, const CheckBoxColorType jsResourceType, const RefPtr<ResourceObject>& resObj);
+        FrameNode* frameNode, const CheckBoxColorType type, const RefPtr<ResourceObject>& resObj);
 
 private:
     static std::string ColorTypeToString(const CheckBoxColorType checkBoxColorType);

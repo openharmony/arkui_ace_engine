@@ -208,15 +208,17 @@ bool ParseJsShadowDimension(const EcmaVM *vm, const Local<JSValueRef> &value, Ca
 }
 
 bool ParseJsShadowColor(const EcmaVM *vm, const Local<JSValueRef> &colorArg,
-    int32_t& type, uint32_t& colorValue, RefPtr<ResourceObject>& colorResObj)
+    int32_t& type, uint32_t& colorValue, RefPtr<ResourceObject>& colorResObj,
+    ArkUINodeHandle nativeNode)
 {
     Color color;
     ShadowColorStrategy shadowColorStrategy;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (ParseJsShadowColorStrategy(vm, colorArg, shadowColorStrategy)) {
         type = 1; // 1: has shadowColorStrategy
         colorValue = static_cast<uint32_t>(shadowColorStrategy);
         return true;
-    } else if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
+    } else if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
         type = 2; // 2: has shadowColor
         colorValue = color.GetValue();
         return true;
@@ -939,17 +941,18 @@ void PushOuterBorderColorVector(const std::optional<Color>& valueColor, std::vec
 }
 
 void ParseOuterBorderEdgeColor(EcmaVM* vm, Local<JSValueRef>& arg, std::optional<Color>& optColor,
-    std::vector<RefPtr<ResourceObject>>& resObjs)
+    std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo)
 {
     Color color;
-    auto result = ArkTSUtils::ParseJsColorAlpha(vm, arg, color, resObjs);
+    auto result = ArkTSUtils::ParseJsColorAlpha(vm, arg, color, resObjs, nodeInfo);
     if (!arg->IsUndefined() && result) {
         optColor = color;
     }
 }
 
 void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values,
-    int32_t argsIndex, std::vector<RefPtr<ResourceObject>>& resObjs, bool needLocalized = false)
+    int32_t argsIndex, std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo,
+    bool needLocalized = false)
 {
     Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(argsIndex);
     Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
@@ -963,15 +966,15 @@ void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, st
     std::optional<Color> startColor;
     std::optional<Color> endColor;
 
-    ParseOuterBorderEdgeColor(vm, leftArg, leftColor, resObjs);
-    ParseOuterBorderEdgeColor(vm, rightArg, rightColor, resObjs);
-    ParseOuterBorderEdgeColor(vm, topArg, topColor, resObjs);
-    ParseOuterBorderEdgeColor(vm, bottomArg, bottomColor, resObjs);
+    ParseOuterBorderEdgeColor(vm, leftArg, leftColor, resObjs, nodeInfo);
+    ParseOuterBorderEdgeColor(vm, rightArg, rightColor, resObjs, nodeInfo);
+    ParseOuterBorderEdgeColor(vm, topArg, topColor, resObjs, nodeInfo);
+    ParseOuterBorderEdgeColor(vm, bottomArg, bottomColor, resObjs, nodeInfo);
     if (needLocalized) {
         Local<JSValueRef> startArgs = runtimeCallInfo->GetCallArgRef(27); // 27: index of BorderColor.startColor
         Local<JSValueRef> endArgs = runtimeCallInfo->GetCallArgRef(28);   // 28: index of BorderColor.endColor
-        ParseOuterBorderEdgeColor(vm, startArgs, startColor, resObjs);
-        ParseOuterBorderEdgeColor(vm, endArgs, endColor, resObjs);
+        ParseOuterBorderEdgeColor(vm, startArgs, startColor, resObjs, nodeInfo);
+        ParseOuterBorderEdgeColor(vm, endArgs, endColor, resObjs, nodeInfo);
     }
     if (startColor.has_value() || endColor.has_value()) {
         PushOuterBorderColorVector(startColor, values);
@@ -1016,7 +1019,7 @@ void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args, std::optional<C
 void ParseNullptrResObj(std::vector<RefPtr<ResourceObject>>& resObjs, int32_t index)
 {
     if (SystemProperties::ConfigChangePerform()) {
-        for (uint32_t i = 0; i < index; i++) {
+        for (int32_t i = 0; i < index; i++) {
             resObjs.push_back(nullptr);
         }
     }
@@ -1572,22 +1575,6 @@ std::function<void(bool)> ParseTransitionCallback(
     return finishCallback;
 }
 
-bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue, Color& result)
-{
-    if (!jsValue->IsObject(vm)) {
-        return false;
-    }
-    auto obj = jsValue->ToObject(vm);
-    auto toNumericProp = obj->Get(vm, "toNumeric");
-    if (toNumericProp->IsFunction(vm)) {
-        panda::Local<panda::FunctionRef> func = toNumericProp;
-            auto colorVal = func->Call(vm, obj, nullptr, 0);
-        result.SetValue(colorVal->Uint32Value(vm));
-        return true;
-    }
-    return false;
-}
-
 const std::vector<AccessibilitySamePageMode> PAGE_MODE_TYPE = { AccessibilitySamePageMode::SEMI_SILENT,
     AccessibilitySamePageMode::FULL_SILENT };
 const std::vector<FocusDrawLevel> FOCUS_DRAW_LEVEL = { FocusDrawLevel::SELF, FocusDrawLevel::TOP };
@@ -1602,7 +1589,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *ru
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> backgroundColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, backgroundColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, backgroundColorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundColor(nativeNode);
     } else {
         auto bgColorRawPtr = AceType::RawPtr(backgroundColorResObj);
@@ -1809,10 +1797,10 @@ void ParseJsShadowRadiusResObj(const EcmaVM *vm, const Local<JSValueRef>& radius
 }
 
 bool ParseJsShadowColorResObj(const EcmaVM *vm, const Local<JSValueRef>& colorArg, int32_t& type, uint32_t& color,
-    std::vector<RefPtr<ResourceObject>>& vectorResObj)
+    std::vector<RefPtr<ResourceObject>>& vectorResObj, ArkUINodeHandle nativeNode)
 {
     RefPtr<ResourceObject> colorResObj;
-    bool ret = ParseJsShadowColor(vm, colorArg, type, color, colorResObj);
+    bool ret = ParseJsShadowColor(vm, colorArg, type, color, colorResObj, nativeNode);
     if (colorResObj) {
         vectorResObj.push_back(colorResObj);
     } else {
@@ -2175,16 +2163,17 @@ ArkUINativeModuleValue CommonBridge::SetBorderColor(ArkUIRuntimeCallInfo *runtim
     Color bottomColor;
     Color leftColor;
 
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, topArg, topColor, resObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, topArg, topColor, resObj, nodeInfo)) {
         topColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, rightArg, rightColor, resObj)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, rightArg, rightColor, resObj, nodeInfo)) {
         rightColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottomColor, resObj)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottomColor, resObj, nodeInfo)) {
         bottomColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, leftArg, leftColor, resObj)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, leftArg, leftColor, resObj, nodeInfo)) {
         leftColor.SetValue(COLOR_ALPHA_VALUE);
     }
     auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -2218,7 +2207,8 @@ ArkUINativeModuleValue CommonBridge::SetOutlineColor(ArkUIRuntimeCallInfo* runti
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::vector<uint32_t> colorOptions;
     std::vector<RefPtr<ResourceObject>> vectorResObj;
-    ParseOuterBorderColor(runtimeCallInfo, vm, colorOptions, NUM_1, vectorResObj);
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorOptions, NUM_1, vectorResObj, nodeInfo);
     auto rawPtr = static_cast<void*>(&vectorResObj);
     GetArkUINodeModifiers()->getCommonModifier()->setOutlineColor(
         nativeNode, colorOptions.data(), colorOptions.size(), rawPtr);
@@ -2320,7 +2310,8 @@ ArkUINativeModuleValue CommonBridge::SetOutline(ArkUIRuntimeCallInfo* runtimeCal
     ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9, vectorResObj); // Outline Radius args start index
 
     std::vector<uint32_t> colorAndStyleOptions;
-    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5, vectorResObj);  // Outline Color args start index
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5, vectorResObj, nodeInfo);  // Outline Color args start index
     ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Outline Style args start index
 
     auto resRawPtr = static_cast<void*>(&vectorResObj);
@@ -2430,7 +2421,7 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
     }
     int32_t type = 0;
     uint32_t color = 0;
-    if (ParseJsShadowColorResObj(vm, colorArg, type, color, vectorResObj)) {
+    if (ParseJsShadowColorResObj(vm, colorArg, type, color, vectorResObj, nativeNode)) {
         shadows[NUM_1].i32 = type;
         shadows[NUM_5].u32 = color;
     }
@@ -2772,7 +2763,8 @@ ArkUINativeModuleValue CommonBridge::SetColorBlend(ArkUIRuntimeCallInfo *runtime
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> colorBlendObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorBlendObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorBlendObj, nodeInfo)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetColorBlend(nativeNode);
         } else {
             auto cbColorRawPtr = AceType::RawPtr(colorBlendObj);
@@ -2923,7 +2915,8 @@ ArkUINativeModuleValue CommonBridge::SetLinearGradient(ArkUIRuntimeCallInfo *run
 
     std::vector<ArkUIInt32orFloat32> colors;
     std::vector<RefPtr<ResourceObject>> vectorResObj;
-    ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj);
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj, nodeInfo);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
     values.push_back({.i32 = static_cast<ArkUI_Int32>(repeating)});
     auto colorRawPtr = static_cast<void*>(&vectorResObj);
@@ -2966,7 +2959,8 @@ ArkUINativeModuleValue CommonBridge::SetSweepGradient(ArkUIRuntimeCallInfo *runt
     if (metricsColorsArg->IsArray(vm)) {
         ParseGradientColorStopsWithColorSpace(vm, metricsColorsArg, colors, colorSpace);
     } else {
-        ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj);
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj, nodeInfo);
     }
     if (!colorSpace.has_value()) {
         colorSpace = ColorSpace::SRGB;
@@ -3014,7 +3008,8 @@ ArkUINativeModuleValue CommonBridge::SetRadialGradient(ArkUIRuntimeCallInfo *run
     values.push_back({.f32 = static_cast<ArkUI_Float32>(radius.Value())});
     values.push_back({.i32 = static_cast<ArkUI_Int32>(radius.Unit())});
     std::vector<ArkUIInt32orFloat32> colors;
-    ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj);
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    ArkTSUtils::ParseGradientColorStops(vm, colorsArg, colors, vectorResObj, nodeInfo);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
     values.push_back({.i32 = static_cast<ArkUI_Int32>(repeating)});
     auto resRawPtr = static_cast<void*>(&vectorResObj);
@@ -3238,13 +3233,15 @@ ArkUINativeModuleValue CommonBridge::ResetLinearGradientBlur(ArkUIRuntimeCallInf
 }
 
 void SetBackgroundBlurStyleParam(ArkUIRuntimeCallInfo* runtimeCallInfo, bool& isValidColor, Color& inactiveColor,
-    int32_t& policy, int32_t& blurType, RefPtr<ResourceObject>& resourceObject)
+    int32_t& policy, int32_t& blurType, ArkUINodeHandle nativeNode, RefPtr<ResourceObject>& resourceObject)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     auto policyArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     auto inactiveColorArg = runtimeCallInfo->GetCallArgRef(NUM_7);
     auto typeArg = runtimeCallInfo->GetCallArgRef(NUM_8);
-    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor, resourceObject)) {
+
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor, resourceObject, nodeInfo)) {
         isValidColor = true;
     }
     ArkTSUtils::ParseJsInt32(vm, policyArg, policy);
@@ -3306,7 +3303,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundBlurStyle(ArkUIRuntimeCallInfo
     auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
     auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
     RefPtr<ResourceObject> inactiveColorResObj;
-    SetBackgroundBlurStyleParam(runtimeCallInfo, isValidColor, inactiveColor, policy, blurType, inactiveColorResObj);
+    SetBackgroundBlurStyleParam(
+        runtimeCallInfo, isValidColor, inactiveColor, policy, blurType, nativeNode, inactiveColorResObj);
     int32_t intArray[NUM_5];
     intArray[NUM_0] = blurStyle;
     intArray[NUM_1] = colorMode;
@@ -3347,7 +3345,8 @@ ArkUINativeModuleValue CommonBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCall
     ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9, resObj); // Border Radius args start index
 
     std::vector<uint32_t> colorAndStyleOptions;
-    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5, resObj);  // Border Color args start index
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5, resObj, nodeInfo);  // Border Color args start index
     ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Border Style args start index
 
     auto rawPtr = static_cast<void*>(&resObj);
@@ -3370,7 +3369,8 @@ ArkUINativeModuleValue CommonBridge::SetLocalizedBorder(ArkUIRuntimeCallInfo* ru
     ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9, resObj, true); // Border Radius args start index
 
     std::vector<uint32_t> colorAndStyleOptions;
-    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5, resObj, true);  // Border Color args start index
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5, resObj, nodeInfo, true);  // Border Color args start index
     ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Border Style args start index
 
     int32_t isLocalizedBorderWidth = 0;
@@ -4409,7 +4409,8 @@ ArkUINativeModuleValue CommonBridge::SetForegroundColor(ArkUIRuntimeCallInfo *ru
     }
     Color foregroundColor = Color::TRANSPARENT;
     RefPtr<ResourceObject> colorResObj;
-    ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor, colorResObj);
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor, colorResObj, nodeInfo);
     auto fgColorRawPtr = AceType::RawPtr(colorResObj);
     GetArkUINodeModifiers()->getCommonModifier()->setForegroundColor(nativeNode, true, foregroundColor.GetValue(), fgColorRawPtr);
     return panda::JSValueRef::Undefined(vm);
@@ -6132,7 +6133,7 @@ ArkUINativeModuleValue CommonBridge::ResetForegroundEffect(ArkUIRuntimeCallInfo*
 }
 
 void SetBackgroundEffectParam(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& policy, int32_t& blurType,
-    Color& inactiveColor, bool& isValidColor, RefPtr<ResourceObject>& resourceObject)
+    Color& inactiveColor, bool& isValidColor, ArkUINodeHandle nativeNode, RefPtr<ResourceObject>& resourceObject)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> policyArg = runtimeCallInfo->GetCallArgRef(7);        // 7:index of parameter policy
@@ -6149,7 +6150,9 @@ void SetBackgroundEffectParam(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& po
         blurType > static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
         blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
     }
-    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor, resourceObject)) {
+
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColor(vm, inactiveColorArg, inactiveColor, resourceObject, nodeInfo)) {
         isValidColor = true;
     }
 }
@@ -6206,7 +6209,9 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundEffect(ArkUIRuntimeCallInfo* r
     ParseBackgroundEffectParams(saturationArg, brightnessArg, vm, saturation, brightness);
     Color color = Color::TRANSPARENT;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColor(vm, colorArg, color, colorResObj)) {
+
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColor(vm, colorArg, color, colorResObj, nodeInfo)) {
         color.SetValue(Color::TRANSPARENT.GetValue());
     }
     auto adaptiveColor = AdaptiveColor::DEFAULT;
@@ -6220,7 +6225,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundEffect(ArkUIRuntimeCallInfo* r
     Color inactiveColor = Color::TRANSPARENT;
     bool isValidColor = false;
     RefPtr<ResourceObject> inactiveColorResObj;
-    SetBackgroundEffectParam(runtimeCallInfo, policy, blurType, inactiveColor, isValidColor, inactiveColorResObj);
+    SetBackgroundEffectParam(
+        runtimeCallInfo, policy, blurType, inactiveColor, isValidColor, nativeNode, inactiveColorResObj);
     bool disableSystemAdaptation = false;
     if (disableSystemAdaptationArg->IsBoolean()) {
         disableSystemAdaptation = disableSystemAdaptationArg->ToBoolean(vm)->Value();
@@ -7304,7 +7310,7 @@ bool ParseLightPosition(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM* vm, ArkUI
     return true;
 }
 
-void ParseLightSource(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM* vm, ArkUINodeHandle& nativeNode)
+void ParseLightSource(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM* vm, ArkUINodeHandle nativeNode)
 {
     struct ArkUISizeType dimPosX = { 0.0, 0 };
     struct ArkUISizeType dimPosY = { 0.0, 0 };
@@ -7330,7 +7336,8 @@ void ParseLightSource(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM* vm, ArkUINo
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     Color colorValue;
     RefPtr<ResourceObject> colorResObj;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorValue, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorValue, colorResObj, nodeInfo)) {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
         GetArkUINodeModifiers()->getCommonModifier()->setPointLightColor(nativeNode, colorValue.GetValue(), colorRawPtr);
     } else {
@@ -8902,7 +8909,7 @@ ArkUINativeModuleValue CommonBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runtime
             "isScrollLockOn" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
-            panda::StringRef::NewFromUtf8(vm, info.GetKeyText()),
+            panda::StringRef::NewFromUtf8(vm, info.GetKeyText().c_str()),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeySource())),
             panda::NumberRef::New(vm, info.GetDeviceId()), panda::NumberRef::New(vm, info.GetMetaKey()),
             panda::NumberRef::New(vm, info.GetUnicode()),
@@ -8963,7 +8970,7 @@ ArkUINativeModuleValue CommonBridge::SetOnKeyPreIme(ArkUIRuntimeCallInfo* runtim
             "isScrollLockOn" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
-            panda::StringRef::NewFromUtf8(vm, info.GetKeyText()),
+            panda::StringRef::NewFromUtf8(vm, info.GetKeyText().c_str()),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeySource())),
             panda::NumberRef::New(vm, info.GetDeviceId()), panda::NumberRef::New(vm, info.GetMetaKey()),
             panda::NumberRef::New(vm, info.GetUnicode()),
@@ -9024,7 +9031,7 @@ ArkUINativeModuleValue CommonBridge::SetOnKeyEventDispatch(ArkUIRuntimeCallInfo*
             "isScrollLockOn" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
-            panda::StringRef::NewFromUtf8(vm, info.GetKeyText()),
+            panda::StringRef::NewFromUtf8(vm, info.GetKeyText().c_str()),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeySource())),
             panda::NumberRef::New(vm, info.GetDeviceId()), panda::NumberRef::New(vm, info.GetMetaKey()),
             panda::NumberRef::New(vm, info.GetUnicode()),
@@ -10301,30 +10308,40 @@ ArkUINativeModuleValue CommonBridge::SetFocusBox(ArkUIRuntimeCallInfo* runtimeCa
     auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     ArkUI_Uint32 hasValue = 0;
     CalcDimension margin;
+    std::vector<RefPtr<ResourceObject>> focusBoxResObjs;
+    RefPtr<ResourceObject> resObjMargin;
     if (!marginArg->IsUndefined() && !marginArg->IsNull()) {
-        if (ArkTSUtils::ParseJsDimensionFpNG(vm, marginArg, margin, false)) {
+        if (ArkTSUtils::ParseJsDimensionFpNG(vm, marginArg, margin, resObjMargin, false)) {
             hasValue = 1;
-        } else if (ArkTSUtils::ParseJsLengthMetrics(vm, marginArg, margin)) {
+        } else if (ArkTSUtils::ParseJsLengthMetrics(vm, marginArg, margin, resObjMargin)) {
             hasValue = 1;
         }
     }
+    focusBoxResObjs.push_back(resObjMargin);
     hasValue = hasValue << 1;
     CalcDimension width;
+    RefPtr<ResourceObject> resObjWidth;
     if (!widthArg->IsUndefined() && !widthArg->IsNull()) {
-        if (ArkTSUtils::ParseJsDimensionFpNG(vm, widthArg, width, false) && GreatOrEqual(width.Value(), 0.0f)) {
+        if (ArkTSUtils::ParseJsDimensionFpNG(vm, widthArg, width, resObjWidth, false) && GreatOrEqual(width.Value(), 0.0f)) {
             hasValue += 1;
-        } else if (ArkTSUtils::ParseJsLengthMetrics(vm, widthArg, width) && GreatOrEqual(width.Value(), 0.0f)) {
+        } else if (ArkTSUtils::ParseJsLengthMetrics(vm, widthArg, width, resObjWidth) && GreatOrEqual(width.Value(), 0.0f)) {
             hasValue += 1;
         }
     }
+    focusBoxResObjs.push_back(resObjWidth);
     hasValue = hasValue << 1;
     Color strokeColor;
-    if (!colorArg->IsUndefined() && !colorArg->IsNull() && ParseColorMetricsToColor(vm, colorArg, strokeColor)) {
+    RefPtr<ResourceObject> resObjColor;
+    if (!colorArg->IsUndefined() && !colorArg->IsNull() &&
+        ArkTSUtils::ParseColorMetricsToColor(vm, colorArg, strokeColor, resObjColor)) {
         hasValue += 1;
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        ArkTSUtils::CompleteResourceObjectFromColor(resObjColor, strokeColor, true, nodeInfo);
     }
+    focusBoxResObjs.push_back(resObjColor);
     GetArkUINodeModifiers()->getCommonModifier()->setFocusBoxStyle(nativeNode, margin.Value(),
         static_cast<int>(margin.Unit()), width.Value(), static_cast<int>(width.Unit()), strokeColor.GetValue(),
-        hasValue);
+        hasValue, static_cast<void*>(&focusBoxResObjs));
     return panda::JSValueRef::Undefined(vm);
 }
 

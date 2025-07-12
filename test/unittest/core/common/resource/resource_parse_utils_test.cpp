@@ -181,6 +181,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest004, TestSize.Level1)
     Color color = Color::WHITE;
     resObj->SetColor(color);
     resObj->SetIsResource(false);
+    resObj->SetColorMode(ColorMode::LIGHT);
     EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, color));
 
     /**
@@ -201,6 +202,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest004, TestSize.Level1)
         resObjParamsList, "com.example.test", "entry", 100000);
     resObjWithName->SetColor(color);
     resObjWithName->SetIsResource(false);
+    resObjWithName->SetColorMode(ColorMode::DARK);
     EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithName, color));
     ResourceParseUtils::SetIsReloading(false);
     EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithName, color));
@@ -243,7 +245,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: ResourceParseUtilsTest003
+ * @tc.name: ResourceParseUtilsTest005
  * @tc.desc: Test resourceParseUtils.
  * @tc.type: FUNC
  */
@@ -258,8 +260,33 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest005, TestSize.Level1)
     resObj->SetColor(color);
     resObj->SetIsResource(false);
     ResourceParseUtils::SetIsReloading(false);
+    resObj->SetColorMode(ColorMode::LIGHT);
     Color result;
     ResourceParseUtils::ParseResColor(resObj, result);
     EXPECT_EQ(color, result);
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest006
+ * @tc.desc: Test resourceParseUtils.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ParseResColor with different colormode.
+     * @tc.expect: ParseResColor return True except colormode undefined.
+     */
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    Color color = Color::WHITE;
+    resObj->SetColor(color);
+    resObj->SetIsResource(false);
+    resObj->SetColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    ResourceParseUtils::SetIsReloading(false);
+    EXPECT_FALSE(ResourceParseUtils::ParseResColor(resObj, color));
+    resObj->SetColorMode(ColorMode::DARK);
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, color));
+    ResourceParseUtils::SetIsReloading(true);
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, color));
 }
 } // namespace OHOS::Ace

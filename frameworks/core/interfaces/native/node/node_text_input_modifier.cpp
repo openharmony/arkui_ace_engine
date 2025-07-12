@@ -60,7 +60,7 @@ constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SO
 constexpr bool DEFAULT_SELECT_ALL = false;
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
-std::string g_strValue;
+thread_local std::string g_strValue;
 constexpr int32_t ELLIPSIS_MODE_TAIL = 2;
 
 void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
@@ -806,9 +806,9 @@ void SetTextInputPlaceholderFont(ArkUINodeHandle node, const struct ArkUIPlaceho
     }
     if (SystemProperties::ConfigChangePerform() && fontfamilyRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontfamilyRawPtr));
-        pattern->RegisterResource<std::vector<std::string>>("fontFamily", resObj, font.fontFamilies);
+        pattern->RegisterResource<std::vector<std::string>>("placeholderFontFamily", resObj, font.fontFamilies);
     } else {
-        pattern->UnRegisterResource("fontFamily");
+        pattern->UnRegisterResource("placeholderFontFamily");
     }
 }
 
@@ -840,11 +840,10 @@ void SetTextInputFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRa
     TextFieldModelNG::SetTextColor(frameNode, Color(color));
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
+    pattern->UnRegisterResource("fontColor");
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         pattern->RegisterResource<Color>("fontColor", resObj, Color(color));
-    } else {
-        pattern->UnRegisterResource("fontColor");
     }
 }
 

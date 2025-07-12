@@ -32,8 +32,6 @@ void SetAbilityComponentOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AbilityComponentModelNG::SetSetAbilityComponentOptions(frameNode, convValue);
 }
 } // AbilityComponentInterfaceModifier
 namespace AbilityComponentAttributeModifier {
@@ -43,8 +41,6 @@ void OnConnectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AbilityComponentModelNG::SetOnConnect(frameNode, convValue);
 }
 void OnDisconnectImpl(Ark_NativePointer node,
                       const Callback_Void* value)
@@ -52,8 +48,6 @@ void OnDisconnectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AbilityComponentModelNG::SetOnDisconnect(frameNode, convValue);
 }
 } // AbilityComponentAttributeModifier
 const GENERATED_ArkUIAbilityComponentModifier* GetAbilityComponentModifier()

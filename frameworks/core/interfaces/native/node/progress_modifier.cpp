@@ -220,6 +220,8 @@ void ResetProgressColor(ArkUINodeHandle node)
     ProgressModelNG::SetGradientColor(frameNode, gradient);
     ProgressModelNG::SetModifierInitiatedColor(frameNode, false);
     ProgressModelNG::SetColor(frameNode, colorVal);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    ProgressModelNG::CreateWithResourceObj(frameNode, JsProgressResourceType::COLOR, resObj);
     ProgressModelNG::SetGradientColorByUser(frameNode, isGradientColor);
 }
 
@@ -488,9 +490,10 @@ void ResetProgressBackgroundColor(ArkUINodeHandle node)
     } else {
         backgroundColor = theme->GetTrackParseFailedBgColor();
     }
-    
+
     if (SystemProperties::ConfigChangePerform()) {
-        CreateWithResourceObjIfNeeded(frameNode, JsProgressResourceType::BackgroundColor, nullptr);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        ProgressModelNG::CreateWithResourceObj(frameNode, JsProgressResourceType::BackgroundColor, resObj);
     }
 
     ProgressModelNG::SetModifierInitiatedBgColor(frameNode, false);

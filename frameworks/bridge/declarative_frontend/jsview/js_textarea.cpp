@@ -32,8 +32,8 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MIN_LINES = 1;
-constexpr uint32_t MAXLINESMODE_CLIP = 0;
-constexpr uint32_t MAXLINESMODE_SCROLL = 1;
+constexpr uint32_t MAX_LINES_MODE_CLIP = 0;
+constexpr uint32_t MAX_LINES_MODE_SCROLL = 1;
 constexpr uint32_t TWO_ARGS = 2;
 }
 
@@ -147,12 +147,12 @@ void JSTextArea::SetMaxLines(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetNormalMaxViewLines(normalMaxViewLines);
     TextFieldModel::GetInstance()->SetMaxViewLines(inlineMaxViewLines);
 
-    auto overflow = MAXLINESMODE_CLIP;
+    auto overflow = MAX_LINES_MODE_CLIP;
     if (info.Length() == TWO_ARGS && info[1]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[1]);
         auto overflowMode = paramObject->GetProperty("overflowMode");
         auto modeValue = overflowMode->IsNumber() ? overflowMode->ToNumber<int32_t>() : -1;
-        if (modeValue >= 0 && (modeValue == MAXLINESMODE_CLIP || modeValue == MAXLINESMODE_SCROLL)) {
+        if (modeValue >= 0 && (modeValue == MAX_LINES_MODE_CLIP || modeValue == MAX_LINES_MODE_SCROLL)) {
             overflow = static_cast<uint32_t>(modeValue);
         }
     }

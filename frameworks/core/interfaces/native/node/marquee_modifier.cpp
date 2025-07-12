@@ -24,7 +24,7 @@ constexpr bool DEFAULT_ALLOW_SCALE = true;
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 const std::string DEFAULT_FONT_FAMILY = "cursive";
 
-void SetMarqueeFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, int unit)
+void SetMarqueeFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, int unit, void* fontSizeRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -41,6 +41,15 @@ void SetMarqueeFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, int unit)
     } else {
         MarqueeModelNG::SetFontSize(frameNode, Dimension(fontSize, static_cast<OHOS::Ace::DimensionUnit>(unit)));
     }
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (SystemProperties::ConfigChangePerform() && fontSizeRawPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontSizeRawPtr));
+        pattern->RegisterResource<CalcDimension>("FontSize", resObj,
+            Dimension(fontSize, static_cast<OHOS::Ace::DimensionUnit>(unit)));
+    } else {
+        pattern->UnRegisterResource("TextColor");
+    }
 }
 
 void ResetMarqueeFontSize(ArkUINodeHandle node)
@@ -53,13 +62,26 @@ void ResetMarqueeFontSize(ArkUINodeHandle node)
     CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
     MarqueeModelNG::SetFontSize(frameNode, fontSize);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("FontSize");
+    }
 }
 
-void SetMarqueeFontColor(ArkUINodeHandle node, uint32_t color)
+void SetMarqueeFontColor(ArkUINodeHandle node, uint32_t color, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MarqueeModelNG::SetTextColor(frameNode, Color(color));
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        pattern->RegisterResource<Color>("TextColor", resObj, Color(color));
+    } else {
+        pattern->UnRegisterResource("TextColor");
+    }
 }
 void ResetMarqueeFontColor(ArkUINodeHandle node)
 {
@@ -67,6 +89,11 @@ void ResetMarqueeFontColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     std::optional<Color> colorOpt;
     MarqueeModelNG::SetTextColor(frameNode, colorOpt);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("TextColor");
+    }
 }
 void SetMarqueeAllowScale(ArkUINodeHandle node, ArkUI_Bool allowScale)
 {

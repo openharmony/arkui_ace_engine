@@ -235,6 +235,7 @@ public:
     void SetMenuOutline(const MenuParam& menuParam);
     void SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply);
     void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply);
+    void SetArrowColor(const Color& color);
     void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
     void SetSelectedOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply);
     std::function<void(WeakPtr<NG::FrameNode>)>& GetTextModifier();
@@ -250,17 +251,11 @@ public:
     void DumpInfo() override;
 
     void UpdateComponentColor(const Color& color, const SelectColorType selectColorType);
-    void SetColorByUser(const RefPtr<FrameNode>& host);
+    void SetColorByUser(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme);
     void UpdateMenuOption(int32_t index, const std::string& value, const SelectOptionType optionType);
-    void SetNormalOptionBgColorResource(bool flag)
-    {
-        isNormalOptionBgColorFlag_ = flag;
-    }
-
-    bool IsNormalOptionBgColorResource()
-    {
-        return isNormalOptionBgColorFlag_;
-    }
+    void SetMenuBackgroundColorByUser(const Color& color, const RefPtr<SelectPaintProperty>& props);
+    void SetModifierByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
+    void SetOptionBgColorByUser(const Color& color, const RefPtr<SelectPaintProperty>& props);
 
 private:
     void OnAttachToFrameNode() override;
@@ -270,14 +265,18 @@ private:
     void HandleFocusStyleTask();
     void HandleBlurStyleTask();
     void SetFocusStyle();
-    void SetMenuBackgroundColorByUser(Color themeColor);
-    void SetOptionBgColorByUser(Color themeColor);
     void ClearFocusStyle();
     void ModFocusIconStyle(RefPtr<SelectTheme> selectTheme, bool focusedFlag);
     void InitFocusEvent();
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
     void UpdateMenuScrollColorConfiguration(const RefPtr<FrameNode>& menuNode);
+    void SetOptionTextModifierByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
+    void SetSelectedOptionTextModifierByUser(
+        const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
+    void SetArrowModifierByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
+    void SetSelectedOptionBgColorByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props,
+        const RefPtr<SelectLayoutProperty>& layoutProps);
     bool HasRowNode() const
     {
         return rowId_.has_value();
@@ -375,6 +374,7 @@ private:
     void ToJsonOptionAlign(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonMenuBackgroundStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonDivider(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonDividerMode(std::unique_ptr<JsonValue>& json) const;
     void ToJsonOptionMaxlines(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     // XTS inspector helper functions
     std::string InspectorGetOptions() const;
@@ -402,7 +402,6 @@ private:
     std::function<void(WeakPtr<NG::FrameNode>)> textApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> textOptionApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> textSelectOptionApply_ = nullptr;
-    bool isNormalOptionBgColorFlag_ = false;
     std::optional<Color> menuBackgroundColor_;
 };
 

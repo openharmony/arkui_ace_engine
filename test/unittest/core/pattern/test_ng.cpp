@@ -182,6 +182,18 @@ RefPtr<FrameNode> TestNG::CreateColumn(const std::function<void(ColumnModelNG)>&
     return AceType::DynamicCast<FrameNode>(element);
 }
 
+RefPtr<FrameNode> TestNG::CreateStack(const std::function<void(StackModelNG)>& callback)
+{
+    StackModelNG model;
+    model.Create();
+    if (callback) {
+        callback(model);
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewStackProcessor::GetInstance()->PopContainer();
+    return AceType::DynamicCast<FrameNode>(element);
+}
+
 void TestNG::SetSize(std::optional<Axis> axis, const CalcLength& crossSize, const CalcLength& mainSize)
 {
     if (axis.has_value() && axis.value() == Axis::HORIZONTAL) {

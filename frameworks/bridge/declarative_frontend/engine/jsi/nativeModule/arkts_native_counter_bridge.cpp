@@ -150,7 +150,8 @@ ArkUINativeModuleValue CounterBridge::SetCounterBackgroundColor(ArkUIRuntimeCall
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getCounterModifier()->resetCounterBackgroundColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
@@ -181,16 +182,24 @@ ArkUINativeModuleValue CounterBridge::SetCounterSize(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> widthValue = runtimeCallInfo->GetCallArgRef(1); // 1: width Value
     Local<JSValueRef> heightValue = runtimeCallInfo->GetCallArgRef(2); // 2: height Value
     CalcDimension width;
-    ArkTSUtils::ParseJsDimensionVp(vm, widthValue, width, false);
+    RefPtr<ResourceObject> widthResObj;
+    ArkTSUtils::ParseJsDimensionVp(vm, widthValue, width, widthResObj, false);
     if (GreatNotEqual(width.Value(), 0.0)) {
-        GetArkUINodeModifiers()->getCounterModifier()->setCounterWidth(
-            nativeNode, width.Value(), static_cast<int>(width.Unit()));
+        auto widthRawPtr = AceType::RawPtr(widthResObj);
+        GetArkUINodeModifiers()->getCounterModifier()->setCounterWidthRes(
+            nativeNode, width.Value(), static_cast<int>(width.Unit()), widthRawPtr);
+    } else {
+        GetArkUINodeModifiers()->getCounterModifier()->resetCounterWidth(nativeNode);
     }
     CalcDimension height;
-    ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height, false);
+    RefPtr<ResourceObject> heightResObj;
+    ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height, heightResObj, false);
     if (GreatNotEqual(height.Value(), 0.0)) {
-        GetArkUINodeModifiers()->getCounterModifier()->setCounterHeight(
-            nativeNode, height.Value(), static_cast<int>(height.Unit()));
+        auto heightRawPtr = AceType::RawPtr(heightResObj);
+        GetArkUINodeModifiers()->getCounterModifier()->setCounterHeightRes(
+            nativeNode, height.Value(), static_cast<int>(height.Unit()), heightRawPtr);
+    } else {
+        GetArkUINodeModifiers()->getCounterModifier()->resetCounterHeight(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }

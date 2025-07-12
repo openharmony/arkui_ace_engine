@@ -26,10 +26,6 @@ namespace NavRouterModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = NavRouterModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 } // NavRouterModifier
@@ -44,8 +40,6 @@ void SetNavRouterOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //NavRouterModelNG::SetSetNavRouterOptions1(frameNode, convValue);
     LOGE("ARKOALA SetNavRouterOptions1 -> Method is not implemented.");
 }
 } // NavRouterInterfaceModifier
@@ -60,7 +54,6 @@ void OnStateChangeImpl(Ark_NativePointer node,
         auto arkIsActivated = Converter::ArkValue<Ark_Boolean>(isActivated);
         arkCallback.Invoke(arkIsActivated);
     };
-    // NavRouterModelNG::SetOnStateChange(frameNode, onStateChangeCallback);
 }
 void ModeImpl(Ark_NativePointer node,
               Ark_NavRouteMode value)
@@ -68,7 +61,6 @@ void ModeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto enumMode = Converter::OptConvert<NavRouteMode>(value);
-    // NavRouterModelNG::SetNavRouteMode(frameNode, EnumToInt(enumMode));
 }
 } // NavRouterAttributeModifier
 const GENERATED_ArkUINavRouterModifier* GetNavRouterModifier()

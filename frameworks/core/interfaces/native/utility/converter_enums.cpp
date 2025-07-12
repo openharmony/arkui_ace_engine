@@ -1030,17 +1030,6 @@ void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src)
     }
 }
 
-// need check
-// template<>
-// void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
-// {
-//     switch (src) {
-//         case ARK_DATA_PANEL_TYPE_LINE: dst = DataPanelType::LINE; break;
-//         case ARK_DATA_PANEL_TYPE_CIRCLE: dst = DataPanelType::CIRCLE; break;
-//         default: LOGE("Unexpected enum value in Ark_DataPanelType: %{public}d", src);
-//     }
-// }
-
 template<>
 void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src)
 {

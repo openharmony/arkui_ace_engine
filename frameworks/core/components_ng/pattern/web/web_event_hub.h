@@ -137,6 +137,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnAllSslErrorRequest, bool);
     ACE_WEB_EVENT_PROPERTY(OnSslSelectCertRequest, bool);
     ACE_WEB_EVENT_PROPERTY(OnInterceptRequest, RefPtr<WebResponse>);
+    ACE_WEB_EVENT_PROPERTY(OnOverrideErrorPage, std::string);
     ACE_WEB_EVENT_PROPERTY(OnUrlLoadIntercept, bool);
     ACE_WEB_EVENT_PROPERTY(OnLoadIntercept, bool);
     ACE_WEB_EVENT_PROPERTY(OnOverrideUrlLoading, bool);
@@ -167,12 +168,15 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedLifecycleChange, void);
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedVisibilityChange, void);
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedGesture, void);
+    ACE_WEB_EVENT_PROPERTY(OnNativeEmbedMouse, void);
     ACE_WEB_EVENT_PROPERTY(OnIntelligentTrackingPreventionResult, void);
     ACE_WEB_EVENT_PROPERTY(OnRenderProcessNotResponding, void);
     ACE_WEB_EVENT_PROPERTY(OnRenderProcessResponding, void);
     ACE_WEB_EVENT_PROPERTY(OnViewportFitChanged, void);
     ACE_WEB_EVENT_PROPERTY(OnInterceptKeyboardAttach,  WebKeyboardOption);
     ACE_WEB_EVENT_PROPERTY(OnAdsBlocked, void);
+    ACE_WEB_EVENT_PROPERTY(OnPdfScrollAtBottom, void);
+    ACE_WEB_EVENT_PROPERTY(OnPdfLoad, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;

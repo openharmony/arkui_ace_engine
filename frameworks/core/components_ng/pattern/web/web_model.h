@@ -62,6 +62,7 @@ public:
     virtual void SetOnErrorReceive(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnHttpErrorReceive(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnInterceptRequest(std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetOnOverrideErrorPage(std::function<std::string(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnUrlLoadIntercept(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnLoadIntercept(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnFileSelectorShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
@@ -168,6 +169,7 @@ public:
     virtual void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetNativeEmbedMouseEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) {};
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
     virtual void SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt) {}
@@ -218,6 +220,8 @@ public:
     virtual void SetBypassVsyncCondition(WebBypassVsyncCondition condition) {}
     virtual void SetDefaultBackgroundColor() {};
     virtual void SetGestureFocusMode(GestureFocusMode mode) {}
+    virtual void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
+    virtual void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) {}
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

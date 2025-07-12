@@ -1028,6 +1028,14 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_REACH_START));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_REACH_END, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_REACH_END));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_WILL_STOP_DRAGGING));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_DID_ZOOM, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_DID_ZOOM));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_ZOOM_START, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_ZOOM_START));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_ZOOM_STOP, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_ZOOM_STOP));
 
     nodeType = static_cast<int32_t>(ARKUI_NODE_LIST);
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_SCROLL, nodeType);
@@ -2723,6 +2731,11 @@ HWTEST_F(NativeNodeTest, NativeNodeTest026, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SCROLL_CLIP_CONTENT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_SCROLL_CLIP_CONTENT)->value->i32,
                                     ArkUI_ContentClipMode::ARKUI_CONTENT_CLIP_MODE_BOUNDARY);
+
+    value[0].i32 = ARKUI_SCROLL_DIRECTION_FREE;
+    nodeAPI->setAttribute(rootNode, NODE_SCROLL_SCROLL_DIRECTION, &item);
+    EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_SCROLL_SCROLL_DIRECTION)->value->i32,
+                                    ARKUI_SCROLL_DIRECTION_FREE);
     nodeAPI->disposeNode(rootNode);
 }
 
@@ -3137,7 +3150,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest033, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = new ArkUI_Node({ARKUI_NODE_WATER_FLOW, nullptr, true});
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_WATER_FLOW);
+    ASSERT_NE(rootNode, nullptr);
     float distance = 10.0f;
     uint32_t color = 0xFFFF0000;
     ArkUI_NumberValue value[] = {{.f32 = distance}};
@@ -3168,7 +3182,26 @@ HWTEST_F(NativeNodeTest, NativeNodeTest033, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_SCROLL_ENABLE_SCROLL_INTERACTION, &item);
     nodeAPI->setAttribute(rootNode, NODE_WATER_FLOW_CACHED_COUNT, &item);
     nodeAPI->setAttribute(rootNode, NODE_WATER_FLOW_SCROLL_TO_INDEX, &item);
+    
+    // test default value of syncLoad
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD), nullptr);
+    auto result = nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    // set and reset syncLoad
+    value[0].i32 = 0;
     nodeAPI->setAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD, &item);
+    result = nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 0);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD), ARKUI_ERROR_CODE_NO_ERROR);
+    result = nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    // set invalid value to syncLoad
+    value[0].i32 = -1;
+    nodeAPI->setAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD, &item);
+    result = nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 1);
 
     item.string = "test";
     nodeAPI->setAttribute(rootNode, NODE_WATER_FLOW_COLUMN_TEMPLATE, &item);
@@ -3194,7 +3227,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest033, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_SECTION_OPTION), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_NODE_ADAPTER), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_CACHED_COUNT), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_FOOTER), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SCROLL_FRICTION), ARKUI_ERROR_CODE_NO_ERROR);
@@ -3212,7 +3244,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest033, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_ROW_GAP), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_NODE_ADAPTER), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_CACHED_COUNT), nullptr);
-    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_SYNC_LOAD), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SCROLL_FRICTION), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SCROLL_BAR_DISPLAY_MODE), nullptr);
@@ -3244,14 +3275,33 @@ HWTEST_F(NativeNodeTest, NativeNodeTest034, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_GRID_ROW_GAP, &item);
     value[0].i32 = 1;
     nodeAPI->setAttribute(rootNode, NODE_GRID_CACHED_COUNT, &item);
+
+    // test default value of syncLoad
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_GRID_SYNC_LOAD), nullptr);
+    auto result = nodeAPI->getAttribute(rootNode, NODE_GRID_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    // set and reset syncLoad
+    value[0].i32 = 0;
     nodeAPI->setAttribute(rootNode, NODE_GRID_SYNC_LOAD, &item);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 0);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_SYNC_LOAD), ARKUI_ERROR_CODE_NO_ERROR);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 1);
+
+    // set invalid value to syncLoad
+    value[0].i32 = -1;
+    nodeAPI->setAttribute(rootNode, NODE_GRID_SYNC_LOAD, &item);
+    result = nodeAPI->getAttribute(rootNode, NODE_GRID_SYNC_LOAD);
+    EXPECT_EQ(result->value[0].i32, 1);
+
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_COLUMN_TEMPLATE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_ROW_TEMPLATE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_COLUMN_GAP), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_ROW_GAP), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_NODE_ADAPTER), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_CACHED_COUNT), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_GRID_SYNC_LOAD), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_GRID_COLUMN_TEMPLATE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_GRID_ROW_TEMPLATE), nullptr);
@@ -3259,7 +3309,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest034, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_GRID_ROW_GAP), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_GRID_NODE_ADAPTER), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_GRID_CACHED_COUNT), nullptr);
-    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_GRID_SYNC_LOAD), nullptr);
+    
     nodeAPI->disposeNode(rootNode);
 }
 
@@ -7434,5 +7484,75 @@ HWTEST_F(NativeNodeTest, NativeNodeTest147, TestSize.Level1)
     EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
     ret = OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(nullptr, &offset);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeScrollZoomTest001
+ * @tc.desc: Test Scroll zoom attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeScrollZoomTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_SCROLL);
+    ASSERT_NE(scroll, nullptr);
+    ArkUI_AttributeItem item0 = { nullptr, 0 };
+    ArkUI_NumberValue value1[] = { { .f32 = 2.0f } };
+    ArkUI_AttributeItem item1 = { value1, sizeof(value1) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(scroll, NODE_SCROLL_MAX_ZOOM_SCALE, &item1), ARKUI_ERROR_CODE_NO_ERROR);
+    auto ret = nodeAPI->getAttribute(scroll, NODE_SCROLL_MAX_ZOOM_SCALE);
+    EXPECT_EQ(ret->value[0].f32, 2.0f);
+    EXPECT_EQ(nodeAPI->resetAttribute(scroll, NODE_SCROLL_MAX_ZOOM_SCALE), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(scroll, NODE_SCROLL_MAX_ZOOM_SCALE);
+    EXPECT_EQ(ret->value[0].f32, 1.0f);
+    EXPECT_EQ(nodeAPI->setAttribute(scroll, NODE_SCROLL_MAX_ZOOM_SCALE, &item0), ERROR_CODE_PARAM_INVALID);
+
+    ArkUI_NumberValue value2[] = { { .f32 = 0.5f } };
+    ArkUI_AttributeItem item2 = { value2, sizeof(value2) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(scroll, NODE_SCROLL_MIN_ZOOM_SCALE, &item2), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(scroll, NODE_SCROLL_MIN_ZOOM_SCALE);
+    EXPECT_EQ(ret->value[0].f32, 0.5f);
+    EXPECT_EQ(nodeAPI->resetAttribute(scroll, NODE_SCROLL_MIN_ZOOM_SCALE), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(scroll, NODE_SCROLL_MIN_ZOOM_SCALE);
+    EXPECT_EQ(ret->value[0].f32, 1.0f);
+    EXPECT_EQ(nodeAPI->setAttribute(scroll, NODE_SCROLL_MIN_ZOOM_SCALE, &item0), ERROR_CODE_PARAM_INVALID);
+
+    ArkUI_NumberValue value3[] = { { .f32 = 1.5f } };
+    ArkUI_AttributeItem item3 = { value3, sizeof(value3) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(scroll, NODE_SCROLL_ZOOM_SCALE, &item3), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(scroll, NODE_SCROLL_ZOOM_SCALE);
+    EXPECT_EQ(ret->value[0].f32, 1.5f);
+    EXPECT_EQ(nodeAPI->resetAttribute(scroll, NODE_SCROLL_ZOOM_SCALE), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(scroll, NODE_SCROLL_ZOOM_SCALE);
+    EXPECT_EQ(ret->value[0].f32, 1.0f);
+    EXPECT_EQ(nodeAPI->setAttribute(scroll, NODE_SCROLL_ZOOM_SCALE, &item0), ERROR_CODE_PARAM_INVALID);
+
+    nodeAPI->disposeNode(scroll);
+}
+
+/**
+ * @tc.name: NativeNodeScrollZoomTest002
+ * @tc.desc: Test Test Scroll zoom event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeScrollZoomTest002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_SCROLL);
+
+    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_SCROLL_EVENT_ON_DID_ZOOM, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_SCROLL_EVENT_ON_DID_ZOOM);
+
+    ret = nodeAPI->registerNodeEvent(scroll, NODE_SCROLL_EVENT_ON_ZOOM_START, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_SCROLL_EVENT_ON_ZOOM_START);
+
+    ret = nodeAPI->registerNodeEvent(scroll, NODE_SCROLL_EVENT_ON_ZOOM_STOP, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_SCROLL_EVENT_ON_ZOOM_STOP);
+    nodeAPI->disposeNode(scroll);
 }
 } // namespace OHOS::Ace

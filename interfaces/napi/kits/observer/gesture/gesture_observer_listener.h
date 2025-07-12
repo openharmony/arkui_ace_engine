@@ -23,6 +23,15 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
 namespace OHOS::Ace::Napi {
+enum class GestureRecognizerState {
+    UNKNOWN = -1,
+    READY = 0,
+    DETECTING = 1,
+    PENDING = 2,
+    BLOCKED = 3,
+    SUCCEED = 4,
+    FAIL = 5,
+};
 class GestureObserverListener final {
 public:
     GestureObserverListener() = default;
@@ -32,6 +41,7 @@ public:
     static void CreateRecognizerObject(napi_env env, napi_value objValueGestureRecognizer,
         const RefPtr<NG::NGGestureRecognizer>& current, NG::GestureListenerType gestureListenerType);
     static bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType);
+    static GestureRecognizerState ConvertRefereeState(NG::RefereeState state);
 };
 
 } // namespace OHOS::Ace::Napi

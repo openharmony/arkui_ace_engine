@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <list>
+#include <memory>
 #include <optional>
 #include <string>
 
@@ -27,6 +28,7 @@
 #include "ui/properties/gradient_property.h"
 #include "ui/properties/ng/calc_length.h"
 #include "ui/resource/resource_configuration.h"
+#include "ui/view/ai_caller_helper.h"
 #include "ui/view/layout/layout_info.h"
 
 typedef struct _ArkUINode* ArkUINodeHandle;
@@ -101,6 +103,7 @@ public:
     virtual int32_t GetMeasureWidth() = 0;
     virtual int32_t GetMeasureHeight() = 0;
     virtual NodeHandle GetParentHandle() = 0;
+    virtual void SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper) = 0;
 };
 } // namespace OHOS::Ace::Kit
 

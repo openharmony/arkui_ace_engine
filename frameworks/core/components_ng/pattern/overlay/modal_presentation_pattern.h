@@ -194,6 +194,9 @@ public:
         return !isUIExtension_;
     }
 
+    void RegisterModalBgColorResFunc(const RefPtr<NG::FrameNode>& modalNode,
+        NG::ModalStyle& modalStyle);
+
     bool TriggerAutoSaveWhenInvisible() override
     {
         return true;

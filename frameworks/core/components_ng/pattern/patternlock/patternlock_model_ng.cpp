@@ -311,7 +311,10 @@ void PatternLockModelNG::HandleSelectedColorResource(FrameNode* frameNode, const
     std::string key = "patternLock.selectedColor";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         std::string color = pattern->GetResCacheMapByKey(key);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
@@ -333,7 +336,10 @@ void PatternLockModelNG::HandlePathColorResource(FrameNode* frameNode, const Ref
     std::string key = "patternLock.pathColor";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         std::string color = pattern->GetResCacheMapByKey(key);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
@@ -355,7 +361,10 @@ void PatternLockModelNG::HandleActiveColorResource(FrameNode* frameNode, const R
     std::string key = "patternLock.activeColor";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         std::string color = pattern->GetResCacheMapByKey(key);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
@@ -377,7 +386,10 @@ void PatternLockModelNG::HandleRegularColorResource(FrameNode* frameNode, const 
     std::string key = "patternLock.regularColor";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         std::string color = pattern->GetResCacheMapByKey(key);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
@@ -399,7 +411,10 @@ void PatternLockModelNG::HandleCircleRadiusResource(FrameNode* frameNode, const 
     std::string key = "patternLock.circleRadius";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         CalcDimension result;
         if (!ResourceParseUtils::ParseResDimensionVp(resObj, result) || result.IsNonPositive()) {
             auto pipeline = PipelineBase::GetCurrentContext();
@@ -420,7 +435,10 @@ void PatternLockModelNG::HandleSideLengthResource(FrameNode* frameNode, const Re
     std::string key = "patternLock.sideLength";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         CalcDimension result;
         if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
             auto pipeline = PipelineBase::GetCurrentContext();
@@ -441,7 +459,10 @@ void PatternLockModelNG::HandleActiveCircleColorResource(FrameNode* frameNode, c
     std::string key = "patternLock.activeCircleColor";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFristLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         std::string color = pattern->GetResCacheMapByKey(key);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {

@@ -88,9 +88,12 @@ void AddBuilderNodeInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
     auto* childNode = reinterpret_cast<UINode*>(child);
     CHECK_NULL_VOID(childNode);
     auto childRef = Referenced::Claim<UINode>(childNode);
+    CHECK_NULL_VOID(childRef);
+    auto parentNode = childRef->GetParent();
+    CHECK_NULL_VOID(parentNode && parentNode == currentNode);
     std::list<RefPtr<UINode>> nodes;
     BuilderUtils::GetBuilderNodes(childRef, nodes);
-    BuilderUtils::AddBuilderToParent(childRef, nodes);
+    BuilderUtils::AddBuilderToParent(childRef->GetParent(), nodes);
 }
 
 ArkUI_Bool AppendChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
@@ -132,9 +135,11 @@ void RemoveBuilderNodeInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
     auto* childNode = reinterpret_cast<UINode*>(child);
     CHECK_NULL_VOID(childNode);
     auto childRef = Referenced::Claim<UINode>(childNode);
+    auto parentNode = childRef->GetParent();
+    CHECK_NULL_VOID(parentNode && parentNode == currentNode);
     std::list<RefPtr<UINode>> nodes;
     BuilderUtils::GetBuilderNodes(childRef, nodes);
-    BuilderUtils::RemoveBuilderFromParent(childRef, nodes);
+    BuilderUtils::RemoveBuilderFromParent(parentNode, nodes);
 }
 
 void RemoveChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
@@ -151,7 +156,12 @@ void ClearBuilderNodeInFrameNode(ArkUINodeHandle node)
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto currentRef = Referenced::Claim<UINode>(currentNode);
-    BuilderUtils::ClearBuilder(currentRef);
+    std::list<RefPtr<NG::UINode>> nodes;
+    CHECK_NULL_VOID(currentRef);
+    for (const auto& child : currentRef->GetChildren()) {
+        BuilderUtils::GetBuilderNodes(child, nodes);
+    }
+    BuilderUtils::RemoveBuilderFromParent(currentRef, nodes);
 }
 
 void ClearChildrenInFrameNode(ArkUINodeHandle node)
@@ -969,6 +979,7 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     auto moveNodeRef = AceType::Claim(moveNode);
     if (oldParent) {
         oldParent->RemoveChild(moveNodeRef);
+        OHOS::Ace::BuilderUtils::RemoveBuilderFromParent(oldParent, moveNodeRef);
         oldParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     int32_t childCount = toNode->TotalChildCount();
@@ -977,6 +988,9 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     } else {
         auto indexChild = toNode->GetChildAtIndex(index);
         toNode->AddChildBefore(moveNodeRef, indexChild);
+    }
+    if (moveNodeRef->GetParent() == AceType::Claim(toNode)) {
+        OHOS::Ace::BuilderUtils::AddBuilderToParent(AceType::Claim(toNode), moveNodeRef);
     }
     toNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     moveNode->setIsMoving(false);
@@ -1043,6 +1057,24 @@ ArkUI_Int32 SetForceDarkConfig(
         ColorInverter::GetInstance().DisableColorInvert(instanceId, nodeTag);
     }
     return ERROR_CODE_NO_ERROR;
+}
+
+void SetFocusDependence(ArkUINodeHandle node, ArkUI_Uint32 focusDependence)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusDependence(static_cast<FocusDependence>(focusDependence));
+}
+
+void ResetFocusDependence(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusDependence(FocusDependence::CHILD);
 }
 
 namespace NodeModifier {
@@ -1131,6 +1163,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .addSupportedUIStates = AddSupportedUIStates,
         .removeSupportedUIStates = RemoveSupportedUIStates,
         .setForceDarkConfig = SetForceDarkConfig,
+        .setFocusDependence = SetFocusDependence,
+        .resetFocusDependence = ResetFocusDependence,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

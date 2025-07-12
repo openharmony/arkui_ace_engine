@@ -722,6 +722,11 @@ typedef enum {
     ARKUI_SCROLL_DIRECTION_HORIZONTAL,
     /** Scrolling is not allowed. */
     ARKUI_SCROLL_DIRECTION_NONE = 3,
+    /**
+     * @brief Scrolling is allowed in both horizontal and vertical directions. Only available in Scroll component.
+     * @since 20
+     */
+    ARKUI_SCROLL_DIRECTION_FREE = 4,
 } ArkUI_ScrollDirection;
 
 /**
@@ -852,7 +857,7 @@ typedef enum {
     ARKUI_HIT_TEST_MODE_BLOCK_HIERARCHY,
     /**
      * Self not respond to the hit test for touch events,
-     * and all descebdants (children, grandchildren, etc.) not respond to the hit test for touch events too.
+     * and all descendants (children, grandchildren, etc.) not respond to the hit test for touch events too.
      * @since 20
      */
     ARKUI_HIT_TEST_MODE_BLOCK_DESCENDANTS,

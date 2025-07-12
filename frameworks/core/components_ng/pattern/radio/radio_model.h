@@ -54,7 +54,8 @@ public:
     virtual void SetHoverEffect(HoverEffectType hoverEffect) {};
     virtual void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
         const RadioColorType radioColorType) {};
-
+    virtual void SetUncheckedBorderColorByJSRadioTheme(bool flag) {}
+    virtual void SetIndicatorColorByJSRadioTheme(bool flag) {}
 private:
     static std::unique_ptr<RadioModel> instance_;
     static std::mutex mutex_;

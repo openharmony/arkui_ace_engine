@@ -46,6 +46,7 @@ struct AISpan {
     int32_t end = 0;
     std::string content = "";
     TextDataDetectType type = TextDataDetectType::INVALID;
+    std::map<std::string, std::string> params;
     bool operator==(const AISpan& span) const
     {
         return start == span.start && end == span.end && content == span.content && type == span.type;

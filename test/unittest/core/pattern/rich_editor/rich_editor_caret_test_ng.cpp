@@ -739,4 +739,115 @@ HWTEST_F(RichEditorCaretTestNg, OnCaretTwinkling001, TestSize.Level1)
     EXPECT_FALSE(richEditorPattern->caretVisible_);
 }
 
+/**
+ * @tc.name: CalcMoveDownPos001
+ * @tc.desc: test CalcMoveDownPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, CalcMoveDownPos001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->overlayMod_ = nullptr;
+    int32_t result = 1;
+    float leadingMarginOffset = 10.0f;
+    result = richEditorPattern->CalcMoveDownPos(leadingMarginOffset);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: CalcMoveDownPos002
+ * @tc.desc: test CalcMoveDownPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, CalcMoveDownPos002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ASSERT_NE(richEditorPattern->overlayMod_, nullptr);
+    int32_t result = 1;
+    float leadingMarginOffset = 10.0f;
+    result = richEditorPattern->CalcMoveDownPos(leadingMarginOffset);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: CalcMoveDownPos001
+ * @tc.desc: test CalcMoveDownPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, CalcMoveDownPos003, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    CaretOffsetInfo caretInfo = richEditorPattern->GetCaretOffsetInfoByPosition();
+    float leadingMarginOffset = 1;
+    richEditorPattern->caretPosition_ = 0;
+    OffsetF offset = { 20, 20 };
+    float height = 10;
+    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    overlayMod->SetCaretOffsetAndHeight(offset, height);
+    auto caretOffsetOverlay = overlayMod->GetCaretOffset();
+    auto minDet =
+        richEditorPattern->paragraphs_.minParagraphFontSize.value_or(richEditorPattern->GetTextThemeFontSize());
+    float textOffsetY = richEditorPattern->richTextRect_.GetY() + (minDet / 2.0);
+    float textOffsetDownY = caretInfo.caretOffsetLine.GetY() + caretInfo.caretHeightLine - textOffsetY;
+    Offset textOffset = Offset(caretOffsetOverlay.GetX() - richEditorPattern->richTextRect_.GetX(), textOffsetDownY);
+    auto caretPositionEnd = richEditorPattern->CalcMoveDownPos(leadingMarginOffset);
+    EXPECT_EQ(caretPositionEnd, richEditorPattern->paragraphs_.GetIndex(textOffset));
+}
+
+/**
+ * @tc.name: CalcMoveDownPos002
+ * @tc.desc: test CalcMoveDownPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, CalcMoveDownPos004, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    CaretOffsetInfo caretInfo = richEditorPattern->GetCaretOffsetInfoByPosition();
+    float leadingMarginOffset = 1;
+    richEditorPattern->caretPosition_ = 1;
+    OffsetF offset = { 20, 20 };
+    float height = 10;
+    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    overlayMod->SetCaretOffsetAndHeight(offset, height);
+    auto caretOffsetOverlay = overlayMod->GetCaretOffset();
+    auto minDet =
+        richEditorPattern->paragraphs_.minParagraphFontSize.value_or(richEditorPattern->GetTextThemeFontSize());
+    float textOffsetY = richEditorPattern->richTextRect_.GetY() + (minDet / 2.0);
+    float textOffsetDownY = caretInfo.caretOffsetLine.GetY() + caretInfo.caretHeightLine - textOffsetY;
+    Offset textOffset = Offset(caretOffsetOverlay.GetX() - richEditorPattern->richTextRect_.GetX(), textOffsetDownY);
+    auto caretPositionEnd = richEditorPattern->CalcMoveDownPos(leadingMarginOffset);
+    EXPECT_EQ(caretPositionEnd, richEditorPattern->paragraphs_.GetIndex(textOffset));
+}
+
+/**
+ * @tc.name: CalcMoveUpPos001
+ * @tc.desc: test CalcMoveUpPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, CalcMoveUpPos001, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    CaretOffsetInfo caretInfo = richEditorPattern->GetCaretOffsetInfoByPosition();
+    float leadingMarginOffset = 1.0;
+    OffsetF offset = { 20, 20 };
+    float height = 10;
+    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    overlayMod->SetCaretOffsetAndHeight(offset, height);
+    auto caretOffsetOverlay = overlayMod->GetCaretOffset();
+    auto minDet =
+        richEditorPattern->paragraphs_.minParagraphFontSize.value_or(richEditorPattern->GetTextThemeFontSize());
+    float textOffsetY = richEditorPattern->richTextRect_.GetY() + (minDet / 2.0);
+    float textOffsetDownY = caretInfo.caretOffsetLine.GetY() + caretInfo.caretHeightLine - textOffsetY;
+    Offset textOffset = Offset(caretOffsetOverlay.GetX() - richEditorPattern->richTextRect_.GetX(), textOffsetDownY);
+    auto caretPosition = richEditorPattern->CalcMoveUpPos(leadingMarginOffset);
+    EXPECT_EQ(caretPosition, richEditorPattern->paragraphs_.GetIndex(textOffset));
+}
+
 }

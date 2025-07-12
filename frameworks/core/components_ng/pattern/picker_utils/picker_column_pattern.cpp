@@ -374,6 +374,11 @@ bool PickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropertiesO
     auto totalOptionCount = pattern->GetOptionCount();
     CHECK_NULL_RETURN(totalOptionCount, false);
 
+    if (!GetCanLoopFromLayoutProperty() && ((isDown && currentIndex_ == totalOptionCount - 1) ||
+        (!isDown && currentIndex_ == 0))) {
+        return false;
+    }
+
     uint32_t currentIndex = GetCurrentIndex();
     if (isDown) {
         currentIndex = (totalOptionCount + currentIndex + 1) % totalOptionCount; // index add one

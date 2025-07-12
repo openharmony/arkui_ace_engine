@@ -92,6 +92,8 @@ void AIWriteAdapter::ShowModalUIExtension(const AIWriteInfo& info,
 
 void AIWriteAdapter::SetWantParams(const AIWriteInfo& info, AAFwk::Want& want)
 {
+    auto context = pipelineContext_.Upgrade();
+    CHECK_NULL_VOID(context);
     auto apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     want.SetElementName(bundleName_, abilityName_);
     want.SetParam(UI_ENTENSION_TYPE.first, UI_ENTENSION_TYPE.second);
@@ -101,7 +103,7 @@ void AIWriteAdapter::SetWantParams(const AIWriteInfo& info, AAFwk::Want& want)
     want.SetParam(SELECT_CONTENT_LENGTH, info.selectLength);
     want.SetParam(FIRST_HANDLE_RECT, info.firstHandle);
     want.SetParam(SECOND_HANDLE_RECT, info.secondHandle);
-    want.SetParam(KEY_PACKAGE_NAME, AceApplicationInfo::GetInstance().GetPackageName());
+    want.SetParam(KEY_PACKAGE_NAME, context->GetBundleName());
     want.SetParam(START_COMPONONT_TYPE, info.componentType);
 }
 

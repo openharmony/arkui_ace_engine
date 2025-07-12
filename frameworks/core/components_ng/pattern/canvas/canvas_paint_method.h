@@ -38,6 +38,7 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     void UpdateRecordingCanvas(float width, float height);
 
+    void SetCustomTextType();
     void PushTask(const TaskFunc& task);
     bool HasTask() const;
     void FlushTask();
@@ -85,6 +86,9 @@ public:
     void CloseImageBitmap(const std::string& src);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     void DrawPixelMapInternal(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
+    void CalculatePixelMapRect(
+        const Ace::CanvasImage& canvasImage, int32_t width, int32_t height, RSRect& srcRect, RSRect& dstRect);
+
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
 #ifdef PIXEL_MAP_SUPPORTED

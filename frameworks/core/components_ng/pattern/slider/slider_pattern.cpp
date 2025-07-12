@@ -86,7 +86,7 @@ inline std::string ToString(const bool boolean)
 
 inline std::string ToString(const SliderModel::SliderMode& mode)
 {
-    static const LinearEnumMapNode<SliderModel::SliderMode, std::string> table[] = {
+    const LinearEnumMapNode<SliderModel::SliderMode, std::string> table[] = {
         { SliderModel::SliderMode::OUTSET, "OUTSET" },
         { SliderModel::SliderMode::INSET, "INSET" },
         { SliderModel::SliderMode::NONE, "NONE" },
@@ -98,7 +98,7 @@ inline std::string ToString(const SliderModel::SliderMode& mode)
 
 inline std::string ToString(const Axis& direction)
 {
-    static const LinearEnumMapNode<Axis, std::string> table[] = {
+    const LinearEnumMapNode<Axis, std::string> table[] = {
         { Axis::VERTICAL, "VERTICAL" },
         { Axis::HORIZONTAL, "HORIZONTAL" },
         { Axis::FREE, "FREE" },
@@ -110,7 +110,7 @@ inline std::string ToString(const Axis& direction)
 
 inline std::string ToString(const SliderModel::BlockStyleType& type)
 {
-    static const LinearEnumMapNode<SliderModel::BlockStyleType, std::string> table[] = {
+    const LinearEnumMapNode<SliderModel::BlockStyleType, std::string> table[] = {
         { SliderModel::BlockStyleType::DEFAULT, "DEFAULT" },
         { SliderModel::BlockStyleType::IMAGE, "IMAGE" },
         { SliderModel::BlockStyleType::SHAPE, "SHAPE" },
@@ -121,7 +121,7 @@ inline std::string ToString(const SliderModel::BlockStyleType& type)
 
 inline std::string ToString(const SliderModel::SliderInteraction& interaction)
 {
-    static const LinearEnumMapNode<SliderModel::SliderInteraction, std::string> table[] = {
+    const LinearEnumMapNode<SliderModel::SliderInteraction, std::string> table[] = {
         { SliderModel::SliderInteraction::SLIDE_AND_CLICK, "SLIDE_AND_CLICK" },
         { SliderModel::SliderInteraction::SLIDE_ONLY, "SLIDE_ONLY" },
         { SliderModel::SliderInteraction::SLIDE_AND_CLICK_UP, "SLIDE_AND_CLICK_UP" },
@@ -132,7 +132,7 @@ inline std::string ToString(const SliderModel::SliderInteraction& interaction)
 
 inline std::string ToString(const BasicShapeType& type)
 {
-    static const LinearEnumMapNode<BasicShapeType, std::string> table[] = {
+    const LinearEnumMapNode<BasicShapeType, std::string> table[] = {
         { BasicShapeType::NONE, "NONE" },  { BasicShapeType::INSET, "INSET" },
         { BasicShapeType::CIRCLE, "CIRCLE" }, { BasicShapeType::ELLIPSE, "ELLIPSE" },
         { BasicShapeType::POLYGON, "POLYGON" }, { BasicShapeType::PATH, "PATH" },
@@ -265,7 +265,7 @@ void SliderPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+    auto sliderTheme = pipeline->GetTheme<SliderTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(sliderTheme);
     auto paintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -645,12 +645,12 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
-    auto selectedTxt = theme->GetSelectedTxt();
-    auto unSelectedTxt = theme->GetUnselectedTxt();
     auto unSelectedDesc = theme->GetUnselectedDesc();
     auto disabledDesc = theme->GetDisabelDesc();
     uint32_t indexPrefix = 0;
     uint32_t indexSuffix = static_cast<int32_t>(pointAccessibilityNodeVec_.size()) - STEP_POINT_OFFSET;
+    SliderModel::SliderShowStepOptions optionsMap =
+        sliderPaintProperty->GetSliderShowStepOptions().value_or(SliderModel::SliderShowStepOptions ());
     for (uint32_t i = 0; i < pointCount; i++) {
         auto isDisabledDesc = false;
         bool isClickAbled = true;
@@ -658,24 +658,19 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
         auto pointAccessibilityProperty = pointNode->GetAccessibilityProperty<TextAccessibilityProperty>();
         pointAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
 
-        auto pointNodeProperty = pointNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(pointNodeProperty);
-        auto valueTxt = UtfUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
         if (currentStepIndex == i) {
             pointAccessibilityProperty->SetSelected(true);
-            pointAccessibilityProperty->SetAccessibilityText(valueTxt);
             pointAccessibilityProperty->SetAccessibilityDescription(" ");
             isClickAbled = false;
         } else if (i >= rangeFromPointIndex && i <= rangeToPointIndex) {
             pointAccessibilityProperty->SetSelected(false);
-            pointAccessibilityProperty->SetAccessibilityText(valueTxt);
             pointAccessibilityProperty->SetAccessibilityDescription(unSelectedDesc);
         } else {
             pointAccessibilityProperty->SetSelected(false);
-            pointAccessibilityProperty->SetAccessibilityText(valueTxt);
             pointAccessibilityProperty->SetAccessibilityDescription(disabledDesc);
             isDisabledDesc = true;
         }
+        UpdateStepPointsAccessibilityText(pointNode, i, optionsMap);
 
         if (i == indexPrefix && HasPrefix()) {
             if (!prefixAccessibilityoptions_.accessibilityText.empty()) {
@@ -843,14 +838,6 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto sliderLayoutAlgorithm = DynamicCast<SliderLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(sliderLayoutAlgorithm, false);
-    trackThickness_ = sliderLayoutAlgorithm->GetTrackThickness();
-    blockSize_ = sliderLayoutAlgorithm->GetBlockSize();
-    blockHotSize_ = sliderLayoutAlgorithm->GetBlockHotSize();
     return UpdateParameters();
 }
 
@@ -2859,5 +2846,22 @@ void SliderPattern::DumpSubInfo(RefPtr<SliderPaintProperty> paintProperty)
     if (paintProperty->HasValidSlideRange()) {
         DumpLog::GetInstance().AddDesc("SlideRange: " + paintProperty->GetValidSlideRange().value()->ToString());
     }
+}
+
+void SliderPattern::UpdateStepPointsAccessibilityText(
+    RefPtr<FrameNode>& node, uint32_t nodeIndex, SliderModel::SliderShowStepOptions& options)
+{
+    CHECK_NULL_VOID(node);
+    auto accessibilityProperty = node->GetAccessibilityProperty<TextAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto nodeProperty = node->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(nodeProperty);
+    auto text = UtfUtils::Str16ToStr8(nodeProperty->GetContent().value_or(u""));
+    if (options.find(nodeIndex) != options.end()) {
+        text = options[nodeIndex];
+    }
+    accessibilityProperty->SetAccessibilityText(text);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
+        "Update step point, index:%{public}u, accessibility text:%{public}s.", nodeIndex, text.c_str());
 }
 } // namespace OHOS::Ace::NG

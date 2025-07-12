@@ -60,7 +60,6 @@ void SetRadioOptionsImpl(Ark_NativePointer node,
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto indicatorType = Converter::OptConvert<RadioIndicatorType>(options->indicatorType);
         // need check
-        // RadioModelNG::SetRadioIndicatorType(frameNode, EnumToInt(indicatorType));
     }
     auto arkBuilder = Converter::OptConvert<CustomNodeBuilder>(options->indicatorBuilder);
     if (arkBuilder.has_value()) {
@@ -68,7 +67,6 @@ void SetRadioOptionsImpl(Ark_NativePointer node,
             auto builderNode = callback.BuildSync(node);
             NG::ViewStackProcessor::GetInstance()->Push(builderNode);
         };
-        // RadioModelNG::SetBuilder(frameNode, std::move(builder));
     }
 }
 } // RadioInterfaceModifier
@@ -101,13 +99,7 @@ void RadioStyleImpl(Ark_NativePointer node,
     auto style = value ? Converter::OptConvert<Converter::RadioStyle>(*value) : std::nullopt;
     // need check
     if (style) {
-        // RadioModelNG::SetCheckedBackgroundColor(frameNode, style->checkedBackgroundColor);
-        // RadioModelNG::SetUncheckedBorderColor(frameNode, style->uncheckedBorderColor);
-        // RadioModelNG::SetIndicatorColor(frameNode, style->indicatorColor);
     } else {
-        // RadioModelNG::SetCheckedBackgroundColor(frameNode, std::nullopt);
-        // RadioModelNG::SetUncheckedBorderColor(frameNode, std::nullopt);
-        // RadioModelNG::SetIndicatorColor(frameNode, std::nullopt);
     }
 }
 void ContentModifierImpl(Ark_NativePointer node,
@@ -116,8 +108,6 @@ void ContentModifierImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RadioModelNG::SetContentModifier(frameNode, convValue);
     LOGE("ARKOALA RadioAttributeModifier::ContentModifierImpl -> Method is not implemented.");
 }
 void _onChangeEvent_checkedImpl(Ark_NativePointer node,
@@ -132,7 +122,6 @@ void _onChangeEvent_checkedImpl(Ark_NativePointer node,
         arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(check));
     };
     // need check
-    // RadioModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // RadioAttributeModifier
 const GENERATED_ArkUIRadioModifier* GetRadioModifier()

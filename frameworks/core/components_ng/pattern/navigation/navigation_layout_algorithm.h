@@ -91,6 +91,7 @@ private:
 
     void SetNavigationHeight(LayoutWrapper* layoutWrapper, SizeF& size);
     void SetNavigationWidth(LayoutWrapper* layoutWrapper, SizeF& size);
+    void ReCalcNavigationSize(LayoutWrapper* layoutWrapper, SizeF& size);
 
     void SizeCalculationForForceSplit(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);

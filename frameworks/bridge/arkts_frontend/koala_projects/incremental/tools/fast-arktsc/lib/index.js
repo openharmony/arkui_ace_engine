@@ -3616,7 +3616,6 @@ class AST {
     isStart() {
         if (this.#root === this)
             return true;
-        // if (this.type) return !!this.#parent?.isStart()
         if (!this.#parent?.isStart())
             return false;
         if (this.#parentIndex === 0)

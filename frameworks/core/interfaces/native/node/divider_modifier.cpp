@@ -78,10 +78,7 @@ void ResetDividerColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     DividerModelNG::ResetResObj(frameNode, "divider.color");
-    auto theme = GetTheme<DividerTheme>();
-    CHECK_NULL_VOID(theme);
-    Color dividerColor = theme->GetColor();
-    DividerModelNG::SetDividerColor(frameNode, dividerColor, false);
+    DividerModelNG::ResetDividerColor(frameNode);
 }
 
 void SetDividerVertical(ArkUINodeHandle node, ArkUI_Bool value)

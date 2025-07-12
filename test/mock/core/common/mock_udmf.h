@@ -90,5 +90,14 @@ public:
     ~MockUnifiedData() = default;
     MOCK_METHOD(int64_t, GetSize, (), (override));
 };
+
+class MockDataLoadParams : public DataLoadParams {
+    DECLARE_ACE_TYPE(MockDataLoadParams, DataLoadParams);
+
+public:
+    MockDataLoadParams() {};
+    ~MockDataLoadParams() = default;
+    MOCK_METHOD(uint32_t, GetRecordCount, (), (override));
+};
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_UDMF_H

@@ -136,6 +136,7 @@ public:
     void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
+    void RegisterExeAppAIFunction(const RefPtr<PipelineBase>& pipeline);
 
     void ChangeSensitiveNodes(bool isSensitive) override;
 
@@ -382,7 +383,8 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool isRouter = true) override;
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage,
+        bool isRouter = true, bool ignoreOrientation = false) override;
 
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {

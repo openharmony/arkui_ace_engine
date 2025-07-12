@@ -94,6 +94,7 @@ public:
     }
     TextDirection GetTextDirection(const std::string& content, TextDirection direction);
     void OnFontScaleConfigurationUpdate() override;
+    void OnColorModeChange(uint32_t colorMode) override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

@@ -7,6 +7,10 @@
     {
       "name": "Color_pink",
       "value": "#FFFF7EFF"
+    },
+    {
+      "name": "Color_red",
+      "value": "#FFFF0000"
     }
   ]
 }

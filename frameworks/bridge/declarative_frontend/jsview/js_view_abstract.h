@@ -72,6 +72,10 @@ struct LocalizedCalcDimension {
     std::optional<CalcDimension> end;
     std::optional<CalcDimension> top;
     std::optional<CalcDimension> bottom;
+    RefPtr<ResourceObject> leftResObj;
+    RefPtr<ResourceObject> rightResObj;
+    RefPtr<ResourceObject> topResObj;
+    RefPtr<ResourceObject> bottomResObj;
 };
 
 struct CommonCalcDimension {
@@ -210,6 +214,9 @@ public:
     static int32_t CloseMenu(const RefPtr<NG::UINode>& customNode);
     static void JsBindContentCover(const JSCallbackInfo& info);
     static void ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle);
+    static void ParseModalTransition(const JSRef<JSVal>& jsValue,
+        std::optional<NG::ModalTransition>& modalTransition,
+        NG::ModalTransition defaultTransition = NG::ModalTransition::DEFAULT);
     static void ParseEnableSafeArea(const JSRef<JSObject>& paramObj, NG::ContentCoverParam& contentCoverParam);
     static void JsBindSheet(const JSCallbackInfo& info);
     static bool CheckJSCallbackInfo(
@@ -222,11 +229,17 @@ public:
         const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, bool isPartialUpdate = false);
     static NG::SheetEffectEdge ParseSheetEffectEdge(const JSRef<JSObject>& paramObj);
     static void ParseBindSheetBorderRadius(const JSRef<JSVal>& args, NG::SheetStyle& sheetStyle);
+    static void ParseBindSheetBorderRadius(const JSRef<JSVal>& args,
+        NG::SheetStyle& sheetStyle, RefPtr<ResourceObject>& resourceObj);
     static bool ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
-    static std::optional<CalcDimension> ParseBindSheetBorderRadiusProp(const JSRef<JSObject>& object, const char* prop);
+    static std::optional<CalcDimension> ParseBindSheetBorderRadiusProp(const JSRef<JSObject>& object,
+        const char* prop, RefPtr<ResourceObject>& resourceObj);
     static bool ParseSheetMode(const std::string heightStr, NG::SheetHeight& detent);
-    static bool ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents);
+    static bool ParseSheetDetents(const JSRef<JSVal>& args,
+        std::vector<NG::SheetHeight>& sheetDetents, NG::SheetStyle& sheetStyle);
     static bool ParseSheetHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent, bool isReset);
+    static bool ParseSheetHeight(const JSRef<JSVal>& args,
+        NG::SheetHeight& detent, bool isReset, RefPtr<ResourceObject>& resObj);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
     static bool ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
     static void ParseCallback(const JSRef<JSObject>& paramObj,
@@ -381,7 +394,11 @@ public:
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result,
         RefPtr<ResourceObject>& resObj);
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToDimension(
+        const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj);
     static bool ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToPositiveDimension(
+        const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
@@ -798,6 +815,8 @@ public:
         bool enableResourceUpdate = false,
         std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr = DEFAULT_RESOURCE_PAIR_ARRAY);
     static bool ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
+    static bool ParseBorderWidthProps(const JSRef<JSVal>& args,
+        NG::BorderWidthProperty& borderWidthProperty, RefPtr<ResourceObject>& resourceObj);
     static bool ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
     static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);
     static bool ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius, bool notNegative = true);
@@ -852,10 +871,12 @@ public:
     static void ParseDialogWidthAndHeight(DialogProperties& properties, const JSRef<JSObject>& obj);
     static void SetBorderRadiusWithCheck(std::optional<NG::BorderRadiusProperty>& result,
         NG::BorderRadiusProperty& dimension);
+    static bool CheckLengthMetrics(const JSRef<JSObject>& object);
 
 private:
+    static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
     static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
-        const Color& color, bool state);
+        Color& color, bool state);
     static bool ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,
         std::vector<RefPtr<ResourceObject>>& resObjArray);
     static bool ParseJsIntegerArrayInternal(const JSRef<JSArray>& jsArray, std::vector<uint32_t>& result,
@@ -910,6 +931,8 @@ private:
     static void SetBorderColorProps(const Color& color, NG::BorderColorProperty& props, const char* corner);
     static void ParseBorderColorProps(
         const JSRef<JSObject>& object, NG::BorderColorProperty& props, const char* propName);
+    static bool ParseBorderColorProps(const JSRef<JSVal>& args,
+        NG::BorderColorProperty& colorProperty, RefPtr<ResourceObject>& resourceObj);
     static void GetBorderColors(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColor);
     static void GetBorderColorsFromResource(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
     static void SetBorderRadiusProps(const CalcDimension& dim, NG::BorderRadiusProperty& props, const char* propName);

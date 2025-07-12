@@ -19,6 +19,10 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_ui_director.h"
+#include "2d_graphics/include/recording/draw_cmd_list.h"
+#endif
 
 namespace OHOS::Ace::NG {
 ImageContentModifier::ImageContentModifier(const WeakPtr<ImagePattern>& pattern)
@@ -41,6 +45,13 @@ void ImageContentModifier::onDraw(DrawingContext& drawingContext)
     UpdateSvgColorFilter(canvasImage);
     ImagePainter imagePainter(canvasImage);
     if (!sensitive_->Get()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&drawingContext.canvas);
+        if (recordingCanvas != nullptr && recordingCanvas->GetDrawCmdList() != nullptr &&
+            Rosen::RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::SVG)) {
+            recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::SVG);
+        }
+#endif
         imagePainter.DrawImage(drawingContext.canvas, {}, size_->Get());
     }
 }

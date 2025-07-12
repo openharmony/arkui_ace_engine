@@ -167,7 +167,7 @@ RefPtr<NG::ImageData> ImageFileCache::GetDataFromCacheFile(const std::string& ur
     if (filePath == "") {
         return nullptr;
     }
-    ImageErrorInfo errorInfo;
+    NG::ImageLoadResultInfo errorInfo;
     auto cacheFileLoader = AceType::MakeRefPtr<FileImageLoader>();
     auto rsData = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)), errorInfo);
     return AceType::MakeRefPtr<NG::DrawingImageData>(rsData);

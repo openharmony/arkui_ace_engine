@@ -352,4 +352,26 @@ void SheetManager::RegisterDestroyCallback(const RefPtr<FrameNode>& targetNode, 
     };
     targetNode->PushDestroyCallbackWithTag(destructor, V2::SHEET_WRAPPER_TAG);
 }
+
+std::unique_ptr<State> SheetManager::CreateBreakPointState(WidthBreakpoint width,
+    HeightBreakpoint height)
+{
+    if (width == WidthBreakpoint::WIDTH_XS) {
+        return std::make_unique<WidthXSState>();
+    }
+    if (width == WidthBreakpoint::WIDTH_SM) {
+        return std::make_unique<WidthSMState>();
+    }
+    if (width == WidthBreakpoint::WIDTH_MD && height == HeightBreakpoint::HEIGHT_SM) {
+        return std::make_unique<WidthMDHeightSMState>();
+    }
+    if (width == WidthBreakpoint::WIDTH_MD &&
+        (height == HeightBreakpoint::HEIGHT_MD || height == HeightBreakpoint::HEIGHT_LG)) {
+        return std::make_unique<WidthMDHeightMDOrLGState>();
+    }
+    if (width == WidthBreakpoint::WIDTH_XL || width == WidthBreakpoint::WIDTH_LG) {
+        return std::make_unique<WidthLGState>();
+    }
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

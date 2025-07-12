@@ -91,7 +91,8 @@ ArkUINativeModuleValue SetMenuDivider(ArkUIRuntimeCallInfo* runtimeCallInfo, boo
     RefPtr<ResourceObject> colorResObj;
     auto dividerOptions = BuildMenuDividerOptions(vm, strokeWidthArg, startMarginArg, endMarginArg);
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
         color = Color::TRANSPARENT;
     }
     dividerOptions.color = color.GetValue();
@@ -134,7 +135,8 @@ ArkUINativeModuleValue MenuBridge::SetMenuFontColor(ArkUIRuntimeCallInfo* runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getMenuModifier()->resetMenuFontColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(colorResObj);

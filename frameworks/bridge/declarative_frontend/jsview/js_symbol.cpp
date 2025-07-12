@@ -27,7 +27,6 @@ namespace OHOS::Ace {
 constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 constexpr int32_t NUM2 = 2;
-constexpr double FULL_DIMENSION = 100.0;
 constexpr float DEFAULT_GRADIENT_ANGLE = 180.0f;
 
 std::unique_ptr<SymbolModel> SymbolModel::instance_ = nullptr;
@@ -125,7 +124,6 @@ void JSSymbol::SetFontSize(const JSCallbackInfo& info)
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterResource<CalcDimension>("FontSize", resObj, fontSize);
-        return;
     }
     if (fontSize.IsNegative()) {
         fontSize = theme->GetTextStyle().GetFontSize();
@@ -151,16 +149,16 @@ void JSSymbol::SetFontColor(const JSCallbackInfo& info)
     std::vector<Color> symbolColor;
     if (SystemProperties::ConfigChangePerform()) {
         std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> resObjArr;
-        bool ret = ParseJsSymbolColor(info[0], symbolColor, true, resObjArr);
+        if (!ParseJsSymbolColor(info[0], symbolColor, true, resObjArr)) {
+            return;
+        }
         if (!resObjArr.empty()) {
             SymbolModel::GetInstance()->RegisterSymbolFontColorResource("symbolColor",
                 symbolColor, resObjArr);
-            return;
+        } else {
+            UnRegisterResource("symbolColor");
         }
-        if (ret) {
-            SymbolModel::GetInstance()->SetFontColor(symbolColor);
-        }
-        UnRegisterResource("symbolColor");
+        SymbolModel::GetInstance()->SetFontColor(symbolColor);
         return;
     }
     if (!ParseJsSymbolColor(info[0], symbolColor)) {
@@ -208,6 +206,7 @@ void JSSymbol::SetMinFontScale(const JSCallbackInfo& info)
     if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale, resObj)) {
         return;
     }
+    UnRegisterResource("MinFontScale");
     if (LessOrEqual(minFontScale, 0.0f)) {
         SymbolModel::GetInstance()->SetMinFontScale(0.0f);
         return;
@@ -218,10 +217,8 @@ void JSSymbol::SetMinFontScale(const JSCallbackInfo& info)
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterResource<float>("MinFontScale", resObj, static_cast<float>(minFontScale));
-    } else {
-        UnRegisterResource("MinFontScale");
-        SymbolModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
     }
+    SymbolModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
 }
 
 void JSSymbol::SetMaxFontScale(const JSCallbackInfo& info)
@@ -231,6 +228,7 @@ void JSSymbol::SetMaxFontScale(const JSCallbackInfo& info)
     if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale, resObj)) {
         return;
     }
+    UnRegisterResource("MaxFontScale");
     if (LessOrEqual(maxFontScale, 1.0f)) {
         SymbolModel::GetInstance()->SetMaxFontScale(1.0f);
         return;
@@ -238,10 +236,8 @@ void JSSymbol::SetMaxFontScale(const JSCallbackInfo& info)
 
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterResource<float>("MaxFontScale", resObj, static_cast<float>(maxFontScale));
-    } else {
-        UnRegisterResource("MaxFontScale");
-        SymbolModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
     }
+    SymbolModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
 }
 
 void JSSymbol::parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::SymbolEffectOptions& symbolEffectOptions)
@@ -322,7 +318,11 @@ void JSSymbol::SetShaderStyle(const JSCallbackInfo& info)
     gradients.reserve(jsArray->Length());
 
     for (size_t i = 0; i < jsArray->Length(); ++i) {
-        JSRef<JSObject> jsGradientObj = JSRef<JSObject>::Cast(jsArray->GetValueAt(i));
+        auto jsValue = jsArray->GetValueAt(i);
+        if (!jsValue->IsObject()) {
+            continue;
+        }
+        JSRef<JSObject> jsGradientObj = JSRef<JSObject>::Cast(jsValue);
         SymbolGradient gradient;
         if (ParseShaderStyle(jsGradientObj, gradient)) {
             gradients.emplace_back(std::move(gradient));
@@ -361,7 +361,7 @@ bool JSSymbol::ParseShaderStyle(const JSRef<JSObject> shaderStyleObj, SymbolGrad
         ParseCommonGradientOptions(optionsObj, gradient);
         auto centerValue = optionsObj->GetProperty("center");
         ParseGradientCenter(centerValue, gradient);
-        ParseJsValueToFloat(optionsObj, static_cast<int32_t>(ArkUIIndex::RADIUS), gradient.radius);
+        ParseJsValueToDimension(optionsObj, static_cast<int32_t>(ArkUIIndex::RADIUS), gradient.radius);
     } else if (gradient.type == SymbolGradientType::LINEAR_GRADIENT) {
         auto optionsValue = shaderStyleObj->GetProperty("options");
         if (!optionsValue->IsObject()) {
@@ -396,14 +396,15 @@ void JSSymbol::ParseJsColorArray(const JSRef<JSVal>& jsValue, SymbolGradient& gr
     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
     for (size_t i = 0; i < array->Length(); i++) {
         JSRef<JSVal> value = array->GetValueAt(i);
-        float opacity;
-        Color color;
-
+        if (!value->IsArray()) {
+            continue;
+        }
         JSRef<JSArray> nestedArray = JSRef<JSArray>::Cast(value);
         if (nestedArray->Length() < NUM2) {
-            return;
+            continue;
         }
-
+        float opacity;
+        Color color;
         JSRef<JSVal> colorVal = nestedArray->GetValueAt(0);
         JSRef<JSVal> opacityVal = nestedArray->GetValueAt(1);
         if (opacityVal->IsNumber()) {
@@ -436,16 +437,10 @@ void JSSymbol::ParseGradientCenter(const JSRef<JSArray>& center, SymbolGradient&
         CalcDimension value;
         JSRef<JSArray> centerArray = JSRef<JSArray>::Cast(center);
         if (ParseJsDimensionVp(centerArray->GetValueAt(0), value)) {
-            gradient.center.x  = CalcDimension(value).Value();
-            if (value.Unit() == DimensionUnit::PERCENT) {
-                gradient.center.x = CalcDimension(value.Value() * FULL_DIMENSION, DimensionUnit::PERCENT).Value();
-            }
+            gradient.radialCenterX = CalcDimension(value);
         }
         if (ParseJsDimensionVp(centerArray->GetValueAt(1), value)) {
-            gradient.center.y = CalcDimension(value).Value();
-            if (value.Unit() == DimensionUnit::PERCENT) {
-                gradient.center.y = CalcDimension(value.Value() * FULL_DIMENSION, DimensionUnit::PERCENT).Value();
-            }
+            gradient.radialCenterY= CalcDimension(value);
         }
     }
 }
@@ -454,11 +449,17 @@ void JSSymbol::ParseJsValueToFloat(const JSRef<JSObject>& jsObj, int32_t key, fl
 {
     CalcDimension offset;
     auto jsOffset = jsObj->GetProperty(key);
-    if (ParseJsResource(jsOffset, offset) || ParseJsDimensionVp(jsOffset, offset)) {
-        output = offset.Value();
+    if (ParseJsDimensionVp(jsOffset, offset) || ParseJsResource(jsOffset, offset)) {
+        output = static_cast<float>(offset.GetNativeValue(DimensionUnit::PX));
     }
-    if (offset.Unit() == DimensionUnit::PERCENT) {
-        output = CalcDimension(offset.Value() * FULL_DIMENSION, DimensionUnit::PERCENT).Value();
+}
+
+void JSSymbol::ParseJsValueToDimension(const JSRef<JSObject>& jsObj, int32_t key, std::optional<Dimension>& output)
+{
+    CalcDimension offset;
+    auto jsOffset = jsObj->GetProperty(key);
+    if (ParseJsDimensionVp(jsOffset, offset) || ParseJsResource(jsOffset, offset)) {
+        output = CalcDimension(offset);
     }
 }
 

@@ -1065,6 +1065,53 @@ HWTEST_F(ScrollPatternTwoTestNg, UpdateCurrentOffset001, TestSize.Level1)
     EXPECT_FALSE(result);
 }
 
+/**
+ * @tc.name: ProcessAxisEndEvent001
+ * @tc.desc: Test ProcessAxisEndEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, ProcessAxisEndEvent001, TestSize.Level1)
+{
+    auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    /**
+     * @tc.steps: step1. call ProcessAxisEndEvent()
+     */
+    scrollable->SetCanStayOverScroll(false);
+    scrollable->ProcessAxisEndEvent();
+    EXPECT_FALSE(scrollable->CanStayOverScroll());
+
+    scrollable->SetCanStayOverScroll(true);
+    scrollable->ProcessAxisEndEvent();
+    EXPECT_FALSE(scrollable->CanStayOverScroll());
+}
+
+/**
+ * @tc.name: HandleDragStart001
+ * @tc.desc: Test ProcessAxisEndEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, HandleDragStart001, TestSize.Level1)
+{
+    auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    scrollable->isDragging_ = false;
+    /**
+     * @tc.steps: step1. call ProcessAxisEndEvent()
+     */
+    GestureEvent eventMouse;
+    eventMouse.SetInputEventType(InputEventType::AXIS);
+    eventMouse.SetSourceTool(SourceTool::MOUSE);
+    scrollable->SetCanStayOverScroll(false);
+    scrollable->HandleDragStart(eventMouse);
+    EXPECT_FALSE(scrollable->isDragging_);
+
+    scrollable->SetCanStayOverScroll(true);
+    scrollable->HandleDragStart(eventMouse);
+    EXPECT_TRUE(scrollable->isDragging_);
+
+    GestureEvent event;
+    scrollable->HandleDragStart(event);
+    EXPECT_TRUE(scrollable->isDragging_);
+}
 
 /**
  * @tc.name: ScrollSnapTrigger_001
@@ -1399,6 +1446,26 @@ HWTEST_F(ScrollPatternTwoTestNg, JumpToPosition_Running, TestSize.Level1)
      */
     scrollPattern->JumpToPosition(4.0f, SCROLL_FROM_START);
     EXPECT_FALSE(scrollPattern->scrollAbort_);
+}
+
+/**
+ * @tc.name: ChangeAnimateOverScroll001
+ * @tc.desc: Test ScrollPattern ChangeAnimateOverScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, ChangeAnimateOverScroll001, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->animateCanOverScroll_ = true;
+    scrollPattern->SetCanStayOverScroll(true);
+    scrollPattern->SetScrollSource(SCROLL_FROM_ANIMATION);
+    scrollPattern->ChangeAnimateOverScroll();
+    EXPECT_TRUE(scrollPattern->animateCanOverScroll_);
+    scrollPattern->SetScrollSource(SCROLL_FROM_JUMP);
+    scrollPattern->ChangeAnimateOverScroll();
+    EXPECT_FALSE(scrollPattern->animateCanOverScroll_);
 }
 
 /**

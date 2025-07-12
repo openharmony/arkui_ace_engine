@@ -48,6 +48,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     protected dirtDescendantElementIds_: Set<number> = new Set<number>();
 
     private monitorIdsDelayedUpdate: Set<number> = new Set();
+    private monitorIdsDelayedUpdateForAddMonitor_: Set<number> = new Set();
     private computedIdsDelayedUpdate: Set<number> = new Set();
 
     private recyclePoolV2_: RecyclePoolV2 | undefined = undefined;
@@ -60,6 +61,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         super(parent, elmtId, extraInfo);
         this.setIsV2(true);
         ViewBuildNodeBase.arkThemeScopeManager?.onViewPUCreate(this);
+        if (parent instanceof ViewPU) {
+            stateMgmtConsole.debug(`Both V1 and V2 components are involved. Disabling Parent-Child optimization`)
+            ObserveV2.getObserve().isParentChildOptimizable_ = false;
+        }
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
 
@@ -369,6 +374,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     public resetMonitorsOnReuse(): void {
         // Clear the monitorIds set for delayed updates, if any
         this.monitorIdsDelayedUpdate.clear();
+        this.monitorIdsDelayedUpdateForAddMonitor_.clear()
         ObserveV2.getObserve().resetMonitorValues();
     }
 
@@ -634,6 +640,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         this.monitorIdsDelayedUpdate.add(watchId);
     }
 
+    public addDelayedMonitorIdsForAddMonitor(watchId: number): void  {
+        stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedMonitorIdsForAddMonitor called for watchId: ${watchId}`);
+        this.monitorIdsDelayedUpdateForAddMonitor_.add(watchId);
+    }
+
     public addDelayedComputedIds(watchId: number) {
         stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedComputedIds called for watchId: ${watchId}`);
         this.computedIdsDelayedUpdate.add(watchId);
@@ -671,6 +682,14 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
           // exec monitor functions
           ObserveV2.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
         }
+        if (this.monitorIdsDelayedUpdateForAddMonitor_.size) {
+            ObserveV2.getObserve().updateDirtyMonitorPath(this.monitorIdsDelayedUpdateForAddMonitor_);
+        }
+        if (ObserveV2.getObserve().monitorFuncsToRun_.size) {
+            const monitorFuncs = ObserveV2.getObserve().monitorFuncsToRun_;
+            ObserveV2.getObserve().monitorFuncsToRun_ = new Set<number>();
+            ObserveV2.getObserve().runMonitorFunctionsForAddMonitor(monitorFuncs)
+        } 
         if(this.elmtIdsDelayedUpdate.size) {
           // update re-render of updated element ids once the view gets active
           if(this.dirtDescendantElementIds_.size === 0) {
@@ -685,6 +704,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         this.markNeedUpdate();
         this.elmtIdsDelayedUpdate.clear();
         this.monitorIdsDelayedUpdate.clear();
+        this.monitorIdsDelayedUpdateForAddMonitor_.clear();
         this.computedIdsDelayedUpdate.clear();
         stateMgmtProfiler.end();
     }

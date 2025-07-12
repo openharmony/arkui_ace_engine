@@ -90,14 +90,13 @@ void JSSpan::RegisterSpanFontInfo(const JSCallbackInfo& info, Font& font)
     auto fontSize = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::SIZE));
     CalcDimension size;
     RefPtr<ResourceObject> fontSizeResObj;
+    UnregisterSpanResource("fontSize");
     bool ret = ParseJsDimensionFpNG(fontSize, size, fontSizeResObj, false);
     if (ret && size.IsNonNegative()) {
         font.fontSize = size;
     }
     if (fontSizeResObj) {
         RegisterSpanResource<CalcDimension>("fontSize", fontSizeResObj, size);
-    } else {
-        UnregisterSpanResource("fontSize");
     }
 
     std::string weight;
@@ -167,7 +166,6 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterSpanResource<CalcDimension>("fontSize", resObj, fontSize);
-        return;
     }
     SpanModel::GetInstance()->SetFontSize(fontSize);
 }
@@ -188,7 +186,6 @@ void JSSpan::SetFontWeight(const JSCallbackInfo& info)
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterSpanResource<FontWeight>("fontWeight", resObj, ConvertStrToFontWeight(fontWeight));
-        return;
     }
     SpanModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
 }
@@ -209,7 +206,6 @@ void JSSpan::SetTextColor(const JSCallbackInfo& info)
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterSpanResource<Color>("fontColor", resObj, textColor);
-        return;
     }
     SpanModel::GetInstance()->SetTextColor(textColor);
 }
@@ -229,16 +225,15 @@ void JSSpan::SetFontFamily(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    UnregisterSpanResource("fontFamily");
     RefPtr<ResourceObject> resObj;
     std::vector<std::string> fontFamilies;
-    bool ret = ParseJsFontFamilies(info[0], fontFamilies, resObj);
-    if (SystemProperties::ConfigChangePerform() && resObj) {
-        RegisterSpanResource<std::vector<std::string>>("fontFamily", resObj, fontFamilies);
+    if (!ParseJsFontFamilies(info[0], fontFamilies, resObj)) {
         return;
     }
-    if (!ret) {
-        return;
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterSpanResource<std::vector<std::string>>("fontFamily", resObj, fontFamilies);
+    } else {
+        UnregisterSpanResource("fontFamily");
     }
     SpanModel::GetInstance()->SetFontFamily(fontFamilies);
 }
@@ -258,7 +253,6 @@ void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterSpanResource<CalcDimension>("letterSpacing", resObj, value);
-        return;
     }
     SpanModel::GetInstance()->SetLetterSpacing(value);
 }
@@ -269,9 +263,15 @@ void JSSpan::SetBaselineOffset(const JSCallbackInfo& info)
         return;
     }
     NG::CalcLength value;
-    if (ConvertFromJSValueNG(info[0], value) &&
+    RefPtr<ResourceObject> resObj;
+    UnRegisterResource("baselineOffset");
+    if (ConvertFromJSValueNG(info[0], value, resObj) &&
         value.GetDimensionContainsNegative().Unit() != DimensionUnit::PERCENT) {
         SpanModel::GetInstance()->SetBaselineOffset(value.GetDimensionContainsNegative());
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            RegisterSpanResource<CalcDimension>("baselineOffset", resObj,
+                value.GetDimensionContainsNegative());
+        }
         return;
     }
     value.Reset();
@@ -288,6 +288,7 @@ void JSSpan::SetTextCase(int32_t value)
 
 void JSSpan::SetDecoration(const JSCallbackInfo& info)
 {
+    UnregisterSpanResource("decorationColor");
     if (info[0]->IsUndefined()) {
         SpanModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
         return;
@@ -354,8 +355,6 @@ void JSSpan::RegisterDecorationColorResource(JSRef<JSVal>& colorValue)
     ParseJsColor(colorValue, result, resObj);
     if (resObj) {
         RegisterSpanResource<Color>("decorationColor", resObj, result);
-    } else {
-        UnregisterSpanResource("decorationColor");
     }
 }
 
@@ -436,7 +435,6 @@ void JSSpan::SetLineHeight(const JSCallbackInfo& info)
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterSpanResource<CalcDimension>("lineHeight", resObj, value);
-        return;
     }
     SpanModel::GetInstance()->SetLineHeight(value);
 }
@@ -554,7 +552,6 @@ void JSSpan::RegisterSpanResource(const std::string& key, const RefPtr<ResourceO
     auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
     if (spanNode) {
         spanNode->RegisterResource<T>(key, resObj, value);
-        return;
     }
 }
 
@@ -565,7 +562,6 @@ void JSSpan::UnregisterSpanResource(const std::string& key)
     auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
     if (spanNode) {
         spanNode->UnregisterResource(key);
-        return;
     }
 }
 

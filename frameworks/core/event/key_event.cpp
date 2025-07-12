@@ -203,7 +203,7 @@ void KeyEventInfo::ParseKeyEvent(KeyEvent& keyEvent)
 {
     keyEvent.action = GetKeyType();
     keyEvent.code = GetKeyCode();
-    keyEvent.key.assign(GetKeyText());
+    keyEvent.key.assign(GetKeyText().c_str());
     keyEvent.sourceType = GetKeySource();
     keyEvent.deviceId = GetDeviceId();
     keyEvent.metaKey = GetMetaKey();

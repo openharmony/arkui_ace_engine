@@ -36,6 +36,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1534,7 +1535,6 @@ HWTEST_F(UINodeTestNg, DumpTreeById001, TestSize.Level1)
     child->tag_ = V2::COMMON_VIEW_ETS_TAG;
     child->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
     parent->AddChild(child);
-
     /**
      * @tc.steps: step2. call DumpTreeById
      * @tc.expected: cover branch GetDumpFile is nullptr and result is false
@@ -3762,5 +3762,51 @@ HWTEST_F(UINodeTestNg, AddChildOPTTest001, TestSize.Level1)
     ONE->AddChildAfter(testNode2, testNode);
     EXPECT_EQ(ONE->children_.size(), 3);
     ONE->Clean();
+}
+
+/**
+ * @tc.name: FindTopNavDestination001
+ * @tc.desc: Test FindTopNavDestination.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, FindTopNavDestination001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto stageNode = FrameNode::CreateFrameNode("testFrameNode", 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(firstNode);
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    RefPtr<NavigationPattern> navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    firstNode->AddChild(navigationGroupNode);
+ 
+    /**
+     * @tc.steps2: make some NavDestinationNode.
+     */
+    auto navDestinationNode1 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 21, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode2 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode3 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 23, AceType::MakeRefPtr<Pattern>(), true);
+    auto navDestinationNode4 = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 24, AceType::MakeRefPtr<Pattern>(), true);
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", navDestinationNode1));
+    navPathList.emplace_back(std::make_pair("pageTwo", navDestinationNode2));
+    navPathList.emplace_back(std::make_pair("pageThree", navDestinationNode3));
+    navPathList.emplace_back(std::make_pair("pageFour", navDestinationNode4));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+ 
+    RefPtr<FrameNode> topNavNode;
+    stageNode->FindTopNavDestination(topNavNode);
+    ASSERT_NE(topNavNode, nullptr);
+    EXPECT_EQ(topNavNode, navDestinationNode4);
 }
 } // namespace OHOS::Ace::NG

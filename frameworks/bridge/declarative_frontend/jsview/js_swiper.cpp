@@ -223,6 +223,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("onContentWillScroll", &JSSwiper::SetOnContentWillScroll);
     JSClass<JSSwiper>::StaticMethod("onSelected", &JSSwiper::SetOnSelected);
     JSClass<JSSwiper>::StaticMethod("maintainVisibleContentPosition", &JSSwiper::SetMaintainVisibleContentPosition);
+    JSClass<JSSwiper>::StaticMethod("onScrollStateChanged", &JSSwiper::SetOnScrollStateChanged);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -558,7 +559,7 @@ std::optional<Dimension> JSSwiper::ParseIndicatorBottom(const JSRef<JSVal>& bott
         return bottom;
     } else {
         CalcDimension dimBottom;
-        bool parseOk = ParseLengthMetricsToDimension(bottomValue, dimBottom);
+        bool parseOk = ParseLengthMetricsToDimension(bottomValue, dimBottom, resObj);
         if (!parseOk) {
             bottom = ParseIndicatorDimension(bottomValue, resObj);
             return bottom;
@@ -706,6 +707,44 @@ bool JSSwiper::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDi
         double value = jsObj->GetProperty("value")->ToNumber<double>();
         auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
         result = CalcDimension(value, unit);
+        return true;
+    }
+    if (jsValue->IsNull()) {
+        result = CalcDimension(0.0f, DimensionUnit::VP);
+        return true;
+    }
+
+    return false;
+}
+
+bool JSSwiper::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result,
+    RefPtr<ResourceObject>& resourceObj)
+{
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        auto value = jsValue->ToString();
+        StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        auto valObj = jsObj->GetProperty("value");
+        if (valObj->IsUndefined() || valObj->IsNull()) {
+            return false;
+        }
+        double value = valObj->ToNumber<double>();
+        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
+        result = CalcDimension(value, unit);
+        auto jsRes = jsObj->GetProperty("res");
+        if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
+            !jsRes->IsNull() && jsRes->IsObject()) {
+            JSRef<JSObject> resObj = JSRef<JSObject>::Cast(jsRes);
+            JSViewAbstract::CompleteResourceObject(resObj);
+            resourceObj = JSViewAbstract::GetResourceObject(resObj);
+        }
         return true;
     }
     if (jsValue->IsNull()) {
@@ -1127,7 +1166,7 @@ void JSSwiper::SetPreviousMargin(const JSCallbackInfo& info)
     }
     SwiperModel::GetInstance()->SetPreviousMargin(value, ignoreBlank);
     if (SystemProperties::ConfigChangePerform()) {
-        SwiperModel::GetInstance()->ProcessPreviousMarginwithResourceObj(resObj);
+        SwiperModel::GetInstance()->ProcessPreviousMarginWithResourceObj(resObj);
     }
 }
 
@@ -1149,7 +1188,7 @@ void JSSwiper::SetNextMargin(const JSCallbackInfo& info)
     }
     SwiperModel::GetInstance()->SetNextMargin(value, ignoreBlank);
     if (SystemProperties::ConfigChangePerform()) {
-        SwiperModel::GetInstance()->ProcessNextMarginwithResourceObj(resObj);
+        SwiperModel::GetInstance()->ProcessNextMarginWithResourceObj(resObj);
     }
 }
 
@@ -1808,5 +1847,26 @@ void JSSwiper::SetMaintainVisibleContentPosition(const JSCallbackInfo& info)
     }
 
     SwiperModel::GetInstance()->SetMaintainVisibleContentPosition(info[0]->ToBoolean());
+}
+void JSSwiper::SetOnScrollStateChanged(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto scrollStateHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), SwiperChangeEventToJSValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onScrollStateChanged = [executionContext = info.GetExecutionContext(), func = std::move(scrollStateHandler),
+                          node = targetNode](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* scrollStateInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!scrollStateInfo) {
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "scrollStateInfo invalid, OnScrollStateChanged failed.");
+            return;
+        }
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(*scrollStateInfo);
+    };
+    SwiperModel::GetInstance()->SetOnScrollStateChanged(std::move(onScrollStateChanged));
 }
 } // namespace OHOS::Ace::Framework

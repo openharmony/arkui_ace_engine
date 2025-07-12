@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -133,6 +133,7 @@ void DialogPattern::OnAttachToFrameNode()
     auto callbackId = pipelineContext->RegisterFoldDisplayModeChangedCallback(std::move(foldModeChangeCallback));
     UpdateFoldDisplayModeChangedCallbackId(callbackId);
     RegisterHoverModeChangeCallback();
+    RegisterAvoidInfoChangeListener(host);
 }
 
 void DialogPattern::RegisterHoverModeChangeCallback()
@@ -173,6 +174,10 @@ void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (HasHoverModeChangedCallbackId()) {
         pipeline->UnRegisterHalfFoldHoverChangedCallback(hoverModeChangedCallbackId_.value_or(-1));
     }
+    if (onWillDismissRelease_) {
+        onWillDismissRelease_();
+    }
+    UnRegisterAvoidInfoChangeListener(frameNode);
 }
 
 void DialogPattern::OnFontConfigurationUpdate()
@@ -2715,6 +2720,52 @@ void DialogPattern::UpdateButtonBackgroundColor(const Color& color, int32_t butt
         }
         ++btnIndex;
     }
+}
+
+bool DialogPattern::GetWindowButtonRect(NG::RectF& floatButtons)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto avoidInfoMgr = pipelineContext->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, false);
+    NG::RectF floatContainerModal;
+    if (avoidInfoMgr->NeedAvoidContainerModal() &&
+        avoidInfoMgr->GetContainerModalButtonsRect(floatContainerModal, floatButtons)) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "When hidden, floatButtons rect is %{public}s",
+            floatButtons.ToString().c_str());
+        return true;
+    };
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "Window title builder shown");
+    return false;
+}
+
+void DialogPattern::OnAvoidInfoChange(const ContainerModalAvoidInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void DialogPattern::RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->AddAvoidInfoListener(WeakClaim(this));
+}
+
+void DialogPattern::UnRegisterAvoidInfoChangeListener(FrameNode* hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->RemoveAvoidInfoListener(WeakClaim(this));
 }
 
 void DialogPattern::UpdateButtonText(const std::string text, int32_t buttonIndex)

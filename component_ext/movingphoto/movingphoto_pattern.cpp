@@ -211,7 +211,11 @@ void MovingPhotoPattern::SetPlaybackPeriodImpl(const SingleTaskExecutor& uiTaskE
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 ContainerScope scope(pattern->instanceId_);
-                pattern->SetPlaybackPeriod(startTime, endTime);
+                bool isSetPeriod = false;
+                isSetPeriod = pattern->SetPlaybackPeriod(startTime, endTime);
+                if (!isSetPeriod) {
+                    pattern->FireMediaPlayerError();
+                }
             }, "ArkUISetPlaybackPeriod");
     });
 }
@@ -594,10 +598,6 @@ void MovingPhotoPattern::ResetMediaPlayer()
     CHECK_NULL_VOID(mediaPlayer_);
     isPrepared_ = false;
     isStopAnimation_ = false;
-    int32_t duration = DURATION_FLAG;
-    mediaPlayer_->GetDuration(duration);
-    autoPlayPeriodStartTime_ = PERIOD_START;
-    autoPlayPeriodEndTime_ = duration;
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -955,6 +955,7 @@ void MovingPhotoPattern::SetRenderContextBoundsInRoundXmage(
             imageSize.Height() * xmageOffsetRatio.Height() + ROUND_XMAGE_PIXEL_GAP);
     }
 }
+
 SizeF MovingPhotoPattern::CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize)
 {
     if (NearZero(rawSize.Height()) || NearZero(rawSize.Width()) || NearZero(layoutSize.Height())) {
@@ -1659,18 +1660,20 @@ void MovingPhotoPattern::ResetVideo()
     isFastKeyUp_ = false;
     if (currentPlayStatus_ == PlaybackStatus::ERROR) {
         ResetMediaPlayer();
+        return;
     }
     if (currentPlayStatus_ == PlaybackStatus::STOPPED) {
         mediaPlayer_->PrepareAsync();
     }
+    int32_t duration = DURATION_FLAG;
+    mediaPlayer_->GetDuration(duration);
+    autoPlayPeriodStartTime_ = PERIOD_START;
+    autoPlayPeriodEndTime_ = duration * US_CONVERT;
     if (currentPlayStatus_ == PlaybackStatus::STARTED) {
         Pause();
     }
+    SetAutoPlayPeriod(autoPlayPeriodStartTime_, autoPlayPeriodEndTime_);
     TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingphoto reset video.");
-    int32_t duration = DURATION_FLAG;
-    mediaPlayer_->GetDuration(duration);
-    SetAutoPlayPeriod(PERIOD_START, duration);
-    Seek(0);
     historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     autoAndRepeatLevel_ = PlaybackMode::NONE;
     isSetAutoPlayPeriod_ = false;
@@ -1709,25 +1712,26 @@ void MovingPhotoPattern::SetEnableTransition(bool enabled)
 
 bool MovingPhotoPattern::GetEnableTransition()
 {
-    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto SetEnableTransition %{public}d.", isEnableTransition_);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto GetEnableTransition %{public}d.", isEnableTransition_);
     return isEnableTransition_;
 }
 
-void MovingPhotoPattern::SetPlaybackPeriod(int64_t startTime, int64_t endTime)
+bool MovingPhotoPattern::SetPlaybackPeriod(int64_t startTime, int64_t endTime)
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto setPlaybackPeriod.");
     if (startTime < VIDEO_PLAYTIME_START_POSITION || startTime >= endTime) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MeidaPlayer SetAutoPlayPeriod error.");
-        return;
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MeidaPlayer SetPlaybackPeriod error.");
+        return false;
     }
-    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
-        return;
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid() || currentPlayStatus_ == PlaybackStatus::STARTED) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is invalid or currentPlayStatus is STARTED.");
+        return false;
     }
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto SetPlaybackPeriod.");
     autoPlayPeriodStartTime_ = startTime;
     autoPlayPeriodEndTime_ = endTime;
     mediaPlayer_->SetPlayRangeUsWithMode(startTime, endTime, SeekMode::SEEK_CLOSEST);
+    return true;
 }
 
 void MovingPhotoPattern::EnableAutoPlay(bool enabled)
@@ -1745,8 +1749,6 @@ void MovingPhotoPattern::EnableAutoPlay(bool enabled)
             isPrepared_);
         return;
     }
-    historyAutoAndRepeatLevel_ = PlaybackMode::AUTO;
-    autoAndRepeatLevel_ = PlaybackMode::AUTO;
     if (currentPlayStatus_ == PlaybackStatus::STOPPED) {
         mediaPlayer_->PrepareAsync();
     }

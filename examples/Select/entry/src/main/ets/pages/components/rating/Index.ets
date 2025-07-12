@@ -28,6 +28,9 @@ export struct RatingIndex {
     { name: 'RatingNormal', path: 'RatingNormal' },
     { name: 'RatingStarStyle', path: 'RatingStarStyle' },
     { name: 'RatingCustom', path: 'RatingCustom' },
+    { name: 'Rating组合场景1', path: 'RatingLevel0' },
+    { name: 'Rating组合场景2', path: 'RatingLevel1' },
+    { name: 'Rating组合场景3', path: 'RatingLevel2' }
   ]
 
   build() {

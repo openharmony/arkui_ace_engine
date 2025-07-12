@@ -20,6 +20,7 @@
 #include <iomanip>
 #include <optional>
 #include <sstream>
+#include <queue>
 #include <string>
 
 #include "event_handler.h"
@@ -727,8 +728,12 @@ WebDelegateObserver::~WebDelegateObserver() {}
 void WebDelegateObserver::NotifyDestory()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "NotifyDestory start");
+    uint32_t destructDelayTime = DESTRUCT_DELAY_MILLISECONDS;
     if (delegate_) {
         delegate_->UnRegisterScreenLockFunction();
+        if (delegate_->GetWebDestroyMode() == WebDestroyMode::NORMAL_MODE) {
+            destructDelayTime = 0;
+        }
     }
     auto context = context_.Upgrade();
     if (!context) {
@@ -750,7 +755,7 @@ void WebDelegateObserver::NotifyDestory()
                     observer->delegate_.Reset();
                 }
             },
-            DESTRUCT_DELAY_MILLISECONDS);
+            destructDelayTime);
         return;
     }
     auto taskExecutor = context->GetTaskExecutor();
@@ -770,7 +775,7 @@ void WebDelegateObserver::NotifyDestory()
                 observer->delegate_.Reset();
             }
         },
-        TaskExecutor::TaskType::UI, DESTRUCT_DELAY_MILLISECONDS, "ArkUIWebNotifyDestory");
+        TaskExecutor::TaskType::UI, destructDelayTime, "ArkUIWebNotifyDestory");
 }
 
 void WebDelegateObserver::OnAttachContext(const RefPtr<NG::PipelineContext> &context)
@@ -785,17 +790,42 @@ void WebDelegateObserver::OnDetachContext()
 
 void GestureEventResultOhos::SetGestureEventResult(bool result)
 {
-    if (result_) {
+    if (!IsMouseToTouch()) {
+        if (!result_) {
+            return;
+        }
         result_->SetGestureEventResult(result);
-        SetSendTask();
-        eventResult_ = result;
+    } else {
+        if (!mouseResult_) {
+            return;
+        }
+        mouseResult_->SetMouseEventResult(result, true);
     }
+    SetSendTask();
+    eventResult_ = result;
 }
 
 void GestureEventResultOhos::SetGestureEventResult(bool result, bool stopPropagation)
 {
-    if (result_) {
+    if (!IsMouseToTouch()) {
+        if (!result_) {
+            return;
+        }
         result_->SetGestureEventResultV2(result, stopPropagation);
+    } else {
+        if (!mouseResult_) {
+            return;
+        }
+        mouseResult_->SetMouseEventResult(result, stopPropagation);
+    }
+    SetSendTask();
+    eventResult_ = result;
+}
+
+void MouseEventResultOhos::SetMouseEventResult(bool result, bool stopPropagation)
+{
+    if (result_) {
+        result_->SetMouseEventResult(result, stopPropagation);
         SetSendTask();
         eventResult_ = result;
     }
@@ -1947,6 +1977,16 @@ bool WebDelegate::IsActivePolicyDisable()
     return false;
 }
 
+OHOS::NWeb::WebDestroyMode WebDelegate::GetWebDestroyMode()
+{
+    CHECK_NULL_RETURN(nweb_ != nullptr, 
+        OHOS::NWeb::WebDestroyMode::NORMAL_MODE);
+    if (nweb_) {
+        return nweb_->GetWebDestroyMode();
+    }
+    return OHOS::NWeb::WebDestroyMode::NORMAL_MODE;
+}
+
 void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface)
 {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2108,6 +2148,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         OnNativeEmbedGestureEventV2_ = useNewPipe ? eventHub->GetOnNativeEmbedGestureEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetNativeEmbedGestureEventId(), oldContext);
+        OnNativeEmbedMouseEventV2_ = useNewPipe ? eventHub->GetOnNativeEmbedMouseEvent()
+                                            : nullptr;
         onIntelligentTrackingPreventionResultV2_ = useNewPipe ?
             eventHub->GetOnIntelligentTrackingPreventionResultEvent() : nullptr;
         onRenderProcessNotRespondingV2_ = useNewPipe
@@ -3315,6 +3357,7 @@ void WebDelegate::InitWebViewWithSurface()
             auto pattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->InitDataDetector();
+            pattern->InitAIDetectResult();
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebInitWebViewWithSurface");
 }
@@ -4969,6 +5012,16 @@ void WebDelegate::OnPageFinished(const std::string& param)
     AccessibilitySendPageChange();
 }
 
+void WebDelegate::SetPageFinishedState(const bool& state)
+{
+    isPageFinished_ = state;
+}
+
+bool WebDelegate::GetPageFinishedState()
+{
+    return isPageFinished_;
+}
+
 void WebDelegate::OnProgressChanged(int param)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -5514,6 +5567,7 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
 
 void WebDelegate::AccessibilitySendPageChange()
 {
+    SetPageFinishedState(true);
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostDelayedTask(
         [weak = WeakClaim(this)]() {
@@ -5669,6 +5723,44 @@ RefPtr<WebResponse> WebDelegate::OnInterceptRequest(const std::shared_ptr<BaseEv
         CHECK_NULL_VOID(webCom);
         result = webCom->OnInterceptRequest(info.get());
     }, "ArkUIWebInterceptRequest");
+    return result;
+}
+
+std::string WebDelegate::OnOverrideErrorPage(
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> webResourceRequest,
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, "");
+    CHECK_NULL_RETURN(webResourceRequest, "");
+    CHECK_NULL_RETURN(error, "");
+    std::string result = "";
+    auto info = std::make_shared<OnOverrideErrorPageEvent>(
+        AceType::MakeRefPtr<WebRequest>(webResourceRequest->RequestHeaders(),
+        webResourceRequest->Method(), webResourceRequest->Url(),
+        webResourceRequest->FromGesture(), webResourceRequest->IsAboutMainFrame(),
+        webResourceRequest->IsRequestRedirect()),
+        AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode()));
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask(
+        [weak = WeakClaim(this), info, &result]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnOverrideErrorPageEvent = webEventHub->GetOnOverrideErrorPageEvent();
+                CHECK_NULL_VOID(propOnOverrideErrorPageEvent);
+                result = propOnOverrideErrorPageEvent(info);
+                return;
+            }
+            auto webCom = delegate->webComponent_.Upgrade();
+            CHECK_NULL_VOID(webCom);
+            result = webCom->OnOverrideErrorPage(info.get());
+        },
+        "ArkUIWebOverrideErrorPage");
     return result;
 }
 
@@ -7283,6 +7375,86 @@ void WebDelegate::SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedT
     }
 }
 
+bool WebDelegate::SetTouchEventInfoFromMouse(const MouseInfo &mouseInfo, TouchEventInfo &touchEventInfo)
+{
+    TouchLocationInfo touchLocationInfo(0);
+    switch (mouseInfo.GetAction()) {
+        case MouseAction::PRESS:
+            touchLocationInfo.SetTouchType(TouchType::DOWN);
+            break;
+        case MouseAction::RELEASE:
+            touchLocationInfo.SetTouchType(TouchType::UP);
+            break;
+        case MouseAction::MOVE:
+            touchLocationInfo.SetTouchType(TouchType::MOVE);
+            break;
+        case MouseAction::CANCEL:
+            touchLocationInfo.SetTouchType(TouchType::CANCEL);
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_WEB, "mouse's action is not match, result is false");
+            return false;
+    }
+    touchLocationInfo.SetLocalLocation(Offset(mouseInfo.GetLocalLocation()));
+    touchLocationInfo.SetScreenLocation(Offset(mouseInfo.GetScreenLocation()));
+    touchLocationInfo.SetGlobalLocation(Offset(mouseInfo.GetScreenLocation()));
+    touchLocationInfo.SetTimeStamp(mouseInfo.GetTimeStamp());
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.SetSourceDevice(SourceType::TOUCH);
+
+    ACE_SCOPED_TRACE(
+        "WebDelegate::SetTouchEventInfoFromMouse touchLocationInfo, LocalLocation: %s, ScreenLocation: %s",
+        mouseInfo.GetLocalLocation().ToString().c_str(), mouseInfo.GetScreenLocation().ToString().c_str());
+    return true;
+}
+
+MouseInfo WebDelegate::TransToMouseInfo(const std::shared_ptr<OHOS::NWeb::NWebNativeEmbedMouseEvent>& mouseEvent)
+{
+    std::string embedId;
+    float x = 0;
+    float y = 0;
+    if (mouseEvent) {
+        embedId = mouseEvent->GetEmbedId();
+        x = mouseEvent->GetX();
+        y = mouseEvent->GetY();
+    } else {
+        embedId = DEFAULT_NATIVE_EMBED_ID;
+    }
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, MouseInfo());
+    CHECK_NULL_RETURN(webPattern->GetHost(), MouseInfo());
+    auto offset = webPattern->GetHost()->GetTransformRelativeOffset();
+    auto pos = GetPosition(embedId);
+
+    auto& mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    MouseInfo mouseInfo;
+    MouseInfo tmpMouseInfo = webPattern->GetMouseInfo();
+    auto mouseAction = static_cast<MouseAction>(mouseEvent->GetType());
+    if ((mouseAction == MouseAction::PRESS || mouseAction == MouseAction::RELEASE) && !mouseInfoQueue.empty()) {
+        tmpMouseInfo = mouseInfoQueue.front();
+        mouseInfoQueue.pop();
+    }
+    mouseInfo.SetLocalLocation(Offset(x, y));
+    mouseInfo.SetGlobalLocation(Offset(x, y));
+    mouseInfo.SetScreenLocation(Offset(x + offset.GetX() + pos.GetX(), y + offset.GetY() + pos.GetY()));
+    mouseInfo.SetAction(mouseAction);
+    mouseInfo.SetButton(static_cast<MouseButton>(mouseEvent->GetButton()));
+    mouseInfo.SetTimeStamp(tmpMouseInfo.GetTimeStamp());
+    mouseInfo.SetSourceDevice(tmpMouseInfo.GetSourceDevice());
+    mouseInfo.SetTarget(tmpMouseInfo.GetTarget());
+    mouseInfo.SetForce(tmpMouseInfo.GetForce());
+    mouseInfo.SetSourceTool(tmpMouseInfo.GetSourceTool());
+    mouseInfo.SetTargetDisplayId(tmpMouseInfo.GetTargetDisplayId());
+    mouseInfo.SetDeviceId(tmpMouseInfo.GetDeviceId());
+
+    ACE_SCOPED_TRACE("WebDelegate::TransToMouseInfo mouseInfo, LocalLocation: %s, ScreenLocation: %s,"
+                     "GlobalLocation: %s",
+        mouseInfo.GetLocalLocation().ToString().c_str(), mouseInfo.GetScreenLocation().ToString().c_str(),
+        mouseInfo.GetGlobalLocation().ToString().c_str());
+    return mouseInfo;
+}
+
 void WebDelegate::OnNativeEmbedAllDestory()
 {
     if (!isEmbedModeEnabled_) {
@@ -7467,6 +7639,87 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebNativeEmbedGestureEvent");
+}
+
+void WebDelegate::OnNativeEmbedMouseEvent(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedMouseEvent> event)
+{
+    if (!event->IsHitNativeArea()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->RequestFocus();
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto button = static_cast<MouseButton>(event->GetButton());
+        bool isSupportMouse = button == MouseButton::LEFT_BUTTON
+            || button == MouseButton::RIGHT_BUTTON || button == MouseButton::MIDDLE_BUTTON;
+        if (OnNativeEmbedMouseEventV2_ && isSupportMouse) {
+            auto gestureEventHub = webEventHub->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gestureEventHub);
+            gestureEventHub->SetRecognizerDelayStatus(RecognizerDelayStatus::END);
+        }
+        return;
+    }
+    CHECK_NULL_VOID(taskExecutor_);
+    auto embedId = event ? event->GetEmbedId() : "";
+    TAG_LOGD(AceLogTag::ACE_WEB, "hit Emebed mouse event notify");
+    MouseInfo mouseInfo = TransToMouseInfo(event);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), embedId, mouseInfo, event]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto result = event->GetResult();
+            auto button = static_cast<MouseButton>(event->GetButton());
+            auto OnNativeEmbedMouseEventV2_ = delegate->OnNativeEmbedMouseEventV2_;
+            bool isSupportMouseToTouch = button == MouseButton::LEFT_BUTTON;
+            bool isSupportMouse = button == MouseButton::LEFT_BUTTON
+                || button == MouseButton::RIGHT_BUTTON || button == MouseButton::MIDDLE_BUTTON;
+            if (OnNativeEmbedMouseEventV2_ && isSupportMouse) {
+                delegate->HandleNativeMouseEvent(result, mouseInfo, embedId, delegate);
+            } else if (delegate->OnNativeEmbedGestureEventV2_ && isSupportMouseToTouch) {
+                delegate->HandleNativeMouseToTouch(result, mouseInfo, embedId, delegate);
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebNativeEmbedMouseEvent");
+}
+
+void WebDelegate::HandleNativeMouseEvent(
+    const std::shared_ptr<OHOS::NWeb::NWebMouseEventResult>& result,
+    const MouseInfo& mouseInfo, std::string embedId, const RefPtr<WebDelegate>& delegate)
+{
+    auto param = AceType::MakeRefPtr<MouseEventResultOhos>(result);
+    OnNativeEmbedMouseEventV2_(
+        std::make_shared<NativeEmbeadMouseInfo>(embedId, mouseInfo, param));
+    if (!param->HasSendTask()) {
+        param->SetMouseEventResult(true, true);
+    }
+    if (!param->GetEventResult() && mouseInfo.GetAction() == MouseAction::PRESS) {
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->RequestFocus();
+    }
+}
+
+void WebDelegate::HandleNativeMouseToTouch(
+    const std::shared_ptr<OHOS::NWeb::NWebMouseEventResult>& result,
+    const MouseInfo& mouseInfo, std::string embedId, const RefPtr<WebDelegate>& delegate)
+{
+    auto param = AceType::MakeRefPtr<GestureEventResultOhos>(result);
+    param->SetIsMouseToTouch(true);
+    TouchEventInfo touchEventInfo("touchEvent");
+    if (!delegate->SetTouchEventInfoFromMouse(mouseInfo, touchEventInfo)) {
+        return;
+    }
+    delegate->OnNativeEmbedGestureEventV2_(
+        std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo, param));
+    if (!param->HasSendTask()) {
+        param->SetGestureEventResult(true);
+    }
+
+    if (!param->GetEventResult() && mouseInfo.GetAction() == MouseAction::PRESS) {
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->RequestFocus();
+    }
 }
 
 void WebDelegate::SetToken()
@@ -8559,6 +8812,40 @@ void WebDelegate::SetViewportScaleState()
 {
     CHECK_NULL_VOID(nweb_);
     nweb_->SetViewportScaleState();
+}
+
+void WebDelegate::OnPdfScrollAtBottom(const std::string& url)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), url]() {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnPdfScrollAtBottom, fire event task");
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnPdfScrollAtBottomEvent(std::make_shared<PdfScrollEvent>(url));
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebPdfScrollAtBottom");
+}
+
+void WebDelegate::OnPdfLoadEvent(int32_t result, const std::string& url)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), result, url]() {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnPdfLoadEvent, fire event task");
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnPdfLoadEvent(std::make_shared<PdfLoadEvent>(result, url));
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebPdfLoadEvent");
 }
 
 } // namespace OHOS::Ace

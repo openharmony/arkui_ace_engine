@@ -745,7 +745,7 @@ public:
         resourceArrowHeightObj_ = obj;
     }
 
-    const RefPtr<ResourceObject>& GeArrowHeightResourceObject()
+    const RefPtr<ResourceObject>& GetArrowHeightResourceObject()
     {
         return resourceArrowHeightObj_;
     }
@@ -755,7 +755,7 @@ public:
         resourceRadiusObj_ = obj;
     }
 
-    const RefPtr<ResourceObject>& GeRadiusResourceObject()
+    const RefPtr<ResourceObject>& GetRadiusResourceObject()
     {
         return resourceRadiusObj_;
     }
@@ -765,7 +765,7 @@ public:
         resourceOutlineWidthObj_ = obj;
     }
 
-    const RefPtr<ResourceObject>& GeOutlineWidthResourceObject()
+    const RefPtr<ResourceObject>& GetOutlineWidthResourceObject()
     {
         return resourceOutlineWidthObj_;
     }
@@ -775,11 +775,20 @@ public:
         resourceBorderWidthObj_ = obj;
     }
 
-    const RefPtr<ResourceObject>& GeBorderWidthResourceObject()
+    const RefPtr<ResourceObject>& GetBorderWidthResourceObject()
     {
         return resourceBorderWidthObj_;
     }
 
+    void SetIsWithTheme(bool isWithTheme)
+    {
+        isWithTheme_ = isWithTheme;
+    }
+
+    bool GetIsWithTheme()
+    {
+        return isWithTheme_;
+    }
 
 private:
     bool isShow_ = true;
@@ -800,6 +809,7 @@ private:
     std::optional<bool> enableHoverMode_ = std::nullopt;
     bool followTransformOfTarget_ = false;
     bool isTips_ = false;
+    bool isWithTheme_ = false;
     TipsAnchorType anchorType_ = TipsAnchorType::TARGET;
     int32_t appearingTime_ = 700;
     int32_t disappearingTime_ = 300;

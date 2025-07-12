@@ -59,7 +59,6 @@ Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation,
     auto pattern = navigationNode->GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(pattern, invalidVal);
     // need check
-    // auto isCreated = pattern->CheckNeedCreate(index);
     return Converter::ArkValue<Ark_Boolean>(true);
 }
 Ark_NativePointer NavigationCreateImpl(Ark_Int32 peer,

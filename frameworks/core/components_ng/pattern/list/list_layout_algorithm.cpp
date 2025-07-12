@@ -286,7 +286,8 @@ void ListLayoutAlgorithm::LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int
 
 bool ListLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    if (layoutWrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(layoutWrapper)) {
+    if (layoutWrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(layoutWrapper) ||
+        layoutWrapper->IsIgnoreOptsValid()) {
         return true;
     }
     return CheckLayoutConstraintChanged(layoutWrapper);
@@ -883,7 +884,7 @@ void ListLayoutAlgorithm::CheckAndMeasureStartItem(LayoutWrapper* layoutWrapper,
     CHECK_NULL_VOID(algorithmWrapper);
     auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(algorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(itemGroup);
-    measureInNextFrame_ = itemGroup->MeasureInNextFrame();
+    measureInNextFrame_ = itemGroup->GroupMeasureInNextFrame();
     startPos = itemGroup->GetRefPos();
     ListItemInfo itemInfo;
     if (forwardLayout) {
@@ -1740,7 +1741,7 @@ void ListLayoutAlgorithm::CheckGroupMeasureBreak(const RefPtr<LayoutWrapper>& wr
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(itemGroup);
-    if (itemGroup->MeasureInNextFrame()) {
+    if (itemGroup->GroupMeasureInNextFrame()) {
         measureInNextFrame_ = true;
     }
 }
@@ -1803,7 +1804,8 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             itemCount++;
         }
         LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
-        if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
+        auto childLayoutProperty = wrapper->GetLayoutProperty();
+        if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout() || wrapper->IsIgnoreOptsValid()) {
             wrapper->Layout();
         } else {
             SyncGeometry(wrapper);
@@ -1990,7 +1992,7 @@ ListItemInfo ListLayoutAlgorithm::GetListItemGroupPosition(const RefPtr<LayoutWr
     auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(itemGroup, pos);
     auto res = itemGroup->GetItemGroupPosition(index);
-    measureInNextFrame_ = itemGroup->MeasureInNextFrame();
+    measureInNextFrame_ = itemGroup->GroupMeasureInNextFrame();
     return { id, res.first, res.second, true };
 }
 
@@ -2056,7 +2058,7 @@ void ListLayoutAlgorithm::AdjustPostionForListItemGroup(LayoutWrapper* layoutWra
     }
     itemGroup->SetScrollAlign(ScrollAlign::NONE);
     wrapper->Measure(GetGroupLayoutConstraint());
-    measureInNextFrame_ = itemGroup->MeasureInNextFrame();
+    measureInNextFrame_ = itemGroup->GroupMeasureInNextFrame();
     if (childrenSize_) {
         return;
     }

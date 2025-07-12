@@ -14,17 +14,27 @@
  */
 #include "core/interfaces/native/node/line_modifier.h"
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/shape/line_model_ng.h"
 
 namespace OHOS::Ace::NG {
 void SetStartPoint(ArkUINodeHandle node, const ArkUI_Float32* pointValues, const ArkUI_Int32* pointUnits,
-    const char* pointStr[])
+    const char* pointStr[], void* resObjArray)
 {
     ShapePoint point;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->UnRegisterResource("LineStartPoint");
     point.first = Dimension(pointValues[0], static_cast<OHOS::Ace::DimensionUnit>(pointUnits[0]));
     point.second = Dimension(pointValues[1], static_cast<OHOS::Ace::DimensionUnit>(pointUnits[1]));
+    RefPtr<ResourceObject>* resObjPtr = static_cast<RefPtr<ResourceObject>*>(resObjArray);
+    if (SystemProperties::ConfigChangePerform() && (resObjPtr[0] || resObjPtr[1])) {
+        std::vector<RefPtr<ResourceObject>> resObjArrayResult = { resObjPtr[0], resObjPtr[1] };
+        LineModelNG::StartPoint(frameNode, point, resObjArrayResult);
+    }
     LineModelNG::StartPoint(frameNode, point);
 }
 
@@ -36,16 +46,27 @@ void ResetStartPoint(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     LineModelNG::StartPoint(frameNode, point);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->UnRegisterResource("LineStartPoint");
 }
 
 void SetEndPoint(ArkUINodeHandle node, const ArkUI_Float32* pointValues, const ArkUI_Int32* pointUnits,
-    const char* pointStr[])
+    const char* pointStr[], void* resObjArray)
 {
     ShapePoint point;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->UnRegisterResource("LineEndPoint");
     point.first = Dimension(pointValues[0], static_cast<OHOS::Ace::DimensionUnit>(pointUnits[0]));
     point.second = Dimension(pointValues[1], static_cast<OHOS::Ace::DimensionUnit>(pointUnits[1]));
+    RefPtr<ResourceObject>* resObjPtr = static_cast<RefPtr<ResourceObject>*>(resObjArray);
+    if (SystemProperties::ConfigChangePerform() && (resObjPtr[0] || resObjPtr[1])) {
+        std::vector<RefPtr<ResourceObject>> resObjArrayResult = { resObjPtr[0], resObjPtr[1] };
+        LineModelNG::EndPoint(frameNode, point, resObjArrayResult);
+    }
     LineModelNG::EndPoint(frameNode, point);
 }
 
@@ -57,6 +78,9 @@ void ResetEndPoint(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     LineModelNG::EndPoint(frameNode, point);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->UnRegisterResource("LineEndPoint");
 }
 
 namespace NodeModifier {

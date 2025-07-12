@@ -19,12 +19,16 @@
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 
 #include "base/utils/utils.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/rect_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::vector<std::string> RADIUS_TYPES = { "TopLeft", "TopRight", "BottomRight", "BottomLeft" };
+} // namespace
 
 void RectModelNG::Create()
 {
@@ -144,6 +148,59 @@ void RectModelNG::SetRadiusValue(
             RectModelNG::SetBottomLeftRadius(frameNode, radius);
             break;
     }
+}
+
+void RectModelNG::SetRadiusValue(const Dimension& radiusX, const Dimension& radiusY,
+    const RefPtr<ResourceObject>& radiusXResObj, const RefPtr<ResourceObject>& radiusYResObj, int32_t index)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetRadiusValue(frameNode, radiusX, radiusY, radiusXResObj, radiusYResObj, index);
+}
+
+void RectModelNG::SetRadiusValue(FrameNode* frameNode, const Dimension& radiusX, const Dimension& radiusY,
+    const RefPtr<ResourceObject>& radiusXResObj, const RefPtr<ResourceObject>& radiusYResObj, int32_t index)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto pattern = frameNode->GetPattern<ShapePattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [frameNode, radiusX, radiusY, radiusXResObj, radiusYResObj, index](
+                            const RefPtr<ResourceObject>& resObj) {
+        NG::Radius radius = NG::Radius(radiusX, radiusY);
+        if (radiusXResObj) {
+            Dimension dim;
+            ResourceParseUtils::ConvertFromResObjNG(radiusXResObj, dim);
+            radius.SetX(dim);
+        }
+        if (radiusYResObj) {
+            Dimension dim;
+            ResourceParseUtils::ConvertFromResObjNG(radiusYResObj, dim);
+            radius.SetY(dim);
+        }
+        switch (index) {
+            case TOP_LEFT_RADIUS:
+                ACE_UPDATE_NODE_PAINT_PROPERTY(RectPaintProperty, TopLeftRadius, radius, frameNode);
+                break;
+            case TOP_RIGHT_RADIUS:
+                ACE_UPDATE_NODE_PAINT_PROPERTY(RectPaintProperty, TopRightRadius, radius, frameNode);
+                break;
+            case BOTTOM_RIGHT_RADIUS:
+                ACE_UPDATE_NODE_PAINT_PROPERTY(RectPaintProperty, BottomLeftRadius, radius, frameNode);
+                break;
+            case BOTTOM_LEFT_RADIUS:
+                ACE_UPDATE_NODE_PAINT_PROPERTY(RectPaintProperty, BottomRightRadius, radius, frameNode);
+                break;
+        }
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    std::string radiusType = RADIUS_TYPES[index];
+    std::string key = std::string("RectRadius") + radiusType;
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void RectModelNG::SetTopLeftRadius(FrameNode* frameNode, const Radius& topLeftRadius)

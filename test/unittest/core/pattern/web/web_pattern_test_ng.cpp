@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "oh_window_pip.h"
+#include "oh_window_comm.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -63,6 +64,7 @@ enum PictureInPictureCallback {
 #define PIP_SURFACE_OK_0 0
 #define PIP_SURFACE_OK_1 100
 #define PIP_SURFACE_N_0  1
+#define PIP_ID_CREATE_ERROR WINDOW_MANAGER_ERRORCODE_PIP_CREATE_FAILED
 
 int32_t OH_PictureInPicture_CreatePip(
     PictureInPicture_PipConfig pipConfig, uint32_t* controllerId)
@@ -82,6 +84,9 @@ int32_t OH_PictureInPicture_StartPip(uint32_t controllerId)
     if (controllerId == PIP_ID_OK_0 || controllerId == PIP_ID_OK_1 ||
         controllerId == PIP_ID_OK_2) {
         return 0;
+    }
+    if (controllerId == PIP_ID_CREATE_ERROR) {
+        return WINDOW_MANAGER_ERRORCODE_PIP_CREATE_FAILED;
     }
     return 1;
 }
@@ -510,8 +515,10 @@ HWTEST_F(WebPatternTestNg, InitDragEvent006, TestSize.Level1)
     WeakPtr<EventHub> eventHub = nullptr;
     RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_NE(gestureHub, nullptr);
+    MockPipelineContext::SetUp();
     bool rerult = webPattern->NotifyStartDragTask();
     EXPECT_TRUE(rerult);
+    MockPipelineContext::TearDown();
     webPattern->isDisableDrag_ = true;
     rerult = webPattern->NotifyStartDragTask();
     EXPECT_FALSE(rerult);
@@ -1889,6 +1896,57 @@ HWTEST_F(WebPatternTestNg, HandleMouseEvent_001, TestSize.Level1)
 
     webPattern->HandleMouseEvent(info);
     EXPECT_NE(webPattern, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: HandleMouseEvent_002
+ * @tc.desc: HandleMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, HandleMouseEvent_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    MouseInfo info;
+    auto mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    info.SetButton(MouseButton::RIGHT_BUTTON);
+    webPattern->HandleMouseEvent(info);
+    EXPECT_EQ(mouseInfoQueue.size(), 0);
+
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 0);
+
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 1);
+
+    MouseInfo info1;
+    info1.SetButton(MouseButton::LEFT_BUTTON);
+    info1.SetAction(MouseAction::RELEASE);
+    webPattern->HandleMouseEvent(info1);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 2);
+    for (int i = 0; i < 10; i++) {
+        webPattern->HandleMouseEvent(info1);
+    }
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 10);
 #endif
 }
 
@@ -4384,7 +4442,42 @@ HWTEST_F(WebPatternTestNg, StartPip_002, TestSize.Level1)
     EXPECT_EQ(ret, false);
 #endif
 }
- 
+
+/**
+ * @tc.name: StartPip_003
+ * @tc.desc: StartPip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, StartPip_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    auto ret = webPattern.StartPip(PIP_ID_CREATE_ERROR);
+    EXPECT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: StartPip_004
+ * @tc.desc: StartPip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, StartPip_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    auto delegateMock = AceType::MakeRefPtr<WebDelegateMock>(
+        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
+    webPattern.delegate_ = delegateMock;
+    auto ret = webPattern.StartPip(PIP_ID_CREATE_ERROR);
+    EXPECT_EQ(ret, false);
+#endif
+}
+
 /**
  * @tc.name: EnablePip_001
  * @tc.desc: EnablePip.
@@ -4641,6 +4734,178 @@ HWTEST_F(WebPatternTestNg, SetDefaultBackgroundColor001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DarkModeBackgroundColor001
+ * @tc.desc: Test DarkModeBackgroundColor001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, DarkModeBackgroundColor001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(
+            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    ASSERT_NE(webPattern->GetHost()->GetRenderContext(), nullptr);
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_FALSE(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor());
+
+    // Test that the default background color is based on darkMode() and forceDarkAccess()
+    // when not set backgroundColor().
+    webPattern->UpdateDarkMode(WebDarkMode::On);
+    webPattern->UpdateForceDarkAccess(true);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::BLACK);
+
+    webPattern->UpdateForceDarkAccess(false);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::WHITE);
+
+    webPattern->UpdateDarkMode(WebDarkMode::Off);
+    webPattern->UpdateForceDarkAccess(true);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::WHITE);
+
+    webPattern->UpdateBackgroundColor(Color::RED.GetValue());
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::RED);
+
+    webPattern->SetDefaultBackgroundColor();
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::WHITE);
+
+    webPattern->UpdateDarkMode(WebDarkMode::On);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::BLACK);
+
+    webPattern->UpdateBackgroundColor(Color::RED.GetValue());
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::RED);
+#endif
+}
+
+/**
+ * @tc.name: DarkModeBackgroundColor002
+ * @tc.desc: Test DarkModeBackgroundColor002.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, DarkModeBackgroundColor002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(
+            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    ASSERT_NE(webPattern->GetHost()->GetRenderContext(), nullptr);
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_FALSE(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor());
+
+    // Tests that when the backgroundColor is set to null or undefined,
+    // it resets the backgroundColor to the default color.
+    webPattern->SetDefaultBackgroundColor();
+    webPattern->UpdateDarkMode(WebDarkMode::On);
+    webPattern->UpdateForceDarkAccess(true);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::BLACK);
+
+    webPattern->UpdateBackgroundColor(Color::RED.GetValue());
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::RED);
+
+    webPattern->UpdateForceDarkAccess(false);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::RED);
+
+    webPattern->SetDefaultBackgroundColor();
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::WHITE);
+
+    webPattern->UpdateForceDarkAccess(true);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::BLACK);
+
+    webPattern->UpdateBackgroundColor(Color::BLUE.GetValue());
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::BLUE);
+#endif
+}
+
+/**
+ * @tc.name: DarkModeBackgroundColor003
+ * @tc.desc: Test DarkModeBackgroundColor003.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, DarkModeBackgroundColor003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(
+            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    ASSERT_NE(webPattern->GetHost()->GetRenderContext(), nullptr);
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_FALSE(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor());
+
+    // In the case of richText, tests that when renderContext sets the backgroundColor, GetBackgroundColor() is null,
+    // the defaultBackgroundColor will not be set.
+    webPattern->GetHost()->GetRenderContext()->UpdateBackgroundColor(Color::BLUE);
+    webPattern->UpdateDarkMode(WebDarkMode::Off);
+    webPattern->UpdateForceDarkAccess(true);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::BLUE);
+
+    webPattern->OnBackgroundColorUpdate(Color::RED.GetValue());
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::RED);
+
+    webPattern->SetDefaultBackgroundColor();
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::WHITE);
+
+    webPattern->UpdateDarkMode(WebDarkMode::On);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::BLACK);
+#endif
+}
+
+/**
  * @tc.name: CheckVisible_001
  * @tc.desc: CheckVisible.
  * @tc.type: FUNC
@@ -4774,6 +5039,66 @@ HWTEST_F(WebPatternTestNg, GetVisibleViewportAvoidHeight001, TestSize.Level1)
     webPattern->OnModifyDone();
     avoidHeight = webPattern->GetVisibleViewportAvoidHeight();
     EXPECT_EQ(avoidHeight, 0);
+#endif
+}
+
+/**
+ * @tc.name: HandleMouseEvent_003
+ * @tc.desc: HandleMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, HandleMouseEvent_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    MouseInfo info;
+    auto mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 1);
+
+    auto uiCallback = [](const std::shared_ptr<BaseEventInfo>& info) {};
+    webPattern->delegate_->OnNativeEmbedGestureEventV2_ = uiCallback;
+    info.SetButton(MouseButton::NONE_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 1);
+
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 2);
+    
+    info.SetAction(MouseAction::RELEASE);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 3);
+
+    info.SetAction(MouseAction::MOVE);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 3);
+
+    info.SetAction(MouseAction::PRESS);
+    webPattern->delegate_ = nullptr;
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 4);
 #endif
 }
 } // namespace OHOS::Ace::NG

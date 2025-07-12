@@ -120,6 +120,7 @@ private:
     void HandleTouchCancelEvent(const TouchEvent& event) override;
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     void UpdateInfoWithDownEvent(const TouchEvent& event);
+    void ResetStatusInHandleOverdueDeadline();
 
     void OnResetStatus() override
     {
@@ -156,6 +157,7 @@ private:
 
     int32_t count_ = 1;
     Dimension distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
+    double userDT_ = 0.0;
 
     // number of tap action.
     int32_t tappedCount_ = 0;

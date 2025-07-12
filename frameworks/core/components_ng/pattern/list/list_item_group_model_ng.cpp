@@ -277,8 +277,10 @@ void ListItemGroupModelNG::ParseResObjDividerColor(const RefPtr<ResourceObject>&
             if (listTheme) {
                 divider.color = listTheme->GetDividerColor();
             }
+            ListItemGroupModelNG::SetDividerColorByUser(AceType::RawPtr(frameNode), false);
         } else {
             divider.color = result;
+            ListItemGroupModelNG::SetDividerColorByUser(AceType::RawPtr(frameNode), true);
         }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
     };
@@ -366,8 +368,10 @@ void ListItemGroupModelNG::ParseResObjDividerColor(FrameNode* frameNode, const R
             if (listTheme) {
                 divider.color = listTheme->GetDividerColor();
             }
+            ListItemGroupModelNG::SetDividerColorByUser(AceType::RawPtr(frameNode), false);
         } else {
             divider.color = result;
+            ListItemGroupModelNG::SetDividerColorByUser(AceType::RawPtr(frameNode), true);
         }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
     };

@@ -31,6 +31,14 @@ const std::string TEST_STR = "test";
 const std::u16string INIT_VALUE_1 = u"hello1";
 const std::u16string INIT_VALUE_2 = u"hello2";
 const std::u16string INIT_VALUE_3 = u"hello world! hello world! hello world!";
+const std::u16string INIT_VALUE_4 = u"hello4";
+const std::u16string INIT_VALUE_5 = u"hello5";
+const std::u16string INIT_VALUE_6 = u"hello6";
+const std::u16string INIT_VALUE_7 = u"hello7";
+const std::u16string INIT_VALUE_8 = u"hello8";
+const std::u16string EMPTY_STRING = u"";
+const std::list<std::u16string> INIT_VALUES = { u"hello1", u"hello2", u"hello3", u"hello4", u"hello5" };
+const std::list<std::u16string> INIT_VALUES_EMPTY = {};
 const std::u16string TEST_INSERT_VALUE = u"s";
 const std::u16string TEST_INSERT_LINE_SEP = u"\n";
 const std::u16string EXCEPT_VALUE = u"h\n";
@@ -92,6 +100,7 @@ const TextStyle TEXT_STYLE_1(10.0);
 const TextStyle TEXT_STYLE_2(20.0);
 const TextStyle TEXT_STYLE_3(30.0);
 const TextSpanOptions TEXT_SPAN_OPTIONS_1 = { .value = INIT_VALUE_1, .style = TEXT_STYLE_1 };
+const float LINE_THICKNESS_SCALE = 1.5f;
 const ImageSpanAttribute IMAGE_SPAN_ATTRIBUTE_1 = {
     .size = ImageSpanSize{ .width = 200.0_px, .height = 100.0_px },
     .verticalAlign = VerticalAlign::CENTER,

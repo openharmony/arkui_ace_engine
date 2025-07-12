@@ -32,6 +32,7 @@
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "ace_engine/interfaces/napi/kits/observer/gesture/gesture_observer_listener.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -176,7 +177,7 @@ EventTargetInfoWrapper* GetEventTargetInfoWrapper(
     return wrapper;
 }
 
-void PaesePanDirection(napi_env env, napi_value value, PanDirection& panDirection)
+void ParsePanDirection(napi_env env, napi_value value, PanDirection& panDirection)
 {
     uint32_t typeValue;
     napi_get_value_uint32(env, value, &typeValue);
@@ -326,6 +327,27 @@ static napi_value IsEnabled(napi_env env, napi_callback_info info)
     return newResult;
 }
 
+static GestureRecognizerState ConvertRefereeState(NG::RefereeState state)
+{
+    switch (state) {
+        case NG::RefereeState::READY:
+            return GestureRecognizerState::READY;
+        case NG::RefereeState::DETECTING:
+            return GestureRecognizerState::DETECTING;
+        case NG::RefereeState::PENDING:
+            return GestureRecognizerState::PENDING;
+        case NG::RefereeState::PENDING_BLOCKED:
+        case NG::RefereeState::SUCCEED_BLOCKED:
+            return GestureRecognizerState::BLOCKED;
+        case NG::RefereeState::SUCCEED:
+            return GestureRecognizerState::SUCCEED;
+        case NG::RefereeState::FAIL:
+            return GestureRecognizerState::FAIL;
+        default:
+            return GestureRecognizerState::UNKNOWN;
+    }
+}
+
 static napi_value GetState(napi_env env, napi_callback_info info)
 {
     napi_escapable_handle_scope scope = nullptr;
@@ -336,7 +358,7 @@ static napi_value GetState(napi_env env, napi_callback_info info)
         return nullptr;
     }
     napi_value result = nullptr;
-    napi_create_int32(env, static_cast<int32_t>(current->recognizer->GetRefereeState()), &result);
+    napi_create_int32(env, static_cast<int32_t>(ConvertRefereeState(current->recognizer->GetRefereeState())), &result);
     napi_value newResult = nullptr;
     napi_escape_handle(env, scope, result, &newResult);
     napi_close_escapable_handle_scope(env, scope);
@@ -671,7 +693,7 @@ static napi_value SetDirection(napi_env env, napi_callback_info info)
     if (argc != PARAM_SIZE_ONE || !GestureObserverListener::MatchValueType(env, argv[PARAM_SIZE_ZERO], napi_number)) {
         panDirection.type = PanDirection::ALL;
     } else {
-        PaesePanDirection(env, argv[PARAM_SIZE_ZERO], panDirection);
+        ParsePanDirection(env, argv[PARAM_SIZE_ZERO], panDirection);
     }
 
     wrapper->panGestureOption->SetDirection(panDirection);

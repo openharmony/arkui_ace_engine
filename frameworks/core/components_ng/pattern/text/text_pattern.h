@@ -266,6 +266,12 @@ public:
     {
         return dataDetectorAdapter_->textDetectResult_;
     }
+    virtual void MarkAISpanStyleChanged()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+    }
     void SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
     {
         dataDetectorAdapter_->SetTextDetectTypes(textDetectConfig.types);
@@ -277,9 +283,7 @@ public:
         auto textDetectConfigCache = dataDetectorAdapter_->textDetectConfigStr_;
         dataDetectorAdapter_->textDetectConfigStr_ = textDetectConfig.ToString();
         if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+            MarkAISpanStyleChanged();
         }
         dataDetectorAdapter_->enablePreviewMenu_ = textDetectConfig.enablePreviewMenu;
     }
@@ -404,6 +408,7 @@ public:
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     std::string GetFontInJson() const;
     std::string GetBindSelectionMenuInJson() const;
+    std::unique_ptr<JsonValue> GetShaderStyleInJson() const;
     virtual void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const {}
     std::string GetFontSizeWithThemeInJson(const std::optional<Dimension>& value) const;
 
@@ -861,9 +866,33 @@ public:
     }
     RefPtr<TextEffect> GetOrCreateTextEffect(const std::u16string& content, bool& needUpdateTypography);
     void RelayoutResetOrUpdateTextEffect();
-    void ReseTextEffect(bool clear = true);
-    bool ResetTextEffectBeforeLayout();
+    void ResetTextEffect();
+    bool ResetTextEffectBeforeLayout(bool onlyReset = true);
+
+    virtual void HandleOnAskCelia();
+
+    void SetIsAskCeliaEnabled(bool isAskCeliaEnabled)
+    {
+        isAskCeliaEnabled_ = isAskCeliaEnabled && IsNeedAskCelia();
+    }
     
+    bool IsAskCeliaEnabled() const
+    {
+        return isAskCeliaEnabled_;
+    }
+    bool IsNeedAskCelia() const
+    {
+        // placeholder and symbol not support
+        auto start = GetTextSelector().GetTextStart();
+        auto end = GetTextSelector().GetTextEnd();
+        auto content = UtfUtils::Str16DebugToStr8(GetSelectedText(start, end));
+        return !std::regex_match(content, std::regex("^\\s*$"));
+    }
+    void UpdateTextSelectorSecondHandle(const RectF& rect)
+    {
+        textSelector_.secondHandle = rect;
+    }
+
 protected:
     int32_t GetClickedSpanPosition()
     {
@@ -894,7 +923,7 @@ protected:
     void RecoverSelection();
     virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
-    Offset GetIndexByOffset(const Offset& pos, int32_t& extend);
+    void GetIndexByOffset(const Offset& pos, int32_t& extend);
     void StartVibratorByLongPress();
     void HandleLongPress(GestureEvent& info);
     void HandleClickEvent(GestureEvent& info);
@@ -951,6 +980,13 @@ protected:
     void OnDetachFromMainTree() override
     {
         isDetachFromMainTree_ = true;
+    }
+
+    void CreateMultipleClickRecognizer()
+    {
+        if (!multipleClickRecognizer_) {
+            multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+        }
     }
 
     bool SetActionExecSubComponent();
@@ -1031,12 +1067,13 @@ protected:
     std::vector<SubComponentInfoEx> subComponentInfos_;
     virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
     MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
-    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_;
     bool ShowShadow(const PointF& textOffset, const Color& color);
     virtual PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect);
     bool hasUrlSpan_ = false;
     WeakPtr<PipelineContext> pipeline_;
     void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
+    bool IsSupportAskCelia();
 
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -1064,6 +1101,7 @@ private:
     void CollectTextSpanNodes(const RefPtr<SpanNode>& child, bool& isSpanHasClick, bool& isSpanHasLongPress);
     void UpdateContainerChildren(const RefPtr<UINode>& parent, const RefPtr<UINode>& child);
     RefPtr<RenderContext> GetRenderContext();
+    void UpdateRectForSymbolShadow(RectF& rect, float offsetX, float offsetY, float blurRadius) const;
     void ProcessBoundRectByTextShadow(RectF& rect);
     void FireOnSelectionChange(int32_t start, int32_t end);
     void FireOnMarqueeStateChange(const TextMarqueeState& state);
@@ -1198,6 +1236,7 @@ private:
     bool isShowAIMenuOption_ = false;
     std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
     bool isRegisteredAreaCallback_ = false;
+    bool isAskCeliaEnabled_ = false;
 };
 } // namespace OHOS::Ace::NG
 

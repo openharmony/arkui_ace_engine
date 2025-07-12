@@ -43,7 +43,7 @@
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/preview_ui_extension_adapter.h"
+#include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_adapter.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
@@ -412,6 +412,7 @@ HWTEST_F(PreviewSessionWrapperImplTestNg, PreviewSessionWrapperImplTestNg006, Te
      * @tc.steps: step1. construct a PreviewSessionWrapperImpl
      */
     auto sessionWrapper = GeneratePreviewSessionWrapperImpl();
+    EXPECT_NE(sessionWrapper, nullptr);
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
 
@@ -421,9 +422,7 @@ HWTEST_F(PreviewSessionWrapperImplTestNg, PreviewSessionWrapperImplTestNg006, Te
     auto type = OHOS::Ace::WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction;
     sessionWrapper->NotifySizeChangeReason(type, nullptr);
-
     sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
-
     type = OHOS::Ace::WindowSizeChangeReason::ROTATION;
     sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
 #endif
@@ -572,7 +571,7 @@ HWTEST_F(PreviewSessionWrapperImplTestNg, PreviewSessionWrapperImplTestNg010, Te
     RectF paintRect = { 10.0f, 10.0f, 10.0f, 10.0f };
     sessionWrapper->NotifyDisplayArea(paintRect);
 
-    sessionWrapper->session_->reason_ = Rosen::SizeChangeReason::ROTATION;
+    sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::ROTATION);
     sessionWrapper->NotifyDisplayArea(paintRect);
 #endif
 }
@@ -654,5 +653,26 @@ HWTEST_F(PreviewSessionWrapperImplTestNg, PreviewSessionWrapperImplTestNg012, Te
     sessionWrapper->OnDisconnect(false);
     sessionWrapper->OnConnect();
 #endif
+}
+
+/**
+ * @tc.name: PreviewSessionWrapperImplTestNg013
+ * @tc.desc: Test the method NotifyDestroy
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewSessionWrapperImplTestNg, PreviewSessionWrapperImplTestNg013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a PreviewSessionWrapperImpl
+     */
+    auto sessionWrapper = GeneratePreviewSessionWrapperImpl();
+    ASSERT_NE(sessionWrapper, nullptr);
+    bool isHandleError = true;
+    sessionWrapper->NotifyDestroy(isHandleError);
+    EXPECT_EQ(isHandleError, true);
+
+    isHandleError = false;
+    sessionWrapper->NotifyDestroy(isHandleError);
+    EXPECT_EQ(isHandleError, false);
 }
 } // namespace OHOS::Ace::NG

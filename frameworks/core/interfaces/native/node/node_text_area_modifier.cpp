@@ -55,7 +55,7 @@ const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, Ellipsis
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 const float ERROR_FLOAT_CODE = -1.0f;
-std::string g_strValue;
+thread_local std::string g_strValue;
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 constexpr int32_t ELLIPSIS_MODE_TAIL = 2;
@@ -284,9 +284,9 @@ void SetTextAreaPlaceholderFont(ArkUINodeHandle node, const struct ArkUIResource
     }
     if (SystemProperties::ConfigChangePerform() && fontfamilyRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontfamilyRawPtr));
-        pattern->RegisterResource<std::vector<std::string>>("placeholderFontfamily", resObj, font.fontFamilies);
+        pattern->RegisterResource<std::vector<std::string>>("placeholderFontFamily", resObj, font.fontFamilies);
     } else {
-        pattern->UnRegisterResource("placeholderFontfamily");
+        pattern->UnRegisterResource("placeholderFontFamily");
     }
 }
 
@@ -715,6 +715,14 @@ void SetTextAreaBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32
         backgroundColor.SetColorSpace(ColorSpace::SRGB);
     }
     TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (SystemProperties::ConfigChangePerform() && resRawPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        pattern->RegisterResource<Color>("backgroundColor", resObj, Color(color));
+    } else {
+        pattern->UnRegisterResource("backgroundColor");
+    }
 }
 
 void ResetTextAreaBackgroundColor(ArkUINodeHandle node)

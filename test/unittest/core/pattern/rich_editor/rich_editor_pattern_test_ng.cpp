@@ -103,9 +103,15 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorToJsonValue001, TestSize.Level1)
     EXPECT_FALSE(filter.IsFastFilter());
     richEditorPattern->SetRequestKeyboardOnFocus(true);
     richEditorPattern->SetSupportStyledUndo(true);
+    richEditorPattern->copyOption_ = CopyOptions::Local;
+    richEditorPattern->SetSupportPreviewText(false);
+    richEditorPattern->SetEnableAutoSpacing(true);
     richEditorPattern->ToJsonValue(jsonObject, filter);
     EXPECT_EQ(jsonObject->GetString("enableKeyboardOnFocus"), "true");
     EXPECT_EQ(jsonObject->GetInt("undoStyle"), 1);
+    EXPECT_EQ(jsonObject->GetInt("copyOptions"), 2);
+    EXPECT_EQ(jsonObject->GetString("enablePreviewText"), "false");
+    EXPECT_EQ(jsonObject->GetString("enableAutoSpacing"), "true");
 
     filter.filterFixed = 10;
     EXPECT_TRUE(filter.IsFastFilter());
@@ -221,33 +227,6 @@ HWTEST_F(RichEditorPatternTestNg, NeedAiAnalysis001, TestSize.Level1)
 }
 
 /**
- * @tc.name: AdjustCursorPosition001
- * @tc.desc: test AdjustCursorPosition
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, AdjustCursorPosition001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    std::u16string content = u"TEST123";
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
-    int32_t pos = 0;
-    richEditorPattern->AdjustCursorPosition(pos);
-    EXPECT_EQ(pos, 0);
-}
-
-/**
  * @tc.name: FixMoveDownChange001
  * @tc.desc: test FixMoveDownChange
  * @tc.type: FUNC
@@ -291,6 +270,11 @@ HWTEST_F(RichEditorPatternTestNg, OnBackPressed001, TestSize.Level1)
 
     EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
 
+    richEditorPattern->textSelector_.Update(0, 1);
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
     RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
     richEditorPattern->CreateHandles();
     richEditorPattern->textSelector_.Update(0, testNumber5);
@@ -461,4 +445,25 @@ HWTEST_F(RichEditorPatternTestNg, DeleteToMaxLength002, TestSize.Level1)
     richEditorPattern->DeleteToMaxLength(len);
     ASSERT_EQ(richEditorPattern->previewLongPress_, false);
 }
+
+/**
+ * @tc.name: RichEditorScopeTest
+ * @tc.desc: test RichEditorScope
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, RichEditorScopeTest, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto& requestFocusBySingleClick = richEditorPattern->requestFocusBySingleClick_;
+
+    requestFocusBySingleClick = false;
+    {
+        RICH_EDITOR_SCOPE(requestFocusBySingleClick);
+        EXPECT_EQ(requestFocusBySingleClick, true);
+    }
+    EXPECT_EQ(requestFocusBySingleClick, false);
+}
+
 } // namespace

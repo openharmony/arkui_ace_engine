@@ -420,8 +420,9 @@ class ACE_EXPORT WebDialogEvent : public BaseEventInfo {
 
 public:
     WebDialogEvent(const std::string& url, const std::string& message, const std::string& value,
-        const DialogEventType& type, const RefPtr<Result>& result)
-        : BaseEventInfo("WebDialogEvent"), url_(url), message_(message), value_(value), type_(type), result_(result)
+        const DialogEventType& type, const RefPtr<Result>& result, bool isReload = false)
+        : BaseEventInfo("WebDialogEvent"), url_(url), message_(message), value_(value), type_(type), result_(result),
+          isReload_(isReload)
     {}
     ~WebDialogEvent() = default;
 
@@ -450,12 +451,18 @@ public:
         return type_;
     }
 
+    bool GetIsReload() const
+    {
+        return isReload_;
+    }
+
 private:
     std::string url_;
     std::string message_;
     std::string value_;
     DialogEventType type_;
     RefPtr<Result> result_;
+    bool isReload_;
 };
 
 class ACE_EXPORT AuthResult : public AceType {
@@ -815,6 +822,46 @@ public:
 
 private:
     std::string loadedUrl_;
+};
+
+class ACE_EXPORT PdfScrollEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(PdfScrollEvent, BaseEventInfo);
+
+public:
+    explicit PdfScrollEvent(const std::string& url)
+        : BaseEventInfo("PdfScrollEvent"), url_(url) {}
+    ~PdfScrollEvent() = default;
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+private:
+    std::string url_;
+};
+
+class ACE_EXPORT PdfLoadEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(PdfLoadEvent, BaseEventInfo);
+
+public:
+    explicit PdfLoadEvent(int32_t result, const std::string& url)
+        : BaseEventInfo("PdfLoadEvent"), result_(result), url_(url) {}
+    ~PdfLoadEvent() = default;
+
+    int32_t GetResult() const
+    {
+        return result_;
+    }
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+private:
+    int32_t result_;
+    std::string url_;
 };
 
 class ACE_EXPORT ContextMenuHideEvent : public BaseEventInfo {
@@ -1219,6 +1266,29 @@ public:
 
 private:
     RefPtr<WebRequest> request_;
+};
+
+class ACE_EXPORT OnOverrideErrorPageEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(OnOverrideErrorPageEvent, BaseEventInfo);
+
+public:
+    OnOverrideErrorPageEvent(const RefPtr<WebRequest>& webResourceRequest, const RefPtr<WebError>& error)
+        : BaseEventInfo("OnOverrideErrorPageEvent"), webResourceRequest_(webResourceRequest), error_(error) {}
+    ~OnOverrideErrorPageEvent() = default;
+
+    const RefPtr<WebRequest>& GetWebResourceRequest() const
+    {
+        return webResourceRequest_;
+    }
+
+    const RefPtr<WebError>& GetError() const
+    {
+        return error_;
+    }
+
+private:
+    RefPtr<WebRequest> webResourceRequest_;
+    RefPtr<WebError> error_;
 };
 
 class ACE_EXPORT LoadWebRequestFocusEvent : public BaseEventInfo {

@@ -65,6 +65,7 @@ public:
         return nodeSlot_;
     }
 
+    void AddBuilderToSlot();
 private:
     WeakPtr<UINode> nodeSlot_;
     std::list<RefPtr<UINode>> children_;

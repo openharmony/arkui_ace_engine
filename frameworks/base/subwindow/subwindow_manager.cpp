@@ -312,7 +312,8 @@ void SubwindowManager::HidePreviewNG()
 void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
-    auto subwindow = GetCurrentWindow();
+    auto subwindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
     if (subwindow) {
         subwindow->HideMenuNG(menu, targetId);
     }
@@ -333,7 +334,8 @@ void SubwindowManager::HideMenuNG(bool showPreviewAnimation, bool startDrag)
 void SubwindowManager::UpdateHideMenuOffsetNG(
     const NG::OffsetF& offset, float menuScale, bool isRedragStart, int32_t menuWrapperId)
 {
-    auto subwindow = GetCurrentWindow();
+    auto subwindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
     if (subwindow) {
         subwindow->UpdateHideMenuOffsetNG(offset, menuScale, isRedragStart, menuWrapperId);
     }
@@ -343,7 +345,8 @@ void SubwindowManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::Fr
     const NG::OffsetF& offset)
 {
     CHECK_NULL_VOID(dragPreviewNode);
-    auto subwindow = GetCurrentWindow();
+    auto subwindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
     if (subwindow) {
         subwindow->ContextMenuSwitchDragPreviewAnimationtNG(dragPreviewNode, offset);
     }
@@ -359,7 +362,8 @@ void SubwindowManager::UpdatePreviewPosition()
 
 bool SubwindowManager::GetMenuPreviewCenter(NG::OffsetF& offset)
 {
-    auto subwindow = GetCurrentWindow();
+    auto subwindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
     if (subwindow) {
         return subwindow->GetMenuPreviewCenter(offset);
     }
@@ -556,7 +560,8 @@ void SubwindowManager::HideTipsNG(int32_t targetId, int32_t disappearingTime, in
 bool SubwindowManager::CancelPopup(const std::string& id)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "cancel popup enter");
-    auto subwindow = GetCurrentWindow();
+    auto subwindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_POPUP);
     if (subwindow) {
         return subwindow->CancelPopup(id);
     }
@@ -585,7 +590,8 @@ void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
 void SubwindowManager::CloseMenu()
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close menu enter");
-    auto subwindow = GetCurrentWindow();
+    auto subwindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
     if (subwindow) {
         subwindow->CloseMenu();
     }
@@ -594,9 +600,28 @@ void SubwindowManager::CloseMenu()
 void SubwindowManager::ClearMenu()
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menu enter");
-    auto subwindow = GetCurrentWindow();
+    auto subwindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
     if (subwindow) {
         subwindow->ClearMenu();
+    }
+}
+
+void SubwindowManager::SetWindowAnchorInfo(
+    const NG::OffsetF& offset, SubwindowType type, int32_t nodeId, int32_t instanceId)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set windowAnchorInfo enter");
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindowByNodeId(instanceId, type, nodeId);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to get the subwindow which overlay node in, so get the current one.");
+        subwindow = GetCurrentWindow();
+    }
+
+    if (subwindow) {
+        subwindow->SetWindowAnchorInfo(offset, type, nodeId);
     }
 }
 
@@ -680,7 +705,7 @@ void SubwindowManager::OnHostWindowSizeChanged(int32_t containerId, Rect windowR
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->OnMainWindowSizeChange(subContinerId);
+    overlayManager->OnMainWindowSizeChange(subContinerId, reason);
 }
 
 void SubwindowManager::HideSheetSubWindow(int32_t containerId)

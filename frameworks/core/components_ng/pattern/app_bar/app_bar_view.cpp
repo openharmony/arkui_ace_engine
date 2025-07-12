@@ -61,7 +61,11 @@ void AssembleUiExtensionParams(
     if (missionId != -1) {
         params.try_emplace("missionId", std::to_string(missionId));
     }
-
+    auto frontend = Container::Current()->GetFrontend();
+    if (frontend) {
+        auto info = frontend->GetTopNavDestinationInfo(false, true);
+        params.try_emplace("TopNavPathInfo", info);
+    }
     if (firstTry) {
         params.try_emplace("ability.want.params.uiExtensionType", "sysDialog/atomicServicePanel");
         appGalleryBundleName = OHOS::Ace::SystemProperties::GetAtomicServiceBundleName();
@@ -150,6 +154,9 @@ void AppBarView::BuildAppbar(RefPtr<PipelineBase> pipleline)
     auto stageNodeWrapper = AceType::DynamicCast<FrameNode>(stageNodeWrapperNode);
     CHECK_NULL_VOID(stageNodeWrapper);
     CHECK_NULL_VOID(appbar->contentStage_);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->BeforeCreateLayoutWrapper();
     stageNodeWrapper->AddChild(appbar->contentStage_);
     stageNodeWrapper->MarkModifyDone();
     stageNodeWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);

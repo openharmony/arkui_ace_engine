@@ -77,6 +77,9 @@ Offset ScrollableController::GetCurrentOffset() const
     if (axis == Axis::NONE) {
         return Offset::Zero();
     }
+    if (axis == Axis::FREE) {
+        return pattern->GetFreeScrollOffset();
+    }
     auto pxOffset = pattern->GetTotalOffset();
     auto vpOffset = Dimension(pxOffset, DimensionUnit::PX).ConvertToVp();
     return (axis == Axis::HORIZONTAL) ? Offset(vpOffset, 0) : Offset(0, vpOffset);
@@ -99,6 +102,9 @@ void ScrollableController::ScrollBy(double pixelX, double pixelY, bool /* smooth
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("ScrollBy, offset:%f, id:%d, tag:%s", static_cast<float>(-offset),
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    if (pattern->GetAxis() == Axis::FREE && pattern->FreeScrollBy(OffsetF { -pixelX, -pixelY })) {
+        return;
+    }
     pattern->SetIsOverScroll(false);
     pattern->UpdateCurrentOffset(static_cast<float>(-offset), SCROLL_FROM_JUMP);
 }
@@ -107,6 +113,9 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, float vel
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    if (pattern->GetAxis() == Axis::FREE && pattern->FreeScrollToEdge(scrollEdgeType, true, velocity)) {
+        return;
+    }
     pattern->SetIsOverScroll(false);
     pattern->SetCanStayOverScroll(false);
     pattern->SetAnimateCanOverScroll(false);
@@ -121,6 +130,9 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smoo
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    if (pattern->GetAxis() == Axis::FREE && pattern->FreeScrollToEdge(scrollEdgeType, smooth, std::nullopt)) {
+        return;
+    }
     pattern->SetIsOverScroll(false);
     pattern->SetCanStayOverScroll(false);
     if (pattern->GetAxis() != Axis::NONE) {
@@ -146,6 +158,9 @@ void ScrollableController::ScrollPage(bool reverse, bool smooth)
     pattern->SetIsOverScroll(false);
     pattern->SetCanStayOverScroll(false);
     if (pattern->GetAxis() == Axis::NONE) {
+        return;
+    }
+    if (pattern->GetAxis() == Axis::FREE && pattern->FreeScrollPage(reverse, smooth)) {
         return;
     }
     if (InstanceOf<WaterFlowPattern>(pattern)) {
@@ -183,9 +198,9 @@ Rect ScrollableController::GetItemRect(int32_t index) const
     auto pxRect = pattern->GetItemRect(index);
     auto pxOffset = pxRect.GetOffset();
     return Rect(Dimension(pxOffset.GetX(), DimensionUnit::PX).ConvertToVp(),
-                Dimension(pxOffset.GetY(), DimensionUnit::PX).ConvertToVp(),
-                Dimension(pxRect.Width(), DimensionUnit::PX).ConvertToVp(),
-                Dimension(pxRect.Height(), DimensionUnit::PX).ConvertToVp());
+        Dimension(pxOffset.GetY(), DimensionUnit::PX).ConvertToVp(),
+        Dimension(pxRect.Width(), DimensionUnit::PX).ConvertToVp(),
+        Dimension(pxRect.Height(), DimensionUnit::PX).ConvertToVp());
 }
 
 int32_t ScrollableController::GetItemIndex(double x, double y) const
@@ -200,5 +215,13 @@ void ScrollableController::StopAnimate()
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     pattern->StopAnimate();
+}
+
+bool ScrollableController::FreeScrollTo(const ScrollToParam& param)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    pattern->FreeScrollTo(param);
+    return true;
 }
 } // namespace OHOS::Ace::NG

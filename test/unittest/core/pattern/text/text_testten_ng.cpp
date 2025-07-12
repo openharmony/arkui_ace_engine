@@ -2612,4 +2612,67 @@ HWTEST_F(TextFieldTenPatternNg, LeftMouseRelease, TestSize.Level1)
     EXPECT_EQ(start, -1);
     EXPECT_EQ(end, -1);
 }
+
+/**
+ * @tc.name: GetVisibleDragViewHandles
+ * @tc.desc: test TextSelectOverlay::GetVisibleDragViewHandles
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, GetVisibleDragViewHandles, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, pattern);
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    pattern->selectOverlay_->OnBind(manager);
+
+    RectF firstRect;
+    RectF secondRect;
+    pattern->selectOverlay_->GetVisibleDragViewHandles(firstRect, secondRect);
+    EXPECT_EQ(firstRect, RectF());
+    EXPECT_EQ(secondRect, RectF());
+
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    manager->shareOverlayInfo_ = std::move(shareOverlayInfo);
+    ASSERT_NE(manager->shareOverlayInfo_, nullptr);
+    manager->shareOverlayInfo_->firstHandle.paintRect = RectF(10.0f, 10.0f, 5.0f, 10.0f);
+    manager->shareOverlayInfo_->secondHandle.paintRect = RectF(20.0f, 20.0f, 5.0f, 10.0f);
+    manager->shareOverlayInfo_->handleLevelMode = HandleLevelMode::OVERLAY;
+    manager->shareOverlayInfo_->firstHandle.isShow = false;
+    manager->shareOverlayInfo_->secondHandle.isShow = false;
+    pattern->selectOverlay_->GetVisibleDragViewHandles(firstRect, secondRect);
+    EXPECT_EQ(firstRect, RectF());
+    EXPECT_EQ(secondRect, RectF());
+
+    manager->shareOverlayInfo_->firstHandle.isShow = true;
+    manager->shareOverlayInfo_->secondHandle.isShow = true;
+    pattern->selectOverlay_->GetVisibleDragViewHandles(firstRect, secondRect);
+    EXPECT_EQ(firstRect, RectF(10.0f, 10.0f, 5.0f, 10.0f));
+    EXPECT_EQ(secondRect, RectF(20.0f, 20.0f, 5.0f, 10.0f));
+}
+
+/**
+ * @tc.name: ApplySelectAreaWithKeyboard
+ * @tc.desc: test ApplySelectAreaWithKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, ApplySelectAreaWithKeyboard, TestSize.Level1)
+{
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    RefPtr<TextPattern> pattern = textNode->GetPattern<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    WeakPtr<MockTextBase> textBase = mockBase;
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textNode);
+    pattern->selectOverlay_->OnBind(manager);
+    pattern->AttachToFrameNode(frameNode);
+
+    RectF area = RectF(0.0f, -10, 10, 20);
+    pattern->selectOverlay_->ApplySelectAreaWithKeyboard(area);
+    EXPECT_EQ(area.Top(), 0.0f);
+    EXPECT_EQ(area.Height(), 10.0f);
+}
 } // namespace OHOS::Ace::NG

@@ -148,7 +148,7 @@ const std::vector<AnimationDirection> DIRECTION_LIST = {
 };
 
 constexpr int32_t DEFAULT_DURATION = 1000;
-std::string g_strValue;
+thread_local std::string g_strValue;
 
 BorderStyle ConvertBorderStyle(int32_t value)
 {
@@ -265,7 +265,7 @@ void CheckGradientColorsResObj(NG::Gradient& gradient, const NG::GradientColor& 
 {
     auto&& updateFunc = [gradientColor, index](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t i = 0; i < colorLength; i++) {
             NG::GradientColor gradColor = colorVector[i];
@@ -286,7 +286,7 @@ void CheckSweepGradientColorsResObj(NG::Gradient& gradient, const NG::GradientCo
 {
     auto&& updateFunc = [gradientColor, index](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t i = 0; i < colorLength; i++) {
             NG::GradientColor gradColor = colorVector[i];
@@ -307,7 +307,7 @@ void CheckRadialGradientColorsResObj(NG::Gradient& gradient, const NG::GradientC
 {
     auto&& updateFunc = [gradientColor, index](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t i = 0; i < colorLength; i++) {
             NG::GradientColor gradColor = colorVector[i];
@@ -357,8 +357,8 @@ void SetSweepGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* c
         }
         gradient.AddColor(gradientColor);
         auto idx = index / NUM_3 + startPos;
-        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr && objs.size() > idx &&
-            objs[idx] != nullptr) {
+        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr &&
+            objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
             CheckSweepGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
         }
     }
@@ -388,8 +388,8 @@ void SetRadialGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* 
         }
         gradient.AddColor(gradientColor);
         auto idx = index / NUM_3 + startPos;
-        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr && objs.size() > idx &&
-            objs[idx] != nullptr) {
+        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr &&
+            objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
             CheckRadialGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
         }
     }
@@ -425,8 +425,8 @@ void SetGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors
         }
         gradient.AddColor(gradientColor);
         auto idx = index / NUM_3;
-        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr && objs.size() > idx &&
-            objs[idx] != nullptr) {
+        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr &&
+            objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
             CheckGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
         }
     }
@@ -3856,9 +3856,10 @@ void SetForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "foregroundColor");
+    ViewAbstractModelNG::RemoveResObj(frameNode, "foregroundColorStrategy");
     if (isColor) {
         if (SystemProperties::ConfigChangePerform() && fgColorRawPtr) {
-            ViewAbstractModelNG::RemoveResObj(frameNode, "foregroundColor");
             auto* fgColor = reinterpret_cast<ResourceObject*>(fgColorRawPtr);
             auto colorResObj = AceType::Claim(fgColor);
             ViewAbstract::SetForegroundColor(frameNode, Color(color), colorResObj);
@@ -3876,6 +3877,7 @@ void ResetForegroundColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::RemoveResObj(frameNode, "foregroundColor");
+    ViewAbstractModelNG::RemoveResObj(frameNode, "foregroundColorStrategy");
 }
 
 void SetMotionPath(ArkUINodeHandle node, ArkUI_CharPtr path, ArkUI_Float32 from, ArkUI_Float32 to, ArkUI_Bool rotatable)
@@ -6602,6 +6604,7 @@ void ResetOutline(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SetOutlineRemoveResObj(frameNode);
     CalcDimension borderWidth;
     ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
     ViewAbstract::SetOuterBorderColor(frameNode, Color::BLACK);
@@ -8118,12 +8121,17 @@ void ResetNextFocus(ArkUINodeHandle node)
 }
 
 void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
-    ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue)
+    ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue,
+    void* focusBoxResObjs)
 {
     CHECK_NULL_VOID(node);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     auto marginUnitEnum = static_cast<OHOS::Ace::DimensionUnit>(marginUnit);
     auto widthUnitEnum = static_cast<OHOS::Ace::DimensionUnit>(widthUnit);
+    std::vector<RefPtr<ResourceObject>> focusBoxResObjArray(NUM_3, nullptr);
+    if (focusBoxResObjs) {
+        focusBoxResObjArray = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(focusBoxResObjs));
+    }
     NG::FocusBoxStyle style;
     if ((hasValue >> 2) & 1) { // 2: margin
         CalcDimension margin = CalcDimension(valueMargin, DimensionUnit::FP);
@@ -8132,6 +8140,7 @@ void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int
             margin.SetUnit(marginUnitEnum);
         }
         style.margin = margin;
+        ViewAbstract::SetFocusBoxStyleUpdateFunc(style, focusBoxResObjArray[NUM_0], "focusBoxStyleMargin");
     }
     if ((hasValue >> 1) & 1) { // 1: strokeWidth
         CalcDimension strokeWidth = CalcDimension(valueStrokeWidth, DimensionUnit::FP);
@@ -8140,10 +8149,12 @@ void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int
             strokeWidth.SetUnit(widthUnitEnum);
         }
         style.strokeWidth = strokeWidth;
+        ViewAbstract::SetFocusBoxStyleUpdateFunc(style, focusBoxResObjArray[NUM_1], "focusBoxStyleWidth");
     }
     if ((hasValue >> 0) & 1) { // 0: strokeColor
         Color strokeColor(valueColor);
         style.strokeColor = strokeColor;
+        ViewAbstract::SetFocusBoxStyleUpdateFunc(style, focusBoxResObjArray[NUM_2], "focusBoxStyleColor");
     }
     ViewAbstract::SetFocusBoxStyle(frameNode, style);
 }
@@ -8153,7 +8164,7 @@ void ResetFocusBoxStyle(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::FocusBoxStyle style;
-    ViewAbstract::SetFocusBoxStyle(frameNode, style);
+    ViewAbstract::SetFocusBoxStyle(frameNode, style, true);
 }
 
 void SetClickDistance(ArkUINodeHandle node, ArkUI_Float32 valueMargin)
@@ -8175,8 +8186,8 @@ void SetBlendModeByBlender(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    OHOS::Rosen::BrightnessBlender* brightnessBlender = reinterpret_cast<OHOS::Rosen::BrightnessBlender*>(blender);
-    ViewAbstractModelNG::SetBrightnessBlender(frameNode, brightnessBlender);
+    OHOS::Rosen::Blender* rsBlender = reinterpret_cast<OHOS::Rosen::Blender*>(blender);
+    ViewAbstractModelNG::SetBlender(frameNode, rsBlender);
     ViewAbstractModelNG::SetBlendApplyType(frameNode, static_cast<OHOS::Ace::BlendApplyType>(blendApplyTypeValue));
 }
 
@@ -9773,6 +9784,8 @@ void SetOnClickInfo(ArkUINodeEvent& event, GestureEvent& info, bool usePx)
     event.clickEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
     // deviceid
     event.clickEvent.deviceId = info.GetDeviceId();
+    // targetDisplayId
+    event.clickEvent.targetDisplayId = info.GetTargetDisplayId();
     // modifierkeystates
     event.clickEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
     if (!info.GetFingerList().empty()) {
@@ -9882,7 +9895,7 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_EVENT;
         event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
         event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
-        event.keyEvent.keyText = info.GetKeyText();
+        event.keyEvent.keyText = info.GetKeyText().c_str();
         event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
@@ -9924,7 +9937,7 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.subKind = ON_KEY_PREIME;
         event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
         event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
-        event.keyEvent.keyText = info.GetKeyText();
+        event.keyEvent.keyText = info.GetKeyText().c_str();
         event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
@@ -9964,7 +9977,7 @@ void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_DISPATCH;
         event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
         event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
-        event.keyEvent.keyText = info.GetKeyText();
+        event.keyEvent.keyText = info.GetKeyText().c_str();
         event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
@@ -10361,6 +10374,8 @@ void TriggerOnHoverEvent(void* extraParam, int32_t nodeId, bool isHover, HoverIn
     // globalDisplayX globalDisplayY
     event.hoverEvent.globalDisplayX = info.GetGlobalDisplayLocation().GetX();
     event.hoverEvent.globalDisplayY = info.GetGlobalDisplayLocation().GetY();
+    // targetDisplayId
+    event.hoverEvent.targetDisplayId = info.GetTargetDisplayId();
     SendArkUISyncEvent(&event);
     info.SetStopPropagation(event.hoverEvent.stopPropagation);
 }

@@ -299,10 +299,12 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     DrivenRender(dirty);
 
+    ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
     MarkSelectedItems();
     UpdateListDirectionInCardStyle();
     snapTrigByScrollBar_ = false;
+    ChangeCanStayOverScroll();
     return true;
 }
 
@@ -388,9 +390,10 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(host, paint);
     const auto& geometryNode = host->GetGeometryNode();
     auto renderContext = host->GetRenderContext();
+    auto frameRect = renderContext->GetPaintRectWithoutTransform();
     if (!listContentModifier_) {
         CHECK_NULL_RETURN(renderContext, paint);
-        auto size = renderContext->GetPaintRectWithoutTransform().GetSize();
+        auto size = frameRect.GetSize();
         auto& padding = geometryNode->GetPadding();
         if (padding) {
             size.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
@@ -406,6 +409,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     paint->SetLaneIdx(laneIdx4Divider_);
     paint->SetContentModifier(listContentModifier_);
     paint->SetAdjustOffset(geometryNode->GetParentAdjust().GetOffset().GetY());
+    paint->UpdateBoundsRect(frameRect, clip);
     UpdateFadingEdge(paint);
     return paint;
 }
@@ -1009,6 +1013,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     if (itemPosition_.empty() || !IsOutOfBoundary() || !isScrollable_) {
         auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
+        userOffset = FireObserverOnWillScroll(userOffset);
         currentDelta_ = lastDelta + userOffset;
         return true;
     }
@@ -1024,6 +1029,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
 
     auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
+    userOffset = FireObserverOnWillScroll(userOffset);
     currentDelta_ = lastDelta + userOffset;
     MarkScrollBarProxyDirty();
     return true;
@@ -3531,9 +3537,12 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNodeInList(FocusStep step, const Weak
 
 bool ListPattern::IsListItemGroupByIndex(int32_t index)
 {
+    if (index < 0) {
+        return false;
+    }
     auto list = GetHost();
     CHECK_NULL_RETURN(list, false);
-    auto layoutWapper = list->GetChildByIndex(index);
+    auto layoutWapper = list->GetChildByIndex(static_cast<uint32_t>(index));
     CHECK_NULL_RETURN(layoutWapper, false);
     auto frameNode = layoutWapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);

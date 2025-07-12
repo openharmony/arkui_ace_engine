@@ -842,21 +842,8 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MeasureDivider(layoutWrapper, hostNode, navigationLayoutProperty, dividerSize_);
     MeasureDragBar(layoutWrapper, hostNode, navigationLayoutProperty, dividerSize_);
     MeasureSplitPlaceholder(layoutWrapper, hostNode, navigationLayoutProperty, contentSize_);
-
-    auto layoutPolicy = navigationLayoutProperty->GetLayoutPolicyProperty();
-    bool isHeightWrapOrFix =
-        layoutPolicy.has_value() ? (layoutPolicy->IsHeightWrap() || layoutPolicy->IsHeightFix()) : false;
-    bool isWidthWrapOrFix =
-        layoutPolicy.has_value() ? (layoutPolicy->IsWidthWrap() || layoutPolicy->IsWidthFix()) : false;
-    if (IsAutoHeight(navigationLayoutProperty) || isHeightWrapOrFix) {
-        SetNavigationHeight(layoutWrapper, size);
-    }
-    if (isWidthWrapOrFix) {
-        SetNavigationWidth(layoutWrapper, size);
-    }
-    size.AddWidth(padding.left.value_or(0.0f) + padding.right.value_or(0.0f));
-    size.AddHeight(padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
-    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+    
+    ReCalcNavigationSize(layoutWrapper, size);
 }
 
 void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -944,6 +931,33 @@ void NavigationLayoutAlgorithm::SetNavigationWidth(LayoutWrapper* layoutWrapper,
         size.SetWidth(navWidth);
         size.AddWidth(realDividerWidth_);
     }
+}
+
+void NavigationLayoutAlgorithm::ReCalcNavigationSize(LayoutWrapper* layoutWrapper, SizeF& size)
+{
+    auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(navigationLayoutProperty);
+    const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
+
+    auto layoutPolicy = navigationLayoutProperty->GetLayoutPolicyProperty();
+    bool isHeightWrapOrFix =
+        layoutPolicy.has_value() ? (layoutPolicy->IsHeightWrap() || layoutPolicy->IsHeightFix()) : false;
+    bool isWidthWrapOrFix =
+        layoutPolicy.has_value() ? (layoutPolicy->IsWidthWrap() || layoutPolicy->IsWidthFix()) : false;
+    if (IsAutoHeight(navigationLayoutProperty) || isHeightWrapOrFix) {
+        SetNavigationHeight(layoutWrapper, size);
+    }
+    if (isWidthWrapOrFix) {
+        SetNavigationWidth(layoutWrapper, size);
+    }
+    size.AddWidth(padding.left.value_or(0.0f) + padding.right.value_or(0.0f));
+    size.AddHeight(padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
+
+    auto realSize = UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(size.Width(), size.Height()),
+        navigationLayoutProperty->GetCalcLayoutConstraint(),
+        navigationLayoutProperty->GetLayoutConstraint()->percentReference);
+
+    layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
 }
 
 } // namespace OHOS::Ace::NG

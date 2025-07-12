@@ -38,6 +38,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t SELECTED_INDEX_1 = 1;
+constexpr double TEST_FONT_SIZE = 10.0;
 } // namespace
 
 class TextPickerResourceTest : public testing::Test {
@@ -261,6 +262,237 @@ HWTEST_F(TextPickerResourceTest, ParseSingleIconTextResourceObj002, TestSize.Lev
     for (uint32_t i = 0; i < resultRange.size(); i++) {
         EXPECT_EQ(resultRange[i].text_, "");
     }
+}
+
+/**
+ * @tc.name: ParseDividerResObj001
+ * @tc.desc: Test ParseDividerResObj when divider is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, ParseDividerResObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call ParseDividerResObj to register the resourceObject callback function.
+     * @tc.expected: Dut to divider is null, the value will not be changed.
+     */
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    NG::ItemDivider newDivider;
+    newDivider.isNull = true;
+    newDivider.strokeWidth = 0.0_vp;
+    TextPickerModelNG::ParseDividerResObj(frameNode, newDivider);
+    pattern->resourceMgr_->ReloadResources();
+    NG::ItemDivider curDivider = textPickerPattern->GetDivider();
+    EXPECT_NE(curDivider.strokeWidth, theme->GetDividerThickness());
+    EXPECT_EQ(curDivider.strokeWidth, newDivider.strokeWidth);
+}
+
+/**
+ * @tc.name: ParseDividerResObj002
+ * @tc.desc: Test ParseDividerResObj when divider is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, ParseDividerResObj002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call ParseDividerResObj to register the resourceObject callback function.
+     * @tc.expected: Dut to divider is not null, the value will be changed.
+     */
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    NG::ItemDivider newDivider;
+    newDivider.isNull = false;
+    newDivider.strokeWidth = 0.0_vp;
+    TextPickerModelNG::ParseDividerResObj(frameNode, newDivider);
+    pattern->resourceMgr_->ReloadResources();
+    NG::ItemDivider curDivider = textPickerPattern->GetDivider();
+    EXPECT_EQ(curDivider.strokeWidth, theme->GetDividerThickness());
+}
+
+/**
+ * @tc.name: UpdateDisappearTextStyle001
+ * @tc.desc: Test TextPickerPattern UpdateDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, UpdateDisappearTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE);
+    TextPickerModelNG::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetDisappearColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetDisappearFontSize().value(), Dimension(TEST_FONT_SIZE));
+
+    textStyle.textColor = Color::GREEN;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE + 1);
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->UpdateDisappearTextStyle(textStyle);
+
+    EXPECT_EQ(pickerProperty->GetDisappearColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetDisappearFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
+}
+
+/**
+ * @tc.name: UpdateNormalTextStyle001
+ * @tc.desc: Test TextPickerPattern UpdateNormalTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, UpdateNormalTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE);
+    TextPickerModelNG::GetInstance()->SetNormalTextStyle(theme, textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetFontSize().value(), Dimension(TEST_FONT_SIZE));
+
+    textStyle.textColor = Color::GREEN;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE + 1);
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->UpdateNormalTextStyle(textStyle);
+
+    EXPECT_EQ(pickerProperty->GetColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
+}
+
+/**
+ * @tc.name: UpdateSelectedTextStyle001
+ * @tc.desc: Test TextPickerPattern UpdateSelectedTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, UpdateSelectedTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE);
+    TextPickerModelNG::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetSelectedColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetSelectedFontSize().value(), Dimension(TEST_FONT_SIZE));
+
+    textStyle.textColor = Color::GREEN;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE + 1);
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->UpdateSelectedTextStyle(textStyle);
+
+    EXPECT_EQ(pickerProperty->GetSelectedColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetSelectedFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
 }
 
 } // namespace OHOS::Ace::NG

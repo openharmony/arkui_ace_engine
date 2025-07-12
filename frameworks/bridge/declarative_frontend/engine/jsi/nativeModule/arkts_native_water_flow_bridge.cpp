@@ -32,6 +32,7 @@ constexpr int32_t NUM_1 = 1;
 constexpr int32_t NUM_2 = 2;
 constexpr int32_t NUM_3 = 3;
 constexpr int32_t NUM_4 = 4;
+constexpr int32_t NUM_5 = 5;
 const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDirection::COLUMN,
     FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
 
@@ -491,7 +492,7 @@ ArkUINativeModuleValue WaterFlowBridge::SetSyncLoad(ArkUIRuntimeCallInfo* runtim
 
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
-    bool syncLoad = false;
+    bool syncLoad = true;
     if (!argSyncLoad->IsUndefined() && !argSyncLoad->IsNull()) {
         syncLoad = argSyncLoad->BooleaValue(vm);
     }
@@ -622,10 +623,28 @@ ArkUINativeModuleValue WaterFlowBridge::SetWaterFlowInitialize(ArkUIRuntimeCallI
             layoutMode = static_cast<uint32_t>(NG::WaterFlowLayoutMode::TOP_DOWN);
         }
         GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowLayoutMode(nativeNode, layoutMode);
-        if (layoutMode != static_cast<uint32_t>(NG::WaterFlowLayoutMode::SLIDING_WINDOW)) {
-            SetWaterFlowFooter(runtimeCallInfo);
-            SetWaterFlowFooterContent(runtimeCallInfo);
+        Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+        Framework::JSRef<Framework::JSVal> sectionsArgs = info[NUM_2];  // sections parameter
+        Framework::JSRef<Framework::JSVal> footerContentArgs = info[NUM_4];  // footerContent parameter
+        Framework::JSRef<Framework::JSVal> footerArgs = info[NUM_5]; // footer parameter
+
+        if (!sectionsArgs->IsNull() && sectionsArgs->IsObject()) {
+            // set sections only when sections exist
             SetWaterFlowSections(runtimeCallInfo);
+        } else {
+            // reset sections and set footer when no sections exist
+            GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowSections(nativeNode);
+
+            // check footerContent first
+            if (!footerContentArgs->IsNull() && footerContentArgs->IsObject()) {
+                SetWaterFlowFooterContent(runtimeCallInfo);
+                return panda::JSValueRef::Undefined(vm);
+            }
+
+            // set footer if no footerContent
+            if (!footerArgs->IsNull() && footerArgs->IsFunction()) {
+                SetWaterFlowFooter(runtimeCallInfo);
+            }
         }
     }
 

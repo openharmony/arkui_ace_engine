@@ -1169,6 +1169,7 @@ HWTEST_F(BarStyleTestNg, SetToolbarOptions001, TestSize.Level1)
     navBarPattern->OnColorModeChange(1);
     EXPECT_NE(navBarNode->GetToolBarNode(), nullptr);
     auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
+    ASSERT_NE(toolbarNode, nullptr);
     auto toolBarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
     ASSERT_NE(toolBarPattern, nullptr);
     EXPECT_TRUE(toolBarPattern->options_.bgOptions.color.has_value());
@@ -1314,5 +1315,26 @@ HWTEST_F(BarStyleTestNg, toolBarStyleTest012, TestSize.Level1)
      * @tc.steps: step4. property 'safeAreaPadding' should be nullptr cause no SAFE_AREA_PADDING barStyle set.
      */
     ASSERT_NE(safeAreaPadding, nullptr);
+}
+
+/*
+ * @tc.name: ToJsonValue001
+ * @tc.desc: Branch: if MoreButtonOptions not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, ToJsonValue001, TestSize.Level1)
+{
+    NavigationBackgroundOptions navigationBgOpt;
+    navigationBgOpt.blurStyleOption = BlurStyleOption();
+    navigationBgOpt.effectOption = EffectOption();
+    MoreButtonOptions moreButtonOpt;
+    moreButtonOpt.bgOptions = navigationBgOpt;
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    moreButtonOpt.ToJsonValue(json, filter);
+    ASSERT_NE(json->GetValue("backgroundEffect"), nullptr);
+    ASSERT_NE(json->GetValue("backgroundBlurStyle"), nullptr);
+    ASSERT_NE(json->GetString("backgroundBlurStyleValue"), "");
 }
 } // namespace OHOS::Ace::NG

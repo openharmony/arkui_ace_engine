@@ -182,11 +182,6 @@ namespace CalendarModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // need check
-    // auto frameNode = CalendarModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 } // CalendarModifier
@@ -198,8 +193,6 @@ void SetCalendarOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<CalendarData>(*value);
-    // need check
-    // CalendarModelNG::SetOptions(frameNode, convValue);
 }
 } // CalendarInterfaceModifier
 namespace CalendarAttributeModifier {
@@ -209,8 +202,6 @@ void ShowLunarImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    // need check
-    // CalendarModelNG::SetShowLunar(frameNode, convValue);
 }
 void ShowHolidayImpl(Ark_NativePointer node,
                      Ark_Boolean value)
@@ -218,8 +209,6 @@ void ShowHolidayImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    // need check
-    // CalendarModelNG::SetShowHoliday(frameNode, convValue);
 }
 void NeedSlideImpl(Ark_NativePointer node,
                    Ark_Boolean value)
@@ -227,8 +216,6 @@ void NeedSlideImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    // need check
-    // CalendarModelNG::SetNeedSlide(frameNode, convValue);
 }
 void StartOfWeekImpl(Ark_NativePointer node,
                      const Ark_Number* value)
@@ -237,8 +224,6 @@ void StartOfWeekImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<int32_t>(*value);
-    // need check
-    // CalendarModelNG::SetStartOfWeek(frameNode, convValue);
 }
 void OffDaysImpl(Ark_NativePointer node,
                  const Ark_Number* value)
@@ -251,8 +236,6 @@ void OffDaysImpl(Ark_NativePointer node,
     auto offDays = convValue
         ? std::optional<std::string>(GetDaysIndexes(static_cast<uint32_t>(*convValue)))
         : std::nullopt;
-    // need check
-    // CalendarModelNG::SetOffDays(frameNode, offDays);
 }
 void DirectionImpl(Ark_NativePointer node,
                    Ark_Axis value)
@@ -260,8 +243,6 @@ void DirectionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Axis>(value);
-    // need check
-    // CalendarModelNG::SetDirection(frameNode, convValue);
 }
 void CurrentDayStyleImpl(Ark_NativePointer node,
                          const Ark_CurrentDayStyle* value)
@@ -270,8 +251,6 @@ void CurrentDayStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<CurrentDayStyleData>(*value);
-    // need check
-    // CalendarModelNG::SetCurrentDayStyle(frameNode, convValue);
 }
 void NonCurrentDayStyleImpl(Ark_NativePointer node,
                             const Ark_NonCurrentDayStyle* value)
@@ -280,8 +259,6 @@ void NonCurrentDayStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<NonCurrentDayStyleData>(*value);
-    // need check
-    // CalendarModelNG::SetNonCurrentDayStyle(frameNode, convValue);
 }
 void TodayStyleImpl(Ark_NativePointer node,
                     const Ark_TodayStyle* value)
@@ -290,8 +267,6 @@ void TodayStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<TodayStyleData>(*value);
-    // need check
-    // CalendarModelNG::SetTodayStyle(frameNode, convValue);
 }
 void WeekStyleImpl(Ark_NativePointer node,
                    const Ark_WeekStyle* value)
@@ -300,8 +275,6 @@ void WeekStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<WeekStyleData>(*value);
-    // need check
-    // CalendarModelNG::SetWeekStyle(frameNode, convValue);
 }
 void WorkStateStyleImpl(Ark_NativePointer node,
                         const Ark_WorkStateStyle* value)
@@ -310,8 +283,6 @@ void WorkStateStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<WorkStateStyleData>(*value);
-    // need check
-    // CalendarModelNG::SetWorkStateStyle(frameNode, convValue);
 }
 void OnSelectChangeImpl(Ark_NativePointer node,
                         const Callback_CalendarSelectedDate_Void* value)
@@ -327,8 +298,6 @@ void OnSelectChangeImpl(Ark_NativePointer node,
             .day = Converter::ArkValue<Ark_Number>(json->GetInt("day")),
         });
     };
-    // need check
-    // CalendarModelNG::SetOnSelectChange(frameNode, onSelectChange);
 }
 void OnRequestDataImpl(Ark_NativePointer node,
                        const Callback_CalendarRequestedData_Void* value)
@@ -346,8 +315,6 @@ void OnRequestDataImpl(Ark_NativePointer node,
             .monthState = Converter::ArkValue<Ark_Number>(json->GetInt("MonthState")),
         });
     };
-    // need check
-    // CalendarModelNG::SetOnRequestData(frameNode, onRequestData);
 }
 } // CalendarAttributeModifier
 const GENERATED_ArkUICalendarModifier* GetCalendarModifier()

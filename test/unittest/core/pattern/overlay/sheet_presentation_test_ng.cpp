@@ -50,6 +50,7 @@ public:
     static void SetSheetTheme(RefPtr<SheetTheme> sheetTheme);
     static void SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType);
     static void TearDownTestCase();
+    static void SetApiVersion(int32_t apiTargetVersion);
 };
 
 void SheetPresentationTestNg::SetUpTestCase()
@@ -87,7 +88,6 @@ void SheetPresentationTestNg::SetSheetTheme(RefPtr<SheetTheme> sheetTheme)
 
 void SheetPresentationTestNg::SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType)
 {
-    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
@@ -103,6 +103,13 @@ void SheetPresentationTestNg::SetSheetType(RefPtr<SheetPresentationPattern> shee
     sheetTheme->sheetType_ = "popup";
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+}
+
+void SheetPresentationTestNg::SetApiVersion(int32_t apiTargetVersion)
+{
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(apiTargetVersion);
 }
 
 void SheetPresentationTestNg::TearDownTestCase()
@@ -204,6 +211,7 @@ HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet001, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet002, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -230,6 +238,7 @@ HWTEST_F(SheetPresentationTestNg, HandleScrollWithSheet002, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -334,6 +343,7 @@ HWTEST_F(SheetPresentationTestNg, CheckBuilderChange001, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, OnAttachToFrameNode001, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -514,9 +524,7 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto001, TestSize.Level1)
     /**
      * @tc.steps: step1. set API14.
      */
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
 
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
@@ -570,9 +578,7 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto002, TestSize.Level1)
     /**
      * @tc.steps: step1. set API14.
      */
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
 
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
@@ -939,6 +945,7 @@ HWTEST_F(SheetPresentationTestNg, GetOverlayManager001, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, OnWindowSizeChanged001, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
         AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
@@ -1010,6 +1017,7 @@ HWTEST_F(SheetPresentationTestNg, HandleFitContontChange001, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, DismissTransition001, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
         AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
@@ -1373,6 +1381,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth001, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1391,7 +1400,8 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth001, TestSize.Level1)
     sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
-
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
     EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), true);
     BorderWidthProperty BorderWidth;
@@ -1413,6 +1423,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth002, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1431,7 +1442,8 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth002, TestSize.Level1)
     sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
-
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
     EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), false);
     EXPECT_EQ(renderContext->GetBorderWidth().has_value(), false);
@@ -1449,6 +1461,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth003, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1469,7 +1482,8 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth003, TestSize.Level1)
     sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
-
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
     EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), false);
     EXPECT_EQ(renderContext->GetBorderWidth().has_value(), false);
@@ -1487,6 +1501,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth004, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1505,7 +1520,8 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth004, TestSize.Level1)
     sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_BOTTOM);
-
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
     EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), true);
     EXPECT_EQ(renderContext->GetBorderWidth().has_value(), true);
@@ -1523,6 +1539,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth005, TestSize.Level1)
      * @tc.steps: step1. create target node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    SheetPresentationTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1541,7 +1558,8 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth005, TestSize.Level1)
     sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
-
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
     EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), true);
     EXPECT_EQ(renderContext->GetBorderWidth().has_value(), true);
@@ -2006,159 +2024,6 @@ HWTEST_F(SheetPresentationTestNg, GetTitleBuilderHeight002, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitScrollProps001
- * @tc.desc: test InitScrollProps function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestNg, InitScrollProps001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet page.
-     */
-    SheetPresentationTestNg::SetUpTestCase();
-    auto rootNode = FrameNode::CreateFrameNode("Root", 101, AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 201,
-        AceType::MakeRefPtr<SheetPresentationPattern>(301, "SheetPresentation", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    sheetNode->MountToParent(rootNode);
-    auto dragBarNode =
-        FrameNode::CreateFrameNode("SheetDragBar", 401, AceType::MakeRefPtr<SheetDragBarPattern>());
-    ASSERT_NE(dragBarNode, nullptr);
-    dragBarNode->MountToParent(sheetNode);
-    auto scrollNode =
-        FrameNode::CreateFrameNode("Scroll", 501, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scrollNode, nullptr);
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 601,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    ASSERT_NE(contentNode, nullptr);
-    contentNode->MountToParent(scrollNode);
-    scrollNode->MountToParent(sheetNode);
-
-    /**
-     * @tc.steps: step2. get sheetPattern and scrollPattern.
-     */
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
-
-    /**
-     * @tc.steps: step3. init sheetPattern value.
-     */
-    sheetPattern->sheetDetentHeight_.emplace_back(1);
-    sheetPattern->currentOffset_ = 1.0f;
-    sheetPattern->height_ = 0.0f;
-    sheetPattern->sheetHeightUp_ = 0.0f;
-    sheetPattern->sheetMaxHeight_ = 0.0f;
-
-    /**
-     * @tc.steps: step4. test "InitScrollProps",
-     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, scrollableDistance_ > 0.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
-    scrollPattern->scrollableDistance_ = 5.2f;
-    sheetPattern->InitScrollProps();
-    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-
-    /**
-     * @tc.steps: step5. test "InitScrollProps",
-     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, scrollableDistance_ < 0.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
-    scrollPattern->scrollableDistance_ = -1.0f;
-    sheetPattern->InitScrollProps();
-    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-
-    /**
-     * @tc.steps: step6. test "InitScrollProps"，
-     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, scrollableDistance_ = 0.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
-    scrollPattern->scrollableDistance_ = 0.0f;
-    sheetPattern->InitScrollProps();
-    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-    SheetPresentationTestNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: InitScrollProps002
- * @tc.desc: test InitScrollProps function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestNg, InitScrollProps002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet page.
-     */
-    SheetPresentationTestNg::SetUpTestCase();
-    auto rootNode = FrameNode::CreateFrameNode("Root", 101, AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 201,
-        AceType::MakeRefPtr<SheetPresentationPattern>(301, "SheetPresentation", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    sheetNode->MountToParent(rootNode);
-    auto dragBarNode =
-        FrameNode::CreateFrameNode("SheetDragBar", 401, AceType::MakeRefPtr<SheetDragBarPattern>());
-    ASSERT_NE(dragBarNode, nullptr);
-    dragBarNode->MountToParent(sheetNode);
-    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 501, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scrollNode, nullptr);
-    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 601,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    ASSERT_NE(contentNode, nullptr);
-    contentNode->MountToParent(scrollNode);
-    scrollNode->MountToParent(sheetNode);
-
-    /**
-     * @tc.steps: step2. get sheetPattern and scrollPattern.
-     */
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
-
-    /**
-     * @tc.steps: step3. init sheetPattern value.
-     */
-    sheetPattern->sheetDetentHeight_.emplace_back(1);
-    sheetPattern->currentOffset_ = 1.0f;
-    sheetPattern->height_ = 0.0f;
-    sheetPattern->sheetHeightUp_ = 0.0f;
-    sheetPattern->sheetMaxHeight_ = 0.0f;
-
-    /**
-     * @tc.steps: step4. test "InitScrollProps"，
-     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, scrollableDistance_ > 0.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
-    scrollPattern->scrollableDistance_ = 5.2f;
-    sheetPattern->InitScrollProps();
-    EXPECT_TRUE(scrollPattern->GetAlwaysEnabled());
-
-    /**
-     * @tc.steps: step5. test "InitScrollProps"。
-     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, scrollableDistance_ < 0.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
-    scrollPattern->scrollableDistance_ = -1.0f;
-    sheetPattern->InitScrollProps();
-    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-
-    /**
-     * @tc.steps: step6. test "InitScrollProps"。
-     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, scrollableDistance_ = 0.
-     */
-    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
-    scrollPattern->scrollableDistance_ = 0.0f;
-    sheetPattern->InitScrollProps();
-    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
-    SheetPresentationTestNg::TearDownTestCase();
-}
-
-/**
  * @tc.name: ModifyFireSheetTransition001
  * @tc.desc: Test SheetPresentationPattern::ModifyFireSheetTransition().
  * @tc.type: FUNC
@@ -2218,6 +2083,7 @@ HWTEST_F(SheetPresentationTestNg, ModifyFireSheetTransition001, TestSize.Level1)
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     sheetPattern->isNeedProcessHeight_ = true;
+    sheetPattern->SetStartProp(1.0);
     sheetPattern->ModifyFireSheetTransition();
     EXPECT_FALSE(sheetPattern->isNeedProcessHeight_);
 
@@ -2225,6 +2091,7 @@ HWTEST_F(SheetPresentationTestNg, ModifyFireSheetTransition001, TestSize.Level1)
      * @tc.steps: step5. set params of isNeedProcessHeight_, test ModifyFireSheetTransition.
      */
     sheetPattern->isSpringBack_ = true;
+    sheetPattern->SetStartProp(1.0);
     sheetPattern->ModifyFireSheetTransition();
     EXPECT_FALSE(sheetPattern->isSpringBack_);
     SheetPresentationTestNg::TearDownTestCase();
@@ -2290,6 +2157,75 @@ HWTEST_F(SheetPresentationTestNg, ModifyFireSheetTransition002, TestSize.Level1)
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     sheetPattern->isAnimationProcess_ = true;
+    sheetPattern->SetStartProp(1.0);
+    sheetPattern->ModifyFireSheetTransition();
+    EXPECT_FALSE(sheetPattern->isAnimationProcess_);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ModifyFireSheetTransition003
+ * @tc.desc: Test SheetPresentationPattern::ModifyFireSheetTransition().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, ModifyFireSheetTransition003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode("Root", 101, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 102, AceType::MakeRefPtr<SheetPresentationPattern>(103, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+    auto dragBarNode = FrameNode::CreateFrameNode("SheetDragBar", 104, AceType::MakeRefPtr<SheetDragBarPattern>());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MountToParent(sheetNode);
+    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 105, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode(
+        "SheetContent", 106, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+
+    /**
+     * @tc.steps: step2. get sheetPattern and layoutProperty.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. init SheetStyle and set sheetHeight.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.isTitleBuilder = false;
+    SheetHeight detent;
+    detent.sheetMode = SheetMode::LARGE;
+    sheetStyle.detents.emplace_back(detent);
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step4. set params of isNeedProcessHeight_, test ModifyFireSheetTransition.
+     */
+    auto host = sheetPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+    sheetPattern->isAnimationProcess_ = true;
+    sheetPattern->SetStartProp(0.0);
+    sheetPattern->ModifyFireSheetTransition();
+    EXPECT_TRUE(sheetPattern->isAnimationProcess_);
+    sheetPattern->SetStartProp(1.0);
     sheetPattern->ModifyFireSheetTransition();
     EXPECT_FALSE(sheetPattern->isAnimationProcess_);
     SheetPresentationTestNg::TearDownTestCase();
@@ -2861,6 +2797,37 @@ HWTEST_F(SheetPresentationTestNg, UpdateTitleTextColor002, TestSize.Level1)
      */
     EXPECT_EQ(subProp->GetTextColor(), sheetTheme->GetSubtitleTextFontColor());
 
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: UpdateSheetObject001
+ * @tc.desc: Test UpdateSheetObject Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, UpdateSheetObject001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node and pattern.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    /**
+     * @tc.steps: step2. set sheetType_ is SheetType::SHEET_BOTTOM, create sheetObject.
+     */
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+    sheetPattern->InitSheetObject();
+    auto sheetObject = sheetPattern->GetSheetObject();
+    /**
+     * @tc.steps: step3. set newType is SheetType::SHEET_CENTER, UpdateSheetObject.
+     * @tc.expected: sheetType_ = SheetType::SHEET_CENTER.
+     */
+    sheetPattern->UpdateSheetObject(SheetType::SHEET_CENTER);
+    EXPECT_EQ(sheetObject->sheetType_, SheetType::SHEET_CENTER);
     SheetPresentationTestNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

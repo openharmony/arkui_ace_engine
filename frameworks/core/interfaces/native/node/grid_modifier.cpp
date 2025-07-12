@@ -358,6 +358,13 @@ void ResetGridFocusWrapMode(ArkUINodeHandle node)
     GridModelNG::SetFocusWrapMode(frameNode, FocusWrapMode::DEFAULT);
 }
 
+ArkUI_Int32 GetGridFocusWrapMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<int32_t>(GridModelNG::GetFocusWrapMode(frameNode));
+}
+
 void SetFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 flingSpeedLimit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -398,13 +405,13 @@ void ResetGridSyncLoad(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetSyncLoad(frameNode, false);
+    GridModelNG::SetSyncLoad(frameNode, true);
 }
 
 ArkUI_Bool GetGridSyncLoad(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, 0);
+    CHECK_NULL_RETURN(frameNode, 1);
     return GridModelNG::GetSyncLoad(frameNode);
 }
 
@@ -567,6 +574,7 @@ const ArkUIGridModifier* GetGridModifier()
         .resetFriction = ResetFriction,
         .setGridFocusWrapMode = SetGridFocusWrapMode,
         .resetGridFocusWrapMode = ResetGridFocusWrapMode,
+        .getGridFocusWrapMode = GetGridFocusWrapMode,
         .getGridColumnsTemplate = GetColumnsTemplate,
         .getGridRowsTemplate = GetRowsTemplate,
         .getGridColumnsGap = GetColumnsGap,
@@ -648,6 +656,7 @@ const CJUIGridModifier* GetCJUIGridModifier()
         .resetFriction = ResetFriction,
         .setGridFocusWrapMode = SetGridFocusWrapMode,
         .resetGridFocusWrapMode = ResetGridFocusWrapMode,
+        .getGridFocusWrapMode = GetGridFocusWrapMode,
         .getGridColumnsTemplate = GetColumnsTemplate,
         .getGridRowsTemplate = GetRowsTemplate,
         .getGridColumnsGap = GetColumnsGap,

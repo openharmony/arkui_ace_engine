@@ -1766,4 +1766,49 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentLifeCyc
     EXPECT_EQ(host->TotalChildCount(), 0);
 #endif
 }
+
+/**
+ * @tc.name: UpdateWant001
+ * @tc.desc: Test func UpdateWant
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, UpdateWant001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent Node
+     */
+    auto pattern = CreateSecurityUEC();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isVisible_ = true;
+    pattern->instanceId_= 2;
+    pattern->state_ = SecurityUIExtensionPattern::AbilityState::FOREGROUND;
+    pattern->needReNotifyForeground_ = false;
+    ValidSessionWrapper(pattern);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+    InvalidSession(pattern);
+    ASSERT_TRUE(pattern->CheckConstraint());
+
+    pattern->sessionType_ = SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    OHOS::AAFwk::Want want;
+    pattern->UpdateWant(want);
+    EXPECT_FALSE(pattern->needReNotifyForeground_);
+
+    pattern->sessionType_ = SessionType::PREVIEW_UI_EXTENSION_ABILITY;
+    pattern->hasAttachContext_ = false;
+    pattern->hasMountToParent_ = true;
+    pattern->UpdateWant(want);
+    EXPECT_TRUE(pattern->needReNotifyForeground_);
+
+    pattern->needReNotifyForeground_ = false;
+    pattern->hasAttachContext_ = true;
+    pattern->hasMountToParent_ = false;
+    pattern->UpdateWant(want);
+    EXPECT_TRUE(pattern->needReNotifyForeground_);
+
+    pattern->needReNotifyForeground_ = false;
+    pattern->hasAttachContext_ = true;
+    pattern->hasMountToParent_ = true;
+    pattern->UpdateWant(want);
+    EXPECT_FALSE(pattern->needReNotifyForeground_);
+}
 } //namespace OHOS::Ace::NG

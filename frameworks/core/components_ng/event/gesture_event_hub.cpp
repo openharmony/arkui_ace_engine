@@ -27,6 +27,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr int32_t MAX_FRAME_NODE_DEPTH = 2;
+constexpr int32_t MIN_RECOGNIZER_GROUP_LOOP_SIZE = 3;
 constexpr const char* HIT_TEST_MODE[] = {
     "HitTestMode.Default",
     "HitTestMode.Block",
@@ -67,6 +68,27 @@ bool IsDifferentFrameNodeCollected(
         }
     }
     return true;
+}
+
+bool IsSystemRecognizerCollected(const RefPtr<NGGestureRecognizer>& current)
+{
+    CHECK_NULL_RETURN(current, false);
+    auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(current);
+    CHECK_NULL_RETURN(recognizerGroup, false);
+    auto recognizerList = recognizerGroup->GetGroupRecognizer();
+    for (const auto &recognizer : recognizerList) {
+        if (!recognizer) {
+            continue;
+        }
+        if (AceType::InstanceOf<RecognizerGroup>(recognizer) && IsSystemRecognizerCollected(recognizer)) {
+            return true;
+        } else {
+            if (recognizer->IsSystemGesture()) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 GestureEventHub::GestureEventHub(const WeakPtr<EventHub>& eventHub) : eventHub_(eventHub) {}
@@ -128,7 +150,7 @@ bool GestureEventHub::ProcessEventTouchTestHit(const OffsetF& coordinateOffset, 
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     if (scrollableActuator_) {
         scrollableActuator_->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets,
-            localPoint, host, targetComponent, responseLinkResult);
+            localPoint, host, targetComponent, responseLinkResult, touchId);
     }
     if (dragEventActuator_ && !dragEventActuator_->GetIsNewFwk()) {
         dragEventActuator_->AddTouchListener(touchRestrict);
@@ -320,12 +342,14 @@ bool GestureEventHub::CheckLastInnerRecognizerCollected(GesturePriority priority
         if (static_cast<int32_t>(externalParallelRecognizer_.size()) <= gestureGroupIndex) {
             return false;
         }
-        return IsDifferentFrameNodeCollected(externalParallelRecognizer_[gestureGroupIndex], host);
+        return !IsSystemRecognizerCollected(externalParallelRecognizer_[gestureGroupIndex]) &&
+               IsDifferentFrameNodeCollected(externalParallelRecognizer_[gestureGroupIndex], host);
     } else {
         if (static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= gestureGroupIndex) {
             return false;
         }
-        return IsDifferentFrameNodeCollected(externalExclusiveRecognizer_[gestureGroupIndex], host);
+        return !IsSystemRecognizerCollected(externalExclusiveRecognizer_[gestureGroupIndex]) &&
+               IsDifferentFrameNodeCollected(externalExclusiveRecognizer_[gestureGroupIndex], host);
     }
 }
 
@@ -351,6 +375,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
     auto userRecognizers = gestureHierarchy_;
     auto userModifierRecognizers = modifierGestureHierarchy_;
     userRecognizers.splice(userRecognizers.end(), userModifierRecognizers);
+    bool overMinRecognizerGroupLoopSize = userRecognizers.size() >= MIN_RECOGNIZER_GROUP_LOOP_SIZE;
     for (auto const& recognizer : userRecognizers) {
         if (!recognizer) {
             continue;
@@ -379,12 +404,12 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         auto checkCurrentRecognizer = false;
         auto parentRecognizer = recognizer->GetGestureGroup().Upgrade();
         if (priority == GesturePriority::Parallel) {
-            checkCurrentRecognizer = (recognizer == userRecognizers.front()) &&
+            checkCurrentRecognizer = overMinRecognizerGroupLoopSize && (recognizer == userRecognizers.front()) &&
                 CheckLastInnerRecognizerCollected(priority, parallelIndex);
             ProcessParallelPriorityGesture(
                 offset, touchId, targetComponent, host, current, recognizers, parallelIndex, checkCurrentRecognizer);
         } else {
-            checkCurrentRecognizer = (recognizer == userRecognizers.front()) &&
+            checkCurrentRecognizer = overMinRecognizerGroupLoopSize && (recognizer == userRecognizers.front()) &&
                 CheckLastInnerRecognizerCollected(priority, exclusiveIndex);
             ProcessExternalExclusiveRecognizer(offset, touchId, targetComponent,
                 host, priority, current, recognizers, exclusiveIndex, checkCurrentRecognizer);

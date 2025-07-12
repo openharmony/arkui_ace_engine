@@ -83,7 +83,7 @@ void ImageLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
     };
 
     std::string src = json->GetString("rawSrc");
-    std::string bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+    std::string bundleName = Container::CurrentBundleName();
     std::string moduleName = json->GetString("moduleName");
     UpdateImageSourceInfo(ImageSourceInfo(src, bundleName, moduleName));
     auto objectFit = json->GetString("objectFit");

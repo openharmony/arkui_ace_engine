@@ -1762,6 +1762,42 @@ HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize.Lev
 }
 
 /**
+ * @tc.name: TriggerGestureJudgeCallbackTest003
+ * @tc.desc: Test TriggerGestureJudgeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(2, COUNT, 0, true);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;
+    };
+    auto func = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
+                    const std::list<RefPtr<NGGestureRecognizer>>& others) { return GestureJudgeResult::REJECT; };
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
+     * @tc.steps: case1: targetComponent is default.
+     * @tc.expected: step2. result equals.
+     */
+
+    targetComponent->SetOnGestureRecognizerJudgeBegin(func);
+    touchEvent.rollAngle = 0;
+    clickRecognizer->touchPoints_[0] = touchEvent;
+    clickRecognizer->touchPoints_[1] = touchEvent;
+    clickRecognizer->touchPoints_[2] = touchEvent;
+    clickRecognizer->targetComponent_ = targetComponent;
+    clickRecognizer->TriggerClickAccepted(touchEvent);
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    EXPECT_EQ(clickRecognizer->disposal_, GestureDisposal::REJECT);
+}
+
+/**
  * @tc.name: OnAcceptedTest001
  * @tc.desc: Test OnAccepted
  */
@@ -2020,5 +2056,54 @@ HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize.Lev
     clickRecognizer->targetComponent_ = targetComponent;
     targetComponent->SetOnGestureRecognizerJudgeBegin(func);
     clickRecognizer->TriggerGestureJudgeCallback();
+}
+
+/**
+ * @tc.name: ResetStatusInHandleOverdueDeadlineTest001
+ * @tc.desc: Test ResetStatusInHandleOverdueDeadline
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ResetStatusInHandleOverdueDeadlineTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create clickRecognizer and SetResponseLinkRecognizers.
+     */
+    RefPtr<ClickRecognizer> triggerClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::list<RefPtr<NGGestureRecognizer>> responseLinkResult;
+    responseLinkResult.push_back(triggerClickRecognizer);
+    RefPtr<NGGestureRecognizer> targetPtr1 = nullptr;
+    responseLinkResult.push_back(targetPtr1);
+    RefPtr<NGGestureRecognizer> targetPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    responseLinkResult.push_back(targetPtr2);
+    triggerClickRecognizer->SetResponseLinkRecognizers(responseLinkResult);
+    targetPtr2->SetResponseLinkRecognizers(responseLinkResult);
+
+    /**
+     * @tc.steps: step2. Do ResetStatusInHandleOverdueDeadline.
+     * @tc.expected: responseLinkRecognizer_ is empty().
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->eventManager_ = eventManager;
+    triggerClickRecognizer->ResetStatusInHandleOverdueDeadline();
+    EXPECT_EQ(triggerClickRecognizer->responseLinkRecognizer_.size(), 0);
+    EXPECT_EQ(targetPtr2->responseLinkRecognizer_.size(), 0);
+
+    /**
+     * @tc.steps: step3. Do ResetStatusInHandleOverdueDeadline with not QueryAllDone.
+     * @tc.expected: responseLinkRecognizer_ is same as before.
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    ASSERT_NE(gestureScope, nullptr);
+    triggerClickRecognizer->refereeState_ = RefereeState::PENDING;
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), triggerClickRecognizer);
+    ASSERT_NE(context->eventManager_, nullptr);
+    ASSERT_NE(context->eventManager_->refereeNG_, nullptr);
+    context->eventManager_->refereeNG_->gestureScopes_.insert(std::make_pair(0, gestureScope));
+    targetPtr2->SetResponseLinkRecognizers(responseLinkResult);
+    triggerClickRecognizer->ResetStatusInHandleOverdueDeadline();
+    EXPECT_EQ(targetPtr2->responseLinkRecognizer_.size(), 3);
 }
 } // namespace OHOS::Ace::NG

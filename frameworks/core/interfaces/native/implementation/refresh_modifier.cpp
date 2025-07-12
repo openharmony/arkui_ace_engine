@@ -71,7 +71,6 @@ void SetRefreshOptionsImpl(Ark_NativePointer node,
     auto promptText = Converter::OptConvert<std::string>(value->promptText);
     if (promptText) {
         // need check
-        // RefreshModelNG::SetLoadingText(frameNode, promptText.value());
     }
 
     RefPtr<UINode> customNode;
@@ -80,12 +79,6 @@ void SetRefreshOptionsImpl(Ark_NativePointer node,
         customNode = CallbackHelper(arkBuilder.value()).BuildSync(node);
     }
     // need check
-    // if (customNode) {
-    //     RefreshModelNG::SetCustomBuilder(frameNode, customNode);
-    //     RefreshModelNG::SetIsCustomBuilderExist(frameNode, true);
-    // } else {
-    //     RefreshModelNG::SetIsCustomBuilderExist(frameNode, false);
-    // }
 }
 } // RefreshInterfaceModifier
 namespace RefreshAttributeModifier {
@@ -123,7 +116,6 @@ void RefreshOffsetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     // need check
-    // RefreshModelNG::SetRefreshOffset(frameNode, convValue);
 }
 void PullToRefreshImpl(Ark_NativePointer node,
                        Ark_Boolean value)

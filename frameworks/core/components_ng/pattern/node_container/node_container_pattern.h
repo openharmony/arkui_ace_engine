@@ -133,7 +133,6 @@ public:
 private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnMountToParentDone() override;
-    void OnAttachToMainTree() override;
     void SetExportTextureInfoIfNeeded();
     bool HandleTextureExport(bool isStop, FrameNode* frameNode);
     std::function<void()> resetFunc_;

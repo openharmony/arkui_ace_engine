@@ -173,6 +173,7 @@ static const std::unordered_set<std::string> stringAttrs = {
     "general_ai_preview_menu_display_failed",
     "textfield_show_password",
     "textfield_hide_password",
+    "general_ai_ask_celia"
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)

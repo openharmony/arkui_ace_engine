@@ -102,7 +102,9 @@ ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distance
     }
     distanceThreshold_ = Dimension(
         Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
-    if (distanceThreshold_.ConvertToPx() <= 0) {
+
+    userDT_ = distanceThreshold_.ConvertToPx();
+    if (userDT_ <= 0) {
         distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
     }
 
@@ -116,7 +118,8 @@ ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, Dimension dista
         fingers_ = DEFAULT_TAP_FINGERS;
     }
     
-    if (distanceThreshold.ConvertToPx() <= 0) {
+    userDT_ = distanceThreshold.ConvertToPx();
+    if (userDT_ <= 0) {
         distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
     }
 
@@ -175,6 +178,7 @@ ClickInfo ClickRecognizer::GetClickInfo()
         info.SetRollAngle(touchPoint.rollAngle.value());
     }
     info.SetSourceTool(touchPoint.sourceTool);
+    info.SetTargetDisplayId(touchPoint.targetDisplayId);
     return info;
 }
 
@@ -340,14 +344,15 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
         OnAccepted();
         return;
     }
+    if (CheckLimitFinger()) {
+        extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
     if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture judge reject");
-        return;
-    }
-    if (CheckLimitFinger()) {
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
     Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
@@ -382,6 +387,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         fingerDeadlineTimer_.Cancel();
         tappedCount_++;
         if (CheckLimitFinger()) {
+            extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
         if (tappedCount_ == count_) {
@@ -432,7 +438,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    extraInfo_ += "receive cancel event.";
+    extraInfo_ += "cancel received.";
     if (IsRefereeFinished()) {
         return;
     }
@@ -440,10 +446,29 @@ void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
 }
 
+void ClickRecognizer::ResetStatusInHandleOverdueDeadline()
+{
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto refereeNG = eventManager->GetGestureRefereeNG(nullptr);
+    CHECK_NULL_VOID(refereeNG);
+    if (refereeNG->QueryAllDone()) {
+        for (const auto& recognizer : responseLinkRecognizer_) {
+            if (recognizer && recognizer != AceType::Claim(this)) {
+                recognizer->ResetResponseLinkRecognizer();
+            }
+        }
+        ResetResponseLinkRecognizer();
+    }
+}
+
 void ClickRecognizer::HandleOverdueDeadline()
 {
     if (currentTouchPointsNum_ < fingers_ || tappedCount_ < count_) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        ResetStatusInHandleOverdueDeadline();
     }
 }
 
@@ -533,6 +558,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
         info.SetRollAngle(touchPoint.rollAngle.value());
     }
     info.SetSourceTool(touchPoint.sourceTool);
+    info.SetTargetDisplayId(touchPoint.targetDisplayId);
 #ifdef SECURITY_COMPONENT_ENABLE
     info.SetDisplayX(touchPoint.screenX);
     info.SetDisplayY(touchPoint.screenY);
@@ -648,7 +674,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEventType(inputEventType_);
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
+    info->SetTargetDisplayId(touchPoint.targetDisplayId);
     if (sysJudge_) {
+        TAG_LOGD(AceLogTag::ACE_GESTURE, "sysJudge");
         return sysJudge_(gestureInfo_, info);
     }
     if (gestureRecognizerJudgeFunc) {
@@ -700,6 +728,7 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
     std::stringstream oss;
     oss << "count: " << count_ << ", "
         << "fingers: " << fingers_ << ", "
+        << "userDT: " << userDT_ << ", "
         << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;

@@ -157,7 +157,7 @@ std::string TextStyle::ToString() const
     jsonValue->Put("renderColors", ss.str().c_str());
     JSON_STRING_PUT_INT(jsonValue, propRenderStrategy_);
     JSON_STRING_PUT_INT(jsonValue, propEffectStrategy_);
-    JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, symbolEffectOptions_);
+    JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, GetInnerSymbolEffectOptions());
 
     return jsonValue->ToString();
 }
@@ -228,9 +228,10 @@ void TextStyle::SetWhenOnlyOneOptionIsValid(const std::optional<NG::SymbolEffect
  
 void TextStyle::SetSymbolEffectOptions(const std::optional<NG::SymbolEffectOptions>& symbolEffectOptions)
 {
-    if (symbolEffectOptions.has_value() && symbolEffectOptions_.has_value()) {
+    auto innerSymbolEffectOptions = GetInnerSymbolEffectOptions();
+    if (symbolEffectOptions.has_value() && innerSymbolEffectOptions.has_value()) {
         auto options = symbolEffectOptions.value();
-        auto oldOptions = symbolEffectOptions_.value();
+        auto oldOptions = innerSymbolEffectOptions.value();
         if (oldOptions.GetEffectType() != options.GetEffectType()) {
             reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::EFFECT_STRATEGY));
         }
@@ -240,11 +241,11 @@ void TextStyle::SetSymbolEffectOptions(const std::optional<NG::SymbolEffectOptio
         CompareCommonSubType(options, oldOptions);
         CompareAnimationMode(options, oldOptions);
     } else {
-        if (symbolEffectOptions_.has_value()) {
-            auto oldOptions = symbolEffectOptions_.value();
+        if (innerSymbolEffectOptions.has_value()) {
+            auto oldOptions = innerSymbolEffectOptions.value();
             SetWhenOnlyOneOptionIsValid(oldOptions);
         }
     }
-    symbolEffectOptions_ = symbolEffectOptions;
+    SetInnerSymbolEffectOptionsWithoutMark(symbolEffectOptions);
 }
 }  // namespace OHOS::Ace

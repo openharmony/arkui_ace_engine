@@ -1430,11 +1430,54 @@ HWTEST_F(TextTestEightNg, InitAiSelection001, TestSize.Level1)
     pattern->contentRect_.SetOffset(OffsetF(10.0f, 10.0f));
     pattern->baselineOffset_ = 0.0f;
 
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+
     // 5. 调用被测函数
     pattern->InitAiSelection(globalOffset);
 
     // 6. 验证结果：textSelector_ 的 aiStart 和 aiEnd 应等于 span2 的 start 和 end
     EXPECT_EQ(pattern->textSelector_.aiStart.value_or(-1), span2.start);
     EXPECT_EQ(pattern->textSelector_.aiEnd.value_or(-1), span2.end);
+}
+
+/**
+ * @tc.name: InitAiSelection002
+ * @tc.desc: Test InitAiSelection with contentRect but offset outside AISpan range
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, InitAiSelection002, TestSize.Level1)
+{
+    // 1. 创建测试环境
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto pattern = frameNode->GetPattern<TextPattern>();
+
+    // 2. 设置contentRect和baselineOffset
+    pattern->contentRect_ = RectF(10.0f, 20.0f, 100.0f, 50.0f);
+    pattern->baselineOffset_ = 5.0f;
+
+    // 3. 初始化AI检测数据
+    AISpan testSpan = { 30, 50, "test content", TextDataDetectType::PHONE_NUMBER };
+    pattern->dataDetectorAdapter_->aiSpanMap_.emplace(30, testSpan);
+    pattern->dataDetectorAdapter_->enablePreviewMenu_ = true;
+    pattern->textDetectEnable_ = true;
+
+    // 4. 模拟段落管理器
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    int32_t mockExtend = 25; // 不在testSpan范围内
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(mockExtend));
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph });
+
+    // 5. 设置全局偏移量（计算后不在AI Span范围内）
+    Offset globalOffset(35.0f, 25.0f);
+
+    // 6. 调用被测函数
+    pattern->InitAiSelection(globalOffset);
+
+    // 7. 验证结果
+    EXPECT_FALSE(pattern->textSelector_.aiStart.has_value());
+    EXPECT_FALSE(pattern->textSelector_.aiEnd.has_value());
 }
 } // namespace OHOS::Ace::NG

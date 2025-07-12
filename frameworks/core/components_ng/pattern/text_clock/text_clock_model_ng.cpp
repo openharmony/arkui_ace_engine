@@ -62,6 +62,8 @@ void TextClockModelNG::SetTextShadow(const std::vector<Shadow>& value)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextClockPattern>();
     CHECK_NULL_VOID(pattern);
+    const std::string key = "textClock.shadow";
+    pattern->RemoveResObj(key);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
@@ -76,8 +78,7 @@ void TextClockModelNG::SetTextShadow(const std::vector<Shadow>& value)
     };
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextShadow, value);
     if (SystemProperties::ConfigChangePerform()) {
-        updateFunc(resObj);
-        pattern->AddResObj("textClock.shadow", resObj, std::move(updateFunc));
+        pattern->AddResObj(key, resObj, std::move(updateFunc));
     }
 }
 
@@ -216,6 +217,10 @@ void TextClockModelNG::SetHoursWest(FrameNode* frameNode, float hoursWest)
 void TextClockModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::string key = "textClock.shadow";
+    pattern->RemoveResObj(key);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
@@ -230,10 +235,7 @@ void TextClockModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Sha
     };
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextShadow, value, frameNode);
     if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern<TextClockPattern>();
-        CHECK_NULL_VOID(pattern);
-        updateFunc(resObj);
-        pattern->AddResObj("textClock.shadow", resObj, std::move(updateFunc));
+        pattern->AddResObj(key, resObj, std::move(updateFunc));
     }
 }
 
@@ -365,7 +367,10 @@ void TextClockModelNG::CreateWithTextColorResourceObj(FrameNode* frameNode, cons
     std::string key = "textClockColor";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         Color result;
         if (ResourceParseUtils::ParseResColor(resObj, result)) {
             pattern->UpdateTextClockColor(result);
@@ -388,7 +393,10 @@ void TextClockModelNG::CreateWithFontSizeResourceObj(FrameNode* frameNode, const
     std::string key = "textClockFontSize";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         CalcDimension fontSize;
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -418,7 +426,10 @@ void TextClockModelNG::CreateWithFontFamilyResourceObj(FrameNode* frameNode, con
     std::string key = "textClockFontFamily";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         std::vector<std::string> fontFamilies;
         if (ResourceParseUtils::ParseResFontFamilies(resObj, fontFamilies)) {
             pattern->UpdateTextClockFontFamily(fontFamilies);
@@ -472,7 +483,10 @@ void TextClockModelNG::CreateWithFormatResourceObj(FrameNode* frameNode, const R
     std::string key = "textClockFormat";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         const std::string DEFAULT_FORMAT_API_TEN = "hms";
         std::string result;
         if (!ResourceParseUtils::ParseResString(resObj, result)) {

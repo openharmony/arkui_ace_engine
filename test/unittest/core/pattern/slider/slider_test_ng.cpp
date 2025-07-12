@@ -104,6 +104,7 @@ const OffsetF SLIDER_GLOBAL_OFFSET = { 200.0f, 200.0f };
 const SizeF BLOCK_SIZE_F(10.0f, 10.0f);
 const SizeF BLOCK_SIZE_F_ZREO(0.0f, 0.0f);
 constexpr float SLIDER_PERCENTAGE = 100.0f;
+const SizeF TEST_SIZE_200 = SizeF(200.0f, 200.0f);
 } // namespace
 class SliderTestNg : public testing::Test {
 public:
@@ -1036,14 +1037,14 @@ HWTEST_F(SliderTestNg, SliderLayoutAlgorithm003, TestSize.Level1)
      * @tc.cases: case1. when sliderPaintProperty's direction is HORIZONTAL.
      */
     sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_NE(sliderLayoutAlgorithm->GetTrackThickness(), SLIDER_OUTSET_TRACK_THICKNRESS.ConvertToPx());
+    EXPECT_NE(sliderLayoutAlgorithm->trackThickness_, SLIDER_OUTSET_TRACK_THICKNRESS.ConvertToPx());
     /**
      * @tc.cases: case2. when sliderPaintProperty's direction is VERTICAL.
      */
     sliderLayoutProperty->UpdateThickness(Dimension(40.0));
     sliderLayoutProperty->UpdateDirection(Axis::VERTICAL);
     sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_NE(sliderLayoutAlgorithm->GetTrackThickness(), SLIDER_INSET_TRACK_THICKNRESS.ConvertToPx());
+    EXPECT_NE(sliderLayoutAlgorithm->trackThickness_, SLIDER_INSET_TRACK_THICKNRESS.ConvertToPx());
 }
 
 /**
@@ -2056,5 +2057,50 @@ HWTEST_F(SliderTestNg, SliderTestNgMinResponse004, TestSize.Level1)
         EXPECT_EQ(sliderPattern->value_, startValue - testData.second);
         sliderPattern->FireChangeEvent(SliderPattern::SliderChangeMode::End);
     }
+}
+
+/**
+ * @tc.name: SliderTestNgMeasureContent0001
+ * @tc.desc: Test Slider MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderTestNgMeasureContent0001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    SliderModelNG sliderModelNG;
+    constexpr float stepValue = 10.0f;
+    constexpr float startValue = 70.0f;
+    sliderModelNG.Create(startValue, stepValue, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapperNode and set sliderLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderLayoutAlgorithm = AceType::MakeRefPtr<SliderLayoutAlgorithm>();
+    ASSERT_NE(sliderLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sliderLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to MATCH_PARENT.
+     * @tc.expected: step3. ret Width is equal to TEST_SIZE_200 Width.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_SIZE_200);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto ret = sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(ret->Width(), TEST_SIZE_200.Width());
 }
 } // namespace OHOS::Ace::NG

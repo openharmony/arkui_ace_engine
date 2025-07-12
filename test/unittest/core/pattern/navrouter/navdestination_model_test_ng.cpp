@@ -178,9 +178,16 @@ HWTEST_F(NavDestinationModelTestNg, SetBackgroundColor001, TestSize.Level1)
     ASSERT_NE(navDestinationPattern, nullptr);
     navDestinationPattern->SetIsUserDefinedBgColor(false);
 
-    navdestinationModel.SetBackgroundColor(Color::BLUE, true);
+    navdestinationModel.SetBackgroundColor(Color::BLUE, true, nullptr);
     EXPECT_EQ(renderContext->propBackgroundColor_, Color::BLUE);
     EXPECT_TRUE(navDestinationPattern->IsUserDefinedBgColor());
+    std::string BUNDLE_NAME = "com.example.test";
+    std::string MODULE_NAME = "entry";
+    g_isConfigChangePerform = true;
+    RefPtr<ResourceObject> bgColorResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    navdestinationModel.SetBackgroundColor(Color::RED, true, bgColorResObj);
+    EXPECT_EQ(renderContext->propBackgroundColor_, Color::RED);
+    g_isConfigChangePerform = false;
     ViewStackProcessor::GetInstance()->ClearStack();
     NavDestinationModelTestNg::TearDownTestCase();
 }
@@ -206,7 +213,7 @@ HWTEST_F(NavDestinationModelTestNg, SetBackgroundColor002, TestSize.Level1)
     ASSERT_NE(navDestinationPattern, nullptr);
     navDestinationPattern->SetIsUserDefinedBgColor(true);
 
-    navdestinationModel.SetBackgroundColor(Color::BLUE, false);
+    navdestinationModel.SetBackgroundColor(Color::BLUE, false, nullptr);
     EXPECT_EQ(renderContext->propBackgroundColor_, Color::WHITE);
     EXPECT_FALSE(navDestinationPattern->IsUserDefinedBgColor());
     ViewStackProcessor::GetInstance()->ClearStack();
@@ -230,9 +237,16 @@ HWTEST_F(NavDestinationModelTestNg, SetBackgroundColor101, TestSize.Level1)
     ASSERT_NE(navDestinationPattern, nullptr);
     navDestinationPattern->SetIsUserDefinedBgColor(false);
 
-    NavDestinationModelNG::SetBackgroundColor(AceType::RawPtr(navDestinationNode), Color::BLUE, true);
+    NavDestinationModelNG::SetBackgroundColor(AceType::RawPtr(navDestinationNode), Color::BLUE, true, nullptr);
     EXPECT_EQ(renderContext->propBackgroundColor_, Color::BLUE);
     EXPECT_TRUE(navDestinationPattern->IsUserDefinedBgColor());
+    std::string BUNDLE_NAME = "com.example.test";
+    std::string MODULE_NAME = "entry";
+    g_isConfigChangePerform = true;
+    RefPtr<ResourceObject> bgColorResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    NavDestinationModelNG::SetBackgroundColor(AceType::RawPtr(navDestinationNode), Color::RED, true, bgColorResObj);
+    EXPECT_EQ(renderContext->propBackgroundColor_, Color::RED);
+    g_isConfigChangePerform = false;
     ViewStackProcessor::GetInstance()->ClearStack();
     NavDestinationModelTestNg::TearDownTestCase();
 }
@@ -254,7 +268,7 @@ HWTEST_F(NavDestinationModelTestNg, SetBackgroundColor102, TestSize.Level1)
     ASSERT_NE(navDestinationPattern, nullptr);
     navDestinationPattern->SetIsUserDefinedBgColor(false);
 
-    NavDestinationModelNG::SetBackgroundColor(AceType::RawPtr(navDestinationNode), Color::BLUE, false);
+    NavDestinationModelNG::SetBackgroundColor(AceType::RawPtr(navDestinationNode), Color::BLUE, false, nullptr);
     EXPECT_EQ(renderContext->propBackgroundColor_, Color::WHITE);
     EXPECT_FALSE(navDestinationPattern->IsUserDefinedBgColor());
     ViewStackProcessor::GetInstance()->ClearStack();

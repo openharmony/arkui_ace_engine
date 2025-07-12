@@ -60,11 +60,6 @@ namespace PanelModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // need check
-    // auto frameNode = SlidingPanelModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 } // PanelModifier
@@ -84,16 +79,12 @@ void ModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // need check
-    // SlidingPanelModelNG::SetPanelMode(frameNode, Converter::OptConvert<PanelMode>(value));
 }
 void TypeImpl(Ark_NativePointer node,
               Ark_PanelType value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // need check
-    // SlidingPanelModelNG::SetPanelType(frameNode, Converter::OptConvert<PanelType>(value));
 }
 void DragBarImpl(Ark_NativePointer node,
                  Ark_Boolean value)
@@ -113,8 +104,6 @@ void CustomHeightImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(customHeight);
     Validator::ValidateNonPercent(customHeight);
     Validator::ValidateNonEmpty(customHeight);
-    // need check
-    // SlidingPanelModelNG::SetPanelCustomHeight(frameNode, customHeight);
 }
 void FullHeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_String* value)
@@ -125,8 +114,6 @@ void FullHeightImpl(Ark_NativePointer node,
     auto fullHeight = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(fullHeight);
     Validator::ValidateNonPercent(fullHeight);
-    // need check
-    // SlidingPanelModelNG::SetPanelFullHeight(frameNode, fullHeight);
 }
 void HalfHeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_String* value)
@@ -137,8 +124,6 @@ void HalfHeightImpl(Ark_NativePointer node,
     auto halfHeight = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(halfHeight);
     Validator::ValidateNonPercent(halfHeight);
-    // need check
-    // SlidingPanelModelNG::SetPanelHalfHeight(frameNode, halfHeight);
 }
 void MiniHeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_String* value)
@@ -149,8 +134,6 @@ void MiniHeightImpl(Ark_NativePointer node,
     auto miniHeight = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(miniHeight);
     Validator::ValidateNonPercent(miniHeight);
-    // need check
-    // SlidingPanelModelNG::SetPanelMiniHeight(frameNode, miniHeight);
 }
 void ShowImpl(Ark_NativePointer node,
               Ark_Boolean value)
@@ -167,8 +150,6 @@ void BackgroundMaskImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto colorValue = Converter::OptConvert<Color>(*value);
-    // need check
-    // SlidingPanelModelNG::SetPanelBackgroundMask(frameNode, colorValue);
 }
 void ShowCloseIconImpl(Ark_NativePointer node,
                        Ark_Boolean value)
@@ -190,8 +171,6 @@ void OnChangeImpl(Ark_NativePointer node,
         auto mode = Converter::ArkValue<Ark_PanelMode>(eventInfo->GetMode());
         arkCallback.Invoke(width, height, mode);
     };
-    // need check
-    // SlidingPanelModelNG::SetOnSizeChange(frameNode, std::move(onEvent));
 }
 void OnHeightChangeImpl(Ark_NativePointer node,
                         const Callback_Number_Void* value)
@@ -203,8 +182,6 @@ void OnHeightChangeImpl(Ark_NativePointer node,
         auto arkIndex = Converter::ArkValue<Ark_Number>(value);
         arkCallback.Invoke(arkIndex);
     };
-    // need check
-    // SlidingPanelModelNG::SetOnHeightChange(frameNode, std::move(onEvent));
 }
 void _onChangeEvent_modeImpl(Ark_NativePointer node,
                              const Callback_PanelMode_Void* callback)
@@ -220,8 +197,6 @@ void _onChangeEvent_modeImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(mode);
     };
-    // need check
-    // SlidingPanelModelNG::SetModeChangeEvent(frameNode, std::move(onEvent));
 }
 } // PanelAttributeModifier
 const GENERATED_ArkUIPanelModifier* GetPanelModifier()

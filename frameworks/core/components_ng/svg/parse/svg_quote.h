@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_QUOTE_H
 
 #include "frameworks/core/components_ng/svg/parse/svg_node.h"
-#include "include/pathops/SkPathOps.h"
 
 namespace OHOS::Ace::NG {
 

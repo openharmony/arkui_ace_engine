@@ -1330,7 +1330,7 @@ HWTEST_F(OverlayManagerToastTestNg, ToastPatternOnDetachFromFrameNode, TestSize.
     CHECK_NULL_VOID(pipeline);
     toastPattern->foldDisplayModeChangedCallbackId_ = std::nullopt;
     toastPattern->halfFoldHoverChangedCallbackId_ = std::nullopt;
-    toastPattern->OnDetachFromFrameNode(nullptr);
+    toastPattern->OnDetachFromFrameNode(AceType::RawPtr(toastNode));
 }
 
 /**
@@ -2046,7 +2046,43 @@ HWTEST_F(OverlayManagerToastTestNg, OnAttachToFrameNode001, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     auto currentCallBackId = pipeline->callbackId_;
     toastPattern->OnAttachToFrameNode();
-    toastPattern->OnDetachFromFrameNode(nullptr);
+    toastPattern->OnDetachFromFrameNode(AceType::RawPtr(toastNode));
     EXPECT_EQ(toastPattern->rowKeyboardCallbackId_, currentCallBackId + CALLBACK_COUNT);
+}
+
+/**
+ * @tc.name: OnWindowSizeChanged001
+ * @tc.desc: Increase the coverage of ToastPattern::OnWindowSizeChanged function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, OnWindowSizeChanged001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION};
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+
+    auto pipeline = toastNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->isSubContainer_ = true;
+    AceEngine::Get().AddContainer(pipeline->GetInstanceId(), container);
+
+    auto overlayManager = pipeline->GetOverlayManager();
+
+    toastPattern->OnWindowSizeChanged(0, 0,  WindowSizeChangeReason::ROTATION);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+    toastPattern->OnWindowSizeChanged(0, 0,  WindowSizeChangeReason::DRAG_MOVE);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
 }
 } // namespace OHOS::Ace::NG

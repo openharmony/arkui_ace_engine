@@ -522,7 +522,13 @@ void FontManager::OnPreviewMenuOptionClick(TextDataDetectType type, const std::s
     }
 }
 
-#ifdef ACE_ENABLE_VK
+void FontManager::StartAbilityOnCalendar(const std::map<std::string, std::string>& params) const
+{
+    if (startAbilityOnCalendarHandler_) {
+        startAbilityOnCalendarHandler_(params);
+    }
+}
+
 void FontManager::AddHybridRenderNode(const WeakPtr<NG::UINode>& node)
 {
     std::lock_guard<std::mutex> lock(hybridRenderNodesMutex_);
@@ -552,5 +558,4 @@ void FontManager::UpdateHybridRenderNodes()
         }
     }
 }
-#endif
 } // namespace OHOS::Ace

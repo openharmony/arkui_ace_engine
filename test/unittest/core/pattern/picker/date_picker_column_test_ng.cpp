@@ -1926,7 +1926,7 @@ HWTEST_F(DatePickerColumnTest, CreateItemTouchEventListener001, TestSize.Level1)
 
 /**
  * @tc.name: DatePickerGetCurrentOption001
- * @tc.desc: Test DatePickerColumnPattern GetCurrentOption
+ * @tc.desc: Test DatePickerColumnPattern GetCurrentOption.
  * @tc.type: FUNC
  */
 HWTEST_F(DatePickerColumnTest, DatePickerGetCurrentOption001, TestSize.Level1)

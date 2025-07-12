@@ -242,6 +242,24 @@ void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size)
     size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
+PaddingPropertyF AdjacentExpandToRect(RectF& adjustingRect, PaddingPropertyF& frameExpand, RectF& frameRect)
+{
+    PaddingPropertyF filtered;
+    if (NearEqual(adjustingRect.Left(), frameRect.Left())) {
+        filtered.left = frameExpand.left;
+    }
+    if (NearEqual(adjustingRect.Top(), frameRect.Top())) {
+        filtered.top = frameExpand.top;
+    }
+    if (NearEqual(adjustingRect.Right(), frameRect.Right())) {
+        filtered.right = frameExpand.right;
+    }
+    if (NearEqual(adjustingRect.Bottom(), frameRect.Bottom())) {
+        filtered.bottom = frameExpand.bottom;
+    }
+    return filtered;
+}
+
 float GetMainAxisOffset(const OffsetF& offset, Axis axis)
 {
     return axis == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();

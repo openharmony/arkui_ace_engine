@@ -141,6 +141,23 @@ class UINodeRegisterProxy {
         return undefined;
     }
 
+    /**
+     * Retrieves the ViewBuildNodeBase instance that owns the element identified by the given elmtId
+     * @param elmtId - Unique ID of the element
+     * @returns The owning ViewBuildNodeBase or undefined if not found
+     */
+    public static GetViewBuildNodeBase(elmtId: number): ViewBuildNodeBase | undefined {
+        const viewWeakRef = this.ElementIdToOwningViewPU_.get(elmtId);
+        if (viewWeakRef && 'deref' in viewWeakRef) {
+            const view = viewWeakRef.deref();
+            if (view) {
+                return view;
+            }
+        }
+        stateMgmtConsole.warn(`fail to get view for elmtIds ${elmtId}`);
+        return undefined;
+    }
+
     public static instance_: UINodeRegisterProxy = new UINodeRegisterProxy();
     public removeElementsInfo_: Array<number> = new Array<number>();
     public static ElementIdToOwningViewPU_: Map<number, WeakRef<ViewBuildNodeBase>> = new Map<number, WeakRef<ViewBuildNodeBase>>();

@@ -159,6 +159,54 @@ ohos_unittest("container_test") {
   ]
 }
 
+ohos_unittest("high_contrast_observer_test") {
+  module_out_path = adapter_test_output_path
+  sources = [
+    "$ace_root/adapter/ohos/entrance/high_contrast_observer.cpp",
+    "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_ace_container.cpp",
+    "high_contrast_observer_test.cpp",
+  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$ace_root/test/unittest:ace_unittest_log",
+  ]
+  external_deps = [
+    "ability_base:view_data",
+    "ability_runtime:abilitykit_native",
+    "accessibility:accessibility_common",
+    "accessibility:accessibilityconfig",
+    "googletest:gmock_main",
+    "napi:ace_napi",
+    "resource_management:global_resmgr",
+    "runtime_core:ani",
+    "window_manager:libwm",
+  ]
+}
+
 ohos_unittest("layout_inspector_test") {
   module_out_path = adapter_test_output_path
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -169,6 +217,7 @@ ohos_unittest("layout_inspector_test") {
     "mock_component_snapshot.cpp",
     "mock_connect_server_manager.cpp",
     "mock_inspector_pixel_map.cpp",
+    "mock_rs_adapter.cpp",
     "mock_v2_inspector.cpp",
     "mock_websocket_manager.cpp",
   ]
@@ -178,6 +227,7 @@ ohos_unittest("layout_inspector_test") {
   }
 
   deps = [
+    ":ace_layout_inspector_mock",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",
@@ -192,7 +242,6 @@ ohos_unittest("layout_inspector_test") {
     "$ace_root/test/unittest:ace_core_extra",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
-    ":ace_layout_inspector_mock",
   ]
   external_deps = [
     "ability_runtime:abilitykit_native",
@@ -237,15 +286,15 @@ ohos_unittest("rs_adapter_test") {
   ]
 
   external_deps = [
-    "googletest:gmock_main",
-    "window_manager:libwm",
-    "graphic_2d:librender_service_base",
     "ability_base:configuration",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
+    "googletest:gmock_main",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "window_manager:libwm",
   ]
 }
 
@@ -253,6 +302,7 @@ group("entrance_unittest") {
   testonly = true
   deps = [
     ":container_test",
+    ":high_contrast_observer_test",
     ":layout_inspector_test",
     ":rs_adapter_test",
   ]

@@ -734,6 +734,15 @@ void WebDelegate::CallIsPagePathInvalid(const bool& isPageInvalid) {}
 void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::string& param) const {}
 void WebDelegate::OnPageStarted(const std::string& param) {}
 void WebDelegate::OnPageFinished(const std::string& param) {}
+void WebDelegate::SetPageFinishedState(const bool& state)
+{
+    isPageFinished_ = state;
+}
+
+bool WebDelegate::GetPageFinishedState()
+{
+    return isPageFinished_;
+}
 void WebDelegate::OnProgressChanged(int param) {}
 void WebDelegate::OnReceivedTitle(const std::string& title, bool isRealTitle) {}
 void WebDelegate::ExitFullScreen() {}
@@ -818,6 +827,12 @@ bool WebDelegate::IsEmptyOnInterceptRequest()
 RefPtr<WebResponse> WebDelegate::OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info)
 {
     return nullptr;
+}
+std::string WebDelegate::OnOverrideErrorPage(
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error)
+{
+    return "";
 }
 void WebDelegate::OnTooltip(const std::string& tooltip) {}
 void WebDelegate::OnRequestFocus() {}
@@ -1272,6 +1287,10 @@ void WebDelegate::UpdateEnableFollowSystemFontWeight(bool enableFollowSystemFont
 bool WebDelegate::IsActivePolicyDisable()
 {
     return false;
+}
+OHOS::NWeb::WebDestroyMode GetWebDestroyMode()
+{
+    return OHOS::NWeb::WebDestroyMode::NORMAL_MODE;
 }
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
 void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}

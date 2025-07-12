@@ -109,6 +109,11 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     void UpdateSelectedColor(const Color& color, bool isFristLoad = false);
     void UpdatePathColor(const Color& color, bool isFristLoad = false);
     void UpdateActiveColor(const Color& color, bool isFristLoad = false);

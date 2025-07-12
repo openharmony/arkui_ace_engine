@@ -306,8 +306,6 @@ void ContentModifierImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SliderModelNG::SetContentModifier(frameNode, convValue);
     LOGE("SliderModifier::ContentModifierImpl is not implemented, Ark_CustomObject is not supported!");
 }
 void SlideRangeImpl(Ark_NativePointer node,

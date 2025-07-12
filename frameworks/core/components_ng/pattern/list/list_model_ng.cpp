@@ -48,11 +48,17 @@ void ListModelNG::Create(bool isCreateArc)
     CHECK_NULL_VOID(pattern);
     pattern->AddScrollableFrameInfo(SCROLL_FROM_NONE);
     if (SystemProperties::ConfigChangePerform()) {
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(frameNode);
         auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->ResetDividerColorSetByUser();
+        auto resourceObject = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+        auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(frameNode))](
+                                const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            frameNode->SetMeasureAnyway(frameNode->GetRerenderable());
+        };
+        pattern->AddResObj("listMeasureAllItem", resourceObject, std::move(updateFunc));
     }
 }
 
@@ -1276,8 +1282,10 @@ void ListModelNG::ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj)
             if (listTheme) {
                 divider.color = listTheme->GetDividerColor();
             }
+            ListModelNG::SetDividerColorByUser(AceType::RawPtr(frameNode), false);
         } else {
             divider.color = result;
+            ListModelNG::SetDividerColorByUser(AceType::RawPtr(frameNode), true);
         }
         divider.color = result;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
@@ -1387,8 +1395,10 @@ void ListModelNG::ParseResObjDividerColor(FrameNode* frameNode, const RefPtr<Res
             if (listTheme) {
                 divider.color = listTheme->GetDividerColor();
             }
+            ListModelNG::SetDividerColorByUser(AceType::RawPtr(frameNode), false);
         } else {
             divider.color = result;
+            ListModelNG::SetDividerColorByUser(AceType::RawPtr(frameNode), true);
         }
         divider.color = result;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);

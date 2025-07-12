@@ -128,6 +128,11 @@ ColorMode Container::CurrentColorMode()
     return MockContainer::mockColorMode_;
 }
 
+std::string Container::CurrentBundleName()
+{
+    return "";
+}
+
 void MockContainer::SetMockColorMode(ColorMode mode)
 {
     mockColorMode_ = mode;
@@ -185,7 +190,7 @@ std::vector<Rect> Container::GetCurrentFoldCreaseRegion()
     return {};
 }
 
-RefPtr<Container> Container::GetFoucsed()
+RefPtr<Container> Container::GetFocused()
 {
     RefPtr<Container> foucsContainer;
     AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {

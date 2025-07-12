@@ -392,7 +392,8 @@ ArkUINativeModuleValue SideBarContainerBridge::SetDivider(ArkUIRuntimeCallInfo* 
     }
 
     Color color(DEFAULT_SIDE_BAR_DIVIDER_COLOR);
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorObj, nodeInfo)) {
         color.SetValue(DEFAULT_SIDE_BAR_DIVIDER_COLOR);
     }
     auto strokeWidthPtr = AceType::RawPtr(strokeWidthObj);

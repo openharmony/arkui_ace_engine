@@ -1106,15 +1106,18 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest007, TestSize.Level1)
     shadow.SetColor(Color(Color::RED));
     shadow.SetShadowType(ShadowType::COLOR);
     std::vector<Shadow> setShadows;
+    textTimerModel.SetTextShadow(setShadows);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetTextShadow().has_value());
+
     setShadows.emplace_back(shadow);
     textTimerModel.SetTextShadow(setShadows);
     g_isConfigChangePerform = true;
     textTimerModel.SetTextShadow(setShadows);
 
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetTextShadow(), setShadows);
 }
 
@@ -1169,5 +1172,45 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest008, TestSize.Level1)
     textTimerModel.CreateWithResourceObj(jsResourceType, resObjWithId);
     pattern->OnColorModeChange(colorMode);
     EXPECT_EQ(layoutProperty->GetTextColor(), testColor);
+}
+
+/**
+ * @tc.name: TextTimerPatternTest009
+ * @tc.desc: Test OnVisibleAreaChange of TextTimerPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerPatternTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern
+     */
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern->textNode_ = FrameNode::GetOrCreateFrameNode("text", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+
+    /**
+     * @tc.steps: step3.OnVisibleAreaChange function is called.
+     * @tc.expected: step3. Check whether the value is correct.
+     */
+    g_isConfigChangePerform = false;
+    int32_t length = host->GetChildren().size();
+    pattern->OnVisibleAreaChange(true);
+    EXPECT_EQ(host->GetChildren().size(), length);
+
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    ASSERT_NE(childNode, nullptr);
+    g_isConfigChangePerform = true;
+    pattern->OnVisibleAreaChange(true);
+    EXPECT_EQ(host->GetChildren().size(), length);
 }
 } // namespace OHOS::Ace::NG

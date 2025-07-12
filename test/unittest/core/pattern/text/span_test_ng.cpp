@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
@@ -624,6 +625,66 @@ HWTEST_F(SpanTestNg, ImageSpanSetBaselineOffset001, TestSize.Level1)
     offset = Dimension(-5.0, DimensionUnit::VP);
     layoutProperty->UpdateBaselineOffset(offset);
     EXPECT_EQ(layoutProperty->GetBaselineOffset(), Dimension(-5.0, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: ImageSpanSetPixelMap001
+ * @tc.desc: Test ImageSpanView SetPixelMap function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, ImageSpanSetPixelMap001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    auto node = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+
+    /**
+     * @tc.steps: step2. Call SetPixelMap function
+     */
+    RefPtr<PixelMap> pixMap = AceType::MakeRefPtr<MockPixelMap>();
+    ImageSpanView::SetPixelMap(AceType::RawPtr(frameNode), pixMap);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. Gets the sourceInfo of the framenode
+     * @tc.expected: step3. sourceInfo has value
+     */
+    auto sourceInfo = layoutProperty->GetImageSourceInfo();
+    ASSERT_NE(sourceInfo.has_value(), false);
+}
+
+/**
+ * @tc.name: ImageSpanSetPixelMap002
+ * @tc.desc: Test ImageSpanView SetPixelMap function when pixel map is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, ImageSpanSetPixelMap002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    auto node = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+
+    /**
+     * @tc.steps: step2. Call SetPixelMap function
+     */
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageSpanView::SetPixelMap(AceType::RawPtr(frameNode), pixMap);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. Gets the sourceInfo of the framenode
+     * @tc.expected: step3. sourceInfo has value
+     */
+    auto sourceInfo = layoutProperty->GetImageSourceInfo();
+    ASSERT_NE(sourceInfo.has_value(), false);
 }
 
 /**
@@ -1406,6 +1467,77 @@ HWTEST_F(SpanTestNg, SpanNodeDumpInfo001, TestSize.Level1)
     EXPECT_EQ(symbolNode->GetTag(), V2::SYMBOL_SPAN_ETS_TAG);
     EXPECT_NE(DumpLog::GetInstance().description_.size(), 1);
 }
+
+/**
+ * @tc.name: SpanCoverage001
+ * @tc.desc: Test SpanCoverage001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanCoverage001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    spanModelNG.SetTextShadow(TEXT_SHADOWS);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto json = std::make_unique<JsonValue>();
+
+    spanModelNG.SetTextDecoration(TextDecoration::LINE_THROUGH);
+    spanModelNG.SetTextDecorationStyle(Ace::TextDecorationStyle::DOUBLE);
+    spanModelNG.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
+    spanNode->spanItem_->SpanDumpInfoAdvance();
+    spanNode->spanItem_->GetSpanContent(u"", true);
+    TextStyle textStyle;
+    Ace::Gradient gradient;
+    textStyle.SetGradient(gradient);
+    spanNode->spanItem_->UpdateReLayoutGradient(textStyle, textStyle);
+
+    InspectorFilter filter;
+    filter.filterExt.clear();
+    filter.filterFixed = 10;
+    EXPECT_TRUE(filter.IsFastFilter());
+    spanNode->spanItem_->ToJsonValue(json, filter);
+    spanNode->spanItem_->fontStyle = nullptr;
+    spanNode->spanItem_->textLineStyle = nullptr;
+    spanNode->spanItem_->ToJsonValue(json, filter);
+    InspectorConfig config;
+    spanNode->spanItem_->ToTreeJson(json, config);
+
+    spanNode->spanItem_->textStyle_ = std::nullopt;
+    spanNode->spanItem_->SpanDumpInfoAdvance();
+
+    spanNode->UnregisterResource("symbolColor");
+
+    auto parentNode = AceType::MakeRefPtr<ContainerSpanNode>(1);
+    ASSERT_NE(parentNode, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    parentNode->RegisterResource<Color>("fontColor", resObj, Color::BLACK);
+    parentNode->UpdateProperty<std::u16string>("u16Content", resObj);
+    parentNode->UpdateProperty<Color>("fontColor", resObj);
+    parentNode->UpdateProperty<CalcDimension>("baselineOffset", resObj);
+    parentNode->UpdateProperty<std::vector<std::string>>("fontFamily", resObj);
+    parentNode->UpdateProperty<FontWeight>("fontWeight", resObj);
+    parentNode->UpdatePropertyImpl("fontWeight", nullptr);
+}
+
+/**
+ * @tc.name: SpanCoverage002
+ * @tc.desc: Test SpanCoverage002.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanCoverage002, TestSize.Level1)
+{
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+    TextStyle textStyle;
+    spanNode->spanItem_->UpdateReLayoutTextStyle(textStyle, textStyle, true);
+    spanNode->spanItem_->textStyle_ = std::nullopt;
+    spanNode->DumpInfo();
+}
+
 
 /**
  * @tc.name: SpanOnHoverEvent001

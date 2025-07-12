@@ -24,7 +24,7 @@ var __decorate =
     else
       for (var i = decorators.length - 1; i >= 0; i--)
         if ((d = decorators[i])) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
+    return (c > 3 && r && Object.defineProperty(target, key, r), r);
   };
 var SegmentButtonItemOptionsArray_1, SegmentButtonOptions_1;
 if (!('finalizeConstruction' in ViewPU.prototype)) {
@@ -230,7 +230,7 @@ function nearEqual(first, second) {
 }
 function validateLengthMetrics(value, defaultValue) {
   const actualValue = value ?? defaultValue;
-  return (actualValue.value < 0 || actualValue.unit === LengthUnit.PERCENT) ? defaultValue : actualValue;
+  return actualValue.value < 0 || actualValue.unit === LengthUnit.PERCENT ? defaultValue : actualValue;
 }
 export var BorderRadiusMode;
 (function (BorderRadiusMode) {
@@ -2274,13 +2274,8 @@ export class SegmentButton extends ViewPU {
     this.panGestureStartPoint = { x: 0, y: 0 };
     this.isPanGestureMoved = false;
     this.__shouldMirror = new ObservedPropertySimplePU(false, this, 'shouldMirror');
-    this.isSegmentFocusStyleCustomized =
-      resourceToNumber(
-        this.getUIContext()?.getHostContext(),
-        segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED,
-        1.0
-      ) === 0.0;
     this.isGestureInProgress = false;
+    this.isCustomizedCache = undefined;
     this.setInitiallyProvidedValue(params);
     this.declareWatch('options', this.onOptionsChange);
     this.declareWatch('selectedIndexes', this.onSelectedChange);
@@ -2346,11 +2341,11 @@ export class SegmentButton extends ViewPU {
     if (params.shouldMirror !== undefined) {
       this.shouldMirror = params.shouldMirror;
     }
-    if (params.isSegmentFocusStyleCustomized !== undefined) {
-      this.isSegmentFocusStyleCustomized = params.isSegmentFocusStyleCustomized;
-    }
     if (params.isGestureInProgress !== undefined) {
       this.isGestureInProgress = params.isGestureInProgress;
+    }
+    if (params.isCustomizedCache !== undefined) {
+      this.isCustomizedCache = params.isCustomizedCache;
     }
   }
   updateStateVars(params) {
@@ -2594,6 +2589,17 @@ export class SegmentButton extends ViewPU {
       console.error(`Ace SegmentButton getSystemLanguage, error: ${error.toString()}`);
     }
     return false;
+  }
+  isSegmentFocusStyleCustomized() {
+    if (this.isCustomizedCache === undefined) {
+      this.isCustomizedCache =
+        resourceToNumber(
+          this.getUIContext()?.getHostContext(),
+          segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED,
+          1.0
+        ) < 0.1; //PC platform returns 0.0, default returns 1.0, using <0.1 to differentiate platform styles.
+    }
+    return this.isCustomizedCache;
   }
   initialRender() {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -3044,7 +3050,7 @@ export class SegmentButton extends ViewPU {
                       selectedIndexes: this.__selectedIndexes,
                       maxFontScale: this.getMaxFontSize(),
                       onItemClicked: this.onItemClicked,
-                      isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized,
+                      isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized(),
                     },
                     undefined,
                     elmtId,
@@ -3062,7 +3068,7 @@ export class SegmentButton extends ViewPU {
                       selectedIndexes: this.selectedIndexes,
                       maxFontScale: this.getMaxFontSize(),
                       onItemClicked: this.onItemClicked,
-                      isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized,
+                      isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized(),
                     };
                   };
                   componentCall.paramsGenerator_ = paramsLambda;
@@ -3071,7 +3077,7 @@ export class SegmentButton extends ViewPU {
                     optionsArray: this.options.buttons,
                     options: this.options,
                     maxFontScale: this.getMaxFontSize(),
-                    isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized,
+                    isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized(),
                   });
                 }
               },

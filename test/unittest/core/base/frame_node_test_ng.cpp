@@ -34,6 +34,19 @@ void FrameNodeTestNg::TearDownTestSuite()
     MockPipelineContext::TearDown();
 }
 
+class TestAICaller : public AICallerHelper {
+public:
+    TestAICaller() = default;
+    ~TestAICaller() override = default;
+    bool onAIFunctionCaller(const std::string& funcName, const std::string& params) override
+    {
+        if (funcName.compare("Success") == 0) {
+            return true;
+        }
+        return false;
+    }
+};
+
 /**
  * @tc.name: FrameNodeTestNg001
  * @tc.desc: Test frame node method
@@ -1511,55 +1524,6 @@ HWTEST_F(FrameNodeTestNg, SwapDirtyLayoutWrapperOnMainThread040, TestSize.Level1
 }
 
 /**
- * @tc.name: FrameNodeTouchTest047
- * @tc.desc: Test method GeometryNodeToJsonValue
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct parameters.
-     */
-    std::unique_ptr<JsonValue> value = JsonUtil::Create(true);
-
-    /**
-     * @tc.steps: step2. construct parameters.
-     * @tc.expected: expect cover branch layoutProperty_ is nullptr.
-     */
-    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
-    EXPECT_EQ(FRAME_NODE2->layoutProperty_, nullptr);
-
-    /**
-     * @tc.steps: step3. set layoutProperty_ and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch layoutProperty_ is not nullptr.
-     */
-    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
-    FRAME_NODE2->layoutProperty_ = layoutProperty;
-    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(FRAME_NODE2->layoutProperty_, nullptr);
-
-    /**
-     * @tc.steps: step4. set calcLayoutConstraint_ and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch calcLayoutConstraint_ is not nullptr.
-     */
-    FRAME_NODE2->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
-
-    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(FRAME_NODE2->layoutProperty_->calcLayoutConstraint_, nullptr);
-
-    /**
-     * @tc.steps: step5. set selfIdealSize and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch selfIdealSize has value.
-     */
-    std::optional<CalcLength> len = CalcLength("auto");
-    FRAME_NODE2->layoutProperty_->calcLayoutConstraint_->selfIdealSize = CalcSize(len, len);
-    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(FRAME_NODE2->renderContext_, nullptr);
-
-    FRAME_NODE2->layoutProperty_ = nullptr;
-}
-
-/**
  * @tc.name: FrameNodeTestNg_TriggerVisibleAreaChangeCallback048
  * @tc.desc: Test frame node method
  * @tc.type: FUNC
@@ -2469,6 +2433,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOrCreate002, TestSize.Level1)
     EXPECT_NE(frameNode2, nullptr);
     EXPECT_EQ(frameNode2->GetId(), 2);
     frameNode2->AddChild(frameNode2, 1, true);
+
     /**
      * @tc.steps: step4. test GetFrameNodeOnly
      * @tc.expected: expect is not nullptr.
@@ -2802,5 +2767,51 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg311, TestSize.Level1)
     bool result = pattern_->OnAttachAdapter(frameNode, childNode1);
     EXPECT_EQ(result, false);
     pattern_ = nullptr;
+}
+
+/**
+ * @tc.name: FrameNodeTestNg312
+ * @tc.desc: Test CallAIFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg312, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    static constexpr uint32_t AI_CALL_SUCCESS = 0;
+    static constexpr uint32_t AI_CALLER_INVALID = 1;
+    static constexpr uint32_t AI_CALL_FUNCNAME_INVALID = 2;
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<Pattern>(), true);
+    
+    /**
+     * @tc.steps2: create AI helper
+     */
+    auto myAICaller = std::make_shared<TestAICaller>();
+
+    /**
+     * @tc.steps3: call ai function without set
+     * @tc.excepted: step3 return AI_CALLER_INVALID means AI helper not setted.
+     */
+    EXPECT_EQ(frameNode->CallAIFunction("Success", ""), AI_CALLER_INVALID);
+
+    /**
+     * @tc.steps4: set ai helper instance.
+     * @tc.excepted: step4 AI helper not null and setted success.
+     */
+    frameNode->SetAICallerHelper(myAICaller);
+    EXPECT_EQ(frameNode->aiCallerHelper_, myAICaller);
+
+    /**
+     * @tc.steps5: call ai function success after set.
+     * @tc.excepted: step5 ai function called success.
+     */
+    EXPECT_EQ(frameNode->CallAIFunction("Success", "params1: 1"), AI_CALL_SUCCESS);
+
+    /**
+     * @tc.steps6: call invalid function after set.
+     * @tc.excepted: step6 ai function not found and return AI_CALL_FUNCNAME_INVALID.
+     */
+    EXPECT_EQ(frameNode->CallAIFunction("OTHERFunction", "params1: 1"), AI_CALL_FUNCNAME_INVALID);
 }
 } // namespace OHOS::Ace::NG

@@ -20,6 +20,7 @@
 #include "callbacks.h"
 #include "interop-logging.h"
 #include "arkoala_api_generated.h"
+#include "securec.h"
 
 // TODO: rework for generic OHOS case.
 void* FindModule(int kind) {
@@ -42,9 +43,7 @@ void* FindModule(int kind) {
         if (module) {
             LOGE("ACE module at: %s", libraryName.c_str());
             return module;
-        } else {
-            // LOGE("Cannot find ACE module: %s %s", libraryName.c_str(), libraryError());
-        }
+        } else {}
     }
     return nullptr;
 }
@@ -102,8 +101,10 @@ const GENERATED_ArkUIAnyAPI* GetAnyImpl(int kind, int version, std::string* resu
         if (impl->version != version) {
             if (result) {
                 char buffer[256];
-                snprintf(buffer, sizeof(buffer), "FATAL: API version mismatch, expected %d got %d",
-                    version, impl->version);
+                if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
+                    "FATAL: API version mismatch, expected %d got %d", version, impl->version) < 0) {
+                    return nullptr;
+                }
                 *result = buffer;
             } else {
                 LOGE("API version mismatch for API %d: expected %d got %d", kind, version, impl->version);

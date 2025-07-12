@@ -154,6 +154,8 @@ public:
     void OnRefreshAccessedHistory(const std::string& url, bool isReload) override;
     bool OnHandleInterceptRequest(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
                                   std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response) override;
+    std::string OnHandleOverrideErrorPage(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+                                          std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error) override;
     bool OnHandleInterceptUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
     void OnResource(const std::string& url) override;
     void OnScaleChanged(float oldScaleFactor, float newScaleFactor) override;
@@ -236,6 +238,7 @@ public:
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity) override;
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo) override;
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event) override;
+    void OnNativeEmbedMouseEvent(std::shared_ptr<NWeb::NWebNativeEmbedMouseEvent> event) override;
     void OnIntelligentTrackingPreventionResult(
         const std::string& websiteHost, const std::string& trackerHost) override;
     void OnTooltip(const std::string& tooltip) override;
@@ -321,6 +324,11 @@ public:
 
     void OnInsertBlanklessFrame(const std::string& pathToFrame) override;
     void OnRemoveBlanklessFrame(int delayTime) override;
+    bool OnBeforeUnloadByJSV2(const std::string& url, const std::string& message, bool isReload,
+        std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
+
+    void OnPdfScrollAtBottom(const std::string& url) override;
+    void OnPdfLoadEvent(int32_t result, const std::string& url) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

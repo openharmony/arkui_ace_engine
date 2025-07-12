@@ -54,7 +54,8 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* run
         Local<JSValueRef> value = panda::ArrayRef::GetValueAt(vm, array, index);
         Color color;
         RefPtr<ResourceObject> resObj;
-        if (!ArkTSUtils::ParseJsSymbolColorAlpha(vm, value, color, resObj)) {
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        if (!ArkTSUtils::ParseJsSymbolColorAlpha(vm, value, color, resObj, nodeInfo)) {
             colorArray.clear();
             break;
         }

@@ -502,36 +502,32 @@ void ViewAbstract::SetIsBuilderBackground(bool val)
     ACE_UPDATE_RENDER_CONTEXT(BuilderBackgroundFlag, val);
 }
 
-void ViewAbstract::SetCustomBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj)
+void ViewAbstract::SetCustomBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    SetCustomBackgroundColor(color);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
+    if (!resObj) {
+        pattern->RemoveResObj("customBackgroundColor");
+        return;
+    }
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        CHECK_NULL_VOID(resObj);
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern<Pattern>();
         CHECK_NULL_VOID(pattern);
-        std::string backgroundColorStr = pattern->GetResCacheMapByKey("customBackgroundColor");
-        Color backgroundColor;
-        if (backgroundColorStr.empty()) {
-            ResourceParseUtils::ParseResColor(resObj, backgroundColor);
-            pattern->AddResCache("customBackgroundColor", backgroundColor.ColorToString());
-        } else {
-            Color::ParseColorString(backgroundColorStr, backgroundColor);
-        }
+        Color backgroundColor = Color::TRANSPARENT;
+        ResourceParseUtils::ParseResColor(resObj, backgroundColor);
         ACE_UPDATE_NODE_RENDER_CONTEXT(CustomBackgroundColor, backgroundColor, frameNode);
     };
     pattern->AddResObj("customBackgroundColor", resObj, std::move(updateFunc));
-
-    Color backgroundColor;
-    ResourceParseUtils::ParseResColor(resObj, backgroundColor);
-    SetCustomBackgroundColor(backgroundColor);
 }
 
 void ViewAbstract::RequestFrame()
@@ -568,10 +564,7 @@ void ViewAbstract::SetBackgroundColorWithResourceObj(const Color& color, const R
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
-    if (!resObj) {
-        pattern->RemoveResObj("backgroundColor");
-        return;
-    }
+    pattern->RemoveResObj("backgroundColor");
     auto &&updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject> &resObj) {
         CHECK_NULL_VOID(resObj);
         auto frameNode = weak.Upgrade();
@@ -2676,11 +2669,36 @@ void ViewAbstract::ResetNextFocus()
     focusHub->ResetNextFocus();
 }
 
+void SetFocusBoxUpdateFunc(FrameNode* frameNode, const NG::FocusBoxStyle& style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), style](const RefPtr<ResourceObject>& resObj) {
+        CHECK_NULL_VOID(resObj);
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        NG::FocusBoxStyle focusBoxStyle = style;
+        focusBoxStyle.ReloadResources();
+        focusHub->GetFocusBox().SetStyle(focusBoxStyle);
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    pattern->AddResObj("focusBox", resObj, std::move(updateFunc));
+}
+
 void ViewAbstract::SetFocusBoxStyle(const NG::FocusBoxStyle& style)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->GetFocusBox().SetStyle(style);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        SetFocusBoxUpdateFunc(frameNode, style);
+    }
 }
 
 void ViewAbstract::SetClickDistance(FrameNode* frameNode, double clickDistance)
@@ -3650,8 +3668,10 @@ void ViewAbstract::UpdatePopupParamResource(const RefPtr<PopupParam>& param, con
         type = POPUPTYPE_POPUPCOLOR;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, popupColorResourceObject, type);
         type = POPUPTYPE_MASKCOLOR;
-        auto maskColorResourceObject = param->GetMaskColorResourceObject();
-        ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, maskColorResourceObject, type);
+        if (!param->GetIsWithTheme()) {
+            auto maskColorResourceObject = param->GetMaskColorResourceObject();
+            ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, maskColorResourceObject, type);
+        }
         auto maskResourceObject = param->GetMaskResourceObject();
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, maskResourceObject);
         auto widthResourceObject = param->GetWidthResourceObject();
@@ -3660,16 +3680,16 @@ void ViewAbstract::UpdatePopupParamResource(const RefPtr<PopupParam>& param, con
         auto arrowWidthResourceObject = param->GetArrowWidthResourceObject();
         optionsType = POPUP_OPTIONTYPE_ARROWWIDTH;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, arrowWidthResourceObject, optionsType);
-        auto arrowHeightResourceObject = param->GeArrowHeightResourceObject();
+        auto arrowHeightResourceObject = param->GetArrowHeightResourceObject();
         optionsType = POPUP_OPTIONTYPE_ARROWHEIGHT;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, arrowHeightResourceObject, optionsType);
-        auto radiusResourceObject = param->GeRadiusResourceObject();
+        auto radiusResourceObject = param->GetRadiusResourceObject();
         optionsType = POPUP_OPTIONTYPE_RADIUS;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, radiusResourceObject, optionsType);
-        auto outLineResourceObject = param->GeOutlineWidthResourceObject();
+        auto outLineResourceObject = param->GetOutlineWidthResourceObject();
         optionsType = POPUP_OPTIONTYPE_OUTLINEWIDTH;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, outLineResourceObject, optionsType);
-        auto borderResourceObject = param->GeBorderWidthResourceObject();
+        auto borderResourceObject = param->GetBorderWidthResourceObject();
         optionsType = POPUP_OPTIONTYPE_BORDERWIDTH;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, borderResourceObject, optionsType);
     }
@@ -4321,10 +4341,13 @@ int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG
                 GetSpecificItemById<NG::FrameNode>(wrapperPattern->GetTargetId());
             CHECK_NULL_RETURN(target, ERROR_CODE_INTERNAL_ERROR);
             NG::OffsetF targetNodePosition = target->GetPositionToWindowWithTransform();
+            auto pipelineContext = target->GetContext();
+            CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
+            auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
             NG::OffsetF menuPosition = { menuParam.anchorPosition.GetX() + menuParam.positionOffset.GetX() +
-                                         targetNodePosition.GetX(),
+                                         targetNodePosition.GetX() + windowRect.Left(),
                                          menuParam.anchorPosition.GetY() + menuParam.positionOffset.GetY() +
-                                         targetNodePosition.GetY() };
+                                         targetNodePosition.GetY() + windowRect.Top() };
             menuProperty->UpdateMenuOffset(menuPosition);
             menuProperty->ResetMenuPlacement();
         }
@@ -4544,12 +4567,12 @@ void ViewAbstract::SetFgDynamicBrightness(const BrightnessOption& brightnessOpti
     ACE_UPDATE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption);
 }
 
-void ViewAbstract::SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+void ViewAbstract::SetBlender(const OHOS::Rosen::Blender* blender)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender);
+    ACE_UPDATE_RENDER_CONTEXT(Blender, blender);
 }
 
 void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
@@ -5670,6 +5693,22 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), strategy](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorStrategy, strategy, frameNode);
+            ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        };
+        pattern->AddResObj("foregroundColorStrategy", resObj, std::move(updateFunc));
+    }
 }
 
 void ViewAbstract::SetKeyboardShortcut(
@@ -6567,6 +6606,20 @@ void ViewAbstract::SetForegroundColorStrategy(FrameNode* frameNode, const Foregr
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorStrategy, strategy, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), strategy](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorStrategy, strategy, frameNode);
+            ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        };
+        pattern->AddResObj("foregroundColorStrategy", resObj, std::move(updateFunc));
+    }
 }
 
 void ViewAbstract::SetLightPosition(
@@ -7577,10 +7630,10 @@ void ViewAbstract::SetFgDynamicBrightness(FrameNode* frameNode, const Brightness
     ACE_UPDATE_NODE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption, frameNode);
 }
 
-void ViewAbstract::SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+void ViewAbstract::SetBlender(FrameNode* frameNode, const OHOS::Rosen::Blender* blender)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Blender, blender, frameNode);
 }
 
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)
@@ -8884,12 +8937,50 @@ void ViewAbstract::ResetNextFocus(FrameNode* frameNode)
     focusHub->ResetNextFocus();
 }
 
-void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style)
+void ViewAbstract::SetFocusBoxStyleUpdateFunc(
+    NG::FocusBoxStyle& style, const RefPtr<ResourceObject>& resObj, const std::string& property)
+{
+    if (property.empty()) {
+        return;
+    }
+    if (!resObj) {
+        style.RemoveResource(property);
+        return;
+    }
+    auto&& updateFunc = [property](const RefPtr<ResourceObject>& resObj, NG::FocusBoxStyle& style) {
+        if (property == "focusBoxStyleColor") {
+            Color strokeColor;
+            ResourceParseUtils::ParseResColor(resObj, strokeColor);
+            style.strokeColor = strokeColor;
+        } else if (property == "focusBoxStyleMargin") {
+            CalcDimension margin;
+            ResourceParseUtils::ParseResDimensionFpNG(resObj, margin, false);
+            style.margin = margin;
+        } else if (property == "focusBoxStyleWidth") {
+            CalcDimension strokeWidth;
+            ResourceParseUtils::ParseResDimensionFpNG(resObj, strokeWidth, false);
+            style.strokeWidth = strokeWidth;
+        }
+    };
+    style.AddResource(property, resObj, std::move(updateFunc));
+}
+
+void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style, bool isReset)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->GetFocusBox().SetStyle(style);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        if (isReset) {
+            auto pattern = frameNode->GetPattern();
+            CHECK_NULL_VOID(pattern);
+            pattern->RemoveResObj("focusBox");
+        } else {
+            SetFocusBoxUpdateFunc(frameNode, style);
+        }
+    }
 }
 
 void ViewAbstract::SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled)

@@ -86,6 +86,21 @@ public:
         return hasStartIcon_;
     }
 
+    const RefPtr<FrameNode> GetBottomDivider() const
+    {
+        return bottomDivider_;
+    }
+
+    const RefPtr<FrameNode> GetHeader() const
+    {
+        return header_.Upgrade();
+    }
+
+    const RefPtr<FrameNode> GetFooter() const
+    {
+        return footer_.Upgrade();
+    }
+
     // Travel children to update items icon info
     void UpdateMenuItemIconInfo();
     void OnExtItemPressed(bool press, bool beforeGroup);
@@ -93,15 +108,18 @@ public:
     void ModifyDivider();
     void SetHeaderContent(const std::string& str);
     void SetFooterContent(const std::string& str);
+    void AttachBottomDivider();
+    void RemoveBottomDivider();
     void OnColorConfigurationUpdate() override;
-
 protected:
     void OnMountToParentDone() override;
+    void OnAttachToFrameNode() override;
 
 private:
     void ModifyFontSize();
     void UpdateHeaderColor();
     void UpdateFooterColor();
+    void CreateBottomDivider();
 
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;
@@ -114,8 +132,11 @@ private:
     // False: none of menu items in group has start icon.
     bool hasStartIcon_ = false;
 
-    RefPtr<FrameNode> headerContent_;
-    RefPtr<FrameNode> footerContent_;
+    RefPtr<FrameNode> headerContent_ = nullptr;
+    RefPtr<FrameNode> footerContent_ = nullptr;
+    WeakPtr<FrameNode> header_ = nullptr;
+    WeakPtr<FrameNode> footer_ = nullptr;
+    RefPtr<FrameNode> bottomDivider_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemGroupPattern);
 };

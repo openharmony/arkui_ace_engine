@@ -35,6 +35,9 @@ export struct PopupIndex {
     { name: 'PopupDragTest', path: 'PopupDragTest' },
     { name: 'PopupMessageTest', path: 'PopupMessageTest' },
     { name: 'PopupComplexTest', path: 'PopupComplexTest' },
+    { name: 'openPopupTest', path: 'openPopupTest' },
+    { name: 'popupBlurTest', path: 'popupBlurTest' },
+    { name: 'popupMutiTest', path: 'popupMutiTest' },
   ]
 
   build() {

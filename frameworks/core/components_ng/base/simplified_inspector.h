@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,10 +28,14 @@ class InspectorFilter;
 class SimplifiedInspector final : public std::enable_shared_from_this<SimplifiedInspector> {
 public:
     SimplifiedInspector(int32_t containerId, const TreeParams& params);
+    SimplifiedInspector(int32_t containerId, const UICommandParams& params);
     ~SimplifiedInspector() = default;
     std::string GetInspector();
     void GetInspectorAsync(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector);
     void GetInspectorBackgroundAsync(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector);
+    void ExecuteUICommand(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector);
+
+    static void TestScrollToTarget(const std::vector<std::string>& params, const RefPtr<FrameNode>& pageRootNode);
 
 private:
     struct SimplifiedInspectorTree {
@@ -53,10 +57,12 @@ private:
         const RefPtr<NG::UINode>& parent, std::shared_ptr<SimplifiedInspectorTree>& treeNode, bool isActive);
     void GetInspectorChildrenBackground(
         const std::shared_ptr<SimplifiedInspectorTree>& treeNode, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray);
+    int32_t ExecuteWebScrollCommand(const RefPtr<FrameNode>& rootNode, int32_t nodeId, const std::string& jsCode);
     RectF deviceRect_;
     int32_t containerId_;
     int pageId_ = 0;
     TreeParams params_;
+    UICommandParams commandParams_;
     InspectorConfig inspectorCfg_;
     size_t size_ = 0;
     bool isAsync_ = false;

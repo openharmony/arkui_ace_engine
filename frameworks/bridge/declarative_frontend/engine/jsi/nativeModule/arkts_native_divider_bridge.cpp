@@ -84,7 +84,8 @@ ArkUINativeModuleValue DividerBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCall
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> dividerResObj;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, dividerResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, dividerResObj, nodeInfo)) {
         auto colorRawPtr = AceType::RawPtr(dividerResObj);
         GetArkUINodeModifiers()->getDividerModifier()->setDividerColor(nativeNode, color.GetValue(), colorRawPtr);
     } else {

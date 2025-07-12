@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,6 +110,77 @@ HWTEST_F(GridIrregularFillerTest, FindNextItem001, TestSize.Level1)
         EXPECT_FALSE(filler.FindNextItem(3));
         EXPECT_EQ(filler.posX_, 1);
         EXPECT_EQ(filler.posY_, 1);
+    }
+}
+
+/**
+ * @tc.name: IrregularFiller::FindNextItem002
+ * @tc.desc: Test IrregularFiller::FindNextItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FindNextItem002, TestSize.Level1)
+{
+    // 0 | 1 | 2 | 3 | 4
+    // 0 | 5 | 2 | 3 | 4
+    // 7 | 5 | 6 | 6 | 8
+    // 7 | 9 | 6 | 6 | 8
+    GridLayoutInfo info;
+    info.crossCount_ = 5;
+
+    info.gridMatrix_[0][0] = 0;
+    info.gridMatrix_[0][1] = 1;
+    info.gridMatrix_[0][2] = 2;
+    info.gridMatrix_[0][3] = 3;
+    info.gridMatrix_[0][4] = 4;
+
+    info.gridMatrix_[1][0] = 0;
+    info.gridMatrix_[1][1] = 5;
+    info.gridMatrix_[1][2] = -2;
+    info.gridMatrix_[1][3] = -3;
+    info.gridMatrix_[1][4] = -4;
+
+    info.gridMatrix_[2][0] = 7;
+    info.gridMatrix_[2][1] = -5;
+    info.gridMatrix_[2][2] = 6;
+    info.gridMatrix_[2][3] = -6;
+    info.gridMatrix_[2][4] = 8;
+
+    info.gridMatrix_[3][0] = -7;
+    info.gridMatrix_[3][1] = 9;
+    info.gridMatrix_[3][2] = -6;
+    info.gridMatrix_[3][3] = -6;
+    info.gridMatrix_[3][4] = -8;
+    {
+        GridIrregularFiller filler(&info, nullptr);
+
+        EXPECT_TRUE(filler.FindNextItem(0));
+
+        EXPECT_TRUE(filler.FindNextItem(1));
+
+        EXPECT_TRUE(filler.FindNextItem(2));
+
+        EXPECT_TRUE(filler.FindNextItem(3));
+
+        EXPECT_TRUE(filler.FindNextItem(4));
+
+        EXPECT_TRUE(filler.FindNextItem(5));
+        EXPECT_EQ(filler.posX_, 1);
+        EXPECT_EQ(filler.posY_, 1);
+
+        EXPECT_TRUE(filler.FindNextItem(6));
+        EXPECT_EQ(filler.posX_, 2);
+        EXPECT_EQ(filler.posY_, 2);
+
+        // Find item index at position before last item
+        EXPECT_TRUE(filler.FindNextItem(7));
+        EXPECT_EQ(filler.posX_, 0);
+        EXPECT_EQ(filler.posY_, 2);
+
+        EXPECT_TRUE(filler.FindNextItem(8));
+        EXPECT_EQ(filler.posX_, 4);
+        EXPECT_EQ(filler.posY_, 2);
+
+        EXPECT_TRUE(filler.FindNextItem(9));
     }
 }
 

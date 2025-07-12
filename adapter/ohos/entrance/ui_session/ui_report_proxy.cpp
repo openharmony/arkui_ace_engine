@@ -297,4 +297,22 @@ void UiReportProxy::ClearAshmem(sptr<Ashmem>& optMem)
         optMem->CloseAshmem();
     }
 }
+
+void UiReportProxy::SendExeAppAIFunctionResult(uint32_t result)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendExeAppAIFunctionResult write interface token failed");
+        return;
+    }
+    if (!messageData.WriteUint32(result)) {
+        LOGW("SendExeAppAIFunctionResult write result  failed");
+        return;
+    }
+    if (Remote()->SendRequest(SEND_EXE_APP_AI_FUNCTION_RESULT, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendExeAppAIFunctionResult send request failed");
+    }
+}
 } // namespace OHOS::Ace

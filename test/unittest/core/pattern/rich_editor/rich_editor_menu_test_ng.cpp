@@ -1179,4 +1179,99 @@ HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions002, TestSize.Level1)
     pattern->UpdateAIMenuOptions();
     EXPECT_EQ(pattern->IsShowAIMenuOption(), true);
 }
+
+/**
+ * @tc.name: UpdateAIMenuOptions
+ * @tc.desc: test UpdateAIMenuOptions function with valid textSelector
+ *           check multi ai entity in selection range
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and text textPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->textSelector_.Update(0, 42);
+
+    /**
+     * @tc.steps: step2. prepare spanItem with at least 2 ai entity
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = std::get<std::u16string>(U16_TEXT_FOR_AI_INFO_2.content);
+    spanItem->position = spanItem->content.length();
+    richEditorPattern->spans_.emplace_back(spanItem);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> selectedRects { RectF(0, 0, 20, 20), RectF(30, 30, 20, 20), RectF(60, 60, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForPlaceholders(_)).WillRepeatedly(SetArgReferee<0>(selectedRects));
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    richEditorPattern->SetTextDetectEnable(true);
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+
+    auto aiSpan1 = U16_TEXT_FOR_AI_INFO_2.aiSpans[0];
+    auto aiSpan2 = U16_TEXT_FOR_AI_INFO_2.aiSpans[1];
+    std::map<int32_t, Ace::AISpan> aiSpanMap;
+    aiSpanMap[aiSpan1.start] = aiSpan1;
+    aiSpanMap[aiSpan2.start] = aiSpan2;
+    richEditorPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->enabled_ = true;
+
+    /**
+     * @tc.steps: step3. create GestureEvent and call PrepareAIMenuOptions function.
+     * @tc.expected: aiMenuOptions is been setted true.
+     */
+    richEditorPattern->UpdateAIMenuOptions();
+    EXPECT_EQ(richEditorPattern->isAskCeliaEnabled_, false);
+    EXPECT_EQ(richEditorPattern->isShowAIMenuOption_, false);
+    richEditorPattern->paragraphs_.Reset();
+
+    /**
+     * @tc.steps: step4. unexpected input set 1.
+     * @tc.expected: aiMenuOptions is been setted true.
+     */
+    richEditorPattern->textSelector_.Update(-10, -42);
+    richEditorPattern->UpdateAIMenuOptions();
+    EXPECT_EQ(richEditorPattern->isAskCeliaEnabled_, false);
+    EXPECT_EQ(richEditorPattern->isShowAIMenuOption_, false);
+    richEditorPattern->paragraphs_.Reset();
+
+    /**
+     * @tc.steps: step5. unexpected input set 2.
+     * @tc.expected: aiMenuOptions is been setted true.
+     */
+    richEditorPattern->textSelector_.Update(42, 10);
+    richEditorPattern->UpdateAIMenuOptions();
+    EXPECT_EQ(richEditorPattern->isAskCeliaEnabled_, false);
+    richEditorPattern->paragraphs_.Reset();
+}
+
+/**
+ * @tc.name: HandleOnShare001
+ * @tc.desc: test rich_editor_select_overlay.cpp HandleOnShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, HandleOnShare001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    richEditorPattern->HandleOnShare();
+    auto value = richEditorPattern->selectOverlay_->GetSelectedText();
+    int32_t ret = value.length();
+    EXPECT_EQ(ret, 0);
+}
 }

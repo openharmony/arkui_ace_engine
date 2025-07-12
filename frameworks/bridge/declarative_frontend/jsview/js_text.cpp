@@ -193,20 +193,21 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     }
     CalcDimension fontSize;
     RefPtr<ResourceObject> resObj;
-    if (ParseJsDimensionNG(info[0], fontSize, DimensionUnit::FP, resObj, false)) {
-        if (SystemProperties::ConfigChangePerform() && resObj) {
-            RegisterResource<CalcDimension>("FontSize", resObj, fontSize);
-            return;
-        }
-    } else {
+    UnRegisterResource("FontSize");
+    JSRef<JSVal> args = info[0];
+    if (!ParseJsDimensionFpNG(args, fontSize, resObj, false) || fontSize.IsNegative()) {
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         fontSize = theme->GetTextStyle().GetFontSize();
+        TextModel::GetInstance()->SetFontSize(fontSize);
+        return;
     }
-    UnRegisterResource("FontSize");
     TextModel::GetInstance()->SetFontSize(fontSize);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("FontSize", resObj, fontSize);
+    }
 }
 
 void JSText::SetFontWeight(const JSCallbackInfo& info)
@@ -541,13 +542,18 @@ void JSText::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     JSRef<JSVal> args = info[0];
-    if (!ParseLengthMetricsToPositiveDimension(args, value)) {
+    UnRegisterResource("LineSpacing");
+    RefPtr<ResourceObject> resObj;
+    if (!ParseLengthMetricsToPositiveDimension(args, value, resObj)) {
         value.Reset();
     }
     if (value.IsNegative()) {
         value.Reset();
     }
     TextModel::GetInstance()->SetLineSpacing(value);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("LineSpacing", resObj, value);
+    }
     if (info.Length() < 2) { // 2 : two args
         TextModel::GetInstance()->SetIsOnlyBetweenLines(false);
         return;
@@ -571,14 +577,12 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
 {
     std::vector<std::string> fontFamilies;
     RefPtr<ResourceObject> resObj;
-    JSRef<JSVal> args = info[0];
-    if (ParseJsFontFamilies(args, fontFamilies, resObj)) {
-        if (SystemProperties::ConfigChangePerform() && resObj) {
-            RegisterResource<std::vector<std::string>>("FontFamily", resObj, fontFamilies);
-            return;
-        }
-    }
     UnRegisterResource("FontFamily");
+    JSRef<JSVal> args = info[0];
+    ParseJsFontFamilies(args, fontFamilies, resObj);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<std::vector<std::string>>("FontFamily", resObj, fontFamilies);
+    }
     TextModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 
@@ -635,19 +639,15 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
     CalcDimension value;
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
+    UnRegisterResource("LetterSpacing");
     if (!ParseJsDimensionFpNG(args, value, resObj, false)) {
         value.Reset();
         TextModel::GetInstance()->SetLetterSpacing(value);
         return;
-    } else if (SystemProperties::ConfigChangePerform() && resObj) {
-        RegisterResource<CalcDimension>("LetterSpacing", resObj, value);
-        return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterResource<CalcDimension>("LetterSpacing", resObj, value);
-        return;
     }
-    UnRegisterResource("LetterSpacing");
     TextModel::GetInstance()->SetLetterSpacing(value);
 }
 
@@ -879,6 +879,10 @@ void JSText::Create(const JSCallbackInfo& info)
     }
 
     RefPtr<TextControllerBase> controller = TextModel::GetInstance()->GetTextController();
+    if (!controller) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "JSText::Create controller is null");
+    }
+
     if (jsController) {
         jsController->SetController(controller);
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {

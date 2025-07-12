@@ -237,6 +237,7 @@ void SetTextPickerTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPi
         return;
     }
     NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
     InitTextPickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
         textStyle);
     if (textStyleStruct->minFontSize) {
@@ -306,6 +307,7 @@ void SetTextPickerSelectedTextStyleWithResObj(ArkUINodeHandle node,
         return;
     }
     NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
     InitTextPickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
         textStyle);
     if (textStyleStruct->minFontSize) {
@@ -375,6 +377,7 @@ void SetTextPickerDisappearTextStyleWithResObj(ArkUINodeHandle node,
         return;
     }
     NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
     InitTextPickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
         textStyle);
     if (textStyleStruct->minFontSize) {
@@ -768,6 +771,8 @@ void ResetTextPickerDividerNull(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::ItemDivider divider;
+    divider.isNull = true;
+    TextPickerModelNG::TextPickerRemoveResObj(frameNode, "textPicker.divider");
     TextPickerModelNG::SetDivider(frameNode, divider);
 }
 
@@ -864,6 +869,7 @@ void SetTextPickerDefaultTextStyleWithResObj(ArkUINodeHandle node,
     CHECK_NULL_VOID(theme);
 
     NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
     InitTextPickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
         textStyle);
     textStyle.minFontSize = StringUtils::StringToCalcDimension(textStyleStruct->minFontSize, false, DimensionUnit::FP);

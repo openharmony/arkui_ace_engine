@@ -133,6 +133,113 @@ protected:
         }
     }
 
+#define DEFINE_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                                                \
+    {                                                                                                           \
+        #KEY_TYPE, [](ShapePaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) { \
+            if (auto realValue = std::get_if<VALUE_TYPE>(&(value->GetValue()))) {                               \
+                prop->UPDATE_METHOD(*realValue);                                                                \
+            }                                                                                                   \
+        }                                                                                                       \
+    }
+
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override
+    {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto property = frameNode->GetPaintPropertyPtr<ShapePaintProperty>();
+        CHECK_NULL_VOID(property);
+        using Handler = std::function<void(ShapePaintProperty*, RefPtr<PropertyValueBase>, RefPtr<FrameNode>)>;
+        static const std::unordered_map<std::string, Handler> handlers = {
+            DEFINE_PROP_HANDLER(ShapeAbstractStroke, Color, UpdateStroke),
+            { "ShapeAbstractFill",
+                [](ShapePaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                    if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, *realValue, frameNode);
+                        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *realValue, frameNode);
+                        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+                    }
+                } },
+            { "ShapeAbstractStrokeOpacity",
+                [](ShapePaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                    if (auto realValue = std::get_if<double>(&(value->GetValue()))) {
+                        double strokeOpacity = *realValue;
+                        strokeOpacity = std::clamp(strokeOpacity, 0.0, 1.0);
+                        prop->UpdateStrokeOpacity(strokeOpacity);
+                    }
+                } },
+            { "ShapeAbstractFillOpacity",
+                [](ShapePaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                    if (auto realValue = std::get_if<double>(&(value->GetValue()))) {
+                        double fillOpacity = *realValue;
+                        fillOpacity = std::clamp(fillOpacity, 0.0, 1.0);
+                        prop->UpdateFillOpacity(fillOpacity);
+                    }
+                } },
+            { "ShapeAbstractStrokeWidth",
+                [](ShapePaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                    if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                        auto strokeWidth = realValue->IsNegative() ? 1.0_vp : *realValue;
+                        prop->UpdateStrokeWidth(strokeWidth);
+                    }
+                } },
+            { "ShapeAbstractWidth",
+                [](ShapePaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                    if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                        auto width = *realValue;
+                        if (LessNotEqual(width.Value(), 0.0)) {
+                            width.SetValue(0.0);
+                        }
+                        CHECK_NULL_VOID(frameNode);
+                        auto layoutProperty = frameNode->GetLayoutProperty();
+                        CHECK_NULL_VOID(layoutProperty);
+                        // get previously user defined ideal height
+                        std::optional<CalcLength> height = std::nullopt;
+                        auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+                        if (layoutConstraint && layoutConstraint->selfIdealSize) {
+                            height = layoutConstraint->selfIdealSize->Height();
+                        }
+                        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), height));
+                    }
+                } },
+            { "ShapeAbstractHeight",
+                [](ShapePaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                    if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                        auto height = *realValue;
+                        if (LessNotEqual(height.Value(), 0.0)) {
+                            height.SetValue(0.0);
+                        }
+                        CHECK_NULL_VOID(frameNode);
+                        auto layoutProperty = frameNode->GetLayoutProperty();
+                        CHECK_NULL_VOID(layoutProperty);
+                        std::optional<CalcLength> width = std::nullopt;
+                        auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+                        if (layoutConstraint && layoutConstraint->selfIdealSize) {
+                            width = layoutConstraint->selfIdealSize->Width();
+                        }
+                        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, CalcLength(height)));
+                    }
+                } },
+            { "ShapeAbstractForegroundColor",
+                [](ShapePaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                    if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                        if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+                            return;
+                        }
+                        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, *realValue, frameNode);
+                        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *realValue, frameNode);
+                        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+                    }
+                } },
+        };
+        auto it = handlers.find(key);
+        if (it != handlers.end()) {
+            it->second(property, value, frameNode);
+        }
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }
+
     RefPtr<ShapeOverlayModifier> shapeOverlayModifier_;
 
 private:

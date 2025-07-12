@@ -21,6 +21,7 @@
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -855,7 +856,7 @@ void UINode::DetachFromMainTree(bool recursive, bool isRoot)
         std::list<RefPtr<UINode>> nodes;
         RefPtr<UINode> uiNode = AceType::Claim<UINode>(this);
         BuilderUtils::GetBuilderNodes(uiNode, nodes);
-        BuilderUtils::RemoveBuilderFromParent(uiNode, nodes);
+        BuilderUtils::RemoveBuilderFromParent(GetParent(), nodes);
     }
     OnDetachFromMainTree(recursive, context);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
@@ -1023,7 +1024,7 @@ void UINode::OnAttachToMainTree(bool)
         std::list<RefPtr<UINode>> nodes;
         RefPtr<UINode> uiNode = AceType::Claim<UINode>(this);
         BuilderUtils::GetBuilderNodes(uiNode, nodes);
-        BuilderUtils::AddBuilderToParent(uiNode, nodes);
+        BuilderUtils::AddBuilderToParent(GetParent(), nodes);
     }
 }
 
@@ -1118,6 +1119,12 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
     }
     if (!CheckVisibleOrActive()) {
         return;
+    }
+    if (GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG || GetTag() == V2::JS_REPEAT_ETS_TAG) {
+        for (const auto& item : GetChildrenForInspector(true)) {
+            CHECK_NULL_CONTINUE(item);
+            item->DumpTree(depth + 1, hasJson);
+        }
     }
     for (const auto& item : GetChildren()) {
         item->DumpTree(depth + 1, hasJson);
@@ -1881,6 +1888,11 @@ void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
 void UINode::SetIsRootBuilderNode(bool isRootBuilderNode)
 {
     isRootBuilderNode_ = isRootBuilderNode;
+    if (isRootBuilderNode) {
+        jsBuilderNodeId_ = nodeId_;
+    } else {
+        jsBuilderNodeId_ = -1;
+    }
 }
 
 bool UINode::GetIsRootBuilderNode() const
@@ -2255,5 +2267,22 @@ RefPtr<UINode> UINode::GetAncestor() const
 void UINode::SetAncestor(const WeakPtr<UINode>& parent)
 {
     ancestor_ = parent;
+}
+
+void UINode::FindTopNavDestination(RefPtr<FrameNode>& result)
+{
+    auto currentNode = AceType::DynamicCast<FrameNode>(this);
+    if (currentNode && currentNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+        auto navigationGroupNode = AceType::DynamicCast<NG::NavigationGroupNode>(currentNode);
+        CHECK_NULL_VOID(navigationGroupNode);
+        result = navigationGroupNode->GetTopDestination();
+        return;
+    }
+    for (const auto& item : GetChildren()) {
+        item->FindTopNavDestination(result);
+        if (result) {
+            return;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

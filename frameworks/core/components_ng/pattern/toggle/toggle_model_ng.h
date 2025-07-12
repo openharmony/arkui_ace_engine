@@ -60,6 +60,11 @@ public:
         const ToggleColorType toggleColorType) override;
     void CreateWithDimensionVpResourceObj(const RefPtr<ResourceObject>& resObj,
         const ToggleDimensionType toggleDimensionType) override;
+    void SetSwitchPointColorSetByUser(const bool flag) override;
+    void SetUnselectedColorSetByUser(const bool flag) override;
+
+    static void SetUnselectedColorSetByUser(FrameNode* frameNode, const bool flag);
+    static void SetSwitchPointColorSetByUser(FrameNode* frameNode, const bool flag);
     static void SetPointRadius(FrameNode* frameNode, const Dimension& switchPointRadius);
     static void ResetPointRadius(FrameNode* frameNode);
     static void SetUnselectedColor(FrameNode* frameNode, const Color& unselectedColor);
@@ -85,9 +90,9 @@ public:
     static bool GetSwitchIsOn(FrameNode* frameNode);
     static Color GetUnselectedColor(FrameNode* frameNode);
 
-    static void UpdateSwitchToggleComponentColor(FrameNode* frameNode, const ToggleColorType toggleColorType);
-    static void UpdateCBToggleComponentColor(FrameNode* frameNode, const ToggleColorType toggleColorType);
-    static void UpdateToggleButtonComponentColor(FrameNode* frameNode, const ToggleColorType toggleColorType);
+    static void SetSwitchDefaultColor(FrameNode* frameNode, const ToggleColorType type);
+    static void SetCheckboxDefaultColor(FrameNode* frameNode, const ToggleColorType type);
+    static void SetButtonDefaultColor(FrameNode* frameNode, const ToggleColorType type);
     static void CreateWithSwitchResourceObj(FrameNode* node, const ToggleColorType toggleColorType,
         const RefPtr<ResourceObject>& resObj, const std::string& key);
     static void CreateWithCheckBoxResourceObj(FrameNode* node, const ToggleColorType toggleColorType,
@@ -95,9 +100,9 @@ public:
     static void CreateWithButtonResourceObj(FrameNode* node, const ToggleColorType toggleColorType,
         const RefPtr<ResourceObject>& resObj, const std::string& key);
     static void CreateWithResourceObj(
-        const FrameNode* node, const ToggleDimensionType toggleDimensionType, const RefPtr<ResourceObject>& resObj);
+        FrameNode* node, const ToggleDimensionType toggleDimensionType, const RefPtr<ResourceObject>& resObj);
     static void CreateWithResourceObj(
-        const FrameNode* node, const ToggleColorType toggleDimensionType, const RefPtr<ResourceObject>& resObj);
+        const FrameNode* node, const ToggleColorType toggleColorType, const RefPtr<ResourceObject>& resObj);
 
 private:
     static void ReCreateFrameNode(

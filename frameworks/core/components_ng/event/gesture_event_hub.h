@@ -308,7 +308,7 @@ public:
         const float scale = 1.0f, const RectF& innerRect = RectF()) const;
     void CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNode, bool isMenuShow);
     OffsetF GetDragPreviewInitPositionToScreen(const RefPtr<PipelineBase>& context, PreparedInfoForDrag& data);
-    int32_t GetBadgeNumber(const RefPtr<UnifiedData>& unifiedData);
+    int32_t GetBadgeNumber(const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     bool TryDoDragStartAnimation(const RefPtr<PipelineBase>& context, const RefPtr<Subwindow>& subwindow,
         const GestureEvent& info, PreparedInfoForDrag& data);
     float GetDefaultPixelMapScale(
@@ -398,6 +398,7 @@ public:
 
     bool IsDragNewFwk() const;
     bool TriggerTouchEvent(const TouchEvent& point);
+    void SetRecognizerDelayStatus(const RecognizerDelayStatus& recognizerDelayStatus = RecognizerDelayStatus::NONE);
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,

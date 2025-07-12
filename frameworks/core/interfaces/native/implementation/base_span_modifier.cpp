@@ -25,10 +25,6 @@ namespace BaseSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = SpanModelNG::CreateSpanNode(id, "");
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 void TextBackgroundStyleImpl(Ark_NativePointer node,
@@ -53,9 +49,7 @@ void BaselineOffsetImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<Dimension>(value);
     Validator::ValidateNonPercent(convValue);
     if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
-        // SpanModelNG::SetBaselineOffset(frameNode, convValue);
     } else {
-        // ImageSpanView::SetBaselineOffset(frameNode, convValue);
     }
 }
 } // BaseSpanModifier

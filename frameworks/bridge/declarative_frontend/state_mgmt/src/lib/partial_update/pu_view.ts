@@ -46,10 +46,11 @@ class SyncedViewRegistry {
   
   public static addSyncedUpdateDirtyNodes(view: ViewPU): void {
     let weakRef = this.wmap_.get(view)
-    if (weakRef) {
+    if (!weakRef) {
       SyncedViewRegistry.wmap_.set(view, weakRef = new WeakRef(view));
     }
     SyncedViewRegistry.dirtyNodesList.add(weakRef);
+    stateMgmtConsole.debug(`SyncedViewRegistry addSyncedUpdateDirtyNodes ${view.debugInfo__()}, syncDirtySize: ${SyncedViewRegistry.dirtyNodesList.size}`);
   }
 }
 
@@ -199,6 +200,9 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
     ViewBuildNodeBase.arkThemeScopeManager?.onViewPUCreate(this)
+
+    // Disable optimization when V1 is involved.
+    ObserveV2.getObserve().isParentChildOptimizable_ = false;
 
     if (localStorage) {
       this.localStorage_ = localStorage;
@@ -497,8 +501,13 @@ abstract class ViewPU extends PUV2ViewBase
           this.dirtyElementIdsNeedsUpdateSynchronously_.add(elmtId);
         }
       }
+      SyncedViewRegistry.addSyncedUpdateDirtyNodes(this);
     }
-    SyncedViewRegistry.addSyncedUpdateDirtyNodes(this);
+    const cb = this.watchedProps.get(varName);
+    if (cb && typeof cb === 'function') {
+      stateMgmtConsole.debug(`${this.debugInfo__()} state var ${varName} calling @Watch function`);
+      cb.call(this, varName);
+    }
   }
 
   // implements IMultiPropertiesChangeSubscriber
@@ -714,10 +723,10 @@ abstract class ViewPU extends PUV2ViewBase
     this.defaultConsume_.forEach((value: SynchedPropertyObjectTwoWayPU<any>, providedPropName: string) => {
       let providedVarStore: ObservedPropertyAbstractPU<any> = this.findProvidePU__(providedPropName);
       if (providedVarStore) {
-        stateMgmtConsole.debug(`${value.debugInfo} connected to the provide ${providedVarStore.debugInfo()}`);
+        stateMgmtConsole.debug(`${value.debugInfo()} connected to the provide ${providedVarStore.debugInfo()}`);
+        value.resetSource(providedVarStore);
         // store the consume reconnect to provide
         this.reconnectConsume_.set(providedPropName, value);
-        value.resetSource(providedVarStore);
         value.getDependencies().forEach((id: number) => {
           this.UpdateElement(id);
         })
@@ -740,13 +749,6 @@ abstract class ViewPU extends PUV2ViewBase
         this.reconnectConsume_.delete(key);
       }
     }
-    this.childrenWeakrefMap_.forEach((weakRefChild) => {
-      const child = weakRefChild.deref();
-      if (!(child instanceof ViewPU) || child.reconnectConsume_.size === 0) {
-        return;
-      }
-      child.disconnectedConsume();
-    })
   }
 
   /**

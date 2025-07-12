@@ -2070,4 +2070,43 @@ HWTEST_F(EventManagerTestNg, DispatchTouchCancelToRecognizer_ItemsEmpty, TestSiz
     EXPECT_EQ(touchTestResult.count(1), 1);
     EXPECT_EQ(touchTestResult[1].size(), 1);
 }
+
+/**
+ * @tc.name: DispatchTouchEventTest001
+ * @tc.desc: Test DispatchTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchTouchEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create TouchEvent and Call DispatchTouchEvent
+     * @tc.expected: retFlag is false
+     */
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    event.sourceType = SourceType::TOUCH;
+    eventManager->touchTestResults_.clear();
+    TouchTestResult touchTestResult;
+    auto firstTarget = AceType::MakeRefPtr<MockTouchEventTarget>();
+    auto secondTarget = AceType::MakeRefPtr<MockTouchEventTarget>();
+    touchTestResult.push_back(firstTarget);
+    touchTestResult.push_back(secondTarget);
+
+    eventManager->touchTestResults_[event.id] = touchTestResult;
+
+    eventManager->DispatchTouchEvent(event, true);
+    bool ret = eventManager->passThroughResult_;
+
+    event.type = TouchType::UP;
+    eventManager->touchTestResults_.clear();
+    eventManager->DispatchTouchEvent(event, true);
+    EXPECT_NE(ret, !eventManager->touchTestResults_[event.id].empty());
+}
 } // namespace OHOS::Ace::NG

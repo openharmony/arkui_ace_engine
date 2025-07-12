@@ -135,9 +135,8 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
             hasDuration = false;
         }
         bool hasCurve = ParseCurveParams(curve, curveArgs);
-        bool hasCanOverScroll =
-            ConvertFromJSValue(animationObj->GetProperty("canOverScroll"), canOverScroll) ? true : false;
-        smooth = !hasDuration && !hasCurve && !hasCanOverScroll ? true : false;
+        bool hasCanOverScroll = ConvertFromJSValue(animationObj->GetProperty("canOverScroll"), canOverScroll);
+        smooth = !hasDuration && !hasCurve && !hasCanOverScroll;
     } else if (animationValue->IsBoolean()) {
         smooth = animationValue->ToBoolean();
     }
@@ -151,6 +150,11 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     }
     ContainerScope scope(instanceId_);
     auto direction = scrollController->GetScrollDirection();
+    if (direction == Axis::FREE && scrollController->FreeScrollTo({ xOffset, yOffset,
+                                       static_cast<float>(animationValue->IsBoolean() ? DEFAULT_DURATION : duration),
+                                       curve, smooth, canOverScroll })) {
+        return;
+    }
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
     scrollController->SetCanStayOverScroll(canStayOverScroll);
     scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth, canOverScroll);

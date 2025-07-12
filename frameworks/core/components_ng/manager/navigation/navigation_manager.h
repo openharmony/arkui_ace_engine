@@ -230,7 +230,7 @@ public:
     {
         return isForceSplitSupported_;
     }
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage);
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool ignoreOrientation = false);
     bool IsForceSplitEnable() const
     {
         return isForceSplitEnable_;
@@ -238,6 +238,10 @@ public:
     const std::string& GetHomePageName() const
     {
         return homePageName_;
+    }
+    bool GetIgnoreOrientation() const
+    {
+        return ignoreOrientation_;
     }
     void AddForceSplitListener(int32_t nodeId, std::function<void()>&& listener);
     void RemoveForceSplitListener(int32_t nodeId);
@@ -297,6 +301,7 @@ private:
     bool isForceSplitEnable_ = false;
     std::string homePageName_;
     std::unordered_map<int32_t, std::function<void()>> forceSplitListeners_;
+    bool ignoreOrientation_ = false;
 };
 } // namespace OHOS::Ace::NG
 

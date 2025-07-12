@@ -494,6 +494,7 @@ protected:
     virtual float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
     void SetLayoutAlgorithmParams(
         const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
+    bool GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty);
 
     bool isFadingEdge_ = false;
     int32_t maxListItemIndex_ = 0;
@@ -576,7 +577,6 @@ private:
         ScrollAlign align, float& targetPos);
     bool GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int32_t indexInGroup, float startPos,
         ScrollAlign align, float& targetPos);
-    bool GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty);
 
     // multiSelectable
     void ClearMultiSelect() override;

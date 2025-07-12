@@ -145,8 +145,6 @@ void PreDecodeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageAnimatorModelNG::SetPreDecode(frameNode, convValue);
 }
 void FillModeImpl(Ark_NativePointer node,
                   Ark_FillMode value)

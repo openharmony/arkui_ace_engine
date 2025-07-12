@@ -249,7 +249,7 @@ public:
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshotByUniqueId(int32_t uniqueId,
         const NG::SnapshotOptions& options) override;
 
-    void GetSnapshotWithRange(const NG::NodeIdentity startID, const NG::NodeIdentity endID, const bool isStartRect,
+    void GetSnapshotWithRange(const NG::NodeIdentity& startID, const NG::NodeIdentity& endID, const bool isStartRect,
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         const NG::SnapshotOptions& options) override;
 

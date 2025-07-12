@@ -56,4 +56,22 @@ HWTEST_F(ResSchedReportTest, ResSchedReportTest001, TestSize.Level1)
     ResSchedReport::GetInstance().OnTouchEvent(touchEvent, config);
     EXPECT_NE(touchEvent.localX, touchEvent.localY);
 }
+
+/**
+ * @tc.name: ResSchedReportTest002
+ * @tc.desc: test touch move
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest002, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.localX = 100.0f;
+    touchEvent.localY = 200.0f;
+    ReportConfig config;
+    config.isReportTid = true;
+    config.tid = 12345;
+    ResSchedReport::GetInstance().OnTouchEvent(touchEvent, config);
+    EXPECT_NE(touchEvent.localX, touchEvent.localY);
+}
 } // namespace OHOS::Ace

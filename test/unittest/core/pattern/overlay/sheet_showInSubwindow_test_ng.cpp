@@ -65,6 +65,7 @@ public:
     std::function<RefPtr<UINode>()> builderFunc_;
     std::function<RefPtr<UINode>()> titleBuilderFunc_;
     static void SetSheetTheme(RefPtr<SheetTheme> sheetTheme);
+    static void SetApiVersion(int32_t apiTargetVersion);
     // Before each TEST_F, the scope is a single test case
     void SetUp() override;
     // After each TEST_F, the scope is a single test case
@@ -201,6 +202,13 @@ RefPtr<FrameNode> SheetShowInSubwindowTestNg::InitTargetNodeEnv(RefPtr<FrameNode
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
     return targetNode;
+}
+
+void SheetShowInSubwindowTestNg::SetApiVersion(int32_t apiTargetVersion)
+{
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(apiTargetVersion);
 }
 
 HWTEST_F(SheetShowInSubwindowTestNg, RemoveSheet001, TestSize.Level1)
@@ -549,7 +557,7 @@ HWTEST_F(SheetShowInSubwindowTestNg, InitSheetWrapperAction004, TestSize.Level1)
  */
 HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber1, TestSize.Level1)
 {
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    SheetShowInSubwindowTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
     /**
      * @tc.steps: step1. create sheet page, get sheet pattern.
      */
@@ -607,8 +615,7 @@ HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber1, TestSize.Level1)
  */
 HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber2, TestSize.Level1)
 {
-    MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion(
-        static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    SheetShowInSubwindowTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
     /**
      * @tc.steps: step1. create sheet page, get sheet pattern.
      */
@@ -671,7 +678,7 @@ HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber2, TestSize.Level1)
  */
 HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber3, TestSize.Level1)
 {
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    SheetShowInSubwindowTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
 
     /**
      * @tc.steps: step1. create sheet page, get sheet pattern.
@@ -857,7 +864,7 @@ HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber5, TestSize.Level1)
  */
 HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber6, TestSize.Level1)
 {
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+    SheetShowInSubwindowTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
     /**
      * @tc.steps: step1. create sheet page, get sheet pattern.
      */
@@ -1120,8 +1127,8 @@ HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm5, TestSize.Level1)
     Dimension titleTextMargin = 2.0_vp;
     auto pipelineContext = MockPipelineContext::GetCurrentContext();
     ASSERT_NE(pipelineContext, nullptr);
-    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
     pipelineContext->SetDisplayWindowRectInfo({ 0, 0, 1000, 1600 });
+    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     sheetTheme->closeIconButtonWidth_ = closeIconButtonWidth;
     sheetTheme->titleTextMargin_ = titleTextMargin;
@@ -1445,6 +1452,78 @@ HWTEST_F(SheetShowInSubwindowTestNg, PostProcessBorderWidth, TestSize.Level1)
 
 /**
  * @tc.name: SheetShowInSubwindowTestNg
+ * @tc.desc: Test SheetSideObject::DirtyLayoutProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, DirtyLayoutProcess001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_SIDE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. create renderContext, layoutAlgorithmT and layoutAlgorithmWrapper,
+     *                   set sheetHeight_ is 1.0f.
+     */
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto layoutAlgorithmT = AceType::MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithmT, nullptr);
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithmT);
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    layoutAlgorithmT->sheetHeight_ = 1.0f;
+    /**
+     * @tc.steps: step. DirtyLayoutProcess.
+     * @tc.expected: sheetHeight_ = 1.0f.
+     */
+    object->DirtyLayoutProcess(layoutAlgorithmWrapper);
+    EXPECT_EQ(object->sheetHeight_, 1.0f);
+}
+
+/**
+ * @tc.name: SheetShowInSubwindowTestNg
+ * @tc.desc: Test SheetSideObject::FireHeightDidChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, FireHeightDidChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_SIDE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. set preDidHeight and sheetHeight_, call FireHeightDidChange and check result.
+     * @tc.expected: preDidHeight_ is updated to match sheetHeight_.
+     */
+    sheetPattern->SetPreDidHeight(1.0f);
+    object->sheetHeight_ = 1.0f;
+    object->FireHeightDidChange();
+    EXPECT_EQ(sheetPattern->GetPreDidHeight(), 1.0f);
+    object->sheetHeight_ = 5.0f;
+    object->FireHeightDidChange();
+    EXPECT_EQ(sheetPattern->GetPreDidHeight(), 5.0f);
+}
+
+/**
+ * @tc.name: SheetShowInSubwindowTestNg
  * @tc.desc: Test SheetPresentationPattern::UpdateSheetObject
  * @tc.type: FUNC
  */
@@ -1610,5 +1689,29 @@ HWTEST_F(SheetShowInSubwindowTestNg, TestSideSheetAvoidKeyboard2, TestSize.Level
     object->AvoidKeyboard(true);
     EXPECT_EQ(sheetPattern->keyboardHeight_, 0);
     EXPECT_TRUE(NearEqual(object->resizeDecreasedHeight_, 0.0f));
+}
+
+/**
+ * @tc.name: UpdateDragBarStatus001
+ * @tc.desc: UpdateDragBarStatus Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, UpdateDragBarStatus001, TestSize.Level1)
+{
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->sheetType_ = SheetType::SHEET_SIDE;
+    sheetPattern->InitSheetObject();
+    auto sheetDragBar = sheetPattern->GetDragBarNode();
+    CHECK_NULL_VOID(sheetDragBar);
+    auto dragBarLayoutProperty = sheetDragBar->GetLayoutProperty();
+    CHECK_NULL_VOID(dragBarLayoutProperty);
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    object->UpdateDragBarStatus();
+    EXPECT_EQ(dragBarLayoutProperty->propVisibility_, VisibleType::INVISIBLE);
 }
 } // namespace OHOS::Ace::NG

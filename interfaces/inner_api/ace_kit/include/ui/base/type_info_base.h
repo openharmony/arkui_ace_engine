@@ -28,13 +28,9 @@ public:                                                                         
     {                                                                                       \
         return #classname;                                                                  \
     }                                                                                       \
-    static constexpr const char* TypeFullName()                                             \
-    {                                                                                       \
-        return __PRETTY_FUNCTION__;                                                         \
-    }                                                                                       \
     static TypeInfoBase::IdType TypeId()                                                    \
     {                                                                                       \
-        static TypeInfoBase::IdType myTypeId = std::hash<std::string> {}(TypeFullName());   \
+        static TypeInfoBase::IdType myTypeId = std::hash<std::string> {}(#classname);       \
         return myTypeId;                                                                    \
     }                                                                                       \
     DECLARE_CLASS_TYPE_SIZE(classname)

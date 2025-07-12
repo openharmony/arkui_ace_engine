@@ -128,6 +128,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
                 isContentNoEnabledFixed = layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetPattern() &&
                                           layoutWrapper->GetHostNode()->GetPattern()->IsContentNoEnabledFixed();
             }
+            fixIdealSize.UpdateIllegalSizeWithCheck(contentSize);
         } else {
             // use the max child size.
             auto childFrame = SizeF();

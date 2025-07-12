@@ -52,6 +52,7 @@ constexpr float DISABLE_ALPHA = 0.6f;
 constexpr float MAX_PERCENT = 100.0f;
 const int32_t UNOPTION_COUNT = 2;
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
+constexpr uint32_t PRECISION_TWO = 2;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -883,7 +884,7 @@ RefPtr<FrameNode> TextPickerPattern::GetColumnNode()
     return DynamicCast<FrameNode>(columnNode);
 }
 
-std::map<uint32_t, RefPtr<FrameNode>> TextPickerPattern::GetColumnNodes()
+std::map<uint32_t, RefPtr<FrameNode>> TextPickerPattern::GetColumnNodes() const
 {
     std::map<uint32_t, RefPtr<FrameNode>> allChildNode;
     auto host = GetHost();
@@ -1570,9 +1571,7 @@ void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         }
     }
     json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
-    if (!columnWidths_.empty()) {
-        json->PutExtAttr("columnWidths", GetColumnWidthsStr().c_str(), filter);
-    }
+    json->PutExtAttr("columnWidths", GetColumnWidthsStr().c_str(), filter);
 }
 
 std::string TextPickerPattern::GetRangeStr() const
@@ -1651,11 +1650,15 @@ std::string TextPickerPattern::GetOptionsMultiStr() const
 
 std::string TextPickerPattern::GetColumnWidthsStr() const
 {
-    std::string result = "";
-    for (const auto& item : columnWidths_) {
-        result += item.ToString();
-        result += ",";
+    std::ostringstream oss;
+    auto allChildNode = GetColumnNodes();
+    for (const auto& child : allChildNode) {
+        const auto& columnNode = child.second;
+        CHECK_NULL_RETURN(columnNode, "");
+        auto columnWidth = columnNode->GetGeometryNode()->GetFrameSize().Width();
+        oss << std::fixed << std::setprecision(PRECISION_TWO) << columnWidth << "px,";
     }
+    std::string result = oss.str();
     result.pop_back();
     return result;
 }
@@ -1673,18 +1676,27 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
     auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(
-        GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-    pickerProperty->UpdateDisappearColor(
-        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
-    pickerProperty->UpdateSelectedColor(
-        GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
-    if (pickerProperty && pickerProperty->GetDisableTextStyleAnimation().value_or(false)) {
+    if (!pickerProperty->GetNormalTextColorSetByUser().value_or(false)) {
+        pickerProperty->UpdateColor(
+            GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    }
+
+    if (!pickerProperty->GetDisappearTextColorSetByUser().value_or(false)) {
+        pickerProperty->UpdateDisappearColor(
+            GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    }
+
+    if (!pickerProperty->GetSelectedTextColorSetByUser().value_or(false)) {
+        pickerProperty->UpdateSelectedColor(
+            GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
+    }
+
+    if (pickerProperty->GetDisableTextStyleAnimation().value_or(false) &&
+        !pickerProperty->GetDefaultTextColorSetByUser().value_or(false)) {
         auto textTheme = context->GetTheme<TextTheme>(host->GetThemeScopeId());
         CHECK_NULL_VOID(textTheme);
-        auto defaultTextStyle = textTheme->GetTextStyle();
         pickerProperty->UpdateDefaultColor(
-            GetTextProperties().defaultTextStyle_.textColor.value_or(defaultTextStyle.GetTextColor()));
+            GetTextProperties().defaultTextStyle_.textColor.value_or(textTheme->GetTextStyle().GetTextColor()));
     }
     if (isPicker_) {
         return;
@@ -1800,31 +1812,33 @@ int32_t TextPickerPattern::CalculateIndex(RefPtr<FrameNode>& frameNode)
 float TextPickerPattern::CalculateColumnSize(int32_t index, float childCount, const SizeF& pickerContentSize)
 {
     float widthSum = 0.0f;
-    if (NearZero(pickerContentSize.Width())) {
-        return 0.0f;
+    if (columnWidths_.empty()) {
+        return pickerContentSize.Width() / std::max(childCount, 1.0f);
     }
-    for (size_t i = 0; i < std::min(columnWidths_.size(), static_cast<size_t>(childCount)); i++) {
-        columnWidths_[i] = columnWidths_[i].Unit() != DimensionUnit::PERCENT ?
-            Dimension(columnWidths_[i].ConvertToPx(), DimensionUnit::PX) :
-            Dimension(pickerContentSize.Width() * columnWidths_[i].Value() / MAX_PERCENT, DimensionUnit::PX);
+    auto columnWidth = columnWidths_;
+    for (size_t i = 0; i < std::min(columnWidth.size(), static_cast<size_t>(childCount)); i++) {
+        columnWidth[i] = columnWidth[i].Unit() != DimensionUnit::PERCENT ?
+            Dimension(columnWidth[i].ConvertToPx(), DimensionUnit::PX) :
+            Dimension(pickerContentSize.Width() * columnWidth[i].Value() / MAX_PERCENT, DimensionUnit::PX);
 
-        if (LessNotEqual(columnWidths_[i].Value(), 0.0f) && !NearZero(childCount)) {
-            columnWidths_[i].SetValue(pickerContentSize.Width() / childCount);
+        if (LessNotEqual(columnWidth[i].Value(), 0.0f) && !NearZero(childCount)) {
+            columnWidth[i].SetValue(pickerContentSize.Width() / childCount);
         }
 
-        widthSum += columnWidths_[i].Value();
+        widthSum += columnWidth[i].Value();
     }
 
     if (GreatNotEqual(widthSum, pickerContentSize.Width())) {
         return pickerContentSize.Width() / std::max(childCount, 1.0f);
     }
 
-    if (static_cast<size_t>(index) >= columnWidths_.size()) {
-        columnWidths_.emplace_back(Dimension((pickerContentSize.Width() - widthSum) /
-            (childCount - columnWidths_.size()), DimensionUnit::PX));
+    if (static_cast<size_t>(index) < columnWidth.size()) {
+        return columnWidth[index].Value();
+    } else if (!NearZero(childCount - columnWidth.size())) {
+        return (pickerContentSize.Width() - widthSum) / (childCount - columnWidth.size());
+    } else {
+        return 0.0f;
     }
-    return columnWidths_.size() == 0 ?
-        pickerContentSize.Width() / std::max(childCount, 1.0f) : columnWidths_[index].Value();
 }
 
 void TextPickerPattern::SetCanLoop(bool isLoop)
@@ -1991,6 +2005,11 @@ void TextPickerPattern::UpdateDisappearTextStyle(const PickerTextStyle& textStyl
     auto defaultTextStyle = pickerTheme->GetDisappearOptionStyle();
     auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetDisappearColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetDisappearColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
@@ -2011,6 +2030,11 @@ void TextPickerPattern::UpdateNormalTextStyle(const PickerTextStyle& textStyle)
     auto defaultTextStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
@@ -2031,6 +2055,11 @@ void TextPickerPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle
     auto defaultTextStyle = pickerTheme->GetOptionStyle(true, false);
     auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetSelectedColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetSelectedColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
@@ -2051,6 +2080,10 @@ void TextPickerPattern::UpdateDefaultTextStyle(const PickerTextStyle& textStyle)
     auto defaultTextStyle = textTheme->GetTextStyle();
     auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetDefaultColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetDefaultColor().value());
+    }
 
     UpdateTextStyleCommon(
         textStyle,

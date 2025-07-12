@@ -154,9 +154,6 @@ public:
     {
         return true;
     }
-    void UpdateComponentColor(const Color& color, const ToggleColorType toggleColorType);
-    void UpdateComponentDimension(const CalcDimension& dimension, const ToggleDimensionType toggleDimensionType);
-
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;

@@ -136,6 +136,7 @@ public:
     static void RemovePopupSelectedColor(FrameNode* frameNode);
     static void RemovePopupItemBackground(FrameNode* frameNode);
     static void RemovePopupTitleBackground(FrameNode* frameNode);
+    static void ChangeFlagForSetByUser(FrameNode* frameNode, std::string type, bool setByUser);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H

@@ -204,7 +204,8 @@ void CaculatePoint(const RefPtr<FrameNode>& node, const std::shared_ptr<OHOS::MM
         item.SetWindowY(static_cast<int32_t>(std::round(tmp.GetY())));
         if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
             // CaculatePoint for double XY Position.
-            PointF tmpPos(item.GetWindowXPos() + rect.GetX(), item.GetWindowYPos() + rect.GetY());
+            PointF tmpPos((NearZero(item.GetWindowXPos()) ? item.GetWindowX() : item.GetWindowXPos()) + rect.GetX(),
+                (NearZero(item.GetWindowYPos()) ? item.GetWindowY() : item.GetWindowYPos()) + rect.GetY());
             renderContext->GetPointTransform(tmpPos);
             item.SetWindowXPos(tmpPos.GetX());
             item.SetWindowYPos(tmpPos.GetY());

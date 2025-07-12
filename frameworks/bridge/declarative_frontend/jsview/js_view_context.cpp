@@ -181,7 +181,6 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
         }
         auto context = container->GetPipelineContext();
         ContainerScope scope(container->GetInstanceId());
-        ElementRegister::GetInstance()->CallJSUpdateDirty2ForAnimateTo();
         context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
             return;
@@ -244,7 +243,6 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
         }
         auto context = container->GetPipelineContext();
         ContainerScope scope(container->GetInstanceId());
-        ElementRegister::GetInstance()->CallJSUpdateDirty2ForAnimateTo();
         context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
             return;
@@ -467,7 +465,6 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
     std::vector<KeyframeParam>& keyframes, const std::optional<int32_t>& count)
 {
     // flush build and flush ui tasks before open animation closure.
-    ElementRegister::GetInstance()->CallJSUpdateDirty2ForAnimateTo();
     pipelineContext->FlushBuild();
     if (!pipelineContext->IsLayouting()) {
         pipelineContext->FlushUITasks(true);
@@ -487,7 +484,6 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
         AceTraceBeginWithArgs("keyframe duration%d", keyframe.duration);
         AnimationUtils::AddDurationKeyFrame(keyframe.duration, keyframe.curve, [&keyframe, &pipelineContext]() {
             keyframe.animationClosure();
-            ElementRegister::GetInstance()->CallJSUpdateDirty2ForAnimateTo();
             pipelineContext->FlushBuild();
             if (!pipelineContext->IsLayouting()) {
                 pipelineContext->FlushUITasks(true);

@@ -321,7 +321,8 @@ ArkUINativeModuleValue SpanBridge::SetDecoration(ArkUIRuntimeCallInfo *runtimeCa
         textDecoration = secondArg->Int32Value(vm);
     }
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, resourceObject, nodeInfo)) {
         color = DEFAULT_DECORATION_COLOR;
     }
     if (fourthArg->IsInt()) {
@@ -361,7 +362,8 @@ ArkUINativeModuleValue SpanBridge::SetFontColor(ArkUIRuntimeCallInfo *runtimeCal
 
     Color textColor = theme->GetTextStyle().GetTextColor();
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, textColor, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, textColor, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontColor(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -428,10 +430,11 @@ ArkUINativeModuleValue SpanBridge::SetBaselineOffset(ArkUIRuntimeCallInfo *runti
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension result;
-    if (secondArg->IsObject(vm) && ArkTSUtils::ParseJsLengthMetrics(vm, secondArg, result) &&
+    RefPtr<ResourceObject> resourceObject;
+    if (secondArg->IsObject(vm) && ArkTSUtils::ParseJsLengthMetrics(vm, secondArg, result, resourceObject) &&
         result.Unit() != DimensionUnit::PERCENT && !std::isnan(result.Value())) {
         GetArkUINodeModifiers()->getSpanModifier()->setSpanBaselineOffset(
-            nativeNode, result.Value(), static_cast<int8_t>(result.Unit()));
+            nativeNode, result.Value(), static_cast<int8_t>(result.Unit()), AceType::RawPtr(resourceObject));
     } else {
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanBaselineOffset(nativeNode);
     }
@@ -532,7 +535,8 @@ ArkUINativeModuleValue SpanBridge::SetTextBackgroundStyle(ArkUIRuntimeCallInfo* 
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::shared_ptr<TextBackgroundStyle> style = std::make_shared<TextBackgroundStyle>();
     RefPtr<ResourceObject> colorResObj;
-    if (!(ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj))) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!(ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo))) {
         color = Color::TRANSPARENT;
     }
     ArkTSUtils::ParseOuterBorderRadius(runtimeCallInfo, vm, radiusArray, valueUnits, NUM_2, style);

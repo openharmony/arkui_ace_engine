@@ -71,7 +71,7 @@ FormOperation FormSpecialStyle::GetOperationToNewFormStyle(const FormSpecialStyl
 
 FormStyleAttribution FormSpecialStyle::GetFormStyleAttribution() const
 {
-    if (isForbiddenByParentControl_) {
+    if (isForbiddenByParentControl_ && !isMultiAppForm_) {
         return FormStyleAttribution::PARENT_CONTROL;
     }
     if (isLockedByAppLock_ && !isMultiAppForm_) {

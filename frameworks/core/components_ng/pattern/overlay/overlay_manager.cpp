@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,7 @@
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/modal_ui_extension.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -1433,14 +1434,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
         menuWrapperPattern->CallMenuDisappearCallback();
         menuWrapperPattern->CallMenuOnDidDisappearCallback();
     }
-    menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
-    menuWrapperPattern->SetOnMenuDisappear(false);
-    menuWrapperPattern->CallMenuStateChangeCallback("false");
-    auto mainPipeline = PipelineContext::GetMainPipelineContext();
-    if (mainPipeline && menuWrapperPattern->GetMenuDisappearCallback()) {
-        ContainerScope scope(mainPipeline->GetInstanceId());
-        mainPipeline->FlushPipelineImmediately();
-    }
+    HandleMenuDisappearCallback(menu);
     // clear contextMenu then return
     auto pipeline = GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
@@ -1453,14 +1447,62 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     auto targetId = menuWrapperPattern->GetTargetId();
     overlayManager->EraseMenuInfo(targetId);
     if ((menuWrapperPattern->IsContextMenu() ||
-            (isShowInSubWindow && (expandDisplay || menuWrapperPattern->GetIsOpenMenu())))) {
+            (isShowInSubWindow && (expandDisplay || menuWrapperPattern->GetIsOpenMenu()))) &&
+        (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
         if (overlayManager->RemoveMenuInSubWindow(menu)) {
             overlayManager->SetIsMenuShow(false);
         }
         return;
     }
+    if (CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay)) {
+        return;
+    }
     overlayManager->RemoveMenuNotInSubWindow(menuWK, rootWeak, weak);
     overlayManager->SetIsMenuShow(false);
+}
+
+void OverlayManager::HandleMenuDisappearCallback(const RefPtr<FrameNode>& menu)
+{
+    CHECK_NULL_VOID(menu);
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+    menuWrapperPattern->SetOnMenuDisappear(false);
+    menuWrapperPattern->CallMenuStateChangeCallback("false");
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    if (mainPipeline && menuWrapperPattern->GetMenuDisappearCallback()) {
+        ContainerScope scope(mainPipeline->GetInstanceId());
+        mainPipeline->FlushPipelineImmediately();
+    }
+}
+
+bool OverlayManager::CheckSelectSubWindowToClose(
+    const RefPtr<FrameNode>& menu, const RefPtr<OverlayManager>& overlayManager, bool expandDisplay)
+{
+    CHECK_NULL_RETURN(menu, false);
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(menuNode, false);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+    auto menuLayoutProp = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuLayoutProp, false);
+    if (expandDisplay && menuPattern->GetTargetTag() == V2::SELECT_ETS_TAG &&
+        menuLayoutProp->GetShowInSubWindowValue(false)) {
+        auto subWindowManager = SubwindowManager::GetInstance();
+        CHECK_NULL_RETURN(subWindowManager, false);
+        auto context = menu->GetContextRefPtr();
+        CHECK_NULL_RETURN(context, false);
+        auto containerid = context->GetInstanceId();
+        auto subwindow = subWindowManager->GetSubwindowByType(containerid, SubwindowType::TYPE_MENU);
+        if (subWindowManager->IsSubwindowExist(subwindow)) {
+            if (overlayManager->RemoveMenuInSubWindow(menu)) {
+                overlayManager->SetIsMenuShow(false);
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
@@ -1611,10 +1653,10 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper
             },
             option.GetOnFinishEvent());
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-        auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-        if (transactionProxy != nullptr) {
-            transactionProxy->FlushImplicitTransaction();
-        }
+    auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
 #endif
     }
     // start animation immediately
@@ -2615,6 +2657,7 @@ void OverlayManager::HideAllMenusWithoutAnimation(bool showInSubwindow)
         }
         RemoveMenuFilter(menuNode, false);
         EraseMenuInfo(targetId);
+        SetIsMenuShow(false);
     }
 }
 
@@ -3207,6 +3250,8 @@ void OverlayManager::RegisterDialogLifeCycleCallback(
     dialogPattern->RegisterDialogWillAppearCallback(std::move(onWillAppearEvent));
     auto onWillDisappearEvent = dialogProps.onWillDisappear;
     dialogPattern->RegisterDialogWillDisappearCallback(std::move(onWillDisappearEvent));
+    auto onWillDismissRelease = dialogProps.onWillDismissRelease;
+    dialogPattern->SetOnWillDismissRelease(std::move(onWillDismissRelease));
 }
 
 void OverlayManager::CustomDialogRecordEvent(const DialogProperties& dialogProps)
@@ -5002,11 +5047,16 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
         AceType::MakeRefPtr<ModalPresentationPattern>(
             targetId, static_cast<ModalTransition>(modalTransition.value()), std::move(callback)));
     CHECK_NULL_VOID(modalNode);
-    if (modalStyle.backgroundColor.has_value()) {
-        modalNode->GetRenderContext()->UpdateBackgroundColor(modalStyle.backgroundColor.value());
-    }
     auto modalPagePattern = modalNode->GetPattern<ModalPresentationPattern>();
     CHECK_NULL_VOID(modalPagePattern);
+    if (modalStyle.backgroundColor.has_value()) {
+        // When the background color is configured and the switch is enabled,
+        // register modal resource update func.
+        if (SystemProperties::ConfigChangePerform()) {
+            modalPagePattern->RegisterModalBgColorResFunc(modalNode, modalStyle);
+        }
+        modalNode->GetRenderContext()->UpdateBackgroundColor(modalStyle.backgroundColor.value());
+    }
     modalPagePattern->UpdateOnDisappear(std::move(onDisappear));
     modalPagePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
     modalPagePattern->UpdateOnAppear(std::move(onAppear));
@@ -5645,7 +5695,9 @@ void OverlayManager::PlaySheetTransition(
     CHECK_NULL_VOID(sheetNode);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    if (sheetPattern->GetSheetType() != SheetType::SHEET_SIDE && isTransitionIn && isFirstTransition &&
+    auto sheetObject = sheetPattern->GetSheetObject();
+    CHECK_NULL_VOID(sheetObject);
+    if (sheetObject->IsSheetObjectBase() && isTransitionIn && isFirstTransition &&
         NearZero(sheetHeight_)) {
         return;
     }
@@ -5779,7 +5831,7 @@ void OverlayManager::UpdateSheetRender(
     }
     sheetNodePattern->UpdateMaskBackgroundColor();
 }
-void OverlayManager::UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode,
+void OverlayManager::UpdateSheetRenderProperty(const RefPtr<FrameNode>& sheetNode,
     const NG::SheetStyle& currentStyle, bool isPartialUpdate)
 {
     UpdateSheetRender(sheetNode, currentStyle, isPartialUpdate);
@@ -5811,7 +5863,9 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     auto currentStyle = sheetStyle;
     if (isStartByUIContext) {
         currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
-        UpdateSheetProperty(sheetNode, currentStyle, isPartialUpdate);
+        sheetNodePattern->UpdateSheetType();
+        sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
+        UpdateSheetRenderProperty(sheetNode, currentStyle, isPartialUpdate);
         sheetNodePattern->UpdateDragBarStatus();
         sheetNodePattern->UpdateTitleColumnSize();
     } else {
@@ -5828,10 +5882,12 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
         sheetNodePattern->UpdateSheetSpringBack(std::move(sheetSpringBack));
         auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
         layoutProperty->UpdateSheetStyle(sheetStyle);
-        UpdateSheetProperty(sheetNode, sheetStyle, isPartialUpdate);
+        sheetNodePattern->UpdateSheetType();
+        sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
+        UpdateSheetRenderProperty(sheetNode, sheetStyle, isPartialUpdate);
     }
     sheetNodePattern->SetBottomOffset(sheetStyle);
-    // onModifyDone, the sheetType_ is updated, and the sheetObject is also updated.
+    // MarkModifyDone must be called after UpdateSheetObject. InitSheetMode depends on SheetObject.
     sheetNode->MarkModifyDone();
 
     auto pipeline = sheetNode->GetContext();
@@ -5842,6 +5898,34 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     pipeline->FlushUITasks();
     ComputeSheetOffset(currentStyle, sheetNode);
+    // The animation generated by the developer actively switching the SheetType, does not rely on PlaySheetTransition,
+    // but on the above FlushUITasks, and ondirty.
+    auto sheetType = sheetNodePattern->GetSheetType();
+    if (sheetType != SheetType::SHEET_POPUP && !sheetNodePattern->GetDismissProcess() &&
+        sheetNodePattern->GetIsPlayTransition()) {
+        PlaySheetTransition(sheetNode, true, false);
+    }
+}
+
+void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle)
+{
+    auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+ 
+    sheetNodePattern->IsNeedPlayTransition(sheetStyle);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    UpdateSheetRenderProperty(sheetNode, sheetStyle, false);
+    sheetNodePattern->SetBottomOffset(sheetStyle);
+    sheetNode->MarkModifyDone();
+    auto pipeline = sheetNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto sheetWrapper = sheetNode->GetParent();
+    CHECK_NULL_VOID(sheetWrapper);
+    sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    ComputeSheetOffset(sheetStyle, sheetNode);
+
     // The animation generated by the developer actively switching the SheetType, does not rely on PlaySheetTransition,
     // but on the above FlushUITasks, and ondirty.
     auto sheetType = sheetNodePattern->GetSheetType();
@@ -5916,6 +6000,10 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     InitSheetWrapperAction(sheetNode, targetNode, sheetStyle);
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);
+    if (SystemProperties::ConfigChangePerform()) {
+        // Register the resource update function as required during sheet node creation.
+        sheetNodePattern->UpdateSheetParamResource(sheetNode, sheetStyle);
+    }
     sheetNodePattern->UpdateIndexByDetentSelection(sheetStyle, true);
     ComputeSheetOffset(sheetStyle, sheetNode);
     sheetNodePattern->OnWillAppear();
@@ -5955,6 +6043,10 @@ RefPtr<FrameNode> OverlayManager::MountSheetWrapperAndChildren(const RefPtr<Fram
     sheetNode->MountToParent(sheetWrapperNode);
     auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
     CHECK_NULL_RETURN(sheetWrapperPattern, nullptr);
+    if (SystemProperties::ConfigChangePerform()) {
+        // Register the resource update function as required during sheet mask node creation.
+        sheetWrapperPattern->UpdateSheetMaskResource(sheetWrapperNode, sheetNode, sheetStyle);
+    }
     sheetWrapperPattern->SetSheetPageNode(sheetNode);
     auto levelOrder = GetLevelOrder(sheetWrapperNode);
     MountToParentWithService(rootNode, sheetWrapperNode, levelOrder);
@@ -6061,7 +6153,7 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
 {
     auto maskRenderContext = maskNode->GetRenderContext();
     CHECK_NULL_VOID(maskRenderContext);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = maskNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
@@ -6382,7 +6474,7 @@ void OverlayManager::ComputeDetentsSheetOffset(const NG::SheetStyle& sheetStyle,
         }
     }
 }
-void OverlayManager::OnMainWindowSizeChange(int32_t subWindowId)
+void OverlayManager::OnMainWindowSizeChange(int32_t subWindowId, WindowSizeChangeReason reason)
 {
     for (auto iter = sheetMap_.begin(); iter != sheetMap_.end(); iter++) {
         auto sheetNode = (*iter).second.Upgrade();
@@ -6394,7 +6486,10 @@ void OverlayManager::OnMainWindowSizeChange(int32_t subWindowId)
             auto sheetWrapperPattern = sheetParent->GetPattern<SheetWrapperPattern>();
             CHECK_NULL_VOID(sheetWrapperPattern);
             sheetWrapperPattern->InitMainWindowRect(subWindowId);
-            sheetParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            if (!(reason == WindowSizeChangeReason::DRAG_START || reason == WindowSizeChangeReason::DRAG_END ||
+                    reason == WindowSizeChangeReason::DRAG_MOVE)) {
+                sheetParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
         }
     }
 }
@@ -7065,6 +7160,10 @@ void OverlayManager::RemoveMenuFilter(const RefPtr<FrameNode>& menuWrapper, bool
 
 void OverlayManager::ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filterNode)
 {
+    if (previewFilterTask_) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "cancel preview filter delay task");
+        previewFilterTask_.Cancel();
+    }
     CHECK_NULL_VOID(filterNode);
     auto filterContext = filterNode->GetRenderContext();
     CHECK_NULL_VOID(filterContext);
@@ -8164,16 +8263,46 @@ const RefPtr<GroupManager>& OverlayManager::GetGroupManager() const
 void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode)
 {
     CHECK_NULL_VOID(columnNode);
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto pipelineContext = menuWrapperNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto hoverDelay = menuWrapperPattern->GetHoverScaleInterruption();
+    auto delay = hoverDelay ? menuTheme->GetHoverImageDelayDuration(true) : 0;
+    if (delay > 0) {
+        previewFilterTask_.Reset([weak = WeakClaim(this), columnWeak = WeakClaim(RawPtr(columnNode)),
+                                     wrapperWeak = WeakClaim(RawPtr(menuWrapperNode))]() {
+            auto columnNode = columnWeak.Upgrade();
+            auto menuWrapperNode = wrapperWeak.Upgrade();
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ExecuteFilterAnimation(columnNode, menuWrapperNode);
+        });
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostDelayedTask(
+            previewFilterTask_, TaskExecutor::TaskType::UI, delay, "ArkUIShowFilterDelayTask");
+    } else {
+        ExecuteFilterAnimation(columnNode, menuWrapperNode);
+    }
+}
+
+void OverlayManager::ExecuteFilterAnimation(
+    const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode)
+{
+    CHECK_NULL_VOID(columnNode);
 
     auto filterRenderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(filterRenderContext);
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto pipelineContext = menuWrapperNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
-
-    CHECK_NULL_VOID(menuWrapperNode);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     auto maskEnable = menuWrapperPattern->GetMenuMaskEnable();
@@ -8185,8 +8314,6 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, co
     AnimationOption option;
     option.SetDuration(menuTheme->GetFilterAnimationDuration());
     option.SetCurve(Curves::SHARP);
-    auto hoverDelay = menuWrapperPattern->GetHoverScaleInterruption();
-    option.SetDelay(hoverDelay ? menuTheme->GetHoverImageDelayDuration(true) : 0);
     option.SetOnFinishEvent([weak = WeakClaim(this), filterId = columnNode->GetId()] {
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "show filter animation finish");
         auto overlayManager = weak.Upgrade();
@@ -8580,6 +8707,7 @@ void OverlayManager::RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode, const
         } else {
             CallMenuDisappearOnlyNewLifeCycle(node);
         }
+        EraseMenuInfoFromWrapper(node);
         rootNode->RemoveChild(node);
     }
     CHECK_EQUAL_VOID(idsNeedClean.empty(), true);
@@ -8897,5 +9025,13 @@ bool OverlayManager::IsSceneBoardWindow()
         }
     }
     return container->IsSceneBoardWindow();
+}
+
+void OverlayManager::EraseMenuInfoFromWrapper(const RefPtr<FrameNode>& menuWrapperNode)
+{
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    EraseMenuInfo(pattern->GetTargetId());
 }
 } // namespace OHOS::Ace::NG

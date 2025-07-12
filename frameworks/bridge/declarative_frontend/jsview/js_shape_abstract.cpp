@@ -52,6 +52,9 @@ constexpr double STROKE_MITERLIMIT_DEFAULT = 4.0f;
 void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
 {
     std::vector<Dimension> dashArray;
+    std::vector<RefPtr<ResourceObject>> resObjArray;
+    bool hasResObj = false;
+    UnRegisterResource("ShapeAbstractStrokeDashArray");
     if (info.Length() < 1 || !info[0]->IsArray()) {
         ShapeAbstractModel::GetInstance()->SetStrokeDashArray(dashArray);
         return;
@@ -61,16 +64,22 @@ void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
     for (int32_t i = 0; i < length; i++) {
         JSRef<JSVal> value = array->GetValueAt(i);
         CalcDimension dim;
+        RefPtr<ResourceObject> resObj;
         bool paramIsValid = false;
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            paramIsValid = ParseJsDimensionVp(value, dim);
+            paramIsValid = ParseJsDimensionVp(value, dim, resObj);
         } else {
-            paramIsValid = ParseJsDimensionVpNG(value, dim);
+            paramIsValid = ParseJsDimensionVpNG(value, dim, resObj);
+        }
+        if (resObj) {
+            hasResObj = true;
         }
         if (paramIsValid) {
             dashArray.emplace_back(dim);
+            resObjArray.emplace_back(resObj);
         } else {
             dashArray.clear();
+            resObjArray.clear();
             break;
         }
     }
@@ -78,7 +87,11 @@ void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
     if (static_cast<uint32_t>(length) == dashArray.size() && (static_cast<uint32_t>(length) & 1)) {
         for (int32_t i = 0; i < length; i++) {
             dashArray.emplace_back(dashArray[i]);
+            resObjArray.emplace_back(resObjArray[i]);
         }
+    }
+    if (SystemProperties::ConfigChangePerform() &&  hasResObj) {
+        ShapeAbstractModel::GetInstance()->SetStrokeDashArray(dashArray, resObjArray);
     }
     ShapeAbstractModel::GetInstance()->SetStrokeDashArray(dashArray);
 }
@@ -89,9 +102,14 @@ void JSShapeAbstract::SetStroke(const JSCallbackInfo& info)
         return;
     }
     Color strokeColor;
-    if (!ParseJsColor(info[0], strokeColor)) {
+    RefPtr<ResourceObject> strokeResObj;
+    UnRegisterResource("ShapeAbstractStroke");
+    if (!ParseJsColor(info[0], strokeColor, strokeResObj)) {
         ShapeAbstractModel::GetInstance()->SetStroke(Color::TRANSPARENT);
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && strokeResObj) {
+        RegisterResource<Color>("ShapeAbstractStroke", strokeResObj, strokeColor);
     }
     ShapeAbstractModel::GetInstance()->SetStroke(strokeColor);
 }
@@ -101,13 +119,18 @@ void JSShapeAbstract::SetFill(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    UnRegisterResource("ShapeAbstractFill");
     if (info[0]->IsString() && info[0]->ToString() == "none") {
         ShapeAbstractModel::GetInstance()->SetFill(Color::TRANSPARENT);
     } else {
         Color fillColor = Color::BLACK;
+        RefPtr<ResourceObject> fillResObj;
         static const char shapeComponentName[] = "";
         static const char attrsShapeAbstractFill[] = "fill";
-        CheckColor(info[0], fillColor, shapeComponentName, attrsShapeAbstractFill);
+        CheckColor(info[0], fillColor, shapeComponentName, attrsShapeAbstractFill, fillResObj);
+        if (SystemProperties::ConfigChangePerform() && fillResObj) {
+            RegisterResource<Color>("ShapeAbstractFill", fillResObj, fillColor);
+        }
         ShapeAbstractModel::GetInstance()->SetFill(fillColor);
     }
 }
@@ -157,7 +180,12 @@ void JSShapeAbstract::SetStrokeOpacity(const JSCallbackInfo& info)
         return;
     }
     double strokeOpacity = DEFAULT_OPACITY;
-    ParseJsDouble(info[0], strokeOpacity);
+    RefPtr<ResourceObject> strokeOpacityResObj;
+    ParseJsDouble(info[0], strokeOpacity, strokeOpacityResObj);
+    UnRegisterResource("ShapeAbstractStrokeOpacity");
+    if (SystemProperties::ConfigChangePerform() && strokeOpacityResObj) {
+        RegisterResource<double>("ShapeAbstractStrokeOpacity", strokeOpacityResObj, strokeOpacity);
+    }
     if (GreatOrEqual(strokeOpacity, 1.0)) {
         strokeOpacity = DEFAULT_OPACITY;
     }
@@ -174,7 +202,12 @@ void JSShapeAbstract::SetFillOpacity(const JSCallbackInfo& info)
         return;
     }
     double fillOpacity = DEFAULT_OPACITY;
-    ParseJsDouble(info[0], fillOpacity);
+    RefPtr<ResourceObject> fillOpacityResObj;
+    ParseJsDouble(info[0], fillOpacity, fillOpacityResObj);
+    UnRegisterResource("ShapeAbstractFillOpacity");
+    if (SystemProperties::ConfigChangePerform() && fillOpacityResObj) {
+        RegisterResource<double>("ShapeAbstractFillOpacity", fillOpacityResObj, fillOpacity);
+    }
     if (GreatOrEqual(fillOpacity, DEFAULT_OPACITY)) {
         fillOpacity = DEFAULT_OPACITY;
     }
@@ -191,6 +224,8 @@ void JSShapeAbstract::SetStrokeWidth(const JSCallbackInfo& info)
     }
     // the default value is 1.0_vp
     CalcDimension lineWidth = 1.0_vp;
+    RefPtr<ResourceObject> strokeWidthResObj;
+    UnRegisterResource("ShapeAbstractStrokeWidth");
     if (info[0]->IsString()) {
         const std::string& value = info[0]->ToString();
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -202,7 +237,10 @@ void JSShapeAbstract::SetStrokeWidth(const JSCallbackInfo& info)
             }
         }
     } else {
-        ParseJsDimensionVp(info[0], lineWidth);
+        ParseJsDimensionVp(info[0], lineWidth, strokeWidthResObj);
+        if (SystemProperties::ConfigChangePerform() && strokeWidthResObj) {
+            RegisterResource<CalcDimension>("ShapeAbstractStrokeWidth", strokeWidthResObj, lineWidth);
+        }
     }
     if (lineWidth.IsNegative()) {
         lineWidth = 1.0_vp;
@@ -227,17 +265,19 @@ void JSShapeAbstract::JsWidth(const JSCallbackInfo& info)
 void JSShapeAbstract::SetWidth(const JSRef<JSVal>& jsValue)
 {
     CalcDimension value;
+    RefPtr<ResourceObject> widthResObj;
+    UnRegisterResource("ShapeAbstractWidth");
     if (jsValue->IsUndefined()) {
         ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         return;
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ParseJsDimensionVp(jsValue, value)) {
+        if (!ParseJsDimensionVp(jsValue, value, widthResObj)) {
             return;
         }
     } else {
-        if (!ParseJsDimensionVpNG(jsValue, value)) {
+        if (!ParseJsDimensionVpNG(jsValue, value, widthResObj)) {
             // JsWidth return, check if set LayoutPolicy before return.
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
             if (jsValue->IsObject()) {
@@ -252,7 +292,9 @@ void JSShapeAbstract::SetWidth(const JSRef<JSVal>& jsValue)
             return;
         }
     }
-
+    if (SystemProperties::ConfigChangePerform() && widthResObj) {
+        RegisterResource<CalcDimension>("ShapeAbstractWidth", widthResObj, value);
+    }
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
@@ -271,17 +313,19 @@ void JSShapeAbstract::JsHeight(const JSCallbackInfo& info)
 void JSShapeAbstract::SetHeight(const JSRef<JSVal>& jsValue)
 {
     CalcDimension value;
+    RefPtr<ResourceObject> heightResObj;
+    UnRegisterResource("ShapeAbstractHeight");
     if (jsValue->IsUndefined()) {
         ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
         return;
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ParseJsDimensionVp(jsValue, value)) {
+        if (!ParseJsDimensionVp(jsValue, value, heightResObj)) {
             return;
         }
     } else {
-        if (!ParseJsDimensionVpNG(jsValue, value)) {
+        if (!ParseJsDimensionVpNG(jsValue, value, heightResObj)) {
             // JsHeight return, check if set LayoutPolicy before return.
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
             if (jsValue->IsObject()) {
@@ -295,6 +339,9 @@ void JSShapeAbstract::SetHeight(const JSRef<JSVal>& jsValue)
             }
             return;
         }
+    }
+    if (SystemProperties::ConfigChangePerform() && heightResObj) {
+        RegisterResource<CalcDimension>("ShapeAbstractHeight", heightResObj, value);
     }
 
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -601,16 +648,21 @@ void JSShapeAbstract::SetForegroundColor(const JSCallbackInfo& info)
         return;
     }
     Color foregroundColor;
+    RefPtr<ResourceObject> foregroundColorResObj;
     ForegroundColorStrategy strategy;
+    UnRegisterResource("ShapeAbstractForegroundColor");
     if (ParseJsColorStrategy(info[0], strategy)) {
         ShapeAbstractModel::GetInstance()->SetFill(Color::FOREGROUND);
         ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
         return;
     }
-    if (!ParseJsColor(info[0], foregroundColor)) {
+    if (!ParseJsColor(info[0], foregroundColor, foregroundColorResObj)) {
         ShapeAbstractModel::GetInstance()->SetFill(Color::BLACK);
         ViewAbstractModel::GetInstance()->SetForegroundColor(Color::BLACK);
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && foregroundColorResObj) {
+        RegisterResource<Color>("ShapeAbstractForegroundColor", foregroundColorResObj, foregroundColor);
     }
     ShapeAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);

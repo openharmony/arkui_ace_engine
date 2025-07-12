@@ -2268,4 +2268,28 @@ HWTEST_F(SwiperTestNg, NotifyDataChange005, TestSize.Level1)
     swiperPattern->NotifyDataChange(4, 2);
     EXPECT_FALSE(swiperPattern->jumpIndex_.has_value());
 }
+
+/**
+ * @tc.name: NotifyDataChange006
+ * @tc.desc: Test SwiperPattern NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, NotifyDataChange006, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto swiperNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    swiperNode->children_.clear();
+    swiperNode->children_ = { frameNode, frameNode };
+    swiperLayoutProperty->propMaintainVisibleContentPosition_ = true;
+    swiperNode->layoutProperty_ = swiperLayoutProperty;
+    swiperPattern->frameNode_ = swiperNode;
+    swiperPattern->oldChildrenSize_ = 2;
+    swiperPattern->currentIndex_ = 0;
+    swiperPattern->jumpIndex_ = std::nullopt;
+    swiperPattern->NotifyDataChange(0, 1);
+    EXPECT_EQ(swiperPattern->jumpIndex_, 1);
+}
 } // namespace OHOS::Ace::NG

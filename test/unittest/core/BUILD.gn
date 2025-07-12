@@ -23,6 +23,7 @@ group("core_unittest") {
     "event:core_event_unittest",
     "gestures:gestures_test_ng",
     "image:image_file_cache_test_ng",
+    "image:image_loader_test",
     "image:image_provider_test_ng",
     "interfaces:core_interfaces_unittest",
     "layout:core_layout_unittest",

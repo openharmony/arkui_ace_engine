@@ -53,7 +53,7 @@ public:
         return dialogTag_;
     }
 
-    bool IfNeedAvoidDock(const RefPtr<FrameNode>& currentNode) const;
+    bool IsPcOrFreeMultiWindow(const RefPtr<FrameNode>& currentNode) const;
 
 private:
     int32_t dismissDialogId_ = 0;

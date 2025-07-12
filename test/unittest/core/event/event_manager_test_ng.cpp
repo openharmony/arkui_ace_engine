@@ -1747,4 +1747,73 @@ HWTEST_F(EventManagerTestNg, EventManagerTest097, TestSize.Level1)
     eventManager->CheckAndLogLastConsumedAxisEventInfo(eventId, action);
     EXPECT_EQ(eventManager->lastConsumedEvent_.eventId, eventId);
 }
+
+/**
+ * @tc.name: EventManagerTest098
+ * @tc.desc: Test RemoveOverlayByESC
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest098, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    KeyEvent event;
+
+    event.code = KeyCode::KEY_ESCAPE;
+    event.action = KeyAction::DOWN;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+    event.code = KeyCode::KEY_CTRL_LEFT;
+    event.action = KeyAction::UP;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+    event.code = KeyCode::KEY_ESCAPE;
+    event.action = KeyAction::UP;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+    event.code = KeyCode::KEY_CTRL_LEFT;
+    event.action = KeyAction::DOWN;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+
+    event.code = KeyCode::KEY_ESCAPE;
+    event.action = KeyAction::DOWN;
+
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp(NG::PipelineContext::GetCurrentContext());
+    auto container = MockContainer::Current();
+
+    container->isSubContainer_ = true;
+    container->isDialogContainer_ = true;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+    container->isSubContainer_ = false;
+    container->isDialogContainer_ = false;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+    container->isSubContainer_ = true;
+    container->isDialogContainer_ = false;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+    container->isSubContainer_ = false;
+    container->isDialogContainer_ = true;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+}
+
+/**
+ * @tc.name: EventManagerTest099
+ * @tc.desc: Test FlushTouchEventsBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest099, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    AxisEvent axisEvent;
+    axisEvent.x = 1;
+    axisEvent.y = 2;
+    axisEvent.sourceType = SourceType::TOUCH;
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    eventManager->axisTestResultsMap_[axisEvent.id].clear();
+    eventManager->AxisTest(axisEvent, frameNode);
+    EXPECT_FALSE(eventManager->passThroughResult_);
+}
 } // namespace OHOS::Ace::NG

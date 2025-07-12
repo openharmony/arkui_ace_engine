@@ -25,6 +25,7 @@ class DataLoadParams : public AceType {
 public:
     DataLoadParams() = default;
     ~DataLoadParams() = default;
+    virtual uint32_t GetRecordCount() = 0;
 };
 } // namespace OHOS::Ace
 #endif

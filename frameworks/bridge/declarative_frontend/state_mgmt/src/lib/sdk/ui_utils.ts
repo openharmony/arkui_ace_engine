@@ -55,7 +55,47 @@ class UIUtilsImpl {
     public makeBinding<T>(getter: () => T, setter?:
     (newValue: T) => void): Binding<T> | MutableBinding<T> {
       return setter ? new MutableBinding(getter, setter) : new Binding(getter);
-    } 
+    }
+
+    public addMonitor(target: object, path: string | string[], monitorFunc: MonitorCallback, options?: MonitorOptions): void {
+      if (!target || typeof target !== 'object' || !(ObserveV2.IsObservedObjectV2(target) ||  target instanceof ViewV2)) {
+        const message = `addMonitor failed because the target is illegal, target must be the @ObservedV2(with at least one @Trace property) or @ComponentV2 instance.`;
+        stateMgmtConsole.applicationError(message);
+        throw new BusinessError(ADD_MONITOR_FAIL_TARGET_ILLEGAL, message);
+      }
+      if (!(typeof path === 'string' || Array.isArray(path))) {
+        const message = `addMonitor failed because path must be string or Array of string.`;
+        stateMgmtConsole.applicationError(message);
+        throw new BusinessError(ADD_MONITOR_FAIL_PATH_ILLEGAL, message);
+      }
+      
+      if (typeof monitorFunc !== 'function' || !monitorFunc.name) {
+        const message = `addMonitor failed because the monitorFunc is illegal, monitorFunc must be function or but cannot be an anonymous function.`;
+        stateMgmtConsole.applicationError(message);
+        throw new BusinessError(ADD_MONITOR_FAIL_FUNC_ILLEGAL, message);
+      }
+      ObserveV2.getObserve().AddMonitorPath(target, path, monitorFunc, options);
+    }
+        
+    public clearMonitor(target: object, path: string | string[], monitorFunc: MonitorCallback): void {
+      if (!target || typeof target !== 'object' || !(ObserveV2.IsObservedObjectV2(target) ||  target instanceof ViewV2)) {
+        const message = `clearMonitor failed because the target is illegal, target must be the @ObservedV2(with at least one @Trace property) or @ComponentV2 instance.`;
+        stateMgmtConsole.applicationError(message);
+        throw new BusinessError(ADD_MONITOR_FAIL_TARGET_ILLEGAL, message);
+      }
+      if (!(typeof path === 'string' || Array.isArray(path))) {
+        const message = `clearMonitor failed because path must be string or Array of string.`;
+        stateMgmtConsole.applicationError(message);
+        throw new BusinessError(ADD_MONITOR_FAIL_PATH_ILLEGAL, message);
+      }
+      
+      if (monitorFunc && (typeof monitorFunc !== 'function' || !monitorFunc.name)) {
+        const message = `clearMonitor failed because the monitorFunc is illegal, monitorFunc must be function or but cannot be an anonymous function.`;
+        stateMgmtConsole.applicationError(message);
+        throw new BusinessError(ADD_MONITOR_FAIL_FUNC_ILLEGAL, message);
+      }
+      ObserveV2.getObserve().clearMonitorPath(target, path, monitorFunc);
+    }
 
     public static instance(): UIUtilsImpl {
       if (UIUtilsImpl.instance_) {

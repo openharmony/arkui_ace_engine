@@ -76,9 +76,8 @@
 
 #include "base/ressched/ressched_report.h"
 
-#ifdef ACE_ENABLE_VK
 #include "accessibility_config.h"
-#endif
+
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
@@ -385,9 +384,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_pt
     if (ability) {
         abilityInfo_ = ability->GetAbilityInfo();
     }
-#ifdef ACE_ENABLE_VK
     SubscribeHighContrastChange();
-#endif
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type,
@@ -410,9 +407,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
-#ifdef ACE_ENABLE_VK
     SubscribeHighContrastChange();
-#endif
 }
 
 // for DynamicComponent
@@ -436,9 +431,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
-#ifdef ACE_ENABLE_VK
     SubscribeHighContrastChange();
-#endif
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
@@ -455,9 +448,7 @@ AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
     LOGI("Container Destroyed");
-#ifdef ACE_ENABLE_VK
     UnsubscribeHighContrastChange();
-#endif
 }
 
 void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
@@ -1192,8 +1183,13 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto touchPassMode = AceApplicationInfo::GetInstance().GetTouchEventPassMode();
-    bool isDebugAcc = (SystemProperties::GetTouchAccelarate() == static_cast<int32_t>(TouchPassMode::ACCELERATE));
-    pipelineContext_->SetTouchAccelarate((touchPassMode == TouchPassMode::ACCELERATE) || isDebugAcc);
+    int32_t debugMode = SystemProperties::GetTouchAccelarate();
+    if (debugMode != static_cast<int32_t>(touchPassMode)) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Debug touch pass mode %{public}d", debugMode);
+        touchPassMode = static_cast<TouchPassMode>(debugMode);
+        AceApplicationInfo::GetInstance().SetTouchEventPassMode(touchPassMode);
+    }
+    pipelineContext_->SetTouchAccelarate(touchPassMode == TouchPassMode::ACCELERATE);
     pipelineContext_->SetTouchPassThrough(touchPassMode == TouchPassMode::PASS_THROUGH);
     auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event,
                                     const std::function<void()>& markProcess,
@@ -2745,6 +2741,25 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     if (fontManager) {
         fontManager->SetOpenLinkOnMapSearchHandler(openLinkOnMapSearchHandler);
     }
+
+    auto&& startAbilityOnCalendar = [weak = WeakClaim(this), instanceId](
+                                        const std::map<std::string, std::string>& params) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId);
+        auto context = container->GetPipelineContext();
+        CHECK_NULL_VOID(context);
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakPtr<AceContainer>(container), params]() {
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                container->OnStartAbilityOnCalendar(params);
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleStartAbilityOnCalendar");
+    };
+    if (fontManager) {
+        fontManager->SetStartAbilityOnCalendar(startAbilityOnCalendar);
+    }
     auto&& setStatusBarEventHandler = [weak = WeakClaim(this), instanceId](const Color& color) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
@@ -3089,6 +3104,21 @@ void AceContainer::InitWindowCallback()
         window->UseImplicitAnimation(useImplicit);
     });
 
+    windowManager->SetHeightBreakpointCallback(
+        [window = pipelineContext_->GetWindow()]() -> HeightBreakpoint {
+        CHECK_NULL_RETURN(window, HeightBreakpoint::HEIGHT_SM);
+        HeightLayoutBreakPoint layoutHeightBreakpoints =
+            SystemProperties::GetHeightLayoutBreakpoints();
+        return window->GetHeightBreakpoint(layoutHeightBreakpoints);
+    });
+    windowManager->SetWidthBreakpointCallback(
+        [window = pipelineContext_->GetWindow()]() -> WidthBreakpoint {
+        CHECK_NULL_RETURN(window, WidthBreakpoint::WIDTH_SM);
+        WidthLayoutBreakPoint layoutWidthBreakpoints =
+            SystemProperties::GetWidthLayoutBreakpoints();
+        return window->GetWidthBreakpoint(layoutWidthBreakpoints);
+    });
+
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);
@@ -3407,6 +3437,17 @@ void  AceContainer::OnFrontUpdated(
     }
 }
 
+void AceContainer::UpdateSubContainerDensity(ResourceConfiguration& resConfig)
+{
+    if (instanceId_ >= MIN_SUBCONTAINER_ID) {
+        auto parentContainer = Platform::AceContainer::GetContainer(GetParentId());
+        CHECK_NULL_VOID(parentContainer);
+        auto parentPipeline = parentContainer->GetPipelineContext();
+        CHECK_NULL_VOID(parentPipeline);
+        resConfig.SetDensity(parentPipeline->GetDensity());
+    }
+}
+
 void AceContainer::UpdateConfiguration(
     const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel)
 {
@@ -3426,13 +3467,8 @@ void AceContainer::UpdateConfiguration(
         resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
     }
     // The density of sub windows needs to be consistent with the main window.
-    if (instanceId_ >= MIN_SUBCONTAINER_ID) {
-        auto parentContainer = Platform::AceContainer::GetContainer(GetParentId());
-        CHECK_NULL_VOID(parentContainer);
-        auto parentPipeline = parentContainer->GetPipelineContext();
-        CHECK_NULL_VOID(parentPipeline);
-        resConfig.SetDensity(parentPipeline->GetDensity());
-    }
+    UpdateSubContainerDensity(resConfig);
+
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
     if (!abilityLevel) {
@@ -3443,6 +3479,7 @@ void AceContainer::UpdateConfiguration(
     }
     themeManager->LoadResourceThemes();
     if (SystemProperties::ConfigChangePerform() && configurationChange.OnlyColorModeChange()) {
+        OnFrontUpdated(configurationChange, configuration);
         UpdateColorMode(static_cast<uint32_t>(resConfig.GetColorMode()));
         return;
     }
@@ -3931,10 +3968,18 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
     }
     dragPointerEvent.sourceType = currentPointerEvent->GetSourceType();
     if (currentPointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
-        dragPointerEvent.displayX = static_cast<float>(pointerItem.GetDisplayXPos());
-        dragPointerEvent.displayY = static_cast<float>(pointerItem.GetDisplayYPos());
-        dragPointerEvent.windowX = static_cast<float>(pointerItem.GetWindowXPos());
-        dragPointerEvent.windowY = static_cast<float>(pointerItem.GetWindowYPos());
+        dragPointerEvent.displayX = NearZero(pointerItem.GetDisplayXPos())
+                                        ? pointerItem.GetDisplayX()
+                                        : static_cast<float>(pointerItem.GetDisplayXPos());
+        dragPointerEvent.displayY = NearZero(pointerItem.GetDisplayYPos())
+                                        ? pointerItem.GetDisplayY()
+                                        : static_cast<float>(pointerItem.GetDisplayYPos());
+        dragPointerEvent.windowX = NearZero(pointerItem.GetWindowXPos())
+                                       ? pointerItem.GetWindowX()
+                                       : static_cast<float>(pointerItem.GetWindowXPos());
+        dragPointerEvent.windowY = NearZero(pointerItem.GetWindowYPos())
+                                       ? pointerItem.GetWindowY()
+                                       : static_cast<float>(pointerItem.GetWindowYPos());
     } else {
         dragPointerEvent.displayX = pointerItem.GetDisplayX();
         dragPointerEvent.displayY = pointerItem.GetDisplayY();
@@ -3988,10 +4033,18 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
         return false;
     }
     if (currentPointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
-        dragPointerEvent.displayX = static_cast<float>(pointerItem.GetDisplayXPos());
-        dragPointerEvent.displayY = static_cast<float>(pointerItem.GetDisplayYPos());
-        dragPointerEvent.windowX = static_cast<float>(pointerItem.GetWindowXPos());
-        dragPointerEvent.windowY = static_cast<float>(pointerItem.GetWindowYPos());
+        dragPointerEvent.displayX = NearZero(pointerItem.GetDisplayXPos())
+                                        ? pointerItem.GetDisplayX()
+                                        : static_cast<float>(pointerItem.GetDisplayXPos());
+        dragPointerEvent.displayY = NearZero(pointerItem.GetDisplayYPos())
+                                        ? pointerItem.GetDisplayY()
+                                        : static_cast<float>(pointerItem.GetDisplayYPos());
+        dragPointerEvent.windowX = NearZero(pointerItem.GetWindowXPos())
+                                       ? pointerItem.GetWindowX()
+                                       : static_cast<float>(pointerItem.GetWindowXPos());
+        dragPointerEvent.windowY = NearZero(pointerItem.GetWindowYPos())
+                                       ? pointerItem.GetWindowY()
+                                       : static_cast<float>(pointerItem.GetWindowYPos());
     } else {
         dragPointerEvent.displayX = pointerItem.GetDisplayX();
         dragPointerEvent.displayY = pointerItem.GetDisplayY();
@@ -4327,7 +4380,7 @@ void AceContainer::UpdateResourceDensity(double density, bool isUpdateResConfig)
     auto resConfig = GetResourceConfiguration();
     resConfig.SetDensity(density);
     SetResourceConfiguration(resConfig);
-    if (SystemProperties::GetResourceDecoupling() && isUpdateResConfig) {
+    if (SystemProperties::GetResourceDecoupling() && (isUpdateResConfig || !IsSceneBoardWindow())) {
         ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
     }
 }
@@ -4781,10 +4834,9 @@ bool AceContainer::SetSystemBarEnabled(const sptr<OHOS::Rosen::Window>& window, 
     return true;
 }
 
-#ifdef ACE_ENABLE_VK
 void AceContainer::SubscribeHighContrastChange()
 {
-    if (!Rosen::RSSystemProperties::GetHybridRenderEnabled()) {
+    if (!Rosen::RSUIDirector::IsHybridRenderEnabled()) {
         return;
     }
     if (highContrastObserver_ != nullptr) {
@@ -4810,7 +4862,6 @@ void AceContainer::UnsubscribeHighContrastChange()
     }
     highContrastObserver_ = nullptr;
 }
-#endif
 
 void AceContainer::DistributeIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
     const std::function<void()>&& loadPageCallback)

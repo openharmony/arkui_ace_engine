@@ -299,6 +299,11 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
             return;
         }
     }
+    if (CheckLimitFinger()) {
+        extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
     if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press reject as judge result is reject");
@@ -309,10 +314,6 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
             CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->SetIsDragUserReject(true);
         }
-        return;
-    }
-    if (CheckLimitFinger()) {
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
     Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);

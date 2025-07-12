@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -851,9 +852,35 @@ HWTEST_F(GestureEventHubTestNg, GetBadgeNumber_001, TestSize.Level1)
     /**
      * @tc.steps: step3. call GetBadgeNumber.
      */
-    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-    auto badgeNumber = guestureEventHub->GetBadgeNumber(unifiedData);
-    EXPECT_NE(badgeNumber, 0);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    RefPtr<MockUnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    ASSERT_NE(unifiedData, nullptr);
+    dragEvent->SetData(unifiedData);
+    EXPECT_CALL(*unifiedData, GetSize()).WillRepeatedly(testing::Return(5));
+    dragEvent->SetUseDataLoadParams(false);
+    auto ret1 = guestureEventHub->GetBadgeNumber(dragEvent);
+    EXPECT_EQ(ret1, 5);
+
+    dragEvent->SetUseDataLoadParams(true);
+    RefPtr<MockDataLoadParams> mockDataLoadParams = AceType::MakeRefPtr<MockDataLoadParams>();
+    ASSERT_NE(mockDataLoadParams, nullptr);
+    dragEvent->SetDataLoadParams(mockDataLoadParams);
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(-1));
+    auto ret2 = guestureEventHub->GetBadgeNumber(dragEvent);
+    EXPECT_EQ(ret2, 1);
+
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(0));
+    auto ret3 = guestureEventHub->GetBadgeNumber(dragEvent);
+    EXPECT_EQ(ret3, 1);
+
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(INT32_MAX + 1));
+    auto ret4 = guestureEventHub->GetBadgeNumber(dragEvent);
+    EXPECT_EQ(ret4, 1);
+
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(10));
+    auto ret5 = guestureEventHub->GetBadgeNumber(dragEvent);
+    EXPECT_EQ(ret5, 10);
 }
 
 /**
@@ -1337,9 +1364,6 @@ HWTEST_F(GestureEventHubTestNg, UpdateMenuNode001, TestSize.Level1)
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<Pattern>(); });
     ASSERT_NE(frameNode, nullptr);
-    auto menuPreviewNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
-    ASSERT_NE(menuPreviewNode, nullptr);
     PreparedInfoForDrag data;
     DragPreviewOption previewOption;
     previewOption.sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
@@ -1348,7 +1372,6 @@ HWTEST_F(GestureEventHubTestNg, UpdateMenuNode001, TestSize.Level1)
     guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
     previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
     frameNode->SetDragPreviewOptions(previewOption);
-    data.menuPreviewNode = menuPreviewNode;
     guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
     RectF RECT(0.0f, 0.0f, 0.0f, 0.0f);
     EXPECT_EQ(data.frameNodeRect, RECT);
@@ -1388,6 +1411,16 @@ HWTEST_F(GestureEventHubTestNg, UpdateMenuNode002, TestSize.Level1)
     customGeometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
     auto menuWrapperNode =
         MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    auto previewNode = menuWrapperPattern->GetPreview();
+    ASSERT_NE(previewNode, nullptr);
+    auto previewRenderContext = previewNode->GetRenderContext();
+    ASSERT_NE(previewRenderContext, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(previewRenderContext);
+    RectF frameSize(1.0f, 1.0f, 1.0f, 1.0f);
+    mockRenderContext->SetPaintRectWithTransform(frameSize);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<Pattern>(); });
     ASSERT_NE(frameNode, nullptr);
@@ -1398,11 +1431,65 @@ HWTEST_F(GestureEventHubTestNg, UpdateMenuNode002, TestSize.Level1)
     frameNode->SetDragPreviewOptions(previewOption);
     guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
     RectF RECT(0.0f, 0.0f, 0.0f, 0.0f);
-    EXPECT_EQ(data.frameNodeRect, RECT);
+    EXPECT_EQ(data.frameNodeRect, frameSize);
     EXPECT_EQ(data.menuRect, RECT);
-    EXPECT_EQ(data.menuPositionLeft, 0.0f);
-    EXPECT_EQ(data.menuPositionTop, 0.0f);
-    EXPECT_EQ(data.menuPositionRight, 0.0f);
-    EXPECT_EQ(data.menuPositionBottom, 0.0f);
+    EXPECT_EQ(data.menuPositionLeft, -1.0f);
+    EXPECT_EQ(data.menuPositionTop, -1.0f);
+    EXPECT_EQ(data.menuPositionRight, 2.0f);
+    EXPECT_EQ(data.menuPositionBottom, 2.0f);
+}
+
+/**
+ * @tc.name: MinRecognizerGroupLoopSizeTest001
+ * @tc.desc: Test ProcessTouchTestHit
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, MinRecognizerGroupLoopSizeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    OffsetF coordinateOffset;
+    TouchRestrict touchRestrict;
+    TouchTestResult innerTargets;
+    TouchTestResult finalResult;
+    ResponseLinkResult responseLinkResult;
+    PointF localPoint;
+
+    /**
+     * @tc.steps: step2. create userRecognizer and set to gestureHierarchy_.
+     */
+    auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(1, 1, false);
+    gestureEventHub->gestureHierarchy_.emplace_back(longPressRecognizer);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0.0);
+    panRecognizer->SetPriority(GesturePriority::Parallel);
+    gestureEventHub->gestureHierarchy_.emplace_back(panRecognizer);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
+
+    auto otherFrameNode = FrameNode::CreateFrameNode("otherButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto otherClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    otherClickRecognizer->AttachFrameNode(otherFrameNode);
+    std::vector<RefPtr<NGGestureRecognizer>> exclusiveRecognizerGroup;
+    exclusiveRecognizerGroup.push_back(otherClickRecognizer);
+    auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(exclusiveRecognizerGroup);
+    gestureEventHub->externalExclusiveRecognizer_.push_back(exclusiveRecognizer);
+
+    /**
+     * @tc.steps: step3. call ProcessTouchTestHit , recognizer is not instance of recognizer group
+     * @tc.expected: result is false
+     */
+    auto result = gestureEventHub->ProcessTouchTestHit(
+        coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, nullptr, responseLinkResult);
+    auto sizeOfResponseLinkResult = static_cast<int32_t>(responseLinkResult.size());
+    EXPECT_FALSE(result);
+    EXPECT_EQ(sizeOfResponseLinkResult, 3);
 }
 } // namespace OHOS::Ace::NG

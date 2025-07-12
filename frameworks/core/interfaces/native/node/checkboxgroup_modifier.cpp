@@ -55,8 +55,8 @@ void ResetCheckboxGroupSelectedColor(ArkUINodeHandle node)
     auto checkBoxTheme = themeManager->GetTheme<CheckboxTheme>();
     CheckBoxGroupModelNG::SetSelectedColor(frameNode, checkBoxTheme->GetActiveColor());
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::SELECTED_COLOR, resObj);
+        CheckBoxGroupModelNG::SetSelectedColorByUser(frameNode, false);
+        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::SELECTED_COLOR, nullptr);
     }
 }
 
@@ -91,8 +91,8 @@ void ResetCheckboxGroupUnSelectedColor(ArkUINodeHandle node)
     auto checkBoxTheme = themeManager->GetTheme<CheckboxTheme>();
     CheckBoxGroupModelNG::SetUnSelectedColor(frameNode, checkBoxTheme->GetInactiveColor());
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::UN_SELECTED_COLOR, resObj);
+        CheckBoxGroupModelNG::SetUnSelectedColorByUser(frameNode, false);
+        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::UN_SELECTED_COLOR, nullptr);
     }
 }
 

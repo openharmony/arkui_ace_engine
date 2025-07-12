@@ -489,7 +489,7 @@ thread_local bool isWorker_ = false;
 
 thread_local bool isDynamicModulePreloaded_ = false;
 
-thread_local std::unordered_set<void*> validEnvs_;
+thread_local std::unordered_map<void*, shared_ptr<JsRuntime>> validCustomRuntime_;
 
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
@@ -822,7 +822,10 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
     if (vm == nullptr) {
         return;
     }
-    validEnvs_.insert(runtime);
+    if (validCustomRuntime_.find(runtime) != validCustomRuntime_.end()) {
+        // already preloaded
+        return;
+    }
 
     if (!arkRuntime->InitializeFromExistVM(vm)) {
         return;
@@ -890,13 +893,14 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
     }
-    localRuntime_ = arkRuntime;
+
+    validCustomRuntime_.emplace(runtime, arkRuntime);
 #endif
 }
 
 void JsiDeclarativeEngineInstance::RemoveInvalidEnv(void* env)
 {
-    validEnvs_.erase(env);
+    validCustomRuntime_.erase(env);
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()
@@ -1000,7 +1004,6 @@ void JsiDeclarativeEngineInstance::InitGroupJsBridge()
     }
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
     JsUINodeRegisterCleanUp(JSNApi::GetGlobalObject(runtime->GetEcmaVm()));
-    JsUpdateDirty2ForAnimateTo(JSNApi::GetGlobalObject(runtime->GetEcmaVm()));
 }
 
 void JsiDeclarativeEngineInstance::RootViewHandle(panda::Local<panda::ObjectRef> value)
@@ -2048,14 +2051,10 @@ void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<p
     std::string pageFullPath;
     std::string ohmUrl;
     if (!ParseNamedRouterParams(vm, params, bundleName, moduleName, pagePath, pageFullPath, ohmUrl)) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "parse named router params failed!");
         return;
     }
 
-    TAG_LOGI(AceLogTag::ACE_ROUTER,
-        "add named router record, name: %{public}s, bundleName: %{public}s, moduleName: %{public}s, "
-        "pagePath: %{public}s, pageFullPath: %{public}s, ohmUrl: %{public}s",
-        namedRoute.c_str(), bundleName.c_str(), moduleName.c_str(), pagePath.c_str(), pageFullPath.c_str(),
-        ohmUrl.c_str());
     NamedRouterProperty namedRouterProperty({ pageGenerator, bundleName, moduleName, pagePath, ohmUrl });
     auto ret = namedRouterRegisterMap_.insert(std::make_pair(namedRoute, namedRouterProperty));
     if (!ret.second) {
@@ -2107,9 +2106,10 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& routeNameOrU
             moduleName = routeNameOrUrl.substr(moduleStartPos, moduleEndPos - moduleStartPos);
             url = routeNameOrUrl.substr(moduleEndPos + strlen("/ets/"));
         } else {
-            bundleName = AceApplicationInfo::GetInstance().GetPackageName();
-            auto container = Container::Current();
+            auto container = Container::GetContainer(instanceId_);
             CHECK_NULL_RETURN(container, false);
+            bundleName = container->IsUseStageModel() ?
+                container->GetBundleName() : AceApplicationInfo::GetInstance().GetPackageName();
             moduleName = container->GetModuleName();
         }
 #else
@@ -2420,7 +2420,7 @@ bool JsiDeclarativeEngine::ExecuteJsForFastPreview(const std::string& jsCode, co
 }
 
 void JsiDeclarativeEngine::SetHspBufferTrackerCallback(
-    std::function<bool(const std::string&, bool, uint8_t**, size_t*, std::string&)>&& callback)
+    std::function<bool(const std::string&, uint8_t**, size_t*, std::string&)>&& callback)
 {
     CHECK_NULL_VOID(engineInstance_);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());

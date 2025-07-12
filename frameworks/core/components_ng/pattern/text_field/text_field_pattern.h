@@ -298,6 +298,8 @@ public:
 
     bool CheckBlurReason();
 
+    bool NeedSetScrollRect();
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -413,11 +415,6 @@ public:
     RefPtr<Referenced> GetJSTextEditableController()
     {
         return jsTextEditableController_.Upgrade();
-    }
-
-    void SetTextEditController(const RefPtr<TextEditController>& textEditController)
-    {
-        textEditingController_ = textEditController;
     }
 
     std::string GetTextValue() const
@@ -2077,7 +2074,6 @@ private:
 
     RefPtr<TextFieldController> textFieldController_;
     WeakPtr<Referenced> jsTextEditableController_;
-    RefPtr<TextEditController> textEditingController_;
     TextEditingValueNG textEditingValue_;
     // controls redraw of overlay modifier, update when need to redraw
     bool changeSelectedRects_ = false;
@@ -2189,7 +2185,6 @@ private:
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
-    bool isPreviewTextOverCount_ = false;
     bool isCaretTwinkling_ = false;
     bool isPasswordSymbol_ = true;
     bool isEnableHapticFeedback_ = true;
@@ -2214,6 +2209,8 @@ private:
     bool cancelButtonTouched_ = false;
     KeyboardGradientMode imeGradientMode_ = KeyboardGradientMode::NONE;
     KeyboardFluidLightMode imeFluidLightMode_ = KeyboardFluidLightMode::NONE;
+    OverflowMode lastOverflowMode_ = OverflowMode::SCROLL;
+    TextOverflow lastTextOverflow_ = TextOverflow::ELLIPSIS;
 };
 } // namespace OHOS::Ace::NG
 

@@ -39,7 +39,8 @@ namespace OHOS::Ace {
 enum class ToggleColorType {
     SELECTED_COLOR,
     SWITCH_POINT_COLOR,
-    UN_SELECTED_COLOR
+    UN_SELECTED_COLOR,
+    BACKGROUND_COLOR
 };
 enum class ToggleDimensionType {
     POINT_RADIUS,
@@ -73,6 +74,8 @@ public:
         const ToggleColorType toggleColorType) {};
     virtual void CreateWithDimensionVpResourceObj(const RefPtr<ResourceObject>& resObj,
         const ToggleDimensionType toggleDimensionType) {};
+    virtual void SetSwitchPointColorSetByUser(const bool flag) {};
+    virtual void SetUnselectedColorSetByUser(const bool flag) {};
 
 private:
     static std::unique_ptr<ToggleModel> instance_;

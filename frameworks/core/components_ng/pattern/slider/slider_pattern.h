@@ -139,6 +139,11 @@ public:
         return valueRatio_;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     OffsetF CalculateGlobalSafeOffset();
@@ -227,6 +232,13 @@ public:
     {
         bubbleFlag_ = flag;
     }
+
+    void UpdateSliderParams(float trackThickness, SizeF blockSize, SizeF blockHotSize)
+    {
+        trackThickness_ = trackThickness;
+        blockSize_ = blockSize;
+        blockHotSize_ = blockHotSize;
+    }
     
     RefPtr<SliderContentModifier> GetSliderContentModifier() const
     {
@@ -261,6 +273,7 @@ public:
     void UpdateSliderComponentColor(const Color& color, const SliderColorType sliderColorType, const Gradient& value);
     void UpdateSliderComponentMedia();
     void UpdateSliderComponentString(const bool isShowTips, const std::string& value);
+    Axis GetDirection() const;
 
 private:
     void OnAttachToFrameNode() override;
@@ -288,7 +301,6 @@ private:
     bool AtPanArea(const Offset& offset, const SourceType& sourceType);
 
     void UpdateMarkDirtyNode(const PropertyChangeFlag& Flag);
-    Axis GetDirection() const;
 
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -438,6 +450,8 @@ private:
         return skipGestureEvents_;
     }
     void DumpSubInfo(RefPtr<SliderPaintProperty> paintProperty);
+    void UpdateStepPointsAccessibilityText(
+        RefPtr<FrameNode>& node, uint32_t nodeIndex, SliderModel::SliderShowStepOptions& options);
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };

@@ -1519,14 +1519,14 @@ HWTEST_F(TextFieldModifyTest, CreateFrameNode001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize text input.
      */
-    auto frameNode1 = TextFieldModelNG::CreateFrameNode(ID, u"", u"", false);
+    auto frameNode1 = TextFieldModelNG::CreateTextInputNode(ID, u"", u"");
     EXPECT_NE(frameNode1, nullptr);
  
     /**
      * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
      * @tc.expected: Check if the text draggable.
      */
-    auto frameNode2 = TextFieldModelNG::CreateFrameNode(ID, u"", HELLO_TEXT_U16, true);
+    auto frameNode2 = TextFieldModelNG::CreateTextAreaNode(ID, u"", HELLO_TEXT_U16);
     EXPECT_NE(frameNode2, nullptr);
 }
  

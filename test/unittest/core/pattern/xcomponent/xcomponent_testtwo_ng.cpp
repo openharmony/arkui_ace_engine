@@ -367,6 +367,44 @@ HWTEST_F(XComponentTestTwoNg, ResetExtControllerTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ResetExtControllerTest001
+ * @tc.desc: Test ResetExtController Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, ResetExtControllerTest001, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    auto result = pattern->ResetExtController(nullptr);
+    EXPECT_EQ(result, XCOMPONENT_CONTROLLER_BAD_PARAMETER);
+
+    auto extFrameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(extFrameNode);
+
+    auto extPattern = extFrameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(extPattern);
+
+    pattern->frameNode_ = nullptr;
+    extPattern->frameNode_ = nullptr;
+    result = pattern->ResetExtController(extPattern);
+    EXPECT_EQ(result, XCOMPONENT_CONTROLLER_RESET_ERROR);
+
+    g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    auto frameNodeTmp = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNodeTmp);
+    pattern->extPattern_ = AceType::WeakClaim(AceType::RawPtr(pattern));
+    auto patternTmp = frameNodeTmp->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(patternTmp);
+    result = pattern->ResetExtController(patternTmp);
+    EXPECT_EQ(result, XCOMPONENT_CONTROLLER_RESET_ERROR);
+}
+
+/**
  * @tc.name: HandleSurfaceChangeEventTest
  * @tc.desc: Test HandleSurfaceChangeEvent Func.
  * @tc.type: FUNC

@@ -378,6 +378,7 @@ protected:
         ViewAbstract::SetHeight(CalcLength(getHeight_(index)));
         ViewAbstract::SetFocusable(true);
         auto node = ViewStackProcessor::GetInstance()->Finish();
+        node->nodeId_ = index;
         return { std::to_string(index), node };
     }
 

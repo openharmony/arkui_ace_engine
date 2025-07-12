@@ -35,7 +35,8 @@ ArkUINativeModuleValue LoadingProgressBridge::SetColor(ArkUIRuntimeCallInfo* run
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getLoadingProgressModifier()->resetColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
@@ -96,7 +97,8 @@ ArkUINativeModuleValue LoadingProgressBridge::SetForegroundColor(ArkUIRuntimeCal
     }
     Color foregroundColor;
     RefPtr<ResourceObject> foregroundColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor, foregroundColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor, foregroundColorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getLoadingProgressModifier()->resetForegroundColor(nativeNode);
     } else {
         auto foregroundColorRawPtr = AceType::RawPtr(foregroundColorResObj);

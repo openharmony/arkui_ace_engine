@@ -44,7 +44,8 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
     auto layoutPolicy = GetLayoutPolicy(layoutWrapper);
 
     if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
-        return LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, layoutWrapper);
+        realSize_ = LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, layoutWrapper);
+        return realSize_;
     }
 
     // Case 1: Width and height are set in the front end.
@@ -100,6 +101,11 @@ void RadioLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childConstraint.percentReference.SetSizeT(contentSize);
     }
     for (auto &&child : layoutWrapper->GetAllChildrenWithBuild()) {
+        auto layoutPolicy = GetLayoutPolicy(layoutWrapper);
+        if (layoutPolicy.has_value() && layoutPolicy->IsMatch() && realSize_) {
+            childConstraint.selfIdealSize.SetWidth(realSize_->Width() * DEFAULT_RADIO_IMAGE_SCALE);
+            childConstraint.selfIdealSize.SetHeight(realSize_->Height() * DEFAULT_RADIO_IMAGE_SCALE);
+        }
         child->Measure(childConstraint);
     }
     PerformMeasureSelf(layoutWrapper);

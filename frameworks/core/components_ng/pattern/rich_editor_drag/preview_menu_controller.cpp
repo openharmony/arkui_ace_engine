@@ -38,7 +38,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/ui_extension/preview_ui_extension_adapter.h"
+#include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_adapter.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/menu_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -54,8 +54,11 @@ constexpr Dimension MARGIN_SIZE = 16.0_vp;
 constexpr Dimension PREVIEW_MIN_HEIGHT = 64.0_vp;
 constexpr Dimension FAILED_TEXT_LINE_SPACING = 8.0_vp;
 constexpr float MAX_HEIGHT_PROPORTIONS = 0.65;
+const std::string CALENDAR_ABILITY_NAME = "AgendaPreviewUIExtensionAbility";
+const std::string UIEXTENSION_PARAM = "ability.want.params.uiExtensionType";
+const std::string UIEXTENSION_PARAM_VALUE = "sys/commonUI";
 #if !defined(ACE_UNITTEST) && !defined(PREVIEW) && defined(OHOS_STANDARD_SYSTEM)
-constexpr float PERCENT_FULL = 100.0;
+constexpr float PERCENT_FULL = 1.0;
 #endif
 } // namespace
 PreviewMenuController::PreviewMenuController(const WeakPtr<TextPattern>& pattern)
@@ -157,8 +160,8 @@ std::function<void()> PreviewMenuController::GetLinkingCallback(const std::strin
     };
 }
 
-void PreviewMenuController::CreatePreviewMenu(
-    TextDataDetectType type, const std::string& content, std::function<void()> disappearCallback)
+void PreviewMenuController::CreatePreviewMenu(TextDataDetectType type, const std::string& content,
+    std::function<void()> disappearCallback, std::map<std::string, std::string> AIparams)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -182,8 +185,12 @@ void PreviewMenuController::CreatePreviewMenu(
     const auto& extensionAdapter = PreviewUIExtensionAdapter::GetInstance();
     CHECK_NULL_VOID(extensionAdapter);
     UIExtensionConfig config;
-    auto wantWrap = WantWrap::CreateWantWrap("", "");
+    std::string bundleName;
+    std::string abilityName;
     std::map<std::string, std::string> params;
+    CreateWantConfig(type, bundleName, abilityName, params, AIparams);
+    PreviewNodeClickCallback(type, previewNode, AIparams);
+    auto wantWrap = WantWrap::CreateWantWrap(bundleName, abilityName);
     CHECK_NULL_VOID(wantWrap);
     wantWrap->SetWantParam(params);
     config.wantWrap = wantWrap;
@@ -204,6 +211,59 @@ void PreviewMenuController::CreatePreviewMenu(
 #endif
     previewNode->MountToParent(frameNode);
     return;
+}
+
+void PreviewMenuController::PreviewNodeClickCallback(
+    TextDataDetectType type, const RefPtr<FrameNode>& previewNode, const std::map<std::string, std::string>& AIparams)
+{
+    CHECK_NULL_VOID(previewNode);
+    std::function<void()> clickCallback;
+    switch (type) {
+        case TextDataDetectType::DATE_TIME:
+            clickCallback = [AIparams, mainId = Container::CurrentIdSafelyWithCheck()]() {
+                ContainerScope scope(mainId);
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+                CHECK_NULL_VOID(pipeline);
+                auto fontManager = pipeline->GetFontManager();
+                CHECK_NULL_VOID(fontManager);
+                fontManager->StartAbilityOnCalendar(AIparams);
+            };
+            break;
+        case TextDataDetectType::PHONE_NUMBER:
+        case TextDataDetectType::EMAIL:
+        case TextDataDetectType::ADDRESS:
+        case TextDataDetectType::URL:
+        default:
+            break;
+    }
+    auto eventHub = previewNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetUserOnClick([clickCallback, mainId = Container::CurrentIdSafelyWithCheck()](GestureEvent& info) {
+        ContainerScope scope(mainId);
+        if (clickCallback) {
+            clickCallback();
+        }
+    });
+}
+
+void PreviewMenuController::CreateWantConfig(TextDataDetectType type, std::string& bundleName, std::string& abilityName,
+    std::map<std::string, std::string>& params, const std::map<std::string, std::string>& AIparams)
+{
+    params[UIEXTENSION_PARAM] = UIEXTENSION_PARAM_VALUE;
+    switch (type) {
+        case TextDataDetectType::DATE_TIME: {
+            bundleName = ExpandedMenuPluginLoader::GetInstance().GetAPPName(TextDataDetectType::DATE_TIME);
+            abilityName = CALENDAR_ABILITY_NAME;
+            break;
+        }
+        case TextDataDetectType::PHONE_NUMBER:
+        case TextDataDetectType::EMAIL:
+        case TextDataDetectType::ADDRESS:
+        case TextDataDetectType::URL:
+        default:
+            break;
+    }
+    params.insert(AIparams.begin(), AIparams.end());
 }
 
 AIPreviewMenuErrorCallback PreviewMenuController::GetErrorCallback(const RefPtr<FrameNode>& previewNode,
@@ -436,7 +496,7 @@ void PreviewMenuController::BindContextMenu(const RefPtr<FrameNode>& targetNode,
         auto textPattern = pattern.Upgrade();
         CHECK_NULL_VOID(textPattern);
         auto data = textPattern->GetSelectedAIData();
-        controller->CreatePreviewMenu(data.type, data.content, func);
+        controller->CreatePreviewMenu(data.type, data.content, func, data.params);
     };
     menuParam_.isShow = isShow;
     isShow_ = isShow;

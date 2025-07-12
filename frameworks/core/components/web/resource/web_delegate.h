@@ -596,14 +596,39 @@ public:
     explicit GestureEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result)
         : result_(result) {}
 
+    explicit GestureEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebMouseEventResult> mouseResult)
+        : mouseResult_(mouseResult) {}
+
     void SetGestureEventResult(bool result) override;
     void SetGestureEventResult(bool result, bool stopPropagation) override;
     bool HasSendTask() { return sendTask_; }
     void SetSendTask() { sendTask_ = true; }
     bool GetEventResult() { return eventResult_; }
+    void SetIsMouseToTouch(bool isMouseToTouch) { isMouseToTouch_ = isMouseToTouch; };
+    bool IsMouseToTouch() { return isMouseToTouch_; };
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result_;
+    std::shared_ptr<OHOS::NWeb::NWebMouseEventResult> mouseResult_;
+    bool sendTask_ = false;
+    bool eventResult_ = false;
+    bool isMouseToTouch_ = false;
+};
+
+class MouseEventResultOhos : public MouseEventResult {
+    DECLARE_ACE_TYPE(MouseEventResultOhos, MouseEventResult);
+
+public:
+    explicit MouseEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebMouseEventResult> result)
+        : result_(result) {}
+
+    void SetMouseEventResult(bool result, bool stopPropagation) override;
+    bool HasSendTask() { return sendTask_; }
+    void SetSendTask() { sendTask_ = true; }
+    bool GetEventResult() { return eventResult_; }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebMouseEventResult> result_;
     bool sendTask_ = false;
     bool eventResult_ = false;
 };
@@ -953,11 +978,16 @@ public:
     void OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
     RefPtr<WebResponse> OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info);
+    std::string OnOverrideErrorPage(
+        std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> webResourceRequest,
+        std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
     bool IsEmptyOnInterceptRequest();
     void ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart);
     void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
+    void SetPageFinishedState(const bool& state);
+    bool GetPageFinishedState();
     void OnProgressChanged(int param);
     void OnReceivedTitle(const std::string& title, bool isRealTitle = false);
     void ExitFullScreen();
@@ -1053,6 +1083,7 @@ public:
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
     void OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility);
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
+    void OnNativeEmbedMouseEvent(std::shared_ptr<NWeb::NWebNativeEmbedMouseEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     bool RequestFocus(OHOS::NWeb::NWebFocusSource source = OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_DEFAULT);
     bool IsCurrentFocus();
@@ -1076,6 +1107,8 @@ public:
         const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
         TouchEventInfo& touchEventInfo);
+    MouseInfo TransToMouseInfo(const std::shared_ptr<OHOS::NWeb::NWebNativeEmbedMouseEvent>& mouseEvent);
+    bool SetTouchEventInfoFromMouse(const MouseInfo &mouseInfo, TouchEventInfo &touchEventInfo);
     bool GetIsSmoothDragResizeEnabled();
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
     void SetDragResizeStartFlag(bool isDragResizeStart);
@@ -1216,6 +1249,8 @@ public:
 
     bool IsActivePolicyDisable();
 
+    OHOS::NWeb::WebDestroyMode GetWebDestroyMode();
+
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
 
     std::string GetCurrentLanguage();
@@ -1262,6 +1297,17 @@ public:
 
     void SetViewportScaleState();
 
+    void OnPdfScrollAtBottom(const std::string& url);
+    void OnPdfLoadEvent(int32_t result, const std::string& url);
+
+    bool HasOnNativeEmbedGestureEventV2()
+    {
+#ifdef OHOS_STANDARD_SYSTEM
+        return static_cast<bool>(OnNativeEmbedGestureEventV2_);
+#else
+        return false;
+#endif
+    }
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1351,6 +1397,10 @@ private:
     NG::SafeAreaInsets GetCombinedSafeArea();
     void OnSafeInsetsChange();
     void EnableHardware();
+    void HandleNativeMouseEvent(const std::shared_ptr<OHOS::NWeb::NWebMouseEventResult>& result,
+        const MouseInfo& mouseInfo, std::string embedId, const RefPtr<WebDelegate>& delegate);
+    void HandleNativeMouseToTouch(const std::shared_ptr<OHOS::NWeb::NWebMouseEventResult>& result,
+        const MouseInfo& mouseInfo, std::string embedId, const RefPtr<WebDelegate>& delegate);
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1370,6 +1420,7 @@ private:
     Method changePageUrlMethod_;
     Method isPagePathInvalidMethod_;
     State state_ { State::WAITINGFORSIZE };
+    bool isPageFinished_;
 #ifdef OHOS_STANDARD_SYSTEM
     std::shared_ptr<OHOS::NWeb::NWeb> nweb_;
     std::shared_ptr<OHOS::NWeb::NWebCookieManager> cookieManager_ = nullptr;
@@ -1411,6 +1462,7 @@ private:
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
     EventCallbackV2 OnNativeEmbedVisibilityChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
+    EventCallbackV2 OnNativeEmbedMouseEventV2_;
     EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
     EventCallbackV2 onRenderProcessNotRespondingV2_;
     EventCallbackV2 onRenderProcessRespondingV2_;

@@ -440,6 +440,7 @@ public:
 
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
+    void UpdateRecycledItems();
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     void LayoutListItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
     void LayoutListItemAll(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, float startPos);

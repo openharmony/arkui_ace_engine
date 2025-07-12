@@ -1018,9 +1018,9 @@ public:
         ViewAbstract::SetFgDynamicBrightness(brightnessOption);
     }
 
-    void SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) override
+    void SetBlender(const OHOS::Rosen::Blender* blender) override
     {
-        ViewAbstract::SetBrightnessBlender(brightnessBlender);
+        ViewAbstract::SetBlender(blender);
     }
 
     void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
@@ -1465,6 +1465,12 @@ public:
         ViewAbstract::SetFocusBoxStyle(style);
     }
 
+    void SetFocusBoxStyleUpdateFunc(
+        NG::FocusBoxStyle& style, const RefPtr<ResourceObject>& resObj, const std::string& property) override
+    {
+        ViewAbstract::SetFocusBoxStyleUpdateFunc(style, resObj, property);
+    }
+
     void SetInspectorId(const std::string& inspectorId) override
     {
         ViewAbstract::SetInspectorId(inspectorId);
@@ -1564,9 +1570,9 @@ public:
         NG::ViewAbstract::SetBackgroundAlign(align);
     }
     void SetCustomBackgroundColor(const Color& color) override;
-    void SetCustomBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) override
+    void SetCustomBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) override
     {
-        NG::ViewAbstract::SetCustomBackgroundColorWithResourceObj(resObj);
+        NG::ViewAbstract::SetCustomBackgroundColorWithResourceObj(color, resObj);
     }
     void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges) override;
     void SetIsTransitionBackground(bool val) override
@@ -1656,7 +1662,7 @@ public:
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj);
     static std::string PopupOptionTypeStr(const PopupOptionsType& type);
     static void ParseOptionsDimension(const RefPtr<NG::FrameNode>& frameNode,
-        const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type, CalcDimension& dimession);
+        const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type, CalcDimension& dimension);
     static void CreateWithDimensionResourceObj(const RefPtr<NG::FrameNode>& frameNode,
         const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type);
     virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
@@ -1884,9 +1890,9 @@ public:
     {
         ViewAbstract::SetBlendApplyType(frameNode, blendApplyType);
     }
-    static void SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+    static void SetBlender(FrameNode* frameNode, const OHOS::Rosen::Blender* blender)
     {
-        ViewAbstract::SetBrightnessBlender(brightnessBlender);
+        ViewAbstract::SetBlender(blender);
     }
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents)
     {

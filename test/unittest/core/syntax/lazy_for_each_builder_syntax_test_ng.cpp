@@ -752,6 +752,37 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachRecycleItemsOutOfBoundaryTest001, T
 }
 
 /**
+ * @tc.name: LazyForEachOnDataDeletedTest001
+ * @tc.desc: Test OnDataDeleted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDataDeletedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto lazyForEachBuilder = lazyForEachNode->builder_;
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    /**
+     * @tc.steps: step2. Invoke OnDataDeleted function.
+     * @tc.expected: Create delete operation and Invoke OnDataDeleted function.
+     */
+    lazyForEachBuilder->UpdateHistoricalTotalCount(lazyForEachBuilder->GetTotalCount());
+    lazyForEachNode->OnDataDeleted(INDEX_0);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuild();
+    EXPECT_EQ(lazyForEachNode->builder_->cachedItems_.size(), 6);
+    EXPECT_EQ(lazyForEachNode->builder_->operationList_.size(), 0);
+}
+
+/**
  * @tc.name: LazyForEachBuilder01
  * @tc.desc: LazyForEachBuilder::GetChildByIndex
  * @tc.type: FUNC

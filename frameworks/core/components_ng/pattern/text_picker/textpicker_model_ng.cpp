@@ -389,6 +389,8 @@ void TextPickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerT
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearTextOverflow,
         value.textOverflow.value_or(TextOverflow::CLIP));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, DisappearTextColorSetByUser, value.textColorSetByUser);
 }
 
 void TextPickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
@@ -434,6 +436,8 @@ void TextPickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& pickerThem
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, TextOverflow,
         value.textOverflow.value_or(TextOverflow::CLIP));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, NormalTextColorSetByUser, value.textColorSetByUser);
 }
 
 void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
@@ -479,6 +483,8 @@ void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTh
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedTextOverflow,
         value.textOverflow.value_or(TextOverflow::CLIP));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, SelectedTextColorSetByUser, value.textColorSetByUser);
 }
 
 void TextPickerModelNG::SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value)
@@ -518,6 +524,7 @@ void TextPickerModelNG::SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, 
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultTextOverflow,
         value.textOverflow.value_or(textStyle.GetTextOverflow()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultTextColorSetByUser, value.textColorSetByUser);
 }
 
 void TextPickerModelNG::HasUserDefinedDisappearFontFamily(bool isUserDefined)
@@ -1067,6 +1074,8 @@ void TextPickerModelNG::SetNormalTextStyle(
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, TextOverflow,
         value.textOverflow.value_or(TextOverflow::CLIP));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, NormalTextColorSetByUser, value.textColorSetByUser, frameNode);
 }
 
 void TextPickerModelNG::SetSelectedTextStyle(
@@ -1115,6 +1124,8 @@ void TextPickerModelNG::SetSelectedTextStyle(
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedTextOverflow,
         value.textOverflow.value_or(TextOverflow::CLIP));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, SelectedTextColorSetByUser, value.textColorSetByUser, frameNode);
 }
 
 void TextPickerModelNG::SetDisappearTextStyle(
@@ -1161,6 +1172,8 @@ void TextPickerModelNG::SetDisappearTextStyle(
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearTextOverflow,
         value.textOverflow.value_or(TextOverflow::CLIP));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, DisappearTextColorSetByUser, value.textColorSetByUser, frameNode);
 }
 
 void TextPickerModelNG::SetDefaultPickerItemHeight(FrameNode* frameNode, const Dimension& value)
@@ -1418,6 +1431,8 @@ void TextPickerModelNG::SetDefaultTextStyle(
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultTextOverflow,
         value.textOverflow.value_or(textStyle.GetTextOverflow()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultTextColorSetByUser,
+        value.textColorSetByUser, frameNode);
 }
 
 std::string TextPickerModelNG::getTextPickerValue(FrameNode* frameNode)
@@ -1703,6 +1718,10 @@ void TextPickerModelNG::ParseDividerResObj(FrameNode* frameNode, const NG::ItemD
     CHECK_NULL_VOID(textPickerPattern);
 
     auto&& updateFunc = [frameNode, divider](const RefPtr<ResourceObject>& resObj) {
+        if (divider.isNull == true) {
+            return;
+        }
+
         auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
         CHECK_NULL_VOID(textPickerPattern);
         auto context = frameNode->GetContext();
@@ -1744,6 +1763,7 @@ void TextPickerModelNG::ParseDividerResObj(FrameNode* frameNode, const NG::ItemD
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, curDivider, frameNode);
     };
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    textPickerPattern->RemoveResObj("textPicker.divider");
     textPickerPattern->AddResObj("textPicker.divider", resObj, std::move(updateFunc));
 }
 
@@ -1755,6 +1775,11 @@ void TextPickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, c
 
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
+
+    if (!textStyleOpt.textColorResObj && !textStyleOpt.fontSizeResObj && !textStyleOpt.fontFamilyResObj) {
+        pickerPattern->RemoveResObj(textStyleType);
+        return;
+    }
 
     auto&& updateFunc = [textStyleOpt, frameNode, updateTextStyleFunc](const RefPtr<ResourceObject> resObj) {
         PickerTextStyle textStyle;
@@ -1839,6 +1864,12 @@ void TextPickerModelNG::ParseDefaultTextStyleResObj(const PickerTextStyle& textS
 
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
+
+    if (!textStyleOpt.textColorResObj && !textStyleOpt.fontSizeResObj && !textStyleOpt.fontFamilyResObj &&
+        !textStyleOpt.minFontSizeResObj && !textStyleOpt.maxFontSizeResObj) {
+        pickerPattern->RemoveResObj("TextPickerDefaultTextStyle");
+        return;
+    }
 
     auto&& updateFunc = [textStyleOpt, frameNode](const RefPtr<ResourceObject> resObj) {
         PickerTextStyle textStyle;

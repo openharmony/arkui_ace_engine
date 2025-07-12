@@ -59,7 +59,7 @@ constexpr float HDR_BRIGHTNESS_MAX = 1.0f;
 constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
 const std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::RIGHT,
     ResizableOption::BOTTOM, ResizableOption::LEFT };
-std::string g_strValue;
+thread_local std::string g_strValue;
 
 enum class ResourceType : uint32_t {
     COLOR = 10001,

@@ -260,6 +260,15 @@ void JsThirdProviderInteractionOperation::SetSearchElementInfoByAccessibilityIdR
         }, TaskExecutor::TaskType::BACKGROUND, "SearchElementInfoByAccessibilityId");
 }
 
+void JsThirdProviderInteractionOperation::SearchElementInfoBySpecificProperty(const int64_t elementId,
+    const SpecificPropertyParam &param, const int32_t requestId,
+    AccessibilityElementOperatorCallback &callback)
+{
+    std::list<AccessibilityElementInfo> infos;
+    std::list<AccessibilityElementInfo> treeInfos;
+    callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
+}
+
 void JsThirdProviderInteractionOperation::SearchElementInfosByText(
     const int64_t elementId, const std::string& text, const int32_t requestId,
     Accessibility::AccessibilityElementOperatorCallback& callback)
@@ -651,7 +660,7 @@ void JsThirdProviderInteractionOperation::GetNodeConfig(NodeConfig& config)
     config.windowId = static_cast<int32_t>(context->GetRealHostWindowId());
     config.belongTreeId = belongTreeId_;
     config.parentWindowId = static_cast<int32_t>(context->GetRealHostWindowId());
-    config.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+    config.bundleName = Container::CurrentBundleName();
 
     GetHostRectTranslateInfo(config);
 }
@@ -682,7 +691,7 @@ int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEventForThird
         Accessibility::WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
     event.SetSource(thirdElementId);
     event.SetEventType(eventType);
-    event.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
+    event.SetBundleName(Container::CurrentBundleName());
 
     // 2. get element from third
     // cut tree id

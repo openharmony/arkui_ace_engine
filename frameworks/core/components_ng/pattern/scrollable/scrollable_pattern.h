@@ -20,12 +20,13 @@
 #include <vector>
 
 #include "base/geometry/axis.h"
+#include "core/animation/bezier_variable_velocity_motion.h"
 #include "core/animation/select_motion.h"
 #include "core/animation/spring_curve.h"
-#include "core/animation/bezier_variable_velocity_motion.h"
 #include "core/animation/velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
@@ -43,7 +44,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/event/mouse_event.h"
-#include "core/components_ng/event/scrollable_event.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
@@ -394,6 +394,27 @@ public:
     {
         return 0.0f;
     }
+
+    /* ============================= Free Scroll Enhancements ============================= */
+    virtual Offset GetFreeScrollOffset() const
+    {
+        return {};
+    }
+    virtual bool FreeScrollBy(const OffsetF& delta)
+    {
+        return false;
+    }
+    virtual bool FreeScrollPage(bool reverse, bool smooth)
+    {
+        return false;
+    }
+    virtual bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std::optional<float>& velocity)
+    {
+        return false;
+    }
+    virtual void FreeScrollTo(const ScrollControllerBase::ScrollToParam& param) {}
+    /* ============================================================================== */
+
     virtual float GetContentStartOffset() const
     {
         return 0.0f;
@@ -434,6 +455,20 @@ public:
     bool GetCanStayOverScroll() const
     {
         return canStayOverScroll_;
+    }
+    void ChangeAnimateOverScroll()
+    {
+        if (GetScrollSource() == SCROLL_FROM_JUMP && GetCanStayOverScroll()) {
+            SetAnimateCanOverScroll(false);
+        }
+    }
+    void ChangeCanStayOverScroll()
+    {
+        if (GetIsOverScroll()) {
+            if (!IsOutOfBoundary()) {
+                SetIsOverScroll(false);
+            }
+        }
     }
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
@@ -509,6 +544,9 @@ public:
     static ScrollState GetScrollState(int32_t scrollSource);
 
     static ScrollSource ConvertScrollSource(int32_t source);
+
+    static int32_t ScrollToTarget(
+        RefPtr<FrameNode>& scrollable, RefPtr<FrameNode>& target, float targetOffset, ScrollAlign targetAlign);
 
     float CalculateFriction(float gamma)
     {
@@ -652,11 +690,6 @@ public:
     virtual bool IsEnablePagingValid()
     {
         return false;
-    }
-
-    void SetNeedLinked(bool needLinked)
-    {
-        needLinked_ = needLinked;
     }
 
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
@@ -850,13 +883,39 @@ public:
     }
 
     void MarkScrollBarProxyDirty();
-protected:
-    void SuggestOpIncGroup(bool flag);
-    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+
+    bool ChildPreMeasureHelperEnabled() override
+    {
+        return true;
+    }
+    bool PostponedTaskForIgnoreEnabled() override
+    {
+        return true;
+    }
+
+    bool NeedCustomizeSafeAreaPadding() override
+    {
+        return true;
+    }
+
+    PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate) override;
+
+    bool ChildTentativelyLayouted(IgnoreStrategy& strategy) override
+    {
+        strategy = IgnoreStrategy::SCROLLABLE_AXIS;
+        return true;
+    }
+
+    bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
+        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
+
     RefPtr<ScrollBar> GetScrollBar() const
     {
         return scrollBar_;
     }
+protected:
+    void SuggestOpIncGroup(bool flag);
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
     EdgeEffect GetEdgeEffect() const;
@@ -874,6 +933,7 @@ protected:
     void FireObserverOnScrollStop();
     void FireObserverOnDidScroll(float finalOffset);
     void FireObserverOnScrollerAreaChange(float finalOffset);
+    float FireObserverOnWillScroll(float offset);
 
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
     void FireOnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
@@ -1144,7 +1204,6 @@ private:
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool edgeEffectAlwaysEnabled_ = false;
     EffectEdge effectEdge_ = EffectEdge::ALL;
-    bool needLinked_ = true;
 
     RefPtr<NodeAnimatablePropertyFloat> springOffsetProperty_;
     RefPtr<NodeAnimatablePropertyFloat> curveOffsetProperty_;

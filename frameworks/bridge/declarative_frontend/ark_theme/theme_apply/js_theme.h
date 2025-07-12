@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
+#include "ui/view/theme/token_theme.h"
 
 #define COLORS_NUMBER (51)
 
@@ -330,12 +331,23 @@ public:
         colors_ = colors;
     }
 
+    void SetDarkColors(const JSThemeColors& darkColors)
+    {
+        darkColors_ = darkColors;
+    }
+
     const JSThemeColors& Colors() const
     {
-        return colors_;
+        bool isDark = IsDarkMode();
+        return isDark ? darkColors_ : colors_;
     }
 private:
     JSThemeColors colors_;
+    JSThemeColors darkColors_;
+    static bool IsDarkMode()
+    {
+        return OHOS::Ace::TokenTheme::IsDarkMode();
+    }
 };
 
 class JSThemeScope {

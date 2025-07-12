@@ -23,6 +23,7 @@
 #include "core/common/interaction/interaction_interface.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
@@ -883,9 +884,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     std::map<std::string, int64_t> summary;
     std::map<std::string, int64_t> detailedSummary;
     int32_t ret = -1;
-    auto unifiedData = dragEvent->GetData();
     DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
-    int32_t recordsSize = GetBadgeNumber(unifiedData);
+    int32_t recordsSize = GetBadgeNumber(dragEvent);
     RefPtr<PixelMap> pixelMap = dragDropInfo.pixelMap;
     if (pixelMap) {
         SetPixelMap(pixelMap);
@@ -1640,16 +1640,13 @@ void GestureEventHub::UpdateMenuNode(
     auto menuGeometryNode = scrollNode->GetGeometryNode();
     CHECK_NULL_VOID(menuGeometryNode);
     auto menuNodeSize = menuGeometryNode->GetFrameRect();
-    RefPtr<FrameNode> imageNode;
+    RefPtr<FrameNode> imageNode = menuWrapperPattern->GetPreview();
     RectF imageNodeSize;
-    if (data.menuPreviewNode) {
-        imageNode = data.menuPreviewNode;
-        CHECK_NULL_VOID(imageNode);
-        imageNodeSize = data.originPreviewRect;
+    if (imageNode) {
+        imageNodeSize = DragDropFuncWrapper::GetPaintRectToScreen(imageNode);
         data.frameNodeRect = imageNodeSize;
     } else {
         imageNode = frameNode;
-        CHECK_NULL_VOID(imageNode);
         auto imageGeometryNode = imageNode->GetGeometryNode();
         CHECK_NULL_VOID(imageGeometryNode);
         imageNodeSize = imageGeometryNode->GetFrameRect();
@@ -1674,19 +1671,26 @@ void GestureEventHub::UpdateMenuNode(
     data.menuNode = newMenuNode;
 }
 
-int32_t GestureEventHub::GetBadgeNumber(const RefPtr<UnifiedData>& unifiedData)
+int32_t GestureEventHub::GetBadgeNumber(const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
 {
+    CHECK_NULL_RETURN(dragEvent, 1);
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, 1);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_RETURN(pattern, 1);
     int32_t badgeNumber = 1;
     pattern->ResetDragOption();
+    auto unifiedData = dragEvent->GetData();
+    auto dataLoadParams = dragEvent->GetDataLoadParams();
+    auto isUseDataLoadParams = dragEvent->IsUseDataLoadParams();
     if (pattern->GetDragRecordSize() >= 0) {
         badgeNumber = pattern->GetDragRecordSize();
-    } else if (unifiedData) {
+    } else if (unifiedData && !isUseDataLoadParams) {
         auto recordSize = unifiedData->GetSize();
         badgeNumber = recordSize > 1 ? recordSize : 1;
+    } else if (dataLoadParams && isUseDataLoadParams) {
+        auto recodeCount = dataLoadParams->GetRecordCount();
+        badgeNumber = (recodeCount == 0 || recodeCount > INT32_MAX) ? 1 : static_cast<int32_t>(recodeCount);
     }
 
     auto dragPreviewOptions = frameNode->GetDragPreviewOption();
@@ -2006,4 +2010,14 @@ const BindMenuStatus& GestureEventHub::GetBindMenuStatus() const
     return bindMenuStatus_;
 }
 
+void GestureEventHub::SetRecognizerDelayStatus(const RecognizerDelayStatus& recognizerDelayStatus)
+{
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto refereeNG = eventManager->GetGestureRefereeNG(nullptr);
+    CHECK_NULL_VOID(refereeNG);
+    refereeNG->SetRecognizerDelayStatus(recognizerDelayStatus);
+}
 } // namespace OHOS::Ace::NG

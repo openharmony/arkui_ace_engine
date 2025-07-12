@@ -304,10 +304,10 @@ HWTEST_F(NavDestinationGroupNodeTestNg, CreateEmpty001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     navdestinationModel.SetHideTitleBar(frameNode, false, false);
     navdestinationModel.SetHideBackButton(frameNode, false);
-    navdestinationModel.SetBackgroundColor(Color::RED, false);
-    navdestinationModel.SetBackgroundColor(Color::RED, true);
-    navdestinationModel.SetBackgroundColor(frameNode, Color::RED, false);
-    navdestinationModel.SetBackgroundColor(frameNode, Color::RED, true);
+    navdestinationModel.SetBackgroundColor(Color::RED, false, nullptr);
+    navdestinationModel.SetBackgroundColor(Color::RED, true, nullptr);
+    navdestinationModel.SetBackgroundColor(frameNode, Color::RED, false, nullptr);
+    navdestinationModel.SetBackgroundColor(frameNode, Color::RED, true, nullptr);
     NavigationTitleInfo param;
     param.hasSubTitle = true;
     param.hasMainTitle = true;

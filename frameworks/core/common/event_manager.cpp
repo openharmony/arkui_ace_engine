@@ -28,7 +28,7 @@
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
-constexpr int32_t DUMP_START_NUMBER = 4;
+constexpr int32_t DUMP_START_NUMBER = 3;
 constexpr int32_t DUMP_LIMIT_SIZE = 500;
 constexpr int64_t EVENT_CLEAR_DURATION = 2000;
 constexpr int64_t TRANSLATE_NS_TO_MS = 1000000;
@@ -205,7 +205,7 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureReferee is not ready, force clean gestureReferee.");
 #ifndef IS_RELEASE_VERSION
         std::list<std::pair<int32_t, std::string>> dumpList;
-        eventTree_.Dump(dumpList, 0);
+        eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
         for (auto& item : dumpList) {
             TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: " SEC_PLD(%{public}s) ".",
                 SEC_PARAM(item.second.c_str()));
@@ -890,6 +890,8 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
     NotifyDragTouchEventListener(point);
 
     CheckUpEvent(event);
+    auto item = touchTestResults_.find(event.id);
+    passThroughResult_ = (item != touchTestResults_.end() && !item->second.empty());
     UpdateInfoWhenFinishDispatch(point, sendOnTouch);
     return true;
 }
@@ -963,6 +965,8 @@ void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
         for (auto stateHistory : stateHistorys) {
             if (stateHistory.procedure.find("Down") != std::string::npos) {
                 gestureLog += ", prcd: Down";
+            } else if (stateHistory.procedure.find("Move") != std::string::npos) {
+                gestureLog += ", prcd: Move";
             } else {
                 gestureLog += ", prcd: Up";
             }
@@ -1100,7 +1104,6 @@ void EventManager::DispatchTouchEventToTouchTestResult(const TouchEvent& touchEv
             eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                 std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
         }
-        passThroughResult_ = isStopTouchEvent;
     }
 }
 
@@ -1551,6 +1554,8 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
     }
     lastHoverNode_ = currHoverNode_;
     currHoverNode_ = hoverNode;
+    auto item = currMouseTestResultsMap_.find(event.id);
+    passThroughResult_ = (item != currMouseTestResultsMap_.end() && !item->second.empty());
 }
 
 bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
@@ -1588,7 +1593,6 @@ bool EventManager::DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event
         }
     }
     auto result = DispatchMouseEventToCurResults(event, handledResults, isStopPropagation);
-    passThroughResult_ = isStopPropagation;
     if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL) {
         DoSingleMouseActionRelease(key);
     }
@@ -1880,6 +1884,8 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
     touchRestrict.inputEventType = InputEventType::AXIS;
     touchRestrict.touchEvent = ConvertAxisEventToTouchEvent(event);
     frameNode->AxisTest(point, point, point, touchRestrict, axisTestResultsMap_[event.id]);
+    auto item = axisTestResultsMap_.find(event.id);
+    passThroughResult_ = (item != axisTestResultsMap_.end() && !item->second.empty());
 }
 
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
@@ -1890,7 +1896,6 @@ bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
             !event.isRotationEvent) {
             axisTestResultsMap_[event.id].clear();
             axisTestResultsMap_.erase(event.id);
-            passThroughResult_  = false;
             return false;
         }
     }
@@ -1898,13 +1903,11 @@ bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
         if (axisTarget && axisTarget->HandleAxisEvent(event)) {
             axisTestResultsMap_[event.id].clear();
             axisTestResultsMap_.erase(event.id);
-            passThroughResult_  = true;
             return true;
         }
     }
     axisTestResultsMap_[event.id].clear();
     axisTestResultsMap_.erase(event.id);
-    passThroughResult_ = false;
     return true;
 }
 
@@ -1995,7 +1998,7 @@ void EventManager::DumpEvent(NG::EventTreeType type, bool hasJson)
         DumpLog::GetInstance().PrintJson(json->ToString());
     } else {
         std::list<std::pair<int32_t, std::string>> dumpList;
-        eventTree.Dump(dumpList, 0);
+        eventTree.Dump(dumpList, 0, DUMP_START_NUMBER);
         for (auto& item : dumpList) {
             DumpLog::GetInstance().Print(item.first, item.second);
         }
@@ -2201,7 +2204,6 @@ bool EventManager::TryResampleTouchEvent(std::vector<TouchEvent>& history,
     std::vector<TouchEvent> events(history);
     events.insert(events.end(), current.begin(), current.end());
     ResamplePoint slope;
-    resample = GetLatestPoint(events, nanoTimeStamp);
     bool ret = CheckDifferentTargetDisplay({}, events) &&
         ResampleAlgo::GetResamplePointerEvent(events, nanoTimeStamp, resample, slope);
     if (ret) {
@@ -2213,19 +2215,8 @@ bool EventManager::TryResampleTouchEvent(std::vector<TouchEvent>& history,
 
     // update history and store the last 2 samples.
     history.clear();
-    auto penultimateIter = events.end() - 2; // cannot be used directly, maybe out of bounds.
-    if (ret && resample.time > penultimateIter->time) { // there are at least 2 samples if the resample exists.
-        if (resample.time > events.back().time) {
-            history.emplace_back(resample);
-            history.emplace_back(events.back());
-        } else {
-            history.emplace_back(events.back());
-            history.emplace_back(resample);
-        }
-    } else {
-        auto historyBegin = events.size() > 1 ? penultimateIter : events.begin();
-        history.assign(historyBegin, events.end());
-    }
+    auto historyBegin = (events.size() > 1) ? (events.end() - 2) : events.begin();
+    history.assign(historyBegin, events.end());
 
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, SEC_PLD(,

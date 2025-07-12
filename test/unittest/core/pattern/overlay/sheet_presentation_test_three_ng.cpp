@@ -47,6 +47,7 @@ public:
     static RefPtr<SheetTheme> sheetTheme_;
     static void SetUpTestCase();
     static void TearDownTestCase();
+    static void SetApiVersion(int32_t apiTargetVersion);
 };
 
 RefPtr<SheetTheme> SheetPresentationTestThreeNg::sheetTheme_ = nullptr;
@@ -72,6 +73,13 @@ void SheetPresentationTestThreeNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+void SheetPresentationTestThreeNg::SetApiVersion(int32_t apiTargetVersion)
+{
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(apiTargetVersion);
 }
 
 /**
@@ -128,6 +136,7 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset002, TestSize.Lev
     auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
     ASSERT_NE(sheetWrapperPattern, nullptr);
     sheetWrapperPattern->subWindowId_ = 1;
+    sheetWrapperPattern->isShowInUEC_ = true;
     SubwindowManager::GetInstance()->parentContainerMap_.try_emplace(1, 1);
     AceEngine::Get().containerMap_.clear();
     AceEngine::Get().containerMap_.emplace(1, MockContainer::Current());
@@ -170,6 +179,7 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset003, TestSize.Lev
     auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
     ASSERT_NE(sheetWrapperPattern, nullptr);
     sheetWrapperPattern->subWindowId_ = 1;
+    sheetWrapperPattern->isShowInUEC_ = true;
     SubwindowManager::GetInstance()->parentContainerMap_.try_emplace(1, 1);
     auto container = MockContainer::Current();
     AceEngine::Get().containerMap_.clear();
@@ -217,6 +227,7 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset004, TestSize.Lev
     auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
     ASSERT_NE(sheetWrapperPattern, nullptr);
     sheetWrapperPattern->subWindowId_ = 1;
+    sheetWrapperPattern->isShowInUEC_ = true;
     SubwindowManager::GetInstance()->parentContainerMap_.try_emplace(1, 1);
     auto container = MockContainer::Current();
     AceEngine::Get().containerMap_.clear();
@@ -263,6 +274,7 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset005, TestSize.Lev
     auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
     ASSERT_NE(sheetWrapperPattern, nullptr);
     sheetWrapperPattern->subWindowId_ = 1;
+    sheetWrapperPattern->isShowInUEC_ = true;
     SubwindowManager::GetInstance()->parentContainerMap_.try_emplace(1, 1);
     auto container = MockContainer::Current();
     AceEngine::Get().containerMap_.clear();
@@ -284,6 +296,54 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset005, TestSize.Lev
 }
 
 /**
+ * @tc.name: ComputeCenterStyleOffset006
+ * @tc.desc: Branch: if (!showInSubWindow) = false
+ *           Branch: ShowInUEC = false
+ *           Branch: if (mainWindowContext && GetContainerModalButtonsRect()) = true
+ *           Condition: mainWindowContext = true, GetContainerModalButtonsRect() = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset006, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(ElementRegister::GetInstance()->MakeUniqueId(),
+        V2::TEXT_ETS_TAG, std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
+    sheetLayoutAlgorithm->sheetStyle_.showInSubWindow = true;
+    auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetWrapperPattern>());
+    auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
+    ASSERT_NE(sheetWrapperPattern, nullptr);
+    sheetWrapperPattern->subWindowId_ = 1;
+    SubwindowManager::GetInstance()->parentContainerMap_.try_emplace(1, 1);
+    auto container = MockContainer::Current();
+    AceEngine::Get().containerMap_.clear();
+    AceEngine::Get().containerMap_.emplace(1, container);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    auto rootGeometryNode = pipelineContext->rootNode_->GetGeometryNode();
+    rootGeometryNode->SetFrameSize(SizeF(1800.0f, 1020.0f));
+    container->pipelineContext_ = pipelineContext;
+    sheetNode->MountToParent(sheetWrapperNode);
+    sheetWrapperPattern->mainWindowRect_ = RectF(0.0f, 0.0f, 1800.0f, 1020.0f);
+    auto sheetGeometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(sheetGeometryNode, nullptr);
+    sheetGeometryNode->frame_.rect_ = RectF(0.0f, 0.0f, 500.0f, 500.0f);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetGeometryNode, sheetNode->GetLayoutProperty());
+    sheetLayoutAlgorithm->ComputeCenterStyleOffset(Referenced::RawPtr(layoutWrapper));
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetX_, (1800.0f - 500.0f) / 2);
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, (1020.0f - 500.0f) / 2);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: UpdateTranslateOffsetWithPlacement001
  * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) = true
  * @tc.type: FUNC
@@ -291,13 +351,18 @@ HWTEST_F(SheetPresentationTestThreeNg, ComputeCenterStyleOffset005, TestSize.Lev
 HWTEST_F(SheetPresentationTestThreeNg, UpdateTranslateOffsetWithPlacement001, TestSize.Level1)
 {
     SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     OffsetF translate;
-    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate);
+    auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate, layoutWrapper);
     EXPECT_EQ(translate.GetX(), 0.0f);
     EXPECT_EQ(translate.GetY(), 8.0f);
     SheetPresentationTestThreeNg::TearDownTestCase();
@@ -314,15 +379,20 @@ HWTEST_F(SheetPresentationTestThreeNg, UpdateTranslateOffsetWithPlacement001, Te
 HWTEST_F(SheetPresentationTestThreeNg, UpdateTranslateOffsetWithPlacement002, TestSize.Level1)
 {
     SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     sheetLayoutAlgorithm->sheetPopupInfo_.placementRechecked = true;
     sheetLayoutAlgorithm->sheetPopupInfo_.placementOnTarget = true;
 
     OffsetF translate;
-    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate);
+    auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate, layoutWrapper);
     EXPECT_EQ(translate.GetX(), 0.0f);
     EXPECT_EQ(translate.GetY(), 0.0f);
     SheetPresentationTestThreeNg::TearDownTestCase();
@@ -339,15 +409,20 @@ HWTEST_F(SheetPresentationTestThreeNg, UpdateTranslateOffsetWithPlacement002, Te
 HWTEST_F(SheetPresentationTestThreeNg, UpdateTranslateOffsetWithPlacement003, TestSize.Level1)
 {
     SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     sheetLayoutAlgorithm->sheetPopupInfo_.placementRechecked = false;
     sheetLayoutAlgorithm->sheetPopupInfo_.showArrow = false;
 
     OffsetF translate;
-    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate);
+    auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate, layoutWrapper);
     EXPECT_EQ(translate.GetX(), 0.0f);
     EXPECT_EQ(translate.GetY(), 0.0f);
     SheetPresentationTestThreeNg::TearDownTestCase();
@@ -365,16 +440,21 @@ HWTEST_F(SheetPresentationTestThreeNg, UpdateTranslateOffsetWithPlacement003, Te
 HWTEST_F(SheetPresentationTestThreeNg, UpdateTranslateOffsetWithPlacement004, TestSize.Level1)
 {
     SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     sheetLayoutAlgorithm->sheetPopupInfo_.placementRechecked = true;
     sheetLayoutAlgorithm->sheetPopupInfo_.placementOnTarget = false;
     sheetLayoutAlgorithm->sheetPopupInfo_.showArrow = false;
 
     OffsetF translate;
-    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate);
+    auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate, layoutWrapper);
     EXPECT_EQ(translate.GetX(), 0.0f);
     EXPECT_EQ(translate.GetY(), 0.0f);
     SheetPresentationTestThreeNg::TearDownTestCase();
@@ -398,46 +478,51 @@ HWTEST_F(SheetPresentationTestThreeNg, UpdateTranslateOffsetWithPlacement004, Te
 HWTEST_F(SheetPresentationTestThreeNg, UpdateTranslateOffsetWithPlacement005, TestSize.Level1)
 {
     SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     sheetLayoutAlgorithm->sheetPopupInfo_.placementRechecked = false;
     sheetLayoutAlgorithm->sheetPopupInfo_.showArrow = true;
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::BOTTOM_LEFT;
 
     OffsetF translate;
-    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate);
+    auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate, layoutWrapper);
     EXPECT_EQ(translate.GetX(), 0.0f);
     EXPECT_EQ(translate.GetY(), 8.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::BOTTOM_RIGHT;
-    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate);
+    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate, layoutWrapper);
     EXPECT_EQ(translate.GetX(), 0.0f);
     EXPECT_EQ(translate.GetY(), 16.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::BOTTOM;
-    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate);
+    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate, layoutWrapper);
     EXPECT_EQ(translate.GetX(), 0.0f);
     EXPECT_EQ(translate.GetY(), 24.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::RIGHT_TOP;
-    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate);
+    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate, layoutWrapper);
     EXPECT_EQ(translate.GetX(), 8.0f);
     EXPECT_EQ(translate.GetY(), 24.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::RIGHT_BOTTOM;
-    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate);
+    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate, layoutWrapper);
     EXPECT_EQ(translate.GetX(), 16.0f);
     EXPECT_EQ(translate.GetY(), 24.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::RIGHT;
-    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate);
+    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate, layoutWrapper);
     EXPECT_EQ(translate.GetX(), 24.0f);
     EXPECT_EQ(translate.GetY(), 24.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::NONE;
-    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate);
+    sheetLayoutAlgorithm->UpdateTranslateOffsetWithPlacement(translate, layoutWrapper);
     EXPECT_EQ(translate.GetX(), 24.0f);
     EXPECT_EQ(translate.GetY(), 24.0f);
     SheetPresentationTestThreeNg::TearDownTestCase();
@@ -1167,14 +1252,19 @@ HWTEST_F(SheetPresentationTestThreeNg, IsShowInSubWindowTest001, TestSize.Level1
 HWTEST_F(SheetPresentationTestThreeNg, UpdateMaxSizeWithPlacement001, TestSize.Level1)
 {
     SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     float maxWidth = 3000.0f;
     float maxHeight = 2000.0f;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 3000.0f);
     EXPECT_EQ(maxHeight, 1992.0f);
     SheetPresentationTestThreeNg::TearDownTestCase();
@@ -1191,16 +1281,21 @@ HWTEST_F(SheetPresentationTestThreeNg, UpdateMaxSizeWithPlacement001, TestSize.L
 HWTEST_F(SheetPresentationTestThreeNg, UpdateMaxSizeWithPlacement002, TestSize.Level1)
 {
     SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     sheetLayoutAlgorithm->sheetPopupInfo_.placementRechecked = true;
     sheetLayoutAlgorithm->sheetPopupInfo_.placementOnTarget = true;
 
     float maxWidth = 3000.0f;
     float maxHeight = 2000.0f;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 3000.0f);
     EXPECT_EQ(maxHeight, 2000.0f);
     SheetPresentationTestThreeNg::TearDownTestCase();
@@ -1217,16 +1312,21 @@ HWTEST_F(SheetPresentationTestThreeNg, UpdateMaxSizeWithPlacement002, TestSize.L
 HWTEST_F(SheetPresentationTestThreeNg, UpdateMaxSizeWithPlacement003, TestSize.Level1)
 {
     SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     sheetLayoutAlgorithm->sheetPopupInfo_.placementRechecked = false;
     sheetLayoutAlgorithm->sheetPopupInfo_.showArrow = false;
 
     float maxWidth = 3000.0f;
     float maxHeight = 2000.0f;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 3000.0f);
     EXPECT_EQ(maxHeight, 2000.0f);
     SheetPresentationTestThreeNg::TearDownTestCase();
@@ -1244,17 +1344,22 @@ HWTEST_F(SheetPresentationTestThreeNg, UpdateMaxSizeWithPlacement003, TestSize.L
 HWTEST_F(SheetPresentationTestThreeNg, UpdateMaxSizeWithPlacement004, TestSize.Level1)
 {
     SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     sheetLayoutAlgorithm->sheetPopupInfo_.placementRechecked = true;
     sheetLayoutAlgorithm->sheetPopupInfo_.placementOnTarget = false;
     sheetLayoutAlgorithm->sheetPopupInfo_.showArrow = false;
 
     float maxWidth = 3000.0f;
     float maxHeight = 2000.0f;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 3000.0f);
     EXPECT_EQ(maxHeight, 2000.0f);
     SheetPresentationTestThreeNg::TearDownTestCase();
@@ -1277,42 +1382,47 @@ HWTEST_F(SheetPresentationTestThreeNg, UpdateMaxSizeWithPlacement004, TestSize.L
 HWTEST_F(SheetPresentationTestThreeNg, UpdateMaxSizeWithPlacement005, TestSize.Level1)
 {
     SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     sheetLayoutAlgorithm->sheetPopupInfo_.placementRechecked = false;
     sheetLayoutAlgorithm->sheetPopupInfo_.showArrow = true;
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::BOTTOM_LEFT;
 
     float maxWidth = 3000.0f;
     float maxHeight = 2000.0f;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 3000.0f);
     EXPECT_EQ(maxHeight, 1992.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::BOTTOM_RIGHT;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 3000.0f);
     EXPECT_EQ(maxHeight, 1984.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::BOTTOM;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 3000.0f);
     EXPECT_EQ(maxHeight, 1976.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::TOP_LEFT;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 3000.0f);
     EXPECT_EQ(maxHeight, 1968.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::TOP_RIGHT;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 3000.0f);
     EXPECT_EQ(maxHeight, 1960.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::TOP;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 3000.0f);
     EXPECT_EQ(maxHeight, 1952.0f);
     SheetPresentationTestThreeNg::TearDownTestCase();
@@ -1336,47 +1446,52 @@ HWTEST_F(SheetPresentationTestThreeNg, UpdateMaxSizeWithPlacement005, TestSize.L
 HWTEST_F(SheetPresentationTestThreeNg, UpdateMaxSizeWithPlacement006, TestSize.Level1)
 {
     SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     sheetLayoutAlgorithm->sheetPopupInfo_.placementRechecked = false;
     sheetLayoutAlgorithm->sheetPopupInfo_.showArrow = true;
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::RIGHT_TOP;
 
     float maxWidth = 3000.0f;
     float maxHeight = 2000.0f;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 2992.0f);
     EXPECT_EQ(maxHeight, 2000.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::RIGHT_BOTTOM;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 2984.0f);
     EXPECT_EQ(maxHeight, 2000.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::RIGHT;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 2976.0f);
     EXPECT_EQ(maxHeight, 2000.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::LEFT_TOP;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 2968.0f);
     EXPECT_EQ(maxHeight, 2000.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::LEFT_BOTTOM;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 2960.0f);
     EXPECT_EQ(maxHeight, 2000.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::LEFT;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 2952.0f);
     EXPECT_EQ(maxHeight, 2000.0f);
 
     sheetLayoutAlgorithm->sheetPopupInfo_.finalPlacement = Placement::NONE;
-    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
+    sheetLayoutAlgorithm->UpdateMaxSizeWithPlacement(maxWidth, maxHeight, layoutWrapper);
     EXPECT_EQ(maxWidth, 2952.0f);
     EXPECT_EQ(maxHeight, 2000.0f);
     SheetPresentationTestThreeNg::TearDownTestCase();
@@ -1640,6 +1755,270 @@ HWTEST_F(SheetPresentationTestThreeNg, SetWindowUseImplicitAnimation001, TestSiz
     EXPECT_EQ(isUseImplicit, true);
     pipelineContext->windowManager_->useImplicitAnimationCallback_ = nullptr;
     pipelineContext->windowManager_ = nullptr;
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: IsNeedChangeScrollHeight001
+ * @tc.desc: Test IsNeedChangeScrollHeight function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, IsNeedChangeScrollHeight001, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    // Make the lowest detentSize is not in the end of the vector
+    sheetPattern->sheetDetentHeight_.emplace_back(50.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(60.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(70.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(40.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(80.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(90.0f);
+    // Make height great than lowest value of detentSize
+    sheetPattern->height_ = 45;
+    sheetPattern->sheetHeightUp_ = 0;
+    sheetPattern->bottomOffsetY_ = 0;
+    sheetPattern->scrollSizeMode_ = ScrollSizeMode::CONTINUOUS;
+    ASSERT_TRUE(sheetPattern->sheetDetentHeight_.size() > 0);
+
+    bool isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);
+    ASSERT_TRUE(isNeedChangeScrollHeight);
+}
+
+/**
+ * @tc.name: IsNeedChangeScrollHeight002
+ * @tc.desc: Test IsNeedChangeScrollHeight function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, IsNeedChangeScrollHeight002, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    // Make the lowest detentSize is in the end of the vector
+    sheetPattern->sheetDetentHeight_.emplace_back(50.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(60.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(70.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(80.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(90.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(40.0f);
+    // Make height great than lowest value of detentSize
+    sheetPattern->height_ = 120;
+    sheetPattern->sheetHeightUp_ = 0;
+    sheetPattern->bottomOffsetY_ = 0;
+    sheetPattern->scrollSizeMode_ = ScrollSizeMode::CONTINUOUS;
+    ASSERT_TRUE(sheetPattern->sheetDetentHeight_.size() > 0);
+
+    bool isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);
+    ASSERT_TRUE(isNeedChangeScrollHeight);
+}
+
+/**
+ * @tc.name: IsNeedChangeScrollHeight003
+ * @tc.desc: Test IsNeedChangeScrollHeight function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, IsNeedChangeScrollHeight003, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    // Make the lowest detentSize is not in the end of the vector
+    sheetPattern->sheetDetentHeight_.emplace_back(50.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(60.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(70.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(40.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(80.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(90.0f);
+    // Make height great than lowest value of detentSize
+    sheetPattern->height_ = 45;
+    sheetPattern->sheetHeightUp_ = 0;
+    sheetPattern->bottomOffsetY_ = 0;
+    // Make scroll size mode is not continuous
+    sheetPattern->scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
+    ASSERT_TRUE(sheetPattern->sheetDetentHeight_.size() > 0);
+
+    bool isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);
+    ASSERT_FALSE(isNeedChangeScrollHeight);
+}
+
+/**
+ * @tc.name: LayoutScrollNode001
+ * @tc.desc: Test LayoutScrollNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, LayoutScrollNode001, TestSize.Level1)
+{
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
+    EXPECT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    EXPECT_NE(sheetPattern, nullptr);
+    auto titleBuilder = sheetPattern->GetTitleBuilderNode();
+    CHECK_NULL_VOID(titleBuilder);
+    auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
+    EXPECT_NE(sheetLayoutAlgorithm, nullptr);
+
+    auto titleBuilderNode = titleBuilder->GetGeometryNode();
+    EXPECT_NE(titleBuilderNode, nullptr);
+    titleBuilderNode->frame_.rect_.SetHeight(10.0f);
+
+    auto dragBarNode = sheetPattern->GetDragBarNode();
+    EXPECT_NE(dragBarNode, nullptr);
+    auto dragBar = dragBarNode->GetGeometryNode();
+    EXPECT_NE(dragBar, nullptr);
+    dragBar->frame_.rect_.SetHeight(10.0f);
+
+    sheetPattern->sheetType_ = SHEET_POPUP;
+    OffsetF translate;
+    auto layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    EXPECT_NE(layoutWrapperNode, nullptr);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    EXPECT_NE(layoutWrapper, nullptr);
+    sheetLayoutAlgorithm->LayoutScrollNode(translate, layoutWrapper);
+    EXPECT_EQ(dragBar->frame_.rect_.GetOffset(), OffsetF(0.0f, 20.0f));
+}
+
+/**
+ * @tc.name: LayoutTitleBuilder001
+ * @tc.desc: Test LayoutTitleBuilder function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, LayoutTitleBuilder001, TestSize.Level1)
+{
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(
+            ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG, std::move(callback)));
+    EXPECT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    EXPECT_NE(sheetPattern, nullptr);
+    auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
+    EXPECT_NE(sheetLayoutAlgorithm, nullptr);
+    sheetPattern->sheetType_ = SHEET_POPUP;
+    OffsetF translate;
+    auto layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
+    EXPECT_NE(layoutWrapperNode, nullptr);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    EXPECT_NE(layoutWrapper, nullptr);
+    auto sheetGeometryNode = sheetNode->GetGeometryNode();
+    EXPECT_NE(sheetGeometryNode, nullptr);
+
+    auto dragBarNode = sheetPattern->GetDragBarNode();
+    CHECK_NULL_VOID(dragBarNode);
+    auto dragBar = dragBarNode->GetGeometryNode();
+    dragBar->frame_.rect_.SetHeight(10.0f);
+    dragBar->margin_ = nullptr;
+    sheetLayoutAlgorithm->LayoutTitleBuilder(translate, layoutWrapper);
+    EXPECT_EQ(sheetGeometryNode->frame_.rect_.GetOffset(), OffsetF(0.0f, 10.0f));
+}
+
+/**
+ * @tc.name: GetSheetTypeFromSheetManager001
+ * @tc.desc: Test SheetPresentationPattern::GetSheetTypeFromSheetManager.
+ *           Condition: The default is Bottom Type
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, GetSheetTypeFromSheetManager001, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    /**
+     * @tc.steps: step1. create sheet page, get sheet pattern.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sheeLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheeLayoutProperty, nullptr);
+    sheeLayoutProperty->UpdateSheetStyle(SheetStyle());
+    /**
+     * @tc.steps: step2. Set preferType is Center.
+     * @tc.expected: the sheetType is Bottom.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    sheeLayoutProperty->UpdateSheetStyle(sheetStyle);
+    EXPECT_EQ(sheetPattern->GetSheetTypeFromSheetManager(), SheetType::SHEET_BOTTOM);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetSheetTypeFromSheetManager002
+ * @tc.desc: Test SheetPresentationPattern::GetSheetTypeFromSheetManager.
+ *           Condition: The default is Bottom Type
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, GetSheetTypeFromSheetManager002, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    /**
+     * @tc.steps: step1. create sheet page, get sheet pattern.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto sheeLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheeLayoutProperty, nullptr);
+    sheeLayoutProperty->UpdateSheetStyle(SheetStyle());
+    /**
+     * @tc.steps: step2. sheetThemeType_ = "auto".
+     */
+    pattern->sheetThemeType_ = "auto";
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetDisplayWindowRectInfo({ 0, 0, 780, 800 });
+    /**
+     * @tc.steps: step2. Set preferType is Bottom.
+     * @tc.expected: the sheetType is Bottom.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    sheeLayoutProperty->UpdateSheetStyle(sheetStyle);
+    EXPECT_EQ(pattern->GetSheetTypeFromSheetManager(), SheetType::SHEET_BOTTOM);
+    /**
+     * @tc.steps: step3. Set preferType is Bottom, and Set Offset property.
+     * @tc.expected: the sheetType is SHEET_BOTTOM_OFFSET.
+     */
+    auto windowManager = pipelineContext->GetWindowManager();
+    ASSERT_NE(windowManager, nullptr);
+    auto isPcOrPadFreeMultiWindowCallback = []() {
+        return true;
+    };
+    windowManager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindowCallback));
+    sheetStyle.bottomOffset = OffsetF(0, -15);
+    sheeLayoutProperty->UpdateSheetStyle(sheetStyle);
+    EXPECT_EQ(pattern->GetSheetTypeFromSheetManager(), SheetType::SHEET_BOTTOM_OFFSET);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

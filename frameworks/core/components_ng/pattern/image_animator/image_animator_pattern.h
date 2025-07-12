@@ -158,6 +158,16 @@ public:
         isAutoMonitorInvisibleArea_ = isAutoMonitorInvisibleArea;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
 private:
     std::vector<PictureInfo> CreatePictureAnimation(int32_t size);
     void UpdateEventCallback();

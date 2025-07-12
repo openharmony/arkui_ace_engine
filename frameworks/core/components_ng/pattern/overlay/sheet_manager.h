@@ -18,8 +18,137 @@
 
 #include "base/utils/singleton.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class State {
+public:
+    virtual SheetType HandleType(const SheetStyle& sheetStyle) = 0;
+    virtual ~State() = default;
+};
+
+// If the breakpoint is WidthXS, the default style is the bottom style,
+// and the developer can actively set the modal style.
+class WidthXSState : public State {
+public:
+    SheetType HandleType(const SheetStyle& sheetStyle) override
+    {
+        if (sheetStyle.sheetType.has_value() &&
+            sheetStyle.sheetType.value() == SheetType::SHEET_CONTENT_COVER) {
+            return sheetStyle.sheetType.value();
+        }
+        SheetType sheetType = SheetType::SHEET_BOTTOM;
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_RETURN(pipeline, sheetType);
+        auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+        CHECK_NULL_RETURN(sheetTheme, sheetType);
+        auto sheetThemeType = sheetTheme->GetSheetType();
+        if (sheetThemeType == "popup") {
+            sheetType = SheetType::SHEET_BOTTOM_FREE_WINDOW;
+        }
+        return sheetType;
+    }
+};
+
+// If the breakpoint is WidthXS, the default style is the bottom style,
+// and the developer can actively set the modal style
+class WidthSMState : public State {
+public:
+    SheetType HandleType(const SheetStyle& sheetStyle) override
+    {
+        if (sheetStyle.sheetType.has_value() &&
+            sheetStyle.sheetType.value() == SheetType::SHEET_CONTENT_COVER) {
+            return sheetStyle.sheetType.value();
+        }
+        SheetType sheetType = SheetType::SHEET_BOTTOM;
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_RETURN(pipeline, sheetType);
+        auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+        CHECK_NULL_RETURN(sheetTheme, sheetType);
+        auto sheetThemeType = sheetTheme->GetSheetType();
+        if (sheetThemeType == "popup") {
+            sheetType = SheetType::SHEET_BOTTOM_FREE_WINDOW;
+        }
+        return sheetType;
+    }
+};
+
+// If the breakpoint is (WidthMD, HeightSM), the default style is the bottom landspace style,
+// and the developer can actively set the modal or side style.
+// In particular, when the sheetBottom_ is "center", the style is center.
+class WidthMDHeightSMState : public State {
+public:
+    SheetType HandleType(const SheetStyle& sheetStyle) override
+    {
+        if (sheetStyle.sheetType.has_value() &&
+            sheetStyle.sheetType.value() == SheetType::SHEET_CONTENT_COVER) {
+            return SheetType::SHEET_CONTENT_COVER;
+        }
+        if (sheetStyle.sheetType.has_value() &&
+            sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM) {
+            return SheetType::SHEET_BOTTOM;
+        }
+        if (sheetStyle.sheetType.has_value() &&
+            sheetStyle.sheetType.value() == SheetType::SHEET_SIDE) {
+            return SheetType::SHEET_SIDE;
+        }
+        SheetType sheetType = SheetType::SHEET_BOTTOMLANDSPACE;
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_RETURN(pipeline, sheetType);
+        auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+        CHECK_NULL_RETURN(sheetTheme, sheetType);
+        if (sheetTheme->GetSheetBottomType() == "center") {
+            sheetType = SheetType::SHEET_CENTER;
+        }
+        return sheetType;
+    }
+};
+
+// If the breakpoint is (WidthMD, HeightMD/HeightLG), the default style is the center style.
+// The version is later than API 14, and developers can set all style.
+// The version is lower than API14, the center style will take effect when the developer sets the popup style.
+class WidthMDHeightMDOrLGState : public State {
+public:
+    SheetType HandleType(const SheetStyle& sheetStyle) override
+    {
+        if (sheetStyle.sheetType.has_value()) {
+            if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN) &&
+                sheetStyle.sheetType.value() == SheetType::SHEET_POPUP) {
+                return SheetType::SHEET_CENTER;
+            }
+            return sheetStyle.sheetType.value();
+        }
+        return SheetType::SHEET_CENTER;
+    }
+};
+
+// When the breakpoint is greater than or equal to WidthLG,
+// the style that takes effect by default is determined from sheetTheme.
+// And developers can set all style.
+class WidthLGState : public State {
+public:
+    SheetType HandleType(const SheetStyle& sheetStyle) override
+    {
+        if (sheetStyle.sheetType.has_value()) {
+            return sheetStyle.sheetType.value();
+        }
+        SheetType sheetType = SheetType::SHEET_POPUP;
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_RETURN(pipeline, sheetType);
+        auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+        CHECK_NULL_RETURN(sheetTheme, sheetType);
+        auto sheetThemeType = sheetTheme->GetSheetType();
+        if (sheetThemeType == "auto") {
+            sheetType = SheetType::SHEET_CENTER;
+        } else if (sheetThemeType == "popup") {
+            sheetType = SheetType::SHEET_POPUP;
+        } else if (sheetThemeType == "center") {
+            sheetType = SheetType::SHEET_CENTER;
+        }
+        return sheetType;
+    }
+};
+
 class ACE_FORCE_EXPORT SheetManager : public Singleton<SheetManager> {
     DECLARE_SINGLETON(SheetManager);
 public:
@@ -73,6 +202,8 @@ public:
     static void SetMaskInteractive(const RefPtr<FrameNode>& maskNode, bool isInteractive);
     void RegisterDestroyCallback(const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle,
         const int32_t containerId);
+    std::unique_ptr<State> CreateBreakPointState(WidthBreakpoint width,
+        HeightBreakpoint height);
 
 private:
     struct SheetContentKey {

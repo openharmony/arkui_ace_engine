@@ -38,7 +38,7 @@ public:
     void SetSelectedOptionFontFamily(const std::vector<std::string>& value) override;
     void SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value) override;
     void SetSelectedOptionFontColor(const Color& color) override;
-    void SetOptionBgColor(const Color& color, bool isNormal = true) override;
+    void SetOptionBgColor(const Color& color) override;
     void SetOptionFontSize(const Dimension& value) override;
     void SetOptionFontWeight(const FontWeight& value) override;
     void SetOptionFontFamily(const std::vector<std::string>& value) override;
@@ -85,8 +85,7 @@ public:
     void ResetShowInSubWindow() override {};
     void SetShowDefaultSelectedIcon(bool show) override {};
     void ResetShowDefaultSelectedIcon() override {};
-    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
-        const SelectColorType selectColorType) override {};
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj, const SelectColorType& type) override {};
     void CreateWithValueIconResourceObj(const std::vector<SelectResObjParam>& resObjVec) override {};
     void CreateWithIntegerResourceObj(const RefPtr<ResourceObject>& resObj) override {};
     void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj) override {};

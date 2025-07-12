@@ -29,7 +29,8 @@ public:
 
     static void SetStart(const JSCallbackInfo& info);
     static void SetEnd(const JSCallbackInfo& info);
-    static void SetPoint(const JSRef<JSArray>& array, ShapePoint& point);
+    static void SetPoint(const JSRef<JSArray>& array, ShapePoint& point, RefPtr<ResourceObject>& pointResObjFirst,
+        RefPtr<ResourceObject>& pointResObjSecond);
 };
 
 } // namespace OHOS::Ace::Framework

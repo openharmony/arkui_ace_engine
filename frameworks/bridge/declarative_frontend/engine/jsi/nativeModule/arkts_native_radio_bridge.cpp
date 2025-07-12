@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_radio_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -91,27 +92,42 @@ ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeC
     RefPtr<ResourceObject> unBorderColorResObj;
     RefPtr<ResourceObject> indicatorColorResObj;
     ArkUIRadioColorStruct resObjStru;
+    bool jsBgColorSetByUser = false;
+    bool jsUnBorderColorSetByUser = false;
+    bool jsIndicatorColorSetByUser = false;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+
     if (checkedBackgroundColor->IsNull() || checkedBackgroundColor->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, checkedBackgroundColor, checkedBackgroundColorVal, backgroundColorResObj)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, checkedBackgroundColor, checkedBackgroundColorVal, backgroundColorResObj,
+        nodeInfo)) {
         checkedBackgroundColorVal = radioTheme->GetActiveColor();
+        resObjStru.checkedBackgroundColor = nullptr;
     } else {
+        jsBgColorSetByUser = true;
         resObjStru.checkedBackgroundColor = AceType::RawPtr(backgroundColorResObj);
     }
     Color uncheckedBorderColorVal;
     if (uncheckedBorderColor->IsNull() || uncheckedBorderColor->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, uncheckedBorderColor, uncheckedBorderColorVal, unBorderColorResObj)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, uncheckedBorderColor, uncheckedBorderColorVal,
+        unBorderColorResObj, nodeInfo)) {
         uncheckedBorderColorVal = radioTheme->GetInactiveColor();
+        resObjStru.uncheckedBorderColor = nullptr;
     } else {
+        jsUnBorderColorSetByUser = true;
         resObjStru.uncheckedBorderColor = AceType::RawPtr(unBorderColorResObj);
     }
     Color indicatorColorVal;
     if (indicatorColor->IsNull() || indicatorColor->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, indicatorColor, indicatorColorVal, indicatorColorResObj)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, indicatorColor, indicatorColorVal, indicatorColorResObj, nodeInfo)) {
         indicatorColorVal = radioTheme->GetPointColor();
+        resObjStru.indicatorColor = nullptr;
     } else {
+        jsIndicatorColorSetByUser = true;
         resObjStru.indicatorColor = AceType::RawPtr(indicatorColorResObj);
     }
 
+    GetArkUINodeModifiers()->getRadioModifier()->setRadioColorSetByUser(
+        nativeNode, jsBgColorSetByUser, jsUnBorderColorSetByUser, jsIndicatorColorSetByUser);
     GetArkUINodeModifiers()->getRadioModifier()->setRadioStylePtr(nativeNode,
         checkedBackgroundColorVal.GetValue(), uncheckedBorderColorVal.GetValue(),
         indicatorColorVal.GetValue(), resObjStru);
@@ -455,31 +471,25 @@ ArkUINativeModuleValue RadioBridge::SetRadioOnChange(ArkUIRuntimeCallInfo* runti
 ArkUINativeModuleValue RadioBridge::SetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    CommonBridge::SetMargin(runtimeCallInfo);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
-    ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
-    ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
-    ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
-    bool isLengthMetrics = ArkTSUtils::ParseMargin(runtimeCallInfo, top, right, bottom, left);
-    if (isLengthMetrics) {
-        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-        GetArkUINodeModifiers()->getRadioModifier()->setRadioMargin(
-            nativeNode, &top, isRightToLeft ? &left : &right, &bottom, isRightToLeft ? &right : &left);
-    } else {
-        GetArkUINodeModifiers()->getRadioModifier()->setRadioMargin(nativeNode, &top, &right, &bottom, &left);
-    }
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getRadioModifier()->setIsUserSetMargin(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue RadioBridge::ResetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    CommonBridge::ResetMargin(runtimeCallInfo);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getRadioModifier()->resetRadioMargin(nativeNode);
+    GetArkUINodeModifiers()->getRadioModifier()->setIsUserSetMargin(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

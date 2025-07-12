@@ -16,6 +16,7 @@
 #include "bridge/card_frontend/card_frontend_declarative.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_custom_env_view_white_list.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #ifdef NG_BUILD
@@ -531,45 +532,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "DrawingRenderingContext", JSDrawingRenderingContext::JSBind },
 };
 
-static const std::unordered_set<std::string> unsupportedTargetsInCustomEnv = {
-    "UIExtensionComponent",
-    "PluginComponent",
-    "AbilityComponent",
-    "FormComponent",
-    "FormMenuItem",
-    "DynamicComponent",
-    "SecurityUIExtensionComponent",
-    "PreviewUIExtensionComponent",
-    "Component3D",
-    "EmbeddedComponent",
-    "IsolatedComponent",
-    "RemoteWindow",
-    "RootScene",
-    "Screen",
-    "SecurityUIExtensionProxy",
-    "WindowScene",
-    "UIExtensionProxy",
-    "FormLink",
-    "AbilityController",
-    "Navigation",
-    "Navigator",
-    "NavRouter",
-    "NavDestination",
-    "XComponent",
-    "XComponentController",
-    "EffectComponent",
-    "RichText",
-    "WebController",
-    "Web",
-    "LocationButton",
-    "PasteButton",
-    "SaveButton",
-    "WithTheme",
-    "Camera",
-    "Piece",
-    "Rating",
-};
-
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
     { "Flex", JSFlexImpl::JSBind },
     { "TextController", JSTextController::JSBind },
@@ -882,7 +844,7 @@ void RegisterBindFuncs(BindingTarget globalObj, bool isCustomEnvSupported)
 
     for (auto& iter : bindFuncs) {
         if (isCustomEnvSupported &&
-            unsupportedTargetsInCustomEnv.find(iter.first) != unsupportedTargetsInCustomEnv.end()) {
+            supportedTargetsInCustomEnv.find(iter.first) == supportedTargetsInCustomEnv.end()) {
             continue;
         }
         iter.second(globalObj);
@@ -1071,19 +1033,6 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     }
 }
 
-void JsUpdateDirty2ForAnimateTo(BindingTarget globalObj)
-{
-    const auto globalObject = JSRef<JSObject>::Make(globalObj);
-    const JSRef<JSVal> updateDirty2ForAnimateToFunc = globalObject->GetProperty("updateDirty2ForAnimateTo");
-    if (updateDirty2ForAnimateToFunc->IsFunction()) {
-        const auto globalFunc = JSRef<JSFunc>::Cast(updateDirty2ForAnimateToFunc);
-        const auto callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
-        };
-        ElementRegister::GetInstance()->RegisterJSUpdateDirty2ForAnimateTo(callback);
-    }
-}
-
 void JsRegisterModules(BindingTarget globalObj, std::string modules, void* nativeEngine)
 {
     std::stringstream input(modules);
@@ -1092,7 +1041,6 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules, void* nativ
         RegisterModuleByName(globalObj, moduleName);
     }
     JsUINodeRegisterCleanUp(globalObj);
-    JsUpdateDirty2ForAnimateTo(globalObj);
 
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);

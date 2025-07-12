@@ -817,4 +817,154 @@ HWTEST_F(ScrollLayoutTestNg, UseInitialOffset003, TestSize.Level1)
     scrollLayoutAlgorithm->UseInitialOffset(axis, selfSize, rawPtr);
     EXPECT_EQ(scrollLayoutAlgorithm->GetCurrentOffset(), 1.0f);
 }
+
+/**
+ * @tc.name: UpdateScrollAlignment001
+ * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollLayoutAlgorithm scrollLayoutAlgorithm(2.0f);
+
+    /**
+     * @tc.steps: step2. Set scrollAlignment to TOP_LEFT
+     */
+    Alignment scrollAlignment = Alignment::TOP_LEFT;
+
+    /**
+     * @tc.steps: step3. Calling the UpdateScrollAlignment function
+     * @tc.expected: The scrollAlignment to be TOP_RIGHT
+     */
+    scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
+    EXPECT_EQ(scrollAlignment, Alignment::TOP_RIGHT);
+}
+
+/**
+ * @tc.name: UpdateScrollAlignment002
+ * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollLayoutAlgorithm scrollLayoutAlgorithm(2.0f);
+
+    /**
+     * @tc.steps: step2. Set scrollAlignment to TOP_RIGHT
+     */
+    Alignment scrollAlignment = Alignment::TOP_RIGHT;
+
+    /**
+     * @tc.steps: step3. Calling the UpdateScrollAlignment function
+     * @tc.expected: The scrollAlignment to be TOP_LEFT
+     */
+    scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
+    EXPECT_EQ(scrollAlignment, Alignment::TOP_LEFT);
+}
+
+/**
+ * @tc.name: UpdateScrollAlignment003
+ * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollLayoutAlgorithm scrollLayoutAlgorithm(2.0f);
+
+    /**
+     * @tc.steps: step2. Set scrollAlignment to BOTTOM_LEFT
+     */
+    Alignment scrollAlignment = Alignment::BOTTOM_LEFT;
+
+    /**
+     * @tc.steps: step3. Calling the UpdateScrollAlignment function
+     * @tc.expected: The scrollAlignment to be BOTTOM_RIGHT
+     */
+    scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
+    EXPECT_EQ(scrollAlignment, Alignment::BOTTOM_RIGHT);
+}
+
+/**
+ * @tc.name: UpdateScrollAlignment004
+ * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollLayoutAlgorithm scrollLayoutAlgorithm(2.0f);
+
+    /**
+     * @tc.steps: step2. Set scrollAlignment to BOTTOM_RIGHT
+     */
+    Alignment scrollAlignment = Alignment::BOTTOM_RIGHT;
+
+    /**
+     * @tc.steps: step3. Calling the UpdateScrollAlignment function
+     * @tc.expected: The scrollAlignment to be BOTTOM_LEFT
+     */
+    scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
+    EXPECT_EQ(scrollAlignment, Alignment::BOTTOM_LEFT);
+}
+
+/**
+ * @tc.name: UpdateScrollAlignment005
+ * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollLayoutAlgorithm scrollLayoutAlgorithm(2.0f);
+
+    /**
+     * @tc.steps: step2. Set scrollAlignment to CENTER_RIGHT
+     */
+    Alignment scrollAlignment = Alignment::CENTER_RIGHT;
+
+    /**
+     * @tc.steps: step3. Calling the UpdateScrollAlignment function
+     * @tc.expected: The scrollAlignment to be CENTER_LEFT
+     */
+    scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
+    EXPECT_EQ(scrollAlignment, Alignment::CENTER_LEFT);
+}
+
+/**
+ * @tc.name: UpdateScrollAlignment006
+ * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollLayoutAlgorithm scrollLayoutAlgorithm(2.0f);
+
+    /**
+     * @tc.steps: step2. Set scrollAlignment to CENTER_LEFT
+     */
+    Alignment scrollAlignment = Alignment::CENTER_LEFT;
+
+    /**
+     * @tc.steps: step3. Calling the UpdateScrollAlignment function
+     * @tc.expected: The scrollAlignment to be CENTER_RIGHT
+     */
+    scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
+    EXPECT_EQ(scrollAlignment, Alignment::CENTER_RIGHT);
+}
 } // namespace OHOS::Ace::NG

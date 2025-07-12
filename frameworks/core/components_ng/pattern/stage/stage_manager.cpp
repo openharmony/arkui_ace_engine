@@ -781,17 +781,18 @@ std::string StageManager::GetPagePath(const RefPtr<FrameNode>& pageNode)
     return info->GetPagePath();
 }
 
-void StageManager::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
+void StageManager::SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool ignoreOrientation)
 {
-    TAG_LOGI(AceLogTag::ACE_ROUTER, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s",
-        isForceSplit, homePage.c_str());
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s, "
+        "ignoreOrientation: %{public}d", isForceSplit, homePage.c_str(), ignoreOrientation);
     //app support split mode, whether force split is enable or disable, the homepage will be recognized
     isDetectPrimaryPage_ = true;
-    if (isForceSplit_ == isForceSplit && homePageConfig_ == homePage) {
+    if (isForceSplit_ == isForceSplit && homePageConfig_ == homePage && ignoreOrientation_ == ignoreOrientation) {
         return;
     }
     isForceSplit_ = isForceSplit;
     homePageConfig_ = homePage;
+    ignoreOrientation_ = ignoreOrientation;
     OnForceSplitConfigUpdate();
 }
 

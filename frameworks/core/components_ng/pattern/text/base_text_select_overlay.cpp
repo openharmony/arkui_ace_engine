@@ -23,6 +23,7 @@
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -306,7 +307,7 @@ void BaseTextSelectOverlay::SetSelectionHoldCallback()
         overlay->OnResetTextSelection();
     };
     selectionInfo.checkTouchInArea = [weak = WeakClaim(this), manager = WeakClaim(AceType::RawPtr(overlayManager))](
-                                         const PointF& point) {
+                                         const PointF& point, bool passThrough) {
         auto baseOverlay = weak.Upgrade();
         CHECK_NULL_RETURN(baseOverlay, false);
         auto overlayManager = manager.Upgrade();
@@ -314,7 +315,7 @@ void BaseTextSelectOverlay::SetSelectionHoldCallback()
         auto host = baseOverlay->GetOwner();
         CHECK_NULL_RETURN(host, false);
         auto localPoint = point;
-        overlayManager->ConvertPointRelativeToNode(host, localPoint);
+        overlayManager->ConvertPointRelativeToNode(host, localPoint, passThrough);
         return baseOverlay->CheckTouchInHostNode(localPoint);
     };
     selectionInfo.eventFilter = [weak = WeakClaim(this)](SourceType sourceType, TouchType touchType) {
@@ -1244,6 +1245,10 @@ void BaseTextSelectOverlay::MarkOverlayDirty()
 
 void BaseTextSelectOverlay::ApplySelectAreaWithKeyboard(RectF& selectArea)
 {
+    if (Negative(selectArea.Top())) {
+        selectArea.SetHeight(selectArea.Height() + selectArea.Top());
+        selectArea.SetTop(0.0f);
+    }
     auto host = GetOwner();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
@@ -1620,5 +1625,24 @@ bool BaseTextSelectOverlay::NeedsProcessMenuOnWinChange()
     auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(selectTheme, false);
     return selectTheme->GetExpandDisplay() || container->IsFreeMultiWindow();
+}
+
+bool BaseTextSelectOverlay::GetDragViewHandleRects(RectF& firstRect, RectF& secondRect)
+{
+    auto overlayInfo = GetSelectOverlayInfos();
+    CHECK_NULL_RETURN(overlayInfo, false);
+    if (overlayInfo->handleLevelMode == HandleLevelMode::OVERLAY || CheckSwitchToMode(HandleLevelMode::OVERLAY)) {
+        firstRect = overlayInfo->firstHandle.paintRect;
+        secondRect = overlayInfo->secondHandle.paintRect;
+        return true;
+    }
+    auto pattern = GetPattern<Pattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textDragBase = AceType::DynamicCast<TextDragBase>(pattern);
+    CHECK_NULL_RETURN(textDragBase, false);
+    auto dragParentOffset = textDragBase->GetParentGlobalOffset();
+    firstRect = overlayInfo->firstHandle.localPaintRect + dragParentOffset;
+    secondRect = overlayInfo->secondHandle.localPaintRect + dragParentOffset;
+    return true;
 }
 } // namespace OHOS::Ace::NG

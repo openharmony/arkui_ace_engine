@@ -1116,6 +1116,32 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg160, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PipelineContextTestNgDisableNotifyResponseRegionChanged
+ * @tc.desc: Test DisableNotifyResponseRegionChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNgDisableNotifyResponseRegionChanged, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call the function NotifyResponseRegionChanged.
+     * @tc.expected: Test the member thpExtraMgr_ is not nullptr.
+     */
+    ASSERT_NE(context_, nullptr);
+    RefPtr<FrameNode> rootNode = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    context_->thpExtraMgr_ = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
+    context_->NotifyResponseRegionChanged(rootNode);
+    EXPECT_TRUE(context_->thpExtraMgr_);
+
+    /**
+     * @tc.steps2: Call the function DisableNotifyResponseRegionChanged.
+     * @tc.expected: Test the member thpExtraMgr_ is nullptr.
+     */
+    context_->thpExtraMgr_.Reset();
+    context_->DisableNotifyResponseRegionChanged();
+    EXPECT_FALSE(context_->thpExtraMgr_);
+}
+
+/**
  * @tc.name: PipelineContextTestNg161
  * @tc.desc: Test StartFoldStatusDelayTask.
  * @tc.type: FUNC
@@ -2485,6 +2511,20 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg404, TestSize.Level1)
     mouseEvent.action = MouseAction::HOVER;
     context_->DispatchMouseToTouchEvent(mouseEvent, node);
     EXPECT_TRUE(context_->eventManager_->touchTestResults_.empty());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg405
+ * @tc.desc: Test the function isNeedCallbackAreaChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg405, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->OnShow();
+    EXPECT_TRUE(context_->isNeedCallbackAreaChange_);
+    context_->OnHide();
+    EXPECT_TRUE(context_->isNeedCallbackAreaChange_);
 }
 } // namespace NG
 } // namespace OHOS::Ace

@@ -135,9 +135,6 @@ bool MenuItemGroupLayoutAlgorithm::UpdateLayoutSizeBasedOnPolicy(
     auto parentIdealWidth = layoutConstraint->parentIdealSize.Width();
     auto parentIdealHeight = layoutConstraint->parentIdealSize.Height();
 
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    auto paddingSize = menuItemGroupSize;
-    AddPaddingToSize(padding, paddingSize);
     float maxWidth = menuItemGroupSize.Width();
     float maxHeight = menuItemGroupSize.Height();
     bool isParentIdealWidth = parentIdealWidth.has_value();
@@ -147,7 +144,7 @@ bool MenuItemGroupLayoutAlgorithm::UpdateLayoutSizeBasedOnPolicy(
         if (layoutPolicy.IsWidthMatch()) {
             maxWidth = parentIdealWidth.value();
         } else if (layoutPolicy.IsWidthWrap()) {
-            maxWidth = std::min(parentIdealWidth.value(), paddingSize.Width());
+            maxWidth = std::min(parentIdealWidth.value(), menuItemGroupSize.Width());
         }
     }
 
@@ -155,7 +152,7 @@ bool MenuItemGroupLayoutAlgorithm::UpdateLayoutSizeBasedOnPolicy(
         if (layoutPolicy.IsHeightMatch()) {
             maxHeight = parentIdealHeight.value();
         } else if (layoutPolicy.IsHeightWrap()) {
-            maxHeight = std::min(parentIdealHeight.value(), paddingSize.Height());
+            maxHeight = std::min(parentIdealHeight.value(), menuItemGroupSize.Height());
         }
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(SizeT(maxWidth, maxHeight));

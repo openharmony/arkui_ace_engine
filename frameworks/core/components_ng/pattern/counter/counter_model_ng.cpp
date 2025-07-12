@@ -407,7 +407,10 @@ void CounterModelNG::HandleHeightResource(FrameNode* frameNode, const RefPtr<Res
     std::string key = "counter.height";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         Dimension height;
         if (!ResourceParseUtils::ConvertFromResObjNG(resObj, height)) {
             return;
@@ -432,7 +435,10 @@ void CounterModelNG::HandleWidthResource(FrameNode* frameNode, const RefPtr<Reso
     std::string key = "counter.width";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         Dimension width;
         if (!ResourceParseUtils::ConvertFromResObjNG(resObj, width)) {
             return;
@@ -457,7 +463,10 @@ void CounterModelNG::HandleBackgroundColorResource(FrameNode* frameNode, const R
     std::string key = "counter.backgroundColor";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         Color color;
         if (ResourceParseUtils::ParseResColor(resObj, color)) {
             auto frameNode = pattern->GetHost();

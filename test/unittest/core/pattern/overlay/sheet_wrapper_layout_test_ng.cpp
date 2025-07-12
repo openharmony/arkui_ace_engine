@@ -37,6 +37,7 @@ class SheetWrapperLayoutTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+    static void SetApiVersion(int32_t apiTargetVersion);
 };
 
 void SheetWrapperLayoutTestNg::SetUpTestCase()
@@ -61,6 +62,13 @@ void SheetWrapperLayoutTestNg::TearDownTestCase()
     MockContainer::TearDown();
 }
 
+void SheetWrapperLayoutTestNg::SetApiVersion(int32_t apiTargetVersion)
+{
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(apiTargetVersion);
+}
+
 /**
  * @tc.name: DecreaseArrowHeightWhenArrowIsShown001
  * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(VERSION_EIGHTEEN)) = true
@@ -69,6 +77,7 @@ void SheetWrapperLayoutTestNg::TearDownTestCase()
 HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown001, TestSize.Level1)
 {
     SheetWrapperLayoutTestNg::SetUpTestCase();
+    SheetWrapperLayoutTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
@@ -76,9 +85,6 @@ HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown001, TestS
         V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
     sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     sheetWrapperLayoutAlgorithm->sheetHeight_ = 1000.0f;
     sheetWrapperLayoutAlgorithm->sheetWidth_ = 400.0f;
 
@@ -97,6 +103,7 @@ HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown001, TestS
 HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown002, TestSize.Level1)
 {
     SheetWrapperLayoutTestNg::SetUpTestCase();
+    SheetWrapperLayoutTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
@@ -104,9 +111,6 @@ HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown002, TestS
         V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
     sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->sheetPopupInfo_.showArrow = false;
     sheetWrapperLayoutAlgorithm->sheetHeight_ = 1000.0f;
@@ -133,6 +137,7 @@ HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown002, TestS
 HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown003, TestSize.Level1)
 {
     SheetWrapperLayoutTestNg::SetUpTestCase();
+    SheetWrapperLayoutTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
@@ -140,9 +145,6 @@ HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown003, TestS
         V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
     sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->sheetPopupInfo_.showArrow = true;
     sheetPattern->sheetPopupInfo_.finalPlacement = Placement::BOTTOM_LEFT;
@@ -193,6 +195,7 @@ HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown003, TestS
 HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown004, TestSize.Level1)
 {
     SheetWrapperLayoutTestNg::SetUpTestCase();
+    SheetWrapperLayoutTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
@@ -200,9 +203,6 @@ HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown004, TestS
         V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
     sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->sheetPopupInfo_.showArrow = true;
     sheetPattern->sheetPopupInfo_.finalPlacement = Placement::RIGHT_TOP;
@@ -248,6 +248,7 @@ HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown004, TestS
 HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown005, TestSize.Level1)
 {
     SheetWrapperLayoutTestNg::SetUpTestCase();
+    SheetWrapperLayoutTestNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
@@ -255,9 +256,6 @@ HWTEST_F(SheetWrapperLayoutTestNg, DecreaseArrowHeightWhenArrowIsShown005, TestS
         V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetWrapperLayoutAlgorithm = AceType::MakeRefPtr<SheetWrapperLayoutAlgorithm>();
     sheetWrapperLayoutAlgorithm->sheetRadius_ = { 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp };
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->sheetPopupInfo_.showArrow = true;
     sheetWrapperLayoutAlgorithm->sheetHeight_ = 1000.0f;

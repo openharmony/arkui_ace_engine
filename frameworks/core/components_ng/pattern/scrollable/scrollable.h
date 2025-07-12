@@ -612,7 +612,6 @@ private:
     void MarkNeedFlushAnimationStartTime();
     float GetFrictionVelocityByFinalPosition(
         float final, float position, float signum, float friction, float threshold = DEFAULT_MULTIPLIER);
-    void InitFriction(double friction);
     void CalcOverScrollVelocity();
     double CalcNextStep(double position, double mainDelta);
 

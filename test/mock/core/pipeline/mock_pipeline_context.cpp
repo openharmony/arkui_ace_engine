@@ -140,6 +140,10 @@ static std::list<PipelineContext::PredictTask> predictTasks_;
 static Rect windowRect_;
 static bool g_isDragging = false;
 static bool hasModalButtonsRect_;
+static bool g_isContainerCustomTitleVisible = false;
+static bool g_isContainerControlButtonVisible = false;
+static RectF g_buttonRect = RectF(0.0f, 0.0f, 0.0f, 0.0f);
+static int32_t g_containerModalTitleHeight = 0;
 } // namespace
 
 RefPtr<MockPipelineContext> MockPipelineContext::pipeline_;
@@ -191,6 +195,26 @@ void MockPipelineContext::SetContainerModalButtonsRect(bool hasModalButtonsRect)
 void MockPipelineContext::SetCurrentWindowRect(Rect rect)
 {
     windowRect_ = rect;
+}
+
+void MockPipelineContext::SetContainerCustomTitleVisible(bool visible)
+{
+    g_isContainerCustomTitleVisible = visible;
+}
+
+void MockPipelineContext::SetContainerControlButtonVisible(bool visible)
+{
+    g_isContainerControlButtonVisible = visible;
+}
+
+void MockPipelineContext::SetContainerModalButtonsRect(RectF buttons)
+{
+    g_buttonRect = buttons;
+}
+
+void MockPipelineContext::SetContainerModalTitleHeight(int32_t height)
+{
+    g_containerModalTitleHeight = height;
 }
 // mock_pipeline_context =======================================================
 
@@ -779,6 +803,8 @@ bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo
 
 void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode) {}
 
+void PipelineContext::SetFlushTSUpdates(std::function<bool(int32_t)>&& flushTSUpdates) {}
+
 void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
@@ -914,6 +940,8 @@ std::string PipelineContext::GetResponseRegion(const RefPtr<NG::FrameNode>& root
 }
 
 void PipelineContext::NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
+
+void PipelineContext::DisableNotifyResponseRegionChanged() {};
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
 
@@ -1061,11 +1089,12 @@ void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& p
 
 int32_t PipelineContext::GetContainerModalTitleHeight()
 {
-    return 0;
+    return g_containerModalTitleHeight;
 }
 
 bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
 {
+    buttons = g_buttonRect;
     return hasModalButtonsRect_;
 }
 
@@ -1123,7 +1152,7 @@ void PipelineBase::SetDestroyed() {}
 
 RefPtr<Frontend> PipelineBase::GetFrontend() const
 {
-    return nullptr;
+    return weakFrontend_.Upgrade();
 }
 
 void PipelineBase::SetTouchPipeline(const WeakPtr<PipelineBase>& context) {}
@@ -1355,12 +1384,12 @@ bool NG::PipelineContext::GetContainerFloatingTitleVisible()
 
 bool NG::PipelineContext::GetContainerCustomTitleVisible()
 {
-    return false;
+    return g_isContainerCustomTitleVisible;
 }
 
 bool NG::PipelineContext::GetContainerControlButtonVisible()
 {
-    return false;
+    return g_isContainerControlButtonVisible;
 }
 
 void NG::PipelineContext::SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
@@ -1422,6 +1451,21 @@ void NG::PipelineContext::FireArkUIObjectLifecycleCallback(void* data)
 {
     CHECK_NULL_VOID(objectLifecycleCallback_);
     objectLifecycleCallback_(data);
+}
+
+bool NG::PipelineContext::CheckSourceTypeChange(SourceType currentSourceType)
+{
+    bool ret = false;
+    if (currentSourceType != lastSourceType_) {
+        ret = true;
+        lastSourceType_ = currentSourceType;
+    }
+    return ret;
+}
+
+const RefPtr<NG::PostEventManager>& NG::PipelineContext::GetPostEventManager()
+{
+    return postEventManager_;
 }
 
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,

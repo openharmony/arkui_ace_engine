@@ -281,6 +281,10 @@ napi_value JsDrawableDescriptor::GetPixelMap(napi_env env, napi_callback_info in
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
     auto* drawable = reinterpret_cast<DrawableDescriptor*>(native);
+    if (!drawable) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     auto pixmap = drawable->GetPixelMap();
 
     napi_value result = Media::PixelMapNapi::CreatePixelMap(env, pixmap);
@@ -364,12 +368,19 @@ napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback
     size_t argc = 2;
     napi_value argv[2] = { nullptr };
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+    napi_status status = napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     if (argc < 1) {
+        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
     if (!GetPixelMapArray(env, argv[0], pixelMaps)) {
+        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
@@ -390,6 +401,7 @@ napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback
     auto napi_status = napi_wrap(env, thisVar, animatedDrawable, OldDestructor, nullptr, nullptr);
     if (napi_status != napi_ok) {
         delete animatedDrawable;
+        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_escape_handle(env, scope, thisVar, &thisVar);

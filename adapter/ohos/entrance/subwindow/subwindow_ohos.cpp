@@ -256,6 +256,35 @@ void SubwindowOhos::InitWindowRSUIDirector(const RefPtr<Platform::AceContainer>&
 #endif
 }
 
+void SubwindowOhos::SetWindowAnchorInfo(const NG::OffsetF &offset, SubwindowType type, int32_t nodeId)
+{
+    CHECK_NULL_VOID(window_);
+    auto windowAnchorInfo = WindowAnchorInfoConverter(offset, type);
+    window_->SetWindowAnchorInfo(windowAnchorInfo);
+}
+
+Rosen::WindowAnchorInfo SubwindowOhos::WindowAnchorInfoConverter(const NG::OffsetF& offset, SubwindowType type)
+{
+    Rosen::WindowAnchorInfo windowAnchorInfo(true);
+    switch (type) {
+        case SubwindowType::TYPE_SYSTEM_TOP_MOST_TOAST:
+        case SubwindowType::TYPE_TOP_MOST_TOAST:
+        case SubwindowType::TYPE_MENU:
+        case SubwindowType::TYPE_POPUP:
+        case SubwindowType::TYPE_DIALOG:
+        case SubwindowType::TYPE_SELECT_MENU:
+        case SubwindowType::TYPE_TIPS:
+        case SubwindowType::SUB_WINDOW_TYPE_COUNT:
+            break;
+        case SubwindowType::TYPE_SHEET:
+        default:
+            windowAnchorInfo.windowAnchor_ = Rosen::WindowAnchor::CENTER;
+    }
+    windowAnchorInfo.offsetX_ = offset.GetX();
+    windowAnchorInfo.offsetY_ = offset.GetY();
+    return windowAnchorInfo;
+}
+
 void SubwindowOhos::InitContainer()
 {
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -1259,14 +1288,11 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     }
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, nullptr);
-    auto isPcOrFreeMultiWindow = dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow();
-    auto followParent = false;
-    if (!isPcOrFreeMultiWindow) {
-        followParent = SetFollowParentWindowLayoutEnabled(true);
-    }
-    if (!followParent) {
+    ResizeWindow();
+    if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
         SetFollowParentWindowLayoutEnabled(false);
-        ResizeWindow();
+    } else {
+        SetFollowParentWindowLayoutEnabled(true);
     }
     ShowWindow(dialogProps.focusable);
     CHECK_NULL_RETURN(window_, nullptr);
@@ -1308,14 +1334,11 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
     }
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, nullptr);
-    auto isPcOrFreeMultiWindow = dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow();
-    auto followParent = false;
-    if (!isPcOrFreeMultiWindow) {
-        followParent = SetFollowParentWindowLayoutEnabled(true);
-    }
-    if (!followParent) {
+    ResizeWindow();
+    if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
         SetFollowParentWindowLayoutEnabled(false);
-        ResizeWindow();
+    } else {
+        SetFollowParentWindowLayoutEnabled(true);
     }
     ShowWindow(dialogProps.focusable);
     CHECK_NULL_RETURN(window_, nullptr);
@@ -1371,14 +1394,11 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
     }
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    auto isPcOrFreeMultiWindow = dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow();
-    auto followParent = false;
-    if (!isPcOrFreeMultiWindow) {
-        followParent = SetFollowParentWindowLayoutEnabled(true);
-    }
-    if (!followParent) {
+    ResizeWindow();
+    if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
         SetFollowParentWindowLayoutEnabled(false);
-        ResizeWindow();
+    } else {
+        SetFollowParentWindowLayoutEnabled(true);
     }
     ShowWindow(dialogProps.focusable);
     CHECK_NULL_VOID(window_);
@@ -2397,20 +2417,16 @@ bool SubwindowOhos::ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode)
 
 void SubwindowOhos::SwitchFollowParentWindowLayout(bool freeMultiWindowEnable)
 {
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-        "subwindow switch followParentWindowLayout, enable: %{public}d", freeMultiWindowEnable);
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "subwindow switch followParentWindowLayout, enable: %{public}d",
+        freeMultiWindowEnable);
     if (nodeId_ != DEFAULT_NODE_ID) {
         LOGI("modal dialog subwindows created by UEC always follow parent.");
         return;
     }
     auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
-    auto needFollowParent = NeedFollowParentWindowLayout() && !expandDisplay && !freeMultiWindowEnable;
-    auto followParent = false;
-    if (needFollowParent) {
-        followParent = SetFollowParentWindowLayoutEnabled(true);
-    }
-    if (!followParent) {
-        followParent = SetFollowParentWindowLayoutEnabled(false);
+    if (NeedFollowParentWindowLayout() && !expandDisplay && !freeMultiWindowEnable) {
+        SetFollowParentWindowLayoutEnabled(true);
+    } else if (SetFollowParentWindowLayoutEnabled(false)) {
         ResizeWindow();
     }
 }

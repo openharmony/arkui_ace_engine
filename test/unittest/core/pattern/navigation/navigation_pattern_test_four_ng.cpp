@@ -229,6 +229,61 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TryForceSplitIfNeeded004
+ * @tc.desc: Branch: if (!navManager->IsForceSplitSupported()) { => false
+ *                   if (navManager->IsForceSplitEnable()) { => true
+ *                   ignoreOrientation => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded004, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetNavigationManager();
+    ASSERT_NE(manager, nullptr);
+    auto windowManager = context->GetWindowManager();
+    ASSERT_NE(windowManager, nullptr);
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationNode, nullptr);
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(pageNode, nullptr);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->forceSplitSuccess_ = false;
+    navigationPattern->forceSplitUseNavBar_ = true;
+    auto property = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+
+    manager->isForceSplitSupported_ = true;
+    manager->isForceSplitEnable_ = true;
+    manager->ignoreOrientation_ = true;
+
+    EXPECT_CALL(*container, IsMainWindow).Times(::testing::AtLeast(1)).WillRepeatedly(Return(true));
+    navigationPattern->pageNode_ = WeakPtr(pageNode);
+    SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
+    auto backupCallback = std::move(windowManager->windowGetModeCallback_);
+    windowManager->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_UNDEFINED; };
+    auto key = NavigationManager::DumpMapKey(navigationNode->GetId(), navigationNode->GetDepth());
+    manager->dumpMap_[key] = [](int depth) {};
+    property->UpdateHideNavBar(true);
+
+    const Dimension NAVIGAITON_WIDTH = 605.0_vp;
+    navigationPattern->TryForceSplitIfNeeded(SizeF(NAVIGAITON_WIDTH.ConvertToPx(), 300.0f));
+    EXPECT_TRUE(navigationPattern->forceSplitSuccess_);
+    EXPECT_FALSE(navigationPattern->forceSplitUseNavBar_);
+
+    windowManager->windowGetModeCallback_ = std::move(backupCallback);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
  * @tc.name: GenerateUINodeByIndex001
  * @tc.desc: Branch: if (parentNode_.Upgrade() || !host) = true
  *           Condition: parentNode_.Upgrade() = true

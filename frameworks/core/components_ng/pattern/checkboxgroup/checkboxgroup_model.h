@@ -50,7 +50,7 @@ public:
     virtual void ResetUnSelectedColor() {};
     virtual void ResetCheckMarkColor() {};
     virtual void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
-        const CheckBoxGroupColorType checkBoxGroupColorType) {};
+        const CheckBoxGroupColorType& checkBoxGroupColorType) {};
 
 private:
     static std::unique_ptr<CheckBoxGroupModel> instance_;

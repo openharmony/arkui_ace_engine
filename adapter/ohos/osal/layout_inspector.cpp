@@ -29,6 +29,7 @@
 #include "connect_server_manager.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
+#include "adapter/ohos/entrance/rs_adapter.h"
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
 #include "base/log/ace_checker.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -321,7 +322,7 @@ void LayoutInspector::CreateContainer3DLayoutInfo(RefPtr<Container>& container)
 
 void LayoutInspector::CreateLayoutInfo(int32_t containerId)
 {
-    auto container = Container::GetFoucsed();
+    auto container = Container::GetFocused();
     return CreateContainerLayoutInfo(container);
 }
 
@@ -423,7 +424,10 @@ void LayoutInspector::BuildInfoForIDE(uint64_t id, const std::shared_ptr<Media::
 
 int64_t LayoutInspector::RsNodeIdToFrameNodeId(uint64_t rsNodeId)
 {
-    auto rsNode = Rosen::RSNodeMap::Instance().GetNode<Rosen::RSNode>(rsNodeId);
+    auto context = PipelineContext::GetCurrentContext();
+    auto rsUIContext = RsAdapter::GetRSUIContext(context);
+    auto rsNode = rsUIContext ? rsUIContext->GetNodeMap().GetNode(rsNodeId)
+                    : Rosen::RSNodeMap::Instance().GetNode(rsNodeId);
     if (rsNode == nullptr) {
         return FIND_RSNODE_ERROR;
     }
@@ -640,7 +644,7 @@ void LayoutInspector::HandleStartRecord()
     std::unique_lock<std::mutex> lock(recMutex_);
     SetRsProfilerNodeMountCallback(LayoutInspector::HandleInnerCallback);
     lock.unlock();
-    auto container = Container::GetFoucsed();
+    auto container = Container::GetFocused();
     CHECK_NULL_VOID(container);
     if (container->IsDynamicRender()) {
         container = Container::CurrentSafely();

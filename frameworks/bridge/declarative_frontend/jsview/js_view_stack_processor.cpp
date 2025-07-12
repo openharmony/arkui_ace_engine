@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 
 #include "bridge/declarative_frontend/engine/bindings.h"
+#include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/models/view_stack_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -84,6 +85,8 @@ void JSViewStackProcessor::JSBind(BindingTarget globalObj)
     JSClass<JSViewStackProcessor>::StaticMethod("getApiVersion", &JSViewStackProcessor::JsGetApiVersion, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("GetAndPushFrameNode", &JSViewStackProcessor::JsGetAndPushFrameNode);
     JSClass<JSViewStackProcessor>::StaticMethod("moveDeletedElmtIds", &JSViewStackProcessor::JsMoveDeletedElmtIds);
+    JSClass<JSViewStackProcessor>::StaticMethod(
+        "scheduleUpdateOnNextVSync", &JSViewStackProcessor::JSScheduleUpdateOnNextVSync);
     JSClass<JSViewStackProcessor>::StaticMethod("sendStateInfo", &JSViewStackProcessor::JsSendStateInfo);
     JSClass<JSViewStackProcessor>::StaticMethod("PushPrebuildCompCmd",
         &JSViewStackProcessor::JsPushPrebuildCompCmd, opt);
@@ -159,6 +162,52 @@ void JSViewStackProcessor::JsMoveDeletedElmtIds(const JSCallbackInfo& info)
     size_t index = jsArr->Length();
     for (const auto& rmElmtId : removedElements) {
         jsArr->SetValueAt(index++, JSRef<JSVal>::Make(ToJSValue(rmElmtId)));
+    }
+}
+
+// Initiates a frame request to RosenWindow and handles the callback from the Vsync request
+void JSViewStackProcessor::JSScheduleUpdateOnNextVSync(const JSCallbackInfo& info)
+{
+    // Get the correct container
+    int32_t containerId = -1;
+    if (info.Length() > 1 && info[1]->IsNumber()) {
+        containerId = info[1]->ToNumber<int32_t>();
+    } else {
+        LOGE("ERROR: JSScheduleUpdateOnNextVSync() no containerId provided.");
+        return;
+    }
+
+    if (containerId < 0) {
+        LOGE("ERROR: JSScheduleUpdateOnNextVSync() invalid containerId.");
+        return;
+    }
+
+    auto container = Container::GetContainer(containerId);
+    if (!container) {
+        LOGE("JSScheduleUpdateOnNextVSync container is null");
+        return;
+    }
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        LOGE("JSScheduleUpdateOnNextVSync context is null");
+        return;
+    }
+
+    if (info[0]->IsFunction()) {
+        auto flushTSFunc = [execCtx = info.GetExecutionContext(),
+            func = JSRef<JSFunc>::Cast(info[0])](int32_t containerId) -> bool {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+            JSRef<JSVal> jsId = JSRef<JSVal>::Make(ToJSValue(containerId));
+            JSRef<JSVal> retVal = func->Call(JSRef<JSObject>(), 1, &jsId);
+            if (!retVal->IsBoolean()) {
+                LOGE("JSScheduleUpdateOnNextVSync: flushTSFunc retVal is not boolean.");
+                return false;
+            }
+            return retVal->ToBoolean();
+        };
+        context->SetFlushTSUpdates(std::move(flushTSFunc));
+    } else {
+        context->SetFlushTSUpdates(nullptr);
     }
 }
 

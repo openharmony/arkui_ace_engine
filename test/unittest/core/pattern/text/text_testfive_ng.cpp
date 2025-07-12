@@ -1060,6 +1060,40 @@ HWTEST_F(TextTestFiveNg, OnHandleLevelModeChanged001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnHandleLevelModeChanged002
+ * @tc.desc: test text_select_overlay.cpp OnHandleLevelModeChanged function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, OnHandleLevelModeChanged002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    textSelectOverlay->OnAncestorNodeChanged(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
+
+    textSelectOverlay->handleLevelMode_ = HandleLevelMode::EMBED;
+    textSelectOverlay->OnHandleLevelModeChanged(HandleLevelMode::OVERLAY);
+    EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::OVERLAY);
+
+    textSelectOverlay->handleLevelMode_ = HandleLevelMode::OVERLAY;
+    textSelectOverlay->OnHandleLevelModeChanged(HandleLevelMode::EMBED);
+    EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::EMBED);
+
+    textSelectOverlay->handleLevelMode_ = HandleLevelMode::EMBED;
+    textSelectOverlay->OnHandleLevelModeChanged(HandleLevelMode::EMBED);
+    EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::EMBED);
+
+    textSelectOverlay->handleLevelMode_ = HandleLevelMode::OVERLAY;
+    textSelectOverlay->OnHandleLevelModeChanged(HandleLevelMode::OVERLAY);
+    EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::OVERLAY);
+}
+
+/**
  * @tc.name: CreateParagraph001
  * @tc.desc: test text_layout_algorithm.cpp CreateParagraph function
  * @tc.type: FUNC
@@ -2651,6 +2685,25 @@ HWTEST_F(TextTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateRectForSymbolShadow001
+ * @tc.desc: test text_pattern.cpp UpdateRectForSymbolShadow function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateRectForSymbolShadow001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    RectF rectsForPlaceholders(0, 0, 10, 10);
+    pattern->UpdateRectForSymbolShadow(rectsForPlaceholders, 0, 0, 0.0);
+    auto shadow = textLayoutProperty->GetTextShadow().value();
+    EXPECT_TRUE(shadow.empty());
+}
+
+/**
  * @tc.name: UpdateContainerChildren001
  * @tc.desc: test text_pattern.cpp UpdateContainerChildren function
  * @tc.type: FUNC
@@ -3301,7 +3354,7 @@ HWTEST_F(TextTestFiveNg, TextShiftMultipleSelection001, TestSize.Level1)
 HWTEST_F(TextTestFiveNg, TextEnableAutoSpacing, TestSize.Level1)
 {
     /**
-     * @tc.steps: Create Text filed node with default text and placeholder
+     * @tc.steps: Create Text filed node with default text and placeholder.
      */
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE_W);
@@ -3314,7 +3367,7 @@ HWTEST_F(TextTestFiveNg, TextEnableAutoSpacing, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
 
     /**
-     * @tc.expected: Get EnableAutoSpacing Value
+     * @tc.expected: Get EnableAutoSpacing Value.
      */
     EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), true);
     EXPECT_EQ(TextModelNG::GetEnableAutoSpacing(frameNode), true);

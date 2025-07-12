@@ -134,14 +134,19 @@ std::string ParseFontFamily(const EcmaVM* vm, const Local<JSValueRef>& fontFamil
 }
 
 Color ParseTextColor(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t argIndex,
-    RefPtr<ResourceObject>& textColorResObj, uint32_t defaultTextColor)
+    RefPtr<ResourceObject>& textColorResObj, uint32_t defaultTextColor,
+    ArkUINodeHandle nativeNode, int32_t& isSetByUser)
 {
     Color textColor;
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(argIndex);
 
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (colorArg->IsNull() || colorArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor, textColorResObj)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor, textColorResObj, nodeInfo)) {
         textColor.SetValue(defaultTextColor);
+        isSetByUser = false;
+    } else {
+        isSetByUser = true;
     }
     return textColor;
 }
@@ -237,9 +242,10 @@ ArkUINativeModuleValue TextPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> overflowArg = runtimeCallInfo->GetCallArgRef(OVER_FLOW_ARG_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
+    ArkUIPickerTextStyleStruct textStyleStruct;
     RefPtr<ResourceObject> textColorResObj;
     Color textColor = ParseTextColor(vm, runtimeCallInfo, COLOR_ARG_INDEX, textColorResObj,
-        DEFAULT_TIME_PICKER_TEXT_COLOR);
+        DEFAULT_TIME_PICKER_TEXT_COLOR, nativeNode, textStyleStruct.textColorSetByUser);
 
     RefPtr<ResourceObject> fontSizeResObj;
     std::string fontSizeStr = ParseFontSize(vm, runtimeCallInfo, FONT_SIZE_ARG_INDEX, fontSizeResObj);
@@ -271,7 +277,6 @@ ArkUINativeModuleValue TextPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = textColor.GetValue();
     textStyleStruct.fontStyle = styleVal;
     textStyleStruct.textOverflow = overflowVal;
@@ -298,9 +303,10 @@ ArkUINativeModuleValue TextPickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     Local<JSValueRef> overflowArg = runtimeCallInfo->GetCallArgRef(OVER_FLOW_ARG_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
+    ArkUIPickerTextStyleStruct textStyleStruct;
     RefPtr<ResourceObject> textColorResObj;
     Color textColor = ParseTextColor(vm, runtimeCallInfo, COLOR_ARG_INDEX, textColorResObj,
-        DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR);
+        DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR, nativeNode, textStyleStruct.textColorSetByUser);
 
     RefPtr<ResourceObject> fontSizeResObj;
     std::string fontSizeStr = ParseFontSize(vm, runtimeCallInfo, FONT_SIZE_ARG_INDEX, fontSizeResObj);
@@ -331,7 +337,6 @@ ArkUINativeModuleValue TextPickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = textColor.GetValue();
     textStyleStruct.fontStyle = styleVal;
     textStyleStruct.textOverflow = overflowVal;
@@ -359,9 +364,10 @@ ArkUINativeModuleValue TextPickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     Local<JSValueRef> overflowArg = runtimeCallInfo->GetCallArgRef(OVER_FLOW_ARG_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
+    ArkUIPickerTextStyleStruct textStyleStruct;
     RefPtr<ResourceObject> textColorResObj;
     Color textColor = ParseTextColor(vm, runtimeCallInfo, COLOR_ARG_INDEX, textColorResObj,
-        DEFAULT_TIME_PICKER_TEXT_COLOR);
+        DEFAULT_TIME_PICKER_TEXT_COLOR, nativeNode, textStyleStruct.textColorSetByUser);
 
     RefPtr<ResourceObject> fontSizeResObj;
     std::string fontSizeStr = ParseFontSize(vm, runtimeCallInfo, FONT_SIZE_ARG_INDEX, fontSizeResObj);
@@ -393,7 +399,6 @@ ArkUINativeModuleValue TextPickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = textColor.GetValue();
     textStyleStruct.fontStyle = styleVal;
     textStyleStruct.textOverflow = overflowVal;
@@ -521,7 +526,8 @@ ArkUINativeModuleValue TextPickerBridge::SetDivider(ArkUIRuntimeCallInfo* runtim
     if (ParseDividerDimension(vm, dividerStrokeWidthArgs, dividerStrokeWidth, strokeWidthResObj)) {
         dividerStrokeWidth = pickerTheme ? pickerTheme->GetDividerThickness() : 0.0_vp;
     }
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, colorResObj, nodeInfo)) {
         colorObj = pickerTheme ? pickerTheme->GetDividerColor() : Color::TRANSPARENT;
     }
     if (ParseDividerDimension(vm, dividerStartMarginArgs, dividerStartMargin, startMarginResObj)) {
@@ -635,9 +641,10 @@ ArkUINativeModuleValue TextPickerBridge::SetDefaultTextStyle(ArkUIRuntimeCallInf
     Local<JSValueRef> overflowArg = runtimeCallInfo->GetCallArgRef(OVER_FLOW_ARG_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
+    ArkUIPickerTextStyleStruct textStyleStruct;
     RefPtr<ResourceObject> textColorResObj;
     Color textColor = ParseTextColor(vm, runtimeCallInfo, COLOR_ARG_INDEX, textColorResObj,
-        DEFAULT_TIME_PICKER_TEXT_COLOR);
+        DEFAULT_TIME_PICKER_TEXT_COLOR, nativeNode, textStyleStruct.textColorSetByUser);
 
     RefPtr<ResourceObject> fontSizeResObj;
     std::string fontSize = ParseFontSize(vm, runtimeCallInfo, FONT_SIZE_ARG_INDEX, fontSizeResObj);
@@ -665,7 +672,6 @@ ArkUINativeModuleValue TextPickerBridge::SetDefaultTextStyle(ArkUIRuntimeCallInf
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = textColor.GetValue();
     textStyleStruct.fontStyle = styleVal;
     textStyleStruct.textOverflow = overflowVal;

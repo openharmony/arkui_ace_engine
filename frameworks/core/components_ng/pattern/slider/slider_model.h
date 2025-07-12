@@ -101,6 +101,9 @@ public:
         float toValue = std::numeric_limits<float>::quiet_NaN();
     };
 
+    using SliderStepItemAccessibility = std::string;
+    using SliderShowStepOptions = std::unordered_map<uint32_t, SliderStepItemAccessibility>;
+
     static SliderModel* GetInstance();
     virtual ~SliderModel() = default;
 
@@ -116,7 +119,7 @@ public:
     virtual void SetMinLabel(float value) = 0;
     virtual void SetMaxLabel(float value) = 0;
     virtual void SetMinResponsiveDistance(float value) {};
-    virtual void SetShowSteps(bool value) = 0;
+    virtual void SetShowSteps(bool value, const std::optional<SliderShowStepOptions>& options = std::nullopt) = 0;
     virtual void SetShowTips(bool value, const std::optional<std::string>& content) = 0;
     virtual void SetThickness(const Dimension& value) = 0;
     virtual void SetBlockBorderColor(const Color& value) = 0;

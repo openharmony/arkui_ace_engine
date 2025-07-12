@@ -235,20 +235,21 @@ void NavigationManager::UpdateCurNavNodeRenderGroupProperty()
         state ? "yes" : "no");
 }
 
-void NavigationManager::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
+void NavigationManager::SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool ignoreOrientation)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "set navigation force split %{public}s, homePage:%{public}s",
-        (isForceSplit ? "enable" : "disable"), homePage.c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "set navigation force split %{public}s, homePage:%{public}s, "
+        "ignoreOrientation:%{public}d", (isForceSplit ? "enable" : "disable"), homePage.c_str(), ignoreOrientation);
     /**
      * As long as the application supports force split, regardless of whether it is enabled or not,
      * the SetForceSplitleEnable interface will be called.
      */
     isForceSplitSupported_ = true;
-    if (isForceSplitEnable_ == isForceSplit && homePageName_ == homePage) {
+    if (isForceSplitEnable_ == isForceSplit && homePageName_ == homePage && ignoreOrientation_ == ignoreOrientation) {
         return;
     }
     isForceSplitEnable_ = isForceSplit;
     homePageName_ = homePage;
+    ignoreOrientation_ = ignoreOrientation;
 
     auto listeners = forceSplitListeners_;
     for (auto& listener : listeners) {

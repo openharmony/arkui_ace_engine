@@ -22,6 +22,7 @@
 #include "jsnapi_expo.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -58,6 +59,7 @@ constexpr int32_t BUILD_PARAM_INDEX_THIS_OBJ = 5;
 
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 {
+    ACE_REUSE_DETECTION_SCOPED_TRACE("JSBaseNode:BuildNode");
     auto builder = info[0];
     CHECK_NULL_VOID(builder->IsFunction());
     auto buildFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builder));
@@ -165,7 +167,9 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 void JSBaseNode::ProccessNode(bool isSupportExportTexture, bool isSupportLazyBuild)
 {
     CHECK_NULL_VOID(viewNode_);
+    CHECK_NULL_VOID(realNode_);
     viewNode_->SetIsRootBuilderNode(true);
+    realNode_->SetJsBuilderNodeId(viewNode_->GetId());
     if (isSupportExportTexture) {
         viewNode_->CreateExportTextureInfoIfNeeded();
         auto exportTextureInfo = viewNode_->GetExportTextureInfo();
