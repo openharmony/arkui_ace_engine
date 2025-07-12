@@ -867,7 +867,7 @@ public:
     RefPtr<TextEffect> GetOrCreateTextEffect(const std::u16string& content, bool& needUpdateTypography);
     void RelayoutResetOrUpdateTextEffect();
     void ResetTextEffect();
-    bool ResetTextEffectBeforeLayout(bool onlyReset = true);
+    bool ResetTextEffectBeforeLayout();
 
     virtual void HandleOnAskCelia();
 

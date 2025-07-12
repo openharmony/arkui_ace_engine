@@ -4329,9 +4329,6 @@ void TextPattern::ParseOriText(const std::u16string& currentText)
 
 void TextPattern::BeforeCreateLayoutWrapper()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(host->GetTag() != V2::SYMBOL_ETS_TAG);
     if (!isSpanStringMode_) {
         PreCreateLayoutWrapper();
     }
@@ -4341,11 +4338,8 @@ void TextPattern::BeforeCreateLayoutWrapper()
     }
 }
 
-bool TextPattern::ResetTextEffectBeforeLayout(bool onlyReset)
+bool TextPattern::ResetTextEffectBeforeLayout()
 {
-    if (onlyReset && !textEffect_) {
-        return true;
-    }
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, true);
     if (textLayoutProperty->GetTextEffectStrategyValue(TextEffectStrategy::NONE) == TextEffectStrategy::NONE ||
@@ -4386,7 +4380,7 @@ RefPtr<TextEffect> TextPattern::GetOrCreateTextEffect(const std::u16string& cont
         ResetTextEffect();
         return nullptr;
     }
-    if (ResetTextEffectBeforeLayout(false)) {
+    if (ResetTextEffectBeforeLayout()) {
         return nullptr;
     }
     auto isNumber = RegularMatchNumbers(content);
