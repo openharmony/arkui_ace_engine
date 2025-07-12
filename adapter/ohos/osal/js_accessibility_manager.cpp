@@ -3954,6 +3954,7 @@ bool JsAccessibilityManager::IsEventIgnoredByWorkMode(const AccessibilityEvent& 
             case AccessibilityEventType::ELEMENT_INFO_CHANGE:
             case AccessibilityEventType::TEXT_CHANGE:
             case AccessibilityEventType::FOCUS:
+            case AccessibilityEventType::SCROLLING_EVENT:
                 return true;
             default:
                 return false;
