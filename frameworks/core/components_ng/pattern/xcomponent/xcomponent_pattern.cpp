@@ -208,21 +208,20 @@ void XComponentPattern::InitSurface()
     surfaceId_ = renderSurface_->GetUniqueId();
     initialSurfaceId_ = surfaceId_;
     UpdateTransformHint();
-    RegisterSurfaceRenderContext();
+    RegisterNode();
 }
 
-void XComponentPattern::RegisterSurfaceRenderContext()
+void XComponentPattern::RegisterNode()
 {
     if (type_ == XComponentType::SURFACE) {
-        XComponentInnerSurfaceController::RegisterSurfaceRenderContext(
-            initialSurfaceId_, WeakPtr(handlingSurfaceRenderContext_));
+        XComponentInnerSurfaceController::RegisterNode(initialSurfaceId_, WeakPtr(GetHost()));
     }
 }
 
-void XComponentPattern::UnregisterSurfaceRenderContext()
+void XComponentPattern::UnregisterNode()
 {
     if (type_ == XComponentType::SURFACE) {
-        XComponentInnerSurfaceController::UnregisterSurfaceRenderContext(initialSurfaceId_);
+        XComponentInnerSurfaceController::UnregisterNode(initialSurfaceId_);
     }
 }
 
@@ -470,7 +469,7 @@ void XComponentPattern::OnRebuildFrame()
 
 void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    UnregisterSurfaceRenderContext();
+    UnregisterNode();
     CHECK_NULL_VOID(frameNode);
     UninitializeAccessibility(frameNode);
     if (isTypedNode_) {
