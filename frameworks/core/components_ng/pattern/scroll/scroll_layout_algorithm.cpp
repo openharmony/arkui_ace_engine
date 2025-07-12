@@ -74,6 +74,15 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto selfSize = idealSize.ConvertToSizeT();
     if (!isMainFix) {
         selfSize.Constrain(constraint->minSize, constraint->maxSize);
+    } else {
+        auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(
+            OptionalSizeF(selfSize), layoutProperty->GetCalcLayoutConstraint(), constraint->percentReference);
+        if (finalSize.Width().has_value()) {
+            selfSize.SetWidth(finalSize.Width().value());
+        }
+        if (finalSize.Height().has_value()) {
+            selfSize.SetHeight(finalSize.Height().value());
+        }
     }
     auto scrollNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(scrollNode);

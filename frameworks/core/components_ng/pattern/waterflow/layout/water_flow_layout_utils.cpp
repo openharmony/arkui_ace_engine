@@ -73,8 +73,18 @@ LayoutConstraintF WaterFlowLayoutUtils::CreateChildConstraint(
 
     itemConstraint.maxSize = itemIdealSize;
     itemConstraint.maxSize.SetMainSize(Infinity<float>(), params.axis);
-    itemConstraint.parentIdealSize = OptionalSizeF(itemIdealSize);
     itemConstraint.percentReference = itemIdealSize;
+
+    if (child) {
+        auto childLayoutProperty = child->GetLayoutProperty();
+        if (childLayoutProperty) {
+            auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+            if (layoutPolicy.has_value() && ((params.axis == Axis::VERTICAL && layoutPolicy->IsWidthMatch()) ||
+                                                (params.axis == Axis::HORIZONTAL && layoutPolicy->IsHeightMatch()))) {
+                itemConstraint.parentIdealSize = OptionalSizeF(itemIdealSize);
+            }
+        }
+    }
 
     CHECK_NULL_RETURN(props->HasItemLayoutConstraint() && !params.haveUserDefSize, itemConstraint);
 

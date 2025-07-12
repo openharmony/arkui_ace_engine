@@ -299,6 +299,7 @@ void JSGrid::JsGridHeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    JSViewAbstract::JsHeight(info);
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {

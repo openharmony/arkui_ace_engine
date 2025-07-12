@@ -548,6 +548,44 @@ HWTEST_F(ScrollLayoutTestNg, RTL001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateFrameSizeWithLayoutPolicy001
+ * @tc.desc: test LayoutPolicy MATCH_PARENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, UpdateFrameSizeWithLayoutPolicy001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::VERTICAL);
+    CreateContent(HEIGHT);
+    CreateScrollDone(frameNode_);
+    ASSERT_NE(frameNode_, nullptr);;
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(1.0f);
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    SizeF parentSize(300.0f, 300.0f);
+    parentLayoutConstraint.maxSize = parentSize;
+    parentLayoutConstraint.percentReference = parentSize;
+    parentLayoutConstraint.selfIdealSize.SetSize(parentSize);
+    layoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+
+    layoutProperty->calcLayoutConstraint_->minSize = CalcSize{ CalcLength(0), CalcLength(0) };
+    layoutProperty->calcLayoutConstraint_->maxSize = CalcSize{ CalcLength(200), CalcLength(200) };
+    layoutAlgorithm->Measure(&layoutWrapper);
+    auto frameSize = layoutWrapper.GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(frameSize, SizeF(200, 200));
+}
+
+/**
  * @tc.name: ScrollEdge001
  * @tc.desc: Test ScrollEdge CheckScrollToEdge
  * @tc.type: FUNC
