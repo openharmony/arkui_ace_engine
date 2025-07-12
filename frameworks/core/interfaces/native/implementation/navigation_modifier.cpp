@@ -642,6 +642,10 @@ void ToolbarConfigurationImpl(Ark_NativePointer node,
     }
 
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto isHideItemText = Converter::OptConvert<bool>(options->value.hideItemValue).value_or(false);
+        NavigationModelStatic::SetHideItemText(frameNode, isHideItemText);
+    }
+    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         NG::NavigationBackgroundOptions bgOptions =
             Converter::Convert<NG::NavigationBackgroundOptions>(options->value);
         toolbarOptions.bgOptions = bgOptions;
