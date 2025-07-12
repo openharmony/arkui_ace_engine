@@ -561,7 +561,7 @@ void NavigationModelNG::UpdateMainTitle(
     const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj)
 {
     std::string key = "navigation.title.commonMainTitle";
-    auto updateFunc = [this, key, weak = AceType::WeakClaim(AceType::RawPtr(titleBarNode))](
+    auto updateFunc = [key, weak = AceType::WeakClaim(AceType::RawPtr(titleBarNode))](
                           const RefPtr<ResourceObject>& mainResObj) mutable {
         auto titleBarNode = weak.Upgrade();
         CHECK_NULL_VOID(titleBarNode);
@@ -865,7 +865,7 @@ bool NavigationModelNG::CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode)
     focusHub->SetFocusDependence(FocusDependence::SELF);
     auto gestureEventHub = backButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureEventHub, false);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context)](GestureEvent& /* info */) {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
@@ -1442,6 +1442,17 @@ void NavigationModelNG::SetOnTitleModeChange(std::function<void(NG::NavigationTi
     eventHub->SetOnTitleModeChange(std::move(eventInfo));
 }
 
+// void NavigationModelNG::SetOnTitleModeChange(FrameNode* frameNode,
+//     std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
+//     std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo)
+// {
+//     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+//     CHECK_NULL_VOID(navigationGroupNode);
+//     auto eventHub = navigationGroupNode->GetEventHub<NavigationEventHub>();
+//     CHECK_NULL_VOID(eventHub);
+//     eventHub->SetOnTitleModeChange(std::move(eventInfo));
+// }
+
 void NavigationModelNG::SetOnNavBarWidthChangeEvent(OnNavBarWidthChangeEvent event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1847,13 +1858,13 @@ void NavigationModelNG::SetOnTitleModeChange(FrameNode* frameNode,
     eventHub->SetOnTitleModeChange(std::move(eventInfo));
 }
 
-void NavigationModelNG::SetOnNavigationModeChange(FrameNode* frameNode,
-    std::function<void(NavigationMode)>&& modeChange)
-{
-    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
-    CHECK_NULL_VOID(navigationEventHub);
-    navigationEventHub->SetOnNavigationModeChange(std::move(modeChange));
-}
+// void NavigationModelNG::SetOnNavigationModeChange(FrameNode* frameNode,
+//     std::function<void(NavigationMode)>&& modeChange)
+// {
+//     auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+//     CHECK_NULL_VOID(navigationEventHub);
+//     navigationEventHub->SetOnNavigationModeChange(std::move(modeChange));
+// }
 
 void NavigationModelNG::SetIsCustomAnimation(FrameNode* frameNode, bool isCustom)
 {
@@ -1902,13 +1913,13 @@ void NavigationModelNG::SetToolBarItems(FrameNode* frameNode, std::vector<NG::Ba
     navBarNode->UpdatePrevToolBarIsCustom(false);
 }
 
-void NavigationModelNG::SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
-    CHECK_NULL_VOID(navigationEventHub);
-    navigationEventHub->SetOnNavBarStateChange(std::move(onNavBarStateChange));
-}
+// void NavigationModelNG::SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange)
+// {
+//     CHECK_NULL_VOID(frameNode);
+//     auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+//     CHECK_NULL_VOID(navigationEventHub);
+//     navigationEventHub->SetOnNavBarStateChange(std::move(onNavBarStateChange));
+// }
 
 void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated)
 {
@@ -2101,7 +2112,6 @@ void NavigationModelNG::SetMaxNavBarWidth(FrameNode* frameNode, const RefPtr<Res
 
 void NavigationModelNG::SetNavBarWidth(FrameNode* frameNode, const Dimension& value)
 {
-    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarWidth, value, frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
@@ -2990,6 +3000,23 @@ void NavigationModelNG::SetMenuItemSymbol(FrameNode* frameNode,
     }
 }
 
+void NavigationModelNG::SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navigationEventHub);
+    navigationEventHub->SetOnNavBarStateChange(std::move(onNavBarStateChange));
+}
+
+void NavigationModelNG::SetOnNavigationModeChange(FrameNode* frameNode,
+    std::function<void(NavigationMode)>&& modeChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navigationEventHub);
+    navigationEventHub->SetOnNavigationModeChange(std::move(modeChange));
+}
+
 void NavigationModelNG::SetCustomTitle(FrameNode* frameNode, const RefPtr<AceType>& customNode)
 {
     auto customTitle = AceType::DynamicCast<NG::UINode>(customNode);
@@ -3130,5 +3157,31 @@ void NavigationModelNG::SetBeforeCreateLayoutWrapperCallBack(
     auto navBarEventHub = navBarPattern->GetOrCreateEventHub<NavBarEventHub>();
     CHECK_NULL_VOID(navBarEventHub);
     navBarEventHub->SetBeforeCreateLayoutWrapperCallBack(std::move(beforeCreateLayoutWrapper));
+}
+void NavigationModelNG::SetSubTitle(FrameNode* frameNode, const std::string& subTitle)
+{
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigation);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetIsTitleChanged(true);
+    auto subTitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    if (subTitleNode) {
+        auto textLayoutProperty = subTitleNode->GetLayoutProperty<TextLayoutProperty>();
+        textLayoutProperty->UpdateContent(subTitle);
+        return;
+    }
+    subTitleNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_VOID(subTitleNode);
+    auto textLayoutProperty = subTitleNode->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateContent(subTitle);
+    titleBarPattern->SetNeedResetSubTitleProperty(true);
+    titleBarNode->SetSubtitle(subTitleNode);
+    titleBarNode->AddChild(subTitleNode);
 }
 } // namespace OHOS::Ace::NG

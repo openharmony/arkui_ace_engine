@@ -33,6 +33,11 @@ class RadioPattern : public Pattern {
     DECLARE_ACE_TYPE(RadioPattern, Pattern);
 
 public:
+    enum class RadioIndicatorType {
+        TICK = 0,
+        DOT,
+        CUSTOM,
+    };
     RadioPattern() = default;
     ~RadioPattern() override = default;
 
@@ -215,6 +220,9 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread();
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void InitClickEvent();
@@ -245,6 +253,7 @@ private:
     void UpdateSelectStatus(bool isSelected);
     void FireBuilder();
     bool OnKeyEvent(const KeyEvent& event);
+    void UpdateGroupStatus(FrameNode* frameNode);
 
     void ImageNodeCreate();
     void startEnterAnimation();

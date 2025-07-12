@@ -385,7 +385,7 @@ HWTEST_F(GridLayoutRangeTest, Solve001, TestSize.Level1)
     GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
     auto res = solver.FindStartingRow(5.0f);
     EXPECT_EQ(res.pos, 0.0f);
-    EXPECT_EQ(res.row, 0);
+    EXPECT_EQ(res.row, -1);
 }
 
 /**

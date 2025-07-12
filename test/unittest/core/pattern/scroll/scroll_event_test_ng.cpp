@@ -1988,7 +1988,7 @@ HWTEST_F(ScrollEventTestNg, HandleCrownActionUpdate001, TestSize.Level1)
     ASSERT_NE(scrollable, nullptr);
     GestureEvent info;
     info.mainDelta_ = 1.0;
-    mainDelta = 2.0;
+    auto mainDelta = 2.0;
     TimeStamp ts = std::chrono::high_resolution_clock::now();
     scrollable->HandleCrownActionUpdate(ts, 0.0, info);
     EXPECT_NE(info.mainDelta_, mainDelta);
@@ -1998,11 +1998,11 @@ HWTEST_F(ScrollEventTestNg, HandleCrownActionUpdate001, TestSize.Level1)
 #endif
 
 /**
- * @tc.name: HandleCrownActionEnd001
+ * @tc.name: HandleCrownActionEnd002
  * @tc.desc: Test HandleCrownActionEnd
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollEventTestNg, HandleCrownActionEnd001, TestSize.Level1)
+HWTEST_F(ScrollEventTestNg, HandleCrownActionEnd002, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::END);

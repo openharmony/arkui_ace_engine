@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#undef KOALA_INTEROP_MODULE
 #define KOALA_INTEROP_MODULE InteropNativeModule
 #include "common-interop.h"
 #include "interop-types.h"
@@ -28,6 +29,11 @@ static std::deque<InteropInt32> callbackResourceSubqueue;
 
 void enqueueCallback(const CallbackBuffer* event) {
     callbackEventsQueue.push_back(Event_CallCallback);
+    callbackCallSubqueue.push_back(*event);
+}
+
+void enqueueCustomCallback(const CallbackBuffer* event) {
+    callbackEventsQueue.push_back(Event_CallCallback_Customize);
     callbackCallSubqueue.push_back(*event);
 }
 
@@ -48,6 +54,7 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
         switch (callbackEventsQueue.front())
         {
             case Event_CallCallback:
+            case Event_CallCallback_Customize:
                 callbackCallSubqueue.front().resourceHolder.release();
                 callbackCallSubqueue.pop_front();
                 break;
@@ -69,6 +76,7 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
     switch (frontEventKind)
     {
         case Event_CallCallback:
+        case Event_CallCallback_Customize:
             memcpy(result + 4, callbackCallSubqueue.front().buffer, sizeof(CallbackBuffer::buffer));
             break;
         case Event_HoldManagedResource:

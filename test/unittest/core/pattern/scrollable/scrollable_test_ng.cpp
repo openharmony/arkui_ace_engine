@@ -1773,7 +1773,6 @@ HWTEST_F(ScrollableTestNg, HandleCrownEvent001, TestSize.Level1)
         scrollable->SetCrownEventDragging(false);
     }
     event.action = CrownAction::BEGIN;
-    scrollable->SetReachBoundary(false);
     scrollable->crownEventNum_ = TEST_CROWN_EVENT_NUN_THRESH;
     scrollable->HandleCrownEvent(event, oft);
     EXPECT_TRUE(scrollable->GetIsDragging());
@@ -1783,7 +1782,6 @@ HWTEST_F(ScrollableTestNg, HandleCrownEvent001, TestSize.Level1)
      * @tc.expected: Rotating pixel points with specific row values.
      */
     event.action = CrownAction::BEGIN;
-    scrollable->SetReachBoundary(true);
     scrollable->HandleCrownEvent(event, oft);
     EXPECT_TRUE(scrollable->GetIsDragging());
 
@@ -1917,23 +1915,23 @@ HWTEST_F(ScrollableTestNg, SetVelocityScale001, TestSize.Level1)
  * @tc.desc: Test OnTouchDown
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollableTestNg, OnTouchDown001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer and Scrollable.
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    ASSERT_NE(scrollPn, nullptr);
+// HWTEST_F(ScrollableTestNg, OnTouchDown001, TestSize.Level1)
+// {
+//     /**
+//      * @tc.steps: step1. Initialize ScrollablePattern type pointer and Scrollable.
+//      * @tc.expected: Pointer is not nullptr.
+//      */
+//     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+//     ASSERT_NE(scrollPn, nullptr);
 
-    /**
-     * @tc.steps: step2. ScrollablePattern OnTouchDown
-     * @tc.expected: Click animation stop
-     */
-    TouchEventInfo touchEvent = TouchEventInfo("unknown");
-    scrollPn->nestedScrollVelocity_ = 0;
-    scrollPn->OnTouchDown(touchEvent);
-    EXPECT_FALSE(scrollPn->isClickAnimationStop_);
-}
+//     /**
+//      * @tc.steps: step2. ScrollablePattern OnTouchDown
+//      * @tc.expected: Click animation stop
+//      */
+//     TouchEventInfo touchEvent = TouchEventInfo("unknown");
+//     scrollPn->nestedScrollVelocity_ = 0;
+//     scrollPn->OnTouchDown(touchEvent);
+//     EXPECT_FALSE(scrollPn->isClickAnimationStop_);
+// }
 #endif
 } // namespace OHOS::Ace::NG

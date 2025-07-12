@@ -44,6 +44,17 @@ public:
 
     ~SwipeGesture() override = default;
 
+#ifdef ARKUI_CAPI_UNITTEST
+    double GetSpeed()
+    {
+        return speed_;
+    }
+
+    SwipeDirection GetDirection()
+    {
+        return direction_;
+    }
+#endif // ARKUI_CAPI_UNITTEST
 protected:
     RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 

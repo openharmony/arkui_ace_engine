@@ -420,7 +420,8 @@ RefPtr<FrameNode> BuildButton(const std::shared_ptr<SelectOverlayInfo>& info, st
     auto textLayoutProperty = text->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, button);
     auto data = buttonBasicInfo.data;
-    auto buttonType = buttonBasicInfo.buttonType;
+    // unused variable 'buttonType'
+    // auto buttonType = buttonBasicInfo.buttonType;
     textLayoutProperty->UpdateContent(data);
     text->MountToParent(button);
     auto hasCallback = false;
@@ -444,7 +445,7 @@ RefPtr<FrameNode> BuildButton(const std::shared_ptr<SelectOverlayInfo>& info, st
     if (hasCallback) {
         button->GetOrCreateGestureEventHub()->SetUserOnClick(
             [lableInfo = data, callbackVariant, overlayId,
-             id = Container::CurrentIdSafelyWithCheck(), buttonType = buttonType]
+             id = Container::CurrentIdSafelyWithCheck()]
                 (GestureEvent& /* info */) {
                 ContainerScope scope(id);
                 auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();

@@ -27,6 +27,114 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::unordered_set<std::string> EMBEDDED_NODE_TAG = { V2::SHEET_WRAPPER_TAG, V2::ALERT_DIALOG_ETS_TAG,
     V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
+// bool CheckTopEdgeOverlap(const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty,
+//     const RefPtr<NavDestinationGroupNode>& hostNode, SafeAreaExpandOpts opts)
+// {
+//     if (!navDestinationLayoutProperty || !hostNode) {
+//         return false;
+//     }
+//     auto layoutProperty = hostNode->GetLayoutProperty();
+//     CHECK_NULL_RETURN(layoutProperty, false);
+//     auto margin = layoutProperty->CreateMargin();
+//     float topMargin = margin.top.value_or(0.0f);
+//     const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
+//     float topPadding = padding.top.value_or(0.0f);
+//     if (!NearEqual(topPadding, 0.0f) || !NearEqual(topMargin, 0.0f)) {
+//         return false;
+//     }
+
+//     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+//     CHECK_NULL_RETURN(pipeline, false);
+//     auto safeAreaManager = pipeline->GetSafeAreaManager();
+
+//     auto parentGlobalOffset = hostNode->GetParentGlobalOffsetDuringLayout();
+//     auto NavDesGeometryNode = hostNode->GetGeometryNode();
+//     CHECK_NULL_RETURN(NavDesGeometryNode, false);
+//     auto frame = NavDesGeometryNode->GetFrameRect() + parentGlobalOffset;
+//     // only handle top-edge and system-type safeArea in current function
+//     if (!(opts.edges & SAFE_AREA_EDGE_TOP) || !(opts.type & SAFE_AREA_TYPE_SYSTEM)) {
+//         return false;
+//     }
+//     SafeAreaExpandOpts topSystemSafeAreaOpts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP};
+//     auto safeAreaPos = safeAreaManager->GetCombinedSafeArea(topSystemSafeAreaOpts);
+//     auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
+//     CHECK_NULL_RETURN(navDestinationPattern, false);
+//     auto barStyle = navDestinationPattern->GetTitleBarStyle().value_or(BarStyle::STANDARD);
+//     if (!safeAreaPos.top_.IsOverlapped(frame.Top())) {
+//         return false;
+//     }
+//     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false) || barStyle == BarStyle::STACK ||
+//         (barStyle == BarStyle::SAFE_AREA_PADDING && !NearZero(navDestinationPattern->GetTitleBarOffsetY()))) {
+//         return true;
+//     }
+//     return false;
+// }
+
+// bool CheckBottomEdgeOverlap(const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty,
+//     const RefPtr<NavDestinationGroupNode>& hostNode, SafeAreaExpandOpts opts)
+// {
+//     if (!navDestinationLayoutProperty || !hostNode) {
+//         return false;
+//     }
+//     auto layoutProperty = hostNode->GetLayoutProperty();
+//     CHECK_NULL_RETURN(layoutProperty, false);
+//     auto margin = layoutProperty->CreateMargin();
+//     float bottomMargin = margin.bottom.value_or(0.0f);
+//     const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
+//     float bottomPadding = padding.bottom.value_or(0.0f);
+//     if (!NearEqual(bottomPadding, 0.0f) || !NearEqual(bottomMargin, 0.0f)) {
+//         return false;
+//     }
+
+//     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+//     CHECK_NULL_RETURN(pipeline, false);
+//     auto safeAreaManager = pipeline->GetSafeAreaManager();
+
+//     auto parentGlobalOffset = hostNode->GetParentGlobalOffsetDuringLayout();
+//     auto NavBarGeometryNode = hostNode->GetGeometryNode();
+//     CHECK_NULL_RETURN(NavBarGeometryNode, false);
+//     auto frame = NavBarGeometryNode->GetFrameRect() + parentGlobalOffset;
+//     bool isToolBarVisible = hostNode->IsToolBarVisible();
+
+//     if ((opts.edges & SAFE_AREA_EDGE_BOTTOM) && (opts.type & SAFE_AREA_TYPE_SYSTEM)) {
+//         SafeAreaExpandOpts expandOpts = { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM };
+//         auto safeAreaPos = safeAreaManager->GetCombinedSafeArea(expandOpts);
+//         if (safeAreaPos.bottom_.IsOverlapped(frame.Bottom()) && !isToolBarVisible) {
+//             return true;
+//         }
+//     }
+//     return false;
+// }
+
+// NavSafeArea CheckIgnoreLayoutSafeArea(LayoutWrapper* layoutWrapper,
+//     const RefPtr<NavDestinationGroupNode>& hostNode,
+//     const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty)
+// {
+//     NavSafeArea safeArea;
+//     auto opts = navDestinationLayoutProperty->GetIgnoreLayoutSafeAreaValue({.type = SAFE_AREA_TYPE_NONE,
+//         .edges = SAFE_AREA_TYPE_NONE});
+
+//     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+//     CHECK_NULL_RETURN(pipeline, safeArea);
+//     auto inset = pipeline->GetSafeArea();
+//     auto safeAreaManager = pipeline->GetSafeAreaManager();
+
+//     bool edgeTopOverLayCondition = CheckTopEdgeOverlap(navDestinationLayoutProperty, hostNode, opts);
+//     bool edgeBottomOverLayCondition = CheckBottomEdgeOverlap(navDestinationLayoutProperty, hostNode, opts);
+
+//     if (edgeTopOverLayCondition) {
+//         auto contentNode =  AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+//         CHECK_NULL_RETURN(contentNode, safeArea);
+//         SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_NONE};
+//         contentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+//         safeArea.top = static_cast<float>(inset.top_.Length());
+//     }
+
+//     if (edgeBottomOverLayCondition) {
+//         safeArea.bottom = static_cast<float>(inset.bottom_.Length());
+//     }
+//     return safeArea;
+// }
 
 float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGroupNode>& hostNode,
     const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty, const SizeF& size,

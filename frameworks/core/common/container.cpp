@@ -43,7 +43,7 @@ int32_t Container::SafelyId()
 {
     uint32_t containerCount = ContainerScope::ContainerCount();
     if (containerCount == 0) {
-        return INSTANCE_ID_UNDEFINED;
+        return DEFAULT_ID;
     }
     if (containerCount == 1) {
         return ContainerScope::SingletonId();
@@ -70,7 +70,7 @@ int32_t Container::CurrentIdSafely()
 
 RefPtr<Container> Container::Current()
 {
-    return AceEngine::Get().GetContainer(ContainerScope::CurrentId());
+    return AceEngine::Get().GetContainer(Container::CurrentIdSafely());
 }
 
 RefPtr<Container> Container::CurrentSafely()
@@ -358,7 +358,7 @@ int32_t Container::GenerateId<PLUGIN_SUBCONTAINER>()
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     return PluginManager::GetInstance().GetPluginSubContainerId();
 #else
-    return INSTANCE_ID_UNDEFINED;
+    return DEFAULT_ID;
 #endif
 }
 

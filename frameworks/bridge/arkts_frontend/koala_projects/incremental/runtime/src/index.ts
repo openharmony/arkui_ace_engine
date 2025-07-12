@@ -93,7 +93,7 @@ export {
     contextNode,
 } from "./memo/node"
 export {
-    memo,
+    memoize,
     memoLifecycle,
     once,
     remember,
@@ -145,6 +145,8 @@ export {
     StateContext,
     StateManager,
     ValueTracker,
+    createStateManager,
+    StateManagerImpl
 } from "./states/State"
 export {
     __context,

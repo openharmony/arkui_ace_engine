@@ -20,6 +20,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 
+#include "arkoala_api_generated.h"
 #include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -342,6 +343,7 @@ void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
         case MouseAction::RELEASE: dst = ARK_MOUSE_ACTION_RELEASE; break;
         case MouseAction::MOVE: dst = ARK_MOUSE_ACTION_MOVE; break;
         case MouseAction::HOVER: dst = ARK_MOUSE_ACTION_HOVER; break;
+        case MouseAction::CANCEL: dst = ARK_MOUSE_ACTION_CANCEL; break;
         default: {
             dst = static_cast<Ark_MouseAction>(-1);
             LOGE("Unexpected enum value in MouseAction: %{public}d", src);
@@ -361,6 +363,21 @@ void AssignArkValue(Ark_MouseButton& dst, const MouseButton& src)
         default: {
             dst = static_cast<Ark_MouseButton>(-1);
             LOGE("Unexpected enum value in MouseButton: %{public}d", src);
+        }
+    }
+}
+
+void AssignArkValue(Ark_AxisAction& dst, const AxisAction& src)
+{
+    switch (src) {
+        case AxisAction::NONE: dst = ARK_AXIS_ACTION_NONE; break;
+        case AxisAction::BEGIN: dst = ARK_AXIS_ACTION_BEGIN; break;
+        case AxisAction::UPDATE: dst = ARK_AXIS_ACTION_UPDATE; break;
+        case AxisAction::END: dst = ARK_AXIS_ACTION_END; break;
+        case AxisAction::CANCEL: dst = ARK_AXIS_ACTION_CANCEL; break;
+        default: {
+            dst = static_cast<Ark_AxisAction>(-1);
+            LOGE("Unexpected enum value in AxisAction: %{public}d", src);
         }
     }
 }
@@ -741,6 +758,8 @@ void AssignArkValue(Ark_SourceType& dst, const SourceType& src)
         case SourceType::NONE: dst = Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN; break;
         case SourceType::MOUSE: dst = Ark_SourceType::ARK_SOURCE_TYPE_MOUSE; break;
         case SourceType::TOUCH: dst = Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN; break;
+        case SourceType::KEYBOARD: dst = Ark_SourceType::ARK_SOURCE_TYPE_KEYBOARD; break;
+        case SourceType::JOYSTICK: dst = Ark_SourceType::ARK_SOURCE_TYPE_JOYSTICK; break;
         default: dst = static_cast<Ark_SourceType>(-1);
             LOGE("Unexpected enum value in SourceType: %{public}d", src);
     }
@@ -834,6 +853,7 @@ void AssignArkValue(Ark_KeySource& dst, const SourceType& src)
     switch (src) {
         case SourceType::NONE: dst = Ark_KeySource::ARK_KEY_SOURCE_UNKNOWN; break;
         case SourceType::KEYBOARD: dst = Ark_KeySource::ARK_KEY_SOURCE_KEYBOARD; break;
+        case SourceType::JOYSTICK: dst = Ark_KeySource::ARK_KEY_SOURCE_JOYSTICK; break;
         default: dst = static_cast<Ark_KeySource>(-1);
             LOGE("Unexpected enum value in SourceType: %{public}d", src);
     }
@@ -919,6 +939,15 @@ void AssignArkValue(Ark_Affinity& dst, const TextAffinity& src)
         case TextAffinity::UPSTREAM: dst = Ark_Affinity::ARK_AFFINITY_UPSTREAM; break;
         case TextAffinity::DOWNSTREAM: dst = Ark_Affinity::ARK_AFFINITY_DOWNSTREAM; break;
         default: LOGE("Unexpected enum value in TextAffinity: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_LengthMetricsUnit& dst, const OHOS::Ace::CanvasUnit& src)
+{
+    switch (src) {
+        case OHOS::Ace::CanvasUnit::DEFAULT: dst = ARK_LENGTH_METRICS_UNIT_DEFAULT; break;
+        case OHOS::Ace::CanvasUnit::PX: dst = ARK_LENGTH_METRICS_UNIT_PX; break;
+        default: dst = static_cast<Ark_LengthMetricsUnit>(-1);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

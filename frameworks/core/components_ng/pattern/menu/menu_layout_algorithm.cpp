@@ -599,12 +599,13 @@ void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(
     auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
     double creaseTop = 0.0;
     double creaseBottom = 0.0;
-    double creaseHeight = 0.0;
+    // creaseHeight not used
+    // double creaseHeight = 0.0;
     if (!foldCreaseRects.empty()) {
         auto foldCrease = foldCreaseRects.front();
         creaseTop = foldCrease.Top() - creaseHeightOffset;
         creaseBottom = foldCrease.Bottom() - creaseHeightOffset;
-        creaseHeight = foldCrease.Height();
+        // creaseHeight = foldCrease.Height();
     }
     double offsetY = 0.0;
     if (props->GetMenuPlacement().has_value()) {
@@ -798,7 +799,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     InitCanExpandCurrentWindow(isShowInSubWindow, layoutWrapper);
     Initialize(layoutWrapper);
     if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
+        InitTargetSizeAndPosition(layoutWrapper, isContextMenu, menuPattern);
     }
     CalcWrapperRectForHoverMode(menuPattern);
 

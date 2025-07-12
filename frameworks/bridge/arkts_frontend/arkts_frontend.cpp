@@ -17,11 +17,13 @@
 #include <ani.h>
 #include "arkcompiler/runtime_core/static_core/plugins/ets/runtime/napi/ets_napi.h"
 #include "interfaces/inner_api/ace/constants.h"
+#include "ui/base/utils/utils.h"
 
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
+#include "bridge/arkts_frontend/ani_context_module.h"
 
 namespace OHOS::Ace {
 UIContentErrorCode ArktsFrontend::RunPage(
@@ -42,6 +44,10 @@ struct AppInfo {
     const char* enterMethodSig;
     const char* emitEventMethodName;
     const char* emitEventMethodSig;
+    const char* checkCallbackMethodName;
+    const char* checkCallbackEventMethodSig;
+    const char* handleMessageMethodName;
+    const char* handleMessageMethodSig;
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
@@ -55,6 +61,10 @@ const AppInfo KOALA_APP_INFO = {
     "IIJ:Z",
     "emitEvent",
     "IIII:V",
+    "checkCallbacks",
+    ":V",
+    "handleMessage",
+    "JILstd/core/String;:Z",
 };
 
 // void TryEmitError(EtsEnv& env)
@@ -65,11 +75,59 @@ const AppInfo KOALA_APP_INFO = {
 //     }
 // }
 
+std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* property)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "called");
+    std::string propertyValue;
+    ani_status status = ANI_ERROR;
+    ani_type errorType = nullptr;
+    if ((status = aniEnv->Object_GetType(aniError, &errorType)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Object_GetType failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    auto errorClass = static_cast<ani_class>(errorType);
+    ani_method getterMethod = nullptr;
+    if ((status = aniEnv->Class_FindMethod(errorClass, property, nullptr, &getterMethod)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Class_FindMethod failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    ani_ref aniRef = nullptr;
+    if ((status = aniEnv->Object_CallMethod_Ref(aniError, getterMethod, &aniRef)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Object_CallMethod_Ref failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    ani_string aniString = reinterpret_cast<ani_string>(aniRef);
+    ani_size sz {};
+    if ((status = aniEnv->String_GetUTF8Size(aniString, &sz)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "String_GetUTF8Size failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    propertyValue.resize(sz + 1);
+    if ((status = aniEnv->String_GetUTF8SubString(
+        aniString, 0, sz, propertyValue.data(), propertyValue.size(), &sz))!= ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "String_GetUTF8SubString failed, status : %{public}d", status);
+        return propertyValue;
+    }
+    propertyValue.resize(sz);
+    return propertyValue;
+}
+
 void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 {
+    ani_boolean errorExists;
+    env->ExistUnhandledError(&errorExists);
+    ani_status status;
     ani_class appClass;
-    if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
-        LOGE("[%{public}s] Cannot load main class %{public}s", __func__, KOALA_APP_INFO.className);
+    if ((status = env->FindClass(KOALA_APP_INFO.className, &appClass)) != ANI_OK) {
+        ani_error aniError;
+        env->GetUnhandledError(&aniError);
+        env->ResetError();
+        std::string errorMsg = GetErrorProperty(env, aniError, "<get>message");
+        std::string errorName = GetErrorProperty(env, aniError, "<get>name");
+        std::string errorStack = GetErrorProperty(env, aniError, "<get>stack");
+        LOGE("[%{public}s] Cannot load main class %{public}s, status: %{public}d, \nerrorMsg: %{public}s, \nerrorName: "
+             "%{public}s, \nerrorStack: %{public}s",
+            __func__, KOALA_APP_INFO.className, status, errorMsg.c_str(), errorName.c_str(), errorStack.c_str());
         return;
     }
 
@@ -94,7 +152,33 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
     //     exit(0);
     // }
 }
+
+// fire all arkoala callbacks at the tail of vsync (PipelineContext::FlushVsync)
+void FireAllArkoalaAsyncEvents(ani_env* env, ani_ref app)
+{
+    ani_class appClass;
+    ANI_CALL(env, FindClass(KOALA_APP_INFO.className, &appClass), return);
+
+    ani_method checkCallbacks = nullptr;
+    ANI_CALL(env,
+        Class_FindMethod(appClass, KOALA_APP_INFO.checkCallbackMethodName, KOALA_APP_INFO.checkCallbackEventMethodSig,
+            &checkCallbacks),
+        return);
+
+    ANI_CALL(env, Object_CallMethod_Void(static_cast<ani_object>(app), checkCallbacks), return);
+}
 } // namespace
+
+ArktsFrontend::ArktsFrontend(void* runtime)
+{
+    auto* env = reinterpret_cast<ani_env*>(runtime);
+    if (!env) {
+        LOGW("ArktsFrontend AniEnv is invalid!");
+        return;
+    }
+    type_ = FrontendType::ARK_TS;
+    env->GetVM(&vm_);
+}
 
 ani_object LegacyLoadPage(ani_env* env)
 {
@@ -160,62 +244,73 @@ ani_object LegacyLoadPage(ani_env* env)
 
 UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::string& params)
 {
-    ani_class appClass;
-    EntryLoader entryLoader(url, env_);
+    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env, UIContentErrorCode::INVALID_URL);
 
-    if (env_->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
+    ani_class appClass;
+    EntryLoader entryLoader(url, env);
+
+    pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
+
+    if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
         LOGE("Cannot load main class %{public}s", KOALA_APP_INFO.className);
         return UIContentErrorCode::INVALID_URL;
     }
 
     ani_static_method create;
-    if (env_->Class_FindStaticMethod(
+    if (env->Class_FindStaticMethod(
             appClass, KOALA_APP_INFO.createMethodName, KOALA_APP_INFO.createMethodSig, &create) != ANI_OK) {
         LOGE("Cannot find create method %{public}s", KOALA_APP_INFO.createMethodName);
-        // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
 
-    std::string appUrl = "ComExampleTrivialApplication"; // TODO: use passed in url and params
-    std::string appParams = "ArkTSLoaderParam";
     ani_string aniUrl;
-    env_->String_NewUTF8(appUrl.c_str(), appUrl.size(), &aniUrl);
+    env->String_NewUTF8(url.c_str(), url.size(), &aniUrl);
     ani_string aniParams;
-    env_->String_NewUTF8(appParams.c_str(), appParams.size(), &aniParams);
+    env->String_NewUTF8(params.c_str(), params.size(), &aniParams);
 
     ani_ref appLocal;
     ani_ref optionalEntry;
-    env_->GetUndefined(&optionalEntry);
+    env->GetUndefined(&optionalEntry);
     auto entryPointObj = entryLoader.GetPageEntryObj();
-    auto legacyEntryPointObj = LegacyLoadPage(env_);
-    if (env_->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false,
+    auto legacyEntryPointObj = LegacyLoadPage(env);
+    std::string moduleName = Container::Current()->GetModuleName();
+    ani_string module;
+    env->String_NewUTF8(moduleName.c_str(), moduleName.size(), &module);
+    if (env->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false, module,
             legacyEntryPointObj ? legacyEntryPointObj : optionalEntry,
             entryPointObj ? entryPointObj : optionalEntry) != ANI_OK) {
         LOGE("createApplication returned null");
-        // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
 
-    env_->GlobalReference_Create(appLocal, &app_);
+    env->GlobalReference_Create(appLocal, &app_);
 
     ani_method start;
-    if (env_->Class_FindMethod(appClass, KOALA_APP_INFO.startMethodName, KOALA_APP_INFO.startMethodSig, &start) !=
+    if (env->Class_FindMethod(appClass, KOALA_APP_INFO.startMethodName, KOALA_APP_INFO.startMethodSig, &start) !=
         ANI_OK) {
         LOGE("find start method returned null");
-        // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
 
     ani_long result;
-    if (env_->Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result) != ANI_OK) {
+    if (env->Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result) != ANI_OK) {
         LOGE("call start method returned null");
-        // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
 
     // TODO: init event loop
     CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
-    pipeline_->SetVsyncListener([env = env_, app = app_]() { RunArkoalaEventLoop(env, app); });
+    pipeline_->SetVsyncListener([vm = vm_, app = app_]() {
+        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        RunArkoalaEventLoop(env, app);
+    });
+
+    // register one hook method to pipeline, which will be called at the tail of vsync
+    pipeline_->SetAsyncEventsHookListener([vm = vm_, app = app_]() {
+        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        FireAllArkoalaAsyncEvents(env, app);
+    });
 
     return UIContentErrorCode::NO_ERRORS;
 }
@@ -223,9 +318,13 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
 void ArktsFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     pipeline_ = DynamicCast<NG::PipelineContext>(context);
+    if (accessibilityManager_) {
+        accessibilityManager_->SetPipelineContext(context);
+        accessibilityManager_->InitializeCallback();
+    }
 }
 
-void* ArktsFrontend::GetShared(int32_t id)
+ani_ref  ArktsFrontend::GetShared(int32_t id)
 {
     int32_t currentInstance = id;
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
@@ -236,35 +335,142 @@ void* ArktsFrontend::GetShared(int32_t id)
         LOGW("LocalStorage with ID %{public}d not found!", currentInstance);
         return nullptr;
     }
-    return it->second;
+    return reinterpret_cast<ani_ref>(it->second);
 }
 
 void ArktsFrontend::Destroy()
 {
-    CHECK_NULL_VOID(env_);
-    env_->GlobalReference_Delete(app_);
+    CHECK_NULL_VOID(vm_);
+    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    CHECK_NULL_VOID(env);
+    env->GlobalReference_Delete(app_);
+    app_ = nullptr;
+    handleMessageMethod_ = nullptr;
 }
 
-ani_object ArktsFrontend::CallGetUIContextFunc()
+ani_object ArktsFrontend::CallGetUIContextFunc(int32_t instanceId)
 {
     ani_object result = nullptr;
     ani_status status;
 
+    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env, result);
+
     ani_class uiContextClass;
-    if ((status = env_->FindClass("Larkui/ohos/arkui/UIContext/UIContext;", &uiContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("L@ohos/arkui/UIContext/UIContext;", &uiContextClass)) != ANI_OK) {
         LOGE("FindClass UIContext failed, %{public}d", status);
         return result;
     }
-    ani_method uiContextClassCtor;
-    if ((status = env_->Class_FindMethod(uiContextClass, "<ctor>", "I:V", &uiContextClassCtor)) != ANI_OK) {
-        LOGE("Class_FindMethod UIContext ctor failed, %{public}d", status);
+    ani_ref aniRef = nullptr;
+    if ((status = env->Class_CallStaticMethodByName_Ref(uiContextClass, "getOrCreateUIContextById",
+        "I:L@ohos/arkui/UIContext/UIContext;", &aniRef, instanceId)) != ANI_OK) {
+        LOGE("Class_CallStaticMethodByName_Ref failed, %{public}d", status);
         return result;
     }
-    ani_int instanceId = 100000;
-    if ((status = env_->Object_New(uiContextClass, uiContextClassCtor, &result, instanceId)) != ANI_OK) {
-        LOGE("New UIContext object failed, %{public}d", status);
-        return result;
-    }
+    result = reinterpret_cast<ani_object>(aniRef);
     return result;
+}
+
+void* ArktsFrontend::PushExtender(const std::string& url, const std::string& params)
+{
+    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    auto pageNode = pageRouterManager_->PushExtender(routerPageInfo);
+    return pageNode.GetRawPtr();
+}
+
+void* ArktsFrontend::ReplaceExtender(
+    const std::string& url, const std::string& params, std::function<void()>&& finishCallback)
+{
+    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    auto pageNode = pageRouterManager_->ReplaceExtender(routerPageInfo, std::move(finishCallback));
+    return pageNode.GetRawPtr();
+}
+
+void* ArktsFrontend::RunPageExtender(const std::string& url, const std::string& params)
+{
+    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    auto pageNode = pageRouterManager_->RunPageExtender(routerPageInfo);
+    return pageNode.GetRawPtr();
+}
+
+void ArktsFrontend::BackExtender(const std::string& url, const std::string& params)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    pageRouterManager_->BackWithTarget(routerPageInfo);
+}
+
+void ArktsFrontend::ClearExtender()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->Clear();
+}
+
+bool ArktsFrontend::HandleMessage(void *frameNode, int32_t type, const std::string& param)
+{
+    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env, false);
+    CHECK_NULL_RETURN(app_, false);
+    CHECK_NULL_RETURN(frameNode, false);
+    ani_status status = ANI_ERROR;
+    if (handleMessageMethod_ == nullptr) {
+        ani_class appClass;
+        if ((status = env->FindClass(KOALA_APP_INFO.className, &appClass)) != ANI_OK) {
+            LOGE("Call handleMessage failed due to FindClass failed, status : %{public}d", status);
+            return false;
+        }
+
+        ani_method handleMessageMethod = nullptr;
+        if ((status = env->Class_FindMethod(appClass, KOALA_APP_INFO.handleMessageMethodName,
+            KOALA_APP_INFO.handleMessageMethodSig, &handleMessageMethod)) != ANI_OK) {
+            LOGE("Call handleMessage failed due to Class_FindMethod failed, status : %{public}d", status);
+            return false;
+        }
+
+        handleMessageMethod_ = handleMessageMethod;
+    }
+
+    ani_long ptrAni = reinterpret_cast<ani_long>(frameNode);
+    ani_int typeAni = type;
+    ani_string paramStr;
+    env->String_NewUTF8(param.c_str(), param.length(), &paramStr);
+    ani_boolean result;
+    if ((status = env->Object_CallMethod_Boolean(static_cast<ani_object>(app_),
+        handleMessageMethod_, &result, ptrAni, typeAni, paramStr)) != ANI_OK) {
+        LOGE("Call handleMessage failed, status: %{public}d", status);
+        return false;
+    }
+
+    return result == ANI_TRUE;
+}
+
+void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)
+{
+    std::shared_ptr<ani_ref> shared_ptr(context);
+    Framework::AniContextModule::AddAniContext(instanceId, shared_ptr);
+}
+
+void* ArktsFrontend::preloadArkTSRuntime = nullptr;
+void ArktsFrontend::PreloadAceModule(void* aniEnv)
+{
+    ArktsFrontend::preloadArkTSRuntime = aniEnv;
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceArkTSModule(void* aniEnv)
+{
+    ArktsFrontend::PreloadAceModule(aniEnv);
 }
 } // namespace OHOS::Ace

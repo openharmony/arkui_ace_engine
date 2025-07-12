@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
 namespace OHOS::Ace::NG {
 
@@ -77,6 +78,9 @@ UINode::~UINode()
         ElementRegister::GetInstance()->RemoveItem(nodeId_);
     } else {
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
+    }
+    if (isThreadSafeNode_) {
+        ElementRegisterMultiThread::GetInstance()->RemoveThreadSafeNode(nodeId_);
     }
     if (propInspectorId_.has_value()) {
         ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(propInspectorId_.value_or(""), nodeId_);
@@ -141,6 +145,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
     if (child->GetAncestor() == this) {
         auto it = std::find(children_.begin(), children_.end(), child);
         if (it != children_.end()) {
+            ACE_BUILD_TRACE_END();
             return;
         }
     }
@@ -204,6 +209,7 @@ void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& si
             LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
                 "%{public}d",
                 (*it)->GetId(), child->GetTag().c_str(), child->GetId());
+            ACE_BUILD_TRACE_END();
             return;
         }
     }
@@ -213,11 +219,13 @@ void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& si
     auto siblingNodeIter = std::find(children_.begin(), children_.end(), siblingNode);
     if (siblingNodeIter != children_.end()) {
         DoAddChild(++siblingNodeIter, child, false);
+        ACE_BUILD_TRACE_END();
         return;
     }
     auto it = children_.begin();
     std::advance(it, -1);
     DoAddChild(it, child, false);
+    ACE_BUILD_TRACE_END();
 }
 
 void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
@@ -230,6 +238,7 @@ void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& s
             LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
                 "%{public}d",
                 (*it)->GetId(), child->GetTag().c_str(), child->GetId());
+            ACE_BUILD_TRACE_END();
             return;
         }
     }
@@ -238,11 +247,13 @@ void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& s
     auto siblingNodeIter = std::find(children_.begin(), children_.end(), siblingNode);
     if (siblingNodeIter != children_.end()) {
         DoAddChild(siblingNodeIter, child, false);
+        ACE_BUILD_TRACE_END();
         return;
     }
     auto it = children_.begin();
     std::advance(it, -1);
     DoAddChild(it, child, false);
+    ACE_BUILD_TRACE_END();
 }
 
 void UINode::TraversingCheck(RefPtr<UINode> node, bool withAbort)
@@ -836,6 +847,20 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     }
 }
 
+bool UINode::CheckThreadSafeNodeTree(bool needCheck)
+{
+    bool needCheckChild = needCheck;
+    if (needCheck && !isThreadSafeNode_) {
+        // Remind developers that it is unsafe to operate node trees containing unsafe nodes on non UI threads.
+        TAG_LOGW(AceLogTag::ACE_NATIVE_NODE,
+            "CheckIsThreadSafeNodeTree failed. thread safe node tree contains unsafe node: %{public}d", GetId());
+        needCheckChild = false;
+    } else if (isThreadSafeNode_) {
+        needCheckChild = true;
+    }
+    return needCheckChild;
+}
+
 void UINode::DetachFromMainTree(bool recursive, bool isRoot)
 {
     if (!onMainTree_) {
@@ -862,8 +887,9 @@ void UINode::DetachFromMainTree(bool recursive, bool isRoot)
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     isTraversing_ = true;
     std::list<RefPtr<UINode>> children = GetChildren();
+    bool needCheckChild = CheckThreadSafeNodeTree(isRoot);
     for (const auto& child : children) {
-        child->DetachFromMainTree(isRecursive, false);
+        child->DetachFromMainTree(isRecursive, needCheckChild);
     }
     if (isFreeNode_) {
         ElementRegister::GetInstance()->RemoveItemSilently(Claim(this));

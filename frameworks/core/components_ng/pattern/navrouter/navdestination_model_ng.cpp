@@ -152,7 +152,7 @@ void NavDestinationModelNG::UpdateMainTitle(
     const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj)
 {
     std::string key = "navDestination.title.commonMainTitle";
-    auto updateFunc = [this, key, weak = AceType::WeakClaim(AceType::RawPtr(titleBarNode))](
+    auto updateFunc = [key, weak = AceType::WeakClaim(AceType::RawPtr(titleBarNode))](
                           const RefPtr<ResourceObject>& mainResObj) {
         auto titleBarNode = weak.Upgrade();
         CHECK_NULL_VOID(titleBarNode);
@@ -242,6 +242,14 @@ void CreateToolBarNode(const RefPtr<NavDestinationGroupNode>& navDestinationNode
     navDestinationNode->SetToolBarNode(toolBarNode);
     navDestinationNode->SetPreToolBarNode(toolBarNode);
     navDestinationNode->UpdatePrevToolBarIsCustom(false);
+}
+
+RefPtr<NG::FrameNode> NavDestinationModelNG::CreateFrameNode(int32_t nodeId)
+{
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    return navDestinationNode;
 }
 
 void NavDestinationModelNG::Create()
@@ -856,7 +864,7 @@ CalcDimension NavDestinationModelNG::ParseTitleHeight(const RefPtr<ResourceObjec
 void NavDestinationModelNG::UpdateTitleHeight(
     const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto updateFunc = [this, weak = AceType::WeakClaim(AceType::RawPtr(titleBarNode))](
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(titleBarNode))](
                           const RefPtr<ResourceObject>& resObj) {
         auto titleBarNode = weak.Upgrade();
         CHECK_NULL_VOID(titleBarNode);
@@ -928,6 +936,14 @@ void NavDestinationModelNG::SetOnBackPressed(FrameNode* frameNode, std::function
     navDestinationEventHub->SetOnBackPressed(onBackPressed);
 }
 
+// void NavDestinationModelNG::SetOnBackPressed(FrameNode* frameNode, std::function<bool()>&& onBackPressed)
+// {
+//     CHECK_NULL_VOID(frameNode);
+//     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+//     CHECK_NULL_VOID(navDestinationEventHub);
+//     navDestinationEventHub->SetOnBackPressed(onBackPressed);
+// }
+
 void NavDestinationModelNG::SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -946,6 +962,15 @@ void NavDestinationModelNG::SetOnReady(
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnReady(onReady);
 }
+
+// void NavDestinationModelNG::SetOnReady(FrameNode* frameNode,
+//                                        std::function<void(RefPtr<NavDestinationContext>)>&& onReady)
+// {
+//     CHECK_NULL_VOID(frameNode);
+//     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+//     CHECK_NULL_VOID(navDestinationEventHub);
+//     navDestinationEventHub->SetOnReady(onReady);
+// }
 
 RefPtr<AceType> NavDestinationModelNG::CreateEmpty()
 {
@@ -1237,6 +1262,14 @@ void NavDestinationModelNG::SetOnWillAppear(FrameNode* frameNode, std::function<
     navDestinationEventHub->SetOnWillAppear(willAppear);
 }
 
+// void NavDestinationModelNG::SetOnWillAppear(FrameNode* frameNode, std::function<void()>&& willAppear)
+// {
+//     CHECK_NULL_VOID(frameNode);
+//     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+//     CHECK_NULL_VOID(navDestinationEventHub);
+//     navDestinationEventHub->SetOnWillAppear(willAppear);
+// }
+
 void NavDestinationModelNG::SetOnWillHide(std::function<void()>&& willHide)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1254,6 +1287,14 @@ void NavDestinationModelNG::SetOnWillHide(FrameNode* frameNode, std::function<vo
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillHide(willHide);
 }
+
+// void NavDestinationModelNG::SetOnWillHide(FrameNode* frameNode, std::function<void()>&& willHide)
+// {
+//     CHECK_NULL_VOID(frameNode);
+//     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+//     CHECK_NULL_VOID(navDestinationEventHub);
+//     navDestinationEventHub->SetOnWillHide(willHide);
+// }
 
 void NavDestinationModelNG::SetOnWillShow(std::function<void()>&& willShow)
 {
@@ -1273,6 +1314,14 @@ void NavDestinationModelNG::SetOnWillShow(FrameNode* frameNode, std::function<vo
     navDestinationEventHub->SetOnWillShow(willShow);
 }
 
+// void NavDestinationModelNG::SetOnWillShow(FrameNode* frameNode, std::function<void()>&& willShow)
+// {
+//     CHECK_NULL_VOID(frameNode);
+//     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+//     CHECK_NULL_VOID(navDestinationEventHub);
+//     navDestinationEventHub->SetOnWillShow(willShow);
+// }
+
 void NavDestinationModelNG::SetOnWillDisAppear(std::function<void()>&& willDisAppear)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1290,6 +1339,14 @@ void NavDestinationModelNG::SetOnWillDisAppear(FrameNode* frameNode, std::functi
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
 }
+
+// void NavDestinationModelNG::SetOnWillDisAppear(FrameNode* frameNode, std::function<void()>&& willDisAppear)
+// {
+//     CHECK_NULL_VOID(frameNode);
+//     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+//     CHECK_NULL_VOID(navDestinationEventHub);
+//     navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
+// }
 
 void NavDestinationModelNG::SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts)
 {

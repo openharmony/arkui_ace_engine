@@ -31,7 +31,7 @@ const RefPtr<Curve> FOLDER_STACK_ANIMATION_CURVE =
 void FolderStackPattern::OnAttachToFrameNode()
 {
     Pattern::OnAttachToFrameNode();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     CHECK_NULL_VOID(OHOS::Ace::SystemProperties::IsBigFoldProduct());
     auto callbackId = pipeline->RegisterFoldStatusChangedCallback([weak = WeakClaim(this)](FoldStatus folderStatus) {
@@ -45,7 +45,7 @@ void FolderStackPattern::OnAttachToFrameNode()
 
 void FolderStackPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (HasFoldStatusChangedCallbackId()) {
         pipeline->UnRegisterFoldStatusChangedCallback(foldStatusChangedCallbackId_.value_or(-1));
@@ -122,7 +122,7 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
     if (foldStatusDelayTask_) {
         foldStatusDelayTask_.Cancel();
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

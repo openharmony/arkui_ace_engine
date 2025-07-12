@@ -86,13 +86,22 @@ public:
         return result;
     }
 
+    void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle)
+    {
+        if (auto controller = handler_.Upgrade(); controller) {
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_VOID(richEditorController);
+            richEditorController->SetUpdateSpanStyle(updateSpanStyle);
+        }
+    }
+
     void UpdateSpanStyleImpl(const Converter::TextSpanOptionsForUpdate& options)
     {
-        if (auto controller = handler_.Upgrade(); controller && options.textStyle) {
+        if (auto controller = handler_.Upgrade(); controller) {
             auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
             CHECK_NULL_VOID(richEditorController);
             richEditorController->UpdateSpanStyle(
-                options.start, options.end, options.textStyle.value(), options.imageSpanAttribute);
+                options.start, options.end, options.textStyle.value_or(TextStyle()), options.imageSpanAttribute);
         }
     }
 
@@ -114,15 +123,17 @@ public:
         }
     }
 
-    void GetSpansImpl(const RangeOptions& options)
+    SelectionInfo GetSpansImpl(const RangeOptions& options)
     {
+        SelectionInfo result;
         if (auto controller = handler_.Upgrade(); controller) {
-            auto start = options.start.value_or(0);
-            auto end = options.end.value_or(0);
+            auto start = options.start.value_or(-1);
+            auto end = options.end.value_or(-1);
             auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-            CHECK_NULL_VOID(richEditorController);
-            richEditorController->GetSpansInfo(start, end);
+            CHECK_NULL_RETURN(richEditorController, result);
+            result = richEditorController->GetSpansInfo(start, end);
         }
+        return result;
     }
 
     SelectionInfo GetSelectionImpl()
@@ -148,13 +159,14 @@ public:
         return ret;
     }
 
-    void FromStyledStringImpl(RefPtr<SpanStringBase> value)
+    SelectionInfo FromStyledStringImpl(RefPtr<SpanStringBase> value)
     {
         if (auto controller = handler_.Upgrade(); controller && value) {
             auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-            CHECK_NULL_VOID(richEditorController);
-            richEditorController->FromStyledString(value);
+            CHECK_NULL_RETURN(richEditorController, {});
+            return richEditorController->FromStyledString(value);
         }
+        return {};
     }
 
     RefPtr<SpanStringBase> ToStyledStringImpl(const RangeOptions& options)

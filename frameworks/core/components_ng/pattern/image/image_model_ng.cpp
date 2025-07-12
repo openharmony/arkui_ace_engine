@@ -120,6 +120,36 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
     SetImageFillSetByUser(false);
 }
 
+void ImageModelNG::Create(const RefPtr<AceDrawableDescriptor>& drawable)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    stack->Push(frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    pattern->SetNeedLoadAlt(true);
+    pattern->SetImageType(ImageType::PIXELMAP_DRAWABLE);
+    pattern->SetDrawable(drawable);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    SetDraggableForFrameNode(frameNode);
+}
+
+void ImageModelNG::SetDraggableForFrameNode(RefPtr<FrameNode> frameNode, bool isImageSpan)
+{
+    if (frameNode->IsFirstBuilding() && !isImageSpan) {
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto draggable = pipeline->GetDraggable<ImageTheme>();
+        if (draggable && !frameNode->IsDraggable()) {
+            auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gestureHub);
+            gestureHub->InitDragDropEvent();
+        }
+        frameNode->SetDraggable(draggable);
+    }
+}
+
 void ImageModelNG::ResetImage()
 {
     auto* stack = ViewStackProcessor::GetInstance();

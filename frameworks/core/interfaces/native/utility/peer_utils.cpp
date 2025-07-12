@@ -15,6 +15,7 @@
 
 #include "core/interfaces/native/utility/peer_utils.h"
 
+namespace OHOS::Ace::NG {
 std::vector<std::string> PeerUtils::CreateAIError(OHOS::Ace::ImageAnalyzerState state)
 {
     constexpr auto ERROR_CODE_AI_ANALYSIS_UNSUPPORTED = 110001;
@@ -35,4 +36,5 @@ std::vector<std::string> PeerUtils::CreateAIError(OHOS::Ace::ImageAnalyzerState 
             break;
     }
     return error;
+}
 }

@@ -77,4 +77,5 @@ const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccess
     };
     return &ScrollableTargetInfoAccessorImpl;
 }
+
 }

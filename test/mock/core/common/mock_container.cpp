@@ -239,4 +239,10 @@ bool Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
                          static_cast<int32_t>(version)
                : GreatOrEqualAPITargetVersion(version);
 }
+
+Window* Container::GetWindow() const
+{
+    auto context = GetPipelineContext();
+    return context ? context->GetWindow() : nullptr;
+}
 } // namespace OHOS::Ace

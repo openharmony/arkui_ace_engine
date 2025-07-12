@@ -222,7 +222,8 @@ int DumpLog::CompressString(const char* in_str, size_t in_len, std::string& out_
     if (!in_str)
         return Z_DATA_ERROR;
 
-    int ret, flush;
+    int ret;
+    int flush;
     unsigned have;
     z_stream strm;
 

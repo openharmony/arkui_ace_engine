@@ -157,6 +157,7 @@ public:
         json->PutExtAttr("accessibilityText", GetAccessibilityText().c_str(), filter);
         json->PutExtAttr("accessibilityTextHint", GetTextType().c_str(), filter);
         json->PutExtAttr("accessibilityDescription", GetAccessibilityDescription().c_str(), filter);
+        json->PutExtAttr("propText", GetText().c_str(), filter);
     }
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
@@ -693,6 +694,21 @@ private:
     static bool CheckHoverConsumeByAccessibility(const RefPtr<FrameNode>& node);
 
     static bool CheckHoverConsumeByComponent(const RefPtr<FrameNode>& node, const NG::PointF& point);
+
+    // the interface supports multithreading
+    void SetAccessibilityGroupMultiThread();
+
+    // the interface supports multithreading
+    void SetAccessibilityTextWithEventMultiThread();
+
+    // the interface supports multithreading
+    void SetAccessibilityDescriptionWithEventMultiThread();
+
+    // the interface supports multithreading
+    void SetAccessibilityLevelMultiThread(const std::string& backupLevel);
+
+    // the interface supports multithreading
+    void NotifyComponentChangeEventMultiThread(AccessibilityEventType eventType);
 
 protected:
     virtual void SetSpecificSupportAction() {}

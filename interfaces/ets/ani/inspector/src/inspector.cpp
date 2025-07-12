@@ -39,17 +39,17 @@ public:
     {
         auto context = NG::PipelineContext::GetCurrentContextSafely();
         if (context == nullptr) {
-            LOGE("inspector-ani can not get current context.");
+            TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani can not get current context.");
             return nullptr;
         }
         auto frontend = context->GetFrontend();
         if (frontend == nullptr) {
-            LOGE("inspector-ani can not get current frontend.");
+            TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani can not get current frontend.");
             return nullptr;
         }
         auto arkTsFrontend = AceType::DynamicCast<ArktsFrontend>(frontend);
         if (frontend == nullptr) {
-            LOGE("inspector-ani can not convert to arkts frontend.");
+            TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani can not convert to arkts frontend.");
             return nullptr;
         }
         return arkTsFrontend;
@@ -78,14 +78,16 @@ public:
         if (iter != fnList.end()) {
             return;
         }
-        LOGI("inspector-ani add %{public}s call back on %{public}s", eventType.c_str(), id_.c_str());
+        TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani add %{public}s call back on %{public}s",
+            eventType.c_str(), id_.c_str());
         fnList.emplace_back(cb);
     }
     
     void RemoveCallbackToList(std::list<ani_ref>& fnList, ani_ref& cb, const std::string& eventType, ani_env* env)
     {
         if (cb == nullptr) {
-            LOGW("inspector-ani start to clear all %{public}s callback list", eventType.c_str());
+            TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani start to clear all %{public}s callback list",
+                eventType.c_str());
             for (auto& ref : fnList) {
                 env->GlobalReference_Delete(ref);
             }
@@ -101,7 +103,7 @@ public:
         if (fnList.empty()) {
             auto arkTsFrontend = ComponentObserver::getFronted();
             if (arkTsFrontend == nullptr) {
-                LOGE("inspector-ani Can not convert to arkts frontend.");
+                TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Can not convert to arkts frontend.");
                 return;
             }
             if (strcmp(LAYOUT_TYPE, eventType.c_str()) == 0) {
@@ -117,7 +119,8 @@ public:
         std::vector<ani_ref> vec;
         ani_ref fnReturnVal;
         for (auto& cb : cbList) {
-            LOGD("inspector-ani start to call user function for component %{public}s", id_.c_str());
+            TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR,
+                "inspector-ani start to call user function for component %{public}s", id_.c_str());
             env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(cb), vec.size(), vec.data(), &fnReturnVal);
         }
     }
@@ -163,37 +166,47 @@ static ComponentObserver* Unwrapp(ani_env *env, ani_object object)
     return reinterpret_cast<ComponentObserver *>(nativeAddr);
 }
 
-std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str)
+ani_status ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str, std::string& str)
 {
     ani_size strSize;
-    env->String_GetUTF8Size(ani_str, &strSize);
+    ani_status status = env->String_GetUTF8Size(ani_str, &strSize);
+    if (status != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani String_GetUTF8Size failed %{public}d.", status);
+        return status;
+    }
    
     std::vector<char> buffer(strSize + 1); // +1 for null terminator
     char* utf8Buffer = buffer.data();
 
     ani_size bytes_written = 0;
-    env->String_GetUTF8(ani_str, utf8Buffer, strSize + 1, &bytes_written);
+    status = env->String_GetUTF8(ani_str, utf8Buffer, buffer.size(), &bytes_written);
+    if (status != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani String_GetUTF8 failed %{public}d.", status);
+        return status;
+    }
     
     utf8Buffer[bytes_written] = '\0';
-    std::string content = std::string(utf8Buffer);
-    return content;
+    str = std::string(utf8Buffer);
+    return status;
 }
 
-static void On([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_string type, ani_fn_object fnObj)
+static void On(ani_env *env, ani_object object, ani_string type, ani_fn_object fnObj)
 {
     if (fnObj == nullptr) {
-        LOGE("inspector-ani callback is undefined.");
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani callback is undefined.");
         return;
     }
-    std::string typeStr = ANIUtils_ANIStringToStdString(env, type);
+    std::string typeStr;
+    ANIUtils_ANIStringToStdString(env, type, typeStr);
     if (strcmp(LAYOUT_TYPE, typeStr.c_str()) != 0 && strcmp(DRAW_TYPE, typeStr.c_str()) != 0) {
-        LOGE("inspector-ani method on not support event type %{public}s", typeStr.c_str());
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani method on not support event type %{public}s",
+            typeStr.c_str());
         return;
     }
     
     auto *observer = Unwrapp(env, object);
     if (observer == nullptr) {
-        LOGE("inspector-ani context is null.");
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani context is null.");
         return;
     }
     ani_ref fnObjGlobalRef = nullptr;
@@ -201,17 +214,19 @@ static void On([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object
     observer->AddCallbackToList(observer->GetCbListByType(typeStr), fnObjGlobalRef, typeStr, env);
 }
 
-static void Off([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_string type, ani_fn_object fnObj)
+static void Off(ani_env *env, ani_object object, ani_string type, ani_fn_object fnObj)
 {
-    std::string typeStr = ANIUtils_ANIStringToStdString(env, type);
+    std::string typeStr;
+    ANIUtils_ANIStringToStdString(env, type, typeStr);
     if (strcmp(LAYOUT_TYPE, typeStr.c_str()) != 0 && strcmp(DRAW_TYPE, typeStr.c_str()) != 0) {
-        LOGE("inspector-ani method on not support event type %{public}s", typeStr.c_str());
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani method on not support event type %{public}s",
+            typeStr.c_str());
         return;
     }
     
     auto *observer = Unwrapp(env, object);
     if (observer == nullptr) {
-        LOGE("inspector-ani context is null.");
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani context is null.");
         return;
     }
     ani_ref fnObjGlobalRef = nullptr;
@@ -219,54 +234,102 @@ static void Off([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object objec
     observer->RemoveCallbackToList(observer->GetCbListByType(typeStr), fnObjGlobalRef, typeStr, env);
 }
 
-static ani_string AniGetInspectorByKey([[maybe_unused]] ani_env *env, ani_string key)
+static ani_boolean AniSendEventByKey(ani_env *env, ani_string id, ani_double action, ani_string params)
 {
-    std::string keyStr = ANIUtils_ANIStringToStdString(env, key);
-    if (keyStr.empty()) {
-        LOGE("inspector-ani key is empty.");
+    std::string keyStr;
+    ani_status status = ANIUtils_ANIStringToStdString(env, id, keyStr);
+    if (status != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani get send event key error.");
+        return ANI_FALSE;
+    }
+    std::string paramsStr;
+    status = ANIUtils_ANIStringToStdString(env, params, paramsStr);
+    if (status != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani get send event params error.");
+        return ANI_FALSE;
+    }
+    ContainerScope scope {Container::CurrentIdSafelyWithCheck()};
+    bool result = NG::Inspector::SendEventByKey(keyStr, action, paramsStr);
+    if (result) {
+        return ANI_TRUE;
+    }
+    return ANI_FALSE;
+}
+
+static ani_object AniGetInspectorTree(ani_env *env)
+{
+    ContainerScope scope {Container::CurrentIdSafelyWithCheck()};
+    std::string resultStr = NG::Inspector::GetInspector(false);
+    if (resultStr.empty()) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani inspector tree is empty.");
         return nullptr;
     }
+    ani_string aniResult;
+    ani_status status = env->String_NewUTF8(resultStr.c_str(), resultStr.size(), &aniResult);
+    if (ANI_OK != status) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Can not convert string to ani_string.");
+        return nullptr;
+    }
+    return aniResult;
+}
+
+static ani_string AniGetInspectorByKey(ani_env *env, ani_string key)
+{
+    std::string keyStr;
+    ani_status getStdStringStatus = ANIUtils_ANIStringToStdString(env, key, keyStr);
+    if (getStdStringStatus != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani get key failed.");
+        return nullptr;
+    }
+    ContainerScope scope{Container::CurrentIdSafelyWithCheck()};
     std::string resultStr = NG::Inspector::GetInspectorNodeByKey(keyStr);
     if (resultStr.empty()) {
-        LOGE("inspector-ani node %{public}s is empty.", keyStr.c_str());
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani node %{public}s is empty.", keyStr.c_str());
         return nullptr;
     }
     ani_string ani_str;
     ani_status status = env->String_NewUTF8(resultStr.c_str(), resultStr.size(), &ani_str);
     if (ANI_OK != status) {
-        LOGE("inspector-ani Can not convert string to ani_string.");
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Can not convert string to ani_string.");
         return nullptr;
     }
     return ani_str;
 }
 
-static ani_object CreateComponentObserver([[maybe_unused]] ani_env *env, ani_string id, const char *className)
+static ani_object CreateComponentObserver(ani_env *env, ani_string id, const char *className)
 {
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
-        LOGE("inspector-ani not found class");
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani not found class");
         return nullptr;
     }
     
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
-        LOGE("inspector-ani can not get construct method.");
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani can not get construct method.");
         return nullptr;
     }
     
-    std::string key = ANIUtils_ANIStringToStdString(env, id);
-    LOGI("inspector-ani start to CreateComponentObserver key is %{public}s", key.c_str());
-    auto* observer = new ComponentObserver(key);
+    std::string key;
+    ani_status status = ANIUtils_ANIStringToStdString(env, id, key);
+    if (status != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani get key of observer failed.");
+        return nullptr;
+    }
+    TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani start to CreateComponentObserver key is %{public}s",
+        key.c_str());
     
     auto arkTsFrontend = ComponentObserver::getFronted();
     if (arkTsFrontend == nullptr) {
-        LOGE("inspector-ani Can not convert to arkts frontend.");
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Can not convert to arkts frontend.");
         return nullptr;
     }
+    auto* observer = new ComponentObserver(key);
     
     ani_object context_object;
     if (ANI_OK != env->Object_New(cls, ctor, &context_object, reinterpret_cast<ani_long>(observer))) {
-        LOGE("inspector-ani Can not new object.");
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Can not new object.");
+        delete observer;
         return nullptr;
     }
     
@@ -285,13 +348,12 @@ static ani_object CreateComponentObserver([[maybe_unused]] ani_env *env, ani_str
     return context_object;
 }
 
-static ani_object CreateComponentObserverForAni([[maybe_unused]] ani_env *env, ani_string id)
+static ani_object CreateComponentObserverForAni(ani_env *env, ani_string id)
 {
     return CreateComponentObserver(env, id, ANI_COMPONENT_OBSERVER_CLS);
 }
 
-static ani_object CreateComponentObserverForKoala([[maybe_unused]] ani_env *env,
-    [[maybe_unused]] ani_object object, ani_string id)
+static ani_object CreateComponentObserverForKoala(ani_env *env, [[maybe_unused]] ani_object object, ani_string id)
 {
     return CreateComponentObserver(env, id, KOALA_COMPONENT_CLS);
 }
@@ -301,7 +363,7 @@ bool ANI_ConstructorForAni(ani_env *env)
 {
     ani_namespace ns;
     if (ANI_OK != env->FindNamespace(ANI_INSPECTOR_NS, &ns)) {
-        LOGE("inspector-ani Not found ns");
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Not found ns");
         return false;
     }
     std::array methods = {
@@ -309,16 +371,20 @@ bool ANI_ConstructorForAni(ani_env *env)
             reinterpret_cast<void *>(OHOS::Ace::CreateComponentObserverForAni)},
         ani_native_function {"getInspectorByKey", nullptr,
             reinterpret_cast<void *>(OHOS::Ace::AniGetInspectorByKey)},
+        ani_native_function {"sendEventByKey", nullptr,
+            reinterpret_cast<void *>(OHOS::Ace::AniSendEventByKey)},
+        ani_native_function {"getInspectorTree", nullptr,
+            reinterpret_cast<void *>(OHOS::Ace::AniGetInspectorTree)},
     };
     
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
-        LOGE("inspector-ani Namespace_BindNativeFunctions error");
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Namespace_BindNativeFunctions error");
         return false;
     }
     
     ani_class clsInspector;
     if (ANI_OK != env->FindClass(ANI_COMPONENT_OBSERVER_CLS, &clsInspector)) {
-        LOGE("inspector-ani not found class");
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani not found class");
         return false;
     }
     
@@ -328,7 +394,7 @@ bool ANI_ConstructorForAni(ani_env *env)
     };
     
     if (ANI_OK != env->Class_BindNativeMethods(clsInspector, methodsInspector.data(), methodsInspector.size())) {
-        LOGE("inspector-ani Class_BindNativeFunctions error");
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Class_BindNativeFunctions error");
         return false;
     }
     return true;
@@ -338,7 +404,7 @@ bool ANI_ConstructorForKoala(ani_env *env)
 {
     ani_class clsInspector;
     if (ANI_OK != env->FindClass(KOALA_INSPECTOR_CLS, &clsInspector)) {
-        LOGE("inspector-koala not found class");
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-koala not found class");
         return false;
     }
     std::array methodsInspector = {
@@ -346,13 +412,13 @@ bool ANI_ConstructorForKoala(ani_env *env)
             reinterpret_cast<void *>(OHOS::Ace::CreateComponentObserverForKoala)},
     };
     if (ANI_OK != env->Class_BindNativeMethods(clsInspector, methodsInspector.data(), methodsInspector.size())) {
-        LOGE("inspector-koala Class_BindNativeFunctions error");
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-koala Class_BindNativeFunctions error");
         return false;
     }
     
     ani_class clsObserver;
     if (ANI_OK != env->FindClass(KOALA_COMPONENT_CLS, &clsObserver)) {
-        LOGE("inspector-koala not found class");
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-koala not found class");
         return false;
     }
     std::array methodsObserver = {
@@ -360,7 +426,7 @@ bool ANI_ConstructorForKoala(ani_env *env)
         ani_native_function {"off", nullptr, reinterpret_cast<void *>(OHOS::Ace::Off)},
     };
     if (ANI_OK != env->Class_BindNativeMethods(clsObserver, methodsObserver.data(), methodsObserver.size())) {
-        LOGE("inspector-koala Class_BindNativeFunctions error");
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-koala Class_BindNativeFunctions error");
         return false;
     }
     return true;
@@ -370,7 +436,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     ani_env *env;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-        LOGE("inspector-ani Unsupported ANI_VERSION_1");
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Unsupported ANI_VERSION_1");
         return ANI_ERROR;
     }
     if (ANI_ConstructorForAni(env) || ANI_ConstructorForKoala(env)) {

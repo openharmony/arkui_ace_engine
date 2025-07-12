@@ -21,7 +21,11 @@
 #include <future>
 #include <thread>
 #include <map>
+#include <memory>
 #include <string>
+
+#include "frameworks/base/log/log_wrapper.h"
+#include "base/memory/referenced.h"
 #include "frameworks/base/perfmonitor/perf_monitor.h"
 
 static void Begin([[maybe_unused]] ani_env *env, ani_string scene, ani_enum_item startInputType, ani_string note)
@@ -46,12 +50,14 @@ static void Begin([[maybe_unused]] ani_env *env, ani_string scene, ani_enum_item
 
     ani_namespace ns;
     if (ANI_OK != env->FindNamespace("L@ohos/arkui/performanceMonitor/performanceMonitor;", &ns)) {
-        return ;
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "[ANI] Failed performanceMonitor to create namespace");
+        return;
     }
 
     ani_int intValue{};
     if (ANI_OK != env->EnumItem_GetValue_Int(startInputType, &intValue)) {
-        std::cerr << "Enum_GetEnumItemByIndex FAILD" << std::endl;
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "[ANI] Enum_GetEnumItemByIndex intValue FAILD");
+        return;
     }
 
     OHOS::Ace::PerfMonitor* pMonitor = nullptr;
@@ -74,7 +80,8 @@ static void End([[maybe_unused]] ani_env *env, ani_string scene)
 
     ani_namespace ns;
     if (ANI_OK != env->FindNamespace("L@ohos/arkui/performanceMonitor/performanceMonitor;", &ns)) {
-        return ;
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "[ANI] Failed performanceMonitor to create namespace");
+        return;
     }
 
     OHOS::Ace::PerfMonitor* pMonitor = nullptr;
@@ -84,21 +91,51 @@ static void End([[maybe_unused]] ani_env *env, ani_string scene)
     }
 }
 
+static void RecordInputEventTime([[maybe_unused]] ani_env* env,
+    ani_enum_item type, ani_enum_item sourceType, ani_double time)
+{
+    ani_namespace ns;
+    if (ANI_OK != env->FindNamespace("L@ohos/arkui/performanceMonitor/performanceMonitor;", &ns)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "[ANI] Failed performanceMonitor to create namespace");
+        return;
+    }
+    ani_int intTypeValue{};
+    if (ANI_OK != env->EnumItem_GetValue_Int(type, &intTypeValue)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "[ANI] Type Enum_GetEnumItemByIndex FAILD");
+        return;
+    }
+    ani_int intSourceTypeValue{};
+    if (ANI_OK != env->EnumItem_GetValue_Int(sourceType, &intSourceTypeValue)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "[ANI] SourceType Enum_GetEnumItemByIndex FAILD");
+        return;
+    }
+    int64_t timeValue = static_cast<int64_t>(time);
+
+    OHOS::Ace::PerfMonitor* pMonitor = nullptr;
+    pMonitor = OHOS::Ace::PerfMonitor::GetPerfMonitor();
+    if (pMonitor != nullptr) {
+        pMonitor->RecordInputEvent(static_cast<OHOS::Ace::PerfActionType>(intTypeValue),
+            static_cast<OHOS::Ace::PerfSourceType>(intSourceTypeValue), timeValue);
+    }
+}
+
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     ani_env *env;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-        std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "[ANI] Unsupported ANI_VERSION_1");
         return ANI_ERROR;
     }
 
     ani_namespace ns;
     if (ANI_OK != env->FindNamespace("L@ohos/arkui/performanceMonitor/performanceMonitor;", &ns)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "[ANI] Failed performanceMonitor to create namespace");
         return ANI_ERROR;
     }
     std::array methods = {
         ani_native_function {"begin", nullptr, reinterpret_cast<void *>(Begin)},
         ani_native_function {"end", nullptr, reinterpret_cast<void *>(End)},
+        ani_native_function {"recordInputEventTime", nullptr, reinterpret_cast<void *>(RecordInputEventTime)},
     };
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
         return ANI_ERROR;

@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/measure_util.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
@@ -61,6 +62,7 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode); // picker multi-thread security
 
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
@@ -70,6 +72,7 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+
     tossAnimationController_->SetPipelineContext(context);
     tossAnimationController_->SetColumn(AceType::WeakClaim(this));
     overscroller_.SetColumn(AceType::WeakClaim(this));
@@ -83,10 +86,26 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
 
 void TextPickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode); // picker multi-thread security
+
     if (hapticController_) {
         hapticController_->Stop();
     }
     UnregisterWindowStateChangedCallback(frameNode);
+}
+
+void TextPickerColumnPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree); // picker multi-thread security
+}
+
+void TextPickerColumnPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree); // picker multi-thread security
 }
 
 bool TextPickerColumnPattern::OnDirtyLayoutWrapperSwap(

@@ -135,49 +135,49 @@ class VideoControllerV2 : public virtual AceType {
     DECLARE_ACE_TYPE(VideoControllerV2, AceType);
 
 public:
-    void Start()
+    virtual void Start()
     {
         for (const auto& item : controllers_) {
             item->Start();
         }
     }
 
-    void Pause()
+    virtual void Pause()
     {
         for (const auto& item : controllers_) {
             item->Pause();
         }
     }
 
-    void Reset()
+    virtual void Reset()
     {
         for (const auto& item : controllers_) {
             item->Reset();
         }
     }
 
-    void Stop()
+    virtual void Stop()
     {
         for (const auto& item : controllers_) {
             item->Stop();
         }
     }
 
-    void SeekTo(float pos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC)
+    virtual void SeekTo(float pos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC)
     {
         for (const auto& item : controllers_) {
             item->SeekTo(pos, seekMode);
         }
     }
 
-    void RequestFullscreen(bool isPortrait)
+    virtual void RequestFullscreen(bool isPortrait)
     {
         for (const auto& item : controllers_) {
             item->RequestFullscreen(isPortrait);
         }
     }
 
-    void ExitFullscreen(bool isSync)
+    virtual void ExitFullscreen(bool isSync)
     {
         for (const auto& item : controllers_) {
             item->ExitFullscreen(isSync);

@@ -16,8 +16,15 @@
 #pragma once
 
 #include "arkoala_api_generated.h"
+
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 struct ImageAttachmentPeer final {
-    OHOS::Ace::RefPtr<OHOS::Ace::ImageSpan> imageSpan;
+    OHOS::Ace::RefPtr<OHOS::Ace::ImageSpan> span;
+
+protected:
+    ImageAttachmentPeer() = default;
+    ~ImageAttachmentPeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

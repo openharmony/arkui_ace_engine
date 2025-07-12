@@ -2803,4 +2803,38 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg311, TestSize.Level1)
     EXPECT_EQ(result, false);
     pattern_ = nullptr;
 }
+ /**
+ * @tc.name: FrameNodeTestNg097
+ * @tc.desc: Test the function IsOpIncValidNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, IsOpIncValidNodeTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat node and generate a node tree.
+     */
+    RefPtr<FrameNode> GET_PARENT = FrameNode::CreateFrameNode("parent", 4, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> GET_CHILD1 = FrameNode::CreateFrameNode("child1", 5, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> GET_CHILD2 = FrameNode::CreateFrameNode("child2", 6, AceType::MakeRefPtr<Pattern>());
+    GET_PARENT->AddChild(GET_CHILD1);
+    GET_PARENT->AddChild(GET_CHILD2);
+    GET_PARENT->GetGeometryNode()->SetFrameSize(SizeF(50, 50));
+
+    /**
+     * @tc.steps2: set boundary1 and call the function IsOpIncValidNode.
+     * @tc.expected: Value returned as expected.
+     */
+    SizeF boundary1(100, 100);
+    EXPECT_EQ(GET_PARENT->IsOpIncValidNode(boundary1, Axis::VERTICAL), 0);
+
+    GET_PARENT->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
+    EXPECT_EQ(GET_PARENT->IsOpIncValidNode(boundary1, Axis::VERTICAL), 0);
+    EXPECT_EQ(GET_PARENT->IsOpIncValidNode(boundary1, Axis::HORIZONTAL), 1);
+
+    SizeF boundary2(100, 200);
+    EXPECT_EQ(GET_PARENT->IsOpIncValidNode(boundary2, Axis::VERTICAL), 1);
+
+    GET_PARENT->RemoveChild(GET_CHILD2);
+    EXPECT_EQ(GET_PARENT->IsOpIncValidNode(boundary2, Axis::VERTICAL), 0);
+}
 } // namespace OHOS::Ace::NG

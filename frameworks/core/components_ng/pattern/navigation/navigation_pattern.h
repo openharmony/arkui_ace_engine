@@ -566,6 +566,8 @@ public:
     void FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle lifecycle, bool isModeChange = false,
         NavDestinationActiveReason reason = NavDestinationActiveReason::TRANSITION);
 
+    bool CheckNeedCreate(int32_t index);
+
 private:
     bool IsDestinationNeedHideInPush(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavDestinationGroupNode>& destNode) const;

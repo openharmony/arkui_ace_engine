@@ -19,5 +19,8 @@
 
 struct RotationGestureEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeGestureEventPeer<OHOS::Ace::RotationGestureEvent> {
+protected:
+    RotationGestureEventPeer() = default;
     ~RotationGestureEventPeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

@@ -19,6 +19,7 @@
 #include "event_converter.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "node_extened.h"
+#include "node_model_safely.h"
 #include "style_modifier.h"
 
 #include "base/error/error_code.h"

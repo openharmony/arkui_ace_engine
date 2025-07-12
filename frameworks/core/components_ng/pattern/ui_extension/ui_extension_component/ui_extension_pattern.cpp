@@ -95,6 +95,20 @@ UIExtensionPattern::UIExtensionPattern(
     UIEXT_LOGI("The %{public}smodal UIExtension is created.", isModal_ ? "" : "non");
 }
 
+void UIExtensionPattern::UpdateSessionWraper(bool isTransferringCaller)
+{
+    isTransferringCaller_ = isTransferringCaller;
+    sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
+        sessionType_, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
+    accessibilitySessionAdapter_ =
+        AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(sessionWrapper_);
+}
+
+bool UIExtensionPattern::GetIsTransferringCaller()
+{
+    return isTransferringCaller_;
+}
+
 UIExtensionPattern::~UIExtensionPattern()
 {
     UIEXT_LOGI("The %{public}smodal UIExtension is destroyed.", isModal_ ? "" : "non");
@@ -104,7 +118,7 @@ UIExtensionPattern::~UIExtensionPattern()
     NotifyDestroy();
     FireModalOnDestroy();
     UIExtensionIdUtility::GetInstance().RecycleExtensionId(uiExtensionId_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
@@ -116,7 +130,7 @@ UIExtensionPattern::~UIExtensionPattern()
 
     auto instanceId = GetInstanceIdFromHost();
     ContainerScope scope(instanceId);
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto ngPipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
     CHECK_NULL_VOID(frontend);
@@ -131,7 +145,7 @@ void UIExtensionPattern::LogoutModalUIExtension()
 {
     auto sessionId = GetSessionId();
     UIEXT_LOGI("LogoutModalUIExtension sessionId %{public}d.", sessionId);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto overlay = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
@@ -149,6 +163,11 @@ void UIExtensionPattern::Initialize()
     accessibilitySessionAdapter_ =
         AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(sessionWrapper_);
     hasInitialize_ = true;
+}
+
+void UIExtensionPattern::SetIsTransferringCaller(bool isTransferringCaller)
+{
+    isTransferringCaller_ = isTransferringCaller;
 }
 
 RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
@@ -189,6 +208,13 @@ void UIExtensionPattern::OnAttachContext(PipelineContext *context)
         instanceId_ = newInstanceId;
         UpdateSessionInstanceId(newInstanceId);
     }
+
+    auto wantWrap = GetWantWrap();
+    CHECK_NULL_VOID(wantWrap);
+    UIEXT_LOGI("OnAttachContext UpdateWant, newInstanceId: %{public}d", instanceId_);
+    UpdateWant(wantWrap);
+    SetWantWrap(nullptr);
+    hasAttachContext_ = true;
 }
 
 void UIExtensionPattern::UpdateSessionInstanceId(int32_t instanceId)
@@ -242,6 +268,7 @@ void UIExtensionPattern::RegisterUIExtensionManagerEvent(int32_t instanceId)
 
 void UIExtensionPattern::OnDetachContext(PipelineContext *context)
 {
+    hasAttachContext_ = false;
     CHECK_NULL_VOID(context);
     auto instanceId = context->GetInstanceId();
     if (instanceId != instanceId_) {
@@ -701,7 +728,7 @@ void UIExtensionPattern::OnAccessibilityEvent(
 {
     UIEXT_LOGI("The accessibility event is reported and the current state is '%{public}s'.", ToString(state_));
     ContainerScope scope(instanceId_);
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto ngPipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(ngPipeline);
     uiExtensionOffset = uiExtensionId_ * NG::UI_EXTENSION_OFFSET_MAX + uiExtensionOffset;
     auto frontend = ngPipeline->GetFrontend();
@@ -1136,7 +1163,7 @@ bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 
 void UIExtensionPattern::HandleFocusEvent()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (canFocusSendToUIExtension_) {
         if (pipeline->GetIsFocusActive()) {
@@ -1199,7 +1226,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -1355,7 +1382,7 @@ void UIExtensionPattern::HandleDragEvent(const DragPointerEvent& info)
     CHECK_NULL_VOID(newPointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     Platform::CalculatePointerEvent(newPointerEvent, host, true);
     Platform::UpdatePointerAction(newPointerEvent, info.action);
@@ -1587,7 +1614,7 @@ void UIExtensionPattern::InitializeAccessibility()
     }
     auto instanceId = GetInstanceIdFromHost();
     ContainerScope scope(instanceId);
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto ngPipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
     CHECK_NULL_VOID(frontend);
@@ -1657,7 +1684,7 @@ void UIExtensionPattern::ResetAccessibilityChildTreeCallback()
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
     auto instanceId = GetInstanceIdFromHost();
     ContainerScope scope(instanceId);
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto ngPipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
     CHECK_NULL_VOID(frontend);
@@ -1713,7 +1740,7 @@ void UIExtensionPattern::AfterMountToParent()
 
 void UIExtensionPattern::RegisterVisibleAreaChange()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1799,7 +1826,11 @@ void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidAr
 
 void UIExtensionPattern::SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
-    curWant_ = wantWrap;
+    if (hasAttachContext_) {
+        UpdateWant(wantWrap);
+    } else {
+        curWant_ = wantWrap;
+    }
 }
 
 RefPtr<OHOS::Ace::WantWrap> UIExtensionPattern::GetWantWrap()
@@ -2168,7 +2199,7 @@ void UIExtensionPattern::UpdateWMSUIExtProperty(
     UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId)
 {
     if (state_ != AbilityState::FOREGROUND) {
-        UIEXT_LOGI("UEC UpdatWMSUIExtProperty state=%{public}s.", ToString(state_));
+        UIEXT_LOGI("UEC UpdateWMSUIExtProperty state=%{public}s.", ToString(state_));
         return;
     }
     SendBusinessData(code, data, BusinessDataSendType::ASYNC, subSystemId);

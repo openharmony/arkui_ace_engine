@@ -19,20 +19,21 @@
 import { SelectionOptions } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface } from "./styledString"
-import { RectWidthStyle, RectHeightStyle } from "./../generated/ArkArkuiExternalInterfaces"
+import { LineMetrics, TextBox, Affinity } from "./arkui-graphics-text"
+import { RectWidthStyle, RectHeightStyle } from "./arkui-external"
 import { ResourceStr, ResourceColor, Length } from "./units"
-import { Resource } from "global/resource";
+import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Callback_String_Void } from "./gridRow"
 import { TextDecorationType, TextDecorationStyle } from "./enums"
 export interface TextBaseController {
-    setSelection(selectionStart: number, selectionEnd: number, options: SelectionOptions): void
+    setSelection(selectionStart: number, selectionEnd: number, options: SelectionOptions | undefined): void
     closeSelectionMenu(): void
     getLayoutManager(): LayoutManager
 }
@@ -283,29 +284,18 @@ export class TextMenuItemIdInternal {
 }
 export class TextMenuItemId implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
+    static readonly CUT : TextMenuItemId = TextMenuItemId.getCUT()
+    static readonly COPY : TextMenuItemId = TextMenuItemId.getCOPY()
+    static readonly PASTE : TextMenuItemId = TextMenuItemId.getPASTE()
+    static readonly SELECT_ALL : TextMenuItemId = TextMenuItemId.getSELECT_ALL()
+    static readonly COLLABORATION_SERVICE : TextMenuItemId = TextMenuItemId.getCOLLABORATION_SERVICE()
+    static readonly CAMERA_INPUT : TextMenuItemId = TextMenuItemId.getCAMERA_INPUT()
+    static readonly AI_WRITER : TextMenuItemId = TextMenuItemId.getAI_WRITER()
+    static readonly TRANSLATE : TextMenuItemId = TextMenuItemId.getTRANSLATE()
+    static readonly SEARCH : TextMenuItemId = TextMenuItemId.getSEARCH()
+    static readonly SHARE : TextMenuItemId = TextMenuItemId.getSHARE()
     public getPeer(): Finalizable | undefined {
         return this.peer
-    }
-    static get CUT(): TextMenuItemId {
-        return TextMenuItemId.getCUT()
-    }
-    static get COPY(): TextMenuItemId {
-        return TextMenuItemId.getCOPY()
-    }
-    static get PASTE(): TextMenuItemId {
-        return TextMenuItemId.getPASTE()
-    }
-    static get SELECT_ALL(): TextMenuItemId {
-        return TextMenuItemId.getSELECT_ALL()
-    }
-    static get COLLABORATION_SERVICE(): TextMenuItemId {
-        return TextMenuItemId.getCOLLABORATION_SERVICE()
-    }
-    static get CAMERA_INPUT(): TextMenuItemId {
-        return TextMenuItemId.getCAMERA_INPUT()
-    }
-    static get AI_WRITER(): TextMenuItemId {
-        return TextMenuItemId.getAI_WRITER()
     }
     static ctor_textmenuitemid(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_ctor()
@@ -349,6 +339,15 @@ export class TextMenuItemId implements MaterializedBase {
     }
     private static getAI_WRITER(): TextMenuItemId {
         return TextMenuItemId.getAI_WRITER_serialize()
+    }
+    private static getTRANSLATE(): TextMenuItemId {
+        return TextMenuItemId.getTRANSLATE_serialize()
+    }
+    private static getSEARCH(): TextMenuItemId {
+        return TextMenuItemId.getSEARCH_serialize()
+    }
+    private static getSHARE(): TextMenuItemId {
+        return TextMenuItemId.getSHARE_serialize()
     }
     private static of_serialize(id: ResourceStr): TextMenuItemId {
         const thisSerializer : Serializer = Serializer.hold()
@@ -499,13 +498,23 @@ export enum MenuType {
     SELECTION_MENU = 0,
     PREVIEW_MENU = 1
 }
+export enum AutoCapitalizationMode {
+    NONE = 0,
+    WORDS = 1,
+    SENTENCES = 2,
+    ALL_CHARACTERS = 3
+}
 export interface DeleteValue {
     deleteOffset: number;
     direction: TextDeleteDirection;
     deleteValue: string;
 }
 export type OnDidChangeCallback = (rangeBefore: TextRange, rangeAfter: TextRange) => void;
-export type EditableTextOnChangeCallback = (value: string, previewText?: PreviewText) => void;
+export type EditableTextOnChangeCallback = (value: string, previewText?: PreviewText, options?: TextChangeOptions) => void;
+export interface PreviewText {
+    offset: number;
+    value: string;
+}
 export type Callback_StyledStringChangeValue_Boolean = (parameter: StyledStringChangeValue) => boolean;
 export interface StyledStringChangedListener {
     onWillChange?: ((parameter: StyledStringChangeValue) => boolean);
@@ -520,27 +529,21 @@ export interface PositionWithAffinity {
     position: number;
     affinity: Affinity;
 }
-export interface Affinity {
-    _AffinityStub: string;
-}
-export interface LineMetrics {
-    _LineMetricsStub: string;
-}
-export interface TextBox {
-    _TextBoxStub: string;
-}
 export interface CaretStyle {
     width?: Length;
     color?: ResourceColor;
-}
-export interface PreviewText {
-    offset: number;
-    value: string;
 }
 export interface TextMenuItem {
     content: ResourceStr;
     icon?: ResourceStr;
     id: TextMenuItemId;
+    labelInfo?: ResourceStr;
+}
+export type AsyncCallback_Array_TextMenuItem_Array_TextMenuItem = (menuItems: Array<TextMenuItem>) => Array<TextMenuItem>;
+export type AsyncCallback_TextMenuItem_TextRange_Boolean = (menuItem: TextMenuItem, range: TextRange) => boolean;
+export interface EditMenuOptions {
+    onCreateMenu: ((menuItems: Array<TextMenuItem>) => Array<TextMenuItem>);
+    onMenuItemClick: ((menuItem: TextMenuItem,range: TextRange) => boolean);
 }
 export interface DecorationStyleResult {
     type: TextDecorationType;
@@ -549,4 +552,92 @@ export interface DecorationStyleResult {
 }
 export interface FontSettingOptions {
     enableVariableFontWeight?: boolean;
+}
+export interface TextChangeOptions {
+    rangeBefore: TextRange;
+    rangeAfter: TextRange;
+    oldContent: string;
+    oldPreviewText: PreviewText;
+}
+export interface EditableTextChangeValue {
+    content: string;
+    previewText?: PreviewText;
+    options?: TextChangeOptions;
+}
+export enum TextMenuShowMode {
+    DEFAULT = 0,
+    PREFER_WINDOW = 1
+}
+export interface TextMenuOptions {
+    showMode?: TextMenuShowMode;
+}
+export enum KeyboardAppearance {
+    NONE_IMMERSIVE = 0,
+    IMMERSIVE = 1,
+    LIGHT_IMMERSIVE = 2,
+    DARK_IMMERSIVE = 3
+}
+export interface TextEditControllerEx {
+    isEditing(): boolean
+    stopEditing(): void
+    setCaretOffset(offset: number): boolean
+    getCaretOffset(): number
+    getPreviewText(): PreviewText
+}
+export class TextEditControllerExInternal extends TextBaseControllerInternal implements MaterializedBase,TextEditControllerEx {
+    static ctor_texteditcontrollerex(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_ctor()
+        return retval
+    }
+    constructor() {
+        super()
+        const ctorPtr : KPointer = TextEditControllerExInternal.ctor_texteditcontrollerex()
+        this.peer = new Finalizable(ctorPtr, TextEditControllerExInternal.getFinalizer())
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._TextEditControllerEx_getFinalizer()
+    }
+    public isEditing(): boolean {
+        return this.isEditing_serialize()
+    }
+    public stopEditing(): void {
+        this.stopEditing_serialize()
+        return
+    }
+    public setCaretOffset(offset: number): boolean {
+        const offset_casted = offset as (number)
+        return this.setCaretOffset_serialize(offset_casted)
+    }
+    public getCaretOffset(): number {
+        return this.getCaretOffset_serialize()
+    }
+    public getPreviewText(): PreviewText {
+        return this.getPreviewText_serialize()
+    }
+    private isEditing_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_isEditing(this.peer!.ptr)
+        return retval
+    }
+    private stopEditing_serialize(): void {
+        ArkUIGeneratedNativeModule._TextEditControllerEx_stopEditing(this.peer!.ptr)
+    }
+    private setCaretOffset_serialize(offset: number): boolean {
+        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_setCaretOffset(this.peer!.ptr, offset)
+        return retval
+    }
+    private getCaretOffset_serialize(): number {
+        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_getCaretOffset(this.peer!.ptr)
+        return retval
+    }
+    private getPreviewText_serialize(): PreviewText {
+        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_getPreviewText(this.peer!.ptr)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const returnResult : PreviewText = retvalDeserializer.readPreviewText()
+        return returnResult
+    }
+    public static fromPtr(ptr: KPointer): TextEditControllerExInternal {
+        const obj : TextEditControllerExInternal = new TextEditControllerExInternal()
+        obj.peer = new Finalizable(ptr, TextEditControllerExInternal.getFinalizer())
+        return obj
+    }
 }

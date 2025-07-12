@@ -23,8 +23,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PermissionRequestAccessor {
 void DestroyPeerImpl(Ark_PermissionRequest peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_PermissionRequest CtorImpl()
@@ -77,7 +75,4 @@ const GENERATED_ArkUIPermissionRequestAccessor* GetPermissionRequestAccessor()
     return &PermissionRequestAccessorImpl;
 }
 
-struct PermissionRequestPeer {
-    virtual ~PermissionRequestPeer() = default;
-};
 }

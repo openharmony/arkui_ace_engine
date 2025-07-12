@@ -22,8 +22,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebContextMenuResultAccessor {
 void DestroyPeerImpl(Ark_WebContextMenuResult peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_WebContextMenuResult CtorImpl()
@@ -81,7 +79,4 @@ const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccess
     return &WebContextMenuResultAccessorImpl;
 }
 
-struct WebContextMenuResultPeer {
-    virtual ~WebContextMenuResultPeer() = default;
-};
 }

@@ -1306,5 +1306,69 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest006, TestSize.Le
     controller->UpdateParagraph(nullptr);
     auto rect = controller->CalculateEmptyValueCaretRect();
     EXPECT_EQ(rect.Height(), 50);
+
+/**
+ * @tc.name: TextFieldMultiThreadTest01
+ * @tc.desc: test textfield multi thread function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldMultiThreadTest01, TestSize.Level0)
+{
+    CreateTextField("", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+    FlushLayoutTask(frameNode_);
+
+    pattern_->OnAttachToFrameNodeMultiThread();
+    pattern_->OnDetachFromFrameNodeMultiThread(AceType::RawPtr(frameNode_));
+    pattern_->OnDetachFromMainTreeMultiThread();
+    pattern_->OnAttachToMainTreeMultiThread();
+
+    pattern_->HandleSetSelectionMultiThread(0, 0, true);
+    EXPECT_EQ(pattern_->updateCaretInfoToControllerMultiThread_, true);
+    pattern_->HandleSetSelectionMultiThread(0, 0, false);
+    EXPECT_EQ(pattern_->updateCaretInfoToControllerMultiThread_, true);
+
+    pattern_->OnModifyDoneMultiThread();
+    pattern_->InitSurfaceChangedCallbackMultiThread();
+    EXPECT_EQ(pattern_->initSurfaceChangedCallbackMultiThread_, true);
+    pattern_->InitSurfaceChangedCallbackMultiThreadAction();
+    pattern_->InitSurfacePositionChangedCallbackMultiThread();
+    EXPECT_EQ(pattern_->initSurfacePositionChangedCallbackMultiThread_, true);
+
+    pattern_->InitSurfacePositionChangedCallbackMultiThreadAction();
+    pattern_->SetCaretPositionMultiThread(0, true);
+    EXPECT_EQ(pattern_->triggerAvoidOnCaretChangeMultiThread_, true);
+
+    auto start = 5;
+    auto end = 5;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::DEFAULT;
+    pattern_->SetSelectionFlagMultiThread(start, end, options);
+    auto ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
+    EXPECT_FALSE(ret);
+
+    pattern_->StopEditingMultiThread();
+    EXPECT_EQ(pattern_->stopEditingMultiThread_, true);
+
+    pattern_->StopEditingMultiThreadAction();
+    pattern_->RegisterWindowSizeCallbackMultiThread();
+    EXPECT_EQ(pattern_->isOritationListenerRegisted_, true);
+
+    pattern_->RegisterWindowSizeCallbackMultiThreadAction();
+    pattern_->SetPreviewTextOperationMultiThread(PREVIEW_ONE);
+
+    pattern_->FinishTextPreviewOperationMultiThread(false);
+    EXPECT_EQ(pattern_->bodyTextInPreivewing_, u"");
+
+    pattern_->SetShowKeyBoardOnFocusMultiThread(true);
+    EXPECT_EQ(pattern_->showKeyBoardOnFocus_, true);
+    pattern_->SetShowKeyBoardOnFocusMultiThread(false);
+    EXPECT_EQ(pattern_->showKeyBoardOnFocus_, false);
+
+    pattern_->ProcessDefaultStyleAndBehaviors();
+    pattern_->ProcessDefaultStyleAndBehaviorsMultiThread();
+    EXPECT_EQ(pattern_->processDefaultStyleAndBehaviorsMultiThread_, true);
 }
 } // namespace OHOS::Ace::NG

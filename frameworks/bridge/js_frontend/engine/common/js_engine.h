@@ -45,6 +45,11 @@ struct JsComponent {
     const std::string methods;
 };
 
+// used for hybrid application
+enum class JsEngineHybridType {
+    NONE, DYNAMIC_HYBRID_STATIC, STATIC_HYBRID_DYNAMIC
+};
+
 class JsEngineInstance {
 public:
     JsEngineInstance() = default;
@@ -548,6 +553,11 @@ public:
         return nullptr;
     }
 
+    void UpdateHybridType(JsEngineHybridType type)
+    {
+        hybridType = type;
+    }
+
 protected:
     NativeEngine* nativeEngine_ = nullptr;
     std::function<void(JsEngine*)> mediaUpdateCallback_;
@@ -556,6 +566,7 @@ protected:
     std::map<std::string, std::set<RefPtr<InspectorEvent>>> drawChildrenEvents_;
     bool needUpdate_ = false;
     PageUrlCheckFunc pageUrlCheckFunc_;
+    JsEngineHybridType hybridType = JsEngineHybridType::NONE;
 
 private:
     // weather the app has debugger.so.

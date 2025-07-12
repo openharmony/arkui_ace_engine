@@ -157,53 +157,261 @@ export enum WaterFlowLayoutMode {
 }
 export interface WaterFlowOptions {
     footer?: CustomBuilder;
+    footerContent?: ComponentContent;
     scroller?: Scroller;
     sections?: WaterFlowSections;
     layoutMode?: WaterFlowLayoutMode;
 }
-/** @memo:stable */
+export type WaterFlowInterface = (options?: WaterFlowOptions) => WaterFlowAttribute;
 export interface WaterFlowAttribute extends ScrollableCommonMethod {
-    /** @memo */
-    setWaterFlowOptions(options?: WaterFlowOptions): this
-    /** @memo */
-    columnsTemplate(value: string): this
-    /** @memo */
-    itemConstraintSize(value: ConstraintSizeOptions): this
-    /** @memo */
-    rowsTemplate(value: string): this
-    /** @memo */
-    columnsGap(value: Length): this
-    /** @memo */
-    rowsGap(value: Length): this
-    /** @memo */
-    layoutDirection(value: FlexDirection): this
-    /** @memo */
-    nestedScroll(value: NestedScrollOptions): this
-    /** @memo */
-    enableScrollInteraction(value: boolean): this
-    /** @memo */
-    friction(value: number | Resource): this
-    /** @memo */
-    cachedCount(count: number, show?: boolean): this
-    /** @memo */
-    onDidScroll(value: OnScrollCallback): this
-    /** @memo */
-    onReachStart(value: (() => void)): this
-    /** @memo */
-    onReachEnd(value: (() => void)): this
-    /** @memo */
-    onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain)): this
-    /** @memo */
-    onScrollIndex(value: ((first: number,last: number) => void)): this
+    columnsTemplate(value: string | undefined): this
+    itemConstraintSize(value: ConstraintSizeOptions | undefined): this
+    rowsTemplate(value: string | undefined): this
+    columnsGap(value: Length | undefined): this
+    rowsGap(value: Length | undefined): this
+    layoutDirection(value: FlexDirection | undefined): this
+    nestedScroll(value: NestedScrollOptions | undefined): this
+    enableScrollInteraction(value: boolean | undefined): this
+    friction(value: number | Resource | undefined): this
+    cachedCount(count: number | undefined, show?: boolean): this
+    onReachStart(value: (() => void) | undefined): this
+    onReachEnd(value: (() => void) | undefined): this
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
+    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
+    onWillScroll(value: OnWillScrollCallback | undefined): this
+    onDidScroll(value: OnScrollCallback | undefined): this
+}
+export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements WaterFlowAttribute {
+    columnsTemplate_value?: string | undefined
+    itemConstraintSize_value?: ConstraintSizeOptions | undefined
+    rowsTemplate_value?: string | undefined
+    columnsGap_value?: Length | undefined
+    rowsGap_value?: Length | undefined
+    layoutDirection_value?: FlexDirection | undefined
+    nestedScroll_value?: NestedScrollOptions | undefined
+    enableScrollInteraction_value?: boolean | undefined
+    friction_value?: number | Resource | undefined
+    cachedCount_value?: number | undefined
+    onReachStart_value?: (() => void) | undefined
+    onReachEnd_value?: (() => void) | undefined
+    onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
+    onScrollIndex_value?: ((first: number,last: number) => void) | undefined
+    onWillScroll_value?: OnWillScrollCallback | undefined
+    onDidScroll_value?: OnScrollCallback | undefined
+    public columnsTemplate(value: string | undefined): this {
+        return this
+    }
+    public itemConstraintSize(value: ConstraintSizeOptions | undefined): this {
+        return this
+    }
+    public rowsTemplate(value: string | undefined): this {
+        return this
+    }
+    public columnsGap(value: Length | undefined): this {
+        return this
+    }
+    public rowsGap(value: Length | undefined): this {
+        return this
+    }
+    public layoutDirection(value: FlexDirection | undefined): this {
+        return this
+    }
+    public nestedScroll(value: NestedScrollOptions | undefined): this {
+        return this
+    }
+    public enableScrollInteraction(value: boolean | undefined): this {
+        return this
+    }
+    public friction(value: number | Resource | undefined): this {
+        return this
+    }
+    public cachedCount(count: number | undefined, show?: boolean): this {
+        return this
+    }
+    public onReachStart(value: (() => void) | undefined): this {
+        return this
+    }
+    public onReachEnd(value: (() => void) | undefined): this {
+        return this
+    }
+    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+        return this
+    }
+    public onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+        return this
+    }
+    public onWillScroll(value: OnWillScrollCallback | undefined): this {
+        return this
+    }
+    public onDidScroll(value: OnScrollCallback | undefined): this {
+        return this
+    }
+}
+export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent implements WaterFlowAttribute {
+    getPeer(): ArkWaterFlowPeer {
+        return (this.peer as ArkWaterFlowPeer)
+    }
+    public setWaterFlowOptions(options?: WaterFlowOptions): this {
+        if (this.checkPriority("setWaterFlowOptions")) {
+            const options_casted = options as (WaterFlowOptions | undefined)
+            this.getPeer()?.setWaterFlowOptionsAttribute(options_casted)
+            return this
+        }
+        return this
+    }
+    public columnsTemplate(value: string | undefined): this {
+        if (this.checkPriority("columnsTemplate")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.columnsTemplateAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public itemConstraintSize(value: ConstraintSizeOptions | undefined): this {
+        if (this.checkPriority("itemConstraintSize")) {
+            const value_casted = value as (ConstraintSizeOptions | undefined)
+            this.getPeer()?.itemConstraintSizeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public rowsTemplate(value: string | undefined): this {
+        if (this.checkPriority("rowsTemplate")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.rowsTemplateAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public columnsGap(value: Length | undefined): this {
+        if (this.checkPriority("columnsGap")) {
+            const value_casted = value as (Length | undefined)
+            this.getPeer()?.columnsGapAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public rowsGap(value: Length | undefined): this {
+        if (this.checkPriority("rowsGap")) {
+            const value_casted = value as (Length | undefined)
+            this.getPeer()?.rowsGapAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public layoutDirection(value: FlexDirection | undefined): this {
+        if (this.checkPriority("layoutDirection")) {
+            const value_casted = value as (FlexDirection | undefined)
+            this.getPeer()?.layoutDirectionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public nestedScroll(value: NestedScrollOptions | undefined): this {
+        if (this.checkPriority("nestedScroll")) {
+            const value_casted = value as (NestedScrollOptions | undefined)
+            this.getPeer()?.nestedScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableScrollInteraction(value: boolean | undefined): this {
+        if (this.checkPriority("enableScrollInteraction")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enableScrollInteractionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public friction(value: number | Resource | undefined): this {
+        if (this.checkPriority("friction")) {
+            const value_casted = value as (number | Resource | undefined)
+            this.getPeer()?.frictionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public cachedCount(count: number | undefined, show?: boolean): this {
+        if (this.checkPriority("cachedCount")) {
+            const count_type = runtimeType(count)
+            const show_type = runtimeType(show)
+            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && (RuntimeType.UNDEFINED == show_type)) {
+                const value_casted = count as (number | undefined)
+                this.getPeer()?.cachedCount0Attribute(value_casted)
+                return this
+            }
+            if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && ((RuntimeType.BOOLEAN == show_type) || (RuntimeType.UNDEFINED == show_type))) {
+                const count_casted = count as (number | undefined)
+                const show_casted = show as (boolean | undefined)
+                this.getPeer()?.cachedCount1Attribute(count_casted, show_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public onReachStart(value: (() => void) | undefined): this {
+        if (this.checkPriority("onReachStart")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onReachStartAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onReachEnd(value: (() => void) | undefined): this {
+        if (this.checkPriority("onReachEnd")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onReachEndAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+        if (this.checkPriority("onScrollFrameBegin")) {
+            const value_casted = value as (OnScrollFrameBeginCallback | undefined)
+            this.getPeer()?.onScrollFrameBeginAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+        if (this.checkPriority("onScrollIndex")) {
+            const value_casted = value as (((first: number,last: number) => void) | undefined)
+            this.getPeer()?.onScrollIndexAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWillScroll(value?: OnWillScrollCallback | undefined): this {
+        if (this.checkPriority("onWillScroll")) {
+            const value_casted = value as (OnWillScrollCallback | undefined)
+            this.getPeer()?.onWillScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onDidScroll(value?: OnScrollCallback | undefined): this {
+        if (this.checkPriority("onDidScroll")) {
+            const value_casted = value as (OnScrollCallback | undefined)
+            this.getPeer()?.onDidScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function WaterFlow(
-  /** @memo */
-  style: ((attributes: WaterFlowAttribute) => void) | undefined,
-  options?: WaterFlowOptions | undefined, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: WaterFlowAttribute) => void) | undefined,
+    options?: WaterFlowOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkWaterFlowComponent()
     })

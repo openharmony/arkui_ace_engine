@@ -77,7 +77,6 @@ constexpr float SWIPER_CURVE_DAMPING = 34.0f;
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
 
-
 public:
     using CustomContentTransitionPtr = std::shared_ptr<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>;
     using PanEventFunction = std::function<void(const GestureEvent& info)>;
@@ -358,7 +357,9 @@ public:
     void ShowPrevious(bool needCheckWillScroll = false);
     void SwipeTo(int32_t index);
     void ChangeIndex(int32_t index, bool useAnimation);
+    void ChangeIndexMultiThread(int32_t index, bool useAnimation);
     void ChangeIndex(int32_t index, SwiperAnimationMode mode);
+    void ChangeIndexMultiThread(int32_t index, SwiperAnimationMode mode);
 
     void OnVisibleChange(bool isVisible) override;
 
@@ -482,13 +483,8 @@ public:
     {
         isIndicatorLongPress_ = isIndicatorLongPress;
     }
-    void SetCachedCount(int32_t cachedCount)
-    {
-        if (cachedCount_.has_value() && cachedCount_.value() != cachedCount) {
-            SetLazyLoadFeature(true);
-        }
-        cachedCount_ = cachedCount;
-    }
+    void SetCachedCount(int32_t cachedCount);
+    void SetCachedCountMultiThread(int32_t cachedCount);
 
     void SetFinishCallbackType(FinishCallbackType finishCallbackType)
     {
@@ -840,6 +836,11 @@ public:
         return targetIndex_;
     }
 
+    float GetStartPos() const
+    {
+        return startMainPos_ - currentDelta_;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -910,9 +911,13 @@ private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
     void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const RefPtr<SwiperLayoutAlgorithm>& algo);

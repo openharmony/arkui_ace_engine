@@ -24,16 +24,15 @@ namespace GeneratedModifier {
 namespace BackgroundColorStyleAccessor {
 void DestroyPeerImpl(Ark_BackgroundColorStyle peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_BackgroundColorStyle CtorImpl(const Ark_TextBackgroundStyle* textBackgroundStyle)
 {
-    TextBackgroundStyle style;
-    if (textBackgroundStyle) {
-        style = Converter::Convert<TextBackgroundStyle>(*textBackgroundStyle);
-    }
-    auto span = AceType::MakeRefPtr<OHOS::Ace::BackgroundColorSpan>(style);
-    return new BackgroundColorStylePeer{ .span = span };
+    auto peer = PeerUtils::CreatePeer<BackgroundColorStylePeer>();
+    TextBackgroundStyle style = textBackgroundStyle
+        ? Converter::Convert<TextBackgroundStyle>(*textBackgroundStyle) : TextBackgroundStyle {};
+    peer->span = AceType::MakeRefPtr<OHOS::Ace::BackgroundColorSpan>(style);
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

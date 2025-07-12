@@ -19,29 +19,63 @@
 
 #include "core/interfaces/native/implementation/styled_string.h"
 #include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
-
-namespace OHOS::Ace::NG::Converter {
-template<>
-RefPtr<SpanBase> Convert(const Ark_SpanStyle& src)
-{
-    return Convert<RefPtr<SpanBase>>(Ark_StyleOptions {
-        .start = ArkValue<Opt_Number>(src.start),
-        .length = ArkValue<Opt_Number>(src.length),
-        .styledKey = src.styledKey,
-        .styledValue = src.styledValue,
-    });
-}
-} // namespace OHOS::Ace::NG::Converter
+#include "core/interfaces/native/implementation/image_attachment_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+using namespace Converter;
+namespace {
+void UpdateSpansRange(std::vector<RefPtr<SpanBase>>& styles, int32_t maxLength)
+{
+    for (auto& style : styles) {
+        if (style == nullptr) {
+            continue;
+        }
+        if (style->GetStartIndex() < 0 || style->GetStartIndex() >= maxLength) {
+            style->UpdateStartIndex(0);
+        }
+        if (style->GetEndIndex() < style->GetStartIndex() || style->GetEndIndex() >= maxLength) {
+            style->UpdateEndIndex(maxLength);
+        }
+    }
+}
+} // namespace
+
 namespace MutableStyledStringAccessor {
 void DestroyPeerImpl(Ark_MutableStyledString peer)
 {
     delete peer;
 }
-Ark_MutableStyledString CtorImpl()
+Ark_MutableStyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+    const Opt_Array_StyleOptions* styles)
 {
-    return new MutableStyledStringPeer();
+    auto peer = MutableStyledStringPeer::Create();
+    if (value) {
+        Converter::VisitUnion(*value,
+            [&peer, styles](const Ark_String& arkText) {
+                auto data = Converter::Convert<std::u16string>(arkText);
+                peer->spanString = AceType::MakeRefPtr<MutableSpanString>(data);
+                CHECK_NULL_VOID(!data.empty() && styles);
+                auto spans = Converter::OptConvert<std::vector<RefPtr<SpanBase>>>(*styles);
+                CHECK_NULL_VOID(spans);
+                UpdateSpansRange(spans.value(), data.length());
+                peer->spanString->BindWithSpans(spans.value());
+            },
+            [&peer](const Ark_ImageAttachment& arkImageAttachment) {
+                ImageAttachmentPeer* peerImageAttachment = arkImageAttachment;
+                CHECK_NULL_VOID(peerImageAttachment && peerImageAttachment->span);
+                auto options = peerImageAttachment->span->GetImageSpanOptions();
+                peer->spanString = AceType::MakeRefPtr<MutableSpanString>(options);
+            },
+            [](const Ark_CustomSpan& arkCustomSpan) {
+                LOGE("StyledStringAccessor::CtorImpl unsupported Ark_CustomSpan");
+            },
+            []() {}
+        );
+    }
+    if (!peer->spanString) {
+        peer->spanString = AceType::MakeRefPtr<MutableSpanString>(std::u16string());
+    }
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -59,8 +93,8 @@ void ReplaceStringImpl(Ark_VMContext vmContext,
     const auto convStart = Converter::Convert<int32_t>(*start);
     const auto convLength = Converter::Convert<int32_t>(*length);
     if (mutableString->CheckRange(convStart, convLength)) {
-        const auto string = Converter::Convert<std::string>(*other);
-        // mutableString->ReplaceString(convStart, convLength, string);
+        const auto string = Converter::Convert<std::u16string>(*other);
+        mutableString->ReplaceString(convStart, convLength, string);
     } else {
         // throw exception.
         LOGE("MutableStyledStringAccessor::ReplaceStringImpl CheckBoundary failed: start:%d length:%d",
@@ -78,8 +112,8 @@ void InsertStringImpl(Ark_VMContext vmContext,
     auto strLength = mutableString->GetLength();
     const auto convStart = Converter::Convert<int32_t>(*start);
     if (convStart >= 0 && convStart <= strLength) {
-        const auto string = Converter::Convert<std::string>(*other);
-        // mutableString->InsertString(convStart, string);
+        const auto string = Converter::Convert<std::u16string>(*other);
+        mutableString->InsertString(convStart, string);
     } else {
         // throw exception.
         LOGE("MutableStyledStringAccessor::InsertStringImpl CheckBoundary failed: start:%d length:%d",

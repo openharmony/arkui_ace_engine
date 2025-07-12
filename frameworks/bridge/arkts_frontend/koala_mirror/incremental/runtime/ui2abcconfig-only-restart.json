@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "package": "@koalaui/runtime",
+        "outDir": "build",
+        "baseUrl": "./src",
+        "paths": {
+            "@koalaui/common": ["../../common/src"],
+            "@koalaui/compat": ["../../compat/src/arkts"]
+        },
+        "plugins": [
+            {
+                "transform": "@koalaui/libarkts/plugins/no-visitor",
+                "stage": "parsed",
+                "name": "no"
+            }
+        ]
+    },
+    "include": ["./src/**/*.ts"]
+}

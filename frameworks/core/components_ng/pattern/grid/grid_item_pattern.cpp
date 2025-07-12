@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 namespace OHOS::Ace::NG {
 namespace {
@@ -23,8 +24,10 @@ const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 } // namespace
 void GridItemPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    // call OnAttachToFrameNodeMultiThread by multi thread;
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     if (gridItemStyle_ == GridItemStyle::PLAIN) {
-        auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
@@ -35,7 +38,13 @@ void GridItemPattern::OnAttachToFrameNode()
         renderContext->UpdateBorderRadius(theme->GetGridItemBorderRadius());
     }
 }
-
+void GridItemPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // call OnAttachToMainTreeMultiThread() by multi thread Pattern::OnAttachToMainTree()
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
 void GridItemPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();

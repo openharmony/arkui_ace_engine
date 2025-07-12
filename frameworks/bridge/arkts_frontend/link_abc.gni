@@ -1,0 +1,74 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+
+template("link_abc_files") {
+  assert(defined(invoker.targets), "Must specify 'targets'")
+  assert(defined(invoker.output_name), "Must specify 'output_name'")
+
+  action(target_name) {
+    forward_variables_from(invoker,
+                           [
+                             "deps",
+                             "testonly",
+                             "visibility",
+                           ])
+
+    if (!defined(deps)) {
+      deps = []
+    }
+
+    # Add all target dependencies
+    foreach(target, invoker.targets) {
+      deps += [ target ]
+    }
+
+    # Determine output directory
+    if (defined(invoker.output_dir)) {
+      output_dir = invoker.output_dir
+    } else {
+      output_dir = get_label_info(":$target_name", "target_out_dir")
+    }
+
+    # Set output file
+    output_file = "$output_dir/${invoker.output_name}.abc"
+    outputs = [ output_file ]
+
+    # Collect input .abc files
+    input_files = []
+    foreach(target, invoker.targets) {
+      target_out_dir = get_label_info(target, "target_out_dir")
+      target_name = get_label_info(target, "name")
+    #   target_label = get_label_info(target, "label_no_toolchain")
+      component_name = string_replace(target_name, "_", ".")
+      input_files += [ "$target_out_dir/${component_name}" ]
+    }
+
+    # Script that will be executed
+    script = "./run_binary.py"
+
+    # Build arguments for the link command
+    args = [
+      rebase_path("${static_linker_build_path}"),
+      "--output",
+      rebase_path(output_file, root_build_dir),
+      "--",
+    ]
+
+    # Add all input files to the arguments
+    foreach(input_file, input_files) {
+      args += [ rebase_path(input_file, root_build_dir) ]
+    }
+  }
+}

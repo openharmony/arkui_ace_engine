@@ -268,7 +268,7 @@ bool CustomNodeBase::CheckFireOnAppear()
 
 void CustomNodeBase::MarkNeedUpdate()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (!context) {
         TAG_LOGW(AceLogTag::ACE_STATE_MGMT, "context no longer exist when [%{public}s] call markNeedUpdate",
             GetJSViewName().c_str());
