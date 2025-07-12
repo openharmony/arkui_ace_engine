@@ -57,7 +57,7 @@ void ListItemGroupModelStatic::SetFooter(FrameNode* frameNode, std::function<Ref
 RefPtr<ListChildrenMainSize> ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ListPattern>();
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetOrCreateListChildrenMainSize();
 }
@@ -65,7 +65,7 @@ RefPtr<ListChildrenMainSize> ListItemGroupModelStatic::GetOrCreateListChildrenMa
 void ListItemGroupModelStatic::ResetListChildrenMainSize(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ListPattern>();
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetChildrenSize();
 }
