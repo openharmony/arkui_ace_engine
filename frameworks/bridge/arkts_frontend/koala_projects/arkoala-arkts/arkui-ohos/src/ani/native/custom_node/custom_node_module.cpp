@@ -33,5 +33,44 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
     ani_long customNode = modifier->getCustomNodeAniModifier()->constructCustomNode(id);
     return customNode;
 }
- 
+
+ani_object QueryNavigationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return nullptr;
+    }
+    ani_object res = modifier->getCustomNodeAniModifier()->queryNavigationInfo(env, node);
+    return res;
+}
+
+ani_object QueryNavDestinationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return nullptr;
+    }
+    ani_object res = modifier->getCustomNodeAniModifier()->queryNavDestinationInfo(env, node);
+    return res;
+}
+
+ani_object QueryNavDestinationInfo0(ani_env* env, [[maybe_unused]] ani_object, ani_long node, ani_boolean isInner)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return nullptr;
+    }
+    ani_object res = modifier->getCustomNodeAniModifier()->queryNavDestinationInfo0(env, node, isInner);
+    return res;
+}
+
+ani_object QueryRouterPageInfo(ani_env* env, [[maybe_unused]] ani_object, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return nullptr;
+    }
+    ani_object res = modifier->getCustomNodeAniModifier()->queryRouterPageInfo(env, node);
+    return res;
+}
 } // namespace OHOS::Ace::Ani
