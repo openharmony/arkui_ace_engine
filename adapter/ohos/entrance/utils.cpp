@@ -111,7 +111,8 @@ bool CheckUrlValid(const std::string& url, const std::string& hapPath)
 RefPtr<AssetProviderImpl> CreateAssetProviderImpl(
     const std::string& packagePath, const std::vector<std::string>& assetBasePaths, bool useCache)
 {
-    if (std::regex_match(packagePath, std::regex(".*\\.hap"))) {
+    if (std::regex_match(packagePath, std::regex(".*\\.hap")) ||
+        std::regex_match(packagePath, std::regex(".*\\.hsp"))) {
         auto assetProviderImpl = AceType::MakeRefPtr<HapAssetProviderImpl>();
         if (assetProviderImpl->Initialize(packagePath, assetBasePaths, useCache)) {
             return assetProviderImpl;
