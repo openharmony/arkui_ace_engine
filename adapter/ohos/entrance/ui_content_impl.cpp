@@ -5708,7 +5708,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
                     UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
                 }
             },
-            TaskExecutor::TaskType::BACKGROUND, "UiSessionGetInspectorTree",
+            TaskExecutor::TaskType::UI, "UiSessionGetInspectorTree",
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     UiSessionManager::GetInstance()->SaveInspectorTreeFunction(callback);

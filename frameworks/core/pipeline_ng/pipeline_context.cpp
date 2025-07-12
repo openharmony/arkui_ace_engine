@@ -5924,7 +5924,7 @@ void PipelineContext::RegisterFocusCallback()
 void PipelineContext::GetInspectorTree(bool onlyNeedVisible)
 {
     if (onlyNeedVisible) {
-        auto root = JsonUtil::Create(true);
+        auto root = JsonUtil::CreateSharedPtrJson(true);
         RefPtr<NG::FrameNode> topNavNode;
         uiTranslateManager_->FindTopNavDestination(rootNode_, topNavNode);
         if (topNavNode != nullptr) {
@@ -5932,11 +5932,14 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible)
         } else {
             rootNode_->DumpSimplifyTree(0, root);
         }
-        auto json = root->ToString();
-        json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
-        auto res = JsonUtil::Create(true);
-        res->Put("0", json.c_str());
-        UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
+        auto cb = [root]() {
+            auto json = root->ToString();
+            json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
+            auto res = JsonUtil::Create(true);
+            res->Put("0", json.c_str());
+            UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
+        };
+        taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetInspectorTree");
     } else {
         bool needThrow = false;
         NG::InspectorFilter filter;

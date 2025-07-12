@@ -3098,7 +3098,7 @@ HWTEST_F(UINodeTestNg, AddFunc_API14, TestSize.Level1)
     const RefPtr<FrameNode> testNode =
         FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
     testNode->AddChild(ONE, 1, false);
-    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    std::shared_ptr<JsonValue> json = JsonUtil::CreateSharedPtrJson(true);
     auto child = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>());
     auto child2 = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 4, AceType::MakeRefPtr<Pattern>());
     testNode->AddDisappearingChild(child);

@@ -961,7 +961,7 @@ void FrameNode::DumpOverlayInfo()
         std::string("OverlayOffset: ").append(offsetX.ToString()).append(std::string(", ")).append(offsetY.ToString()));
 }
 
-void FrameNode::DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json)
+void FrameNode::DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json)
 {
     json->Put("$rect", GetTransformRectRelativeToWindow().ToBounds().c_str());
     json->Put("$debugLine", "");
@@ -1048,12 +1048,12 @@ bool FrameNode::CheckVisibleOrActive()
     }
 }
 
-void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+void FrameNode::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(json);
     DumpSimplifyCommonInfo(json);
     if (pattern_) {
-        auto child = JsonUtil::Create();
+        auto child = JsonUtil::CreateSharedPtrJson();
         pattern_->DumpSimplifyInfo(child);
         json->Put("$attrs", std::move(child));
     }
