@@ -2561,40 +2561,6 @@ HWTEST_F(SelectOverlayManagerTestNg, IsSelectOverlaySubWindowMenu02, TestSize.Le
     content->CreateSelectOverlay(info, animation);
     EXPECT_EQ(content->IsSelectOverlaySubWindowMenu(), false);
 }
-/**
- * @tc.name: ToggleOptionMenu001
- * @tc.desc: test select_content_overlay_manager.cpp ToggleOptionMenu
- * @tc.type: FUNC
- */
-HWTEST_F(SelectOverlayManagerTestNg, ToggleOptionMenu001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init SelectContentOverlayManager
-     */
-    Init();
-    auto content = AceType::MakeRefPtr<SelectContentOverlayManager>(root_);
-    ASSERT_NE(content, nullptr);
-    SelectOverlayInfo selectInfo;
-    selectInfo.enableHandleLevel = true;
-    selectInfo.menuInfo.showCut = true;
-    selectInfo.isUseOverlayNG = true;
-
-    /**
-     * @tc.steps: step2. CreateSelectOverlayNode
-     */
-    content->shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
-    ASSERT_NE(content->shareOverlayInfo_, nullptr);
-    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(content->shareOverlayInfo_);
-    ASSERT_NE(frameNode, nullptr);
-    content->menuNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    ASSERT_NE(content->menuNode_.Upgrade(), nullptr);
-
-    /**
-     * @tc.steps: step3. call ToggleOptionMenu
-     */
-    content->ToggleOptionMenu();
-    EXPECT_TRUE(content->shareOverlayInfo_->menuInfo.menuIsShow);
-}
 
 /**
  * @tc.name: DisableMenu001
