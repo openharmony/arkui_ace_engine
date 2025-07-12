@@ -1894,7 +1894,7 @@ private:
     bool isStopBackPress_ = true;
     bool blockKbInFloatingWindow_ = false;
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
-    LRUMap<std::uintptr_t, RefPtr<Paragraph>> paragraphCache_;
+    LRUMap<uint64_t, RefPtr<Paragraph>> paragraphCache_;
     SysScale lastSysScale_;
     std::map<int32_t, AISpan> lastAISpanMap_;
     // Used to avoid show single handle by first click after window focus
