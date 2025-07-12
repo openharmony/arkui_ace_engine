@@ -145,6 +145,11 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     return false;
 }
 
+void ListItemPattern::OnRecycle()
+{
+    ResetSwipeStatus(false);
+}
+
 void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)
 {
     auto host = GetHost();
