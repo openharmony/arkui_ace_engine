@@ -112,57 +112,63 @@ RefPtr<NodePaintMethod> ShapeContainerPattern::CreateNodePaintMethod()
     return MakeRefPtr<ShapeContainerPaintMethod>(shapeContainerModifier_);
 }
 
-#define DEFINE_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                                                       \
-    { #KEY_TYPE, [](ShapeContainerPaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) { \
-         if (auto realValue = std::get_if<VALUE_TYPE>(&(value->GetValue()))) {                                         \
-             prop->UPDATE_METHOD(*realValue);                                                                          \
-         }                                                                                                             \
-     } }
-
 void ShapeContainerPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value)
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto property = frameNode->GetPaintPropertyPtr<ShapeContainerPaintProperty>();
-    CHECK_NULL_VOID(property);
-    using Handler = std::function<void(ShapeContainerPaintProperty*, RefPtr<PropertyValueBase>, RefPtr<FrameNode>)>;
+    using Handler = std::function<void(RefPtr<PropertyValueBase>, RefPtr<FrameNode>)>;
     static const std::unordered_map<std::string, Handler> handlers = {
-        DEFINE_PROP_HANDLER(ShapeStroke, Color, UpdateStroke),
-        DEFINE_PROP_HANDLER(ShapeDashOffset, CalcDimension, UpdateStrokeDashOffset),
-        DEFINE_PROP_HANDLER(ShapeMiterLimit, double, UpdateStrokeMiterLimit),
-        { "ShapeFill",
-            [](ShapeContainerPaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+        { "ShapeStroke",
+            [](RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
                 if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
-                    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, Fill, *realValue, frameNode);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Stroke, *realValue, frameNode);
+                }
+            } },
+        { "ShapeDashOffset",
+            [](RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, *realValue, frameNode);
+                }
+            } },
+        { "ShapeMiterLimit",
+            [](RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                if (auto realValue = std::get_if<double>(&(value->GetValue()))) {
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeMiterLimit, *realValue, frameNode);
+                }
+            } },
+        { "ShapeFill",
+            [](RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, *realValue, frameNode);
                     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *realValue, frameNode);
                     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
                 }
             } },
         { "ShapeStrokeOpacity",
-            [](ShapeContainerPaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+            [](RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
                 if (auto realValue = std::get_if<double>(&(value->GetValue()))) {
-                    auto strokeOpacity = std::clamp(*realValue, 0.0, 1.0);
-                    prop->UpdateStrokeOpacity(strokeOpacity);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(
+                        ShapePaintProperty, StrokeOpacity, std::clamp(*realValue, 0.0, 1.0), frameNode);
                 }
             } },
         { "ShapeFillOpacity",
-            [](ShapeContainerPaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+            [](RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
                 if (auto realValue = std::get_if<double>(&(value->GetValue()))) {
-                    auto fillOpacity = std::clamp(*realValue, 0.0, 1.0);
-                    prop->UpdateFillOpacity(fillOpacity);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(
+                        ShapePaintProperty, FillOpacity, std::clamp(*realValue, 0.0, 1.0), frameNode);
                 }
             } },
         { "ShapeStrokeWidth",
-            [](ShapeContainerPaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
+            [](RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
                 if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto strokeWidth = realValue->IsNegative() ? 1.0_vp : *realValue;
-                    prop->UpdateStrokeWidth(strokeWidth);
+                    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, strokeWidth, frameNode);
                 }
             } },
     };
     auto it = handlers.find(key);
     if (it != handlers.end()) {
-        it->second(property, value, frameNode);
+        it->second(value, frameNode);
     }
     if (frameNode->GetRerenderable()) {
         for (auto childNode : ChildNodes_) {
