@@ -22,24 +22,22 @@
 namespace OHOS::Ace::NG {
 void AccessibilityProperty::SetAccessibilityGroupMultiThread()
 {
-    NotifyComponentChangeEventMultiThread(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+    // no need send event when node is free
 }
 
 void AccessibilityProperty::SetAccessibilityTextWithEventMultiThread()
 {
-    NotifyComponentChangeEventMultiThread(AccessibilityEventType::TEXT_CHANGE);
+    // no need send event when node is free
 }
 
 void AccessibilityProperty::SetAccessibilityDescriptionWithEventMultiThread()
 {
-    NotifyComponentChangeEventMultiThread(AccessibilityEventType::TEXT_CHANGE);
+    // no need send event when node is free
 }
 
 void AccessibilityProperty::SetAccessibilityLevelMultiThread(const std::string& backupLevel)
 {
-    if (backupLevel != accessibilityLevel_.value_or("")) {
-        NotifyComponentChangeEventMultiThread(AccessibilityEventType::ELEMENT_INFO_CHANGE);
-    }
+    // no need send event when node is free
 }
 
 void AccessibilityProperty::NotifyComponentChangeEventMultiThread(AccessibilityEventType eventType)
@@ -50,6 +48,19 @@ void AccessibilityProperty::NotifyComponentChangeEventMultiThread(AccessibilityE
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
         host->NotifyComponentChangeEvent(eventType);
+    });
+}
+
+void AccessibilityProperty::SetAccessibilityNextFocusInspectorKeyMultiThread(
+    const std::string& accessibilityNextFocusInspectorKey)
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = WeakClaim(this), accessibilityNextFocusInspectorKey]() {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        // no need send event when node is free
+        host->UpdateAccessibilityNextFocusIdMap(accessibilityNextFocusInspectorKey);
     });
 }
 } // namespace OHOS::Ace::NG
