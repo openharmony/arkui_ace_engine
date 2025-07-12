@@ -1121,6 +1121,7 @@ HWTEST_F(TextTestFiveNg, CreateParagraph001, TestSize.Level1)
 
     pattern->textDetectEnable_ = true;
     pattern->copyOption_ = CopyOptions::InApp;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, AISpan()));
 
     EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode), maxSize.Width()), true);
@@ -1996,6 +1997,7 @@ HWTEST_F(TextTestFiveNg, UpdateParagraph001, TestSize.Level1)
 
     pattern->textDetectEnable_ = true;
     pattern->copyOption_ = CopyOptions::InApp;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, AISpan()));
 
     EXPECT_EQ(spanItem->UpdateParagraph(frameNode, paragraph, true), -1);
@@ -2535,6 +2537,7 @@ HWTEST_F(TextTestFiveNg, InitClickEvent001, TestSize.Level1)
 
     textPattern->textDetectEnable_ = true;
     textPattern->copyOption_ = CopyOptions::InApp;
+    ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     textPattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, AISpan()));
 
     EXPECT_EQ(sysJudgeFunc.value()(gestureInfo, info), GestureJudgeResult::CONTINUE);
@@ -2565,6 +2568,7 @@ HWTEST_F(TextTestFiveNg, SetOnClickMenu001, TestSize.Level1)
 
     textPattern->SetOnClickMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
 
+    ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     auto func = textPattern->dataDetectorAdapter_->onClickMenu_;
     ASSERT_NE(func, nullptr);
 

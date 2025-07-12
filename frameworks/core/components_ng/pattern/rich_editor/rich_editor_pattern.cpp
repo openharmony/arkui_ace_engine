@@ -170,6 +170,9 @@ RichEditorPattern::RichEditorPattern(bool isStyledStringMode) :
     floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
     undoManager_ = RichEditorUndoManager::Create(isSpanStringMode_, WeakClaim(this));
     styleManager_ = std::make_unique<StyleManager>(WeakClaim(this));
+    if (!dataDetectorAdapter_) {
+        dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
+    }
 }
 
 RichEditorPattern::~RichEditorPattern()

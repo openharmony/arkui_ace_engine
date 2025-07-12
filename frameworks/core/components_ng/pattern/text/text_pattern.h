@@ -239,6 +239,7 @@ public:
     }
     void SetTextDetectTypes(const std::string& types)
     {
+        CHECK_NULL_VOID(GetDataDetectorAdapter());
         dataDetectorAdapter_->SetTextDetectTypes(types);
         textDetectTypes_ = types; // url value is not recorded in dataDetectorAdapter_, need to record it here
     }
@@ -248,23 +249,26 @@ public:
     }
     RefPtr<DataDetectorAdapter> GetDataDetectorAdapter()
     {
+        if (!dataDetectorAdapter_) {
+            dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
+        }
         return dataDetectorAdapter_;
     }
     virtual const std::map<int32_t, AISpan>& GetAISpanMap()
     {
-        return dataDetectorAdapter_->aiSpanMap_;
+        return GetDataDetectorAdapter()->aiSpanMap_;
     }
     const std::u16string& GetTextForAI()
     {
-        return dataDetectorAdapter_->textForAI_;
+        return GetDataDetectorAdapter()->textForAI_;
     }
     void SetOnResult(std::function<void(const std::string&)>&& onResult)
     {
-        dataDetectorAdapter_->onResult_ = std::move(onResult);
+        GetDataDetectorAdapter()->onResult_ = std::move(onResult);
     }
     TextDataDetectResult GetTextDetectResult()
     {
-        return dataDetectorAdapter_->textDetectResult_;
+        return GetDataDetectorAdapter()->textDetectResult_;
     }
     virtual void MarkAISpanStyleChanged()
     {
@@ -274,6 +278,7 @@ public:
     }
     void SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
     {
+        CHECK_NULL_VOID(GetDataDetectorAdapter());
         dataDetectorAdapter_->SetTextDetectTypes(textDetectConfig.types);
         dataDetectorAdapter_->onResult_ = std::move(textDetectConfig.onResult);
         dataDetectorAdapter_->entityColor_ = textDetectConfig.entityColor;
@@ -289,6 +294,7 @@ public:
     }
     void ModifyAISpanStyle(TextStyle& aiSpanStyle)
     {
+        CHECK_NULL_VOID(GetDataDetectorAdapter());
         TextDetectConfig textDetectConfig;
         aiSpanStyle.SetTextColor(dataDetectorAdapter_->entityColor_.value_or(textDetectConfig.entityColor));
         aiSpanStyle.SetTextDecoration(
@@ -1055,7 +1061,7 @@ protected:
     friend class TextContentModifier;
     // properties for AI
     bool textDetectEnable_ = false;
-    RefPtr<DataDetectorAdapter> dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
+    RefPtr<DataDetectorAdapter> dataDetectorAdapter_;
 
     OffsetF parentGlobalOffset_;
     std::optional<TextResponseType> textResponseType_;

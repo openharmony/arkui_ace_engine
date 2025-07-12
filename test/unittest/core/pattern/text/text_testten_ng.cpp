@@ -460,6 +460,7 @@ HWTEST_F(TextFieldTenPatternNg, HandleClickEvent001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     GestureEvent info;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
     pattern->HandleClickEvent(info);
     EXPECT_FALSE(pattern->dataDetectorAdapter_->hasClickedAISpan_);
@@ -526,6 +527,7 @@ HWTEST_F(TextFieldTenPatternNg, HandleSingleClickEvent001, TestSize.Level1)
     pattern->HandleSingleClickEvent(info);
     EXPECT_FALSE(pattern->moveOverClickThreshold_);
 
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
     pattern->isMousePressed_ = true;
     pattern->clickedSpanPosition_ = -1;
@@ -751,6 +753,7 @@ HWTEST_F(TextFieldTenPatternNg, SetOnClickMenu001, TestSize.Level1)
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 3;
     pattern->shiftFlag_ = false;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->onClickMenu_(action);
     EXPECT_EQ(pattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(pattern->textSelector_.destinationOffset, -1);
@@ -1084,6 +1087,7 @@ HWTEST_F(TextFieldTenPatternNg, HandleMouseLeftReleaseAction001, TestSize.Level1
     pattern->blockPress_ = true;
     pattern->status_ = Status::FLOATING;
     pattern->mouseStatus_ = MouseStatus::PRESSED;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
     pattern->HandleMouseLeftReleaseAction(info, offset);
     EXPECT_FALSE(pattern->blockPress_);
@@ -1195,6 +1199,7 @@ HWTEST_F(TextFieldTenPatternNg, HandleMouseLeftReleaseAction002, TestSize.Level1
     pattern->blockPress_ = true;
     pattern->status_ = Status::FLOATING;
     pattern->mouseStatus_ = MouseStatus::PRESSED;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
     pattern->HandleMouseLeftReleaseAction(info, offset);
     EXPECT_FALSE(pattern->blockPress_);
@@ -1428,6 +1433,7 @@ HWTEST_F(TextFieldTenPatternNg, OnVisibleChange001, TestSize.Level1)
     bool isVisible = false;
     pattern->textDetectEnable_ = true;
     pattern->OnVisibleChange(isVisible);
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_FALSE(pattern->dataDetectorAdapter_->aiDetectDelayTask_);
 }
 
@@ -1522,6 +1528,7 @@ HWTEST_F(TextFieldTenPatternNg, ProcessSpanString001, TestSize.Level1)
 
     pattern->textDetectEnable_ = true;
     EXPECT_TRUE(pattern->CanStartAITask());
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_FALSE(pattern->dataDetectorAdapter_->aiDetectInitialized_);
 
     auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
@@ -1861,6 +1868,7 @@ HWTEST_F(TextFieldTenPatternNg, HandleMouseRightButton001, TestSize.Level1)
     info.action_ = MouseAction::RELEASE;
     pattern->copyOption_ = CopyOptions::None;
     pattern->HandleMouseRightButton(info, offset);
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_FALSE(pattern->dataDetectorAdapter_->hasClickedAISpan_);
 
     /**

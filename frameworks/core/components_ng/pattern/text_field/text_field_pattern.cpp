@@ -818,7 +818,6 @@ void TextFieldPattern::ProcessOverlayAfterLayout(const OffsetF& prevOffset)
 bool TextFieldPattern::HasFocus() const
 {
     auto focusHub = GetFocusHub();
-
     CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsCurrentFocus();
 }
@@ -1761,7 +1760,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
 
 void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
 {
-    CHECK_NULL_VOID(clipboard_);
+    CHECK_NULL_VOID(GetClipboard());
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -1869,7 +1868,7 @@ void TextFieldPattern::HandleOnPaste()
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnPaste len:%{public}d", static_cast<int32_t>(pasteData.length()));
         textfield->AddInsertCommand(pasteData, InputReason::PASTE);
     };
-    CHECK_NULL_VOID(clipboard_);
+    CHECK_NULL_VOID(GetClipboard());
     clipboard_->GetData(pasteCallback);
 }
 
@@ -1969,9 +1968,7 @@ void TextFieldPattern::StripNextLine(std::wstring& data)
 
 void TextFieldPattern::HandleOnCut()
 {
-#if !defined(PREVIEW)
-    CHECK_NULL_VOID(clipboard_);
-#endif
+    CHECK_NULL_VOID(GetClipboard());
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
@@ -3212,7 +3209,7 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     bool needToResetKeyboard = false;
-    // check unspecified  for first time entrance
+    // check unspecified for first time entrance
     if (keyboard_ != layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
         auto autoFillType = GetAutoFillType(false);
         if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::UNSPECIFIED ||
@@ -3412,8 +3409,6 @@ void TextFieldPattern::OnModifyDone()
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     directionKeysMoveFocusOut_ = textFieldTheme->GetDirectionKeysMoveFocusOut();
-    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
     CheckIfNeedToResetKeyboard();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -3444,9 +3439,6 @@ void TextFieldPattern::OnModifyDone()
     }
     Register2DragDropManager();
     ProcessUnderlineColorOnModifierDone();
-    if (!clipboard_ && context) {
-        clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
-    }
     if (barState_.has_value() && barState_.value() != layoutProperty->GetDisplayModeValue(DisplayMode::AUTO) &&
         HasFocus() && IsNormalInlineState()) {
         lastTextRectY_ = textRect_.GetY();
@@ -3726,11 +3718,11 @@ void TextFieldPattern::FilterInitializeText()
         changeValueInfo.oldPreviewText.value = GetPreviewTextValue();
         changeValueInfo.rangeBefore = TextRange { 0, changeValueInfo.oldContent.length() };
         auto textChanged = contentController_->FilterValue();
-        changeValueInfo.value = GetBodyTextValue();
-        changeValueInfo.previewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
-        changeValueInfo.previewText.value = GetPreviewTextValue();
-        changeValueInfo.rangeAfter = TextRange { 0, changeValueInfo.value.length() };
         if (isFilterChanged_) {
+            changeValueInfo.value = GetBodyTextValue();
+            changeValueInfo.previewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
+            changeValueInfo.previewText.value = GetPreviewTextValue();
+            changeValueInfo.rangeAfter = TextRange { 0, changeValueInfo.value.length() };
             bool isWillChange = FireOnWillChange(changeValueInfo);
             isFilterChanged_ = false;
             if (!isWillChange) {
@@ -7977,13 +7969,13 @@ void TextFieldPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    auto accessibilityProperty = host->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityGroup(true);
+    accessibilityProperty->SetErrorText(UtfUtils::Str16DebugToStr8(GetErrorTextString()));
     SetAccessibilityActionOverlayAndSelection();
     SetAccessibilityActionGetAndSetCaretPosition();
     SetAccessibilityMoveTextAction();
-    SetAccessibilityErrotText();
 }
 
 void TextFieldPattern::SetAccessibilityActionOverlayAndSelection()
@@ -8096,15 +8088,6 @@ void TextFieldPattern::SetAccessibilityMoveTextAction()
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         pattern->SetCaretPosition(caretPosition);
     });
-}
-
-void TextFieldPattern::SetAccessibilityErrotText()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetErrorText(UtfUtils::Str16DebugToStr8(GetErrorTextString()));
 }
 
 void TextFieldPattern::StopEditing()
