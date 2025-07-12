@@ -636,19 +636,26 @@ void HandleSuccess(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const DragN
     }
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
     if (dragStatus == DragStatus::ENDED) {
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->ResetDragging();
+        taskExecutor->PostTask(
+            [asyncCtx, dragNotifyMsg, dragStatus]() {
+                CHECK_NULL_VOID(asyncCtx);
+                GetCallBackDataForJs(asyncCtx, dragNotifyMsg, dragStatus);
+            },
+            TaskExecutor::TaskType::JS, "ArkUIDragHandleSuccess", PriorityType::VIP);
+        return;
     }
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
+    taskExecutor->PostSyncTask(
         [asyncCtx, dragNotifyMsg, dragStatus]() {
             CHECK_NULL_VOID(asyncCtx);
             GetCallBackDataForJs(asyncCtx, dragNotifyMsg, dragStatus);
         },
-        TaskExecutor::TaskType::JS, "ArkUIDragHandleSuccess", PriorityType::VIP);
+        TaskExecutor::TaskType::JS, "ArkUIDragHandleSuccess");
 }
 
 void HandleFail(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t errorCode, const std::string& errMsg = "")
