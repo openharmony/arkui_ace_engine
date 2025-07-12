@@ -1535,6 +1535,10 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
             break;
         }
         if (currentIndex >= info_.GetChildrenCount()) {
+            if (currentIndex == 0) {
+                layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+                TAG_LOGW(ACE_GRID, "total item count is 0");
+            }
             break;
         }
         // Step1. Get wrapper of [GridItem]
