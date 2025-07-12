@@ -314,7 +314,9 @@ bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetFunctionParam(env, object, "onWillAppear", dialogProps.onWillAppear);
     GetFunctionParam(env, object, "onWillDisappear", dialogProps.onWillDisappear);
     GetLevelMode(env, object, dialogProps.dialogLevelMode);
-    GetInt32Param(env, object, "levelUniqueId", dialogProps.dialogLevelUniqueId);
+    double levelUniqueId = -1;
+    GetDoubleParam(env, object, "levelUniqueId", levelUniqueId);
+    dialogProps.dialogLevelUniqueId = static_cast<int32_t>(levelUniqueId);
     GetImmersiveMode(env, object, dialogProps.dialogImmersiveMode);
     return true;
 }
@@ -529,7 +531,9 @@ bool GetActionMenuOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetBoolParam(env, object, "showInSubWindow", dialogProps.isShowInSubWindow);
     GetBoolParam(env, object, "isModal", dialogProps.isModal);
     GetLevelMode(env, object, dialogProps.dialogLevelMode);
-    GetInt32Param(env, object, "levelUniqueId", dialogProps.dialogLevelUniqueId);
+    double levelUniqueId = -1;
+    GetDoubleParam(env, object, "levelUniqueId", levelUniqueId);
+    dialogProps.dialogLevelUniqueId = static_cast<int32_t>(levelUniqueId);
     GetImmersiveMode(env, object, dialogProps.dialogImmersiveMode);
     return true;
 }
@@ -721,21 +725,21 @@ bool GetKeyboardAvoidDistance(ani_env *env, ani_object object, std::optional<OHO
         return false;
     }
 
-    ani_double value;
+    ani_double aniValue;
     ani_object resultObj = static_cast<ani_object>(resultRef);
-    status = env->Object_GetPropertyByName_Double(resultObj, "value", &value);
+    status = env->Object_GetPropertyByName_Double(resultObj, "value", &aniValue);
     if (status != ANI_OK) {
         return false;
     }
 
-    ani_int unit;
-    status = env->Object_GetPropertyByName_Int(resultObj, "unit", &unit);
-    if (status != ANI_OK) {
+    int32_t unit;
+    if (!GetEnumInt(env, resultObj, "unit", "Larkui/Graphics/LengthUnit;", unit)) {
         return false;
     }
 
+    double value = static_cast<double>(aniValue);
     auto dimensionUnit = static_cast<OHOS::Ace::DimensionUnit>(unit);
-    if (value >= 0.0 && dimensionUnit >= OHOS::Ace::DimensionUnit::PX
+    if (OHOS::Ace::GreatOrEqual(value, 0.0) && dimensionUnit >= OHOS::Ace::DimensionUnit::PX
         && dimensionUnit <= OHOS::Ace::DimensionUnit::CALC && dimensionUnit != OHOS::Ace::DimensionUnit::PERCENT) {
         OHOS::Ace::Dimension dimension(value, dimensionUnit);
         result = dimension;
@@ -775,7 +779,9 @@ bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetBackgroundEffectOptions(env, object, dialogProps.effectOption);
     GetKeyboardAvoidDistance(env, object, dialogProps.keyboardAvoidDistance);
     GetLevelMode(env, object, dialogProps.dialogLevelMode);
-    GetInt32Param(env, object, "levelUniqueId", dialogProps.dialogLevelUniqueId);
+    double levelUniqueId = -1;
+    GetDoubleParam(env, object, "levelUniqueId", levelUniqueId);
+    dialogProps.dialogLevelUniqueId = static_cast<int32_t>(levelUniqueId);
     GetImmersiveMode(env, object, dialogProps.dialogImmersiveMode);
     GetBoolParam(env, object, "focusable", dialogProps.focusable);
     return true;

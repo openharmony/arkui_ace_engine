@@ -264,7 +264,7 @@ bool GetFloatArrayParam(ani_env *env, ani_object object, const char *name, std::
     std::vector<float> floatArray;
     for (int i = 0; i < int(length); i++) {
         ani_ref itemRef;
-        status = env->Array_Get(resultObj, (ani_int)i, &itemRef);
+        status = env->Array_Get(resultObj, (ani_size)i, &itemRef);
         if (status != ANI_OK) {
             continue;
         }
@@ -363,7 +363,7 @@ bool GetStringArrayParam(ani_env *env, ani_object object, const char *name, std:
 
 bool GetEnumInt(ani_env* env, ani_object resultObj, const char *enum_descriptor, int32_t& result)
 {
-    if (IsEnum(env, resultObj, enum_descriptor)) {
+    if (!IsEnum(env, resultObj, enum_descriptor)) {
         return false;
     }
 
@@ -677,14 +677,14 @@ void CompleteResourceParamV1(ani_env *env, ani_object object)
     }
 
     ModifyResourceParam(env, object, resType, resName);
-    ani_int idInt = static_cast<ani_int>(UNKNOWN_RESOURCE_ID);
-    status = env->Object_SetPropertyByName_Int(object, "id", idInt);
+    ani_double aniId = static_cast<ani_double>(static_cast<double>(UNKNOWN_RESOURCE_ID));
+    status = env->Object_SetPropertyByName_Double(object, "id", aniId);
     if (status != ANI_OK) {
         return;
     }
 
-    int32_t aniType = static_cast<int32_t>(resType);
-    status = env->Object_SetPropertyByName_Int(object, "type", static_cast<ani_int>(aniType));
+    ani_double aniType = static_cast<ani_double>(static_cast<double>(resType));
+    status = env->Object_SetPropertyByName_Double(object, "type", aniType);
     if (status != ANI_OK) {
         return;
     }
@@ -734,8 +734,8 @@ void CompleteResourceParamV2(ani_env *env, ani_object object)
         return;
     }
 
-    int32_t aniType = static_cast<int32_t>(resType);
-    status = env->Object_SetPropertyByName_Int(object, "type", static_cast<ani_int>(aniType));
+    ani_double aniType = static_cast<ani_double>(static_cast<double>(resType));
+    status = env->Object_SetPropertyByName_Double(object, "type", aniType);
     if (status != ANI_OK) {
         return;
     }
@@ -773,10 +773,14 @@ bool GetResourceParam(ani_env *env, ani_object object, ResourceInfo& result)
     }
 
     CompleteResourceParam(env, object);
-    GetInt32Param(env, object, "id", result.resId);
+    double id = 0;
+    GetDoubleParam(env, object, "id", id);
+    result.resId = static_cast<int32_t>(id);
     GetStringParamOpt(env, object, "bundleName", result.bundleName);
     GetStringParamOpt(env, object, "moduleName", result.moduleName);
-    GetInt32Param(env, object, "type", result.type);
+    double type = 0;
+    GetDoubleParam(env, object, "type", type);
+    result.type = static_cast<int32_t>(type);
     GetStringArrayParam(env, object, "params", result.params);
     return true;
 }
@@ -1031,7 +1035,7 @@ bool GetLengthParam(ani_env *env, ani_ref ref, OHOS::Ace::CalcDimension& result)
 bool GetColorParam(ani_env* env, ani_object object, PromptActionColor& result)
 {
     int32_t resultInt;
-    if (!GetEnumInt(env, object, "policy", "Larkui/component/enums/Color;", resultInt)) {
+    if (!GetEnumInt(env, object, "Larkui/component/enums/Color;", resultInt)) {
         return false;
     }
     result = static_cast<PromptActionColor>(resultInt);
@@ -1042,7 +1046,7 @@ bool GetResourceColorParam(ani_env *env, ani_object object, OHOS::Ace::Color& re
 {
     std::string resultStr;
     if (GetStringParam(env, object, resultStr)) {
-        result = OHOS::Ace::Color::FromString(resultStr);
+        OHOS::Ace::Color::ParseColorString(resultStr, result);
         return true;
     }
 
@@ -1065,7 +1069,7 @@ bool GetResourceColorParam(ani_env *env, ani_object object, OHOS::Ace::Color& re
         if (resultStr.size() == 0) {
             return false;
         }
-        result = OHOS::Ace::Color::FromString(resultStr);
+        OHOS::Ace::Color::ParseColorString(resultStr, result);
         return true;
     }
     return false;
