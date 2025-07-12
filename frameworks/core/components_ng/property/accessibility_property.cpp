@@ -65,8 +65,9 @@ std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
 
 void AccessibilityProperty::NotifyComponentChangeEvent(AccessibilityEventType eventType)
 {
+    auto frameNode = host_.Upgrade();
+    FREE_NODE_CHECK(frameNode, NotifyComponentChangeEvent, eventType);
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        auto frameNode = host_.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
