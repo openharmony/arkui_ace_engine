@@ -1747,6 +1747,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest011, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_AUTO_RESIZE, &item);
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_RESIZABLE, &item);
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_DRAGGABLE, &item);
+    nodeAPI->setAttribute(rootNode, NODE_IMAGE_SYNC_LOAD, &item);
 
     value[0].u32 = 0xFFFF0000;
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_FILL_COLOR, &item);
@@ -1765,6 +1766,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest011, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_AUTO_RESIZE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_ALT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_DRAGGABLE), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SYNC_LOAD), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_RENDER_MODE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_FIT_ORIGINAL_SIZE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_FILL_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
@@ -1780,6 +1782,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest011, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_AUTO_RESIZE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_ALT), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_DRAGGABLE), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SYNC_LOAD), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_RENDER_MODE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_FILL_COLOR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_RESIZABLE), nullptr);
