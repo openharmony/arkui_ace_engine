@@ -1202,7 +1202,7 @@ HWTEST_F(ScrollBarTestNg, SetScrollBarColorTest002, TestSize.Level1)
     scrollPattern_ = scrollNode_->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(scrollPattern_);
 
-    ScrollModelNG::SetScrollBarColor(frameNode_.GetRawPtr(), Color::BLUE);
+    model.SetScrollBarColor(Color::BLUE);
     auto scrollBar = scrollPattern_->GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
     EXPECT_EQ(scrollBar->GetForegroundColor(), Color::BLUE);
