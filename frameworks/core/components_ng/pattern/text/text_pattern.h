@@ -281,11 +281,11 @@ public:
         dataDetectorAdapter_->entityDecorationColor_ = textDetectConfig.entityDecorationColor;
         dataDetectorAdapter_->entityDecorationStyle_ = textDetectConfig.entityDecorationStyle;
         auto textDetectConfigCache = dataDetectorAdapter_->textDetectConfigStr_;
+        dataDetectorAdapter_->enablePreviewMenu_ = textDetectConfig.enablePreviewMenu;
         dataDetectorAdapter_->textDetectConfigStr_ = textDetectConfig.ToString();
         if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
             MarkAISpanStyleChanged();
         }
-        dataDetectorAdapter_->enablePreviewMenu_ = textDetectConfig.enablePreviewMenu;
     }
     void ModifyAISpanStyle(TextStyle& aiSpanStyle)
     {

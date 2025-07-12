@@ -466,4 +466,8 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
     return 0;
 }
 
+std::string SystemProperties::GetMapSearchPrefix()
+{
+    return "";
+}
 } // namespace OHOS::Ace

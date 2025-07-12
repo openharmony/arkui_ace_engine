@@ -1926,6 +1926,30 @@ HWTEST_F(TextTestThreeNg, SetTextDetectTypes001, TestSize.Level1)
 
 
 /**
+ * @tc.name: SetTextDetectConfig001
+ * @tc.desc: test test_pattern.h SetTextDetectTypes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, SetTextDetectConfig001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create frameNode and pattern with child span node.
+    */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"");
+    TextDetectConfig textDetectConfig;
+    textDetectConfig.enablePreviewMenu = true;
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = frameNode->GetPattern<TextPattern>();
+
+    /**
+     * @tc.steps: step2. call InitTextDetect.
+     */
+    pattern->SetTextDetectConfig(textDetectConfig);
+    EXPECT_EQ(pattern->dataDetectorAdapter_->enablePreviewMenu_, true);
+}
+
+/**
  * @tc.name: SetTextDetectTypes002
  * @tc.desc: test test_pattern.h SetTextDetectTypes.
  * @tc.type: FUNC

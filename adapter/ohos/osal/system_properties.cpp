@@ -700,6 +700,7 @@ WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBre
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::syncLoadEnabled_ = true;
 bool SystemProperties::whiteBlockEnabled_ = false;
+std::string SystemProperties::mapSearchPrefix_ = "";
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -866,6 +867,7 @@ void SystemProperties::InitDeviceInfo(
         system::GetIntParameter("const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
     syncLoadEnabled_ = system::GetBoolParameter("persist.ace.scrollable.syncload.enable", false);
     whiteBlockEnabled_ = system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
+    mapSearchPrefix_ = system::GetParameter("const.arkui.mapSearch", "");
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -1349,5 +1351,10 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 {
     auto ret = OHOS::system::GetParameter("persist.resourceschedule.whiteblock.cachedcount", "0");
     return StringUtils::StringToInt(ret);
+}
+
+std::string SystemProperties::GetMapSearchPrefix()
+{
+    return mapSearchPrefix_;
 }
 } // namespace OHOS::Ace

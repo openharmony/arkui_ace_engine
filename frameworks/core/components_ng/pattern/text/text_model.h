@@ -70,6 +70,7 @@ struct TextDetectConfig {
         decorationJson->Put("color", entityDecorationColor.ToString().c_str());
         decorationJson->Put("style", static_cast<int64_t>(entityDecorationStyle));
         jsonValue->Put("decoration", decorationJson);
+        jsonValue->Put("enablePreviewMenu", enablePreviewMenu ? "true" : "false");
         return jsonValue->ToString();
     }
 
