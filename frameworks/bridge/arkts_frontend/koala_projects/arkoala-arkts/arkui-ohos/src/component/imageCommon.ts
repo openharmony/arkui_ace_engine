@@ -56,7 +56,7 @@ export class ImageAnalyzerController implements MaterializedBase {
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = (retvalDeserializer.readInt32() as ImageAnalyzerType)
+            buffer[buffer_i] = TypeChecker.ImageAnalyzerType_FromNumeric(retvalDeserializer.readInt32())
         }
         const returnResult : Array<ImageAnalyzerType> = buffer
         return returnResult

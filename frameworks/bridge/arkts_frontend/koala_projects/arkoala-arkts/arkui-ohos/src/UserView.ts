@@ -36,7 +36,8 @@ export class UserView {
     static getNativeLog(group: int32): string {
         let ptr = InteropNativeModule._GetGroupedLog(group)
         let length = InteropNativeModule._StringLength(ptr)
-        let data = int8Array(length);
+        // @ts-ignore
+        let data = new byte[length];
         // @ts-ignore
         InteropNativeModule._StringData(ptr, data, length)
         InteropNativeModule._InvokeFinalizer(ptr, InteropNativeModule._GetStringFinalizer())

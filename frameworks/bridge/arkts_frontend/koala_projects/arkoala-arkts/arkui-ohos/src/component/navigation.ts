@@ -474,8 +474,15 @@ export class NavPathStack implements MaterializedBase {
         thisSerializer.release()
     }
     private getAllPathName_serialize(): Array<string> {
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getAllPathName(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getAllPathName(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -484,24 +491,16 @@ export class NavPathStack implements MaterializedBase {
         const returnResult : Array<string> = buffer
         return returnResult
     }
-    private getParamByIndex_serialize(index: number): object | undefined {
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getParamByIndex(this.peer!.ptr, index)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private getParamByName_serialize(name: string): Array<object> {
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getParamByName(this.peer!.ptr, name)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<object> = new Array<object>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = (retvalDeserializer.readCustomObject("Any") as Object)
-        }
-        const returnResult : Array<object> = buffer
-        return returnResult
-    }
     private getIndexByName_serialize(name: string): Array<number> {
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getIndexByName(this.peer!.ptr, name)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getIndexByName(this.peer!.ptr, name) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<number> = new Array<number>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {

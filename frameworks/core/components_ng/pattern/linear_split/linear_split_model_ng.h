@@ -20,15 +20,6 @@
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
 
 namespace OHOS::Ace::NG {
-
-struct ItemDivider final {
-    Dimension startMargin = 0.0_vp;
-    Dimension endMargin = 0.0_vp;
-    bool operator==(const ItemDivider& itemDivider) const
-    {
-        return (startMargin == itemDivider.startMargin) && (endMargin == itemDivider.endMargin);
-    }
-};
 class  ACE_EXPORT LinearSplitModelNG : public OHOS::Ace::LinearSplitModel {
 public:
     void Create(SplitType splitType) override;

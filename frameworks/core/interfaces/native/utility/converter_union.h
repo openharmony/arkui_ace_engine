@@ -327,22 +327,22 @@ void VisitUnionPtr(const T* src, Fs... funcs)
 }
 
 template<typename T, typename... Fs, decltype(T().value.selector) = 0>
-void VisitUnionPtr(const T* src, Fs... funcs)
+void VisitUnion(const T& src, Fs... funcs)
 {
-    if (src && src->tag != INTEROP_TAG_UNDEFINED) {
+    if (src.tag != INTEROP_TAG_UNDEFINED) {
         using U = decltype(T().value);
-        detail::UnionVisitor<U, UnionLastIndex<U>>::Visit(src->value, detail::Overloaded{funcs...});
+        detail::UnionVisitor<U, UnionLastIndex<U>>::Visit(src.value, detail::Overloaded{funcs...});
     } else {
         detail::Overloaded{funcs...}();
     }
 }
 
 template<typename T, typename... Fs, decltype(T().value.selector) = 0>
-void VisitUnion(const T& src, Fs... funcs)
+void VisitUnionPtr(const T* src, Fs... funcs)
 {
-    if (src.tag != INTEROP_TAG_UNDEFINED) {
+    if (src && src->tag != INTEROP_TAG_UNDEFINED) {
         using U = decltype(T().value);
-        detail::UnionVisitor<U, UnionLastIndex<U>>::Visit(src.value, detail::Overloaded{funcs...});
+        detail::UnionVisitor<U, UnionLastIndex<U>>::Visit(src->value, detail::Overloaded{funcs...});
     } else {
         detail::Overloaded{funcs...}();
     }

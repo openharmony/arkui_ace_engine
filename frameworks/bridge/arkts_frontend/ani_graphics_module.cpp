@@ -17,9 +17,9 @@
 
 #include <ani.h>
 
-#if !defined(PREVIEW)
-#include "canvas_ani/ani_canvas.h"
-#endif
+// #if !defined(PREVIEW)
+// #include "canvas_ani/ani_canvas.h"
+// #endif
 
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "core/components_ng/base/extension_handler.h"

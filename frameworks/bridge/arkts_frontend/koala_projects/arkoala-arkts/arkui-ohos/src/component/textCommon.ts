@@ -93,70 +93,6 @@ export class TextBaseControllerInternal implements MaterializedBase,TextBaseCont
         return obj
     }
 }
-export interface TextEditControllerEx {
-    isEditing(): boolean
-    stopEditing(): void
-    setCaretOffset(offset: number): boolean
-    getCaretOffset(): number
-    getPreviewText(): PreviewText
-}
-export class TextEditControllerExInternal extends TextBaseControllerInternal implements MaterializedBase,TextEditControllerEx {
-    static ctor_texteditcontrollerex(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_ctor()
-        return retval
-    }
-    constructor() {
-        super()
-        const ctorPtr : KPointer = TextEditControllerExInternal.ctor_texteditcontrollerex()
-        this.peer = new Finalizable(ctorPtr, TextEditControllerExInternal.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._TextEditControllerEx_getFinalizer()
-    }
-    public isEditing(): boolean {
-        return this.isEditing_serialize()
-    }
-    public stopEditing(): void {
-        this.stopEditing_serialize()
-        return
-    }
-    public setCaretOffset(offset: number): boolean {
-        const offset_casted = offset as (number)
-        return this.setCaretOffset_serialize(offset_casted)
-    }
-    public getCaretOffset(): number {
-        return this.getCaretOffset_serialize()
-    }
-    public getPreviewText(): PreviewText {
-        return this.getPreviewText_serialize()
-    }
-    private isEditing_serialize(): boolean {
-        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_isEditing(this.peer!.ptr)
-        return retval
-    }
-    private stopEditing_serialize(): void {
-        ArkUIGeneratedNativeModule._TextEditControllerEx_stopEditing(this.peer!.ptr)
-    }
-    private setCaretOffset_serialize(offset: number): boolean {
-        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_setCaretOffset(this.peer!.ptr, offset)
-        return retval
-    }
-    private getCaretOffset_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_getCaretOffset(this.peer!.ptr)
-        return retval
-    }
-    private getPreviewText_serialize(): PreviewText {
-        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_getPreviewText(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : PreviewText = retvalDeserializer.readPreviewText()
-        return returnResult
-    }
-    public static fromPtr(ptr: KPointer): TextEditControllerExInternal {
-        const obj : TextEditControllerExInternal = new TextEditControllerExInternal()
-        obj.peer = new Finalizable(ptr, TextEditControllerExInternal.getFinalizer())
-        return obj
-    }
-}
 export interface StyledStringController {
     setStyledString(styledString: StyledString): void
     getStyledString(): MutableStyledString
@@ -258,7 +194,7 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     private getRectsForRange_serialize(range: TextRange, widthStyle: RectWidthStyle, heightStyle: RectHeightStyle): Array<TextBox> {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeTextRange(range)
-        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), widthStyle.valueOf(), heightStyle.valueOf())
+        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), TypeChecker.RectWidthStyle_ToNumeric(widthStyle), TypeChecker.RectHeightStyle_ToNumeric(heightStyle))
         thisSerializer.release()
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
@@ -407,65 +343,19 @@ export class TextMenuItemId implements MaterializedBase {
         const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
         return obj
     }
-}
-export interface EditMenuOptions {
-    onCreateMenu(menuItems: Array<TextMenuItem>): Array<TextMenuItem>
-    onMenuItemClick(menuItem: TextMenuItem, range: TextRange): boolean
-}
-export class EditMenuOptionsInternal implements MaterializedBase,EditMenuOptions {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
+    private static getTRANSLATE_serialize(): TextMenuItemId {
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getTRANSLATE()
+        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
     }
-    static ctor_editmenuoptions(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._EditMenuOptions_ctor()
-        return retval
+    private static getSEARCH_serialize(): TextMenuItemId {
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getSEARCH()
+        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
     }
-    constructor() {
-        const ctorPtr : KPointer = EditMenuOptionsInternal.ctor_editmenuoptions()
-        this.peer = new Finalizable(ctorPtr, EditMenuOptionsInternal.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._EditMenuOptions_getFinalizer()
-    }
-    public onCreateMenu(menuItems: Array<TextMenuItem>): Array<TextMenuItem> {
-        const menuItems_casted = menuItems as (Array<TextMenuItem>)
-        return this.onCreateMenu_serialize(menuItems_casted)
-    }
-    public onMenuItemClick(menuItem: TextMenuItem, range: TextRange): boolean {
-        const menuItem_casted = menuItem as (TextMenuItem)
-        const range_casted = range as (TextRange)
-        return this.onMenuItemClick_serialize(menuItem_casted, range_casted)
-    }
-    private onCreateMenu_serialize(menuItems: Array<TextMenuItem>): Array<TextMenuItem> {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeInt32(menuItems.length as int32)
-        for (let i = 0; i < menuItems.length; i++) {
-            const menuItems_element : TextMenuItem = menuItems[i]
-            thisSerializer.writeTextMenuItem(menuItems_element)
-        }
-        const retval  = ArkUIGeneratedNativeModule._EditMenuOptions_onCreateMenu(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<TextMenuItem> = new Array<TextMenuItem>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = retvalDeserializer.readTextMenuItem()
-        }
-        const returnResult : Array<TextMenuItem> = buffer
-        return returnResult
-    }
-    private onMenuItemClick_serialize(menuItem: TextMenuItem, range: TextRange): boolean {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeTextMenuItem(menuItem)
-        thisSerializer.writeTextRange(range)
-        const retval  = ArkUIGeneratedNativeModule._EditMenuOptions_onMenuItemClick(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    public static fromPtr(ptr: KPointer): EditMenuOptionsInternal {
-        const obj : EditMenuOptionsInternal = new EditMenuOptionsInternal()
-        obj.peer = new Finalizable(ptr, EditMenuOptionsInternal.getFinalizer())
+    private static getSHARE_serialize(): TextMenuItemId {
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getSHARE()
+        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
         return obj
     }
 }

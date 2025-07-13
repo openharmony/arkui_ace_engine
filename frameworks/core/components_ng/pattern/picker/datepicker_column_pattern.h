@@ -144,6 +144,7 @@ private:
     uint32_t GetOptionCount() const override;
     bool GetOptionItemCount(uint32_t& itemCounts) override;
     bool IsLanscape(uint32_t itemCount) override;
+    void UnregisterWindowStateChangedCallback(FrameNode* frameNode) override;
     void OnWindowHide() override;
     void OnWindowShow() override;
 

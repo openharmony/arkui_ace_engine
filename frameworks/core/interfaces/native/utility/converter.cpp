@@ -1480,23 +1480,6 @@ uint32_t Convert(const Ark_LayoutSafeAreaType& src)
 }
 
 template<>
-BindSheetDismissReason Convert(const Ark_DismissReason& src)
-{
-    switch (src) {
-        case Ark_DismissReason::ARK_DISMISS_REASON_PRESS_BACK:
-            return BindSheetDismissReason::BACK_PRESSED;
-        case Ark_DismissReason::ARK_DISMISS_REASON_TOUCH_OUTSIDE:
-            return BindSheetDismissReason::TOUCH_OUTSIDE;
-        case Ark_DismissReason::ARK_DISMISS_REASON_CLOSE_BUTTON:
-            return BindSheetDismissReason::CLOSE_BUTTON;
-        default:
-            LOGE("Unexpected enum value in Ark_DismissReason: %{public}d", src);
-            break;
-    }
-    return BindSheetDismissReason::CLOSE_BUTTON;
-}
-
-template<>
 NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
 {
     NG::NavigationBackgroundOptions options;

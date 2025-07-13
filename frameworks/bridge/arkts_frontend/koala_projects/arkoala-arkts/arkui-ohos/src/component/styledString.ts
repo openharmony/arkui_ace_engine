@@ -146,11 +146,18 @@ export class StyledString implements MaterializedBase {
         thisSerializer.writeInt8(styledKey_type as int32)
         if ((RuntimeType.UNDEFINED) != (styledKey_type)) {
             const styledKey_value  = (styledKey as StyledStringKey)
-            thisSerializer.writeInt32(styledKey_value.valueOf())
+            thisSerializer.writeInt32(TypeChecker.StyledStringKey_ToNumeric(styledKey_value))
         }
-        const retval  = ArkUIGeneratedNativeModule._StyledString_getStyles(this.peer!.ptr, start, length, thisSerializer.asBuffer(), thisSerializer.length())
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._StyledString_getStyles(this.peer!.ptr, start, length, thisSerializer.asBuffer(), thisSerializer.length()) as FixedArray<byte>;
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<SpanStyle> = new Array<SpanStyle>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -188,15 +195,45 @@ export class StyledString implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._StyledString_toHtml(toPeerPtr(styledString))
         return retval
     }
-    private static marshalling_serialize(styledString: StyledString): NativeBuffer {
-        const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling(toPeerPtr(styledString))
-        return new Deserializer(retval, retval.length as int32).readBuffer()
+    private static marshalling0_serialize(styledString: StyledString, callback_: StyledStringMarshallCallback): NativeBuffer {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling0(toPeerPtr(styledString), thisSerializer.asBuffer(), thisSerializer.length()) as FixedArray<byte>
+        thisSerializer.release()
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        return new Deserializer(exactRetValue, exactRetValue.length as int32).readBuffer()
     }
-    private static unmarshalling_serialize(buffer: NativeBuffer): Promise<StyledString> {
+    private static marshalling1_serialize(styledString: StyledString): NativeBuffer {
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling1(toPeerPtr(styledString)) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        return new Deserializer(exactRetValue, exactRetValue.length as int32).readBuffer()
+    }
+    private static unmarshalling0_serialize(buffer: NativeBuffer, callback_: StyledStringUnmarshallCallback): Promise<StyledString> {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeBuffer(buffer)
+        thisSerializer.holdAndWriteCallback(callback_)
+        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString>()[0]
+        ArkUIGeneratedNativeModule._StyledString_unmarshalling0(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    private static unmarshalling1_serialize(buffer: NativeBuffer): Promise<StyledString> {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeBuffer(buffer)
         const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString>()[0]
-        ArkUIGeneratedNativeModule._StyledString_unmarshalling(thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._StyledString_unmarshalling1(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -602,17 +639,25 @@ export class TextShadowStyle implements MaterializedBase {
         {
             const ctorPtr : KPointer = TextShadowStyle.ctor_textshadowstyle((value)!)
             this.peer = new Finalizable(ctorPtr, TextShadowStyle.getFinalizer())
+            this.textShadow = this.getTextShadow()
         }
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TextShadowStyle_getFinalizer()
     }
-    private getTextShadow(): Array<ShadowOptions> {
+    public getTextShadow(): Array<ShadowOptions> {
         return this.getTextShadow_serialize()
     }
     private getTextShadow_serialize(): Array<ShadowOptions> {
-        const retval  = ArkUIGeneratedNativeModule._TextShadowStyle_getTextShadow(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._TextShadowStyle_getTextShadow(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<ShadowOptions> = new Array<ShadowOptions>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -648,17 +693,25 @@ export class BackgroundColorStyle implements MaterializedBase {
         {
             const ctorPtr : KPointer = BackgroundColorStyle.ctor_backgroundcolorstyle((textBackgroundStyle)!)
             this.peer = new Finalizable(ctorPtr, BackgroundColorStyle.getFinalizer())
+            this.textBackgroundStyle = this.getTextBackgroundStyle()
         }
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._BackgroundColorStyle_getFinalizer()
     }
-    private getTextBackgroundStyle(): TextBackgroundStyle {
+    public getTextBackgroundStyle(): TextBackgroundStyle {
         return this.getTextBackgroundStyle_serialize()
     }
     private getTextBackgroundStyle_serialize(): TextBackgroundStyle {
-        const retval  = ArkUIGeneratedNativeModule._BackgroundColorStyle_getTextBackgroundStyle(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BackgroundColorStyle_getTextBackgroundStyle(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : TextBackgroundStyle = retvalDeserializer.readTextBackgroundStyle()
         return returnResult
     }
@@ -1039,41 +1092,125 @@ export class ImageAttachment implements MaterializedBase {
     private getValue(): PixelMap {
         return this.getValue_serialize()
     }
-    private getSize(): SizeOptions {
+    public getSize(): SizeOptions | undefined {
         return this.getSize_serialize()
     }
-    private getVerticalAlign(): ImageSpanAlignment {
+    public getVerticalAlign(): ImageSpanAlignment | undefined {
         return this.getVerticalAlign_serialize()
     }
-    private getObjectFit(): ImageFit {
+    public getObjectFit(): ImageFit | undefined {
         return this.getObjectFit_serialize()
     }
-    private getLayoutStyle(): ImageAttachmentLayoutStyle {
+    public getLayoutStyle(): ImageAttachmentLayoutStyle | undefined {
         return this.getLayoutStyle_serialize()
     }
-    private getValue_serialize(): PixelMap {
-        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getValue(this.peer!.ptr)
-        const obj : PixelMap = PixelMapInternal.fromPtr(retval)
-        return obj
+    public getColorFilter(): ColorFilterType | undefined {
+        return this.getColorFilter_serialize()
     }
-    private getSize_serialize(): SizeOptions {
-        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getSize(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : SizeOptions = retvalDeserializer.readSizeOptions()
+    private getValue_serialize(): PixelMap {
+        throw new Error("Object deserialization is not implemented.")
+    }
+    private getSize_serialize(): SizeOptions | undefined {
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getSize(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const buffer_runtimeType  = (retvalDeserializer.readInt8() as int32)
+        let buffer : SizeOptions | undefined
+        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        {
+            buffer = retvalDeserializer.readSizeOptions()
+        }
+        const returnResult : SizeOptions | undefined = buffer
         return returnResult
     }
-    private getVerticalAlign_serialize(): ImageSpanAlignment {
-        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getVerticalAlign(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+    private getVerticalAlign_serialize(): ImageSpanAlignment | undefined {
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getVerticalAlign(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const buffer_runtimeType  = (retvalDeserializer.readInt8() as int32)
+        let buffer : ImageSpanAlignment | undefined
+        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        {
+            buffer = TypeChecker.ImageSpanAlignment_FromNumeric(retvalDeserializer.readInt32())
+        }
+        const returnResult : ImageSpanAlignment | undefined = buffer
+        return returnResult
     }
-    private getObjectFit_serialize(): ImageFit {
-        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getObjectFit(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+    private getObjectFit_serialize(): ImageFit | undefined {
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getObjectFit(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const buffer_runtimeType  = (retvalDeserializer.readInt8() as int32)
+        let buffer : ImageFit | undefined
+        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        {
+            buffer = TypeChecker.ImageFit_FromNumeric(retvalDeserializer.readInt32())
+        }
+        const returnResult : ImageFit | undefined = buffer
+        return returnResult
     }
-    private getLayoutStyle_serialize(): ImageAttachmentLayoutStyle {
-        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getLayoutStyle(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : ImageAttachmentLayoutStyle = retvalDeserializer.readImageAttachmentLayoutStyle()
+    private getLayoutStyle_serialize(): ImageAttachmentLayoutStyle | undefined {
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getLayoutStyle(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const buffer_runtimeType  = (retvalDeserializer.readInt8() as int32)
+        let buffer : ImageAttachmentLayoutStyle | undefined
+        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        {
+            buffer = retvalDeserializer.readImageAttachmentLayoutStyle()
+        }
+        const returnResult : ImageAttachmentLayoutStyle | undefined = buffer
+        return returnResult
+    }
+    private getColorFilter_serialize(): ColorFilterType | undefined {
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getColorFilter(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const buffer_runtimeType  = (retvalDeserializer.readInt8() as int32)
+        let buffer : ColorFilterType | undefined
+        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        {
+            const buffer__selector : int32 = retvalDeserializer.readInt8()
+            let buffer_ : ColorFilter | drawing.ColorFilter | undefined
+            if (buffer__selector == 0) {
+                buffer_ = (retvalDeserializer.readColorFilter() as ColorFilter)
+            }
+            else {
+                throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
+            }
+            buffer = (buffer_ as ColorFilter | drawing.ColorFilter)
+        }
+        const returnResult : ColorFilterType | undefined = buffer
         return returnResult
     }
 }
@@ -1117,9 +1254,16 @@ export class CustomSpan implements MaterializedBase {
     private onMeasure_serialize(measureInfo: CustomSpanMeasureInfo): CustomSpanMetrics {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeCustomSpanMeasureInfo(measureInfo)
-        const retval  = ArkUIGeneratedNativeModule._CustomSpan_onMeasure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._CustomSpan_onMeasure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length()) as FixedArray<byte>
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : CustomSpanMetrics = retvalDeserializer.readCustomSpanMetrics()
         return returnResult
     }

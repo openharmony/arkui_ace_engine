@@ -94,6 +94,27 @@ void DatePickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     UnregisterWindowStateChangedCallback(frameNode);
 }
 
+void DatePickerColumnPattern::UnregisterWindowStateChangedCallback(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
+}
+
+void DatePickerColumnPattern::OnWindowHide()
+{
+    isShow_ = false;
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+}
+
+void DatePickerColumnPattern::OnWindowShow()
+{
+    isShow_ = true;
+}
+
 void DatePickerColumnPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
@@ -278,6 +299,26 @@ void DatePickerColumnPattern::UpdateTextAreaPadding(
             CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp) };
         textLayoutProperty->UpdatePadding(defaultPadding);
     }
+}
+
+bool DatePickerColumnPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    bool isChange =
+        config.frameSizeChange || config.frameOffsetChange || config.contentSizeChange || config.contentOffsetChange;
+
+    CHECK_NULL_RETURN(isChange, false);
+    CHECK_NULL_RETURN(dirty, false);
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto offset = geometryNode->GetFrameOffset();
+    auto size = geometryNode->GetFrameSize();
+    if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
+        offset_ = offset;
+        size_ = size;
+        AddHotZoneRectToText();
+    }
+    return true;
 }
 
 void DatePickerColumnPattern::InitTextFontFamily()

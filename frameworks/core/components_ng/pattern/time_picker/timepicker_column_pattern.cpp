@@ -203,6 +203,26 @@ bool TimePickerColumnPattern::IsTossNeedToStop()
     return IsStartEndTimeDefined();
 }
 
+bool TimePickerColumnPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    bool isChange =
+        config.frameSizeChange || config.frameOffsetChange || config.contentSizeChange || config.contentOffsetChange;
+
+    CHECK_NULL_RETURN(isChange, false);
+    CHECK_NULL_RETURN(dirty, false);
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto offset = geometryNode->GetFrameOffset();
+    auto size = geometryNode->GetFrameSize();
+    if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
+        offset_ = offset;
+        size_ = size;
+        AddHotZoneRectToText();
+    }
+    return true;
+}
+
 void TimePickerColumnPattern::InitTextFontFamily()
 {
     auto host = GetHost();

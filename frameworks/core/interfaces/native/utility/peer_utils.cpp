@@ -37,4 +37,4 @@ std::vector<std::string> PeerUtils::CreateAIError(OHOS::Ace::ImageAnalyzerState 
     }
     return error;
 }
-}
+} // namespace OHOS::Ace::NG

@@ -498,8 +498,15 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         return retval
     }
     private getTarget_serialize(): EventTarget {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTarget(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTarget(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : EventTarget = retvalDeserializer.readEventTarget()
         return returnResult
     }
@@ -1099,848 +1106,6 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setStopPropagation_serialize(stopPropagation_casted)
         return
     }
-    private getButton_serialize(): MouseButton {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getButton(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setButton_serialize(button: MouseButton): void {
-        ArkUIGeneratedNativeModule._MouseEvent_setButton(this.peer!.ptr, button.valueOf())
-    }
-    private getAction_serialize(): MouseAction {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getAction(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setAction_serialize(action: MouseAction): void {
-        ArkUIGeneratedNativeModule._MouseEvent_setAction(this.peer!.ptr, action.valueOf())
-    }
-    private getDisplayX_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getDisplayX(this.peer!.ptr)
-        return retval
-    }
-    private setDisplayX_serialize(displayX: number): void {
-        ArkUIGeneratedNativeModule._MouseEvent_setDisplayX(this.peer!.ptr, displayX)
-    }
-    private getDisplayY_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getDisplayY(this.peer!.ptr)
-        return retval
-    }
-    private setDisplayY_serialize(displayY: number): void {
-        ArkUIGeneratedNativeModule._MouseEvent_setDisplayY(this.peer!.ptr, displayY)
-    }
-    private getWindowX_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getWindowX(this.peer!.ptr)
-        return retval
-    }
-    private setWindowX_serialize(windowX: number): void {
-        ArkUIGeneratedNativeModule._MouseEvent_setWindowX(this.peer!.ptr, windowX)
-    }
-    private getWindowY_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getWindowY(this.peer!.ptr)
-        return retval
-    }
-    private setWindowY_serialize(windowY: number): void {
-        ArkUIGeneratedNativeModule._MouseEvent_setWindowY(this.peer!.ptr, windowY)
-    }
-    private getScreenX_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getScreenX(this.peer!.ptr)
-        return retval
-    }
-    private setScreenX_serialize(screenX: number): void {
-        ArkUIGeneratedNativeModule._MouseEvent_setScreenX(this.peer!.ptr, screenX)
-    }
-    private getScreenY_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getScreenY(this.peer!.ptr)
-        return retval
-    }
-    private setScreenY_serialize(screenY: number): void {
-        ArkUIGeneratedNativeModule._MouseEvent_setScreenY(this.peer!.ptr, screenY)
-    }
-    private getX_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getX(this.peer!.ptr)
-        return retval
-    }
-    private setX_serialize(x: number): void {
-        ArkUIGeneratedNativeModule._MouseEvent_setX(this.peer!.ptr, x)
-    }
-    private getY_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getY(this.peer!.ptr)
-        return retval
-    }
-    private setY_serialize(y: number): void {
-        ArkUIGeneratedNativeModule._MouseEvent_setY(this.peer!.ptr, y)
-    }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._MouseEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    public static fromPtr(ptr: KPointer): MouseEventInternal {
-        const obj : MouseEventInternal = new MouseEventInternal()
-        obj.peer = new Finalizable(ptr, MouseEventInternal.getFinalizer())
-        return obj
-    }
-}
-export interface AccessibilityHoverEvent {
-    type: AccessibilityHoverType
-    x: number
-    y: number
-    displayX: number
-    displayY: number
-    windowX: number
-    windowY: number
-}
-export class AccessibilityHoverEventInternal extends BaseEventInternal implements MaterializedBase,AccessibilityHoverEvent {
-    get type(): AccessibilityHoverType {
-        return this.getType()
-    }
-    set type(type: AccessibilityHoverType) {
-        this.setType(type)
-    }
-    get x(): number {
-        return this.getX()
-    }
-    set x(x: number) {
-        this.setX(x)
-    }
-    get y(): number {
-        return this.getY()
-    }
-    set y(y: number) {
-        this.setY(y)
-    }
-    get displayX(): number {
-        return this.getDisplayX()
-    }
-    set displayX(displayX: number) {
-        this.setDisplayX(displayX)
-    }
-    get displayY(): number {
-        return this.getDisplayY()
-    }
-    set displayY(displayY: number) {
-        this.setDisplayY(displayY)
-    }
-    get windowX(): number {
-        return this.getWindowX()
-    }
-    set windowX(windowX: number) {
-        this.setWindowX(windowX)
-    }
-    get windowY(): number {
-        return this.getWindowY()
-    }
-    set windowY(windowY: number) {
-        this.setWindowY(windowY)
-    }
-    static ctor_accessibilityhoverevent(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_ctor()
-        return retval
-    }
-    constructor() {
-        super()
-        const ctorPtr : KPointer = AccessibilityHoverEventInternal.ctor_accessibilityhoverevent()
-        this.peer = new Finalizable(ctorPtr, AccessibilityHoverEventInternal.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getFinalizer()
-    }
-    private getType(): AccessibilityHoverType {
-        return this.getType_serialize()
-    }
-    private setType(type: AccessibilityHoverType): void {
-        const type_casted = type as (AccessibilityHoverType)
-        this.setType_serialize(type_casted)
-        return
-    }
-    private getX(): number {
-        return this.getX_serialize()
-    }
-    private setX(x: number): void {
-        const x_casted = x as (number)
-        this.setX_serialize(x_casted)
-        return
-    }
-    private getY(): number {
-        return this.getY_serialize()
-    }
-    private setY(y: number): void {
-        const y_casted = y as (number)
-        this.setY_serialize(y_casted)
-        return
-    }
-    private getDisplayX(): number {
-        return this.getDisplayX_serialize()
-    }
-    private setDisplayX(displayX: number): void {
-        const displayX_casted = displayX as (number)
-        this.setDisplayX_serialize(displayX_casted)
-        return
-    }
-    private getDisplayY(): number {
-        return this.getDisplayY_serialize()
-    }
-    private setDisplayY(displayY: number): void {
-        const displayY_casted = displayY as (number)
-        this.setDisplayY_serialize(displayY_casted)
-        return
-    }
-    private getWindowX(): number {
-        return this.getWindowX_serialize()
-    }
-    private setWindowX(windowX: number): void {
-        const windowX_casted = windowX as (number)
-        this.setWindowX_serialize(windowX_casted)
-        return
-    }
-    private getWindowY(): number {
-        return this.getWindowY_serialize()
-    }
-    private setWindowY(windowY: number): void {
-        const windowY_casted = windowY as (number)
-        this.setWindowY_serialize(windowY_casted)
-        return
-    }
-    private getType_serialize(): AccessibilityHoverType {
-        const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getType(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setType_serialize(type: AccessibilityHoverType): void {
-        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setType(this.peer!.ptr, type.valueOf())
-    }
-    private getX_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getX(this.peer!.ptr)
-        return retval
-    }
-    private setX_serialize(x: number): void {
-        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setX(this.peer!.ptr, x)
-    }
-    private getY_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getY(this.peer!.ptr)
-        return retval
-    }
-    private setY_serialize(y: number): void {
-        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setY(this.peer!.ptr, y)
-    }
-    private getDisplayX_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getDisplayX(this.peer!.ptr)
-        return retval
-    }
-    private setDisplayX_serialize(displayX: number): void {
-        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setDisplayX(this.peer!.ptr, displayX)
-    }
-    private getDisplayY_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getDisplayY(this.peer!.ptr)
-        return retval
-    }
-    private setDisplayY_serialize(displayY: number): void {
-        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setDisplayY(this.peer!.ptr, displayY)
-    }
-    private getWindowX_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getWindowX(this.peer!.ptr)
-        return retval
-    }
-    private setWindowX_serialize(windowX: number): void {
-        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setWindowX(this.peer!.ptr, windowX)
-    }
-    private getWindowY_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getWindowY(this.peer!.ptr)
-        return retval
-    }
-    private setWindowY_serialize(windowY: number): void {
-        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setWindowY(this.peer!.ptr, windowY)
-    }
-    public static fromPtr(ptr: KPointer): AccessibilityHoverEventInternal {
-        const obj : AccessibilityHoverEventInternal = new AccessibilityHoverEventInternal()
-        obj.peer = new Finalizable(ptr, AccessibilityHoverEventInternal.getFinalizer())
-        return obj
-    }
-}
-export interface TouchEvent {
-    type: TouchType
-    touches: Array<TouchObject>
-    changedTouches: Array<TouchObject>
-    stopPropagation: (() => void)
-    preventDefault: (() => void)
-    getHistoricalPoints(): Array<HistoricalPoint>
-}
-export class TouchEventInternal extends BaseEventInternal implements MaterializedBase,TouchEvent {
-    get type(): TouchType {
-        return this.getType()
-    }
-    set type(type: TouchType) {
-        this.setType(type)
-    }
-    get touches(): Array<TouchObject> {
-        throw new Error("Not implemented")
-    }
-    set touches(touches: Array<TouchObject>) {
-        this.setTouches(touches)
-    }
-    get changedTouches(): Array<TouchObject> {
-        throw new Error("Not implemented")
-    }
-    set changedTouches(changedTouches: Array<TouchObject>) {
-        this.setChangedTouches(changedTouches)
-    }
-    get stopPropagation(): (() => void) {
-        throw new Error("Not implemented")
-    }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
-    }
-    get preventDefault(): (() => void) {
-        throw new Error("Not implemented")
-    }
-    set preventDefault(preventDefault: (() => void)) {
-        this.setPreventDefault(preventDefault)
-    }
-    static ctor_touchevent(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_ctor()
-        return retval
-    }
-    constructor() {
-        super()
-        const ctorPtr : KPointer = TouchEventInternal.ctor_touchevent()
-        this.peer = new Finalizable(ctorPtr, TouchEventInternal.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._TouchEvent_getFinalizer()
-    }
-    public getHistoricalPoints(): Array<HistoricalPoint> {
-        return this.getHistoricalPoints_serialize()
-    }
-    private getType(): TouchType {
-        return this.getType_serialize()
-    }
-    private setType(type: TouchType): void {
-        const type_casted = type as (TouchType)
-        this.setType_serialize(type_casted)
-        return
-    }
-    private getTouches(): Array<TouchObject> {
-        return this.getTouches_serialize()
-    }
-    private setTouches(touches: Array<TouchObject>): void {
-        const touches_casted = touches as (Array<TouchObject>)
-        this.setTouches_serialize(touches_casted)
-        return
-    }
-    private getChangedTouches(): Array<TouchObject> {
-        return this.getChangedTouches_serialize()
-    }
-    private setChangedTouches(changedTouches: Array<TouchObject>): void {
-        const changedTouches_casted = changedTouches as (Array<TouchObject>)
-        this.setChangedTouches_serialize(changedTouches_casted)
-        return
-    }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
-        return
-    }
-    private getPreventDefault(): (() => void) {
-        return this.getPreventDefault_serialize()
-    }
-    private setPreventDefault(preventDefault: (() => void)): void {
-        const preventDefault_casted = preventDefault as ((() => void))
-        this.setPreventDefault_serialize(preventDefault_casted)
-        return
-    }
-    private getHistoricalPoints_serialize(): Array<HistoricalPoint> {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getHistoricalPoints(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<HistoricalPoint> = new Array<HistoricalPoint>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = retvalDeserializer.readHistoricalPoint()
-        }
-        const returnResult : Array<HistoricalPoint> = buffer
-        return returnResult
-    }
-    private getType_serialize(): TouchType {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getType(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setType_serialize(type: TouchType): void {
-        ArkUIGeneratedNativeModule._TouchEvent_setType(this.peer!.ptr, type.valueOf())
-    }
-    private getTouches_serialize(): Array<TouchObject> {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getTouches(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<TouchObject> = new Array<TouchObject>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = retvalDeserializer.readTouchObject()
-        }
-        const returnResult : Array<TouchObject> = buffer
-        return returnResult
-    }
-    private setTouches_serialize(touches: Array<TouchObject>): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeInt32(touches.length as int32)
-        for (let i = 0; i < touches.length; i++) {
-            const touches_element : TouchObject = touches[i]
-            thisSerializer.writeTouchObject(touches_element)
-        }
-        ArkUIGeneratedNativeModule._TouchEvent_setTouches(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getChangedTouches_serialize(): Array<TouchObject> {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getChangedTouches(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<TouchObject> = new Array<TouchObject>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = retvalDeserializer.readTouchObject()
-        }
-        const returnResult : Array<TouchObject> = buffer
-        return returnResult
-    }
-    private setChangedTouches_serialize(changedTouches: Array<TouchObject>): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeInt32(changedTouches.length as int32)
-        for (let i = 0; i < changedTouches.length; i++) {
-            const changedTouches_element : TouchObject = changedTouches[i]
-            thisSerializer.writeTouchObject(changedTouches_element)
-        }
-        ArkUIGeneratedNativeModule._TouchEvent_setChangedTouches(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._TouchEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getPreventDefault_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getPreventDefault(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setPreventDefault_serialize(preventDefault: (() => void)): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(preventDefault)
-        ArkUIGeneratedNativeModule._TouchEvent_setPreventDefault(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    public static fromPtr(ptr: KPointer): TouchEventInternal {
-        const obj : TouchEventInternal = new TouchEventInternal()
-        obj.peer = new Finalizable(ptr, TouchEventInternal.getFinalizer())
-        return obj
-    }
-}
-export interface PixelMapMock {
-    release(): void
-}
-export class PixelMapMockInternal implements MaterializedBase,PixelMapMock {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_pixelmapmock(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._PixelMapMock_ctor()
-        return retval
-    }
-    constructor() {
-        const ctorPtr : KPointer = PixelMapMockInternal.ctor_pixelmapmock()
-        this.peer = new Finalizable(ctorPtr, PixelMapMockInternal.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._PixelMapMock_getFinalizer()
-    }
-    public release(): void {
-        this.release_serialize()
-        return
-    }
-    private release_serialize(): void {
-        ArkUIGeneratedNativeModule._PixelMapMock_release(this.peer!.ptr)
-    }
-    public static fromPtr(ptr: KPointer): PixelMapMockInternal {
-        const obj : PixelMapMockInternal = new PixelMapMockInternal()
-        obj.peer = new Finalizable(ptr, PixelMapMockInternal.getFinalizer())
-        return obj
-    }
-}
-export interface DragEvent {
-    dragBehavior: DragBehavior
-    useCustomDropAnimation: boolean
-    getDisplayX(): number
-    getDisplayY(): number
-    getWindowX(): number
-    getWindowY(): number
-    getX(): number
-    getY(): number
-    setData(unifiedData: UnifiedData): void
-    getData(): UnifiedData
-    getSummary(): Summary
-    setResult(dragResult: DragResult): void
-    getResult(): DragResult
-    getPreviewRect(): Rectangle
-    getVelocityX(): number
-    getVelocityY(): number
-    getVelocity(): number
-    getModifierKeyState(keys: Array<string>): boolean
-}
-export class DragEventInternal implements MaterializedBase,DragEvent {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    get dragBehavior(): DragBehavior {
-        return this.getDragBehavior()
-    }
-    set dragBehavior(dragBehavior: DragBehavior) {
-        this.setDragBehavior(dragBehavior)
-    }
-    get useCustomDropAnimation(): boolean {
-        return this.getUseCustomDropAnimation()
-    }
-    set useCustomDropAnimation(useCustomDropAnimation: boolean) {
-        this.setUseCustomDropAnimation(useCustomDropAnimation)
-    }
-    static ctor_dragevent(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_ctor()
-        return retval
-    }
-    constructor() {
-        const ctorPtr : KPointer = DragEventInternal.ctor_dragevent()
-        this.peer = new Finalizable(ctorPtr, DragEventInternal.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._DragEvent_getFinalizer()
-    }
-    public getDisplayX(): number {
-        return this.getDisplayX_serialize()
-    }
-    public getDisplayY(): number {
-        return this.getDisplayY_serialize()
-    }
-    public getWindowX(): number {
-        return this.getWindowX_serialize()
-    }
-    public getWindowY(): number {
-        return this.getWindowY_serialize()
-    }
-    public getX(): number {
-        return this.getX_serialize()
-    }
-    public getY(): number {
-        return this.getY_serialize()
-    }
-    public setData(unifiedData: UnifiedData): void {
-        const unifiedData_casted = unifiedData as (UnifiedData)
-        this.setData_serialize(unifiedData_casted)
-        return
-    }
-    public getData(): UnifiedData {
-        return this.getData_serialize()
-    }
-    public getSummary(): Summary {
-        return this.getSummary_serialize()
-    }
-    public setResult(dragResult: DragResult): void {
-        const dragResult_casted = dragResult as (DragResult)
-        this.setResult_serialize(dragResult_casted)
-        return
-    }
-    public getResult(): DragResult {
-        return this.getResult_serialize()
-    }
-    public getPreviewRect(): Rectangle {
-        return this.getPreviewRect_serialize()
-    }
-    public getVelocityX(): number {
-        return this.getVelocityX_serialize()
-    }
-    public getVelocityY(): number {
-        return this.getVelocityY_serialize()
-    }
-    public getVelocity(): number {
-        return this.getVelocity_serialize()
-    }
-    public getModifierKeyState(keys: Array<string>): boolean {
-        const keys_casted = keys as (Array<string>)
-        return this.getModifierKeyState_serialize(keys_casted)
-    }
-    private getDragBehavior(): DragBehavior {
-        return this.getDragBehavior_serialize()
-    }
-    private setDragBehavior(dragBehavior: DragBehavior): void {
-        const dragBehavior_casted = dragBehavior as (DragBehavior)
-        this.setDragBehavior_serialize(dragBehavior_casted)
-        return
-    }
-    private getUseCustomDropAnimation(): boolean {
-        return this.getUseCustomDropAnimation_serialize()
-    }
-    private setUseCustomDropAnimation(useCustomDropAnimation: boolean): void {
-        const useCustomDropAnimation_casted = useCustomDropAnimation as (boolean)
-        this.setUseCustomDropAnimation_serialize(useCustomDropAnimation_casted)
-        return
-    }
-    private getDisplayX_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getDisplayX(this.peer!.ptr)
-        return retval
-    }
-    private getDisplayY_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getDisplayY(this.peer!.ptr)
-        return retval
-    }
-    private getWindowX_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getWindowX(this.peer!.ptr)
-        return retval
-    }
-    private getWindowY_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getWindowY(this.peer!.ptr)
-        return retval
-    }
-    private getX_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getX(this.peer!.ptr)
-        return retval
-    }
-    private getY_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getY(this.peer!.ptr)
-        return retval
-    }
-    private setData_serialize(unifiedData: UnifiedData): void {
-        ArkUIGeneratedNativeModule._DragEvent_setData(this.peer!.ptr, toPeerPtr(unifiedData))
-    }
-    private getData_serialize(): UnifiedData {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getData(this.peer!.ptr)
-        const obj : UnifiedData = UnifiedDataInternal.fromPtr(retval)
-        return obj
-    }
-    private getSummary_serialize(): Summary {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getSummary(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : Summary = retvalDeserializer.readSummary()
-        return returnResult
-    }
-    private setResult_serialize(dragResult: DragResult): void {
-        ArkUIGeneratedNativeModule._DragEvent_setResult(this.peer!.ptr, dragResult.valueOf())
-    }
-    private getResult_serialize(): DragResult {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getResult(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private getPreviewRect_serialize(): Rectangle {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getPreviewRect(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : Rectangle = retvalDeserializer.readRectangle()
-        return returnResult
-    }
-    private getVelocityX_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getVelocityX(this.peer!.ptr)
-        return retval
-    }
-    private getVelocityY_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getVelocityY(this.peer!.ptr)
-        return retval
-    }
-    private getVelocity_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getVelocity(this.peer!.ptr)
-        return retval
-    }
-    private getModifierKeyState_serialize(keys: Array<string>): boolean {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeInt32(keys.length as int32)
-        for (let i = 0; i < keys.length; i++) {
-            const keys_element : string = keys[i]
-            thisSerializer.writeString(keys_element)
-        }
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getModifierKeyState(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    private getDragBehavior_serialize(): DragBehavior {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getDragBehavior(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setDragBehavior_serialize(dragBehavior: DragBehavior): void {
-        ArkUIGeneratedNativeModule._DragEvent_setDragBehavior(this.peer!.ptr, dragBehavior.valueOf())
-    }
-    private getUseCustomDropAnimation_serialize(): boolean {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getUseCustomDropAnimation(this.peer!.ptr)
-        return retval
-    }
-    private setUseCustomDropAnimation_serialize(useCustomDropAnimation: boolean): void {
-        ArkUIGeneratedNativeModule._DragEvent_setUseCustomDropAnimation(this.peer!.ptr, useCustomDropAnimation ? 1 : 0)
-    }
-    public static fromPtr(ptr: KPointer): DragEventInternal {
-        const obj : DragEventInternal = new DragEventInternal()
-        obj.peer = new Finalizable(ptr, DragEventInternal.getFinalizer())
-        return obj
-    }
-}
-export interface KeyEvent {
-    type: KeyType
-    keyCode: number
-    keyText: string
-    keySource: KeySource
-    deviceId: number
-    metaKey: number
-    timestamp: number
-    stopPropagation: (() => void)
-    intentionCode: IntentionCode
-    unicode?: number
-    getModifierKeyState(keys: Array<string>): boolean
-}
-export class KeyEventInternal implements MaterializedBase,KeyEvent {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    get type(): KeyType {
-        return this.getType()
-    }
-    set type(type: KeyType) {
-        this.setType(type)
-    }
-    get keyCode(): number {
-        return this.getKeyCode()
-    }
-    set keyCode(keyCode: number) {
-        this.setKeyCode(keyCode)
-    }
-    get keyText(): string {
-        return this.getKeyText()
-    }
-    set keyText(keyText: string) {
-        this.setKeyText(keyText)
-    }
-    get keySource(): KeySource {
-        return this.getKeySource()
-    }
-    set keySource(keySource: KeySource) {
-        this.setKeySource(keySource)
-    }
-    get deviceId(): number {
-        return this.getDeviceId()
-    }
-    set deviceId(deviceId: number) {
-        this.setDeviceId(deviceId)
-    }
-    get metaKey(): number {
-        return this.getMetaKey()
-    }
-    set metaKey(metaKey: number) {
-        this.setMetaKey(metaKey)
-    }
-    get timestamp(): number {
-        return this.getTimestamp()
-    }
-    set timestamp(timestamp: number) {
-        this.setTimestamp(timestamp)
-    }
-    get stopPropagation(): (() => void) {
-        throw new Error("Not implemented")
-    }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
-    }
-    get intentionCode(): IntentionCode {
-        throw new Error("Not implemented")
-    }
-    set intentionCode(intentionCode: IntentionCode) {
-        this.setIntentionCode(intentionCode)
-    }
-    get unicode(): number | undefined {
-        return this.getUnicode()
-    }
-    set unicode(unicode: number | undefined) {
-        const unicode_NonNull  = (unicode as number)
-        this.setUnicode(unicode_NonNull)
-    }
-    static ctor_keyevent(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._KeyEvent_ctor()
-        return retval
-    }
-    constructor() {
-        const ctorPtr : KPointer = KeyEventInternal.ctor_keyevent()
-        this.peer = new Finalizable(ctorPtr, KeyEventInternal.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._KeyEvent_getFinalizer()
-    }
-    public getModifierKeyState(keys: Array<string>): boolean {
-        const keys_casted = keys as (Array<string>)
-        return this.getModifierKeyState_serialize(keys_casted)
-    }
-    private getType(): KeyType {
-        return this.getType_serialize()
-    }
-    private setType(type: KeyType): void {
-        const type_casted = type as (KeyType)
-        this.setType_serialize(type_casted)
-        return
-    }
-    private getKeyCode(): number {
-        return this.getKeyCode_serialize()
-    }
-    private setKeyCode(keyCode: number): void {
-        const keyCode_casted = keyCode as (number)
-        this.setKeyCode_serialize(keyCode_casted)
-        return
-    }
-    private getKeyText(): string {
-        return this.getKeyText_serialize()
-    }
-    private setKeyText(keyText: string): void {
-        const keyText_casted = keyText as (string)
-        this.setKeyText_serialize(keyText_casted)
-        return
-    }
-    private getKeySource(): KeySource {
-        return this.getKeySource_serialize()
-    }
-    private setKeySource(keySource: KeySource): void {
-        const keySource_casted = keySource as (KeySource)
-        this.setKeySource_serialize(keySource_casted)
-        return
-    }
-    private getDeviceId(): number {
-        return this.getDeviceId_serialize()
-    }
-    private setDeviceId(deviceId: number): void {
-        const deviceId_casted = deviceId as (number)
-        this.setDeviceId_serialize(deviceId_casted)
-        return
-    }
-    private getMetaKey(): number {
-        return this.getMetaKey_serialize()
-    }
-    private setMetaKey(metaKey: number): void {
-        const metaKey_casted = metaKey as (number)
-        this.setMetaKey_serialize(metaKey_casted)
-        return
-    }
-    private getTimestamp(): number {
-        return this.getTimestamp_serialize()
-    }
-    private setTimestamp(timestamp: number): void {
-        const timestamp_casted = timestamp as (number)
-        this.setTimestamp_serialize(timestamp_casted)
-        return
-    }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
-        return
-    }
     private getIntentionCode(): IntentionCode {
         return this.getIntentionCode_serialize()
     }
@@ -1949,7 +1114,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setIntentionCode_serialize(intentionCode_casted)
         return
     }
-    private getUnicode(): number {
+    private getUnicode(): number | undefined {
         return this.getUnicode_serialize()
     }
     private setUnicode(unicode: number): void {
@@ -1970,10 +1135,10 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     }
     private getType_serialize(): KeyType {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getType(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return TypeChecker.KeyType_FromNumeric(retval)
     }
     private setType_serialize(type: KeyType): void {
-        ArkUIGeneratedNativeModule._KeyEvent_setType(this.peer!.ptr, type.valueOf())
+        ArkUIGeneratedNativeModule._KeyEvent_setType(this.peer!.ptr, TypeChecker.KeyType_ToNumeric(type))
     }
     private getKeyCode_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getKeyCode(this.peer!.ptr)
@@ -1991,10 +1156,10 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     }
     private getKeySource_serialize(): KeySource {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getKeySource(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return TypeChecker.KeySource_FromNumeric(retval)
     }
     private setKeySource_serialize(keySource: KeySource): void {
-        ArkUIGeneratedNativeModule._KeyEvent_setKeySource(this.peer!.ptr, keySource.valueOf())
+        ArkUIGeneratedNativeModule._KeyEvent_setKeySource(this.peer!.ptr, TypeChecker.KeySource_ToNumeric(keySource))
     }
     private getDeviceId_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getDeviceId(this.peer!.ptr)
@@ -2011,15 +1176,24 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         ArkUIGeneratedNativeModule._KeyEvent_setMetaKey(this.peer!.ptr, metaKey)
     }
     private getTimestamp_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getTimestamp(this.peer!.ptr)
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getTimestamp(this.peer!.ptr) as number
         return retval
     }
     private setTimestamp_serialize(timestamp: number): void {
-        ArkUIGeneratedNativeModule._KeyEvent_setTimestamp(this.peer!.ptr, timestamp)
+        ArkUIGeneratedNativeModule._KeyEvent_setTimestamp(this.peer!.ptr, timestamp as int64)
     }
     private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._KeyEvent_getStopPropagation(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult = retvalDeserializer.readCallback_Void(true);
+        return returnResult
     }
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -2029,19 +1203,28 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     }
     private getIntentionCode_serialize(): IntentionCode {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getIntentionCode(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : IntentionCode = retvalDeserializer.readIntentionCode()
-        return returnResult
+        return TypeChecker.IntentionCode_FromNumeric(retval)
     }
     private setIntentionCode_serialize(intentionCode: IntentionCode): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeIntentionCode(intentionCode)
-        ArkUIGeneratedNativeModule._KeyEvent_setIntentionCode(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._KeyEvent_setIntentionCode(this.peer!.ptr, TypeChecker.IntentionCode_ToNumeric(intentionCode))
     }
-    private getUnicode_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getUnicode(this.peer!.ptr)
-        return retval
+    private getUnicode_serialize(): number | undefined {
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getUnicode(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setUnicode_serialize(unicode: number): void {
         ArkUIGeneratedNativeModule._KeyEvent_setUnicode(this.peer!.ptr, unicode)
@@ -2071,7 +1254,7 @@ export class ProgressMask implements MaterializedBase {
         if (TypeChecker.isColor(color)) {
             thisSerializer.writeInt8(0 as int32)
             const color_0  = color as Color
-            thisSerializer.writeInt32(color_0.valueOf())
+            thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(color_0))
         }
         else if (RuntimeType.NUMBER == color_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -2127,7 +1310,7 @@ export class ProgressMask implements MaterializedBase {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(value_0.valueOf())
+            thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_0))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -2152,15 +1335,23 @@ export class ProgressMask implements MaterializedBase {
     }
 }
 export interface Measurable {
+    uniqueId?: number | undefined
     measure(constraint: ConstraintSizeOptions): MeasureResult
-    getMargin(): DirectionalEdgesT
-    getPadding(): DirectionalEdgesT
-    getBorderWidth(): DirectionalEdgesT
+    getMargin(): DirectionalEdgesT<number>
+    getPadding(): DirectionalEdgesT<number>
+    getBorderWidth(): DirectionalEdgesT<number>
 }
 export class MeasurableInternal implements MaterializedBase,Measurable {
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
+    }
+    get uniqueId(): number | undefined {
+        return this.getUniqueId()
+    }
+    set uniqueId(uniqueId: number | undefined) {
+        const uniqueId_NonNull  = (uniqueId as number)
+        this.setUniqueId(uniqueId_NonNull)
     }
     static ctor_measurable(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._Measurable_ctor()
@@ -2177,14 +1368,22 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         const constraint_casted = constraint as (ConstraintSizeOptions)
         return this.measure_serialize(constraint_casted)
     }
-    public getMargin(): DirectionalEdgesT {
+    public getMargin(): DirectionalEdgesT<number> {
         return this.getMargin_serialize()
     }
-    public getPadding(): DirectionalEdgesT {
+    public getPadding(): DirectionalEdgesT<number> {
         return this.getPadding_serialize()
     }
-    public getBorderWidth(): DirectionalEdgesT {
+    public getBorderWidth(): DirectionalEdgesT<number> {
         return this.getBorderWidth_serialize()
+    }
+    private getUniqueId(): number | undefined {
+        return this.getUniqueId_serialize()
+    }
+    private setUniqueId(uniqueId: number): void {
+        const uniqueId_casted = uniqueId as (number)
+        this.setUniqueId_serialize(uniqueId_casted)
+        return
     }
     private measure_serialize(constraint: ConstraintSizeOptions): MeasureResult {
         const thisSerializer : Serializer = Serializer.hold()
@@ -2195,23 +1394,30 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         const returnResult : MeasureResult = retvalDeserializer.readMeasureResult()
         return returnResult
     }
-    private getMargin_serialize(): DirectionalEdgesT {
+    private getMargin_serialize(): DirectionalEdgesT<number> {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getMargin(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        const returnResult : DirectionalEdgesT<number> = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
-    private getPadding_serialize(): DirectionalEdgesT {
+    private getPadding_serialize(): DirectionalEdgesT<number> {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getPadding(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        const returnResult : DirectionalEdgesT<number> = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
-    private getBorderWidth_serialize(): DirectionalEdgesT {
+    private getBorderWidth_serialize(): DirectionalEdgesT<number> {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getBorderWidth(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        const returnResult : DirectionalEdgesT<number> = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
+    }
+    private getUniqueId_serialize(): number | undefined {
+        const retval  = ArkUIGeneratedNativeModule._Measurable_getUniqueId(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+    private setUniqueId_serialize(uniqueId: number): void {
+        ArkUIGeneratedNativeModule._Measurable_setUniqueId(this.peer!.ptr, uniqueId)
     }
     public static fromPtr(ptr: KPointer): MeasurableInternal {
         const obj : MeasurableInternal = new MeasurableInternal()
@@ -2242,15 +1448,12 @@ export class View implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._View_getFinalizer()
     }
-    public create(value: object): object {
-        const value_casted = value as (object)
+    public create(value: KPointer): KPointer {
+        const value_casted = value as (KPointer)
         return this.create_serialize(value_casted)
     }
-    private create_serialize(value: object): object {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCustomObject("Any", value)
-        const retval  = ArkUIGeneratedNativeModule._View_create(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    private create_serialize(value: KPointer): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._View_create(this.peer!.ptr, value)
         return retval
     }
 }
@@ -2286,15 +1489,50 @@ export class TextContentControllerBase implements MaterializedBase {
     public getTextContentLineCount(): number {
         return this.getTextContentLineCount_serialize()
     }
+    public addText(text: string, textOperationOptions?: TextContentControllerOptions): number {
+        const text_casted = text as (string)
+        const textOperationOptions_casted = textOperationOptions as (TextContentControllerOptions | undefined)
+        return this.addText_serialize(text_casted, textOperationOptions_casted)
+    }
+    public deleteText(range?: TextRange): void {
+        const range_casted = range as (TextRange | undefined)
+        this.deleteText_serialize(range_casted)
+        return
+    }
+    public getSelection(): TextRange {
+        return this.getSelection_serialize()
+    }
+    public clearPreviewText(): void {
+        this.clearPreviewText_serialize()
+        return
+    }
+    public getText(range?: TextRange): string {
+        const range_casted = range as (TextRange | undefined)
+        return this.getText_serialize(range_casted)
+    }
     private getCaretOffset_serialize(): CaretOffset {
-        const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getCaretOffset(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getCaretOffset(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : CaretOffset = retvalDeserializer.readCaretOffset()
         return returnResult
     }
     private getTextContentRect_serialize(): RectResult {
-        const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getTextContentRect(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getTextContentRect(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : RectResult = retvalDeserializer.readRectResult()
         return returnResult
     }
@@ -2302,106 +1540,73 @@ export class TextContentControllerBase implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getTextContentLineCount(this.peer!.ptr)
         return retval
     }
-}
-export class ChildrenMainSizeInternal {
-    public static fromPtr(ptr: KPointer): ChildrenMainSize {
-        const obj : ChildrenMainSize = new ChildrenMainSize(undefined)
-        obj.peer = new Finalizable(ptr, ChildrenMainSize.getFinalizer())
-        return obj
-    }
-}
-export class ChildrenMainSize implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    get childDefaultSize(): number {
-        return this.getChildDefaultSize()
-    }
-    set childDefaultSize(childDefaultSize: number) {
-        this.setChildDefaultSize(childDefaultSize)
-    }
-    static ctor_childrenmainsize(childDefaultSize: number): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_ctor(childDefaultSize)
+    private addText_serialize(text: string, textOperationOptions?: TextContentControllerOptions): number {
+        const thisSerializer : Serializer = Serializer.hold()
+        let textOperationOptions_type : int32 = RuntimeType.UNDEFINED
+        textOperationOptions_type = runtimeType(textOperationOptions)
+        thisSerializer.writeInt8(textOperationOptions_type as int32)
+        if ((RuntimeType.UNDEFINED) != (textOperationOptions_type)) {
+            const textOperationOptions_value  = textOperationOptions!
+            thisSerializer.writeTextContentControllerOptions(textOperationOptions_value)
+        }
+        const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_addText(this.peer!.ptr, text, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
-    constructor(childDefaultSize?: number) {
-        if ((childDefaultSize) !== (undefined))
-        {
-            const ctorPtr : KPointer = ChildrenMainSize.ctor_childrenmainsize((childDefaultSize)!)
-            this.peer = new Finalizable(ctorPtr, ChildrenMainSize.getFinalizer())
-        }
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ChildrenMainSize_getFinalizer()
-    }
-    public splice(start: number, deleteCount?: number, childrenSize?: Array<number>): void {
-        const start_casted = start as (number)
-        const deleteCount_casted = deleteCount as (number | undefined)
-        const childrenSize_casted = childrenSize as (Array<number> | undefined)
-        this.splice_serialize(start_casted, deleteCount_casted, childrenSize_casted)
-        return
-    }
-    public update(index: number, childSize: number): void {
-        const index_casted = index as (number)
-        const childSize_casted = childSize as (number)
-        this.update_serialize(index_casted, childSize_casted)
-        return
-    }
-    private getChildDefaultSize(): number {
-        return this.getChildDefaultSize_serialize()
-    }
-    private setChildDefaultSize(childDefaultSize: number): void {
-        const childDefaultSize_casted = childDefaultSize as (number)
-        this.setChildDefaultSize_serialize(childDefaultSize_casted)
-        return
-    }
-    private splice_serialize(start: number, deleteCount?: number, childrenSize?: Array<number>): void {
+    private deleteText_serialize(range?: TextRange): void {
         const thisSerializer : Serializer = Serializer.hold()
-        let deleteCount_type : int32 = RuntimeType.UNDEFINED
-        deleteCount_type = runtimeType(deleteCount)
-        thisSerializer.writeInt8(deleteCount_type as int32)
-        if ((RuntimeType.UNDEFINED) != (deleteCount_type)) {
-            const deleteCount_value  = deleteCount!
-            thisSerializer.writeNumber(deleteCount_value)
+        let range_type : int32 = RuntimeType.UNDEFINED
+        range_type = runtimeType(range)
+        thisSerializer.writeInt8(range_type as int32)
+        if ((RuntimeType.UNDEFINED) != (range_type)) {
+            const range_value  = range!
+            thisSerializer.writeTextRange(range_value)
         }
-        let childrenSize_type : int32 = RuntimeType.UNDEFINED
-        childrenSize_type = runtimeType(childrenSize)
-        thisSerializer.writeInt8(childrenSize_type as int32)
-        if ((RuntimeType.UNDEFINED) != (childrenSize_type)) {
-            const childrenSize_value  = childrenSize!
-            thisSerializer.writeInt32(childrenSize_value.length as int32)
-            for (let i = 0; i < childrenSize_value.length; i++) {
-                const childrenSize_value_element : number = childrenSize_value[i]
-                thisSerializer.writeNumber(childrenSize_value_element)
-            }
-        }
-        ArkUIGeneratedNativeModule._ChildrenMainSize_splice(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextContentControllerBase_deleteText(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private update_serialize(index: number, childSize: number): void {
-        ArkUIGeneratedNativeModule._ChildrenMainSize_update(this.peer!.ptr, index, childSize)
+    private getSelection_serialize(): TextRange {
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getSelection(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const returnResult : TextRange = retvalDeserializer.readTextRange()
+        return returnResult
     }
-    private getChildDefaultSize_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_getChildDefaultSize(this.peer!.ptr)
+    private clearPreviewText_serialize(): void {
+        ArkUIGeneratedNativeModule._TextContentControllerBase_clearPreviewText(this.peer!.ptr)
+    }
+    private getText_serialize(range?: TextRange): string {
+        const thisSerializer : Serializer = Serializer.hold()
+        let range_type : int32 = RuntimeType.UNDEFINED
+        range_type = runtimeType(range)
+        thisSerializer.writeInt8(range_type as int32)
+        if ((RuntimeType.UNDEFINED) != (range_type)) {
+            const range_value  = range!
+            thisSerializer.writeTextRange(range_value)
+        }
+        const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getText(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
-    }
-    private setChildDefaultSize_serialize(childDefaultSize: number): void {
-        ArkUIGeneratedNativeModule._ChildrenMainSize_setChildDefaultSize(this.peer!.ptr, childDefaultSize)
     }
 }
 export interface UICommonEvent {
-    setOnClick(callback_?: ((event: ClickEvent) => void)): void
-    setOnTouch(callback_?: ((event: TouchEvent) => void)): void
-    setOnAppear(callback_?: (() => void)): void
-    setOnDisappear(callback_?: (() => void)): void
-    setOnKeyEvent(callback_?: ((event: KeyEvent) => void)): void
-    setOnFocus(callback_?: (() => void)): void
-    setOnBlur(callback_?: (() => void)): void
-    setOnHover(callback_?: HoverCallback): void
-    setOnMouse(callback_?: ((event: MouseEvent) => void)): void
-    setOnSizeChange(callback_?: SizeChangeCallback): void
-    setOnVisibleAreaApproximateChange(options: VisibleAreaEventOptions, event?: VisibleAreaChangeCallback): void
+    setOnClick(callback_: ((event: ClickEvent) => void) | undefined): void
+    setOnTouch(callback_: ((event: TouchEvent) => void) | undefined): void
+    setOnAppear(callback_: (() => void) | undefined): void
+    setOnDisappear(callback_: (() => void) | undefined): void
+    setOnKeyEvent(callback_: ((event: KeyEvent) => void) | undefined): void
+    setOnFocus(callback_: (() => void) | undefined): void
+    setOnBlur(callback_: (() => void) | undefined): void
+    setOnHover(callback_: HoverCallback | undefined): void
+    setOnMouse(callback_: ((event: MouseEvent) => void) | undefined): void
+    setOnSizeChange(callback_: SizeChangeCallback | undefined): void
+    setOnVisibleAreaApproximateChange(options: VisibleAreaEventOptions, event: VisibleAreaChangeCallback | undefined): void
 }
 export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
     peer?: Finalizable | undefined = undefined
@@ -2419,63 +1624,63 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._UICommonEvent_getFinalizer()
     }
-    public setOnClick(callback_?: ((event: ClickEvent) => void)): void {
+    public setOnClick(callback_: ((event: ClickEvent) => void) | undefined): void {
         const callback__casted = callback_ as (((event: ClickEvent) => void) | undefined)
         this.setOnClick_serialize(callback__casted)
         return
     }
-    public setOnTouch(callback_?: ((event: TouchEvent) => void)): void {
+    public setOnTouch(callback_: ((event: TouchEvent) => void) | undefined): void {
         const callback__casted = callback_ as (((event: TouchEvent) => void) | undefined)
         this.setOnTouch_serialize(callback__casted)
         return
     }
-    public setOnAppear(callback_?: (() => void)): void {
+    public setOnAppear(callback_: (() => void) | undefined): void {
         const callback__casted = callback_ as ((() => void) | undefined)
         this.setOnAppear_serialize(callback__casted)
         return
     }
-    public setOnDisappear(callback_?: (() => void)): void {
+    public setOnDisappear(callback_: (() => void) | undefined): void {
         const callback__casted = callback_ as ((() => void) | undefined)
         this.setOnDisappear_serialize(callback__casted)
         return
     }
-    public setOnKeyEvent(callback_?: ((event: KeyEvent) => void)): void {
+    public setOnKeyEvent(callback_: ((event: KeyEvent) => void) | undefined): void {
         const callback__casted = callback_ as (((event: KeyEvent) => void) | undefined)
         this.setOnKeyEvent_serialize(callback__casted)
         return
     }
-    public setOnFocus(callback_?: (() => void)): void {
+    public setOnFocus(callback_: (() => void) | undefined): void {
         const callback__casted = callback_ as ((() => void) | undefined)
         this.setOnFocus_serialize(callback__casted)
         return
     }
-    public setOnBlur(callback_?: (() => void)): void {
+    public setOnBlur(callback_: (() => void) | undefined): void {
         const callback__casted = callback_ as ((() => void) | undefined)
         this.setOnBlur_serialize(callback__casted)
         return
     }
-    public setOnHover(callback_?: HoverCallback): void {
+    public setOnHover(callback_: HoverCallback | undefined): void {
         const callback__casted = callback_ as (HoverCallback | undefined)
         this.setOnHover_serialize(callback__casted)
         return
     }
-    public setOnMouse(callback_?: ((event: MouseEvent) => void)): void {
+    public setOnMouse(callback_: ((event: MouseEvent) => void) | undefined): void {
         const callback__casted = callback_ as (((event: MouseEvent) => void) | undefined)
         this.setOnMouse_serialize(callback__casted)
         return
     }
-    public setOnSizeChange(callback_?: SizeChangeCallback): void {
+    public setOnSizeChange(callback_: SizeChangeCallback | undefined): void {
         const callback__casted = callback_ as (SizeChangeCallback | undefined)
         this.setOnSizeChange_serialize(callback__casted)
         return
     }
-    public setOnVisibleAreaApproximateChange(options: VisibleAreaEventOptions, event?: VisibleAreaChangeCallback): void {
+    public setOnVisibleAreaApproximateChange(options: VisibleAreaEventOptions, event: VisibleAreaChangeCallback | undefined): void {
         const options_casted = options as (VisibleAreaEventOptions)
         const event_casted = event as (VisibleAreaChangeCallback | undefined)
         this.setOnVisibleAreaApproximateChange_serialize(options_casted, event_casted)
         return
     }
-    private setOnClick_serialize(callback_?: ((event: ClickEvent) => void)): void {
+    private setOnClick_serialize(callback_: ((event: ClickEvent) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -2487,7 +1692,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnClick(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnTouch_serialize(callback_?: ((event: TouchEvent) => void)): void {
+    private setOnTouch_serialize(callback_: ((event: TouchEvent) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -2499,7 +1704,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnTouch(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnAppear_serialize(callback_?: (() => void)): void {
+    private setOnAppear_serialize(callback_: (() => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -2511,7 +1716,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnAppear(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnDisappear_serialize(callback_?: (() => void)): void {
+    private setOnDisappear_serialize(callback_: (() => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -2523,7 +1728,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnDisappear(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnKeyEvent_serialize(callback_?: ((event: KeyEvent) => void)): void {
+    private setOnKeyEvent_serialize(callback_: ((event: KeyEvent) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -2535,7 +1740,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnKeyEvent(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnFocus_serialize(callback_?: (() => void)): void {
+    private setOnFocus_serialize(callback_: (() => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -2547,7 +1752,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnFocus(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnBlur_serialize(callback_?: (() => void)): void {
+    private setOnBlur_serialize(callback_: (() => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -2559,7 +1764,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnBlur(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnHover_serialize(callback_?: HoverCallback): void {
+    private setOnHover_serialize(callback_: HoverCallback | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -2571,7 +1776,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnHover(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnMouse_serialize(callback_?: ((event: MouseEvent) => void)): void {
+    private setOnMouse_serialize(callback_: ((event: MouseEvent) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -2583,7 +1788,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnMouse(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnSizeChange_serialize(callback_?: SizeChangeCallback): void {
+    private setOnSizeChange_serialize(callback_: SizeChangeCallback | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -2595,7 +1800,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnSizeChange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnVisibleAreaApproximateChange_serialize(options: VisibleAreaEventOptions, event?: VisibleAreaChangeCallback): void {
+    private setOnVisibleAreaApproximateChange_serialize(options: VisibleAreaEventOptions, event: VisibleAreaChangeCallback | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeVisibleAreaEventOptions(options)
         let event_type : int32 = RuntimeType.UNDEFINED
@@ -2650,6 +1855,5095 @@ export class GestureModifierInternal implements MaterializedBase,GestureModifier
         return obj
     }
 }
+export class ArkCommonMethodPeer extends PeerNode {
+    _attributeSet?: ArkCommonAttributeSet;
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkCommonMethodPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._CommonMethod_construct(peerId, flags)
+        const _peer  = new ArkCommonMethodPeer(_peerPtr, peerId, "CommonMethod", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    width0Attribute(value: Length | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLength(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_width0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    width1Attribute(value: Length | LayoutPolicy | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (((RuntimeType.NUMBER) == (value_value_type)) || ((RuntimeType.STRING) == (value_value_type)) || (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Length
+                thisSerializer.writeLength(value_value_0)
+            }
+            else if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isLayoutPolicy(value_value))) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as LayoutPolicy
+                thisSerializer.writeLayoutPolicy(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_width1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    height0Attribute(value: Length | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLength(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_height0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    height1Attribute(value: Length | LayoutPolicy | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (((RuntimeType.NUMBER) == (value_value_type)) || ((RuntimeType.STRING) == (value_value_type)) || (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Length
+                thisSerializer.writeLength(value_value_0)
+            }
+            else if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isLayoutPolicy(value_value))) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as LayoutPolicy
+                thisSerializer.writeLayoutPolicy(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_height1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    responseRegionAttribute(value: Array<Rectangle> | Rectangle | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isArray_Rectangle(value_value))) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Array<Rectangle>
+                thisSerializer.writeInt32(value_value_0.length as int32)
+                for (let i = 0; i < value_value_0.length; i++) {
+                    const value_value_0_element : Rectangle = value_value_0[i]
+                    thisSerializer.writeRectangle(value_value_0_element)
+                }
+            }
+            else if (TypeChecker.isRectangle(value_value, false, false, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Rectangle
+                let value_x_type : int32 = RuntimeType.UNDEFINED
+                value_x_type = runtimeType(value_value_1.x)
+                if ((RuntimeType.UNDEFINED) == (value_x_type)) {
+                    value_value_1.x  = 0
+                }
+                let value_y_type : int32 = RuntimeType.UNDEFINED
+                value_y_type = runtimeType(value_value_1.y)
+                if ((RuntimeType.UNDEFINED) == (value_y_type)) {
+                    value_value_1.y  = 0
+                }
+                let value_width_type : int32 = RuntimeType.UNDEFINED
+                value_width_type = runtimeType(value_value_1.width)
+                if ((RuntimeType.UNDEFINED) == (value_width_type)) {
+                    value_value_1.width  = '100%'
+                }
+                let value_height_type : int32 = RuntimeType.UNDEFINED
+                value_height_type = runtimeType(value_value_1.height)
+                if ((RuntimeType.UNDEFINED) == (value_height_type)) {
+                    value_value_1.height  = '100%'
+                }
+                thisSerializer.writeRectangle(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_responseRegion(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    mouseResponseRegionAttribute(value: Array<Rectangle> | Rectangle | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isArray_Rectangle(value_value))) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Array<Rectangle>
+                thisSerializer.writeInt32(value_value_0.length as int32)
+                for (let i = 0; i < value_value_0.length; i++) {
+                    const value_value_0_element : Rectangle = value_value_0[i]
+                    thisSerializer.writeRectangle(value_value_0_element)
+                }
+            }
+            else if (TypeChecker.isRectangle(value_value, false, false, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Rectangle
+                thisSerializer.writeRectangle(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_mouseResponseRegion(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    sizeAttribute(value: SizeOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeSizeOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_size(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    constraintSizeAttribute(value: ConstraintSizeOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeConstraintSizeOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_constraintSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    touchableAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_touchable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    hitTestBehaviorAttribute(value: HitTestMode | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as HitTestMode)
+            thisSerializer.writeInt32(TypeChecker.HitTestMode_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_hitTestBehavior(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onChildTouchTestAttribute(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onChildTouchTest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    layoutWeightAttribute(value: number | string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_layoutWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    chainWeightAttribute(value: ChainWeightOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeChainWeightOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_chainWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    paddingAttribute(value: Padding | Length | LocalizedPadding | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isPadding(value_value, false, false, false, false)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Padding
+                const value_value_0_top  = value_value_0.top
+                let value_value_0_top_type : int32 = RuntimeType.UNDEFINED
+                value_value_0_top_type = runtimeType(value_value_0_top)
+                thisSerializer.writeInt8(value_value_0_top_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_value_0_top_type)) {
+                    const value_value_0_top_value  = value_value_0_top!
+                    thisSerializer.writeLength(value_value_0_top_value)
+                }
+                const value_value_0_right  = value_value_0.right
+                let value_value_0_right_type : int32 = RuntimeType.UNDEFINED
+                value_value_0_right_type = runtimeType(value_value_0_right)
+                thisSerializer.writeInt8(value_value_0_right_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_value_0_right_type)) {
+                    const value_value_0_right_value  = value_value_0_right!
+                    thisSerializer.writeLength(value_value_0_right_value)
+                }
+                const value_value_0_bottom  = value_value_0.bottom
+                let value_value_0_bottom_type : int32 = RuntimeType.UNDEFINED
+                value_value_0_bottom_type = runtimeType(value_value_0_bottom)
+                thisSerializer.writeInt8(value_value_0_bottom_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_value_0_bottom_type)) {
+                    const value_value_0_bottom_value  = value_value_0_bottom!
+                    thisSerializer.writeLength(value_value_0_bottom_value)
+                }
+                const value_value_0_left  = value_value_0.left
+                let value_value_0_left_type : int32 = RuntimeType.UNDEFINED
+                value_value_0_left_type = runtimeType(value_value_0_left)
+                thisSerializer.writeInt8(value_value_0_left_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_value_0_left_type)) {
+                    const value_value_0_left_value  = value_value_0_left!
+                    thisSerializer.writeLength(value_value_0_left_value)
+                }
+            }
+            else if (((RuntimeType.NUMBER) == (value_value_type)) || ((RuntimeType.STRING) == (value_value_type)) || (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Length
+                thisSerializer.writeLength(value_value_1)
+            }
+            else if (TypeChecker.isLocalizedPadding(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as LocalizedPadding
+                thisSerializer.writeLocalizedPadding(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_padding(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    safeAreaPaddingAttribute(value: Padding | LengthMetrics | LocalizedPadding | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isPadding(value_value, false, false, false, false)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Padding
+                const value_value_0_top  = value_value_0.top
+                let value_value_0_top_type : int32 = RuntimeType.UNDEFINED
+                value_value_0_top_type = runtimeType(value_value_0_top)
+                thisSerializer.writeInt8(value_value_0_top_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_value_0_top_type)) {
+                    const value_value_0_top_value  = value_value_0_top!
+                    thisSerializer.writeLength(value_value_0_top_value)
+                }
+                const value_value_0_right  = value_value_0.right
+                let value_value_0_right_type : int32 = RuntimeType.UNDEFINED
+                value_value_0_right_type = runtimeType(value_value_0_right)
+                thisSerializer.writeInt8(value_value_0_right_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_value_0_right_type)) {
+                    const value_value_0_right_value  = value_value_0_right!
+                    thisSerializer.writeLength(value_value_0_right_value)
+                }
+                const value_value_0_bottom  = value_value_0.bottom
+                let value_value_0_bottom_type : int32 = RuntimeType.UNDEFINED
+                value_value_0_bottom_type = runtimeType(value_value_0_bottom)
+                thisSerializer.writeInt8(value_value_0_bottom_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_value_0_bottom_type)) {
+                    const value_value_0_bottom_value  = value_value_0_bottom!
+                    thisSerializer.writeLength(value_value_0_bottom_value)
+                }
+                const value_value_0_left  = value_value_0.left
+                let value_value_0_left_type : int32 = RuntimeType.UNDEFINED
+                value_value_0_left_type = runtimeType(value_value_0_left)
+                thisSerializer.writeInt8(value_value_0_left_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_value_0_left_type)) {
+                    const value_value_0_left_value  = value_value_0_left!
+                    thisSerializer.writeLength(value_value_0_left_value)
+                }
+            }
+            else if (TypeChecker.isLengthMetrics(value_value, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as LengthMetrics
+                thisSerializer.writeLengthMetrics(value_value_1)
+            }
+            else if (TypeChecker.isLocalizedPadding(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as LocalizedPadding
+                thisSerializer.writeLocalizedPadding(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_safeAreaPadding(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    marginAttribute(value: Padding | Length | LocalizedPadding | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isPadding(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Padding
+                thisSerializer.writePadding(value_value_0)
+            }
+            else if (((RuntimeType.NUMBER) == (value_value_type)) || ((RuntimeType.STRING) == (value_value_type)) || (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Length
+                thisSerializer.writeLength(value_value_1)
+            }
+            else if (TypeChecker.isLocalizedPadding(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as LocalizedPadding
+                thisSerializer.writeLocalizedPadding(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_margin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundColor0Attribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundColor0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundColor1Attribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundColor1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    pixelRoundAttribute(value: PixelRoundPolicy | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writePixelRoundPolicy(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_pixelRound(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundImageSizeAttribute(value: SizeOptions | ImageSize | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as SizeOptions
+                thisSerializer.writeSizeOptions(value_value_0)
+            }
+            else if (TypeChecker.isImageSize(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as ImageSize
+                thisSerializer.writeInt32(TypeChecker.ImageSize_ToNumeric(value_value_1))
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundImageSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundImagePositionAttribute(value: Position | Alignment | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Position
+                thisSerializer.writePosition(value_value_0)
+            }
+            else if (TypeChecker.isAlignment(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Alignment
+                thisSerializer.writeInt32(TypeChecker.Alignment_ToNumeric(value_value_1))
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundImagePosition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundEffect0Attribute(value: BackgroundEffectOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBackgroundEffectOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundEffect1Attribute(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeBackgroundEffectOptions(options_value)
+        }
+        let sysOptions_type : int32 = RuntimeType.UNDEFINED
+        sysOptions_type = runtimeType(sysOptions)
+        thisSerializer.writeInt8(sysOptions_type as int32)
+        if ((RuntimeType.UNDEFINED) != (sysOptions_type)) {
+            const sysOptions_value  = sysOptions!
+            thisSerializer.writeSystemAdaptiveOptions(sysOptions_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundImageResizableAttribute(value: ResizableOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeResizableOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundImageResizable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    foregroundEffectAttribute(value: ForegroundEffectOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeForegroundEffectOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_foregroundEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    visualEffectAttribute(value: VisualEffect | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeVisualEffect(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_visualEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundFilterAttribute(value: Filter | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeFilter(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    foregroundFilterAttribute(value: Filter | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeFilter(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_foregroundFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    compositingFilterAttribute(value: Filter | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeFilter(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_compositingFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    opacity0Attribute(value: number | Resource | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Resource
+                thisSerializer.writeResource(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_opacity0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    opacity1Attribute(value: number | Resource | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Resource
+                thisSerializer.writeResource(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_opacity1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    borderAttribute(value: BorderOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBorderOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_border(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    borderStyleAttribute(value: BorderStyle | EdgeStyles | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isBorderStyle(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as BorderStyle
+                thisSerializer.writeInt32(TypeChecker.BorderStyle_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as EdgeStyles
+                thisSerializer.writeEdgeStyles(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_borderStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    borderWidthAttribute(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (((RuntimeType.NUMBER) == (value_value_type)) || ((RuntimeType.STRING) == (value_value_type)) || (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Length
+                thisSerializer.writeLength(value_value_0)
+            }
+            else if (TypeChecker.isEdgeWidths(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as EdgeWidths
+                thisSerializer.writeEdgeWidths(value_value_1)
+            }
+            else if (TypeChecker.isLocalizedEdgeWidths(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as LocalizedEdgeWidths
+                thisSerializer.writeLocalizedEdgeWidths(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_borderWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    borderColorAttribute(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || ((RuntimeType.OBJECT == value_value_type)
+                && (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as ResourceColor
+                let value_value_0_type : int32 = RuntimeType.UNDEFINED
+                value_value_0_type = runtimeType(value_value_0)
+                if (TypeChecker.isColor(value_value_0)) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const value_value_0_0  = value_value_0 as Color
+                    thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0_0))
+                }
+                else if (RuntimeType.NUMBER == value_value_0_type) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const value_value_0_1  = value_value_0 as number
+                    thisSerializer.writeNumber(value_value_0_1)
+                }
+                else if (RuntimeType.STRING == value_value_0_type) {
+                    thisSerializer.writeInt8(2 as int32)
+                    const value_value_0_2  = value_value_0 as string
+                    thisSerializer.writeString(value_value_0_2)
+                }
+                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    thisSerializer.writeInt8(3 as int32)
+                    const value_value_0_3  = value_value_0 as Resource
+                    thisSerializer.writeResource(value_value_0_3)
+                }
+            }
+            else if (TypeChecker.isEdgeColors(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as EdgeColors
+                thisSerializer.writeEdgeColors(value_value_1)
+            }
+            else if (TypeChecker.isLocalizedEdgeColors(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as LocalizedEdgeColors
+                thisSerializer.writeLocalizedEdgeColors(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_borderColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    borderRadiusAttribute(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (((RuntimeType.NUMBER) == (value_value_type)) || ((RuntimeType.STRING) == (value_value_type)) || (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Length
+                thisSerializer.writeLength(value_value_0)
+            }
+            else if (TypeChecker.isBorderRadiuses(value_value, false, false, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as BorderRadiuses
+                thisSerializer.writeBorderRadiuses(value_value_1)
+            }
+            else if (TypeChecker.isLocalizedBorderRadiuses(value_value, false, false, false, false)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as LocalizedBorderRadiuses
+                thisSerializer.writeLocalizedBorderRadiuses(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_borderRadius(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    borderImageAttribute(value: BorderImageOption | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBorderImageOption(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_borderImage(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    outline0Attribute(value: OutlineOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeOutlineOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_outline0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    outline1Attribute(value: OutlineOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeOutlineOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_outline1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    outlineStyle0Attribute(value: OutlineStyle | EdgeOutlineStyles | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isOutlineStyle(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as OutlineStyle
+                thisSerializer.writeInt32(TypeChecker.OutlineStyle_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as EdgeOutlineStyles
+                thisSerializer.writeEdgeOutlineStyles(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_outlineStyle0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    outlineStyle1Attribute(value: OutlineStyle | EdgeOutlineStyles | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isOutlineStyle(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as OutlineStyle
+                thisSerializer.writeInt32(TypeChecker.OutlineStyle_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as EdgeOutlineStyles
+                thisSerializer.writeEdgeOutlineStyles(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_outlineStyle1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    outlineWidth0Attribute(value: Dimension | EdgeOutlineWidths | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (((RuntimeType.NUMBER) == (value_value_type)) || ((RuntimeType.STRING) == (value_value_type)) || (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Dimension
+                thisSerializer.writeLength(value_value_0)
+            }
+            else if (TypeChecker.isEdgeOutlineWidths(value_value, false, false, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as EdgeOutlineWidths
+                thisSerializer.writeEdgeOutlineWidths(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_outlineWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    outlineWidth1Attribute(value: Dimension | EdgeOutlineWidths | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (((RuntimeType.NUMBER) == (value_value_type)) || ((RuntimeType.STRING) == (value_value_type)) || (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Dimension
+                thisSerializer.writeLength(value_value_0)
+            }
+            else if (TypeChecker.isEdgeOutlineWidths(value_value, false, false, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as EdgeOutlineWidths
+                thisSerializer.writeEdgeOutlineWidths(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_outlineWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    outlineColor0Attribute(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as ResourceColor
+                let value_value_0_type : int32 = RuntimeType.UNDEFINED
+                value_value_0_type = runtimeType(value_value_0)
+                if (TypeChecker.isColor(value_value_0)) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const value_value_0_0  = value_value_0 as Color
+                    thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0_0))
+                }
+                else if (RuntimeType.NUMBER == value_value_0_type) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const value_value_0_1  = value_value_0 as number
+                    thisSerializer.writeNumber(value_value_0_1)
+                }
+                else if (RuntimeType.STRING == value_value_0_type) {
+                    thisSerializer.writeInt8(2 as int32)
+                    const value_value_0_2  = value_value_0 as string
+                    thisSerializer.writeString(value_value_0_2)
+                }
+                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    thisSerializer.writeInt8(3 as int32)
+                    const value_value_0_3  = value_value_0 as Resource
+                    thisSerializer.writeResource(value_value_0_3)
+                }
+            }
+            else if (TypeChecker.isEdgeColors(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as EdgeColors
+                thisSerializer.writeEdgeColors(value_value_1)
+            }
+            else if (TypeChecker.isLocalizedEdgeColors(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as LocalizedEdgeColors
+                thisSerializer.writeLocalizedEdgeColors(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_outlineColor0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    outlineColor1Attribute(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as ResourceColor
+                let value_value_0_type : int32 = RuntimeType.UNDEFINED
+                value_value_0_type = runtimeType(value_value_0)
+                if (TypeChecker.isColor(value_value_0)) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const value_value_0_0  = value_value_0 as Color
+                    thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0_0))
+                }
+                else if (RuntimeType.NUMBER == value_value_0_type) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const value_value_0_1  = value_value_0 as number
+                    thisSerializer.writeNumber(value_value_0_1)
+                }
+                else if (RuntimeType.STRING == value_value_0_type) {
+                    thisSerializer.writeInt8(2 as int32)
+                    const value_value_0_2  = value_value_0 as string
+                    thisSerializer.writeString(value_value_0_2)
+                }
+                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    thisSerializer.writeInt8(3 as int32)
+                    const value_value_0_3  = value_value_0 as Resource
+                    thisSerializer.writeResource(value_value_0_3)
+                }
+            }
+            else if (TypeChecker.isEdgeColors(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as EdgeColors
+                thisSerializer.writeEdgeColors(value_value_1)
+            }
+            else if (TypeChecker.isLocalizedEdgeColors(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as LocalizedEdgeColors
+                thisSerializer.writeLocalizedEdgeColors(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_outlineColor1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    outlineRadius0Attribute(value: Dimension | OutlineRadiuses | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (((RuntimeType.NUMBER) == (value_value_type)) || ((RuntimeType.STRING) == (value_value_type)) || (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Dimension
+                thisSerializer.writeLength(value_value_0)
+            }
+            else if (TypeChecker.isOutlineRadiuses(value_value, false, false, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as OutlineRadiuses
+                thisSerializer.writeOutlineRadiuses(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_outlineRadius0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    outlineRadius1Attribute(value: Dimension | OutlineRadiuses | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (((RuntimeType.NUMBER) == (value_value_type)) || ((RuntimeType.STRING) == (value_value_type)) || (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Dimension
+                thisSerializer.writeLength(value_value_0)
+            }
+            else if (TypeChecker.isOutlineRadiuses(value_value, false, false, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as OutlineRadiuses
+                thisSerializer.writeOutlineRadiuses(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_outlineRadius1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    foregroundColor0Attribute(value: ResourceColor | ColoringStrategy | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as ResourceColor
+                let value_value_0_type : int32 = RuntimeType.UNDEFINED
+                value_value_0_type = runtimeType(value_value_0)
+                if (TypeChecker.isColor(value_value_0)) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const value_value_0_0  = value_value_0 as Color
+                    thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0_0))
+                }
+                else if (RuntimeType.NUMBER == value_value_0_type) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const value_value_0_1  = value_value_0 as number
+                    thisSerializer.writeNumber(value_value_0_1)
+                }
+                else if (RuntimeType.STRING == value_value_0_type) {
+                    thisSerializer.writeInt8(2 as int32)
+                    const value_value_0_2  = value_value_0 as string
+                    thisSerializer.writeString(value_value_0_2)
+                }
+                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    thisSerializer.writeInt8(3 as int32)
+                    const value_value_0_3  = value_value_0 as Resource
+                    thisSerializer.writeResource(value_value_0_3)
+                }
+            }
+            else if (TypeChecker.isColoringStrategy(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as ColoringStrategy
+                thisSerializer.writeInt32(TypeChecker.ColoringStrategy_ToNumeric(value_value_1))
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_foregroundColor0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    foregroundColor1Attribute(value: ResourceColor | ColoringStrategy | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as ResourceColor
+                let value_value_0_type : int32 = RuntimeType.UNDEFINED
+                value_value_0_type = runtimeType(value_value_0)
+                if (TypeChecker.isColor(value_value_0)) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const value_value_0_0  = value_value_0 as Color
+                    thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0_0))
+                }
+                else if (RuntimeType.NUMBER == value_value_0_type) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const value_value_0_1  = value_value_0 as number
+                    thisSerializer.writeNumber(value_value_0_1)
+                }
+                else if (RuntimeType.STRING == value_value_0_type) {
+                    thisSerializer.writeInt8(2 as int32)
+                    const value_value_0_2  = value_value_0 as string
+                    thisSerializer.writeString(value_value_0_2)
+                }
+                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    thisSerializer.writeInt8(3 as int32)
+                    const value_value_0_3  = value_value_0 as Resource
+                    thisSerializer.writeResource(value_value_0_3)
+                }
+            }
+            else if (TypeChecker.isColoringStrategy(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as ColoringStrategy
+                thisSerializer.writeInt32(TypeChecker.ColoringStrategy_ToNumeric(value_value_1))
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_foregroundColor1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onClick0Attribute(value: ((event: ClickEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onClick0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onClick1Attribute(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let event_type : int32 = RuntimeType.UNDEFINED
+        event_type = runtimeType(event)
+        thisSerializer.writeInt8(event_type as int32)
+        if ((RuntimeType.UNDEFINED) != (event_type)) {
+            const event_value  = event!
+            thisSerializer.holdAndWriteCallback(event_value)
+        }
+        let distanceThreshold_type : int32 = RuntimeType.UNDEFINED
+        distanceThreshold_type = runtimeType(distanceThreshold)
+        thisSerializer.writeInt8(distanceThreshold_type as int32)
+        if ((RuntimeType.UNDEFINED) != (distanceThreshold_type)) {
+            const distanceThreshold_value  = distanceThreshold!
+            thisSerializer.writeNumber(distanceThreshold_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onClick1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onHoverAttribute(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onHover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onHoverMoveAttribute(value: ((parameter: HoverEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onHoverMove(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onAccessibilityHoverAttribute(value: AccessibilityCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onAccessibilityHover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    hoverEffectAttribute(value: HoverEffect | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as HoverEffect)
+            thisSerializer.writeInt32(TypeChecker.HoverEffect_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_hoverEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onMouseAttribute(value: ((event: MouseEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onMouse(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onTouchAttribute(value: ((event: TouchEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onTouch(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onKeyEvent0Attribute(value: ((event: KeyEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onKeyEvent0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onKeyEvent1Attribute(value: ((parameter: KeyEvent) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onKeyEvent1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDigitalCrownAttribute(value: ((parameter: CrownEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onDigitalCrown(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onKeyPreImeAttribute(value: ((parameter: KeyEvent) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onKeyPreIme(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onKeyEventDispatchAttribute(value: ((parameter: KeyEvent) => boolean) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onKeyEventDispatch(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onFocusAxisEventAttribute(value: ((parameter: FocusAxisEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onFocusAxisEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onAxisEventAttribute(value: ((parameter: AxisEvent) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onAxisEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    focusableAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_focusable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    nextFocusAttribute(value: FocusMovement | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeFocusMovement(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_nextFocus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    tabStopAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_tabStop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onFocusAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onFocus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onBlurAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onBlur(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    tabIndexAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_tabIndex(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    defaultFocusAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_defaultFocus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    groupDefaultFocusAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_groupDefaultFocus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    focusOnTouchAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_focusOnTouch(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    focusBoxAttribute(value: FocusBoxStyle | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeFocusBoxStyle(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_focusBox(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    animationAttribute(value: AnimateParam | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeAnimateParam(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_animation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    SetOrCreateAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        ArkUIAniModule._Animation_SetOrCreateAnimatableProperty(this.peer.ptr, functionName, value, callback);
+    }
+    transition0Attribute(value: TransitionOptions | TransitionEffect | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isTransitionOptions(value_value, false, false, false, false, false)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as TransitionOptions
+                thisSerializer.writeTransitionOptions(value_value_0)
+            }
+            else if (TypeChecker.isTransitionEffect(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as TransitionEffect
+                thisSerializer.writeTransitionEffect(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_transition0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    transition1Attribute(effect: TransitionEffect | undefined, onFinish: TransitionFinishCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let effect_type : int32 = RuntimeType.UNDEFINED
+        effect_type = runtimeType(effect)
+        thisSerializer.writeInt8(effect_type as int32)
+        if ((RuntimeType.UNDEFINED) != (effect_type)) {
+            const effect_value  = effect!
+            thisSerializer.writeTransitionEffect(effect_value)
+        }
+        let onFinish_type : int32 = RuntimeType.UNDEFINED
+        onFinish_type = runtimeType(onFinish)
+        thisSerializer.writeInt8(onFinish_type as int32)
+        if ((RuntimeType.UNDEFINED) != (onFinish_type)) {
+            const onFinish_value  = onFinish!
+            thisSerializer.holdAndWriteCallback(onFinish_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_transition1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    motionBlur0Attribute(value: MotionBlurOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeMotionBlurOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_motionBlur0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    motionBlur1Attribute(value: MotionBlurOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeMotionBlurOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_motionBlur1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    brightness0Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_brightness0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    brightness1Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_brightness1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    contrast0Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_contrast0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    contrast1Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_contrast1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    grayscale0Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_grayscale0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    grayscale1Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_grayscale1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    colorBlend0Attribute(value: Color | string | Resource | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as Resource
+                thisSerializer.writeResource(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_colorBlend0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    colorBlend1Attribute(value: Color | string | Resource | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as Resource
+                thisSerializer.writeResource(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_colorBlend1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    saturate0Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_saturate0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    saturate1Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_saturate1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    sepia0Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_sepia0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    sepia1Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_sepia1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    invert0Attribute(value: number | InvertOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as InvertOptions
+                thisSerializer.writeInvertOptions(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_invert0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    invert1Attribute(value: number | InvertOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as InvertOptions
+                thisSerializer.writeInvertOptions(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_invert1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    hueRotate0Attribute(value: number | string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_hueRotate0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    hueRotate1Attribute(value: number | string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_hueRotate1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    useShadowBatching0Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_useShadowBatching0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    useShadowBatching1Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_useShadowBatching1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    useEffect0Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_useEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    useEffect1Attribute(useEffect: boolean | undefined, effectType: EffectType | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let useEffect_type : int32 = RuntimeType.UNDEFINED
+        useEffect_type = runtimeType(useEffect)
+        thisSerializer.writeInt8(useEffect_type as int32)
+        if ((RuntimeType.UNDEFINED) != (useEffect_type)) {
+            const useEffect_value  = useEffect!
+            thisSerializer.writeBoolean(useEffect_value)
+        }
+        let effectType_type : int32 = RuntimeType.UNDEFINED
+        effectType_type = runtimeType(effectType)
+        thisSerializer.writeInt8(effectType_type as int32)
+        if ((RuntimeType.UNDEFINED) != (effectType_type)) {
+            const effectType_value  = (effectType as EffectType)
+            thisSerializer.writeInt32(TypeChecker.EffectType_ToNumeric(effectType_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_useEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    useEffect2Attribute(useEffect: boolean | undefined, effectType?: EffectType): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let useEffect_type : int32 = RuntimeType.UNDEFINED
+        useEffect_type = runtimeType(useEffect)
+        thisSerializer.writeInt8(useEffect_type as int32)
+        if ((RuntimeType.UNDEFINED) != (useEffect_type)) {
+            const useEffect_value  = useEffect!
+            thisSerializer.writeBoolean(useEffect_value)
+        }
+        let effectType_type : int32 = RuntimeType.UNDEFINED
+        effectType_type = runtimeType(effectType)
+        thisSerializer.writeInt8(effectType_type as int32)
+        if ((RuntimeType.UNDEFINED) != (effectType_type)) {
+            const effectType_value  = (effectType as EffectType)
+            thisSerializer.writeInt32(TypeChecker.EffectType_ToNumeric(effectType_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_useEffect2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    renderGroup0Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_renderGroup0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    renderGroup1Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_renderGroup1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    freeze0Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_freeze0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    freeze1Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_freeze1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    translate0Attribute(value: TranslateOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeTranslateOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_translate0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    translate1Attribute(value: TranslateOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeTranslateOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_translate1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    scale0Attribute(value: ScaleOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeScaleOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_scale0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    scale1Attribute(value: ScaleOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeScaleOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_scale1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    gridSpanAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_gridSpan(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    gridOffsetAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_gridOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    rotate0Attribute(value: RotateOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeRotateOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_rotate0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    rotate1Attribute(value: RotateOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeRotateOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_rotate1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    transform0Attribute(value: TransformationMatrix | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeTransformationMatrix(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_transform0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    transform1Attribute(value: Object | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteObject(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_transform1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onAppearAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onAppear(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDisAppearAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onDisAppear(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onAttachAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onAttach(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDetachAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onDetach(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onAreaChangeAttribute(value: ((oldValue: Area,newValue: Area) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onAreaChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    visibilityAttribute(value: Visibility | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as Visibility)
+            thisSerializer.writeInt32(TypeChecker.Visibility_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_visibility(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    flexGrowAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_flexGrow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    flexShrinkAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_flexShrink(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    flexBasisAttribute(value: number | string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_flexBasis(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    alignSelfAttribute(value: ItemAlign | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as ItemAlign)
+            thisSerializer.writeInt32(TypeChecker.ItemAlign_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_alignSelf(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    displayPriorityAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_displayPriority(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    zIndexAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_zIndex(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    directionAttribute(value: Direction | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as Direction)
+            thisSerializer.writeInt32(TypeChecker.Direction_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_direction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    alignAttribute(value: Alignment | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as Alignment)
+            thisSerializer.writeInt32(TypeChecker.Alignment_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_align(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    positionAttribute(value: Position | Edges | LocalizedEdges | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isPosition(value_value, false, false)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Position
+                thisSerializer.writePosition(value_value_0)
+            }
+            else if (TypeChecker.isEdges(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Edges
+                thisSerializer.writeEdges(value_value_1)
+            }
+            else if (TypeChecker.isLocalizedEdges(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as LocalizedEdges
+                thisSerializer.writeLocalizedEdges(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_position(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    markAnchorAttribute(value: Position | LocalizedPosition | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isPosition(value_value, false, false)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Position
+                thisSerializer.writePosition(value_value_0)
+            }
+            else if (TypeChecker.isLocalizedPosition(value_value, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as LocalizedPosition
+                thisSerializer.writeLocalizedPosition(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_markAnchor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    offsetAttribute(value: Position | Edges | LocalizedEdges | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isPosition(value_value, false, false)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Position
+                thisSerializer.writePosition(value_value_0)
+            }
+            else if (TypeChecker.isEdges(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Edges
+                thisSerializer.writeEdges(value_value_1)
+            }
+            else if (TypeChecker.isLocalizedEdges(value_value, true, false, true, false)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as LocalizedEdges
+                thisSerializer.writeLocalizedEdges(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_offset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enabledAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_enabled(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    useSizeTypeAttribute(value: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            const value_value_xs  = value_value.xs
+            let value_value_xs_type : int32 = RuntimeType.UNDEFINED
+            value_value_xs_type = runtimeType(value_value_xs)
+            thisSerializer.writeInt8(value_value_xs_type as int32)
+            if ((RuntimeType.UNDEFINED) != (value_value_xs_type)) {
+                const value_value_xs_value  = value_value_xs!
+                let value_value_xs_value_type : int32 = RuntimeType.UNDEFINED
+                value_value_xs_value_type = runtimeType(value_value_xs_value)
+                if (RuntimeType.NUMBER == value_value_xs_value_type) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const value_value_xs_value_0  = value_value_xs_value as number
+                    thisSerializer.writeNumber(value_value_xs_value_0)
+                }
+                else if (RuntimeType.OBJECT == value_value_xs_value_type) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const value_value_xs_value_1  = value_value_xs_value as Literal_Number_offset_span
+                    const value_value_xs_value_1_span  = value_value_xs_value_1.span
+                    thisSerializer.writeNumber(value_value_xs_value_1_span)
+                    const value_value_xs_value_1_offset  = value_value_xs_value_1.offset
+                    thisSerializer.writeNumber(value_value_xs_value_1_offset)
+                }
+            }
+            const value_value_sm  = value_value.sm
+            let value_value_sm_type : int32 = RuntimeType.UNDEFINED
+            value_value_sm_type = runtimeType(value_value_sm)
+            thisSerializer.writeInt8(value_value_sm_type as int32)
+            if ((RuntimeType.UNDEFINED) != (value_value_sm_type)) {
+                const value_value_sm_value  = value_value_sm!
+                let value_value_sm_value_type : int32 = RuntimeType.UNDEFINED
+                value_value_sm_value_type = runtimeType(value_value_sm_value)
+                if (RuntimeType.NUMBER == value_value_sm_value_type) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const value_value_sm_value_0  = value_value_sm_value as number
+                    thisSerializer.writeNumber(value_value_sm_value_0)
+                }
+                else if (RuntimeType.OBJECT == value_value_sm_value_type) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const value_value_sm_value_1  = value_value_sm_value as Literal_Number_offset_span
+                    const value_value_sm_value_1_span  = value_value_sm_value_1.span
+                    thisSerializer.writeNumber(value_value_sm_value_1_span)
+                    const value_value_sm_value_1_offset  = value_value_sm_value_1.offset
+                    thisSerializer.writeNumber(value_value_sm_value_1_offset)
+                }
+            }
+            const value_value_md  = value_value.md
+            let value_value_md_type : int32 = RuntimeType.UNDEFINED
+            value_value_md_type = runtimeType(value_value_md)
+            thisSerializer.writeInt8(value_value_md_type as int32)
+            if ((RuntimeType.UNDEFINED) != (value_value_md_type)) {
+                const value_value_md_value  = value_value_md!
+                let value_value_md_value_type : int32 = RuntimeType.UNDEFINED
+                value_value_md_value_type = runtimeType(value_value_md_value)
+                if (RuntimeType.NUMBER == value_value_md_value_type) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const value_value_md_value_0  = value_value_md_value as number
+                    thisSerializer.writeNumber(value_value_md_value_0)
+                }
+                else if (RuntimeType.OBJECT == value_value_md_value_type) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const value_value_md_value_1  = value_value_md_value as Literal_Number_offset_span
+                    const value_value_md_value_1_span  = value_value_md_value_1.span
+                    thisSerializer.writeNumber(value_value_md_value_1_span)
+                    const value_value_md_value_1_offset  = value_value_md_value_1.offset
+                    thisSerializer.writeNumber(value_value_md_value_1_offset)
+                }
+            }
+            const value_value_lg  = value_value.lg
+            let value_value_lg_type : int32 = RuntimeType.UNDEFINED
+            value_value_lg_type = runtimeType(value_value_lg)
+            thisSerializer.writeInt8(value_value_lg_type as int32)
+            if ((RuntimeType.UNDEFINED) != (value_value_lg_type)) {
+                const value_value_lg_value  = value_value_lg!
+                let value_value_lg_value_type : int32 = RuntimeType.UNDEFINED
+                value_value_lg_value_type = runtimeType(value_value_lg_value)
+                if (RuntimeType.NUMBER == value_value_lg_value_type) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const value_value_lg_value_0  = value_value_lg_value as number
+                    thisSerializer.writeNumber(value_value_lg_value_0)
+                }
+                else if (RuntimeType.OBJECT == value_value_lg_value_type) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const value_value_lg_value_1  = value_value_lg_value as Literal_Number_offset_span
+                    const value_value_lg_value_1_span  = value_value_lg_value_1.span
+                    thisSerializer.writeNumber(value_value_lg_value_1_span)
+                    const value_value_lg_value_1_offset  = value_value_lg_value_1.offset
+                    thisSerializer.writeNumber(value_value_lg_value_1_offset)
+                }
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_useSizeType(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    alignRules0Attribute(value: AlignRuleOption | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeAlignRuleOption(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_alignRules0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    alignRules1Attribute(value: LocalizedAlignRuleOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLocalizedAlignRuleOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_alignRules1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    aspectRatioAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_aspectRatio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    clickEffect0Attribute(value: ClickEffect | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeClickEffect(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_clickEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    clickEffect1Attribute(value: ClickEffect | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeClickEffect(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_clickEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDragStartAttribute(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onDragStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDragEnterAttribute(value: ((event: DragEvent,extraParams?: string) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onDragEnter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDragMoveAttribute(value: ((event: DragEvent,extraParams?: string) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onDragMove(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDragLeaveAttribute(value: ((event: DragEvent,extraParams?: string) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onDragLeave(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDrop0Attribute(value: ((event: DragEvent,extraParams?: string) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onDrop0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDrop1Attribute(eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let eventCallback_type : int32 = RuntimeType.UNDEFINED
+        eventCallback_type = runtimeType(eventCallback)
+        thisSerializer.writeInt8(eventCallback_type as int32)
+        if ((RuntimeType.UNDEFINED) != (eventCallback_type)) {
+            const eventCallback_value  = eventCallback!
+            thisSerializer.holdAndWriteCallback(eventCallback_value)
+        }
+        let dropOptions_type : int32 = RuntimeType.UNDEFINED
+        dropOptions_type = runtimeType(dropOptions)
+        thisSerializer.writeInt8(dropOptions_type as int32)
+        if ((RuntimeType.UNDEFINED) != (dropOptions_type)) {
+            const dropOptions_value  = dropOptions!
+            thisSerializer.writeDropOptions(dropOptions_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onDrop1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDragEndAttribute(value: ((event: DragEvent,extraParams?: string) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onDragEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    allowDropAttribute(value: Array<UniformDataType> | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeInt32(value_value.length as int32)
+            for (let i = 0; i < value_value.length; i++) {
+                const value_value_element : UniformDataType = value_value[i]
+                thisSerializer.writeInt32(TypeChecker.UniformDataType_ToNumeric(value_value_element))
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_allowDrop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    draggableAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_draggable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    dragPreview0Attribute(value: CustomBuilder | DragItemInfo | string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.FUNCTION == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_0))
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as DragItemInfo
+                thisSerializer.writeDragItemInfo(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_dragPreview0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    dragPreview1Attribute(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let preview_type : int32 = RuntimeType.UNDEFINED
+        preview_type = runtimeType(preview)
+        thisSerializer.writeInt8(preview_type as int32)
+        if ((RuntimeType.UNDEFINED) != (preview_type)) {
+            const preview_value  = preview!
+            let preview_value_type : int32 = RuntimeType.UNDEFINED
+            preview_value_type = runtimeType(preview_value)
+            if (RuntimeType.FUNCTION == preview_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const preview_value_0  = preview_value as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(preview_value_0))
+            }
+            else if (RuntimeType.OBJECT == preview_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const preview_value_1  = preview_value as DragItemInfo
+                thisSerializer.writeDragItemInfo(preview_value_1)
+            }
+            else if (RuntimeType.STRING == preview_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const preview_value_2  = preview_value as string
+                thisSerializer.writeString(preview_value_2)
+            }
+        }
+        let config_type : int32 = RuntimeType.UNDEFINED
+        config_type = runtimeType(config)
+        thisSerializer.writeInt8(config_type as int32)
+        if ((RuntimeType.UNDEFINED) != (config_type)) {
+            const config_value  = config!
+            thisSerializer.writePreviewConfiguration(config_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_dragPreview1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onPreDragAttribute(value: ((parameter: PreDragStatus) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onPreDrag(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    linearGradient0Attribute(value: LinearGradientOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLinearGradientOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_linearGradient0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    linearGradient1Attribute(value: LinearGradientOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLinearGradientOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_linearGradient1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    sweepGradient0Attribute(value: SweepGradientOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeSweepGradientOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_sweepGradient0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    sweepGradient1Attribute(value: SweepGradientOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeSweepGradientOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_sweepGradient1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    radialGradient0Attribute(value: RadialGradientOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeRadialGradientOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_radialGradient0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    radialGradient1Attribute(value: RadialGradientOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeRadialGradientOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_radialGradient1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    motionPathAttribute(value: MotionPathOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeMotionPathOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_motionPath(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    shadow0Attribute(value: ShadowOptions | ShadowStyle | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as ShadowOptions
+                thisSerializer.writeShadowOptions(value_value_0)
+            }
+            else if (TypeChecker.isShadowStyle(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as ShadowStyle
+                thisSerializer.writeInt32(TypeChecker.ShadowStyle_ToNumeric(value_value_1))
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_shadow0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    shadow1Attribute(value: ShadowOptions | ShadowStyle | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as ShadowOptions
+                thisSerializer.writeShadowOptions(value_value_0)
+            }
+            else if (TypeChecker.isShadowStyle(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as ShadowStyle
+                thisSerializer.writeInt32(TypeChecker.ShadowStyle_ToNumeric(value_value_1))
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_shadow1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    clip0Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_clip0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    clip1Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_clip1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    clip2Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_clip2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    clipShape0Attribute(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isCircleShape(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as CircleShape
+                thisSerializer.writeCircleShape(value_value_0)
+            }
+            else if (TypeChecker.isEllipseShape(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as EllipseShape
+                thisSerializer.writeEllipseShape(value_value_1)
+            }
+            else if (TypeChecker.isPathShape(value_value)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as PathShape
+                thisSerializer.writePathShape(value_value_2)
+            }
+            else if (TypeChecker.isRectShape(value_value)) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as RectShape
+                thisSerializer.writeRectShape(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_clipShape0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    clipShape1Attribute(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isCircleShape(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as CircleShape
+                thisSerializer.writeCircleShape(value_value_0)
+            }
+            else if (TypeChecker.isEllipseShape(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as EllipseShape
+                thisSerializer.writeEllipseShape(value_value_1)
+            }
+            else if (TypeChecker.isPathShape(value_value)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as PathShape
+                thisSerializer.writePathShape(value_value_2)
+            }
+            else if (TypeChecker.isRectShape(value_value)) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as RectShape
+                thisSerializer.writeRectShape(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_clipShape1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    mask0Attribute(value: ProgressMask | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeProgressMask(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_mask0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    mask1Attribute(value: ProgressMask | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeProgressMask(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_mask1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    mask2Attribute(value: ProgressMask | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeProgressMask(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_mask2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    maskShape0Attribute(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isCircleShape(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as CircleShape
+                thisSerializer.writeCircleShape(value_value_0)
+            }
+            else if (TypeChecker.isEllipseShape(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as EllipseShape
+                thisSerializer.writeEllipseShape(value_value_1)
+            }
+            else if (TypeChecker.isPathShape(value_value)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as PathShape
+                thisSerializer.writePathShape(value_value_2)
+            }
+            else if (TypeChecker.isRectShape(value_value)) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as RectShape
+                thisSerializer.writeRectShape(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_maskShape0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    maskShape1Attribute(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isCircleShape(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as CircleShape
+                thisSerializer.writeCircleShape(value_value_0)
+            }
+            else if (TypeChecker.isEllipseShape(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as EllipseShape
+                thisSerializer.writeEllipseShape(value_value_1)
+            }
+            else if (TypeChecker.isPathShape(value_value)) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as PathShape
+                thisSerializer.writePathShape(value_value_2)
+            }
+            else if (TypeChecker.isRectShape(value_value)) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as RectShape
+                thisSerializer.writeRectShape(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_maskShape1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    keyAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_key(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    idAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_id(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    geometryTransition0Attribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_geometryTransition0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    geometryTransition1Attribute(id: string | undefined, options?: GeometryTransitionOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let id_type : int32 = RuntimeType.UNDEFINED
+        id_type = runtimeType(id)
+        thisSerializer.writeInt8(id_type as int32)
+        if ((RuntimeType.UNDEFINED) != (id_type)) {
+            const id_value  = id!
+            thisSerializer.writeString(id_value)
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeGeometryTransitionOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_geometryTransition1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    stateStylesAttribute(value: StateStyles | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeStateStyles(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_stateStyles(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    restoreIdAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_restoreId(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    sphericalEffect0Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_sphericalEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    sphericalEffect1Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_sphericalEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    lightUpEffect0Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_lightUpEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    lightUpEffect1Attribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_lightUpEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    pixelStretchEffect0Attribute(value: PixelStretchEffectOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writePixelStretchEffectOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_pixelStretchEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    pixelStretchEffect1Attribute(value: PixelStretchEffectOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writePixelStretchEffectOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_pixelStretchEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityGroup0Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityGroup0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityGroup1Attribute(isGroup: boolean | undefined, accessibilityOptions: AccessibilityOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let isGroup_type : int32 = RuntimeType.UNDEFINED
+        isGroup_type = runtimeType(isGroup)
+        thisSerializer.writeInt8(isGroup_type as int32)
+        if ((RuntimeType.UNDEFINED) != (isGroup_type)) {
+            const isGroup_value  = isGroup!
+            thisSerializer.writeBoolean(isGroup_value)
+        }
+        let accessibilityOptions_type : int32 = RuntimeType.UNDEFINED
+        accessibilityOptions_type = runtimeType(accessibilityOptions)
+        thisSerializer.writeInt8(accessibilityOptions_type as int32)
+        if ((RuntimeType.UNDEFINED) != (accessibilityOptions_type)) {
+            const accessibilityOptions_value  = accessibilityOptions!
+            thisSerializer.writeAccessibilityOptions(accessibilityOptions_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityGroup1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityText0Attribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityText0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityText1Attribute(value: Resource | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeResource(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityText1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityNextFocusIdAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityNextFocusId(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityDefaultFocusAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityDefaultFocus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityUseSamePageAttribute(value: AccessibilitySamePageMode | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as AccessibilitySamePageMode)
+            thisSerializer.writeInt32(TypeChecker.AccessibilitySamePageMode_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityUseSamePage(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityScrollTriggerableAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityScrollTriggerable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityRoleAttribute(value: AccessibilityRoleType | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as AccessibilityRoleType)
+            thisSerializer.writeInt32(TypeChecker.AccessibilityRoleType_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityRole(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onAccessibilityFocusAttribute(value: AccessibilityFocusCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onAccessibilityFocus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityTextHintAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityTextHint(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityDescription0Attribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityDescription0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityDescription1Attribute(value: Resource | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeResource(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityDescription1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityLevelAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityLevel(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityVirtualNodeAttribute(value: CustomBuilder | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityVirtualNode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityCheckedAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityChecked(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilitySelectedAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilitySelected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    obscuredAttribute(value: Array<ObscuredReasons> | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeInt32(value_value.length as int32)
+            for (let i = 0; i < value_value.length; i++) {
+                const value_value_element : ObscuredReasons = value_value[i]
+                thisSerializer.writeInt32(TypeChecker.ObscuredReasons_ToNumeric(value_value_element))
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_obscured(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    reuseIdAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_reuseId(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    reuseAttribute(value: ReuseOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeReuseOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_reuse(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    renderFit0Attribute(value: RenderFit | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as RenderFit)
+            thisSerializer.writeInt32(TypeChecker.RenderFit_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_renderFit0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    renderFit1Attribute(value: RenderFit | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as RenderFit)
+            thisSerializer.writeInt32(TypeChecker.RenderFit_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_renderFit1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    gestureModifierAttribute(value: GestureModifier | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeGestureModifier(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_gestureModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundBrightness0Attribute(value: BackgroundBrightnessOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBackgroundBrightnessOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundBrightness0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundBrightness1Attribute(value: BackgroundBrightnessOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBackgroundBrightnessOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundBrightness1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onGestureJudgeBeginAttribute(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onGestureJudgeBegin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onGestureRecognizerJudgeBegin0Attribute(value: GestureRecognizerJudgeBeginCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onGestureRecognizerJudgeBegin0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onGestureRecognizerJudgeBegin1Attribute(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let callback__type : int32 = RuntimeType.UNDEFINED
+        callback__type = runtimeType(callback_)
+        thisSerializer.writeInt8(callback__type as int32)
+        if ((RuntimeType.UNDEFINED) != (callback__type)) {
+            const callback__value  = callback_!
+            thisSerializer.holdAndWriteCallback(callback__value)
+        }
+        let exposeInnerGesture_type : int32 = RuntimeType.UNDEFINED
+        exposeInnerGesture_type = runtimeType(exposeInnerGesture)
+        thisSerializer.writeInt8(exposeInnerGesture_type as int32)
+        if ((RuntimeType.UNDEFINED) != (exposeInnerGesture_type)) {
+            const exposeInnerGesture_value  = exposeInnerGesture!
+            thisSerializer.writeBoolean(exposeInnerGesture_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onGestureRecognizerJudgeBegin1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    shouldBuiltInRecognizerParallelWithAttribute(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_shouldBuiltInRecognizerParallelWith(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    monopolizeEventsAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_monopolizeEvents(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onTouchInterceptAttribute(value: ((parameter: TouchEvent) => HitTestMode) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onTouchIntercept(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onSizeChangeAttribute(value: SizeChangeCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onSizeChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    accessibilityFocusDrawLevelAttribute(value: FocusDrawLevel | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as FocusDrawLevel)
+            thisSerializer.writeInt32(TypeChecker.FocusDrawLevel_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityFocusDrawLevel(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    customPropertyAttribute(name: string | undefined, value: Object | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let name_type : int32 = RuntimeType.UNDEFINED
+        name_type = runtimeType(name)
+        thisSerializer.writeInt8(name_type as int32)
+        if ((RuntimeType.UNDEFINED) != (name_type)) {
+            const name_value  = name!
+            thisSerializer.writeString(name_value)
+        }
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteObject(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_customProperty(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    expandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let types_type : int32 = RuntimeType.UNDEFINED
+        types_type = runtimeType(types)
+        thisSerializer.writeInt8(types_type as int32)
+        if ((RuntimeType.UNDEFINED) != (types_type)) {
+            const types_value  = types!
+            thisSerializer.writeInt32(types_value.length as int32)
+            for (let i = 0; i < types_value.length; i++) {
+                const types_value_element : SafeAreaType = types_value[i]
+                thisSerializer.writeInt32(TypeChecker.SafeAreaType_ToNumeric(types_value_element))
+            }
+        }
+        let edges_type : int32 = RuntimeType.UNDEFINED
+        edges_type = runtimeType(edges)
+        thisSerializer.writeInt8(edges_type as int32)
+        if ((RuntimeType.UNDEFINED) != (edges_type)) {
+            const edges_value  = edges!
+            thisSerializer.writeInt32(edges_value.length as int32)
+            for (let i = 0; i < edges_value.length; i++) {
+                const edges_value_element : SafeAreaEdge = edges_value[i]
+                thisSerializer.writeInt32(TypeChecker.SafeAreaEdge_ToNumeric(edges_value_element))
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_expandSafeArea(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundAttribute(builder: CustomBuilder | undefined, options?: BackgroundOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let builder_type : int32 = RuntimeType.UNDEFINED
+        builder_type = runtimeType(builder)
+        thisSerializer.writeInt8(builder_type as int32)
+        if ((RuntimeType.UNDEFINED) != (builder_type)) {
+            const builder_value  = builder!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builder_value))
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            const options_value_align  = options_value.align
+            let options_value_align_type : int32 = RuntimeType.UNDEFINED
+            options_value_align_type = runtimeType(options_value_align)
+            thisSerializer.writeInt8(options_value_align_type as int32)
+            if ((RuntimeType.UNDEFINED) != (options_value_align_type)) {
+                const options_value_align_value  = (options_value_align as Alignment)
+                thisSerializer.writeInt32(TypeChecker.Alignment_ToNumeric(options_value_align_value))
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_background(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundImage0Attribute(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let src_type : int32 = RuntimeType.UNDEFINED
+        src_type = runtimeType(src)
+        thisSerializer.writeInt8(src_type as int32)
+        if ((RuntimeType.UNDEFINED) != (src_type)) {
+            const src_value  = src!
+            let src_value_type : int32 = RuntimeType.UNDEFINED
+            src_value_type = runtimeType(src_value)
+            if ((RuntimeType.STRING == src_value_type) || (RuntimeType.OBJECT == src_value_type)) {
+                thisSerializer.writeInt8(0 as int32)
+                const src_value_0  = src_value as ResourceStr
+                let src_value_0_type : int32 = RuntimeType.UNDEFINED
+                src_value_0_type = runtimeType(src_value_0)
+                if (RuntimeType.STRING == src_value_0_type) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const src_value_0_0  = src_value_0 as string
+                    thisSerializer.writeString(src_value_0_0)
+                }
+                else if (RuntimeType.OBJECT == src_value_0_type) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const src_value_0_1  = src_value_0 as Resource
+                    thisSerializer.writeResource(src_value_0_1)
+                }
+            }
+            else if (TypeChecker.isPixelMap(src_value, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const src_value_1  = src_value as PixelMap
+                thisSerializer.writePixelMap(src_value_1)
+            }
+        }
+        let repeat_type : int32 = RuntimeType.UNDEFINED
+        repeat_type = runtimeType(repeat)
+        thisSerializer.writeInt8(repeat_type as int32)
+        if ((RuntimeType.UNDEFINED) != (repeat_type)) {
+            const repeat_value  = (repeat as ImageRepeat)
+            thisSerializer.writeInt32(TypeChecker.ImageRepeat_ToNumeric(repeat_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundImage0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundImage1Attribute(src: ResourceStr | PixelMap | undefined, options?: BackgroundImageOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let src_type : int32 = RuntimeType.UNDEFINED
+        src_type = runtimeType(src)
+        thisSerializer.writeInt8(src_type as int32)
+        if ((RuntimeType.UNDEFINED) != (src_type)) {
+            const src_value  = src!
+            let src_value_type : int32 = RuntimeType.UNDEFINED
+            src_value_type = runtimeType(src_value)
+            if ((RuntimeType.STRING == src_value_type) || (RuntimeType.OBJECT == src_value_type)) {
+                thisSerializer.writeInt8(0 as int32)
+                const src_value_0  = src_value as ResourceStr
+                let src_value_0_type : int32 = RuntimeType.UNDEFINED
+                src_value_0_type = runtimeType(src_value_0)
+                if (RuntimeType.STRING == src_value_0_type) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const src_value_0_0  = src_value_0 as string
+                    thisSerializer.writeString(src_value_0_0)
+                }
+                else if (RuntimeType.OBJECT == src_value_0_type) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const src_value_0_1  = src_value_0 as Resource
+                    thisSerializer.writeResource(src_value_0_1)
+                }
+            }
+            else if (TypeChecker.isPixelMap(src_value, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const src_value_1  = src_value as PixelMap
+                thisSerializer.writePixelMap(src_value_1)
+            }
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeBackgroundImageOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundImage1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundBlurStyle0Attribute(value: BlurStyle | undefined, options?: BackgroundBlurStyleOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as BlurStyle)
+            thisSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_value))
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeBackgroundBlurStyleOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundBlurStyle0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundBlurStyle1Attribute(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let style_type : int32 = RuntimeType.UNDEFINED
+        style_type = runtimeType(style)
+        thisSerializer.writeInt8(style_type as int32)
+        if ((RuntimeType.UNDEFINED) != (style_type)) {
+            const style_value  = (style as BlurStyle)
+            thisSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(style_value))
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeBackgroundBlurStyleOptions(options_value)
+        }
+        let sysOptions_type : int32 = RuntimeType.UNDEFINED
+        sysOptions_type = runtimeType(sysOptions)
+        thisSerializer.writeInt8(sysOptions_type as int32)
+        if ((RuntimeType.UNDEFINED) != (sysOptions_type)) {
+            const sysOptions_value  = sysOptions!
+            thisSerializer.writeSystemAdaptiveOptions(sysOptions_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundBlurStyle1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    foregroundBlurStyle0Attribute(value: BlurStyle | undefined, options?: ForegroundBlurStyleOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as BlurStyle)
+            thisSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_value))
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeForegroundBlurStyleOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_foregroundBlurStyle0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    foregroundBlurStyle1Attribute(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let style_type : int32 = RuntimeType.UNDEFINED
+        style_type = runtimeType(style)
+        thisSerializer.writeInt8(style_type as int32)
+        if ((RuntimeType.UNDEFINED) != (style_type)) {
+            const style_value  = (style as BlurStyle)
+            thisSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(style_value))
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeForegroundBlurStyleOptions(options_value)
+        }
+        let sysOptions_type : int32 = RuntimeType.UNDEFINED
+        sysOptions_type = runtimeType(sysOptions)
+        thisSerializer.writeInt8(sysOptions_type as int32)
+        if ((RuntimeType.UNDEFINED) != (sysOptions_type)) {
+            const sysOptions_value  = sysOptions!
+            thisSerializer.writeSystemAdaptiveOptions(sysOptions_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_foregroundBlurStyle1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    focusScopeId0Attribute(id: string | undefined, isGroup?: boolean): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let id_type : int32 = RuntimeType.UNDEFINED
+        id_type = runtimeType(id)
+        thisSerializer.writeInt8(id_type as int32)
+        if ((RuntimeType.UNDEFINED) != (id_type)) {
+            const id_value  = id!
+            thisSerializer.writeString(id_value)
+        }
+        let isGroup_type : int32 = RuntimeType.UNDEFINED
+        isGroup_type = runtimeType(isGroup)
+        thisSerializer.writeInt8(isGroup_type as int32)
+        if ((RuntimeType.UNDEFINED) != (isGroup_type)) {
+            const isGroup_value  = isGroup!
+            thisSerializer.writeBoolean(isGroup_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_focusScopeId0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    focusScopeId1Attribute(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let id_type : int32 = RuntimeType.UNDEFINED
+        id_type = runtimeType(id)
+        thisSerializer.writeInt8(id_type as int32)
+        if ((RuntimeType.UNDEFINED) != (id_type)) {
+            const id_value  = id!
+            thisSerializer.writeString(id_value)
+        }
+        let isGroup_type : int32 = RuntimeType.UNDEFINED
+        isGroup_type = runtimeType(isGroup)
+        thisSerializer.writeInt8(isGroup_type as int32)
+        if ((RuntimeType.UNDEFINED) != (isGroup_type)) {
+            const isGroup_value  = isGroup!
+            thisSerializer.writeBoolean(isGroup_value)
+        }
+        let arrowStepOut_type : int32 = RuntimeType.UNDEFINED
+        arrowStepOut_type = runtimeType(arrowStepOut)
+        thisSerializer.writeInt8(arrowStepOut_type as int32)
+        if ((RuntimeType.UNDEFINED) != (arrowStepOut_type)) {
+            const arrowStepOut_value  = arrowStepOut!
+            thisSerializer.writeBoolean(arrowStepOut_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_focusScopeId1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    focusScopePriorityAttribute(scopeId: string | undefined, priority?: FocusPriority): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let scopeId_type : int32 = RuntimeType.UNDEFINED
+        scopeId_type = runtimeType(scopeId)
+        thisSerializer.writeInt8(scopeId_type as int32)
+        if ((RuntimeType.UNDEFINED) != (scopeId_type)) {
+            const scopeId_value  = scopeId!
+            thisSerializer.writeString(scopeId_value)
+        }
+        let priority_type : int32 = RuntimeType.UNDEFINED
+        priority_type = runtimeType(priority)
+        thisSerializer.writeInt8(priority_type as int32)
+        if ((RuntimeType.UNDEFINED) != (priority_type)) {
+            const priority_value  = (priority as FocusPriority)
+            thisSerializer.writeInt32(TypeChecker.FocusPriority_ToNumeric(priority_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_focusScopePriority(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    blur0Attribute(value: number | undefined, options?: BlurOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeBlurOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_blur0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    blur1Attribute(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let blurRadius_type : int32 = RuntimeType.UNDEFINED
+        blurRadius_type = runtimeType(blurRadius)
+        thisSerializer.writeInt8(blurRadius_type as int32)
+        if ((RuntimeType.UNDEFINED) != (blurRadius_type)) {
+            const blurRadius_value  = blurRadius!
+            thisSerializer.writeNumber(blurRadius_value)
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeBlurOptions(options_value)
+        }
+        let sysOptions_type : int32 = RuntimeType.UNDEFINED
+        sysOptions_type = runtimeType(sysOptions)
+        thisSerializer.writeInt8(sysOptions_type as int32)
+        if ((RuntimeType.UNDEFINED) != (sysOptions_type)) {
+            const sysOptions_value  = sysOptions!
+            thisSerializer.writeSystemAdaptiveOptions(sysOptions_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_blur1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    linearGradientBlur0Attribute(value: number | undefined, options: LinearGradientBlurOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeLinearGradientBlurOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_linearGradientBlur0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    linearGradientBlur1Attribute(blurRadius: number | undefined, options: LinearGradientBlurOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let blurRadius_type : int32 = RuntimeType.UNDEFINED
+        blurRadius_type = runtimeType(blurRadius)
+        thisSerializer.writeInt8(blurRadius_type as int32)
+        if ((RuntimeType.UNDEFINED) != (blurRadius_type)) {
+            const blurRadius_value  = blurRadius!
+            thisSerializer.writeNumber(blurRadius_value)
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeLinearGradientBlurOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_linearGradientBlur1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    systemBarEffectAttribute(): void {
+        ArkUIGeneratedNativeModule._CommonMethod_systemBarEffect(this.peer.ptr)
+    }
+    backdropBlur0Attribute(value: number | undefined, options?: BlurOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeBlurOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backdropBlur0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backdropBlur1Attribute(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let radius_type : int32 = RuntimeType.UNDEFINED
+        radius_type = runtimeType(radius)
+        thisSerializer.writeInt8(radius_type as int32)
+        if ((RuntimeType.UNDEFINED) != (radius_type)) {
+            const radius_value  = radius!
+            thisSerializer.writeNumber(radius_value)
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeBlurOptions(options_value)
+        }
+        let sysOptions_type : int32 = RuntimeType.UNDEFINED
+        sysOptions_type = runtimeType(sysOptions)
+        thisSerializer.writeInt8(sysOptions_type as int32)
+        if ((RuntimeType.UNDEFINED) != (sysOptions_type)) {
+            const sysOptions_value  = sysOptions!
+            thisSerializer.writeSystemAdaptiveOptions(sysOptions_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_backdropBlur1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    sharedTransitionAttribute(id: string | undefined, options?: sharedTransitionOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let id_type : int32 = RuntimeType.UNDEFINED
+        id_type = runtimeType(id)
+        thisSerializer.writeInt8(id_type as int32)
+        if ((RuntimeType.UNDEFINED) != (id_type)) {
+            const id_value  = id!
+            thisSerializer.writeString(id_value)
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writesharedTransitionOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_sharedTransition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    chainModeAttribute(direction: Axis | undefined, style: ChainStyle | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let direction_type : int32 = RuntimeType.UNDEFINED
+        direction_type = runtimeType(direction)
+        thisSerializer.writeInt8(direction_type as int32)
+        if ((RuntimeType.UNDEFINED) != (direction_type)) {
+            const direction_value  = (direction as Axis)
+            thisSerializer.writeInt32(TypeChecker.Axis_ToNumeric(direction_value))
+        }
+        let style_type : int32 = RuntimeType.UNDEFINED
+        style_type = runtimeType(style)
+        thisSerializer.writeInt8(style_type as int32)
+        if ((RuntimeType.UNDEFINED) != (style_type)) {
+            const style_value  = (style as ChainStyle)
+            thisSerializer.writeInt32(TypeChecker.ChainStyle_ToNumeric(style_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_chainMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    dragPreviewOptionsAttribute(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeDragPreviewOptions(value_value)
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeDragInteractionOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_dragPreviewOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    overlayAttribute(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as string
+                thisSerializer.writeString(value_value_0)
+            }
+            else if (RuntimeType.FUNCTION == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_1))
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as ComponentContent
+                thisSerializer.writeComponentContent(value_value_2)
+            }
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeOverlayOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_overlay(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    blendMode0Attribute(value: BlendMode | undefined, type?: BlendApplyType): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as BlendMode)
+            thisSerializer.writeInt32(TypeChecker.BlendMode_ToNumeric(value_value))
+        }
+        let type_type : int32 = RuntimeType.UNDEFINED
+        type_type = runtimeType(type)
+        thisSerializer.writeInt8(type_type as int32)
+        if ((RuntimeType.UNDEFINED) != (type_type)) {
+            const type_value  = (type as BlendApplyType)
+            thisSerializer.writeInt32(TypeChecker.BlendApplyType_ToNumeric(type_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_blendMode0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    blendMode1Attribute(mode: BlendMode | undefined, type?: BlendApplyType): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let mode_type : int32 = RuntimeType.UNDEFINED
+        mode_type = runtimeType(mode)
+        thisSerializer.writeInt8(mode_type as int32)
+        if ((RuntimeType.UNDEFINED) != (mode_type)) {
+            const mode_value  = (mode as BlendMode)
+            thisSerializer.writeInt32(TypeChecker.BlendMode_ToNumeric(mode_value))
+        }
+        let type_type : int32 = RuntimeType.UNDEFINED
+        type_type = runtimeType(type)
+        thisSerializer.writeInt8(type_type as int32)
+        if ((RuntimeType.UNDEFINED) != (type_type)) {
+            const type_value  = (type as BlendApplyType)
+            thisSerializer.writeInt32(TypeChecker.BlendApplyType_ToNumeric(type_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_blendMode1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    advancedBlendModeAttribute(effect: BlendMode | BrightnessBlender | undefined, type?: BlendApplyType): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let effect_type : int32 = RuntimeType.UNDEFINED
+        effect_type = runtimeType(effect)
+        thisSerializer.writeInt8(effect_type as int32)
+        if ((RuntimeType.UNDEFINED) != (effect_type)) {
+            const effect_value  = effect!
+            let effect_value_type : int32 = RuntimeType.UNDEFINED
+            effect_value_type = runtimeType(effect_value)
+            if (TypeChecker.isBlendMode(effect_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const effect_value_0  = effect_value as BlendMode
+                thisSerializer.writeInt32(TypeChecker.BlendMode_ToNumeric(effect_value_0))
+            }
+            else if (RuntimeType.OBJECT == effect_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const effect_value_1  = effect_value as BrightnessBlender
+                thisSerializer.writeBrightnessBlender(effect_value_1)
+            }
+        }
+        let type_type : int32 = RuntimeType.UNDEFINED
+        type_type = runtimeType(type)
+        thisSerializer.writeInt8(type_type as int32)
+        if ((RuntimeType.UNDEFINED) != (type_type)) {
+            const type_value  = (type as BlendApplyType)
+            thisSerializer.writeInt32(TypeChecker.BlendApplyType_ToNumeric(type_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_advancedBlendMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    bindTipsAttribute(message: TipsMessageType | undefined, options?: TipsOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let message_type : int32 = RuntimeType.UNDEFINED
+        message_type = runtimeType(message)
+        thisSerializer.writeInt8(message_type as int32)
+        if ((RuntimeType.UNDEFINED) != (message_type)) {
+            const message_value  = message!
+            let message_value_type : int32 = RuntimeType.UNDEFINED
+            message_value_type = runtimeType(message_value)
+            if ((RuntimeType.STRING == message_value_type) || (RuntimeType.OBJECT == message_value_type)) {
+                thisSerializer.writeInt8(0 as int32)
+                const message_value_0  = message_value as ResourceStr
+                let message_value_0_type : int32 = RuntimeType.UNDEFINED
+                message_value_0_type = runtimeType(message_value_0)
+                if (RuntimeType.STRING == message_value_0_type) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const message_value_0_0  = message_value_0 as string
+                    thisSerializer.writeString(message_value_0_0)
+                }
+                else if (RuntimeType.OBJECT == message_value_0_type) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const message_value_0_1  = message_value_0 as Resource
+                    thisSerializer.writeResource(message_value_0_1)
+                }
+            }
+            else if (TypeChecker.isStyledString(message_value, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const message_value_1  = message_value as StyledString
+                thisSerializer.writeStyledString(message_value_1)
+            }
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeTipsOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_bindTips(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    bindPopupAttribute(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let show_type : int32 = RuntimeType.UNDEFINED
+        show_type = runtimeType(show)
+        thisSerializer.writeInt8(show_type as int32)
+        if ((RuntimeType.UNDEFINED) != (show_type)) {
+            const show_value  = show!
+            thisSerializer.writeBoolean(show_value)
+        }
+        let popup_type : int32 = RuntimeType.UNDEFINED
+        popup_type = runtimeType(popup)
+        thisSerializer.writeInt8(popup_type as int32)
+        if ((RuntimeType.UNDEFINED) != (popup_type)) {
+            const popup_value  = popup!
+            let popup_value_type : int32 = RuntimeType.UNDEFINED
+            popup_value_type = runtimeType(popup_value)
+            if (TypeChecker.isPopupOptions(popup_value, false, false, true, false, false, true, true, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true)) {
+                thisSerializer.writeInt8(0 as int32)
+                const popup_value_0  = popup_value as PopupOptions
+                thisSerializer.writePopupOptions(popup_value_0)
+            }
+            else if (TypeChecker.isCustomPopupOptions(popup_value, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true)) {
+                thisSerializer.writeInt8(1 as int32)
+                const popup_value_1  = popup_value as CustomPopupOptions
+                thisSerializer.writeCustomPopupOptions(popup_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_bindPopup(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    bindMenu0Attribute(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let content_type : int32 = RuntimeType.UNDEFINED
+        content_type = runtimeType(content)
+        thisSerializer.writeInt8(content_type as int32)
+        if ((RuntimeType.UNDEFINED) != (content_type)) {
+            const content_value  = content!
+            let content_value_type : int32 = RuntimeType.UNDEFINED
+            content_value_type = runtimeType(content_value)
+            if (RuntimeType.OBJECT == content_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const content_value_0  = content_value as Array<MenuElement>
+                thisSerializer.writeInt32(content_value_0.length as int32)
+                for (let i = 0; i < content_value_0.length; i++) {
+                    const content_value_0_element : MenuElement = content_value_0[i]
+                    thisSerializer.writeMenuElement(content_value_0_element)
+                }
+            }
+            else if (RuntimeType.FUNCTION == content_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const content_value_1  = content_value as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(content_value_1))
+            }
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeMenuOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_bindMenu0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    bindMenu1Attribute(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let isShow_type : int32 = RuntimeType.UNDEFINED
+        isShow_type = runtimeType(isShow)
+        thisSerializer.writeInt8(isShow_type as int32)
+        if ((RuntimeType.UNDEFINED) != (isShow_type)) {
+            const isShow_value  = isShow!
+            thisSerializer.writeBoolean(isShow_value)
+        }
+        let content_type : int32 = RuntimeType.UNDEFINED
+        content_type = runtimeType(content)
+        thisSerializer.writeInt8(content_type as int32)
+        if ((RuntimeType.UNDEFINED) != (content_type)) {
+            const content_value  = content!
+            let content_value_type : int32 = RuntimeType.UNDEFINED
+            content_value_type = runtimeType(content_value)
+            if (RuntimeType.OBJECT == content_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const content_value_0  = content_value as Array<MenuElement>
+                thisSerializer.writeInt32(content_value_0.length as int32)
+                for (let i = 0; i < content_value_0.length; i++) {
+                    const content_value_0_element : MenuElement = content_value_0[i]
+                    thisSerializer.writeMenuElement(content_value_0_element)
+                }
+            }
+            else if (RuntimeType.FUNCTION == content_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const content_value_1  = content_value as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(content_value_1))
+            }
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeMenuOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_bindMenu1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    bindContextMenu0Attribute(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let content_type : int32 = RuntimeType.UNDEFINED
+        content_type = runtimeType(content)
+        thisSerializer.writeInt8(content_type as int32)
+        if ((RuntimeType.UNDEFINED) != (content_type)) {
+            const content_value  = content!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(content_value))
+        }
+        let responseType_type : int32 = RuntimeType.UNDEFINED
+        responseType_type = runtimeType(responseType)
+        thisSerializer.writeInt8(responseType_type as int32)
+        if ((RuntimeType.UNDEFINED) != (responseType_type)) {
+            const responseType_value  = (responseType as ResponseType)
+            thisSerializer.writeInt32(TypeChecker.ResponseType_ToNumeric(responseType_value))
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeContextMenuOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_bindContextMenu0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    bindContextMenu1Attribute(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let isShown_type : int32 = RuntimeType.UNDEFINED
+        isShown_type = runtimeType(isShown)
+        thisSerializer.writeInt8(isShown_type as int32)
+        if ((RuntimeType.UNDEFINED) != (isShown_type)) {
+            const isShown_value  = isShown!
+            thisSerializer.writeBoolean(isShown_value)
+        }
+        let content_type : int32 = RuntimeType.UNDEFINED
+        content_type = runtimeType(content)
+        thisSerializer.writeInt8(content_type as int32)
+        if ((RuntimeType.UNDEFINED) != (content_type)) {
+            const content_value  = content!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(content_value))
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeContextMenuOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_bindContextMenu1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    bindContentCover0Attribute(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let isShow_type : int32 = RuntimeType.UNDEFINED
+        isShow_type = runtimeType(isShow)
+        thisSerializer.writeInt8(isShow_type as int32)
+        if ((RuntimeType.UNDEFINED) != (isShow_type)) {
+            const isShow_value  = isShow!
+            thisSerializer.writeBoolean(isShow_value)
+        }
+        let builder_type : int32 = RuntimeType.UNDEFINED
+        builder_type = runtimeType(builder)
+        thisSerializer.writeInt8(builder_type as int32)
+        if ((RuntimeType.UNDEFINED) != (builder_type)) {
+            const builder_value  = builder!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builder_value))
+        }
+        let type_type : int32 = RuntimeType.UNDEFINED
+        type_type = runtimeType(type)
+        thisSerializer.writeInt8(type_type as int32)
+        if ((RuntimeType.UNDEFINED) != (type_type)) {
+            const type_value  = (type as ModalTransition)
+            thisSerializer.writeInt32(TypeChecker.ModalTransition_ToNumeric(type_value))
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_bindContentCover0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    bindContentCover1Attribute(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: ContentCoverOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let isShow_type : int32 = RuntimeType.UNDEFINED
+        isShow_type = runtimeType(isShow)
+        thisSerializer.writeInt8(isShow_type as int32)
+        if ((RuntimeType.UNDEFINED) != (isShow_type)) {
+            const isShow_value  = isShow!
+            thisSerializer.writeBoolean(isShow_value)
+        }
+        let builder_type : int32 = RuntimeType.UNDEFINED
+        builder_type = runtimeType(builder)
+        thisSerializer.writeInt8(builder_type as int32)
+        if ((RuntimeType.UNDEFINED) != (builder_type)) {
+            const builder_value  = builder!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builder_value))
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeContentCoverOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_bindContentCover1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    bindSheetAttribute(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let isShow_type : int32 = RuntimeType.UNDEFINED
+        isShow_type = runtimeType(isShow)
+        thisSerializer.writeInt8(isShow_type as int32)
+        if ((RuntimeType.UNDEFINED) != (isShow_type)) {
+            const isShow_value  = isShow!
+            thisSerializer.writeBoolean(isShow_value)
+        }
+        let builder_type : int32 = RuntimeType.UNDEFINED
+        builder_type = runtimeType(builder)
+        thisSerializer.writeInt8(builder_type as int32)
+        if ((RuntimeType.UNDEFINED) != (builder_type)) {
+            const builder_value  = builder!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builder_value))
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeSheetOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_bindSheet(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onVisibleAreaChangeAttribute(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let ratios_type : int32 = RuntimeType.UNDEFINED
+        ratios_type = runtimeType(ratios)
+        thisSerializer.writeInt8(ratios_type as int32)
+        if ((RuntimeType.UNDEFINED) != (ratios_type)) {
+            const ratios_value  = ratios!
+            thisSerializer.writeInt32(ratios_value.length as int32)
+            for (let i = 0; i < ratios_value.length; i++) {
+                const ratios_value_element : number = ratios_value[i]
+                thisSerializer.writeNumber(ratios_value_element)
+            }
+        }
+        let event_type : int32 = RuntimeType.UNDEFINED
+        event_type = runtimeType(event)
+        thisSerializer.writeInt8(event_type as int32)
+        if ((RuntimeType.UNDEFINED) != (event_type)) {
+            const event_value  = event!
+            thisSerializer.holdAndWriteCallback(event_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onVisibleAreaChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onVisibleAreaApproximateChangeAttribute(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeVisibleAreaEventOptions(options_value)
+        }
+        let event_type : int32 = RuntimeType.UNDEFINED
+        event_type = runtimeType(event)
+        thisSerializer.writeInt8(event_type as int32)
+        if ((RuntimeType.UNDEFINED) != (event_type)) {
+            const event_value  = event!
+            thisSerializer.holdAndWriteCallback(event_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_onVisibleAreaApproximateChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    keyboardShortcutAttribute(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as string
+                thisSerializer.writeString(value_value_0)
+            }
+            else if (TypeChecker.isFunctionKey(value_value)) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as FunctionKey
+                thisSerializer.writeInt32(TypeChecker.FunctionKey_ToNumeric(value_value_1))
+            }
+        }
+        let keys_type : int32 = RuntimeType.UNDEFINED
+        keys_type = runtimeType(keys)
+        thisSerializer.writeInt8(keys_type as int32)
+        if ((RuntimeType.UNDEFINED) != (keys_type)) {
+            const keys_value  = keys!
+            thisSerializer.writeInt32(keys_value.length as int32)
+            for (let i = 0; i < keys_value.length; i++) {
+                const keys_value_element : ModifierKey = keys_value[i]
+                thisSerializer.writeInt32(TypeChecker.ModifierKey_ToNumeric(keys_value_element))
+            }
+        }
+        let action_type : int32 = RuntimeType.UNDEFINED
+        action_type = runtimeType(action)
+        thisSerializer.writeInt8(action_type as int32)
+        if ((RuntimeType.UNDEFINED) != (action_type)) {
+            const action_value  = action!
+            thisSerializer.holdAndWriteCallback(action_value)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_keyboardShortcut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export class ArkCommonPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkCommonPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._Common_construct(peerId, flags)
+        const _peer  = new ArkCommonPeer(_peerPtr, peerId, "Common", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setCommonOptionsAttribute(): void {
+        ArkUIGeneratedNativeModule._CommonInterface_setCommonOptions(this.peer.ptr)
+    }
+}
+export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkCommonShapeMethodPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._CommonShapeMethod_construct(peerId, flags)
+        const _peer  = new ArkCommonShapeMethodPeer(_peerPtr, peerId, "CommonShapeMethod", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    strokeAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonShapeMethod_stroke(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    fillAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonShapeMethod_fill(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    strokeDashOffsetAttribute(value: number | string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeDashOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    strokeLineCapAttribute(value: LineCapStyle | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as LineCapStyle)
+            thisSerializer.writeInt32(TypeChecker.LineCapStyle_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeLineCap(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    strokeLineJoinAttribute(value: LineJoinStyle | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as LineJoinStyle)
+            thisSerializer.writeInt32(TypeChecker.LineJoinStyle_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeLineJoin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    strokeMiterLimitAttribute(value: number | string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeMiterLimit(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    strokeOpacityAttribute(value: number | string | Resource | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as Resource
+                thisSerializer.writeResource(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeOpacity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    fillOpacityAttribute(value: number | string | Resource | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as Resource
+                thisSerializer.writeResource(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonShapeMethod_fillOpacity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    strokeWidthAttribute(value: Length | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLength(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    antiAliasAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CommonShapeMethod_antiAlias(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    strokeDashArrayAttribute(value: Array<Length> | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeInt32(value_value.length as int32)
+            for (let i = 0; i < value_value.length; i++) {
+                const value_value_element : Length = value_value[i]
+                thisSerializer.writeLength(value_value_element)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeDashArray(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkScrollableCommonMethodPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._ScrollableCommonMethod_construct(peerId, flags)
+        const _peer  = new ArkScrollableCommonMethodPeer(_peerPtr, peerId, "ScrollableCommonMethod", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    scrollBarAttribute(value: BarState | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as BarState)
+            thisSerializer.writeInt32(TypeChecker.BarState_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_scrollBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    scrollBarColorAttribute(value: Color | number | string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_scrollBarColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    scrollBarWidthAttribute(value: number | string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_scrollBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    nestedScrollAttribute(value: NestedScrollOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNestedScrollOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_nestedScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enableScrollInteractionAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_enableScrollInteraction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    frictionAttribute(value: number | Resource | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Resource
+                thisSerializer.writeResource(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_friction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onScrollAttribute(value: ((first: number,last: number) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onReachStartAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onReachStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onReachEndAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onReachEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onScrollStartAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onScrollStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onScrollStopAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onScrollStop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    flingSpeedLimitAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_flingSpeedLimit(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    clipContentAttribute(value: ContentClipMode | RectShape | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isContentClipMode(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as ContentClipMode
+                thisSerializer.writeInt32(TypeChecker.ContentClipMode_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as RectShape
+                thisSerializer.writeRectShape(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_clipContent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    digitalCrownSensitivityAttribute(value: CrownSensitivity | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as CrownSensitivity)
+            thisSerializer.writeInt32(TypeChecker.CrownSensitivity_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_digitalCrownSensitivity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backToTopAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_backToTop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    edgeEffectAttribute(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let edgeEffect_type : int32 = RuntimeType.UNDEFINED
+        edgeEffect_type = runtimeType(edgeEffect)
+        thisSerializer.writeInt8(edgeEffect_type as int32)
+        if ((RuntimeType.UNDEFINED) != (edgeEffect_type)) {
+            const edgeEffect_value  = (edgeEffect as EdgeEffect)
+            thisSerializer.writeInt32(TypeChecker.EdgeEffect_ToNumeric(edgeEffect_value))
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeEdgeEffectOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_edgeEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    fadingEdgeAttribute(enabled: boolean | undefined, options?: FadingEdgeOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let enabled_type : int32 = RuntimeType.UNDEFINED
+        enabled_type = runtimeType(enabled)
+        thisSerializer.writeInt8(enabled_type as int32)
+        if ((RuntimeType.UNDEFINED) != (enabled_type)) {
+            const enabled_value  = enabled!
+            thisSerializer.writeBoolean(enabled_value)
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeFadingEdgeOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_fadingEdge(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export interface ComponentOptions {
     freezeWhenInactive: boolean;
 }
@@ -2666,12 +6960,15 @@ export interface ProvideOptions {
     allowOverride?: string;
 }
 export interface AnimatableArithmetic<T> {
+    plus(rhs:AnimatableArithmetic<T>): AnimatableArithmetic<T>;
+    subtract(rhs:AnimatableArithmetic<T>): AnimatableArithmetic<T>;
+    multiply(scale:number): AnimatableArithmetic<T>;
+    equals(rhs:AnimatableArithmetic<T>): boolean;
 }
-// declare function getContext(arg0: Object): Context
-export interface Context {
-    _ContextStub: string;
+export type ReuseIdCallback = () => string;
+export interface ReuseOptions {
+    reuseId?: ReuseIdCallback;
 }
-// declare function postCardAction(arg0: Object, arg1: Object): void
 export interface Configuration {
     colorMode: string;
     fontScale: number;
@@ -2687,8 +6984,138 @@ export interface ExpectedFrameRateRange {
     max: number;
     expected: number;
 }
-// declare function dollar_r(arg0: string, arg1: Array<object>): Resource
-// declare function dollar_rawfile(arg0: string): Resource
+export enum AccessibilitySamePageMode {
+    SEMI_SILENT = 0,
+    FULL_SILENT = 1
+}
+export enum AccessibilityRoleType {
+    ACTION_SHEET = 0,
+    ALERT_DIALOG = 1,
+    INDEXER_COMPONENT = 2,
+    BADGE_COMPONENT = 3,
+    BLANK = 4,
+    BUTTON = 5,
+    BACK_BUTTON = 6,
+    SHEET_DRAG_BAR = 7,
+    CALENDAR_PICKER = 8,
+    CALENDAR = 9,
+    CANVAS = 10,
+    CANVAS_GRADIENT = 11,
+    CANVAS_PATTERN = 12,
+    CHECKBOX = 13,
+    CHECKBOX_GROUP = 14,
+    CIRCLE = 15,
+    COLUMN_SPLIT = 16,
+    COLUMN = 17,
+    CANVAS_RENDERING_CONTEXT_2D = 18,
+    CHART = 19,
+    COUNTER = 20,
+    CONTAINER_MODAL = 21,
+    DATA_PANEL = 22,
+    DATE_PICKER = 23,
+    DIALOG = 24,
+    DIVIDER = 25,
+    DRAG_BAR = 26,
+    EFFECT_COMPONENT = 27,
+    ELLIPSE = 28,
+    FLEX = 29,
+    FLOW_ITEM = 30,
+    FORM_COMPONENT = 31,
+    FORM_LINK = 32,
+    GAUGE = 33,
+    GRID = 34,
+    GRID_COL = 35,
+    GRID_CONTAINER = 36,
+    GRID_ITEM = 37,
+    GRID_ROW = 38,
+    HYPERLINK = 39,
+    IMAGE = 40,
+    IMAGE_ANIMATOR = 41,
+    IMAGE_BITMAP = 42,
+    IMAGE_DATA = 43,
+    IMAGE_SPAN = 44,
+    LABEL = 45,
+    LINE = 46,
+    LIST = 47,
+    LIST_ITEM = 48,
+    LIST_ITEM_GROUP = 49,
+    LOADING_PROGRESS = 50,
+    MARQUEE = 51,
+    MATRIX2D = 52,
+    MENU = 53,
+    MENU_ITEM = 54,
+    MENU_ITEM_GROUP = 55,
+    NAV_DESTINATION = 56,
+    NAV_ROUTER = 57,
+    NAVIGATION = 58,
+    NAVIGATION_BAR = 59,
+    NAVIGATION_MENU = 60,
+    NAVIGATOR = 61,
+    OFFSCREEN_CANVAS = 62,
+    OFFSCREEN_CANVAS_RENDERING_CONTEXT2D = 63,
+    OPTION = 64,
+    PANEL = 65,
+    PAPER_PAGE = 66,
+    PATH = 67,
+    PATH2D = 68,
+    PATTERN_LOCK = 69,
+    PICKER = 70,
+    PICKER_VIEW = 71,
+    PLUGIN_COMPONENT = 72,
+    POLYGON = 73,
+    POLYLINE = 74,
+    POPUP = 75,
+    PROGRESS = 76,
+    QRCODE = 77,
+    RADIO = 78,
+    RATING = 79,
+    RECT = 80,
+    REFRESH = 81,
+    RELATIVE_CONTAINER = 82,
+    REMOTE_WINDOW = 83,
+    RICH_EDITOR = 84,
+    RICH_TEXT = 85,
+    ROLE_PAGER = 86,
+    ROW = 87,
+    ROW_SPLIT = 88,
+    SCROLL = 89,
+    SCROLL_BAR = 90,
+    SEARCH = 91,
+    SEARCH_FIELD = 92,
+    SELECT = 93,
+    SHAPE = 94,
+    SIDEBAR_CONTAINER = 95,
+    SLIDER = 96,
+    SPAN = 97,
+    STACK = 98,
+    STEPPER = 99,
+    STEPPER_ITEM = 100,
+    SWIPER = 101,
+    SWIPER_INDICATOR = 102,
+    SWITCH = 103,
+    SYMBOL_GLYPH = 104,
+    TAB_CONTENT = 105,
+    TAB_BAR = 106,
+    TABS = 107,
+    TEXT = 108,
+    TEXT_CLOCK = 109,
+    TEXT_ENTRY = 110,
+    TEXT_INPUT = 111,
+    TEXT_PICKER = 112,
+    TEXT_TIMER = 113,
+    TEXT_AREA = 114,
+    TEXT_FIELD = 115,
+    TIME_PICKER = 116,
+    TITLE_BAR = 117,
+    TOGGLER = 118,
+    UI_EXTENSION_COMPONENT = 119,
+    VIDEO = 120,
+    WATER_FLOW = 121,
+    WEB = 122,
+    XCOMPONENT = 123,
+    ROLE_NONE = 124
+}
+export type AccessibilityFocusCallback = (isFocus: boolean) => void;
 export enum FinishCallbackType {
     REMOVED = 0,
     LOGICALLY = 1
@@ -2727,6 +7154,34 @@ export interface GeometryTransitionOptions {
     follow?: boolean;
     hierarchyStrategy?: TransitionHierarchyStrategy;
 }
+export type Tuple_ResourceColor_Number = [
+    ResourceColor,
+    number
+]
+export interface LinearGradientOptions {
+    angle?: number | string;
+    direction?: GradientDirection;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
+}
+export type Tuple_Length_Length = [
+    Length,
+    Length
+]
+export interface SweepGradientOptions {
+    center: [ Length, Length ];
+    start?: number | string;
+    end?: number | string;
+    rotation?: number | string;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
+}
+export interface RadialGradientOptions {
+    center: [ Length, Length ];
+    radius: Length;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
+}
 export enum TransitionHierarchyStrategy {
     NONE = 0,
     ADAPTIVE = 1
@@ -2743,21 +7198,21 @@ export interface ScaleOptions {
     centerX?: number | string;
     centerY?: number | string;
 }
-export interface Literal_String_anchor_HorizontalAlign_align {
+export interface HorizontalAlignOptions {
     anchor: string;
     align: HorizontalAlign;
 }
-export interface Literal_String_anchor_VerticalAlign_align {
+export interface VerticalAlignOptions {
     anchor: string;
     align: VerticalAlign;
 }
 export interface AlignRuleOption {
-    left?: Literal_String_anchor_HorizontalAlign_align;
-    right?: Literal_String_anchor_HorizontalAlign_align;
-    middle?: Literal_String_anchor_HorizontalAlign_align;
-    top?: Literal_String_anchor_VerticalAlign_align;
-    bottom?: Literal_String_anchor_VerticalAlign_align;
-    center?: Literal_String_anchor_VerticalAlign_align;
+    left?: HorizontalAlignOptions;
+    right?: HorizontalAlignOptions;
+    middle?: HorizontalAlignOptions;
+    top?: VerticalAlignOptions;
+    bottom?: VerticalAlignOptions;
+    center?: VerticalAlignOptions;
     bias?: Bias;
 }
 export interface LocalizedHorizontalAlignParam {
@@ -2845,26 +7300,17 @@ export enum PreDragStatus {
     PREVIEW_LIFT_FINISHED = 3,
     PREVIEW_LANDING_STARTED = 4,
     PREVIEW_LANDING_FINISHED = 5,
-    ACTION_CANCELED_BEFORE_DRAG = 6
+    ACTION_CANCELED_BEFORE_DRAG = 6,
+    PREPARING_FOR_DRAG_DETECTION = 7
 }
 export interface DragItemInfo {
     pixelMap?: PixelMap;
     builder?: CustomBuilder;
     extraInfo?: string;
 }
-// declare function animateTo(arg0: AnimateParam, arg1: (() => void)): void
-// declare function animateToImmediately(arg0: AnimateParam, arg1: (() => void)): void
-// declare function vp2px(arg0: number): number
-// declare function px2vp(arg0: number): number
-// declare function fp2px(arg0: number): number
-// declare function px2fp(arg0: number): number
-// declare function lpx2px(arg0: number): number
-// declare function px2lpx(arg0: number): number
-declare function requestFocus(arg0: string): boolean
-declare function setCursor(arg0: PointerStyle): void
-declare function restoreDefault(): void
 export interface EventTarget {
     area: Area;
+    id?: string;
 }
 export enum SourceType {
     UNKNOWN = 0,
@@ -2872,7 +7318,9 @@ export enum SourceType {
     MOUSE = 1,
     Mouse = 1,
     TOUCH_SCREEN = 2,
-    TouchScreen = 2
+    TouchScreen = 2,
+    KEYBOARD = 4,
+    JOYSTICK = 5
 }
 export enum SourceTool {
     UNKNOWN = 0,

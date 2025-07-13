@@ -151,15 +151,22 @@ export class Scroller implements MaterializedBase {
         thisSerializer.writeInt8(value_direction_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_direction_type)) {
             const value_direction_value  = (value_direction as Axis)
-            thisSerializer.writeInt32(value_direction_value.valueOf())
+            thisSerializer.writeInt32(TypeChecker.Axis_ToNumeric(value_direction_value))
         }
         const retval  = ArkUIGeneratedNativeModule._Scroller_scrollPage1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
     private currentOffset_serialize(): OffsetResult {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_currentOffset(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._Scroller_currentOffset(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : OffsetResult = retvalDeserializer.readOffsetResult()
         return returnResult
     }
@@ -216,8 +223,15 @@ export class Scroller implements MaterializedBase {
         return retval
     }
     private getItemRect_serialize(index: number): RectResult {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_getItemRect(this.peer!.ptr, index)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._Scroller_getItemRect(this.peer!.ptr, index) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : RectResult = retvalDeserializer.readRectResult()
         return returnResult
     }
