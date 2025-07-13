@@ -268,6 +268,7 @@ static ani_object OpenCustomDialogContent(ani_env* env, ani_long content, ani_ob
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->SetBuilderFunc(nullptr);
     dialogProps.contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
@@ -415,6 +416,7 @@ static ani_object OpenCustomDialogWithController(ani_env* env, ani_long content,
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->SetBuilderFunc(nullptr);
     dialogProps.contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
     if (!OHOS::Ace::Ani::GetDialogController(env, controller, dialogProps.dialogCallback)) {
         return nullptr;
