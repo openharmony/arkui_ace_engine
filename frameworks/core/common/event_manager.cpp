@@ -28,6 +28,7 @@
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
+constexpr int32_t DUMP_DOUBLE_NUMBER = 2;
 constexpr int32_t DUMP_START_NUMBER = 3;
 constexpr int32_t DUMP_LIMIT_SIZE = 500;
 constexpr int64_t EVENT_CLEAR_DURATION = 2000;
@@ -2469,8 +2470,10 @@ void EventManager::DumpEventWithCount(const std::vector<std::string>& params, NG
     if (params.size() == MIN_PARAM_SIZE) {
         DumpEvent(type, hasJson);
         return;
-    }
-    if (params.size() >= COUNT_PARAM_SIZE) {
+    } else if (params.size() == DUMP_DOUBLE_NUMBER && hasJson) {
+        DumpEvent(type, hasJson);
+        return;
+    } else if (params.size() >= COUNT_PARAM_SIZE) {
         if (params[1] != "-n") {
             DumpEvent(type, hasJson);
             return;
