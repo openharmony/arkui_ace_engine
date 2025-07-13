@@ -1501,7 +1501,8 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
         needScrollSnapChange_ = needScrollSnapToSideCallback_(mainDelta);
     }
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}f, currentVelocity_ is %{public}f, "
-        "needScrollSnapChange_ is %{public}u", position, currentVelocity_, needScrollSnapChange_);
+        "currentPos_ is %{public}f, needScrollSnapChange_ is %{public}u", position, currentVelocity_,
+        currentPos_, needScrollSnapChange_);
     if (LessOrEqual(std::abs(mainDelta), 1)) {
         // trace stop at OnScrollStop
         AceAsyncTraceBeginCommercial(
