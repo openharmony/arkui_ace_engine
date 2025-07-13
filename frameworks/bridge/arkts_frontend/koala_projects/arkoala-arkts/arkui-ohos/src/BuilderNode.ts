@@ -263,7 +263,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             if (this.__params === undefined && this.__arg !== undefined) {
                 this.__params = rememberMutableState<T>(this.__arg!);
             }
-            if (this.__params?.value) {
+            if (this.__params) {
                 const result = setNeedCreate(true);
                 this.__builder?.builder(this.__params!.value);
                 setNeedCreate(result);
