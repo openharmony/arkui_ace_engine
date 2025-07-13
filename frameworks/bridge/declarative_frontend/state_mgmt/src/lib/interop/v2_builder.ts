@@ -134,6 +134,83 @@ function createCompatibleNodeWithFunc5<T1, T2, T3, T4, T5>(fn: ((arg1: T1, arg2:
     return builderViewV2;
 }
 
+function createCompatibleNodeWithFunc6<T1, T2, T3, T4, T5, T6>(fn: ((arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6) => void) | Object,
+    elmtId: number, arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6): ViewV2 {
+    let builderViewV2 = new BuilderViewV2(undefined, undefined, elmtId);
+    let buildFunc = function (): void {
+        if (fn && typeof fn === 'function') {
+            fn.bind(this)(arg1, arg2, arg3, arg4, arg5, arg6);
+        } else if (fn && typeof fn === 'object' && 'builder' in fn && typeof fn.builder === 'function') {
+            fn.builder.bind(this)(arg1, arg2, arg3, arg4, arg5, arg6);
+        }
+    }
+    builderViewV2.initialRender = buildFunc.bind(builderViewV2);
+    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    return builderViewV2;
+}
+
+function createCompatibleNodeWithFunc7<T1, T2, T3, T4, T5, T6, T7>(fn: ((arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6,
+    arg7: T7) => void) | Object, elmtId: number, arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7): ViewV2 {
+    let builderViewV2 = new BuilderViewV2(undefined, undefined, elmtId);
+    let buildFunc = function (): void {
+        if (fn && typeof fn === 'function') {
+            fn.bind(this)(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+        } else if (fn && typeof fn === 'object' && 'builder' in fn && typeof fn.builder === 'function') {
+            fn.builder.bind(this)(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+        }
+    }
+    builderViewV2.initialRender = buildFunc.bind(builderViewV2);
+    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    return builderViewV2;
+}
+
+function createCompatibleNodeWithFunc8<T1, T2, T3, T4, T5, T6, T7, T8>(fn: ((arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6,
+    arg7: T7, arg8: T8) => void) | Object, elmtId: number, arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7, arg8: T8): ViewV2 {
+    let builderViewV2 = new BuilderViewV2(undefined, undefined, elmtId);
+    let buildFunc = function (): void {
+        if (fn && typeof fn === 'function') {
+            fn.bind(this)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+        } else if (fn && typeof fn === 'object' && 'builder' in fn && typeof fn.builder === 'function') {
+            fn.builder.bind(this)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+        }
+    }
+    builderViewV2.initialRender = buildFunc.bind(builderViewV2);
+    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    return builderViewV2;
+}
+
+function createCompatibleNodeWithFunc9<T1, T2, T3, T4, T5, T6, T7, T8, T9>(fn: ((arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6,
+    arg7: T7, arg8: T8, arg9: T9) => void) | Object, elmtId: number, arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7,
+    arg8: T8, arg9: T9): ViewV2 {
+    let builderViewV2 = new BuilderViewV2(undefined, undefined, elmtId);
+    let buildFunc = function (): void {
+        if (fn && typeof fn === 'function') {
+            fn.bind(this)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+        } else if (fn && typeof fn === 'object' && 'builder' in fn && typeof fn.builder === 'function') {
+            fn.builder.bind(this)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+        }
+    }
+    builderViewV2.initialRender = buildFunc.bind(builderViewV2);
+    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    return builderViewV2;
+}
+
+function createCompatibleNodeWithFunc10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(fn: ((arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6,
+    arg7: T7, arg8: T8, arg9: T9, arg10: T10) => void) | Object, elmtId: number, arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7,
+    arg8: T8, arg9: T9, arg10: T10): ViewV2 {
+    let builderViewV2 = new BuilderViewV2(undefined, undefined, elmtId);
+    let buildFunc = function (): void {
+        if (fn && typeof fn === 'function') {
+            fn.bind(this)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+        } else if (fn && typeof fn === 'object' && 'builder' in fn && typeof fn.builder === 'function') {
+            fn.builder.bind(this)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+        }
+    }
+    builderViewV2.initialRender = buildFunc.bind(builderViewV2);
+    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    return builderViewV2;
+}
+
 function runPendingJobs(): void {
     console.log('runPendingJobs enter');
 }

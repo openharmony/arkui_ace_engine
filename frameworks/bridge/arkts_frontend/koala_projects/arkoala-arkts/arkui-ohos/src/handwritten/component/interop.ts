@@ -264,6 +264,31 @@ export function compatibleWrappedBuilder(builder: Any, ...args: FixedArray<ESVal
                 component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
                     args[1], args[2], args[3], args[4]);
                 break;
+            case 6:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc6');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5]);
+                break;
+            case 7:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc7');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6]);
+                break;
+            case 8:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc8');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
+                break;
+            case 9:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc9');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
+                break;
+            case 10:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc10');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+                break;
             default:
                 throw Error('Error arguments in Legacy Builder Function');
         }
