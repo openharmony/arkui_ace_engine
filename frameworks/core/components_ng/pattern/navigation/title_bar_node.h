@@ -119,6 +119,9 @@ public:
         return needAvoidContainerModal_;
     }
 
+    void OnAttachToMainTree(bool recursive) override;
+    void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
+
 private:
     RefPtr<UINode> backButton_;
     RefPtr<UINode> customBackButton_;
@@ -128,6 +131,7 @@ private:
     std::string innerChildId_;
     bool needAvoidContainerModal_ = false;
     bool useContainerModalTitleHeight_ = false;
+    int32_t menuBarChangeListenerId_ = -1;
 };
 
 } // namespace OHOS::Ace::NG

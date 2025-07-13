@@ -70,4 +70,26 @@ void TitleBarNode::MarkIsInitialTitle(bool isInitialTitle)
     auto pattern = GetPattern<TitleBarPattern>();
     pattern->MarkIsInitialTitle(isInitialTitle);
 }
+
+void TitleBarNode::OnAttachToMainTree(bool recursive)
+{
+    FrameNode::OnAttachToMainTree(recursive);
+    menuBarChangeListenerId_ =
+        AppBarView::AddRectChangeListener(GetContextRefPtr(), [weakTitleBar = WeakClaim(this)](const RectF& rect) {
+            auto titleBarNode = weakTitleBar.Upgrade();
+            CHECK_NULL_VOID(titleBarNode);
+            auto context = titleBarNode->GetContext();
+            CHECK_NULL_VOID(context);
+            titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            context->RequestFrame();
+        });
+}
+
+void TitleBarNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
+{
+    FrameNode::OnDetachFromMainTree(recursive, context);
+    if (menuBarChangeListenerId_ != -1) {
+        AppBarView::RemoveRectChangeListener(Claim(context), menuBarChangeListenerId_);
+    }
+}
 } // namespace OHOS::Ace::NG
