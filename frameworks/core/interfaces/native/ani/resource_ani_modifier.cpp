@@ -39,7 +39,7 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
     return result;
 }
 } // namespace
-bool ResourceAniModifier::ParseAniColor(ani_env* env, ani_object aniValue, Color& color)
+bool ResourceAniModifier::ParseAniColor(ani_env* env, ani_object aniValue, Color& color, RefPtr<ResourceObject>& resObj)
 {
     ani_status status;
     ani_class stringClass;
@@ -91,11 +91,14 @@ bool ResourceAniModifier::ParseAniColor(ani_env* env, ani_object aniValue, Color
     if (isResource) {
         ani_double resId;
         env->Object_GetPropertyByName_Double(aniValue, "id", &resId);
+        ani_double resType;
+        env->Object_GetPropertyByName_Double(aniValue, "type", &resType);
         ani_ref bundleName;
         env->Object_GetPropertyByName_Ref(aniValue, "bundleName", &bundleName);
         ani_ref moduleName;
         env->Object_GetPropertyByName_Ref(aniValue, "moduleName", &moduleName);
-        auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        std::vector<ResourceObjectParams> params;
+        resObj = AceType::MakeRefPtr<ResourceObject>(resId, resType, params,
             ArktsAniUtils::ANIStringToStdString(env, static_cast<ani_string>(bundleName)),
             ArktsAniUtils::ANIStringToStdString(env, static_cast<ani_string>(moduleName)),
             Container::CurrentIdSafely());

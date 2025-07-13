@@ -18,6 +18,8 @@
 #include <cstdint>
 
 #include "ani.h"
+#include "ui/base/referenced.h"
+#include "ui/resource/resource_object.h"
 
 #include "base/log/log_wrapper.h"
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
@@ -34,7 +36,11 @@ void AniThemeColors::SetColors(ani_env* env, ani_array colors)
         // type ResourceColor = number | string | Resource
         ani_ref value;
         env->Array_Get_Ref((ani_array_ref)colors, i, &value);
-        colors_.push_back((ani_object)value);
+        LOGI("FZY AniThemeColors::SetColors %{public}s", ArktsAniUtils::JsonStringify(env, (ani_object)value).c_str());
+
+        ani_ref globalRef;
+        env->GlobalReference_Create(value, &globalRef);
+        colors_.push_back((ani_object)globalRef);
     }
     env->GetVM(&vm_);
 }
@@ -51,7 +57,22 @@ Color AniThemeColors::ConvertAniValueToColor(ani_object aniValue) const
         return Color();
     }
     Color color;
-    ResourceAniModifier::ParseAniColor(env, aniValue, color);
+    RefPtr<ResourceObject> resObj;
+    ResourceAniModifier::ParseAniColor(env, aniValue, color, resObj);
+    LOGI("FZY AniThemeColors::ConvertAniValueToColor %{public}s, color: %{public}s",
+        ArktsAniUtils::JsonStringify(env, aniValue).c_str(), color.ToString().c_str());
     return color;
+}
+
+AniThemeColors::~AniThemeColors()
+{
+    LOGI("FZY ~AniThemeColors id: %{public}d", id_);
+    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    if (!env) {
+        return;
+    }
+    for (auto& color : colors_) {
+        env->GlobalReference_Delete(static_cast<ani_ref>(color));
+    }
 }
 } // namespace OHOS::Ace::NG

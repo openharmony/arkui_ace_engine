@@ -51,9 +51,14 @@ ani_double Lpx2px(ani_env* env, ani_object obj, ani_double value, ani_int instan
 ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
 ani_int GetColorValue(ani_env* env, ani_object aniClass, ani_object src);
 void SendThemeToNative(ani_env* env, ani_object aniClass, ani_array colorArray, ani_int id);
+void RemoveThemeInNative(ani_env* env, ani_object aniClass, ani_int withThemeId);
 void SetDefaultTheme(ani_env* env, ani_object aniClass, ani_array colorArray, ani_boolean isDark);
 void UpdateColorMode(ani_env* env, ani_object aniClass, ani_int colorMode);
 void RestoreColorMode(ani_env* env, ani_object aniClass);
+void SetThemeScopeId(ani_env* env, ani_object aniClass, ani_int themeScopeId);
+void CreateAndBindTheme(ani_env* env, ani_object aniClass, ani_int themeScopeId, ani_int themeId, ani_array colors,
+    ani_int colorMode, ani_fn_object onThemeScopeDestroy);
+void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, ani_long parent);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE

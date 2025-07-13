@@ -22,12 +22,20 @@
 #include "ui/properties/color.h"
 
 #include "base/utils/device_config.h"
+#include "core/interfaces/ani/ani_api.h"
+#include "ui/resource/resource_object.h"
+
+typedef struct __ani_env ani_env;
+typedef class __ani_array* ani_array;
 
 namespace OHOS::Ace::NG {
 class AniThemeModule final {
 public:
     static void UpdateColorMode(int32_t colorMode);
     static void RestoreColorMode();
+    static bool HandleThemeColorsArg(
+        ani_env* env, ani_array colorsArg, std::vector<uint32_t>& colors, std::vector<RefPtr<ResourceObject>>& resObjs);
+    static ArkUINodeHandle CreateWithThemeNode(int32_t nodeId);
 
 private:
     static ColorMode MapAniColorModeToColorMode(int32_t aniColorMode);

@@ -16,7 +16,9 @@
 #ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_RESOURCE_ANI_MODIFIER_H
 #define FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_RESOURCE_ANI_MODIFIER_H
 
+#include "ui/base/referenced.h"
 #include "ui/properties/color.h"
+#include "ui/resource/resource_object.h"
 
 typedef struct __ani_env ani_env;
 typedef class __ani_object* ani_object;
@@ -24,7 +26,7 @@ typedef class __ani_object* ani_object;
 namespace OHOS::Ace::NG {
 class ResourceAniModifier final {
 public:
-    static bool ParseAniColor(ani_env* env, ani_object aniValue, Color& color);
+    static bool ParseAniColor(ani_env* env, ani_object aniValue, Color& color, RefPtr<ResourceObject>& resObj);
 };
 } // namespace OHOS::Ace::NG
 

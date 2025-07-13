@@ -226,9 +226,14 @@ struct ArkUIAniCommonModifier {
     ArkUI_Uint32 (*getColorValueByString)(const std::string& src);
     ArkUI_Uint32 (*getColorValueByNumber)(ArkUI_Uint32 src);
     void (*sendThemeToNative)(ani_env* env, ani_array colors, ani_int id);
+    void (*removeThemeInNative)(ani_env* env, ani_int withThemeId);
     void (*setDefaultTheme)(ani_env* env, ani_array colors, ani_boolean isDark);
     void (*updateColorMode)(ani_int colorMode);
     void (*restoreColorMode)();
+    void (*setThemeScopeId)(ani_env* env, ani_int themeScopeId);
+    void (*createAndBindTheme)(ani_env* env, ani_int themeScopeId, ani_int themeId, ani_array colors, ani_int colorMode,
+        ani_fn_object onThemeScopeDestroy);
+    void (*applyParentThemeScopeId)(ani_env* env, ani_long self, ani_long parent);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);

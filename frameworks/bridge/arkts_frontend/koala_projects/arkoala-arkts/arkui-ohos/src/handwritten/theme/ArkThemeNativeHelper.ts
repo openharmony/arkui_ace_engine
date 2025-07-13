@@ -24,9 +24,9 @@ import { Colors } from '@ohos/arkui/theme';
 
 export class ArkThemeNativeHelper {
     static sendThemeToNative(theme: Theme, elmtId: int32): void {
-        ArkUIAniModule._SendThemeToNative(ArkThemeNativeHelper.convertThemeToColorArray(theme), elmtId);
+        ArkUIAniModule._SendThemeToNative(ArkThemeNativeHelper.convertColorsToArray(theme.colors), elmtId);
     }
-    static setDefaultTheme(theme: CustomTheme): void {
+    static setDefaultTheme(theme: CustomTheme | undefined): void {
         const colorArray = ArkThemeNativeHelper.convertColorsToArray(theme?.colors);
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.LIGHT);
         ArkUIAniModule._SetDefaultTheme(colorArray, false);
@@ -34,7 +34,25 @@ export class ArkThemeNativeHelper {
         ArkUIAniModule._SetDefaultTheme(colorArray, true);
         ArkThemeScopeManager.getInstance().onExitLocalColorMode();
     }
-    private static convertThemeToColorArray(theme: Theme): ResourceColor[] {
+    static createInternal(themeScopeId: int32, themeId: int32, theme: CustomTheme | undefined, colorMode: ThemeColorMode,
+        onThemeScopeDestroy: () => void
+    ) {
+        // set local color mode if need
+        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
+            ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
+        }
+
+        ArkUIAniModule._CreateAndBindTheme(themeScopeId, themeId,
+            ArkThemeNativeHelper.convertColorsToArray(theme?.colors), colorMode, onThemeScopeDestroy);
+        // getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId,
+        //     ArkThemeNativeHelper.convertColorsToArray(theme?.colors), colorMode, onThemeScopeDestroy);
+
+        // reset local color mode if need
+        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
+            ArkThemeScopeManager.getInstance().onExitLocalColorMode();
+        }
+    }
+    public static convertThemeToColorArray(theme: Theme): ResourceColor[] {
         return [
             theme.colors.brand,
             theme.colors.warning,
@@ -89,7 +107,7 @@ export class ArkThemeNativeHelper {
             theme.colors.interactiveClick,
         ];
     }
-    private static convertColorsToArray(colors: CustomColors | undefined): ResourceColor[] {
+    public static convertColorsToArray(colors: CustomColors | undefined): ResourceColor[] {
         const basisColors = ArkThemeScopeManager.getSystemColors();
         if (!colors) {
             return new Array<ResourceColor>(Object.keys(basisColors).length);

@@ -19,25 +19,26 @@ import { Shapes, Typography } from './index';
 import { ThemeColorMode } from 'arkui/component/common';
 import { ArkShapesImpl } from './ArkShapesImpl';
 import { ArkTypographyImpl } from './ArkTypographyImpl';
+import { int32 } from "@koalaui/common"
 
 /**
  * Theme counter used to generate next theme id
  */
-let themeCounter = 0;
+let themeCounter: int32 = 0;
 
 /**
  * Base ArkTheme class
  */
 export class ArkThemeBase extends Theme {
     // Theme tokens
-    colors: Colors;
-    shapes: Shapes;
-    typography: Typography;
+    // colors: Colors;
+    // shapes: Shapes;
+    // typography: Typography;
 
     /**
      * Unique theme instance id
      */
-    id: number;
+    id: int32;
 
     /**
      * Copy of CustomTheme used to create this theme instance

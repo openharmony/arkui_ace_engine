@@ -21,7 +21,9 @@
 #include <vector>
 #include <map>
 
+#include "ui/base/referenced.h"
 #include "ui/properties/color.h"
+#include "base/log/log.h"
 
 #define COLORS_NUMBER (51)
 
@@ -90,10 +92,12 @@ typedef struct __ani_env ani_env;
 typedef struct __ani_vm ani_vm;
 
 namespace OHOS::Ace::NG {
-class AniThemeColors {
+class AniThemeColors : public Referenced {
 public:
+    int32_t id_ = -1;
+
     AniThemeColors() = default;
-    virtual ~AniThemeColors() = default;
+    virtual ~AniThemeColors();
 
     void SetColors(ani_env* env, ani_array colors);
 
@@ -116,6 +120,7 @@ public:
 
     Color FontPrimary() const
     {
+        LOGI("FZY AniThemeColors FontPrimary, %{public}d", id_);
         return ConvertAniValueToColor(colors_[FONT_PRIMARY]);
     }
     Color FontSecondary() const
@@ -321,26 +326,53 @@ public:
     AniTheme() = default;
     virtual ~AniTheme() = default;
 
-    void SetColors(const AniThemeColors& colors)
+    void SetColors(const RefPtr<AniThemeColors>& colors)
     {
         colors_ = colors;
     }
 
-    const AniThemeColors& Colors() const
+    const RefPtr<AniThemeColors>& Colors() const
     {
         return colors_;
     }
 
+    int32_t id_ = -1;
+
 private:
-    AniThemeColors colors_;
+    RefPtr<AniThemeColors> colors_;
 };
 
 class AniThemeScope {
 public:
-    static std::map<int32_t, AniTheme> aniThemes;
     // keeps the current theme in static optional object
     inline static std::optional<AniTheme> aniCurrentTheme = std::nullopt;
     inline static bool isCurrentThemeDefault = true;
+
+    static const AniTheme& GetAniTheme(int32_t themeScopeId)
+    {
+        return aniThemes[themeScopeId];
+    }
+
+    static void AddAniTheme(int32_t themeScopeId, const AniTheme& aniTheme)
+    {
+        LOGI("FZY AddAniTheme %{public}d", themeScopeId);
+        aniThemes[themeScopeId] = aniTheme;
+    }
+
+    static void RemoveAniTheme(int32_t themeScopeId)
+    {
+        LOGI("FZY RemoveAniTheme %{public}d", themeScopeId);
+        aniThemes.erase(themeScopeId);
+    }
+
+    static bool IsAniThemeExists(int32_t themeScopeId)
+    {
+        LOGI("FZY IsAniThemeExists %{public}d", themeScopeId);
+        auto iter = aniThemes.find(themeScopeId);
+        return iter != aniThemes.end();
+    }
+private:
+    static std::map<int32_t, AniTheme> aniThemes;
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_ANI_THEME_H

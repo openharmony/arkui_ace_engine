@@ -21,20 +21,13 @@ import { ArkTypographyImpl } from './ArkTypographyImpl';
 
 export class ArkThemeImpl extends ArkThemeBase {
     constructor(
-        customTheme: CustomTheme,
+        customTheme: CustomTheme | undefined,
         colorMode: ThemeColorMode,
         baselineTheme: ArkThemeBase,
     ) {
-        // if (!customTheme) {
-        //     super(baselineTheme.id, undefined, colorMode,
-        //         new Colors(undefined, baselineTheme.colors),
-        //         new ArkShapesImpl(undefined, baselineTheme.shapes),
-        //         new ArkTypographyImpl(undefined, baselineTheme.typography));
-        //     return;
-        // }
         super(baselineTheme.id, customTheme, colorMode,
-            new Colors(customTheme.colors, baselineTheme.colors),
-            new ArkShapesImpl(customTheme.shapes, baselineTheme.shapes),
-            new ArkTypographyImpl(customTheme.typography, baselineTheme.typography));
+            new Colors(customTheme ? customTheme.colors : undefined, baselineTheme.colors),
+            new ArkShapesImpl(customTheme ? customTheme.shapes : undefined, baselineTheme.shapes),
+            new ArkTypographyImpl(customTheme ? customTheme.typography : undefined, baselineTheme.typography));
     }
 }

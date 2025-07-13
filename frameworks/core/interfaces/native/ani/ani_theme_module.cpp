@@ -15,17 +15,27 @@
 
 #include "core/interfaces/native/ani/ani_theme_module.h"
 
+#include "ani.h"
+
+#include "base/log/log_wrapper.h"
+#include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components_ng/syntax/with_theme_node.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/interfaces/native/ani/resource_ani_modifier.h"
+#include "core/interfaces/native/node/theme_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void AniThemeModule::UpdateColorMode(int32_t colorMode)
 {
     ColorMode colorModeValue = MapAniColorModeToColorMode(colorMode);
+    LOGI("FZY AniThemeModule::UpdateColorMode %{public}d", static_cast<int32_t>(colorModeValue));
     if (colorModeValue != ColorMode::COLOR_MODE_UNDEFINED) {
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
         UpdateColorModeForThemeConstants(colorModeValue);
 #else
+        LOGI("FZY AniThemeModule::UpdateColorMode resMgr UpdateColorMode");
         ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
 #endif
         auto pipelineContext = NG::PipelineContext::GetCurrentContext();
@@ -43,6 +53,7 @@ void AniThemeModule::RestoreColorMode()
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     UpdateColorModeForThemeConstants(colorModeValue);
 #else
+    LOGI("FZY AniThemeModule::RestoreColorMode resMgr UpdateColorMode ");
     ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
 #endif
 }
@@ -74,5 +85,40 @@ ColorMode AniThemeModule::MapAniColorModeToColorMode(int32_t aniColorMode)
             return ColorMode::COLOR_MODE_UNDEFINED;
     }
     return ColorMode::COLOR_MODE_UNDEFINED;
+}
+
+bool AniThemeModule::HandleThemeColorsArg(
+    ani_env* env, ani_array colorsArg, std::vector<uint32_t>& colors, std::vector<RefPtr<ResourceObject>>& resObjs)
+{
+    auto basisTheme = TokenThemeStorage::GetInstance()->GetDefaultTheme();
+    if (!basisTheme) {
+        basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
+    }
+    if (!basisTheme) {
+        return false;
+    }
+    for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
+        Color color;
+        ani_ref colorParams;
+        RefPtr<ResourceObject> resObj;
+        auto status = env->Array_Get(colorsArg, i, &colorParams);
+        if (status != ANI_OK) {
+            LOGW("HandleThemeColorsArg colorsArg get index: %{public}d failed", i);
+            continue;
+        }
+        if (!ResourceAniModifier::ParseAniColor(env, static_cast<ani_object>(colorParams), color, resObj)) {
+            color = basisTheme->Colors()->GetByIndex(i);
+        }
+        resObjs.push_back(resObj);
+        colors.push_back(static_cast<uint32_t>(color.GetValue()));
+    }
+    return true;
+}
+
+ArkUINodeHandle AniThemeModule::CreateWithThemeNode(int32_t themeScopeId)
+{
+    auto themeModifier = NodeModifier::GetThemeModifier();
+    auto node = themeModifier->createWithThemeNode(themeScopeId);
+    return node;
 }
 } // namespace OHOS::Ace::NG

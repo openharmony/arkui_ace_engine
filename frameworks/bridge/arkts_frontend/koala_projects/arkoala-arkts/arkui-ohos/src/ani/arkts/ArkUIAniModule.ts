@@ -213,7 +213,17 @@ export class ArkUIAniModule {
 
     native static _GetColorValue(color: number | string): KUInt
     native static _SendThemeToNative(colorArray: ResourceColor[], elmtId: KInt): void
+    native static _RemoveThemeInNative(withThemeId: number): void
     native static _SetDefaultTheme(colorArray: ResourceColor[], isDark: boolean): void
     native static _UpdateColorMode(colorMode: KInt): void
     native static _RestoreColorMode(): void
+    native static _SetThemeScopeId(themeScopeId: number): void
+    native static _CreateAndBindTheme(
+        themeScopeId: KInt,
+        themeId: KInt,
+        colors: ResourceColor[],
+        colorMode: KInt,
+        onThemeScopeDestroy: () => void
+    ): void;
+    native static _ApplyParentThemeScopeId(self: KPointer, parent: KPointer): void
 }

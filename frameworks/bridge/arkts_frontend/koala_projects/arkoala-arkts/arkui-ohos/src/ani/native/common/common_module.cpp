@@ -415,6 +415,15 @@ void SendThemeToNative(ani_env* env, ani_object aniClass, ani_array colorArray, 
     modifier->getCommonAniModifier()->sendThemeToNative(env, colorArray, id);
 }
 
+void RemoveThemeInNative(ani_env* env, ani_object aniClass, ani_int withThemeId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->removeThemeInNative(env, withThemeId);
+}
+
 void SetDefaultTheme(ani_env* env, ani_object aniClass, ani_array colorArray, ani_boolean isDark)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -440,5 +449,34 @@ void RestoreColorMode(ani_env* env, ani_object aniClass)
         return;
     }
     modifier->getCommonAniModifier()->restoreColorMode();
+}
+
+void SetThemeScopeId(ani_env* env, ani_object aniClass, ani_int themeScopeId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setThemeScopeId(env, themeScopeId);
+}
+
+void CreateAndBindTheme(ani_env* env, ani_object aniClass, ani_int themeScopeId, ani_int themeId, ani_array colors,
+    ani_int colorMode, ani_fn_object onThemeScopeDestroy)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->createAndBindTheme(
+        env, themeScopeId, themeId, colors, colorMode, onThemeScopeDestroy);
+}
+
+void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, ani_long parent)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->applyParentThemeScopeId(env, self, parent);
 }
 } // namespace OHOS::Ace::Ani
