@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -267,6 +267,7 @@ struct DialogProperties {
     std::vector<ButtonInfo> buttons;
     std::function<void()> onCancel;       // NG cancel callback
     std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss; // Cancel Dismiss Callback
+    std::function<void()> onWillDismissRelease;
     std::function<void(int32_t, int32_t)> onSuccess;      // NG prompt success callback
     std::function<void(const bool)> onChange;             // onChange success callback
     std::function<void(DialogProperties&)> onLanguageChange;    // onLanguageChange callback
@@ -359,6 +360,7 @@ struct PromptDialogAttr {
     std::function<void()> customBuilder;
     std::function<void(const int32_t dialogId)> customBuilderWithId;
     std::function<void(const int32_t& info, const int32_t& instanceId)> customOnWillDismiss;
+    std::function<void()> customOnWillDismissRelease;
 
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;

@@ -2123,4 +2123,41 @@ HWTEST_F(LongPressRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize
     targetComponent->SetOnGestureRecognizerJudgeBegin(func);
     longPressRecognizer->TriggerGestureJudgeCallback();
 }
+
+/**
+ * @tc.name: TriggerGestureJudgeCallbackTest003
+ * @tc.desc: Test LongPressRecognizer function: TriggerGestureJudgeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, TriggerGestureJudgeCallbackTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, 2, false, false, false, true);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;
+    };
+    auto func = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
+                    const std::list<RefPtr<NGGestureRecognizer>>& others) { return GestureJudgeResult::REJECT; };
+
+    /**
+     * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
+     * @tc.steps: case1: targetComponent is default.
+     * @tc.expected: step2. result equals.
+     */
+
+    targetComponent->SetOnGestureRecognizerJudgeBegin(func);
+    TouchEvent touchEvent;
+    touchEvent.rollAngle = 0;
+    longPressRecognizer->touchPoints_[0] = touchEvent;
+    longPressRecognizer->touchPoints_[1] = touchEvent;
+    longPressRecognizer->touchPoints_[2] = touchEvent;
+    longPressRecognizer->targetComponent_ = targetComponent;
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    longPressRecognizer->HandleOverdueDeadline(true);
+    EXPECT_EQ(longPressRecognizer->disposal_, GestureDisposal::NONE);
+}
 } // namespace OHOS::Ace::NG

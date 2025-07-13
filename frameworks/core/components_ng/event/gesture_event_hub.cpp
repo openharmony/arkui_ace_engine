@@ -150,7 +150,7 @@ bool GestureEventHub::ProcessEventTouchTestHit(const OffsetF& coordinateOffset, 
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     if (scrollableActuator_) {
         scrollableActuator_->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets,
-            localPoint, host, targetComponent, responseLinkResult);
+            localPoint, host, targetComponent, responseLinkResult, touchId);
     }
     if (dragEventActuator_ && !dragEventActuator_->GetIsNewFwk()) {
         dragEventActuator_->AddTouchListener(touchRestrict);
@@ -288,8 +288,7 @@ void GestureEventHub::ProcessParallelPriorityGesture(const Offset& offset, int32
         parallelIndex++;
     } else if (static_cast<int32_t>(externalParallelRecognizer_.size()) > parallelIndex) {
         externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
-        current = externalParallelRecognizer_[parallelIndex];
-        parallelIndex++;
+        current = *recognizers.begin();
     } else if (recognizers.size() == 1) {
         current = *recognizers.begin();
     }
@@ -1322,6 +1321,15 @@ void GestureEventHub::AddPanEvent(
 
 void GestureEventHub::AddPanEvent(
     const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap)
+{
+    if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
+        panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distanceMap);
+    }
+    panEventActuator_->AddPanEvent(panEvent);
+}
+
+void GestureEventHub::AddPanEvent(const RefPtr<PanEvent>& panEvent,
+    PanDirection direction, int32_t fingers, const PanDistanceMapDimension& distanceMap)
 {
     if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
         panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distanceMap);

@@ -38,7 +38,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
 
     auto [size, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
     syncLoad_ = props_->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren ||
-                info_->targetIndex_.has_value();
+                !NearZero(info_->delta_) || info_->targetIndex_.has_value() ;
     Init(size);
     if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
         info_->isDataValid_ = false;
@@ -400,7 +400,7 @@ bool WaterFlowLayoutSW::FillBackSection(float viewportBound, int32_t& idx, int32
     }
     EndPosQ q;
     PrepareEndPosQueue(q, info_->lanes_[section], mainGaps_[section], viewportBound);
-    auto notScrolling = NearZero(info_->delta_);
+
     while (!q.empty() && idx <= maxChildIdx) {
         if (OverDue(cacheDeadline_)) {
             return true;
@@ -416,7 +416,7 @@ bool WaterFlowLayoutSW::FillBackSection(float viewportBound, int32_t& idx, int32
         if (LessNotEqual(endPos, viewportBound)) {
             q.push({ endPos, laneIdx });
         }
-        if (!syncLoad_ && notScrolling && wrapper_->ReachResponseDeadline()) {
+        if (!syncLoad_ && wrapper_->ReachResponseDeadline()) {
             info_->measureInNextFrame_ = true;
             return true;
         }

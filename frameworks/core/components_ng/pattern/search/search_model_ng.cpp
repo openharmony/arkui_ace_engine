@@ -1082,7 +1082,6 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
 
     auto buttonRenderContext = frameNode->GetRenderContext();
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    buttonRenderContext->UpdateClipEdge(true);
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(buttonPattern);
     buttonPattern->SetApplyShadow(false);

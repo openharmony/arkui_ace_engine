@@ -68,6 +68,8 @@ void GaugeModelNG::SetGradientColors(
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, GradientColors, colors);
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, Values, values);
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, GaugeType, type);
+    SetGradientColorModeInit();
+    SetGradientInit(colors);
 }
 
 void GaugeModelNG::SetStrokeWidth(const Dimension& strokeWidth)
@@ -146,6 +148,7 @@ void GaugeModelNG::ResetGradientColors()
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, GaugeType, PROPERTY_UPDATE_RENDER);
     if (SystemProperties::ConfigChangePerform()) {
         SetUseGradient(false);
+        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, GradientColorsInit, PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -253,6 +256,8 @@ void GaugeModelNG::SetGradientColors(FrameNode* frameNode, const std::vector<Col
     ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, GradientColors, colors, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, Values, values, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, GaugeType, type, frameNode);
+    SetGradientColorModeInit(frameNode);
+    SetGradientInit(frameNode, colors);
 }
 
 void GaugeModelNG::ResetGradientColors(FrameNode* frameNode)
@@ -262,6 +267,8 @@ void GaugeModelNG::ResetGradientColors(FrameNode* frameNode)
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, GaugeType, PROPERTY_UPDATE_RENDER, frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         SetUseGradient(frameNode, false);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            GaugePaintProperty, GradientColorsInit, PROPERTY_UPDATE_RENDER, frameNode);
     }
 }
 
@@ -384,4 +391,34 @@ void GaugeModelNG::SetUseSpecialDefaultIndicator(bool useSpecialDefaultIndicator
         ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, UseSpecialDefaultIndicator, useSpecialDefaultIndicator);
     }
 }
-} // namespace OHOS::Ace::NG
+
+void GaugeModelNG::SetGradientColorModeInit()
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        auto colorMode = Container::CurrentColorMode();
+        ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, ColorModeInit, static_cast<int>(colorMode));
+    }
+}
+
+void GaugeModelNG::SetGradientInit(const std::vector<ColorStopArray>& colors)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, GradientColorsInit, colors);
+    }
+}
+
+void GaugeModelNG::SetGradientColorModeInit(FrameNode* frameNode)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        auto colorMode = Container::CurrentColorMode();
+        ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, ColorModeInit, static_cast<int>(colorMode), frameNode);
+    }
+}
+
+void GaugeModelNG::SetGradientInit(FrameNode* frameNode, const std::vector<ColorStopArray>& colors)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, GradientColorsInit, colors, frameNode);
+    }
+}
+}

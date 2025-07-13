@@ -968,6 +968,20 @@ void TextPickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
     textLayoutProperty->UpdateFontFamily(fontFamilyVector.empty() ? FONT_FAMILY_DEFAULT : fontFamilyVector);
     textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetDisappearFontStyle().value_or(
         pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
+    
+    if (textPickerLayoutProperty->GetDisappearMinFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMinFontSize(textPickerLayoutProperty->GetDisappearMinFontSize().value());
+    }
+    if (textPickerLayoutProperty->GetDisappearMaxFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMaxFontSize(textPickerLayoutProperty->GetDisappearMaxFontSize().value());
+    }
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    if (textPickerLayoutProperty->GetDisappearTextOverflow().has_value() &&
+        textPickerLayoutProperty->GetDisappearTextOverflow().value() != TextOverflow::MARQUEE) {
+        textLayoutProperty->UpdateTextOverflow(textPickerLayoutProperty->GetDisappearTextOverflow().value());
+    } else {
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
+    }
 }
 
 void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -994,6 +1008,20 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
     textLayoutProperty->UpdateFontFamily(fontFamilyVector.empty() ? FONT_FAMILY_DEFAULT : fontFamilyVector);
     textLayoutProperty->UpdateItalicFontStyle(
         textPickerLayoutProperty->GetFontStyle().value_or(pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
+    
+    if (textPickerLayoutProperty->GetMinFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMinFontSize(textPickerLayoutProperty->GetMinFontSize().value());
+    }
+    if (textPickerLayoutProperty->GetMaxFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMaxFontSize(textPickerLayoutProperty->GetMaxFontSize().value());
+    }
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    if (textPickerLayoutProperty->GetTextOverflow().has_value() &&
+        textPickerLayoutProperty->GetTextOverflow().value() != TextOverflow::MARQUEE) {
+        textLayoutProperty->UpdateTextOverflow(textPickerLayoutProperty->GetTextOverflow().value());
+    } else {
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
+    }
 }
 
 void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -1029,6 +1057,20 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     textLayoutProperty->UpdateFontFamily(fontFamilyVector.empty() ? FONT_FAMILY_DEFAULT : fontFamilyVector);
     textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetSelectedFontStyle().value_or(
         pickerTheme->GetOptionStyle(true, false).GetFontStyle()));
+
+    if (textPickerLayoutProperty->GetSelectedMinFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMinFontSize(textPickerLayoutProperty->GetSelectedMinFontSize().value());
+    }
+    if (textPickerLayoutProperty->GetSelectedMaxFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMaxFontSize(textPickerLayoutProperty->GetSelectedMaxFontSize().value());
+    }
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    if (textPickerLayoutProperty->GetSelectedTextOverflow().has_value() &&
+        textPickerLayoutProperty->GetSelectedTextOverflow().value() != TextOverflow::MARQUEE) {
+        textLayoutProperty->UpdateTextOverflow(textPickerLayoutProperty->GetSelectedTextOverflow().value());
+    } else {
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
+    }
 }
 
 void TextPickerColumnPattern::UpdateDefaultTextProperties(const RefPtr<TextLayoutProperty>& textLayoutProperty,
@@ -1148,7 +1190,9 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
         textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
     }
     textLayoutProperty->UpdateMaxLines(1);
-    textLayoutProperty->UpdateTextOverflow(isTextFadeOut_ ? TextOverflow::MARQUEE : TextOverflow::CLIP);
+    if (isTextFadeOut_) {
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+    }
     AddAnimationTextProperties(currentIndex, textLayoutProperty);
 }
 

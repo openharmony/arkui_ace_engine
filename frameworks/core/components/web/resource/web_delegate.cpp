@@ -7647,6 +7647,16 @@ void WebDelegate::OnNativeEmbedMouseEvent(std::shared_ptr<OHOS::NWeb::NWebNative
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
         webPattern->RequestFocus();
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto button = static_cast<MouseButton>(event->GetButton());
+        bool isSupportMouse = button == MouseButton::LEFT_BUTTON
+            || button == MouseButton::RIGHT_BUTTON || button == MouseButton::MIDDLE_BUTTON;
+        if (OnNativeEmbedMouseEventV2_ && isSupportMouse) {
+            auto gestureEventHub = webEventHub->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gestureEventHub);
+            gestureEventHub->SetRecognizerDelayStatus(RecognizerDelayStatus::END);
+        }
         return;
     }
     CHECK_NULL_VOID(taskExecutor_);

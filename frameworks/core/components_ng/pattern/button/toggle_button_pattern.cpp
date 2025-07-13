@@ -454,31 +454,6 @@ void ToggleButtonPattern::UpdateSelectStatus(bool isSelected)
     context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
 }
 
-void ToggleButtonPattern::UpdateComponentColor(const Color& color, const ToggleColorType toggleColorType)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto paintProperty = GetPaintProperty<ToggleButtonPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-
-    if (pipelineContext->IsSystmColorChange()) {
-        switch (toggleColorType) {
-            case ToggleColorType::SELECTED_COLOR:
-                paintProperty->UpdateSelectedColor(color);
-                break;
-            case ToggleColorType::SWITCH_POINT_COLOR:
-                break;
-            case ToggleColorType::UN_SELECTED_COLOR:
-                break;
-        }
-    }
-    if (host->GetRerenderable()) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
-}
-
 void ToggleButtonPattern::MarkIsSelected(bool isSelected)
 {
     if (isOn_ == isSelected) {
@@ -766,6 +741,8 @@ void ToggleButtonPattern::OnColorConfigurationUpdate()
             Color color = theme->GetCheckedColor();
             pops->UpdateSelectedColor(color);
         }
+        host->MarkModifyDone();
+        host->MarkDirtyNode();
     }
 }
 

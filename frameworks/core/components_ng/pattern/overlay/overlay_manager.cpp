@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1653,34 +1653,14 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper
             },
             option.GetOnFinishEvent());
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
-        auto rsUIContext = GetRSUIContext(context);
-        if (rsUIContext) {
-            rsUIContext->GetRSTransaction()->FlushImplicitTransaction();
-        } else {
-            auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-            if (transactionProxy != nullptr) {
-                transactionProxy->FlushImplicitTransaction();
-            }
-        }
+    auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
 #endif
     }
     // start animation immediately
     pipeline->RequestFrame();
-}
-
-std::shared_ptr<Rosen::RSUIContext> OverlayManager::GetRSUIContext(const RefPtr<PipelineBase>& pipeline)
-{
-#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto window = pipeline->GetWindow();
-    CHECK_NULL_RETURN(window, nullptr);
-    auto rsUIDirector = window->GetRSUIDirector();
-    CHECK_NULL_RETURN(rsUIDirector, nullptr);
-    auto rsUIContext = rsUIDirector->GetRSUIContext();
-    return rsUIContext;
-#endif
-    return nullptr;
 }
 
 // check if there is a bound menu on the current floating node on the main window
@@ -1896,15 +1876,9 @@ void OverlayManager::PopToast(int32_t toastId)
         },
         option.GetOnFinishEvent());
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
-    auto rsUIContext = GetRSUIContext(context);
-    if (rsUIContext) {
-        rsUIContext->GetRSTransaction()->FlushImplicitTransaction();
-    } else {
-        auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-        if (transactionProxy != nullptr) {
-            transactionProxy->FlushImplicitTransaction();
-        }
+    auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
     }
 #endif
     // start animation immediately
@@ -3276,6 +3250,8 @@ void OverlayManager::RegisterDialogLifeCycleCallback(
     dialogPattern->RegisterDialogWillAppearCallback(std::move(onWillAppearEvent));
     auto onWillDisappearEvent = dialogProps.onWillDisappear;
     dialogPattern->RegisterDialogWillDisappearCallback(std::move(onWillDisappearEvent));
+    auto onWillDismissRelease = dialogProps.onWillDismissRelease;
+    dialogPattern->SetOnWillDismissRelease(std::move(onWillDismissRelease));
 }
 
 void OverlayManager::CustomDialogRecordEvent(const DialogProperties& dialogProps)

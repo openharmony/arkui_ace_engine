@@ -120,7 +120,7 @@ void BlankPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("min", blankMin.ToString().c_str());
 }
 
-void BlankPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+void BlankPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     auto blankProperty = GetLayoutProperty<BlankLayoutProperty>();
     CHECK_NULL_VOID(blankProperty);

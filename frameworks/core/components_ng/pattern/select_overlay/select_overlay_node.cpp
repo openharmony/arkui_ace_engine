@@ -94,6 +94,14 @@ std::unordered_map<TextDataDetectType, std::pair<std::string, std::function<bool
     { TextDataDetectType::DATE_TIME, std::make_pair(OH_DEFAULT_AI_MENU_DATETIME, &TextSystemMenu::IsShowAIDatetime) },
 };
 
+std::unordered_map<std::string, TextDataDetectType> AI_ID_TYPE_MAP = {
+    { OH_DEFAULT_AI_MENU_PHONE, TextDataDetectType::PHONE_NUMBER },
+    { OH_DEFAULT_AI_MENU_URL, TextDataDetectType::URL },
+    { OH_DEFAULT_AI_MENU_EMAIL, TextDataDetectType::EMAIL },
+    { OH_DEFAULT_AI_MENU_ADDRESS, TextDataDetectType::ADDRESS },
+    { OH_DEFAULT_AI_MENU_DATETIME, TextDataDetectType::DATE_TIME },
+};
+
 bool IsAIMenuOption(const std::string& id)
 {
     return id == OH_DEFAULT_AI_MENU_PHONE || id == OH_DEFAULT_AI_MENU_URL || id == OH_DEFAULT_AI_MENU_EMAIL ||
@@ -1022,8 +1030,11 @@ std::string GetItemContent(const std::string& id, const std::string& content,
         return textOverlayTheme->GetCameraInput();
     }
     if (IsAIMenuOption(id)) {
-        CHECK_NULL_RETURN(info, content);
-        return textOverlayTheme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType);
+        if (info) {
+            return textOverlayTheme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType);
+        } else {
+            return textOverlayTheme->GetAiMenuOptionName(AI_ID_TYPE_MAP[id]);
+        }
     }
     if (id == OH_DEFAULT_ASK_CELIA) {
         return textOverlayTheme->GetAskCelia();

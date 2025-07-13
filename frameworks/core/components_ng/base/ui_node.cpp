@@ -1166,7 +1166,7 @@ void UINode::DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json)
     json->PutRef(key.c_str(), std::move(currentNode));
 }
 
-void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current)
+void UINode::DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current)
 {
     current->Put("$type", tag_.c_str());
     current->Put("$ID", nodeId_);
@@ -1185,14 +1185,14 @@ void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current
         auto array = JsonUtil::CreateArray();
         if (!nodeChildren.empty()) {
             for (const auto& item : nodeChildren) {
-                auto child = JsonUtil::Create();
+                auto child = JsonUtil::CreateSharedPtrJson();
                 item->DumpSimplifyTree(depth + 1, child);
                 array->PutRef(std::move(child));
             }
         }
         if (!disappearingChildren_.empty()) {
             for (const auto& [item, index, branch] : disappearingChildren_) {
-                auto child = JsonUtil::Create();
+                auto child = JsonUtil::CreateSharedPtrJson();
                 item->DumpSimplifyTree(depth + 1, child);
                 array->PutRef(std::move(child));
             }

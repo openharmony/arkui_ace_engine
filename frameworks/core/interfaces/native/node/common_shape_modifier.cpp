@@ -61,10 +61,13 @@ void SetFillOpacity(ArkUINodeHandle node, ArkUI_Float32 fillOpacity, void* resOb
     ShapeModelNG::SetFillOpacity(frameNode, fillOpacity);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    pattern->UnRegisterResource("ShapeAbstractFillOpacity");
+    pattern->IsEnableChildrenMatchParent() ? pattern->UnRegisterResource("ShapeFillOpacity")
+                                           : pattern->UnRegisterResource("ShapeAbstractFillOpacity");
     if (SystemProperties::ConfigChangePerform() && resObjPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
-        pattern->RegisterResource<double>("ShapeAbstractFillOpacity", resObj, fillOpacity);
+        pattern->IsEnableChildrenMatchParent()
+            ? pattern->RegisterResource<double>("ShapeFillOpacity", resObj, fillOpacity)
+            : pattern->RegisterResource<double>("ShapeAbstractFillOpacity", resObj, fillOpacity);
     }
 }
 
@@ -76,7 +79,8 @@ void ResetFillOpacity(ArkUINodeHandle node)
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform()) {
-        pattern->UnRegisterResource("ShapeAbstractFillOpacity");
+        pattern->IsEnableChildrenMatchParent() ? pattern->UnRegisterResource("ShapeFillOpacity")
+                                               : pattern->UnRegisterResource("ShapeAbstractFillOpacity");
     }
 }
 
@@ -87,10 +91,13 @@ void SetStrokeOpacity(ArkUINodeHandle node, ArkUI_Float32 strokeOpacity, void* r
     ShapeModelNG::SetStrokeOpacity(frameNode, strokeOpacity);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    pattern->UnRegisterResource("ShapeAbstractStrokeOpacity");
+    pattern->IsEnableChildrenMatchParent() ? pattern->UnRegisterResource("ShapeStrokeOpacity")
+                                           : pattern->UnRegisterResource("ShapeAbstractStrokeOpacity");
     if (SystemProperties::ConfigChangePerform() && resObjPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
-        pattern->RegisterResource<double>("ShapeAbstractStrokeOpacity", resObj, strokeOpacity);
+        pattern->IsEnableChildrenMatchParent()
+            ? pattern->RegisterResource<double>("ShapeStrokeOpacity", resObj, strokeOpacity)
+            : pattern->RegisterResource<double>("ShapeAbstractStrokeOpacity", resObj, strokeOpacity);
     }
 }
 
@@ -102,7 +109,8 @@ void ResetStrokeOpacity(ArkUINodeHandle node)
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform()) {
-        pattern->UnRegisterResource("ShapeAbstractStrokeOpacity");
+        pattern->IsEnableChildrenMatchParent() ? pattern->UnRegisterResource("ShapeStrokeOpacity")
+                                               : pattern->UnRegisterResource("ShapeAbstractStrokeOpacity");
     }
 }
 
@@ -115,10 +123,13 @@ void SetStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, int unit, void* r
     ShapeModelNG::SetStrokeWidth(frameNode, lineWidth);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    pattern->UnRegisterResource("ShapeAbstractStrokeWidth");
+    pattern->IsEnableChildrenMatchParent() ? pattern->UnRegisterResource("ShapeStrokeWidth")
+                                           : pattern->UnRegisterResource("ShapeAbstractStrokeWidth");
     if (SystemProperties::ConfigChangePerform() && resObjPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
-        pattern->RegisterResource<CalcDimension>("ShapeAbstractStrokeWidth", resObj, lineWidth);
+        pattern->IsEnableChildrenMatchParent()
+            ? pattern->RegisterResource<CalcDimension>("ShapeStrokeWidth", resObj, lineWidth)
+            : pattern->RegisterResource<CalcDimension>("ShapeAbstractStrokeWidth", resObj, lineWidth);
     }
 }
 
@@ -130,7 +141,8 @@ void ResetStrokeWidth(ArkUINodeHandle node)
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform()) {
-        pattern->UnRegisterResource("ShapeAbstractStrokeWidth");
+        pattern->IsEnableChildrenMatchParent() ? pattern->UnRegisterResource("ShapeStrokeWidth")
+                                               : pattern->UnRegisterResource("ShapeAbstractStrokeWidth");
     }
 }
 
@@ -156,10 +168,13 @@ void SetStroke(ArkUINodeHandle node, uint32_t stroke, void* resObjPtr)
     ShapeModelNG::SetStroke(frameNode, strokeColor);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    pattern->UnRegisterResource("ShapeAbstractStroke");
+    pattern->IsEnableChildrenMatchParent() ? pattern->UnRegisterResource("ShapeStroke")
+                                           : pattern->UnRegisterResource("ShapeAbstractStroke");
     if (SystemProperties::ConfigChangePerform() && resObjPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
-        pattern->RegisterResource<Color>("ShapeAbstractStroke", resObj, strokeColor);
+        pattern->IsEnableChildrenMatchParent()
+            ? pattern->RegisterResource<Color>("ShapeStroke", resObj, strokeColor)
+            : pattern->RegisterResource<Color>("ShapeAbstractStroke", resObj, strokeColor);
     }
 }
 
@@ -171,7 +186,8 @@ void ResetStroke(ArkUINodeHandle node)
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform()) {
-        pattern->UnRegisterResource("ShapeAbstractStroke");
+        pattern->IsEnableChildrenMatchParent() ? pattern->UnRegisterResource("ShapeStroke")
+                                               : pattern->UnRegisterResource("ShapeAbstractStroke");
     }
 }
 
@@ -183,10 +199,13 @@ void SetFill(ArkUINodeHandle node, uint32_t fill, void* resObjPtr)
     ShapeModelNG::SetFill(frameNode, fillColor);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    pattern->UnRegisterResource("ShapeAbstractFill");
+    pattern->IsEnableChildrenMatchParent() ? pattern->UnRegisterResource("ShapeFill")
+                                           : pattern->UnRegisterResource("ShapeAbstractFill");
     if (SystemProperties::ConfigChangePerform() && resObjPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
-        pattern->RegisterResource<Color>("ShapeAbstractFill", resObj, fillColor);
+        pattern->IsEnableChildrenMatchParent()
+            ? pattern->RegisterResource<Color>("ShapeFill", resObj, fillColor)
+            : pattern->RegisterResource<Color>("ShapeAbstractFill", resObj, fillColor);
     }
 }
 
@@ -198,7 +217,8 @@ void ResetFill(ArkUINodeHandle node)
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform()) {
-        pattern->UnRegisterResource("ShapeAbstractFill");
+        pattern->IsEnableChildrenMatchParent() ? pattern->UnRegisterResource("ShapeFill")
+                                               : pattern->UnRegisterResource("ShapeAbstractFill");
     }
 }
 
@@ -264,7 +284,8 @@ void SetStrokeDashArray(
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    pattern->UnRegisterResource("ShapeAbstractStrokeDashArray");
+    pattern->IsEnableChildrenMatchParent() ? pattern->UnRegisterResource("ShapeStrokeDashArray")
+                                           : pattern->UnRegisterResource("ShapeAbstractStrokeDashArray");
     std::vector<Dimension> dashArray;
     std::vector<RefPtr<ResourceObject>> resObjArrayResult;
     RefPtr<ResourceObject>* resObjPtr = static_cast<RefPtr<ResourceObject>*>(resObjArray);
@@ -277,7 +298,9 @@ void SetStrokeDashArray(
         resObjArrayResult.emplace_back(resObjPtr[i]);
     }
     if (SystemProperties::ConfigChangePerform() && hasResObj) {
-        ShapeAbstractModelNG::SetStrokeDashArray(frameNode, dashArray, resObjArrayResult);
+        pattern->IsEnableChildrenMatchParent()
+            ? ShapeModelNG::SetStrokeDashArray(frameNode, dashArray, resObjArrayResult)
+            : ShapeAbstractModelNG::SetStrokeDashArray(frameNode, dashArray, resObjArrayResult);
     }
     ShapeModelNG::SetStrokeDashArray(frameNode, dashArray);
 }
@@ -290,7 +313,8 @@ void ResetStrokeDashArray(ArkUINodeHandle node)
     ShapeModelNG::SetStrokeDashArray(frameNode, dashArray);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    pattern->UnRegisterResource("ShapeAbstractStrokeDashArray");
+    pattern->IsEnableChildrenMatchParent() ? pattern->UnRegisterResource("ShapeStrokeDashArray")
+                                           : pattern->UnRegisterResource("ShapeAbstractStrokeDashArray");
 }
 
 void SetShapeWidth(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit, void* resObjPtr)

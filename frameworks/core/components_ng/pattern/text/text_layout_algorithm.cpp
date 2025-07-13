@@ -25,16 +25,14 @@
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
-
-#ifdef ACE_ENABLE_VK
-#include "render_service_base/include/platform/common/rs_system_properties.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HUNDRED = 100;
 constexpr int32_t TWENTY = 20;
-constexpr float DEFAULT_STROKE_WIDTH = 0.0f;
 
 uint32_t GetAdaptedMaxLines(const TextStyle& textStyle, const LayoutConstraintF& contentConstraint)
 {
@@ -134,12 +132,12 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         return SizeF {};
     }
     CHECK_NULL_RETURN(paragraphManager_, std::nullopt);
-#ifdef ACE_ENABLE_VK
+#ifdef ENABLE_ROSEN_BACKEND
     auto pipeline = host->GetContext();
     auto fontManager = pipeline == nullptr ? nullptr : pipeline->GetFontManager();
-    if (fontManager != nullptr && Rosen::RSSystemProperties::GetHybridRenderEnabled()) {
+    if (fontManager != nullptr && Rosen::RSUIDirector::IsHybridRenderEnabled()) {
         if (static_cast<uint32_t>(paragraphManager_->GetLineCount()) >=
-            Rosen::RSSystemProperties::GetHybridRenderTextBlobLenCount()) {
+            Rosen::RSUIDirector::GetHybridRenderTextBlobLenCount()) {
             fontManager->AddHybridRenderNode(host);
         } else {
             fontManager->RemoveHybridRenderNode(host);
@@ -173,8 +171,7 @@ void TextLayoutAlgorithm::UpdateRelayoutShaderStyle(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(pattern);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
-    if (textStyle_.GetGradient().has_value() && !pattern->GetExternalParagraph() &&
-        textStyle_.GetStrokeWidth().Value() >= DEFAULT_STROKE_WIDTH) {
+    if (textStyle_.GetGradient().has_value() && !pattern->GetExternalParagraph()) {
         RelayoutShaderStyle(textLayoutProperty);
     }
 }

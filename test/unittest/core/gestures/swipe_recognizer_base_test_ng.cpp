@@ -422,4 +422,48 @@ HWTEST_F(SwipeRecognizerBaseTestNg, SwipeRecognizerBaseTest001, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: SwipeRecognizerBaseTest002
+ * @tc.desc: Test SwipeRecognizer: Test for TriggerGestureJudgeCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerBaseTestNg, SwipeRecognizerBaseTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swipeRecognizer.
+     */
+    int32_t fingers = 1;
+    SwipeDirection direction = { SwipeDirection::HORIZONTAL };
+    double speed = 10.0;
+    auto swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(fingers, direction, speed);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<NG::TargetComponent>();
+    auto judgeFunc1 = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
+                          const std::list<RefPtr<NGGestureRecognizer>>& others) -> GestureJudgeResult {
+        return GestureJudgeResult::REJECT;
+    };
+    auto judgeFunc2 = [](const RefPtr<GestureInfo>& gestureInfo,
+                          const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+        return GestureJudgeResult::REJECT;
+    };
+    targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(judgeFunc1));
+    targetComponent->onGestureJudgeBegin_ = judgeFunc2;
+    swipeRecognizer->SetTargetComponent(targetComponent);
+    /**
+     * @tc.steps: step2. TriggerGestureJudgeCallback with inputEventType::AXIS.
+     * @tc.expected: step2. result equals.
+     */
+    AxisEvent axisEvent;
+    swipeRecognizer->inputEventType_ = InputEventType::AXIS;
+    swipeRecognizer->lastAxisEvent_ = axisEvent;
+    EXPECT_EQ(swipeRecognizer->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+
+    /**
+     * @tc.steps: step3. TriggerGestureJudgeCallback with inputEventType::TOUCH_SCREEN.
+     * @tc.expected: step3. result equals.
+     */
+    TouchEvent touchEvent;
+    swipeRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    swipeRecognizer->lastTouchEvent_ = touchEvent;
+    EXPECT_EQ(swipeRecognizer->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+}
 } // namespace OHOS::Ace::NG

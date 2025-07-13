@@ -369,9 +369,9 @@ public:
 
     std::unordered_map<int32_t, TouchDelegates> touchDelegatesMap_;
 
-    TouchDelegateHdl AddTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate> delegater);
+    TouchDelegateHdl AddTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate>& delegater);
 
-    TouchDelegateHdl ReplaceTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate> delegater);
+    TouchDelegateHdl UpdateTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate>& delegater);
 
     void UnregisterTouchDelegate(TouchDelegateHdl handler);
 

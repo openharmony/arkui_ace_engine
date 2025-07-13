@@ -243,12 +243,13 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::DETECTING) {
         if (GreatOrEqual(fabs(currentDev_ - initialDev_), distance_)) {
             scale_ = currentDev_ / initialDev_;
+            if (CheckLimitFinger()) {
+                extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
+                return;
+            }
             auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
             if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-                return;
-            }
-            if (CheckLimitFinger()) {
                 return;
             }
             if (!isLastPinchFinished_) {
@@ -317,6 +318,7 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    extraInfo_ += "cancel received.";
     if (!IsActiveFinger(event.id)) {
         return;
     }
@@ -338,6 +340,7 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
+    extraInfo_ += "cancel received.";
     UpdateTouchPointWithAxisEvent(event);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -512,6 +515,11 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEventType(inputEventType_);
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
+    if (inputEventType_ == InputEventType::AXIS) {
+        info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+    } else {
+        info->SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+    }
     if (gestureRecognizerJudgeFunc) {
         return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
     }

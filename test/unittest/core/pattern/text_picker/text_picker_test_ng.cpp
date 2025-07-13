@@ -91,6 +91,7 @@ constexpr size_t FIVE_CHILDREN = 5;
 constexpr size_t THREE = 3;
 constexpr uint32_t SELECTED_INDEX_1 = 1;
 constexpr double FONT_SIZE_10 = 10.0;
+constexpr double FONT_SIZE_20 = 20.0;
 constexpr double FONT_SIZE_INVALID = -1.0;
 const std::string EMPTY_TEXT = "";
 const std::string TEXT_PICKER_CONTENT = "text";
@@ -785,6 +786,51 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle004, TestSize.L
 }
 
 /**
+ * @tc.name: TextPickerModelNGSetDisappearTextStyle005
+ * @tc.desc: Test TextPickerModelNG SetDisappearTextStyle(set minFontSize and maxFontSize).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle005, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    PickerTextStyle textStyle;
+    textStyle.minFontSize = Dimension(FONT_SIZE_10);
+    textStyle.maxFontSize = Dimension(FONT_SIZE_20);
+    TextPickerModelNG::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    ASSERT_TRUE(pickerProperty->HasDisappearMinFontSize());
+    ASSERT_TRUE(pickerProperty->HasDisappearMaxFontSize());
+    EXPECT_EQ(Dimension(FONT_SIZE_10), pickerProperty->GetDisappearMinFontSize().value());
+    EXPECT_EQ(Dimension(FONT_SIZE_20), pickerProperty->GetDisappearMaxFontSize().value());
+}
+
+/**
+ * @tc.name: TextPickerModelNGSetDisappearTextStyle006
+ * @tc.desc: Test TextPickerModelNG SetDisappearTextStyle(set TextOverflow).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetDisappearTextStyle006, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    PickerTextStyle textStyle;
+    textStyle.textOverflow = TextOverflow::ELLIPSIS;
+    TextPickerModelNG::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    ASSERT_TRUE(pickerProperty->HasDisappearTextOverflow());
+    EXPECT_EQ(TextOverflow::ELLIPSIS, pickerProperty->GetDisappearTextOverflow().value());
+}
+
+/**
  * @tc.name: TextPickerModelNGSetNormalTextStyle001
  * @tc.desc: Test TextPickerModelNG SetNormalTextStyle(set Color).
  * @tc.type: FUNC
@@ -868,6 +914,51 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle004, TestSize.Leve
 }
 
 /**
+ * @tc.name: TextPickerModelNGSetNormalTextStyle005
+ * @tc.desc: Test TextPickerModelNG SetNormalTextStyle(set minFontSize and maxFontSize).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle005, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    PickerTextStyle textStyle;
+    textStyle.minFontSize = Dimension(FONT_SIZE_10);
+    textStyle.maxFontSize = Dimension(FONT_SIZE_20);
+    TextPickerModelNG::GetInstance()->SetNormalTextStyle(theme, textStyle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    ASSERT_TRUE(pickerProperty->HasMinFontSize());
+    ASSERT_TRUE(pickerProperty->HasMaxFontSize());
+    EXPECT_EQ(Dimension(FONT_SIZE_10), pickerProperty->GetMinFontSize().value());
+    EXPECT_EQ(Dimension(FONT_SIZE_20), pickerProperty->GetMaxFontSize().value());
+}
+
+/**
+* @tc.name: TextPickerModelNGSetNormalTextStyle006
+* @tc.desc: Test TextPickerModelNG SetNormalTextStyle(set TextOverflow).
+* @tc.type: FUNC
+*/
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetNormalTextStyle006, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    PickerTextStyle textStyle;
+    textStyle.textOverflow = TextOverflow::ELLIPSIS;
+    TextPickerModelNG::GetInstance()->SetNormalTextStyle(theme, textStyle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    ASSERT_TRUE(pickerProperty->HasTextOverflow());
+    EXPECT_EQ(TextOverflow::ELLIPSIS, pickerProperty->GetTextOverflow().value());
+}
+
+/**
  * @tc.name: TextPickerModelNGSetSelectedTextStyle001
  * @tc.desc: Test TextPickerModelNG SetSelectedTextStyle(set Color).
  * @tc.type: FUNC
@@ -948,6 +1039,51 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle004, TestSize.Le
     ASSERT_NE(pickerProperty, nullptr);
     ASSERT_TRUE(pickerProperty->HasSelectedWeight());
     EXPECT_EQ(Ace::FontWeight::BOLD, pickerProperty->GetSelectedWeight().value());
+}
+
+/**
+ * @tc.name: TextPickerModelNGSetSelectedTextStyle005
+ * @tc.desc: Test TextPickerModelNG SetSelectedTextStyle(set minFontSize and maxFontSize).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle005, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    PickerTextStyle textStyle;
+    textStyle.minFontSize = Dimension(FONT_SIZE_10);
+    textStyle.maxFontSize = Dimension(FONT_SIZE_20);
+    TextPickerModelNG::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    ASSERT_TRUE(pickerProperty->HasSelectedMinFontSize());
+    ASSERT_TRUE(pickerProperty->HasSelectedMaxFontSize());
+    EXPECT_EQ(Dimension(FONT_SIZE_10), pickerProperty->GetSelectedMinFontSize().value());
+    EXPECT_EQ(Dimension(FONT_SIZE_20), pickerProperty->GetSelectedMaxFontSize().value());
+}
+
+/**
+* @tc.name: TextPickerModelNGSetSelectedTextStyle006
+* @tc.desc: Test TextPickerModelNG SetSelectedTextStyle(set TextOverflow).
+* @tc.type: FUNC
+*/
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle006, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    PickerTextStyle textStyle;
+    textStyle.textOverflow = TextOverflow::ELLIPSIS;
+    TextPickerModelNG::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    ASSERT_TRUE(pickerProperty->HasSelectedTextOverflow());
+    EXPECT_EQ(TextOverflow::ELLIPSIS, pickerProperty->GetSelectedTextOverflow().value());
 }
 
 /**

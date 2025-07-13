@@ -51,8 +51,10 @@ void SheetSideObject::DirtyLayoutProcess(const RefPtr<LayoutAlgorithmWrapper>& l
     if (sideSheetLayoutAlgorithm->GetSideSheetMaxWidth() > 0) {
         sheetMaxWidth_ = sideSheetLayoutAlgorithm->GetSideSheetMaxWidth();
         sheetWidth_ = sideSheetLayoutAlgorithm->GetSideSheetWidth();
-        pattern->SetCenterHeight(sideSheetLayoutAlgorithm->GetCenterHeight());
         pattern->SetSheetMaxHeight(sideSheetLayoutAlgorithm->GetSideSheetMaxHeight());
+    }
+    if (GreatNotEqual(sideSheetLayoutAlgorithm->GetSheetHeight(), 0.0f)) {
+        SetSheetHeight(sideSheetLayoutAlgorithm->GetSheetHeight());
     }
     UpdateDragBarStatus();
     UpdateSidePosition();
@@ -88,7 +90,7 @@ void SheetSideObject::UpdateSidePosition()
     if (!sheetPattern->IsOnAppearing()
         && !sheetPattern->IsOnDisappearing() && !sheetPattern->IsDragging()) {
         sheetPattern->FireOnWidthDidChange();
-        sheetPattern->FireOnHeightDidChange();
+        FireHeightDidChange();
         bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
         if (!isRTL) {
             context->UpdateTransformTranslate({ sheetMaxWidth_ - sheetWidth_, 0.0f, 0.0f });
@@ -209,7 +211,7 @@ void SheetSideObject::InitAnimationForOverlay(bool isTransitionIn, bool isFirstT
             sheetPattern->GetBuilderInitHeight();
         }
         sheetPattern->FireOnTypeDidChange();
-        sheetPattern->FireOnHeightDidChange();
+        FireHeightDidChange();
         ACE_SCOPED_TRACE("Side Sheet starts the entrance animation");
     }
 }
@@ -660,5 +662,17 @@ float SheetSideObject::GetUpOffsetCaretNeed()
     }
     // The expected height of the Caret to be lifted
     return inputMinH - inputH;
+}
+
+void SheetSideObject::FireHeightDidChange()
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto preDidHeight = pattern->GetPreDidHeight();
+    if (NearEqual(preDidHeight, sheetHeight_)) {
+        return;
+    }
+    pattern->OnHeightDidChange(sheetHeight_);
+    pattern->SetPreDidHeight(sheetHeight_);
 }
 } // namespace OHOS::Ace::NG

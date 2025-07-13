@@ -763,6 +763,7 @@ let ScrollDirection;
   ScrollDirection[ScrollDirection.Horizontal = 1] = 'Horizontal';
   ScrollDirection[ScrollDirection.Free = 2] = 'Free';
   ScrollDirection[ScrollDirection.None = 3] = 'None';
+  ScrollDirection[ScrollDirection.FREE = 4] = 'FREE';
 })(ScrollDirection || (ScrollDirection = {}));
 
 let Sticky;
@@ -1642,6 +1643,18 @@ class QuickReplaceSymbolEffect extends SymbolEffect {
   scope(value) {
     this.scope = value;
     return this;
+  }
+}
+
+class ContentTransition{
+}
+
+class NumericTextTransition extends ContentTransition {
+  constructor(options) {
+    super();
+    this.type = 'NumericTextTransition';
+    this.flipDirection = options.flipDirection;
+    this.enableBlur = options.enableBlur;
   }
 }
 

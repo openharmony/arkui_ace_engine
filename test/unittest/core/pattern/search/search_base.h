@@ -95,6 +95,8 @@ const std::u16string NUM_FILTER_U16 = u"[0-9]";
 const std::string FILTER_NUM_TEXT = "0123456789";
 const std::u16string FILTER_NUM_TEXT_U16 = u"0123456789";
 const Dimension DEFAULT_INDENT_SIZE = Dimension(5, DimensionUnit::VP);
+const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
+const Dimension TEXT_INDENT = Dimension(5, DimensionUnit::PX);
 
 class SearchBases : public testing::Test {
 public:

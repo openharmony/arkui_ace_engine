@@ -113,6 +113,7 @@ void FormRenderWindow::Destroy()
 #ifdef ENABLE_ROSEN_BACKEND
     frameCallback_.userData_ = nullptr;
     frameCallback_.callback_ = nullptr;
+    rsSurfaceNode_ = nullptr;
     if (rsUIDirector_) {
         rsUIDirector_->Destroy();
         rsUIDirector_.reset();

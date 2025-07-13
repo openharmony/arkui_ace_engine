@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RATING_RATING_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RATING_RATING_MODEL_NG_H
 
+#include "core/common/resource/resource_object.h"
 #include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/pattern/rating/rating_model.h"
 #include "core/components_ng/base/frame_node.h"
@@ -45,7 +46,10 @@ public:
     void SetBackgroundSrc(const std::string& value, bool flag = false) override;
     void SetOnChange(RatingChangeEvent&& onChange) override;
     void SetOnChangeEvent(RatingChangeEvent&& onChangeEvent) override;
+    void CreateWithMediaResourceObj(const RefPtr<ResourceObject>& resObj, const RatingUriType ratingUriType) override;
     
+    static void CreateWithMediaResourceObj(
+        FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const RatingUriType ratingUriType);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetStars(FrameNode* frameNode, int32_t value);
     static void SetStepSize(FrameNode* frameNode, double value);
@@ -56,6 +60,11 @@ public:
     static void SetChangeValue(FrameNode* frameNode, double value);
     static void SetRatingOptions(FrameNode* frameNode, double rating = .0, bool indicator = false);
     static void SetOnChange(FrameNode* frameNode, RatingChangeEvent&& onChange);
+
+private:
+    static std::string StringTypeToStr(const RatingUriType ratingUriType);
+    static void UpdateStarStyleImage(FrameNode* frameNode, const RatingUriType& ratingUriType,
+        const std::string& result);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RATING_RATING_MODEL_NG_H

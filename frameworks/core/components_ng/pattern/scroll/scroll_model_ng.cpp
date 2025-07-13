@@ -123,8 +123,11 @@ RefPtr<ScrollProxy> ScrollModelNG::CreateScrollBarProxy()
 int32_t ScrollModelNG::GetAxis(FrameNode *frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    int32_t value = 0;
     auto layoutProperty = frameNode->GetLayoutProperty<ScrollLayoutProperty>();
+    if (layoutProperty->GetAxis() == Axis::FREE) {
+        return ArkUI_ScrollDirection::ARKUI_SCROLL_DIRECTION_FREE;
+    }
+    int32_t value = 0;
     if (layoutProperty->GetAxis()) {
         value = static_cast<int32_t>(layoutProperty->GetAxisValue());
     }
@@ -413,6 +416,7 @@ uint32_t ScrollModelNG::GetScrollBarColor(FrameNode* frameNode)
 
 void ScrollModelNG::SetScrollBarColor(const Color& color)
 {
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
@@ -420,7 +424,6 @@ void ScrollModelNG::SetScrollBarColor(const Color& color)
     auto scrollBar = pattern->GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
     scrollBar->SetForegroundColor(color);
-    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color);
 }
 
 int32_t ScrollModelNG::GetEdgeEffect(FrameNode* frameNode)
@@ -487,18 +490,21 @@ void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
+    if (axis == Axis::FREE || pattern->GetAxis() == Axis::FREE) {
+        return; // calling SetAxis would disrupt the axisChanged signal in ::OnModifyDone and initialization of FreeScroll
+    }
     pattern->SetAxis(axis);
 }
 
 void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& color)
 {
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     auto scrollBar = pattern->GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
     scrollBar->SetForegroundColor(color);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color, frameNode);
 }
 
 void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension)
@@ -788,6 +794,14 @@ void ScrollModelNG::SetMaxZoomScale(FrameNode* frameNode, float scale)
     pattern->SetMaxZoomScale(scale);
 }
 
+float ScrollModelNG::GetMaxZoomScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, 1.0f);
+    return pattern->GetMaxZoomScale();
+}
+
 void ScrollModelNG::SetMinZoomScale(float scale)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -800,6 +814,14 @@ void ScrollModelNG::SetMinZoomScale(FrameNode* frameNode, float scale)
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMinZoomScale(scale);
+}
+
+float ScrollModelNG::GetMinZoomScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, 1.0f);
+    return pattern->GetMinZoomScale();
 }
 
 void ScrollModelNG::SetZoomScale(float scale)
@@ -830,6 +852,14 @@ void ScrollModelNG::ResetZoomScale(FrameNode* frameNode)
     pattern->SetZoomScale(std::nullopt);
 }
 
+float ScrollModelNG::GetZoomScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, 1.0f);
+    return pattern->GetZoomScale();
+}
+
 void ScrollModelNG::SetZoomScaleChangeEvent(std::function<void(float)>&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -851,6 +881,14 @@ void ScrollModelNG::SetEnableBouncesZoom(FrameNode* frameNode, bool enable)
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableBouncesZoom(enable);
+}
+
+bool ScrollModelNG::GetEnableBouncesZoom(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    return pattern->GetEnableBouncesZoom();
 }
 
 void ScrollModelNG::SetOnDidZoom(std::function<void(float)>&& event)

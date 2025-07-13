@@ -57,6 +57,8 @@ public:
     {}
     ~ListItemPattern() override = default;
 
+    void OnRecycle() override;
+
     bool IsAtomicNode() const override
     {
         return false;

@@ -892,47 +892,6 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest019, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateComponentColor
- * @tc.desc: test ToggleButtonPattern::UpdateComponentColor.
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleButtonTestNg, UpdateComponentColor, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create bubble and get frameNode.
-     */
-    TestProperty testProperty;
-    testProperty.isOn = std::make_optional(IS_ON);
-    RefPtr<FrameNode> frameNode = CreateToggleButtonFrameNode(testProperty);
-    ASSERT_NE(frameNode, nullptr);
-    auto togglePattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
-    ASSERT_NE(togglePattern, nullptr);
-    auto pipelineContext = frameNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto paintProperty = frameNode->GetPaintProperty<ToggleButtonPaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-
-    /**
-     * @tc.steps: step2. pattern UpdateComponentColor.
-     * @tc.expected: step2. check whether the function is executed successfully.
-     */
-    std::vector<std::pair<bool, bool>> vec { { true, true }, { true, false }, { false, true }, { false, false } };
-    for (const auto& pair : vec) {
-        pipelineContext->SetIsSystemColorChange(pair.first);
-        frameNode->SetRerenderable(pair.second);
-        togglePattern->UpdateComponentColor(Color::RED, ToggleColorType::SWITCH_POINT_COLOR);
-        togglePattern->UpdateComponentColor(Color::RED, ToggleColorType::UN_SELECTED_COLOR);
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
-            auto ret = paintProperty->GetSelectedColor();
-            EXPECT_EQ(ret.value_or(Color::BLACK), Color::BLACK);
-            togglePattern->UpdateComponentColor(Color::RED, ToggleColorType::SELECTED_COLOR);
-            ret = paintProperty->GetSelectedColor();
-            EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
-        }
-    }
-}
-
-/**
  * @tc.name: OnColorConfigurationUpdate
  * @tc.desc: test ToggleButtonPattern::OnColorConfigurationUpdate.
  * @tc.type: FUNC
@@ -971,5 +930,51 @@ HWTEST_F(ToggleButtonTestNg, OnColorConfigurationUpdate, TestSize.Level1)
         }
     }
     g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetBackgroundColor
+ * @tc.desc: test ToggleButtonModelNG::SetBackgroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, SetBackgroundColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    ToggleButtonModelNG toggleButtonModelNG;
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 1, AceType::MakeRefPtr<ButtonPattern>());
+    EXPECT_NE(buttonNode, nullptr);
+    stack->Push(buttonNode);
+
+    /**
+     * @tc.steps: step2. call SetBackgroundColor for button frameNode with flag true.
+     * @tc.expected: step2. context background color should be updated to BACKGROUND_COLOR.
+     */
+    toggleButtonModelNG.SetBackgroundColor(AceType::RawPtr(buttonNode), BACKGROUND_COLOR, true);
+    auto context = buttonNode->GetRenderContext();
+    EXPECT_NE(context, nullptr);
+    EXPECT_EQ(context->GetBackgroundColorValue(), BACKGROUND_COLOR);
+
+    /**
+     * @tc.steps: step3. create toggle frameNode and get its pattern and paint property.
+     */
+    auto toggleNode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, 1, AceType::MakeRefPtr<ToggleButtonPattern>());
+    EXPECT_NE(toggleNode, nullptr);
+    auto pattern = AceType::DynamicCast<ToggleButtonPattern>(toggleNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<ToggleButtonPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. call SetBackgroundColor for toggle frameNode with flag true or false.
+     * @tc.expected: step4. toggle background color should be updated.
+     */
+    toggleButtonModelNG.SetBackgroundColor(AceType::RawPtr(toggleNode), BACKGROUND_COLOR, true);
+    EXPECT_EQ(paintProperty->GetBackgroundColor(), BACKGROUND_COLOR);
+    toggleButtonModelNG.SetBackgroundColor(AceType::RawPtr(toggleNode), BACKGROUND_COLOR, false);
+    EXPECT_NE(paintProperty->GetBackgroundColor(), BACKGROUND_COLOR);
 }
 } // namespace OHOS::Ace::NG

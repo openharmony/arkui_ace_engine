@@ -569,4 +569,46 @@ HWTEST_F(TextFieldAutoFillControllerTest, PlayAutoFillIconHideAnimation003, Test
     autoFillController->PlayAutoFillIconHideAnimation(onFinishCallback, AutoFillContentLengthMode::EXTRA_LONG);
     ASSERT_EQ(autoFillController->GetAutoFillAnimationStatus(), AutoFillAnimationStatus::INIT);
 }
+
+/**
+ * @tc.name: ResetAutoFillAnimationStatus001
+ * @tc.desc: test testInput text ResetAutoFillAnimationStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAutoFillControllerTest, ResetAutoFillAnimationStatus001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create frameNode
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    auto autoFillController = AceType::MakeRefPtr<AutoFillController>(AceType::WeakClaim(AceType::RawPtr(pattern_)));
+    pattern_->autoFillController_ = autoFillController;
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty->GetNonAutoLayoutDirection(), TextDirection::RTL);
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    EXPECT_EQ(layoutProperty->GetNonAutoLayoutDirection(), TextDirection::RTL);
+
+    /**
+     * @tc.steps: step2. Init autoFillParagraph_ and autoFillIconNode_
+     */
+    std::u16string content = u"123";
+    autoFillController->InitAutoFillParagraph(content);
+    autoFillController->CreateAutoFillIcon();
+
+    /**
+     * @tc.steps: step3. Call PlayAutoFillTextScrollAnimation
+     */
+    autoFillController->PlayAutoFillTextScrollAnimation();
+    ASSERT_EQ(autoFillController->GetAutoFillAnimationStatus(), AutoFillAnimationStatus::TRANSLATION);
+
+    /**
+     * @tc.steps: step4. Call ResetAutoFillAnimationStatus
+     */
+    autoFillController->ResetAutoFillAnimationStatus();
+    ASSERT_EQ(autoFillController->GetAutoFillAnimationStatus(), AutoFillAnimationStatus::INIT);
+}
 } // namespace OHOS::Ace::NG

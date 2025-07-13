@@ -310,4 +310,30 @@ HWTEST_F(PreviewMenuControllerTest, CreateWantConfigDateTimeTest001, TestSize.Le
     // 验证参数总数 = 基础参数 + AIparams
     EXPECT_EQ(params.size(), 3);
 }
+
+/**
+ * @tc.name: GetCopyAndSelectableWhenTextEffect001
+ * @tc.desc: Verify copy and selectable status when textEffect_ is not null
+ * @tc.require: AR000H0F6A
+ */
+HWTEST_F(PreviewMenuControllerTest, GetCopyAndSelectableWhenTextEffect001, TestSize.Level1)
+{
+    // 1. Prepare textPattern with textEffect_
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
+
+    // 2. Set different copyOption modes (should be overridden by textEffect_)
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    
+    // Case 1: copyOption = InApp (should return true)
+    textPattern->copyOption_ = CopyOptions::InApp;
+    auto result1 = textPattern->GetCopyAndSelectable();
+    EXPECT_TRUE(result1.first);  // isShowCopy
+
+    // Case 2: copyOption = InApp (should still return false due to textEffect_)
+    textPattern->textEffect_ = TextEffect::CreateTextEffect(); // Set textEffect_
+    auto result2 = textPattern->GetCopyAndSelectable();
+    EXPECT_FALSE(result2.first);
+}
 } // namespace OHOS::Ace::NG

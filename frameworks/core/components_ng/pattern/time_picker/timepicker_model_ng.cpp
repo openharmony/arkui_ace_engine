@@ -364,6 +364,8 @@ void TimePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, 
         TimePickerLayoutProperty, DisappearFontFamily, value.fontFamily.value_or(disappearStyle.GetFontFamilies()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, DisappearFontStyle, value.fontStyle.value_or(disappearStyle.GetFontStyle()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TimePickerLayoutProperty, DisappearTextColorSetByUser, value.textColorSetByUser);
 }
 
 void TimePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
@@ -393,6 +395,8 @@ void TimePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, con
         TimePickerLayoutProperty, FontFamily, value.fontFamily.value_or(normalStyle.GetFontFamilies()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, FontStyle, value.fontStyle.value_or(normalStyle.GetFontStyle()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TimePickerLayoutProperty, NormalTextColorSetByUser, value.textColorSetByUser);
 }
 
 void TimePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
@@ -423,6 +427,8 @@ void TimePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
         TimePickerLayoutProperty, SelectedFontFamily, value.fontFamily.value_or(selectedStyle.GetFontFamilies()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TimePickerLayoutProperty, SelectedTextColorSetByUser, value.textColorSetByUser);
 }
 
 void TimePickerModelNG::HasUserDefinedDisappearFontFamily(bool isUserDefined)
@@ -617,6 +623,8 @@ void TimePickerModelNG::SetDisappearTextStyle(
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, DisappearFontStyle,
         value.fontStyle.value_or(disappearStyle.GetFontStyle()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TimePickerLayoutProperty, DisappearTextColorSetByUser, value.textColorSetByUser, frameNode);
 }
 void TimePickerModelNG::SetNormalTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
@@ -641,6 +649,8 @@ void TimePickerModelNG::SetNormalTextStyle(
         TimePickerLayoutProperty, FontFamily, value.fontFamily.value_or(normalStyle.GetFontFamilies()), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, FontStyle, value.fontStyle.value_or(normalStyle.GetFontStyle()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TimePickerLayoutProperty, NormalTextColorSetByUser, value.textColorSetByUser, frameNode);
 }
 void TimePickerModelNG::SetSelectedTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
@@ -670,6 +680,8 @@ void TimePickerModelNG::SetSelectedTextStyle(
         value.fontFamily.value_or(selectedStyle.GetFontFamilies()), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TimePickerLayoutProperty, SelectedTextColorSetByUser, value.textColorSetByUser, frameNode);
 }
 
 void TimePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme)
@@ -944,6 +956,11 @@ void TimePickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, c
 
     auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(pickerPattern);
+
+    if (!textStyleOpt.textColorResObj && !textStyleOpt.fontSizeResObj && !textStyleOpt.fontFamilyResObj) {
+        pickerPattern->RemoveResObj(textStyleType);
+        return;
+    }
 
     auto&& updateFunc = [textStyleOpt, frameNode, updateTextStyleFunc](const RefPtr<ResourceObject> resObj) {
         PickerTextStyle textStyle;

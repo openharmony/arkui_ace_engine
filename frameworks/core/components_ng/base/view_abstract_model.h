@@ -180,7 +180,7 @@ public:
     virtual void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {};
     virtual void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {};
     virtual void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {};
-    virtual void SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) {};
+    virtual void SetBlender(const OHOS::Rosen::Blender* blender) {};
 
     // outerBorder
     virtual void SetOuterBorderRadius(const Dimension& value) = 0;

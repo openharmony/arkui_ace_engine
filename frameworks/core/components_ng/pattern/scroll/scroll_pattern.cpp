@@ -1196,8 +1196,19 @@ Rect ScrollPattern::GetItemRect(int32_t index) const
     CHECK_NULL_RETURN(item, Rect());
     auto itemGeometry = item->GetGeometryNode();
     CHECK_NULL_RETURN(itemGeometry, Rect());
-    return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
-        itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+    float scale = GetZoomScale();
+    if (scale == 1.0f) {
+        return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
+            itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+    } else {
+        auto rect = itemGeometry->GetFrameRect();
+        auto cx = rect.Left() + rect.Width() / 2;
+        auto cy = rect.Top() + rect.Height() / 2;
+        auto left = cx - (cx - rect.Left()) * scale;
+        auto top = cy - (cy - rect.Top()) * scale;
+        auto size = itemGeometry->GetFrameSize() * scale;
+        return Rect(left, top, size.Width(), size.Height());
+    }
 }
 
 float ScrollPattern::GetSelectScrollWidth()
@@ -1595,6 +1606,11 @@ void ScrollPattern::SetMaxZoomScale(float scale)
     }
 }
 
+float ScrollPattern::GetMaxZoomScale() const
+{
+    return maxZoomScale_;
+}
+
 void ScrollPattern::SetMinZoomScale(float scale)
 {
     if (scale > 0) {
@@ -1604,8 +1620,16 @@ void ScrollPattern::SetMinZoomScale(float scale)
     }
 }
 
+float ScrollPattern::GetMinZoomScale() const
+{
+    return minZoomScale_;
+}
+
 void ScrollPattern::SetZoomScale(std::optional<float> scale)
 {
+    if (scale.has_value() && scale.value() <= 0.0f) {
+        scale = 1.0f;
+    }
     if (scale != zoomScale_) {
         zoomScale_ = scale;
         auto host = GetHost();
@@ -1614,6 +1638,11 @@ void ScrollPattern::SetZoomScale(std::optional<float> scale)
         CHECK_NULL_VOID(prop);
         prop->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+float ScrollPattern::GetZoomScale() const
+{
+    return zoomScale_.value_or(1.0f);
 }
 
 void ScrollPattern::UpdateZoomScale(float scale)
@@ -1630,6 +1659,16 @@ void ScrollPattern::UpdateZoomScale(float scale)
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnZoomScaleChange(scale);
     }
+}
+
+void ScrollPattern::SetEnableBouncesZoom(bool enable)
+{
+    enableBouncesZoom_ = enable;
+}
+
+bool ScrollPattern::GetEnableBouncesZoom() const
+{
+    return enableBouncesZoom_;
 }
 
 void ScrollPattern::SetChildScale(std::optional<float> scale)
@@ -1662,6 +1701,8 @@ SizeF ScrollPattern::GetChildrenExpandedSize()
         return SizeF(viewPort_.Width(), viewPortExtent_.Height());
     } else if (axis == Axis::HORIZONTAL) {
         return SizeF(viewPortExtent_.Width(), viewPort_.Height());
+    } else if (axis == Axis::FREE) {
+        return SizeF(viewPortExtent_.Width(), viewPortExtent_.Height());
     }
     return SizeF();
 }
@@ -1682,13 +1723,27 @@ Offset ScrollPattern::GetFreeScrollOffset() const
     }
     return {};
 }
-RefPtr<NGGestureRecognizer> ScrollPattern::GetOverrideRecognizer() const
+
+RefPtr<NGGestureRecognizer> ScrollPattern::GetOverrideRecognizer()
 {
-    if (freeScroll_) {
+    if (!freeScroll_) {
+        return nullptr;
+    }
+    if (!zoomCtrl_) {
         return freeScroll_->GetFreePanGesture();
     }
-    return nullptr;
+    auto pan = freeScroll_->GetFreePanGesture();
+    auto pinch = zoomCtrl_->GetPinchGesture();
+    if (!gestureGroup_) {
+        std::vector<RefPtr<NGGestureRecognizer>> recognizers = { pan, pinch };
+        gestureGroup_ = MakeRefPtr<ParallelRecognizer>(recognizers);
+    } else if (gestureGroup_->GetGroupRecognizer().empty()) {
+        std::list<RefPtr<NGGestureRecognizer>> recognizers = { pan, pinch };
+        gestureGroup_->AddChildren(recognizers);
+    }
+    return gestureGroup_;
 }
+
 bool ScrollPattern::FreeScrollBy(const OffsetF& delta)
 {
     CHECK_NULL_RETURN(freeScroll_, false);

@@ -237,12 +237,13 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
             lastAngle_ = 0.0;
             angleSignChanged_ = false;
             resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
+            if (CheckLimitFinger()) {
+                extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
+                return;
+            }
             auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
             if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-                return;
-            }
-            if (CheckLimitFinger()) {
                 return;
             }
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
@@ -286,12 +287,12 @@ void RotationRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
 void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    extraInfo_ += "cancel received.";
     if (!IsActiveFinger(event.id)) {
         return;
     }
     touchPoints_[event.id] = event;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
-        extraInfo_ += "receive cancel event.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -309,6 +310,7 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
+    extraInfo_ += "cancel received.";
     UpdateTouchPointWithAxisEvent(event);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -465,6 +467,7 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEventType(inputEventType_);
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
+    info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
     if (gestureRecognizerJudgeFunc) {
         return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
     }

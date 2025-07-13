@@ -131,7 +131,7 @@ RefPtr<Container> Container::GetDefault()
     return defaultContainer;
 }
 
-RefPtr<Container> Container::GetFoucsed()
+RefPtr<Container> Container::GetFocused()
 {
     RefPtr<Container> foucsContainer;
     AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {

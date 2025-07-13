@@ -194,7 +194,7 @@ private:
     Color GetLoadingProgressColor();
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     float scrollOffset_ = 0.0f;

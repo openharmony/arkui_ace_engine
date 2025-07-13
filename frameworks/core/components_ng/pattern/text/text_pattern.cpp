@@ -50,10 +50,7 @@
 #include "core/components_ng/render/render_property.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
-#endif
-
-#ifdef ACE_ENABLE_VK
-#include "render_service_base/include/platform/common/rs_system_properties.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -163,8 +160,8 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     if (fontManager) {
         fontManager->UnRegisterCallbackNG(frameNode);
         fontManager->RemoveVariationNodeNG(frameNode);
-#ifdef ACE_ENABLE_VK
-        if (Rosen::RSSystemProperties::GetHybridRenderEnabled()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        if (Rosen::RSUIDirector::IsHybridRenderEnabled()) {
             fontManager->RemoveHybridRenderNode(frameNode);
         }
 #endif
@@ -1900,7 +1897,7 @@ std::pair<bool, bool> TextPattern::GetCopyAndSelectable()
     auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
     bool isShowCopy = true;
     bool isShowSelectText = true;
-    if (copyOption_ == CopyOptions::None) {
+    if (copyOption_ == CopyOptions::None || textEffect_) {
         isShowCopy = false;
         isShowSelectText = false;
     } else if (mode == TextSelectableMode::UNSELECTABLE) {
@@ -2787,6 +2784,7 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
     if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
         return false;
     }
+    CHECK_NULL_RETURN(!textEffect_, false);
     UpdateShiftFlag(keyEvent);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -3753,6 +3751,7 @@ void TextPattern::OnModifyDone()
             ResetSelection();
         }
     }
+    ResetTextEffectBeforeLayout();
     RecoverCopyOption();
     RegisterFormVisibleChangeCallback();
     RegisterVisibleAreaChangeCallback();
@@ -4340,7 +4339,6 @@ void TextPattern::BeforeCreateLayoutWrapper()
     if (HasSpanOnHoverEvent()) {
         InitSpanMouseEvent();
     }
-    ResetTextEffectBeforeLayout();
 }
 
 bool TextPattern::ResetTextEffectBeforeLayout(bool onlyReset)
@@ -4764,7 +4762,7 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
     }
 }
 
-void TextPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);

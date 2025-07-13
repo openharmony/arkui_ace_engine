@@ -22,6 +22,8 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
 constexpr double HALF = 0.5;
@@ -258,6 +260,17 @@ void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
         std::string subtitle = NavigationTitleUtil::GetSubtitleString(titleBarNode);
         json->PutExtAttr("title", title.c_str(), filter);
         json->PutExtAttr("subtitle", subtitle.c_str(), filter);
+        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+        if (titleBarPattern) {
+            titleBarPattern->GetTitleBarOptions().ToJsonValue(json, filter);
+        }
+    }
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(toolBarNode_);
+    if (toolBarNode) {
+        auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
+        if (toolBarPattern) {
+            toolBarPattern->GetToolBarOptions().ToJsonValue(json, filter);
+        }
     }
     json->PutExtAttr("mode", mode_ == NavDestinationMode::DIALOG
         ? "NavDestinationMode::DIALOG"

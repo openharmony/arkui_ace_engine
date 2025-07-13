@@ -23,6 +23,7 @@
 #include "core/common/interaction/interaction_interface.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
@@ -1689,7 +1690,7 @@ int32_t GestureEventHub::GetBadgeNumber(const RefPtr<OHOS::Ace::DragEvent>& drag
         badgeNumber = recordSize > 1 ? recordSize : 1;
     } else if (dataLoadParams && isUseDataLoadParams) {
         auto recodeCount = dataLoadParams->GetRecordCount();
-        badgeNumber = static_cast<int32_t>(recodeCount) > 1 ? recodeCount : 1;
+        badgeNumber = (recodeCount == 0 || recodeCount > INT32_MAX) ? 1 : static_cast<int32_t>(recodeCount);
     }
 
     auto dragPreviewOptions = frameNode->GetDragPreviewOption();
@@ -2009,4 +2010,14 @@ const BindMenuStatus& GestureEventHub::GetBindMenuStatus() const
     return bindMenuStatus_;
 }
 
+void GestureEventHub::SetRecognizerDelayStatus(const RecognizerDelayStatus& recognizerDelayStatus)
+{
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto refereeNG = eventManager->GetGestureRefereeNG(nullptr);
+    CHECK_NULL_VOID(refereeNG);
+    refereeNG->SetRecognizerDelayStatus(recognizerDelayStatus);
+}
 } // namespace OHOS::Ace::NG

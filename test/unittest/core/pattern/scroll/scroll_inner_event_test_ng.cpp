@@ -159,7 +159,7 @@ void ScrollInnerEventTestNg::CollectTouchTarget(Point point)
     ResponseLinkResult responseLinkResult;
     auto scrollableActuator = frameNode_->GetOrCreateGestureEventHub()->scrollableActuator_;
     scrollableActuator->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, result, localPoint,
-        frameNode, targetComponent, responseLinkResult);
+        frameNode, targetComponent, responseLinkResult, 1);
 }
 
 /**

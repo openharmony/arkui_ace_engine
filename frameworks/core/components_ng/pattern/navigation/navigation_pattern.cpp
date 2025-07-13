@@ -1136,7 +1136,7 @@ void NavigationPattern::UpdateNavPathList()
             addByNavRouter_ = false;
             uiNode = navigationStack_->Get();
         } else if (isCurForceSetList) {
-            if (navDestinationId != -1) {
+            if (static_cast<int32_t>(navDestinationId) != -1) {
                 uiNode = FindNavDestinationNodeInPreList(navDestinationId);
             }
         } else {

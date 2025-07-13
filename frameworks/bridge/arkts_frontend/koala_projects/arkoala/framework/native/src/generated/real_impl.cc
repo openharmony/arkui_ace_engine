@@ -88,7 +88,6 @@ void busyWait(Ark_Int64 nsDelay) {
             std::next_permutation(buf.begin(), buf.end());
         }
     }
-    //ARKOALA_LOG("Requested wait %f ms, actual %f ms\n", nsDelay/1000000.0f, (now - start).count()/1000000.0f);
 }
 
 const int MAX_NODE_TYPE = 200;
@@ -10430,9 +10429,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
-        //auto convValue = Converter::Convert<type>(node);
-        //auto convValue = Converter::OptConvert<type>(node); // for enums
-        //undefinedModelNG::SetSetClipRect(frameNode, convValue);
     }
     void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
     {
@@ -10445,18 +10441,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
-        //auto convValue = Converter::Convert<type>(node);
-        //auto convValue = Converter::OptConvert<type>(node); // for enums
-        //undefinedModelNG::SetStartDoubleAnimation(frameNode, convValue);
     }
     void AnimationTranslateImpl(Ark_NativePointer node,
                                 const Ark_TranslateOptions* options)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
-        //auto convValue = Converter::Convert<type>(node);
-        //auto convValue = Converter::OptConvert<type>(node); // for enums
-        //undefinedModelNG::SetAnimationTranslate(frameNode, convValue);
     }
     } // AnimationExtenderAccessor
     namespace UnifiedDataAccessor {
@@ -10496,9 +10486,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
-        //auto convValue = Converter::Convert<type>(root);
-        //auto convValue = Converter::OptConvert<type>(root); // for enums
-        //undefinedModelNG::SetEndFrame(frameNode, convValue);
     }
     void SyncInstanceIdImpl(Ark_Int32 instanceId)
     {
@@ -11276,9 +11263,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
-        //auto convValue = Converter::Convert<type>(navigation);
-        //auto convValue = Converter::OptConvert<type>(navigation); // for enums
-        //undefinedModelNG::SetCheckNeedCreate(frameNode, convValue);
         return {};
     }
     Ark_NativePointer NavigationCreateImpl(Ark_Int32 peer,
@@ -11291,9 +11275,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
-        //auto convValue = Converter::Convert<type>(navigation);
-        //auto convValue = Converter::OptConvert<type>(navigation); // for enums
-        //undefinedModelNG::SetSetNavigationOptions(frameNode, convValue);
     }
     void SetNavDestinationNodeImpl(Ark_NavPathStack peer,
                                    Ark_Int32 index,
@@ -11307,9 +11288,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
-        //auto convValue = Converter::Convert<type>(node);
-        //auto convValue = Converter::OptConvert<type>(node); // for enums
-        //undefinedModelNG::SetEmitTextInputEvent(frameNode, convValue);
     }
     } // EventEmulatorAccessor
     namespace ActionSheetAccessor {

@@ -1043,7 +1043,7 @@ HWTEST_F(BadgeTestNg, BadgeDumpSimplifyInfoTest001, TestSize.Level1)
     textNode->MountToParent(frameNode_);
     pattern_->OnModifyDone();
 
-    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    std::shared_ptr<JsonValue> json = std::make_shared<JsonValue>();
     pattern_->DumpSimplifyInfo(json);
 
     // update badge layoutProperty and go to different branch
@@ -1765,5 +1765,55 @@ HWTEST_F(BadgeTestNg, BadgePatternOnColorUpdate001, TestSize.Level1)
     layoutProperty->UpdateBadgeColorByuser(true);
     pattern_->OnColorConfigurationUpdate();
     EXPECT_EQ(layoutProperty->GetBadgeTextColor(), Color::BLACK);
+}
+
+/**
+ * @tc.name: CreateBadgeFrameNodeTest001
+ * @tc.desc: Test to create a badge frame node and return.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(BadgeTestNg, CreateBadgeFrameNodeTest001, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    auto framenode = badge.CreateBadgeFrameNode();
+    ASSERT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: CreateByFrameNodeTest001
+ * @tc.desc: Test to create a badge by frame node.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(BadgeTestNg, CreateByFrameNodeTest001, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    auto framenode = badge.CreateBadgeFrameNode();
+    ASSERT_NE(framenode, nullptr);
+
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeValue = "test";
+    badgeParameters.badgeCount = 1;
+    badgeParameters.badgeMaxCount = 99;
+    badgeParameters.badgePosition = 1;
+    badgeParameters.badgeColor = Color::BLACK;
+    badgeParameters.badgeTextColor = Color::GREEN;
+    badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
+    badgeParameters.badgeCircleSize = BADGE_CIRCLE_SIZE;
+    badgeParameters.isPositionXy = true;
+    badgeParameters.badgePositionX = Dimension(10);
+    badgeParameters.badgePositionY = Dimension(10);
+    badge.CreateByFrameNode(framenode, badgeParameters);
+
+    GetInstance();
+    ASSERT_NE(layoutProperty_, nullptr);
+    EXPECT_EQ(layoutProperty_->GetBadgeValue(), "test");
+    EXPECT_EQ(layoutProperty_->GetBadgeCount(), 1);
+    EXPECT_EQ(layoutProperty_->GetBadgeMaxCount(), 99);
+    EXPECT_EQ(layoutProperty_->GetBadgeColor(), Color::BLACK);
+    EXPECT_EQ(layoutProperty_->GetBadgeTextColor(), Color::GREEN);
+    EXPECT_EQ(layoutProperty_->GetBadgeFontSize(), BADGE_FONT_SIZE);
+    EXPECT_EQ(layoutProperty_->GetBadgeCircleSize(), BADGE_CIRCLE_SIZE);
 }
 } // namespace OHOS::Ace::NG

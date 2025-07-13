@@ -34,6 +34,28 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+struct GestureEventHubAddPanEventTestCase {
+    bool needCreatPanEventActuatorFirst = false;
+    PanDirection panDirectionType;
+    PanDirection comparePanDirectionType;
+    bool expectRecreatePanEvent = false;
+    Dimension expectDistance;
+    GestureEventHubAddPanEventTestCase(bool needCreatPanEventActuatorFirst,
+        PanDirection panDirectionType, PanDirection comparePanDirectionType, bool expectRecreatePanEvent,
+        Dimension expectDistance)
+        : needCreatPanEventActuatorFirst(needCreatPanEventActuatorFirst), panDirectionType(panDirectionType),
+        comparePanDirectionType(comparePanDirectionType), expectRecreatePanEvent(expectRecreatePanEvent),
+        expectDistance(expectDistance)
+    {}
+};
+const std::vector<GestureEventHubAddPanEventTestCase> ADD_PAN_EVENT_TEST_CASE = {
+    GestureEventHubAddPanEventTestCase(false, PAN_DIRECTION_ALL, PAN_DIRECTION_ALL, true, DEFAULT_PAN_DISTANCE),
+    GestureEventHubAddPanEventTestCase(false, DRAG_DIRECTION, PAN_DIRECTION_ALL, true, DEFAULT_PAN_DISTANCE),
+    GestureEventHubAddPanEventTestCase(true, DRAG_DIRECTION, PAN_DIRECTION_ALL, true, DEFAULT_PAN_DISTANCE),
+    GestureEventHubAddPanEventTestCase(true, PAN_DIRECTION_ALL, PAN_DIRECTION_ALL, false, DISTANCE),
+};
+}
 
 /**
  * @tc.name: CalcFrameNodeOffsetAndSize_001
@@ -852,19 +874,35 @@ HWTEST_F(GestureEventHubTestNg, GetBadgeNumber_001, TestSize.Level1)
     /**
      * @tc.steps: step3. call GetBadgeNumber.
      */
-    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     ASSERT_NE(dragEvent, nullptr);
+    RefPtr<MockUnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    ASSERT_NE(unifiedData, nullptr);
+    dragEvent->SetData(unifiedData);
+    EXPECT_CALL(*unifiedData, GetSize()).WillRepeatedly(testing::Return(5));
     dragEvent->SetUseDataLoadParams(false);
     auto ret1 = guestureEventHub->GetBadgeNumber(dragEvent);
-    EXPECT_NE(ret1, 0);
+    EXPECT_EQ(ret1, 5);
 
     dragEvent->SetUseDataLoadParams(true);
     RefPtr<MockDataLoadParams> mockDataLoadParams = AceType::MakeRefPtr<MockDataLoadParams>();
     ASSERT_NE(mockDataLoadParams, nullptr);
-    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(10));
+    dragEvent->SetDataLoadParams(mockDataLoadParams);
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(-1));
     auto ret2 = guestureEventHub->GetBadgeNumber(dragEvent);
-    EXPECT_NE(ret2, 10);
+    EXPECT_EQ(ret2, 1);
+
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(0));
+    auto ret3 = guestureEventHub->GetBadgeNumber(dragEvent);
+    EXPECT_EQ(ret3, 1);
+
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(INT32_MAX + 1));
+    auto ret4 = guestureEventHub->GetBadgeNumber(dragEvent);
+    EXPECT_EQ(ret4, 1);
+
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(10));
+    auto ret5 = guestureEventHub->GetBadgeNumber(dragEvent);
+    EXPECT_EQ(ret5, 10);
 }
 
 /**
@@ -1475,5 +1513,51 @@ HWTEST_F(GestureEventHubTestNg, MinRecognizerGroupLoopSizeTest001, TestSize.Leve
     auto sizeOfResponseLinkResult = static_cast<int32_t>(responseLinkResult.size());
     EXPECT_FALSE(result);
     EXPECT_EQ(sizeOfResponseLinkResult, 3);
+}
+
+/**
+ * @tc.name: GestureEventHubProcessTouchHitTest001
+ * @tc.desc: Test ProcessTouchTestHit
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubProcessTouchHitTest001, TestSize.Level1)
+{
+    auto panActionStart = [](GestureEvent& info) {};
+    auto panActionUpdate = [](GestureEvent& info) {};
+    auto panActionEnd = [](GestureEvent& info) {};
+    auto panActionCancel = []() {};
+    auto panEvent = AceType::MakeRefPtr<PanEvent>(
+        std::move(panActionStart), std::move(panActionUpdate), std::move(panActionEnd), std::move(panActionCancel));
+
+    for (const auto &testCase : ADD_PAN_EVENT_TEST_CASE) {
+        /**
+        * @tc.steps: step1. Create GestureEventHub.
+        * @tc.expected: gestureEventHub is not null.
+        */
+        auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+        auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+        ASSERT_NE(gestureEventHub, nullptr);
+        PanDistanceMapDimension distanceMap = { { SourceTool::UNKNOWN, DISTANCE } };
+        PanDistanceMapDimension expectDistanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE } };
+        auto panEventActuator = AceType::MakeRefPtr<PanEventActuator>(
+            AceType::WeakClaim(AceType::RawPtr(gestureEventHub)),
+            testCase.panDirectionType, FINGERS_NUMBER, distanceMap);
+        ASSERT_NE(panEventActuator, nullptr);
+        if (testCase.needCreatPanEventActuatorFirst) {
+            gestureEventHub->panEventActuator_ = panEventActuator;
+        } else {
+            gestureEventHub->panEventActuator_ = nullptr;
+        }
+        gestureEventHub->AddPanEvent(panEvent, testCase.comparePanDirectionType, FINGERS, expectDistanceMap);
+        if (testCase.expectRecreatePanEvent) {
+            EXPECT_NE(gestureEventHub->panEventActuator_, panEventActuator);
+        } else {
+            EXPECT_EQ(gestureEventHub->panEventActuator_, panEventActuator);
+        }
+        ASSERT_NE(gestureEventHub->panEventActuator_, nullptr);
+        auto panRecognizer = gestureEventHub->panEventActuator_->panRecognizer_;
+        ASSERT_NE(panRecognizer, nullptr);
+        EXPECT_EQ(panRecognizer->GetDistance(), testCase.expectDistance.ConvertToPx());
+    }
 }
 } // namespace OHOS::Ace::NG

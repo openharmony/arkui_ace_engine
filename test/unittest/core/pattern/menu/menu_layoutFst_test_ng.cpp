@@ -2038,4 +2038,43 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
 
     EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
 }
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg050
+ * @tc.desc: Test MultiMenu layout algorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg050, TestSize.Level1)
+{
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    PaddingProperty padding;
+    padding.left = CalcLength(10.0f);
+    padding.right = CalcLength(10.0f);
+    padding.top = CalcLength(10.0f);
+    padding.bottom = CalcLength(10.0f);
+    layoutProp->UpdateSafeAreaPadding(padding);
+    auto* wrapper = new LayoutWrapperNode(multiMenu, geometryNode, layoutProp);
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT / 3));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+        wrapper->AppendChild(childWrapper);
+        multiMenu->AddChild(menuItem);
+    }
+
+    algorithm->Layout(wrapper);
+
+    OffsetF offset { 10.0, 10.0 };
+    for (auto&& child : wrapper->GetAllChildrenWithBuild()) {
+        EXPECT_EQ(child->GetGeometryNode()->GetMarginFrameOffset(), offset);
+        offset.AddY(MENU_SIZE_HEIGHT / 3);
+    }
+}
 } // namespace OHOS::Ace::NG

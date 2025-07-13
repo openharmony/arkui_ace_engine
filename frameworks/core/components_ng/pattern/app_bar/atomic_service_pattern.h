@@ -39,6 +39,7 @@ public:
     {
         return MakeRefPtr<AtomicServiceLayoutAlgorithm>();
     }
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&, const DirtySwapConfig&) override;
     RefPtr<CustomAppBarNode> GetJSAppBarContainer();
     RefPtr<FrameNode> GetStageNodeWrapper();
     RefPtr<FrameNode> GetContent();
@@ -67,7 +68,10 @@ public:
         std::function<void(RefPtr<FrameNode> host, std::optional<bool> settedColorMode)> beforeCreateLayoutBuilder);
     bool OnBackPressedCallback() override;
     void SetOnBackPressedConsumed();
-
+    int32_t AddRectChangeListener(std::function<void(const RectF& rect)>&& listener);
+    void RemoveRectChangeListener(int32_t id);
+    void NotifyRectChange(const RectF& rect);
+    void CallRectChange();
 private:
     void UpdateLayoutMargin();
     void UpdateOverlayLayout();
@@ -75,6 +79,8 @@ private:
     void ContentSafeAreaCallBack();
     static std::function<void(RefPtr<FrameNode> host, std::optional<bool> settedColorMode)> beforeCreateLayoutBuilder_;
     std::optional<bool> onBackPressedConsumed_;
+    std::optional<RectF> appBarRect_;
+    std::unordered_map<int32_t, std::function<void(const RectF& rect)>> rectChangeListeners_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H

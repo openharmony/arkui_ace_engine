@@ -76,9 +76,8 @@
 
 #include "base/ressched/ressched_report.h"
 
-#ifdef ACE_ENABLE_VK
 #include "accessibility_config.h"
-#endif
+
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
@@ -385,9 +384,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_pt
     if (ability) {
         abilityInfo_ = ability->GetAbilityInfo();
     }
-#ifdef ACE_ENABLE_VK
     SubscribeHighContrastChange();
-#endif
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type,
@@ -410,9 +407,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
-#ifdef ACE_ENABLE_VK
     SubscribeHighContrastChange();
-#endif
 }
 
 // for DynamicComponent
@@ -436,9 +431,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
-#ifdef ACE_ENABLE_VK
     SubscribeHighContrastChange();
-#endif
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
@@ -455,9 +448,7 @@ AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
     LOGI("Container Destroyed");
-#ifdef ACE_ENABLE_VK
     UnsubscribeHighContrastChange();
-#endif
 }
 
 void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
@@ -3113,6 +3104,21 @@ void AceContainer::InitWindowCallback()
         window->UseImplicitAnimation(useImplicit);
     });
 
+    windowManager->SetHeightBreakpointCallback(
+        [window = pipelineContext_->GetWindow()]() -> HeightBreakpoint {
+        CHECK_NULL_RETURN(window, HeightBreakpoint::HEIGHT_SM);
+        HeightLayoutBreakPoint layoutHeightBreakpoints =
+            SystemProperties::GetHeightLayoutBreakpoints();
+        return window->GetHeightBreakpoint(layoutHeightBreakpoints);
+    });
+    windowManager->SetWidthBreakpointCallback(
+        [window = pipelineContext_->GetWindow()]() -> WidthBreakpoint {
+        CHECK_NULL_RETURN(window, WidthBreakpoint::WIDTH_SM);
+        WidthLayoutBreakPoint layoutWidthBreakpoints =
+            SystemProperties::GetWidthLayoutBreakpoints();
+        return window->GetWidthBreakpoint(layoutWidthBreakpoints);
+    });
+
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);
@@ -4828,10 +4834,9 @@ bool AceContainer::SetSystemBarEnabled(const sptr<OHOS::Rosen::Window>& window, 
     return true;
 }
 
-#ifdef ACE_ENABLE_VK
 void AceContainer::SubscribeHighContrastChange()
 {
-    if (!Rosen::RSSystemProperties::GetHybridRenderEnabled()) {
+    if (!Rosen::RSUIDirector::IsHybridRenderEnabled()) {
         return;
     }
     if (highContrastObserver_ != nullptr) {
@@ -4857,7 +4862,6 @@ void AceContainer::UnsubscribeHighContrastChange()
     }
     highContrastObserver_ = nullptr;
 }
-#endif
 
 void AceContainer::DistributeIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
     const std::function<void()>&& loadPageCallback)

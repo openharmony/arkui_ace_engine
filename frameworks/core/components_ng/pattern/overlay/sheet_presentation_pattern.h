@@ -714,6 +714,11 @@ public:
         property_ = property;
     }
 
+    float GetPreDidHeight() const
+    {
+        return preDidHeight_;
+    }
+
     void SetPreDidHeight(float height)
     {
         preDidHeight_ = height;
@@ -1164,6 +1169,8 @@ private:
     std::string DrawClipPathTop(const SizeF&, const BorderRadiusProperty&);
     std::string DrawClipPathLeft(const SizeF&, const BorderRadiusProperty&);
     std::string DrawClipPathRight(const SizeF&, const BorderRadiusProperty&);
+
+    SheetType GetSheetTypeFromSheetManager() const;
     
     uint32_t broadcastPreDetentsIndex_ = 0;
     SheetAccessibilityDetents sheetDetents_ = SheetAccessibilityDetents::HIGH;

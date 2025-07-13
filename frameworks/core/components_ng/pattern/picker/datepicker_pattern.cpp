@@ -650,10 +650,17 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(
-        GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-    pickerProperty->UpdateDisappearColor(
-        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+
+    if (!pickerProperty->GetNormalTextColorSetByUser().value_or(false)) {
+        pickerProperty->UpdateColor(
+            GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    }
+
+    if (!pickerProperty->GetDisappearTextColorSetByUser().value_or(false)) {
+        pickerProperty->UpdateDisappearColor(
+            GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    }
+
     if (isPicker_) {
         if (!SystemProperties::ConfigChangePerform()) {
             OnModifyDone();
@@ -2109,14 +2116,14 @@ LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunar
         remainingDays -= daysInMonth;
         return false; // continue to process next month
     };
-    
+
     lunarResult.year = lunarYear;
     for (uint32_t month = MIN_MONTH; month <= MAX_MONTH; ++month) {
         // process regular month
         if (processMonth(month, false)) {
             break;
         }
-        
+
         // process leap month if exists
         if (hasLeapMonth && lunarLeapMonth == month) {
             if (processMonth(month, true)) {
@@ -3151,6 +3158,11 @@ void DatePickerPattern::UpdateDisappearTextStyle(const PickerTextStyle& textStyl
     auto defaultTextStyle = pickerTheme->GetDisappearOptionStyle();
     auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetDisappearColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetDisappearColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
@@ -3171,6 +3183,11 @@ void DatePickerPattern::UpdateNormalTextStyle(const PickerTextStyle& textStyle)
     auto defaultTextStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
@@ -3191,6 +3208,11 @@ void DatePickerPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle
     auto defaultTextStyle = pickerTheme->GetOptionStyle(true, false);
     auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetSelectedColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetSelectedColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,

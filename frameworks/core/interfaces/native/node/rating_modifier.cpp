@@ -60,6 +60,40 @@ void SetStarStyle(ArkUINodeHandle node,
     }
 }
 
+void SetStarStylePtr(ArkUINodeHandle node, const char* backgroundUri,
+    const char* foregroundUri, const char* secondaryUri, const ArkUIRatingStyleStruct& resObj)
+{
+    CHECK_NULL_VOID(node);
+    SetStarStyle(node, backgroundUri, foregroundUri, secondaryUri);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        if (resObj.backgroundResObj) {
+            auto* backgroundObj = reinterpret_cast<ResourceObject*>(resObj.backgroundResObj);
+            auto backgroundResObjPtr = AceType::Claim(backgroundObj);
+            RatingModelNG::CreateWithMediaResourceObj(frameNode, backgroundResObjPtr, RatingUriType::BACKGROUND_URI);
+        } else {
+            RatingModelNG::CreateWithMediaResourceObj(frameNode, nullptr, RatingUriType::BACKGROUND_URI);
+        }
+
+        if (resObj.foregroundResObj) {
+            auto* foregroundObj = reinterpret_cast<ResourceObject*>(resObj.foregroundResObj);
+            auto foregroundResObjPtr = AceType::Claim(foregroundObj);
+            RatingModelNG::CreateWithMediaResourceObj(frameNode, foregroundResObjPtr, RatingUriType::FOREGROUND_URI);
+        } else {
+            RatingModelNG::CreateWithMediaResourceObj(frameNode, nullptr, RatingUriType::FOREGROUND_URI);
+        }
+
+        if (resObj.secondaryResObj) {
+            auto* secondaryObj = reinterpret_cast<ResourceObject*>(resObj.secondaryResObj);
+            auto secondaryResObjPtr = AceType::Claim(secondaryObj);
+            RatingModelNG::CreateWithMediaResourceObj(frameNode, secondaryResObjPtr, RatingUriType::SECONDARY_URI);
+        } else {
+            RatingModelNG::CreateWithMediaResourceObj(frameNode, nullptr, RatingUriType::SECONDARY_URI);
+        }
+    }
+}
+
 void SetOnChange(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -93,6 +127,11 @@ void ResetStarStyle(ArkUINodeHandle node)
     RatingModelNG::SetBackgroundSrc(frameNode, "", true);
     RatingModelNG::SetForegroundSrc(frameNode, "", true);
     RatingModelNG::SetSecondarySrc(frameNode, "", true);
+    if (SystemProperties::ConfigChangePerform()) {
+        RatingModelNG::CreateWithMediaResourceObj(frameNode, nullptr, RatingUriType::BACKGROUND_URI);
+        RatingModelNG::CreateWithMediaResourceObj(frameNode, nullptr, RatingUriType::FOREGROUND_URI);
+        RatingModelNG::CreateWithMediaResourceObj(frameNode, nullptr, RatingUriType::SECONDARY_URI);
+    }
 }
 
 void SetRatingOptions(ArkUINodeHandle node, ArkUI_Float64 rating, ArkUI_Bool indicator)
@@ -122,6 +161,7 @@ const ArkUIRatingModifier* GetRatingModifier()
         .resetStarStyle = ResetStarStyle,
         .setRatingOptions = SetRatingOptions,
         .resetOnChange = ResetOnChange,
+        .setStarStylePtr = SetStarStylePtr,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

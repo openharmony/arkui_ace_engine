@@ -976,9 +976,47 @@ void TextPickerDialogView::SetTextProperties(
 
     CHECK_NULL_VOID(pickerTheme);
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
-    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
 
     SetTextDisappearProperties(pickerTheme, properties);
+    SetTextNormalProperties(pickerTheme, properties);
+
+    if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontSize,
+            ConvertFontScaleValue(properties.selectedTextStyle_.fontSize.value(), selectedTextStyleFont_, true));
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontSize,
+            ConvertFontScaleValue(selectedStyle.GetFontSize()));
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor,
+        properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedWeight,
+        properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontFamily,
+        properties.selectedTextStyle_.fontFamily.value_or(selectedStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontStyle,
+        properties.selectedTextStyle_.fontStyle.value_or(selectedStyle.GetFontStyle()));
+
+    if (properties.selectedTextStyle_.minFontSize.has_value() && properties.selectedTextStyle_.minFontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedMinFontSize,
+            ConvertFontScaleValue(properties.selectedTextStyle_.minFontSize.value()));
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedMinFontSize, Dimension());
+    }
+    if (properties.selectedTextStyle_.maxFontSize.has_value() && properties.selectedTextStyle_.maxFontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedMaxFontSize,
+            ConvertFontScaleValue(properties.selectedTextStyle_.maxFontSize.value()));
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedMaxFontSize, Dimension());
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedTextOverflow,
+        properties.selectedTextStyle_.textOverflow.value_or(TextOverflow::CLIP));
+}
+
+void TextPickerDialogView::SetTextNormalProperties(
+    const RefPtr<PickerTheme>& pickerTheme, const PickerTextProperties& properties)
+{
+    CHECK_NULL_VOID(pickerTheme);
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
 
     if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize,
@@ -995,28 +1033,25 @@ void TextPickerDialogView::SetTextProperties(
         properties.normalTextStyle_.fontFamily.value_or(normalStyle.GetFontFamilies()));
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontStyle,
         properties.normalTextStyle_.fontStyle.value_or(normalStyle.GetFontStyle()));
-
-    if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(
-            TextPickerLayoutProperty, SelectedFontSize,
-            ConvertFontScaleValue(properties.selectedTextStyle_.fontSize.value(), selectedTextStyleFont_, true));
+    
+    if (properties.normalTextStyle_.minFontSize.has_value() && properties.normalTextStyle_.minFontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MinFontSize,
+            ConvertFontScaleValue(properties.normalTextStyle_.minFontSize.value()));
     } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontSize,
-            ConvertFontScaleValue(selectedStyle.GetFontSize()));
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MinFontSize, Dimension());
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor,
-        properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedWeight,
-        properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontFamily,
-        properties.selectedTextStyle_.fontFamily.value_or(selectedStyle.GetFontFamilies()));
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontStyle,
-        properties.selectedTextStyle_.fontStyle.value_or(selectedStyle.GetFontStyle()));
+    if (properties.normalTextStyle_.maxFontSize.has_value() && properties.normalTextStyle_.maxFontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MaxFontSize,
+            ConvertFontScaleValue(properties.normalTextStyle_.maxFontSize.value()));
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MaxFontSize, Dimension());
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, TextOverflow,
+        properties.normalTextStyle_.textOverflow.value_or(TextOverflow::CLIP));
 }
 
 void TextPickerDialogView::SetTextDisappearProperties(
     const RefPtr<PickerTheme>& pickerTheme, const PickerTextProperties& properties)
-
 {
     CHECK_NULL_VOID(pickerTheme);
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
@@ -1036,6 +1071,23 @@ void TextPickerDialogView::SetTextDisappearProperties(
         properties.disappearTextStyle_.fontFamily.value_or(disappearStyle.GetFontFamilies()));
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontStyle,
         properties.disappearTextStyle_.fontStyle.value_or(disappearStyle.GetFontStyle()));
+
+    if (properties.disappearTextStyle_.minFontSize.has_value() &&
+        properties.disappearTextStyle_.minFontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMinFontSize,
+            ConvertFontScaleValue(properties.disappearTextStyle_.minFontSize.value()));
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMinFontSize, Dimension());
+    }
+    if (properties.disappearTextStyle_.maxFontSize.has_value() &&
+        properties.disappearTextStyle_.maxFontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMaxFontSize,
+            ConvertFontScaleValue(properties.disappearTextStyle_.maxFontSize.value()));
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearMaxFontSize, Dimension());
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearTextOverflow,
+        properties.disappearTextStyle_.textOverflow.value_or(TextOverflow::CLIP));
 }
 
 void TextPickerDialogView::SetDefaultTextStyle(const NG::PickerTextStyle& value)

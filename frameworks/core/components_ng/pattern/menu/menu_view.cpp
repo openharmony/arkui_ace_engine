@@ -1363,6 +1363,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ReloadMenuParam(menuNode, menuParam);
     if (!menuParam.title.empty()) {
         CreateTitleNode(menuParam.title, column);
     }
@@ -1495,10 +1496,10 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     CHECK_NULL_RETURN(previewNode, nullptr);
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
+    ReloadMenuParam(menuNode, menuParam);
     menuWrapperPattern->SetMenuParam(menuParam);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
 
-    ReloadMenuParam(menuParam);
     CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
@@ -1529,10 +1530,18 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     return wrapperNode;
 }
 
-void MenuView::ReloadMenuParam(const MenuParam& menuParam)
+void MenuView::ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
+    CHECK_NULL_VOID(menuNode);
+    auto pipeline = menuNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto colorMode = pipeline->GetColorMode();
+    auto isCurDarkMode = colorMode == ColorMode::DARK;
     MenuParam& menuParamValue = const_cast<MenuParam&>(menuParam);
-    if (SystemProperties::ConfigChangePerform()) {
+    if (SystemProperties::ConfigChangePerform() && menuParam.isDarkMode != isCurDarkMode && !menuParam.isWithTheme) {
+        //Because the Menu is created outside the light/dark mode switching process,
+        //it is necessary to manually set the reloading state to trigger the color inversion process.
+        ResourceParseUtils::SetIsReloading(true);
         menuParamValue.ReloadResources();
         if (menuParamValue.borderRadius) {
             menuParamValue.borderRadius->ReloadResources();
@@ -1546,6 +1555,8 @@ void MenuView::ReloadMenuParam(const MenuParam& menuParam)
         if (menuParamValue.outlineWidth) {
             menuParamValue.outlineWidth->ReloadResources();
         }
+        menuParamValue.isDarkMode = !menuParamValue.isDarkMode;
+        ResourceParseUtils::SetIsReloading(false);
     }
 }
 

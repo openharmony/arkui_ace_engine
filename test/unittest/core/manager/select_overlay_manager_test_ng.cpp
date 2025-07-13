@@ -2262,6 +2262,78 @@ HWTEST_F(SelectOverlayManagerTestNg, SwitchToHandleMode, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwitchToHandleMode001
+ * @tc.desc: test SwitchToHandleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, SwitchToHandleMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Crate SelectContentOverlayManager and SelectOverlayHolder.
+     */
+    Init();
+    auto content = AceType::MakeRefPtr<SelectContentOverlayManager>(root_);
+    auto holder = AceType::MakeRefPtr<MockSelectOverlayHolder>();
+    content->SetHolder(holder);
+    content->Show(false, 0);
+    EXPECT_NE(content->handleNode_.Upgrade(), nullptr);
+    EXPECT_NE(content->menuNode_.Upgrade(), nullptr);
+    holder->allowSwitchMode_ = true;
+    holder->SetOwner(root_);
+
+    /**
+     * @tc.steps: step2. SwitchToHandleMode EMBED mode.
+     */
+    content->SwitchToHandleMode(HandleLevelMode::EMBED, false);
+    EXPECT_EQ(holder->handleLevelMode_, HandleLevelMode::EMBED);
+
+    /**
+     * @tc.steps: step3. SwitchToHandleMode OVERLAY mode.
+     */
+    content->SwitchToHandleMode(HandleLevelMode::OVERLAY);
+    EXPECT_EQ(holder->handleLevelMode_, HandleLevelMode::OVERLAY);
+}
+
+/**
+ * @tc.name: SwitchToHandleMode002
+ * @tc.desc: test SwitchToHandleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, SwitchToHandleMode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Crate SelectContentOverlayManager and SelectOverlayHolder.
+     */
+    Init();
+    auto content = AceType::MakeRefPtr<SelectContentOverlayManager>(root_);
+    auto holder = AceType::MakeRefPtr<MockSelectOverlayHolder>();
+    content->SetHolder(holder);
+    content->Show(false, 0);
+    EXPECT_NE(content->handleNode_.Upgrade(), nullptr);
+    EXPECT_NE(content->menuNode_.Upgrade(), nullptr);
+    holder->allowSwitchMode_ = true;
+    holder->SetOwner(root_);
+
+    /**
+     * @tc.steps: step2. Update enableHandleLevel
+     */
+    EXPECT_NE(content->shareOverlayInfo_, nullptr);
+    content->shareOverlayInfo_->enableHandleLevel = false;
+
+    /**
+     * @tc.steps: step3. SwitchToHandleMode EMBED mode.
+     */
+    content->SwitchToHandleMode(HandleLevelMode::EMBED, false);
+    EXPECT_EQ(holder->handleLevelMode_, HandleLevelMode::EMBED);
+
+    /**
+     * @tc.steps: step4. SwitchToHandleMode OVERLAY mode.
+     */
+    content->SwitchToHandleMode(HandleLevelMode::OVERLAY);
+    EXPECT_EQ(holder->handleLevelMode_, HandleLevelMode::OVERLAY);
+}
+
+/**
  * @tc.name: ClickAndSwitchToHandleMode
  * @tc.desc: test click to switch overlay mode.
  * @tc.type: FUNC
@@ -2573,5 +2645,97 @@ HWTEST_F(SelectOverlayManagerTestNg, IsSelectOverlaySubWindowMenu02, TestSize.Le
     bool animation = true;
     content->CreateSelectOverlay(info, animation);
     EXPECT_EQ(content->IsSelectOverlaySubWindowMenu(), false);
+}
+
+/**
+ * @tc.name: DisableMenu001
+ * @tc.desc: test select_content_overlay_manager.cpp DisableMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, DisableMenu001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = AceType::MakeRefPtr<SelectContentOverlayManager>(root_);
+    ASSERT_NE(content, nullptr);
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = true;
+    selectInfo.menuInfo.showCut = true;
+    selectInfo.isUseOverlayNG = true;
+
+    /**
+     * @tc.steps: step2. CreateSelectOverlayNode
+     */
+    content->shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content->shareOverlayInfo_, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(content->shareOverlayInfo_);
+    ASSERT_NE(frameNode, nullptr);
+    content->menuNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(content->menuNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step3. call DisableMenu
+     */
+    content->DisableMenu();
+    auto selectOverlayPattern = frameNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(selectOverlayPattern, nullptr);
+    EXPECT_TRUE(selectOverlayPattern->info_->menuInfo.menuDisable);
+}
+
+/**
+ * @tc.name: EnableMenu001
+ * @tc.desc: test select_content_overlay_manager.cpp EnableMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, EnableMenu001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = AceType::MakeRefPtr<SelectContentOverlayManager>(root_);
+    ASSERT_NE(content, nullptr);
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = true;
+    selectInfo.menuInfo.showCut = true;
+    selectInfo.isUseOverlayNG = true;
+
+    /**
+     * @tc.steps: step2. CreateSelectOverlayNode
+     */
+    content->shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content->shareOverlayInfo_, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(content->shareOverlayInfo_);
+    ASSERT_NE(frameNode, nullptr);
+    content->menuNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(content->menuNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step3. call EnableMenu
+     */
+    content->EnableMenu();
+    auto selectOverlayPattern = frameNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(selectOverlayPattern, nullptr);
+    EXPECT_FALSE(selectOverlayPattern->info_->menuInfo.menuDisable);
+}
+
+/**
+ * @tc.name: HideHandle001
+ * @tc.desc: test select_content_overlay_manager.cpp HideHandle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, HideHandle001, TestSize.Level1)
+{
+    Init();
+    auto content = AceType::MakeRefPtr<SelectContentOverlayManager>(root_);
+    auto holder = AceType::MakeRefPtr<MockSelectOverlayHolder>();
+    content->SetHolder(holder);
+    content->Show(false, 0);
+    EXPECT_NE(content->handleNode_.Upgrade(), nullptr);
+    EXPECT_NE(content->menuNode_.Upgrade(), nullptr);
+    content->HideHandle();
+    EXPECT_NE(content->handleNode_.Upgrade(), nullptr);
 }
 } // namespace OHOS::Ace::NG

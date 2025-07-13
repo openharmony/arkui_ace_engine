@@ -62,6 +62,8 @@ struct PickerTextStyle {
     std::optional<Dimension> maxFontSize;
     std::optional<Ace::TextOverflow> textOverflow;
 
+    bool textColorSetByUser = false;
+
     RefPtr<ResourceObject> textColorResObj;
     RefPtr<ResourceObject> fontSizeResObj;
     RefPtr<ResourceObject> fontFamilyResObj;

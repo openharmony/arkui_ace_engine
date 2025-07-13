@@ -57,7 +57,7 @@ ScrollModel* ScrollModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::FREE, Axis::NONE };
+const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::FREE, Axis::NONE, Axis::FREE };
 
 bool ParseJsDimensionArray(
     const JSRef<JSVal>& jsValue, std::vector<Dimension>& result, std::vector<RefPtr<ResourceObject>>& resObjs)
@@ -115,12 +115,6 @@ void JSScroll::Create(const JSCallbackInfo& info)
             ScrollModel::GetInstance()->SetScrollBarProxy(proxy);
         }
     }
-    // init scroll bar
-    std::pair<bool, Color> barColor;
-    barColor.first = false;
-    std::pair<bool, Dimension> barWidth;
-    barWidth.first = false;
-    ScrollModel::GetInstance()->InitScrollBar(GetTheme<ScrollBarTheme>(), barColor, barWidth, EdgeEffect::NONE);
     JSScrollTheme::ApplyTheme();
 }
 

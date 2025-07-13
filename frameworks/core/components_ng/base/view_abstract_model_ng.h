@@ -1018,9 +1018,9 @@ public:
         ViewAbstract::SetFgDynamicBrightness(brightnessOption);
     }
 
-    void SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) override
+    void SetBlender(const OHOS::Rosen::Blender* blender) override
     {
-        ViewAbstract::SetBrightnessBlender(brightnessBlender);
+        ViewAbstract::SetBlender(blender);
     }
 
     void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
@@ -1890,9 +1890,9 @@ public:
     {
         ViewAbstract::SetBlendApplyType(frameNode, blendApplyType);
     }
-    static void SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+    static void SetBlender(FrameNode* frameNode, const OHOS::Rosen::Blender* blender)
     {
-        ViewAbstract::SetBrightnessBlender(brightnessBlender);
+        ViewAbstract::SetBlender(blender);
     }
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents)
     {

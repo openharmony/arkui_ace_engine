@@ -2103,6 +2103,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onNativeEmbedLifecycleChange", &JSWeb::OnNativeEmbedLifecycleChange);
     JSClass<JSWeb>::StaticMethod("onNativeEmbedVisibilityChange", &JSWeb::OnNativeEmbedVisibilityChange);
     JSClass<JSWeb>::StaticMethod("onNativeEmbedGestureEvent", &JSWeb::OnNativeEmbedGestureEvent);
+    JSClass<JSWeb>::StaticMethod("onNativeEmbedMouseEvent", &JSWeb::OnNativeEmbedMouseEvent);
     JSClass<JSWeb>::StaticMethod("copyOptions", &JSWeb::CopyOption);
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
     JSClass<JSWeb>::StaticMethod("layoutMode", &JSWeb::SetLayoutMode);
@@ -3480,7 +3481,7 @@ JSRef<JSVal> OnOverrideErrorPageEventToJSValue(const OnOverrideErrorPageEvent& e
     auto errorEvent = Referenced::Claim(errorObj->Unwrap<JSWebResourceError>());
     errorEvent->SetOverrideErrorPageEvent(eventInfo);
 
-    obj->SetPropertyObject("webResourceRequest", requestObj);
+    obj->SetPropertyObject("request", requestObj);
     obj->SetPropertyObject("error", errorObj);
 
     return JSRef<JSVal>::Cast(obj);

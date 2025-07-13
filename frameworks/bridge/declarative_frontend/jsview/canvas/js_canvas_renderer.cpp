@@ -43,8 +43,6 @@ constexpr int32_t ALPHA_INDEX = 3;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-std::unordered_map<int32_t, std::shared_ptr<Pattern>> JSCanvasRenderer::pattern_;
-unsigned int JSCanvasRenderer::patternCount_ = 0;
 namespace {
 
 const std::set<std::string> FONT_WEIGHTS = { "normal", "bold", "lighter", "bolder", "100", "200", "300", "400", "500",
@@ -420,8 +418,7 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
     } else if (type == "pattern") {
         auto* jSCanvasPattern = info.UnwrapArg<JSCanvasPattern>(0);
         CHECK_NULL_VOID(jSCanvasPattern);
-        int32_t id = jSCanvasPattern->GetId();
-        renderingContext2DModel_->SetFillPattern(GetPatternPtr(id));
+        renderingContext2DModel_->SetFillPattern(jSCanvasPattern->GetPattern());
     }
 }
 
@@ -457,8 +454,7 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
     } else if (type == "pattern") {
         auto* jSCanvasPattern = info.UnwrapArg<JSCanvasPattern>(0);
         CHECK_NULL_VOID(jSCanvasPattern);
-        int32_t id = jSCanvasPattern->GetId();
-        renderingContext2DModel_->SetStrokePattern(GetPatternPtr(id));
+        renderingContext2DModel_->SetStrokePattern(jSCanvasPattern->GetPattern());
     }
 }
 
@@ -656,15 +652,10 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
         auto pixelMap = jsImage->GetPixelMap();
         pattern->SetPixelMap(pixelMap);
 #endif
-        pattern_[patternCount_] = pattern;
-
         JSRef<JSObject> obj = JSClass<JSCanvasPattern>::NewInstance();
         obj->SetProperty("__type", "pattern");
         auto canvasPattern = Referenced::Claim(obj->Unwrap<JSCanvasPattern>());
-        canvasPattern->SetCanvasRenderer(AceType::WeakClaim(this));
-        canvasPattern->SetId(patternCount_);
-        canvasPattern->SetUnit(GetUnit());
-        patternCount_++;
+        canvasPattern->SetPattern(pattern);
         info.SetReturnValue(obj);
     }
 }
@@ -1518,42 +1509,6 @@ void JSCanvasRenderer::JsSetLineDash(const JSCallbackInfo& info)
         }
     }
     renderingContext2DModel_->SetLineDash(lineDash);
-}
-
-Pattern JSCanvasRenderer::GetPattern(unsigned int id)
-{
-    if (id < 0 || id >= pattern_.size()) {
-        return Pattern();
-    }
-    return *(pattern_[id].get());
-}
-
-std::weak_ptr<Ace::Pattern> JSCanvasRenderer::GetPatternNG(int32_t id)
-{
-    if (id < 0 || id >= static_cast<int32_t>(pattern_.size())) {
-        return std::shared_ptr<Pattern>();
-    }
-    return pattern_[id];
-}
-
-std::shared_ptr<Pattern> JSCanvasRenderer::GetPatternPtr(int32_t id)
-{
-    if (id < 0 || id >= static_cast<int32_t>(pattern_.size())) {
-        return std::shared_ptr<Pattern>();
-    }
-    return pattern_[id];
-}
-
-void JSCanvasRenderer::SetTransform(unsigned int id, const TransformParam& transform)
-{
-    if (id >= 0 && id <= patternCount_) {
-        pattern_[id]->SetScaleX(transform.scaleX);
-        pattern_[id]->SetScaleY(transform.scaleY);
-        pattern_[id]->SetSkewX(transform.skewX);
-        pattern_[id]->SetSkewY(transform.skewY);
-        pattern_[id]->SetTranslateX(transform.translateX);
-        pattern_[id]->SetTranslateY(transform.translateY);
-    }
 }
 
 // textAlign: CanvasTextAlign

@@ -421,6 +421,43 @@ HWTEST_F(TextTestNg, GetSelectedBackgroundColor001, TestSize.Level1)
     EXPECT_EQ(textModelNG.GetFontSize(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
 }
 
+
+/**
+ * @tc.name: GetSelectedBackgroundColor002
+ * @tc.desc: Test GetSelectedBackgroundColor when GetHost is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetSelectedBackgroundColor002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE_W);
+
+    /**
+     * @tc.steps: step2. set theme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    ASSERT_EQ(textModelNG.GetSelectedBackgroundColor(frameNode), Color::BLACK);
+
+    Font font;
+    font.fontFamilies = { "font1", "font2" };
+    textModelNG.SetFont(font);
+    EXPECT_EQ(textModelNG.GetFontSize(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
+    EXPECT_EQ(textModelNG.GetFont(frameNode).fontFamilies.size(), 2);
+}
+
 /**
  * @tc.name: OnAttachToFrameNode001
  * @tc.desc: Test TextPattern OnAttachToFrameNode when GetHost is nullptr.

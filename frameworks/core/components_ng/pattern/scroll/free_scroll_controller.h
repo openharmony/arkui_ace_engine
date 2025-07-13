@@ -37,9 +37,6 @@ public:
 
     RefPtr<PanRecognizer> GetFreePanGesture() const
     {
-        if (!enableScroll_) {
-            return MakeRefPtr<PanRecognizer>(0, PanDirection {}, 1.0); // dummy recognizer
-        }
         return freePanGesture_;
     }
 
@@ -85,12 +82,13 @@ private:
     /**
      * @brief clamp position to be within the scrollable area.
      */
-    void ClampPosition(OffsetF& finalPos) const;
+    OffsetF ClampPosition(const OffsetF& finalPos) const;
 
     /**
      * @brief Check if the new offset would reach any edges. If so, fire corresponding user callbacks.
+     * @return true if any edge is reached, false otherwise.
      */
-    void CheckCrashEdge(const OffsetF& newOffset, const SizeF& scrollableArea) const;
+    bool CheckCrashEdge(const OffsetF& newOffset, const SizeF& scrollableArea) const;
 
     /**
      * @brief triggers onWillScroll user callback

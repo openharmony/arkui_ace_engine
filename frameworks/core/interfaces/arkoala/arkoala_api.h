@@ -486,6 +486,12 @@ struct ArkUIButtonSizeStruct {
     ArkUI_VoidPtr maxFontSize;
 };
 
+struct ArkUIRatingStyleStruct {
+    ArkUI_VoidPtr backgroundResObj;
+    ArkUI_VoidPtr foregroundResObj;
+    ArkUI_VoidPtr secondaryResObj;
+};
+
 struct ArkUIFontWithOptionsStruct {
     ArkUI_Float32 fontSizeNumber;
     ArkUI_Int32 fontSizeUnit;
@@ -1011,6 +1017,7 @@ struct ArkUIPickerTextStyleStruct {
     void* textColorRawPtr;
     void* minFontSizeRawPtr;
     void* maxFontSizeRawPtr;
+    ArkUI_Bool textColorSetByUser;
 };
 
 struct ArkUIPickerDividerResObjStruct {
@@ -1233,6 +1240,10 @@ enum ArkUIEventSubKind {
     ON_SCROLL_EDGE,
     ON_SCROLL_REACH_START,
     ON_SCROLL_REACH_END,
+    ON_SCROLL_WILL_STOP_DRAGGING,
+    ON_SCROLL_DID_ZOOM,
+    ON_SCROLL_ZOOM_START,
+    ON_SCROLL_ZOOM_STOP,
 
     ON_TABS_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TABS,
     ON_NAVIGATOR_CLICK = ARKUI_MAX_EVENT_NUM * ARKUI_NAVIGATOR,
@@ -2768,14 +2779,14 @@ struct ArkUIPathModifier {
 };
 
 struct ArkUIPolygonModifier {
-    void (*setPolygonPoints)(
-        ArkUINodeHandle node, const ArkUI_Float32* pointX, const ArkUI_Float32* pointY, ArkUI_Int32 length);
+    void (*setPolygonPoints)(ArkUINodeHandle node, const ArkUI_Float32* pointX, const ArkUI_Float32* pointY,
+        ArkUI_Int32 length, void* xResObjArray, void* yResObjArray);
     void (*resetPolygonPoints)(ArkUINodeHandle node);
 };
 
 struct ArkUIPolylineModifier {
-    void (*setPoints)(
-        ArkUINodeHandle node, const ArkUI_Float32* pointX, const ArkUI_Float32* pointY, ArkUI_Int32 length);
+    void (*setPoints)(ArkUINodeHandle node, const ArkUI_Float32* pointX, const ArkUI_Float32* pointY,
+        ArkUI_Int32 length, void* xResObjArray, void* yResObjArray);
     void (*resetPoints)(ArkUINodeHandle node);
 };
 
@@ -3869,12 +3880,16 @@ struct ArkUIScrollModifier {
         ArkUI_Int32 paginationSize, const ArkUI_Int32* paginationParam, void* resObjs);
     void (*setMaxZoomScale)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*resetMaxZoomScale)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getMaxZoomScale)(ArkUINodeHandle node);
     void (*setMinZoomScale)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*resetMinZoomScale)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getMinZoomScale)(ArkUINodeHandle node);
     void (*setZoomScale)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*resetZoomScale)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getZoomScale)(ArkUINodeHandle node);
     void (*setEnableBouncesZoom)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableBouncesZoom)(ArkUINodeHandle node);
+    ArkUI_Bool (*getEnableBouncesZoom)(ArkUINodeHandle node);
     void (*setScrollOnDidZoom)(ArkUINodeHandle node, void* callback);
     void (*setScrollOnZoomStart)(ArkUINodeHandle node, void* callback);
     void (*setScrollOnZoomStop)(ArkUINodeHandle node, void* callback);
@@ -5677,6 +5692,8 @@ struct ArkUIRatingModifier {
     void (*resetStarStyle)(ArkUINodeHandle node);
     void (*setRatingOptions)(ArkUINodeHandle node, ArkUI_Float64 rating, ArkUI_Bool indicator);
     void (*resetOnChange)(ArkUINodeHandle node);
+    void (*setStarStylePtr)(ArkUINodeHandle node, ArkUI_CharPtr backgroundUri,
+        ArkUI_CharPtr foregroundUri, ArkUI_CharPtr secondaryUri, const ArkUIRatingStyleStruct& resObj);
 };
 
 struct ArkUIRowSplitModifier {
@@ -5856,18 +5873,18 @@ struct ArkUITextPickerModifier {
     void (*getTextPickerSelectedIndex)(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size);
     void (*setTextPickerSelectedIndex)(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size);
     ArkUI_CharPtr (*getTextPickerTextStyle)(ArkUINodeHandle node);
-    void (*setTextPickerTextStyle)(
-        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal);
+    void (*setTextPickerTextStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+        ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow);
     void (*setTextPickerTextStyleWithResObj)(
         ArkUINodeHandle node, const struct ArkUIPickerTextStyleStruct* textStyleStruct);
     ArkUI_CharPtr (*getTextPickerSelectedTextStyle)(ArkUINodeHandle node);
-    void (*setTextPickerSelectedTextStyle)(
-        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal);
+    void (*setTextPickerSelectedTextStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+        ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow);
     void (*setTextPickerSelectedTextStyleWithResObj)(
         ArkUINodeHandle node, const struct ArkUIPickerTextStyleStruct* textStyleStruct);
     ArkUI_CharPtr (*getTextPickerDisappearTextStyle)(ArkUINodeHandle node);
-    void (*setTextPickerDisappearTextStyle)(
-        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal);
+    void (*setTextPickerDisappearTextStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
+        ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow);
     void (*setTextPickerDisappearTextStyleWithResObj)(
         ArkUINodeHandle node, const struct ArkUIPickerTextStyleStruct* textStyleStruct);
     void (*setTextPickerDefaultPickerItemHeight)(ArkUINodeHandle node, ArkUI_Float32 dVal, ArkUI_Int32 dUnit);
@@ -6956,8 +6973,8 @@ struct ArkUICustomNodeExtModifier {
 struct ArkUIThemeModifier {
     ArkUINodeHandle (*createWithThemeNode)(ArkUI_Int32 id);
     ArkUINodeHandle (*getWithThemeNode)(ArkUI_Int32 id);
-    ArkUINodeHandle (*createTheme)(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, ArkUI_Int32 colorMode,
-        const void* resObjs);
+    ArkUINodeHandle (*createTheme)(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, const ArkUI_Uint32* darkColors,
+        ArkUI_Int32 colorMode, const void* lightResObjs, const void* darkResObjs);
     void (*createThemeScope)(ArkUINodeHandle node, ArkUINodeHandle theme);
     void (*setDefaultTheme)(const ArkUI_Uint32* colors, ArkUI_Bool isDark);
     void (*removeFromCache)(ArkUI_Int32 themeId);

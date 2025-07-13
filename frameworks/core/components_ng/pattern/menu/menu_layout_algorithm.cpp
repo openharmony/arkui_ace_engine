@@ -612,12 +612,15 @@ void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(
     } else {
         offsetY = position_.GetY();
     }
+    auto isShowInSubWindow = canExpandCurrentWindow_ && isExpandDisplay_ && !isTargetNodeInSubwindow_;
+    auto windowsOffsetY = isShowInSubWindow ? param_.windowsOffsetY : 0;
     if (LessNotEqual(offsetY, creaseTop)) {
-        wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, creaseTop - top_);
+        wrapperRect_.SetRect(left_, top_ + windowsOffsetY, width_ - left_ - right_, creaseTop - top_);
     } else if (GreatNotEqual(offsetY, creaseBottom)) {
-        wrapperRect_.SetRect(left_, creaseBottom, width_ - left_ - right_, height_ - creaseBottom - bottom_);
+        wrapperRect_.SetRect(left_, creaseBottom, width_ - left_ - right_,
+        windowsOffsetY + height_ - creaseBottom - bottom_);
     } else {
-        wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
+        wrapperRect_.SetRect(left_, top_ + windowsOffsetY, width_ - left_ - right_, height_ - top_ - bottom_);
     }
 }
 

@@ -916,6 +916,7 @@ HWTEST_F(NavigationPatternTestSevenNg, SetBackButtonIcon001, TestSize.Level1)
 {
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
@@ -959,6 +960,7 @@ HWTEST_F(NavigationPatternTestSevenNg, SetBackButtonIcon002, TestSize.Level1)
 {
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
@@ -1009,6 +1011,7 @@ HWTEST_F(NavigationPatternTestSevenNg, SetBackButtonIcon003, TestSize.Level1)
 {
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
@@ -1042,6 +1045,7 @@ HWTEST_F(NavigationPatternTestSevenNg, SetBackButtonIcon004, TestSize.Level1)
 {
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
@@ -1072,6 +1076,7 @@ HWTEST_F(NavigationPatternTestSevenNg, SetBackButtonIcon005, TestSize.Level1)
 {
     NavigationModelNG navigationModel;
     navigationModel.Create();
+    navigationModel.SetNavigationStack();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);

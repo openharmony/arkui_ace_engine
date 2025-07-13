@@ -26,7 +26,8 @@ enum class TestingHybridRenderType : uint32_t {
     TEXT,
     SVG,
     HMSYMBOL,
-    CANVAS
+    CANVAS,
+    TYPE_MAX
 };
 
 class TestingDrawCmdList {

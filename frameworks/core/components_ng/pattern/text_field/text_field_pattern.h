@@ -1216,7 +1216,7 @@ public:
     }
 
     void DumpInfo() override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void DumpAdvanceInfo() override;
     void DumpPlaceHolderInfo();
     void DumpTextEngineInfo();

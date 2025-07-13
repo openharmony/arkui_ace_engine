@@ -871,6 +871,7 @@ public:
     static void ParseDialogWidthAndHeight(DialogProperties& properties, const JSRef<JSObject>& obj);
     static void SetBorderRadiusWithCheck(std::optional<NG::BorderRadiusProperty>& result,
         NG::BorderRadiusProperty& dimension);
+    static bool CheckLengthMetrics(const JSRef<JSObject>& object);
 
 private:
     static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);

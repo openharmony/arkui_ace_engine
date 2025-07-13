@@ -2512,5 +2512,19 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg404, TestSize.Level1)
     context_->DispatchMouseToTouchEvent(mouseEvent, node);
     EXPECT_TRUE(context_->eventManager_->touchTestResults_.empty());
 }
+
+/**
+ * @tc.name: PipelineContextTestNg405
+ * @tc.desc: Test the function isNeedCallbackAreaChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg405, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->OnShow();
+    EXPECT_TRUE(context_->isNeedCallbackAreaChange_);
+    context_->OnHide();
+    EXPECT_TRUE(context_->isNeedCallbackAreaChange_);
+}
 } // namespace NG
 } // namespace OHOS::Ace

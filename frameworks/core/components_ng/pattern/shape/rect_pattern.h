@@ -80,9 +80,9 @@ public:
                 [](RectPaintProperty* prop, RefPtr<PropertyValueBase> value, RefPtr<FrameNode> frameNode) {
                     if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                         Radius radius;
-                        realValue->IsNegative() ? radius.SetX(Dimension(DEFAULT_RADIUS_VALUE))
-                                                   : radius.SetX(*realValue);
-                        radius.SetY(DEFAULT_RADIUS_INVALID);
+                        realValue->IsNegative() ? radius.SetY(Dimension(DEFAULT_RADIUS_VALUE))
+                                                   : radius.SetY(*realValue);
+                        radius.SetX(DEFAULT_RADIUS_INVALID);
                         prop->UpdateRadius(radius);
                     }
                 } },

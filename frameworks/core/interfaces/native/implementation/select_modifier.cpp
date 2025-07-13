@@ -349,8 +349,6 @@ void MenuItemContentModifierImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetMenuItemContentModifier(frameNode, convValue);
 }
 void DividerImpl(Ark_NativePointer node,
                  const Opt_DividerOptions* value)

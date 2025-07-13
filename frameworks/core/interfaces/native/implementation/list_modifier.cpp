@@ -155,18 +155,9 @@ void SetListOptionsImpl(Ark_NativePointer node,
     }
 
     auto initialIndex = optionsOpt.value().initialIndex;
-    // ListModelNG::SetInitialIndex(frameNode, initialIndex);
     auto space = optionsOpt.value().space;
-    // ListModelNG::SetListSpace(frameNode, space);
 
     RefPtr<ScrollControllerBase> positionController = ListModelNG::GetOrCreateController(frameNode);
-    // RefPtr<ScrollProxy> scrollBarProxy = ListModelNG::GetOrCreateScrollBarProxy(frameNode);
-    // auto abstPeerPtrOpt = optionsOpt.value().scroller;
-    // CHECK_NULL_VOID(abstPeerPtrOpt);
-    // auto peerImplPtr = *abstPeerPtrOpt;
-    // CHECK_NULL_VOID(peerImplPtr);
-    // peerImplPtr->SetController(positionController);
-    // peerImplPtr->SetScrollBarProxy(scrollBarProxy);
 }
 } // ListInterfaceModifier
 namespace ListAttributeModifier {
@@ -175,7 +166,6 @@ void AlignListItemImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // ListModelNG::SetListItemAlign(frameNode, Converter::OptConvert<V2::ListItemAlign>(value));
 }
 void ListDirectionImpl(Ark_NativePointer node,
                        Ark_Axis value)
@@ -183,7 +173,6 @@ void ListDirectionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<Axis> direction = Converter::OptConvert<Axis>(value);
-    // ListModelNG::SetListDirection(frameNode, EnumToInt(direction));
 }
 void ScrollBarImpl(Ark_NativePointer node,
                    Ark_BarState value)
@@ -191,7 +180,6 @@ void ScrollBarImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<DisplayMode> mode = Converter::OptConvert<DisplayMode>(value);
-    // ListModelNG::SetListScrollBar(frameNode, EnumToInt(mode));
 }
 void ContentStartOffsetImpl(Ark_NativePointer node,
                             const Ark_Number* value)
@@ -216,8 +204,6 @@ void DividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    // need check
-    // ListModelNG::SetDivider(frameNode, divider);
 }
 void EditModeImpl(Ark_NativePointer node,
                   Ark_Boolean value)
@@ -247,9 +233,6 @@ void CachedCount1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(count);
-    //auto convValue = Converter::OptConvert<type>(count); // for enums
-    //ListModelNG::SetCachedCount1(frameNode, convValue);
 }
 void ChainAnimationImpl(Ark_NativePointer node,
                         Ark_Boolean value)
@@ -273,15 +256,12 @@ void StickyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<V2::StickyStyle> style = Converter::OptConvert<V2::StickyStyle>(value);
-    // need check
-    // ListModelNG::SetSticky(frameNode, EnumToInt(style));
 }
 void ScrollSnapAlignImpl(Ark_NativePointer node,
                          Ark_ScrollSnapAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // ListModelNG::SetScrollSnapAlign(frameNode, Converter::OptConvert<Ace::ScrollSnapAlign>(value));
 }
 void NestedScrollImpl(Ark_NativePointer node,
                       const Ark_NestedScrollOptions* value)
@@ -290,8 +270,6 @@ void NestedScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto options = Converter::Convert<Converter::NestedScrollModeOptions>(*value);
-    // need check
-    // ListModelNG::SetListNestedScroll(frameNode, options.forward, options.backward);
 }
 void EnableScrollInteractionImpl(Ark_NativePointer node,
                                  Ark_Boolean value)
@@ -306,8 +284,6 @@ void FrictionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    // need check
-    // ListModelNG::SetListFriction(frameNode, Converter::OptConvert<float>(*value));
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
                           Ark_ChildrenMainSize value)
@@ -316,9 +292,6 @@ void ChildrenMainSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto peer = value;
-    // need check
-    // RefPtr<ListChildrenMainSize> handler = ListModelNG::GetOrCreateListChildrenMainSize(frameNode);
-    // peer->SetHandler(handler);
 }
 void MaintainVisibleContentPositionImpl(Ark_NativePointer node,
                                         Ark_Boolean value)

@@ -55,8 +55,9 @@ void JSBadge::Create(const JSCallbackInfo& info)
         return;
     }
 
+    auto frameNode = BadgeModel::GetInstance()->CreateBadgeFrameNode();
     BadgeParameters badgeParameters = CreateBadgeParameters(info);
-    BadgeModel::GetInstance()->Create(badgeParameters);
+    BadgeModel::GetInstance()->CreateByFrameNode(frameNode, badgeParameters);
 }
 
 BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)

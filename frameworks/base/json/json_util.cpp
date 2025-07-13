@@ -211,6 +211,20 @@ bool JsonValue::Put(const char* key, const std::unique_ptr<JsonValue>& value)
     return true;
 }
 
+bool JsonValue::Put(const char* key, const std::shared_ptr<JsonValue>& value)
+{
+    if (!value || !key) {
+        return false;
+    }
+    cJSON* jsonObject = cJSON_Duplicate(value->GetJsonObject(), true);
+    if (jsonObject == nullptr) {
+        return false;
+    }
+
+    cJSON_AddItemToObject(object_, key, jsonObject);
+    return true;
+}
+
 bool JsonValue::PutFixedAttr(const char* key, const std::unique_ptr<JsonValue>& value,
     const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
 {
@@ -231,6 +245,20 @@ bool JsonValue::PutExtAttr(const char* key, const std::unique_ptr<JsonValue>& va
 
 // add item to array
 bool JsonValue::Put(const std::unique_ptr<JsonValue>& value)
+{
+    if (!value) {
+        return false;
+    }
+    cJSON* jsonObject = cJSON_Duplicate(value->GetJsonObject(), true);
+    if (jsonObject == nullptr) {
+        return false;
+    }
+
+    cJSON_AddItemToArray(object_, jsonObject);
+    return true;
+}
+
+bool JsonValue::Put(const std::shared_ptr<JsonValue>& value)
 {
     if (!value) {
         return false;
@@ -401,6 +429,24 @@ bool JsonValue::PutRef(std::unique_ptr<JsonValue>&& value)
         return true;
     } else {
         std::unique_ptr<JsonValue> lValue = std::move(value);
+        return Put(lValue);
+    }
+}
+
+bool JsonValue::PutRef(std::shared_ptr<JsonValue>&& value)
+{
+    if (value == nullptr) {
+        return false;
+    }
+    /*
+    * If value is root, it controls the lifecycle of JsonObject, we can just move it into current object
+    * Else we need to copy the JsonObject and put the new object in current object
+    */
+    if (value->isRoot_) {
+        cJSON_AddItemToArray(object_, value->ReleaseJsonObject());
+        return true;
+    } else {
+        std::shared_ptr<JsonValue> lValue = std::move(value);
         return Put(lValue);
     }
 }
@@ -595,6 +641,11 @@ std::unique_ptr<JsonValue> JsonUtil::ParseJsonString(const std::string& content,
 std::unique_ptr<JsonValue> JsonUtil::Create(bool isRoot)
 {
     return std::make_unique<JsonValue>(cJSON_CreateObject(), isRoot);
+}
+
+std::shared_ptr<JsonValue> JsonUtil::CreateSharedPtrJson(bool isRoot)
+{
+    return std::make_shared<JsonValue>(cJSON_CreateObject(), isRoot);
 }
 
 std::unique_ptr<JsonValue> JsonUtil::CreateArray(bool isRoot)

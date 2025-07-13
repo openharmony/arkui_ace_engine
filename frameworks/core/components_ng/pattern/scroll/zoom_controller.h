@@ -16,7 +16,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_ZOOM_CONTROLLER_H
 
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/gestures/pinch_gesture.h"
+#include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
 
 namespace OHOS::Ace::NG {
 class ScrollPattern;
@@ -33,6 +33,11 @@ public:
     explicit ZoomController(ScrollPattern& pattern);
     ~ZoomController() final;
 
+    RefPtr<PinchRecognizer> GetPinchGesture() const
+    {
+        return pinchGesture_;
+    }
+
 private:
     void InitializePinchGesture();
     void DeinitializePinchGesture();
@@ -43,7 +48,7 @@ private:
     void UpdateOffset(float scale, float prevScale, OffsetF centerOffset);
 
     ScrollPattern& pattern_;
-    RefPtr<PinchGesture> pinchGesture_;
+    RefPtr<PinchRecognizer> pinchGesture_;
     float zoomScaleStart_ = 1.0f;
 };
 
