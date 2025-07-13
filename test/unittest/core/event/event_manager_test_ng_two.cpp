@@ -24,7 +24,7 @@ class TouchDelegateTest : public TouchDelegate {
     void DelegateTouchEvent(const TouchEvent& point)
     {
         return;
-    };
+    }
 };
 /**
  * @tc.name: ExecuteTouchTestDoneCallbackTest001
@@ -294,31 +294,31 @@ HWTEST_F(EventManagerTestNg, AddTouchDelegate001, TestSize.Level1)
     EXPECT_EQ(eventManager->touchDelegatesMap_[TOUCH_ID].size(), 2);
 
     /**
-     * @tc.steps: step3. Call ReplaceTouchDelegate.
+     * @tc.steps: step3. Call UpdateTouchDelegate.
      * @tc.expected: touchDelegatesMap_ is not empty and size is 1.
      */
-    eventManager->ReplaceTouchDelegate(TOUCH_ID, delegate);
+    eventManager->UpdateTouchDelegate(TOUCH_ID, delegate);
     EXPECT_FALSE(eventManager->touchDelegatesMap_.empty());
     EXPECT_EQ(eventManager->touchDelegatesMap_[TOUCH_ID].size(), 1);
 
     /**
-     * @tc.steps: step4. Call ReplaceTouchDelegate when eventManager->touchDelegatesMap_ is empty.
+     * @tc.steps: step4. Call UpdateTouchDelegate when eventManager->touchDelegatesMap_ is empty.
      * @tc.expected: touchDelegatesMap_ is not empty and size is 1.
      */
     eventManager->UnregisterTouchDelegate(TOUCH_ID);
     EXPECT_TRUE(eventManager->touchDelegatesMap_.empty());
-    eventManager->ReplaceTouchDelegate(TOUCH_ID, delegate);
+    eventManager->UpdateTouchDelegate(TOUCH_ID, delegate);
     EXPECT_FALSE(eventManager->touchDelegatesMap_.empty());
     EXPECT_EQ(eventManager->touchDelegatesMap_[TOUCH_ID].size(), 1);
 
     /**
-     * @tc.steps: step5. Call ReplaceTouchDelegate when eventManager->touchDelegatesMap_[TOUCH_ID] is empty.
+     * @tc.steps: step5. Call UpdateTouchDelegate when eventManager->touchDelegatesMap_[TOUCH_ID] is empty.
      * @tc.expected: touchDelegatesMap_ is not empty and size is 1.
      */
     eventManager->touchDelegatesMap_[TOUCH_ID].clear();
     EXPECT_FALSE(eventManager->touchDelegatesMap_.empty());
     EXPECT_TRUE(eventManager->touchDelegatesMap_[TOUCH_ID].empty());
-    eventManager->ReplaceTouchDelegate(TOUCH_ID, delegate);
+    eventManager->UpdateTouchDelegate(TOUCH_ID, delegate);
     EXPECT_FALSE(eventManager->touchDelegatesMap_.empty());
     EXPECT_EQ(eventManager->touchDelegatesMap_[TOUCH_ID].size(), 1);
 }
