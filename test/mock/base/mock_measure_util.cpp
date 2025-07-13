@@ -40,6 +40,7 @@ double MeasureUtil::MeasureTextWidth(const TextStyle& textStyle, const std::stri
 Size MeasureUtil::MeasureTextSize(const TextStyle& textStyle, const std::string& text)
 {
     return Size(TEXT_SIZE_WIDTH, TEXT_SIZE_HEIGHT);
+}
 MeasureContext* MeasureUtilGetMeasureCtx()
 {
     return &s_MeasureCtx;

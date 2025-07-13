@@ -20,6 +20,10 @@
 
 namespace OHOS::Ace {
 
+namespace {
+    std::pair<std::string, std::function<void()>> registerCallback_;
+}
+
 std::string FontManager::appCustomFont_ = "";
 const std::vector<std::string>& FontManager::GetFontNames() const
 {
