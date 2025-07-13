@@ -16,11 +16,11 @@
 class BuilderViewV2 extends ViewV2 {
     aboutToBeDeleted(): void {
     }
-    protected purgeVariableDependenciesOnElmtId(removedElmtId: number) {
+    protected purgeVariableDependenciesOnElmtId(removedElmtId: number): void {
     }
     public updateRecycleElmtId(oldElmtId: number, newElmtId: number): void {
     }
-    public updateStateVars(params: Object) {
+    public updateStateVars(params: Object): void  {
     }
     constructor(parent, extraInfo, elmtId = -1) {
         super(parent, elmtId, extraInfo);
@@ -30,7 +30,7 @@ class BuilderViewV2 extends ViewV2 {
     initialRender(): void {
 
     }
-    rerender() {
+    rerender(): void {
         this.updateDirtyElements();
     }
     static getEntryName(): string {
@@ -48,7 +48,7 @@ function createCompatibleNodeWithFuncVoid(fn: (() => void) | Object, elmtId: num
         }
     }
     builderViewV2.initialRender = buildFunc.bind(builderViewV2);
-    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    builderViewV2.rerender = (): void => { builderViewV2.updateDirtyElements(); };
     return builderViewV2;
 }
 
@@ -63,7 +63,7 @@ function createCompatibleNodeWithFunc<T1>(fn: ((arg1: T1) => void) | Object, elm
         }
     }
     builderViewV2.initialRender = buildFunc.bind(builderViewV2);
-    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    builderViewV2.rerender = (): void => { builderViewV2.updateDirtyElements(); };
     if (typeof arg1 === 'object') {
         builderViewV2['arg1'] = UIUtilsImpl.instance().makeObserved(arg1);
     } else {
@@ -85,7 +85,7 @@ function createCompatibleNodeWithFunc2<T1, T2>(fn: ((arg1: T1, arg2: T2) => void
         }
     }
     builderViewV2.initialRender = buildFunc.bind(builderViewV2);
-    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    builderViewV2.rerender = (): void => { builderViewV2.updateDirtyElements(); };
     return builderViewV2;
 }
 
@@ -100,7 +100,7 @@ function createCompatibleNodeWithFunc3<T1, T2, T3>(fn: ((arg1: T1, arg2: T2, arg
         }
     }
     builderViewV2.initialRender = buildFunc.bind(builderViewV2);
-    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    builderViewV2.rerender = (): void => { builderViewV2.updateDirtyElements(); };
     return builderViewV2;
 }
 
@@ -115,7 +115,7 @@ function createCompatibleNodeWithFunc4<T1, T2, T3, T4>(fn: ((arg1: T1, arg2: T2,
         }
     }
     builderViewV2.initialRender = buildFunc.bind(builderViewV2);
-    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    builderViewV2.rerender = (): void => { builderViewV2.updateDirtyElements(); };
     return builderViewV2;
 }
 
@@ -130,7 +130,7 @@ function createCompatibleNodeWithFunc5<T1, T2, T3, T4, T5>(fn: ((arg1: T1, arg2:
         }
     }
     builderViewV2.initialRender = buildFunc.bind(builderViewV2);
-    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    builderViewV2.rerender = (): void => { builderViewV2.updateDirtyElements(); };
     return builderViewV2;
 }
 
@@ -145,7 +145,7 @@ function createCompatibleNodeWithFunc6<T1, T2, T3, T4, T5, T6>(fn: ((arg1: T1, a
         }
     }
     builderViewV2.initialRender = buildFunc.bind(builderViewV2);
-    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    builderViewV2.rerender = (): void => { builderViewV2.updateDirtyElements(); };
     return builderViewV2;
 }
 
@@ -160,7 +160,7 @@ function createCompatibleNodeWithFunc7<T1, T2, T3, T4, T5, T6, T7>(fn: ((arg1: T
         }
     }
     builderViewV2.initialRender = buildFunc.bind(builderViewV2);
-    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    builderViewV2.rerender = (): void => { builderViewV2.updateDirtyElements(); };
     return builderViewV2;
 }
 
@@ -175,7 +175,7 @@ function createCompatibleNodeWithFunc8<T1, T2, T3, T4, T5, T6, T7, T8>(fn: ((arg
         }
     }
     builderViewV2.initialRender = buildFunc.bind(builderViewV2);
-    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    builderViewV2.rerender = (): void => { builderViewV2.updateDirtyElements(); };
     return builderViewV2;
 }
 
@@ -191,7 +191,7 @@ function createCompatibleNodeWithFunc9<T1, T2, T3, T4, T5, T6, T7, T8, T9>(fn: (
         }
     }
     builderViewV2.initialRender = buildFunc.bind(builderViewV2);
-    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    builderViewV2.rerender = (): void => { builderViewV2.updateDirtyElements(); };
     return builderViewV2;
 }
 
@@ -207,7 +207,7 @@ function createCompatibleNodeWithFunc10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
         }
     }
     builderViewV2.initialRender = buildFunc.bind(builderViewV2);
-    builderViewV2.rerender = () => { builderViewV2.updateDirtyElements(); };
+    builderViewV2.rerender = (): void => { builderViewV2.updateDirtyElements(); };
     return builderViewV2;
 }
 
