@@ -85,6 +85,13 @@ bool GetButtonArray(ani_env *env, ani_object object, const char *name, std::vect
 
 bool GetMaskRect(ani_env *env, ani_object object, std::optional<OHOS::Ace::DimensionRect>& result)
 {
+    OHOS::Ace::DimensionRect maskRect;
+    maskRect.SetOffset(OHOS::Ace::DimensionOffset(OHOS::Ace::CalcDimension(0, OHOS::Ace::DimensionUnit::VP),
+        OHOS::Ace::CalcDimension(0, OHOS::Ace::DimensionUnit::VP)));
+    maskRect.SetSize(OHOS::Ace::DimensionSize(OHOS::Ace::CalcDimension(1, OHOS::Ace::DimensionUnit::PERCENT),
+        OHOS::Ace::CalcDimension(1, OHOS::Ace::DimensionUnit::PERCENT)));
+    result = std::make_optional<OHOS::Ace::DimensionRect>(maskRect);
+
     ani_ref resultRef;
     ani_status status = env->Object_GetPropertyByName_Ref(object, "maskRect", &resultRef);
     if (status != ANI_OK) {
@@ -135,8 +142,10 @@ bool GetMaskRect(ani_env *env, ani_object object, std::optional<OHOS::Ace::Dimen
     if (!GetLengthParam(env, heightRef, height)) {
         return false;
     }
-    result->SetOffset(OHOS::Ace::DimensionOffset(dx, dy));
-    result->SetSize(OHOS::Ace::DimensionSize(width, height));
+
+    maskRect.SetOffset(OHOS::Ace::DimensionOffset(dx, dy));
+    maskRect.SetSize(OHOS::Ace::DimensionSize(width, height));
+    result = std::make_optional<OHOS::Ace::DimensionRect>(maskRect);
     return true;
 }
 
@@ -216,12 +225,14 @@ bool GetBackgroundBlurStyleOptions(ani_env* env, ani_object object, std::optiona
         return false;
     }
 
-    GetThemeColorMode(env, object, result->colorMode);
-    GetAdaptiveColor(env, object, result->adaptiveColor);
-    GetDoubleParam(env, object, "scale", result->scale);
-    GetBlurOptions(env, object, result->blurOption);
-    GetBlurStyleActivePolicy(env, object, result->policy);
-    GetResourceColorParam(env, object, "inactiveColor", result->inactiveColor);
+    OHOS::Ace::BlurStyleOption blurStyleOption;
+    GetThemeColorMode(env, object, blurStyleOption.colorMode);
+    GetAdaptiveColor(env, object, blurStyleOption.adaptiveColor);
+    GetDoubleParam(env, object, "scale", blurStyleOption.scale);
+    GetBlurOptions(env, object, blurStyleOption.blurOption);
+    GetBlurStyleActivePolicy(env, object, blurStyleOption.policy);
+    GetResourceColorParam(env, object, "inactiveColor", blurStyleOption.inactiveColor);
+    result = std::make_optional<OHOS::Ace::BlurStyleOption>(blurStyleOption);
     return true;
 }
 
@@ -242,26 +253,28 @@ bool GetBackgroundEffectOptions(ani_env* env, ani_object object, std::optional<O
         return false;
     }
 
+    OHOS::Ace::EffectOption effectOption;
     ani_ref radiusRef;
     status = env->Object_GetPropertyByName_Ref(object, "backgroundEffect", &radiusRef);
     if (status == ANI_OK) {
         OHOS::Ace::CalcDimension dimension;
         if (GetLengthParam(env, radiusRef, dimension)) {
-            result->radius = dimension;
+            effectOption.radius = dimension;
         }
     }
 
-    GetDoubleParam(env, resultObj, "saturation", result->saturation);
-    result->saturation = (result->saturation > 0.0f || OHOS::Ace::NearZero(result->saturation)) ?
-        result->saturation : 1.0f;
-    GetDoubleParam(env, resultObj, "brightness", result->brightness);
-    result->brightness = (result->brightness > 0.0f || OHOS::Ace::NearZero(result->brightness)) ?
-        result->brightness : 1.0f;
-    GetResourceColorParam(env, resultObj, "color", result->color);
-    GetAdaptiveColor(env, resultObj, result->adaptiveColor);
-    GetBlurOptions(env, resultObj, result->blurOption);
-    GetBlurStyleActivePolicy(env, resultObj, result->policy);
-    GetResourceColorParam(env, resultObj, "inactiveColor", result->inactiveColor);
+    GetDoubleParam(env, resultObj, "saturation", effectOption.saturation);
+    effectOption.saturation = (effectOption.saturation > 0.0f || OHOS::Ace::NearZero(effectOption.saturation)) ?
+        effectOption.saturation : 1.0f;
+    GetDoubleParam(env, resultObj, "brightness", effectOption.brightness);
+    effectOption.brightness = (effectOption.brightness > 0.0f || OHOS::Ace::NearZero(effectOption.brightness)) ?
+        effectOption.brightness : 1.0f;
+    GetResourceColorParam(env, resultObj, "color", effectOption.color);
+    GetAdaptiveColor(env, resultObj, effectOption.adaptiveColor);
+    GetBlurOptions(env, resultObj, effectOption.blurOption);
+    GetBlurStyleActivePolicy(env, resultObj, effectOption.policy);
+    GetResourceColorParam(env, resultObj, "inactiveColor", effectOption.inactiveColor);
+    result = std::make_optional<OHOS::Ace::EffectOption>(effectOption);
     return true;
 }
 
@@ -847,38 +860,40 @@ bool GetCornerRadius(ani_env *env, ani_object object, std::optional<OHOS::Ace::N
         return false;
     }
 
+    ani_object resultObj = static_cast<ani_object>(resultRef);
     OHOS::Ace::CalcDimension dimension;
-    if (GetDimesionParam(env, resultRef, dimension)) {
+    if (GetDimesionParam(env, resultObj, dimension)) {
         CheckDimension(dimension);
         result = OHOS::Ace::NG::BorderRadiusProperty(dimension);
         return true;
     }
 
-    ani_object resultObj = static_cast<ani_object>(resultRef);
+    OHOS::Ace::NG::BorderRadiusProperty borderRadius;
     OHOS::Ace::CalcDimension topLeft;
     if (GetDimesionParam(env, resultObj, "topLeft", topLeft)) {
         CheckDimension(topLeft);
-        result->radiusTopLeft = topLeft;
+        borderRadius.radiusTopLeft = topLeft;
     }
 
     OHOS::Ace::CalcDimension topRight;
     if (GetDimesionParam(env, resultObj, "topRight", topRight)) {
         CheckDimension(topRight);
-        result->radiusTopRight = topRight;
+        borderRadius.radiusTopRight = topRight;
     }
 
     OHOS::Ace::CalcDimension bottomLeft;
     if (GetDimesionParam(env, resultObj, "bottomLeft", bottomLeft)) {
         CheckDimension(bottomLeft);
-        result->radiusBottomLeft = bottomLeft;
+        borderRadius.radiusBottomLeft = bottomLeft;
     }
 
     OHOS::Ace::CalcDimension bottomRight;
     if (GetDimesionParam(env, resultObj, "bottomRight", bottomRight)) {
         CheckDimension(bottomRight);
-        result->radiusBottomRight = bottomRight;
+        borderRadius.radiusBottomRight = bottomRight;
     }
-    result->multiValued = true;
+    borderRadius.multiValued = true;
+    result = std::make_optional<OHOS::Ace::NG::BorderRadiusProperty>(borderRadius);
     return true;
 }
 
@@ -894,38 +909,40 @@ bool GetBorderWidth(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG
         return false;
     }
 
+    ani_object resultObj = static_cast<ani_object>(resultRef);
     OHOS::Ace::CalcDimension dimension;
-    if (GetDimesionParam(env, resultRef, dimension)) {
+    if (GetDimesionParam(env, resultObj, dimension)) {
         CheckDimension(dimension);
         result = OHOS::Ace::NG::BorderWidthProperty({ dimension, dimension, dimension, dimension });
         return true;
     }
 
-    ani_object resultObj = static_cast<ani_object>(resultRef);
+    OHOS::Ace::NG::BorderWidthProperty borderWidth;
     OHOS::Ace::CalcDimension left;
     if (GetDimesionParam(env, resultObj, "left", left)) {
         CheckDimension(left);
-        result->leftDimen = left;
+        borderWidth.leftDimen = left;
     }
 
     OHOS::Ace::CalcDimension right;
     if (GetDimesionParam(env, resultObj, "right", right)) {
         CheckDimension(left);
-        result->rightDimen = right;
+        borderWidth.rightDimen = right;
     }
 
     OHOS::Ace::CalcDimension top;
     if (GetDimesionParam(env, resultObj, "top", top)) {
         CheckDimension(top);
-        result->topDimen = top;
+        borderWidth.topDimen = top;
     }
 
     OHOS::Ace::CalcDimension bottom;
     if (GetDimesionParam(env, resultObj, "bottom", bottom)) {
         CheckDimension(bottom);
-        result->bottomDimen = bottom;
+        borderWidth.bottomDimen = bottom;
     }
-    result->multiValued = true;
+    borderWidth.multiValued = true;
+    result = std::make_optional<OHOS::Ace::NG::BorderWidthProperty>(borderWidth);
     return true;
 }
 
@@ -941,33 +958,36 @@ bool GetBorderColor(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG
         return false;
     }
 
+    OHOS::Ace::NG::BorderColorProperty borderColor;
     ani_object resultObj = static_cast<ani_object>(resultRef);
     OHOS::Ace::Color color;
     if (GetResourceColorParam(env, resultObj, color)) {
-        result->SetColor(color);
+        borderColor.SetColor(color);
+        result = std::make_optional<OHOS::Ace::NG::BorderColorProperty>(borderColor);
         return true;
     }
 
     OHOS::Ace::Color left;
     if (GetResourceColorParam(env, resultObj, "left", left)) {
-        result->leftColor = left;
+        borderColor.leftColor = left;
     }
 
     OHOS::Ace::Color right;
     if (GetResourceColorParam(env, resultObj, "right", right)) {
-        result->rightColor = right;
+        borderColor.rightColor = right;
     }
 
     OHOS::Ace::Color top;
     if (GetResourceColorParam(env, resultObj, "top", top)) {
-        result->topColor = top;
+        borderColor.topColor = top;
     }
 
     OHOS::Ace::Color bottom;
     if (GetResourceColorParam(env, resultObj, "bottom", bottom)) {
-        result->bottomColor = bottom;
+        borderColor.bottomColor = bottom;
     }
-    result->multiValued = true;
+    borderColor.multiValued = true;
+    result = std::make_optional<OHOS::Ace::NG::BorderColorProperty>(borderColor);
     return true;
 }
 
@@ -1010,26 +1030,28 @@ bool GetBorderStyle(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG
         return true;
     }
 
+    OHOS::Ace::NG::BorderStyleProperty borderStyle;
     OHOS::Ace::BorderStyle left;
     if (GetBorderStyle(env, resultObj, "left", left)) {
-        result->styleLeft = left;
+        borderStyle.styleLeft = left;
     }
 
     OHOS::Ace::BorderStyle right;
     if (GetBorderStyle(env, resultObj, "right", right)) {
-        result->styleRight = right;
+        borderStyle.styleRight = right;
     }
 
     OHOS::Ace::BorderStyle top;
     if (GetBorderStyle(env, resultObj, "top", top)) {
-        result->styleTop = top;
+        borderStyle.styleTop = top;
     }
 
     OHOS::Ace::BorderStyle bottom;
     if (GetBorderStyle(env, resultObj, "bottom", bottom)) {
-        result->styleBottom = bottom;
+        borderStyle.styleBottom = bottom;
     }
-    result->multiValued = true;
+    borderStyle.multiValued = true;
+    result = std::make_optional<OHOS::Ace::NG::BorderStyleProperty>(borderStyle);
     return true;
 }
 
