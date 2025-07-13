@@ -20,6 +20,7 @@
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/interfaces/native/node/theme_modifier.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -27,10 +28,12 @@ namespace OHOS::Ace::NG {
 void AniThemeModule::UpdateColorMode(int32_t colorMode)
 {
     ColorMode colorModeValue = MapAniColorModeToColorMode(colorMode);
+    LOGI("FZY AniThemeModule::UpdateColorMode %{public}d", static_cast<int32_t>(colorModeValue));
     if (colorModeValue != ColorMode::COLOR_MODE_UNDEFINED) {
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
         UpdateColorModeForThemeConstants(colorModeValue);
 #else
+        LOGI("FZY AniThemeModule::UpdateColorMode resMgr UpdateColorMode");
         ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
 #endif
         auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
@@ -48,6 +51,7 @@ void AniThemeModule::RestoreColorMode()
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     UpdateColorModeForThemeConstants(colorModeValue);
 #else
+    LOGI("FZY AniThemeModule::RestoreColorMode resMgr UpdateColorMode ");
     ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
 #endif
 }
@@ -102,5 +106,12 @@ void AniThemeModule::ConvertToColorArray(
         }
         colors.push_back(color.GetValue());
     }
+}
+
+ArkUINodeHandle AniThemeModule::CreateWithThemeNode(int32_t themeScopeId)
+{
+    auto themeModifier = NodeModifier::GetThemeModifier();
+    auto node = themeModifier->createWithThemeNode(themeScopeId);
+    return node;
 }
 } // namespace OHOS::Ace::NG
