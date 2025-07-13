@@ -817,4 +817,19 @@ HWTEST_F(ScrollLayoutTestNg, UseInitialOffset003, TestSize.Level1)
     scrollLayoutAlgorithm->UseInitialOffset(axis, selfSize, rawPtr);
     EXPECT_EQ(scrollLayoutAlgorithm->GetCurrentOffset(), 1.0f);
 }
+
+/**
+ * @tc.name: SuggestOpIncActivatedOnce001
+ * @tc.desc: Test SuggestOpIncActivatedOnce
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, SuggestOpIncActivatedOnce001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    FlushUITasks();
+    EXPECT_FALSE(frameNode_->GetSuggestOpIncActivatedOnce());
+}
 } // namespace OHOS::Ace::NG

@@ -195,13 +195,17 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void ScrollLayoutAlgorithm::MarkAndCheckNewOpIncNode(const RefPtr<LayoutWrapper>& layoutWrapper, Axis axis)
 {
-    auto childNode = AceType::DynamicCast<FrameNode>(layoutWrapper);
-    if (childNode && childNode->GetSuggestOpIncActivatedOnce()) {
-        childNode->SetSuggestOpIncActivatedOnce();
-        for (auto& child : childNode->GetChildren()) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(child);
-            if (frameNode) {
-                frameNode->MarkAndCheckNewOpIncNode(axis);
+    auto frameNode = AceType::DynamicCast<FrameNode>(layoutWrapper);
+    if (frameNode && !frameNode->GetSuggestOpIncActivatedOnce()) {
+        frameNode->SetSuggestOpIncActivatedOnce();
+        for (auto childIndex = 0; childIndex < frameNode->GetTotalChildCount(); ++childIndex) {
+            auto childWrapper = layoutWrapper->GetChildByIndex(childIndex);
+            if (!childWrapper) {
+                continue;
+            }
+            auto childNode = AceType::DynamicCast<FrameNode>(childWrapper);
+            if (childNode) {
+                childNode->MarkAndCheckNewOpIncNode(axis);
             }
         }
     }
