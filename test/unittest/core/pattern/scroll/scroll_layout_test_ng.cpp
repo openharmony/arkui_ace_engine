@@ -819,6 +819,21 @@ HWTEST_F(ScrollLayoutTestNg, UseInitialOffset003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SuggestOpIncActivatedOnce001
+ * @tc.desc: Test SuggestOpIncActivatedOnce
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, SuggestOpIncActivatedOnce001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    FlushUITasks();
+    EXPECT_FALSE(frameNode_->GetSuggestOpIncActivatedOnce());
+}
+
+/**
  * @tc.name: UpdateScrollAlignment001
  * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
  * @tc.type: FUNC
