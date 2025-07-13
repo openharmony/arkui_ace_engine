@@ -181,6 +181,8 @@ export interface InternalScope<Value> {
     recache(newValue?: Value): Value
     /** @returns internal state for parameter */
     param<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V>
+
+    get parent(): ManagedScope | undefined
 }
 
 /**

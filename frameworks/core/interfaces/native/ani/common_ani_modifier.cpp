@@ -46,6 +46,8 @@
 #include "core/interfaces/native/implementation/scrollable_target_info_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
+#include "core/components_ng/token_theme/token_colors.h"
+#include "bridge/arkts_frontend/arkts_ani_utils.h"
 
 #include <cstdint>
 #include <memory>
@@ -612,16 +614,27 @@ ArkUI_Uint32 GetColorValueByNumber(ArkUI_Uint32 src)
 
 void SendThemeToNative(ani_env* env, const std::vector<Ark_ResourceColor>& colorArray, ani_int id)
 {
-    auto colors = AniThemeColors();
-    colors.SetColors(colorArray);
+    auto colors = AceType::MakeRefPtr<AniThemeColors>();
+    colors->SetColors(colorArray);
 
     auto themeScopeId = static_cast<int32_t>(id);
-    AniThemeScope::aniThemes[themeScopeId].SetColors(colors);
+
+    AniTheme aniTheme;
+    aniTheme.SetColors(colors);
+    AniThemeScope::AddAniTheme(themeScopeId, aniTheme);
+
     // save the current theme when Theme was created by WithTheme container
     if (AniThemeScope::isCurrentThemeDefault || themeScopeId > 0) {
-        std::optional<NG::AniTheme> themeOpt = std::make_optional(AniThemeScope::aniThemes[themeScopeId]);
+        LOGI("FZY SendThemeToNative set currentTheme %{public}d", id);
+        std::optional<NG::AniTheme> themeOpt = std::make_optional(AniThemeScope::GetAniTheme(themeScopeId));
         AniThemeScope::aniCurrentTheme.swap(themeOpt);
     }
+}
+
+void RemoveThemeInNative(ani_env* env, ani_int withThemeId)
+{
+    auto themeScopeId = static_cast<int32_t>(withThemeId);
+    AniThemeScope::RemoveAniTheme(themeScopeId);
 }
 
 void SetDefaultTheme(ani_env* env, const std::vector<Ark_ResourceColor>& colorArray, ani_boolean isDark)
@@ -641,6 +654,72 @@ void UpdateColorMode(ani_int colorMode)
 void RestoreColorMode()
 {
     AniThemeModule::RestoreColorMode();
+}
+
+void SetThemeScopeId(ani_env* env, ani_int themeScopeId)
+{
+    auto scopeId = static_cast<int32_t>(themeScopeId);
+    AniThemeScope::isCurrentThemeDefault = scopeId == 0;
+
+    std::optional<AniTheme> themeOpt = AniThemeScope::IsAniThemeExists(scopeId)
+                                           ? std::make_optional(AniThemeScope::GetAniTheme(scopeId))
+                                           : std::nullopt;
+
+    LOGI("FZY SetThemeScopeId swap currentTHeme %{public}d", themeScopeId);
+    AniThemeScope::aniCurrentTheme.swap(themeOpt);
+}
+
+void CreateAndBindTheme(ani_env* env, ani_int themeScopeId, ani_int themeId,
+    const std::vector<Ark_ResourceColor>& colorArray, ani_int colorMode, ani_fn_object onThemeScopeDestroy)
+{
+    int32_t themeScopeIdValue = static_cast<int32_t>(themeScopeId);
+    int32_t themeIdValue = static_cast<int32_t>(themeId);
+    int32_t colorModeValue = static_cast<int32_t>(colorMode);
+
+    std::vector<uint32_t> colors;
+    std::vector<RefPtr<ResourceObject>> resObjs;
+    AniThemeModule::ConvertToColorArray(colorArray, colors);
+
+    if (!onThemeScopeDestroy) {
+        return;
+    }
+    auto containerId = Container::CurrentId();
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    std::function<void()> onThemeScopeDestroyFunc = [vm, func = onThemeScopeDestroy, containerId]() {
+        ContainerScope scope(containerId);
+        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        if (env) {
+            ani_ref result;
+            env->FunctionalObject_Call(func, 0, nullptr, &result);
+        }
+    };
+
+    auto themeModifier = NodeModifier::GetThemeModifier();
+    auto theme = themeModifier->createTheme(themeId, colors.data(), colorModeValue, static_cast<void*>(&resObjs));
+    CHECK_NULL_VOID(theme);
+    ArkUINodeHandle node = themeModifier->getWithThemeNode(themeScopeId);
+    if (!node) {
+        node = AniThemeModule::CreateWithThemeNode(themeScopeId);
+    }
+    themeModifier->createThemeScope(node, theme);
+    themeModifier->setOnThemeScopeDestroy(node, reinterpret_cast<void*>(&onThemeScopeDestroyFunc));
+}
+
+void ApplyParentThemeScopeId(ani_env* env, ani_long self, ani_long parent)
+{
+    auto* selfPtr = reinterpret_cast<UINode*>(self);
+    auto* parentPtr = reinterpret_cast<UINode*>(parent);
+    if (!selfPtr || !parentPtr) {
+        return;
+    }
+    int32_t elementThemeScopeId = selfPtr->GetThemeScopeId();
+    if (parentPtr && elementThemeScopeId == 0) {
+        int32_t themeScopeId = parentPtr->GetThemeScopeId();
+        if (elementThemeScopeId != themeScopeId) {
+            selfPtr->SetThemeScopeId(themeScopeId);
+        }
+    }
 }
 
 const ArkUIAniCommonModifier* GetCommonAniModifier()
@@ -693,9 +772,13 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getHoverEventPointer = OHOS::Ace::NG::GetHoverEventPointer,
         .getColorValueByNumber = OHOS::Ace::NG::GetColorValueByNumber,
         .sendThemeToNative = OHOS::Ace::NG::SendThemeToNative,
+        .removeThemeInNative = OHOS::Ace::NG::RemoveThemeInNative,
         .setDefaultTheme = OHOS::Ace::NG::SetDefaultTheme,
         .updateColorMode = OHOS::Ace::NG::UpdateColorMode,
-        .restoreColorMode = OHOS::Ace::NG::RestoreColorMode
+        .restoreColorMode = OHOS::Ace::NG::RestoreColorMode,
+        .setThemeScopeId = OHOS::Ace::NG::SetThemeScopeId,
+        .createAndBindTheme = OHOS::Ace::NG::CreateAndBindTheme,
+        .applyParentThemeScopeId = OHOS::Ace::NG::ApplyParentThemeScopeId
     };
     return &impl;
 }

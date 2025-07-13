@@ -70,7 +70,7 @@ import { Callback_SwiperContentTransitionProxy_Void, SwiperContentTransitionProx
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./../embeddedComponent"
 import { Callback_TimePickerResult_Void, TimePickerResult, OnTimePickerChangeCallback } from "./../timePicker"
 import { ImageOnCompleteCallback, ImageCompleteEvent, ImageErrorCallback, ImageError } from "./../image"
-import { WithThemeAttribute, WithThemeInterface, WithThemeOptions } from "./../withTheme"
+import { WithThemeAttribute, WithThemeOptions } from "./../withTheme"
 import { Callback_WrappedBuilder_Args_Void, CommonConfiguration } from "./../arkui-wrapper-builder"
 import { CheckedCallback } from "./../radioops"
 import { CustomNodeBuilder } from "./../customBuilder"
@@ -2741,12 +2741,12 @@ export function deserializeAndCallWebKeyboardCallback(thisDeserializer: Deserial
     _continuation(_callResult)
 }
 export function deserializeAndCallWithThemeInterface(thisDeserializer: Deserializer): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as WithThemeInterface)
-    let options : WithThemeOptions = thisDeserializer.readWithThemeOptions()
-    let _continuation : ((value: WithThemeAttribute) => void) = thisDeserializer.readCallback_WithThemeAttribute_Void(true)
-    const _callResult  = _call(options)
-    _continuation(_callResult)
+    // const _resourceId : int32 = thisDeserializer.readInt32()
+    // const _call  = (ResourceHolder.instance().get(_resourceId) as WithThemeInterface)
+    // let options : WithThemeOptions = thisDeserializer.readWithThemeOptions()
+    // let _continuation : ((value: WithThemeAttribute) => void) = thisDeserializer.readCallback_WithThemeAttribute_Void(true)
+    // const _callResult  = _call(options)
+    // _continuation(_callResult)
 }
 export function deserializeAndCallCallback_String_SurfaceRect_Void(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()

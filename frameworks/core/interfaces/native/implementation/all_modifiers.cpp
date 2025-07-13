@@ -198,6 +198,7 @@ const GENERATED_ArkUIToggleModifier* GetToggleModifier();
 const GENERATED_ArkUIVideoModifier* GetVideoModifier();
 const GENERATED_ArkUIWebModifier* GetWebModifier();
 const GENERATED_ArkUIWindowSceneModifier* GetWindowSceneModifier();
+const GENERATED_ArkUIWithThemeModifier* GetWithThemeModifier();
 const GENERATED_ArkUIXComponentModifier* GetXComponentModifier();
 const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier();
 const GENERATED_ArkUIRemoteWindowModifier* GetRemoteWindowModifier();
@@ -560,6 +561,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetVideoModifier,
         GetWebModifier,
         GetWindowSceneModifier,
+        GetWithThemeModifier,
         GetXComponentModifier,
         GetSideBarContainerModifier,
         GetRemoteWindowModifier,

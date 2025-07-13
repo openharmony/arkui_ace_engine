@@ -948,6 +948,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SendThemeToNative)
         },
         ani_native_function {
+            "_RemoveThemeInNative",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveThemeInNative)
+        },
+        ani_native_function {
             "_SetDefaultTheme",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetDefaultTheme)
@@ -961,6 +966,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_RestoreColorMode",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::RestoreColorMode)
+        },
+        ani_native_function {
+            "_SetThemeScopeId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetThemeScopeId)
+        },
+        ani_native_function {
+            "_CreateAndBindTheme",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateAndBindTheme)
+        },
+        ani_native_function {
+            "_ApplyParentThemeScopeId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ApplyParentThemeScopeId)
         },
     };
 

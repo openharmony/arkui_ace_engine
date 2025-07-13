@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_UTILS_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_UTILS_H
 
+#include <optional>
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
