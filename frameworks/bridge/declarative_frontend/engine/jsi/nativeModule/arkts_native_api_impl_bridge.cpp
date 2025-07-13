@@ -473,18 +473,6 @@ ArkUINativeModuleValue ArkUINativeModule::SetMarqueeFrameRateRange(ArkUIRuntimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModuleForm(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    auto object = panda::ObjectRef::New(vm);
-    auto frameNode = panda::ObjectRef::New(vm);
-    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getStackTopNode"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetStackTopNode));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
-
-    return object;
-}
-
 ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
