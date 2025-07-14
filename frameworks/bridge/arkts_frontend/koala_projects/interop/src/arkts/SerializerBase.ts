@@ -50,9 +50,9 @@ export enum Tags {
     OBJECT = 107,
 }
 
-const VALUE_UNDEFINED: number = 5
 const VALUE_TRUE: number = 1
 const VALUE_FALSE: number = 0
+const MAX_SAFE_INT32: number = 2147483647
 
 export function runtimeType<T>(value: T): int32 {
     if (value === undefined)
@@ -61,19 +61,19 @@ export function runtimeType<T>(value: T): int32 {
     if (value === null)
         return RuntimeType.OBJECT;
 
-    if (value instanceof String)
+    if (typeof value === "string")
         return RuntimeType.STRING
 
-    if (value instanceof Numeric)
+    if (typeof value === "number")
         return RuntimeType.NUMBER
 
-    if (value instanceof Boolean)
+    if (typeof value === "boolean")
         return RuntimeType.BOOLEAN
 
-    if (value instanceof BigInt)
+    if (typeof value === "bigint")
         return RuntimeType.BIGINT
 
-    if (value instanceof Function)
+    if (typeof value === "function")
         return RuntimeType.FUNCTION
 
     if (value instanceof Object)
@@ -180,11 +180,15 @@ export class SerializerBase implements Disposable {
         let buffSize = this._length
         const minSize = buffSize + value
         const resizedSize = Math.max(minSize, Math.round(3 * buffSize / 2)).toInt()
+        if (value <= 0 || resizedSize <= 0) {
+            throw new Error(`bug: value(${value}) resizedSize(${resizedSize}) is illegal`)
+        }
         let resizedBuffer = InteropNativeModule._Malloc(resizedSize)
         let oldBuffer = this._buffer
-        for (let i = oldBuffer; i < this._position; i++) {
-            let val = unsafeMemory.readInt8(i);
-            unsafeMemory.writeInt8(resizedBuffer - oldBuffer + i, val)
+        let offset = this._position - oldBuffer;
+        for (let i = 0; i < offset; i++) {
+            let val = unsafeMemory.readInt8(oldBuffer + i);
+            unsafeMemory.writeInt8(resizedBuffer + i, val)
         }
         this._buffer = resizedBuffer
         this._position = this._position - oldBuffer + resizedBuffer
@@ -285,7 +289,10 @@ export class SerializerBase implements Disposable {
             this.writeTag(Tags.UNDEFINED)
             return
         }
-        if (value == Math.round(value)) {
+        if (value > MAX_SAFE_INT32) {
+            throw new Error(`bug: ${value} is illegal`)
+        }
+        if (Number.isInteger(value)) {
             this.writeTag(Tags.INT32)
             this.writeInt32(value.toInt())
         } else {
@@ -369,7 +376,7 @@ export class SerializerBase implements Disposable {
         this._position = newPos
 
         if (value == undefined)
-            unsafeMemory.writeInt8(pos, VALUE_UNDEFINED as byte);
+            unsafeMemory.writeInt8(pos, Tags.UNDEFINED as byte);
         else if (value == true)
             unsafeMemory.writeInt8(pos, VALUE_TRUE as byte);
         else if (value == false)

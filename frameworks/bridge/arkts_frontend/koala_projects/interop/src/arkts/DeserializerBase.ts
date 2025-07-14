@@ -163,14 +163,13 @@ export class DeserializerBase implements Disposable {
 
         this._position = newPos
         const value = unsafeMemory.readInt8(pos);
-        if (value == 5)
+        if (value == Tags.UNDEFINED)
             return false;
 
         return value == 1
     }
 
     final readFunction(): int32 {
-        // TODO: not exactly correct.
         return this.readInt32()
     }
 
@@ -184,6 +183,10 @@ export class DeserializerBase implements Disposable {
 
     final readString(): string {
         const encodedLength = this.readInt32();
+        if (encodedLength <= 0) {
+            throw new Error(`value size(${encodedLength}) is equal or less than zero`)
+        }
+
         const pos = this._position
         const newPos = pos + encodedLength
 
