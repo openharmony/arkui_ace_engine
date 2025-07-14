@@ -219,7 +219,10 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
         constraint.maxSize = SizeF { Infinity<float>(), crossLen };
         constraint.parentIdealSize = OptionalSizeF(std::nullopt, crossLen);
     }
-
+    
+    if (isCache) {
+        child->SetActive();
+    }
     child->Measure(constraint);
     SetItemInfo(child, itemIdx, row, col, itemSize);
 
