@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { IMutableKeyedStateMeta, IObservedObject, RenderIdType, WatchIdType } from '../decorator';
+import { IMutableKeyedStateMeta, IObservedObject, ISubscribedWatches, RenderIdType, WatchIdType } from '../decorator';
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { FactoryInternal } from './iFactoryInternal';
 import { ObserveSingleton } from './observeSingleton';
@@ -24,7 +24,7 @@ final class CONSTANT {
     public static readonly OB_LENGTH = '__OB_LENGTH';
 }
 
-export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, ObserveWrappedBase {
+export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, ObserveWrappedBase, ISubscribedWatches {
     public store_: Map<K, V>;
     // Use public access to enable unit testing.
     protected meta_: IMutableKeyedStateMeta;
@@ -86,9 +86,11 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, Obse
         if (!this.store_.has(key)) {
             this.store_.set(key, val);
             this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            this.executeOnSubscribingWatches('set');
         } else if (this.store_.get(key) !== val) {
             this.store_.set(key, val);
             this.meta_.fireChange(String(key as Object | undefined | null));
+            this.executeOnSubscribingWatches('set');
         }
         this.meta_.fireChange(CONSTANT.OB_MAP_ANY_PROPERTY);
         return this;
@@ -133,6 +135,7 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, Obse
             this.meta_.fireChange(String(key as Object | undefined | null));
             this.meta_.fireChange(CONSTANT.OB_MAP_ANY_PROPERTY);
             this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            this.executeOnSubscribingWatches('delete');
             return ret;
         } else {
             return false;
@@ -150,6 +153,7 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, Obse
             this.store_.clear();
             this.meta_.fireChange(CONSTANT.OB_LENGTH);
             this.meta_.fireChange(CONSTANT.OB_MAP_ANY_PROPERTY);
+            this.executeOnSubscribingWatches('clear');
         }
     }
 

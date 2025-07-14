@@ -22,7 +22,9 @@ import { OBSERVE } from '../../decorator';
 import { NullableObject } from '../../base/types';
 import { UIUtils } from '../../utils';
 
-export class InterfaceProxyHandler<T extends Object> implements proxy.ProxyHandler<T>, IObservedObject, ISubscribedWatches {
+export class InterfaceProxyHandler<T extends Object>
+    implements proxy.ProxyHandler<T>, IObservedObject, ISubscribedWatches
+{
     private readonly __meta: IMutableStateMeta = STATE_MGMT_FACTORY.makeMutableStateMeta();
 
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
