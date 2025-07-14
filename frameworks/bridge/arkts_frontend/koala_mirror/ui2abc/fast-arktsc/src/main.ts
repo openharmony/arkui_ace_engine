@@ -33,6 +33,8 @@ export const options = program
 
     .option('--group-by <size>', 'Group files by groups before passing them to compiler')
     .option('--restart-stages', 'Compilation with plugins and compiler restarting')
+    .option('--cache', 'Enable AST cache in the compiler')
+    .option('--simultaneous', 'Use simultaneous compilation')
 
     .option('--output-dir <path>', 'Path to output dir (only used by AOT compilation)')
     .option('--aot-libs <libs>', 'Comma-separated AOT libraries to include')
@@ -92,8 +94,35 @@ function produceNinjafile(
     let linker = compiler.replace(basename, 'arklink')
     const stages = intermediateOutDirs.length
 
+    const passFlags = [
+        options.restartStages ? `--restart-stages` : ``,
+        options.cache ? `--cache` : ``,
+        options.simultaneous ? `--simultaneous` : ``,
+    ].join(` `)
     const buildCommand = (stage: number, _in: string, _out: string) => {
-        return `${tools_prefix}${compiler} --ets-module --arktsconfig ${path.resolve(config)} --output ${_out} ${options.restartStages ? `--restart-stages` : ``} ${stages > 1 ? `--stage ${stage}` : ``} ${_in}`
+        return `${tools_prefix}${compiler} --ets-module --arktsconfig ${path.resolve(config)} --output ${_out} ${stages > 1 ? `--stage ${stage}` : ``} ${passFlags} ${_in}`
+    }
+
+    if (options.simultaneous) {
+        if (options.restartStages) {
+            throw new Error(`Do not mix "--simultaneous" and "--restart-stages" flags together`)
+        }
+        if (options.cache) {
+            throw new Error(`Do not mix "--simultaneous" and "--cache" flags together`)
+        }
+        const synthetic_rule = "synthetic_rule"
+        const outputs = Array(files.length).fill(linkPath)
+        result.push(
+`
+rule ${synthetic_rule}
+    command = ${buildCommand(0, files.join(':'), outputs.join(':'))}
+
+build ${linkPath}: ${synthetic_rule} | ${files.join(' ')}
+`)
+        result.push(`build link: phony ${linkPath}\n`)
+        result.push(`build all: phony link\n`)
+        result.push("default all\n")
+        return result.join('\n')
     }
 
     let compilerPrefix = [...Array(stages).keys()].map((i) => `
@@ -172,7 +201,7 @@ function main(configPath: string, linkName: string) {
 }
 
 
-
+// TODO: move all AOT stuff away from here
 function archDir(): string {
     const arch = process.arch
     let sdkArch = "";
@@ -202,7 +231,7 @@ function archDir(): string {
 }
 
 function mainAot(abc: string) {
-    let sdk = options.sdk ?? path.resolve(path.join(__dirname, '..', '..', 'panda', 'node_modules', '@panda', 'sdk'))
+    let sdk = options.sdk ?? path.resolve(path.join(__dirname, '..', '..', '..', 'incremental', 'tools', 'panda', 'node_modules', '@panda', 'sdk'))
     let aot = path.join(sdk, archDir(), 'bin', 'ark_aot')
     let stdlib = path.resolve(path.join(sdk, "ets", "etsstdlib.abc"))
     const aotLibs = abc.indexOf("etsstdlib") == -1 ? [stdlib] : []

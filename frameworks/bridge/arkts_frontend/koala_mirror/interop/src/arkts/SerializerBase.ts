@@ -18,7 +18,6 @@ import { ResourceId, ResourceHolder, Disposable } from "./ResourceManager"
 import { NativeBuffer } from "./NativeBuffer"
 import { InteropNativeModule } from "./InteropNativeModule"
 import { MaterializedBase } from "./MaterializedBase"
-import {unsafeMemory} from "std/core"
 
 /**
  * Value representing possible JS runtime object type.
@@ -127,6 +126,25 @@ export class SerializerBase implements Disposable {
     private _length: int32
     private _last: int64
 
+    private static pool: SerializerBase[] = [
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+        new SerializerBase(),
+    ]
+    private static poolTop = 0
+
+    static hold(): SerializerBase {
+        if (SerializerBase.poolTop === SerializerBase.pool.length) {
+            throw new Error("Pool empty! Release one of taken serializers")
+        }
+        return SerializerBase.pool[SerializerBase.poolTop++]
+    }
+
     private static customSerializers: CustomSerializer | undefined = new DateSerializer()
     static registerCustomSerializer(serializer: CustomSerializer) {
         if (SerializerBase.customSerializers == undefined) {
@@ -151,6 +169,10 @@ export class SerializerBase implements Disposable {
     public release() {
         this.releaseResources()
         this.position = this._buffer
+        if (this !== SerializerBase.pool[SerializerBase.poolTop - 1]) {
+            throw new Error("Serializers should be release in LIFO order")
+        }
+        SerializerBase.poolTop -= 1;
     }
     public final dispose() {
         InteropNativeModule._Free(this._buffer)
@@ -179,9 +201,9 @@ export class SerializerBase implements Disposable {
         const resizedSize = Math.max(minSize, Math.round(3 * buffSize / 2)) as int32
         let resizedBuffer = InteropNativeModule._Malloc(resizedSize)
         let oldBuffer = this._buffer
-        for (let i = 0; i < this.position; i++) {
-            let val = unsafeMemory.readInt8(oldBuffer + i);
-            unsafeMemory.writeInt8(resizedBuffer + i, val)
+        for (let i = oldBuffer; i < this.position; i++) {
+            let val = unsafeMemory.readInt8(i);
+            unsafeMemory.writeInt8(resizedBuffer - oldBuffer + i, val)
         }
         this._buffer = resizedBuffer
         this.position = this.position - oldBuffer + resizedBuffer
@@ -340,6 +362,18 @@ export class SerializerBase implements Disposable {
         unsafeMemory.writeFloat32(pos, value)
         this.position = newPos
     }
+    final writeFloat64(value: double) {
+        let pos = this.position
+        let newPos = pos + 8
+        if (newPos > this._last) {
+            this.updateCapacity(8)
+            pos = this.position
+            newPos = pos + 8
+        }
+
+        unsafeMemory.writeFloat64(pos, value)
+        this.position = newPos
+    }
     final writePointer(value: pointer) {
         this.writeInt64(value)
     }
@@ -379,13 +413,9 @@ export class SerializerBase implements Disposable {
     }
     //TODO: Needs to be implemented
     final writeBuffer(value: NativeBuffer) {
-        this.writeCallbackResource({
-            resourceId: value.resourceId,
-            hold: value.hold,
-            release: value.release
-        })
+        this.holdAndWriteObject(value)
         this.writePointer(value.data)
-        this.writeInt64(value.length as int64)
+        this.writeInt64(value.length)
     }
 }
 

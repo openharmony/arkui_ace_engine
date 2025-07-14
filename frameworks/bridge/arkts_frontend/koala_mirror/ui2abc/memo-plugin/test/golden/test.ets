@@ -1,7 +1,7 @@
 
 import { __memo_context_type as __memo_context_type, __memo_id_type as __memo_id_type, __hash as __hash } from "@koalaui/runtime";
 
-import { memo as memo, memo_stable as memo_stable, memo_intrinsic as memo_intrinsic, memo_entry as memo_entry } from "@koalaui/runtime/annotations";
+import { memo as memo, memo_stable as memo_stable, memo_intrinsic as memo_intrinsic, memo_entry as memo_entry, memo_wrap as memo_wrap } from "@koalaui/runtime/annotations";
 
 import { __context as __context, __id as __id, __key as __key } from "@koalaui/runtime";
 
@@ -337,7 +337,7 @@ class Test {
     }
   }
   
-  @memo() public compute_test(__memo_context: __memo_context_type, __memo_id: __memo_id_type, @memo() arg1: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined, arg2: (()=> void) | undefined, content: (()=> void) | undefined): void {
+  @memo() public compute_test(__memo_context: __memo_context_type, __memo_id: __memo_id_type, @memo() arg1: (((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined), arg2: ((()=> void) | undefined), content: ((()=> void) | undefined)): void {
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_compute_test_@test/test.ets"))), 3);
     const __memo_parameter_this = __memo_scope.param(0, this), __memo_parameter_arg1 = __memo_scope.param(1, arg1), __memo_parameter_arg2 = __memo_scope.param(2, arg2);
     if (__memo_scope.unchanged) {
@@ -405,12 +405,25 @@ class Test {
     let key = __hash("id___key_@test/test.ets");
   }
   
+  @memo() public wrap_param_test(__memo_context: __memo_context_type, __memo_id: __memo_id_type, @memo_wrap() obj: A): void {
+    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_wrap_param_test_@test/test.ets"))), 2);
+    const __memo_parameter_this = __memo_scope.param(0, this), __memo_parameter_obj = __memo_scope.param(1, obj);
+    if (__memo_scope.unchanged) {
+      __memo_scope.cached;
+      return;
+    }
+    {
+      __memo_scope.recache();
+      return;
+    }
+  }
+  
   public constructor() {}
   
 }
 
 declare class AbstractTest {
-  public test_signature(@memo() arg1: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void), @memo() arg2: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined, @memo() arg3: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined | ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> int) | undefined, @memo() x: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type, y: ((z: @memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void))=> void))=> void)): @memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void)
+  public test_signature(@memo() arg1: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void), @memo() arg2: (((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined), @memo() arg3: ((((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined) | (((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> int) | undefined)), @memo() x: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type, y: ((z: @memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void))=> void))=> void)): @memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void)
   
   public constructor() {}
   
@@ -526,6 +539,10 @@ class Use {
     const MemoStableClass_instance = new MemoStableClass();
     MemoStableClass_instance.test1(__memo_context, ((__memo_id) + (__hash("id_test1_@test/test.ets"))), "a");
     MemoStableClass_instance.test2(__memo_context, ((__memo_id) + (__hash("id_test2_@test/test.ets"))), 5);
+    const obj: A = new A();
+    test.wrap_param_test(__memo_context, ((__memo_id) + (__hash("id_wrap_param_test_@test/test.ets"))), __memo_context.compute(((__memo_id) + (__hash("id_wrap_param_test_@test/test.ets"))), ((): A => {
+      return (obj as A);
+    })));
     {
       __memo_scope.recache();
       return;

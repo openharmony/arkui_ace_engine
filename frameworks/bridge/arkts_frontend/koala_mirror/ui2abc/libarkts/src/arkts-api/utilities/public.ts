@@ -15,10 +15,11 @@
 
 import { global } from "../static/global"
 import { isNumber, throwError, withWarning } from "../../utils"
-import { KNativePointer, nullptr } from "@koalaui/interop"
-import { passNode, passNodeArray, unpackNodeArray, unpackNonNullableNode } from "./private"
+import { KNativePointer, nullptr, KInt} from "@koalaui/interop"
+import { passNode, passNodeArray, unpackNodeArray, unpackNonNullableNode, passString } from "./private"
 import { Es2pandaContextState, Es2pandaModifierFlags } from "../../generated/Es2pandaEnums"
 import type { AstNode } from "../peers/AstNode"
+import { isSameNativeObject } from "../peers/ArktsObject"
 import {
     type AnnotationUsage,
     ClassDefinition,
@@ -29,13 +30,19 @@ import {
     isMemberExpression,
     isScriptFunction,
     isIdentifier,
-    isETSModule
+    isETSModule,
+    ImportSpecifier
 } from "../../generated"
 import { Config } from "../peers/Config"
 import { Context } from "../peers/Context"
 import { NodeCache } from "../node-cache"
 import { listPrograms } from "../plugins"
 
+/**
+ * TODO: Replace or remove with better naming
+ * 
+ * @deprecated
+ */
 export function createETSModuleFromContext(): ETSModule {
     let program = global.es2panda._ContextProgram(global.context)
     if (program == nullptr) {
@@ -49,6 +56,12 @@ export function createETSModuleFromContext(): ETSModule {
     return new ETSModule(ast)
 }
 
+/**
+ * Now used only in tests
+ * TODO: Remove or replace with better method
+ * 
+ * @deprecated
+ */
 export function createETSModuleFromSource(
     source: string,
     state: Es2pandaContextState = Es2pandaContextState.ES2PANDA_STATE_PARSED,
@@ -67,14 +80,6 @@ export function createETSModuleFromSource(
 export function metaDatabase(fileName: string): string {
     if (fileName.endsWith(".meta.json")) throw new Error(`Must pass source, not database: ${fileName}`)
     return `${fileName}.meta.json`
-}
-
-export function updateETSModuleByStatements(
-    node: ETSModule,
-    statements: readonly AstNode[],
-): ETSModule {
-    global.generatedEs2panda._BlockStatementSetStatements(global.context, node.peer, passNodeArray(statements), statements.length)
-    return node
 }
 
 export function checkErrors() {
@@ -98,27 +103,38 @@ export function proceedToState(state: Es2pandaContextState): void {
     checkErrors()
 }
 
-export function startChecker(): boolean {
-    return global.es2panda._CheckerStartChecker(global.context)
-}
-
-export function recheckSubtree(node: AstNode): void {
-    global.es2panda._AstNodeRecheck(global.context, node.peer)
-    checkErrors()
-}
-
+/** @deprecated Use {@link rebindContext} instead */
 export function rebindSubtree(node: AstNode): void {
     global.es2panda._AstNodeRebind(global.context, node.peer)
     checkErrors()
 }
 
-export function recheckContext(context: KNativePointer): void {
-    global.es2panda._AstNodeRecheck(
+/** @deprecated Use {@link recheckSubtree} instead */
+export function recheckSubtree(node: AstNode): void {
+    global.es2panda._AstNodeRecheck(global.context, node.peer)
+    checkErrors()
+}
+
+export function rebindContext(context: KNativePointer = global.context): void {
+    global.es2panda._AstNodeRebind(
         context,
         global.es2panda._ProgramAst(
             context,
             global.es2panda._ContextProgram(
                 context
+            )
+        )
+    )
+    checkErrors()
+}
+
+export function recheckContext(context: KNativePointer = global.context): void {
+    global.es2panda._AstNodeRecheck(
+        context,
+        global.es2panda._ProgramAst(
+            context,
+            global.es2panda._ContextProgram(
+                context,
             )
         )
     )
@@ -234,4 +250,23 @@ export function collectDependencies(files: string[], configPath: string): string
         context.destroy()
     }
     return Array.from(result)
+}
+
+export function generateTsDeclarationsFromContext(
+  outputDeclEts: string,
+  outputEts: string,
+  exportAll: boolean,
+  isolated: boolean
+): KInt {
+  return global.es2panda._GenerateTsDeclarationsFromContext(
+    global.context,
+    passString(outputDeclEts),
+    passString(outputEts),
+    exportAll,
+    isolated
+  );
+}
+
+export function setAllParents(ast: AstNode): void {
+    global.es2panda._AstNodeUpdateAll(global.context, ast.peer);
 }

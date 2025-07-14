@@ -14,7 +14,7 @@
  */
 
 import { NumberLiteral } from '../types';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { attachModifiers, compose, updateThenAttach } from '../utilities/private';
 
 export function updateNumberLiteral(original: NumberLiteral, value: number): NumberLiteral {

@@ -17,8 +17,8 @@ class Test {
     }
     console.log(__memo_parameter_arg1.value);
     console.log(__memo_parameter_arg2.value);
-    console.log(({let gensym%%_273 = __memo_parameter_arg2.value;
-    (((gensym%%_273) == (null)) ? undefined : gensym%%_273())}));
+    console.log(({let gensym_XXX = __memo_parameter_arg2.value;
+    (((gensym_XXX) == (null)) ? undefined : gensym_XXX())}));
     {
       __memo_scope.recache();
       return;

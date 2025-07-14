@@ -521,3 +521,23 @@ function clearObservable(data: any) {
         }
     }
 }
+
+/**
+ * Interface for getting the observed properties of a class
+ */
+export interface TrackableProps {
+    /**
+     * Retrieves the set of property names that are being tracked for changes using `@Track` decorator
+     */
+    trackedProperties(): ReadonlySet<string>
+}
+
+/**
+ * Interface for getting the observability status of a class
+ */
+export interface ObservableClass {
+    /**
+     * Indicates whether the class is decorated with `@Observed`.
+     */
+    isObserved(): boolean
+}

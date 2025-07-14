@@ -73,11 +73,11 @@ void* StageArena::alloc(size_t size)
 #ifdef KOALA_WINDOWS
     #include <windows.h>
     #define PLUGIN_DIR "windows_host_tools"
-    #define LIB_PREFIX ""
+    #define LIB_PREFIX "lib"
     #define LIB_SUFFIX ".dll"
 #endif
 
-#ifdef KOALA_LINUX
+#if defined(KOALA_LINUX) || defined(KOALA_MACOS)
     #include <dlfcn.h>
 
     #ifdef __x86_64__
@@ -92,7 +92,12 @@ void* StageArena::alloc(size_t size)
 
 const char* DEFAULT_SDK_PATH = "../../../incremental/tools/panda/node_modules/@panda/sdk" ;
 const char* NAME = LIB_PREFIX "es2panda-public" LIB_SUFFIX;
+
 const char* LIB_ES2PANDA_PUBLIC = LIB_PREFIX "es2panda_public" LIB_SUFFIX;
+const char* IS_UI_FLAG = "IS_UI_FLAG";
+const char* NOT_UI_FLAG = "NOT_UI_FLAG";
+const string MODULE_SUFFIX = ".d.ets";
+const string ARKUI = "arkui";
 
 #ifdef KOALA_WINDOWS
     const char *SEPARATOR = "\\";
@@ -103,26 +108,64 @@ const char *LIB_DIR = "lib";
 
 static std::string ES2PANDA_LIB_PATH = "";
 
+std::string joinPath(vector<string> &paths)
+{
+    std::string res;
+    for (std::size_t i = 0; i < paths.size(); ++i) {
+        if (i == 0) {
+            res = paths[i];
+        } else {
+            res += SEPARATOR + paths[i];
+        }
+    }
+    return res;
+}
+
 void impl_SetUpSoPath(KStringPtr &soPath)
 {
     ES2PANDA_LIB_PATH = std::string(soPath.c_str());
 }
 KOALA_INTEROP_V1(SetUpSoPath, KStringPtr);
 
-void* FindLibrary()
-{
-    std::string libraryName;
+// todo: simplify this
+void* FindLibrary() {
+    void *res = nullptr;
+    std::vector<std::string> pathArray;
+    
+    // find by SetUpSoPath
     if (!ES2PANDA_LIB_PATH.empty()) {
-        libraryName = ES2PANDA_LIB_PATH + SEPARATOR + LIB_DIR + SEPARATOR + LIB_ES2PANDA_PUBLIC;
-    } else {
-        char* envValue = getenv("PANDA_SDK_PATH");
-        if (!envValue) {
-            std::cout << "PANDA_SDK_PATH not specified, assuming " << DEFAULT_SDK_PATH << std::endl;
+        pathArray = {ES2PANDA_LIB_PATH, LIB_DIR, LIB_ES2PANDA_PUBLIC};
+        res = loadLibrary(joinPath(pathArray));
+        if (res) {
+            return res;
         }
-        std::string prefix = envValue ? std::string(envValue) : DEFAULT_SDK_PATH;
-        libraryName = prefix + ("/" PLUGIN_DIR "/lib/") + NAME;
     }
-    return loadLibrary(libraryName);
+
+    // find by set PANDA_SDK_PATH
+    char* envValue = getenv("PANDA_SDK_PATH");
+    if (envValue) {
+        pathArray = {envValue, PLUGIN_DIR, LIB_DIR, NAME};
+        res = loadLibrary(joinPath(pathArray));
+        if (res) {
+            return res;
+        }
+    }
+
+    // find by set LD_LIBRARY_PATH
+    pathArray = {LIB_ES2PANDA_PUBLIC};
+    res = loadLibrary(joinPath(pathArray));
+    if (res) {
+        return res;
+    }
+
+    // find by DEFAULT_SDK_PATH
+    pathArray = {DEFAULT_SDK_PATH, PLUGIN_DIR, LIB_DIR, NAME};
+    res = loadLibrary(joinPath(pathArray));
+    if (res) {
+        return res;
+    }
+
+    return nullptr;
 }
 
 es2panda_Impl *GetImplSlow()
@@ -257,7 +300,7 @@ KNativePointer impl_AstNodeUpdateAll(KNativePointer contextPtr, KNativePointer p
 }
 KOALA_INTEROP_2(AstNodeUpdateAll, KNativePointer, KNativePointer, KNativePointer)
 
-KNativePointer impl_AstNodeUpdateChildren(KNativePointer contextPtr, KNativePointer nodePtr) {
+KNativePointer impl_AstNodeSetChildrenParentPtr(KNativePointer contextPtr, KNativePointer nodePtr) {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
     auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
     cachedParentNode = node;
@@ -265,7 +308,7 @@ KNativePointer impl_AstNodeUpdateChildren(KNativePointer contextPtr, KNativePoin
     GetImpl()->AstNodeIterateConst(context, node, changeParent);
     return node;
 }
-KOALA_INTEROP_2(AstNodeUpdateChildren, KNativePointer, KNativePointer, KNativePointer)
+KOALA_INTEROP_2(AstNodeSetChildrenParentPtr, KNativePointer, KNativePointer, KNativePointer)
 
 std::vector<void*> cachedChildren;
 
@@ -306,11 +349,6 @@ void impl_MemFinalize()
     GetImpl()->MemFinalize();
 }
 KOALA_INTEROP_V0(MemFinalize)
-
-constexpr const char* IS_UI_FLAG = "IS_UI_FLAG";
-constexpr const char* NOT_UI_FLAG = "NOT_UI_FLAG";
-const string MODULE_SUFFIX = ".d.ets";
-const string ARKUI = "arkui";
 
 static bool isUIHeaderFile(es2panda_Context* context, es2panda_Program* program)
 {

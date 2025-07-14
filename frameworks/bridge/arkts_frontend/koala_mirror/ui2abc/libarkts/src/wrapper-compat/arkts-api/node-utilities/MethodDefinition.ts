@@ -14,7 +14,7 @@
  */
 
 import { KInt } from '@koalaui/interop';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { AstNode } from '../peers/AstNode';
 import { MethodDefinition } from '../types';
 import { updateThenAttach } from '../utilities/private';

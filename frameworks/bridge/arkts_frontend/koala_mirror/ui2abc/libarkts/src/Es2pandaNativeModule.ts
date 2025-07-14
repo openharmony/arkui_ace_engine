@@ -102,7 +102,7 @@ export class Es2pandaNativeModule {
     _CreateNumberLiteral(context: KPtr, value: KDouble): KPtr {
         throw new Error("Not implemented")
     }
-    _AstNodeUpdateChildren(context: KPtr, node: KPtr): void {
+    _AstNodeSetChildrenParentPtr(context: KPtr, node: KPtr): void {
         throw new Error("Not implemented")
     }
     _AstNodeUpdateAll(context: KPtr, node: KPtr): void {
@@ -219,6 +219,9 @@ export class Es2pandaNativeModule {
     }
     _AstNodeProgram(context: KNativePointer, instance: KNativePointer): KNativePointer {
         throw new Error("Not implemented")
+    }
+    _CreateContextGenerateAbcForExternalSourceFiles(config: KPtr, fileCount: KInt, filenames: string[]): KPtr {
+        throw new Error('Not implemented');
     }
 }
 

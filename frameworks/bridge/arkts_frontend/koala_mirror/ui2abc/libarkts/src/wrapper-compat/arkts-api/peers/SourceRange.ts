@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { SourcePosition } from './SourcePosition';
-import { ArktsObject } from './ArktsObject';
+import { SourcePosition } from '../../../arkts-api/peers/SourcePosition';
+import { ArktsObject } from '../../../arkts-api/peers/ArktsObject';
 import { global } from '../static/global';
 import { KNativePointer } from '@koalaui/interop';
 

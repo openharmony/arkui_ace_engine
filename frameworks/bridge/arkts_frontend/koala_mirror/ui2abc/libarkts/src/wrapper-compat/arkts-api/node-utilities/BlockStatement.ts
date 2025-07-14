@@ -14,7 +14,7 @@
  */
 
 import { BlockStatement, Statement } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { attachModifiers, updateThenAttach } from '../utilities/private';
 
 export function updateBlockStatement(original: BlockStatement, statementList: readonly Statement[]): BlockStatement {

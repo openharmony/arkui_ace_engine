@@ -27,7 +27,7 @@ import { NativePtrDecoder } from './nativePtrDecoder';
 import { Es2pandaModifierFlags, Es2pandaScriptFunctionFlags } from '../../../generated/Es2pandaEnums';
 import { classByPeer } from '../class-by-peer';
 import type { AstNode } from '../peers/AstNode';
-import { ArktsObject } from '../peers/ArktsObject';
+import { ArktsObject } from '../../../arkts-api/peers/ArktsObject';
 import { Es2pandaAstNodeType } from '../../../generated/Es2pandaEnums';
 
 export const arrayOfNullptr = new BigUint64Array([nullptr]);
@@ -143,10 +143,10 @@ export function updatePeerByNode<T extends AstNode>(peer: KNativePointer, origin
         peer,
         global.generatedEs2panda._AstNodeParent(global.context, original.peer)
     );
-    global.es2panda._AstNodeUpdateChildren(global.context, peer);
+    global.es2panda._AstNodeSetChildrenParentPtr(global.context, peer);
     global.generatedEs2panda._AstNodeClearModifier(global.context, peer, allFlags);
     global.generatedEs2panda._AstNodeAddModifier(global.context, peer, original.modifiers);
-    global.es2panda._AstNodeUpdateChildren(global.context, peer);
+    global.es2panda._AstNodeSetChildrenParentPtr(global.context, peer);
     return peer;
 }
 
@@ -161,7 +161,7 @@ export function updateNodeByNode<T extends AstNode>(node: T, original: AstNode):
         node.peer,
         global.generatedEs2panda._AstNodeParent(global.context, original.peer)
     );
-    global.es2panda._AstNodeUpdateChildren(global.context, node.peer);
+    global.es2panda._AstNodeSetChildrenParentPtr(global.context, node.peer);
     return node;
 }
 

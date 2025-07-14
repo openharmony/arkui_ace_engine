@@ -19,7 +19,6 @@ import { NativeBuffer } from "./NativeBuffer"
 import { InteropNativeModule } from "./InteropNativeModule"
 import { Tags, CallbackResource } from "./SerializerBase";
 import { ResourceHolder, Disposable } from "./ResourceManager"
-import {unsafeMemory} from "std/core"
 
 export class DeserializerBase implements Disposable {
     private position : int64 = 0
@@ -136,6 +135,19 @@ export class DeserializerBase implements Disposable {
         return unsafeMemory.readFloat32(pos)
     }
 
+    final readFloat64(): double {
+        const pos = this.position
+        const newPos = pos + 8
+
+        if (newPos > this._end) {
+            throw new Error(`value size(8) is less than remaining buffer length`)
+        }
+
+
+        this.position = newPos
+        return unsafeMemory.readFloat64(pos)
+    }
+
     final readBoolean(): boolean {
         const pos = this.position
         const newPos = pos + 1
@@ -217,7 +229,8 @@ export class DeserializerBase implements Disposable {
         const resource = this.readCallbackResource()
         const data = this.readPointer()
         const length = this.readInt64()
-        return NativeBuffer.wrap(data, length, resource.resourceId, resource.hold, resource.release)
+        InteropNativeModule._CallCallbackResourceHolder(resource.hold, resource.resourceId)
+        return new NativeBuffer(data, length, resource.release)
     }
 }
 

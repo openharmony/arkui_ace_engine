@@ -143,7 +143,7 @@ KInt impl_StringLength(KNativePointer ptr) {
 }
 KOALA_INTEROP_1(StringLength, KInt, KNativePointer)
 
-void impl_StringData(KNativePointer ptr, KByte* bytes, KUInt size) {
+void impl_StringData(KNativePointer ptr, KByte* bytes, KInt size) {
     string* s = reinterpret_cast<string*>(ptr);
     if (s) {
         #ifdef __STDC_LIB_EXT1__
@@ -153,7 +153,7 @@ void impl_StringData(KNativePointer ptr, KByte* bytes, KUInt size) {
         #endif
     }
 }
-KOALA_INTEROP_V3(StringData, KNativePointer, KByte*, KUInt)
+KOALA_INTEROP_V3(StringData, KNativePointer, KByte*, KInt)
 
 
 #ifdef KOALA_JNI
@@ -253,7 +253,7 @@ struct ForeignVMContext {
     int32_t (*callSync)(KVMContext vmContext, int32_t callback, uint8_t* data, int32_t length);
 };
 typedef KInt (*LoadVirtualMachine_t)(KInt vmKind, const char* bootFiles, const char* userFiles, const char* libraryPath, const struct ForeignVMContext* foreignVM);
-typedef KNativePointer (*StartApplication_t)(const char* appUrl, const char* appParams);
+typedef KNativePointer (*StartApplication_t)(const char* appUrl, const char* appParams, int32_t loopIterationr);
 typedef KBoolean (*RunApplication_t)(const KInt arg0, const KInt arg1);
 typedef const char* (*EmitEvent_t)(const KInt type, const KInt target, const KInt arg0, const KInt arg1);
 typedef void (*RestartWith_t)(const char* page);
@@ -293,12 +293,12 @@ KInt impl_LoadVirtualMachine(KVMContext vmContext, KInt vmKind, const KStringPtr
 }
 KOALA_INTEROP_CTX_4(LoadVirtualMachine, KInt, KInt, KStringPtr, KStringPtr, KStringPtr)
 
-KNativePointer impl_StartApplication(const KStringPtr& appUrl, const KStringPtr& appParams) {
+KNativePointer impl_StartApplication(const KStringPtr& appUrl, const KStringPtr& appParams, KInt loopIterations) {
     static StartApplication_t impl = nullptr;
     if (!impl) impl = reinterpret_cast<StartApplication_t>(getImpl(nullptr, "StartApplication"));
-    return impl(appUrl.c_str(), appParams.c_str());
+    return impl(appUrl.c_str(), appParams.c_str(), loopIterations);
 }
-KOALA_INTEROP_2(StartApplication, KNativePointer, KStringPtr, KStringPtr)
+KOALA_INTEROP_3(StartApplication, KNativePointer, KStringPtr, KStringPtr, KInt)
 
 KBoolean impl_RunApplication(const KInt arg0, const KInt arg1) {
     static RunApplication_t impl = nullptr;
@@ -346,8 +346,8 @@ KNativePointer impl_Malloc(KLong length) {
 }
 KOALA_INTEROP_DIRECT_1(Malloc, KNativePointer, KLong)
 
-void impl_Free(KNativePointer data) {
-	if (data) {
+void malloc_finalize(KNativePointer data) {
+    if (data) {
         free(data);
 #ifndef KOALA_INTEROP_MEM_ANALYZER
  	    if (mallocCounter.fetch_sub(1, std::memory_order_release) == 0) {
@@ -355,6 +355,15 @@ void impl_Free(KNativePointer data) {
         }
 #endif
     }
+}
+
+KNativePointer impl_GetMallocFinalizer() {
+    return reinterpret_cast<KNativePointer>(malloc_finalize);
+}
+KOALA_INTEROP_DIRECT_0(GetMallocFinalizer, KNativePointer)
+
+void impl_Free(KNativePointer data) {
+	malloc_finalize(data);
 }
 KOALA_INTEROP_DIRECT_V1(Free, KNativePointer)
 
@@ -415,16 +424,16 @@ void impl_CallCallbackResourceReleaser(KNativePointer releaser, KInt resourceId)
 }
 KOALA_INTEROP_V2(CallCallbackResourceReleaser, KNativePointer, KInt)
 
-KInt impl_CallForeignVM(KNativePointer foreignContextRaw, KInt function, KByte* data, KInt length) {
+KInt impl_CallForeignVM(KNativePointer foreignContextRaw, KInt function, KSerializerBuffer data, KInt length) {
     const ForeignVMContext* foreignContext = (const ForeignVMContext*)foreignContextRaw;
     // TODO: set actuall callbacks caller/holder/releaser.
     /*
     *(int64_t*)(data + 8) = impl_CallCallbackSync;
     *(int64_t*)(data + 16) = 0;
     *(int64_t*)(data + 24) = 0; */
-    return foreignContext->callSync(foreignContext->vmContext, function, data, length);
+    return foreignContext->callSync(foreignContext->vmContext, function, reinterpret_cast<uint8_t*>(data), length);
 }
-KOALA_INTEROP_4(CallForeignVM, KInt, KNativePointer, KInt, KByte*, KInt)
+KOALA_INTEROP_4(CallForeignVM, KInt, KNativePointer, KInt, KSerializerBuffer, KInt)
 
 #ifdef KOALA_FOREIGN_NAPI
 KVMContext g_foreignVMContext = nullptr;
@@ -469,6 +478,17 @@ void resolveDeferred(KVMDeferred* deferred, uint8_t* argsData, int32_t argsLengt
         deferred->handler = nullptr;
     }
 #endif
+#ifdef KOALA_ANI
+    ani_vm* vm = (ani_vm*)deferred->context;
+    ani_env* env = nullptr;
+    ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+    if (env == nullptr || status != ANI_OK) {
+        status = vm->AttachCurrentThread(nullptr, ANI_VERSION_1, &env);
+        CHECK_ANI_FATAL(status);
+    }
+    status = env->PromiseResolver_Resolve((ani_resolver)deferred->handler, nullptr);
+    CHECK_ANI_FATAL(status);
+#endif
 }
 
 void rejectDeferred(KVMDeferred* deferred, const char* message) {
@@ -478,6 +498,21 @@ void rejectDeferred(KVMDeferred* deferred, const char* message) {
         deferred->handler = nullptr;
     }
 #endif
+#ifdef KOALA_ANI
+    if (deferred->handler) {
+        ani_vm* vm = (ani_vm*)deferred->context;
+        ani_env* env = nullptr;
+        ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+        if (env == nullptr || status != ANI_OK) {
+            status = vm->AttachCurrentThread(nullptr, ANI_VERSION_1, &env);
+            CHECK_ANI_FATAL(status);
+        }
+        status = env->PromiseResolver_Reject((ani_resolver)deferred->handler, nullptr);
+        CHECK_ANI_FATAL(status);
+        deferred->handler = nullptr;
+    }
+#endif
+
 }
 
 #ifdef KOALA_NAPI
@@ -515,6 +550,19 @@ KVMDeferred* CreateDeferred(KVMContext vmContext, KVMObjectHandle* promiseHandle
         (napi_threadsafe_function*)&deferred->handler);
     if (status != napi_ok) LOGE("cannot make threadsafe function; status=%d", status);
     *promiseHandle = (KVMObjectHandle)promise;
+#endif
+#ifdef KOALA_ANI
+    ani_env* env = (ani_env*)vmContext;
+    ani_object promise = nullptr;
+    ani_resolver resolver = nullptr;
+    ani_status status = env->Promise_New(&resolver, &promise);
+    deferred->handler = resolver;
+    CHECK_ANI_FATAL(status);
+    *promiseHandle = (KVMObjectHandle)promise;
+    ani_vm* vm = nullptr;
+    status = env->GetVM(&vm);
+    CHECK_ANI_FATAL(status);
+    deferred->context = vm;
 #endif
     return deferred;
 }
@@ -679,7 +727,7 @@ KStringPtr impl_RawUtf8ToString(KVMContext vmContext, KNativePointer data) {
 KOALA_INTEROP_CTX_1(RawUtf8ToString, KStringPtr, KNativePointer)
 #endif
 
-#if defined(KOALA_NAPI) || defined(KOALA_JNI) || defined(KOALA_CJ) || defined(KOALA_ETS_NAPI) || defined(KOALA_ANI)
+#if defined(KOALA_NAPI) || defined(KOALA_JNI) || defined(KOALA_CJ) || defined(KOALA_ETS_NAPI) || defined(KOALA_ANI) || defined(KOALA_KOTLIN)
 KStringPtr impl_StdStringToString(KVMContext vmContext, KNativePointer stringPtr) {
     std::string* string = reinterpret_cast<std::string*>(stringPtr);
     KStringPtr result(string->c_str(), string->size(), false);

@@ -205,7 +205,7 @@ template <>
 inline void WriteToString(std::string *result, const InteropMaterialized *value)
 {
   char hex[20];
-  #ifdef __STDC_LIB_EXT1__ 
+  #ifdef __STDC_LIB_EXT1__
     std::snprintf_s(hex, sizeof(hex), "0x%llx", (long long)value->ptr);
   #else
     std::snprintf(hex, sizeof(hex), "0x%llx", (long long)value->ptr);
@@ -501,6 +501,22 @@ public:
     position += 4;
     return value;
   }
+  InteropFloat64 readFloat64()
+  {
+    check(8);
+#ifdef KOALA_NO_UNALIGNED_ACCESS
+    InteropFloat64 value;
+    #ifdef __STDC_LIB_EXT1__
+      memcpy_s(&value, 8, data + position, 8);
+    #else
+      memcpy(&value, data + position, 8);
+    #endif
+#else
+    auto value = *(InteropFloat64 *)(data + position);
+#endif
+    position += 8;
+    return value;
+  }
   InteropNativePointer readPointer()
   {
     check(8);
@@ -648,7 +664,28 @@ inline void WriteToString(std::string *result, InteropFloat32 value)
 #if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && (__MAC_OS_X_VERSION_MAX_ALLOWED < 130300L))
   // to_chars() is not available on older macOS.
   char buf[20];
-  #ifdef __STDC_LIB_EXT1__ 
+  #ifdef __STDC_LIB_EXT1__
+    snprintf_s(buf, sizeof buf, "%f", value);
+  #else
+    snprintf(buf, sizeof buf, "%f", value);
+  #endif
+  result->append(buf);
+#else
+  std::string storage;
+  storage.resize(20);
+  // We use to_chars() to avoid locale issues.
+  auto rc = std::to_chars(storage.data(), storage.data() + storage.size(), value);
+  storage.resize(rc.ptr - storage.data());
+  result->append(storage);
+#endif
+}
+template <>
+inline void WriteToString(std::string *result, InteropFloat64 value)
+{
+#if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && (__MAC_OS_X_VERSION_MAX_ALLOWED < 130300L))
+  // to_chars() is not available on older macOS.
+  char buf[20];
+  #ifdef __STDC_LIB_EXT1__
     snprintf_s(buf, sizeof buf, "%f", value);
   #else
     snprintf(buf, sizeof buf, "%f", value);

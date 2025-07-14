@@ -35,9 +35,9 @@ import {
     updatePeerByNode,
 } from './utilities/private';
 import { proceedToState } from './utilities/public';
-import { AstNode } from './peers/AstNode';
-import { Config } from './peers/Config';
-import { Context } from './peers/Context';
+import { AstNode } from '../../arkts-api/peers/AstNode';
+import { Config } from '../../arkts-api/peers/Config';
+import { Context } from '../../arkts-api/peers/Context';
 import { nodeByType } from './class-by-peer';
 import { MemberExpression } from './to-be-generated/MemberExpression';
 import {

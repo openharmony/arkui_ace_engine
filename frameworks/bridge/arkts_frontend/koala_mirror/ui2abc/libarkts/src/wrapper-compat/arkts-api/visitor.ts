@@ -15,6 +15,7 @@
 
 import { global } from './static/global';
 import { factory } from './factory/nodeFactory';
+import { factory as factory1 } from '../../arkts-api/factory/nodeFactory';
 import { AstNode } from './peers/AstNode';
 import {
     isBlockStatement,
@@ -105,7 +106,7 @@ function visitOuterExpression(node: AstNode, visitor: Visitor): AstNode {
         return node;
     } else if (isBlockExpression(node)) {
         updated = true;
-        return factory.updateBlockExpression(node, nodesVisitor(node.statements, visitor));
+        return factory1.updateBlockExpression(node, nodesVisitor(node.statements, visitor));
     } else if (isCallExpression(node)) {
         updated = true;
         const call = factory.updateCallExpression(
@@ -131,7 +132,7 @@ function visitOuterExpression(node: AstNode, visitor: Visitor): AstNode {
         );
     } else if (isETSNewClassInstanceExpression(node)) {
         updated = true;
-        return factory.updateETSNewClassInstanceExpression(
+        return factory1.updateETSNewClassInstanceExpression(
             node,
             node.typeRef,
             nodesVisitor(node.arguments, visitor)
@@ -164,7 +165,7 @@ function visitInnerExpression(node: AstNode, visitor: Visitor): AstNode {
     }
     if (isConditionalExpression(node)) {
         updated = true;
-        return factory.updateConditionalExpression(
+        return factory1.updateConditionalExpression(
             node,
             nodeVisitor(node.test, visitor),
             nodeVisitor(node.consequent, visitor),
@@ -173,7 +174,7 @@ function visitInnerExpression(node: AstNode, visitor: Visitor): AstNode {
     }
     if (isTSAsExpression(node)) {
         updated = true;
-        return factory.updateTSAsExpression(
+        return factory1.updateTSAsExpression(
             node,
             nodeVisitor(node.expr, visitor),
             nodeVisitor(node.typeAnnotation, visitor),
@@ -203,7 +204,7 @@ function visitTrivialExpression(node: AstNode, visitor: Visitor): AstNode {
     }
     if (isBinaryExpression(node)) {
         updated = true;
-        return factory.updateBinaryExpression(
+        return factory1.updateBinaryExpression(
             node,
             nodeVisitor(node.left, visitor),
             nodeVisitor(node.right, visitor),
@@ -293,7 +294,7 @@ function visitDefinition(node: AstNode, visitor: Visitor): AstNode {
     }
     if (isTSInterfaceBody(node)) {
         updated = true;
-        return factory.updateInterfaceBody(node, nodesVisitor(node.body, visitor));
+        return factory1.updateInterfaceBody(node, nodesVisitor(node.body, visitor));
     }
     if (isVariableDeclarator(node)) {
         updated = true;
@@ -330,7 +331,7 @@ function visitStatement(node: AstNode, visitor: Visitor): AstNode {
     }
     if (isReturnStatement(node)) {
         updated = true;
-        return factory.updateReturnStatement(node, nodeVisitor(node.argument, visitor));
+        return factory1.updateReturnStatement(node, nodeVisitor(node.argument, visitor));
     }
     if (isTryStatement(node)) {
         updated = true;
@@ -398,7 +399,7 @@ function visitLiteral(node: AstNode, visitor: Visitor): AstNode {
     }
     if (isTemplateLiteral(node)) {
         updated = true;
-        return factory.updateTemplateLiteral(
+        return factory1.updateTemplateLiteral(
             node,
             nodesVisitor(node.quasis, visitor),
             nodesVisitor(node.expressions, visitor),

@@ -17,7 +17,7 @@
 #define _KOALA_TYPES_H
 
 #include <stdint.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <string.h>
 #include <cmath>
 
@@ -42,12 +42,19 @@
 #endif
 
 struct KStringPtrImpl {
+    KStringPtrImpl(const uint8_t* str) : _value(nullptr), _owned(true) {
+      int len = str ? strlen((const char*)str) : 0;
+      assign((const char*)str, len);
+    }
     KStringPtrImpl(const char* str) : _value(nullptr), _owned(true) {
         int len = str ? strlen(str) : 0;
         assign(str, len);
     }
     KStringPtrImpl(const char* str, int len, bool owned) : _value(nullptr), _owned(owned) {
         assign(str, len);
+    }
+    KStringPtrImpl(const uint8_t* str, int len, bool owned) : _value(nullptr), _owned(owned) {
+        assign((const char*)str, len);
     }
     KStringPtrImpl() : _value(nullptr), _length(0), _owned(true) {}
 

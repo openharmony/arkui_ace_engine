@@ -52,6 +52,9 @@ export class InteropNativeModule {
     native static _CallCallbackSync(callbackKind: int32, args: KSerializerBuffer, argsSize: int32): void
     native static _CallCallbackResourceHolder(holder: KPointer, resourceId: int32): void
     native static _CallCallbackResourceReleaser(releaser: KPointer, resourceId: int32): void
+    native static _CallbackAwait(pipeline: KPointer): Object
+    native static _UnblockCallbackWait(pipeline: KPointer): void
+
     native static _LoadVirtualMachine(arg0: int32, arg1: string, arg2: string, arg3: string): int32
     native static _RunApplication(arg0: int32, arg1: int32): boolean
     native static _StartApplication(appUrl: string, appParams: string): KPointer
@@ -65,6 +68,8 @@ export class InteropNativeModule {
     native static _WriteByte(data: KPointer, index: int64, length: int64, value: int32): void
     @ani.unsafe.Direct
     native static _Malloc(length: int64): KPointer
+    @ani.unsafe.Direct
+    native static _GetMallocFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _Free(data: KPointer): void
     @ani.unsafe.Quick
