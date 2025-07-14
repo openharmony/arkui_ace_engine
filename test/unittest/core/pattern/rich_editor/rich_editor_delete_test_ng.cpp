@@ -31,6 +31,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
+const std::u16string PREVIEW_TEXT = u"nin'hao";
 }
 class RichEditorDeleteTestNg : public RichEditorCommonTestNg {
 public:
@@ -412,6 +413,75 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteBackwardOperation002, TestSize.Level1)
     richEditorNode_.Reset();
     auto ret = richEditorPattern->DeleteBackwardOperation(0);
     EXPECT_EQ(ret, u"");
+}
+
+/**
+ * @tc.name: SetPreviewTextForDelete001
+ * @tc.desc: test SetPreviewTextForDelete
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDeleteTestNg, SetPreviewTextForDelete001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. preview text invalid or not by IME
+     */
+    int32_t oriLength = 0;
+    bool isBackward = true;
+    bool isByIME = true;
+    richEditorPattern->previewTextRecord_.previewContent = u"";
+    EXPECT_TRUE(richEditorPattern->SetPreviewTextForDelete(oriLength, isBackward, isByIME));
+
+    isByIME = false;
+    EXPECT_TRUE(richEditorPattern->SetPreviewTextForDelete(oriLength, isBackward, isByIME));
+
+    richEditorPattern->caretPosition_ = 7;
+    richEditorPattern->previewTextRecord_.previewContent = PREVIEW_TEXT;
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 7;
+    EXPECT_TRUE(richEditorPattern->SetPreviewTextForDelete(oriLength, isBackward, isByIME));
+
+    /**
+     * @tc.steps: step2. caretPosition_ invalid
+     */
+    isByIME = true;
+    richEditorPattern->caretPosition_ = -1;
+    EXPECT_TRUE(richEditorPattern->SetPreviewTextForDelete(oriLength, isBackward, isByIME));
+
+    richEditorPattern->caretPosition_ = 8;
+    EXPECT_TRUE(richEditorPattern->SetPreviewTextForDelete(oriLength, isBackward, isByIME));
+
+    /**
+     * @tc.steps: step3. deleteBackward
+     */
+    richEditorPattern->caretPosition_ = 7;
+    oriLength = 1;
+    EXPECT_FALSE(richEditorPattern->SetPreviewTextForDelete(oriLength, isBackward, isByIME));
+
+    /**
+     * @tc.steps: step4. deleteForward
+     */
+    oriLength = 1;
+    isBackward = false;
+    richEditorPattern->caretPosition_ = 0;
+    EXPECT_FALSE(richEditorPattern->SetPreviewTextForDelete(oriLength, isBackward, isByIME));
+
+    /**
+     * @tc.steps: step5. delete nothing
+     */
+    oriLength = 0;
+    EXPECT_FALSE(richEditorPattern->SetPreviewTextForDelete(oriLength, isBackward, isByIME));
+
+    /**
+     * @tc.steps: step6. all preview texts have been deleted
+     */
+    oriLength = 7;
+    EXPECT_FALSE(richEditorPattern->SetPreviewTextForDelete(oriLength, isBackward, isByIME));
+    EXPECT_FALSE(richEditorPattern->IsPreviewTextInputting());
 }
 
 /**

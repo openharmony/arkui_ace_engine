@@ -364,6 +364,7 @@ public:
 
     bool NotUpdateCaretInPreview(int32_t caret, const PreviewTextRecord& record);
     int32_t SetPreviewText(const std::u16string& previewTextValue, const PreviewRange range) override;
+    bool SetPreviewTextForDelete(int32_t oriLength, bool isBackward, bool isByIME);
 
     const PreviewTextInfo GetPreviewTextInfo() const;
 
@@ -628,7 +629,7 @@ public:
     std::pair<bool, bool> IsEmojiOnCaretPosition(int32_t& emojiLength, bool isBackward, int32_t length);
     int32_t CalculateDeleteLength(int32_t length, bool isBackward);
     void DeleteBackward(int32_t length = 1) override;
-    void DeleteBackward(int32_t length, TextChangeReason reason);
+    void DeleteBackward(int32_t length, TextChangeReason reason, bool isByIME = false);
 #ifndef ACE_UNITTEST
     void DeleteSpans(const RangeOptions& options, TextChangeReason reason);
     void AddPlaceholderSpan(const BuilderSpanOptions& options, bool restoreBuilderSpan, TextChangeReason reason);
@@ -653,7 +654,7 @@ public:
 #endif
     std::u16string DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length = 1) override;
-    void DeleteForward(int32_t length, TextChangeReason reason);
+    void DeleteForward(int32_t length, TextChangeReason reason, bool isByIME = false);
     std::u16string DeleteForwardOperation(int32_t length, bool isIME = true);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
