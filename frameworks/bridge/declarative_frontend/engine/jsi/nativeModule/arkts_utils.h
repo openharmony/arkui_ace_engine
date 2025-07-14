@@ -83,10 +83,16 @@ public:
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result, RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsDimensionFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
         DimensionUnit dimensionUnit, CalcDimension& result, RefPtr<ResourceObject>& resourceObject);
+    static bool ParseJsDimensionFromResourceByName(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj,
+        DimensionUnit dimensionUnit, const RefPtr<ResourceObject>& resourceObject,
+        const RefPtr<ResourceWrapper>& resourceWrapper, CalcDimension& result);
     static bool ParseJsDimensionFromResourceNG(
         const EcmaVM* vm, const Local<JSValueRef>& jsObj, DimensionUnit dimensionUnit, CalcDimension& result);
     static bool ParseJsDimensionFromResourceNG(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
         DimensionUnit dimensionUnit, CalcDimension& result, RefPtr<ResourceObject>& resourceObject);
+    static bool ParseJsDimensionNGFromResourceByName(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj,
+        DimensionUnit dimensionUnit, const RefPtr<ResourceObject>& resourceObject,
+        const RefPtr<ResourceWrapper>& resourceWrapper, CalcDimension& result);
     static bool ParseStringArray(
         const EcmaVM* vm, const Local<JSValueRef>& arg, std::string* array, int32_t defaultLength);
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result);
