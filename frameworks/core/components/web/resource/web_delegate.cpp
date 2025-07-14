@@ -5559,8 +5559,9 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
                     AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode())));
         },
         TaskExecutor::TaskType::JS, "ArkUIWebErrorReceive");
-    
-    if (error->ErrorCode() == ArkWeb_NetError::ARKWEB_ERR_INTERNET_DISCONNECTED) {
+
+    if (error->ErrorCode() == ArkWeb_NetError::ARKWEB_ERR_INTERNET_DISCONNECTED ||
+        error->ErrorCode() == ArkWeb_NetError::ARKWEB_ERR_NAME_NOT_RESOLVED) {
         AccessibilityReleasePageEvent();
     }
 }
@@ -6829,6 +6830,12 @@ void WebDelegate::HandleAccessibilityHoverEvent(
         int embedWidth = embedInfo->GetWidth();
         int embedHeight = embedInfo->GetHeight();
         if (x >= embedX && y >= embedY && x <= embedX + embedWidth && y <= embedY + embedHeight) {
+            std::string surfaceId = dataInfo->GetSurfaceId();
+            int64_t webNodeId = GetWebAccessibilityIdBySurfaceId(surfaceId);
+            if (webNodeId == -1) {
+                TAG_LOGW(AceLogTag::ACE_WEB, "WebDelegate::HandleAccessibilityHoverEvent cannot find the bind webNode");
+                continue;
+            }
             NG::PointF mutablePoint = point;
             mutablePoint.SetX(x - embedX);
             mutablePoint.SetY(y - embedY);
