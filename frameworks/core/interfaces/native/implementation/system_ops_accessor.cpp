@@ -63,7 +63,7 @@ Ark_Int32 GetResourceIdImpl(const Ark_String* bundleName,
     auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
     CHECK_NULL_RETURN(resourceAdapter, -1);
     uint32_t resId = resourceAdapter->GetResId(resourceStr);
-    return resId;
+    return static_cast<Ark_Int32>(resId);
 }
 } // SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()

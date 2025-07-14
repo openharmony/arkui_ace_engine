@@ -34,7 +34,7 @@ static bool registerNatives(ets_env *env, const ets_class clazz, const std::vect
         EtsNativeMethod method;
         method.name = name.c_str();
         method.func = func;
-        method.signature = (flag & ETS_SLOW_NATIVE_FLAG) == 0 ? FAST_NATIVE_PREFIX : nullptr;
+        method.signature = (static_cast<uint32_t>(flag) & ETS_SLOW_NATIVE_FLAG) == 0 ? FAST_NATIVE_PREFIX : nullptr;
         if (registerByOne) {
             result &= env->RegisterNatives(clazz, &method, 1) >= 0;
             if (env->ErrorCheck()) {

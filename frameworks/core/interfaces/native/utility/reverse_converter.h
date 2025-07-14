@@ -100,7 +100,7 @@ namespace OHOS::Ace::NG::Converter {
         T AllocateArray(std::size_t size)
         {
             T result;
-            result.length = size;
+            result.length = static_cast<int32_t>(size);
             result.array = static_cast<decltype(T().array)>(Allocate(size * sizeof(*result.array)));
             return result;
         }
@@ -123,7 +123,7 @@ namespace OHOS::Ace::NG::Converter {
             dst = ctx->Store(src);
         } else {
             dst.chars = src.data();
-            dst.length = src.size();
+            dst.length = static_cast<int32_t>(src.size());
         }
     }
 
