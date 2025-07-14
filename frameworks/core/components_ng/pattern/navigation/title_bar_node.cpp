@@ -92,4 +92,12 @@ void TitleBarNode::OnDetachFromMainTree(bool recursive, PipelineContext* context
         AppBarView::RemoveRectChangeListener(Claim(context), menuBarChangeListenerId_);
     }
 }
+
+void TitleBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto titleBarPattern = GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto titleBarOptions = titleBarPattern->GetTitleBarOptions();
+    titleBarOptions.ToJsonValue(json, filter);
+}
 } // namespace OHOS::Ace::NG

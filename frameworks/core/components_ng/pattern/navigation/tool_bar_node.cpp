@@ -47,4 +47,16 @@ RefPtr<NavToolbarNode> NavToolbarNode::GetOrCreateToolbarNode(
     ElementRegister::GetInstance()->AddUINode(toolbarNode);
     return toolbarNode;
 }
+
+void NavToolbarNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto toolBarPattern = GetPattern<NavToolbarPattern>();
+    CHECK_NULL_VOID(toolBarPattern);
+    auto toolBarOptions = toolBarPattern->GetToolBarOptions();
+    toolBarOptions.ToJsonValue(json, filter);
+    auto moreButtonOptions = toolBarPattern->GetToolbarMoreButtonOptions();
+    auto mbOptionJson = JsonUtil::Create(true);
+    moreButtonOptions.ToJsonValue(mbOptionJson, filter);
+    json->PutExtAttr("moreButtonOptions", mbOptionJson, filter);
+}
 } // namespace OHOS::Ace::NG
