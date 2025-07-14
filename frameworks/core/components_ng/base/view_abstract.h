@@ -206,14 +206,11 @@ public:
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption &option);
     static void SetLightUpEffect(double radio);
-    static void CheckLocalizedPadding(PaddingProperty& value, const TextDirection& direction);
-    static void CheckLocalizedMargin(MarginProperty& value, const TextDirection& direction);
-    static void CheckLocalizedSafeAreaPadding(PaddingProperty& value, const TextDirection& direction);
-    static void CheckPositionLocalizedEdges(EdgesParam& value, TextDirection layoutDirection);
-    static void CheckOffsetLocalizedEdges(EdgesParam& value, TextDirection layoutDirection);
+    static void CheckLocalizedMarginOrPadding(PaddingProperty& value, const TextDirection& direction);
+    static void CheckPositionOrOffsetLocalizedEdges(EdgesParam& value, TextDirection layoutDirection);
     static void CheckLocalizedEdgeWidths(BorderWidthProperty& value, const TextDirection& direction);
     static void CheckLocalizedBorderRadiuses(BorderRadiusProperty& value, const TextDirection& direction);
-    static void CheckLocalizedOuterBorderColor(NG::BorderColorProperty& value, const TextDirection& direction);
+    static void CheckLocalizedBorderColor(NG::BorderColorProperty& value, const TextDirection& direction);
 
     static void SetPadding(const CalcLength &value);
     static void SetPadding(const PaddingProperty &value);

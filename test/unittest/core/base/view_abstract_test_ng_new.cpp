@@ -2040,4 +2040,102 @@ HWTEST_F(ViewAbstractTestNg, DisableOnCrownEvent003, TestSize.Level1)
 }
 #endif
 
+/**
+ * @tc.name: CheckLocalizedMarginOrPadding001
+ * @tc.desc: Test CheckLocalizedMarginOrPadding when start,top,bottom,left have values
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CheckLocalizedMarginOrPadding001, TestSize.Level1)
+{
+    PaddingProperty paddingProperty;
+    paddingProperty.start = std::make_optional<CalcLength>(5.0);
+    paddingProperty.top = std::make_optional<CalcLength>(6.0);
+    paddingProperty.bottom = std::make_optional<CalcLength>(7.0);
+    paddingProperty.left = std::make_optional<CalcLength>(8.0);
+
+    auto textDirection = TextDirection::LTR;
+    ViewAbstract::CheckLocalizedMarginOrPadding(paddingProperty, textDirection);
+    EXPECT_EQ(paddingProperty.left.value(), CalcLength(5.0));
+
+    textDirection = TextDirection::RTL;
+    ViewAbstract::CheckLocalizedMarginOrPadding(paddingProperty, textDirection);
+    EXPECT_EQ(paddingProperty.right.value(), CalcLength(5.0));
+}
+
+/**
+ * @tc.name: CheckLocalizedMarginOrPadding002
+ * @tc.desc: Test CheckLocalizedMarginOrPadding when end,right have values
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CheckLocalizedMarginOrPadding002, TestSize.Level1)
+{
+    PaddingProperty paddingProperty;
+    paddingProperty.end = std::make_optional<CalcLength>(5.0);
+    paddingProperty.right = std::make_optional<CalcLength>(6.0);
+
+    auto textDirection = TextDirection::LTR;
+    ViewAbstract::CheckLocalizedMarginOrPadding(paddingProperty, textDirection);
+    EXPECT_EQ(paddingProperty.right.value(), CalcLength(5.0));
+
+    textDirection = TextDirection::RTL;
+    ViewAbstract::CheckLocalizedMarginOrPadding(paddingProperty, textDirection);
+    EXPECT_EQ(paddingProperty.left.value(), CalcLength(5.0));
+}
+
+/**
+ * @tc.name: CheckLocalizedMarginOrPadding003
+ * @tc.desc: Test CheckLocalizedMarginOrPadding When neither start nor end has a value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CheckLocalizedMarginOrPadding003, TestSize.Level1)
+{
+    PaddingProperty paddingProperty;
+
+    auto textDirection = TextDirection::LTR;
+    ViewAbstract::CheckLocalizedMarginOrPadding(paddingProperty, textDirection);
+    EXPECT_FALSE(paddingProperty.right.has_value());
+    EXPECT_FALSE(paddingProperty.left.has_value());
+}
+
+/**
+ * @tc.name: CheckPositionOrOffsetLocalizedEdges001
+ * @tc.desc: Test CheckPositionOrOffsetLocalizedEdges
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CheckPositionOrOffsetLocalizedEdges001, TestSize.Level1)
+{
+    auto top = CalcDimension(1.0);
+    auto bottom = CalcDimension(2.0);
+    auto start = CalcDimension(3.0);
+    auto end = CalcDimension(4.0);
+
+    EdgesParam edges;
+    edges.SetTop(top);
+    edges.SetBottom(bottom);
+    edges.start = start;
+    edges.end = end;
+
+    auto textDirection = TextDirection::LTR;
+    ViewAbstract::CheckPositionOrOffsetLocalizedEdges(edges, textDirection);
+    EXPECT_EQ(edges.left.value(), start);
+
+    textDirection = TextDirection::RTL;
+    ViewAbstract::CheckPositionOrOffsetLocalizedEdges(edges, textDirection);
+    EXPECT_EQ(edges.left.value(), end);
+}
+
+/**
+ * @tc.name: CheckPositionOrOffsetLocalizedEdges002
+ * @tc.desc: Test CheckPositionOrOffsetLocalizedEdges
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CheckPositionOrOffsetLocalizedEdges002, TestSize.Level1)
+{
+    EdgesParam edges;
+
+    auto textDirection = TextDirection::LTR;
+    ViewAbstract::CheckPositionOrOffsetLocalizedEdges(edges, textDirection);
+    EXPECT_FALSE(edges.left.has_value());
+    EXPECT_FALSE(edges.right.has_value());
+}
 } // namespace OHOS::Ace::NG
