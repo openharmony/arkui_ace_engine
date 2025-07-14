@@ -2959,6 +2959,7 @@ interfaces/native/native_interface_xcomponent.cpp @arkuilayout
 interfaces/native/native_interface_xcomponent.h @arkuilayout
 interfaces/native/native_node.h @arkui_architecture
 interfaces/native/native_node_napi.h @arkuiframework
+interfaces/native/native_node_ani.h @arkuiframework
 interfaces/native/native_styled_string.h @huawei_g_five
 interfaces/native/native_type.h @arkui_architecture
 interfaces/native/native_xcomponent_key_event.h @arkuilayout
@@ -2979,6 +2980,7 @@ interfaces/native/node/native_compatible.h @arkuiframework
 interfaces/native/node/native_drawable_descriptor.cpp @arkui_image
 interfaces/native/node/native_drawable_descriptor.h @arkui_image
 interfaces/native/node/native_impl.cpp @arkui_architecture
+interfaces/native/node/native_node_ani.cpp @arkuiframework
 interfaces/native/node/native_node_extented.cpp @arkuiframework
 interfaces/native/node/native_node_napi.cpp @arkuiframework
 interfaces/native/node/node_adapter_impl.cpp @arkuiframework
