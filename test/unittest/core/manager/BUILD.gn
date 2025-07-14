@@ -156,9 +156,6 @@ ace_unittest("navigation_manager_test_ng") {
   type = "new"
   module_output = "manager"
   sources = [
-    "$ace_root/frameworks/core/components_ng/pattern/app_bar/app_bar_view.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_pattern.cpp",
     "$ace_root/test/unittest/core/pattern/navigation/mock_navigation_stack.cpp",
     "navigation_manager_test_ng.cpp",
   ]

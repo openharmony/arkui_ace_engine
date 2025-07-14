@@ -39,4 +39,15 @@ ACE_WEAK_SYM void AppBarView::SetOnBackPressedConsumed()
 {
     return;
 }
+
+ACE_WEAK_SYM int32_t AppBarView::AddRectChangeListener(
+    const RefPtr<PipelineContext>& pipelineContext, std::function<void(const RectF& rect)>&& listener)
+{
+    return -1;
+}
+
+ACE_WEAK_SYM void AppBarView::RemoveRectChangeListener(const RefPtr<PipelineContext>& pipelineContext, int32_t id)
+{
+    return;
+}
 } // namespace OHOS::Ace::NG
