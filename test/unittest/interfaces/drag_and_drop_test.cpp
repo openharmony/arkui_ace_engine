@@ -136,6 +136,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest002, TestSize.Level1)
     OH_ArkUI_DragAction_UnregisterStatusListener(dragAction);
     EXPECT_EQ(OH_ArkUI_StartDrag(dragAction), ARKUI_ERROR_CODE_NO_ERROR);
     OH_ArkUI_DragAction_Dispose(dragAction);
+    delete uiContext;
 }
 
 /**
@@ -175,6 +176,8 @@ HWTEST_F(DragAndDropTest, DragAndDropTest004, TestSize.Level1)
     EXPECT_EQ(nodeAPI->registerNodeEvent(textNode, NODE_ON_DRAG_LEAVE, 4, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->registerNodeEvent(areaNode, NODE_ON_DROP, 5, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->registerNodeEvent(textNode, NODE_ON_DRAG_END, 6, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
+    delete textNode;
+    delete areaNode;
 }
 
 /**
@@ -276,6 +279,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest007, TestSize.Level1)
     EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
     auto ret4 = OH_ArkUI_SetNodeDraggable(nullptr, false);
     EXPECT_EQ(ret4, ARKUI_ERROR_CODE_PARAM_INVALID);
+    delete textNode;
 }
 
 /**
@@ -335,6 +339,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest009, TestSize.Level1)
     auto ret4 =
         OH_ArkUI_DragPreviewOption_SetScaleMode(nullptr, ArkUI_DragPreviewScaleMode::ARKUI_DRAG_PREVIEW_SCALE_DISABLED);
     EXPECT_EQ(ret4, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_DragPreviewOption_Dispose(dragPreviewOption);
 }
 
 /**
@@ -365,6 +370,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest010, TestSize.Level1)
     EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
     auto ret4 = OH_ArkUI_DragPreviewOption_SetDefaultShadowEnabled(nullptr, false);
     EXPECT_EQ(ret4, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_DragPreviewOption_Dispose(dragPreviewOption);
 }
 
 /**
@@ -396,6 +402,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest011, TestSize.Level1)
     EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
     auto ret4 = OH_ArkUI_DragPreviewOption_SetDefaultRadiusEnabled(nullptr, false);
     EXPECT_EQ(ret4, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_DragPreviewOption_Dispose(dragPreviewOption);
 }
 
 /**
@@ -429,6 +436,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest012, TestSize.Level1)
     EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
     auto ret4 = OH_ArkUI_DragPreviewOption_SetNumberBadgeEnabled(nullptr, false);
     EXPECT_EQ(ret4, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_DragPreviewOption_Dispose(dragPreviewOption);
 }
 
 /**
@@ -455,6 +463,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest013, TestSize.Level1)
      */
     auto ret2 = OH_ArkUI_DragPreviewOption_SetBadgeNumber(nullptr, true);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_DragPreviewOption_Dispose(dragPreviewOption);
 }
 
 /**
@@ -485,6 +494,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest014, TestSize.Level1)
     EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
     auto ret4 = OH_ArkUI_DragPreviewOption_SetDefaultAnimationBeforeLiftingEnabled(nullptr, false);
     EXPECT_EQ(ret4, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_DragPreviewOption_Dispose(dragPreviewOption);
 }
 
 /**
@@ -507,6 +517,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest015, TestSize.Level1)
     EXPECT_TRUE(option->isScaleEnabled);
     EXPECT_FALSE(option->isDefaultShadowEnabled);
     EXPECT_FALSE(option->isDefaultRadiusEnabled);
+    OH_ArkUI_DragPreviewOption_Dispose(dragPreviewOption);
 }
 
 /**
@@ -545,6 +556,8 @@ HWTEST_F(DragAndDropTest, DragAndDropTest016, TestSize.Level1)
      */
     auto ret2 = OH_ArkUI_SetNodeDragPreviewOption(nullptr, dragPreviewOption);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_DragPreviewOption_Dispose(dragPreviewOption);
+    delete textNode;
 }
 
 /**
@@ -880,6 +893,8 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0027, TestSize.Level1)
      */
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_DragAction_Dispose(dragAction);
+    delete uiContext;
 }
 
 /**
@@ -909,6 +924,9 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0028, TestSize.Level1)
      */
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_DragPreviewOption_Dispose(previewOptions);
+    OH_ArkUI_DragAction_Dispose(dragAction);
+    delete uiContext;
 }
 
 /**
@@ -1060,6 +1078,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0034, TestSize.Level1)
      */
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+    delete uiContext;
 }
 
 /**
@@ -1422,6 +1441,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0046, TestSize.Level1)
     auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
     ASSERT_NE(dragAction, nullptr);
     EXPECT_EQ(dragActions->useDataLoadParams, true);
+    OH_ArkUI_DragAction_Dispose(dragAction);
 }
 
 /**
@@ -1567,6 +1587,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0050, TestSize.Level1)
      */
     ret = OH_ArkUI_DragEvent_GetUdmfData(drag_Event, data);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_UdmfData_Destroy(data);
 }
 
 /**
@@ -1610,6 +1631,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0051, TestSize.Level1)
      */
     ret = OH_ArkUI_DragAction_SetPixelMaps(dragAction, pixelmapArray, size);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_DragAction_Dispose(dragAction);
 }
 
 /**
@@ -1642,6 +1664,9 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0052, TestSize.Level1)
      */
     ret = OH_ArkUI_DragAction_SetData(dragAction, data);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_DragAction_Dispose(dragAction);
+    OH_UdmfData_Destroy(data);
+    delete uiContext;
 }
 
 /**
@@ -1688,6 +1713,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0053, TestSize.Level1)
     ASSERT_NE(drag_Event, nullptr);
     ret = OH_ArkUI_DragEvent_StartDataLoading(drag_Event, options, key, keyLen);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_UdmfGetDataParams_Destroy(options);
 }
 
 /**
@@ -1796,6 +1822,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0057, TestSize.Level1)
      */
     ret = OH_ArkUI_EnableDropDisallowedBadge(uiContext, requestIdentify);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    delete uiContext;
 }
 
 /**
@@ -1823,5 +1850,6 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0058, TestSize.Level1)
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(ret3, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_UdmfData_Destroy(data);
 }
 } // namespace OHOS::Ace
