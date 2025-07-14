@@ -1172,4 +1172,69 @@ HWTEST_F(WaterFlowTestNg, OnAttachAtapter001, TestSize.Level1)
     EXPECT_EQ(pattern_->OnAttachAdapter(frameNode_, lazyForEachNode), true);
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 11);
 }
+
+/**
+ * @tc.name: ReachEndWithFooterMeasurementError001
+ * @tc.desc: Test OnReachEnd event when footer has complex structure
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ReachEndWithFooterMeasurementError001, TestSize.Level1)
+{
+    bool reached = false;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetOnReachEnd([&]() { reached = true; });
+
+    // Create footer with complex structure that may cause measurement issues
+    model.SetFooter([]() {
+        ColumnModelNG column;
+        column.Create(Dimension(), nullptr, "");
+
+        IfElseModelNG ifElse;
+        ifElse.Create();
+
+        ViewStackProcessor::GetInstance()->Pop(); // ifElse
+        ViewStackProcessor::GetInstance()->Pop(); // column
+    });
+
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER);
+    CreateDone();
+
+    // Verify footer is set correctly
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+
+    // Scroll to bottom to trigger potential measurement issues
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+
+    // Verify reach end event is triggered despite potential measurement errors
+    EXPECT_TRUE(reached);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, TOTAL_LINE_NUMBER - 1);
+}
+
+/**
+ * @tc.name: ReachEndWithFooterPrecisionError001
+ * @tc.desc: Test OnReachEnd event with footer precision issues
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ReachEndWithFooterPrecisionError001, TestSize.Level1)
+{
+    bool reached = false;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetOnReachEnd([&]() { reached = true; });
+
+    // Create simple footer to test precision issues
+    model.SetFooter(GetDefaultHeaderBuilder());
+
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER);
+    CreateDone();
+
+    // Force layout to trigger potential precision errors
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+
+    // Should still trigger reach end despite precision errors
+    EXPECT_TRUE(reached);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, TOTAL_LINE_NUMBER - 1);
+}
 } // namespace OHOS::Ace::NG

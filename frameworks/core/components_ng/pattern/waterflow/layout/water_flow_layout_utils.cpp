@@ -175,6 +175,9 @@ float WaterFlowLayoutUtils::MeasureFooter(LayoutWrapper* wrapper, Axis axis)
 {
     auto footer = wrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(footer, 0.0f);
+    if (footer->GetTotalChildCount() == 0) {
+        return 0.0f;
+    }
     auto layoutProperty = wrapper->GetLayoutProperty();
     auto footerConstraint = layoutProperty->CreateChildConstraint();
     footer->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
