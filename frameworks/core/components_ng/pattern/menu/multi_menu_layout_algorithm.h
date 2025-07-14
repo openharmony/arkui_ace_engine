@@ -34,6 +34,7 @@ public:
         const RefPtr<LayoutWrapper>& child, const LayoutConstraintF& layoutConstraint);
 
 private:
+    void RemoveParentRestrictionsForFixIdeal(const LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
     void UpdateEmbeddedPercentReference(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
         std::optional<LayoutConstraintF>& layoutConstraint);
     void UpdateSelfSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,

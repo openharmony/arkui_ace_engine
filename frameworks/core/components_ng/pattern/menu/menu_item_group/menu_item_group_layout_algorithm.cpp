@@ -33,6 +33,22 @@ void RecordItemsAndGroups(const RefPtr<FrameNode>& host)
     menuPattern->RecordItemsAndGroups();
 }
 
+void MenuItemGroupLayoutAlgorithm::RemoveParentRestrictionsForFixIdeal(
+    const RefPtr<LayoutProperty> layoutProperty, LayoutConstraintF& childConstraint)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicyProperty.has_value()) {
+        auto& layoutPolicy = layoutPolicyProperty.value();
+        if (layoutPolicy.IsWidthFix()) {
+            childConstraint.maxSize.SetWidth(std::numeric_limits<float>::infinity());
+        }
+        if (layoutPolicy.IsHeightFix()) {
+            childConstraint.maxSize.SetHeight(std::numeric_limits<float>::infinity());
+        }
+    }
+}
+
 void MenuItemGroupLayoutAlgorithm::MeasureChildren(
     LayoutWrapper* layoutWrapper, float& maxChildrenWidth, SizeF& menuItemGroupSize)
 {
@@ -42,6 +58,7 @@ void MenuItemGroupLayoutAlgorithm::MeasureChildren(
     CHECK_NULL_VOID(layoutConstraint);
 
     auto childConstraint = props->CreateChildConstraint();
+    RemoveParentRestrictionsForFixIdeal(props, childConstraint);
     childConstraint.minSize = layoutConstraint->minSize;
 
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
@@ -127,7 +144,7 @@ bool MenuItemGroupLayoutAlgorithm::UpdateLayoutSizeBasedOnPolicy(
     }
 
     auto& layoutPolicy = layoutPolicyProperty.value();
-    if (!(layoutPolicy.IsAdaptive() || layoutPolicy.IsMatch())) {
+    if (!(layoutPolicy.IsWrap() || layoutPolicy.IsMatch())) {
         return false;
     }
 

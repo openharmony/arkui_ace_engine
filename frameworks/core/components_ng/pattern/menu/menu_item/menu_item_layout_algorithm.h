@@ -40,6 +40,8 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void RemoveParentRestrictionsForFixIdeal(
+        const RefPtr<LayoutProperty> layoutProperty, LayoutConstraintF& childConstraint);
     void CheckNeedMatchParent(LayoutWrapper* layoutWrapper,
         std::optional<LayoutConstraintF>& layoutConstraint);
     void CheckUserHeight(LayoutWrapper* layoutWrapper);

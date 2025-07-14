@@ -32,6 +32,7 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutProps = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
     auto childConstraint = layoutProps->CreateChildConstraint();
+    RemoveParentRestrictionsForFixIdeal(layoutProps, childConstraint);
     // Measure child row to get row height and width.
     auto rowWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(rowWrapper);
@@ -74,6 +75,22 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Measure same as box, base on the child row.
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+}
+
+void SelectLayoutAlgorithm::RemoveParentRestrictionsForFixIdeal(
+    const RefPtr<LayoutProperty> layoutProperty, LayoutConstraintF& childConstraint)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicyProperty.has_value()) {
+        auto& layoutPolicy = layoutPolicyProperty.value();
+        if (layoutPolicy.IsWidthFix()) {
+            childConstraint.maxSize.SetWidth(std::numeric_limits<float>::infinity());
+        }
+        if (layoutPolicy.IsHeightFix()) {
+            childConstraint.maxSize.SetHeight(std::numeric_limits<float>::infinity());
+        }
+    }
 }
 
 SizeF SelectLayoutAlgorithm::MeasureSelectText(

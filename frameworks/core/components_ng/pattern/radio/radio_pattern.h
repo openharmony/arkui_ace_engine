@@ -192,10 +192,6 @@ public:
         return true;
     }
 
-    bool isEqualWidthAndHeight() override
-    {
-        return true;
-    }
     void UpdateRadioComponentColor(const Color& color, const RadioColorType radioColorType);
     void OnColorConfigurationUpdate() override;
     void SetUncheckedBorderColorByJSRadioTheme(bool flag)
