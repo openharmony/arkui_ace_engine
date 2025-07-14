@@ -130,10 +130,10 @@ ani_object createIntervalInfo(ani_env *env, int64_t timestamp, int64_t targetTim
         return nullptr;
     }
     ani_method intervalInfoCtor;
-    env->Class_FindMethod(intervalInfo_cls, "<ctor>", "DD:V", &intervalInfoCtor);
+    env->Class_FindMethod(intervalInfo_cls, "<ctor>", "JJ:V", &intervalInfoCtor);
     ani_object intervalInfoObj;
     env->Object_New(
-        intervalInfo_cls, intervalInfoCtor, &intervalInfoObj, ani_double(timestamp), ani_double(targetTimestamp));
+        intervalInfo_cls, intervalInfoCtor, &intervalInfoObj, ani_long(timestamp), ani_long(targetTimestamp));
     return intervalInfoObj;
 }
 
