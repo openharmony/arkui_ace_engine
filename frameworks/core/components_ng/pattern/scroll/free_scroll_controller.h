@@ -42,7 +42,6 @@ public:
 
     /**
      * @brief Allow other modules to modify offset. Calling this function automatically stops scroll animations.
-     * @attention doesn't allow over-scroll
      */
     void SetOffset(OffsetF newPos, bool allowOverScroll = false);
     inline void UpdateOffset(const OffsetF& delta)
@@ -107,6 +106,7 @@ private:
     RefPtr<TouchEventImpl> freeTouch_;
     ScrollState state_ = ScrollState::IDLE;
     bool enableScroll_ = true;
+    bool duringExternalAnimation_ = false;
 };
 
 } // namespace OHOS::Ace::NG

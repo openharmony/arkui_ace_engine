@@ -210,9 +210,10 @@ void FreeScrollController::Fling(const OffsetF& velocity)
 void FreeScrollController::HandleAnimationUpdate(const OffsetF& currentValue)
 {
     // todo: figure out how to modify offset_ without disrupting animation
-    FireOnWillScroll(currentValue - prevOffset_, ScrollState::FLING, ScrollSource::FLING);
-    bool reachedEdge = CheckCrashEdge(currentValue, pattern_.GetViewPortExtent() - pattern_.GetViewSize());
-    if (reachedEdge) {
+    FireOnWillScroll(currentValue - prevOffset_, ScrollState::FLING,
+        duringExternalAnimation_ ? ScrollSource::SCROLLER_ANIMATION : ScrollSource::FLING);
+    const bool reachedEdge = CheckCrashEdge(currentValue, pattern_.GetViewPortExtent() - pattern_.GetViewSize());
+    if (!duringExternalAnimation_ && reachedEdge) {
         // change friction during animation
         const auto finalPos = ClampPosition(offset_->GetStagingValue());
         AnimationUtils::AnimateWithCurrentCallback(
@@ -479,8 +480,10 @@ void FreeScrollController::ScrollTo(OffsetF finalPos, const optional<float>& vel
             auto self = weak.Upgrade();
             CHECK_NULL_VOID(self);
             self->HandleAnimationEnd();
+            self->duringExternalAnimation_ = false;
         });
     state_ = ScrollState::FLING;
+    duringExternalAnimation_ = true;
     FireOnScrollStart();
 }
 } // namespace OHOS::Ace::NG
