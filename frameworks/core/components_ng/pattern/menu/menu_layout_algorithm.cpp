@@ -389,6 +389,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         LessOrEqual(afterAnimationScale, 0.0f) ? menuTheme->GetPreviewAfterAnimationScale() : afterAnimationScale;
     previewScale_ = LessOrEqual(afterAnimationScale, 0.0f) ? previewScale_ : afterAnimationScale;
     position_ = props->GetMenuOffset().value_or(OffsetF());
+    anchorPosition_ = props->GetAnchorPosition();
     dumpInfo_.globalLocation = position_;
     // user-set offset
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
@@ -2749,6 +2750,17 @@ float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float position, boo
         return wrapperRect_.Top() + paddingTop_;
     } else {
         float wrapperHeight = wrapperSize_.Height();
+        // When the component height is less than the bottom margin and the menu height can be lowered,
+        // or when the anchor point y coordinate is at the bottom of the screen and
+        // the anchorPosition_ has a set value, the menu should be placed at the bottom of the screen.
+        if (anchorPosition_.has_value()) {
+            if (((LessNotEqual(bottomSpace_, size.Height()) || GreatOrEqual(position, wrapperRect_.Bottom())) &&
+                LessNotEqual(size.Height(), wrapperRect_.Height()))) {
+                return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
+            }
+            // can't fit in screen, line up with top of the screen
+            return wrapperRect_.Top() + paddingTop_;
+        }
         // put menu above click point
         if (GreatOrEqual(topSpace_, size.Height())) {
             // menu show on top
