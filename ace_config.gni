@@ -380,3 +380,10 @@ if (ohos_indep_compiler_enable) {
 if (ace_engine_feature_enable_form_size_change_animation) {
   ace_common_defines += [ "FORM_SIZE_CHANGE_ANIMATION" ]
 }
+
+# Enable ArkUI static instructive code
+ace_engine_feature_enable_static_instructive_code = false
+
+if (ace_engine_feature_enable_static_instructive_code) {
+  ace_common_defines += [ "ACE_STATIC" ]
+}
