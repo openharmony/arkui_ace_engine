@@ -548,6 +548,65 @@ HWTEST_F(RichEditorAITestOneNg, InitAiselection, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitAiSelection002
+ * @tc.desc: test InitAiSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, InitAiSelection002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto controller = pattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+    std::map<int32_t, AISpan> aiSpanMap;
+    AISpan aiSpan0;
+    aiSpan0.content = ADDRESS;
+    aiSpan0.start = 0;
+    aiSpan0.end = 3;
+    aiSpanMap[0] = aiSpan0;
+    TextSpanOptions options;
+    options.value = ADDRESS_U16;
+    controller->AddTextSpan(options);
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(0, 0, 100, 20));
+        }));
+    PositionWithAffinity positionWithAffinity(1, TextAffinity::DOWNSTREAM);
+    EXPECT_CALL(*mockParagraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    pattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
+    Offset offset = { 10, 10 };
+    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+    pattern->dataDetectorAdapter_->enablePreviewMenu_ = true;
+    pattern->textDetectEnable_ = true;
+
+    pattern->showSelect_ = false;
+    pattern->InitAiSelection(offset, false);
+    EXPECT_TRUE(pattern->GetTextSelector().aiStart.has_value());
+    EXPECT_TRUE(pattern->GetTextSelector().aiEnd.has_value());
+
+    pattern->showSelect_ = false;
+    pattern->InitAiSelection(offset, true);
+    EXPECT_TRUE(pattern->GetTextSelector().aiStart.has_value());
+    EXPECT_TRUE(pattern->GetTextSelector().aiEnd.has_value());
+
+    pattern->showSelect_ = true;
+    pattern->InitAiSelection(offset, false);
+    EXPECT_TRUE(pattern->GetTextSelector().aiStart.has_value());
+    EXPECT_TRUE(pattern->GetTextSelector().aiEnd.has_value());
+
+    pattern->showSelect_ = true;
+    pattern->InitAiSelection(offset, true);
+    EXPECT_FALSE(pattern->GetTextSelector().aiStart.has_value());
+    EXPECT_FALSE(pattern->GetTextSelector().aiEnd.has_value());
+}
+
+/**
  * @tc.name: UpdateAIStyle
  * @tc.desc: test UpdateAIStyle.
  * @tc.type: FUNC
