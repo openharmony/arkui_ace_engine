@@ -2791,6 +2791,7 @@ HWTEST_F(TabBarPatternTestNg, GetIndicatorStyle, TestSize.Level1)
     IndicatorStyle indicator;
     OffsetF indicatorOffset;
     EXPECT_EQ(tabBarPattern_->IsValidIndex(tabBarPattern_->swiperStartIndex_), true);
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
     tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset, firstRect);
 
     IndicatorStyle indicatorStyle1;

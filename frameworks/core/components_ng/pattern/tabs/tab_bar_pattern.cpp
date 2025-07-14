@@ -2761,10 +2761,15 @@ Color TabBarPattern::GetTabBarBackgroundColor() const
 
 void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset, RectF& tabBarItemRect)
 {
-    if (indicator_ < 0 || indicator_ >= static_cast<int32_t>(indicatorStyles_.size())) {
+    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+    int32_t showingIndicator = indicator_;
+    if (paintProperty && paintProperty->HasIndicator()) {
+        showingIndicator = paintProperty->GetIndicatorValue();
+    }
+    if (showingIndicator < 0 || showingIndicator >= static_cast<int32_t>(indicatorStyles_.size())) {
         return;
     }
-    indicatorStyle = indicatorStyles_[indicator_];
+    indicatorStyle = indicatorStyles_[showingIndicator];
     if (NonPositive(indicatorStyle.width.Value())) {
         indicatorStyle.width = Dimension(tabBarItemRect.Width());
     }
