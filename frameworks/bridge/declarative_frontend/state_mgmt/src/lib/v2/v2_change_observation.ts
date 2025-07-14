@@ -93,6 +93,7 @@ class ObserveV2 {
   // Queue of tasks to run in next idle period (used for optimization)
   public idleTasks_: (Array<[(...any: any[]) => any, ...any[]]> & { first: number, end: number }) =
     Object.assign(Array(1000).fill([]), { first: 0, end: 0 });
+  public static readonly idleTasksInitLength = 1000;
 
   // queued up Set of bindId
   // elmtIds of UINodes need re-render
@@ -217,6 +218,9 @@ class ObserveV2 {
   // find these view model objects with the reverse map id2targets_
   public clearBinding(id: number): void {
     if (this.idleTasks_) {
+      if (this.idleTasks_.end - this.idleTasks_.first > ObserveV2.idleTasksInitLength) {
+        ObserveV2.getObserve().runIdleTasks();
+      }
       this.idleTasks_[this.idleTasks_.end++] = [this.clearBindingInternal, id];
     } else {
       this.clearBindingInternal(id);
@@ -280,13 +284,14 @@ class ObserveV2 {
       delete this.idleTasks_[this.idleTasks_.first];
       this.idleTasks_.first++;
       // ensure that there is no accumulation in idleTask leading to oom
-      if (this.idleTasks_.end - this.idleTasks_.first < 1000 && this.idleTasks_.first % 100 === 0 && Date.now() >= deadline - 1) {
+      if (this.idleTasks_.end - this.idleTasks_.first < ObserveV2.idleTasksInitLength &&
+        this.idleTasks_.first % 100 === 0 && Date.now() >= deadline - 1) {
         return;
       }
     }
     this.idleTasks_.first = 0;
     this.idleTasks_.end = 0;
-    this.idleTasks_.length = 1000;
+    this.idleTasks_.length = ObserveV2.idleTasksInitLength;
   }
 
   /**
