@@ -139,6 +139,7 @@ private:
     void CheckImageInfoHasChangedOrNot(
         int32_t imageFlag, const ImageSourceInfo& sourceInfo, const std::string& lifeCycleTag);
     float GetFocusRectRadius(const RefPtr<RatingLayoutProperty>& property, float& focusSpace);
+    void OnColorModeChange(uint32_t colorMode) override;
 
     // Init pan recognizer to update render when drag updates, fire change event when drag ends.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
