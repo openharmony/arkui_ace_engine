@@ -274,4 +274,13 @@ void SetOverlayComponentContent(ani_env* env, ani_object obj, ani_long ptr, ani_
     ParseOverlayOptions(env, options, opt);
     modifier->getCommonAniModifier()->setOverlayComponent(ptr, buildNodePtr, opt);
 }
+
+void SetParallelScoped(ani_env* env, ani_object obj, ani_boolean parallel)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setParallelScoped(parallel);
+}
 } // namespace OHOS::Ace::Ani

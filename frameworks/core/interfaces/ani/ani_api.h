@@ -110,6 +110,7 @@ struct ArkUIAniCommonModifier {
     void (*onLayoutInnerLayout)(ani_env* env, ani_long ptr);
     void (*frameNodeMarkDirtyNode)(ani_env* env, ani_long ptr);
     void (*setOverlayComponent)(ani_long node, ani_long builderPtr, AniOverlayOptions options);
+    void (*setParallelScoped)(ani_boolean parallel);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);
