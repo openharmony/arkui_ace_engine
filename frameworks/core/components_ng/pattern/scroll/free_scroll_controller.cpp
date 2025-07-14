@@ -209,7 +209,11 @@ void FreeScrollController::Fling(const OffsetF& velocity)
 
 void FreeScrollController::HandleAnimationUpdate(const OffsetF& currentValue)
 {
-    // todo: figure out how to modify offset_ without disrupting animation
+    pattern_.MarkDirty();
+    if (state_ != ScrollState::FLING) {
+        return;
+    }
+
     FireOnWillScroll(currentValue - prevOffset_, ScrollState::FLING,
         duringExternalAnimation_ ? ScrollSource::SCROLLER_ANIMATION : ScrollSource::FLING);
     const bool reachedEdge = CheckCrashEdge(currentValue, pattern_.GetViewPortExtent() - pattern_.GetViewSize());
@@ -223,7 +227,6 @@ void FreeScrollController::HandleAnimationUpdate(const OffsetF& currentValue)
                 prop->Set(finalPos);
             });
     }
-    pattern_.MarkDirty();
 }
 
 void FreeScrollController::HandleAnimationEnd()
