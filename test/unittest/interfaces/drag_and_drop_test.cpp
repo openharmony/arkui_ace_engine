@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <cstdint>
+#include <cstring>
 #include <iostream>
 
 #include "gtest/gtest.h"
@@ -25,6 +26,7 @@
 #include "native_node.h"
 #include "native_type.h"
 #include "node_model.h"
+#include "securec.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -1309,7 +1311,8 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0044, TestSize.Level1)
     int32_t lengthError = 10;
     ArkUIDragEvent dragEvent;
     char dragEventBundleName[] = "com.example.tdd";
-    dragEvent.bundleName = dragEventBundleName;
+    int32_t err = strcpy_s(dragEvent.bundleName, sizeof(dragEvent.bundleName), dragEventBundleName);
+    ASSERT_EQ(err, 0);
     auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
 
     /**
