@@ -29,6 +29,9 @@ void UpdateChildConstraint(Axis axis, const OptionalSizeF& selfIdealSize, Layout
     contentConstraint.parentIdealSize = selfIdealSize;
     if (axis == Axis::VERTICAL) {
         contentConstraint.maxSize.SetHeight(Infinity<float>());
+    } else if (axis == Axis::FREE) {
+        contentConstraint.maxSize.SetWidth(Infinity<float>());
+        contentConstraint.maxSize.SetHeight(Infinity<float>());
     } else {
         contentConstraint.maxSize.SetWidth(Infinity<float>());
     }

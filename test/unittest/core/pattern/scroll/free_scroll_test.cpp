@@ -160,6 +160,25 @@ TEST_F(FreeScrollTest, RecognizerOverride001)
 }
 
 /**
+ * @tc.name: Measure001
+ * @tc.desc: Test child constraint with Axis::FREE
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Measure001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    ViewAbstract::SetWidth(CalcLength(1.0f));
+    ViewAbstract::SetHeight(CalcLength(1.0f));
+    ColumnModelNG col;
+    col.Create(Dimension(0), nullptr, "");
+    CreateContentChild(1);
+    CreateScrollDone();
+    EXPECT_EQ(GetChildSize(frameNode_, 0), SizeF(1, ITEM_MAIN_SIZE));
+}
+
+/**
  * @tc.name: FreeScroll001
  * @tc.desc: Test Scroll with Axis::FREE
  * @tc.type: FUNC
