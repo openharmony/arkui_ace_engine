@@ -90,6 +90,46 @@ void FreeScrollController::InitializePanRecognizer()
 }
 
 namespace {
+using State = FreeScrollController::State;
+ScrollSource ToScrollSource(State state)
+{
+    switch (state) {
+        case State::IDLE:
+            return ScrollSource::OTHER_USER_INPUT;
+        case State::DRAG:
+            return ScrollSource::DRAG;
+        case State::FLING:
+            return ScrollSource::FLING;
+        case State::EXTERNAL_FLING:
+            return ScrollSource::SCROLLER_ANIMATION;
+        case State::BOUNCE:
+            return ScrollSource::EDGE_EFFECT;
+        default:
+            return ScrollSource::OTHER_USER_INPUT; // Default to IDLE if unknown
+    }
+}
+
+ScrollState ToScrollState(State state)
+{
+    switch (state) {
+        case State::IDLE:
+            return ScrollState::IDLE;
+        case State::DRAG:
+            return ScrollState::SCROLL;
+        case State::FLING:
+        case State::EXTERNAL_FLING:
+        case State::BOUNCE:
+            return ScrollState::FLING;
+        default:
+            return ScrollState::IDLE; // Default to IDLE if unknown
+    }
+}
+
+bool InAnimation(State state)
+{
+    return state == State::FLING || state == State::EXTERNAL_FLING || state == State::BOUNCE;
+}
+
 /**
  * @return ratio (non-negative) between overScroll and viewport length.
  */
@@ -137,7 +177,7 @@ constexpr float EDGE_FRICTION = 10;
 
 void FreeScrollController::HandlePanStart(const GestureEvent& event)
 {
-    state_ = ScrollState::SCROLL;
+    state_ = State::DRAG;
     FireOnScrollStart();
 }
 
@@ -168,11 +208,11 @@ void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
 
 void FreeScrollController::HandlePanEndOrCancel(const GestureEvent& event)
 {
-    state_ = ScrollState::IDLE;
+    state_ = State::IDLE;
     const auto& src = event.GetVelocity();
     OffsetF velocity { static_cast<float>(src.GetVelocityX()), static_cast<float>(src.GetVelocityY()) };
     Fling(velocity);
-    if (state_ == ScrollState::IDLE) {
+    if (state_ == State::IDLE) {
         // If the state is IDLE, it means no fling animation is running.
         // We can fire the onScrollEnd event here.
         FireOnScrollEnd();
@@ -198,40 +238,46 @@ void FreeScrollController::Fling(const OffsetF& velocity)
         // No movement, no need to animate.
         return;
     }
-    state_ = ScrollState::FLING;
+    state_ = State::FLING;
     offset_->AnimateWithVelocity(CreateSpringOption(friction), finalPos, velocity, [weak = WeakClaim(this)]() {
         auto self = weak.Upgrade();
-        if (self) {
-            self->HandleAnimationEnd();
+        CHECK_NULL_VOID(self);
+        if (self->state_ == State::BOUNCE) {
+            return; // don't trigger if we transitioned to BOUNCE state
         }
+        self->HandleAnimationEnd();
     });
 }
 
 void FreeScrollController::HandleAnimationUpdate(const OffsetF& currentValue)
 {
     pattern_.MarkDirty();
-    if (state_ != ScrollState::FLING) {
+    if (state_ == State::DRAG) {
         return;
     }
 
-    FireOnWillScroll(currentValue - prevOffset_, ScrollState::FLING,
-        duringExternalAnimation_ ? ScrollSource::SCROLLER_ANIMATION : ScrollSource::FLING);
+    FireOnWillScroll(currentValue - prevOffset_, ScrollState::FLING, ToScrollSource(state_));
     const bool reachedEdge = CheckCrashEdge(currentValue, pattern_.GetViewPortExtent() - pattern_.GetViewSize());
-    if (!duringExternalAnimation_ && reachedEdge) {
-        // change friction during animation
+    if (state_ == State::FLING && reachedEdge) {
+        // change friction during animation and transition to BOUNCE animation
         const auto finalPos = ClampPosition(offset_->GetStagingValue());
-        AnimationUtils::AnimateWithCurrentCallback(
+        AnimationUtils::Animate(
             CreateSpringOption(EDGE_FRICTION), [weak = WeakPtr(offset_), finalPos]() {
                 auto prop = weak.Upgrade();
                 CHECK_NULL_VOID(prop);
                 prop->Set(finalPos);
+            }, [weak = WeakClaim(this)]() {
+                auto self = weak.Upgrade();
+                CHECK_NULL_VOID(self);
+                self->HandleAnimationEnd();
             });
+        state_ = State::BOUNCE;
     }
 }
 
 void FreeScrollController::HandleAnimationEnd()
 {
-    state_ = ScrollState::IDLE;
+    state_ = State::IDLE;
     FireOnScrollEnd();
 }
 
@@ -282,12 +328,12 @@ void FreeScrollController::StopScrollAnimation()
     option.SetDuration(0);
     AnimationUtils::StartAnimation(
         option, [this]() { offset_->Set(offset_->Get()); }, nullptr);
-    state_ = ScrollState::IDLE;
+    state_ = State::IDLE;
 }
 
 void FreeScrollController::HandleTouchUpOrCancel()
 {
-    if (state_ == ScrollState::IDLE) {
+    if (state_ == State::IDLE) {
         // animate if currently out of bounds
         Fling({});
     }
@@ -303,12 +349,12 @@ OffsetF FreeScrollController::GetOffset() const
 
 void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset, const SizeF& scrollableArea)
 {
-    if (offset_ && offset_->Get() != adjustedOffset && state_ != ScrollState::FLING) {
+    if (offset_ && offset_->Get() != adjustedOffset && !InAnimation(state_)) {
         offset_->Set(adjustedOffset);
     }
     if (adjustedOffset != prevOffset_) {
         // Fire onDidScroll only if the offset has changed.
-        FireOnDidScroll(adjustedOffset - prevOffset_, state_);
+        FireOnDidScroll(adjustedOffset - prevOffset_, ToScrollState(state_));
         prevOffset_ = adjustedOffset;
     }
     auto props = pattern_.GetLayoutProperty<ScrollLayoutProperty>();
@@ -325,7 +371,7 @@ void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset, const
 
 void FreeScrollController::SetOffset(OffsetF newPos, bool allowOverScroll)
 {
-    if (state_ == ScrollState::FLING) {
+    if (state_ == State::FLING) {
         StopScrollAnimation();
     }
     if (!allowOverScroll) {
@@ -483,10 +529,8 @@ void FreeScrollController::ScrollTo(OffsetF finalPos, const optional<float>& vel
             auto self = weak.Upgrade();
             CHECK_NULL_VOID(self);
             self->HandleAnimationEnd();
-            self->duringExternalAnimation_ = false;
         });
-    state_ = ScrollState::FLING;
-    duringExternalAnimation_ = true;
+    state_ = State::EXTERNAL_FLING;
     FireOnScrollStart();
 }
 } // namespace OHOS::Ace::NG

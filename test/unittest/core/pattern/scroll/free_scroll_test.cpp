@@ -40,6 +40,7 @@ constexpr float LARGE_DELTA_Y = 2000.0f;
 constexpr float VELOCITY_X = 1000.0f;
 constexpr float VELOCITY_Y = 1000.0f;
 } // namespace
+using State = FreeScrollController::State;
 
 class FreeScrollTest : public ScrollTestNg {
 public:
@@ -417,20 +418,20 @@ TEST_F(FreeScrollTest, Animation001)
 
     auto controller = pattern_->freeScroll_;
     ASSERT_TRUE(controller);
-    EXPECT_EQ(controller->state_, ScrollState::IDLE);
+    EXPECT_EQ(controller->state_, State::IDLE);
     PanStart({});
     PanUpdate({ -DELTA_X, DELTA_Y });
-    EXPECT_EQ(controller->state_, ScrollState::SCROLL);
+    EXPECT_EQ(controller->state_, State::DRAG);
     PanEnd({ -DELTA_X, DELTA_Y }, { -VELOCITY_X, VELOCITY_Y });
     EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
-    EXPECT_EQ(controller->state_, ScrollState::FLING);
+    EXPECT_EQ(controller->state_, State::FLING);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     ASSERT_TRUE(pattern_->freeScroll_);
     EXPECT_LT(GetChildX(frameNode_, 0), -DELTA_X); // triggered high response spring
     EXPECT_EQ(GetChildY(frameNode_, 0), 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
-    EXPECT_EQ(controller->state_, ScrollState::IDLE);
+    EXPECT_EQ(controller->state_, State::IDLE);
 
     constexpr float friction2 = 0.8f;
     ScrollModelNG::SetFriction(frameNode_.GetRawPtr(), friction2);
@@ -467,19 +468,19 @@ TEST_F(FreeScrollTest, Animation002)
 
     auto controller = pattern_->freeScroll_;
     ASSERT_TRUE(controller);
-    EXPECT_EQ(controller->state_, ScrollState::FLING);
+    EXPECT_EQ(controller->state_, State::FLING);
 
     TouchDown();
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
-    EXPECT_EQ(controller->state_, ScrollState::IDLE);
+    EXPECT_EQ(controller->state_, State::IDLE);
     TouchUp();
-    EXPECT_EQ(controller->state_, ScrollState::FLING);
+    EXPECT_EQ(controller->state_, State::FLING);
     EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, 0));
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
-    EXPECT_EQ(controller->state_, ScrollState::IDLE);
+    EXPECT_EQ(controller->state_, State::IDLE);
 }
 
 /**
@@ -532,9 +533,10 @@ TEST_F(FreeScrollTest, Animation004)
     PanUpdate({ DELTA_X - 1, DELTA_Y - 1 });
     MockAnimationManager::GetInstance().SetTicks(2);
     PanEnd({ -LARGE_DELTA_X, -LARGE_DELTA_Y }, { VELOCITY_X, VELOCITY_Y });
-    EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::FLING);
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::FLING);
     EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue().GetX(), -1 + VELOCITY_X / (friction * -FRICTION_SCALE));
     MockAnimationManager::GetInstance().Tick(); // switched to high-friction spring motion after reaching edge
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::BOUNCE);
     EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue(), OffsetF());
     FlushUITasks(frameNode_);
     EXPECT_GT(GetChildX(frameNode_, 0), 0);
@@ -544,6 +546,7 @@ TEST_F(FreeScrollTest, Animation004)
     EXPECT_EQ(GetChildX(frameNode_, 0), 0);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::IDLE);
 }
 
 /**
@@ -602,7 +605,7 @@ TEST_F(FreeScrollTest, Event001)
     EXPECT_EQ(willScrollCalled, 2);
     FlushUITasks(frameNode_);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
-    EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::IDLE);
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::IDLE);
     EXPECT_FALSE(scrollBegun);
 }
 
@@ -669,7 +672,7 @@ TEST_F(FreeScrollTest, Event002)
     FlushUITasks(frameNode_);
     EXPECT_TRUE(Negative(GetChildX(frameNode_, 0))); // delta during animation can't be modified by onWillScroll
     EXPECT_TRUE(Negative(GetChildY(frameNode_, 0)));
-    EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::IDLE);
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::IDLE);
     EXPECT_EQ(scrollStop, 2);
     EXPECT_EQ(didScroll, 2);
 }
@@ -754,7 +757,7 @@ TEST_F(FreeScrollTest, Scroller002)
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(-CONTENT_W + WIDTH, 0).ToString());
     scroller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, 1000.0f);
-    EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::FLING);
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::EXTERNAL_FLING);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(-CONTENT_W + WIDTH, -CONTENT_H + HEIGHT).ToString());
@@ -768,8 +771,7 @@ TEST_F(FreeScrollTest, Scroller002)
     const Dimension posX_2 = 500.0_vp;
     const Dimension posY_2 = -100.0_vp;
     scroller->FreeScrollTo({ posX_2, posY_2, 1000, nullptr, true });
-    EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::FLING);
-    EXPECT_TRUE(pattern_->freeScroll_->duringExternalAnimation_);
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::EXTERNAL_FLING);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(-posX_2.Value(), 0.0f).ToString());
@@ -803,10 +805,10 @@ TEST_F(FreeScrollTest, Scroller003)
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, -HEIGHT).ToString());
 
     scroller->ScrollPage(false, true);
-    EXPECT_EQ(ScrollState::FLING, pattern_->freeScroll_->state_);
+    EXPECT_EQ(State::EXTERNAL_FLING, pattern_->freeScroll_->state_);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
-    EXPECT_EQ(ScrollState::IDLE, pattern_->freeScroll_->state_);
+    EXPECT_EQ(State::IDLE, pattern_->freeScroll_->state_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, -HEIGHT * 2).ToString());
 
     scroller->ScrollPage(true, false);
@@ -814,9 +816,9 @@ TEST_F(FreeScrollTest, Scroller003)
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, -HEIGHT));
 
     scroller->ScrollPage(true, true);
-    EXPECT_EQ(ScrollState::FLING, pattern_->freeScroll_->state_);
+    EXPECT_EQ(State::EXTERNAL_FLING, pattern_->freeScroll_->state_);
     MockAnimationManager::GetInstance().Tick();
-    EXPECT_EQ(ScrollState::IDLE, pattern_->freeScroll_->state_);
+    EXPECT_EQ(State::IDLE, pattern_->freeScroll_->state_);
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, 0).ToString());
 }
@@ -843,8 +845,7 @@ TEST_F(FreeScrollTest, Scroller004)
     FlushUITasks(frameNode_);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
-    EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::IDLE);
-    EXPECT_FALSE(pattern_->freeScroll_->duringExternalAnimation_);
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::IDLE);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(-CONTENT_W, -CONTENT_H).ToString());
 }
 

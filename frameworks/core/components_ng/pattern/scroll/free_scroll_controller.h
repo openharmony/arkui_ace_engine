@@ -104,9 +104,18 @@ private:
     OffsetF prevOffset_;
     RefPtr<PanRecognizer> freePanGesture_;
     RefPtr<TouchEventImpl> freeTouch_;
-    ScrollState state_ = ScrollState::IDLE;
+
+public:
+    enum class State {
+        IDLE,
+        DRAG,
+        FLING,
+        EXTERNAL_FLING, // used for external animations like scroller animation
+        BOUNCE, // used for edge effects
+    };
+private:
+    State state_ = State::IDLE;
     bool enableScroll_ = true;
-    bool duringExternalAnimation_ = false;
 };
 
 } // namespace OHOS::Ace::NG
