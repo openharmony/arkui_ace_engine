@@ -1315,6 +1315,6 @@ const trackInternal = (
 }; // trackInternal
 
 // used to manually mark dirty v2 before animateTo
-function __UpdateDirty2ForAnimateTo__V2_Change_Observation(): void {
+function __updateDirty2Immediately_V2_Change_Observation(): void {
   ObserveV2.getObserve().updateDirty2();
 }
