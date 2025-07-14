@@ -92,7 +92,7 @@ void SheetPresentationPattern::OnModifyDone()
         CHECK_NULL_VOID(sheetTheme);
         auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto sheetStyle = layoutProperty->GetSheetStyleValue();
+        auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
         BlurStyle blurStyle = static_cast<BlurStyle>(sheetTheme->GetSheetBackgroundBlurStyle());
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
             && blurStyle != BlurStyle::NO_MATERIAL) {
@@ -163,7 +163,7 @@ float SheetPresentationPattern::GetSheetTopSafeArea()
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
         CHECK_NULL_RETURN(layoutProperty, 0.0f);
-        auto sheetStyle = layoutProperty->GetSheetStyleValue();
+        auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
         if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM &&
             IsPhoneInLandScape()) {
             sheetTopSafeArea = 0.0f;
@@ -195,7 +195,7 @@ void SheetPresentationPattern::InitPageHeight()
     }
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM &&
         IsPhoneInLandScape()) {
         sheetTopSafeArea_ = 0.0f;
@@ -279,7 +279,7 @@ void SheetPresentationPattern::CheckBuilderChange()
         CHECK_NULL_VOID(sheetPattern);
         auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto sheetStyle = layoutProperty->GetSheetStyleValue();
+        auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
         if (sheetStyle.sheetHeight.sheetMode == SheetMode::AUTO) {
             auto sheetWrapper = sheetNode->GetParent();
             CHECK_NULL_VOID(sheetWrapper);
@@ -305,7 +305,7 @@ void SheetPresentationPattern::AvoidAiBar()
     if (NonPositive(scrollPattern->GetScrollableDistance()) || isScrolling_) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto inset = pipeline->GetSafeArea();
     auto layoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
@@ -441,7 +441,7 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
     CHECK_NULL_VOID(sheetTheme);
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToBounds(true);
@@ -913,7 +913,7 @@ void SheetPresentationPattern::AvoidKeyboard(bool forceAvoid)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetSafeAreaManager();
     if (!forceAvoid && keyboardHeight_ == manager->GetKeyboardInset().Length()) {
@@ -1199,7 +1199,7 @@ void SheetPresentationPattern::UpdateDragBarStatus()
     CHECK_NULL_VOID(host);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     auto showDragIndicator = sheetStyle.showDragBar.value_or(true);
 
     auto sheetDragBar = GetDragBarNode();
@@ -1276,7 +1276,7 @@ bool SheetPresentationPattern::IsShowCloseIcon()
     CHECK_NULL_RETURN(host, false);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetSheetStyleValue().showCloseIcon.value_or(true);
+    return layoutProperty->GetSheetStyleValue(SheetStyle()).showCloseIcon.value_or(true);
 }
 
 RefPtr<FrameNode> SheetPresentationPattern::GetTitleNode()
@@ -1326,7 +1326,7 @@ void SheetPresentationPattern::UpdateTitlePadding()
     CHECK_NULL_VOID(host);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetSheetStyleValue().isTitleBuilder.has_value()) {
+    if (!layoutProperty->HasSheetStyle() || !layoutProperty->GetSheetStyleValue().isTitleBuilder.has_value()) {
         return;
     }
 
@@ -1378,11 +1378,11 @@ void SheetPresentationPattern::UpdateSheetTitle()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     if (sheetStyle.sheetTitle.has_value()) {
         auto titleId = GetTitleId();
         auto titleNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(titleId));
@@ -1421,11 +1421,11 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     if (pipeline->GetFontScale() != scale_) {
         auto operationNode = GetTitleBuilderNode();
         CHECK_NULL_VOID(operationNode);
@@ -1562,7 +1562,7 @@ void SheetPresentationPattern::UpdateMaskBackgroundColor()
     CHECK_NULL_VOID(sheetTheme);
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     sheetMaskColor_ = sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor());
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (sheetStyle.maskColor.has_value()) {
@@ -1632,7 +1632,7 @@ void SheetPresentationPattern::CheckSheetHeightChange()
             CHECK_NULL_VOID(overlayManager);
             auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
             CHECK_NULL_VOID(layoutProperty);
-            auto sheetStyle = layoutProperty->GetSheetStyleValue();
+            auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
             overlayManager->ComputeSheetOffset(sheetStyle, host);
             overlayManager->PlaySheetTransition(host, true, false);
             auto maskNode = overlayManager->GetSheetMask(host);
@@ -1678,7 +1678,7 @@ void SheetPresentationPattern::InitSheetDetents()
     // record input detents
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     IsCustomDetentsChanged(sheetStyle);
     preDetents_.clear();
     sheetDetentHeight_.clear();
@@ -1962,7 +1962,7 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType) const
         sheetType = SheetType::SHEET_CENTER;
         auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto sheetStyle = layoutProperty->GetSheetStyleValue();
+        auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN) &&
             sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_POPUP) {
             sheetType = SheetType::SHEET_POPUP;
@@ -1978,7 +1978,7 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType) const
 
 void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType) const
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     double rootWidth = 0.0;
     if (windowSize_.has_value()) {
         rootWidth = windowSize_.value().Width();
@@ -1987,7 +1987,7 @@ void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType) const
     }
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
 #ifdef PREVIEW
     rootWidth = pipelineContext->GetDisplayWindowRectInfo().Width();
 #endif
@@ -2175,7 +2175,7 @@ RefPtr<RenderContext> SheetPresentationPattern::GetRenderContext()
 
 bool SheetPresentationPattern::PostTask(const TaskExecutor::Task& task, const std::string& name)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);

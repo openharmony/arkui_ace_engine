@@ -26,6 +26,7 @@
 #include "core/components/plugin/plugin_element.h"
 #include "core/components/plugin/plugin_window.h"
 #include "core/components/plugin/render_plugin.h"
+#include "bridge/arkts_frontend/arkts_plugin_frontend.h"
 #include "ability_info.h"
 
 namespace OHOS::Ace {
@@ -65,6 +66,26 @@ void PluginSubContainer::Initialize(const std::string& codeLanguage)
     auto container = AceEngine::Get().GetContainer(outSidePipelineContext->GetInstanceId());
     if (!container) {
         return;
+    }
+    if (codeLanguage == OHOS::AppExecFwk::Constants::CODE_LANGUAGE_1_2) {
+        if (outSidePipelineContext->GetFrontendType() != FrontendType::ARK_TS) {
+            TAG_LOGE(AceLogTag::ACE_PLUGIN_COMPONENT,
+                "codeLanguage %{public}s is not supported in frontend type %{public}d.",
+                codeLanguage.c_str(), outSidePipelineContext->GetFrontendType());
+            return;
+        }
+        frontend_ = AceType::MakeRefPtr<ArktsPluginFrontend>(container->GetSharedRuntime());
+        frontend_->Initialize(FrontendType::ARK_TS, taskExecutor_);
+        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "PluginSubContainer initialize end.");
+        return;
+    } else {
+        if (outSidePipelineContext->GetFrontendType() == FrontendType::ARK_TS) {
+            TAG_LOGE(AceLogTag::ACE_PLUGIN_COMPONENT,
+                "codeLanguage %{public}s is not supported in frontend type %{public}d.",
+                codeLanguage.c_str(), outSidePipelineContext->GetFrontendType());
+            return;
+        }
+        frontend_ = AceType::MakeRefPtr<PluginFrontend>();
     }
 
     // set JS engine，init in JS thread

@@ -43,7 +43,7 @@ int32_t IsolatedPattern::isolatedIdGenerator_ = 0;
 IsolatedPattern::IsolatedPattern()
     : PlatformPattern(AceLogTag::ACE_ISOLATED_COMPONENT, ++isolatedIdGenerator_)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
@@ -53,7 +53,7 @@ IsolatedPattern::IsolatedPattern()
 
 IsolatedPattern::~IsolatedPattern()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
@@ -215,7 +215,7 @@ void IsolatedPattern::HandleBlurEvent()
 void IsolatedPattern::OnAttachToFrameNode()
 {
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);

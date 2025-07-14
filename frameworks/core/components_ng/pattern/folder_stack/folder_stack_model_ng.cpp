@@ -112,20 +112,20 @@ void FolderStackModelNG::SetAutoHalfFold(bool IsAutoHalfFold)
 }
 
 void FolderStackModelNG::SetOnFolderStateChange(
-    FrameNode* frameNode, std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnFolderStateChange(std::move(onChange));
-}
-
-void FolderStackModelNG::SetOnFolderStateChange(
     std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateEventHub<FolderStackEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnFolderStateChange(std::move(onChange));
+}
+
+void FolderStackModelNG::SetOnFolderStateChange(
+    FrameNode* frameNode, std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFolderStateChange(std::move(onChange));
 }

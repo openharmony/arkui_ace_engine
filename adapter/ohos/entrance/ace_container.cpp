@@ -490,7 +490,9 @@ void AceContainer::Initialize()
 {
     ContainerScope scope(instanceId_);
     // For DECLARATIVE_JS frontend use UI as JS Thread, so InitializeFrontend after UI thread created.
-    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::DECLARATIVE_CJ) {
+    // For STATIC_HYBRID_DYNAMIC and DYNAMIC_HYBRID_STATIC frontend, also initialize after AttachView
+    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::DECLARATIVE_CJ &&
+        type_ != FrontendType::STATIC_HYBRID_DYNAMIC && type_ != FrontendType::DYNAMIC_HYBRID_STATIC) {
         InitializeFrontend();
     }
 }
@@ -659,9 +661,17 @@ void AceContainer::InitializeFrontend()
             return;
         }
     } else if (type_ == FrontendType::ARK_TS) {
+        LOGI("Init ARK_TS Frontend");
         frontend_ = MakeRefPtr<ArktsFrontend>(sharedRuntime_);
+    } else if (type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
+        // initialize after AttachView
+        LOGI("Init STATIC_HYBRID_DYNAMIC Frontend");
+        InitializeStaticHybridDynamic(aceAbility);
+    } else if (type_ == FrontendType::DYNAMIC_HYBRID_STATIC) {
+        LOGI("Init DYNAMIC_HYBRID_STATIC Frontend");
+        InitializeDynamicHybridStatic(aceAbility);
     } else {
-        LOGE("Frontend type not supported");
+        LOGE("Frontend type not supported, error type: %{public}i", type_);
         EventReport::SendAppStartException(AppStartExcepType::FRONTEND_TYPE_ERR);
         return;
     }
@@ -672,6 +682,9 @@ void AceContainer::InitializeFrontend()
         frontend_->DisallowPopLastPage();
     }
     frontend_->Initialize(type_, taskExecutor_);
+    if (subFrontend_) {
+        subFrontend_->Initialize(type_, taskExecutor_);
+    }
 }
 
 RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
@@ -2459,6 +2472,9 @@ void AceContainer::SetAniLocalStorage(void* storage, const std::shared_ptr<OHOS:
         if (!arktsFrontend) {
             ReleaseStorageReference(sharedRuntime, storage);
             return;
+        }
+        if (contextRef->GetBindingObject() && contextRef->GetBindingObject()->Get<ani_ref>()) {
+            arktsFrontend->SetAniContext(id, contextRef->GetBindingObject()->Get<ani_ref>());
         }
         arktsFrontend->RegisterLocalStorage(id, storage);
     }, TaskExecutor::TaskType::UI, "ArkUISetAniLocalStorage");
@@ -4833,5 +4849,40 @@ UIContentErrorCode AceContainer::RunIntentPage()
     auto front = GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
     return front->RunIntentPage();
+}
+
+bool AceContainer::IsPcOrPadFreeMultiWindowMode() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->IsPcOrPadFreeMultiWindowMode();
+}
+
+bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool animation)
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    Rosen::WindowType winType;
+    switch (type) {
+        case SystemBarType::STATUS:
+            winType = Rosen::WindowType::WINDOW_TYPE_STATUS_BAR;
+            break;
+        case SystemBarType::NAVIGATION_INDICATOR:
+            winType = Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
+            break;
+        default:
+            return false;
+    }
+    auto property = uiWindow_->GetSystemBarPropertyByType(winType);
+    property.enable_ = enable;
+    property.enableAnimation_ = animation;
+    property.settingFlag_ = static_cast<Rosen::SystemBarSettingFlag>(
+        static_cast<int32_t>(property.settingFlag_) |
+        static_cast<int32_t>(Rosen::SystemBarSettingFlag::ENABLE_SETTING));
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set SystemBar: type:%{public}d, enable:%{public}d, animation:%{public}d",
+        static_cast<int32_t>(type), enable, animation);
+    if (Rosen::WMError::WM_OK != uiWindow_->SetSpecificBarProperty(winType, property)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to set systemBar property");
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::Platform

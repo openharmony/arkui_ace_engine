@@ -48,6 +48,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/lazy_compose_adapter.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/base/lazy_compose_adapter.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
@@ -322,7 +323,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetPatternTypeName(), T::TypeName());
         }
-        return reinterpret_cast<T*>(RawPtr(pattern_));
+        return static_cast<T*>(RawPtr(pattern_));
     }
 
     template<typename T>
@@ -346,7 +347,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetLayoutPropertyTypeName(), T::TypeName());
         }
-        return reinterpret_cast<T*>(RawPtr(layoutProperty_));
+        return static_cast<T*>(RawPtr(layoutProperty_));
     }
 
     template<typename T>
@@ -364,7 +365,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetPaintPropertyTypeName(), T::TypeName());
         }
-        return reinterpret_cast<T*>(RawPtr(paintProperty_));
+        return static_cast<T*>(RawPtr(paintProperty_));
     }
 
     template<typename T>
@@ -804,6 +805,9 @@ public:
     RefPtr<FrameNode> FindChildByPositionWithoutChildTransform(float x, float y);
 
     RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
+    // For ArkTS1.2 to determine whether there is already an animable property with corresponding name on the node
+    // due to differences in compilation implementation.
+    bool HasAnimatableProperty(const std::string& propertyName) const;
     static RefPtr<FrameNode> FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName);
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent, const PropertyUnit& propertyType = PropertyUnit::UNKNOWN);
@@ -1178,7 +1182,8 @@ public:
     bool GetOpIncGroupCheckedThrough();
     void SetOpIncCheckedOnce();
     bool GetOpIncCheckedOnce();
-    void MarkAndCheckNewOpIncNode(Axis axis);
+    void MarkAndCheckNewOpIncNode(Axis axis) override;
+    void SuggestOpIncGroup(Axis axis);
     ChildrenListWithGuard GetAllChildren();
     OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth, Axis axis);
     void GetInspectorValue() override;
@@ -1591,6 +1596,12 @@ private:
     const char* GetPaintPropertyTypeName() const;
     void AddNodeToRegisterTouchTest();
     void CleanupPipelineResources();
+
+    void MarkModifyDoneMultiThread();
+    void MarkDirtyNodeMultiThread(PropertyChangeFlag extraFlag);
+    void RebuildRenderContextTreeMultiThread();
+    void MarkNeedRenderMultiThread(bool isRenderBoundary);
+    void OnMountToParentDoneMultiThread();
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.

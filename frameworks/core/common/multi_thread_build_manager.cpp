@@ -21,6 +21,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
+#include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -33,6 +34,7 @@ std::unique_ptr<ffrt::queue> asyncUITaskQueue = nullptr;
 #endif
 }
 thread_local bool MultiThreadBuildManager::isFreeNodeScope_ = false;
+thread_local bool MultiThreadBuildManager::isThreadSafeNodeScope_ = false;
 thread_local bool MultiThreadBuildManager::isUIThread_ = false;
 
 MultiThreadBuildManager& MultiThreadBuildManager::GetInstance()
@@ -112,6 +114,16 @@ bool MultiThreadBuildManager::TryPostUnSafeTask(NG::UINode* node, std::function<
         return true;
     }
     return false;
+}
+
+void MultiThreadBuildManager::SetIsThreadSafeNodeScope(bool isThreadSafeNodeScope)
+{
+    isThreadSafeNodeScope_ = isThreadSafeNodeScope;
+}
+
+bool MultiThreadBuildManager::IsThreadSafeNodeScope()
+{
+    return isThreadSafeNodeScope_ || SystemProperties::GetDebugThreadSafeNodeEnabled();
 }
 
 bool MultiThreadBuildManager::PostAsyncUITask(int32_t contextId, std::function<void()>&& asyncUITask,

@@ -17,45 +17,101 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { CommonShapeMethod, CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Resource } from "global/resource";
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { ArkPathComponent } from "./../generated/ArkPath"
-import { ArkPathPeer } from "./../generated/peers/ArkPathPeer"
+
+export class ArkPathPeer extends ArkCommonShapeMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkPathPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._Path_construct(peerId, flags)
+        const _peer  = new ArkPathPeer(_peerPtr, peerId, "Path", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setPathOptionsAttribute(options?: PathOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writePathOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._PathInterface_setPathOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    commandsAttribute(value: string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeString(value_value)
+        }
+        ArkUIGeneratedNativeModule._PathAttribute_commands(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export interface PathOptions {
     width?: number | string;
     height?: number | string;
     commands?: string;
 }
-/** @memo:stable */
+export type PathInterface = (options?: PathOptions) => PathAttribute;
 export interface PathAttribute extends CommonShapeMethod {
-    /** @memo */
-    setPathOptions(options?: PathOptions): this
-    /** @memo */
-    commands(value: string): this
+    commands(value: string | undefined): this
+}
+export class ArkPathStyle extends ArkCommonShapeMethodStyle implements PathAttribute {
+    commands_value?: string | undefined
+    public commands(value: string | undefined): this {
+        return this
+        }
+}
+export class ArkPathComponent extends ArkCommonShapeMethodComponent implements PathAttribute {
+    getPeer(): ArkPathPeer {
+        return (this.peer as ArkPathPeer)
+    }
+    public setPathOptions(options?: PathOptions): this {
+        if (this.checkPriority("setPathOptions")) {
+            const options_casted = options as (PathOptions | undefined)
+            this.getPeer()?.setPathOptionsAttribute(options_casted)
+            return this
+        }
+        return this
+    }
+    public commands(value: string | undefined): this {
+        if (this.checkPriority("commands")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.commandsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function Path(
-  /** @memo */
-  style: ((attributes: PathAttribute) => void) | undefined,
-  options?: PathOptions | undefined, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: PathAttribute) => void) | undefined,
+    options?: PathOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkPathComponent()
     })

@@ -531,6 +531,9 @@ public:
     static void SetOverlayBuilder(std::function<void()>&& buildFunc,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
+    static void SetOverlayBuilder(FrameNode* frameNode, const RefPtr<NG::UINode>& customNode,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY);
     static void SetOverlayComponentContent(const RefPtr<NG::FrameNode>& contentNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
@@ -1039,6 +1042,8 @@ public:
     static void SetBackgroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* backgroundFilter);
     static void SetForegroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* foregroundFilter);
     static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter);
+    static int32_t GetWindowWidthBreakpoint();
+    static int32_t GetWindowHeightBreakpoint();
 
     static void SetJSFrameNodeOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void ClearJSFrameNodeOnReachStart(FrameNode* frameNode);
@@ -1083,6 +1088,22 @@ private:
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;
 };
+
+// multi thread function start
+void SetInspectorIdMultiThread(FrameNode* frameNode, const std::string& inspectorId);
+void SetBackgroundBlurStyleMultiThread(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle,
+    const SysOptions& sysOptions);
+void SetOnAreaChangedMultiThread(FrameNode* frameNode, std::function<void(const RectF& oldRect,
+    const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&& onAreaChanged);
+void SetOnVisibleChangeMultiThread(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
+    const std::vector<double> &ratioList);
+void SetOnVisibleAreaApproximateChangeMultiThread(FrameNode* frameNode,
+    const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
+    int32_t expectedUpdateInterval);
+void ResetAreaChangedMultiThread(FrameNode* frameNode);
+void ResetVisibleChangeMultiThread(FrameNode* frameNode);
+void SetNeedFocusMultiThread(FrameNode* frameNode, bool value);
+// multi thread function end
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_H

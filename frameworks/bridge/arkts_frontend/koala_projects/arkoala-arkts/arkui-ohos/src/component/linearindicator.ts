@@ -17,31 +17,19 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "../Graphics"
-import { ColorMetrics } from "./../generated/ArkColorMetricsMaterialized"
-import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { ResizableOptions } from "./image"
-import { Resource } from "global/resource";
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { ArkLinearIndicatorComponent } from "./../generated/ArkLinearindicator"
-import { ArkLinearIndicatorPeer } from "./../generated/peers/ArkLinearindicatorPeer"
+import { ColorMetrics } from "../Graphics"
+
 export class LinearIndicatorControllerInternal {
     public static fromPtr(ptr: KPointer): LinearIndicatorController {
         const obj : LinearIndicatorController = new LinearIndicatorController()
@@ -106,6 +94,73 @@ export class LinearIndicatorController implements MaterializedBase {
         ArkUIGeneratedNativeModule._LinearIndicatorController_stop(this.peer!.ptr)
     }
 }
+export class ArkLinearIndicatorPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkLinearIndicatorPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._LinearIndicator_construct(peerId, flags)
+        const _peer  = new ArkLinearIndicatorPeer(_peerPtr, peerId, "LinearIndicator", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setLinearIndicatorOptionsAttribute(count?: number, controller?: LinearIndicatorController): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let count_type : int32 = RuntimeType.UNDEFINED
+        count_type = runtimeType(count)
+        thisSerializer.writeInt8(count_type as int32)
+        if ((RuntimeType.UNDEFINED) != (count_type)) {
+            const count_value  = count!
+            thisSerializer.writeNumber(count_value)
+        }
+        let controller_type : int32 = RuntimeType.UNDEFINED
+        controller_type = runtimeType(controller)
+        thisSerializer.writeInt8(controller_type as int32)
+        if ((RuntimeType.UNDEFINED) != (controller_type)) {
+            const controller_value  = controller!
+            thisSerializer.writeLinearIndicatorController(controller_value)
+        }
+        ArkUIGeneratedNativeModule._LinearIndicatorInterface_setLinearIndicatorOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    indicatorStyleAttribute(value: LinearIndicatorStyle | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLinearIndicatorStyle(value_value)
+        }
+        ArkUIGeneratedNativeModule._LinearIndicatorAttribute_indicatorStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    indicatorLoopAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._LinearIndicatorAttribute_indicatorLoop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onChangeAttribute(value: OnLinearIndicatorChangeCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._LinearIndicatorAttribute_onChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export interface LinearIndicatorStartOptions {
     interval?: number;
     duration?: number;
@@ -117,26 +172,78 @@ export interface LinearIndicatorStyle {
     trackBackgroundColor?: ColorMetrics;
     trackColor?: ColorMetrics;
 }
-export type OnLinearIndicatorChangeCallback = (index: number, progress: number) => void;
-/** @memo:stable */
+export type LinearIndicatorInterface = (count?: number, controller?: LinearIndicatorController) => LinearIndicatorAttribute;
 export interface LinearIndicatorAttribute extends CommonMethod {
-    /** @memo */
-    setLinearIndicatorOptions(count?: number, controller?: LinearIndicatorController): this
-    /** @memo */
-    indicatorStyle(value?: LinearIndicatorStyle): this
-    /** @memo */
-    indicatorLoop(value?: boolean): this
-    /** @memo */
-    onChange(value?: OnLinearIndicatorChangeCallback): this
+    indicatorStyle(value: LinearIndicatorStyle | undefined): this
+    indicatorLoop(value: boolean | undefined): this
+    onChange(value: OnLinearIndicatorChangeCallback | undefined): this
+}
+export class ArkLinearIndicatorStyle extends ArkCommonMethodStyle implements LinearIndicatorAttribute {
+    indicatorStyle_value?: LinearIndicatorStyle | undefined
+    indicatorLoop_value?: boolean | undefined
+    onChange_value?: OnLinearIndicatorChangeCallback | undefined
+    public indicatorStyle(value: LinearIndicatorStyle | undefined): this {
+        return this
+    }
+    public indicatorLoop(value: boolean | undefined): this {
+        return this
+    }
+    public onChange(value: OnLinearIndicatorChangeCallback | undefined): this {
+        return this
+        }
+}
+export type OnLinearIndicatorChangeCallback = (index: number, progress: number) => void;
+export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implements LinearIndicatorAttribute {
+    getPeer(): ArkLinearIndicatorPeer {
+        return (this.peer as ArkLinearIndicatorPeer)
+    }
+    public setLinearIndicatorOptions(count?: number, controller?: LinearIndicatorController): this {
+        if (this.checkPriority("setLinearIndicatorOptions")) {
+            const count_casted = count as (number | undefined)
+            const controller_casted = controller as (LinearIndicatorController | undefined)
+            this.getPeer()?.setLinearIndicatorOptionsAttribute(count_casted, controller_casted)
+            return this
+        }
+        return this
+    }
+    public indicatorStyle(value: LinearIndicatorStyle | undefined): this {
+        if (this.checkPriority("indicatorStyle")) {
+            const value_casted = value as (LinearIndicatorStyle | undefined)
+            this.getPeer()?.indicatorStyleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public indicatorLoop(value: boolean | undefined): this {
+        if (this.checkPriority("indicatorLoop")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.indicatorLoopAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onChange(value: OnLinearIndicatorChangeCallback | undefined): this {
+        if (this.checkPriority("onChange")) {
+            const value_casted = value as (OnLinearIndicatorChangeCallback | undefined)
+            this.getPeer()?.onChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function LinearIndicator(
-  /** @memo */
-  style: ((attributes: LinearIndicatorAttribute) => void) | undefined,
-  count?: number | undefined, controller?: LinearIndicatorController | undefined, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: LinearIndicatorAttribute) => void) | undefined,
+    count?: number, controller?: LinearIndicatorController,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkLinearIndicatorComponent()
     })

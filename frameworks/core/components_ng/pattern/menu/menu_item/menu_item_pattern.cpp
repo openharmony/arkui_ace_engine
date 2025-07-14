@@ -2668,7 +2668,11 @@ void MenuItemPattern::SetBgColor(const Color& color)
 {
     auto renderContext = GetHost()->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(color);
+    // if (color) {
+    //     renderContext->UpdateBackgroundColor(color.value());
+    // } else {
+    //     renderContext->ResetBackgroundColor();
+    // }
     bgColor_ = color;
 }
 
@@ -2684,28 +2688,44 @@ void MenuItemPattern::SetFontColor(const Color& color, bool isNeedRecord)
     }
     auto context = text_->GetRenderContext();
     CHECK_NULL_VOID(context);
-    context->UpdateForegroundColor(color);
+    // if (color) {
+    //     auto value = color.value();
+    //     props->UpdateTextColor(value);
+    //     context->UpdateForegroundColor(value);
+    // } else {
+    //     props->ResetTextColor();
+    //     context->ResetForegroundColor();
+    // }
     context->UpdateForegroundColorFlag(false);
     context->ResetForegroundColorStrategy();
 }
 
-void MenuItemPattern::SetFontSize(const Dimension& value)
+void MenuItemPattern::SetFontSize(const std::optional<Dimension>& value)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
     CHECK_NULL_VOID(selectTheme_);
-    props->UpdateFontSize(value.IsNegative() ? selectTheme_->GetMenuFontSize() : value);
+    if (value) {
+        Dimension fontSize = value.value();
+        props->UpdateFontSize(fontSize.IsNegative() ? selectTheme_->GetMenuFontSize() : fontSize);
+    } else {
+        props->ResetFontSize();
+    }
 }
 
-void MenuItemPattern::SetFontWeight(const FontWeight& value)
+void MenuItemPattern::SetFontWeight(const std::optional<FontWeight>& value)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
-    props->UpdateFontWeight(value);
+    if (value) {
+        props->UpdateFontWeight(value.value());
+    } else {
+        props->ResetFontWeight();
+    }
 }
 
 void MenuItemPattern::SetFontFamily(const std::vector<std::string>& value)
@@ -2717,13 +2737,17 @@ void MenuItemPattern::SetFontFamily(const std::vector<std::string>& value)
     props->UpdateFontFamily(value);
 }
 
-void MenuItemPattern::SetItalicFontStyle(const Ace::FontStyle& value)
+void MenuItemPattern::SetItalicFontStyle(const std::optional<Ace::FontStyle>& value)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
-    props->UpdateItalicFontStyle(value);
+    if (value) {
+        props->UpdateItalicFontStyle(value.value());
+    } else {
+        props->ResetItalicFontStyle();
+    }
 }
 
 void MenuItemPattern::SetSelected(int32_t selected)
@@ -2854,7 +2878,7 @@ void MenuItemPattern::UpdateIcon(const std::string& src, const std::function<voi
             return;
         }
     }
-  
+
     row->RemoveChild(icon_); // it's safe even if icon_ is nullptr
     row->MarkModifyDone();
     row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -2908,7 +2932,7 @@ float MenuItemPattern::GetSelectOptionWidth()
     auto optionNode = GetHost();
     CHECK_NULL_RETURN(optionNode, MIN_OPTION_WIDTH.ConvertToPx());
     float finalWidth = MIN_OPTION_WIDTH.ConvertToPx();
-    
+
     if (IsWidthModifiedBySelect()) {
         auto optionPatintProperty = optionNode->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_RETURN(optionPatintProperty, MIN_OPTION_WIDTH.ConvertToPx());
@@ -2917,7 +2941,7 @@ float MenuItemPattern::GetSelectOptionWidth()
     } else {
         finalWidth = defaultWidth;
     }
-    
+
     if (finalWidth < MIN_OPTION_WIDTH.ConvertToPx()) {
         finalWidth = defaultWidth;
     }
@@ -2948,7 +2972,7 @@ std::string MenuItemPattern::GetText()
     CHECK_NULL_RETURN(text_, std::string());
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, std::string());
-    return UtfUtils::Str16ToStr8(textProps->GetContentValue());
+    return UtfUtils::Str16ToStr8(textProps->GetContentValue(std::u16string()));
 }
 
 std::string MenuItemPattern::InspectorGetFont()
@@ -3441,5 +3465,9 @@ void MenuItemPattern::OnColorConfigurationUpdate()
         content_->MarkModifyDone();
         content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+}
+void MenuItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutExtAttr("selected", IsSelected(), filter);
 }
 } // namespace OHOS::Ace::NG

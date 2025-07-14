@@ -820,6 +820,10 @@ public:
         isNeedReloadDensity_ = isNeedReloadDensity;
     }
 
+    void SetVsyncListener(const std::function<void()>& vsync)
+    {
+        vsyncListener_ = vsync;
+    }
 protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
@@ -1022,6 +1026,7 @@ private:
 
     std::vector<RectCallback> rectCallbackList_;
     std::list<TouchEvent> touchEvents_;
+    std::function<void()> vsyncListener_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

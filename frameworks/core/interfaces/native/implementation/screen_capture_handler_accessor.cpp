@@ -23,8 +23,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScreenCaptureHandlerAccessor {
 void DestroyPeerImpl(Ark_ScreenCaptureHandler peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_ScreenCaptureHandler CtorImpl()
@@ -68,7 +66,4 @@ const GENERATED_ArkUIScreenCaptureHandlerAccessor* GetScreenCaptureHandlerAccess
     return &ScreenCaptureHandlerAccessorImpl;
 }
 
-struct ScreenCaptureHandlerPeer {
-    virtual ~ScreenCaptureHandlerPeer() = default;
-};
 }

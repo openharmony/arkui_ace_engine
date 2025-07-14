@@ -611,4 +611,25 @@ HWTEST_F(GridIrregularFillerTest, FillMatrixByLine002, TestSize.Level1)
     EXPECT_EQ(idx, 10);
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_5);
 }
+
+/**
+ * @tc.name: GridIrregularFiller::ErrorCase001
+ * @tc.desc: Test GridIrregularFiller::Fill when items are not created
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, ErrorCase001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo5());
+    CreateDone(); // no children
+
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 30;
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+    filler.Fill({ .crossLens = { 50.0f, 50.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f, 0);
+    EXPECT_EQ(info.gridMatrix_.size(), 1); // should stop filling when child is absent
+}
 } // namespace OHOS::Ace::NG

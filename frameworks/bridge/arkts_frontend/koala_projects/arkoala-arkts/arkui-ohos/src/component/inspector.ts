@@ -16,18 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { GlobalScope } from "./GlobalScope"
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { GlobalScope } from "./../generated/peers/GlobalScope"
-// declare function getInspectorNodes(): Object
-// declare function getInspectorNodeById(arg0: number): Object
-export namespace Profiler {
-    export type Callback_String_Void = (info: string) => void;
-}
-declare function registerVsyncCallback(arg0: ((info: string) => void)): void
-declare function unregisterVsyncCallback(): void
-// declare function setAppBgColor(arg0: string): void
 export function getInspectorNodes(): Object {
     return GlobalScope.getInspectorNodes()
 }
@@ -38,11 +30,10 @@ export function setAppBgColor(value: string): void {
     GlobalScope.setAppBgColor(value)
 }
 export namespace Profiler {
+    export type Callback_String_Void = (info: string) => void;
     export function registerVsyncCallback(callback_: ((info: string) => void)): void {
         GlobalScope.Profiler_registerVsyncCallback(callback_)
     }
-}
-export namespace Profiler {
     export function unregisterVsyncCallback(): void {
         GlobalScope.Profiler_unregisterVsyncCallback()
     }

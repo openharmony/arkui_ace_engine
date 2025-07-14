@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components/common/properties/color.h"
@@ -46,10 +47,19 @@ constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 void ListItemPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
+    // call OnAttachToFrameNodeMultiThread() by multi thread;
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     CHECK_NULL_VOID(host);
     if (listItemStyle_ == V2::ListItemStyle::CARD) {
         SetListItemDefaultAttributes(host);
     }
+}
+
+void ListItemPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    // call OnAttachToMainTreeMultiThread() by multi thread
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
 void ListItemPattern::OnColorConfigurationUpdate()
@@ -439,7 +449,7 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
         FireSwipeActionOffsetChange(oldOffset, curOffset_);
     }
     if (!springController_) {
-        springController_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
+        springController_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContextSafelyWithCheck());
     } else if (axisChanged) {
         springController_->Stop();
     }
@@ -925,6 +935,8 @@ void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
 {
     json->PutFixedAttr("selectable", selectable_, filter, FIXED_ATTR_SELECTABLE);
     json->PutExtAttr("selected", isSelected_, filter);
+    json->PutExtAttr("itemStyle", GetListItemStyle() == V2::ListItemStyle::NONE ?
+        "ListItemStyle.NONE" : "ListItemStyle.CARD", filter);
 }
 
 void ListItemPattern::SwipeCommon(ListItemSwipeIndex targetState)
@@ -1157,7 +1169,7 @@ void ListItemPattern::InitDisableEvent()
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_VOID(theme);

@@ -80,7 +80,7 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         if (listItemStyle_ == V2::ListItemStyle::CARD) {
-            auto pipelineContext = PipelineBase::GetCurrentContext();
+            auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_RETURN(pipelineContext, FocusPattern());
             auto listItemTheme = pipelineContext->GetTheme<ListItemTheme>();
             CHECK_NULL_RETURN(listItemTheme, FocusPattern());
@@ -204,7 +204,7 @@ public:
         return MakeRefPtr<ListItemAccessibilityProperty>();
     }
 
-    V2::ListItemStyle GetListItemStyle()
+    V2::ListItemStyle GetListItemStyle() const
     {
         return listItemStyle_;
     }
@@ -281,6 +281,9 @@ private:
     void ChangeDeleteAreaStage();
     void StartSpringMotion(float start, float end, float velocity, bool isCloseAllSwipeActions = false);
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void OnColorConfigurationUpdate() override;
     void InitListItemCardStyleForList();
     void UpdateListItemAlignToCenter();
@@ -341,7 +344,7 @@ private:
     bool isLayouted_ = false;
     bool isSpringMotionRunning_ = false;
     bool isDragging_ = false;
-    
+
     PendingSwipeFunc pendingSwipeFunc_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemPattern);

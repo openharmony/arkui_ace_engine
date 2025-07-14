@@ -20,7 +20,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"
 #include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasModifier {
@@ -46,12 +46,11 @@ void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
 
     Converter::VisitUnion(*context,
         [pattern](const Ark_CanvasRenderingContext2D& peer) {
-            CanvasRenderingContext2DPeerImpl* peerImplPtr = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
-            CHECK_NULL_VOID(peerImplPtr);
-            peerImplPtr->SetInstanceId(Container::CurrentId());
-            peerImplPtr->SetCanvasPattern(pattern);
-            peerImplPtr->CanvasRendererPeerImpl::SetAntiAlias();
-            peerImplPtr->CanvasRendererPeerImpl::SetDensity();
+            CHECK_NULL_VOID(peer);
+            peer->SetInstanceId(Container::CurrentId());
+            peer->SetCanvasPattern(pattern);
+            peer->CanvasRendererPeerImpl::SetAntiAlias();
+            peer->CanvasRendererPeerImpl::SetDensity();
         },
         [pattern](const Ark_DrawingRenderingContext &peer) {
             DrawingRenderingContextPeerImpl* peerImplPtr = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
@@ -60,8 +59,7 @@ void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
             peerImplPtr->SetCanvasPattern(pattern);
         },
         [frameNode]() {
-            // need check
-            // CanvasModelNG::DetachRenderContext(frameNode);
+            CanvasModelNG::DetachRenderContext(frameNode);
         });
 }
 
@@ -93,21 +91,29 @@ void SetCanvasOptions1Impl(Ark_NativePointer node,
 } // CanvasInterfaceModifier
 namespace CanvasAttributeModifier {
 void OnReadyImpl(Ark_NativePointer node,
-                 const VoidCallback* value)
+                 const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onEvent = [arkCallback = CallbackHelper(*value)]() { arkCallback.Invoke(); };
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
     CanvasModelNG::SetOnReady(frameNode, std::move(onEvent));
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,
-                        Ark_Boolean value)
+                        const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // need check
-    // CanvasModelNG::EnableAnalyzer(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    CanvasModelNG::EnableAnalyzer(frameNode, *convValue);
 }
 } // CanvasAttributeModifier
 const GENERATED_ArkUICanvasModifier* GetCanvasModifier()

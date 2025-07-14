@@ -25,8 +25,8 @@
 
 namespace OHOS::Ace {
 
-class DrawableDescriptorOhos : public DrawableDescriptor {
-    DECLARE_ACE_TYPE(DrawableDescriptorOhos, DrawableDescriptor);
+class DrawableDescriptorOhos : public AceDrawableDescriptor {
+    DECLARE_ACE_TYPE(DrawableDescriptorOhos, AceDrawableDescriptor);
 
 public:
     explicit DrawableDescriptorOhos(Drawable::DrawableDescriptor* drawable);
@@ -40,7 +40,7 @@ public:
 
 private:
     Drawable::PaintConfig ConverConfig(const NG::ImagePaintConfig& config);
-    
+
     // do not take the object out
     Drawable::DrawableDescriptor* drawable_;
     std::shared_ptr<std::mutex> mutex_ = std::make_shared<std::mutex>();
@@ -49,4 +49,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_DRAWABLE_DESCRIPTOR_OHOS_H
+#endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_DRAWABLE_DESCRIPTOR_OHOS_H

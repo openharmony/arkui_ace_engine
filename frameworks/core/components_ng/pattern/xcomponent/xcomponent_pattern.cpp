@@ -29,6 +29,7 @@
 #include "base/memory/ace_type.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ace_view.h"
@@ -155,6 +156,7 @@ void XComponentPattern::InitXComponent()
 void XComponentPattern::InitSurface()
 {
     auto host = GetHost();
+    FREE_NODE_CHECK(host, InitSurface, host);
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -269,13 +271,14 @@ void XComponentPattern::Initialize()
 
 void XComponentPattern::OnAttachToMainTree()
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree", GetId().c_str());
     isOnTree_ = true;
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceCreated();
     }
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (needRecoverDisplaySync_ && displaySync_ && !displaySync_->IsOnPipeline()) {
@@ -289,13 +292,14 @@ void XComponentPattern::OnAttachToMainTree()
 
 void XComponentPattern::OnDetachFromMainTree()
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] DetachFromMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] DetachFromMainTree", GetId().c_str());
     isOnTree_ = false;
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceDestroyed();
     }
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (displaySync_ && displaySync_->IsOnPipeline()) {
@@ -468,6 +472,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     UnregisterSurfaceRenderContext();
     CHECK_NULL_VOID(frameNode);
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
     UninitializeAccessibility(frameNode);
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
@@ -514,6 +519,7 @@ void XComponentPattern::InitController()
     CHECK_NULL_VOID(xcomponentController_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, InitController);
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(), TaskExecutor::TaskType::UI);

@@ -722,6 +722,12 @@ public:
 
     static bool IsNeedResampleTouchPoints();
 
+    static bool GetAsyncInitializeEnabled()
+    {
+        // return asyncInitializeEnabled_.load();
+        return false;
+    }
+
     static bool IsNeedSymbol();
 
     static bool GetMultiInstanceEnabled();
@@ -764,6 +770,11 @@ public:
     static bool IsSyncLoadEnabled()
     {
         return syncLoadEnabled_;
+    }
+
+    static bool GetDebugThreadSafeNodeEnabled()
+    {
+        return debugThreadSafeNodeEnable_;
     }
 
 private:
@@ -838,6 +849,7 @@ private:
     static bool sideBarContainerBlurEnable_;
     static std::atomic<bool> stateManagerEnable_;
     static std::atomic<bool> acePerformanceMonitorEnable_;
+    // static std::atomic<bool> asyncInitializeEnabled_;
     static std::atomic<bool> focusCanBeActive_;
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
@@ -863,6 +875,7 @@ private:
     static HeightLayoutBreakPoint heightLayoutBreakpoints_;
     static bool syncLoadEnabled_;
     static bool whiteBlockEnabled_;
+    static bool debugThreadSafeNodeEnable_;
 };
 
 } // namespace OHOS::Ace

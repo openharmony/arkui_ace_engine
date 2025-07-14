@@ -1,0 +1,11 @@
+{
+    "ui": "tdd",
+    "spec": "./test/arkts-api/**/*.test.ts",
+    "extension": [
+        "ts"
+    ],
+    "require": [
+        "../../incremental/test-utils/scripts/register"
+    ],
+    "timeout": 20000
+}

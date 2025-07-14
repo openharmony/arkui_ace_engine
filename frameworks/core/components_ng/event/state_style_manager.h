@@ -126,7 +126,7 @@ public:
         if (!HasStateStyle(state)) {
             return;
         }
-        if ((currentState_ & state) != state) {
+                if ((currentState_ & state) != state) {
             return;
         }
         auto temp = currentState_ ^ state;

@@ -47,6 +47,9 @@ public:
     void OnModifyDone() override;
 
     void OnAttachToFrameNode() override;
+    void OnAttachToMainTree() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTreeMultiThread();
 
     bool IsAtomicNode() const override
     {
@@ -146,6 +149,11 @@ public:
     int32_t GetImagesSize()
     {
         return static_cast<int32_t>(images_.size());
+    }
+
+    const ImageProperties& GetImage(int32_t index)
+    {
+        return images_[index];
     }
 
     bool CheckIfNeedVisibleAreaChange()

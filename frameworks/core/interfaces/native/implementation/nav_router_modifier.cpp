@@ -19,18 +19,17 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavRouterModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = NavRouterModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = NavRouterModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // NavRouterModifier
 namespace NavRouterInterfaceModifier {
@@ -51,24 +50,28 @@ void SetNavRouterOptions1Impl(Ark_NativePointer node,
 } // NavRouterInterfaceModifier
 namespace NavRouterAttributeModifier {
 void OnStateChangeImpl(Ark_NativePointer node,
-                       const Callback_Boolean_Void* value)
+                       const Opt_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onStateChangeCallback = [arkCallback = CallbackHelper(*value)](const bool isActivated) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onStateChangeCallback = [arkCallback = CallbackHelper(*optValue)](const bool isActivated) {
         auto arkIsActivated = Converter::ArkValue<Ark_Boolean>(isActivated);
         arkCallback.Invoke(arkIsActivated);
     };
-    // NavRouterModelNG::SetOnStateChange(frameNode, onStateChangeCallback);
+    NavRouterModelNG::SetOnStateChange(frameNode, onStateChangeCallback);
 }
 void ModeImpl(Ark_NativePointer node,
-              Ark_NavRouteMode value)
+              const Opt_NavRouteMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto enumMode = Converter::OptConvert<NavRouteMode>(value);
-    // NavRouterModelNG::SetNavRouteMode(frameNode, EnumToInt(enumMode));
+    auto enumMode = Converter::OptConvert<NavRouteMode>(*value);
+    NavRouterModelNG::SetNavRouteMode(frameNode, EnumToInt(enumMode));
 }
 } // NavRouterAttributeModifier
 const GENERATED_ArkUINavRouterModifier* GetNavRouterModifier()

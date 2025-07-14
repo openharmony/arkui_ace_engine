@@ -25,8 +25,6 @@ const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 namespace TextControllerAccessor {
 void DestroyPeerImpl(Ark_TextController peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->controller = nullptr;
     delete peer;
 }
 Ark_TextController CtorImpl()
@@ -73,7 +71,4 @@ const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor()
     return &TextControllerAccessorImpl;
 }
 
-struct TextControllerPeer {
-    virtual ~TextControllerPeer() = default;
-};
 }

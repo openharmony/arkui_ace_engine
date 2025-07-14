@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 
 inline RefPtr<NavigationBarTheme> NavigationGetTheme()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     return pipeline->GetTheme<NavigationBarTheme>();
 }
@@ -292,6 +292,12 @@ enum class NavDestinationType {
     HOME = 1,
     PLACE_HOLDER = 2,
 };
+enum class LaunchMode {
+    STANDARD = 0,
+    MOVE_TO_TOP_SINGLETON = 1,
+    POP_TO_SINGLETON = 2,
+    NEW_INSTANCE = 3,
+};
 
 inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)
 {
@@ -308,6 +314,11 @@ struct NavDestinationTransition {
     RefPtr<Curve> curve;
     std::function<void()> event;
     std::function<void()> onTransitionEnd;
+};
+
+struct NavigationOptions {
+    LaunchMode launchMode = LaunchMode::STANDARD;
+    bool animated = true;
 };
 
 using NavDestinationTransitionDelegate = std::function<std::optional<std::vector<NavDestinationTransition>>(

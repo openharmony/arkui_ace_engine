@@ -24,7 +24,7 @@ class PipelineBase;
 };
 
 namespace OHOS::Ace::NG {
-struct ACE_EXPORT ScaleProperty {
+struct ACE_FORCE_EXPORT ScaleProperty {
     float vpScale = 0.0f;
     float fpScale = 0.0f;
     float lpxScale = 0.0f;

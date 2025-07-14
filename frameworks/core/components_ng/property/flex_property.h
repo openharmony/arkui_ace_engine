@@ -33,6 +33,10 @@ using ChainWeightPair = std::pair<std::optional<float>, std::optional<float>>; /
 using GuidelineItem = std::vector<GuidelineInfo>;
 using BarrierItem = std::vector<BarrierInfo>;
 
+namespace {
+constexpr float DEFAULT_BIAS = 0.5f;
+}
+
 class FlexItemProperty {
 public:
     FlexItemProperty() = default;
@@ -102,6 +106,105 @@ public:
         return result;
     }
 
+    std::string AlignDirectionToString2(AlignDirection direction) const
+    {
+        switch (direction) {
+            case AlignDirection::MIDDLE:
+                return "middle";
+            case AlignDirection::LEFT:
+                return "left";
+            case AlignDirection::RIGHT:
+                return "right";
+            case AlignDirection::TOP:
+                return "top";
+            case AlignDirection::CENTER:
+                return "center";
+            case AlignDirection::BOTTOM:
+                return "bottom";
+            case AlignDirection::START:
+                return "start";
+            case AlignDirection::END:
+                return "end";
+            default:
+                return "";
+        }
+    }
+
+    std::string HorizontalAlignToString2(HorizontalAlign align) const
+    {
+        switch (align) {
+            case HorizontalAlign::CENTER:
+                return "HorizontalAlign.Center";
+            case HorizontalAlign::START:
+                return "HorizontalAlign.Start";
+            case HorizontalAlign::END:
+                return "HorizontalAlign.End";
+            default:
+                return "";
+        }
+    }
+
+    std::string VerticalAlignToString2(VerticalAlign align) const
+    {
+        switch (align) {
+            case VerticalAlign::TOP:
+                return "VerticalAlign.Top";
+            case VerticalAlign::CENTER:
+                return "VerticalAlign.Center";
+            case VerticalAlign::BOTTOM:
+                return "VerticalAlign.Bottom";
+            case VerticalAlign::BASELINE:
+                return "VerticalAlign.BaseLine";
+            default:
+                return "";
+        }
+    }
+
+    std::string AlignToString(AlignDirection direction, AlignRule rule) const
+    {
+        std::string result;
+        if (direction == AlignDirection::LEFT || direction == AlignDirection::RIGHT ||
+            direction == AlignDirection::MIDDLE || direction == AlignDirection::START ||
+            direction == AlignDirection::END) {
+            result += HorizontalAlignToString2(rule.horizontal);
+        } else if (direction == AlignDirection::TOP || direction == AlignDirection::BOTTOM ||
+            direction == AlignDirection::CENTER) {
+            result += VerticalAlignToString2(rule.vertical);
+        } else {
+            result += "";
+        }
+        return result;
+    }
+
+    void AlignRulesToJson(std::unique_ptr<JsonValue>& json) const
+    {
+        std::unique_ptr<JsonValue> alignRulesJson = JsonUtil::Create(true);
+        if (GetAlignRules().has_value()) {
+            auto alignRules = GetAlignRules().value();
+            auto iter = alignRules.begin();
+            for (; iter != alignRules.end(); iter++) {
+                std::unique_ptr<JsonValue> ruleJson = JsonUtil::Create(true);
+                ruleJson->Put("anchor", iter->second.anchor.c_str());
+                ruleJson->Put("align", AlignToString(iter->first, iter->second).c_str());
+                std::string direction = AlignDirectionToString2(iter->first);
+                if (!direction.empty()) {
+                    alignRulesJson->Put(direction.c_str(), ruleJson);
+                }
+            }
+        }
+        int32_t multiplier100 = 100;
+        std::unique_ptr<JsonValue> biasJson = JsonUtil::Create(true);
+        auto bias = BiasPair(DEFAULT_BIAS, DEFAULT_BIAS);
+        if (GetBias().has_value()) {
+            bias = GetBiasValue();
+        }
+        biasJson->Put("horizontal", round(static_cast<double>(bias.first) * multiplier100) / multiplier100);
+        biasJson->Put("vertical", round(static_cast<double>(bias.second) * multiplier100) / multiplier100);
+
+        alignRulesJson->Put("bias", biasJson);
+        json->Put("alignRules", alignRulesJson);
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         static const char* ITEM_ALIGN[] = { "ItemAlign.Auto", "ItemAlign.Start", "ItemAlign.Center", "ItemAlign.End",
@@ -117,6 +220,7 @@ public:
         json->PutExtAttr(
             "alignSelf", ITEM_ALIGN[static_cast<int32_t>(propAlignSelf.value_or(FlexAlign::AUTO))], filter);
         json->PutExtAttr("displayPriority", propDisplayIndex.value_or(1), filter);
+        AlignRulesToJson(json);
         auto res = JsonUtil::Create(true);
         res->Put("horizontal", propChainWeight->first.value_or(0.0f));
         res->Put("vertical", propChainWeight->second.value_or(0.0f));

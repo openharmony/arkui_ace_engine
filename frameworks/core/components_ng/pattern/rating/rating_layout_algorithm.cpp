@@ -79,7 +79,6 @@ void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<RatingPattern>();
     CHECK_NULL_VOID(pattern);
-
     if (pattern->UseContentModifier()) {
         if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             host->GetGeometryNode()->ResetContent();

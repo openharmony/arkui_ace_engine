@@ -19,5 +19,8 @@
 
 struct SwipeGestureEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeGestureEventPeer<OHOS::Ace::SwipeGestureEvent> {
+protected:
+    SwipeGestureEventPeer() = default;
     ~SwipeGestureEventPeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

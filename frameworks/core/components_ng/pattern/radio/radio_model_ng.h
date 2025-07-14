@@ -65,13 +65,13 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     void SetBuilder(std::function<void()>&& buildFunc) override;
     static void SetRadioIndicator(int32_t indicator);
+    static void SetCheckedBackgroundColorSetByUser(FrameNode* frameNode, bool flag);
+    static void SetUncheckedBorderColorSetByUser(FrameNode* frameNode, bool flag);
+    static void SetIndicatorColorSetByUser(FrameNode* frameNode, bool flag);
     static void SetChecked(FrameNode* frameNode, bool isChecked);
     static void SetCheckedBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetUncheckedBorderColor(FrameNode* frameNode, const Color& color);
     static void SetIndicatorColor(FrameNode* frameNode, const Color& color);
-    static void SetCheckedBackgroundColorSetByUser(FrameNode* frameNode, bool flag);
-    static void SetUncheckedBorderColorSetByUser(FrameNode* frameNode, bool flag);
-    static void SetIndicatorColorSetByUser(FrameNode* frameNode, bool flag);
     static void SetWidth(FrameNode* frameNode, const Dimension& width);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
@@ -79,8 +79,11 @@ public:
     static void SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetBuilderFunc(FrameNode* frameNode, NG::RadioMakeCallback&& jsMake);
+    static void SetBuilder(FrameNode* frameNode, std::function<void()>&& builder);
     static void SetChangeValue(FrameNode* frameNode, bool value);
     static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
+    static void SetOnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChangeEvent);
+    static void SetRadioIndicatorType(FrameNode* frameNode, const std::optional<int32_t>& indicator);
     static bool GetChecked(FrameNode* frameNode);
     static Color GetCheckedBackgroundColor(FrameNode* frameNode);
     static Color GetUncheckedBorderColor(FrameNode* frameNode);

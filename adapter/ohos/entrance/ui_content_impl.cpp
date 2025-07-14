@@ -1413,7 +1413,7 @@ ani_object UIContentImpl::GetUIAniContext()
     CHECK_NULL_RETURN(frontend, result);
     auto arktsFrontend = AceType::DynamicCast<ArktsFrontend>(frontend);
     CHECK_NULL_RETURN(arktsFrontend, result);
-    result = arktsFrontend->CallGetUIContextFunc();
+    result = arktsFrontend->CallGetUIContextFunc(instanceId_);
     return result;
 }
 
@@ -1509,6 +1509,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
             AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
             AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
             AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
+            AceApplicationInfo::GetInstance().SetDebugForParallel(context->GetApplicationInfo()->debug);
             AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
             AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
             CapabilityRegistry::Register();
@@ -2360,6 +2361,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (vmType_ == VMType::ARK_NATIVE) {
         frontendType = FrontendType::ARK_TS;
     }
+    // if (appInfo->codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_HYBRID) {
+    //     if (vmType_ == VMType::ARK_NATIVE) {
+    //         frontendType = FrontendType::STATIC_HYBRID_DYNAMIC;
+    //     } else {
+    //         frontendType = FrontendType::DYNAMIC_HYBRID_STATIC;
+    //     }
+    // }
     auto container = CreateContainer(info, frontendType, useNewPipe);
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetUIContentType(uIContentType_);
@@ -2640,7 +2648,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
         }
     }
-    if (runtime_ && storageWrapper.napiStorage_.has_value()) {
+    if (runtime_ && storageWrapper.napiStorage_.has_value()) { // 1.1 SetLocalStorage
         auto storage = storageWrapper.napiStorage_.value();
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
         if (!storage) {

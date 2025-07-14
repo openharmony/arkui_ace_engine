@@ -282,7 +282,7 @@ public:
                     childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
                     childRenderContext->ResetForegroundColorStrategy();
                     childRenderContext->UpdateForegroundColorFlag(false);
-                } else {
+                } else if (renderContext->HasForegroundColorStrategy()) {
                     childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
                     childRenderContext->ResetForegroundColor();
                     childRenderContext->UpdateForegroundColorFlag(false);
@@ -298,7 +298,7 @@ public:
                     childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
                     childRenderContext->ResetForegroundColorStrategy();
                     childRenderContext->UpdateForegroundColorFlag(false);
-                } else {
+                } else if (renderContext->HasForegroundColorStrategy()) {
                     childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
                     childRenderContext->ResetForegroundColor();
                     childRenderContext->UpdateForegroundColorFlag(false);
@@ -639,6 +639,16 @@ public:
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
+
+    virtual RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index)
+    {
+        return nullptr;
+    }
+
+    virtual int32_t GetTotalChildCount() const
+    {
+        return -1;
+    }
 
     void CheckLocalized()
     {

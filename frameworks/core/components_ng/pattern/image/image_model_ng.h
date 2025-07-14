@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
+    void Create(const RefPtr<AceDrawableDescriptor>& drawable) override;
     void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) override;
     void CreateWithResourceObj(ImageResourceType resourceType, const RefPtr<ResourceObject>& resObject) override;
     void ResetImage() override;
@@ -79,6 +80,7 @@ public:
     void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) override;
     void ResetResizableLattice() override;
     void SetImageFillSetByUser(bool value) override;
+    static void SetDraggableForFrameNode(RefPtr<FrameNode> frameNode, bool isImageSpan = false);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode* frameNode, const std::string& src);

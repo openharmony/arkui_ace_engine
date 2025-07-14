@@ -39,6 +39,23 @@ ModelPattern::ModelPattern(uint32_t key, const ModelViewContext& context) : key_
             }
         });
 }
+ModelPattern::ModelPattern(uint32_t key) : key_(key)
+{
+}
+
+void ModelPattern::SetModelViewContext(const ModelViewContext& context)
+{
+    modelAdapter_ = MakeRefPtr<ModelAdapterWrapper>(key_, context);
+    modelAdapter_->SetPaintFinishCallback([weak = WeakClaim(this)]() {
+            auto model = weak.Upgrade();
+            if (model) {
+                if (model->NeedsRepaint()) {
+                    model->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                }
+                model->GetPaintProperty<ModelPaintProperty>()->ResetFlagProperties();
+            }
+        });
+}
 
 void ModelPattern::OnModifyDone()
 {
@@ -89,7 +106,7 @@ bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     bool measure = (config.skipMeasure || dirty->SkipMeasureContent()) ? false : true;
     float width = contentSize.Width();
     float height = contentSize.Height();
-    float scale = PipelineContext::GetCurrentContext()->GetViewScale();
+    float scale = PipelineContext::GetCurrentContextSafelyWithCheck()->GetViewScale();
     Render3D::WindowChangeInfo windowChangeInfo {
         contentOffset.GetX(), contentOffset.GetY(),
         width, height,
@@ -164,7 +181,8 @@ void ModelPattern::MarkDirtyNode(const PropertyChangeFlag flag)
 static std::string TextureImagesToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
     std::string ret;
-    if (modelPaintProperty->GetModelImageTexturePathsValue().empty()) {
+    if (!modelPaintProperty->HasModelImageTexturePaths() ||
+            modelPaintProperty->GetModelImageTexturePathsValue().empty()) {
         return ret;
     }
     auto& imageTextures = modelPaintProperty->GetModelImageTexturePaths().value();
@@ -228,7 +246,7 @@ static std::string SurfaceTypeToStr(const RefPtr<ModelAdapterWrapper>& modelAdap
 static std::string SceneResourceToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
     std::string ret;
-    if (modelPaintProperty->GetModelSourceValue().empty()) {
+    if (!modelPaintProperty->HasModelSource() || modelPaintProperty->GetModelSourceValue().empty()) {
         return ret;
     }
     ret = modelPaintProperty->GetModelSource().value();
@@ -238,7 +256,7 @@ static std::string SceneResourceToStr(const RefPtr<ModelPaintProperty>& modelPai
 static std::string SceneEnvironmentToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
     std::string ret;
-    if (modelPaintProperty->GetModelBackgroundValue().empty()) {
+    if (!modelPaintProperty->HasModelBackground() || modelPaintProperty->GetModelBackgroundValue().empty()) {
         return ret;
     }
     ret = modelPaintProperty->GetModelBackground().value();
@@ -259,7 +277,7 @@ static std::string SceneCustomRenderToStr(const RefPtr<ModelPaintProperty>& mode
 static std::string SceneShaderPathToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
     std::string ret;
-    if (modelPaintProperty->GetShaderPathValue().empty()) {
+    if (!modelPaintProperty->HasShaderPath() || modelPaintProperty->GetShaderPathValue().empty()) {
         return ret;
     }
     ret = modelPaintProperty->GetShaderPath().value();

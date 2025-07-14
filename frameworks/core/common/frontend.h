@@ -78,7 +78,11 @@ struct WindowConfig {
     }
 };
 
-enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN, ETS_CARD, DECLARATIVE_CJ, ARK_TS };
+enum class FrontendType {
+    JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN, ETS_CARD, DECLARATIVE_CJ, ARK_TS,
+    DYNAMIC_HYBRID_STATIC, STATIC_HYBRID_DYNAMIC
+};
+
 struct PageTarget;
 
 class ACE_FORCE_EXPORT Frontend : public AceType {
@@ -165,6 +169,14 @@ public:
     virtual void ReplacePage(const std::string& url, const std::string& params) = 0;
 
     virtual void PushPage(const std::string& url, const std::string& params) = 0;
+
+    // For ArkTS1.2
+    virtual void* PushExtender(const std::string& url, const std::string& params) { return nullptr; };
+    virtual void* ReplaceExtender(
+        const std::string& url, const std::string& params, std::function<void()>&& finishCallback) { return nullptr; };
+    virtual void* RunPageExtender(const std::string& url, const std::string& params) { return nullptr; };
+    virtual void BackExtender(const std::string& url, const std::string& params) {};
+    virtual void ClearExtender() {};
 
     // Gets front-end event handler to handle ace event.
     virtual RefPtr<AceEventHandler> GetEventHandler() = 0;

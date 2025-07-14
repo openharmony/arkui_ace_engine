@@ -18,7 +18,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/implementation/color_filter_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "frameworks/core/components/image/image_component.h"
@@ -30,6 +30,6 @@ const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
     1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
 };
 
-void ApplyColorFilterValues(Ark_NativePointer node, const Ark_Union_ColorFilter_DrawingColorFilter* value);
+void ApplyColorFilterValues(Ark_NativePointer node, const Opt_Union_ColorFilter_DrawingColorFilter* value);
 } // namespace ImageCommonMethods
 } // namespace OHOS::Ace::NG::GeneratedModifier

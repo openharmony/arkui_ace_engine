@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "package": "@test",
+        "outDir": "../../build/golden",
+        "baseUrl": ".",
+        "paths": {
+            "@koalaui/compat": [ "../../../../incremental/compat/src/arkts" ],
+            "#platform": [ "../../../../incremental/compat/src/arkts" ],
+            "@koalaui/common": [ "../../../../incremental/common/src" ],
+            "@koalaui/runtime": [ "../../../../incremental/runtime/ets" ],
+            "@koalaui/runtime/annotations": [ "../../../../incremental/runtime/annotations" ]
+        },
+        "plugins": [
+            {
+                "transform": "../../lib/ParserTransformer",
+                "stage": "parsed",
+                "stableForTests": true
+            },
+            {
+                "transform": "../../lib/MemoTransformer",
+                "stage": "checked",
+                "keepTransformed": "../test/out",
+                "stableForTests": true
+            }
+        ]
+    },
+    "include": ["./**/*.ets"]
+}

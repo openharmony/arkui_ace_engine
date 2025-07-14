@@ -190,6 +190,7 @@ bool FontSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 }
 
 // DecorationSpan
+
 DecorationSpan::DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
     std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options)
     : SpanBase(0, 0), types_(types), color_(color), style_(style), options_(options)

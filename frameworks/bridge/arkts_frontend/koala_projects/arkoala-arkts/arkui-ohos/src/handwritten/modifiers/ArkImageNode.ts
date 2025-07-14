@@ -13,19 +13,14 @@
  * limitations under the License.
  */
 
-import { PixelMap } from "../../generated/ArkPixelMapMaterialized"
-import { InteropNativeModule } from "@koalaui/interop";
-import { ResourceStr, ResourceColor } from "../../component/units"
-import { Resource } from "../../../global/resource/resource";
-import { ColorFilter, CopyOptions, DrawingColorFilter, DynamicRangeMode, ImageAIOptions, ImageContent, DrawableDescriptor, ImageAnalyzerConfig, ImageAttribute, ImageErrorCallback, ImageFit, ImageInterpolation, ImageRenderMode, ImageRepeat, ImageSourceSize, PointLightStyle, ResizableOptions, ResolutionQuality, Type_ImageAttribute_onComplete_callback_event } from "../../generated";
-import { ArkImagePeer } from "../../generated/peers/ArkImagePeer";
+import { ArkImagePeer } from "../../component/image";
 import { ArkBaseNode } from "./ArkBaseNode";
 
 export class ArkImageNode extends ArkBaseNode {
 
     constructParam(...param: Object[]): this {
         let peerNode = this.getPeer() as ArkImagePeer
-        peerNode.setImageOptions0Attribute(param[0] as PixelMap | ResourceStr | DrawableDescriptor)
+        peerNode.setImageOptions0Attribute(param[0] as string)
         return this
     }
 

@@ -61,6 +61,7 @@ public:
     void CreateWithResourceObjIntervalSize(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjSnapPaginations(std::vector<RefPtr<ResourceObject>>& resObjs) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<FrameNode> CreateFrameNodeMultiThread(int32_t nodeId);
     static void SetScrollController(
         FrameNode* frameNode, const RefPtr<ScrollControllerBase>& scroller, const RefPtr<ScrollProxy>& proxy);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);

@@ -66,6 +66,14 @@ void NavigatorModelNG::SetParams(const std::string& params)
     eventHub->SetParams(params);
 }
 
+RefPtr<FrameNode> NavigatorModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::NAVIGATOR_ETS_TAG, nodeId,
+        AceType::MakeRefPtr<NavigatorPattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode;
+}
+
 void NavigatorModelNG::SetParams(FrameNode* frameNode, const std::string& params)
 {
     CHECK_NULL_VOID(frameNode);

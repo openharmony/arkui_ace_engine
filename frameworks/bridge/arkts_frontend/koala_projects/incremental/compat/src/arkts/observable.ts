@@ -19,7 +19,7 @@ const OBSERVABLE_TARGET = "target"
 
 export function getObservableTarget(proxy: Object): Object {
     try {
-        return Reflect.get(proxy, OBSERVABLE_TARGET) ?? proxy
+        return (Reflect.get(proxy, OBSERVABLE_TARGET) ?? proxy) as Object
     } catch (error) {
         return proxy
     }
@@ -216,7 +216,7 @@ export function observableProxy<Value>(value: Value, parent?: ObservableHandler,
 }
 
 function createProxyArray<T>(array: Array<T>): Array<T> {
-    return Proxy.create(array, new CustomArrayProxyHandler<T>())
+    return proxy.Proxy.create(array, new CustomArrayProxyHandler<T>())
 }
 
 function proxyChildrenOnly<T>(array: Array<T>, parent: ObservableHandler, observed?: boolean): Array<T> {
@@ -224,7 +224,7 @@ function proxyChildrenOnly<T>(array: Array<T>, parent: ObservableHandler, observ
     return array.map((it: T) => observableProxy(it, parent, observed))
 }
 
-class CustomArrayProxyHandler<T> extends DefaultArrayProxyHandler<T> {
+class CustomArrayProxyHandler<T> extends proxy.DefaultArrayProxyHandler<T> {
     override get(target: Array<T>, index: int32): T {
         const observable = ObservableHandler.find(target)
         if (observable) observable.onAccess()
@@ -257,7 +257,7 @@ class CustomArrayProxyHandler<T> extends DefaultArrayProxyHandler<T> {
         return super.set(target, name, value)
     }
 
-    override invoke(target: Array<T>, method: Method, args: NullishType[]): NullishType {
+    override invoke(target: Array<T>, method: Method, args: FixedArray<NullishType>): NullishType {
         const observable = ObservableHandler.find(target)
         if (observable) {
             const name = method.getName()

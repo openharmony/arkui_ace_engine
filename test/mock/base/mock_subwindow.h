@@ -38,6 +38,9 @@ public:
     MOCK_METHOD5(ShowMenuNG,
         void(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
             const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset));
+    MOCK_METHOD5(ShowMenuNG,
+        void(std::function<RefPtr<NG::UINode>()>&& buildFunc, std::function<RefPtr<NG::UINode>()>&& previewBuildFunc,
+            const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset));
     MOCK_METHOD1(ShowPreviewNG, bool(bool isStartDraggingFromSubWindow));
     MOCK_METHOD1(SetWindowTouchable, void(bool touchable));
     MOCK_METHOD0(HidePreviewNG, void());
@@ -133,6 +136,13 @@ public:
     MOCK_METHOD1(RemoveFollowParentWindowLayoutNode, void(int32_t nodeId));
     MOCK_METHOD1(SetNodeId, void(int32_t nodeId));
     MOCK_CONST_METHOD0(GetNodeId, int32_t());
+    MOCK_METHOD2(ShowToastStatic, void(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback));
+    MOCK_METHOD2(CloseToastStatic, void(int32_t toastId, std::function<void(int32_t)>&& callback));
+    MOCK_METHOD2(ShowDialogStatic, void(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback));
+    MOCK_METHOD2(ShowActionMenuStatic, void(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback));
+    MOCK_METHOD2(OpenCustomDialogStatic, void(DialogProperties &dialogProps, std::function<void(int32_t)> &&callback));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

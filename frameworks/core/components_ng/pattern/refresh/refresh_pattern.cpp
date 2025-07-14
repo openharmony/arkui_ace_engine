@@ -19,6 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
@@ -74,12 +75,21 @@ Dimension RefreshPattern::GetTriggerRefreshDisTance()
 void RefreshPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
+    // call OnAttachToFrameNodeMultiThread by multi thread
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(true);
     host->GetRenderContext()->UpdateClipEdge(true);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     isHigherVersion_ =  context->GetMinPlatformVersion() >= static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN);
+}
+
+void RefreshPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    // call OnAttachToMainTreeMultiThread by multi thread
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
 bool RefreshPattern::OnDirtyLayoutWrapperSwap(
@@ -273,7 +283,9 @@ void RefreshPattern::InitProgressColumn()
     CHECK_NULL_VOID(loadingTextLayoutProperty);
     auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
+    if (layoutProperty->HasLoadingText()) {
+        loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
+    }
     loadingTextLayoutProperty->UpdateMaxLines(1);
     loadingTextLayoutProperty->UpdateMaxFontScale(2.0f);
     loadingTextLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -377,7 +389,9 @@ void RefreshPattern::InitChildNode()
         CHECK_NULL_VOID(loadingTextLayoutProperty);
         auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
+        if (layoutProperty->HasLoadingText()) {
+            loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
+        }
         loadingTextNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto textAccessibilityProperty = loadingTextNode_->GetAccessibilityProperty<AccessibilityProperty>();
         CHECK_NULL_VOID(textAccessibilityProperty);

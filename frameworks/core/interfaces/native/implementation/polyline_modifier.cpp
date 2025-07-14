@@ -15,7 +15,9 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/polygon_model_ng.h"
+#include "core/components_ng/pattern/shape/polygon_model_static.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
@@ -46,11 +48,10 @@ namespace PolylineModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = PolygonModelNG::CreateFrameNode(id, false);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = PolygonModelStatic::CreateFrameNode(id, false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // PolylineModifier
 namespace PolylineInterfaceModifier {
@@ -63,23 +64,30 @@ void SetPolylineOptionsImpl(Ark_NativePointer node,
     auto opt = Converter::OptConvert<PolylineOptions>(*options);
     CHECK_NULL_VOID(opt);
     Validator::ValidateNonNegative(opt->width);
-    // ShapeAbstractModelNG::SetWidth(frameNode, opt->width);
+    ShapeAbstractModelStatic::SetWidth(frameNode, opt->width);
     Validator::ValidateNonNegative(opt->height);
-    // ShapeAbstractModelNG::SetHeight(frameNode, opt->height);
+    ShapeAbstractModelStatic::SetHeight(frameNode, opt->height);
 }
 } // PolylineInterfaceModifier
 namespace PolylineAttributeModifier {
 void PointsImpl(Ark_NativePointer node,
-                const Array_Point* value)
+                const Opt_Array_ShapePoint* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    std::optional<ShapePoints> points = Converter::Convert<std::vector<ShapePoint>>(*value);
-    if (points->size() < POINTS_NUMBER_MIN) {
+    std::optional<ShapePoints> points;
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        std::vector<ShapePoint> shapePointArray;
+        for (int32_t i = 0; i < value->value.length; ++i) {
+            shapePointArray.emplace_back(Converter::Convert<ShapePoint>(value->value.array[i]));
+        }
+        points = std::make_optional<ShapePoints>(shapePointArray);
+    }
+    if (points && points->size() < POINTS_NUMBER_MIN) {
         points.reset();
     }
-    // PolygonModelNG::SetPoints(frameNode, points);
+    PolygonModelStatic::SetPoints(frameNode, points);
 }
 } // PolylineAttributeModifier
 const GENERATED_ArkUIPolylineModifier* GetPolylineModifier()

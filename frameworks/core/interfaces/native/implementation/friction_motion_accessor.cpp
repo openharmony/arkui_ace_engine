@@ -43,7 +43,4 @@ const GENERATED_ArkUIFrictionMotionAccessor* GetFrictionMotionAccessor()
     return &FrictionMotionAccessorImpl;
 }
 
-struct FrictionMotionPeer {
-    virtual ~FrictionMotionPeer() = default;
-};
 }

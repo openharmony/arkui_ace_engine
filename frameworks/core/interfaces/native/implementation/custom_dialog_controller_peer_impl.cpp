@@ -18,7 +18,7 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_static.h"
 #include "core/components/theme/shadow_theme.h"
 
 namespace {
@@ -35,45 +35,73 @@ inline void AssignCast(std::optional<KeyboardAvoidMode>& dst, const Ark_Keyboard
         default: LOGE("Unexpected enum value in Ark_KeyboardAvoidMode: %{public}d", src);
     }
 }
+template<>
+inline void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src)
+{
+    switch (src) {
+        case ARK_LEVEL_MODE_OVERLAY: dst = LevelMode::OVERLAY; break;
+        case ARK_LEVEL_MODE_EMBEDDED: dst = LevelMode::EMBEDDED; break;
+        default: LOGE("Unexpected enum value in Ark_LevelMode: %{public}d", src);
+    }
+}
+template<>
+inline void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src)
+{
+    switch (src) {
+        case ARK_IMMERSIVE_MODE_DEFAULT: dst = ImmersiveMode::DEFAULT; break;
+        case ARK_IMMERSIVE_MODE_EXTEND: dst = ImmersiveMode::EXTEND; break;
+        default: LOGE("Unexpected enum value in Ark_ImmersiveMode: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 void CustomDialogControllerPeerImpl::SetOwnerView(Ark_NativePointer node)
 {
     CHECK_NULL_VOID(node);
+    if (!ownerView_.Invalid()) {
+        return;
+    }
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     auto weakNode = AceType::WeakClaim(frameNode);
     CHECK_NULL_VOID(!weakNode.Invalid());
     ownerView_ = weakNode;
+    auto pipeline = frameNode->GetContext();
+    if (pipeline) {
+        SetInstanceId(pipeline->GetInstanceId());
+    }
 }
 
-void CustomDialogControllerPeerImpl::SetBuilder(CustomNodeBuilder builder, Ark_NativePointer node)
+void CustomDialogControllerPeerImpl::SetBuilder(
+    CustomNodeBuilder builder, const RefPtr<CustomDialogControllerPeer>& peer)
 {
-    CHECK_NULL_VOID(node);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    builder_ = [callback = CallbackHelper(builder), frameNode]() -> RefPtr<UINode> {
-        auto refNode = AceType::Claim(frameNode);
-        CHECK_NULL_RETURN(refNode, nullptr);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, nullptr);
-        pipelineContext->UpdateCurrentActiveNode(refNode);
-        return callback.BuildSync(reinterpret_cast<Ark_NativePointer>(frameNode));
-    };
-}
-
-void CustomDialogControllerPeerImpl::SetOnCancel(Opt_Callback_Void cancel, Ark_NativePointer node)
-{
-    CHECK_NULL_VOID(node);
-    auto cancelOpt = Converter::OptConvert<Callback_Void>(cancel);
-    CHECK_NULL_VOID(cancelOpt);
-    dialogProperties_.onCancel = [callback = CallbackHelper(cancelOpt.value()), node]() {
-        auto refNode = AceType::Claim(reinterpret_cast<FrameNode*>(node));
-        CHECK_NULL_VOID(refNode);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+    builder_ = [callback = CallbackHelper(builder), weakPeer = AceType::WeakClaim(AceType::RawPtr(peer))]() -> void {
+        auto controllerPeer = weakPeer.Upgrade();
+        CHECK_NULL_VOID(controllerPeer);
+        auto weakNode = controllerPeer->GetOwnerViewNode();
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->UpdateCurrentActiveNode(refNode);
-        callback.Invoke();
+        pipelineContext->UpdateCurrentActiveNode(frameNode);
+        callback.BuildAsync([weakPeer](const RefPtr<UINode>& uiNode) {
+            auto controller = weakPeer.Upgrade();
+            CHECK_NULL_VOID(controller);
+            auto builderFunc = [uiNode]() -> RefPtr<UINode> {
+                return uiNode;
+            };
+            CustomDialogControllerModelStatic::SetOpenDialog(
+                controller->dialogProperties_, controller->dialogs_, weakPeer, std::move(builderFunc));
+        }, reinterpret_cast<Ark_NativePointer>(AceType::RawPtr(frameNode)));
     };
+}
+
+void CustomDialogControllerPeerImpl::SetOnCancel(
+    Opt_Callback_Void cancel, const RefPtr<CustomDialogControllerPeer>& peer)
+{
+    auto cancelOpt = TransformCallbackToFunctionVoid(cancel, peer);
+    CHECK_NULL_VOID(cancelOpt);
+    dialogProperties_.onCancel = cancelOpt;
 }
 
 void CustomDialogControllerPeerImpl::SetAutoCancel(Opt_Boolean autoCancel)
@@ -271,6 +299,91 @@ void CustomDialogControllerPeerImpl::SetHoverModeArea(Opt_HoverModeAreaType hove
     dialogProperties_.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(hoverModeArea);
 }
 
+void CustomDialogControllerPeerImpl::SetBackgroundBlurStyleOptions(
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions)
+{
+    dialogProperties_.blurStyleOption = Converter::OptConvert<BlurStyleOption>(backgroundBlurStyleOptions);
+}
+
+void CustomDialogControllerPeerImpl::SetBackgroundEffect(Opt_BackgroundEffectOptions backgroundEffect)
+{
+    dialogProperties_.effectOption = Converter::OptConvert<EffectOption>(backgroundEffect);
+}
+
+void CustomDialogControllerPeerImpl::SetOnDidAppear(
+    Opt_Callback_Void onDidAppear, const RefPtr<CustomDialogControllerPeer>& peer)
+{
+    auto callback = TransformCallbackToFunctionVoid(onDidAppear, peer);
+    CHECK_NULL_VOID(callback);
+    dialogProperties_.onDidAppear = callback;
+}
+
+void CustomDialogControllerPeerImpl::SetOnDidDisappear(
+    Opt_Callback_Void onDidDisappear, const RefPtr<CustomDialogControllerPeer>& peer)
+{
+    auto callback = TransformCallbackToFunctionVoid(onDidDisappear, peer);
+    CHECK_NULL_VOID(callback);
+    dialogProperties_.onDidDisappear = callback;
+}
+
+void CustomDialogControllerPeerImpl::SetOnWillAppear(
+    Opt_Callback_Void onWillAppear, const RefPtr<CustomDialogControllerPeer>& peer)
+{
+    auto callback = TransformCallbackToFunctionVoid(onWillAppear, peer);
+    CHECK_NULL_VOID(callback);
+    dialogProperties_.onWillAppear = callback;
+}
+
+void CustomDialogControllerPeerImpl::SetOnWillDisappear(
+    Opt_Callback_Void onWillDisappear, const RefPtr<CustomDialogControllerPeer>& peer)
+{
+    auto callback = TransformCallbackToFunctionVoid(onWillDisappear, peer);
+    CHECK_NULL_VOID(callback);
+    dialogProperties_.onWillDisappear = callback;
+}
+
+void CustomDialogControllerPeerImpl::SetKeyboardAvoidDistance(Opt_LengthMetrics keyboardAvoidDistance)
+{
+    dialogProperties_.keyboardAvoidDistance = Converter::OptConvert<Dimension>(keyboardAvoidDistance);
+}
+
+void CustomDialogControllerPeerImpl::SetLevelMode(Opt_LevelMode levelMode)
+{
+    auto result = Converter::OptConvert<LevelMode>(levelMode);
+    if (result.has_value()) {
+        dialogProperties_.dialogLevelMode = result.value();
+    }
+}
+
+void CustomDialogControllerPeerImpl::SetLevelUniqueId(Opt_Number levelUniqueId)
+{
+    auto result = Converter::OptConvert<int32_t>(levelUniqueId);
+    if (result.has_value()) {
+        dialogProperties_.dialogLevelUniqueId = result.value();
+    }
+}
+
+void CustomDialogControllerPeerImpl::SetImersiveMode(Opt_ImmersiveMode immersiveMode)
+{
+    auto result = Converter::OptConvert<ImmersiveMode>(immersiveMode);
+    if (result.has_value()) {
+        dialogProperties_.dialogImmersiveMode = result.value();
+    }
+}
+
+void CustomDialogControllerPeerImpl::SetLevelOrder(Opt_LevelOrder levelOrder)
+{
+    dialogProperties_.levelOrder = Converter::OptConvert<double>(levelOrder);
+}
+
+void CustomDialogControllerPeerImpl::SetFocusable(Opt_Boolean focusable)
+{
+    auto result = Converter::OptConvert<bool>(focusable);
+    if (result.has_value()) {
+        dialogProperties_.focusable = result.value();
+    }
+}
+
 DialogProperties CustomDialogControllerPeerImpl::GetDialogProperties() const
 {
     return dialogProperties_;
@@ -287,15 +400,13 @@ void CustomDialogControllerPeerImpl::OpenDialog()
         }
     }
     dialogProperties_.isSysBlurStyle = true;
-    // need check
-    // CustomDialogControllerModelNG::SetOpenDialog(dialogProperties_, dialogs_, WeakClaim(this), std::move(builder_));
+    builder_();
 }
 
 void CustomDialogControllerPeerImpl::CloseDialog()
 {
     ContainerScope scope(instanceId_);
-    // need check
-    // CustomDialogControllerModelNG::SetCloseDialog(dialogProperties_, dialogs_, WeakClaim(this));
+    CustomDialogControllerModelStatic::SetCloseDialog(dialogProperties_, dialogs_, WeakClaim(this));
 }
 
 RefPtr<UINode> CustomDialogControllerPeerImpl::GetWindowScene() const
@@ -313,4 +424,21 @@ RefPtr<UINode> CustomDialogControllerPeerImpl::GetWindowScene() const
     return parent;
 }
 
+std::function<void()> CustomDialogControllerPeerImpl::TransformCallbackToFunctionVoid(
+    Opt_Callback_Void callback, const RefPtr<CustomDialogControllerPeer>& peer)
+{
+    auto callbackOpt = Converter::OptConvert<Callback_Void>(callback);
+    CHECK_NULL_RETURN(callbackOpt, nullptr);
+    return [callbackFunc = CallbackHelper(callbackOpt.value()), weak = AceType::WeakClaim(AceType::RawPtr(peer))]() {
+        auto controllerPeer = weak.Upgrade();
+        CHECK_NULL_VOID(controllerPeer);
+        auto weakNode = controllerPeer->GetOwnerViewNode();
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(frameNode);
+        callbackFunc.InvokeSync();
+    };
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier

@@ -122,14 +122,14 @@ public:
     }
 
 private:
-    Dimension width_ = 0.0_vp;
-    Dimension height_ = 0.0_vp;
-    DimensionOffset offset_;
     struct ResourceUpdater {
         RefPtr<ResourceObject> resObj;
         std::function<void(const RefPtr<ResourceObject>&, DimensionRect&)> updateFunc;
     };
     std::unordered_map<std::string, ResourceUpdater> resMap_;
+    Dimension width_ = 1.00_pct;
+    Dimension height_ = 1.00_pct;
+    DimensionOffset offset_ = {0.00_vp, 0.00_vp};
 };
 
 } // namespace OHOS::Ace

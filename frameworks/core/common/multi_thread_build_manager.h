@@ -36,6 +36,8 @@ public:
     static bool IsFreeNodeScope();
     static void TryExecuteUnSafeTask(NG::UINode* node, std::function<void()>&& task);
     static bool TryPostUnSafeTask(NG::UINode* node, std::function<void()>&& task);
+    static void SetIsThreadSafeNodeScope(bool isThreadSafeNodeScope);
+    static bool IsThreadSafeNodeScope();
     bool PostAsyncUITask(int32_t contextId, std::function<void()>&& asyncUITask,
         std::function<void()>&& onFinishTask);
     bool PostUITask(int32_t contextId, std::function<void()>&& uiTask);
@@ -43,6 +45,7 @@ public:
 private:
     MultiThreadBuildManager();
     void InitAsyncUITaskQueue();
+    static thread_local bool isThreadSafeNodeScope_;
     static thread_local bool isFreeNodeScope_;
     static thread_local bool isUIThread_;
     ACE_DISALLOW_COPY_AND_MOVE(MultiThreadBuildManager);

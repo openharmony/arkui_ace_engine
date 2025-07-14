@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -25,4 +26,15 @@ namespace OHOS::Ace::NG::Converter {
 
     template<>
     RefPtr<SpanBase> Convert(const Ark_StyleOptions& src);
+
+    template<>
+    inline RefPtr<SpanBase> Convert(const Ark_SpanStyle& src)
+    {
+        return Convert<RefPtr<SpanBase>>(Ark_StyleOptions {
+            .start = ArkValue<Opt_Number>(src.start),
+            .length = ArkValue<Opt_Number>(src.length),
+            .styledKey = src.styledKey,
+            .styledValue = src.styledValue,
+        });
+    }
 }

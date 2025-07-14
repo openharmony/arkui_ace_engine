@@ -15,6 +15,8 @@
 
 #include "image_source_ohos.h"
 
+#include "pixel_map_ohos.h"
+
 #include "media_errors.h"
 
 namespace OHOS::Ace {
@@ -136,6 +138,19 @@ RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap()
         return nullptr;
     }
     return PixelMap::Create(std::move(pixelMap));
+}
+
+RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(const DecodeOptions& options)
+{
+    uint32_t errorCode;
+    Media::DecodeOptions decodeOpts;
+    decodeOpts.desiredPixelFormat = PixelMapOhos::ConvertToMediaPixelFormat(options.desiredFormat);
+    auto pixelmap = imageSource_->CreatePixelMap(decodeOpts, errorCode);
+    if (errorCode != Media::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "create pixelmap failed, errorCode = %{public}u", errorCode);
+        return nullptr;
+    }
+    return PixelMap::Create(std::move(pixelmap));
 }
 
 ImageSource::Size ImageSourceOhos::GetImageSize()

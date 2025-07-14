@@ -418,6 +418,14 @@ void DatePickerModelNG::SetOnDateChange(FrameNode* frameNode, DateChangeEvent&& 
     eventHub->SetOnDateChange(std::move(onChange));
 }
 
+void DatePickerModelNG::SetChangeEvent(FrameNode* frameNode, DateChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(onChange));
+}
+
 PickerTextStyle DatePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
@@ -741,7 +749,7 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     if (!executor) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
@@ -975,7 +983,7 @@ uint32_t DatePickerModelNG::getBackgroundColor(FrameNode* frameNode)
 
 const Dimension DatePickerModelNG::ConvertFontScaleValue(const Dimension& fontSizeValue)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
     auto maxAppFontScale = pipeline->GetMaxAppFontScale();
     auto follow = pipeline->IsFollowSystem();
@@ -1021,7 +1029,7 @@ void DatePickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, c
     auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
-    auto&& updateFunc = [textStyleOpt, frameNode, updateTextStyleFunc](const RefPtr<ResourceObject> resObj) {
+    auto&& updateFunc = [textStyleOpt, updateTextStyleFunc](const RefPtr<ResourceObject> resObj) {
         PickerTextStyle textStyle;
         Color color;
         CalcDimension fontSize;
