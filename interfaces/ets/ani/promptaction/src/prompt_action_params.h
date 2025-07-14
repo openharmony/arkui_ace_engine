@@ -169,10 +169,10 @@ bool GetShadowParamOpt(ani_env *env, ani_object object, std::optional<OHOS::Ace:
 ani_object WrapBusinessError(ani_env* env, const std::string& msg);
 ani_ref CreateBusinessError(ani_env* env, int32_t code, const std::string& msg);
 bool ResourceIntegerToString(const ResourceInfo& resourceInfo, std::string& result);
-bool GetDimesionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension& result);
-bool GetDimesionParam(ani_env* env, ani_ref ref, OHOS::Ace::CalcDimension& result);
-bool GetDimesionParam(ani_env* env, ani_object object, const char *name, OHOS::Ace::CalcDimension& result);
-bool GetDimesionParamOpt(ani_env* env, ani_object object, const char *name,
+bool GetDimensionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension& result);
+bool GetDimensionParam(ani_env* env, ani_ref ref, OHOS::Ace::CalcDimension& result);
+bool GetDimensionParam(ani_env* env, ani_object object, const char *name, OHOS::Ace::CalcDimension& result);
+bool GetDimensionParamOpt(ani_env* env, ani_object object, const char *name,
     std::optional<OHOS::Ace::CalcDimension>& result);
 void CheckDimension(OHOS::Ace::CalcDimension value);
 bool GetBackgroundBlurStyleParam(ani_env* env, ani_object object, int32_t& result);
