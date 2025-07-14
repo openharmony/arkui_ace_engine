@@ -358,6 +358,11 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController006, TestSize.Level
     replacementString =
         AceType::DynamicCast<MutableSpanString>(onStyledStringWillChangeValue.GetReplacementString())->GetU16string();
     EXPECT_EQ(replacementString, INIT_STRING_3);
+
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(onStyledStringWillChangeValue.GetRangeBefore().start, 0);
+    EXPECT_EQ(onStyledStringWillChangeValue.GetRangeBefore().end, 0);
 }
 
 /**

@@ -73,8 +73,7 @@ void OnContentChangedImpl(Ark_RichEditorStyledStringController peer,
     CHECK_NULL_VOID(listener);
 
     auto onWillChangeArk = Converter::OptConvert<Callback_StyledStringChangeValue_Boolean>(listener->onWillChange);
-    auto onWillChangeCapture = std::make_shared<Callback_StyledStringChangeValue_Boolean>(*onWillChangeArk);
-    auto onWillChange = [onWillChangeCapture, arkCallback = CallbackHelper(*onWillChangeCapture)](
+    auto onWillChange = [onWillChangeArk, arkCallback = CallbackHelper(*onWillChangeArk)](
         const StyledStringChangeValue& value) {
         auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value);
         Callback_Boolean_Void continuation;
@@ -84,12 +83,10 @@ void OnContentChangedImpl(Ark_RichEditorStyledStringController peer,
     peer->SetOnWillChange(std::move(onWillChange));
 
     auto onDidChangeArk = Converter::OptConvert<OnDidChangeCallback>(listener->onDidChange);
-    auto onDidChangeCapture = std::make_shared<OnDidChangeCallback>(*onDidChangeArk);
-    auto onDidChange = [onDidChangeCapture, arkCallback = CallbackHelper(*onDidChangeCapture)](
+    auto onDidChange = [onDidChangeArk, arkCallback = CallbackHelper(*onDidChangeArk)](
         const StyledStringChangeValue& value) {
         auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value);
         arkCallback.Invoke(changeValue.range, changeValue.range);
-        LOGW("RichEditorStyledStringControllerAccessor :: before range = after, that's temporary and will be fixed");
     };
     peer->SetOnDidChange(std::move(onDidChange));
 }
