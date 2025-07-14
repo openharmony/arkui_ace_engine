@@ -179,7 +179,6 @@ struct ComposeTitleBar {
         let message: string = (exception as BusinessError)?.message;
         hilog.error(0x3900, 'ComposeTitleBar',
           `Faild to getFrameNodeByUniqueId,cause, code: ${code}, message: ${message}`);
-        return 1;
       }
     })
     .width('100%')
@@ -923,7 +922,6 @@ struct ComposeTitleBarDialog {
       let code: number = (exception as BusinessError)?.code;
       let message: string = (exception as BusinessError)?.message;
       hilog.error(0x3900, 'ComposeTitleBar', `Faild to getMainWindowSync,cause, code: ${code}, message: ${message}`);
-      return 1;
     }
   }
 }
