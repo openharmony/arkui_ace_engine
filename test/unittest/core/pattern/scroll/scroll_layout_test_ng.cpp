@@ -15,6 +15,9 @@
 
 #include "scroll_test_ng.h"
 
+#include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+
 namespace OHOS::Ace::NG {
 class ScrollLayoutTestNg : public ScrollTestNg {
 public:
@@ -1019,6 +1022,130 @@ HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment006, TestSize.Level1)
      */
     scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
     EXPECT_EQ(scrollAlignment, Alignment::CENTER_RIGHT);
+}
+
+/**
+ * @tc.name: OnSurfaceChanged001
+ * @tc.desc: Test ScrollLayoutAlgorithm OnSurfaceChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, OnSurfaceChanged001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     * Set currentFocus_ of focusHub to false
+     */
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(2.0f);
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    WeakPtr<FrameNode> hostNode = std::move(frameNode);
+    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(hostNode);
+    frameNode->GetOrCreateFocusHub()->SetCurrentFocus(false);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode->CreateLayoutWrapper(false, false);
+    layoutWrapper->hostNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Set currentOffset_ to 4
+     */
+    scrollLayoutAlgorithm->currentOffset_ = 4.0f;
+
+    /**
+     * @tc.steps: step3. Set contentMainSize to 2
+     * @tc.expected: The currentOffset is unchanged
+     */
+    scrollLayoutAlgorithm->OnSurfaceChanged(AceType::RawPtr(layoutWrapper), 2.0f);
+    EXPECT_EQ(scrollLayoutAlgorithm->currentOffset_, 4.0f);
+}
+
+/**
+ * @tc.name: OnSurfaceChanged002
+ * @tc.desc: Test ScrollLayoutAlgorithm OnSurfaceChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, OnSurfaceChanged002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     * Set currentFocus_ of focusHub to true
+     */
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(2.0f);
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<TextFieldPattern> textFieldPattern = AceType::MakeRefPtr<TextFieldPattern>();
+    auto textFieldNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 3, textFieldPattern);
+    ASSERT_NE(textFieldNode, nullptr);
+    textFieldPattern->frameNode_ = textFieldNode;
+    RefPtr<PipelineContext> pipe = AceType::MakeRefPtr<PipelineContext>();
+    RefPtr<TextFieldManagerNG> manager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    manager->onFocusTextField_ = textFieldPattern;
+    pipe->SetTextFieldManager(manager);
+    auto context = AceType::RawPtr(pipe);
+    frameNode->context_ = context;
+    WeakPtr<FrameNode> hostNode = std::move(frameNode);
+    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(hostNode);
+    frameNode->GetOrCreateFocusHub()->SetCurrentFocus(true);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode->CreateLayoutWrapper(false, false);
+    layoutWrapper->hostNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Set currentOffset_ to 4
+     */
+    scrollLayoutAlgorithm->currentOffset_ = 4.0f;
+
+    /**
+     * @tc.steps: step3. Set contentMainSize to 10
+     * @tc.expected: The currentOffset to be -10
+     */
+    scrollLayoutAlgorithm->OnSurfaceChanged(AceType::RawPtr(layoutWrapper), 10.0f);
+    frameNode->context_ = nullptr;
+    EXPECT_EQ(scrollLayoutAlgorithm->currentOffset_, -10.0f);
+}
+
+/**
+ * @tc.name: OnSurfaceChanged003
+ * @tc.desc: Test ScrollLayoutAlgorithm OnSurfaceChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, OnSurfaceChanged003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     * Set currentFocus_ of focusHub to true
+     */
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(2.0f);
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<TextFieldPattern> textFieldPattern = AceType::MakeRefPtr<TextFieldPattern>();
+    auto textFieldNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 3, textFieldPattern);
+    ASSERT_NE(textFieldNode, nullptr);
+    textFieldPattern->frameNode_ = textFieldNode;
+    RefPtr<PipelineContext> pipe = AceType::MakeRefPtr<PipelineContext>();
+    RefPtr<TextFieldManagerNG> manager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    manager->onFocusTextField_ = textFieldPattern;
+    pipe->SetTextFieldManager(manager);
+    auto context = AceType::RawPtr(pipe);
+    frameNode->context_ = context;
+    WeakPtr<FrameNode> hostNode = std::move(frameNode);
+    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(hostNode);
+    frameNode->GetOrCreateFocusHub()->SetCurrentFocus(true);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode->CreateLayoutWrapper(false, false);
+    layoutWrapper->hostNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Set currentOffset_ to 4
+     */
+    scrollLayoutAlgorithm->currentOffset_ = 4.0f;
+
+    /**
+     * @tc.steps: step3. Set contentMainSize to 50
+     * @tc.expected: The currentOffset is unchanged
+     */
+    scrollLayoutAlgorithm->OnSurfaceChanged(AceType::RawPtr(layoutWrapper), 50.0f);
+    frameNode->context_ = nullptr;
+    EXPECT_EQ(scrollLayoutAlgorithm->currentOffset_, 4.0f);
 }
 
 /**
