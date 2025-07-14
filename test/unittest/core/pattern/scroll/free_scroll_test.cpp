@@ -632,6 +632,34 @@ TEST_F(FreeScrollTest, Event002)
 }
 
 /**
+ * @tc.name: Events003
+ * @tc.desc: Test onReachStart disabled
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Event003)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    model.SetOnReachStart([]() {
+        ADD_FAILURE() << "onReachStart should not be called in FreeScroll mode";
+    });
+    model.SetOnReachEnd([]() {
+        ADD_FAILURE() << "onReachEnd should not be called in FreeScroll mode";
+    });
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+
+    PanUpdate({ DELTA_X, DELTA_Y });
+    pattern_->freeScroll_->SetOffset({ -CONTENT_W + WIDTH + 1, -CONTENT_H + HEIGHT + 1 });
+    for (int i = 0; i < 3; ++i) {
+        PanUpdate({ -DELTA_X, -DELTA_Y });
+    }
+    EXPECT_LT(GetChildX(frameNode_, 0), -CONTENT_W + WIDTH);
+    EXPECT_LT(GetChildY(frameNode_, 0), -CONTENT_H + HEIGHT);
+}
+
+/**
  * @tc.name: Scroller001
  * @tc.desc: Test scroller interface
  * @tc.type: FUNC

@@ -512,6 +512,9 @@ void ScrollPattern::FireOnDidScroll(float scroll)
 
 void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart)
 {
+    if (freeScroll_) {
+        return; // not supported in FreeScroll mode
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (ReachStart(!isInitialized_)) {
@@ -530,6 +533,9 @@ void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnR
 
 void ScrollPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd)
 {
+    if (freeScroll_) {
+        return; // not supported in FreeScroll mode
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (ReachEnd(false)) {
