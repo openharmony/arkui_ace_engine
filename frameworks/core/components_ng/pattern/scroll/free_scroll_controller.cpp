@@ -94,6 +94,7 @@ void FreeScrollController::InitializePanRecognizer()
     freePanGesture_->SetOnActionCancel(endCallback);
     freePanGesture_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
     freePanGesture_->SetIsSystemGesture(true);
+    freePanGesture_->SetIsAllowMouse(false);
 }
 
 namespace {

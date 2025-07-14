@@ -460,7 +460,7 @@ private:
     float minZoomScale_ = 1.0f;
     std::optional<float> zoomScale_;
     std::optional<float> childScale_;
-    float enableBouncesZoom_ = true;
+    bool enableBouncesZoom_ = true;
     /* ============================================================================== */
 
     /* ============================= Free Scroll Enhancements ============================= */
