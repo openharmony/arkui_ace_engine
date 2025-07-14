@@ -859,7 +859,7 @@ void BubblePattern::OnColorConfigurationUpdate()
     // Tips: Color mode changes are already adapted, so ConfigChangePerform() control is not required.
     if (isTips_) {
         UpdateStyleOption(BlurStyle::COMPONENT_REGULAR, true);
-    } else if (isCustomPopup_ && SystemProperties::ConfigChangePerform()) {
+    } else if (SystemProperties::ConfigChangePerform()) {
         UpdateStyleOption(popupParam_->GetBlurStyle(), false);
     }
     if (isCustomPopup_) {

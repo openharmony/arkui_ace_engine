@@ -572,17 +572,15 @@ void SelectModelNG::ResetComponentColor(FrameNode* frameNode, const SelectColorT
             }
             break;
         case SelectColorType::OPTION_BG_COLOR:
-            pattern->SetOptionBgColor(selectTheme->GetBackgroundColor());
+            pattern->SetOptionBgColor(Color::TRANSPARENT);
             break;
         case SelectColorType::OPTION_FONT_COLOR:
             pattern->SetOptionFontColor(selectTheme->GetMenuFontColor());
             break;
         case SelectColorType::MENU_BACKGROUND_COLOR: {
-            if (props->GetMenuBackgroundColorSetByUserValue(false)) {
-                pattern->SetMenuBackgroundColor(Color::TRANSPARENT);
-            } else {
-                pattern->SetMenuBackgroundColor(selectTheme->GetBackgroundColor());
-            }
+            auto themeBgcolor =
+                selectTheme->GetMenuBlendBgColor() ? selectTheme->GetBackgroundColor() : Color::TRANSPARENT;
+            pattern->SetMenuBackgroundColor(themeBgcolor);
             break;
         }
         default:
@@ -1260,19 +1258,19 @@ void SelectModelNG::SetFontColorByUser(FrameNode* frameNode, bool isValidValue)
     paintProperty->UpdateFontColorSetByUser(isValidValue);
 }
 
-void SelectModelNG::SetMenuBackgroundColorByUser(bool isFromModifier)
+void SelectModelNG::SetMenuBackgroundColorByUser(bool isValidValue)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    SetMenuBackgroundColorByUser(frameNode, isFromModifier);
+    SetMenuBackgroundColorByUser(frameNode, isValidValue);
 }
 
-void SelectModelNG::SetMenuBackgroundColorByUser(FrameNode* frameNode, bool isFromModifier)
+void SelectModelNG::SetMenuBackgroundColorByUser(FrameNode* frameNode, bool isValidValue)
 {
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<SelectPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateMenuBackgroundColorSetByUser(isFromModifier);
+    paintProperty->UpdateMenuBackgroundColorSetByUser(isValidValue);
 }
 
 void SelectModelNG::SetSelectedOptionFontColorByUser(bool isValidValue)

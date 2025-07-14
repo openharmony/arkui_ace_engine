@@ -150,7 +150,7 @@ public:
     virtual void CreateWithIntegerResourceObj(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj) {};
     virtual void SetOptionFontColorByUser(bool isValidValue = true) {};
-    virtual void SetMenuBackgroundColorByUser(bool isFromModifier = true) {};
+    virtual void SetMenuBackgroundColorByUser(bool isValidValue = true) {};
     virtual void SetFontColorByUser(bool isValidValue = true) {};
     virtual void SetSelectedOptionFontColorByUser(bool isValidValue = true) {};
     virtual void SetOptionBgColorByUser(bool isValidValue = true) {};
