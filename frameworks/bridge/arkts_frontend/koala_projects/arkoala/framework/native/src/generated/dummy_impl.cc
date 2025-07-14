@@ -18930,7 +18930,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void InitialScaleImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Float32* value)
     {
         if (!needGroupedLog(1))
             return;
@@ -40968,7 +40968,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number XImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 XImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
             return {42};
@@ -40978,7 +40978,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {42};
     }
-    Ark_Number YImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 YImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
             return {42};
@@ -41078,7 +41078,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_Number GetEditStateFlagsImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 GetEditStateFlagsImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
             return {42};
@@ -41088,7 +41088,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {42};
     }
-    Ark_Number GetPreviewWidthImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 GetPreviewWidthImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
             return {42};
@@ -41098,7 +41098,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {42};
     }
-    Ark_Number GetPreviewHeightImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 GetPreviewHeightImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
             return {42};
