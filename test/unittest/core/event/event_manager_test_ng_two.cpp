@@ -449,9 +449,12 @@ HWTEST_F(EventManagerTestNg, EventManagerHandleOut001, TestSize.Level1)
 
     auto touchCallback = []() -> void {};
     auto mouseCallback = []() -> void {};
-    std::vector<RectCallback> rectCallbackList { RectCallback(rectGetCallback1, touchCallback, mouseCallback),
+    std::vector<RectCallback> rectCallbackList {
+        RectCallback(rectGetCallback1, touchCallback, mouseCallback),
         RectCallback(rectGetCallback2, touchCallback, mouseCallback),
-        RectCallback(nullptr, touchCallback, mouseCallback), RectCallback(rectGetCallback2, touchCallback, nullptr) };
+        RectCallback(nullptr, touchCallback, mouseCallback),
+        RectCallback(rectGetCallback2, touchCallback, nullptr)
+    };
 
     /**
      * @tc.steps: step3. Call HandleOutOfRectCallback with SourceType::TOUCH
@@ -642,34 +645,6 @@ HWTEST_F(EventManagerTestNg, EventManagerDispatchHover001, TestSize.Level1)
     event.action = MouseAction::WINDOW_LEAVE;
     eventManager->DispatchMouseHoverAnimationNG(event, true);
     EXPECT_EQ(eventManager->currHoverNode_.Upgrade(), nullptr);
-}
-
-/**
- * @tc.name: OnNonPointerEvent001
- * @tc.desc: Test OnNonPointerEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, OnNonPointerEvent001, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    NonPointerEvent event;
-    event.eventType = UIInputEventType::KEY;
-    auto ret = eventManager->OnNonPointerEvent(event);
-    EXPECT_FALSE(ret);
-
-    event.eventType = UIInputEventType::FOCUS_AXIS;
-    ret = eventManager->OnNonPointerEvent(event);
-    EXPECT_FALSE(ret);
-
-    event.eventType = UIInputEventType::CROWN;
-    ret = eventManager->OnNonPointerEvent(event);
-    EXPECT_FALSE(ret);
-
-    event.eventType = UIInputEventType::TOUCH;
-    ret = eventManager->OnNonPointerEvent(event);
-    EXPECT_FALSE(ret);
 }
 
 /**
@@ -874,142 +849,6 @@ HWTEST_F(EventManagerTestNg, TryResampleTouchEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetResampleTouchEvent001
- * @tc.desc: Test GetResampleTouchEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, GetResampleTouchEvent001, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    std::vector<TouchEvent> history;
-    std::vector<TouchEvent> current;
-    TouchEvent touchEvent1;
-    touchEvent1.SetTargetDisplayId(1);
-    TouchEvent touchEvent2;
-    touchEvent2.SetTargetDisplayId(1);
-
-    uint64_t resampleTime1 = 2 * 1000 * 1000;
-    std::chrono::nanoseconds nanoseconds1(resampleTime1);
-    TimeStamp ts1(nanoseconds1);
-    touchEvent1.time = ts1;
-    touchEvent2.time = ts1;
-    touchEvent2.x = 0.0f;
-    touchEvent2.y = 0.0f;
-    history.push_back(touchEvent1);
-    current.push_back(touchEvent2);
-    TouchEvent newEvent;
-    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
-
-    SystemProperties::debugEnabled_ = true;
-    bool ret = eventManager->GetResampleTouchEvent(history, current, resampleTime, newEvent);
-    EXPECT_FALSE(ret);
-
-    SystemProperties::debugEnabled_ = false;
-    ret = eventManager->GetResampleTouchEvent(history, current, resampleTime, newEvent);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: GetResampleTouchEvent002
- * @tc.desc: Test GetResampleTouchEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, GetResampleTouchEvent002, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    std::vector<TouchEvent> history;
-    std::vector<TouchEvent> current;
-    TouchEvent touchEvent1;
-    touchEvent1.SetTargetDisplayId(1);
-    TouchEvent touchEvent2;
-    touchEvent2.SetTargetDisplayId(1);
-
-    uint64_t resampleTime1 = 2 * 1000 * 1000;
-    std::chrono::nanoseconds nanoseconds1(resampleTime1);
-    TimeStamp ts1(nanoseconds1);
-    touchEvent1.time = ts1;
-    touchEvent2.time = ts1;
-    touchEvent2.x = 1.0f;
-    touchEvent2.y = 0.0f;
-    history.push_back(touchEvent1);
-    current.push_back(touchEvent2);
-    TouchEvent newEvent;
-    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
-
-    SystemProperties::debugEnabled_ = true;
-    bool ret = eventManager->GetResampleTouchEvent(history, current, resampleTime, newEvent);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: GetResampleTouchEvent003
- * @tc.desc: Test GetResampleTouchEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, GetResampleTouchEvent003, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    std::vector<TouchEvent> history;
-    std::vector<TouchEvent> current;
-    TouchEvent touchEvent1;
-    touchEvent1.SetTargetDisplayId(1);
-    TouchEvent touchEvent2;
-    touchEvent2.SetTargetDisplayId(1);
-
-    uint64_t resampleTime1 = 2 * 1000 * 1000;
-    std::chrono::nanoseconds nanoseconds1(resampleTime1);
-    TimeStamp ts1(nanoseconds1);
-    touchEvent1.time = ts1;
-    touchEvent2.time = ts1;
-    touchEvent2.x = 0.0f;
-    touchEvent2.y = 1.0f;
-    history.push_back(touchEvent1);
-    current.push_back(touchEvent2);
-    TouchEvent newEvent;
-    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
-
-    SystemProperties::debugEnabled_ = true;
-    bool ret = eventManager->GetResampleTouchEvent(history, current, resampleTime, newEvent);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: GetResampleTouchEvent004
- * @tc.desc: Test GetResampleTouchEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, GetResampleTouchEvent004, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    std::vector<TouchEvent> history;
-    std::vector<TouchEvent> current;
-    TouchEvent touchEvent1;
-    touchEvent1.SetTargetDisplayId(1);
-    TouchEvent touchEvent2;
-    touchEvent2.SetTargetDisplayId(1);
-
-    uint64_t resampleTime1 = 2 * 1000 * 1000;
-    std::chrono::nanoseconds nanoseconds1(resampleTime1);
-    TimeStamp ts1(nanoseconds1);
-    touchEvent1.time = ts1;
-    touchEvent2.time = ts1;
-    touchEvent2.x = 1.0f;
-    touchEvent2.y = 1.0f;
-    history.push_back(touchEvent1);
-    current.push_back(touchEvent2);
-    TouchEvent newEvent;
-    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
-
-    SystemProperties::debugEnabled_ = true;
-    bool ret = eventManager->GetResampleTouchEvent(history, current, resampleTime, newEvent);
-    EXPECT_TRUE(ret);
-}
-
-/**
  * @tc.name: GetResampleTouchEvent005
  * @tc.desc: Test GetResampleTouchEvent function.
  * @tc.type: FUNC
@@ -1018,6 +857,7 @@ HWTEST_F(EventManagerTestNg, GetResampleTouchEvent005, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
+
     std::vector<TouchEvent> history;
     std::vector<TouchEvent> current;
     TouchEvent touchEvent1;
@@ -1049,6 +889,7 @@ HWTEST_F(EventManagerTestNg, GetResampleTouchEvent006, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
+
     std::vector<TouchEvent> history;
     std::vector<TouchEvent> current;
     TouchEvent touchEvent1;
@@ -1072,136 +913,6 @@ HWTEST_F(EventManagerTestNg, GetResampleTouchEvent006, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetResampleMouseEvent001
- * @tc.desc: Test GetResampleMouseEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, GetResampleMouseEvent001, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    std::vector<MouseEvent> history;
-    std::vector<MouseEvent> current;
-    MouseEvent mouseEvent1;
-    mouseEvent1.targetDisplayId = 1;
-    MouseEvent mouseEvent2;
-    mouseEvent2.targetDisplayId = 1;
-
-    uint64_t resampleTime1 = 2 * 1000 * 1000;
-    std::chrono::nanoseconds nanoseconds1(resampleTime1);
-    TimeStamp ts1(nanoseconds1);
-    mouseEvent1.time = ts1;
-    mouseEvent2.time = ts1;
-    mouseEvent2.x = 0.0f;
-    mouseEvent2.y = 0.0f;
-    history.push_back(mouseEvent1);
-    current.push_back(mouseEvent2);
-    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
-
-    SystemProperties::debugEnabled_ = true;
-    auto mouseEvent = eventManager->GetResampleMouseEvent(history, current, resampleTime);
-    EXPECT_EQ(mouseEvent.x, 0.0f);
-
-    SystemProperties::debugEnabled_ = false;
-    mouseEvent = eventManager->GetResampleMouseEvent(history, current, resampleTime);
-    EXPECT_EQ(mouseEvent.x, 0.0f);
-}
-
-/**
- * @tc.name: GetResampleMouseEvent002
- * @tc.desc: Test GetResampleMouseEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, GetResampleMouseEvent002, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    std::vector<MouseEvent> history;
-    std::vector<MouseEvent> current;
-    MouseEvent mouseEvent1;
-    mouseEvent1.targetDisplayId = 1;
-    MouseEvent mouseEvent2;
-    mouseEvent2.targetDisplayId = 1;
-
-    uint64_t resampleTime1 = 2 * 1000 * 1000;
-    std::chrono::nanoseconds nanoseconds1(resampleTime1);
-    TimeStamp ts1(nanoseconds1);
-    mouseEvent1.time = ts1;
-    mouseEvent2.time = ts1;
-    mouseEvent2.x = 1.0f;
-    mouseEvent2.y = 0.0f;
-    history.push_back(mouseEvent1);
-    current.push_back(mouseEvent2);
-    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
-
-    auto mouseEvent = eventManager->GetResampleMouseEvent(history, current, resampleTime);
-    EXPECT_NE(mouseEvent.x, 0.0f);
-}
-
-/**
- * @tc.name: GetResampleMouseEvent003
- * @tc.desc: Test GetResampleMouseEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, GetResampleMouseEvent003, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    std::vector<MouseEvent> history;
-    std::vector<MouseEvent> current;
-    MouseEvent mouseEvent1;
-    mouseEvent1.targetDisplayId = 1;
-    MouseEvent mouseEvent2;
-    mouseEvent2.targetDisplayId = 1;
-
-    uint64_t resampleTime1 = 2 * 1000 * 1000;
-    std::chrono::nanoseconds nanoseconds1(resampleTime1);
-    TimeStamp ts1(nanoseconds1);
-    mouseEvent1.time = ts1;
-    mouseEvent2.time = ts1;
-    mouseEvent2.x = 0.0f;
-    mouseEvent2.y = 1.0f;
-    history.push_back(mouseEvent1);
-    current.push_back(mouseEvent2);
-    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
-
-    auto mouseEvent = eventManager->GetResampleMouseEvent(history, current, resampleTime);
-    EXPECT_EQ(mouseEvent.x, 0.0f);
-}
-
-/**
- * @tc.name: GetResampleMouseEvent004
- * @tc.desc: Test GetResampleMouseEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, GetResampleMouseEvent004, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    std::vector<MouseEvent> history;
-    std::vector<MouseEvent> current;
-    MouseEvent mouseEvent1;
-    mouseEvent1.targetDisplayId = 1;
-    MouseEvent mouseEvent2;
-    mouseEvent2.targetDisplayId = 1;
-
-    uint64_t resampleTime1 = 2 * 1000 * 1000;
-    std::chrono::nanoseconds nanoseconds1(resampleTime1);
-    TimeStamp ts1(nanoseconds1);
-    mouseEvent1.time = ts1;
-    mouseEvent2.time = ts1;
-    mouseEvent2.x = 1.0f;
-    mouseEvent2.y = 1.0f;
-    history.push_back(mouseEvent1);
-    current.push_back(mouseEvent2);
-    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
-
-    auto mouseEvent = eventManager->GetResampleMouseEvent(history, current, resampleTime);
-    EXPECT_EQ(mouseEvent.x, 1.0f);
-}
-
-/**
  * @tc.name: GetResampleMouseEvent005
  * @tc.desc: Test GetResampleMouseEvent function.
  * @tc.type: FUNC
@@ -1210,6 +921,7 @@ HWTEST_F(EventManagerTestNg, GetResampleMouseEvent005, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
+
     std::vector<MouseEvent> history;
     std::vector<MouseEvent> current;
     MouseEvent mouseEvent1;
@@ -1240,6 +952,7 @@ HWTEST_F(EventManagerTestNg, GetResampleMouseEvent006, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
+
     std::vector<MouseEvent> history;
     std::vector<MouseEvent> current;
     MouseEvent mouseEvent1;
@@ -1261,136 +974,7 @@ HWTEST_F(EventManagerTestNg, GetResampleMouseEvent006, TestSize.Level1)
     EXPECT_EQ(mouseEvent.x, 0.0f);
 }
 
-/**
- *
- * @tc.name: GetResamplePointerEvent001
- * @tc.desc: Test GetResamplePointerEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, GetResamplePointerEvent001, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    std::vector<DragPointerEvent> history;
-    std::vector<DragPointerEvent> current;
-    DragPointerEvent dragPointerEvent1;
-    dragPointerEvent1.targetWindowId = 1;
-    DragPointerEvent dragPointerEvent2;
-    dragPointerEvent2.targetWindowId = 1;
 
-    uint64_t resampleTime1 = 2 * 1000 * 1000;
-    std::chrono::nanoseconds nanoseconds1(resampleTime1);
-    TimeStamp ts1(nanoseconds1);
-    dragPointerEvent1.time = ts1;
-    dragPointerEvent2.time = ts1;
-    dragPointerEvent2.x = 0.0f;
-    dragPointerEvent2.y = 0.0f;
-    history.push_back(dragPointerEvent1);
-    current.push_back(dragPointerEvent2);
-    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
-
-    SystemProperties::debugEnabled_ = true;
-    auto dragPointerEvent = eventManager->GetResamplePointerEvent(history, current, resampleTime);
-    EXPECT_EQ(dragPointerEvent.x, 0.0f);
-
-    SystemProperties::debugEnabled_ = false;
-    dragPointerEvent = eventManager->GetResamplePointerEvent(history, current, resampleTime);
-    EXPECT_EQ(dragPointerEvent.x, 0.0f);
-}
-
-/**
- * @tc.name: GetResamplePointerEvent002
- * @tc.desc: Test GetResamplePointerEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, GetResamplePointerEvent002, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    std::vector<DragPointerEvent> history;
-    std::vector<DragPointerEvent> current;
-    DragPointerEvent dragPointerEvent1;
-    dragPointerEvent1.targetWindowId = 1;
-    DragPointerEvent dragPointerEvent2;
-    dragPointerEvent2.targetWindowId = 1;
-
-    uint64_t resampleTime1 = 2 * 1000 * 1000;
-    std::chrono::nanoseconds nanoseconds1(resampleTime1);
-    TimeStamp ts1(nanoseconds1);
-    dragPointerEvent1.time = ts1;
-    dragPointerEvent2.time = ts1;
-    dragPointerEvent2.x = 1.0f;
-    dragPointerEvent2.y = 0.0f;
-    history.push_back(dragPointerEvent1);
-    current.push_back(dragPointerEvent2);
-    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
-
-    auto dragPointerEvent = eventManager->GetResamplePointerEvent(history, current, resampleTime);
-    EXPECT_NE(dragPointerEvent.x, 0.0f);
-}
-
-/**
- * @tc.name: GetResamplePointerEvent003
- * @tc.desc: Test GetResamplePointerEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, GetResamplePointerEvent003, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    std::vector<DragPointerEvent> history;
-    std::vector<DragPointerEvent> current;
-    DragPointerEvent dragPointerEvent1;
-    dragPointerEvent1.targetWindowId = 1;
-    DragPointerEvent dragPointerEvent2;
-    dragPointerEvent2.targetWindowId = 1;
-
-    uint64_t resampleTime1 = 2 * 1000 * 1000;
-    std::chrono::nanoseconds nanoseconds1(resampleTime1);
-    TimeStamp ts1(nanoseconds1);
-    dragPointerEvent1.time = ts1;
-    dragPointerEvent2.time = ts1;
-    dragPointerEvent2.x = 0.0f;
-    dragPointerEvent2.y = 1.0f;
-    history.push_back(dragPointerEvent1);
-    current.push_back(dragPointerEvent2);
-    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
-
-    auto dragPointerEvent = eventManager->GetResamplePointerEvent(history, current, resampleTime);
-    EXPECT_EQ(dragPointerEvent.x, 0.0f);
-}
-
-/**
- * @tc.name: GetResamplePointerEvent004
- * @tc.desc: Test GetResamplePointerEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, GetResamplePointerEvent004, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    std::vector<DragPointerEvent> history;
-    std::vector<DragPointerEvent> current;
-    DragPointerEvent dragPointerEvent1;
-    dragPointerEvent1.targetWindowId = 1;
-    DragPointerEvent dragPointerEvent2;
-    dragPointerEvent2.targetWindowId = 1;
-
-    uint64_t resampleTime1 = 2 * 1000 * 1000;
-    std::chrono::nanoseconds nanoseconds1(resampleTime1);
-    TimeStamp ts1(nanoseconds1);
-    dragPointerEvent1.time = ts1;
-    dragPointerEvent2.time = ts1;
-    dragPointerEvent2.x = 1.0f;
-    dragPointerEvent2.y = 1.0f;
-    history.push_back(dragPointerEvent1);
-    current.push_back(dragPointerEvent2);
-    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
-
-    auto dragPointerEvent = eventManager->GetResamplePointerEvent(history, current, resampleTime);
-    EXPECT_EQ(dragPointerEvent.x, 1.0f);
-}
 
 /**
  * @tc.name: GetResamplePointerEvent005
@@ -1401,6 +985,7 @@ HWTEST_F(EventManagerTestNg, GetResamplePointerEvent005, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
+
     std::vector<DragPointerEvent> history;
     std::vector<DragPointerEvent> current;
     DragPointerEvent dragPointerEvent1;
@@ -1417,6 +1002,7 @@ HWTEST_F(EventManagerTestNg, GetResamplePointerEvent005, TestSize.Level1)
     current.push_back(dragPointerEvent2);
     uint64_t resampleTime = 3 * 1000 * 1000;
 
+    SystemProperties::debugEnabled_ = true;
     auto dragPointerEvent = eventManager->GetResamplePointerEvent(history, current, resampleTime);
     EXPECT_EQ(dragPointerEvent.x, 0.0f);
 }
@@ -1450,5 +1036,170 @@ HWTEST_F(EventManagerTestNg, GetResamplePointerEvent006, TestSize.Level1)
     SystemProperties::debugEnabled_ = true;
     auto dragPointerEvent = eventManager->GetResamplePointerEvent(history, current, resampleTime);
     EXPECT_EQ(dragPointerEvent.x, 0.0f);
+}
+
+/**
+ * @tc.name: GetResampleTouchEvent0012
+ * @tc.desc: Test GetResampleTouchEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetResampleTouchEvent0012, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    std::vector<TouchEvent> history;
+    std::vector<TouchEvent> current;
+    TouchEvent touchEvent1;
+    touchEvent1.SetTargetDisplayId(1);
+    TouchEvent touchEvent2;
+    touchEvent2.SetTargetDisplayId(1);
+
+    uint64_t resampleTime1 = 2 * 1000 * 1000;
+    std::chrono::nanoseconds nanoseconds1(resampleTime1);
+    TimeStamp ts1(nanoseconds1);
+    touchEvent1.time = ts1;
+    touchEvent2.time = ts1;
+    history.push_back(touchEvent1);
+    
+    TouchEvent newEvent;
+    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
+    std::vector<std::pair<float, float>> xyVec = {{0.0f, 0.0f}, {1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}};
+    for (auto xy : xyVec) {
+        current.clear();
+        touchEvent2.x = xy.first;
+        touchEvent2.y = xy.second;
+        current.push_back(touchEvent2);
+
+        SystemProperties::debugEnabled_ = true;
+        bool ret = eventManager->GetResampleTouchEvent(history, current, resampleTime, newEvent);
+        if (xy.first == 1.0f && xy.second == 1.0f) {
+            EXPECT_TRUE(ret);
+        } else {
+            EXPECT_FALSE(ret);
+        }
+
+        SystemProperties::debugEnabled_ = false;
+        ret = eventManager->GetResampleTouchEvent(history, current, resampleTime, newEvent);
+        if (xy.first == 1.0f && xy.second == 1.0f) {
+            EXPECT_TRUE(ret);
+        } else {
+            EXPECT_FALSE(ret);
+        }
+    }
+}
+
+/**
+ * @tc.name: GetResampleMouseEvent0012
+ * @tc.desc: Test GetResampleMouseEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetResampleMouseEvent0012, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    std::vector<MouseEvent> history;
+    std::vector<MouseEvent> current;
+    MouseEvent mouseEvent1;
+    mouseEvent1.targetDisplayId = 1;
+    MouseEvent mouseEvent2;
+    mouseEvent2.targetDisplayId = 1;
+
+    uint64_t resampleTime1 = 2 * 1000 * 1000;
+    std::chrono::nanoseconds nanoseconds1(resampleTime1);
+    TimeStamp ts1(nanoseconds1);
+    mouseEvent1.time = ts1;
+    mouseEvent2.time = ts1;
+    history.push_back(mouseEvent1);
+    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
+
+    std::vector<std::pair<float, float>> xyVec = {{0.0f, 0.0f}, {1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}};
+    for (auto xy : xyVec) {
+        current.clear();
+        mouseEvent2.x = xy.first;
+        mouseEvent2.y = xy.second;
+        current.push_back(mouseEvent2);
+
+        SystemProperties::debugEnabled_ = true;
+        auto mouseEvent = eventManager->GetResampleMouseEvent(history, current, resampleTime);
+        EXPECT_EQ(mouseEvent.x, xy.first);
+
+        SystemProperties::debugEnabled_ = false;
+        mouseEvent = eventManager->GetResampleMouseEvent(history, current, resampleTime);
+        EXPECT_EQ(mouseEvent.x, xy.first);
+    }
+}
+
+/**
+ *
+ * @tc.name: GetResamplePointerEvent0012
+ * @tc.desc: Test GetResamplePointerEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetResamplePointerEvent0012, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    std::vector<DragPointerEvent> history;
+    std::vector<DragPointerEvent> current;
+    DragPointerEvent dragPointerEvent1;
+    dragPointerEvent1.targetWindowId = 1;
+    DragPointerEvent dragPointerEvent2;
+    dragPointerEvent2.targetWindowId = 1;
+
+    uint64_t resampleTime1 = 2 * 1000 * 1000;
+    std::chrono::nanoseconds nanoseconds1(resampleTime1);
+    TimeStamp ts1(nanoseconds1);
+    dragPointerEvent1.time = ts1;
+    dragPointerEvent2.time = ts1;
+    history.push_back(dragPointerEvent1);
+    uint64_t resampleTime = 3 * 1000 * 1000 + 20 * 1000 * 1000;
+
+    std::vector<std::pair<float, float>> xyVec = {{0.0f, 0.0f}, {1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}};
+    for (auto xy : xyVec) {
+        current.clear();
+        dragPointerEvent2.x = xy.first;
+        dragPointerEvent2.y = xy.second;
+        current.push_back(dragPointerEvent2);
+
+        SystemProperties::debugEnabled_ = true;
+        auto dragPointerEvent = eventManager->GetResamplePointerEvent(history, current, resampleTime);
+        EXPECT_EQ(dragPointerEvent.x, xy.first);
+
+        SystemProperties::debugEnabled_ = false;
+        dragPointerEvent = eventManager->GetResamplePointerEvent(history, current, resampleTime);
+        EXPECT_EQ(dragPointerEvent.x, xy.first);
+    }
+}
+
+/**
+ * @tc.name: OnNonPointerEvent001
+ * @tc.desc: Test OnNonPointerEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, OnNonPointerEvent001, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    NonPointerEvent event;
+    event.eventType = UIInputEventType::KEY;
+    auto ret = eventManager->OnNonPointerEvent(event);
+    EXPECT_FALSE(ret);
+
+    NonPointerEvent event2;
+    event2.eventType = UIInputEventType::FOCUS_AXIS;
+    ret = eventManager->OnNonPointerEvent(event2);
+    EXPECT_FALSE(ret);
+
+    NonPointerEvent event3;
+    event3.eventType = UIInputEventType::CROWN;
+    ret = eventManager->OnNonPointerEvent(event3);
+    EXPECT_FALSE(ret);
+
+    NonPointerEvent event4;
+    event4.eventType = UIInputEventType::TOUCH;
+    ret = eventManager->OnNonPointerEvent(event4);
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS::Ace::NG
