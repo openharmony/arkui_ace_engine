@@ -1576,10 +1576,7 @@ ArkUINativeModuleValue WebBridge::SetMediaOptions(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (!secondArg->IsNumber()) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    if (!thirdArg->IsBoolean()) {
+    if (!secondArg->IsNumber() && !thirdArg->IsBoolean()) {
         return panda::JSValueRef::Undefined(vm);
     }
     int mode = secondArg->Int32Value(vm);

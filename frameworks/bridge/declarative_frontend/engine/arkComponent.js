@@ -31899,7 +31899,7 @@ class WebMediaOptionsModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().web.resetMediaOptions(node);
     } else {
-      getUINativeModule().web.setMediaOptions(node, this.value);
+      getUINativeModule().web.setMediaOptions(node, this.value?.resumeInterval, this.value?.audioExclusive);
     }
   }
 }
