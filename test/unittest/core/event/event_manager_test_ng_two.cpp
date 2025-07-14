@@ -974,8 +974,6 @@ HWTEST_F(EventManagerTestNg, GetResampleMouseEvent006, TestSize.Level1)
     EXPECT_EQ(mouseEvent.x, 0.0f);
 }
 
-
-
 /**
  * @tc.name: GetResamplePointerEvent005
  * @tc.desc: Test GetResamplePointerEvent function.

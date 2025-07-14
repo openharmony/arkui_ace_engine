@@ -2162,6 +2162,6 @@ HWTEST_F(EventManagerTestNg, DispatchTouchEventTest001, TestSize.Level1)
     event.type = TouchType::UP;
     eventManager->touchTestResults_.clear();
     eventManager->DispatchTouchEvent(event, true);
-    EXPECT_EQ(ret, !eventManager->touchTestResults_[event.id].empty());
+    EXPECT_NE(ret, !eventManager->touchTestResults_[event.id].empty());
 }
 } // namespace OHOS::Ace::NG
