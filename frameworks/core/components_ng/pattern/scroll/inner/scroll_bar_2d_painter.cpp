@@ -38,6 +38,10 @@ ScrollBar2DPainter::ScrollBar2DPainter()
 namespace {
 void Update(ScrollBarOverlayModifier& painter, const ScrollBar& bar)
 {
+    if (!bar.NeedPaint()) {
+        painter.SetOpacity(0);
+        return;
+    }
     painter.SetBarColor(bar.GetForegroundColor());
     painter.StartBarAnimation(
         bar.GetHoverAnimationType(), bar.GetOpacityAnimationType(), bar.GetNeedAdaptAnimation(), bar.GetActiveRect());

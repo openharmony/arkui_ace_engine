@@ -53,6 +53,10 @@ public:
         ScrollTestNg::TearDownTestSuite();
         MockAnimationManager::Enable(false);
     }
+    void TearDown() override {
+        ScrollTestNg::TearDown();
+        MockAnimationManager::GetInstance().SetTicks(1);
+    }
 
     static GestureEvent MakePanGesture(const Offset& delta, const Velocity& velocity = Velocity())
     {
@@ -160,6 +164,25 @@ TEST_F(FreeScrollTest, RecognizerOverride001)
 }
 
 /**
+ * @tc.name: Measure001
+ * @tc.desc: Test child constraint with Axis::FREE
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Measure001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    ViewAbstract::SetWidth(CalcLength(1.0f));
+    ViewAbstract::SetHeight(CalcLength(1.0f));
+    ColumnModelNG col;
+    col.Create(Dimension(0), nullptr, "");
+    CreateContentChild(1);
+    CreateScrollDone();
+    EXPECT_EQ(GetChildSize(frameNode_, 0), SizeF(1, ITEM_MAIN_SIZE));
+}
+
+/**
  * @tc.name: FreeScroll001
  * @tc.desc: Test Scroll with Axis::FREE
  * @tc.type: FUNC
@@ -175,6 +198,28 @@ TEST_F(FreeScrollTest, FreeScroll001)
     PanUpdate({ -DELTA_X, -DELTA_Y });
     EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X);
     EXPECT_EQ(GetChildY(frameNode_, 0), -DELTA_Y);
+}
+
+/**
+ * @tc.name: FreeScroll001
+ * @tc.desc: Test scroll enabled
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, EnableScroll001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ WIDTH, HEIGHT * 2 });
+    CreateScrollDone();
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF());
+    EXPECT_TRUE(pattern_->scrollableEvent_->GetEnabled());
+    PanUpdate({ -DELTA_X, -DELTA_Y });
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, -DELTA_Y));
+    EXPECT_FALSE(pattern_->scrollBar2d_->horizontal_.NeedPaint());
+    EXPECT_TRUE(pattern_->scrollBar2d_->vertical_.NeedPaint());
+    EXPECT_EQ(pattern_->scrollBar2d_->painter_->horizontal_.GetOpacity(), 0);
+    EXPECT_NE(pattern_->scrollBar2d_->painter_->vertical_.GetOpacity(), 0);
 }
 
 /**
@@ -499,8 +544,6 @@ TEST_F(FreeScrollTest, Animation004)
     EXPECT_EQ(GetChildX(frameNode_, 0), 0);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
-
-    MockAnimationManager::GetInstance().SetTicks(1);
 }
 
 /**
@@ -632,6 +675,34 @@ TEST_F(FreeScrollTest, Event002)
 }
 
 /**
+ * @tc.name: Events003
+ * @tc.desc: Test onReachStart disabled
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Event003)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    model.SetOnReachStart([]() {
+        ADD_FAILURE() << "onReachStart should not be called in FreeScroll mode";
+    });
+    model.SetOnReachEnd([]() {
+        ADD_FAILURE() << "onReachEnd should not be called in FreeScroll mode";
+    });
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+
+    PanUpdate({ DELTA_X, DELTA_Y });
+    pattern_->freeScroll_->SetOffset({ -CONTENT_W + WIDTH + 1, -CONTENT_H + HEIGHT + 1 });
+    for (int i = 0; i < 3; ++i) {
+        PanUpdate({ -DELTA_X, -DELTA_Y });
+    }
+    EXPECT_LT(GetChildX(frameNode_, 0), -CONTENT_W + WIDTH);
+    EXPECT_LT(GetChildY(frameNode_, 0), -CONTENT_H + HEIGHT);
+}
+
+/**
  * @tc.name: Scroller001
  * @tc.desc: Test scroller interface
  * @tc.type: FUNC
@@ -698,6 +769,7 @@ TEST_F(FreeScrollTest, Scroller002)
     const Dimension posY_2 = -100.0_vp;
     scroller->FreeScrollTo({ posX_2, posY_2, 1000, nullptr, true });
     EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::FLING);
+    EXPECT_TRUE(pattern_->freeScroll_->duringExternalAnimation_);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(-posX_2.Value(), 0.0f).ToString());
@@ -747,6 +819,33 @@ TEST_F(FreeScrollTest, Scroller003)
     EXPECT_EQ(ScrollState::IDLE, pattern_->freeScroll_->state_);
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, 0).ToString());
+}
+
+/**
+ * @tc.name: Scroller004
+ * @tc.desc: Test scroller interface
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Scroller004)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    auto scroller = AceType::MakeRefPtr<ScrollableController>();
+    scroller->SetScrollPattern(pattern_);
+
+    MockAnimationManager::GetInstance().SetTicks(2);
+
+    scroller->FreeScrollTo({ .xOffset = Dimension(CONTENT_W), .yOffset = Dimension(CONTENT_H), .smooth = true, .canOverScroll = true });
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(pattern_->freeScroll_->state_, ScrollState::IDLE);
+    EXPECT_FALSE(pattern_->freeScroll_->duringExternalAnimation_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(-CONTENT_W, -CONTENT_H).ToString());
 }
 
 namespace {
