@@ -230,6 +230,9 @@ bool ScrollPattern::ScrollSnapTrigger()
 
 void ScrollPattern::CheckScrollable()
 {
+    if (freeScroll_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();

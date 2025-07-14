@@ -201,6 +201,24 @@ TEST_F(FreeScrollTest, FreeScroll001)
 }
 
 /**
+ * @tc.name: FreeScroll001
+ * @tc.desc: Test scroll enabled
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, EnableScroll001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ WIDTH, HEIGHT * 2 });
+    CreateScrollDone();
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF());
+    EXPECT_TRUE(pattern_->scrollableEvent_->GetEnabled());
+    PanUpdate({ -DELTA_X, -DELTA_Y });
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, -DELTA_Y));
+}
+
+/**
  * @tc.name: InitialOffset001
  * @tc.desc: Test Scroll with Axis::FREE
  * @tc.type: FUNC
