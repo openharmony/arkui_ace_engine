@@ -37,6 +37,7 @@ constexpr double ICON_SIZE = 24;
 constexpr double ICON_HOT_ZONE_SIZE = 40;
 constexpr int32_t DEFAULT_NODE_ID = 1;
 constexpr int32_t MIN_PLATFORM_VERSION = 10;
+constexpr int32_t MAX_LENGTH = 100;
 const std::string WORLD_TEXT = "world";
 const std::string TEXTCASE_TEXT = "textcase";
 const std::u16string TEXTCASE_TEXT_U16 = u"textcase";
@@ -1001,6 +1002,86 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg009, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
     textFieldModelNG.SetTextAlign(TextAlign::RIGHT);
+}
+
+/**
+ * @tc.name: testFieldModelNg010
+ * @tc.desc: test testInput ModelNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+
+    /**
+     * @tc.step: step2. Set Action
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    textFieldModelNG.SetTextAlign(TextAlign::RIGHT);
+
+    /**
+     * @tc.steps: step3. SetWidth.
+     */
+    TextFieldModelNG::SetWidth(frameNode, "auto");
+    TextFieldModelNG::SetWidth(frameNode, "not auto");
+
+    /**
+     * @tc.steps: step4. SetMaxLength.
+     */
+    TextFieldModelNG::SetMaxLength(frameNode, 0);
+    TextFieldModelNG::SetMaxLength(frameNode, MAX_LENGTH);
+    TextFieldModelNG::ResetPlaceholderColor(frameNode);
+    TextFieldModelStatic::SetPlaceholderColor(frameNode, std::make_optional(Color::GRAY));
+    TextFieldModelNG::ResetPlaceholderColor(frameNode);
+}
+
+/**
+ * @tc.name: testFieldModelNg011
+ * @tc.desc: test testInput ModelNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+
+    /**
+     * @tc.step: step2. Set Action
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto textPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    EXPECT_NE(textPaintProperty, nullptr);
+    textFieldModelNG.SetTextAlign(TextAlign::RIGHT);
+
+    /**
+     * @tc.steps: step3. SetShowCounter.
+     */
+    TextFieldModelNG::SetMaxLength(frameNode, MAX_LENGTH);
+    TextFieldModelNG::SetShowCounter(frameNode, true);
+    TextFieldModelNG::SetShowCounter(frameNode, false);
+    layoutProperty->ResetMaxLength();
+    TextFieldModelNG::SetShowCounter(frameNode, true);
+    TextFieldModelNG::SetShowCounter(frameNode, false);
+    layoutProperty->UpdateTextInputType(TextInputType::NUMBER_PASSWORD);
+    TextFieldModelNG::SetShowCounter(frameNode, true);
+    TextFieldModelNG::SetShowCounter(frameNode, false);
+    textPaintProperty->UpdateInputStyle(InputStyle::INLINE);
+    layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+    TextFieldModelNG::SetShowCounter(frameNode, true);
+    TextFieldModelNG::SetShowCounter(frameNode, false);
 }
 
 /**
