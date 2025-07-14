@@ -374,7 +374,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest005, TestSize.Le
 
 /**
  * @tc.name: XComponentLayoutAlgorithmTest006
- * @tc.desc: Test XComponent measure functions when width or height is matchParent.
+ * @tc.desc: Test XComponent measure functions when width or height is LayoutPolicy.
  * @tc.type: FUNC
  */
 HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Level1)
@@ -392,51 +392,115 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     auto xComponentPattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(xComponentPattern);
-    auto xComponentLayoutAlgorithm = xComponentPattern->CreateLayoutAlgorithm();
-    ASSERT_TRUE(xComponentLayoutAlgorithm);
+    RefPtr<XComponentLayoutAlgorithm> xComponentLayoutAlgorithm = AceType::MakeRefPtr<XComponentLayoutAlgorithm>();
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(xComponentLayoutAlgorithm));
 
     /**
      * @tc.steps1: Width is matchParent
-     * @tc.expected: the return value of MeasureContent is (300, 1000)
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (300, 1000)
      */
     LayoutConstraintF layoutConstraint;
-    layoutConstraint.maxSize = SizeF(1000.0f, 1000.0f);
+    SizeF size = SizeF(1000.0f, 1000.0f);
     layoutConstraint.parentIdealSize = OptionalSizeF(300.0f, 400.0f);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
-    auto contentSize = xComponentLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
-    ASSERT_TRUE(contentSize.has_value());
-    EXPECT_EQ(contentSize.value(), SizeF(300, 1000));
+    xComponentLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, layoutProperty, size);
+    EXPECT_EQ(size, SizeF(300, 1000));
 
     /**
      * @tc.steps2: Height is matchParent
-     * @tc.expected: the return value of MeasureContent is (1000, 400)
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (1000, 400)
      */
+    size = SizeF(1000.0f, 1000.0f);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
-    contentSize = xComponentLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
-    ASSERT_TRUE(contentSize.has_value());
-    EXPECT_EQ(contentSize.value(), SizeF(1000, 400));
+    xComponentLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, layoutProperty, size);
+    EXPECT_EQ(size, SizeF(1000, 400));
 
     /**
      * @tc.steps3: Width and Height is not matchParent
-     * @tc.expected: the return value of MeasureContent is (1000, 1000)
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (1000, 1000)
      */
+    size = SizeF(1000.0f, 1000.0f);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
-    contentSize = xComponentLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
-    ASSERT_TRUE(contentSize.has_value());
-    EXPECT_EQ(contentSize.value(), SizeF(1000, 1000));
+    xComponentLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, layoutProperty, size);
+    EXPECT_EQ(size, SizeF(1000, 1000));
 
     /**
      * @tc.steps4: layoutPolicy has no value
-     * @tc.expected: the return value of MeasureContent is (1000, 1000)
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (1000, 1000)
      */
     layoutProperty->layoutPolicy_ = std::nullopt;
-    contentSize = xComponentLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
-    ASSERT_TRUE(contentSize.has_value());
-    EXPECT_EQ(contentSize.value(), SizeF(1000, 1000));
+    xComponentLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, layoutProperty, size);
+    EXPECT_EQ(size, SizeF(1000, 1000));
+}
+
+/**
+ * @tc.name: XComponentLayoutAlgorithmTest007
+ * @tc.desc: Test XComponent measure functions when width or height is LayoutPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest007, TestSize.Level1)
+{
+    std::shared_ptr<InnerXComponentController> const xComponentController;
+    XComponentModelNG xComponent;
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+    // Create LayoutWrapper and set XComponentLayoutAlgorithm.
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_TRUE(geometryNode);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    auto xComponentPattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(xComponentPattern);
+    RefPtr<XComponentLayoutAlgorithm> xComponentLayoutAlgorithm = AceType::MakeRefPtr<XComponentLayoutAlgorithm>();
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(xComponentLayoutAlgorithm));
+
+    /**
+     * @tc.steps1: Width is WrapContent
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (0, 1000)
+     */
+    LayoutConstraintF layoutConstraint;
+    SizeF size = SizeF(1000.0f, 1000.0f);
+    layoutConstraint.parentIdealSize = OptionalSizeF(300.0f, 400.0f);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    xComponentLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, layoutProperty, size);
+    EXPECT_EQ(size, SizeF(0, 1000));
+
+    /**
+     * @tc.steps2: Height is WrapContent
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (1000, 0)
+     */
+    size = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+    xComponentLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, layoutProperty, size);
+    EXPECT_EQ(size, SizeF(1000, 0));
+
+    /**
+     * @tc.steps3: Width is fixIdealSize
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (0, 1000)
+     */
+    size = SizeF(1000.0f, 1000.0f);
+    layoutConstraint.parentIdealSize = OptionalSizeF(300.0f, 400.0f);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    xComponentLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, layoutProperty, size);
+    EXPECT_EQ(size, SizeF(0, 1000));
+
+    /**
+     * @tc.steps4: Height is fixIdealSize
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (1000, 0)
+     */
+    size = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    xComponentLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, layoutProperty, size);
+    EXPECT_EQ(size, SizeF(1000, 0));
 }
 
 /**

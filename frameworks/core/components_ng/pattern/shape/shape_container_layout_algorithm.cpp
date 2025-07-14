@@ -19,6 +19,30 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
+void ShapeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    BoxLayoutAlgorithm::Measure(layoutWrapper);
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value());
+    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
+    auto contentSize = content->GetRect().GetSize();
+    OptionalSizeF frameSize =
+        UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(contentSize.Width(), contentSize.Height()),
+            layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
+            layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+    if (layoutPolicy->IsWidthFix()) {
+        layoutWrapper->GetGeometryNode()->SetFrameWidth(frameSize.Width().value_or(-1));
+    }
+    if (layoutPolicy->IsHeightFix()) {
+        layoutWrapper->GetGeometryNode()->SetFrameHeight(frameSize.Height().value_or(-1));
+    }
+    auto childrenSize = frameSize.ConvertToSizeT();
+    MeasureAdaptiveLayoutChildren(layoutWrapper, childrenSize);
+}
+
 std::optional<SizeF> ShapeContainerLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
@@ -57,20 +81,38 @@ std::optional<SizeF> ShapeContainerLayoutAlgorithm::MeasureContent(
     } else {
         newSize = contentConstraint.Constrain(GetChildrenSize(layoutWrapper, newSize));
     }
-    // if width or height is matchParent
-    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
-    if (layoutProperty) {
-        auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-        if (layoutPolicy.has_value()) {
-            if (layoutPolicy->IsWidthMatch() && contentConstraint.parentIdealSize.Width().has_value()) {
-                newSize.SetWidth(contentConstraint.parentIdealSize.Width().value());
-            }
-            if (layoutPolicy->IsHeightMatch() && contentConstraint.parentIdealSize.Height().has_value()) {
-                newSize.SetHeight(contentConstraint.parentIdealSize.Height().value());
-            }
-        }
-    }
+    MeasureLayoutPolicySize(contentConstraint, layoutWrapper, newSize);
     return newSize;
+}
+
+void ShapeContainerLayoutAlgorithm::MeasureLayoutPolicySize(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, SizeF& size)
+{
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value());
+    const std::optional<float>& parentIdealSizeWidth = contentConstraint.parentIdealSize.Width();
+    const std::optional<float>& parentIdealSizeHeight = contentConstraint.parentIdealSize.Height();
+    if (layoutPolicy->IsWidthMatch() && parentIdealSizeWidth.has_value()) {
+        size.SetWidth(parentIdealSizeWidth.value());
+    }
+    if (layoutPolicy->IsHeightMatch() && parentIdealSizeHeight.has_value()) {
+        size.SetHeight(parentIdealSizeHeight.value());
+    }
+
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<ShapeContainerPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pixelMapInfo = paintProperty->GetPixelMapInfoValue(ImageSourceInfo());
+    CHECK_NULL_VOID(pixelMapInfo.GetPixmap());
+    if (layoutPolicy->IsWidthAdaptive()) {
+        size.SetWidth(std::max(static_cast<float>(pixelMapInfo.GetPixmap()->GetWidth()), size.Width()));
+    }
+    if (layoutPolicy->IsHeightAdaptive()) {
+        size.SetHeight(std::max(static_cast<float>(pixelMapInfo.GetPixmap()->GetHeight()), size.Height()));
+    }
 }
 
 // get the max child size and offset.
@@ -81,6 +123,16 @@ SizeF ShapeContainerLayoutAlgorithm::GetChildrenSize(LayoutWrapper* layoutWrappe
     float maxHeight = 0.0f;
 
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        if (layoutPolicy->IsWidthAdaptive() && !childLayoutConstraint.parentIdealSize.Width().has_value()) {
+            childLayoutConstraint.parentIdealSize.SetWidth(0);
+        }
+        if (layoutPolicy->IsHeightAdaptive() && !childLayoutConstraint.parentIdealSize.Height().has_value()) {
+            childLayoutConstraint.parentIdealSize.SetHeight(0);
+        }
+    }
+
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(childLayoutConstraint);
     }

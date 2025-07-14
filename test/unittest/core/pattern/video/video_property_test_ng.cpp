@@ -495,51 +495,125 @@ HWTEST_F(VideoPropertyTestNg, VideoMeasureTest006, TestSize.Level1)
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
     auto videoPattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_NE(videoPattern, nullptr);
-    auto videoLayoutAlgorithm = videoPattern->CreateLayoutAlgorithm();
-    ASSERT_NE(videoLayoutAlgorithm, nullptr);
+    RefPtr<VideoLayoutAlgorithm> videoLayoutAlgorithm = AceType::MakeRefPtr<VideoLayoutAlgorithm>();
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(videoLayoutAlgorithm));
 
     /**
      * @tc.steps1: Width is matchParent
-     * @tc.expected: the return value of MeasureContent is (300, 1000)
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (300, 1000)
      */
     LayoutConstraintF layoutConstraint;
-    layoutConstraint.maxSize = SizeF(1000.0f, 1000.0f);
+    SizeF size = SizeF(1000.0f, 1000.0f);
     layoutConstraint.parentIdealSize = OptionalSizeF(300.0f, 400.0f);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
-    auto videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
-    ASSERT_TRUE(videoSize.has_value());
-    EXPECT_EQ(videoSize.value(), SizeF(300, 1000));
+    videoLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, &layoutWrapper, size);
+    EXPECT_EQ(size, SizeF(300, 1000));
 
     /**
      * @tc.steps2: Height is matchParent
-     * @tc.expected: the return value of MeasureContent is (1000, 400)
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (1000, 400)
      */
+    size = SizeF(1000.0f, 1000.0f);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
-    videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
-    ASSERT_TRUE(videoSize.has_value());
-    EXPECT_EQ(videoSize.value(), SizeF(1000, 400));
+    videoLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, &layoutWrapper, size);
+    EXPECT_EQ(size, SizeF(1000, 400));
 
     /**
      * @tc.steps3: Width and Height is not matchParent
-     * @tc.expected: the return value of MeasureContent is (1000, 1000)
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (1000, 1000)
      */
+    size = SizeF(1000.0f, 1000.0f);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
-    videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
-    ASSERT_TRUE(videoSize.has_value());
-    EXPECT_EQ(videoSize.value(), SizeF(1000, 1000));
+    videoLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, &layoutWrapper, size);
+    EXPECT_EQ(size, SizeF(1000, 1000));
 
     /**
      * @tc.steps4: layoutPolicy has no value
-     * @tc.expected: the return value of MeasureContent is (1000, 1000)
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (1000, 1000)
      */
     layoutProperty->layoutPolicy_ = std::nullopt;
-    videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
-    ASSERT_TRUE(videoSize.has_value());
-    EXPECT_EQ(videoSize.value(), SizeF(1000, 1000));
+    videoLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, &layoutWrapper, size);
+    EXPECT_EQ(size, SizeF(1000, 1000));
+}
+
+/**
+ * @tc.name: VideoMeasureTest007
+ * @tc.desc: Create Video, and invoke its Measure and layout function, and test its child/children layout algorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoMeasureTest007, TestSize.Level1)
+{
+    VideoModelNG video;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    video.Create(videoController);
+
+    auto frameNodeTemp = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNodeTemp, nullptr);
+    auto videoPatternTemp = AceType::DynamicCast<VideoPattern>(frameNodeTemp->GetPattern());
+    ASSERT_NE(videoPatternTemp, nullptr);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPatternTemp->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(false));
+
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+    auto layoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    // Create LayoutWrapper and set videoLayoutAlgorithm.
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
+    auto videoPattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_NE(videoPattern, nullptr);
+    RefPtr<VideoLayoutAlgorithm> videoLayoutAlgorithm = AceType::MakeRefPtr<VideoLayoutAlgorithm>();
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(videoLayoutAlgorithm));
+
+    /**
+     * @tc.steps1: Width is WrapContent
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (0, 1000)
+     */
+    LayoutConstraintF layoutConstraint;
+    SizeF size = SizeF(1000.0f, 1000.0f);
+    layoutConstraint.parentIdealSize = OptionalSizeF(300.0f, 400.0f);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    videoLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, &layoutWrapper, size);
+    EXPECT_EQ(size, SizeF(0, 1000));
+
+    /**
+     * @tc.steps2: Height is WrapContent
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (1000, 0)
+     */
+    size = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+    videoLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, &layoutWrapper, size);
+    EXPECT_EQ(size, SizeF(1000, 0));
+
+    /**
+     * @tc.steps3: Width is fixIdealSize
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (0, 1000)
+     */
+    size = SizeF(1000.0f, 1000.0f);
+    layoutConstraint.parentIdealSize = OptionalSizeF(300.0f, 400.0f);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    videoLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, &layoutWrapper, size);
+    EXPECT_EQ(size, SizeF(0, 1000));
+
+    /**
+     * @tc.steps4: Height is fixIdealSize
+     * @tc.expected: the return size of MeasureLayoutPolicySize is (1000, 0)
+     */
+    size = SizeF(1000.0f, 1000.0f);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    videoLayoutAlgorithm->MeasureLayoutPolicySize(layoutConstraint, &layoutWrapper, size);
+    EXPECT_EQ(size, SizeF(1000, 0));
 }
 
 /**
