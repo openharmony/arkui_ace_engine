@@ -79,6 +79,7 @@ public:
     void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func) override;
     void SetCopyOption(CopyOptions copyOption) override;
     static void ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& frameNode);
+    static void ProcessDefaultStyleAndBehaviorsMultiThread(const RefPtr<FrameNode>& frameNode);
     void ResetMaxLength() override;
     void SetForegroundColor(const Color& value) override;
     void SetPasswordIcon(const PasswordIcon& passwordIcon) override;

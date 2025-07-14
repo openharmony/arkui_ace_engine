@@ -32,6 +32,7 @@
 #include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_animate.h"
+#include "core/interfaces/native/node/node_api_multi_thread.h"
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
@@ -270,6 +271,11 @@ ArkUINodeHandle CreateCustomNode(ArkUI_CharPtr tag)
 ArkUINodeHandle GetOrCreateCustomNode(ArkUI_CharPtr tag)
 {
     return reinterpret_cast<ArkUINodeHandle>(ViewModel::GetOrCreateCustomNode(tag));
+}
+
+ArkUINodeHandle CreateCustomNodeByNodeId(ArkUI_CharPtr tag, ArkUI_Int32 nodeId)
+{
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateCustomNodeByNodeId(tag, nodeId));
 }
 
 ArkUI_Bool IsRightToLeft()
@@ -2370,6 +2376,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     .createNewScope = CreateNewScope,
     .registerOEMVisualEffect = RegisterOEMVisualEffect,
     .setOnNodeDestroyCallback = SetOnNodeDestroyCallback,
+    .createCustomNodeByNodeId = CreateCustomNodeByNodeId,
 };
 /* clang-format on */
 

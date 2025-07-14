@@ -68,6 +68,7 @@ public:
     void ParseResObjFriction(const RefPtr<ResourceObject>& resObj) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
+    static RefPtr<ScrollProxy> GetOrCreateScrollBarProxy(FrameNode* frameNode);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
     static void SetRowsTemplate(FrameNode* frameNode, const std::string& value);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
@@ -116,6 +117,7 @@ public:
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& ScrollFrameBegin);
     static void SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
     static void SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment);
+    static void SetScrollToIndexMultiThread(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetWaterflowFooter(FrameNode* frameNode, FrameNode* footerNode);
@@ -124,6 +126,7 @@ public:
     static void SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed);
     static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
     static void SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMode mode);
+    static void SetFooter(FrameNode* frameNode, const RefPtr<NG::UINode>& footer);
     static WaterFlowLayoutMode GetLayoutMode(FrameNode* frameNode);
     static void ParseResObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetFooter(FrameNode* frameNode, std::function<void()>&& footer);

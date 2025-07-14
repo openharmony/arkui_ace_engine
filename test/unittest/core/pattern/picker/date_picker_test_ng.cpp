@@ -2219,7 +2219,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest024, TestSize.Level1)
     EXPECT_EQ(columnPattern->selectedColumnId_, "year");
 
     columnPattern->SetSelectedMarkId(columnName[1]);
-    columnPattern->circleUtils_ = new PickerColumnPatternCircleUtils<DatePickerColumnPattern>();
+    // columnPattern->circleUtils_ = new PickerColumnPatternCircleUtils<DatePickerColumnPattern>();
     columnPattern->SetSelectedMarkListener(call);
     columnPattern->SetSelectedMark(false, false);
     EXPECT_EQ(columnPattern->selectedColumnId_, "month");
@@ -2292,7 +2292,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest026, TestSize.Level1)
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
 
-    columnPattern->circleUtils_ = new PickerColumnPatternCircleUtils<DatePickerColumnPattern>();
+    // columnPattern->circleUtils_ = new PickerColumnPatternCircleUtils<DatePickerColumnPattern>();
     columnPattern->animationCreated_ = false;
     CrownEvent crownEvent;
     crownEvent.action = OHOS::Ace::CrownAction::BEGIN;

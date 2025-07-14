@@ -1,0 +1,43 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# DO NOT MODIFY THIS FILE MANUALLY.
+# USE FOLLOWING COMMAND:
+# ../tools/gen_gni.py --json arktsconfig.json --output interop.gni --gn-tool ../../../../../../../../prebuilts/build-tools/linux-x86/bin/gn
+
+koalaui_interop_files = [
+  "src/arkts/loadLibraries.ts",
+  "src/arkts/NativeBuffer.ts",
+  "src/arkts/DeserializerBase.ts",
+  "src/arkts/index.ts",
+  "src/arkts/InteropNativeModule.ts",
+  "src/arkts/InteropTypes.ts",
+  "src/arkts/SerializerBase.ts",
+  "src/arkts/MaterializedBase.ts",
+  "src/arkts/Finalizable.ts",
+  "src/arkts/callback.ts",
+  "src/arkts/ResourceManager.ts",
+  "src/arkts/ResourceManager.ts",
+]
+
+koalaui_interop_path_keys = [
+  "@koalaui/compat",
+  "@koalaui/common",
+  "#common/wrappers/*",
+]
+
+koalaui_interop_path_values = [
+  "../incremental/compat/src/arkts",
+  "../incremental/common/src",
+  "src/napi/wrappers/*",
+]

@@ -306,9 +306,9 @@ public:
     void SetBgColor(const Color& color);
     void SetFontColor(const Color& color, bool isNeedRecord = true);
     void SetFontFamily(const std::vector<std::string>& value);
-    void SetFontSize(const Dimension& value);
-    void SetFontWeight(const FontWeight& value);
-    void SetItalicFontStyle(const Ace::FontStyle& value);
+    void SetFontSize(const std::optional<Dimension>& value);
+    void SetFontWeight(const std::optional<FontWeight>& value);
+    void SetItalicFontStyle(const std::optional<Ace::FontStyle>& value);
     void SetSelected(int32_t selected);
     void SetBorderColor(const Color& color);
     Color GetBorderColor() const;
@@ -404,7 +404,7 @@ public:
     {
         pasteButton_ = pasteButton;
     }
-    inline void SetOptionFontColor(const Color& color)
+    inline void SetOptionFontColor(const std::optional<Color>& color)
     {
         optionFontColor_ = color;
     }
@@ -432,6 +432,7 @@ public:
     void OnColorConfigurationUpdate() override;
 
 protected:
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
     void CreateBottomDivider();

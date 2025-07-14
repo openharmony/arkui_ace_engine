@@ -40,6 +40,7 @@
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
@@ -814,6 +815,10 @@ void FrameNode::DumpCommonInfo()
     if (layoutProperty_->GetLayoutRect()) {
         DumpLog::GetInstance().AddDesc(
             std::string("LayoutRect: ").append(layoutProperty_->GetLayoutRect().value().ToString().c_str()));
+    }
+    if (GetSuggestOpIncMarked()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("SuggestOpIncMarked: ").append(std::to_string(static_cast<int32_t>(GetSuggestOpIncMarked()))));
     }
     DumpExtensionHandlerInfo();
     DumpSafeAreaInfo();
@@ -1809,18 +1814,9 @@ RectF FrameNode::GetRectWithRender()
     return currFrameRect;
 }
 
-bool FrameNode::CheckAncestorPageShow()
-{
-    auto pageNode = GetPageNode();
-    if (!pageNode) {
-        return true;
-    }
-    return pageNode->GetPattern<PagePattern>()->IsOnShow();
-}
-
 void FrameNode::TriggerOnSizeChangeCallback()
 {
-    if (!IsActive() || !CheckAncestorPageShow()) {
+    if (!IsActive()) {
         return;
     }
     if (eventHub_ && (eventHub_->HasOnSizeChanged() || eventHub_->HasInnerOnSizeChanged()) && lastFrameNodeRect_) {
@@ -2460,6 +2456,8 @@ void FrameNode::UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstrai
 
 void FrameNode::RebuildRenderContextTree()
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, RebuildRenderContextTree);
     if (!needSyncRenderTree_) {
         return;
     }
@@ -2497,6 +2495,8 @@ void FrameNode::RebuildRenderContextTree()
 
 void FrameNode::MarkModifyDoneUnsafely()
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, MarkModifyDone);
     pattern_->OnModifyDone();
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     if (pipeline) {
@@ -2529,7 +2529,7 @@ void FrameNode::MarkModifyDoneUnsafely()
     renderContext_->OnModifyDone();
 #if (defined(__aarch64__) || defined(__x86_64__))
     if (Recorder::IsCacheAvaliable()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakPtr(pattern_)]() {
             auto pattern = weak.Upgrade();
@@ -2555,6 +2555,8 @@ void FrameNode::MarkModifyDone()
 
 [[deprecated("using AfterMountToParent")]] void FrameNode::OnMountToParentDone()
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, OnMountToParentDone);
     pattern_->OnMountToParentDone();
 }
 
@@ -2572,6 +2574,8 @@ void FrameNode::FlushUpdateAndMarkDirty()
 
 void FrameNode::MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag)
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, MarkDirtyNode, extraFlag);
     if (IsFreeze()) {
         // store the flag.
         layoutProperty_->UpdatePropertyChangeFlag(extraFlag);
@@ -2687,6 +2691,8 @@ void FrameNode::MarkNeedRenderOnly()
 
 void FrameNode::MarkNeedRender(bool isRenderBoundary)
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, MarkNeedRender, isRenderBoundary);
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     // If it has dirtyLayoutBox, need to mark dirty after layout done.
@@ -4355,6 +4361,11 @@ RefPtr<NodeAnimatablePropertyBase> FrameNode::GetAnimatablePropertyFloat(const s
     return iter->second;
 }
 
+bool FrameNode::HasAnimatableProperty(const std::string& propertyName) const
+{
+    return nodeAnimatablePropertyMap_.find(propertyName) != nodeAnimatablePropertyMap_.end();
+}
+
 RefPtr<FrameNode> FrameNode::FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName)
 {
     CHECK_NULL_RETURN(parentNode, nullptr);
@@ -5247,7 +5258,7 @@ bool FrameNode::ReachResponseDeadline() const
 OffsetF FrameNode::GetOffsetInScreen()
 {
     auto frameOffset = GetPaintRectOffset(false, true);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, OffsetF(0.0f, 0.0f));
     auto window = pipelineContext->GetWindow();
     CHECK_NULL_RETURN(window, OffsetF(0.0f, 0.0f));
@@ -6343,6 +6354,26 @@ void FrameNode::MarkAndCheckNewOpIncNode(Axis axis)
     }
 }
 
+void FrameNode::SuggestOpIncGroup(Axis axis)
+{
+    if (!SystemProperties::IsOpIncEnable() || axis != Axis::VERTICAL) {
+        return;
+    }
+    if (GetSuggestOpIncActivatedOnce()) {
+        return;
+    }
+    auto parent = GetParent();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+    while (parent) {
+        if (frameNode && frameNode->GetSuggestOpIncMarked()) {
+            frameNode->MarkSuggestOpIncGroup(false, false);
+        }
+        parent = parent->GetParent();
+        frameNode = AceType::DynamicCast<FrameNode>(parent);
+    }
+    SetSuggestOpIncActivatedOnce();
+}
+
 int FrameNode::GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh)
 {
     CHECK_NULL_RETURN(host, 0);
@@ -6704,6 +6735,9 @@ void FrameNode::BuildLayoutInfo(std::unique_ptr<JsonValue>& json)
     }
     if (layoutProperty_->GetLayoutRect()) {
         json->Put("LayoutRect", layoutProperty_->GetLayoutRect().value().ToString().c_str());
+    }
+    if (static_cast<int32_t>(GetSuggestOpIncMarked()) != 0) {
+        json->Put("SuggestOpIncMarked", static_cast<int32_t>(GetSuggestOpIncMarked()));
     }
 }
 

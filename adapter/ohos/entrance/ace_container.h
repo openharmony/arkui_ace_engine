@@ -909,6 +909,24 @@ public:
 
     UIContentErrorCode RunIntentPage();
     void SetIsFormRender(bool isFormRender) override;
+    RefPtr<Frontend> GetSubFrontend() const override
+    {
+        CHECK_NE_RETURN(type_ == FrontendType::STATIC_HYBRID_DYNAMIC ||
+                        type_ == FrontendType::DYNAMIC_HYBRID_STATIC, true, nullptr);
+        std::lock_guard<std::mutex> lock(subFrontendMutex_);
+        return subFrontend_;
+    }
+
+    FrontendType GetSubFrontendType() const
+    {
+        CHECK_NE_RETURN(type_ == FrontendType::STATIC_HYBRID_DYNAMIC ||
+                        type_ == FrontendType::DYNAMIC_HYBRID_STATIC, true, type_);
+        if (type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
+            return FrontendType::DECLARATIVE_JS;
+        } else {
+            return FrontendType::ARK_TS;
+        }
+    }
 
 private:
     virtual bool MaybeRelease() override;
@@ -952,6 +970,16 @@ private:
         std::optional<bool> enable, std::optional<bool> animation);
 
     void FlushReloadTask(bool needReloadTransition, const ConfigurationChange& configurationChange);
+    void InitSystemBarConfig();
+    bool IsPcOrPadFreeMultiWindowMode() const override;
+    bool IsFullScreenWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN;
+    }
+    bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) override;
+    void InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
+    void InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
@@ -1042,6 +1070,10 @@ private:
     void UnsubscribeHighContrastChange();
     std::shared_ptr<HighContrastObserver> highContrastObserver_ = nullptr;
 #endif
+    // for multiple frontEnd
+    // valid only when type_ is STATIC_HYBRID_DYNAMIC or DYNAMIC_HYBRID_STATIC
+    RefPtr<Frontend> subFrontend_ = nullptr;
+    mutable std::mutex subFrontendMutex_;
 };
 
 } // namespace OHOS::Ace::Platform

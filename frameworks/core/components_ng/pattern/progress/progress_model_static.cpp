@@ -288,4 +288,4 @@ void ProgressModelStatic::SetPrivacySensitive(FrameNode* frameNode, const std::o
     // }
     // ViewAbstractModelStatic::SetPrivacySensitive(frameNode, flag);
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG

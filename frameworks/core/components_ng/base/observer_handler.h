@@ -220,7 +220,10 @@ public:
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
     using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
+    using DensityHandleFuncForAni = std::function<void(AbilityContextInfo&, double)>;
     void SetHandleDensityChangeFunc(DensityHandleFunc func);
+        void SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func);
+
     void SetLayoutDoneHandleFunc(DrawCommandSendHandleFunc func);
     void HandleLayoutDoneCallBack();
     void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
@@ -231,6 +234,20 @@ public:
     void SetPanGestureHandleFunc(PanGestureHandleFunc func);
     void SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func);
     void SetHandleGestureHandleFunc(GestureHandleFunc func);
+
+    using BeforePanStartHandleFuncForAni = std::function<void()>;
+    void SetBeforePanStartHandleFuncForAni(BeforePanStartHandleFuncForAni func);
+    using AfterPanStartHandleFuncForAni = std::function<void()>;
+    void SetAfterPanStartHandleFuncForAni(AfterPanStartHandleFuncForAni func);
+    using BeforePanEndHandleFuncForAni = std::function<void()>;
+    void SetBeforePanEndHandleFuncForAni(BeforePanEndHandleFuncForAni func);
+    using AfterPanEndHandleFuncForAni = std::function<void()>;
+    void SetAfterPanEndHandleFuncForAni(AfterPanEndHandleFuncForAni func);
+
+    using WillClickHandleFuncForAni = std::function<void()>;
+    void SetWillClickHandleFuncForAni(WillClickHandleFuncForAni func);
+    using DidClickHandleFuncForAni = std::function<void()>;
+    void SetDidClickHandleFuncForAni(DidClickHandleFuncForAni func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
@@ -238,12 +255,21 @@ private:
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
     DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
     DensityHandleFunc densityHandleFunc_ = nullptr;
+    DensityHandleFuncForAni densityHandleFuncForAni_ = nullptr;
     NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
     WillClickHandleFunc willClickHandleFunc_ = nullptr;
     DidClickHandleFunc didClickHandleFunc_ = nullptr;
     PanGestureHandleFunc panGestureHandleFunc_ = nullptr;
     TabContentStateHandleFunc tabContentStateHandleFunc_ = nullptr;
     GestureHandleFunc gestureHandleFunc_ = nullptr;
+
+    BeforePanStartHandleFuncForAni beforePanStartHandleFuncForAni_ = nullptr;
+    AfterPanStartHandleFuncForAni afterPanStartHandleFuncForAni_ = nullptr;
+    BeforePanEndHandleFuncForAni beforePanEndHandleFuncForAni_ = nullptr;
+    AfterPanEndHandleFuncForAni afterPanEndHandleFuncForAni_ = nullptr;
+
+    WillClickHandleFuncForAni willClickHandleFuncForAni_ = nullptr;
+    DidClickHandleFuncForAni didClickHandleFuncForAni_ = nullptr;
 
     napi_value GetUIContextValue();
 };

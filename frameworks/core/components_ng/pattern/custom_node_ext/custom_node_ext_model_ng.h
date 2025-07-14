@@ -25,6 +25,7 @@ class CustomNodeExtModelNG {
 public:
     static RefPtr<FrameNode> GetOrCreateFrameNode(const std::string& tag);
     static RefPtr<FrameNode> CreateFrameNode(const std::string& tag);
+    static RefPtr<FrameNode> CreateFrameNode(const std::string& tag, int32_t nodeId);
 
     static void SetMeasureCallback(
         FrameNode* frameNode, std::function<void(LayoutConstraintF constraints)>&& onMeasure);

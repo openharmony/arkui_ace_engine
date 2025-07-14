@@ -51,6 +51,14 @@ public:
         return false;
     }
 
+    std::unique_ptr<RectF> GetCaretRect()
+    {
+        if (auto controller = handler_.Upgrade(); controller) {
+            return std::make_unique<RectF>(controller->GetCaretRect());
+        }
+        return nullptr;
+    }
+
     void CloseSelectionMenu() override
     {
         if (auto controller = handler_.Upgrade(); controller) {
@@ -130,8 +138,7 @@ public:
         if (auto controller = handler_.Upgrade(); controller) {
             auto richEditorController = AceType::DynamicCast<RichEditorController>(controller);
             CHECK_NULL_RETURN(richEditorController, nullptr);
-            // need check
-            // return richEditorController->GetPattern();
+            return richEditorController->GetPattern();
         }
         return nullptr;
     }

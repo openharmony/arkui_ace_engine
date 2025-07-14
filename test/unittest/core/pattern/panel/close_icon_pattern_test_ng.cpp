@@ -21,6 +21,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
+#include "core/components/close_icon/close_icon_theme.h"
 #include "core/components/common/layout/constants.h"
 
 #define private public
@@ -34,6 +35,9 @@
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 #include "core/components_ng/pattern/panel/sliding_panel_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -54,6 +58,8 @@ const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 
 class CloseIconPatternTestNg : public testing::Test {
 public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     PaddingProperty CreatePadding(float left, float top, float right, float bottom)
     {
         PaddingProperty padding;
@@ -64,6 +70,24 @@ public:
         return padding;
     }
 };
+
+void CloseIconPatternTestNg::SetUpTestSuite()
+{
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+    auto closeIconTheme = CloseIconTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(closeIconTheme));
+    EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
+}
+
+void CloseIconPatternTestNg::TearDownTestSuite()
+{
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+}
 
 /**
  * @tc.name: CloseIconPatternTest001

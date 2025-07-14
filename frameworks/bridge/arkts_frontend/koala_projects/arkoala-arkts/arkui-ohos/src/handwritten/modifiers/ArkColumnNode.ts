@@ -13,20 +13,34 @@
  * limitations under the License.
  */
 
-import { ColumnAttribute, HorizontalAlign } from "../../generated";
-import { ArkColumnPeer } from "../../generated/peers/ArkColumnPeer";
-import { ArkBaseNode } from "./ArkBaseNode";
+import { InteropNativeModule } from '@koalaui/interop';
+import { ColumnAttribute, HorizontalAlign, FlexAlign, PointLightStyle, ArkColumnPeer } from '../../component';
+import { ArkBaseNode } from './ArkBaseNode';
 
-export class ArkColumnNode extends ArkBaseNode /* implements ColumnAttribute */ {
-    alignItems(value: HorizontalAlign | undefined): this {
-        if (value) {
-            this.getPeer().alignItemsAttribute(value);
-        } else {
-            // this.getPeer().resetAlignItemsAttribute(value);
-        }
+export class ArkColumnNode extends ArkBaseNode implements ColumnAttribute {
+
+    constructParam(...param: Object[]): this {
+        InteropNativeModule._NativeLog('column constructParam enter');
         return this;
     }
+
     getPeer() : ArkColumnPeer {
         return this.peer as ArkColumnPeer
+    }
+
+    alignItems(value: HorizontalAlign | undefined): this {
+        return this;
+    }
+
+    justifyContent(value: FlexAlign | undefined): this {
+        return this;
+    }
+
+    pointLight(value: PointLightStyle | undefined): this {
+        return this;
+    }
+
+    reverse(value: boolean | undefined): this {
+        return this;
     }
 }

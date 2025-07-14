@@ -827,7 +827,7 @@ HWTEST_F(ImagePatternTestNg, ImagePatternOnKeyEvent001, TestSize.Level0)
  * @tc.desc: Output the dump info of ImagePattern object.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, ImageDumpInfo001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, ImageDumpInfo001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Out dump info.

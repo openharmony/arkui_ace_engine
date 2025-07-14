@@ -1,0 +1,14 @@
+{
+    "ui": "tdd",
+    "spec": "./test/**/*.test.ts",
+    "exclude": [
+        "./test/ets/**/*",
+        "./test/unmemoized/**/*",
+        "./test/ui2abc/**/*.ts",
+        "./test/arkts/**/*",
+        "./test/ui2abc_run.ts",
+        "./test/artks_run.ts"
+    ],
+    "extension": ["ts"],
+    "require": ["../../incremental/test-utils/scripts/register"]
+}

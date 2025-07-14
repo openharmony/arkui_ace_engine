@@ -95,6 +95,15 @@ std::string LinearGradientBlurDirection(GradientDirection direction)
         json##name->Put("y", "");                                    \
     }
 
+#define ACE_OFFSET_EDGES(name)                                                                                      \
+auto json##name = JsonUtil::Create(true);                                                                           \
+if (prop##name.has_value()) {                                                                                       \
+    json##name->Put("left", prop##name->left.has_value() ? prop##name->left.value().ToString().c_str() : "");       \
+    json##name->Put("top", prop##name->top.has_value() ? prop##name->top.value().ToString().c_str() : "");          \
+    json##name->Put("right", prop##name->right.has_value() ? prop##name->right.value().ToString().c_str() : "");    \
+    json##name->Put("bottom", prop##name->bottom.has_value() ? prop##name->bottom.value().ToString().c_str() : ""); \
+}
+
 void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     /* no fixed attr below, just return */
@@ -104,11 +113,16 @@ void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const
     ACE_OFFSET_API_TEN_TO_JSON(Position);
     json->PutExtAttr("position", jsonPosition, filter);
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     // add version protection, null as default start from API 10 or higher
     if (context && context->GetMinPlatformVersion() > static_cast<int32_t>(PlatformVersion::VERSION_NINE)) {
-        ACE_OFFSET_API_TEN_TO_JSON(Offset);
-        json->PutExtAttr("offset", jsonOffset, filter);
+        if (propOffsetEdges.has_value()) {
+            ACE_OFFSET_EDGES(OffsetEdges);
+            json->PutExtAttr("offset", jsonOffsetEdges, filter);
+        } else {
+            ACE_OFFSET_API_TEN_TO_JSON(Offset);
+            json->PutExtAttr("offset", jsonOffset, filter);
+        }
 
         ACE_OFFSET_API_TEN_TO_JSON(Anchor);
         json->PutExtAttr("markAnchor", jsonAnchor, filter);
@@ -353,24 +367,18 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     if (filter.IsFastFilter()) {
         return;
     }
-    if (propTransformRotate.has_value()) {
-        auto jsonValue = JsonUtil::Create(true);
-        jsonValue->Put("x", std::to_string(propTransformRotate->x).c_str());
-        jsonValue->Put("y", std::to_string(propTransformRotate->y).c_str());
-        jsonValue->Put("z", std::to_string(propTransformRotate->z).c_str());
-        jsonValue->Put("angle", std::to_string(propTransformRotate->w).c_str());
-        jsonValue->Put("perspective", std::to_string(propTransformRotate->v).c_str());
-        jsonValue->Put("centerX", center.GetX().ToString().c_str());
-        jsonValue->Put("centerY", center.GetY().ToString().c_str());
-        if (center.GetZ().has_value()) {
-            jsonValue->Put("centerZ", center.GetZ().value().ToString().c_str());
-        } else {
-            json->PutExtAttr("centerZ", JsonUtil::Create(true), filter);
-        }
-        json->PutExtAttr("rotate", jsonValue, filter);
-    } else {
-        json->PutExtAttr("rotate", JsonUtil::Create(true), filter);
-    }
+    auto transformRotate = HasTransformRotate() ? GetTransformRotateValue() : DEFAULT_ROTATE_VEC;
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("x", std::to_string(transformRotate.x).c_str());
+    jsonValue->Put("y", std::to_string(transformRotate.y).c_str());
+    jsonValue->Put("z", std::to_string(transformRotate.z).c_str());
+    jsonValue->Put("angle", std::to_string(transformRotate.w).c_str());
+    jsonValue->Put("perspective", std::to_string(transformRotate.v).c_str());
+    jsonValue->Put("centerX", center.GetX().ToString().c_str());
+    jsonValue->Put("centerY", center.GetY().ToString().c_str());
+    auto centerZ = center.GetZ().value_or(Dimension());
+    jsonValue->Put("centerZ", centerZ.ToString().c_str());
+    json->PutExtAttr("rotate", jsonValue, filter);
 
     if (propTransformScale.has_value()) {
         auto jsonValue = JsonUtil::Create(true);
@@ -432,7 +440,25 @@ void PointLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         return;
     }
     auto jsonLightIntensity = JsonUtil::Create(true);
+    auto lightSourceJSON = JsonUtil::Create(true);
+    std::vector<std::string> strings = {
+        "IlluminatedType.NONE",
+        "IlluminatedType.BORDER",
+        "IlluminatedType.CONTENT",
+        "IlluminatedType.BORDER_CONTENT",
+        "IlluminatedType.BLOOM_BORDER",
+        "IlluminatedType.BLOOM_BORDER_CONTENT"
+    };
     jsonLightIntensity->Put("lightIntensity", propLightIntensity.has_value() ? propLightIntensity.value() : 0.0);
+    if (propLightPosition && propLightIntensity && propLightColor) {
+        lightSourceJSON->Put("color", propLightColor.value_or(Color::WHITE).ColorToString().c_str());
+        jsonLightIntensity->Put("lightSource", lightSourceJSON);
+    } else {
+        jsonLightIntensity->Put("lightSource", "No light source");
+    }
+    auto iiluminatedString = strings.at(propLightIlluminated.value_or(0)).c_str();
+    jsonLightIntensity->Put("illuminated", iiluminatedString);
+    jsonLightIntensity->Put("bloom", std::to_string(propBloom.value_or(0.0f)).c_str());
     json->PutExtAttr("pointLight", jsonLightIntensity, filter);
 
     if (propLightPosition.has_value()) {

@@ -14,30 +14,43 @@
  */
 
 import { int32, KoalaCallsiteKey } from "@koalaui/common"
-import { Disposable, IncrementalNode, scheduleCallback } from "@koalaui/runtime"
+import { Disposable, GlobalStateManager, IncrementalNode, MutableState, scheduleCallback } from "@koalaui/runtime"
 import { NativePeerNode } from "./NativePeerNode"
 import { nullptr, pointer } from "@koalaui/interop"
-import { ArkRootPeer } from "./generated/peers/ArkStaticComponentsPeer"
+import { ArkRootPeer } from "./component"
 import { ReusablePool } from "./ReusablePool"
+import { StateStylesOps } from './component/arkui-custom'
+import { ArkUIAniModule } from "arkui.ani"
 
 export const PeerNodeType = 11
 export const RootPeerType = 33
 export const LazyItemNodeType = 17 // LazyItems are detached node trees that are stored privately in LazyForEach
-const INITIAL_ID = 1000
+export const BuilderRootNodeType = 19 // BuilderRootNode are detached node trees that are stored privately in BuilderNode
+const INITIAL_ID = 0
+const ID_CAPACITY = 10000
+const UNINITIALIZE_CURSOR = -1
 
 export class PeerNode extends IncrementalNode {
     static generateRootPeer() {
-        return ArkRootPeer.create()
+        return ArkRootPeer.create(undefined)
     }
     peer: NativePeerNode
     protected static currentId: int32 = INITIAL_ID
-    static nextId(): int32 { return PeerNode.currentId++ }
+    protected static cursor: int32 = UNINITIALIZE_CURSOR
+    static nextId(): int32 {
+        if (PeerNode.cursor === UNINITIALIZE_CURSOR || PeerNode.currentId >= PeerNode.cursor + ID_CAPACITY) {
+            PeerNode.cursor = ArkUIAniModule._RequireArkoalaNodeId(ID_CAPACITY)
+            PeerNode.currentId = PeerNode.cursor
+        }
+        return PeerNode.currentId++;
+    }
     private id: int32
     private _reuseCb?: () => void
     private _recycleCb?: () => void
     // Pool to store recycled child scopes, grouped by type
     private _reusePool?: Map<string, ReusablePool>
     reusable: boolean = false
+    private _uiStateStyle?: MutableState<int32>;
 
     getPeerPtr(): pointer {
         return this.peer.ptr
@@ -96,10 +109,17 @@ export class PeerNode extends IncrementalNode {
     }
 
     setReusePoolSize(size: number, reuseKey: string): void {
+        if (size < 0) return
         if (!this.isKind(RootPeerType)) {
             if (this.parent?.isKind(PeerNodeType))
                 (this.parent! as PeerNode).setReusePoolSize(size, reuseKey)
             return
+        }
+        if (!this._reusePool) {
+            this._reusePool = new Map<string, ReusablePool>()
+        }
+        if (!this._reusePool?.has(reuseKey)) {
+            this._reusePool?.set(reuseKey, new ReusablePool())
         }
         this._reusePool?.get(reuseKey)?.setMaxSize(size)
     }
@@ -145,15 +165,15 @@ export class PeerNode extends IncrementalNode {
                     this.insertMark = peerPtr
                     return
                 }
-                // Find the closest peer node backward.
-                let sibling: PeerNode | undefined = undefined
-                for (let node = child.previousSibling; node; node = node!.previousSibling) {
-                    if (node!.isKind(PeerNodeType)) {
-                        sibling = node as PeerNode
-                        break
-                    }
+                // Find the closest peer node forward.
+                let sibling: PeerNode | undefined = findSiblingPeerNode(child, true)
+                if (sibling === undefined) {
+                    // Add to the end (common case!).
+                    this.peer.addChild(peerPtr)
+                } else {
+                    // Insert child in the middle.
+                    this.peer.insertChildBefore(peerPtr, sibling?.peer?.ptr ?? nullptr)
                 }
-                this.peer.insertChildAfter(peerPtr, sibling?.peer?.ptr ?? nullptr)
             }
         }
         this.onChildRemoved = (child: IncrementalNode) => {
@@ -180,15 +200,47 @@ export class PeerNode extends IncrementalNode {
         this._reusePool = undefined
         this._recycleCb = undefined
         this._reuseCb = undefined
+        this._uiStateStyle = undefined;
         super.dispose()
+    }
+
+    public getOrCreateStateStyleMutable(): MutableState<int32> | undefined {
+        if (this._uiStateStyle !== undefined) {
+            return this._uiStateStyle!;
+        }
+        else {
+            const manager = GlobalStateManager.instance
+            this._uiStateStyle = manager.mutableState<int32>(0 as int32, true)
+            StateStylesOps.onStateStyleChange(this.getPeerPtr(), (state: int32) => {
+                this._uiStateStyle!.value = state
+            })
+            return this._uiStateStyle!;
+        }
     }
 }
 
-function findPeerNode(node: IncrementalNode): PeerNode | undefined {
+export function findPeerNode(node: IncrementalNode): PeerNode | undefined {
     if (node.isKind(PeerNodeType)) return node as PeerNode
     for (let child = node.firstChild; child; child = child!.nextSibling) {
         let peer = findPeerNode(child!)
         if (peer) return peer
+    }
+    return undefined
+}
+
+function findSiblingPeerNode(node: IncrementalNode, forward: boolean): PeerNode | undefined {
+    if (forward) {
+        for (let sibling = node.nextSibling; sibling; sibling = sibling!.nextSibling) {
+            if (sibling!.isKind(PeerNodeType)) {
+                return sibling as PeerNode
+            }
+        }
+    } else {
+        for (let sibling = node.previousSibling; sibling; sibling = sibling!.previousSibling) {
+            if (sibling!.isKind(PeerNodeType)) {
+                return sibling as PeerNode
+            }
+        }
     }
     return undefined
 }

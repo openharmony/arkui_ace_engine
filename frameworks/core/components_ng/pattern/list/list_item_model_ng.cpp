@@ -15,13 +15,12 @@
 
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 
-#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -75,6 +74,13 @@ void ListItemModelNG::Create(bool isCreateArc)
     stack->Push(frameNode);
 }
 
+RefPtr<FrameNode> ListItemModelNG::CreateListItem(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+    return frameNode;
+}
+
 void ListItemModelNG::OnDidPop()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -114,9 +120,24 @@ void ListItemModelNG::SetSticky(V2::StickyMode stickyMode)
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, StickyMode, stickyMode);
 }
 
+void ListItemModelNG::SetSticky(FrameNode* frameNode, const std::optional<V2::StickyMode>& stickyMode)
+{
+    if (stickyMode.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StickyMode, stickyMode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StickyMode, frameNode);
+    }
+}
+
 void ListItemModelNG::SetEditMode(uint32_t editMode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EditMode, editMode);
+}
+
+void ListItemModelNG::SetEditMode(FrameNode* frameNode, uint32_t editMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EditMode, editMode, frameNode);
 }
 
 void ListItemModelNG::SetSelectable(bool selectable)
@@ -135,7 +156,7 @@ void ListItemModelNG::SetSelected(bool selected)
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(selected);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
 }
@@ -144,7 +165,7 @@ void ListItemModelNG::SetSelectChangeEvent(std::function<void(bool)>&& changeEve
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetSelectChangeEvent(std::move(changeEvent));
 }
@@ -153,7 +174,7 @@ void ListItemModelNG::SetSelectCallback(OnSelectFunc&& selectCallback)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(selectCallback));
 }
@@ -172,7 +193,7 @@ void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, OnDel
         node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     }
     CHECK_NULL_VOID(node);
-    auto eventHub = node->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = node->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto pattern = node->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -225,7 +246,7 @@ void ListItemModelNG::SetSelected(FrameNode* frameNode, bool selected)
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(selected);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
 }
@@ -238,12 +259,12 @@ void ListItemModelNG::SetSelectable(FrameNode* frameNode, bool selectable)
     pattern->SetSelectable(selectable);
 }
 
-void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, FrameNode* buildNode, OnDeleteEvent&& onDelete,
+void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, UINode* buildNode, OnDeleteEvent&& onDelete,
     OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
-    OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea)
+    OnStateChangedEvent&& onStateChange, const std::optional<Dimension>& length, bool isStartArea)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -255,7 +276,11 @@ void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, FrameNode* buildNode, 
         eventHub->SetOnEnterStartDeleteArea(std::move(onEnterDeleteArea));
         eventHub->SetOnExitStartDeleteArea(std::move(onExitDeleteArea));
         eventHub->SetStartOnStateChange(std::move(onStateChange));
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length, frameNode);
+        if (length) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length.value(), frameNode);
+        } else {
+            ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, frameNode);
+        }
     } else {
         const auto endNode = AceType::Claim<UINode>(buildNode);
         pattern->SetEndNode(endNode);
@@ -264,26 +289,43 @@ void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, FrameNode* buildNode, 
         eventHub->SetOnEnterEndDeleteArea(std::move(onEnterDeleteArea));
         eventHub->SetOnExitEndDeleteArea(std::move(onExitDeleteArea));
         eventHub->SetEndOnStateChange(std::move(onStateChange));
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length, frameNode);
+        if (length) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length.value(), frameNode);
+        } else {
+            ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, frameNode);
+        }
     }
 }
 
 void ListItemModelNG::SetSwiperAction(FrameNode* frameNode, std::function<void()>&& startAction,
-    std::function<void()>&& endAction, OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect)
+    std::function<void()>&& endAction, OnOffsetChangeFunc&& onOffsetChangeFunc,
+    const std::optional<V2::SwipeEdgeEffect>& edgeEffect)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOffsetChangeCallBack(std::move(onOffsetChangeFunc));
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect, frameNode);
+    if (edgeEffect.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, frameNode);
+    }
 }
 
 void ListItemModelNG::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(selectCallback));
+}
+
+void ListItemModelNG::SetSelectChangeEvent(FrameNode* frameNode, OnSelectFunc&& changeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetSelectChangeEvent(std::move(changeEvent));
 }
 
 void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& builderComponent, OnDeleteEvent&& onDelete,
@@ -294,7 +336,7 @@ void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& build
         node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     }
     CHECK_NULL_VOID(node);
-    auto eventHub = node->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = node->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto pattern = node->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -310,54 +352,17 @@ void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& build
         ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length);
     }
 }
-
 void ListItemModelNG::SetAutoScale(FrameNode* frameNode, bool autoScale)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, autoScale, frameNode);
 }
 
-void ListItemModelNG::SetStyle(FrameNode* frameNode, V2::ListItemStyle style)
+void ListItemModelNG::SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemStyle>& style)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetListItemStyle(style);
-}
-
-void ListItemModelNG::ParseResObjStartArea(const RefPtr<ResourceObject>& resObj)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ListItemPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->RemoveResObj("listItem.StartDeleteAreaDistance");
-    CHECK_NULL_VOID(resObj);
-        auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
-            CalcDimension result;
-            if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
-                return;
-            }
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, result, frameNode);
-        };
-        pattern->AddResObj("listItem.StartDeleteAreaDistance", resObj, std::move(updateFunc));
-}
-
-void ListItemModelNG::ParseResObjEndArea(const RefPtr<ResourceObject>& resObj)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ListItemPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->RemoveResObj("listItem.EndDeleteAreaDistance");
-    CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
-        CalcDimension result;
-        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
-            return;
-        }
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, result, frameNode);
-    };
-    pattern->AddResObj("listItem.EndDeleteAreaDistance", resObj, std::move(updateFunc));
+    pattern->SetListItemStyle(style.value_or(V2::ListItemStyle::NONE));
 }
 } // namespace OHOS::Ace::NG

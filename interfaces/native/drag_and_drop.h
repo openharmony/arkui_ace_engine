@@ -36,7 +36,7 @@
 #define ARKUI_NATIVE_DRAG_AND_DROP_H
 
 #include <stdint.h>
-
+#include <stdbool.h>
 #include "native_type.h"
 #include "ui_input_event.h"
 

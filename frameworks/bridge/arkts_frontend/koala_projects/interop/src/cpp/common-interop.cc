@@ -367,6 +367,11 @@ void impl_CopyArray(KNativePointer data, KLong length, KByte* array) {
 }
 KOALA_INTEROP_V3(CopyArray, KNativePointer, KLong, KByte*)
 
+void impl_CopyBuffer(KNativePointer data, KLong length, KNativePointer source) {
+    memcpy(data, source, length);
+}
+KOALA_INTEROP_V3(CopyBuffer, KNativePointer, KLong, KNativePointer)
+
 static Callback_Caller_t g_callbackCaller = nullptr;
 void setCallbackCaller(Callback_Caller_t callbackCaller) {
     g_callbackCaller = callbackCaller;
@@ -655,6 +660,15 @@ KStringPtr impl_StdStringToString(KVMContext vmContext, KNativePointer stringPtr
     return result;
 }
 KOALA_INTEROP_CTX_1(StdStringToString, KStringPtr, KNativePointer)
+
+#if  defined(KOALA_NAPI)  || defined(KOALA_ANI)
+KStringPtr impl_RawUtf8ToString(KVMContext vmContext, KNativePointer data) {
+    auto string = (const char*)data;
+    KStringPtr result(string, strlen(string), false);
+    return result;
+}
+KOALA_INTEROP_CTX_1(RawUtf8ToString, KStringPtr, KNativePointer)
+#endif
 
 KInteropReturnBuffer impl_RawReturnData(KVMContext vmContext, KInt v1, KInt v2) {
     void* data = new int8_t[v1];

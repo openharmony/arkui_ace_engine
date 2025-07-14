@@ -94,6 +94,7 @@ template("ace_core_source_set") {
       "accessibility/accessibility_utils.cpp",
       "accessibility/native_interface_accessibility_impl.cpp",
       "accessibility/native_interface_accessibility_provider.cpp",
+      "accessibility/static/accessibility_static_utils.cpp",
 
       # animation
       "animation/animatable_data.cpp",
@@ -301,6 +302,11 @@ template("ace_core_source_set") {
 
       # force split
       "common/force_split/force_split_utils.cpp",
+
+      # drawable
+      "drawable/animated_drawable_descriptor.cpp",
+      "drawable/layered_drawable_descriptor.cpp",
+      "drawable/pixel_map_drawable_descriptor.cpp",
     ]
 
     if (platform == "ohos" || platform == "ohos_ng") {
@@ -676,6 +682,7 @@ template("ace_core_source_set") {
     }
 
     if (defined(config.window_scene_support) && config.window_scene_support) {
+      defines += [ "WINDOW_SCENE_SUPPORTED" ]
       deps += [
         "$ace_root/frameworks/core/components_ng/pattern/ui_extension:ace_core_components_ui_extension_pattern_ng_$platform",
         "$ace_root/frameworks/core/components_ng/pattern/window_scene:ace_core_components_window_scene_$platform",
@@ -727,6 +734,7 @@ template("ace_core_ng_source_set") {
       "accessibility/accessibility_utils.cpp",
       "accessibility/native_interface_accessibility_impl.cpp",
       "accessibility/native_interface_accessibility_provider.cpp",
+      "accessibility/static/accessibility_static_utils.cpp",
 
       # animation
       "animation/animatable_data.cpp",
@@ -842,6 +850,7 @@ template("ace_core_ng_source_set") {
       # pipeline
       "pipeline/base/constants.cpp",
       "pipeline/base/element_register.cpp",
+      "pipeline/base/element_register_multi_thread.cpp",
       "pipeline/base/related_node.cpp",
       "pipeline/container_window_manager.cpp",
       "pipeline/pipeline_base.cpp",
@@ -943,6 +952,11 @@ template("ace_core_ng_source_set") {
 
       # force split
       "common/force_split/force_split_utils.cpp",
+
+      # drawable
+      "drawable/animated_drawable_descriptor.cpp",
+      "drawable/layered_drawable_descriptor.cpp",
+      "drawable/pixel_map_drawable_descriptor.cpp",
     ]
 
     include_dirs = [ "$ace_root" ]
@@ -1122,6 +1136,7 @@ template("ace_core_ng_source_set") {
       }
     }
     if (defined(config.window_scene_support) && config.window_scene_support) {
+      defines += [ "WINDOW_SCENE_SUPPORTED" ]
       deps += [
         "$ace_root/frameworks/core/components_ng/pattern/ui_extension:ace_core_components_ui_extension_pattern_ng_$platform",
         "$ace_root/frameworks/core/components_ng/pattern/window_scene:ace_core_components_window_scene_$platform",

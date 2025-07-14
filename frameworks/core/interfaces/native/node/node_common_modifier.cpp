@@ -49,6 +49,7 @@
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/node_common_modifier_multi_thread.h"
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_gesture_modifier.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
@@ -97,7 +98,6 @@ constexpr int32_t Y_INDEX = 1;
 constexpr int32_t Z_INDEX = 2;
 constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
-constexpr float DEFAULT_BIAS = 0.5f;
 constexpr float DEFAULT_SATURATE = 1.0f;
 constexpr float DEFAULT_BRIGHTNESS = 1.0f;
 constexpr int32_t OUTLINE_LEFT_WIDTH_INDEX = 0;
@@ -148,7 +148,7 @@ const std::vector<AnimationDirection> DIRECTION_LIST = {
 };
 
 constexpr int32_t DEFAULT_DURATION = 1000;
-std::string g_strValue;
+thread_local std::string g_strValue;
 
 BorderStyle ConvertBorderStyle(int32_t value)
 {
@@ -3314,6 +3314,7 @@ void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGe
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetGeometryTransition, node, id, options);
     std::string idStr(id);
     ViewAbstract::SetGeometryTransition(frameNode, idStr,
         static_cast<bool>(options->follow), static_cast<bool>(options->hierarchyStrategy));
@@ -3335,6 +3336,7 @@ void ResetGeometryTransition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, ResetGeometryTransition, node);
     ViewAbstract::SetGeometryTransition(frameNode, "", false, true);
 }
 

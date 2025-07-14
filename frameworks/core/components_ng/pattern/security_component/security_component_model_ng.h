@@ -47,6 +47,8 @@ public:
         const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent);
     static void SetIconSize(const Dimension& value);
     static void SetIconSize(const NG::CalcSize& value);
+    static void SetIconSize(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetIconColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetSymbolIconSize(const Dimension& value);
     static void SetIconColor(const Color& value);
     static void SetIconBorderRadius(const Dimension& value);
@@ -55,8 +57,6 @@ public:
         const std::optional<Dimension>& bottomRight);
     static void SetIcon(const ImageSourceInfo& value);
     static void SetText(const std::string& value);
-    static void SetIconSize(FrameNode* frameNode, const std::optional<Dimension>& value);
-    static void SetIconColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetSymbolIconColor(const std::vector<Color>& value);
     static void SetFontSize(const Dimension& value);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
@@ -83,6 +83,8 @@ public:
     static void SetBackgroundBorderRadius(const std::optional<Dimension>& topLeft,
         const std::optional<Dimension>& topRight, const std::optional<Dimension>& bottomLeft,
         const std::optional<Dimension>& bottomRight);
+    static void SetBackgroundBorderRadius(FrameNode* frameNode,
+        const std::optional<BorderRadiusProperty>& value);
     static void SetBackgroundPadding(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom);
     static void SetBackgroundPadding(FrameNode* frameNode,
@@ -95,12 +97,19 @@ public:
     static void SetTextIconLayoutDirection(FrameNode* frameNode,
         const std::optional<SecurityComponentLayoutDirection>& value);
     static void SetAlign(const Alignment alignment);
+    static void SetAlign(FrameNode* frameNode, const std::optional<Alignment>& alignment);
     static void SetMaxFontScale(const float value);
+    static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMinFontScale(const float value);
+    static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMaxLines(const int32_t value);
+    static void SetMaxLines(FrameNode* frameNode, const std::optional<const int32_t>& value);
     static void SetAdaptMaxFontSize(const Dimension& value);
+    static void SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetAdaptMinFontSize(const Dimension& value);
+    static void SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value);
+    static void SetHeightAdaptivePolicy(FrameNode* frameNode, const std::optional<TextHeightAdaptivePolicy>& value);
 
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)
     {

@@ -95,6 +95,9 @@ public:
 private:
     std::string ContentClipToStr() const;
     std::string GetBarStateString() const;
+    std::string GetClipContentString() const;
+    std::unique_ptr<JsonValue> GetClipContentRectString() const;
+    std::unique_ptr<JsonValue> GetDimensionOffsetJSON(const DimensionOffset& offset) const;
 };
 
 class GridPaintProperty : public ScrollablePaintProperty {

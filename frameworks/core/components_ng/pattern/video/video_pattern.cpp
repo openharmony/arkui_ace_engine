@@ -440,13 +440,11 @@ void VideoPattern::ResetMediaPlayerOnBg()
             return;
         }
 
-        uiTaskExecutor.PostSyncTask([weak, id] {
+        uiTaskExecutor.PostSyncTask([weak] {
             auto videoPattern = weak.Upgrade();
             CHECK_NULL_VOID(videoPattern);
-            ContainerScope scope(id);
             videoPattern->PrepareSurface();
             }, "ArkUIVideoPrepareSurface");
-
         mediaPlayer->SetRenderFirstFrame(showFirstFrame);
         if (mediaPlayer->PrepareAsync() != 0) {
             TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
@@ -2364,5 +2362,27 @@ int32_t VideoPattern::OnInjectionEvent(const std::string& command)
     }
     pattern->Start();
     return RET_SUCCESS;
+}
+void VideoPattern::SetVideoController(const RefPtr<VideoControllerV2>& videoController)
+{
+    if (videoControllerV2_) {
+        // Video Controller is already attached
+        return;
+    }
+    videoControllerV2_ = videoController;
+
+    // if pattern is attached to frame node
+    auto frameNode = frameNode_.Upgrade();
+    if (frameNode) {
+        // full screen node is not supposed to register js controller event
+        if (!InstanceOf<VideoFullScreenPattern>(this)) {
+            SetMethodCall();
+        }
+    }
+}
+
+RefPtr<VideoControllerV2> VideoPattern::GetVideoController()
+{
+    return videoControllerV2_;
 }
 } // namespace OHOS::Ace::NG

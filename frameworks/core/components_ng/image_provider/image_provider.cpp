@@ -39,7 +39,7 @@ constexpr uint64_t MAX_WAITING_TIME_FOR_TASKS = 1000; // 1000ms
 void ImageProvider::CacheImageObject(const RefPtr<ImageObject>& obj)
 {
     CHECK_NULL_VOID(obj);
-    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    auto pipelineCtx = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineCtx);
     auto cache = pipelineCtx->GetImageCache();
     CHECK_NULL_VOID(cache);
@@ -67,7 +67,7 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
         return true;
     }
 
-    auto container = Container::Current();
+    auto container = Container::CurrentSafelyWithCheck();
     if (container && container->IsSubContainer()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "%{private}s-%{public}s. subContainer's dataProviderManager is null.",
             dfxConfig.GetImageSrc().c_str(), dfxConfig.ToStringWithoutSrc().c_str());
@@ -95,7 +95,7 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
 RefPtr<ImageObject> ImageProvider::QueryThumbnailCache(const ImageSourceInfo& src)
 {
     // query thumbnail from cache
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto cache = pipeline->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);
@@ -114,7 +114,7 @@ RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(const ImageSourceIn
     if (!src.SupportObjCache()) {
         return nullptr;
     }
-    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    auto pipelineCtx = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineCtx, nullptr);
     auto imageCache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(imageCache, nullptr);

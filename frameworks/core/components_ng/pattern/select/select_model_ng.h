@@ -96,6 +96,7 @@ public:
         FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const SelectColorType& type);
     static void CreateWithIntegerResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void CreateWithStringResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetDivider(FrameNode* frameNode, const std::optional<NG::SelectDivider>& divider);
     static void SetDivider(FrameNode* frameNode, const NG::SelectDivider& divider);
     static void SetDividerStyle(FrameNode* frameNode, const NG::SelectDivider& divider, const DividerMode& mode);
     static void ResetDividerStyle(FrameNode* frameNode);
@@ -125,7 +126,7 @@ public:
     static void SetArrowPosition(FrameNode* frameNode, const ArrowPosition value);
     static void SetSpace(FrameNode* frameNode, const Dimension& value);
     static void SetMenuAlign(FrameNode* frameNode, const MenuAlign& menuAlign);
-    static void SetAvoidance(FrameNode* frameNode, AvoidanceMode mode);
+    static void SetAvoidance(FrameNode* frameNode,  AvoidanceMode avoidance);
     static void SetValue(FrameNode* frameNode, const std::string& value);
     static void SetSelected(FrameNode* frameNode, int32_t idx);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);

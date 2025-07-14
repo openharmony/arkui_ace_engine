@@ -2398,7 +2398,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg122, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg123
+ * @tc.name: SetIsTransFlagTest
  * @tc.desc: Test SetIsTransFlag.
  * @tc.type: FUNC
  */
@@ -2490,6 +2490,37 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg126, TestSize.Level1)
     EXPECT_CALL(*mockWindow, RequestFrame()).Times(0);
     context_->SetFlushTSUpdates(nullptr);
     context_->FlushTSUpdates();
+}
+
+/**
+ * @tc.name: PipelineContextTestNg123
+ * @tc.desc: Test callbacks execution at the tail of vsync.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg123, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: Define one callback and register it to pipeline.
+     * @tc.expected: The asyncEventsHookListener_ is not null.
+     */
+    bool flag = false;
+    context_->SetAsyncEventsHookListener([&flag]() { flag = !flag; });
+    EXPECT_NE(context_->asyncEventsHookListener_, nullptr);
+
+    /**
+     * @tc.steps3: Call the function FlushVsync.
+     * @tc.expected: The hook callback is executed.
+     */
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    EXPECT_TRUE(flag);
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    EXPECT_FALSE(flag);
 }
 } // namespace NG
 } // namespace OHOS::Ace

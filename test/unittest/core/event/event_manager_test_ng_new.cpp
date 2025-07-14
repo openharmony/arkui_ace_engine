@@ -1925,11 +1925,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest089, TestSize.Level1)
 
 #ifdef SUPPORT_DIGITAL_CROWN
 /**
- * @tc.name: EventManagerTest089
+ * @tc.name: EventManagerTest0100
  * @tc.desc: Test OnCrownEvent
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, EventManagerTest089, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, EventManagerTest0100, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventManager.

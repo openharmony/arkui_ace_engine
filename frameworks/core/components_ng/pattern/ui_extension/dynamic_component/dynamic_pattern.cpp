@@ -690,7 +690,7 @@ void DynamicPattern::ResetAccessibilityChildTreeCallback()
 {
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
     ContainerScope scope(instanceId_);
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto ngPipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
     CHECK_NULL_VOID(frontend);

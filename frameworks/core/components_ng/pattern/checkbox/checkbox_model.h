@@ -34,9 +34,9 @@ public:
     virtual ~CheckBoxModel() = default;
 
     virtual void Create(const std::optional<std::string>& name, const std::optional<std::string>& groupName,
-        const std::string& tagName);
-    virtual void SetSelect(bool isSelected);
-    virtual void SetSelectedColor(const Color& color);
+        const std::string& tagName) = 0;
+    virtual void SetSelect(bool isSelected) = 0;
+    virtual void SetSelectedColor(const Color& color) = 0;
     virtual void SetUnSelectedColor(const Color& color) {}
     virtual void SetBuilder(std::optional<std::function<void(void)>>& buildFunc) {};
     virtual void SetCheckMarkColor(const Color& color) {}

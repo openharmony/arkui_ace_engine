@@ -28,7 +28,7 @@ const auto DEFAULT_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 
 } // namespace
 class IndicatorPattern : public SwiperIndicatorPattern {
     DECLARE_ACE_TYPE(IndicatorPattern, SwiperIndicatorPattern);
-
+    UNITEST_FRIEND_CLASS;
 public:
     IndicatorPattern();
     ~IndicatorPattern() override = default;

@@ -87,6 +87,7 @@ template("ace_osal_ohos_source_set") {
       "stylus_detector_loader.cpp",
       "stylus_detector_mgr.cpp",
       "system_properties.cpp",
+      "system_properties_multi_thread.cpp",
       "text_share_adapter.cpp",
       "text_share_loader.cpp",
       "text_share_mgr.cpp",
@@ -146,11 +147,13 @@ template("ace_osal_ohos_source_set") {
         "ability_base:view_data",
         "ability_base:want",
         "ability_runtime:abilitykit_native",
+        #"graphic_2d:drawing_ani",
         "graphic_2d:libframe_analyzer",
         "image_framework:image",
         "input:libmmi-client",
         "napi:ace_napi",
         "resource_management:global_resmgr",
+        "runtime_core:ani",
       ]
       if (defined(config.accessibility_support) &&
           config.accessibility_support) {

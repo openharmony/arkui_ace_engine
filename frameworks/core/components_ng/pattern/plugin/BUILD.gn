@@ -18,6 +18,7 @@ import(
 build_component_ng("plugin_pattern_ng") {
   sources = [
     "plugin_model_ng.cpp",
+    "plugin_model_static.cpp",
     "plugin_node.cpp",
     "plugin_pattern.cpp",
   ]

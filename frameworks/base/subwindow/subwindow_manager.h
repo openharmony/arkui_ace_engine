@@ -225,6 +225,18 @@ public:
     const std::vector<RefPtr<Subwindow>> GetSortSubwindow(int32_t instanceId);
     void RemoveSubwindowByNodeId(const int32_t nodeId);
 
+    // ArkTS 1.2
+    ACE_FORCE_EXPORT void ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    void ShowToastNGStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    ACE_FORCE_EXPORT void CloseToastStatic(
+        const int32_t toastId, const NG::ToastShowMode& showMode, std::function<void(int32_t)>&& callback);
+    ACE_FORCE_EXPORT void ShowDialogStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback);
+    ACE_FORCE_EXPORT void ShowActionMenuStatic(DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback);
+    ACE_FORCE_EXPORT void OpenCustomDialogStatic(DialogProperties &dialogProps,
+        std::function<void(int32_t)> &&callback);
+
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
     RefPtr<Subwindow> GetSubwindowByNodeId(int32_t instanceId, SubwindowType windowType, int32_t nodeId);

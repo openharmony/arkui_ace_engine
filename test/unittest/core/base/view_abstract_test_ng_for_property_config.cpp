@@ -1524,6 +1524,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractAddMouseEventForTipsTest001, TestSize.L
      */
     const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", -2, AceType::MakeRefPtr<Pattern>());
     auto param = AceType::MakeRefPtr<PopupParam>();
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"tipTest");
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
     auto pipelineContext = container->GetPipelineContext();

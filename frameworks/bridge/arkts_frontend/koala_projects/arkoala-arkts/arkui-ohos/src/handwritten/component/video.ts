@@ -1,0 +1,56 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+import { TypeChecker } from "#components"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { int32 } from "@koalaui/common"
+import { PixelMap } from "#external"
+import { ArkUIAniModule } from "arkui.ani"
+
+const PlayBackSpeedTable: number[] = [0.75, 1.0, 1.25, 1.75, 2.0];
+
+function convertPlaybackSpeed(value: PlaybackSpeed): number {
+    const index = value as number;
+    return PlayBackSpeedTable[index]
+}
+
+function hookSetVideoOptions(component: ArkVideoComponent, value: VideoOptions): void {
+    const peer = component.getPeer();
+    let value_currentProgressRate_type : int32 = RuntimeType.UNDEFINED
+    const value_currentProgressRate  = value.currentProgressRate
+    value_currentProgressRate_type = runtimeType(value_currentProgressRate)
+    if ((RuntimeType.UNDEFINED) != (value_currentProgressRate_type)) {
+        const value_currentProgressRate_value  = value_currentProgressRate!
+        if (TypeChecker.isPlaybackSpeed(value_currentProgressRate_value)) {
+            value.currentProgressRate = convertPlaybackSpeed(value_currentProgressRate_value as PlaybackSpeed);
+        }
+    }
+    const value_previewUri  = value.previewUri
+    let value_previewUri_type : int32 = RuntimeType.UNDEFINED
+    value_previewUri_type = runtimeType(value_previewUri)
+    if ((RuntimeType.UNDEFINED) != (value_previewUri_type) && peer !== undefined) {
+        const value_previewUri_value  = value_previewUri!
+        let value_previewUri_value_type : int32 = RuntimeType.UNDEFINED
+        value_previewUri_value_type = runtimeType(value_previewUri_value)
+        if (!TypeChecker.isResource(value_previewUri_value, false, false, false, false, false) && (RuntimeType.STRING != value_previewUri_value_type)) {
+            value.previewUri = undefined;
+            peer.setVideoOptionsAttribute(value);
+            ArkUIAniModule._Video_Transfer_PixelMap(peer.getPeerPtr() as KPointer, value_previewUri_value as PixelMap);
+            return;
+        }
+    }
+    peer?.setVideoOptionsAttribute(value);
+}

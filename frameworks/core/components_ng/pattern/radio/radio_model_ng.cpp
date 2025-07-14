@@ -67,6 +67,14 @@ void RadioModelNG::SetBuilder(std::function<void()>&& buildFunc)
     radioPattern->SetBuilder(std::move(buildFunc));
 }
 
+void RadioModelNG::SetBuilder(FrameNode* frameNode, std::function<void()>&& builder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto radioPattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(radioPattern);
+    radioPattern->SetBuilder(std::move(builder));
+}
+
 void RadioModelNG::SetRadioIndicator(int32_t indicator)
 {
     ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator);
@@ -100,6 +108,14 @@ void RadioModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
     auto eventHub = frameNode->GetOrCreateEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+void RadioModelNG::SetOnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
 
 void RadioModelNG::SetWidth(const Dimension& width)
@@ -180,8 +196,8 @@ void RadioModelNG::SetChecked(FrameNode* frameNode, bool isChecked)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateEventHub<RadioEventHub>();
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
-        "radio frame node %{public}d set checked %{public}d", frameNode->GetId(), isChecked);
+    // TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
+    //     "radio frame node %{public}d set checked %{public}d", frameNode->GetId(), isChecked);
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isChecked);
     ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, isChecked, frameNode);
@@ -191,6 +207,7 @@ void RadioModelNG::SetCheckedBackgroundColor(FrameNode* frameNode, const Color& 
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColor, color, frameNode);
 }
+
 
 void RadioModelNG::SetCheckedBackgroundColorSetByUser(FrameNode* frameNode, bool flag)
 {
@@ -263,6 +280,16 @@ void RadioModelNG::SetChangeValue(FrameNode* frameNode, bool value)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetRadioChecked(value);
+}
+
+void RadioModelNG::SetRadioIndicatorType(FrameNode* frameNode, const std::optional<int32_t>& indicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (indicator.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, frameNode);
+    }
 }
 
 bool RadioModelNG::GetChecked(FrameNode* frameNode)

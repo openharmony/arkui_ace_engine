@@ -106,7 +106,7 @@ std::string GetSpringMotionCurveString(ani_env *env,
     env->Reference_IsUndefined(response, &isUndefinedResponse);
     if (!isUndefinedResponse) {
         ani_double resultResponse;
-        if (ANI_OK == env->Object_CallMethodByName_Double(response, "doubleValue", nullptr, &resultResponse)) {
+        if (ANI_OK == env->Object_CallMethodByName_Double(response, "unboxed", nullptr, &resultResponse)) {
             double value = static_cast<double>(resultResponse);
             responseValue = static_cast<float>(value);
         }
@@ -115,7 +115,7 @@ std::string GetSpringMotionCurveString(ani_env *env,
     env->Reference_IsUndefined(dampingFraction, &isUndefinedDampingFraction);
     if (!isUndefinedDampingFraction) {
         ani_double resultDampingFraction;
-        if (ANI_OK == env->Object_CallMethodByName_Double(dampingFraction, "doubleValue",
+        if (ANI_OK == env->Object_CallMethodByName_Double(dampingFraction, "unboxed",
             nullptr, &resultDampingFraction)) {
             double value = static_cast<double>(resultDampingFraction);
             dampingFractionValue = static_cast<float>(value);
@@ -125,7 +125,7 @@ std::string GetSpringMotionCurveString(ani_env *env,
     env->Reference_IsUndefined(overlapDuration, &isUndefinedOverlapDuration);
     if (!isUndefinedOverlapDuration) {
         ani_double resultOverlapDuration;
-        if (ANI_OK == env->Object_CallMethodByName_Double(overlapDuration, "doubleValue",
+        if (ANI_OK == env->Object_CallMethodByName_Double(overlapDuration, "unboxed",
             nullptr, &resultOverlapDuration)) {
             double value = static_cast<double>(resultOverlapDuration);
             overlapDurationValue = static_cast<float>(value);
@@ -313,7 +313,7 @@ std::string GetSpringResponsiveMotionCurveString(ani_env *env,
     env->Reference_IsUndefined(response, &isUndefinedResponse);
     if (!isUndefinedResponse) {
         ani_double resultResponse;
-        if (ANI_OK == env->Object_CallMethodByName_Double(response, "doubleValue", nullptr, &resultResponse)) {
+        if (ANI_OK == env->Object_CallMethodByName_Double(response, "unboxed", nullptr, &resultResponse)) {
             double value = static_cast<double>(resultResponse);
             responseValue = static_cast<float>(value);
         }
@@ -322,7 +322,7 @@ std::string GetSpringResponsiveMotionCurveString(ani_env *env,
     env->Reference_IsUndefined(dampingFraction, &isUndefinedDampingFraction);
     if (!isUndefinedDampingFraction) {
         ani_double resultDampingFraction;
-        if (ANI_OK == env->Object_CallMethodByName_Double(dampingFraction, "doubleValue",
+        if (ANI_OK == env->Object_CallMethodByName_Double(dampingFraction, "unboxed",
             nullptr, &resultDampingFraction)) {
             double value = static_cast<double>(resultDampingFraction);
             dampingFractionValue = static_cast<float>(value);
@@ -332,7 +332,7 @@ std::string GetSpringResponsiveMotionCurveString(ani_env *env,
     env->Reference_IsUndefined(overlapDuration, &isUndefinedOverlapDuration);
     if (!isUndefinedOverlapDuration) {
         ani_double resultOverlapDuration;
-        if (ANI_OK == env->Object_CallMethodByName_Double(overlapDuration, "doubleValue",
+        if (ANI_OK == env->Object_CallMethodByName_Double(overlapDuration, "unboxed",
             nullptr, &resultOverlapDuration)) {
             double value = static_cast<double>(resultOverlapDuration);
             overlapDurationValue = static_cast<float>(value);

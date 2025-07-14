@@ -1,0 +1,58 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import image from '@ohos.multimedia.image';
+import { BusinessError, AsyncCallback } from '@ohos.base';
+import { CustomBuilder } from '@ohos.arkui.component';
+import { ComponentContent } from '@ohos.arkui.node';
+
+export default namespace componentSnapshot {
+
+    loadLibrary("componentSnapshot_ani");
+
+    export enum SnapshotRegionMode {
+        COMMON,
+        LOCALIZED,
+        NO_REGION
+    };
+    
+    export interface LocalizedSnapshotRegion {
+        start: number
+        top: number
+        end: number
+        bottom: number
+    }
+
+    export interface SnapshotRegion {
+        left: number
+        right: number
+        top: number
+        bottom: number
+    }
+
+    export type SnapshotRegionType = SnapshotRegion | LocalizedSnapshotRegion;
+
+    export interface SnapshotOptions {
+        scale?: number
+        waitUntilRenderFinished?: boolean
+        region?: SnapshotRegionType
+    }
+
+    export native function get(id: string, callback: AsyncCallback<image.PixelMap>, options?: SnapshotOptions): void;
+    export native function get(id: string, options?: SnapshotOptions): Promise<image.PixelMap>;
+    export native function getSync(id: string, options?: SnapshotOptions): image.PixelMap;
+    export native function getWithUniqueId(uniqueId: number, options?: SnapshotOptions): Promise<image.PixelMap>;
+    export native function getSyncWithUniqueId(uniqueId: number, options?: SnapshotOptions): image.PixelMap;
+}

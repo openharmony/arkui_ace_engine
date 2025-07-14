@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 
@@ -41,6 +42,8 @@ bool ScrollableController::AnimateTo(
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
     auto host = pattern->GetHost();
+    // call AnimateToMultiThread by multi thread
+    FREE_NODE_CHECK(host, AnimateTo, position, duration, curve, smooth, canOverScroll);
     CHECK_NULL_RETURN(host, false);
     if (pattern->GetAxis() != Axis::NONE) {
         if (position.Unit() == DimensionUnit::PERCENT) {
@@ -89,13 +92,16 @@ Axis ScrollableController::GetScrollDirection() const
     return pattern->GetAxis();
 }
 
-void ScrollableController::ScrollBy(double pixelX, double pixelY, bool /* smooth */)
+void ScrollableController::ScrollBy(double pixelX, double pixelY, bool smooth)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    // call ScrollByMultiThread by multi thread
+    FREE_NODE_CHECK(host, ScrollBy, pixelX, pixelY, smooth)
     pattern->StopAnimate();
     auto offset = pattern->GetAxis() == Axis::VERTICAL ? pixelY : pixelX;
-    auto host = pattern->GetHost();
+
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("ScrollBy, offset:%f, id:%d, tag:%s", static_cast<float>(-offset),
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
@@ -123,6 +129,9 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smoo
     CHECK_NULL_VOID(pattern);
     pattern->SetIsOverScroll(false);
     pattern->SetCanStayOverScroll(false);
+    auto host = pattern->GetHost();
+    // call ScrollToEdgeMultiThread by multi thread
+    FREE_NODE_CHECK(host, ScrollToEdge, scrollEdgeType, smooth);
     if (pattern->GetAxis() != Axis::NONE) {
         pattern->ScrollToEdge(scrollEdgeType, smooth);
     }
@@ -133,6 +142,8 @@ void ScrollableController::Fling(double flingVelocity)
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
+    // call FlingMultiThread by multi thread
+    FREE_NODE_CHECK(host, Fling, flingVelocity);
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("Fling, flingVelocity:%f, id:%d, tag:%s", static_cast<float>(flingVelocity),
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());

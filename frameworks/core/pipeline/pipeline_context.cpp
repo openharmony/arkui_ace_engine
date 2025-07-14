@@ -175,6 +175,10 @@ void PipelineContext::FlushBuild()
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
+    if (vsyncListener_) {
+        ACE_SCOPED_TRACE("arkoala build");
+        vsyncListener_();
+    }
 
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushBuild();
@@ -2004,6 +2008,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         FlushAnimationTasks();
         window_->FlushLayoutSize(width_, height_);
         hasIdleTasks_ = false;
+        if (asyncEventsHookListener_ != nullptr) {
+            ACE_SCOPED_TRACE("arkoala callbacks");
+            asyncEventsHookListener_(); // fire all arkoala callbacks
+        }
     } else {
         LOGW("the surface is not ready, waiting");
     }

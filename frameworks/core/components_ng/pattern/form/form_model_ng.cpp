@@ -244,5 +244,5 @@ void FormModelNG::SetModuleName(FrameNode* frameNode, const std::string& moduleN
     property->UpdateRequestFormInfo(formInfo);
 }
 
-void FormModelNG::SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height) {}
+// void FormModelNG::SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height) {}
 } // namespace OHOS::Ace::NG

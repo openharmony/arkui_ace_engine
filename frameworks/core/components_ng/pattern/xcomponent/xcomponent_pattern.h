@@ -309,6 +309,11 @@ public:
     {
         hasGotNativeXComponent_ = hasGotNativeXComponent;
     }
+    void SetXComponentController(std::shared_ptr<InnerXComponentController> controlller)
+    {
+        xcomponentController_ = controlller;
+        InitController();
+    }
 
     void SetExportTextureSurfaceId(const std::string& surfaceId);
     void FireExternalEvent(RefPtr<NG::PipelineContext> context,
@@ -410,6 +415,7 @@ protected:
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
     ArkUI_AccessibilityProvider* arkuiAccessibilityProvider_ = nullptr;
     bool isNeedSoftKeyboard_ = false;
+    void RegisterTransformHintCallback(PipelineContext* context);
 
 private:
     void OnAreaChangedInner() override;
@@ -469,9 +475,15 @@ private:
     void ReleaseImageAnalyzer();
     void SetRotation(uint32_t rotation);
     void RegisterSurfaceCallbackModeEvent();
-    void RegisterTransformHintCallback(PipelineContext* context);
     void RegisterSurfaceRenderContext();
     void UnregisterSurfaceRenderContext();
+
+    void InitSurfaceMultiThread(const RefPtr<FrameNode>& host);
+    void InitControllerMultiThread();
+    void OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& host);
+    void RegisterContextEventMultiThread(const RefPtr<FrameNode>& host);
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& host);
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);

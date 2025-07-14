@@ -567,7 +567,7 @@ void ContainerModalToolBar::AddRightNavDestRow()
 
 void ContainerModalToolBar::RemoveToolbarRowContainers()
 {
-    auto RemoveIfEmpty = [this](RefPtr<FrameNode>& container, const RefPtr<FrameNode>& parent) {
+    auto RemoveIfEmpty = [](RefPtr<FrameNode>& container, const RefPtr<FrameNode>& parent) {
         if (container && container->GetChildren().empty()) {
             if (parent) {
                 parent->RemoveChild(container);

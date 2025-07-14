@@ -25,6 +25,7 @@ ace_unittest("model_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/model/model_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/model/model_touch_handler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/model/model_view_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/model/model_view_static_ng.cpp",
     "model_test_ng.cpp",
   ]
 

@@ -1216,7 +1216,8 @@ void TabBarPattern::AddTabBarEventCallback()
         CHECK_NULL_VOID(gestureHub);
         auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+        if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
+            tabBarPattern->scrollableEvent_) {
             gestureHub->AddScrollableEvent(tabBarPattern->scrollableEvent_);
         }
         for (const auto& childNode : host->GetChildren()) {
@@ -1473,7 +1474,7 @@ void TabBarPattern::ShowDialogWithNode(int32_t index)
     } else {
         auto imageProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageProperty);
-        ImageSourceInfo imageSourceInfo = imageProperty->GetImageSourceInfoValue();
+        ImageSourceInfo imageSourceInfo = imageProperty->GetImageSourceInfoValue(ImageSourceInfo());
         dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(textValue.value_or(u""), imageSourceInfo);
     }
 }

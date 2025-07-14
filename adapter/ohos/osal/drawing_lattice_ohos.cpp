@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,10 @@
 
 #include "drawing_lattice_ohos.h"
 
-#include "base/utils/utils.h"
+// #include "lattice_ani/ani_lattice.h"
 #include "lattice_napi/js_lattice.h"
+
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLattice(void* sptrAddr)
@@ -31,6 +33,16 @@ RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromNative(void* sptr
     CHECK_NULL_RETURN(sptrAddr, nullptr);
     auto* lattice = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::Lattice>*>(sptrAddr);
     return AceType::MakeRefPtr<DrawingLatticeOhos>(*lattice);
+}
+
+RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromAni(void* aniAddr)
+{
+    return nullptr;
+    // CHECK_NULL_RETURN(aniAddr, nullptr);
+    // auto* aniLattice = reinterpret_cast<OHOS::Rosen::Drawing::AniLattice*>(aniAddr);
+    // CHECK_NULL_RETURN(aniLattice, nullptr);
+    // auto lattice = aniLattice->GetLattice();
+    // return AceType::MakeRefPtr<DrawingLatticeOhos>(lattice);
 }
 
 void* DrawingLatticeOhos::GetDrawingLatticeSptrAddr()

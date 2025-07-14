@@ -74,7 +74,8 @@ public:
 
     RefPtr<FrameNode> GetMenu();
 
-    std::u16string GetHeaderContent();
+    std::u16string GetHeaderContent() const;
+    std::u16string GetFooterContent() const;
 
     bool HasSelectIcon() const
     {
@@ -94,6 +95,7 @@ public:
     void SetHeaderContent(const std::string& str);
     void SetFooterContent(const std::string& str);
     void OnColorConfigurationUpdate() override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 protected:
     void OnMountToParentDone() override;

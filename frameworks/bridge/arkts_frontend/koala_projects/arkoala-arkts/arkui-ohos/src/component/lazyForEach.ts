@@ -114,7 +114,7 @@ export interface IDataSource<T> {
 /** @memo */
 export function LazyForEach<T>(
     /** @memo */
-    style: ((attributes: DynamicNode) => void) | undefined,
+    style: ((attributes: DynamicNode<T>) => void) | undefined,
     dataSource: IDataSource<T>,
     /** @memo */
     itemGenerator: (item: T, index: number) => void,

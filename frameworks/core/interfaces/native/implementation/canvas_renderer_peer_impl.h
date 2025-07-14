@@ -144,6 +144,8 @@ public:
     void SetFont(std::string fontStr);
     void SetTextAlign(const std::string& alignStr);
     void SetTextBaseline(const std::string& baselineStr);
+    void SetLetterSpacing(const std::string& letterSpacing);
+    void SetLetterSpacing(const Ace::Dimension& letterSpacing);
 
     // inheritance
     void ResetPaintState();
@@ -219,6 +221,7 @@ private:
     Ace::Pattern GetPattern(unsigned int id);
     std::shared_ptr<Ace::Pattern> GetPatternPtr(int32_t id);
     void ParseImageData(Ace::ImageData& imageData, const PutImageDataParam& params);
+    bool IsValidLetterSpacing(const std::string& letterSpacing);
 
     static std::unordered_map<int32_t, std::shared_ptr<Ace::Pattern>> pattern_;
     static unsigned int patternCount_;

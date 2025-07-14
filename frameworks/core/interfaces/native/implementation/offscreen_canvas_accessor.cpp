@@ -113,7 +113,4 @@ const GENERATED_ArkUIOffscreenCanvasAccessor* GetOffscreenCanvasAccessor()
     return &OffscreenCanvasAccessorImpl;
 }
 
-struct OffscreenCanvasPeer {
-    virtual ~OffscreenCanvasPeer() = default;
-};
 }

@@ -20,8 +20,12 @@ ohos_shared_library("promptAction_ani") {
   deps = [ "$ace_root/build:libace_compatible" ]
   include_dirs = [ "./include" ]
   sources = [
+    "./src/dialog_params.cpp",
     "./src/promptAction.cpp",
-    "./src/promptActionUtils.cpp",
+    "./src/prompt_action_controller.cpp",
+    "./src/prompt_action_params.cpp",
+    "./src/toast_params.cpp",
+    "./src/prompt_action_utils.cpp",
   ]
   external_deps = [
     #"runtime_core:libarkruntime",

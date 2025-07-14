@@ -79,7 +79,4 @@ const GENERATED_ArkUIClientAuthenticationHandlerAccessor* GetClientAuthenticatio
     return &ClientAuthenticationHandlerAccessorImpl;
 }
 
-struct ClientAuthenticationHandlerPeer {
-    virtual ~ClientAuthenticationHandlerPeer() = default;
-};
 }

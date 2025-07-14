@@ -141,7 +141,7 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
-    void DetachFromMainTree(bool recursive = false, bool isRoot = true);
+    void DetachFromMainTree(bool recursive = false, bool needCheckThreadSafeNodeTree = false);
     virtual void FireCustomDisappear();
     // Traverse downwards to update system environment variables.
     void UpdateConfigurationUpdate();
@@ -1080,6 +1080,16 @@ public:
         return true;
     }
 
+    bool IsThreadSafeNode() const
+    {
+        return isThreadSafeNode_;
+    }
+
+    bool IsFree() const
+    {
+        return isFree_;
+    }
+
     void PostAfterAttachMainTreeTask(std::function<void()>&& task)
     {
         if (IsOnMainTree()) {
@@ -1208,6 +1218,7 @@ private:
         }
         afterAttachMainTreeTasks_.clear();
     }
+    bool CheckThreadSafeNodeTree(bool needCheck);
     virtual bool MaybeRelease() override;
 
     std::list<RefPtr<UINode>> children_;
@@ -1220,6 +1231,8 @@ private:
     bool onMainTree_ = false;
     bool isFreeNode_ = false;
     bool isFreeState_ = false; // the free node in free state can be operated by non UI threads
+    bool isThreadSafeNode_ = false;
+    bool isFree_ = false; // the thread safe node in free state can be operated by non UI threads
     std::vector<std::function<void()>> afterAttachMainTreeTasks_;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;

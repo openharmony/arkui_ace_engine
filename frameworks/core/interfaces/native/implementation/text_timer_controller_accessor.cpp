@@ -66,7 +66,4 @@ const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor
     return &TextTimerControllerAccessorImpl;
 }
 
-struct TextTimerControllerPeer {
-    virtual ~TextTimerControllerPeer() = default;
-};
 }
