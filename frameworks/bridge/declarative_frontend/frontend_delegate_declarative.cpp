@@ -62,7 +62,10 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
     auto currentId = Container::CurrentId();
     ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+    if (!context) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "context is null in MainWindowOverlay.");
+        return ;
+    }
     auto overlayManager = context->GetOverlayManager();
     if (overlay) {
         overlayManager = overlay;
@@ -2006,8 +2009,8 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
 void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
 {
     auto task = [dialogId](const RefPtr<NG::OverlayManager>& overlayManager) {
-        CHECK_NULL_VOID(overlayManager);
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
+        CHECK_NULL_VOID(overlayManager);
         overlayManager->CloseCustomDialog(dialogId);
         SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     };
