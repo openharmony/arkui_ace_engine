@@ -216,6 +216,10 @@ TEST_F(FreeScrollTest, EnableScroll001)
     EXPECT_TRUE(pattern_->scrollableEvent_->GetEnabled());
     PanUpdate({ -DELTA_X, -DELTA_Y });
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, -DELTA_Y));
+    EXPECT_FALSE(pattern_->scrollBar2d_->horizontal_.NeedPaint());
+    EXPECT_TRUE(pattern_->scrollBar2d_->vertical_.NeedPaint());
+    EXPECT_EQ(pattern_->scrollBar2d_->painter_->horizontal_.GetOpacity(), 0);
+    EXPECT_NE(pattern_->scrollBar2d_->painter_->vertical_.GetOpacity(), 0);
 }
 
 /**
