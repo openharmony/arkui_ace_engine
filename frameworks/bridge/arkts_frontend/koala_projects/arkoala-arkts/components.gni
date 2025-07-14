@@ -200,6 +200,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/component/pageTransition.ets",
   "arkui-preprocessed/arkui/component/panel.ets",
   "arkui-preprocessed/arkui/component/particle.ets",
+  "arkui-preprocessed/arkui/component/particle_helper.ets",
   "arkui-preprocessed/arkui/component/pasteButton.ets",
   "arkui-preprocessed/arkui/component/path.ets",
   "arkui-preprocessed/arkui/component/patternLock.ets",
