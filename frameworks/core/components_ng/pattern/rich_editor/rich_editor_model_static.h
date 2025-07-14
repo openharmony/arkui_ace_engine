@@ -25,6 +25,7 @@ public:
     static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<RichEditorBaseControllerBase> GetRichEditorController(FrameNode* frameNode);
     static RefPtr<RichEditorBaseControllerBase> GetRichEditorStyledStringController(FrameNode* frameNode);
+    static bool IsStyledStringMode(FrameNode* frameNode);
     static void SetStyledStringMode(FrameNode* frameNode, bool isStyledStringMode);
     static void SetOnCut(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
