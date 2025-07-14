@@ -819,7 +819,7 @@ public:
     {
         return safeAreaPadding;
     }
-    virtual bool ChildTentativelyLayouted(IgnoreStrategy& strategy)
+    virtual bool ChildTentativelyLayouted()
     {
         return false;
     }

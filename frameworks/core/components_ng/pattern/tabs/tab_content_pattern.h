@@ -493,9 +493,8 @@ public:
         return safeAreaPadding;
     }
 
-    bool ChildTentativelyLayouted(IgnoreStrategy& strategy) override
+    bool ChildTentativelyLayouted() override
     {
-        strategy = IgnoreStrategy::SCROLLABLE_AXIS;
         return true;
     }
 
@@ -504,7 +503,7 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
-        if (!host->GetScrollableAxisSensitive()) {
+        if (host->IsScrollableAxisInsensitive()) {
             return false;
         }
         auto expandFromSwiper = host->GetAccumulatedSafeAreaExpand(

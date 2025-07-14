@@ -4507,7 +4507,7 @@ bool ScrollablePattern::AccumulatingTerminateHelper(
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (!host->GetScrollableAxisSensitive()) {
+    if (host->IsScrollableAxisInsensitive()) {
         return false;
     }
     auto expandFromList = host->GetAccumulatedSafeAreaExpand(false,

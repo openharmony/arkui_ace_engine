@@ -427,9 +427,10 @@ ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpand(
     StartPoint startPoint = StartPoint::NORMAL;
     if (strategy == IgnoreStrategy::FROM_MARGIN) {
         startPoint = StartPoint::FROM_MARGIN;
-    } else if (strategy == IgnoreStrategy::SCROLLABLE_AXIS) {
+    } else if (strategy == IgnoreStrategy::AXIS_INSENSITIVE) {
         isScrollableAxis_ = true;
-        auto sae = FilterEdges(GetAccumulatedSafeAreaExpandForAllEdges(startPoint, options.type), options.edges);
+        auto sae = FilterEdges(GetAccumulatedSafeAreaExpandForAllEdges(
+            includingSelf ? StartPoint::INCLUDING_SELF : startPoint, options.type), options.edges);
         isScrollableAxis_ = false;
         return sae;
     } else if (includingSelf) {
@@ -550,7 +551,7 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(
     auto innerSpace = layoutProperty->CreatePaddingAndBorder(false, false);
 
     auto pattern = recursiveHost->GetPattern();
-    if (isScrollableAxis_ && pattern && pattern->NeedCustomizeSafeAreaPadding()) {
+    if (!isScrollableAxis_ && pattern && pattern->NeedCustomizeSafeAreaPadding()) {
         innerSpace.Plus(pattern->CustomizeSafeAreaPadding(safeAreaPadding, true), true);
         safeAreaPadding = pattern->CustomizeSafeAreaPadding(safeAreaPadding, false);
     }

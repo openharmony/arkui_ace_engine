@@ -4333,7 +4333,7 @@ bool SwiperPattern::AccumulatingTerminateHelper(
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (!host->GetScrollableAxisSensitive()) {
+    if (host->IsScrollableAxisInsensitive()) {
         return false;
     }
     auto expandFromSwiper = host->GetAccumulatedSafeAreaExpand(

@@ -445,9 +445,8 @@ void LayoutProperty::ExpandConstraintWithSafeArea()
         options = *ignoreLayoutSafeAreaOpts_;
     }
     auto pattern = parent->GetPattern();
-    IgnoreStrategy strategy = IgnoreStrategy::NORMAL;
-    ExpandEdges sae = pattern && pattern->ChildTentativelyLayouted(strategy)
-                          ? host->GetAccumulatedSafeAreaExpand(false, options, strategy)
+    ExpandEdges sae = pattern && pattern->ChildTentativelyLayouted()
+                          ? host->GetAccumulatedSafeAreaExpand(false, options)
                           : parent->GetAccumulatedSafeAreaExpand(true, options);
     OptionalSizeF expandedSize;
     auto geometryNode = host->GetGeometryNode();
