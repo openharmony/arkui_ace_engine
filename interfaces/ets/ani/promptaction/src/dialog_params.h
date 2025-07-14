@@ -42,6 +42,7 @@ bool GetMaskRect(ani_env *env, ani_object object, std::optional<OHOS::Ace::Dimen
 bool GetDialogAlignment(ani_env* env, ani_object object, OHOS::Ace::DialogAlignment& result);
 bool GetThemeColorMode(ani_env* env, ani_object object, OHOS::Ace::ThemeColorMode& result);
 bool GetAdaptiveColor(ani_env* env, ani_object object, OHOS::Ace::AdaptiveColor& result);
+bool GetGrayscale(ani_env* env, ani_object object, std::vector<float>& result);
 bool GetBlurOptions(ani_env* env, ani_object object, OHOS::Ace::BlurOption& result);
 bool GetBlurStyleActivePolicy(ani_env* env, ani_object object, OHOS::Ace::BlurStyleActivePolicy& result);
 bool GetBackgroundBlurStyleOptions(ani_env* env, ani_object object, std::optional<OHOS::Ace::BlurStyleOption>& result);

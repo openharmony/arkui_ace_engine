@@ -190,6 +190,43 @@ bool GetAdaptiveColor(ani_env* env, ani_object object, OHOS::Ace::AdaptiveColor&
     return true;
 }
 
+bool GetGrayscale(ani_env* env, ani_object object, std::vector<float>& result)
+{
+    ani_ref resultRef;
+    ani_status status = env->Object_GetPropertyByName_Ref(object, "grayscale", &resultRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    if (IsUndefinedObject(env, resultRef)) {
+        return false;
+    }
+
+    ani_size length;
+    ani_tuple_value resultObj = static_cast<ani_tuple_value>(resultRef);
+    status = env->TupleValue_GetNumberOfItems(resultObj, &length);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    std::vector<float> floatArray;
+    for (int i = 0; i < int(length); i++) {
+        ani_ref itemRef;
+        status = env->Object_GetFieldByName_Ref(resultObj, ("$" + std::to_string(i)).c_str(), &itemRef);
+        if (status != ANI_OK) {
+            continue;
+        }
+
+        ani_object itemObj = static_cast<ani_object>(itemRef);
+        double itemValue;
+        if (GetDoubleParam(env, itemObj, itemValue)) {
+            floatArray.emplace_back(static_cast<float>(itemValue));
+        }
+    }
+    result = floatArray;
+    return true;
+}
+
 bool GetBlurOptions(ani_env* env, ani_object object, OHOS::Ace::BlurOption& result)
 {
     ani_ref resultRef;
@@ -206,7 +243,13 @@ bool GetBlurOptions(ani_env* env, ani_object object, OHOS::Ace::BlurOption& resu
     if (!IsClassObject(env, resultObj, "Larkui/component/common/BlurOptions;")) {
         return false;
     }
-    return GetFloatArrayParam(env, resultObj, "grayscale", result.grayscale);
+
+    std::vector<float> grayscale;
+    if (!GetGrayscale(env, resultObj, grayscale)) {
+        return false;
+    }
+    result.grayscale = grayscale;
+    return true;
 }
 
 bool GetBlurStyleActivePolicy(ani_env* env, ani_object object, OHOS::Ace::BlurStyleActivePolicy& result)
@@ -237,12 +280,12 @@ bool GetBackgroundBlurStyleOptions(ani_env* env, ani_object object, std::optiona
     }
 
     OHOS::Ace::BlurStyleOption blurStyleOption;
-    GetThemeColorMode(env, object, blurStyleOption.colorMode);
-    GetAdaptiveColor(env, object, blurStyleOption.adaptiveColor);
-    GetDoubleParam(env, object, "scale", blurStyleOption.scale);
-    GetBlurOptions(env, object, blurStyleOption.blurOption);
-    GetBlurStyleActivePolicy(env, object, blurStyleOption.policy);
-    GetResourceColorParam(env, object, "inactiveColor", blurStyleOption.inactiveColor);
+    GetThemeColorMode(env, resultObj, blurStyleOption.colorMode);
+    GetAdaptiveColor(env, resultObj, blurStyleOption.adaptiveColor);
+    GetDoubleParam(env, resultObj, "scale", blurStyleOption.scale);
+    GetBlurOptions(env, resultObj, blurStyleOption.blurOption);
+    GetBlurStyleActivePolicy(env, resultObj, blurStyleOption.policy);
+    GetResourceColorParam(env, resultObj, "inactiveColor", blurStyleOption.inactiveColor);
     result = std::make_optional<OHOS::Ace::BlurStyleOption>(blurStyleOption);
     return true;
 }
@@ -265,21 +308,25 @@ bool GetBackgroundEffectOptions(ani_env* env, ani_object object, std::optional<O
     }
 
     OHOS::Ace::EffectOption effectOption;
-    ani_ref radiusRef;
-    status = env->Object_GetPropertyByName_Ref(object, "backgroundEffect", &radiusRef);
+    double radius = 0;
+    ani_double aniRadius;
+    status = env->Object_GetPropertyByName_Double(resultObj, "radius", &aniRadius);
     if (status == ANI_OK) {
-        OHOS::Ace::CalcDimension dimension;
-        if (GetLengthParam(env, radiusRef, dimension)) {
-            effectOption.radius = dimension;
-        }
+        radius = static_cast<double>(aniRadius);
     }
+    radius = OHOS::Ace::LessNotEqual(radius, 0.0f) ? 0.0f : radius;
+    effectOption.radius = OHOS::Ace::CalcDimension(radius, OHOS::Ace::DimensionUnit::VP);
 
-    GetDoubleParam(env, resultObj, "saturation", effectOption.saturation);
-    effectOption.saturation = (effectOption.saturation > 0.0f || OHOS::Ace::NearZero(effectOption.saturation)) ?
-        effectOption.saturation : 1.0f;
-    GetDoubleParam(env, resultObj, "brightness", effectOption.brightness);
-    effectOption.brightness = (effectOption.brightness > 0.0f || OHOS::Ace::NearZero(effectOption.brightness)) ?
-        effectOption.brightness : 1.0f;
+    double saturation = 0;
+    GetDoubleParam(env, resultObj, "saturation", saturation);
+    effectOption.saturation = (OHOS::Ace::GreatNotEqual(saturation, 0.0f) || OHOS::Ace::NearZero(saturation)) ?
+        saturation : 1.0f;
+
+    double brightness = 0;
+    GetDoubleParam(env, resultObj, "brightness", brightness);
+    effectOption.brightness = (OHOS::Ace::GreatNotEqual(brightness, 0.0f) || OHOS::Ace::NearZero(brightness)) ?
+        brightness : 1.0f;
+
     GetResourceColorParam(env, resultObj, "color", effectOption.color);
     GetAdaptiveColor(env, resultObj, effectOption.adaptiveColor);
     GetBlurOptions(env, resultObj, effectOption.blurOption);
