@@ -124,9 +124,14 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, ToolBarModifier.identity, ToolBarModifier, callback);
     return this;
   }
-  toolbarConfiguration(value: any): NavigationAttribute {
+  toolbarConfiguration(value: Array<ToolbarItem> | undefined, options?: NavigationToolbarOptions | undefined): NavigationAttribute {
+    let configuration = new ArkNavigationToolBarConfiguration();
+    configuration.value = value;
+    if (!isNull(options)) {
+      configuration.options = options;
+    }
     modifierWithKey(this._modifiersWithKeys, ToolBarConfigurationModifier.identity,
-      ToolBarConfigurationModifier, value);
+      ToolBarConfigurationModifier, configuration);
     return this;
   }
   hideToolBar(isHide: boolean, animated?: boolean): NavigationAttribute {
@@ -292,16 +297,16 @@ class ToolBarModifier extends ModifierWithKey<object | undefined> {
   }
 }
 
-class ToolBarConfigurationModifier extends ModifierWithKey<Array<ToolbarItem> | undefined> {
-  constructor(value: Array<ToolbarItem> | undefined) {
+class ToolBarConfigurationModifier extends ModifierWithKey<ArkNavigationToolBarConfiguration> {
+  constructor(value: ArkNavigationToolBarConfiguration) {
     super(value);
   }
   static identity: Symbol = Symbol('toolbarConfiguration');
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
+    if (reset || !this.value) {
       getUINativeModule().navigation.resetToolBarConfiguration(node);
     } else {
-      getUINativeModule().navigation.setToolBarConfiguration(node, this.value);
+      getUINativeModule().navigation.setToolBarConfiguration(node, this.value.value, this.value.options);
     }
   }
   checkObjectDiff(): boolean {

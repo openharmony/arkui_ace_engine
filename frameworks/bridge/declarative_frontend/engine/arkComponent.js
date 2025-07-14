@@ -19956,6 +19956,18 @@ class ArkNavHideTitleBarOrToolBar {
   }
 }
 
+class ArkNavigationToolBarConfiguration {
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+  isEqual(another) {
+    return (this.value === another.value) && (this.options.backgroundColor === another.options.backgroundColor) &&
+      (this.options.backgroundBlurStyle === another.options.backgroundBlurStyle) &&
+      (this.options.barStyle === another.options.barStyle);
+  }
+}
+
 class ArkEmitterPropertyOptions {
   constructor() {
     this.index = undefined;
@@ -24983,9 +24995,14 @@ class ArkNavDestinationComponent extends ArkComponent {
     }
     return this;
   }
-  toolbarConfiguration(value) {
+  toolbarConfiguration(value, options) {
+    let configuration = new ArkNavigationToolBarConfiguration();
+    configuration.value = value;
+    if (!isNull(options)) {
+      configuration.options = options;
+    }
     modifierWithKey(this._modifiersWithKeys, NavDestinationToolBarConfigurationModifier.identity,
-      NavDestinationToolBarConfigurationModifier, value);
+      NavDestinationToolBarConfigurationModifier, configuration);
     return this;
   }
   hideBackButton(value) {
@@ -25156,10 +25173,10 @@ class NavDestinationToolBarConfigurationModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || !this.value) {
       getUINativeModule().navDestination.resetToolBarConfiguration(node);
     } else {
-      getUINativeModule().navDestination.setToolBarConfiguration(node, this.value);
+      getUINativeModule().navDestination.setToolBarConfiguration(node, this.value.value, this.value.options);
     }
   }
   checkObjectDiff() {
@@ -26233,9 +26250,14 @@ class ArkNavigationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ToolBarModifier.identity, ToolBarModifier, value);
     return this;
   }
-  toolbarConfiguration(value) {
+  toolbarConfiguration(value, options) {
+    let configuration = new ArkNavigationToolBarConfiguration();
+    configuration.value = value;
+    if (!isNull(options)) {
+      configuration.options = options;
+    }
     modifierWithKey(this._modifiersWithKeys, ToolBarConfigurationModifier.identity,
-      ToolBarConfigurationModifier, value);
+      ToolBarConfigurationModifier, configuration);
     return this;
   }
   hideToolBar(isHide, animated) {
@@ -26409,10 +26431,10 @@ class ToolBarConfigurationModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || !this.value) {
       getUINativeModule().navigation.resetToolBarConfiguration(node);
     } else {
-      getUINativeModule().navigation.setToolBarConfiguration(node, this.value);
+      getUINativeModule().navigation.setToolBarConfiguration(node, this.value.value, this.value.options);
     }
   }
   checkObjectDiff() {
