@@ -16,6 +16,7 @@
 #include <iostream>
 
 #include "gtest/gtest.h"
+#include "securec.h"
 #define private public
 #define protected public
 #include "native_key_event.h"
@@ -150,7 +151,10 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest004, TestSize.Level1)
     event.keyEvent.unicode = ARKUI_UNICODE;
     event.keyEvent.deviceId = ARKUI_DEVICE_ID;
     event.keyEvent.timestamp = ARKUI_TIME;
-    event.keyEvent.keyText = ARKUI_KEY_TEXT;
+    std::size_t n = std::min(std::strlen(ARKUI_KEY_TEXT), sizeof(event.keyEvent.keyText) - 1);
+    errno_t ret = strncpy_s(event.keyEvent.keyText, sizeof(event.keyEvent.keyText), ARKUI_KEY_TEXT, n);
+    ASSERT_EQ(ret, 0);
+    event.keyEvent.keyText[n] = '\0';
     uiInputEvent.inputEvent = &event.keyEvent;
     uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
     nodeEvent.origin = &uiInputEvent;
@@ -244,7 +248,10 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest006, TestSize.Level1)
     event.keyEvent.unicode = ARKUI_UNICODE;
     event.keyEvent.deviceId = ARKUI_DEVICE_ID;
     event.keyEvent.timestamp = ARKUI_TIME;
-    event.keyEvent.keyText = ARKUI_KEY_TEXT;
+    std::size_t n = std::min(std::strlen(ARKUI_KEY_TEXT), sizeof(event.keyEvent.keyText) - 1);
+    errno_t ret = strncpy_s(event.keyEvent.keyText, sizeof(event.keyEvent.keyText), ARKUI_KEY_TEXT, n);
+    ASSERT_EQ(ret, 0);
+    event.keyEvent.keyText[n] = '\0';
     uiInputEvent.inputEvent = &event.keyEvent;
     nodeEvent.origin = &uiInputEvent;
     nodeEvent.node = node;

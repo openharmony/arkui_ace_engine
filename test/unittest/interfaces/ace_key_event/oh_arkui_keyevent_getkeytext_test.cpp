@@ -14,7 +14,7 @@
  */
 
 #include "key_event_test.h"
-
+#include "securec.h"
 #include "frameworks/core/common/ace_application_info.h"
 
 using namespace testing;
@@ -43,7 +43,13 @@ HWTEST_F(KeyEventTest, KeyEvent_GetKeyText002, TestSize.Level0)
 HWTEST_F(KeyEventTest, KeyEvent_GetKeyText003, TestSize.Level0)
 {
     const char* testText = "A";
-    ArkUIKeyEvent keyEvent { .type = ARKUI_KEY_EVENT_DOWN, .keyCode = 65, .keyText = testText };
+    ArkUIKeyEvent keyEvent { .type = ARKUI_KEY_EVENT_DOWN, .keyCode = 65 };
+    std::size_t maxLen  = sizeof(keyEvent.keyText);
+    std::size_t copyLen = std::min(strlen(testText), maxLen - 1);
+    errno_t ret = strncpy_s(keyEvent.keyText, maxLen, testText, copyLen);
+    ASSERT_EQ(ret, 0);
+    keyEvent.keyText[copyLen] = '\0';
+
     ArkUI_UIInputEvent event = {
         .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
         .eventTypeId = C_KEY_EVENT_ID,

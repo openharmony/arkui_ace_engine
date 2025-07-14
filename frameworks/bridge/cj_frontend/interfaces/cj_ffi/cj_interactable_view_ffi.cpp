@@ -21,6 +21,7 @@
 
 #include "cj_common_ffi.h"
 #include "cj_lambda.h"
+#include "securec.h"
 
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -363,7 +364,14 @@ void FfiOHOSAceFrameworkInteractableViewOnKey(bool (*callback)(CJKeyEvent info))
 {
     auto onKeyEvent = [ffiCallback = CJLambda::Create(callback)](KeyEventInfo& keyInfo) -> bool {
         CJKeyEvent ffiKeyInfo {};
-        ffiKeyInfo.keyText = keyInfo.GetKeyText().c_str();
+        std::string text = keyInfo.GetKeyText();
+        std::size_t maxLen  = sizeof(ffiKeyInfo.keyText);
+        std::size_t copyLen = std::min(text.size(), maxLen - 1);
+        errno_t ans = strncpy_s(ffiKeyInfo.keyText, maxLen, text.c_str(), copyLen);
+        if (ans != EOK) {
+            return false;
+        }
+        ffiKeyInfo.keyText[copyLen] = '\0';
         ffiKeyInfo.type = static_cast<int32_t>(keyInfo.GetKeyType());
         ffiKeyInfo.keyCode = static_cast<int32_t>(keyInfo.GetKeyCode());
         ffiKeyInfo.keySource = static_cast<int32_t>(keyInfo.GetKeySource());

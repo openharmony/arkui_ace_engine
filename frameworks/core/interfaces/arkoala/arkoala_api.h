@@ -1486,7 +1486,7 @@ struct ArkUIKeyEvent {
     ArkUI_Int32 subKind;
     ArkUI_Int32 type;
     ArkUI_Int32 keyCode;
-    ArkUI_CharPtr keyText;
+    char keyText[128];
     ArkUI_Int32 keySource;
     ArkUI_Int64 deviceId;
     ArkUI_Uint32 unicode;

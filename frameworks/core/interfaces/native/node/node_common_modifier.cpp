@@ -53,6 +53,7 @@
 #include "core/interfaces/native/node/node_gesture_modifier.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
 #include "core/interfaces/native/node/view_model.h"
+#include "securec.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -9895,7 +9896,14 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_EVENT;
         event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
         event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
-        event.keyEvent.keyText = info.GetKeyText().c_str();
+        std::string text = info.GetKeyText();
+        std::size_t maxLen  = sizeof(event.keyEvent.keyText);
+        std::size_t copyLen = std::min(text.size(), maxLen - 1);
+        errno_t ret = strncpy_s(event.keyEvent.keyText, maxLen, text.c_str(), copyLen);
+        if (ret != EOK) {
+            return false;
+        }
+        event.keyEvent.keyText[copyLen] = '\0';
         event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
@@ -9937,7 +9945,14 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.subKind = ON_KEY_PREIME;
         event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
         event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
-        event.keyEvent.keyText = info.GetKeyText().c_str();
+        std::string text = info.GetKeyText();
+        std::size_t maxLen  = sizeof(event.keyEvent.keyText);
+        std::size_t copyLen = std::min(text.size(), maxLen - 1);
+        errno_t ret = strncpy_s(event.keyEvent.keyText, maxLen, text.c_str(), copyLen);
+        if (ret != EOK) {
+            return false;
+        }
+        event.keyEvent.keyText[copyLen] = '\0';
         event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
@@ -9977,7 +9992,14 @@ void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_DISPATCH;
         event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
         event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
-        event.keyEvent.keyText = info.GetKeyText().c_str();
+        std::string text = info.GetKeyText();
+        std::size_t maxLen  = sizeof(event.keyEvent.keyText);
+        std::size_t copyLen = std::min(text.size(), maxLen - 1);
+        errno_t ret = strncpy_s(event.keyEvent.keyText, maxLen, text.c_str(), copyLen);
+        if (ret != EOK) {
+            return false;
+        }
+        event.keyEvent.keyText[copyLen] = '\0';
         event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
