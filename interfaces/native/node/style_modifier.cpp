@@ -6500,7 +6500,7 @@ void ResetMaxZoomScale(ArkUI_NodeHandle node)
     if (!node || !fullImpl) {
         return;
     }
-    GetFullImpl()->getNodeModifiers()->getScrollModifier()->resetMaxZoomScale(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getScrollModifier()->resetMaxZoomScale(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetMaxZoomScale(ArkUI_NodeHandle node)
@@ -6528,7 +6528,7 @@ void ResetMinZoomScale(ArkUI_NodeHandle node)
     if (!node || !fullImpl) {
         return;
     }
-    GetFullImpl()->getNodeModifiers()->getScrollModifier()->resetMinZoomScale(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getScrollModifier()->resetMinZoomScale(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetMinZoomScale(ArkUI_NodeHandle node)

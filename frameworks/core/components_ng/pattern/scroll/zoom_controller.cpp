@@ -83,7 +83,8 @@ void ZoomController::HandleZoomUpdate(GestureEvent& info)
     float scale = info.GetScale() * zoomScaleStart_;
     float maxScale = pattern_.maxZoomScale_;
     float minScale = std::min(pattern_.minZoomScale_, pattern_.maxZoomScale_);
-    if (!pattern_.enableBouncesZoom_) {
+    if (!pattern_.enableBouncesZoom_ ||
+        info.GetInputEventType() == InputEventType::AXIS) {
         scale = std::clamp(scale, minScale, maxScale);
     } else if (scale > maxScale && scale > 0) {
         auto friction = (1.0f - MAX_OVER_SCALE) * maxScale / scale + MAX_OVER_SCALE;

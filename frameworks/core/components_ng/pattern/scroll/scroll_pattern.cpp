@@ -1435,6 +1435,10 @@ void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     scrollSnapOptions->Put("enableSnapToStart", enableSnapToSide_.first);
     scrollSnapOptions->Put("enableSnapToEnd", enableSnapToSide_.second);
     json->PutExtAttr("scrollSnap", scrollSnapOptions, filter);
+    json->PutExtAttr("maxZoomScale", maxZoomScale_, filter);
+    json->PutExtAttr("minZoomScale", minZoomScale_, filter);
+    json->PutExtAttr("zoomScale", zoomScale_.value_or(1.0f), filter);
+    json->PutExtAttr("enableBouncesZoom", enableBouncesZoom_, filter);
 }
 
 std::string ScrollPattern::GetScrollSnapPagination() const
