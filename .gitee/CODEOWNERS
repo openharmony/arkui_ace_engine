@@ -3007,6 +3007,9 @@ interfaces/native/ui_input_event.h @arkuievent
 interfaces/native/implementation/overlay_accessor.cpp @arkuievent
 
 [ANI Interfaces]
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.overlayManager.ts @arkuipopupwindow
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.promptAction.ts @arkuipopupwindow
+interfaces/ets/ani/overlayManager/ @arkuipopupwindow
 interfaces/ets/ani/promptaction/ @arkuipopupwindow
 
 [Innerkits Interfaces]
