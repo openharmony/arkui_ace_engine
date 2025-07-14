@@ -169,6 +169,7 @@ protected:
     Dimension textIndent_ = 0.0_px;
     float indent_ = 0.0f;
     bool isInlineFocus_ = false;
+    bool isPlaceHolderOverSize_ = false;
 
 private:
     void InlineFocusMeasure(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,

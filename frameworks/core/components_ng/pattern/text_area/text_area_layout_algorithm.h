@@ -37,6 +37,8 @@ protected:
 private:
     void CalcMeasureContentWithMinLines(
         std::optional<SizeF>& size, LayoutWrapper* layoutWrapper, const LayoutConstraintF& contentConstraint);
+    std::optional<SizeF> ReMeasureContentForPlaceholder(const LayoutConstraintF& contentConstraint,
+        LayoutWrapper* layoutWrapper, TextStyle& textStyle, LayoutConstraintF& textFieldContentConstraint);
 };
 } // namespace OHOS::Ace::NG
 
