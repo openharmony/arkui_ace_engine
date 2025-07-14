@@ -165,6 +165,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest003, TestSize.Level1)
 {
     auto theme = AceType::MakeRefPtr<TokenTheme>(TOKEN_THEME_ID);
     theme->SetColors(g_testProperty.tokenColors_);
+    theme->SetDarkColors(g_testProperty.tokenColors_);
     theme->SetColorMode(THEME_COLOR_MODE);
     TokenThemeStorage::GetInstance()->CacheSet(theme);
     EXPECT_TRUE(theme);
