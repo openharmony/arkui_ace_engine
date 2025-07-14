@@ -104,9 +104,6 @@ bool GetInt64Param(ani_env* env, ani_object object, const char *name, int64_t& r
 bool GetDoubleParam(ani_env* env, ani_object object, double& result);
 bool GetDoubleParam(ani_env* env, ani_object object, const char *name, double& result);
 bool GetDoubleParamOpt(ani_env *env, ani_object object, const char *name, std::optional<double>& result);
-bool GetFloatParam(ani_env* env, ani_object object, float& result);
-bool GetFloatParam(ani_env* env, ani_object object, const char *name, float& result);
-bool GetFloatArrayParam(ani_env *env, ani_object object, const char *name, std::vector<float>& result);
 std::string ANIStringToStdString(ani_env *env, ani_string ani_str);
 bool GetStringParam(ani_env *env, ani_object object, std::string& result);
 bool GetStringParam(ani_env *env, ani_object object, const char *name, std::string& result);

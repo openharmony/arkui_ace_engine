@@ -216,69 +216,6 @@ bool GetDoubleParamOpt(ani_env *env, ani_object object, const char *name, std::o
     return true;
 }
 
-bool GetFloatParam(ani_env* env, ani_object object, float& result)
-{
-    ani_float resultValue;
-    ani_status status = env->Object_CallMethodByName_Float(object, "unboxed", nullptr, &resultValue);
-    if (status != ANI_OK) {
-        return false;
-    }
-    result = static_cast<float>(resultValue);
-    return true;
-}
-
-bool GetFloatParam(ani_env* env, ani_object object, const char *name, float& result)
-{
-    ani_ref resultRef;
-    ani_status status = env->Object_GetPropertyByName_Ref(object, name, &resultRef);
-    if (status != ANI_OK) {
-        return false;
-    }
-
-    if (IsUndefinedObject(env, resultRef)) {
-        return false;
-    }
-    ani_object resultObj = static_cast<ani_object>(resultRef);
-    return GetFloatParam(env, resultObj, result);
-}
-
-bool GetFloatArrayParam(ani_env *env, ani_object object, const char *name, std::vector<float>& result)
-{
-    ani_ref resultRef;
-    ani_status status = env->Object_GetPropertyByName_Ref(object, name, &resultRef);
-    if (status != ANI_OK) {
-        return false;
-    }
-
-    if (IsUndefinedObject(env, resultRef) || !IsArrayObject(env, resultRef)) {
-        return false;
-    }
-
-    ani_size length;
-    ani_array resultObj = static_cast<ani_array>(resultRef);
-    status = env->Array_GetLength(resultObj, &length);
-    if (status != ANI_OK) {
-        return false;
-    }
-
-    std::vector<float> floatArray;
-    for (int i = 0; i < int(length); i++) {
-        ani_ref itemRef;
-        status = env->Array_Get(resultObj, (ani_size)i, &itemRef);
-        if (status != ANI_OK) {
-            continue;
-        }
-
-        float itemFloat;
-        ani_object itemObj = static_cast<ani_object>(itemRef);
-        if (GetFloatParam(env, itemObj, itemFloat)) {
-            floatArray.emplace_back(itemFloat);
-        }
-    }
-    result = floatArray;
-    return true;
-}
-
 std::string ANIStringToStdString(ani_env *env, ani_string ani_str)
 {
     ani_size strSize;
