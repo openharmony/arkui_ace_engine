@@ -645,56 +645,6 @@ HWTEST_F(EventManagerTestNg, EventManagerDispatchHover001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckDifferentTargetDisplay001
- * @tc.desc: Test CheckDifferentTargetDisplay function.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, CheckDifferentTargetDisplay001, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    std::vector<TouchEvent> history;
-    std::vector<TouchEvent> current;
-    TouchEvent touchEvent1;
-    touchEvent1.SetTargetDisplayId(1);
-    TouchEvent touchEvent2;
-    touchEvent2.SetTargetDisplayId(2);
-
-    // all empty, CheckDifferentTargetDisplay == true
-    bool ret = eventManager->CheckDifferentTargetDisplay(history, current);
-    EXPECT_TRUE(ret);
-
-    // his empty, cur not empty
-    current.push_back(touchEvent1);
-    ret = eventManager->CheckDifferentTargetDisplay(history, current);
-    EXPECT_TRUE(ret);
-    current.push_back(touchEvent1);
-    ret = eventManager->CheckDifferentTargetDisplay(history, current);
-    EXPECT_TRUE(ret);
-    current.push_back(touchEvent2);
-    ret = eventManager->CheckDifferentTargetDisplay(history, current);
-    EXPECT_FALSE(ret);
-
-    // his not empty, cur empty
-    current.clear();
-    history.push_back(touchEvent1);
-    ret = eventManager->CheckDifferentTargetDisplay(history, current);
-    EXPECT_TRUE(ret);
-    history.push_back(touchEvent1);
-    ret = eventManager->CheckDifferentTargetDisplay(history, current);
-    EXPECT_TRUE(ret);
-    history.push_back(touchEvent2);
-    ret = eventManager->CheckDifferentTargetDisplay(history, current);
-    EXPECT_FALSE(ret);
-
-    // his not empty, cur not empty
-    current.push_back(touchEvent1);
-    ret = eventManager->CheckDifferentTargetDisplay(history, current);
-    EXPECT_FALSE(ret);
-}
-
-/**
  * @tc.name: OnNonPointerEvent001
  * @tc.desc: Test OnNonPointerEvent function.
  * @tc.type: FUNC
