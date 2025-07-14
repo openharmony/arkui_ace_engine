@@ -711,7 +711,8 @@ void SetTextPickerDivider(
 }
 
 void SetTextPickerDividerWithResObj(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
-    const ArkUI_Int32* units, ArkUI_Int32 length, const struct ArkUIPickerDividerResObjStruct* dividerResObjStr)
+    const ArkUI_Int32* units, ArkUI_Int32 length, const struct ArkUIPickerDividerResObjStruct* dividerResObjStr,
+    ArkUI_Bool isDefaultColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -722,6 +723,7 @@ void SetTextPickerDividerWithResObj(ArkUINodeHandle node, ArkUI_Uint32 color, co
 
     NG::ItemDivider divider;
     divider.color = Color(color);
+    divider.isDefaultColor = isDefaultColor;
     divider.strokeWidth = Dimension(values[POS_0], static_cast<OHOS::Ace::DimensionUnit>(units[POS_0]));
     divider.startMargin = Dimension(values[POS_1], static_cast<OHOS::Ace::DimensionUnit>(units[POS_1]));
     divider.endMargin = Dimension(values[POS_2], static_cast<OHOS::Ace::DimensionUnit>(units[POS_2]));
@@ -771,7 +773,6 @@ void ResetTextPickerDividerNull(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::ItemDivider divider;
-    divider.isNull = true;
     TextPickerModelNG::TextPickerRemoveResObj(frameNode, "textPicker.divider");
     TextPickerModelNG::SetDivider(frameNode, divider);
 }

@@ -28,6 +28,19 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint8_t DOUBLE = 2;
 const Dimension PICKER_DIALOG_DIVIDER_MARGIN = 24.0_vp;
+
+void UpdateDividerColor(ItemDivider& divider)
+{
+    if (SystemProperties::ConfigChangePerform() && divider.isDefaultColor) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext && pipelineContext->IsSystmColorChange()) {
+            auto pickerTheme = pipelineContext->GetTheme<PickerTheme>();
+            if (pickerTheme) {
+                divider.color = pickerTheme->GetDividerColor();
+            }
+        }
+    }
+}
 } // namespace
 
 CanvasDrawFunction TextPickerPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
@@ -95,6 +108,7 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
             if (contentRect.Width() >= 0.0f && (contentRect.Height() >= dividerHeight)) {
                 if (textPickerPattern->GetCustomDividerFlag()) {
                     auto divider = textPickerPattern->GetDivider();
+                    UpdateDividerColor(divider);
                     auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
                     divider.isRtl = (textDirection == TextDirection::RTL) ? true : false;
                     picker->PaintCustomDividerLines(canvas, contentRect, frameRect, divider, dividerHeight);
@@ -229,7 +243,7 @@ void TextPickerPaintMethod::PaintLine(const OffsetF& offset, const DividerInfo &
     RSBrush brush;
     brush.SetColor(info.dividerColor.GetValue());
     canvas.AttachBrush(brush);
-    
+
     auto startPointX = offset.GetX();
     auto startPointY = offset.GetY();
     auto endPointX = offset.GetX() + info.dividerLength;

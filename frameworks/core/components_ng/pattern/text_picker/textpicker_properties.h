@@ -30,7 +30,7 @@ struct ItemDivider final {
     Dimension endMargin = 0.0_vp;
     Color color = Color::TRANSPARENT;
     bool isRtl = false;
-    bool isNull = false;
+    bool isDefaultColor = false;
 
     RefPtr<ResourceObject> strokeWidthResObj;
     RefPtr<ResourceObject> startMarginResObj;

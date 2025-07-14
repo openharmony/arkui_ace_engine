@@ -219,6 +219,7 @@ void ParseDivider(JSRef<JSObject>& obj, NG::ItemDivider& divider)
     if (ConvertFromJSValue(obj->GetProperty("color"), color, colorResObj)) {
         divider.color = color;
         divider.colorResObj = colorResObj;
+        divider.isDefaultColor = false;
     }
 
     Dimension startMargin = defaultMargin;
@@ -1413,7 +1414,6 @@ void JSTextPicker::SetDivider(const JSCallbackInfo& info)
         ParseDivider(obj, divider);
     } else if (info.Length() >= 1 && info[0]->IsNull()) {
         divider.strokeWidth = 0.0_vp;
-        divider.isNull = true;
     }
 
     TextPickerModel::GetInstance()->SetDivider(divider);
