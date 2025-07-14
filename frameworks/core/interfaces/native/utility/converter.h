@@ -31,6 +31,7 @@
 #include "base/geometry/shape.h"
 #include "bridge/common/utils/utils.h"
 #include "core/animation/chain_animation.h"
+#include "core/common/resource/resource_wrapper.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/paint_state.h"
@@ -189,6 +190,7 @@ namespace Converter {
             std::optional<double> GetFloatResource();
 
             RefPtr<ThemeConstants> themeConstants_;
+            RefPtr<ResourceWrapper> resWrapper_;
             ResourceType type_;
             std::string bundleName_;
             std::string moduleName_;
