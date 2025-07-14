@@ -43,6 +43,13 @@ struct NewLineOffset {
     }
 };
 
+struct MatchParentRowInfo {
+    float width;
+    const OffsetF& paddingOffset;
+    bool isRightToLeft;
+    float offsetYAdjust;
+};
+
 struct ChildrenRowInfo {
     bool isMatchParent = false;
     float maxHeight = 0;
@@ -67,7 +74,6 @@ public:
 private:
     float UpdateChildPositionWidthIgnoreLayoutSafeArea(
         bool isRtl, const RefPtr<LayoutWrapper>& childLayoutWrapper, const OffsetF& originOffset);
-    void InitChildrenRowInLayout(LayoutWrapper* layoutWrapper);
     float MeasureNonMatchParentChildren(LayoutWrapper* layoutWrapper, V2::GridSizeType sizeType,
         std::list<RefPtr<LayoutWrapper>>& children);
     void DisableWidthLayoutPolicy(const RefPtr<LayoutWrapper>& child);
@@ -81,8 +87,7 @@ private:
     OptionalSizeF MeasureSelfByLayoutPolicy(LayoutWrapper* layoutWrapper, float childHeight,
         LayoutCalPolicy widthLayoutPolicy, LayoutCalPolicy heightLayoutPolicy);
     void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, V2::GridSizeType sizeType);
-    void LayoutChildrenRow(ChildrenRow& row, float width, const OffsetF &paddingOffset,
-        bool isRightToLeft, float offsetYAdjust = 0);
+    void LayoutChildrenRow(ChildrenRow& row, MatchParentRowInfo& matchParentRowInfo, float& rowHeightAdjust);
     bool IsRightToLeft(LayoutWrapper* layoutWrapper);
     bool GetSizeTypeAndMaxSize(LayoutWrapper* layoutWrapper, SizeF &maxSize, V2::GridSizeType& sizeType);
     void ParseGridRowParams(LayoutWrapper *layoutWrapper, const V2::GridSizeType &sizeType,
@@ -98,6 +103,8 @@ private:
     FlexAlign GetChildAlignment(LayoutWrapper* gridRow, const RefPtr<LayoutProperty>& childLayoutProperty);
     void UpdateFirstLineOffset(bool& childTallerThanMatchParent, const bool isGreatThanParent, float ignoreMatchOffset,
         float& firstLineOffset);
+    void UpdateRowHeightWhenIgnoreOpts(
+        float& rowHeightAdjust, const RefPtr<LayoutWrapper>& childLayoutWrapper, float saeAdjust);
     int32_t columnNum_ { V2::DEFAULT_COLUMN_NUMBER };
     std::pair<double, double> gutterInDouble_ { 0, 0 };
     double columnUnitWidth_ = 0;

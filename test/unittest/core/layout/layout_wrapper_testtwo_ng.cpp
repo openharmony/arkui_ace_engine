@@ -1193,10 +1193,15 @@ HWTEST_F(LayoutWrapperTestTwoNg, StrategyControlOnGetAccumulatedSafeAreaExpand00
     /**
      * @tc.steps: step6. overlay whole margin, with fromMargin
      */
-    EXPECT_EQ(layoutWrapper1->GetAccumulatedSafeAreaExpand(false, {
+    expectedRes.left = 0.0f;
+    expectedRes.right = 15.0f;
+    expectedRes.bottom = 25.0f;
+    expectedRes.top = 10.0f;
+    auto res = layoutWrapper1->GetAccumulatedSafeAreaExpand(false, {
         .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
         .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
-    }, IgnoreStrategy::FROM_MARGIN), expectedRes);
+    }, IgnoreStrategy::FROM_MARGIN);
+    EXPECT_EQ(res, expectedRes) << res.ToString().c_str();
 }
 /**
  * @tc.name: OverBorderPaddingOnGetAccumulatedSafeAreaExpand

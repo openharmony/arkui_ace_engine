@@ -256,10 +256,6 @@ void LinearSplitLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutBeforeAPI10(layoutWrapper);
         return;
     }
-    auto host = layoutWrapper->GetHostNode();
-    if (host && !host->GetIgnoreLayoutProcess() && GetNeedPostponeForIgnore()) {
-        return;
-    }
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     float childTotalWidth = 0.0f;
     float childTotalHeight = 0.0f;
@@ -307,8 +303,7 @@ void LinearSplitLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(co
     }
     auto saeCorrect = originOffset;
     IgnoreLayoutSafeAreaOpts& opts = *(childNode->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts());
-    auto sae =
-        childNode->GetAccumulatedSafeAreaExpand(false, opts);
+    auto sae = childNode->GetAccumulatedSafeAreaExpand(false, opts, IgnoreStrategy::FROM_MARGIN);
     auto offsetX = sae.left.value_or(0.0f);
     auto offsetY = sae.top.value_or(0.0f);
     OffsetF saeTrans = OffsetF(offsetX , offsetY);
@@ -401,6 +396,7 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(
             childOffsetCross = childrenDragPos_[index];
         }
         item->GetGeometryNode()->SetMarginFrameOffset(OffsetF(childOffsetMain, childOffsetCross));
+        UpdateChildPositionWidthIgnoreLayoutSafeArea(item, OffsetF(childOffsetMain, childOffsetCross));
         item->Layout();
         childOffsetCross += item->GetGeometryNode()->GetMarginFrameSize().Height() + endMargin +
                             static_cast<float>(DEFAULT_SPLIT_HEIGHT);
@@ -654,13 +650,13 @@ void LinearSplitLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* la
         if (childNode && childNode->GetLayoutProperty() && childNode->GetLayoutProperty()->IsExpandConstraintNeeded()) {
             bundle.first.emplace_back(childNode);
             child->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
-            SetNeedPostponeForIgnore();
             continue;
         }
         child->Measure(layoutConstraint);
     }
-    if (host && host->GetContext() && GetNeedPostponeForIgnore()) {
+    if (host && host->GetContext() && GetNeedPostponeForIgnore() && !bundle.first.empty()) {
         auto context = host->GetContext();
+        host->SetDelaySelfLayoutForIgnore();
         bundle.second = host;
         context->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
     }
