@@ -145,7 +145,7 @@ void SystemWindowScene::InserSurfaceNodeId(uint64_t nodeId)
         surfaceNodeCountMap_[nodeId] = iter->second + 1;
         TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE,
             "OnAttachToFrameNode id: %{public}d, duplicate surfaceNodeId:%{public}s, count:%{public}d",
-            session_->GetPersistentId(), std::to_string(nodeId).c_str(), iter->second)
+            session_->GetPersistentId(), std::to_string(nodeId).c_str(), iter->second);
     }
 }
 
