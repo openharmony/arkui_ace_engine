@@ -22,6 +22,8 @@
 #define protected public
 #define private public
 
+#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/log/dump_log.h"
@@ -3098,7 +3100,7 @@ HWTEST_F(UINodeTestNg, AddFunc_API14, TestSize.Level1)
     const RefPtr<FrameNode> testNode =
         FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
     testNode->AddChild(ONE, 1, false);
-    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    std::shared_ptr<JsonValue> json = JsonUtil::CreateSharedPtrJson(true);
     auto child = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>());
     auto child2 = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 4, AceType::MakeRefPtr<Pattern>());
     testNode->AddDisappearingChild(child);
@@ -3540,7 +3542,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg049, TestSize.Level1)
     /**
      * @tc.steps: step2. attach context
      */
-    SystemProperties::multiInstanceEnabled_ = true;
+    g_isMultiInstanceEnabled = true;
     testNode->AttachContext(AceType::RawPtr(context), true);
     EXPECT_EQ(testNode->context_, AceType::RawPtr(context));
     EXPECT_EQ(testNode->instanceId_, context->GetInstanceId());
@@ -3808,5 +3810,41 @@ HWTEST_F(UINodeTestNg, FindTopNavDestination001, TestSize.Level1)
     stageNode->FindTopNavDestination(topNavNode);
     ASSERT_NE(topNavNode, nullptr);
     EXPECT_EQ(topNavNode, navDestinationNode4);
+}
+
+/**
+ * @tc.name: UINodeTestNg074
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg074, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: step1. create node with darkMode
+     * @tc.expected: node isDarkMethod_ is true
+     */
+    MockContainer::SetUp();
+    EXPECT_FALSE(ONE->isDarkMode_);
+    g_isConfigChangePerform = true;
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    auto lightNode = FrameNode::CreateFrameNode("lightNode", 1000, AceType::MakeRefPtr<Pattern>());
+    EXPECT_TRUE(lightNode->isDarkMode_);
+
+    /**
+     * @tc.steps2: step1. create node with lightMode
+     * @tc.expected: node isDarkMethod_ is false
+     */
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+    auto darkNode = FrameNode::CreateFrameNode("darkNode", 1001, AceType::MakeRefPtr<Pattern>());
+    EXPECT_FALSE(darkNode->isDarkMode_);
+
+    /**
+     * @tc.steps3: step1. create node with no container
+     * @tc.expected: node isDarkMethod_ is false
+     */
+    MockContainer::TearDown();
+    auto noContainerNode = FrameNode::CreateFrameNode("noContainerNode", 1002, AceType::MakeRefPtr<Pattern>());
+    EXPECT_FALSE(noContainerNode->isDarkMode_);
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

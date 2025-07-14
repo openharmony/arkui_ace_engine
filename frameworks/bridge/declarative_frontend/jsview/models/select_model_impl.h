@@ -89,9 +89,6 @@ public:
     void CreateWithValueIconResourceObj(const std::vector<SelectResObjParam>& resObjVec) override {};
     void CreateWithIntegerResourceObj(const RefPtr<ResourceObject>& resObj) override {};
     void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj) override {};
-    void SetOptionFontColorByUser(bool flag) override {};
-    void SetMenuBackgroundColorByUser(bool flag) override {};
-    void SetFontColorByUser(bool flag) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SELECT_MODEL_IMPL_H

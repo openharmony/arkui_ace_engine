@@ -28,6 +28,7 @@
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
+constexpr int32_t DUMP_DOUBLE_NUMBER = 2;
 constexpr int32_t DUMP_START_NUMBER = 3;
 constexpr int32_t DUMP_LIMIT_SIZE = 500;
 constexpr int64_t EVENT_CLEAR_DURATION = 2000;
@@ -965,6 +966,8 @@ void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
         for (auto stateHistory : stateHistorys) {
             if (stateHistory.procedure.find("Down") != std::string::npos) {
                 gestureLog += ", prcd: Down";
+            } else if (stateHistory.procedure.find("Move") != std::string::npos) {
+                gestureLog += ", prcd: Move";
             } else {
                 gestureLog += ", prcd: Up";
             }
@@ -2467,8 +2470,10 @@ void EventManager::DumpEventWithCount(const std::vector<std::string>& params, NG
     if (params.size() == MIN_PARAM_SIZE) {
         DumpEvent(type, hasJson);
         return;
-    }
-    if (params.size() >= COUNT_PARAM_SIZE) {
+    } else if (params.size() == DUMP_DOUBLE_NUMBER && hasJson) {
+        DumpEvent(type, hasJson);
+        return;
+    } else if (params.size() >= COUNT_PARAM_SIZE) {
         if (params[1] != "-n") {
             DumpEvent(type, hasJson);
             return;
@@ -2495,7 +2500,7 @@ void EventManager::DumpEventWithCount(const std::vector<std::string>& params, NG
     }
 }
 
-TouchDelegateHdl EventManager::AddTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate> delegater)
+TouchDelegateHdl EventManager::AddTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate>& delegater)
 {
     touchDelegatesMap_[touchId].emplace_back(delegater);
     TouchDelegatesIter iter = std::prev(touchDelegatesMap_[touchId].end());
@@ -2504,7 +2509,7 @@ TouchDelegateHdl EventManager::AddTouchDelegate(const int32_t touchId, const Ref
     return handler;
 }
 
-TouchDelegateHdl EventManager::ReplaceTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate> delegater)
+TouchDelegateHdl EventManager::UpdateTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate>& delegater)
 {
     if (touchDelegatesMap_.find(touchId) == touchDelegatesMap_.end() || touchDelegatesMap_[touchId].empty()) {
         touchDelegatesMap_[touchId].emplace_back(delegater);
@@ -2514,7 +2519,7 @@ TouchDelegateHdl EventManager::ReplaceTouchDelegate(const int32_t touchId, const
         touchDelegatesMap_[touchId].emplace_back(delegater);
     }
     TouchDelegatesIter iter = std::prev(touchDelegatesMap_[touchId].end());
-    LOGD("ReplaceTouchDelegate successful");
+    LOGD("UpdateTouchDelegate successful");
     TouchDelegateHdl handler(touchId, iter);
     return handler;
 }

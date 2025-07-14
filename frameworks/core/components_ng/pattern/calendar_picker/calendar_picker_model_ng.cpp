@@ -314,6 +314,7 @@ void CalendarPickerModelNG::SetTextStyle(const PickerTextStyle& textStyle)
     ACE_UPDATE_LAYOUT_PROPERTY(
         CalendarPickerLayoutProperty, Color, textStyle.textColor.value_or(calendarTheme->GetEntryFontColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, Weight, textStyle.fontWeight.value_or(FontWeight::NORMAL));
+    ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, NormalTextColorSetByUser, textStyle.textColorSetByUser);
 }
 
 void CalendarPickerModelNG::SetOnChange(SelectedChangeEvent&& onChange)
@@ -370,6 +371,8 @@ void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const PickerTextS
         textStyle.textColor.value_or(calendarTheme->GetEntryFontColor()), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         CalendarPickerLayoutProperty, Weight, textStyle.fontWeight.value_or(FontWeight::NORMAL), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        CalendarPickerLayoutProperty, NormalTextColorSetByUser, textStyle.textColorSetByUser, frameNode);
 }
 
 void CalendarPickerModelNG::ClearBorderColor()
@@ -882,6 +885,11 @@ void CalendarPickerModelNG::ParseNormalTextStyleResObj(const PickerTextStyle& te
 
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
+
+    if (!textStyleOpt.textColorResObj && !textStyleOpt.fontSizeResObj && !textStyleOpt.fontFamilyResObj) {
+        pickerPattern->RemoveResObj("CalendarPickerNormalTextStyle");
+        return;
+    }
 
     auto&& updateFunc = [textStyleOpt, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject> resObj) {
         auto frameNode = weak.Upgrade();

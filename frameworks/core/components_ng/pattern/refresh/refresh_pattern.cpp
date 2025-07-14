@@ -978,21 +978,26 @@ void RefreshPattern::ResetAnimation()
 {
     float currentOffset = scrollOffset_;
     if (isHigherVersion_) {
-        AnimationOption option;
-        option.SetCurve(DEFAULT_CURVE);
-        option.SetDuration(0);
-        animation_ =
-            AnimationUtils::StartAnimation(option, [weak = AceType::WeakClaim(this), offset = currentOffset]() {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                auto offsetProperty = pattern->offsetProperty_;
-                CHECK_NULL_VOID(offsetProperty);
-                offsetProperty->Set(offset);
-            }, [weak = AceType::WeakClaim(this)]() {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->EndTrailingTrace();
-            });
+        if (animation_) {
+            AnimationOption option;
+            option.SetCurve(DEFAULT_CURVE);
+            option.SetDuration(0);
+            animation_ =
+                AnimationUtils::StartAnimation(option, [weak = AceType::WeakClaim(this), offset = currentOffset]() {
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    auto offsetProperty = pattern->offsetProperty_;
+                    CHECK_NULL_VOID(offsetProperty);
+                    offsetProperty->Set(offset);
+                }, [weak = AceType::WeakClaim(this)]() {
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->EndTrailingTrace();
+                });
+        } else {
+            CHECK_NULL_VOID(offsetProperty_);
+            offsetProperty_->Set(currentOffset);
+        }
     } else {
         AnimationUtils::StopAnimation(animation_);
         CHECK_NULL_VOID(lowVersionOffset_);

@@ -572,6 +572,10 @@ bool PanRecognizer::HandlePanAccept()
             return true;
         }
     }
+    if (CheckLimitFinger()) {
+        extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
+        return false;
+    }
     if (TriggerGestureJudgeCallback() == GestureJudgeResult::REJECT) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         if (gestureInfo_ && gestureInfo_->GetType() == GestureTypeName::DRAG) {
@@ -580,9 +584,6 @@ bool PanRecognizer::HandlePanAccept()
             dragEventActuator->SetIsDragUserReject(true);
         }
         return true;
-    }
-    if (CheckLimitFinger()) {
-        return false;
     }
     if (IsBridgeMode()) {
         OnAccepted();
@@ -594,6 +595,7 @@ bool PanRecognizer::HandlePanAccept()
 
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    extraInfo_ += "cancel received.";
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
                                                                   : static_cast<int32_t>(MouseAction::CANCEL);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
@@ -614,6 +616,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
+    extraInfo_ += "cancel received.";
     isTouchEventFinished_ = false;
     lastAction_ = static_cast<int32_t>(AxisAction::CANCEL);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
@@ -834,6 +837,14 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type)
 {
     std::string callbackName = GetCallbackName(callback);
+    if (type == GestureCallbackType::START || type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
+        std::string callbackTypeStr = (type == GestureCallbackType::START) ? "START" :
+            (type == GestureCallbackType::END) ? "END" : "CANCEL";
+        extraInfo_ += " " + callbackTypeStr
+            + " cBk: " + std::to_string((callback && *callback))
+            + " isE: "  + std::to_string(IsEnabled())
+            + " gIn: " + std::to_string((!gestureInfo_ || !gestureInfo_->GetDisposeTag()));
+    }
     ACE_SCOPED_TRACE("PanRecognizer %s, mainDelta: %f", callbackName.c_str(), mainDelta_);
     if ((type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) && !IsEnabled()) {
         if (panEndOnDisableState_ && *panEndOnDisableState_ && (!gestureInfo_ || !gestureInfo_->GetDisposeTag())) {
@@ -894,38 +905,7 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
     }
     auto info = std::make_shared<PanGestureEvent>();
     UpdateFingerListInfo();
-    info->SetFingerList(fingerList_);
-    info->SetTimeStamp(time_);
-    info->SetDeviceId(deviceId_);
-    info->SetOffsetX((direction_.type & PanDirection::HORIZONTAL) == 0 ? 0.0 : averageDistance_.GetX());
-    info->SetOffsetY((direction_.type & PanDirection::VERTICAL) == 0 ? 0.0 : averageDistance_.GetY());
-    info->SetSourceDevice(deviceType_);
-    if (inputEventType_ == InputEventType::AXIS) {
-        info->SetVelocity(Velocity());
-        info->SetMainVelocity(0.0);
-        info->SetSourceTool(lastAxisEvent_.sourceTool);
-        info->SetVerticalAxis(lastAxisEvent_.verticalAxis);
-        info->SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
-    } else {
-        info->SetVelocity(panVelocity_.GetVelocity());
-        info->SetMainVelocity(panVelocity_.GetMainAxisVelocity());
-        info->SetSourceTool(lastTouchEvent_.sourceTool);
-    }
-    info->SetTarget(GetEventTarget().value_or(EventTarget()));
-    info->SetForce(lastTouchEvent_.force);
-    info->SetRawInputEventType(inputEventType_);
-    info->SetRawInputEvent(lastPointEvent_);
-    info->SetRawInputDeviceId(deviceId_);
-    info->SetLastAction(lastAction_);
-    if (lastTouchEvent_.tiltX.has_value()) {
-        info->SetTiltX(lastTouchEvent_.tiltX.value());
-    }
-    if (lastTouchEvent_.tiltY.has_value()) {
-        info->SetTiltY(lastTouchEvent_.tiltY.value());
-    }
-    if (lastTouchEvent_.rollAngle.has_value()) {
-        info->SetRollAngle(lastTouchEvent_.rollAngle.value());
-    }
+    UpdateGestureEventInfo(info);
     if (gestureInfo_) {
         gestureInfo_->SetInputEventType(inputEventType_);
     }
@@ -945,6 +925,44 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
         return GestureJudgeResult::REJECT;
     }
     return GestureJudgeResult::CONTINUE;
+}
+
+void PanRecognizer::UpdateGestureEventInfo(std::shared_ptr<PanGestureEvent>& info)
+{
+    info->SetFingerList(fingerList_);
+    info->SetTimeStamp(time_);
+    info->SetDeviceId(deviceId_);
+    info->SetOffsetX((direction_.type & PanDirection::HORIZONTAL) == 0 ? 0.0 : averageDistance_.GetX());
+    info->SetOffsetY((direction_.type & PanDirection::VERTICAL) == 0 ? 0.0 : averageDistance_.GetY());
+    info->SetSourceDevice(deviceType_);
+    if (inputEventType_ == InputEventType::AXIS) {
+        info->SetVelocity(Velocity());
+        info->SetMainVelocity(0.0);
+        info->SetSourceTool(lastAxisEvent_.sourceTool);
+        info->SetVerticalAxis(lastAxisEvent_.verticalAxis);
+        info->SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
+        info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+    } else {
+        info->SetVelocity(panVelocity_.GetVelocity());
+        info->SetMainVelocity(panVelocity_.GetMainAxisVelocity());
+        info->SetSourceTool(lastTouchEvent_.sourceTool);
+        info->SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+    }
+    info->SetTarget(GetEventTarget().value_or(EventTarget()));
+    info->SetForce(lastTouchEvent_.force);
+    info->SetRawInputEventType(inputEventType_);
+    info->SetRawInputEvent(lastPointEvent_);
+    info->SetRawInputDeviceId(deviceId_);
+    info->SetLastAction(lastAction_);
+    if (lastTouchEvent_.tiltX.has_value()) {
+        info->SetTiltX(lastTouchEvent_.tiltX.value());
+    }
+    if (lastTouchEvent_.tiltY.has_value()) {
+        info->SetTiltY(lastTouchEvent_.tiltY.value());
+    }
+    if (lastTouchEvent_.rollAngle.has_value()) {
+        info->SetRollAngle(lastTouchEvent_.rollAngle.value());
+    }
 }
 
 bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)

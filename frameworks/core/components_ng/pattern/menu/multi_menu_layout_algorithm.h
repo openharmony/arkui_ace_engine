@@ -34,6 +34,7 @@ public:
         const RefPtr<LayoutWrapper>& child, const LayoutConstraintF& layoutConstraint);
 
 private:
+    void RemoveParentRestrictionsForFixIdeal(const LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
     void UpdateEmbeddedPercentReference(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
         std::optional<LayoutConstraintF>& layoutConstraint);
     void UpdateSelfSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
@@ -44,7 +45,8 @@ private:
         LayoutConstraintF& childConstraint, float paddingWidth, std::optional<LayoutConstraintF>& layoutConstraint,
         bool idealSizeHasVal);
     bool UpdateSelectOverlayMenuMinWidth(const RefPtr<MenuPattern>& pattern, const RefPtr<GridColumnInfo>& columnInfo);
-
+    void UpdateChildPositionWidthIgnoreLayoutSafeArea(
+        const RefPtr<LayoutWrapper>& childLayoutWrapper, OffsetF& originOffset, bool isEmbed, OffsetF& embedCorrect);
     float userHeight_ = 0.0f;
     
     ACE_DISALLOW_COPY_AND_MOVE(MultiMenuLayoutAlgorithm);

@@ -36,6 +36,10 @@ AceScopedPerformanceCheck::AceScopedPerformanceCheck(const std::string& /* name 
 
 AceScopedPerformanceCheck::~AceScopedPerformanceCheck() {}
 
+void AceScopedPerformanceCheck::UpdateRecordPath(const std::string& path) {}
+
+void AceScopedPerformanceCheck::ReportAllRecord() {}
+
 bool AceChecker::IsPerformanceCheckEnabled()
 {
     return false;

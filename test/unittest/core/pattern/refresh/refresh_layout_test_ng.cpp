@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include "refresh_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -536,5 +537,27 @@ HWTEST_F(RefreshLayoutTestNg, BeginAndEndTrailingTrace001, TestSize.Level1)
     EXPECT_TRUE(pattern_->hasBeginTrailingTrace_);
     pattern_->EndTrailingTrace();
     EXPECT_FALSE(pattern_->hasBeginTrailingTrace_);
+}
+
+/**
+ * @tc.name: ResetAnimation001
+ * @tc.desc: Test ResetAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, ResetAnimation001, TestSize.Level1)
+{
+    RefreshModelNG model = CreateRefresh();
+    CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+
+    pattern_->scrollOffset_ = 100.0f;
+    pattern_->ResetAnimation();
+    EXPECT_EQ(pattern_->animation_, nullptr);
+    EXPECT_EQ(pattern_->offsetProperty_->Get(), 100.0f);
+    pattern_->QuickStartFresh();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_NE(pattern_->animation_, nullptr);
+    pattern_->ResetAnimation();
+    EXPECT_EQ(pattern_->offsetProperty_->Get(), pattern_->refreshOffset_.ConvertToPx());
 }
 } // namespace OHOS::Ace::NG

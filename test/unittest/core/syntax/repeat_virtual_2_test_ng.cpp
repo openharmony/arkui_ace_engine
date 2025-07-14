@@ -549,6 +549,57 @@ HWTEST_F(RepeatVirtual2TestNg, GetRID4Index001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CallOnGetRid4Index001
+ * @tc.desc: Test caches.CallOnGetRid4Index
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, CallOnGetRid4Index001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10);
+
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index)->std::pair<RIDType, uint32_t> {
+        return {1, OnGetRid4IndexResult::CREATED_NEW_NODE}; };
+    auto item0 = repeatNode->caches_.CallOnGetRid4Index(0).value();
+    EXPECT_EQ(item0, nullptr);
+
+    repeatNode->caches_.onGetRid4Index_ = [&](IndexType index)->std::pair<RIDType, uint32_t> {
+        CreateListItemNode(); return {1, OnGetRid4IndexResult::CREATED_NEW_NODE}; };
+    auto item1 = repeatNode->caches_.CallOnGetRid4Index(0).value();
+    EXPECT_EQ(item1->node_->GetId(), 10002);
+
+    repeatNode->caches_.onGetRid4Index_ = [&](IndexType index)->std::pair<RIDType, uint32_t> {
+        CreateListItemNode(); return {0, OnGetRid4IndexResult::CREATED_NEW_NODE}; };
+    auto item2 = repeatNode->caches_.CallOnGetRid4Index(0);
+    EXPECT_EQ(item2, std::nullopt);
+
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index)->std::pair<RIDType, uint32_t> {
+        return {1, OnGetRid4IndexResult::UPDATED_NODE}; };
+    auto item3 = repeatNode->caches_.CallOnGetRid4Index(0).value();
+    EXPECT_EQ(item3->node_->GetId(), 10002);
+
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index)->std::pair<RIDType, uint32_t> {
+        return {2, OnGetRid4IndexResult::UPDATED_NODE}; };
+    auto item4 = repeatNode->caches_.CallOnGetRid4Index(0);
+    EXPECT_EQ(item4, std::nullopt);
+
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index)->std::pair<RIDType, uint32_t> {
+        return {1, OnGetRid4IndexResult::UPDATED_NODE}; };
+    repeatNode->caches_.GetCacheItem4RID(1).value()->node_ = nullptr;
+    auto item5 = repeatNode->caches_.CallOnGetRid4Index(0);
+    EXPECT_EQ(item5, std::nullopt);
+
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index)->std::pair<RIDType, uint32_t> {
+        return {0, OnGetRid4IndexResult::UPDATED_NODE}; };
+    auto item6 = repeatNode->caches_.CallOnGetRid4Index(0);
+    EXPECT_EQ(item6, std::nullopt);
+
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index)->std::pair<RIDType, uint32_t> {
+        return {1, OnGetRid4IndexResult::NO_NODE}; };
+    auto item7 = repeatNode->caches_.CallOnGetRid4Index(0);
+    EXPECT_EQ(item7, std::nullopt);
+}
+
+/**
  * @tc.name: ConvertFromToIndex001
  * @tc.desc: Test caches.ConvertFromToIndex
  * @tc.type: FUNC

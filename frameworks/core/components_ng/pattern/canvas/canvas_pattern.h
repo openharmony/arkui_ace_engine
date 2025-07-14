@@ -49,6 +49,11 @@ public:
         return true;
     }
 
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     int32_t GetId() const
     {
         auto host = GetHost();
@@ -196,7 +201,7 @@ public:
     void Reset();
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
 
 private:
     void OnAttachToFrameNode() override;

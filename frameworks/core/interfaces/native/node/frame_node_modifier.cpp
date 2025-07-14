@@ -90,7 +90,7 @@ void AddBuilderNodeInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
     auto childRef = Referenced::Claim<UINode>(childNode);
     CHECK_NULL_VOID(childRef);
     auto parentNode = childRef->GetParent();
-    CHECK_NULL_VOID(parentNode && parentNode->GetId() == currentNode->GetId());
+    CHECK_NULL_VOID(parentNode && parentNode == currentNode);
     std::list<RefPtr<UINode>> nodes;
     BuilderUtils::GetBuilderNodes(childRef, nodes);
     BuilderUtils::AddBuilderToParent(childRef->GetParent(), nodes);
@@ -136,7 +136,7 @@ void RemoveBuilderNodeInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
     CHECK_NULL_VOID(childNode);
     auto childRef = Referenced::Claim<UINode>(childNode);
     auto parentNode = childRef->GetParent();
-    CHECK_NULL_VOID(parentNode && parentNode->GetId() == currentNode->GetId());
+    CHECK_NULL_VOID(parentNode && parentNode == currentNode);
     std::list<RefPtr<UINode>> nodes;
     BuilderUtils::GetBuilderNodes(childRef, nodes);
     BuilderUtils::RemoveBuilderFromParent(parentNode, nodes);

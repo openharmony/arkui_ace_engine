@@ -156,6 +156,7 @@ private:
     void HandleCallbackReports(const GestureEvent& info, GestureCallbackType type, PanGestureState panGestureState);
     void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
     GestureJudgeResult TriggerGestureJudgeCallback();
+    void UpdateGestureEventInfo(std::shared_ptr<PanGestureEvent>& info);
     void ChangeFingers(int32_t fingers);
     void ChangeDirection(const PanDirection& direction);
     void ChangeDistance(double distance);

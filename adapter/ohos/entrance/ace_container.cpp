@@ -3104,6 +3104,21 @@ void AceContainer::InitWindowCallback()
         window->UseImplicitAnimation(useImplicit);
     });
 
+    windowManager->SetHeightBreakpointCallback(
+        [window = pipelineContext_->GetWindow()]() -> HeightBreakpoint {
+        CHECK_NULL_RETURN(window, HeightBreakpoint::HEIGHT_SM);
+        HeightLayoutBreakPoint layoutHeightBreakpoints =
+            SystemProperties::GetHeightLayoutBreakpoints();
+        return window->GetHeightBreakpoint(layoutHeightBreakpoints);
+    });
+    windowManager->SetWidthBreakpointCallback(
+        [window = pipelineContext_->GetWindow()]() -> WidthBreakpoint {
+        CHECK_NULL_RETURN(window, WidthBreakpoint::WIDTH_SM);
+        WidthLayoutBreakPoint layoutWidthBreakpoints =
+            SystemProperties::GetWidthLayoutBreakpoints();
+        return window->GetWidthBreakpoint(layoutWidthBreakpoints);
+    });
+
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);

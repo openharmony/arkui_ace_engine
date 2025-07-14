@@ -122,17 +122,25 @@ void Scrollable::Initialize(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(pipeline);
     auto scrollableTheme = pipeline->GetTheme<ScrollableTheme>();
     CHECK_NULL_VOID(scrollableTheme);
-    flingVelocityScale_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)
+    flingVelocityScale_ = pipeline->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)
                               ? scrollableTheme->GetFlingVelocityScale()
                               : VELOCITY_SCALE;
-    springVelocityScale_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)
+    springVelocityScale_ = pipeline->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)
                                ? scrollableTheme->GetSpringVelocityScale()
                                : VELOCITY_SCALE;
     ratio_ = scrollableTheme->GetRatio();
     springResponse_ = scrollableTheme->GetSpringResponse();
     touchPadVelocityScaleRate_ = scrollableTheme->GetTouchPadVelocityScaleRate();
     if (friction_ == -1) {
-        InitFriction(scrollableTheme->GetFriction());
+        if (pipeline->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+            defaultFriction_ = scrollableTheme->GetFriction();
+        } else if (pipeline->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            defaultFriction_ = API12_FRICTION;
+        } else if (pipeline->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+            defaultFriction_ = API11_FRICTION;
+        } else {
+            defaultFriction_ = FRICTION;
+        }
     }
 }
 
@@ -1074,16 +1082,6 @@ float Scrollable::GetFrictionVelocityByFinalPosition(
     return DEFAULT_THRESHOLD * threshold * signum - (final - position) * friction;
 }
 
-void Scrollable::InitFriction(double friction)
-{
-    defaultFriction_ =
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
-    defaultFriction_ =
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : defaultFriction_;
-    defaultFriction_ =
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN) ? friction : defaultFriction_;
-}
-
 void Scrollable::FixScrollMotion(float position, float initVelocity)
 {
 #ifdef WEARABLE_PRODUCT
@@ -1503,7 +1501,8 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
         needScrollSnapChange_ = needScrollSnapToSideCallback_(mainDelta);
     }
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}f, currentVelocity_ is %{public}f, "
-        "needScrollSnapChange_ is %{public}u", position, currentVelocity_, needScrollSnapChange_);
+        "currentPos_ is %{public}f, needScrollSnapChange_ is %{public}u", position, currentVelocity_,
+        currentPos_, needScrollSnapChange_);
     if (LessOrEqual(std::abs(mainDelta), 1)) {
         // trace stop at OnScrollStop
         AceAsyncTraceBeginCommercial(

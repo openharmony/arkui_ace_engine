@@ -2574,4 +2574,372 @@ HWTEST_F(SelectPatternTestNg, BindMenuTouch014, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfoMove));
     ViewStackProcessor::GetInstance()->ClearStack();
 }
+
+/**
+ * @tc.name: SetOptionTextModifierByUser
+ * @tc.desc: Test SelectPattern SetOptionTextModifierByUser.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetOptionTextModifierByUser, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node.
+     * @tc.expected: step1. Select model and frame node are created successfully, related objects are obtained.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+    selectTheme->fontColor_ = Color::GREEN;
+    /**
+     * @tc.steps: step2. Enable user-defined font color flag, call SetOptionTextModifierByUser.
+     * @tc.expected: step2. Option font color in selectPattern is not set.
+     */
+    EXPECT_FALSE(selectPattern->optionFont_.FontColor.has_value());
+    selectModelInstance.SetOptionFontColorByUser(true);
+    EXPECT_TRUE(props->GetOptionFontColorSetByUserValue(false));
+    selectPattern->SetOptionTextModifierByUser(selectTheme, props);
+    EXPECT_FALSE(selectPattern->optionFont_.FontColor.has_value());
+
+    /**
+     * @tc.steps: step3. Disable user-defined font color flag, call SetOptionTextModifierByUser.
+     * @tc.expected: step3. Option font color in selectPattern is set to theme green.
+     */
+    selectModelInstance.SetOptionFontColorByUser(false);
+    EXPECT_FALSE(props->GetOptionFontColorSetByUserValue(false));
+    selectPattern->SetOptionTextModifierByUser(selectTheme, props);
+    EXPECT_TRUE(selectPattern->optionFont_.FontColor.has_value());
+    EXPECT_EQ(selectPattern->optionFont_.FontColor, Color::GREEN);
+}
+
+/**
+ * @tc.name: SetSelectedOptionTextModifierByUser
+ * @tc.desc: Test SelectPattern SetSelectedOptionTextModifierByUser.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelectedOptionTextModifierByUser, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node.
+     * @tc.expected: step1. Select model and frame node are created successfully, related objects are obtained.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+    auto applySelectedFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        ASSERT_NE(textNode, nullptr);
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateTextColor(Color::BLUE);
+    };
+    selectTheme->selectedColorText_ = Color::GREEN;
+    selectPattern->textSelectOptionApply_ = applySelectedFunc;
+    auto optionSelected = selectPattern->options_[0];
+    ASSERT_NE(optionSelected, nullptr);
+    auto menuItemSelectedPattern = optionSelected->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemSelectedPattern, nullptr);
+    auto textSelected = menuItemSelectedPattern->text_;
+    ASSERT_NE(textSelected, nullptr);
+    /**
+     * @tc.steps: step2. Enable user-defined selected font color flag, disable text modifier flag.
+     * @tc.expected: step2. Selected font color in selectPattern is not set, text node color is not blue.
+     */
+    selectModelInstance.SetSelectedOptionFontColorByUser(true);
+    EXPECT_TRUE(props->GetSelectedOptionFontColorSetByUserValue(false));
+    props->UpdateSelectedOptionTextModifierSetByUser(false);
+    EXPECT_FALSE(props->GetSelectedOptionTextModifierSetByUserValue(false));
+    selectPattern->SetSelectedOptionTextModifierByUser(selectTheme, props);
+    EXPECT_FALSE(selectPattern->selectedFont_.FontColor.has_value());
+    auto propertySelected = textSelected->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(propertySelected, nullptr);
+    ASSERT_NE(propertySelected->GetTextColor(), Color::BLUE);
+
+    /**
+     * @tc.steps: step3. Enable both user-defined selected font color flag and text modifier flag.
+     * @tc.expected: step3. Selected font color in selectPattern is still not set.
+     */
+    props->UpdateSelectedOptionTextModifierSetByUser(true);
+    EXPECT_TRUE(props->GetSelectedOptionTextModifierSetByUserValue(false));
+    selectPattern->SetSelectedOptionTextModifierByUser(selectTheme, props);
+    EXPECT_FALSE(selectPattern->selectedFont_.FontColor.has_value());
+
+    /**
+     * @tc.steps: step4. Disable user-defined selected font color flag, call SetSelectedOptionTextModifierByUser.
+     * @tc.expected: step4. Selected font color in selectPattern is set to theme green.
+     */
+    selectModelInstance.SetSelectedOptionFontColorByUser(false);
+    EXPECT_FALSE(props->GetSelectedOptionFontColorSetByUserValue(false));
+    selectPattern->SetSelectedOptionTextModifierByUser(selectTheme, props);
+    EXPECT_TRUE(selectPattern->selectedFont_.FontColor.has_value());
+    EXPECT_EQ(selectPattern->selectedFont_.FontColor, Color::GREEN);
+}
+
+/**
+ * @tc.name: SetArrowModifierByUser
+ * @tc.desc: Test SelectPattern SetArrowModifierByUser.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetArrowModifierByUser, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node.
+     * @tc.expected: step1. Select model and frame node are created successfully, related objects are obtained.
+     */
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    EXPECT_TRUE(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN));
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+
+    auto applyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto symbolNode = weakNode.Upgrade();
+        ASSERT_NE(symbolNode, nullptr);
+        auto property = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateFontSize(Dimension(80));
+    };
+    selectPattern->arrowApply_ = applyFunc;
+
+    /**
+     * @tc.steps: step2. Disable arrow modifier flag, call SetArrowModifierByUser.
+     * @tc.expected: step2. Arrow font size is not updated to 80.
+     */
+    props->UpdateArrowModifierSetByUser(false);
+    EXPECT_FALSE(props->GetArrowModifierSetByUserValue(false));
+    selectPattern->SetArrowModifierByUser(selectTheme, props);
+    auto frameNode = selectPattern->spinner_;
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::SYMBOL_ETS_TAG);
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    ASSERT_NE(property->GetFontSize(), Dimension(80));
+
+    /**
+     * @tc.steps: step3. Enable arrow modifier flag, call SetArrowModifierByUser.
+     * @tc.expected: step3. Arrow font size is updated to 80.
+     */
+    props->UpdateArrowModifierSetByUser(true);
+    EXPECT_TRUE(props->GetArrowModifierSetByUserValue(false));
+    selectPattern->SetArrowModifierByUser(selectTheme, props);
+    EXPECT_EQ(property->GetFontSize(), Dimension(80));
+}
+
+/**
+ * @tc.name: SetModifierByUser001
+ * @tc.desc: Test SelectPattern SetModifierByUser.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetModifierByUser001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node, obtain related objects.
+     * @tc.expected: step1. Select model and frame node are created successfully, related objects are obtained.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+    auto layoutProps = select->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(layoutProps, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+    selectTheme->selectedColor_ = Color::GREEN;
+    /**
+     * @tc.steps: step2. Show default selected icon, enable user-defined selected background color flag.
+     * @tc.expected: step2. Selected background color in selectPattern is not set.
+     */
+    selectModelInstance.SetShowDefaultSelectedIcon(true);
+    EXPECT_TRUE(layoutProps->GetShowDefaultSelectedIconValue(false));
+    selectModelInstance.SetSelectedOptionBgColorByUser(true);
+    EXPECT_TRUE(props->GetSelectedOptionBgColorSetByUserValue(false));
+    selectPattern->SetSelectedOptionBgColorByUser(selectTheme, props, layoutProps);
+    selectPattern->SetModifierByUser(selectTheme, props);
+    EXPECT_FALSE(selectPattern->selectedBgColor_.has_value());
+
+    /**
+     * @tc.steps: step3. Hide default selected icon, enable user-defined selected background color flag.
+     * @tc.expected: step3. Selected background color in selectPattern is not set.
+     */
+    selectModelInstance.SetShowDefaultSelectedIcon(false);
+    EXPECT_FALSE(layoutProps->GetShowDefaultSelectedIconValue(false));
+    selectModelInstance.SetSelectedOptionBgColorByUser(true);
+    EXPECT_TRUE(props->GetSelectedOptionBgColorSetByUserValue(false));
+    selectPattern->SetSelectedOptionBgColorByUser(selectTheme, props, layoutProps);
+    selectPattern->SetModifierByUser(selectTheme, props);
+    EXPECT_FALSE(selectPattern->selectedBgColor_.has_value());
+
+    /**
+     * @tc.steps: step4. Show default selected icon, disable user-defined selected background color flag.
+     * @tc.expected: step4. Selected background color in selectPattern is not set.
+     */
+    selectModelInstance.SetShowDefaultSelectedIcon(true);
+    EXPECT_TRUE(layoutProps->GetShowDefaultSelectedIconValue(false));
+    selectModelInstance.SetSelectedOptionBgColorByUser(false);
+    EXPECT_FALSE(props->GetSelectedOptionBgColorSetByUserValue(false));
+    selectPattern->SetSelectedOptionBgColorByUser(selectTheme, props, layoutProps);
+    selectPattern->SetModifierByUser(selectTheme, props);
+    EXPECT_FALSE(selectPattern->selectedBgColor_.has_value());
+
+    /**
+     * @tc.steps: step5. Hide default selected icon, disable user-defined selected background color flag.
+     * @tc.expected: step5. Selected background color in selectPattern is set to theme green.
+     */
+    selectModelInstance.SetShowDefaultSelectedIcon(false);
+    EXPECT_FALSE(layoutProps->GetShowDefaultSelectedIconValue(false));
+    selectModelInstance.SetSelectedOptionBgColorByUser(false);
+    EXPECT_FALSE(props->GetSelectedOptionBgColorSetByUserValue(false));
+    selectPattern->SetSelectedOptionBgColorByUser(selectTheme, props, layoutProps);
+    selectPattern->SetModifierByUser(selectTheme, props);
+    EXPECT_TRUE(selectPattern->selectedBgColor_.has_value());
+    EXPECT_EQ(selectPattern->selectedBgColor_, Color::GREEN);
+}
+
+/**
+ * @tc.name: SetModifierByUser002
+ * @tc.desc: Test SelectPattern SetModifierByUser.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetModifierByUser002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node, obtain related objects.
+     * @tc.expected: step1. Select model and frame node are created successfully, related objects are obtained.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+    auto layoutProps = select->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(layoutProps, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+
+    auto frameNode = selectPattern->text_;
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetMaxLines(), 1);
+
+    auto applyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        ASSERT_NE(textNode, nullptr);
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateMaxLines(2);
+        property->UpdateFontSize(Dimension(80));
+    };
+    selectPattern->fontColor_ = Color::GREEN;
+    selectPattern->textApply_ = applyFunc;
+    /**
+     * @tc.steps: step2. Enable user-defined font color flag, disable text modifier flag, call SetModifierByUser.
+     * @tc.expected: step2. Font color remains green, max lines remains 1.
+     */
+    selectModelInstance.SetFontColorByUser(true);
+    EXPECT_TRUE(props->GetFontColorSetByUserValue(false));
+    props->UpdateTextModifierSetByUser(false);
+    EXPECT_FALSE(props->GetTextModifierSetByUserValue(false));
+    selectPattern->SetModifierByUser(selectTheme, props);
+    EXPECT_EQ(selectPattern->fontColor_, Color::GREEN);
+    EXPECT_EQ(property->GetMaxLines(), 1);
+
+    /**
+     * @tc.steps: step3. Enable both user-defined font color flag and text modifier flag, call SetModifierByUser.
+     * @tc.expected: step3. Font color remains green, max lines is updated to 2.
+     */
+    selectModelInstance.SetFontColorByUser(true);
+    EXPECT_TRUE(props->GetFontColorSetByUserValue(false));
+    props->UpdateTextModifierSetByUser(true);
+    EXPECT_TRUE(props->GetTextModifierSetByUserValue(false));
+    selectPattern->SetModifierByUser(selectTheme, props);
+    EXPECT_EQ(selectPattern->fontColor_, Color::GREEN);
+    EXPECT_EQ(property->GetMaxLines(), 2);
+
+    /**
+     * @tc.steps: step4. Disable user-defined font color flag, call SetModifierByUser.
+     * @tc.expected: step4. Font color is no longer green.
+     */
+    selectModelInstance.SetFontColorByUser(false);
+    EXPECT_FALSE(props->GetFontColorSetByUserValue(false));
+    selectPattern->SetModifierByUser(selectTheme, props);
+    ASSERT_NE(selectPattern->fontColor_, Color::GREEN);
+}
+
+/**
+ * @tc.name: SetOptionBgColorByUser001
+ * @tc.desc: Test SetOptionBgColorByUser func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetOptionBgColorByUser001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select pattern and gesture hub
+     */
+    auto select = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+    selectPattern->options_.push_back(option);
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto paintProperty = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateOptionBgColorSetByUser(true);
+    selectPattern->SetOptionBgColorByUser(Color::BLACK, paintProperty);
+    ASSERT_NE(selectPattern->options_[0], nullptr);
+    auto itemPaintProperty = selectPattern->options_[0]->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(itemPaintProperty, nullptr);
+    ASSERT_EQ(itemPaintProperty->GetOptionBgColor().has_value(), false);
+}
 } // namespace OHOS::Ace::NG

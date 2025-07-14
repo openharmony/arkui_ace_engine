@@ -83,7 +83,7 @@ public:
     void OnColorConfigurationUpdate() override;
     void DumpInfo() override;
     
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void OnVisibleChange(bool isVisible) override;
     void OnWindowHide() override;

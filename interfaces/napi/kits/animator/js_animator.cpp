@@ -1196,11 +1196,12 @@ void AnimatorResult::ApplyOption()
 void AnimatorResult::Destroy(napi_env env)
 {
     if (animator_) {
-        if (!animator_->IsStopped()) {
+        if (animator_->IsRunning()) {
             animator_->Stop();
             TAG_LOGI(AceLogTag::ACE_ANIMATION, "jsAnimator force stopping done when destroying, id:%{public}d",
                 animator_->GetId());
         }
+        animator_ = nullptr;
     }
     if (onframe_ != nullptr) {
         napi_delete_reference(env, onframe_);

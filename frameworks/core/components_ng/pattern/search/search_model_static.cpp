@@ -258,7 +258,7 @@ void SearchModelStatic::SetPlaceholderColor(FrameNode* frameNode, const std::opt
         SearchModelNG::SetPlaceholderColor(frameNode, optColor.value());
         return;
     }
-    TextFieldModelNG::ResetPlaceholderColor(frameNode);
+    SearchModelNG::ResetPlaceholderColor(frameNode);
 }
 
 void SearchModelStatic::SetCaretWidth(FrameNode* frameNode, const std::optional<Dimension>& value)

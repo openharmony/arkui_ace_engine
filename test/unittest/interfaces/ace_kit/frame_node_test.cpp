@@ -228,7 +228,6 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest007, TestSize.Level1)
     EXPECT_NE(frameNode->GetParentHandle(), nullptr);
 }
 
-
 /**
  * @tc.name: FrameNodeTestTest008
  * @tc.desc:
@@ -338,7 +337,7 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest102, TestSize.Level1)
     /**
      * @tc.steps2: set function callback, validate result.
      */
-    frameNodeImpl->SetMeasureCallback([](RefPtr<FrameNode> node)->void {});
+    frameNodeImpl->SetMeasureCallback([](RefPtr<FrameNode> node) -> void {});
     auto node = frameNodeImpl->PopAceNode();
     EXPECT_NE(node->measureCallback_, nullptr);
 }
@@ -364,7 +363,7 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest103, TestSize.Level1)
     /**
      * @tc.steps2: set function callback, validate result.
      */
-    frameNodeImpl->SetOnNodeDestroyCallback([](RefPtr<FrameNode> node)->void {});
+    frameNodeImpl->SetOnNodeDestroyCallback([](RefPtr<FrameNode> node) -> void {});
     auto node = frameNodeImpl->PopAceNode();
     EXPECT_NE(node->destroyCallback_, nullptr);
 }
@@ -390,8 +389,7 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest104, TestSize.Level1)
     /**
      * @tc.steps2: set function callback, validate result.
      */
-    frameNodeImpl->SetConfigurationUpdateCallback([](
-        const ConfigurationChange& configurationChange)->void {});
+    frameNodeImpl->SetConfigurationUpdateCallback([](const ConfigurationChange& configurationChange) -> void {});
     auto node = frameNodeImpl->PopAceNode();
     EXPECT_NE(node->configurationUpdateCallback_, nullptr);
 }
@@ -450,8 +448,8 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest106, TestSize.Level1)
     node->OnWindowFocused();
     node->OnWindowUnfocused();
 
-    NG::OnAreaChangedFunc callback = [](const NG::RectF& oldRect,
-        const NG::OffsetF& oldOrigin, const NG::RectF& rect, const NG::OffsetF& origin) {};
+    NG::OnAreaChangedFunc callback = [](const NG::RectF& oldRect, const NG::OffsetF& oldOrigin, const NG::RectF& rect,
+                                         const NG::OffsetF& origin) {};
     node->SetOnAreaChangeCallback(std::move(callback));
     EXPECT_NE(node->lastFrameRect_, nullptr);
     EXPECT_NE(node->lastParentOffsetToWindow_, nullptr);
@@ -479,8 +477,8 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest107, TestSize.Level1)
      * @tc.steps2: build a object to SetOnAreaChangeCallback.
      */
     auto node = frameNodeImpl->PopAceNode();
-    NG::OnAreaChangedFunc callback = [](const NG::RectF& oldRect, const NG::OffsetF& oldOrigin,
-        const NG::RectF& rect, const NG::OffsetF& origin) {};
+    NG::OnAreaChangedFunc callback = [](const NG::RectF& oldRect, const NG::OffsetF& oldOrigin, const NG::RectF& rect,
+                                         const NG::OffsetF& origin) {};
     node->lastFrameRect_ = std::make_unique<NG::RectF>();
     node->SetOnAreaChangeCallback(std::move(callback));
     EXPECT_NE(node->lastFrameRect_, nullptr);

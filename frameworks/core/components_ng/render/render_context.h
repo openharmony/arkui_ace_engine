@@ -51,7 +51,7 @@ class DrawCmdList;
 class VisualEffect;
 class Filter;
 enum class Gravity;
-class BrightnessBlender;
+class Blender;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
@@ -348,7 +348,7 @@ public:
     virtual void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {}
     virtual void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {}
     virtual void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {}
-    virtual void UpdateBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) {}
+    virtual void UpdateBlender(const OHOS::Rosen::Blender* blender) {}
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
     virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
@@ -463,7 +463,7 @@ public:
 
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
-    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
+    virtual void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
 

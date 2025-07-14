@@ -157,6 +157,7 @@ private:
 
     int32_t count_ = 1;
     Dimension distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
+    double userDT_ = 0.0;
 
     // number of tap action.
     int32_t tappedCount_ = 0;

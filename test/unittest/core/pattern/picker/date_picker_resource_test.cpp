@@ -152,9 +152,79 @@ HWTEST_F(DatePickerResourceTest, UpdateDisappearTextStyle001, TestSize.Level1)
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->UpdateDisappearTextStyle(textStyle);
-    
+
     EXPECT_EQ(pickerProperty->GetDisappearColor().value(), Color::GREEN);
     EXPECT_EQ(pickerProperty->GetDisappearFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
+}
+
+/**
+ * @tc.name: UpdateNormalTextStyle001
+ * @tc.desc: Test DatePickerPattern UpdateNormalTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerResourceTest, UpdateNormalTextStyle001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE);
+    DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetFontSize().value(), Dimension(TEST_FONT_SIZE));
+
+    textStyle.textColor = Color::GREEN;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE + 1);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->UpdateNormalTextStyle(textStyle);
+
+    EXPECT_EQ(pickerProperty->GetColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
+}
+
+/**
+ * @tc.name: UpdateSelectedTextStyle001
+ * @tc.desc: Test DatePickerPattern UpdateSelectedTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerResourceTest, UpdateSelectedTextStyle001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE);
+    DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetSelectedColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetSelectedFontSize().value(), Dimension(TEST_FONT_SIZE));
+
+    textStyle.textColor = Color::GREEN;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE + 1);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->UpdateSelectedTextStyle(textStyle);
+
+    EXPECT_EQ(pickerProperty->GetSelectedColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetSelectedFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
 }
 
 } // namespace OHOS::Ace::NG

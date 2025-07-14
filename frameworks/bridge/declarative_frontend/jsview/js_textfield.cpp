@@ -1434,13 +1434,12 @@ void JSTextField::SetShowUnderline(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetShowUnderline(jsValue->ToBoolean());
 }
 
-void JSTextField::SetUnderlineColorObject(const JSRef<JSVal>& jsValue)
+void JSTextField::SetUnderlineColorObject(const JSRef<JSObject>& param)
 {
     UnregisterResource("underlineColorTyping");
     UnregisterResource("underlineColorNormal");
     UnregisterResource("underlineColorError");
     UnregisterResource("underlineColorDisable");
-    auto param = JSRef<JSObject>::Cast(jsValue);
     UserUnderlineColor userColor = UserUnderlineColor();
     auto typingColorProp = param->GetProperty("typing");
     Color typing;
@@ -1497,7 +1496,7 @@ void JSTextField::SetUnderlineColor(const JSCallbackInfo& info)
             UnregisterResource("underlineColorNormal");
         }
     } else if (jsValue->IsObject()) {
-        SetUnderlineColorObject(jsValue);
+        SetUnderlineColorObject(JSRef<JSObject>::Cast(jsValue));
     } else {
         TextFieldModel::GetInstance()->SetUserUnderlineColor(UserUnderlineColor());
         if (SystemProperties::ConfigChangePerform()) {

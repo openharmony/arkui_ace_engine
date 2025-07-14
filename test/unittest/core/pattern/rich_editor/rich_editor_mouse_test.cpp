@@ -1207,4 +1207,54 @@ HWTEST_F(RichEditorMouseTest, AdjustMouseLocalOffset, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
 }
 
+/**
+ * @tc.name: HandleImageHoverEventTest001
+ * @tc.desc: test HandleImageHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, HandleImageHoverEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::MOVE);
+    mouseInfo.SetLocalLocation(MOUSE_LOCAL_LOCATION);
+    richEditorPattern->isMousePressed_ = false;
+    OffsetF frameOffset{ 0.0f, 0.0f };
+    SizeF frameSize{ 10.0f, 10.0f };
+
+    WeakPtr<ImageSpanNode> hoverableNode1;
+
+    auto imageSpanNode2 = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 0);
+    WeakPtr<ImageSpanNode> hoverableNode2 = imageSpanNode2;
+
+    auto imageSpanNode3 = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 0);
+    imageSpanNode3->SetImageItem(nullptr);
+    WeakPtr<ImageSpanNode> hoverableNode3 = imageSpanNode3;
+    
+    auto imageSpanNode4 = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 0);
+    imageSpanNode4->GetSpanItem()->onHover_ = [](bool inHover, HoverInfo& info) {};
+    WeakPtr<ImageSpanNode> hoverableNode4 = imageSpanNode4;
+    
+    auto imageSpanNode5 = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 0);
+    imageSpanNode5->GetSpanItem()->onHover_ = [](bool inHover, HoverInfo& info) {};
+    imageSpanNode5->GetGeometryNode()->SetFrameOffset(frameOffset);
+    imageSpanNode5->GetGeometryNode()->SetFrameSize(frameSize);
+    WeakPtr<ImageSpanNode> hoverableNode5 = imageSpanNode5;
+
+    richEditorPattern->hoverableNodes.push_back(hoverableNode1);
+    richEditorPattern->hoverableNodes.push_back(hoverableNode2);
+    richEditorPattern->hoverableNodes.push_back(hoverableNode3);
+    richEditorPattern->hoverableNodes.push_back(hoverableNode4);
+    richEditorPattern->hoverableNodes.push_back(hoverableNode5);
+
+    richEditorPattern->lastHoverSpanItem_ = nullptr;
+    richEditorPattern->HandleImageHoverEvent(mouseInfo);
+
+    richEditorPattern->lastHoverSpanItem_ = imageSpanNode4->GetSpanItem();
+    richEditorPattern->HandleImageHoverEvent(mouseInfo);
+}
+
 }

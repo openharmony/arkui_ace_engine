@@ -1589,17 +1589,20 @@ HWTEST_F(BaseUtilsTest, StringExpressionTest007, TestSize.Level1)
 {
     // replace sign number with unit with formula == ""
     std::string formula = "";
-    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
     EXPECT_EQ(formula, "");
     EXPECT_EQ(ret.size(), 0);
 
     // replace sign number with unit normal case
     formula = "+1.1px";
-    std::vector<std::string> ret2 = StringExpression::ConvertDal2Rpn(formula);
+    std::vector<std::string> ret2;
+    StringExpression::ConvertDal2Rpn(formula, ret2);
     EXPECT_EQ(ret2.size(), 0);
 
     formula = "calc(2 * 3 - (2 + 3) / 5 + 6 / 2 + (1 + 2))";
-    std::vector<std::string> ret3 = StringExpression::ConvertDal2Rpn(formula);
+    std::vector<std::string> ret3;
+    StringExpression::ConvertDal2Rpn(formula, ret3);
     EXPECT_EQ(ret3.size(), 17);
 }
 
@@ -1755,7 +1758,8 @@ HWTEST_F(BaseUtilsTest, StringExpressionTest019, TestSize.Level1)
 HWTEST_F(BaseUtilsTest, StringExpressionTest020, TestSize.Level1)
 {
     std::string formula = "2+3*(4";
-    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
     EXPECT_EQ(ret.size(), 0);
 }
 
@@ -1768,7 +1772,8 @@ HWTEST_F(BaseUtilsTest, StringExpressionTest021, TestSize.Level1)
 {
     std::string formula = "calc(-2.5 + 3.1)";
     std::vector<std::string> expected = {"0", "2.5", "-", "3.1", "+"};
-    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
     EXPECT_EQ(ret, expected);
 }
 
@@ -1780,7 +1785,8 @@ HWTEST_F(BaseUtilsTest, StringExpressionTest021, TestSize.Level1)
 HWTEST_F(BaseUtilsTest, StringExpressionTest022, TestSize.Level1)
 {
     std::string formula = "3 + + 4";
-    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
     EXPECT_EQ(ret.size(), 0);
 }
 
@@ -1793,7 +1799,8 @@ HWTEST_F(BaseUtilsTest, StringExpressionTest023, TestSize.Level1)
 {
     std::string formula = "calc(1 + 2#3)";
     std::vector<std::string> expected = { "1", "2#3", "+" };
-    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
     EXPECT_EQ(ret, expected);
 }
 
@@ -1806,7 +1813,8 @@ HWTEST_F(BaseUtilsTest, StringExpressionTest024, TestSize.Level1)
 {
     std::string formula = "calc(-5 + 3 * -2)";
     std::vector<std::string> expected = { "0", "5", "-", "3", "0", "2", "-", "*", "+" };
-    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
     EXPECT_EQ(ret, expected);
 }
 
@@ -1819,7 +1827,8 @@ HWTEST_F(BaseUtilsTest, StringExpressionTest025, TestSize.Level1)
 {
     std::string formula = "calc(+10px)";
     std::vector<std::string> expected = { "0px", "10px", "+" };
-    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
     EXPECT_EQ(ret, expected);
 }
 
@@ -1832,7 +1841,8 @@ HWTEST_F(BaseUtilsTest, StringExpressionTest026, TestSize.Level1)
 {
     std::string formula = "calc( 2 * ( 3 % 2 + 4 ))";
     std::vector<std::string> expected = {"2", "3%2", "4", "+", "*"};
-    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    std::vector<std::string> ret;
+    StringExpression::ConvertDal2Rpn(formula, ret);
     EXPECT_EQ(ret, expected);
 }
 

@@ -1009,7 +1009,7 @@ void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("CanvasModifier", contentModifier_->GetDumpInfo().c_str());
 }
 
-void CanvasPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+void CanvasPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(paintMethod_);
     auto jsonMethod = JsonUtil::Create();

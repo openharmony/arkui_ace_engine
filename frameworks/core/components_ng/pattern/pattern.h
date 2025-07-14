@@ -67,7 +67,7 @@ public:
 private:
     std::function<void()> callback_;
 };
- 
+
 // Pattern is the base class for different measure, layout and paint behavior.
 class ACE_FORCE_EXPORT Pattern : public virtual AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
@@ -134,26 +134,6 @@ public:
     }
 
     virtual bool IsEnableFix()
-    {
-        return false;
-    }
-
-    virtual bool IsContentNoEnabledFixed()
-    {
-        return false;
-    }
-
-    virtual bool isEqualWidthAndHeight()
-    {
-        return false;
-    }
-
-    virtual bool IsChildComponentContent()
-    {
-        return false;
-    }
-
-    virtual bool IsChildColumnLayout()
     {
         return false;
     }
@@ -433,6 +413,7 @@ public:
     virtual void DumpAdvanceInfo() {}
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
+    virtual void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
     virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) {}
@@ -561,7 +542,7 @@ public:
     {
         return false;
     }
-    
+
     virtual void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
 

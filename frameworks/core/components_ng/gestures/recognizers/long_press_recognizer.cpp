@@ -299,6 +299,11 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
             return;
         }
     }
+    if (CheckLimitFinger()) {
+        extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
     if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press reject as judge result is reject");
@@ -309,10 +314,6 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
             CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->SetIsDragUserReject(true);
         }
-        return;
-    }
-    if (CheckLimitFinger()) {
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
     Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
@@ -567,6 +568,27 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
         return GestureJudgeResult::CONTINUE;
     }
     auto info = std::make_shared<LongPressGestureEvent>();
+    UpdateGestureEventInfo(info);
+    if (gestureInfo_) {
+        gestureInfo_->SetInputEventType(inputEventType_);
+    }
+    if (gestureRecognizerJudgeFunc &&
+        gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_) == GestureJudgeResult::REJECT) {
+        return GestureJudgeResult::REJECT;
+    }
+    if (!gestureRecognizerJudgeFunc && callback && callback(gestureInfo_, info) == GestureJudgeResult::REJECT) {
+        // If outer callback exits, prioritize checking outer callback. If outer reject, return reject.
+        return GestureJudgeResult::REJECT;
+    }
+    if (callbackNative && callbackNative(gestureInfo_, info) == GestureJudgeResult::REJECT) {
+        // If outer callback doesn't exit or accept, check inner callback. If inner reject, return reject.
+        return GestureJudgeResult::REJECT;
+    }
+    return GestureJudgeResult::CONTINUE;
+}
+
+void LongPressRecognizer::UpdateGestureEventInfo(std::shared_ptr<LongPressGestureEvent>& info)
+{
     info->SetTimeStamp(time_);
     info->SetDeviceId(deviceId_);
     info->SetRepeat(repeat_);
@@ -578,9 +600,6 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(trackPoint.force);
-    if (gestureInfo_) {
-        gestureInfo_->SetInputEventType(inputEventType_);
-    }
     if (trackPoint.tiltX.has_value()) {
         info->SetTiltX(trackPoint.tiltX.value());
     }
@@ -595,19 +614,7 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
     info->SetLastAction(lastAction_);
-    if (gestureRecognizerJudgeFunc &&
-        gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_) == GestureJudgeResult::REJECT) {
-        return GestureJudgeResult::REJECT;
-    }
-    if (!gestureRecognizerJudgeFunc && callback && callback(gestureInfo_, info) == GestureJudgeResult::REJECT) {
-        // If outer callback exits, prioritize checking outer callback. If outer reject, return reject.
-        return GestureJudgeResult::REJECT;
-    }
-    if (callbackNative && callbackNative(gestureInfo_, info) == GestureJudgeResult::REJECT) {
-        // If outer callback doesn't exit or accept, check inner callback. If inner reject, return reject.
-        return GestureJudgeResult::REJECT;
-    }
-    return GestureJudgeResult::CONTINUE;
+    info->SetPressedKeyCodes(trackPoint.pressedKeyCodes_);
 }
 
 RefPtr<DragEventActuator> LongPressRecognizer::GetDragEventActuator()

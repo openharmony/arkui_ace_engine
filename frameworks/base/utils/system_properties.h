@@ -414,6 +414,11 @@ public:
         return buildTraceEnable_;
     }
 
+    static bool GetDynamicDetectionTraceEnabled()
+    {
+        return dynamicDetectionTraceEnable_;
+    }
+
     static bool GetCacheNavigationNodeEnable();
 
     static bool GetAccessibilityEnabled()
@@ -773,6 +778,7 @@ private:
     static std::atomic<bool> layoutTraceEnable_;
     static std::atomic<bool> traceInputEventEnable_;
     static bool buildTraceEnable_;
+    static bool dynamicDetectionTraceEnable_;
     static bool cacheNavigationNodeEnable_;
     static bool syncDebugTraceEnable_;
     static bool measureDebugTraceEnable_;

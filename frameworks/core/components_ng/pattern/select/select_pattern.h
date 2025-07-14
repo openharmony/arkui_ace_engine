@@ -53,6 +53,11 @@ public:
         return true;
     }
 
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -251,10 +256,11 @@ public:
     void DumpInfo() override;
 
     void UpdateComponentColor(const Color& color, const SelectColorType selectColorType);
-    void SetColorByUser(const RefPtr<FrameNode>& host);
+    void SetColorByUser(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme);
     void UpdateMenuOption(int32_t index, const std::string& value, const SelectOptionType optionType);
-    void SetModifierByUser(const RefPtr<FrameNode>& frameNode, const RefPtr<SelectPaintProperty>& props,
-        const RefPtr<SelectLayoutProperty>& layoutProps);
+    void SetMenuBackgroundColorByUser(const Color& color, const RefPtr<SelectPaintProperty>& props);
+    void SetModifierByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
+    void SetOptionBgColorByUser(const Color& color, const RefPtr<SelectPaintProperty>& props);
 
 private:
     void OnAttachToFrameNode() override;
@@ -270,6 +276,12 @@ private:
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
     void UpdateMenuScrollColorConfiguration(const RefPtr<FrameNode>& menuNode);
+    void SetOptionTextModifierByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
+    void SetSelectedOptionTextModifierByUser(
+        const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
+    void SetArrowModifierByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
+    void SetSelectedOptionBgColorByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props,
+        const RefPtr<SelectLayoutProperty>& layoutProps);
     bool HasRowNode() const
     {
         return rowId_.has_value();
@@ -395,6 +407,7 @@ private:
     std::function<void(WeakPtr<NG::FrameNode>)> textApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> textOptionApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> textSelectOptionApply_ = nullptr;
+    std::optional<Color> menuBackgroundColor_;
 };
 
 } // namespace OHOS::Ace::NG

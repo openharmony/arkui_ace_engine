@@ -103,7 +103,7 @@ void TabBarPattern::SetController(const RefPtr<SwiperController>& controller)
     tabsController->SetTabBarTranslateImpl([weak](const TranslateOptions& options) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->SetTabBarTranslate(options);
+        pattern->SetTabBarTranslate(options, true);
     });
     tabsController->SetTabBarOpacityImpl([weak](float opacity) {
         auto pattern = weak.Upgrade();
@@ -162,11 +162,14 @@ void TabBarPattern::StartShowTabBarImmediately()
 
     auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     auto translate = options.y.ConvertToPx();
+    if (NearEqual(translate, userDefinedTranslateY_)) {
+        return;
+    }
     tabBarProperty_->Set(translate);
     auto propertyCallback = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->tabBarProperty_->Set(0.0f);
+        pattern->tabBarProperty_->Set(pattern->GetUserDefinedTranslateY());
     };
     auto finishCallback = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -328,13 +331,16 @@ void TabBarPattern::UpdateTabBarHiddenOffset(float offset)
     }
 }
 
-void TabBarPattern::SetTabBarTranslate(const TranslateOptions& options)
+void TabBarPattern::SetTabBarTranslate(const TranslateOptions& options, bool isUserDefined)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformTranslate(options);
+    if (isUserDefined) {
+        userDefinedTranslateY_ = options.y.ConvertToPx();
+    }
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsNode);
     auto divider = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());

@@ -644,6 +644,7 @@ void IndicatorPattern::UpdateDefaultColor()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto swiperIndicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
     if (swiperDigitalParameters_ && !swiperDigitalParameters_->parametersByUser.count("fontColor")) {

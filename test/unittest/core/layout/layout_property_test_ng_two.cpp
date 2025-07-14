@@ -1363,4 +1363,110 @@ HWTEST_F(LayoutPropertyTestNgTwo, UpdateIsMirrorable001, TestSize.Level1)
     auto isMirrorable1 = layoutProperty->GetPositionProperty()->GetIsMirrorable().value_or(false);
     EXPECT_EQ(isMirrorable1, false);
 }
+
+/**
+ * @tc.name: CheckCalcLayoutConstraintTest01
+ * @tc.desc: Test CheckCalcLayoutConstraint()
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckCalcLayoutConstraintTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layoutProperty and update calcConstraint
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->layoutConstraint_ = LayoutConstraintF();
+    MeasureProperty userConstraint = {
+        .minSize = CalcSize(CalcLength("calc(10%)"), CalcLength("calc(10%)")),
+        .maxSize = CalcSize(CalcLength("calc(90%)"), CalcLength("calc(90%)")),
+        .selfIdealSize = CalcSize(CalcLength("calc(50%)"), CalcLength("calc(50%)")),
+    };
+    layoutProperty->UpdateCalcLayoutProperty(userConstraint);
+    ASSERT_NE(layoutProperty->calcLayoutConstraint_, nullptr);
+    LayoutConstraintF parentConstraint = {
+        .scaleProperty = {.vpScale = 1.0, .fpScale = 1.0, .lpxScale = 1.0},
+        .percentReference = { 100, 100 }
+    };
+    layoutProperty->CheckCalcLayoutConstraint(parentConstraint);
+    /**
+     * @tc.expected: layoutConstraint_ has correct maxSize, minSize and selfIdealSize.
+     *               calcLayoutConstraint_ has cache for minSize, maxSize and selfIdealSize
+     */
+    EXPECT_EQ(layoutProperty->layoutConstraint_->maxSize, SizeF(90, 90))
+        << layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->minSize, SizeF(10, 10))
+        << layoutProperty->layoutConstraint_->minSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize, OptionalSizeF(50, 50))
+        << layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preMaxSize.has_value());
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preMinSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preMinSize,
+        CalcSize(CalcLength("calc(10%)"), CalcLength("calc(10%)")))
+        << layoutProperty->calcLayoutConstraint_->preMinSize.value().ToString();
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preMaxSize,
+        CalcSize(CalcLength("calc(90%)"), CalcLength("calc(90%)")))
+        << layoutProperty->calcLayoutConstraint_->preMaxSize.value().ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preSelfIdealSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preSelfIdealSize,
+        CalcSize(CalcLength("calc(50%)"), CalcLength("calc(50%)")))
+        << layoutProperty->calcLayoutConstraint_->preSelfIdealSize.value().ToString();
+}
+
+/**
+ * @tc.name: CheckCalcLayoutConstraintTest02
+ * @tc.desc: Test CheckCalcLayoutConstraint()
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckCalcLayoutConstraintTest02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layoutProperty and update calcConstraint
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->layoutConstraint_ = LayoutConstraintF();
+    MeasureProperty userConstraint = {
+        .minSize = CalcSize(CalcLength("calc(10%)"), CalcLength("calc(10%)")),
+        .maxSize = CalcSize(CalcLength("calc(90%)"), CalcLength("calc(90%)")),
+        .selfIdealSize = CalcSize(CalcLength("calc(50%)"), CalcLength("calc(50%)")),
+    };
+    layoutProperty->UpdateCalcLayoutProperty(userConstraint);
+    ASSERT_NE(layoutProperty->calcLayoutConstraint_, nullptr);
+    LayoutConstraintF parentConstraint = {
+        .scaleProperty = {.vpScale = 1.0, .fpScale = 1.0, .lpxScale = 1.0},
+        .percentReference = { 100, 100 }
+    };
+    layoutProperty->CheckCalcLayoutConstraint(parentConstraint);
+    /**
+     * @tc.steps: step2. layoutProperty update new calcConstraint
+     */
+    userConstraint = {
+        .minSize = CalcSize(CalcLength("calc(20%)"), CalcLength("calc(20%)")),
+        .maxSize = CalcSize(CalcLength("calc(80%)"), CalcLength("calc(80%)")),
+        .selfIdealSize = CalcSize(CalcLength("calc(40%)"), CalcLength("calc(40%)")),
+    };
+    layoutProperty->UpdateCalcLayoutProperty(userConstraint);
+    layoutProperty->CheckCalcLayoutConstraint(parentConstraint);
+    /**
+     * @tc.expected: layoutConstraint_ has correct maxSize, minSize and selfIdealSize.
+     *               calcLayoutConstraint_ has cache for minSize, maxSize and selfIdealSize
+     */
+    EXPECT_EQ(layoutProperty->layoutConstraint_->maxSize, SizeF(80, 80))
+        << layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->minSize, SizeF(20, 20))
+        << layoutProperty->layoutConstraint_->minSize.ToString();
+    EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize, OptionalSizeF(50, 50))
+        << layoutProperty->layoutConstraint_->maxSize.ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preMinSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preMinSize,
+        CalcSize(CalcLength("calc(20%)"), CalcLength("calc(20%)")))
+        << layoutProperty->calcLayoutConstraint_->preMinSize.value().ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preMaxSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preMaxSize,
+        CalcSize(CalcLength("calc(80%)"), CalcLength("calc(80%)")))
+        << layoutProperty->calcLayoutConstraint_->preMaxSize.value().ToString();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->preSelfIdealSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preSelfIdealSize,
+        CalcSize(CalcLength("calc(40%)"), CalcLength("calc(40%)")))
+        << layoutProperty->calcLayoutConstraint_->preSelfIdealSize.value().ToString();
+}
 }

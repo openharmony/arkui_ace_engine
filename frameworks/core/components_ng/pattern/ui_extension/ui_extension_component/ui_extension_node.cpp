@@ -74,7 +74,7 @@ HitTestResult UIExtensionNode::TouchTest(const PointF& globalPoint, const PointF
     auto eventManager = context->GetEventManager();
     CHECK_NULL_RETURN(eventManager, testResult);
     auto delegate = AceType::MakeRefPtr<UIExtensionTouchDelegate>(pattern);
-    eventManager->ReplaceTouchDelegate(touchRestrict.touchEvent.id, delegate);
+    eventManager->UpdateTouchDelegate(touchRestrict.touchEvent.id, delegate);
     return testResult;
 }
 } // namespace OHOS::Ace::NG

@@ -68,11 +68,14 @@ RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedData(napi_value napiValue)
 RefPtr<DataLoadParams> UdmfClientImpl::TransformDataLoadParams(napi_env env, napi_value napiValue)
 {
     UDMF::DataLoadParams dataLoadParams;
-    UDMF::DataLoadParamsNapi::Convert2NativeValue(env, napiValue, dataLoadParams);
-    auto udDataLoadParams = AceType::MakeRefPtr<DataLoadParamsImpl>();
-    CHECK_NULL_RETURN(udDataLoadParams, nullptr);
-    udDataLoadParams->SetDataLoadParams(std::make_shared<UDMF::DataLoadParams>(dataLoadParams));
-    return udDataLoadParams;
+    if (UDMF::DataLoadParamsNapi::Convert2NativeValue(env, napiValue, dataLoadParams)) {
+        auto udDataLoadParams = AceType::MakeRefPtr<DataLoadParamsImpl>();
+        CHECK_NULL_RETURN(udDataLoadParams, nullptr);
+        udDataLoadParams->SetDataLoadParams(std::make_shared<UDMF::DataLoadParams>(dataLoadParams));
+        return udDataLoadParams;
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "convert udmf data load params failed.");
+    return nullptr;
 }
 
 napi_value UdmfClientImpl::TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData)
@@ -165,8 +168,6 @@ int32_t UdmfClientImpl::SetDelayInfo(RefPtr<DataLoadParams> dataLoadParams, std:
 {
     CHECK_NULL_RETURN(dataLoadParams, UDMF::E_ERROR);
     auto& client = UDMF::UdmfClient::GetInstance();
-    UDMF::CustomOption udCustomOption;
-    udCustomOption.intention = UDMF::Intention::UD_INTENTION_DRAG;
     auto udDataLoadParams = AceType::DynamicCast<DataLoadParamsImpl>(dataLoadParams);
     CHECK_NULL_RETURN(udDataLoadParams, UDMF::E_ERROR);
     CHECK_NULL_RETURN(udDataLoadParams->GetDataLoadParams(), UDMF::E_ERROR);

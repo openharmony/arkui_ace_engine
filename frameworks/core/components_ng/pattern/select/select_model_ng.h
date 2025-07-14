@@ -158,12 +158,18 @@ public:
     static void SetArrowColor(FrameNode* frameNode, const Color& color);
     static void SetShowDefaultSelectedIcon(FrameNode* frameNode, bool show);
     static void SetColorStatus(FrameNode* frameNode, const SelectColorType& type);
-    void SetMenuBackgroundColorByUser(bool isFromModifier) override;
-    static void SetMenuBackgroundColorByUser(FrameNode* frameNode, bool isFromModifier);
-    void SetOptionFontColorByUser(bool isValidValue) override;
-    static void SetOptionFontColorByUser(FrameNode* frameNode, bool isValidValue);
-    void SetFontColorByUser(bool isValidValue) override;
-    static void SetFontColorByUser(FrameNode* frameNode, bool isValidValue);
+    void SetMenuBackgroundColorByUser(bool isValidValue = true) override;
+    static void SetMenuBackgroundColorByUser(FrameNode* frameNode, bool isValidValue = true);
+    void SetOptionFontColorByUser(bool isValidValue = true) override;
+    static void SetOptionFontColorByUser(FrameNode* frameNode, bool isValidValue = true);
+    void SetFontColorByUser(bool isValidValue = true) override;
+    static void SetFontColorByUser(FrameNode* frameNode, bool isValidValue = true);
+    void SetSelectedOptionFontColorByUser(bool isValidValue = true) override;
+    static void SetSelectedOptionFontColorByUser(FrameNode* frameNode, bool isValidValue = true);
+    void SetOptionBgColorByUser(bool isValidValue = true) override;
+    static void SetOptionBgColorByUser(FrameNode* frameNode, bool isValidValue = true);
+    void SetSelectedOptionBgColorByUser(bool isValidValue = true) override;
+    static void SetSelectedOptionBgColorByUser(FrameNode* frameNode, bool isValidValue = true);
 
 private:
     void AddResObjWithCallBack(

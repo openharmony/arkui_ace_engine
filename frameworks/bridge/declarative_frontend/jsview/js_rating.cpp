@@ -141,20 +141,34 @@ void JSRating::SetStarStyle(const JSCallbackInfo& info)
     auto getSecondaryUri = paramObject->GetProperty("secondaryUri");
     
     std::string backgroundUri;
-    ParseJsMedia(getBackgroundUri, backgroundUri);
+    RefPtr<ResourceObject> bgUriResObj;
+    ParseJsMedia(getBackgroundUri, backgroundUri, bgUriResObj);
     RatingModel::GetInstance()->SetBackgroundSrc(backgroundUri, backgroundUri.empty());
+    CreateWithResourceObj(bgUriResObj, RatingUriType::BACKGROUND_URI);
 
     std::string foregroundUri;
-    ParseJsMedia(getForegroundUri, foregroundUri);
+    RefPtr<ResourceObject> fgUriResObj;
+    ParseJsMedia(getForegroundUri, foregroundUri, fgUriResObj);
     RatingModel::GetInstance()->SetForegroundSrc(foregroundUri, foregroundUri.empty());
+    CreateWithResourceObj(fgUriResObj, RatingUriType::FOREGROUND_URI);
 
     std::string secondaryUri;
-    ParseJsMedia(getSecondaryUri, secondaryUri);
+    RefPtr<ResourceObject> secondaryUriResObj;
+    ParseJsMedia(getSecondaryUri, secondaryUri, secondaryUriResObj);
 
     if (secondaryUri.empty()) {
         RatingModel::GetInstance()->SetSecondarySrc(backgroundUri, backgroundUri.empty());
+        CreateWithResourceObj(bgUriResObj, RatingUriType::SECONDARY_URI);
     } else {
         RatingModel::GetInstance()->SetSecondarySrc(secondaryUri, false);
+        CreateWithResourceObj(secondaryUriResObj, RatingUriType::SECONDARY_URI);
+    }
+}
+
+void JSRating::CreateWithResourceObj(const RefPtr<ResourceObject>& resObj, const RatingUriType& ratingUriType)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        RatingModel::GetInstance()->CreateWithMediaResourceObj(resObj, ratingUriType);
     }
 }
 

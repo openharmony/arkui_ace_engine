@@ -348,7 +348,7 @@ public:
     void CheckContentNeedMeasure(const RefPtr<FrameNode>& node);
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void SetIsCustomAnimation(bool isCustom)
     {
         isCustomAnimation_ = isCustom;

@@ -7507,28 +7507,7 @@ Local<panda::ObjectRef> CommonBridge::CreateGestureEventInfo(
     EcmaVM* vm, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info)
 {
     auto obj = SetUniqueAttributes(vm, typeName, info);
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "timestamp"),
-        panda::NumberRef::New(vm, static_cast<double>(info->GetTimeStamp().time_since_epoch().count())));
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "source"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetSourceDevice())));
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, info->GetForce()));
-    if (info->GetTiltX().has_value()) {
-        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"), panda::NumberRef::New(vm, info->GetTiltX().value()));
-    }
-    if (info->GetTiltY().has_value()) {
-        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"), panda::NumberRef::New(vm, info->GetTiltY().value()));
-    }
-    if (info->GetRollAngle().has_value()) {
-        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
-            panda::NumberRef::New(vm, info->GetRollAngle().value()));
-    }
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetSourceTool())));
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "deviceId"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetDeviceId())));
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetTargetDisplayId())));
-
+    SetCommonAttributes(obj, vm, info);
     auto fingerArr = panda::ArrayRef::New(vm);
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
     std::list<FingerInfo> notTouchFingerList;
@@ -7552,7 +7531,37 @@ Local<panda::ObjectRef> CommonBridge::CreateGestureEventInfo(
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fingerList"), fingerArr);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, info));
     CreateFingerInfosInfo(vm, info, obj);
+    obj->SetNativePointerFieldCount(vm, 1);
+    obj->SetNativePointerField(vm, 0, static_cast<void*>(info.get()));
     return obj;
+}
+
+void CommonBridge::SetCommonAttributes(
+    Local<panda::ObjectRef>& obj, EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info)
+{
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "timestamp"),
+        panda::NumberRef::New(vm, static_cast<double>(info->GetTimeStamp().time_since_epoch().count())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "source"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetSourceDevice())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, info->GetForce()));
+    if (info->GetTiltX().has_value()) {
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"), panda::NumberRef::New(vm, info->GetTiltX().value()));
+    }
+    if (info->GetTiltY().has_value()) {
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"), panda::NumberRef::New(vm, info->GetTiltY().value()));
+    }
+    if (info->GetRollAngle().has_value()) {
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
+            panda::NumberRef::New(vm, info->GetRollAngle().value()));
+    }
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetSourceTool())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "deviceId"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetDeviceId())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetTargetDisplayId())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState));
 }
 
 Local<panda::ObjectRef> CommonBridge::CreateGestureEventInfo(EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info)

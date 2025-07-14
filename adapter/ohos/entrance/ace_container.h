@@ -664,7 +664,7 @@ public:
     }
 
     void SetToken(sptr<IRemoteObject>& token);
-    sptr<IRemoteObject> GetToken();
+    sptr<IRemoteObject> GetToken() override;
     void SetParentToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetParentToken();
     uint32_t GetParentWindowType() const;

@@ -55,6 +55,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float POSITION_FIVE = 5.0f;
 constexpr float RESULT_FIVE = 5.0f;
+constexpr float ARROW_HEIGHT = 8.0f;
 constexpr float RESULT_TEN = 10.0f;
 constexpr float BORDER_RADIUS_TEN = 10.0f;
 constexpr float MARGIN_START = 10.0f;
@@ -352,6 +353,8 @@ HWTEST_F(BubbleTestTwoNg, UpdateBubbleMaxSize001, TestSize.Level1)
     layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
     layoutAlgorithm->useCustom_ = true;
     layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    layoutAlgorithm->isTips_ = true;
+    layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
     auto childProp = childNode->GetLayoutProperty();
     ASSERT_NE(childProp, nullptr);
     auto layoutConstraint = childProp->GetLayoutConstraint();
@@ -539,7 +542,7 @@ HWTEST_F(BubbleTestTwoNg, CoverParent001, TestSize.Level1)
     algorithm.targetSize_ = SizeF(SIZE_TWENTY, SIZE_TWENTY);
     position = algorithm.CoverParent(childSize, Placement::BOTTOM);
     EXPECT_FLOAT_EQ(position.GetX(), RESULT_TEN);
-    EXPECT_FLOAT_EQ(position.GetY(), RESULT_TEN);
+    EXPECT_FLOAT_EQ(position.GetY(), RESULT_TEN + ARROW_HEIGHT);
 
     algorithm.isHalfFoldHover_ = true;
     algorithm.avoidKeyboard_ = false;
@@ -1551,6 +1554,36 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetPlacement004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BubblePatternUpdateStyleOptionTest001
+ * @tc.desc: Test BubblePattern::UpdateStyleOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateStyleOptionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set param.
+     */
+    bubblePattern->isTips_ = true;
+    bubblePattern->OnColorConfigurationUpdate();
+    auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto renderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(BlurStyle::COMPONENT_REGULAR, renderContext->GetBackBlurStyle()->blurStyle);
+}
+
+/**
  * @tc.name: AvoidOrCoverParent001
  * @tc.desc: Test AvoidOrCoverParent
  * @tc.type: FUNC
@@ -1741,5 +1774,45 @@ HWTEST_F(BubbleTestTwoNg, InitTargetSizeAndPosition002, TestSize.Level1)
     layoutAlgorithm->expandDisplay_ = true;
     layoutAlgorithm->InitTargetSizeAndPosition(showInSubwindow, AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutAlgorithm->targetOffset_, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: UpdateContentPositionRange001
+ * @tc.desc: Test adjust bubble position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, UpdateContentPositionRange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. test GetBubblePosition.
+     */
+    float xMin = 200.0f;
+    float xMax = 1000.0f;
+    float yMin = 200.0f;
+    float yMax = 1000.0f;
+    Dimension BUBBLE_ARROW_HEIGHT = 8.0_vp;
+    layoutAlgorithm->placement_ = Placement::BOTTOM;
+    layoutAlgorithm->UpdateContentPositionRange(xMin, xMax, yMin, yMax);
+    EXPECT_EQ(yMin, 200.0 + BUBBLE_ARROW_HEIGHT.ConvertToPx());
+
+    layoutAlgorithm->placement_ = Placement::RIGHT;
+    layoutAlgorithm->UpdateContentPositionRange(xMin, xMax, yMin, yMax);
+    EXPECT_EQ(xMin, 200.0 + BUBBLE_ARROW_HEIGHT.ConvertToPx());
 }
 } // namespace OHOS::Ace::NG

@@ -840,7 +840,7 @@ HWTEST_F(TextTestNineNg, UpdateShaderStyle004, TestSize.Level1)
     multipleAlgorithm->UpdateShaderStyle(layoutProperty, textStyle);
     EXPECT_EQ(textStyle.GetColorShaderStyle().value(), Color::GREEN);
 }
- 
+
 /**
  * @tc.name: UpdateShaderStyle005
  * @tc.desc: Test UpdateShaderStyle.
@@ -871,6 +871,36 @@ HWTEST_F(TextTestNineNg, UpdateShaderStyle005, TestSize.Level1)
     layoutProperty->ResetGradientShaderStyle();
     auto gradientValue1 = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
     EXPECT_EQ(gradientValue1.GetLinearGradient(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateShaderStyle006
+ * @tc.desc: Test UpdateShaderStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, UpdateShaderStyle006, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test2", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    auto value = 5.0;
+    auto values = CalcDimension(value);
+    gradient.GetRadialGradient()->radialCenterX = values;
+    gradient.GetRadialGradient()->radialCenterY = values;
+    layoutProperty->UpdateGradientShaderStyle(gradient);
+
+    auto gradientValue = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    AnimatableDimension result(value);
+    ASSERT_NE(gradientValue.GetRadialGradient(), nullptr);
+    EXPECT_EQ(gradientValue.GetRadialGradient()->radialCenterX, result);
+    EXPECT_EQ(gradientValue.GetRadialGradient()->radialCenterY, result);
+    layoutProperty->ResetGradientShaderStyle();
+    auto gradientValue1 = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    EXPECT_EQ(gradientValue1.GetRadialGradient(), nullptr);
 }
 
 /**

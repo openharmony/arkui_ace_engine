@@ -966,7 +966,7 @@ public:
     }
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void RichEditorErrorReport(RichEditorInfo& info);
     void MouseDoubleClickParagraphEnd(int32_t& index);
     void AdjustSelectionExcludeSymbol(int32_t& start, int32_t& end);
@@ -1371,7 +1371,7 @@ public:
     RefPtr<FrameNode> GetContentHost() const override;
 
     float GetCaretWidth();
-    void UpdateCaretStyleByTypingStyle();
+    void UpdateCaretStyleByTypingStyle(bool isReset);
     void MarkAISpanStyleChanged() override;
     void HandleOnAskCelia() override;
 
@@ -1894,7 +1894,7 @@ private:
     bool isStopBackPress_ = true;
     bool blockKbInFloatingWindow_ = false;
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
-    LRUMap<std::uintptr_t, RefPtr<Paragraph>> paragraphCache_;
+    LRUMap<uint64_t, RefPtr<Paragraph>> paragraphCache_;
     SysScale lastSysScale_;
     std::map<int32_t, AISpan> lastAISpanMap_;
     // Used to avoid show single handle by first click after window focus

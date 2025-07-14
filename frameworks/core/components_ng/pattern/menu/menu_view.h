@@ -140,7 +140,7 @@ private:
         std::map<std::string, AlignRule>& alignMap);
     static void UpdateMenuOutlineWithArrow(
         const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
-    static void ReloadMenuParam(const MenuParam& menuParam);
+    static void ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
 };
 } // namespace OHOS::Ace::NG
 

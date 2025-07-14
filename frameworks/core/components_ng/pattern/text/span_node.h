@@ -262,7 +262,7 @@ struct SpanItem : public AceType {
     DECLARE_ACE_TYPE(SpanItem, AceType);
 
 public:
-    SpanItem() = default;
+    SpanItem() : nodeId_(ElementRegister::GetInstance()->MakeUniqueId()) {}
     virtual ~SpanItem()
     {
         children.clear();
@@ -829,7 +829,7 @@ public:
 protected:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;

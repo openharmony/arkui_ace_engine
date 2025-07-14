@@ -128,6 +128,27 @@ bool UpdateColumnWidth(const RefPtr<FrameNode>& frameNode, const RefPtr<GridColu
     return true;
 }
 
+void MultiMenuLayoutAlgorithm::RemoveParentRestrictionsForFixIdeal(
+    const LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto menuPattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    if (menuPattern->IsEnabledContentForFixIdeal() && layoutPolicyProperty.has_value()) {
+        auto& layoutPolicy = layoutPolicyProperty.value();
+        if (layoutPolicy.IsWidthFix()) {
+            childConstraint.maxSize.SetWidth(std::numeric_limits<float>::infinity());
+        }
+        if (layoutPolicy.IsHeightFix()) {
+            childConstraint.maxSize.SetHeight(std::numeric_limits<float>::infinity());
+        }
+    }
+}
+
 void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -137,6 +158,7 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutConstraint);
     auto childConstraint = layoutProperty->CreateChildConstraint();
     childConstraint.maxSize.SetWidth(layoutConstraint->maxSize.Width());
+    RemoveParentRestrictionsForFixIdeal(layoutWrapper, childConstraint);
     // constraint max size minus padding
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     auto node = layoutWrapper->GetHostNode();
@@ -219,6 +241,34 @@ void MultiMenuLayoutAlgorithm::UpdateMenuDefaultConstraintByDevice(const RefPtr<
     }
 }
 
+void MultiMenuLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(
+    const RefPtr<LayoutWrapper>& childLayoutWrapper, OffsetF& translate, bool isEmbed, OffsetF& embedCorrect)
+{
+    CHECK_NULL_VOID(childLayoutWrapper);
+    auto childNode = childLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(childNode);
+    auto property = childNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    if (!property->IsIgnoreOptsValid()) {
+        return;
+    };
+    auto saeCorrect = translate;
+    IgnoreLayoutSafeAreaOpts& opts = *(property->GetIgnoreLayoutSafeAreaOpts());
+    auto sae = childNode->GetAccumulatedSafeAreaExpand(false, opts);
+    auto offsetX = sae.left.value_or(0.0f);
+    auto offsetY = sae.top.value_or(0.0f);
+    if (isEmbed) {
+        if (sae.left.has_value())
+            offsetX += embedCorrect.GetX();
+        if (sae.top.has_value())
+            offsetY += embedCorrect.GetY();
+    }
+    OffsetF saeTrans = OffsetF(offsetX, offsetY);
+    saeCorrect -= saeTrans;
+    childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(saeCorrect);
+    translate.AddY(-offsetY);
+}
+
 void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -236,14 +286,26 @@ void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     OffsetF translate(0.0f, 0.0f);
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    const auto& safeAreaPadding = layoutProperty->GetOrCreateSafeAreaPadding();
     auto outPadding = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
     if (!pattern->IsEmbedded()) {
         translate.AddX(padding.left.value_or(outPadding));
         translate.AddY(padding.top.value_or(outPadding));
+    } else {
+        translate.AddX(safeAreaPadding.left.value_or(0.0f));
+        translate.AddY(safeAreaPadding.top.value_or(0.0f));
     }
     // translate each option by the height of previous options
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
+        OffsetF embedCorrect(0.0f, 0.0f);
+        bool isEmbed = pattern->IsEmbedded();
+        if (isEmbed) {
+            embedCorrect.AddX(padding.left.value_or(0.0f) - safeAreaPadding.left.value_or(0.0f));
+            embedCorrect.AddY(padding.top.value_or(0.0f) - safeAreaPadding.top.value_or(0.0f));
+        }
+        UpdateChildPositionWidthIgnoreLayoutSafeArea(child, translate, isEmbed, embedCorrect);
+
         child->Layout();
         translate.AddY(child->GetGeometryNode()->GetMarginFrameSize().Height());
     }

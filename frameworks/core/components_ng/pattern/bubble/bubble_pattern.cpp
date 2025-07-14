@@ -829,8 +829,39 @@ void BubblePattern::UpdateBubbleText()
     host->MarkDirtyNode();
 }
 
+void BubblePattern::UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto popupTheme = GetPopupTheme();
+    CHECK_NULL_VOID(popupTheme);
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_VOID(popupPaintProp);
+    auto renderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto defaultBGcolor = popupTheme->GetDefaultBGColor();
+    auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(defaultBGcolor);
+    renderContext->UpdateBackgroundColor(backgroundColor);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = blurStyle;
+    styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
+    renderContext->UpdateBackBlurStyle(styleOption);
+    if (needUpdateShadow) {
+        auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
+        renderContext->UpdateBackShadow(shadow);
+    }
+}
+
 void BubblePattern::OnColorConfigurationUpdate()
 {
+    // Tips: Color mode changes are already adapted, so ConfigChangePerform() control is not required.
+    if (isTips_) {
+        UpdateStyleOption(BlurStyle::COMPONENT_REGULAR, true);
+    } else if (SystemProperties::ConfigChangePerform()) {
+        UpdateStyleOption(popupParam_->GetBlurStyle(), false);
+    }
     if (isCustomPopup_) {
         return;
     }
@@ -838,24 +869,6 @@ void BubblePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     colorMode_ = context->GetColorMode();
     UpdateBubbleText();
-    if (isTips_) {
-        auto host = GetHost();
-        auto popupTheme = GetPopupTheme();
-        auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
-        CHECK_NULL_VOID(childNode);
-        auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
-        auto renderContext = childNode->GetRenderContext();
-        CHECK_NULL_VOID(popupTheme);
-        auto defaultBGcolor = popupTheme->GetDefaultBGColor();
-        auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(defaultBGcolor);
-        renderContext->UpdateBackgroundColor(backgroundColor);
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
-        styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
-        renderContext->UpdateBackBlurStyle(styleOption);
-        auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
-        renderContext->UpdateBackShadow(shadow);
-    }
 }
 
 void BubblePattern::UpdateAgingTextSize()

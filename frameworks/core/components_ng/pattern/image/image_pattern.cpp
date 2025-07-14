@@ -445,6 +445,7 @@ void ImagePattern::OnImageLoadSuccess()
     dstRect_ = loadingCtx_->GetDstRect();
     auto srcInfo = loadingCtx_->GetSourceInfo();
     auto frameCount = loadingCtx_->GetFrameCount();
+    imageDfxConfig_.SetFrameSize(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
 
     image_->SetImageDfxConfig(imageDfxConfig_);
     RectF paintRect = CalcImageContentPaintSize(geometryNode);
@@ -2766,11 +2767,6 @@ void ImagePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 
     json->Put("draggable", enableDrag_);
     json->Put("enableAnalyzer", isEnableAnalyzer_);
-}
-
-void ImagePattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
-{
-    DumpInfo(json);
 }
 
 void ImagePattern::DumpLayoutInfo(std::unique_ptr<JsonValue>& json)

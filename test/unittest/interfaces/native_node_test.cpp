@@ -1028,6 +1028,14 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_REACH_START));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_REACH_END, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_REACH_END));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_WILL_STOP_DRAGGING));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_DID_ZOOM, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_DID_ZOOM));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_ZOOM_START, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_ZOOM_START));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_ZOOM_STOP, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_SCROLL_ZOOM_STOP));
 
     nodeType = static_cast<int32_t>(ARKUI_NODE_LIST);
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SCROLL_EVENT_ON_SCROLL, nodeType);
@@ -1282,6 +1290,14 @@ HWTEST_F(NativeNodeTest, NativeNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_REACH_START));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_SCROLL_REACH_END);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_REACH_END));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_SCROLL_WILL_STOP_DRAGGING);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_SCROLL_DID_ZOOM);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_DID_ZOOM));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_SCROLL_ZOOM_START);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_ZOOM_START));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_SCROLL_ZOOM_STOP);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_ZOOM_STOP));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_LIST_SCROLL);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_SCROLL));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_LIST_SCROLL_FRAME_BEGIN);
@@ -1747,6 +1763,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest011, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_AUTO_RESIZE, &item);
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_RESIZABLE, &item);
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_DRAGGABLE, &item);
+    nodeAPI->setAttribute(rootNode, NODE_IMAGE_SYNC_LOAD, &item);
 
     value[0].u32 = 0xFFFF0000;
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_FILL_COLOR, &item);
@@ -1765,6 +1782,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest011, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_AUTO_RESIZE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_ALT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_DRAGGABLE), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SYNC_LOAD), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_RENDER_MODE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_FIT_ORIGINAL_SIZE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_FILL_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
@@ -1780,6 +1798,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest011, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_AUTO_RESIZE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_ALT), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_DRAGGABLE), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SYNC_LOAD), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_RENDER_MODE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_FILL_COLOR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_RESIZABLE), nullptr);
@@ -2723,6 +2742,11 @@ HWTEST_F(NativeNodeTest, NativeNodeTest026, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SCROLL_CLIP_CONTENT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_SCROLL_CLIP_CONTENT)->value->i32,
                                     ArkUI_ContentClipMode::ARKUI_CONTENT_CLIP_MODE_BOUNDARY);
+
+    value[0].i32 = ARKUI_SCROLL_DIRECTION_FREE;
+    nodeAPI->setAttribute(rootNode, NODE_SCROLL_SCROLL_DIRECTION, &item);
+    EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_SCROLL_SCROLL_DIRECTION)->value->i32,
+                                    ARKUI_SCROLL_DIRECTION_FREE);
     nodeAPI->disposeNode(rootNode);
 }
 
@@ -7471,5 +7495,75 @@ HWTEST_F(NativeNodeTest, NativeNodeTest147, TestSize.Level1)
     EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
     ret = OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(nullptr, &offset);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeScrollZoomTest001
+ * @tc.desc: Test Scroll zoom attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeScrollZoomTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_SCROLL);
+    ASSERT_NE(scroll, nullptr);
+    ArkUI_AttributeItem item0 = { nullptr, 0 };
+    ArkUI_NumberValue value1[] = { { .f32 = 2.0f } };
+    ArkUI_AttributeItem item1 = { value1, sizeof(value1) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(scroll, NODE_SCROLL_MAX_ZOOM_SCALE, &item1), ARKUI_ERROR_CODE_NO_ERROR);
+    auto ret = nodeAPI->getAttribute(scroll, NODE_SCROLL_MAX_ZOOM_SCALE);
+    EXPECT_EQ(ret->value[0].f32, 2.0f);
+    EXPECT_EQ(nodeAPI->resetAttribute(scroll, NODE_SCROLL_MAX_ZOOM_SCALE), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(scroll, NODE_SCROLL_MAX_ZOOM_SCALE);
+    EXPECT_EQ(ret->value[0].f32, 1.0f);
+    EXPECT_EQ(nodeAPI->setAttribute(scroll, NODE_SCROLL_MAX_ZOOM_SCALE, &item0), ERROR_CODE_PARAM_INVALID);
+
+    ArkUI_NumberValue value2[] = { { .f32 = 0.5f } };
+    ArkUI_AttributeItem item2 = { value2, sizeof(value2) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(scroll, NODE_SCROLL_MIN_ZOOM_SCALE, &item2), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(scroll, NODE_SCROLL_MIN_ZOOM_SCALE);
+    EXPECT_EQ(ret->value[0].f32, 0.5f);
+    EXPECT_EQ(nodeAPI->resetAttribute(scroll, NODE_SCROLL_MIN_ZOOM_SCALE), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(scroll, NODE_SCROLL_MIN_ZOOM_SCALE);
+    EXPECT_EQ(ret->value[0].f32, 1.0f);
+    EXPECT_EQ(nodeAPI->setAttribute(scroll, NODE_SCROLL_MIN_ZOOM_SCALE, &item0), ERROR_CODE_PARAM_INVALID);
+
+    ArkUI_NumberValue value3[] = { { .f32 = 1.5f } };
+    ArkUI_AttributeItem item3 = { value3, sizeof(value3) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(scroll, NODE_SCROLL_ZOOM_SCALE, &item3), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(scroll, NODE_SCROLL_ZOOM_SCALE);
+    EXPECT_EQ(ret->value[0].f32, 1.5f);
+    EXPECT_EQ(nodeAPI->resetAttribute(scroll, NODE_SCROLL_ZOOM_SCALE), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(scroll, NODE_SCROLL_ZOOM_SCALE);
+    EXPECT_EQ(ret->value[0].f32, 1.0f);
+    EXPECT_EQ(nodeAPI->setAttribute(scroll, NODE_SCROLL_ZOOM_SCALE, &item0), ERROR_CODE_PARAM_INVALID);
+
+    nodeAPI->disposeNode(scroll);
+}
+
+/**
+ * @tc.name: NativeNodeScrollZoomTest002
+ * @tc.desc: Test Test Scroll zoom event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeScrollZoomTest002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_SCROLL);
+
+    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_SCROLL_EVENT_ON_DID_ZOOM, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_SCROLL_EVENT_ON_DID_ZOOM);
+
+    ret = nodeAPI->registerNodeEvent(scroll, NODE_SCROLL_EVENT_ON_ZOOM_START, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_SCROLL_EVENT_ON_ZOOM_START);
+
+    ret = nodeAPI->registerNodeEvent(scroll, NODE_SCROLL_EVENT_ON_ZOOM_STOP, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_SCROLL_EVENT_ON_ZOOM_STOP);
+    nodeAPI->disposeNode(scroll);
 }
 } // namespace OHOS::Ace

@@ -3481,7 +3481,7 @@ JSRef<JSVal> OnOverrideErrorPageEventToJSValue(const OnOverrideErrorPageEvent& e
     auto errorEvent = Referenced::Claim(errorObj->Unwrap<JSWebResourceError>());
     errorEvent->SetOverrideErrorPageEvent(eventInfo);
 
-    obj->SetPropertyObject("webResourceRequest", requestObj);
+    obj->SetPropertyObject("request", requestObj);
     obj->SetPropertyObject("error", errorObj);
 
     return JSRef<JSVal>::Cast(obj);

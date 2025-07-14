@@ -216,11 +216,6 @@ private:
 
     PaintState paintState_;
     std::vector<PaintState> savePaintState_;
-    static std::unordered_map<int32_t, std::shared_ptr<Pattern>> pattern_;
-    static unsigned int patternCount_;
-    std::weak_ptr<Ace::Pattern> GetPatternNG(int32_t id);
-    Pattern GetPattern(unsigned int id);
-    std::shared_ptr<Pattern> GetPatternPtr(int32_t id);
     bool isInitializeShadow_ = false;
     bool isOffscreenInitializeShadow_ = false;
     Dimension GetDimensionValue(const std::string& str);

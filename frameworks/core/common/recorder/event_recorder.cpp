@@ -308,9 +308,9 @@ void EventRecorder::SetFocusContainerInfo(const std::string& windowName, int32_t
     focusContainerId_ = id;
 }
 
-int32_t EventRecorder::GetContainerId(bool isFoucs)
+int32_t EventRecorder::GetContainerId(bool isFocus)
 {
-    if (isFoucs) {
+    if (isFocus) {
         return focusContainerId_;
     } else {
         return containerId_;

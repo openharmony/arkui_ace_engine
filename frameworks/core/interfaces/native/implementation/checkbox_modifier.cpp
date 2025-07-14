@@ -73,7 +73,6 @@ void SetCheckboxOptionsImpl(Ark_NativePointer node,
                 auto uiNode = callback.BuildSync(node);
                 ViewStackProcessor::GetInstance()->Push(uiNode);
             };
-            // CheckBoxModelNG::SetBuilder(frameNode, std::move(customBuilder));
         }
     }
 }
@@ -154,8 +153,6 @@ void ContentModifierImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CheckboxModelNG::SetContentModifier(frameNode, convValue);
 }
 void _onChangeEvent_selectImpl(Ark_NativePointer node,
                                const Callback_Boolean_Void* callback)

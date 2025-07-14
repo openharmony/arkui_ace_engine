@@ -83,12 +83,14 @@ bool PostEventManager::PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEve
     mouseEvent.postEventNodeId = uiNode->GetId();
     auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
     CHECK_NULL_RETURN(frameNode, false);
+    targetNode_ = frameNode;
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     mouseEvent.passThrough = true;
     passThroughResult_ = false;
     pipelineContext->OnMouseEvent(mouseEvent, frameNode);
     mouseEvent.passThrough = false;
+    targetNode_.Reset();
     return passThroughResult_;
 }
 
@@ -303,5 +305,10 @@ bool PostEventManager::CheckPointValidity(const TouchEvent& touchEvent)
 void PostEventManager::SetPassThroughResult(bool passThroughResult)
 {
     passThroughResult_ = passThroughResult;
+}
+
+RefPtr<FrameNode> PostEventManager::GetPostTargetNode()
+{
+    return targetNode_.Upgrade();
 }
 } // namespace OHOS::Ace::NG

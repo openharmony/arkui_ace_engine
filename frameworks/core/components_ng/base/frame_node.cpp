@@ -961,7 +961,7 @@ void FrameNode::DumpOverlayInfo()
         std::string("OverlayOffset: ").append(offsetX.ToString()).append(std::string(", ")).append(offsetY.ToString()));
 }
 
-void FrameNode::DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json)
+void FrameNode::DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json)
 {
     json->Put("$rect", GetTransformRectRelativeToWindow().ToBounds().c_str());
     json->Put("$debugLine", "");
@@ -1048,12 +1048,12 @@ bool FrameNode::CheckVisibleOrActive()
     }
 }
 
-void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+void FrameNode::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(json);
     DumpSimplifyCommonInfo(json);
     if (pattern_) {
-        auto child = JsonUtil::Create();
+        auto child = JsonUtil::CreateSharedPtrJson();
         pattern_->DumpSimplifyInfo(child);
         json->Put("$attrs", std::move(child));
     }
@@ -5224,7 +5224,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
     if (arkoalaLazyAdapter_) {
-        return ArkoalaGetOrCreateChild(index);
+        return ArkoalaGetOrCreateChild(index, addToRenderTree);
     }
     auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
@@ -5345,7 +5345,7 @@ void FrameNode::ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cac
     arkoalaLazyAdapter_->SetActiveRange(liveStart, liveEnd);
 }
 
-RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index)
+RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index, bool active)
 {
     CHECK_NULL_RETURN(arkoalaLazyAdapter_, nullptr);
     if (auto node = arkoalaLazyAdapter_->GetChild(index)) {
@@ -5354,7 +5354,7 @@ RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index)
     auto node = arkoalaLazyAdapter_->GetOrCreateChild(index);
     CHECK_NULL_RETURN(node, nullptr);
     AddChild(node);
-    node->SetActive(true);
+    node->SetActive(active);
     return node;
 }
 /* ============================== Arkoala LazyForEach adapter section END ================================*/
@@ -6000,6 +6000,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     EventTarget eventTarget;
     eventTarget.id = GetInspectorId().value_or("").c_str();
     event.SetTarget(eventTarget);
+    event.SetPressedKeyCodes(touchEvent.pressedKeyCodes_);
     auto result = onTouchIntercept(event);
     SetHitTestMode(result);
     return result;

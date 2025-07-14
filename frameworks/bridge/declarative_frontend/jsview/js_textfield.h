@@ -153,7 +153,7 @@ public:
     static void SetKeyboardAppearanceConfig(const JSCallbackInfo& info);
     static void ParseOnIconSrc(const JSRef<JSVal>& showVal, PasswordIcon& passwordIcon);
     static void ParseOffIconSrc(const JSRef<JSVal>& showVal, PasswordIcon& passwordIcon);
-    static void SetUnderlineColorObject(const JSRef<JSVal>& jsValue);
+    static void SetUnderlineColorObject(const JSRef<JSObject>& jsValue);
     static void UnregisterResource(const std::string& key);
 
 private:

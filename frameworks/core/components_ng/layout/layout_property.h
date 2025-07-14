@@ -231,7 +231,7 @@ public:
 
     virtual void UpdateCalcMaxSize(const CalcSize& value);
 
-    std::pair<std::vector<std::string>, std::vector<std::string>> CalcToString(const CalcSize& calcSize);
+    void CalcToString(const CalcSize& calcSize, std::pair<std::vector<std::string>, std::vector<std::string>>& result);
 
     virtual void ExpandConstraintWithSafeArea();
 

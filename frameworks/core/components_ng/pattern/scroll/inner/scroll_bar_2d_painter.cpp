@@ -41,7 +41,6 @@ void Update(ScrollBarOverlayModifier& painter, const ScrollBar& bar)
     painter.SetBarColor(bar.GetForegroundColor());
     painter.StartBarAnimation(
         bar.GetHoverAnimationType(), bar.GetOpacityAnimationType(), bar.GetNeedAdaptAnimation(), bar.GetActiveRect());
-    painter.SetRect(bar.GetActiveRect());
     painter.SetScrollable(bar.IsScrollable());
 
     switch (bar.GetDisplayMode()) {

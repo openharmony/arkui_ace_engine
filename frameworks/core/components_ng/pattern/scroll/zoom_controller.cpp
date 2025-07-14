@@ -28,8 +28,8 @@ namespace {
     constexpr float MIN_OVER_SCALE = 0.5f;
     constexpr float ANIMATION_CURVE_VELOCITY = 0.0f;    // The move animation spring curve velocity is 0.0
     constexpr float ANIMATION_CURVE_MASS = 1.0f;        // The move animation spring curve mass is 1.0
-    constexpr float ANIMATION_CURVE_STIFFNESS = 400.0f; // The move animation spring curve stiffness is 400.0
-    constexpr float ANIMATION_CURVE_DAMPING = 38.0f;    // The move animation spring curve damping is 38.0
+    constexpr float ANIMATION_CURVE_STIFFNESS = 188.0f; // The move animation spring curve stiffness is 188.0
+    constexpr float ANIMATION_CURVE_DAMPING = 24.0f;    // The move animation spring curve damping is 24.0
 }
 ZoomController::ZoomController(ScrollPattern& pattern) : pattern_(pattern)
 {
@@ -61,6 +61,8 @@ void ZoomController::InitializePinchGesture()
     };
     pinchGesture_->SetOnActionEnd(endCallback);
     pinchGesture_->SetOnActionCancel(endCallback);
+    pinchGesture_->SetRecognizerType(GestureTypeName::PINCH_GESTURE);
+    pinchGesture_->SetIsSystemGesture(true);
 }
 
 void ZoomController::DeinitializePinchGesture()

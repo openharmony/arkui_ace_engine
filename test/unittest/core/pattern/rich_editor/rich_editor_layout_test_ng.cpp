@@ -672,4 +672,31 @@ HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
+/**
+ * @tc.name: RichEditorLayoutAlgorithmTest001
+ * @tc.desc: test RichEditorLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest001, TestSize.Level1)
+{
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    std::list<RefPtr<SpanItem>> spanList1;
+    spanList1.push_back(AceType::MakeRefPtr<SpanItem>());
+    spanList1.push_back(AceType::MakeRefPtr<SpanItem>());
+    uint64_t hash1 = layoutAlgorithm->Hash(spanList1);
+
+    std::list<RefPtr<SpanItem>> spanList2;
+    spanList2.push_back(AceType::MakeRefPtr<SpanItem>());
+    spanList2.push_back(AceType::MakeRefPtr<SpanItem>());
+    uint64_t hash2 = layoutAlgorithm->Hash(spanList2);
+
+    EXPECT_NE(hash1, hash2);
+}
+
 } // namespace OHOS::Ace::NG

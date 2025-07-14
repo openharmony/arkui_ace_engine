@@ -57,6 +57,7 @@ ohos_source_set("ace_kit") {
     "src/view/theme/theme_factory.cpp",
     "src/view/theme/theme_style_impl.cpp",
     "src/view/theme/token_colors.cpp",
+    "src/view/theme/token_theme.cpp",
     "src/view/ui_context_impl.cpp",
     "src/view/view.cpp",
     "src/view_factory/abstract_view_factory.cpp",
@@ -86,5 +87,9 @@ ohos_source_set("ace_kit") {
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
     ]
+  }
+
+  if (current_os == "ohos") {
+    external_deps += [ "ipc:ipc_single" ]
   }
 }

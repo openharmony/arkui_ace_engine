@@ -134,7 +134,7 @@ abstract class ViewBuildNodeBase {
 
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild?.deref();
-            if (child instanceof ViewPU && child.defaultConsume_.size > 0) {
+            if (child instanceof ViewPU) {
                 child.propagateToChildrenToConnected();
             }
         })
@@ -183,7 +183,7 @@ abstract class ViewBuildNodeBase {
         }
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild?.deref();
-            if (child instanceof ViewPU && child.reconnectConsume_.size > 0) {
+            if (child instanceof ViewPU) {
                 child.propagateToChildrenToDisconnected();
             }
         })

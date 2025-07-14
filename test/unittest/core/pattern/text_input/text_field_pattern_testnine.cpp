@@ -903,6 +903,7 @@ HWTEST_F(TextFieldPatternTestNine, OnModifyDone001, TestSize.Level0)
     auto size = textFieldManager->textFieldInfoMap_.size();
     pattern_->firstAutoFillContainerNode_ =  pattern_->frameNode_;
     pattern_->OnModifyDone();
+    pattern_->HandleOnCopy(true);
     EXPECT_EQ(textFieldManager->textFieldInfoMap_.size(), size + 1);
 }
 

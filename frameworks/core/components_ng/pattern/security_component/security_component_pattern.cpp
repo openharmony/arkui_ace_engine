@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/geometry/dimension.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -41,6 +42,9 @@ static std::mutex g_scMutex;
 const std::string SYSTEM_INTERNAL_ERROR_MESSAGE = "system internal error";
 constexpr int REPORT_CLICK_ERROR = -1;
 #endif
+constexpr float MIN_FONT_SCALE = 0.85f;
+constexpr float MAX_FONT_SCALE = 3.20f;
+constexpr float FLOAT_ZERO = 0.0;
 constexpr int HANDLE_RES_ERROR = 1;
 }
 SecurityComponentPattern::SecurityComponentPattern()
@@ -338,6 +342,33 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
     SetNodeHitTestMode(text, HitTestMode::HTMTRANSPARENT);
 }
 
+void SecurityComponentPattern::ToJsonValueBorderRadius(const std::optional<BorderRadiusProperty>& borderRadius,
+    const RefPtr<SecurityComponentTheme>& theme, std::unique_ptr<JsonValue>& borderRadiusJson) const
+{
+    if (borderRadius.has_value()) {
+        auto topLeft = borderRadius->radiusTopLeft.value_or(theme->GetBorderRadius());
+        if (LessNotEqual(topLeft.Value(), FLOAT_ZERO)) {
+            topLeft = theme->GetBorderRadius();
+        }
+        borderRadiusJson->Put("topLeft", topLeft.ToString().c_str());
+        auto topRight = borderRadius->radiusTopRight.value_or(theme->GetBorderRadius());
+        if (LessNotEqual(topRight.Value(), FLOAT_ZERO)) {
+            topRight = theme->GetBorderRadius();
+        }
+        borderRadiusJson->Put("topRight", topRight.ToString().c_str());
+        auto bottomLeft = borderRadius->radiusBottomLeft.value_or(theme->GetBorderRadius());
+        if (LessNotEqual(bottomLeft.Value(), FLOAT_ZERO)) {
+            bottomLeft = theme->GetBorderRadius();
+        }
+        borderRadiusJson->Put("bottomLeft", bottomLeft.ToString().c_str());
+        auto bottomRight = borderRadius->radiusBottomRight.value_or(theme->GetBorderRadius());
+        if (LessNotEqual(bottomRight.Value(), FLOAT_ZERO)) {
+            bottomRight = theme->GetBorderRadius();
+        }
+        borderRadiusJson->Put("bottomRight", bottomRight.ToString().c_str());
+    }
+}
+
 void SecurityComponentPattern::ToJsonValueIconNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& iconNode,
     const InspectorFilter& filter) const
 {
@@ -350,6 +381,8 @@ void SecurityComponentPattern::ToJsonValueIconNode(std::unique_ptr<JsonValue>& j
     auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(iconProp);
     CHECK_NULL_VOID(iconProp->GetCalcLayoutConstraint());
+    auto iconRenderContext = iconNode->GetRenderContext();
+    CHECK_NULL_VOID(iconRenderContext);
     // GetDimension would ret a empty dimension when width is empty
     auto width = iconProp->GetCalcLayoutConstraint()->selfIdealSize->Width();
     if (width.has_value()) {
@@ -359,6 +392,15 @@ void SecurityComponentPattern::ToJsonValueIconNode(std::unique_ptr<JsonValue>& j
     }
     json->PutExtAttr("iconColor", iconProp->GetImageSourceInfo()->GetFillColor().
         value_or(theme->GetIconColor()).ColorToString().c_str(), filter);
+    auto iconBorderRadius = iconRenderContext->GetBorderRadius();
+    if (iconBorderRadius.has_value()) {
+        auto iconBorderRadiusJson = JsonUtil::Create(true);
+        CHECK_NULL_VOID(iconBorderRadiusJson);
+        ToJsonValueBorderRadius(iconBorderRadius, theme, iconBorderRadiusJson);
+        json->PutExtAttr("iconBorderRadius", iconBorderRadiusJson, filter);
+    } else {
+        json->PutExtAttr("iconBorderRadius", theme->GetBorderRadius().ToString().c_str(), filter);
+    }
 }
 
 void SecurityComponentPattern::ToJsonValueSymbolIconNode(std::unique_ptr<JsonValue>& json,
@@ -392,6 +434,28 @@ void SecurityComponentPattern::ToJsonValueTextNode(std::unique_ptr<JsonValue>& j
         static_cast<int64_t>(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)), filter);
     json->PutExtAttr("fontColor",
         textProp->GetTextColor().value_or(theme->GetFontColor()).ColorToString().c_str(), filter);
+    json->PutExtAttr("minFontScale",
+        std::to_string(textProp->GetMinFontScale().value_or(MIN_FONT_SCALE)).c_str(), filter);
+    json->PutExtAttr("maxFontScale",
+        std::to_string(textProp->GetMaxFontScale().value_or(MAX_FONT_SCALE)).c_str(), filter);
+    json->PutExtAttr("minFontSize", textProp->GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr("maxFontSize", textProp->GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr("maxLines", std::to_string(textProp->GetMaxLines().value_or(UINT32_MAX)).c_str(), filter);
+    json->PutExtAttr("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
+        textProp->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str(), filter);
+}
+
+void SecurityComponentPattern::ToJsonValuePadding(const RefPtr<SecurityComponentTheme>& theme,
+    const RefPtr<SecurityComponentLayoutProperty>& layoutProperty, std::unique_ptr<JsonValue>& paddingJson) const
+{
+    paddingJson->Put("top",
+        layoutProperty->GetBackgroundTopPadding().value_or(theme->GetBackgroundTopPadding()).ToString().c_str());
+    paddingJson->Put("bottom",
+        layoutProperty->GetBackgroundBottomPadding().value_or(theme->GetBackgroundBottomPadding()).ToString().c_str());
+    paddingJson->Put("left",
+        layoutProperty->GetBackgroundLeftPadding().value_or(theme->GetBackgroundLeftPadding()).ToString().c_str());
+    paddingJson->Put("right",
+        layoutProperty->GetBackgroundRightPadding().value_or(theme->GetBackgroundRightPadding()).ToString().c_str());
 }
 
 void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -416,6 +480,7 @@ void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, con
     json->PutExtAttr("layoutDirection", static_cast<int64_t>(
         layoutProperty->GetTextIconLayoutDirection().value_or(SecurityComponentLayoutDirection::VERTICAL)), filter);
     json->PutExtAttr("type", node->GetTag().c_str(), filter);
+    json->PutExtAttr("stateEffect", layoutProperty->GetStateEffect().value_or(true), filter);
 
     RefPtr<FrameNode> iconNode = GetSecCompChildNode(node, V2::IMAGE_ETS_TAG);
     if (iconNode != nullptr) {
@@ -431,17 +496,12 @@ void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, con
     }
     auto paddingJson = JsonUtil::Create(true);
     CHECK_NULL_VOID(paddingJson);
-    paddingJson->Put("top",
-        layoutProperty->GetBackgroundTopPadding().value_or(theme->GetBackgroundTopPadding()).ToString().c_str());
-    paddingJson->Put("bottom",
-        layoutProperty->GetBackgroundBottomPadding().value_or(theme->GetBackgroundBottomPadding()).ToString().c_str());
-    paddingJson->Put("left",
-        layoutProperty->GetBackgroundLeftPadding().value_or(theme->GetBackgroundLeftPadding()).ToString().c_str());
-    paddingJson->Put("right",
-        layoutProperty->GetBackgroundRightPadding().value_or(theme->GetBackgroundRightPadding()).ToString().c_str());
+    ToJsonValuePadding(theme, layoutProperty, paddingJson);
     json->PutExtAttr("padding", paddingJson, filter);
     json->PutExtAttr("textIconSpace",
         layoutProperty->GetTextIconSpace().value_or(theme->GetTextIconSpace()).ToString().c_str(), filter);
+    json->PutExtAttr("align", layoutProperty->GetAlignment().value_or(
+        Alignment::CENTER).GetAlignmentStr(TextDirection::LTR).c_str(), filter);
     ToJsonValueRect(json, filter);
 }
 

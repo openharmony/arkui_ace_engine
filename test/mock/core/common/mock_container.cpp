@@ -14,6 +14,7 @@
  */
 
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/interfaces/ipc_single/iremote_object.h"
 
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
@@ -190,16 +191,16 @@ std::vector<Rect> Container::GetCurrentFoldCreaseRegion()
     return {};
 }
 
-RefPtr<Container> Container::GetFoucsed()
+RefPtr<Container> Container::GetFocused()
 {
-    RefPtr<Container> foucsContainer;
-    AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
+    RefPtr<Container> focusContainer;
+    AceEngine::Get().NotifyContainers([&focusContainer](const RefPtr<Container>& container) {
         auto pipeline = container->GetPipelineContext();
         if (pipeline && pipeline->IsWindowFocused()) {
-            foucsContainer = container;
+            focusContainer = container;
         }
     });
-    return foucsContainer;
+    return focusContainer;
 }
 
 bool Container::IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node)
@@ -243,5 +244,10 @@ bool Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
                      PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >=
                          static_cast<int32_t>(version)
                : GreatOrEqualAPITargetVersion(version);
+}
+
+sptr<IRemoteObject> Container::GetToken()
+{
+    return nullptr;
 }
 } // namespace OHOS::Ace

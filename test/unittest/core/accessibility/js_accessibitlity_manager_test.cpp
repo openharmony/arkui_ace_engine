@@ -39,6 +39,7 @@ namespace OHOS::Ace {
 
 namespace OHOS::Ace::NG {
 namespace {
+    const int32_t NUMTWO = 2;
 } // namespace
 
 class MockAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
@@ -104,6 +105,14 @@ public:
     MOCK_METHOD(std::vector<RefPtr<FrameNode>>, GetTopPagesWithTransition, (), (const));
     MOCK_METHOD(std::vector<std::string>, GetTopPagePaths, (), (const));
     MOCK_METHOD(RefPtr<FrameNode>, GetLastPageWithTransition, (), (const));
+};
+
+class MockUiExtensionPattern : public Pattern {
+public:
+    int32_t GetUiExtensionId()
+    {
+        return NUMTWO;
+    }
 };
 
 class JsAccessibilityManagerTest : public testing::Test {
@@ -3466,5 +3475,59 @@ HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventForUEA001, TestSize
     jsAccessibilityManager->UpdatePageMode(std::string("SEMI_SILENT"));
     ret = jsAccessibilityManager->IsSendAccessibilityEventForUEA(accessibilityEvent, componentType, pageId);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: FindUIExtensionAccessibilityElement001
+ * @tc.desc: Test FindUIExtensionAccessibilityElement
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, FindUIExtensionAccessibilityElement001, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto checkNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(checkNode, nullptr);
+    std::string customid = "testCustomId";
+    Framework::CommonProperty commonProperty;
+    std::list<AccessibilityElementInfo> infos;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    Accessibility::AccessibilityElementInfo elementInfo;
+    elementInfo.SetInspectorKey(customid);
+    infos.push_back(elementInfo);
+    bool result = jsAccessibilityManager->FindUIExtensionAccessibilityElement(checkNode,
+        customid, commonProperty, infos, context);
+    EXPECT_FALSE(result);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: FindUIExtensionAccessibilityElement002
+ * @tc.desc: Test FindUIExtensionAccessibilityElement
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, FindUIExtensionAccessibilityElement002, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+        return AceType::MakeRefPtr<MockUiExtensionPattern>();
+    });
+    std::string customid = "testCustomId";
+    Framework::CommonProperty commonProperty;
+    std::list<AccessibilityElementInfo> infos;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    Accessibility::AccessibilityElementInfo elementInfo;
+    elementInfo.SetInspectorKey(customid);
+    infos.push_back(elementInfo);
+    bool result = jsAccessibilityManager->FindUIExtensionAccessibilityElement(uiExtensionNode,
+        customid, commonProperty, infos, context);
+    EXPECT_TRUE(result);
+    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG

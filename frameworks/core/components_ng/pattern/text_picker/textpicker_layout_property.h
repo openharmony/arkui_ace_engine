@@ -53,6 +53,9 @@ public:
         value->propDefaultTextStyle_ = CloneDefaultTextStyle();
         value->propDefaultTextOverflow_ = CloneDefaultTextOverflow();
         value->propDigitalCrownSensitivity_ = CloneDigitalCrownSensitivity();
+        value->propDisappearTextOverflow_ = CloneDisappearTextOverflow();
+        value->propTextOverflow_ = CloneTextOverflow();
+        value->propSelectedTextOverflow_ = CloneSelectedTextOverflow();
         return value;
     }
 
@@ -75,6 +78,9 @@ public:
         ResetDefaultTextStyle();
         ResetDefaultTextOverflow();
         ResetDigitalCrownSensitivity();
+        ResetDisappearTextOverflow();
+        ResetTextOverflow();
+        ResetSelectedTextOverflow();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -221,6 +227,11 @@ public:
         DisappearTextStyle, FontFamily, DisappearFontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         DisappearTextStyle, ItalicFontStyle, DisappearFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DisappearTextStyle, AdaptMinFontSize, DisappearMinFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DisappearTextStyle, AdaptMaxFontSize, DisappearMaxFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisappearTextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(TextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(TextStyle, FontSize, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -230,6 +241,11 @@ public:
         TextStyle, FontFamily, FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         TextStyle, ItalicFontStyle, FontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        TextStyle, AdaptMinFontSize, MinFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        TextStyle, AdaptMaxFontSize, MaxFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(SelectedTextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
@@ -242,6 +258,11 @@ public:
         SelectedTextStyle, FontFamily, SelectedFontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         SelectedTextStyle, ItalicFontStyle, SelectedFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        SelectedTextStyle, AdaptMinFontSize, SelectedMinFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        SelectedTextStyle, AdaptMaxFontSize, SelectedMaxFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedTextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(DefaultTextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
@@ -260,6 +281,11 @@ public:
         DefaultTextStyle, AdaptMaxFontSize, DefaultMaxFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultTextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisappearTextColorSetByUser, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NormalTextColorSetByUser, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedTextColorSetByUser, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultTextColorSetByUser, bool, PROPERTY_UPDATE_MEASURE_SELF);
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerLayoutProperty);
 };

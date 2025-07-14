@@ -69,6 +69,7 @@ const CalcLength CALC_LENGTH_CALC { 10.0, DimensionUnit::CALC };
 const CalcLength ERROR_CALC_LENGTH_CALC { -10.0, DimensionUnit::CALC };
 const Dimension CALC_TEST { 10.0, DimensionUnit::CALC };
 const Dimension ERROR_CALC_TEST { -10.0, DimensionUnit::CALC };
+const Offset MOUSE_LOCAL_LOCATION = { 1, 1 };
 const Offset MOUSE_GLOBAL_LOCATION = { 100, 200 };
 constexpr int32_t WORD_LIMIT_LEN = 6;
 constexpr int32_t WORD_LIMIT_RETURN = 2;

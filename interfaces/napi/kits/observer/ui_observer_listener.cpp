@@ -1160,10 +1160,10 @@ napi_value UIObserverListener::GetFrameNodeObject(const RefPtr<NG::FrameNode>& f
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto container = Container::Current();
-    CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(container, nullptr);
 
     auto frontEnd = container->GetFrontend();
-    CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(frontEnd, nullptr);
 
     return frontEnd->GetFrameNodeValueByNodeId(frameNode->GetId());
 }

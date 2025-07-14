@@ -116,20 +116,33 @@ std::optional<SizeF> VideoLayoutAlgorithm::MeasureContent(
     }
     auto layoutSize = contentConstraint.selfIdealSize.IsValid() ? contentConstraint.selfIdealSize.ConvertToSizeT()
                                                                 : contentConstraint.maxSize;
-    // if width or height is matchParent
-    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
-    if (layoutProperty) {
-        auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-        if (layoutPolicy.has_value()) {
-            if (layoutPolicy->IsWidthMatch() && contentConstraint.parentIdealSize.Width().has_value()) {
-                layoutSize.SetWidth(contentConstraint.parentIdealSize.Width().value());
-            }
-            if (layoutPolicy->IsHeightMatch() && contentConstraint.parentIdealSize.Height().has_value()) {
-                layoutSize.SetHeight(contentConstraint.parentIdealSize.Height().value());
-            }
-        }
-    }
+    MeasureLayoutPolicySize(contentConstraint, layoutWrapper, layoutSize);
     return layoutSize;
+}
+
+void VideoLayoutAlgorithm::MeasureLayoutPolicySize(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, SizeF& size)
+{
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value());
+
+    if (layoutPolicy->IsWidthMatch() && contentConstraint.parentIdealSize.Width().has_value()) {
+        // if width is matchParent
+        size.SetWidth(contentConstraint.parentIdealSize.Width().value());
+    } else if (layoutPolicy->IsWidthAdaptive()) {
+        // if width is wrapContent or fixAtIdealSize set width 0.0
+        size.SetWidth(0.0);
+    }
+
+    if (layoutPolicy->IsHeightMatch() && contentConstraint.parentIdealSize.Height().has_value()) {
+        // if height is matchParent
+        size.SetHeight(contentConstraint.parentIdealSize.Height().value());
+    } else if (layoutPolicy->IsHeightAdaptive()) {
+        // if height is wrapContent or fixAtIdealSize set height 0.0
+        size.SetHeight(0.0);
+    }
 }
 
 } // namespace OHOS::Ace::NG

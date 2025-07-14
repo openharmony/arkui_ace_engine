@@ -20,6 +20,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -1542,5 +1543,58 @@ HWTEST_F(MenuViewTestNg, UpdateMenuPositionLeft, TestSize.Level1)
         { "end", { .anchor = "__stack__", .horizontal = HorizontalAlign::END } } };
     MenuView::UpdateMenuPositionLeft(menuNodeMargin, menuNodeAlignRules, alignMap["start"], 0, 0);
     EXPECT_EQ(menuNodeAlignRules[AlignDirection::LEFT].horizontal, HorizontalAlign::START);
+}
+
+/**
+@tc.name: ReloadMenuParam001
+@tc.desc: Test ReloadMenuParam function.
+@tc.type: FUNC
+*/
+HWTEST_F(MenuViewTestNg, ReloadMenuParam001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize MenuParam with default values
+     * @tc.expected: MenuParam initialized with 0.0_vp borderRadius
+     */
+    InitMenuTestNg();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    MenuParam menuParam;
+    menuParam.borderRadius = NG::BorderRadiusProperty(0.0_vp);
+    menuParam.previewBorderRadius = NG::BorderRadiusProperty(0.0_vp);
+    menuParam.outlineColor = NG::BorderColorProperty();
+    menuParam.outlineWidth = NG::BorderWidthProperty();
+    menuParam.isDarkMode = true;
+    menuParam.isWithTheme = false;
+
+    /**
+     * @tc.steps2: Temporarily set config change flag and call ReloadMenuParam
+     * @tc.expected: MenuParam values remain unchanged after reload
+     */
+    auto data = g_isConfigChangePerform;
+    if (!data) {
+        g_isConfigChangePerform = true;
+    }
+    MenuView::ReloadMenuParam(menuFrameNode_, menuParam);
+
+    /**
+     * @tc.steps3: Verify MenuParam values
+     * @tc.expected: All properties match initial settings
+     */
+    MenuParam& menuParamValue = const_cast<MenuParam&>(menuParam);
+    EXPECT_EQ(menuParamValue.borderRadius, NG::BorderRadiusProperty(0.0_vp));
+    EXPECT_EQ(menuParam.previewBorderRadius, NG::BorderRadiusProperty(0.0_vp));
+    EXPECT_EQ(menuParamValue.outlineColor, NG::BorderColorProperty());
+    EXPECT_EQ(menuParamValue.outlineWidth, NG::BorderWidthProperty());
+
+    ResourceParseUtils::SetIsReloading(true);
+    MenuView::ReloadMenuParam(menuFrameNode_, menuParam);
+    g_isConfigChangePerform = data;
+    ResourceParseUtils::SetIsReloading(false);
+
+    menuParamValue = const_cast<MenuParam&>(menuParam);
+    EXPECT_EQ(menuParamValue.borderRadius, NG::BorderRadiusProperty(0.0_vp));
+    EXPECT_EQ(menuParam.previewBorderRadius, NG::BorderRadiusProperty(0.0_vp));
+    EXPECT_EQ(menuParamValue.outlineColor, NG::BorderColorProperty());
+    EXPECT_EQ(menuParamValue.outlineWidth, NG::BorderWidthProperty());
 }
 } // namespace OHOS::Ace::NG

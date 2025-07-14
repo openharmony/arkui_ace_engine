@@ -2740,6 +2740,18 @@ typedef enum {
      */
     NODE_IMAGE_RESIZABLE,
     /**
+     * @brief Defines the synchronous image loading attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to load the image synchronously. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to load the image synchronously. \n
+     *
+     */
+    NODE_IMAGE_SYNC_LOAD = 4012,
+    /**
      * @brief Defines the color of the component when it is selected.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -5356,6 +5368,60 @@ typedef enum {
      * @since 20
      */
     NODE_SCROLL_BAR_MARGIN = 1002022,
+
+    /**
+     * @brief Sets the maximum zoom scale for scrollable content.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: maximum zoom scale to set. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: current maximum zoom scale. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_MAX_ZOOM_SCALE = 1002023,
+
+    /**
+     * @brief Sets the minimum zoom scale for scrollable content.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: minimum zoom scale to set. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: current minimum zoom scale. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_MIN_ZOOM_SCALE = 1002024,
+
+    /**
+     * @brief Sets the zoom scale for scrollable content.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: zoom scale to set. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: current zoom scale. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_ZOOM_SCALE = 1002025,
+
+    /**
+     * @brief Sets whether to enable the zoom bounce effect when the scaling exceeds the limits.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable the zoom bounce effect when the scaling exceeds the limits.
+     * The value <b>1</b> means to enable the effect, and <b>0</b> means the opposite. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable the zoom bounce effect when the scaling exceeds the limits.
+     * The value <b>1</b> means to enable the effect, and <b>0</b> means the opposite. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_ENABLE_BOUNCES_ZOOM = 1002026,
     
     /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
@@ -7887,6 +7953,50 @@ typedef enum {
      * {@Link ArkUI_NodeComponentEvent} contains no parameters. \n
      */
     NODE_SCROLL_EVENT_ON_REACH_END,
+    /**
+     * @brief Defines the callback for when the user is about to release the drag on the scrollable container component.
+     *
+     * Notes for triggering the event:\n
+     * This event is triggered when the user is about to release the drag on the scrollable container component. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object
+     * is {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: speed at which the user releases the drag, in vp. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING,
+    /**
+     * @brief Defines the callback for the <b>Scroll</b> component's zoom event,
+     * triggered at the end of each frame during zooming. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object
+     * is {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: current zoom scale. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_EVENT_ON_DID_ZOOM,
+    /**
+     * @brief Defines the callback for the <b>Scroll</b> component's zoom start event,
+     * triggered when zooming begins. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object
+     * is {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} does not contain parameters. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_EVENT_ON_ZOOM_START,
+    /**
+     * @brief Defines the callback for the <b>Scroll</b> component's zoom end event,
+     * triggered when zooming ends. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object
+     * is {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} does not contain parameters. \n
+     *
+     * @since 20
+     */
+    NODE_SCROLL_EVENT_ON_ZOOM_STOP,
 
     /**
      * @brief Defines the event triggered when a child component enters or leaves the list display area.

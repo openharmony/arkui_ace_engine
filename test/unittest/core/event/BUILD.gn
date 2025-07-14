@@ -25,6 +25,7 @@ ace_unittest("event_manager_test_ng") {
     "event_manager_test_ng_issuse.cpp",
     "event_manager_test_ng_new.cpp",
     "event_manager_test_ng_two.cpp",
+    "event_manager_pen_test_ng.cpp",
   ]
 }
 

@@ -4966,11 +4966,11 @@ void RosenRenderContext::OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyTyp
     RequestNextFrame();
 }
 
-void RosenRenderContext::UpdateBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+void RosenRenderContext::UpdateBlender(const OHOS::Rosen::Blender* blender)
 {
     CHECK_NULL_VOID(rsNode_);
-    CHECK_NULL_VOID(brightnessBlender);
-    rsNode_->SetBlender(brightnessBlender);
+    CHECK_NULL_VOID(blender);
+    rsNode_->SetBlender(blender);
     RequestNextFrame();
 }
 
@@ -7703,49 +7703,6 @@ void RosenRenderContext::SetAdvanceInfo(std::unique_ptr<JsonValue>& json)
     }
     if (GetBloom().has_value()) {
         json->Put("Bloom", std::to_string(GetBloom().value()).c_str());
-    }
-}
-
-void RosenRenderContext::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
-{
-    if (rsNode_) {
-        DumpSimplifyStagingProperties(json);
-        if (!NearZero(rsNode_->GetStagingProperties().GetPivotZ())) {
-            json->Put("PivotZ", std::to_string(rsNode_->GetStagingProperties().GetPivotZ()).c_str());
-        }
-        if (!NearZero(rsNode_->GetStagingProperties().GetRotation())) {
-            json->Put("Rotation", std::to_string(rsNode_->GetStagingProperties().GetRotation()).c_str());
-        }
-        if (!NearZero(rsNode_->GetStagingProperties().GetRotationX())) {
-            json->Put("RotationX", std::to_string(rsNode_->GetStagingProperties().GetRotationX()).c_str());
-        }
-        if (!NearZero(rsNode_->GetStagingProperties().GetRotationY())) {
-            json->Put("RotationY", std::to_string(rsNode_->GetStagingProperties().GetRotationY()).c_str());
-        }
-        if (!NearEqual(rsNode_->GetStagingProperties().GetAlpha(), 1)) {
-            json->Put("Alpha", std::to_string(rsNode_->GetStagingProperties().GetAlpha()).c_str());
-        }
-        if (HasPosition()) {
-            auto position = GetPosition();
-            json->Put("Position",
-                position->GetX().ToString().append(",").append(position->GetY().ToString()).c_str());
-        }
-        if (HasOffset()) {
-            auto offset = GetOffset();
-            json->Put("Offset", offset->GetX().ToString().append(",").append(offset->GetY().ToString()).c_str());
-        }
-        if (HasPositionEdges()) {
-            auto positionEdges = GetPositionEdges();
-            json->Put("PositionEdges", positionEdges->ToString().c_str());
-        }
-        if (HasOffsetEdges()) {
-            auto offsetEdges = GetOffsetEdges();
-            json->Put("OffsetEdges", offsetEdges->ToString().c_str());
-        }
-        if (HasAnchor()) {
-            auto anchor = GetAnchor();
-            json->Put("Anchor", anchor->GetX().ToString().append(",").append(anchor->GetY().ToString()).c_str());
-        }
     }
 }
 

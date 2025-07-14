@@ -71,6 +71,7 @@ const InspectorFilter filter;
 namespace {
     constexpr float MAX_ROTATE = 360.0f;
     constexpr float TEST_FONT_SIZE = 2.0;
+    constexpr float DEFAULT_BORDER_RADIUS = 1.0f;
 class TestNode : public UINode {
     DECLARE_ACE_TYPE(TestNode, UINode);
 
@@ -1278,6 +1279,50 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue003, T
     auto jsonNode = JsonUtil::Create(true);
     pattern.ToJsonValue(jsonNode, filter);
     ASSERT_EQ(jsonNode->GetString("type", ""), V2::LOCATION_BUTTON_ETS_TAG);
+}
+
+/**
+ * @tc.name: SecurityComponentPatternToJsonValue004
+ * @tc.desc: Test security component ToJsonValueBorderRadius
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue004, TestSize.Level1)
+{
+    SecurityComponentPattern pattern;
+    CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    auto frameNode = RefPtr(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    pattern.frameNode_ = frameNode;
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateHasCustomPermissionForSecComp(true);
+    auto iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
+    ASSERT_NE(iconNode, nullptr);
+    
+    SaveButtonModelNG sc;
+    sc.SetIconBorderRadius(Dimension(3.0));
+    sc.SetBackgroundBorderRadius(Dimension(3.0));
+    pattern.UpdateIconProperty(frameNode, iconNode);
+
+    auto jsonNode = JsonUtil::Create(true);
+    pattern.ToJsonValue(jsonNode, filter);
+    auto jsonBorderRadius = jsonNode->GetObject("iconBorderRadius");
+    ASSERT_EQ(jsonBorderRadius->GetString("topLeft", ""), "3.00px");
+    ASSERT_EQ(jsonBorderRadius->GetString("topRight", ""), "3.00px");
+    ASSERT_EQ(jsonBorderRadius->GetString("bottomLeft", ""), "3.00px");
+    ASSERT_EQ(jsonBorderRadius->GetString("bottomRight", ""), "3.00px");
+    
+    sc.SetIconBorderRadius(Dimension(-3.0));
+    sc.SetBackgroundBorderRadius(Dimension(-3.0));
+    pattern.UpdateIconProperty(frameNode, iconNode);
+    auto jsonNodeNegative = JsonUtil::Create(true);
+    pattern.ToJsonValue(jsonNodeNegative, filter);
+    auto jsonBorderRadiusNegative = jsonNodeNegative->GetObject("iconBorderRadius");
+    ASSERT_EQ(jsonBorderRadiusNegative->GetString("topLeft"), Dimension(DEFAULT_BORDER_RADIUS).ToString().c_str());
+    ASSERT_EQ(jsonBorderRadiusNegative->GetString("topRight"), Dimension(DEFAULT_BORDER_RADIUS).ToString().c_str());
+    ASSERT_EQ(jsonBorderRadiusNegative->GetString("bottomLeft"), Dimension(DEFAULT_BORDER_RADIUS).ToString().c_str());
+    ASSERT_EQ(jsonBorderRadiusNegative->GetString("bottomRight"), Dimension(DEFAULT_BORDER_RADIUS).ToString().c_str());
 }
 
 /**

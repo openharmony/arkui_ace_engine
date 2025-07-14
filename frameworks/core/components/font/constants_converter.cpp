@@ -560,7 +560,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         brush.SetColor(textStyle.GetTextColor().GetValue());
         txtStyle.foregroundBrush = brush;
     }
-    if (textStyle.GetColorShaderStyle().has_value() && textStyle.GetStrokeWidth().Value() >= DEFAULT_STROKE_WIDTH) {
+    if (textStyle.GetColorShaderStyle().has_value() && textStyle.GetStrokeWidth().Value() == DEFAULT_STROKE_WIDTH) {
         RSBrush brush;
         auto shaderEffect =
             RSRecordingShaderEffect::CreateColorShader(textStyle.GetColorShaderStyle().value().GetValue());
@@ -599,7 +599,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtStyle.fontFeatures = features;
     }
 
-    auto gradiantColor = textStyle.GetFontForegroudGradiantColor();
+    auto gradiantColor = textStyle.GetFontForegroudGradiantColor().value_or(FontForegroudGradiantColor());
     if (gradiantColor.IsValid()) {
         ConvertGradiantColor(textStyle, context, txtStyle, gradiantColor);
     }
@@ -674,7 +674,7 @@ NG::Gradient ToGradient(const Gradient& gradient)
 
 void ConvertForegroundPaint(const TextStyle& textStyle, double width, double height, Rosen::TextStyle& txtStyle)
 {
-    if (!textStyle.GetGradient().has_value()) {
+    if (!textStyle.GetGradient().has_value() || textStyle.GetStrokeWidth().Value() != DEFAULT_STROKE_WIDTH) {
         return;
     }
     txtStyle.textStyleUid = static_cast<unsigned long>(textStyle.GetTextStyleUid());

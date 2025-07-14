@@ -1676,18 +1676,27 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
     auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(
-        GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-    pickerProperty->UpdateDisappearColor(
-        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
-    pickerProperty->UpdateSelectedColor(
-        GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
-    if (pickerProperty && pickerProperty->GetDisableTextStyleAnimation().value_or(false)) {
+    if (!pickerProperty->GetNormalTextColorSetByUser().value_or(false)) {
+        pickerProperty->UpdateColor(
+            GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    }
+
+    if (!pickerProperty->GetDisappearTextColorSetByUser().value_or(false)) {
+        pickerProperty->UpdateDisappearColor(
+            GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    }
+
+    if (!pickerProperty->GetSelectedTextColorSetByUser().value_or(false)) {
+        pickerProperty->UpdateSelectedColor(
+            GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
+    }
+
+    if (pickerProperty->GetDisableTextStyleAnimation().value_or(false) &&
+        !pickerProperty->GetDefaultTextColorSetByUser().value_or(false)) {
         auto textTheme = context->GetTheme<TextTheme>(host->GetThemeScopeId());
         CHECK_NULL_VOID(textTheme);
-        auto defaultTextStyle = textTheme->GetTextStyle();
         pickerProperty->UpdateDefaultColor(
-            GetTextProperties().defaultTextStyle_.textColor.value_or(defaultTextStyle.GetTextColor()));
+            GetTextProperties().defaultTextStyle_.textColor.value_or(textTheme->GetTextStyle().GetTextColor()));
     }
     if (isPicker_) {
         return;
@@ -1996,6 +2005,11 @@ void TextPickerPattern::UpdateDisappearTextStyle(const PickerTextStyle& textStyl
     auto defaultTextStyle = pickerTheme->GetDisappearOptionStyle();
     auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetDisappearColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetDisappearColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
@@ -2016,6 +2030,11 @@ void TextPickerPattern::UpdateNormalTextStyle(const PickerTextStyle& textStyle)
     auto defaultTextStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
@@ -2036,6 +2055,11 @@ void TextPickerPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle
     auto defaultTextStyle = pickerTheme->GetOptionStyle(true, false);
     auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetSelectedColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetSelectedColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
@@ -2056,6 +2080,10 @@ void TextPickerPattern::UpdateDefaultTextStyle(const PickerTextStyle& textStyle)
     auto defaultTextStyle = textTheme->GetTextStyle();
     auto pickerProperty = GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetDefaultColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetDefaultColor().value());
+    }
 
     UpdateTextStyleCommon(
         textStyle,

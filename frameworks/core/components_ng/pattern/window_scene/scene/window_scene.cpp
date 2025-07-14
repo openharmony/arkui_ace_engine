@@ -196,6 +196,7 @@ void WindowScene::OnAttachToFrameNode()
         context->SetRSNode(surfaceNode);
         surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
         SetSubWindowBufferAvailableCallback(surfaceNode);
+        Rosen::SceneSessionManager::GetInstance().NotifyOnAttachToFrameNode(session_);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "OnAttachToFrameNode id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
             session_->GetPersistentId(), host->GetId(), session_->GetWindowType(), session_->GetWindowName().c_str());
@@ -210,6 +211,7 @@ void WindowScene::OnAttachToFrameNode()
     context->SetRSNode(surfaceNode);
     surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
+    Rosen::SceneSessionManager::GetInstance().NotifyOnAttachToFrameNode(session_);
     RegisterFocusCallback();
     WindowPattern::OnAttachToFrameNode();
 }
@@ -719,7 +721,6 @@ void WindowScene::OnLayoutFinished()
             self->BufferAvailableCallback();
             return;
         }
-        CHECK_EQUAL_VOID(self->session_->IsAnco(), true);
         if (self->session_->GetBufferAvailableCallbackEnable()) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "buffer available callback enable is true, no need remove blank.");
             return;
@@ -743,10 +744,6 @@ void WindowScene::OnDrawingCompleted()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
-        if (self->blankWindow_) {
-            self->BufferAvailableCallbackForBlank(true);
-            return;
-        }
         CHECK_NULL_VOID(self->snapshotWindow_);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);

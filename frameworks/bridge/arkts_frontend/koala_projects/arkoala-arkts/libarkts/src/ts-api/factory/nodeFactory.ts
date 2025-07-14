@@ -810,12 +810,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createIfStatement(
-    //     expression: Expression,
-    //     thenStatement: Statement,
-    //     elseStatement?: Statement
-    // ): IfStatement;
     function createIfStatement(
         expression: Expression,
         thenStatement: Statement,
@@ -830,12 +824,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // updateIfStatement(
-    //     expression: Expression,
-    //     thenStatement: Statement,
-    //     elseStatement: Statement | undefined
-    // ): IfStatement;
     function updateIfStatement(
         node: IfStatement,
         expression: Expression,

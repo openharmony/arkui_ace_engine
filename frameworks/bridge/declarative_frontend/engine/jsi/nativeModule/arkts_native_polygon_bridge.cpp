@@ -46,22 +46,28 @@ ArkUINativeModuleValue PolygonBridge::SetPolygonPoints(ArkUIRuntimeCallInfo* run
     CalcDimension y;
     std::vector<ArkUI_Float32> xPointValues;
     std::vector<ArkUI_Float32> yPointValues;
+    std::vector<RefPtr<ResourceObject>> xResObjArray;
+    std::vector<RefPtr<ResourceObject>> yResObjArray;
     for (size_t i = 0; i < xlength; i++) {
         Local<JSValueRef> xValue = panda::ArrayRef::GetValueAt(vm, xPointArray, i);
         Local<JSValueRef> yValue = panda::ArrayRef::GetValueAt(vm, yPointArray, i);
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, xValue, x, false) ||
-            !ArkTSUtils::ParseJsDimensionVpNG(vm, yValue, y, false)) {
+        RefPtr<ResourceObject> xResObj;
+        RefPtr<ResourceObject> yResObj;
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, xValue, x, xResObj, false) ||
+            !ArkTSUtils::ParseJsDimensionVpNG(vm, yValue, y, yResObj, false)) {
             flag = false;
             break;
         }
 
         xPointValues.push_back(x.Value());
         yPointValues.push_back(y.Value());
+        xResObjArray.push_back(xResObj);
+        yResObjArray.push_back(yResObj);
     }
 
     if (flag) {
-        GetArkUINodeModifiers()->getPolygonModifier()->
-            setPolygonPoints(nativeNode, xPointValues.data(), yPointValues.data(), xlength);
+        GetArkUINodeModifiers()->getPolygonModifier()->setPolygonPoints(
+            nativeNode, xPointValues.data(), yPointValues.data(), xlength, xResObjArray.data(), yResObjArray.data());
     } else {
         GetArkUINodeModifiers()->getPolygonModifier()->resetPolygonPoints(nativeNode);
     }

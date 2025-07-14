@@ -282,14 +282,12 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
     Color color;
     RefPtr<ResourceObject> resObj;
     std::optional<Color> switchPointColor;
-    bool isValidValue = false;
     if (ParseJsColor(info[0], color, resObj)) {
         switchPointColor = color;
-        isValidValue = true;
+        ToggleModel::GetInstance()->SetSwitchPointColorSetByUser(true);
     }
     CreateWithColorResourceObj(resObj, static_cast<int32_t>(ToggleColorType::SWITCH_POINT_COLOR));
     ToggleModel::GetInstance()->SetSwitchPointColor(switchPointColor);
-    ToggleModel::GetInstance()->SetSwitchPointColorSetByUser(isValidValue);
 }
 
 void JSToggle::JsPadding(const JSCallbackInfo& info)
@@ -401,12 +399,14 @@ NG::PaddingProperty JSToggle::GetPadding(const std::optional<CalcDimension>& top
 void JSToggle::SetBackgroundColor(const JSCallbackInfo& info)
 {
     Color backgroundColor = Color::TRANSPARENT;
-    bool flag = ParseJsColor(info[0], backgroundColor);
+    RefPtr<ResourceObject> resObj;
+    bool flag = ParseJsColor(info[0], backgroundColor, resObj);
     if (!Container::IsCurrentUseNewPipeline()) {
         JSViewAbstract::JsBackgroundColor(info);
         return;
     }
     ToggleModel::GetInstance()->SetBackgroundColor(backgroundColor, flag);
+    CreateWithColorResourceObj(resObj, static_cast<int32_t>(ToggleColorType::BACKGROUND_COLOR));
 }
 
 void JSToggle::JsHoverEffect(const JSCallbackInfo& info)

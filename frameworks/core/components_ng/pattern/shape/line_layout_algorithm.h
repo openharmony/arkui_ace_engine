@@ -27,8 +27,12 @@ public:
     LineLayoutAlgorithm() = default;
     ~LineLayoutAlgorithm() override = default;
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
+
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+
+    void MeasureLayoutPolicySize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, SizeF& size);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(LineLayoutAlgorithm);

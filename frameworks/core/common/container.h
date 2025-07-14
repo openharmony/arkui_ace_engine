@@ -54,6 +54,11 @@
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
 
+namespace OHOS {
+class IRemoteObject;
+template<typename T>
+class sptr;
+} // namespace OHOS
 namespace OHOS::Ace {
 
 using PageTask = std::function<void()>;
@@ -345,7 +350,7 @@ public:
     static RefPtr<Container> GetContainer(int32_t containerId);
     static RefPtr<Container> GetActive();
     static RefPtr<Container> GetDefault();
-    static RefPtr<Container> GetFoucsed();
+    static RefPtr<Container> GetFocused();
     static RefPtr<Container> GetByWindowId(uint32_t windowId);
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
@@ -776,6 +781,8 @@ public:
     virtual void UpdateColorMode(uint32_t colorMode) {};
 
     virtual void TriggerModuleSerializer() {};
+
+    virtual sptr<IRemoteObject> GetToken();
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::vector<std::string> GetFontFamilyName(const std::string& path);

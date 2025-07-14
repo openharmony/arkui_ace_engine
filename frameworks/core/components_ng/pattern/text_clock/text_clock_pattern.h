@@ -146,7 +146,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnLanguageConfigurationUpdate() override;
     void DumpInfo() override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void OnColorConfigurationUpdate() override;
     void InitTextClockController();
 

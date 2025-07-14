@@ -157,19 +157,7 @@ void EnvelopedDragData(
     std::map<std::string, int64_t> summary;
     std::map<std::string, int64_t> detailedSummary;
     int32_t dataSize = 1;
-    DragDropFuncWrapper::EnvelopedDataLoadParams(dragAction, udKey);
-    if (dragAction->unifiedData) {
-        int32_t ret = UdmfClient::GetInstance()->SetData(dragAction->unifiedData, udKey);
-        if (ret != 0) {
-            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set data failed, return value is %{public}d", ret);
-        } else {
-            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
-            if (ret != 0) {
-                TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
-            }
-        }
-        dataSize = static_cast<int32_t>(dragAction->unifiedData->GetSize());
-    }
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
     int32_t recordSize = (dataSize != 0 ? dataSize : static_cast<int32_t>(shadowInfos.size()));
     if (dragAction->previewOption.isNumber) {
         recordSize = dragAction->previewOption.badgeNumber > 1 ? dragAction->previewOption.badgeNumber : 1;
@@ -190,12 +178,32 @@ void EnvelopedDragData(
         summary, false, detailedSummary };
 }
 
-void DragDropFuncWrapper::EnvelopedDataLoadParams(
-    std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, std::string& udKey)
+void DragDropFuncWrapper::EnvelopedData(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
+    std::string& udKey, std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary,
+    int32_t& dataSize)
 {
     CHECK_NULL_VOID(dragAction);
+    int32_t ret = 1;
+    if (dragAction->unifiedData) {
+        ret = UdmfClient::GetInstance()->SetData(dragAction->unifiedData, udKey);
+        if (ret != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set data failed, return value is %{public}d", ret);
+        }
+        dataSize = static_cast<int32_t>(dragAction->unifiedData->GetSize());
+    }
     if (dragAction->dataLoadParams) {
-        UdmfClient::GetInstance()->SetDelayInfo(dragAction->dataLoadParams, udKey);
+        ret = UdmfClient::GetInstance()->SetDelayInfo(dragAction->dataLoadParams, udKey);
+        if (ret != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set delayInfo failed, return value is %{public}d", ret);
+        }
+        auto recodeCount = dragAction->dataLoadParams->GetRecordCount();
+        dataSize = (recodeCount == 0 || recodeCount > INT32_MAX) ? 1 : static_cast<int32_t>(recodeCount);
+    }
+    if (ret == 0) {
+        ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
+        if (ret != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
+        }
     }
 }
 
@@ -1531,7 +1539,11 @@ void DragDropFuncWrapper::ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>
     auto dataLoadParams = dragEvent->GetDataLoadParams();
     auto isUseDataLoadParams = dragEvent->IsUseDataLoadParams();
     if (dataLoadParams && isUseDataLoadParams) {
-        UdmfClient::GetInstance()->SetDelayInfo(dataLoadParams, udKey);
+        ACE_SCOPED_TRACE("drag: set delayInfo to udmf");
+        if (UdmfClient::GetInstance()->SetDelayInfo(dataLoadParams, udKey) != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set delayInfo failed, return value is %{public}d", ret);
+            DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SET_DATA_FAIL);
+        }
     }
     if (unifiedData && !isUseDataLoadParams) {
         ACE_SCOPED_TRACE("drag: set drag data to udmf");

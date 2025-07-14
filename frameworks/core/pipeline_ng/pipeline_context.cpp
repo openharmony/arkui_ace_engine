@@ -1438,15 +1438,13 @@ void PipelineContext::SetupRootElement()
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<Rosen::RSUIDirector> rsUIDirector;
     if (!IsJsCard() && !isFormRender_) {
-        auto window = GetWindow();
-        if (window) {
-            rsUIDirector = window->GetRSUIDirector();
-            if (rsUIDirector) {
-                rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-            }
+        rsUIDirector = GetRSUIDirector();
+        if (rsUIDirector) {
+            RSTransactionBegin(rsUIDirector);
+            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            RSTransactionCommit(rsUIDirector);
         }
     }
-    FlushImplicitTransaction(rsUIDirector);
 #endif
     accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
     stageManager_ = ViewAdvancedRegister::GetInstance()->GenerateStageManager(stageNode);
@@ -1511,20 +1509,32 @@ void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback)
         }, TaskExecutor::TaskType::UI, "ArkUISetOnWindowFocusedCallback");
 }
 
-void PipelineContext::FlushImplicitTransaction(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector)
+void PipelineContext::RSTransactionBegin(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetMultiInstanceEnabled() && rsUIDirector) {
         auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
-        if (surfaceNode) {
-            auto rsUIContext = surfaceNode->GetRSUIContext();
-            if (rsUIContext) {
-                auto rsTransaction = rsUIContext->GetRSTransaction();
-                if (rsTransaction) {
-                    rsTransaction->FlushImplicitTransaction();
-                }
-            }
-        }
+        CHECK_NULL_VOID(surfaceNode);
+        auto rsUIContext = surfaceNode->GetRSUIContext();
+        CHECK_NULL_VOID(rsUIContext);
+        auto rsTransaction = rsUIContext->GetRSTransaction();
+        CHECK_NULL_VOID(rsTransaction);
+        rsTransaction->Begin();
+    }
+#endif
+}
+
+void PipelineContext::RSTransactionCommit(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetMultiInstanceEnabled() && rsUIDirector) {
+        auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
+        CHECK_NULL_VOID(surfaceNode);
+        auto rsUIContext = surfaceNode->GetRSUIContext();
+        CHECK_NULL_VOID(rsUIContext);
+        auto rsTransaction = rsUIContext->GetRSTransaction();
+        CHECK_NULL_VOID(rsTransaction);
+        rsTransaction->Commit();
     }
 #endif
 }
@@ -1556,15 +1566,13 @@ void PipelineContext::SetupSubRootElement()
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<Rosen::RSUIDirector> rsUIDirector;
     if (!IsJsCard()) {
-        auto window = GetWindow();
-        if (window) {
-            rsUIDirector = window->GetRSUIDirector();
-            if (rsUIDirector) {
-                rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-            }
+        rsUIDirector = GetRSUIDirector();
+        if (rsUIDirector) {
+            RSTransactionBegin(rsUIDirector);
+            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            RSTransactionCommit(rsUIDirector);
         }
     }
-    FlushImplicitTransaction(rsUIDirector);
 #endif
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
@@ -3530,7 +3538,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-injectionkeycode" && params.size() > PARAM_NUM) {
         UiSessionManager::GetInstance()->SendCommand(params[1]);
 #endif
-    } else if (params[0] == "-forcedark" && params.size() > 2) { // 2 means the forcedark needs at least 3 args
+    } else if (params[0] == "-forcedark") {
         DumpForceColor(params);
     } else if (params[0] == "-bindaicaller" && params.size() >= PARAM_NUM) {
         OnDumpBindAICaller(params);
@@ -4601,15 +4609,13 @@ void PipelineContext::SetAppBgColor(const Color& color)
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<Rosen::RSUIDirector> rsUIDirector;
     if (!IsJsCard()) {
-        auto window = GetWindow();
-        if (window) {
-            rsUIDirector = window->GetRSUIDirector();
-            if (rsUIDirector) {
-                rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-            }
+        rsUIDirector = GetRSUIDirector();
+        if (rsUIDirector) {
+            RSTransactionBegin(rsUIDirector);
+            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            RSTransactionCommit(rsUIDirector);
         }
     }
-    FlushImplicitTransaction(rsUIDirector);
 #endif
     CHECK_NULL_VOID(stageManager_);
     auto stage = stageManager_->GetStageNode();
@@ -5918,7 +5924,7 @@ void PipelineContext::RegisterFocusCallback()
 void PipelineContext::GetInspectorTree(bool onlyNeedVisible)
 {
     if (onlyNeedVisible) {
-        auto root = JsonUtil::Create(true);
+        auto root = JsonUtil::CreateSharedPtrJson(true);
         RefPtr<NG::FrameNode> topNavNode;
         uiTranslateManager_->FindTopNavDestination(rootNode_, topNavNode);
         if (topNavNode != nullptr) {
@@ -5926,11 +5932,14 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible)
         } else {
             rootNode_->DumpSimplifyTree(0, root);
         }
-        auto json = root->ToString();
-        json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
-        auto res = JsonUtil::Create(true);
-        res->Put("0", json.c_str());
-        UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
+        auto cb = [root]() {
+            auto json = root->ToString();
+            json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
+            auto res = JsonUtil::Create(true);
+            res->Put("0", json.c_str());
+            UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
+        };
+        taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetInspectorTree");
     } else {
         bool needThrow = false;
         NG::InspectorFilter filter;
@@ -6467,6 +6476,9 @@ void PipelineContext::FireArkUIObjectLifecycleCallback(void* data)
 
 void PipelineContext::DumpForceColor(const std::vector<std::string>& params) const
 {
+    if (params.size() <= PARAM_NUM) {
+        return;
+    }
     int32_t nodeId = StringUtils::StringToInt(params[1], -1);
     if (nodeId < 0) {
         return;

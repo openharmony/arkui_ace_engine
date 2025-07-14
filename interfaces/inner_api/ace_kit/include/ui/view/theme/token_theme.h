@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_THEME_TOKEN_THEME_H
 
 #include "ui/base/ace_type.h"
-#include "ui/view/theme/token_colors.h"
 #include "ui/resource/resource_object.h"
+#include "ui/view/theme/token_colors.h"
 
 namespace OHOS::Ace {
 
@@ -26,6 +26,7 @@ using TokenThemeScopeId = int32_t;
 
 class ACE_FORCE_EXPORT TokenTheme : public virtual AceType {
     DECLARE_ACE_TYPE(TokenTheme, AceType);
+
 public:
     explicit TokenTheme(int32_t id)
     {
@@ -38,9 +39,14 @@ public:
         colors_ = colors;
     }
 
+    void SetDarkColors(const RefPtr<TokenColors>& darkColors)
+    {
+        darkColors_ = darkColors;
+    }
+
     const RefPtr<TokenColors>& Colors() const
     {
-        return colors_;
+        return IsDark() ? darkColors_ : colors_;
     }
 
     void SetColorMode(ColorMode colorMode)
@@ -63,15 +69,32 @@ public:
         resObjs_ = std::move(resObjs);
     }
 
+    void SetDarkResObjs(std::vector<RefPtr<ResourceObject>>&& darkResObjs)
+    {
+        darkResObjs_ = std::move(darkResObjs);
+    }
+
     const std::vector<RefPtr<ResourceObject>>& GetResObjs() const
     {
-        return resObjs_;
+        return IsDark() ? darkResObjs_ : resObjs_;
     }
+
+    static bool IsDarkMode();
+
 private:
     int32_t id_ { 0 };
     RefPtr<TokenColors> colors_;
+    RefPtr<TokenColors> darkColors_;
     std::vector<RefPtr<ResourceObject>> resObjs_;
+    std::vector<RefPtr<ResourceObject>> darkResObjs_;
     ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
+    bool IsDark() const
+    {
+        if (colorMode_ == ColorMode::COLOR_MODE_UNDEFINED) {
+            return IsDarkMode();
+        }
+        return colorMode_ == ColorMode::DARK;
+    }
 };
 
 } // namespace OHOS::Ace
