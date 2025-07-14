@@ -23,7 +23,7 @@
 #include "core/components_ng/pattern/text/text_model_static.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/macros.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/utility/callback_helper.h"

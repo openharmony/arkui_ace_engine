@@ -19,7 +19,7 @@
 
 #include "arkoala-macros.h"
 #include "arkoala_api_generated.h"
-#include "node_api.h"
+#include "ui_node_api.h"
 
 namespace OHOS::Ace::NG {
 namespace GeneratedApiImpl {

@@ -20,7 +20,7 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/implementation/text_clock_controller_peer_impl.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 

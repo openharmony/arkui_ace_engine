@@ -17,7 +17,7 @@
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "children_main_size_peer.h"
 
 namespace OHOS::Ace::NG::Converter {

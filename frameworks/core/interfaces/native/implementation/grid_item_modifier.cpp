@@ -19,7 +19,7 @@
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
