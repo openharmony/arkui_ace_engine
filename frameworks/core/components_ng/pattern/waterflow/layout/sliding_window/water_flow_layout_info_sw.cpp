@@ -1056,4 +1056,14 @@ bool WaterFlowLayoutInfoSW::HaveRecordIdx(int32_t idx) const
     }
     return false;
 }
+
+float WaterFlowLayoutInfoSW::CalcMaxHeight(int itemCnt)
+{
+    auto footerHeight = 0.0f;
+    if (EndIndex() != itemCnt - 1) {
+        footerHeight = footerHeight_;
+    }
+    const float contentEnd = EndPos() + footerHeight + BotMargin();
+    return std::max(-totalOffset_ + contentEnd, maxHeight_);
+}
 } // namespace OHOS::Ace::NG

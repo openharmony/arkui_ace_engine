@@ -842,7 +842,13 @@ void WaterFlowLayoutSW::LayoutFooter(const OffsetF& paddingOffset, bool reverse)
 
 void WaterFlowLayoutSW::PostMeasureSelf(float selfCrossLen)
 {
-    mainLen_ = info_->GetContentHeight();
+    mainLen_ = info_->CalcMaxHeight(itemCnt_);
+    const auto& constraint = props_->GetLayoutConstraint();
+    if (axis_ == Axis::VERTICAL) {
+        mainLen_ = std::clamp(mainLen_, constraint->minSize.Height(), constraint->maxSize.Height());
+    } else {
+        mainLen_ = std::clamp(mainLen_, constraint->minSize.Width(), constraint->minSize.Width());
+    }
     SizeF selfSize = (axis_ == Axis::VERTICAL) ? SizeF(selfCrossLen, mainLen_) : SizeF(mainLen_, selfCrossLen);
     AddPaddingToSize(props_->CreatePaddingAndBorder(), selfSize);
     wrapper_->GetGeometryNode()->SetFrameSize(selfSize);
