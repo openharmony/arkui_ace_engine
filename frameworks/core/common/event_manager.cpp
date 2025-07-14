@@ -227,7 +227,7 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
         if (!refereeNG_->IsReady()) {
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
                 "GestureReferee is contaminate by new comming recognizer, force clean gestureReferee.");
-            refereeNG_->ForceCleanGestureReferee();
+            refereeNG_->ForceCleanGestureRefereeState();
         }
 #ifdef OHOS_STANDARD_SYSTEM
         for (const auto& entry : reHitTestResult) {
