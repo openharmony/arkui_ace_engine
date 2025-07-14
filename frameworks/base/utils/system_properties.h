@@ -771,6 +771,8 @@ public:
         return syncLoadEnabled_;
     }
 
+    static std::string GetMapSearchPrefix();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -869,6 +871,7 @@ private:
     static HeightLayoutBreakPoint heightLayoutBreakpoints_;
     static bool syncLoadEnabled_;
     static bool whiteBlockEnabled_;
+    static std::string mapSearchPrefix_;
 };
 
 } // namespace OHOS::Ace

@@ -176,8 +176,6 @@ enum class WindowChangeType {
     if (!*_##name->isValid_) {                          \
         ifInvalid;                                      \
     }
-#define PETALMAPS_SEARCH_URL(address) \
-    (std::string("https://www.petalmaps.com/search/?q=") + (address) + "&utm_source=fb")
 
 struct UIContentImplHelper {
     explicit UIContentImplHelper(UIContentImpl* uiContent) : uiContent_(uiContent)
@@ -2507,7 +2505,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
         CHECK_NULL_VOID(abilityContext);
         AAFwk::Want want;
-        auto url = PETALMAPS_SEARCH_URL(address);
+        auto url = SystemProperties::GetMapSearchPrefix() + address + "&utm_source=fb";
         want.SetUri(url);
         abilityContext->OpenLink(want, REQUEST_CODE);
     });
