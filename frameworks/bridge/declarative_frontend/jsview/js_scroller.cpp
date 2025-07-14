@@ -150,9 +150,13 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     }
     ContainerScope scope(instanceId_);
     auto direction = scrollController->GetScrollDirection();
-    if (direction == Axis::FREE && scrollController->FreeScrollTo({ xOffset, yOffset,
-                                       static_cast<float>(animationValue->IsBoolean() ? DEFAULT_DURATION : duration),
-                                       curve, smooth, canOverScroll })) {
+    if (direction == Axis::FREE &&
+        scrollController->FreeScrollTo({ .xOffset = xOffset,
+            .yOffset = yOffset,
+            .duration = static_cast<float>(animationValue->IsBoolean() ? DEFAULT_DURATION : duration),
+            .curve = curve,
+            .smooth = (animationValue->IsBoolean() && smooth) || animationValue->IsObject(),
+            .canOverScroll = canOverScroll })) {
         return;
     }
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
