@@ -182,7 +182,7 @@ std::vector<uint32_t> GetResIdInJson(const MediaData& jsonBuf, const std::vector
     return ids;
 }
 
-ani_object CreatePixelMapDrawable(ani_env* env, const MediaData& mediaData)
+ani_object CreatePixelMapDrawable(ani_env* env, MediaData& mediaData)
 {
     ani_class cls;
     ani_object obj = nullptr;
@@ -205,11 +205,11 @@ ani_object CreatePixelMapDrawable(ani_env* env, const MediaData& mediaData)
     if (drawable == nullptr) {
         return obj;
     }
-    PixelMapDrawableSetRawDataC(drawable, mediaData.data.get(), mediaData.len);
+    PixelMapDrawableSetRawDataC(drawable, mediaData.data.release(), mediaData.len);
     return obj;
 }
 
-ani_object CreateLayeredDrawableByJsonBuffer(ani_env* env, const DrawableInfo& info)
+ani_object CreateLayeredDrawableByJsonBuffer(ani_env* env, DrawableInfo& info)
 {
     ani_class cls;
     ani_object obj = nullptr;
@@ -240,7 +240,7 @@ ani_object CreateLayeredDrawableByJsonBuffer(ani_env* env, const DrawableInfo& i
         std::unique_ptr<uint8_t[]> data;
         auto state = resMgr->GetDrawableInfoById(id, dinfo, data, 0, info.density);
         if (state == Global::Resource::SUCCESS) {
-            datas.push_back({ data.get(), std::get<1>(dinfo) });
+            datas.push_back({ data.release(), std::get<1>(dinfo) });
         }
     }
     if (datas.size() < BUFFER_NUMBER) {
@@ -252,13 +252,13 @@ ani_object CreateLayeredDrawableByJsonBuffer(ani_env* env, const DrawableInfo& i
     std::unique_ptr<uint8_t[]> maskData;
     size_t maskLen = 0;
     auto state = resMgr->GetMediaDataByName(DEFAULT_MASK, maskLen, maskData);
-    if (state == Global::Resource::SUCCESS || maskLen > 0) {
-        LayeredDrawableSetMaskDataC(drawable, maskData.get(), maskLen);
+    if (state == Global::Resource::SUCCESS && maskLen > 0) {
+        LayeredDrawableSetMaskDataC(drawable, maskData.release(), maskLen);
     }
     return obj;
 }
 
-ani_object CreateLayerdDrawableByTwoBuffer(ani_env* env, const DrawableInfo& info)
+ani_object CreateLayerdDrawableByTwoBuffer(ani_env* env, DrawableInfo& info)
 {
     ani_class cls;
     ani_object obj = nullptr;
@@ -275,8 +275,8 @@ ani_object CreateLayerdDrawableByTwoBuffer(ani_env* env, const DrawableInfo& inf
     if (drawable == nullptr) {
         return obj;
     }
-    LayeredDrawableSetForegroundDataC(drawable, info.firstBuffer.data.get(), info.firstBuffer.len);
-    LayeredDrawableSetBackgroundDataC(drawable, info.secondBuffer.data.get(), info.secondBuffer.len);
+    LayeredDrawableSetForegroundDataC(drawable, info.firstBuffer.data.release(), info.firstBuffer.len);
+    LayeredDrawableSetBackgroundDataC(drawable, info.secondBuffer.data.release(), info.secondBuffer.len);
     // initialize mask data
     auto resMgr = info.manager;
     auto themeMask = resMgr->GetThemeMask();
@@ -285,12 +285,12 @@ ani_object CreateLayerdDrawableByTwoBuffer(ani_env* env, const DrawableInfo& inf
     size_t maskLen = 0;
     auto state = resMgr->GetMediaDataByName(DEFAULT_MASK, maskLen, maskData);
     if (state == Global::Resource::SUCCESS && maskLen > 0) {
-        LayeredDrawableSetMaskDataC(drawable, maskData.get(), maskLen);
+        LayeredDrawableSetMaskDataC(drawable, maskData.release(), maskLen);
     }
     return obj;
 }
 
-ani_object DrawableDescriptorAni::CreateDrawableDescriptor(ani_env* env, const DrawableInfo& info)
+ani_object DrawableDescriptorAni::CreateDrawableDescriptor(ani_env* env, DrawableInfo& info)
 {
     ani_object object = nullptr;
     std::string type = info.type;
