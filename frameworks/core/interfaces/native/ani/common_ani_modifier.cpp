@@ -22,6 +22,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "bridge/arkts_frontend/ani_graphics_module.h"
@@ -32,7 +33,17 @@
 #include <vector>
 
 namespace OHOS::Ace::NG {
-
+namespace {
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
+constexpr int NUM_3 = 3;
+constexpr int NUM_4 = 4;
+constexpr int NUM_5 = 5;
+constexpr int NUM_6 = 6;
+constexpr int NUM_7 = 7;
+constexpr int NUM_8 = 8;
+}
 static thread_local std::vector<int32_t> restoreInstanceIds_;
 
 ani_ref* GetHostContext()
@@ -176,6 +187,55 @@ void FrameNodeMarkDirtyNode(ani_env* env, ani_long ptr)
     Framework::AniGraphicsModule::FrameNodeMarkDirtyNode(env, ptr);
 }
 
+Alignment ParseAlignment(int32_t align)
+{
+    Alignment alignment = Alignment::CENTER;
+    switch (align) {
+        case NUM_0:
+            alignment = Alignment::TOP_LEFT;
+            break;
+        case NUM_1:
+            alignment = Alignment::TOP_CENTER;
+            break;
+        case NUM_2:
+            alignment = Alignment::TOP_RIGHT;
+            break;
+        case NUM_3:
+            alignment = Alignment::CENTER_LEFT;
+            break;
+        case NUM_4:
+            alignment = Alignment::CENTER;
+            break;
+        case NUM_5:
+            alignment = Alignment::CENTER_RIGHT;
+            break;
+        case NUM_6:
+            alignment = Alignment::BOTTOM_LEFT;
+            break;
+        case NUM_7:
+            alignment = Alignment::BOTTOM_CENTER;
+            break;
+        case NUM_8:
+            alignment = Alignment::BOTTOM_RIGHT;
+            break;
+        default:
+            break;
+    }
+    return alignment;
+}
+
+void SetOverlayComponent(ani_long node, ani_long builderPtr, AniOverlayOptions options)
+{
+    CHECK_NULL_VOID(node);
+    FrameNode* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNodePeer* overlayNodePeer = builderPtr ? reinterpret_cast<FrameNodePeer*>(builderPtr) : nullptr;
+    RefPtr<NG::FrameNode> overlayNode = FrameNodePeer::GetFrameNodeByPeer(overlayNodePeer);
+    CalcDimension x(options.x, DimensionUnit::VP);
+    CalcDimension y(options.y, DimensionUnit::VP);
+    Alignment align = ParseAlignment(options.alignment);
+    ViewAbstract::SetOverlayBuilder(frameNode, overlayNode, align, x, y);
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -194,7 +254,8 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .isDebugMode =  OHOS::Ace::NG::IsDebugMode,
         .onMeasureInnerMeasure = OHOS::Ace::NG::OnMeasureInnerMeasure,
         .onLayoutInnerLayout = OHOS::Ace::NG::OnLayoutInnerLayout,
-        .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode };
+        .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode,
+        .setOverlayComponent = OHOS::Ace::NG::SetOverlayComponent };
     return &impl;
 }
 

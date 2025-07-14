@@ -30,7 +30,7 @@ import { SourceTool, AnimateParam, SheetOptions, KeyEvent } from "./common"
 import { TextPickerDialogOptions } from "./textPicker"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Frame, Size } from "../Graphics"
-import { TouchEvent, DragItemInfo, CustomBuilder, OnDragEventCallback, PreviewConfiguration, DropOptions } from "./common"
+import { TouchEvent, DragItemInfo, CustomBuilder, OnDragEventCallback, PreviewConfiguration, DropOptions, OverlayOptions } from "./common"
 import { DragEvent } from '../component'
 
 export class BaseContextInternal {
@@ -1114,6 +1114,45 @@ export class DragDropOps {
     }
 }
 
+export class OverlayOps {
+    public static setOverlayAttribute(node: KPointer, value: string | CustomBuilder | undefined, options?: OverlayOptions): void {
+        const node_casted = node as (KPointer)
+        const value_casted = value as (string | CustomBuilder | undefined)
+        const options_casted = options as (OverlayOptions | undefined)
+        OverlayOps.setOverlayAttribute_serialize(node_casted, value_casted, options_casted)
+        return
+    }
+    private static setOverlayAttribute_serialize(node: KPointer, value: string | CustomBuilder | undefined, options?: OverlayOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(0)
+                const value_value_0  = value_value as string
+                thisSerializer.writeString(value_value_0)
+            }
+            else if (RuntimeType.FUNCTION == value_value_type) {
+                thisSerializer.writeInt8(1)
+                const value_value_1  = value_value as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_1))
+            }
+        }
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeOverlayOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._OverlayOps_setOverlayAttribute(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export class UIContextAtomicServiceBar {
     public static getBarRect(): Frame {
         return UIContextAtomicServiceBar.getBarRect_serialize()

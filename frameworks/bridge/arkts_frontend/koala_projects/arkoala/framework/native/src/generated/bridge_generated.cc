@@ -40076,6 +40076,42 @@ Ark_NativePointer impl_OffscreenCanvasRenderingContext2D_transferToImageBitmap(A
         return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->transferToImageBitmap(self);
 }
 KOALA_INTEROP_DIRECT_1(OffscreenCanvasRenderingContext2D_transferToImageBitmap, Ark_NativePointer, Ark_NativePointer)
+void impl_OverlayOps_setOverlayAttribute(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+    Deserializer thisDeserializer(thisArray, thisLength);
+    const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Union_String_CustomBuilder value_value_buf = {};
+    value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+    {
+        const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
+        Ark_Union_String_CustomBuilder value_value_buf_ = {};
+        value_value_buf_.selector = value_value_buf__selector;
+        if (value_value_buf__selector == 0) {
+            value_value_buf_.selector = 0;
+            value_value_buf_.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        else if (value_value_buf__selector == 1) {
+            value_value_buf_.selector = 1;
+            value_value_buf_.value1 = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
+        }
+        else {
+            INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
+        }
+        value_value_buf.value = static_cast<Ark_Union_String_CustomBuilder>(value_value_buf_);
+    }
+    Opt_Union_String_CustomBuilder value_value = value_value_buf;;
+
+    const auto options_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_OverlayOptions options_value_buf = {};
+    options_value_buf.tag = options_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (options_value_buf_runtimeType))
+    {
+        options_value_buf.value = thisDeserializer.readOverlayOptions();
+    }
+    Opt_OverlayOptions options_value = options_value_buf;
+    GetAccessors()->getOverlayOpsAccessor()->setOverlayAttribute(node, (const Opt_Union_String_CustomBuilder*)&value_value, (const Opt_OverlayOptions*)&options_value);
+}
+KOALA_INTEROP_DIRECT_V3(OverlayOps_setOverlayAttribute, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_OffscreenCanvas_ctor(KInteropNumber width, KInteropNumber height) {
         return GetAccessors()->getOffscreenCanvasAccessor()->ctor((const Ark_Number*) (&width), (const Ark_Number*) (&height));
 }
