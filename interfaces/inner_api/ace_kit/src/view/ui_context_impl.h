@@ -55,6 +55,8 @@ public:
     NG::OffsetF GetContainerModalButtonsOffset() override;
     void RegisterArkUIObjectLifecycleCallback(ArkUIObjectLifecycleCallback&& callback) override;
     void UnregisterArkUIObjectLifecycleCallback() override;
+    sptr<IRemoteObject> GetToken() override;
+
 private:
     NG::PipelineContext* context_ = nullptr;
     RefPtr<OverlayManager> overlayManager_;

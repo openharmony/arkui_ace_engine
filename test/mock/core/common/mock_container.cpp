@@ -14,6 +14,7 @@
  */
 
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/interfaces/ipc_single/iremote_object.h"
 
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
@@ -243,5 +244,10 @@ bool Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
                      PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >=
                          static_cast<int32_t>(version)
                : GreatOrEqualAPITargetVersion(version);
+}
+
+sptr<IRemoteObject> Container::GetToken()
+{
+    return nullptr;
 }
 } // namespace OHOS::Ace

@@ -16,6 +16,7 @@
 #include "core/common/container.h"
 
 #include <dirent.h>
+#include "iremote_object.h"
 
 #include "base/utils/utils.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -418,5 +419,10 @@ bool Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
 {
     return PipelineBase::GetCurrentContextSafelyWithCheck() &&
            PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
+}
+
+sptr<IRemoteObject> Container::GetToken()
+{
+    return nullptr;
 }
 } // namespace OHOS::Ace

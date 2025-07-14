@@ -86,6 +86,7 @@ config("ace_unittest_config") {
       "//foundation/window/window_manager/interfaces/innerkits",
       "//commonlibrary/c_utils/base/include/",
       "//third_party/node/src",
+      "$ace_root/test/mock/interfaces/ipc_single",
     ]
   }
 
@@ -686,7 +687,7 @@ ohos_source_set("ace_core_extra") {
   ]
   configs = [ ":ace_unittest_config" ]
   if (current_os == "ohos") {
-    external_deps += [ "c_utils:utils" ]
+    external_deps += [ "c_utils:utils", "ipc:ipc_single" ]
   }
 }
 
@@ -811,6 +812,7 @@ ohos_source_set("ace_components_mock") {
       "c_utils:utils",
       "napi:ace_napi",
       "skia:skia_canvaskit",
+      "ipc:ipc_single"
     ]
   }
 }

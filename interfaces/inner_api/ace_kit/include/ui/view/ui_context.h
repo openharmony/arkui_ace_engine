@@ -24,6 +24,11 @@
 #include "ui/view/frame_node.h"
 #include "ui/view/overlay/overlay_manager.h"
 
+namespace OHOS {
+class IRemoteObject;
+template<typename T>
+class sptr;
+} // namespace OHOS
 namespace OHOS::Ace::Kit {
 
 using Task = std::function<void()>;
@@ -63,6 +68,8 @@ public:
     virtual NG::OffsetF GetContainerModalButtonsOffset() = 0;
     virtual void RegisterArkUIObjectLifecycleCallback(ArkUIObjectLifecycleCallback&& callback) = 0;
     virtual void UnregisterArkUIObjectLifecycleCallback() = 0;
+
+    virtual sptr<IRemoteObject> GetToken() = 0;
 };
 
 }

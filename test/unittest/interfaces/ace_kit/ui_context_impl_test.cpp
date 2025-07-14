@@ -19,6 +19,7 @@
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 #undef private
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/interfaces/ipc_single/iremote_object.h"
 #include "ui/base/ace_type.h"
 
 #include "base/memory/ace_type.h"
@@ -441,6 +442,25 @@ HWTEST_F(UIContextImplTest, UnregisterArkUIObjectLifecycleCallback001, TestSize.
      * @tc.expected: step3. Task should be added without errors or crashes
      */
     EXPECT_FALSE(taskExecuted);
+}
+
+/**
+ * @tc.name: GetTokenTest
+ * @tc.desc: Test get token to the normal task list
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, GetTokenTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get token from uiContext
+     */
+    auto token = uiContext_->GetToken();
+
+    ASSERT_EQ(token, nullptr);
+    /**
+     * @tc.expected: step2. Task should be added without errors or crashes
+     */
+    SUCCEED();
 }
 
 } // namespace OHOS::Ace::Kit

@@ -15,6 +15,8 @@
 
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 
+#include "iremote_object.h"
+
 #include "ui/base/utils/utils.h"
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "interfaces/inner_api/ace_kit/src/view/overlay/overlay_manager_impl.h"
@@ -168,6 +170,15 @@ NG::OffsetF UIContextImpl::GetContainerModalButtonsOffset()
     Ace::NG::RectF containerModal;
     context_->GetContainerModalButtonsRect(containerModal, buttonsRect);
     return buttonsRect.GetOffset();
+}
+
+sptr<IRemoteObject> UIContextImpl::GetToken()
+{
+    CHECK_NULL_RETURN(context_, nullptr);
+    ContainerScope scope(context_->GetInstanceId());
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    return container->GetToken();
 }
 
 } // namespace OHOS::Ace::Kit
