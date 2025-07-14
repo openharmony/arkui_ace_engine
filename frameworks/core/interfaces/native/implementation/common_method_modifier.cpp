@@ -414,6 +414,8 @@ auto g_bindMenuOptionsParam = [](
     menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
     menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
     menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
+    menuParam.layoutRegionMargin->start = menuParam.layoutRegionMargin->left;
+    menuParam.layoutRegionMargin->end = menuParam.layoutRegionMargin->right;
     menuParam.hapticFeedbackMode =
         OptConvert<HapticFeedbackMode>(menuOptions.hapticFeedbackMode).value_or(menuParam.hapticFeedbackMode);
     menuParam.outlineColor = OptConvert<BorderColorProperty>(menuOptions.outlineColor);
