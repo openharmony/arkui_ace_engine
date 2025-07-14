@@ -297,8 +297,8 @@ public:
     void SearchElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
         std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
         const int64_t uiExtensionOffset = 0) override;
-    void FindUIExtensionAccessibilityElement(RefPtr<NG::FrameNode> checkNode, const std::string &customId,
-        std::list<AccessibilityElementInfo> &treeInfos, std::list<AccessibilityElementInfo> &infos,
+    bool FindUIExtensionAccessibilityElement(const RefPtr<NG::FrameNode>& checkNode, const std::string &customId,
+        const CommonProperty& commonProperty, std::list<AccessibilityElementInfo> &infos,
         const RefPtr<PipelineBase>& context);
     bool SetAccessibilityCustomId(RefPtr<NG::FrameNode> checkNode, const std::string &customId,
         CommonProperty &commonProperty, std::list<AccessibilityElementInfo> &infos,
