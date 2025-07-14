@@ -56,8 +56,10 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     instanceId_ = Container::CurrentId();
     nodeStatus_ = ViewStackProcessor::GetInstance()->IsBuilderNode() ? NodeStatus::BUILDER_NODE_OFF_MAINTREE
                                                                      : NodeStatus::NORMAL_NODE;
-    auto currentContainer = Container::GetContainer(instanceId_);
-    isDarkMode_ = currentContainer ? (currentContainer->GetColorMode() == ColorMode::DARK) : false;
+    if (SystemProperties::ConfigChangePerform()) {
+        auto currentContainer = Container::GetContainer(instanceId_);
+        isDarkMode_ = currentContainer ? (currentContainer->GetColorMode() == ColorMode::DARK) : false;
+    }
 }
 
 UINode::~UINode()

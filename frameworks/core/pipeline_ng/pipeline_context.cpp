@@ -3538,7 +3538,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-injectionkeycode" && params.size() > PARAM_NUM) {
         UiSessionManager::GetInstance()->SendCommand(params[1]);
 #endif
-    } else if (params[0] == "-forcedark" && params.size() > 2) { // 2 means the forcedark needs at least 3 args
+    } else if (params[0] == "-forcedark") {
         DumpForceColor(params);
     } else if (params[0] == "-bindaicaller" && params.size() >= PARAM_NUM) {
         OnDumpBindAICaller(params);
@@ -6476,6 +6476,9 @@ void PipelineContext::FireArkUIObjectLifecycleCallback(void* data)
 
 void PipelineContext::DumpForceColor(const std::vector<std::string>& params) const
 {
+    if (params.size() <= PARAM_NUM) {
+        return;
+    }
     int32_t nodeId = StringUtils::StringToInt(params[1], -1);
     if (nodeId < 0) {
         return;

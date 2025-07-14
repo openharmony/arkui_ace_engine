@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include <thread>
 #define private public
 #define protected public
 #include "core/common/color_inverter.h"
@@ -356,5 +357,52 @@ HWTEST_F(ColorInverterTest, ColorInverterTest0012, TestSize.Level1)
     Color full = Color::FromARGB(halfAlpha, fullColor, fullColor, fullColor);
     Color invertColor = Color::FromARGB(halfAlpha, 0, 0, 0);
     EXPECT_EQ(ColorInverter::DefaultInverter(full.GetValue()), invertColor.GetValue());
+}
+
+/**
+ * @tc.name: ColorInverterTest0013
+ * @tc.desc: test for mutiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorInverterTest, ColorInverterTest0013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call EnableColorInvert and DisableColorInvert with mutithread
+     * @tc.expected: no crash happend
+     */
+    ColorInverter::GetInstance().colorInvertFuncManagerMap_.clear();
+    std::vector<std::thread> threads;
+    auto enableTask = []() {
+        ColorInvertFunc func = [](uint32_t color) { return ~color; };
+        ColorInverter::GetInstance().EnableColorInvert(-1, "", std::move(func));
+        auto invertFunc = ColorInverter::GetInstance().GetInvertFunc(-1, "");
+    };
+    auto disableTask = []() {
+        ColorInverter::GetInstance().DisableColorInvert(-1, "");
+        auto invertFunc = ColorInverter::GetInstance().GetInvertFunc(-1, "");
+    };
+    for (int i = 0; i < 20; ++i) {
+        if (i % 2 == 0) {
+            threads.emplace_back(std::thread(enableTask));
+        } else {
+            threads.emplace_back(std::thread(disableTask));
+        }
+    }
+    for (auto&& thread : threads) {
+        thread.join();
+    }
+    /**
+     * @tc.steps: step2. Get invertFunc
+     * @tc.expected: if invertFunc is null colorInvertFuncManagerMap_ is empty else give back right value
+     */
+    auto invertFunc = ColorInverter::GetInstance().GetInvertFunc(-1, "");
+    if (invertFunc) {
+        static const uint8_t fullColor = 255;
+        Color full = Color::FromARGB(fullColor, fullColor, fullColor, fullColor);
+        Color invertColor = Color::FromARGB(0, 0, 0, 0);
+        EXPECT_EQ(Color(invertFunc(full.GetValue())), invertColor);
+    } else {
+        EXPECT_TRUE(ColorInverter::GetInstance().colorInvertFuncManagerMap_.empty());
+    }
 }
 } // namespace OHOS::Ace
