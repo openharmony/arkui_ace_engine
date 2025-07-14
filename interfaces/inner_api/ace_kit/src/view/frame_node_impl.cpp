@@ -38,6 +38,9 @@ RefPtr<FrameNode> FrameNode::GetFrameNode(ArkUINodeHandle node)
     auto kitNode = frameNode->GetKitNode();
     if (!kitNode) {
         kitNode = MakeRefPtr<FrameNodeImpl>(Claim(frameNode));
+        auto nodeImpl = AceType::DynamicCast<FrameNodeImpl>(kitNode);
+        CHECK_NULL_RETURN(nodeImpl, nullptr);
+        nodeImpl->MoveOwnershipAndGetAceNode();
     }
     return kitNode;
 }
