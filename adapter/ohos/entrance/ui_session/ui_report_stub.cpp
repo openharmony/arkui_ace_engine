@@ -113,6 +113,11 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             SendCurrentPageName(result);
             break;
         }
+        case SEND_EXE_APP_AI_FUNCTION_RESULT: {
+            uint32_t result = data.ReadUint32();
+            SendExeAppAIFunctionResult(result);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -281,6 +286,18 @@ void UiReportStub::ClearAshmem(sptr<Ashmem>& optMem)
     if (optMem != nullptr) {
         optMem->UnmapAshmem();
         optMem->CloseAshmem();
+    }
+}
+
+void UiReportStub::RegisterExeAppAIFunction(const std::function<void(uint32_t)>& finishCallback)
+{
+    exeAppAIFunctionCallback_ = std::move(finishCallback);
+}
+
+void UiReportStub::SendExeAppAIFunctionResult(uint32_t result)
+{
+    if (exeAppAIFunctionCallback_) {
+        exeAppAIFunctionCallback_(result);
     }
 }
 } // namespace OHOS::Ace

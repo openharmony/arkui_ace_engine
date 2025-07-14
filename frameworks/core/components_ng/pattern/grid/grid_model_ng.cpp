@@ -877,9 +877,9 @@ void GridModelNG::SetSyncLoad(FrameNode* frameNode, bool syncLoad)
 
 bool GridModelNG::GetSyncLoad(FrameNode* frameNode)
 {
-    bool result = false;
+    bool result = true;
     CHECK_NULL_RETURN(frameNode, result);
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, SyncLoad, result, frameNode, false);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, SyncLoad, result, frameNode, true);
     return result;
 }
 } // namespace OHOS::Ace::NG

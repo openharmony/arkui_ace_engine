@@ -46,22 +46,18 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
     auto arkOptions = Converter::OptConvert<Ark_ListItemGroupOptions>(*options);
     CHECK_NULL_VOID(arkOptions);
     auto space = Converter::OptConvert<Dimension>(arkOptions.value().space);
-    // ListItemGroupModelNG::SetSpace(frameNode, space);
     auto style = Converter::OptConvert<V2::ListItemGroupStyle>(arkOptions.value().style);
-    // ListItemGroupModelNG::SetStyle(frameNode, style);
     auto header = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().header);
     if (header.has_value()) {
         auto builder = [callback = CallbackHelper(header.value()), node]() -> RefPtr<UINode> {
             return callback.BuildSync(node);
         };
-        // ListItemGroupModelNG::SetHeader(frameNode, std::move(builder));
     }
     auto footer = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().footer);
     if (footer.has_value()) {
         auto builder = [callback = CallbackHelper(footer.value()), node]() -> RefPtr<UINode> {
             return callback.BuildSync(node);
         };
-        // ListItemGroupModelNG::SetFooter(frameNode, std::move(builder));
     }
 }
 } // ListItemGroupInterfaceModifier
@@ -81,8 +77,6 @@ void ChildrenMainSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto peer = value;
-    // RefPtr<ListChildrenMainSize> handler = ListItemGroupModelNG::GetOrCreateListChildrenMainSize(frameNode);
-    // peer->SetHandler(handler);
 }
 } // ListItemGroupAttributeModifier
 const GENERATED_ArkUIListItemGroupModifier* GetListItemGroupModifier()

@@ -404,6 +404,7 @@ void UIObserverListener::OnWillClick(
     AddGestureEventInfoOne(objValueClickEvent, gestureEventInfo);
     AddGestureEventInfoTwo(objValueClickEvent, gestureEventInfo);
     AddGestureEventInfoThree(objValueClickEvent, gestureEventInfo);
+    AddTapLocationInfo(objValueClickEvent, gestureEventInfo);
     AddClickEventInfoOne(objValueClickEvent, clickInfo);
     AddClickEventInfoTwo(objValueClickEvent, clickInfo);
 
@@ -440,6 +441,7 @@ void UIObserverListener::OnDidClick(
     AddGestureEventInfoOne(objValueClickEvent, gestureEventInfo);
     AddGestureEventInfoTwo(objValueClickEvent, gestureEventInfo);
     AddGestureEventInfoThree(objValueClickEvent, gestureEventInfo);
+    AddTapLocationInfo(objValueClickEvent, gestureEventInfo);
     AddClickEventInfoOne(objValueClickEvent, clickInfo);
     AddClickEventInfoTwo(objValueClickEvent, clickInfo);
 
@@ -520,6 +522,11 @@ void UIObserverListener::OnGestureStateChange(NG::GestureListenerType gestureLis
     AddGestureEventInfoOne(objValueGestureEvent, gestureEventInfo);
     AddGestureEventInfoTwo(objValueGestureEvent, gestureEventInfo);
     AddGestureEventInfoThree(objValueGestureEvent, gestureEventInfo);
+    bool canGetTap = gestureEventInfo.GetGestureTypeName() == GestureTypeName::TAP_GESTURE ||
+                     gestureEventInfo.GetGestureTypeName() == GestureTypeName::CLICK;
+    if (canGetTap) {
+        AddTapLocationInfo(objValueGestureEvent, gestureEventInfo);
+    }
     AddGestureEventInfoFour(objValueGestureEvent, gestureEventInfo);
     AddTargetObject(objValueGestureEvent, gestureEventInfo);
     GestureObserverListener::AddGestureRecognizerInfo(env_, objValueGestureRecognizer, current, gestureListenerType);
@@ -683,12 +690,12 @@ void UIObserverListener::AddGestureEventInfoOne(napi_value objValueEvent, const 
     }
     napi_value napiAngle = GetNamedProperty(env_, objValueEvent, "angle");
     if (GetValueType(env_, napiAngle) != napi_null) {
-        napi_create_double(env_, gestureEventInfo.GetAngle() / scale, &napiAngle);
+        napi_create_double(env_, gestureEventInfo.GetAngle(), &napiAngle);
         napi_set_named_property(env_, objValueEvent, "angle", napiAngle);
     }
     napi_value napiSpeed = GetNamedProperty(env_, objValueEvent, "speed");
     if (GetValueType(env_, napiSpeed) != napi_null) {
-        napi_create_double(env_, gestureEventInfo.GetSpeed() / scale, &napiSpeed);
+        napi_create_double(env_, gestureEventInfo.GetSpeed(), &napiSpeed);
         napi_set_named_property(env_, objValueEvent, "speed", napiSpeed);
     }
     napi_close_handle_scope(env_, scope);
@@ -786,7 +793,6 @@ void UIObserverListener::AddGestureEventInfoThree(napi_value objValueEvent, cons
     napi_set_named_property(env_, objValueEvent, "targetDisplayId", napiTargetDisplayId);
     AddFingerInfosInfo(objValueEvent, gestureEventInfo);
     AddFingerListInfo(objValueEvent, gestureEventInfo);
-    AddTapLocationInfo(objValueEvent, gestureEventInfo);
     napi_close_handle_scope(env_, scope);
 }
 
@@ -860,13 +866,12 @@ void UIObserverListener::AddFingerListInfo(napi_value objValueClickEvent, const 
         napi_close_handle_scope(env_, scope);
         return;
     }
-    int32_t index = 0;
     if (fingerList.size() > 0) {
         for (auto finger : fingerList) {
             napi_value napiFinger = nullptr;
             napi_create_object(env_, &napiFinger);
             AddFingerObjectInfo(napiFinger, finger);
-            napi_set_element(env_, napiFingerList, index++, napiFinger);
+            napi_set_element(env_, napiFingerList, finger.fingerId_, napiFinger);
         }
     }
     napi_set_named_property(env_, objValueClickEvent, "fingerList", napiFingerList);
@@ -1155,10 +1160,10 @@ napi_value UIObserverListener::GetFrameNodeObject(const RefPtr<NG::FrameNode>& f
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto container = Container::Current();
-    CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(container, nullptr);
 
     auto frontEnd = container->GetFrontend();
-    CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(frontEnd, nullptr);
 
     return frontEnd->GetFrameNodeValueByNodeId(frameNode->GetId());
 }

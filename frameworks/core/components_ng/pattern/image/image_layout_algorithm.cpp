@@ -103,9 +103,97 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     return contentConstraint.Constrain(size);
 }
 
+/**
+ * Measure the layout size of the Image component based on its layout policy.
+ *
+ * This method handles different layout policies:
+ * - For WRAP_CONTENT or FIXED policies, it calculates the image's frame size using its raw size.
+ * - For MATCH_PARENT, it delegates the measurement to the base BoxLayoutAlgorithm and uses the result as the frame
+ *  size. If a valid size is determined, it is set on the geometry node.
+ */
 void ImageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    BoxLayoutAlgorithm::Measure(layoutWrapper);
+    CHECK_NULL_VOID(layoutWrapper);
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    bool isPolicy = layoutPolicy.has_value();
+    if (isPolicy && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        auto pattern = host->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto rawImageSize = pattern->GetImageSizeForMeasure();
+        if (rawImageSize == std::nullopt) {
+            return;
+        }
+        OptionalSizeF imageFrameSize;
+        if (layoutPolicy->IsMatch()) {
+            BoxLayoutAlgorithm::Measure(layoutWrapper);
+            imageFrameSize.SetWidth(layoutWrapper->GetGeometryNode()->GetFrameSize().Width());
+            imageFrameSize.SetHeight(layoutWrapper->GetGeometryNode()->GetFrameSize().Height());
+        }
+        UpdateFrameSizeWithLayoutPolicy(layoutWrapper, imageFrameSize, rawImageSize);
+        if (imageFrameSize.IsValid()) {
+            layoutWrapper->GetGeometryNode()->SetFrameSize(imageFrameSize.ConvertToSizeT());
+        }
+    } else {
+        BoxLayoutAlgorithm::Measure(layoutWrapper);
+    }
+}
+
+/**
+ * Update the frame size of the image (`imageFrameSize`) based on the layout policy defined in the layout property.
+ *
+ * This method handles different layout policies for width and height:
+ * - WRAP_CONTENT:
+ *   - If width or height is set to WRAP, use the smaller of the raw image size and the parent ideal size.
+ *   - This ensures the image adapts to its content but remains within parent constraints.
+ *
+ * - FIX_AT_IDEAL_SIZE:
+ *   - If width or height is FIXED, directly use the raw image's dimensions.
+ *   - This simulates a hardcoded size, unaffected by surrounding layout constraints.
+ *
+ * - MATCH_PARENT:
+ *   - MATCH is not handled here; it is assumed to be processed by other logic.
+ *   - Typically used when the image should stretch to fill the available space.
+ *
+ * - Default (neither WRAP, FIXED, nor MATCH):
+ *   - Use the self ideal size if specified, otherwise fall back to raw image size.
+ */
+void ImageLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(
+    LayoutWrapper* layoutWrapper, OptionalSizeF& imageFrameSize, const std::optional<SizeF>& rawImageSize)
+{
+    // Update frame size based on layout policy
+    auto layoutProperty = AceType::DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint.has_value());
+    // Calculate the frameWidth size based on the layout policy
+    if (layoutPolicy->IsWidthWrap()) {
+        auto parentIdealSize = layoutConstraint->parentIdealSize;
+        imageFrameSize.SetWidth(std::min(
+            parentIdealSize.Width().value_or(rawImageSize->Width()), rawImageSize->Width()
+        ));
+    } else if (layoutPolicy->IsWidthFix()) {
+        // If width is fixed, use the raw image size
+        imageFrameSize.SetWidth(rawImageSize->Width());
+    } else if (!layoutPolicy->IsWidthMatch()) {
+        imageFrameSize.SetWidth(layoutConstraint->selfIdealSize.Width().value_or(rawImageSize->Width()));
+    }
+    // Calculate the frameHeight size based on the layout policy
+    if (layoutPolicy->IsHeightWrap()) {
+        auto parentIdealSize = layoutConstraint->parentIdealSize;
+        imageFrameSize.SetHeight(std::min(
+            parentIdealSize.Height().value_or(rawImageSize->Height()), rawImageSize->Height()
+        ));
+    } else if (layoutPolicy->IsHeightFix()) {
+        // If height is fixed, use the raw image size
+        imageFrameSize.SetHeight(rawImageSize->Height());
+    } else if (!layoutPolicy->IsHeightMatch()) {
+        imageFrameSize.SetHeight(layoutConstraint->selfIdealSize.Height().value_or(rawImageSize->Height()));
+    }
 }
 
 void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

@@ -827,6 +827,21 @@ HWTEST_F(TextTestThreeNg, UpdateAIMenuOptions001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsNeedAskCelia
+ * @tc.desc: test test_pattern.h IsNeedAskCelia function with valid textSelector
+ *           check multi ai entity in selection range
+ * @tc.type: FUNC
+ */
+ HWTEST_F(TextTestThreeNg, IsNeedAskCelia001, TestSize.Level1)
+ {
+     /**
+      * @tc.steps: step1. create frameNode and text textPattern
+      */
+     auto [frameNode, textPattern] = Init();
+     EXPECT_FALSE(textPattern->IsNeedAskCelia());
+ }
+
+/**
  * @tc.name: SetTextSelection001
  * @tc.desc: test test_pattern.h SetTextSelection function.
  * @tc.type: FUNC
@@ -2612,5 +2627,70 @@ HWTEST_F(TextTestThreeNg, PrepareAIMenuOptions002, TestSize.Level1)
     EXPECT_EQ(aiSpan.type, TextDataDetectType::EMAIL);
     EXPECT_EQ(ret, false);
     textPattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: TextModelGetShaderStyleInJson001
+ * @tc.desc: Test if GetShaderStyleInJson is successful
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextModelGetShaderStyleInJson001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textModelNG and FrameNode
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set type == RADIAL.
+     */
+    Gradient gradientLinear = Gradient();
+    gradientLinear.type_ = GradientType::LINEAR;
+    LinearGradient linearGradient;
+    linearGradient.angle = std::make_optional(2.00_vp);
+    gradientLinear.SetLinearGradient(linearGradient);
+    textLayoutProperty->UpdateGradientShaderStyle(gradientLinear);
+    std::string radialJson = pattern->GetShaderStyleInJson()->ToString();
+    EXPECT_EQ(radialJson,
+        "{\"angle\":\"2.00vp\",\"direction\":\"GradientDirection.None\",\"colors\":[],\"repeating\":\"false\"}");
+
+    /**
+     * @tc.steps: step3. Set type == RADIAL.
+     */
+    Gradient gradientRadial = Gradient();
+    gradientRadial.type_ = GradientType::RADIAL;
+    RadialGradient radialGradient;
+    radialGradient.radialCenterX = std::make_optional(25.0_vp);
+    radialGradient.radialCenterY = std::make_optional(25.0_vp);
+    gradientRadial.SetRadialGradient(radialGradient);
+    textLayoutProperty->UpdateGradientShaderStyle(gradientRadial);
+    std::string linearJson = pattern->GetShaderStyleInJson()->ToString();
+    EXPECT_EQ(linearJson, "{\"center\":[\"25.00vp\",\"25.00vp\"],\"colors\":[],\"repeating\":\"false\"}");
+
+    /**
+     * @tc.steps: step4. Set ColorShaderStyle.
+     */
+    Color color = Color::RED;
+    textLayoutProperty->ResetGradientShaderStyle();
+    textLayoutProperty->UpdateColorShaderStyle(color);
+    std::string colorJson = pattern->GetShaderStyleInJson()->ToString();
+    EXPECT_EQ(colorJson, "{\"color\":\"#FFFF0000\"}");
+
+    /**
+     * @tc.steps: step5. Set type == null.
+     */
+    Gradient gradient = Gradient();
+    textLayoutProperty->UpdateGradientShaderStyle(gradient);
+    std::string json = pattern->GetShaderStyleInJson()->ToString();
+    EXPECT_EQ(json, "{}");
 }
 } // namespace OHOS::Ace::NG

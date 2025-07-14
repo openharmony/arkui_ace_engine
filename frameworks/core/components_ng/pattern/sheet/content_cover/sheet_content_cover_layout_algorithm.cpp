@@ -86,16 +86,14 @@ void SheetContentCoverLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frameNode);
     auto sheetPattern = frameNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    auto wrapperGeometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(wrapperGeometryNode);
-    auto parentConstraint  = wrapperGeometryNode->GetParentLayoutConstraint();
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto parentConstraint  = geometryNode->GetParentLayoutConstraint();
     LayoutConstraintF layoutConstraint = parentConstraint.value();
     sheetHeight_ = layoutConstraint.maxSize.Height();
     sheetWidth_ = layoutConstraint.maxSize.Width();
-    sheetOffsetX_ = 0.0f;
-    sheetOffsetY_ = 0.0f;
-    wrapperGeometryNode->SetFrameSize(SizeF(sheetWidth_, sheetHeight_));
-    wrapperGeometryNode->SetContentSize(SizeF(sheetWidth_, sheetHeight_));
+    geometryNode->SetFrameSize(SizeF(sheetWidth_, sheetHeight_));
+    geometryNode->SetContentSize(SizeF(sheetWidth_, sheetHeight_));
 
     auto layoutProp = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProp);
@@ -132,8 +130,7 @@ void SheetContentCoverLayoutAlgorithm::LayoutTitleBuilder(const NG::OffsetF& tra
     auto geometryNode = titleBuilderWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
 
-    auto offset = translate;
-    geometryNode->SetMarginFrameOffset(offset);
+    geometryNode->SetMarginFrameOffset(translate);
     titleBuilderWrapper->Layout();
 }
 
@@ -151,8 +148,7 @@ void SheetContentCoverLayoutAlgorithm::LayoutDragBar(const NG::OffsetF& translat
     auto geometryNode = dragBarWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
 
-    auto offset = translate;
-    geometryNode->SetMarginFrameOffset(offset);
+    geometryNode->SetMarginFrameOffset(translate);
     dragBarWrapper->Layout();
 }
 
@@ -170,8 +166,7 @@ void SheetContentCoverLayoutAlgorithm::LayoutCloseIcon(const NG::OffsetF& transl
     auto geometryNode = closeIconWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
 
-    auto offset = translate;
-    geometryNode->SetMarginFrameOffset(offset);
+    geometryNode->SetMarginFrameOffset(translate);
     closeIconWrapper->Layout();
 }
 
@@ -189,8 +184,7 @@ void SheetContentCoverLayoutAlgorithm::LayoutScrollNode(const NG::OffsetF& trans
     auto geometryNode = scrollWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
 
-    auto offset = translate;
-    geometryNode->SetMarginFrameOffset(offset);
+    geometryNode->SetMarginFrameOffset(translate);
     scrollWrapper->Layout();
 }
 
@@ -203,7 +197,7 @@ void SheetContentCoverLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(sheetPattern);
     auto scrollNode = sheetPattern->GetSheetScrollNode();
     CHECK_NULL_VOID(scrollNode);
-    OffsetF positionOffset(sheetOffsetX_, sheetOffsetY_);
+    OffsetF positionOffset(0.0f, 0.0f);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     geometryNode->SetMarginFrameOffset(positionOffset);
 

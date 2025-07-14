@@ -28,6 +28,7 @@ std::shared_ptr<ImageData> ResourceImageLoader::LoadImageData(const SourceInfo& 
     auto resource = src.GetResource();
     auto resourceAdapter =
         ResourceManager::GetOrCreateResourceAdpter(resource.GetBundleName(), resource.GetModuleName());
+    CHECK_NULL_RETURN(resourceAdapter, nullptr);
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;
     resourceAdapter->GetMediaData(resource.GetId(), dataLen, data);
@@ -36,4 +37,4 @@ std::shared_ptr<ImageData> ResourceImageLoader::LoadImageData(const SourceInfo& 
 }
 } // namespace Drawable
 } // namespace Ace
-} // namespace OHOS
+} // namespace OHOS

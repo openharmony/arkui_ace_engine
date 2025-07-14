@@ -109,7 +109,6 @@ CanvasRendererPeerImpl::CanvasRendererPeerImpl()
     instanceId_ = Container::CurrentIdSafely();
     density_ = PipelineBase::GetCurrentDensity();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        // paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         isJudgeSpecialValue_ = true;
@@ -948,9 +947,6 @@ void CanvasRendererPeerImpl::SetTextBaseline(const std::string& baselineStr)
 void CanvasRendererPeerImpl::ResetPaintState()
 {
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
-        // The default value of the font size in canvas is 14px.
-        // paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
     } else {
         paintState_ = PaintState();
     }

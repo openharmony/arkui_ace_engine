@@ -14,6 +14,10 @@
  */
 
 #include "gtest/gtest.h"
+
+#define private public
+#define protected public
+
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "test/unittest/interfaces/ace_kit/mock/mock_ace_kit_pattern.h"
 #include "test/unittest/interfaces/ace_kit/mock/mock_ace_kit_property.h"
@@ -29,6 +33,19 @@ using namespace testing::ext;
 using namespace OHOS::Ace::Kit;
 namespace OHOS::Ace {
 class FrameNodeTest : public testing::Test {};
+
+class TestAICaller : public AICallerHelper {
+public:
+    TestAICaller() = default;
+    ~TestAICaller() override = default;
+    bool onAIFunctionCaller(const std::string& funcName, const std::string& params) override
+    {
+        if (funcName.compare("Success") == 0) {
+            return true;
+        }
+        return false;
+    }
+};
 
 /**
  * @tc.name: FrameNodeTestTest001
@@ -211,7 +228,6 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest007, TestSize.Level1)
     EXPECT_NE(frameNode->GetParentHandle(), nullptr);
 }
 
-
 /**
  * @tc.name: FrameNodeTestTest008
  * @tc.desc:
@@ -321,7 +337,7 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest102, TestSize.Level1)
     /**
      * @tc.steps2: set function callback, validate result.
      */
-    frameNodeImpl->SetMeasureCallback([](RefPtr<FrameNode> node)->void {});
+    frameNodeImpl->SetMeasureCallback([](RefPtr<FrameNode> node) -> void {});
     auto node = frameNodeImpl->PopAceNode();
     EXPECT_NE(node->measureCallback_, nullptr);
 }
@@ -347,7 +363,7 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest103, TestSize.Level1)
     /**
      * @tc.steps2: set function callback, validate result.
      */
-    frameNodeImpl->SetOnNodeDestroyCallback([](RefPtr<FrameNode> node)->void {});
+    frameNodeImpl->SetOnNodeDestroyCallback([](RefPtr<FrameNode> node) -> void {});
     auto node = frameNodeImpl->PopAceNode();
     EXPECT_NE(node->destroyCallback_, nullptr);
 }
@@ -373,8 +389,7 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest104, TestSize.Level1)
     /**
      * @tc.steps2: set function callback, validate result.
      */
-    frameNodeImpl->SetConfigurationUpdateCallback([](
-        const ConfigurationChange& configurationChange)->void {});
+    frameNodeImpl->SetConfigurationUpdateCallback([](const ConfigurationChange& configurationChange) -> void {});
     auto node = frameNodeImpl->PopAceNode();
     EXPECT_NE(node->configurationUpdateCallback_, nullptr);
 }
@@ -433,8 +448,8 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest106, TestSize.Level1)
     node->OnWindowFocused();
     node->OnWindowUnfocused();
 
-    NG::OnAreaChangedFunc callback = [](const NG::RectF& oldRect,
-        const NG::OffsetF& oldOrigin, const NG::RectF& rect, const NG::OffsetF& origin) {};
+    NG::OnAreaChangedFunc callback = [](const NG::RectF& oldRect, const NG::OffsetF& oldOrigin, const NG::RectF& rect,
+                                         const NG::OffsetF& origin) {};
     node->SetOnAreaChangeCallback(std::move(callback));
     EXPECT_NE(node->lastFrameRect_, nullptr);
     EXPECT_NE(node->lastParentOffsetToWindow_, nullptr);
@@ -462,8 +477,8 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest107, TestSize.Level1)
      * @tc.steps2: build a object to SetOnAreaChangeCallback.
      */
     auto node = frameNodeImpl->PopAceNode();
-    NG::OnAreaChangedFunc callback = [](const NG::RectF& oldRect, const NG::OffsetF& oldOrigin,
-        const NG::RectF& rect, const NG::OffsetF& origin) {};
+    NG::OnAreaChangedFunc callback = [](const NG::RectF& oldRect, const NG::OffsetF& oldOrigin, const NG::RectF& rect,
+                                         const NG::OffsetF& origin) {};
     node->lastFrameRect_ = std::make_unique<NG::RectF>();
     node->SetOnAreaChangeCallback(std::move(callback));
     EXPECT_NE(node->lastFrameRect_, nullptr);
@@ -717,5 +732,50 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest114, TestSize.Level1)
      */
     node->ProcessAllVisibleCallback(visibleAreaRatios, callbackInfo, 1, 1);
     EXPECT_EQ(flag, 3);
+}
+
+/**
+ * @tc.name: FrameNodeTestTest114
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest115, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    constexpr char tag[] = "TEST115";
+    const int32_t id = 115;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+    auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
+    ASSERT_TRUE(frameNodeImpl);
+
+    /**
+     * @tc.steps2: create AI helper
+     */
+    auto myAICaller = std::make_shared<TestAICaller>();
+    /**
+     * @tc.steps3: call ai function without set
+     * @tc.excepted: step3 return 1 means AI helper not setted.
+     */
+    EXPECT_EQ(frameNodeImpl->frameNode_->CallAIFunction("Success", ""), 1);
+    /**
+     * @tc.steps4: set ai helper instance.
+     * @tc.excepted: step4 AI helper not null and setted success.
+     */
+    frameNodeImpl->SetAICallerHelper(myAICaller);
+    EXPECT_EQ(frameNodeImpl->frameNode_->aiCallerHelper_, myAICaller);
+    /**
+     * @tc.steps5: call ai function success after set.
+     * @tc.excepted: step5 ai function called success.
+     */
+    EXPECT_EQ(frameNodeImpl->frameNode_->CallAIFunction("Success", "params1: 1"), 0);
+    /**
+     * @tc.steps6: call invalid function after set.
+     * @tc.excepted: step6 ai function not found and return 2.
+     */
+    EXPECT_EQ(frameNodeImpl->frameNode_->CallAIFunction("OTHERFunction", "params1: 1"), 2);
 }
 } // namespace OHOS::Ace

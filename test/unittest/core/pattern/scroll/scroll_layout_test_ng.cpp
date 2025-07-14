@@ -713,7 +713,7 @@ HWTEST_F(ScrollLayoutTestNg, ScrollGetChildrenExpandedSize001, TestSize.Level1)
 
     pattern_->SetAxis(Axis::FREE);
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0.f, 0.f));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(2010.f, HEIGHT + 10.f));
 }
 
 /**
@@ -816,5 +816,475 @@ HWTEST_F(ScrollLayoutTestNg, UseInitialOffset003, TestSize.Level1)
     ASSERT_NE(rawPtr, nullptr);
     scrollLayoutAlgorithm->UseInitialOffset(axis, selfSize, rawPtr);
     EXPECT_EQ(scrollLayoutAlgorithm->GetCurrentOffset(), 1.0f);
+}
+
+/**
+ * @tc.name: SuggestOpIncActivatedOnce001
+ * @tc.desc: Test SuggestOpIncActivatedOnce
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, SuggestOpIncActivatedOnce001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    FlushUITasks();
+    EXPECT_FALSE(frameNode_->GetSuggestOpIncActivatedOnce());
+}
+
+/**
+ * @tc.name: UpdateScrollAlignment001
+ * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollLayoutAlgorithm scrollLayoutAlgorithm(2.0f);
+
+    /**
+     * @tc.steps: step2. Set scrollAlignment to TOP_LEFT
+     */
+    Alignment scrollAlignment = Alignment::TOP_LEFT;
+
+    /**
+     * @tc.steps: step3. Calling the UpdateScrollAlignment function
+     * @tc.expected: The scrollAlignment to be TOP_RIGHT
+     */
+    scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
+    EXPECT_EQ(scrollAlignment, Alignment::TOP_RIGHT);
+}
+
+/**
+ * @tc.name: UpdateScrollAlignment002
+ * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollLayoutAlgorithm scrollLayoutAlgorithm(2.0f);
+
+    /**
+     * @tc.steps: step2. Set scrollAlignment to TOP_RIGHT
+     */
+    Alignment scrollAlignment = Alignment::TOP_RIGHT;
+
+    /**
+     * @tc.steps: step3. Calling the UpdateScrollAlignment function
+     * @tc.expected: The scrollAlignment to be TOP_LEFT
+     */
+    scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
+    EXPECT_EQ(scrollAlignment, Alignment::TOP_LEFT);
+}
+
+/**
+ * @tc.name: UpdateScrollAlignment003
+ * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollLayoutAlgorithm scrollLayoutAlgorithm(2.0f);
+
+    /**
+     * @tc.steps: step2. Set scrollAlignment to BOTTOM_LEFT
+     */
+    Alignment scrollAlignment = Alignment::BOTTOM_LEFT;
+
+    /**
+     * @tc.steps: step3. Calling the UpdateScrollAlignment function
+     * @tc.expected: The scrollAlignment to be BOTTOM_RIGHT
+     */
+    scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
+    EXPECT_EQ(scrollAlignment, Alignment::BOTTOM_RIGHT);
+}
+
+/**
+ * @tc.name: UpdateScrollAlignment004
+ * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollLayoutAlgorithm scrollLayoutAlgorithm(2.0f);
+
+    /**
+     * @tc.steps: step2. Set scrollAlignment to BOTTOM_RIGHT
+     */
+    Alignment scrollAlignment = Alignment::BOTTOM_RIGHT;
+
+    /**
+     * @tc.steps: step3. Calling the UpdateScrollAlignment function
+     * @tc.expected: The scrollAlignment to be BOTTOM_LEFT
+     */
+    scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
+    EXPECT_EQ(scrollAlignment, Alignment::BOTTOM_LEFT);
+}
+
+/**
+ * @tc.name: UpdateScrollAlignment005
+ * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollLayoutAlgorithm scrollLayoutAlgorithm(2.0f);
+
+    /**
+     * @tc.steps: step2. Set scrollAlignment to CENTER_RIGHT
+     */
+    Alignment scrollAlignment = Alignment::CENTER_RIGHT;
+
+    /**
+     * @tc.steps: step3. Calling the UpdateScrollAlignment function
+     * @tc.expected: The scrollAlignment to be CENTER_LEFT
+     */
+    scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
+    EXPECT_EQ(scrollAlignment, Alignment::CENTER_LEFT);
+}
+
+/**
+ * @tc.name: UpdateScrollAlignment006
+ * @tc.desc: Test ScrollLayoutAlgorithm UpdateScrollAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, UpdateScrollAlignment006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollLayoutAlgorithm scrollLayoutAlgorithm(2.0f);
+
+    /**
+     * @tc.steps: step2. Set scrollAlignment to CENTER_LEFT
+     */
+    Alignment scrollAlignment = Alignment::CENTER_LEFT;
+
+    /**
+     * @tc.steps: step3. Calling the UpdateScrollAlignment function
+     * @tc.expected: The scrollAlignment to be CENTER_RIGHT
+     */
+    scrollLayoutAlgorithm.UpdateScrollAlignment(scrollAlignment);
+    EXPECT_EQ(scrollAlignment, Alignment::CENTER_RIGHT);
+}
+
+/**
+ * @tc.name: UseInitialOffset_001
+ * @tc.desc: Test ScrollLayoutAlgorithm UseInitialOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, UseInitialOffset_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(2.0f);
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    WeakPtr<FrameNode> hostNode = std::move(frameNode);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode->CreateLayoutWrapper(false, false);
+    layoutWrapper->hostNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Set isInitialized_ to false and initialOffset_
+     * set currentOffset_ to 2
+     */
+    scrollPattern->isInitialized_ = false;
+    scrollPattern->initialOffset_ = OffsetT<CalcDimension>(CalcDimension(2.0), CalcDimension(4.0));
+    scrollLayoutAlgorithm->currentOffset_ = 2.0f;
+
+    /**
+     * @tc.steps: step3. Set axis to VERTICAL and selfSize
+     * @tc.expected: The currentOffset to be -4
+     */
+    auto axis = Axis::VERTICAL;
+    auto selfSize = SizeF(1.0f, 2.0f);
+    scrollLayoutAlgorithm->UseInitialOffset(axis, selfSize, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(scrollLayoutAlgorithm->GetCurrentOffset(), -4.0f);
+}
+
+/**
+ * @tc.name: UseInitialOffset_002
+ * @tc.desc: Test ScrollLayoutAlgorithm UseInitialOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, UseInitialOffset_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(2.0f);
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    WeakPtr<FrameNode> hostNode = std::move(frameNode);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode->CreateLayoutWrapper(false, false);
+    layoutWrapper->hostNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Set isInitialized_ to false and initialOffset_
+     * set currentOffset_ to 4 and crossOffset_ to 3
+     */
+    scrollPattern->isInitialized_ = false;
+    scrollPattern->initialOffset_ =
+        OffsetT<CalcDimension>(CalcDimension(2.0, DimensionUnit::PERCENT), CalcDimension(4.0, DimensionUnit::PERCENT));
+    scrollLayoutAlgorithm->currentOffset_ = 4.0f;
+    scrollLayoutAlgorithm->crossOffset_ = 3.0f;
+
+    /**
+     * @tc.steps: step3. Set axis to FREE and selfSize
+     * @tc.expected: The currentOffset to be -2 and crossOffset_ to be -8
+     */
+    auto axis = Axis::FREE;
+    auto selfSize = SizeF(1.0f, 2.0f);
+    scrollLayoutAlgorithm->UseInitialOffset(axis, selfSize, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(scrollLayoutAlgorithm->GetCurrentOffset(), -2.0f);
+    EXPECT_EQ(scrollLayoutAlgorithm->GetFreeOffset().GetY(), -8.0f);
+}
+
+/**
+ * @tc.name: UseInitialOffset_003
+ * @tc.desc: Test ScrollLayoutAlgorithm UseInitialOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, UseInitialOffset_003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(2.0f);
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    WeakPtr<FrameNode> hostNode = std::move(frameNode);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode->CreateLayoutWrapper(false, false);
+    layoutWrapper->hostNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Set isInitialized_ to false and initialOffset_
+     * set currentOffset_ to 4
+     */
+    scrollPattern->isInitialized_ = false;
+    scrollPattern->initialOffset_ =
+        OffsetT<CalcDimension>(CalcDimension(2.0, DimensionUnit::PERCENT), CalcDimension(4.0, DimensionUnit::PERCENT));
+    scrollLayoutAlgorithm->currentOffset_ = 4.0f;
+
+    /**
+     * @tc.steps: step3. Set axis to HORIZONTAL and selfSize
+     * @tc.expected: The currentOffset to be -8
+     */
+    auto axis = Axis::HORIZONTAL;
+    auto selfSize = SizeF(4.0f, 2.0f);
+    scrollLayoutAlgorithm->UseInitialOffset(axis, selfSize, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(scrollLayoutAlgorithm->GetCurrentOffset(), -8.0f);
+}
+
+/**
+ * @tc.name: UseInitialOffset_004
+ * @tc.desc: Test ScrollLayoutAlgorithm UseInitialOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, UseInitialOffset_004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(2.0f);
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    WeakPtr<FrameNode> hostNode = std::move(frameNode);
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode->CreateLayoutWrapper(false, false);
+    layoutWrapper->hostNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Set isInitialized_ to true and initialOffset_
+     * set currentOffset_ to 4
+     */
+    scrollPattern->isInitialized_ = true;
+    scrollPattern->initialOffset_ =
+        OffsetT<CalcDimension>(CalcDimension(2.0, DimensionUnit::PERCENT), CalcDimension(4.0, DimensionUnit::PERCENT));
+    scrollLayoutAlgorithm->currentOffset_ = 4.0f;
+
+    /**
+     * @tc.steps: step3. Set axis to NONE and selfSize
+     * @tc.expected: The currentOffset is unchanged
+     */
+    auto axis = Axis::NONE;
+    auto selfSize = SizeF(4.0f, 2.0f);
+    scrollLayoutAlgorithm->UseInitialOffset(axis, selfSize, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(scrollLayoutAlgorithm->GetCurrentOffset(), 4.0f);
+}
+
+/**
+ * @tc.name: AdjustOffsetInFreeMode001
+ * @tc.desc: Test ScrollLayoutAlgorithm AdjustOffsetInFreeMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, AdjustOffsetInFreeMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(2.0f);
+
+    /**
+     * @tc.steps: step2. Set effect to FADE and appliedEdge to END
+     */
+    auto effect = EdgeEffect::FADE;
+    auto appliedEdge = EffectEdge::END;
+
+    /**
+     * @tc.steps: step3. Set offset to 2 and scrollableDistance to 3
+     * @tc.expected: The function returns a result of 0
+     */
+    auto result = scrollLayoutAlgorithm->AdjustOffsetInFreeMode(2.0f, 3.0f, effect, appliedEdge);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: AdjustOffsetInFreeMode002
+ * @tc.desc: Test ScrollLayoutAlgorithm AdjustOffsetInFreeMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, AdjustOffsetInFreeMode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(2.0f);
+
+    /**
+     * @tc.steps: step2. Set effect to SPRING and appliedEdge to END
+     */
+    auto effect = EdgeEffect::SPRING;
+    auto appliedEdge = EffectEdge::END;
+
+    /**
+     * @tc.steps: step3. Set offset to 2 and scrollableDistance to 3
+     * @tc.expected: The function returns a result of 0
+     */
+    auto result = scrollLayoutAlgorithm->AdjustOffsetInFreeMode(2.0f, 3.0f, effect, appliedEdge);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: AdjustOffsetInFreeMode003
+ * @tc.desc: Test ScrollLayoutAlgorithm AdjustOffsetInFreeMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, AdjustOffsetInFreeMode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(2.0f);
+
+    /**
+     * @tc.steps: step2. Set effect to SPRING and appliedEdge to START
+     */
+    auto effect = EdgeEffect::SPRING;
+    auto appliedEdge = EffectEdge::START;
+
+    /**
+     * @tc.steps: step3. Set offset to 2 and scrollableDistance to 3
+     * @tc.expected: The function returns a result of 2
+     */
+    auto result = scrollLayoutAlgorithm->AdjustOffsetInFreeMode(2.0f, 3.0f, effect, appliedEdge);
+    EXPECT_EQ(result, 2.0f);
+}
+
+/**
+ * @tc.name: AdjustOffsetInFreeMode004
+ * @tc.desc: Test ScrollLayoutAlgorithm AdjustOffsetInFreeMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, AdjustOffsetInFreeMode004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(2.0f);
+
+    /**
+     * @tc.steps: step2. Set effect to NONE and appliedEdge to START
+     */
+    auto effect = EdgeEffect::NONE;
+    auto appliedEdge = EffectEdge::START;
+
+    /**
+     * @tc.steps: step3. Set offset to -4 and scrollableDistance to 3
+     * @tc.expected: The function returns a result of -3
+     */
+    auto result = scrollLayoutAlgorithm->AdjustOffsetInFreeMode(-4.0f, 3.0f, effect, appliedEdge);
+    EXPECT_EQ(result, -3.0f);
+}
+
+/**
+ * @tc.name: AdjustOffsetInFreeMode005
+ * @tc.desc: Test ScrollLayoutAlgorithm AdjustOffsetInFreeMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, AdjustOffsetInFreeMode005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(2.0f);
+
+    /**
+     * @tc.steps: step2. Set effect to SPRING and appliedEdge to START
+     */
+    auto effect = EdgeEffect::SPRING;
+    auto appliedEdge = EffectEdge::START;
+
+    /**
+     * @tc.steps: step3. Set offset to -4 and scrollableDistance to 3
+     * @tc.expected: The function returns a result of -3
+     */
+    auto result = scrollLayoutAlgorithm->AdjustOffsetInFreeMode(-4.0f, 3.0f, effect, appliedEdge);
+    EXPECT_EQ(result, -3.0f);
+}
+
+/**
+ * @tc.name: AdjustOffsetInFreeMode006
+ * @tc.desc: Test ScrollLayoutAlgorithm AdjustOffsetInFreeMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, AdjustOffsetInFreeMode006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(2.0f);
+
+    /**
+     * @tc.steps: step2. Set effect to SPRING and appliedEdge to ALL
+     */
+    auto effect = EdgeEffect::SPRING;
+    auto appliedEdge = EffectEdge::ALL;
+
+    /**
+     * @tc.steps: step3. Set offset to -4 and scrollableDistance to 3
+     * @tc.expected: The function returns a result of -4
+     */
+    auto result = scrollLayoutAlgorithm->AdjustOffsetInFreeMode(-4.0f, 3.0f, effect, appliedEdge);
+    EXPECT_EQ(result, -4.0f);
 }
 } // namespace OHOS::Ace::NG

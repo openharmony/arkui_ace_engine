@@ -50,13 +50,33 @@ public:
     void HandleDragStart() override {};
     void HandleDragUpdate(const GestureEvent& info) override {};
     void HandleDragEnd(float dragVelocity) override {};
-    
+
+    void BeforeCreateLayoutWrapper() override {};
+    SheetKeyboardAvoidMode GetAvoidKeyboardModeByDefault() const override
+    {
+        return SheetKeyboardAvoidMode::NONE;
+    }
+    void AvoidKeyboardInDirtyLayoutProcess() override {};
+    void AvoidKeyboard(bool forceAvoid) override {};
+
+    void FireHeightDidChange() override;
+
     bool CheckIfUpdateObject(SheetType newType) override
     {
         return newType != SheetType::SHEET_CONTENT_COVER;
     }
 
     bool IsSheetObjectBase() const override
+    {
+        return false;
+    }
+
+    bool CheckIfNeedSetOuterBorderProp() const override
+    {
+        return false;
+    }
+
+    bool CheckIfNeedShadowByDefault() const override
     {
         return false;
     }

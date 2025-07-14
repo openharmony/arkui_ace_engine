@@ -1450,6 +1450,9 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage041
     DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
     EXPECT_EQ(ret, 0);
     EXPECT_EQ(dragEvent->IsUseDataLoadParams(), true);
+    EXPECT_CALL(*mockUdmfClient, SetDelayInfo(_, _)).WillRepeatedly(testing::Return(1));
+    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
+    EXPECT_EQ(ret, 0);
 
     dragEvent->SetUseDataLoadParams(false);
     DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
@@ -1473,18 +1476,54 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage042
 {
     auto dragAction = std::make_shared<OHOS::Ace::NG::ArkUIInteralDragAction>();
     ASSERT_NE(dragAction, nullptr);
-    dragAction->dataLoadParams = AceType::MakeRefPtr<MockDataLoadParams>();
-    ASSERT_NE(dragAction->dataLoadParams, nullptr);
-    std::string udKey = "test";
+    std::string udKey;
+    std::map<std::string, int64_t> summary;
+    std::map<std::string, int64_t> detailedSummary;
+    int32_t dataSize = 1;
+
+    RefPtr<MockInteractionInterface> mockInteractionInterface = AceType::MakeRefPtr<MockInteractionInterface>();
+    ASSERT_NE(mockInteractionInterface, nullptr);
+    EXPECT_CALL(*mockInteractionInterface, GetAppDragSwitchState(_)).WillRepeatedly(testing::Return(1));
+    RefPtr<MockUnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    ASSERT_NE(unifiedData, nullptr);
+    dragAction->unifiedData = unifiedData;
+    dragAction->dataLoadParams = nullptr;
     auto mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
-    EXPECT_CALL(*mockUdmfClient, SetDelayInfo(_, _))
-        .WillRepeatedly([&](RefPtr<DataLoadParams> dataLoadParams, std::string& key) {
-            key = "";
-            return 0;
-        });
-    DragDropFuncWrapper::EnvelopedDataLoadParams(nullptr, udKey);
-    EXPECT_EQ(udKey, "test");
-    DragDropFuncWrapper::EnvelopedDataLoadParams(dragAction, udKey);
-    EXPECT_EQ(udKey, "");
+    EXPECT_CALL(*mockUdmfClient, SetData(_, _)).WillRepeatedly(testing::Return(1));
+    EXPECT_CALL(*unifiedData, GetSize()).WillRepeatedly(testing::Return(1));
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    EXPECT_EQ(dataSize, 1);
+
+    EXPECT_CALL(*mockUdmfClient, SetData(_, _)).WillRepeatedly(testing::Return(0));
+    EXPECT_CALL(*unifiedData, GetSize()).WillRepeatedly(testing::Return(5));
+    EXPECT_CALL(*mockUdmfClient, GetSummary(_, _, _)).WillRepeatedly(testing::Return(0));
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    EXPECT_EQ(dataSize, 5);
+
+    dragAction->unifiedData = nullptr;
+    RefPtr<MockDataLoadParams> mockDataLoadParams = AceType::MakeRefPtr<MockDataLoadParams>();
+    ASSERT_NE(mockDataLoadParams, nullptr);
+    dragAction->dataLoadParams = mockDataLoadParams;
+    EXPECT_CALL(*mockUdmfClient, SetDelayInfo(_, _)).WillRepeatedly(testing::Return(1));
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    EXPECT_EQ(dataSize, 1);
+
+    EXPECT_CALL(*mockUdmfClient, SetDelayInfo(_, _)).WillRepeatedly(testing::Return(0));
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(10));
+    EXPECT_CALL(*mockUdmfClient, GetSummary(_, _, _)).WillRepeatedly(testing::Return(1));
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    EXPECT_EQ(dataSize, 10);
+
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(-1));
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    EXPECT_EQ(dataSize, 1);
+
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(0));
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    EXPECT_EQ(dataSize, 1);
+
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(INT32_MAX + 1));
+    DragDropFuncWrapper::EnvelopedData(dragAction, udKey, summary, detailedSummary, dataSize);
+    EXPECT_EQ(dataSize, 1);
 }
 } // namespace OHOS::Ace::NG

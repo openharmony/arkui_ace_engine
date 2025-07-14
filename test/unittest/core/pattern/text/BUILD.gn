@@ -38,6 +38,7 @@ ace_unittest("text_test_ng") {
     "text_testtwo_ng.cpp",
     "typed_text_test_ng.cpp",
   ]
+  defines = [ "ENABLE_ROSEN_BACKEND" ]
   cflags = [ "-fno-access-control" ]
 }
 

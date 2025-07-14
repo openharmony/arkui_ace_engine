@@ -35,7 +35,7 @@ function customRefreshComponent(params: Params) {
       Row() {
         Column() {
           apng({
-            src: $r('app.media.stack'),
+            src: $r('app.media.startIcon'),
             controller: params.controller
           })
             .margin({ top: 40 })
@@ -61,7 +61,7 @@ struct RefreshAPNGExample {
 
   aboutToAppear(): void {
     let uiContext = this.getUIContext();
-    this.contentNode = new ComponentContent(uiContext, wrapBuilder(customRefreshingContent), this.params);
+    this.contentNode = new ComponentContent(uiContext, wrapBuilder(customRefreshComponent), this.params);
   }
 
   build() {

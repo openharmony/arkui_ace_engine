@@ -101,9 +101,14 @@ public:
         return contentModifierNode_ != nullptr;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void OnColorConfigurationUpdate() override;
 
     void UpdateTextColor(const Color& color, bool isFirstLoad = false);

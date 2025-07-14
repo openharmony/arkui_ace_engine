@@ -81,12 +81,32 @@ HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest002, TestSize.Lev
 {
     /**
      * @tc.steps: step1. AddResource.
-     * @tc.expect: resMap_ size is 3
+     * @tc.expect: resMap_ size is 1
      */
     auto manager = AceType::MakeRefPtr<PatternResourceManager>();
     auto func = [](const RefPtr<ResourceObject>& resObj) { return; };
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     manager->AddResource("key", resObj, func);
     EXPECT_FALSE(manager->Empty());
+}
+
+/**
+ * @tc.name: PatternResourceManagerTest003
+ * @tc.desc: Test PatternResourceManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. AddResource.
+     * @tc.steps: step2. AddResource as same key.
+     * @tc.expect: resMap_ size is 1
+     */
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto func = [](const RefPtr<ResourceObject>& resObj) { return; };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    manager->AddResource("key", resObj, func);
+    manager->AddResource("key", resObj, func);
+    EXPECT_EQ(manager->resKeyArray_.size(), 1);
 }
 } // namespace OHOS::Ace

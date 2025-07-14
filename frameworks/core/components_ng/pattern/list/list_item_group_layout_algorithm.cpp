@@ -123,6 +123,8 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         ReverseItemPosition(cachedItemPosition_, prevTotalItemCount_, prevTotalMainSize_);
         ReverseItemPosition(itemPosition_, prevTotalItemCount_, prevTotalMainSize_);
         ReverseLayoutedItemInfo(prevTotalItemCount_, prevTotalMainSize_);
+    } else {
+        recycledItemPosition_.insert(itemPosition_.begin(), itemPosition_.end());
     }
 
     if (cacheParam_) {
@@ -138,6 +140,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         AdjustItemPosition();
         UpdateLayoutedItemInfo();
     }
+    UpdateRecycledItems();
 
     ReverseLayoutedItemInfo(totalItemCount_, totalMainSize_);
     auto crossSize = contentIdealSize.CrossSize(axis_);
@@ -152,6 +155,16 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
     layoutWrapper->SetCacheCount(listLayoutProperty_->GetCachedCountWithDefault() * lanes_);
     isLayouted_ = false;
+}
+
+void ListItemGroupLayoutAlgorithm::UpdateRecycledItems()
+{
+    if (isLayouted_) {
+        return;
+    }
+    for (const auto& item : itemPosition_) {
+        recycledItemPosition_.erase(item.first);
+    }
 }
 
 void ListItemGroupLayoutAlgorithm::UpdateCachedItemPosition(int32_t cacheCount)
@@ -1158,7 +1171,7 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
             if (GreatOrEqual(pos->second.endPos, startPos - referencePos)) {
                 break;
             }
-            recycledItemPosition_.insert(*pos);
+            recycledItemPosition_.insert_or_assign(pos->first, pos->second);
             cachedItemPosition_.insert(*pos);
             pos = itemPosition_.erase(pos);
         }
@@ -1169,7 +1182,7 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
         if (LessOrEqual(pos->second.startPos, endPos - (referencePos - totalMainSize_))) {
             break;
         }
-        recycledItemPosition_.insert(*pos);
+        recycledItemPosition_.insert_or_assign(pos->first, pos->second);
         cachedItemPosition_.insert(*pos);
         removeIndexes.emplace_back(pos->first);
     }

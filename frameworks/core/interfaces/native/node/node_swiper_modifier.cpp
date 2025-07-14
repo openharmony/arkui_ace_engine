@@ -290,6 +290,24 @@ void GetDotIndicatorSpaceAndIgnoreSize(const std::vector<std::string>& dotIndica
     swiperParameters.setIgnoreSizeValue = (setIgnoreSize == "1" ? true : false);
 }
 
+void InitIndicatorParametersWithResObj(SwiperParameters& swiperParameters, const void* resObjs)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    CHECK_NULL_VOID(resObjs);
+    auto resourceObjs = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(resObjs));
+    swiperParameters.resourceDimLeftValueObject = resourceObjs.at(INDICATOR_RESOURCE_LEFT);
+    swiperParameters.resourceDimTopValueObject = resourceObjs.at(INDICATOR_RESOURCE_TOP);
+    swiperParameters.resourceDimRightValueObject = resourceObjs.at(INDICATOR_RESOURCE_RIGHT);
+    swiperParameters.resourceDimBottomValueObject = resourceObjs.at(INDICATOR_RESOURCE_BOTTOM);
+    swiperParameters.resourceItemWidthValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_WIDTH);
+    swiperParameters.resourceItemHeightValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_HEIGHT);
+    swiperParameters.resourceSelectedItemWidthValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_WIDTH);
+    swiperParameters.resourceSelectedItemHeightValueObject =
+        resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_HEIGHT);
+    swiperParameters.resourceColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_COLOR);
+    swiperParameters.resourceSelectedColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR);
+}
+
 SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std::string>& dotIndicatorInfo,
     const void* resObjs)
 {
@@ -325,21 +343,7 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     ParseDotIndicatorSize(frameNode, dotIndicatorInfo, swiperIndicatorTheme, swiperParameters);
     GetDotIndicatorSpaceAndIgnoreSize(dotIndicatorInfo, swiperIndicatorTheme, swiperParameters);
     ParseMaxDisplayCount(dotIndicatorInfo, swiperParameters);
-    if (SystemProperties::ConfigChangePerform() && resObjs) {
-        auto resourceObjs = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(resObjs));
-        swiperParameters.resourceDimLeftValueObject = resourceObjs.at(INDICATOR_RESOURCE_LEFT);
-        swiperParameters.resourceDimTopValueObject = resourceObjs.at(INDICATOR_RESOURCE_TOP);
-        swiperParameters.resourceDimRightValueObject = resourceObjs.at(INDICATOR_RESOURCE_RIGHT);
-        swiperParameters.resourceDimBottomValueObject = resourceObjs.at(INDICATOR_RESOURCE_BOTTOM);
-        swiperParameters.resourceItemWidthValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_WIDTH);
-        swiperParameters.resourceItemHeightValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_HEIGHT);
-        swiperParameters.resourceSelectedItemWidthValueObject =
-            resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_WIDTH);
-        swiperParameters.resourceSelectedItemHeightValueObject =
-        resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_HEIGHT);
-        swiperParameters.resourceColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_COLOR);
-        swiperParameters.resourceSelectedColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR);
-    }
+    InitIndicatorParametersWithResObj(swiperParameters, resObjs);
     swiperParameters.parametersByUser.insert("dotIndicator");
     return swiperParameters;
 }

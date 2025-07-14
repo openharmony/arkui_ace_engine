@@ -139,6 +139,11 @@ public:
         return valueRatio_;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     OffsetF CalculateGlobalSafeOffset();
@@ -226,6 +231,13 @@ public:
     void SetBubbleFlag(bool flag)
     {
         bubbleFlag_ = flag;
+    }
+
+    void UpdateSliderParams(float trackThickness, SizeF blockSize, SizeF blockHotSize)
+    {
+        trackThickness_ = trackThickness;
+        blockSize_ = blockSize;
+        blockHotSize_ = blockHotSize;
     }
     
     RefPtr<SliderContentModifier> GetSliderContentModifier() const

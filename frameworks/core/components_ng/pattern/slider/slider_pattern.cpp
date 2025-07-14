@@ -86,7 +86,7 @@ inline std::string ToString(const bool boolean)
 
 inline std::string ToString(const SliderModel::SliderMode& mode)
 {
-    static const LinearEnumMapNode<SliderModel::SliderMode, std::string> table[] = {
+    const LinearEnumMapNode<SliderModel::SliderMode, std::string> table[] = {
         { SliderModel::SliderMode::OUTSET, "OUTSET" },
         { SliderModel::SliderMode::INSET, "INSET" },
         { SliderModel::SliderMode::NONE, "NONE" },
@@ -98,7 +98,7 @@ inline std::string ToString(const SliderModel::SliderMode& mode)
 
 inline std::string ToString(const Axis& direction)
 {
-    static const LinearEnumMapNode<Axis, std::string> table[] = {
+    const LinearEnumMapNode<Axis, std::string> table[] = {
         { Axis::VERTICAL, "VERTICAL" },
         { Axis::HORIZONTAL, "HORIZONTAL" },
         { Axis::FREE, "FREE" },
@@ -110,7 +110,7 @@ inline std::string ToString(const Axis& direction)
 
 inline std::string ToString(const SliderModel::BlockStyleType& type)
 {
-    static const LinearEnumMapNode<SliderModel::BlockStyleType, std::string> table[] = {
+    const LinearEnumMapNode<SliderModel::BlockStyleType, std::string> table[] = {
         { SliderModel::BlockStyleType::DEFAULT, "DEFAULT" },
         { SliderModel::BlockStyleType::IMAGE, "IMAGE" },
         { SliderModel::BlockStyleType::SHAPE, "SHAPE" },
@@ -121,7 +121,7 @@ inline std::string ToString(const SliderModel::BlockStyleType& type)
 
 inline std::string ToString(const SliderModel::SliderInteraction& interaction)
 {
-    static const LinearEnumMapNode<SliderModel::SliderInteraction, std::string> table[] = {
+    const LinearEnumMapNode<SliderModel::SliderInteraction, std::string> table[] = {
         { SliderModel::SliderInteraction::SLIDE_AND_CLICK, "SLIDE_AND_CLICK" },
         { SliderModel::SliderInteraction::SLIDE_ONLY, "SLIDE_ONLY" },
         { SliderModel::SliderInteraction::SLIDE_AND_CLICK_UP, "SLIDE_AND_CLICK_UP" },
@@ -132,7 +132,7 @@ inline std::string ToString(const SliderModel::SliderInteraction& interaction)
 
 inline std::string ToString(const BasicShapeType& type)
 {
-    static const LinearEnumMapNode<BasicShapeType, std::string> table[] = {
+    const LinearEnumMapNode<BasicShapeType, std::string> table[] = {
         { BasicShapeType::NONE, "NONE" },  { BasicShapeType::INSET, "INSET" },
         { BasicShapeType::CIRCLE, "CIRCLE" }, { BasicShapeType::ELLIPSE, "ELLIPSE" },
         { BasicShapeType::POLYGON, "POLYGON" }, { BasicShapeType::PATH, "PATH" },
@@ -838,14 +838,6 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto sliderLayoutAlgorithm = DynamicCast<SliderLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(sliderLayoutAlgorithm, false);
-    trackThickness_ = sliderLayoutAlgorithm->GetTrackThickness();
-    blockSize_ = sliderLayoutAlgorithm->GetBlockSize();
-    blockHotSize_ = sliderLayoutAlgorithm->GetBlockHotSize();
     return UpdateParameters();
 }
 

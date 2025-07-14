@@ -88,9 +88,12 @@ void AddBuilderNodeInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
     auto* childNode = reinterpret_cast<UINode*>(child);
     CHECK_NULL_VOID(childNode);
     auto childRef = Referenced::Claim<UINode>(childNode);
+    CHECK_NULL_VOID(childRef);
+    auto parentNode = childRef->GetParent();
+    CHECK_NULL_VOID(parentNode && parentNode == currentNode);
     std::list<RefPtr<UINode>> nodes;
     BuilderUtils::GetBuilderNodes(childRef, nodes);
-    BuilderUtils::AddBuilderToParent(childRef, nodes);
+    BuilderUtils::AddBuilderToParent(childRef->GetParent(), nodes);
 }
 
 ArkUI_Bool AppendChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
@@ -132,9 +135,11 @@ void RemoveBuilderNodeInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
     auto* childNode = reinterpret_cast<UINode*>(child);
     CHECK_NULL_VOID(childNode);
     auto childRef = Referenced::Claim<UINode>(childNode);
+    auto parentNode = childRef->GetParent();
+    CHECK_NULL_VOID(parentNode && parentNode == currentNode);
     std::list<RefPtr<UINode>> nodes;
     BuilderUtils::GetBuilderNodes(childRef, nodes);
-    BuilderUtils::RemoveBuilderFromParent(childRef, nodes);
+    BuilderUtils::RemoveBuilderFromParent(parentNode, nodes);
 }
 
 void RemoveChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
@@ -152,7 +157,10 @@ void ClearBuilderNodeInFrameNode(ArkUINodeHandle node)
     CHECK_NULL_VOID(currentNode);
     auto currentRef = Referenced::Claim<UINode>(currentNode);
     std::list<RefPtr<NG::UINode>> nodes;
-    BuilderUtils::GetBuilderNodes(currentRef, nodes);
+    CHECK_NULL_VOID(currentRef);
+    for (const auto& child : currentRef->GetChildren()) {
+        BuilderUtils::GetBuilderNodes(child, nodes);
+    }
     BuilderUtils::RemoveBuilderFromParent(currentRef, nodes);
 }
 
@@ -971,6 +979,7 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     auto moveNodeRef = AceType::Claim(moveNode);
     if (oldParent) {
         oldParent->RemoveChild(moveNodeRef);
+        OHOS::Ace::BuilderUtils::RemoveBuilderFromParent(oldParent, moveNodeRef);
         oldParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     int32_t childCount = toNode->TotalChildCount();
@@ -979,6 +988,9 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     } else {
         auto indexChild = toNode->GetChildAtIndex(index);
         toNode->AddChildBefore(moveNodeRef, indexChild);
+    }
+    if (moveNodeRef->GetParent() == AceType::Claim(toNode)) {
+        OHOS::Ace::BuilderUtils::AddBuilderToParent(AceType::Claim(toNode), moveNodeRef);
     }
     toNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     moveNode->setIsMoving(false);

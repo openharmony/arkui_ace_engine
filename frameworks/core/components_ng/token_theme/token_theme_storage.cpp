@@ -185,15 +185,21 @@ RefPtr<TokenTheme> TokenThemeStorage::CreateSystemTokenTheme(ColorMode colorMode
     auto themeId = colorMode == ColorMode::DARK ?
         TokenThemeStorage::SYSTEM_THEME_DARK_ID : TokenThemeStorage::SYSTEM_THEME_LIGHT_ID;
     auto tokenColors = AceType::MakeRefPtr<TokenColors>();
+    auto tokenDarkColors = AceType::MakeRefPtr<TokenColors>();
     auto tokenTheme = AceType::MakeRefPtr<TokenTheme>(themeId);
     tokenTheme->SetColors(tokenColors);
+    tokenTheme->SetDarkColors(tokenDarkColors);
 
     std::vector<Color> colors;
+    std::vector<Color> darkColors;
     colors.reserve(TokenColors::TOTAL_NUMBER);
+    darkColors.reserve(TokenColors::TOTAL_NUMBER);
     for (size_t resId = 0; resId < TokenColors::TOTAL_NUMBER; ++resId) {
         colors.push_back(themeConstants->GetColor(TokenColors::GetSystemColorResIdByIndex(resId)));
+        darkColors.push_back(themeConstants->GetColor(TokenColors::GetSystemColorResIdByIndex(resId)));
     }
     tokenColors->SetColors(std::move(colors));
+    tokenDarkColors->SetColors(std::move(darkColors));
     return tokenTheme;
 }
 

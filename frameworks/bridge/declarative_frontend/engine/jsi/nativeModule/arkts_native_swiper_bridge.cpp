@@ -736,7 +736,7 @@ std::string ParseBottom(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool
     }
     if (hasIgnoreSize) {
         CalcDimension bottomcCalc;
-        bool parseOK =  ArkTSUtils::ParseJsLengthMetrics(vm, jsValue, bottomcCalc);
+        bool parseOK =  ArkTSUtils::ParseJsLengthMetrics(vm, jsValue, bottomcCalc, resObj);
         if (!parseOK) {
             bottom = GetStringByValueRef(vm, jsValue, resObj);
             return bottom;

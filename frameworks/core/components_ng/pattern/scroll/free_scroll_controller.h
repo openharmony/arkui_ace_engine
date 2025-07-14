@@ -17,9 +17,11 @@
 
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 class ScrollPattern;
+enum class ScrollEdge;
 
 /**
  * @brief Controller for free scrolling behavior. It manages related gestures and animations.
@@ -35,15 +37,28 @@ public:
 
     RefPtr<PanRecognizer> GetFreePanGesture() const
     {
-        if (!enableScroll_) {
-            return MakeRefPtr<PanRecognizer>(0, PanDirection {}, 1.0); // dummy recognizer
-        }
         return freePanGesture_;
+    }
+
+    /**
+     * @brief Allow other modules to modify offset. Calling this function automatically stops scroll animations.
+     * @attention doesn't allow over-scroll
+     */
+    void SetOffset(OffsetF newPos, bool allowOverScroll = false);
+    inline void UpdateOffset(const OffsetF& delta)
+    {
+        SetOffset(offset_->Get() + delta);
     }
 
     void OnLayoutFinished(const OffsetF& adjustedOffset, const SizeF& scrollableArea);
 
     OffsetF GetOffset() const;
+
+    /**
+     * @brief Start a scroll animation to the final position.
+     */
+    void ScrollTo(OffsetF finalPos, const std::optional<float>& velocity,
+        std::optional<int32_t> duration = std::nullopt, RefPtr<Curve> curve = nullptr, bool allowOverScroll = false);
 
 private:
     void InitializePanRecognizer();
@@ -59,20 +74,38 @@ private:
     /**
      * @brief Start the scroll animation if possible with the given velocity and offset_.
      */
-    void TryScrollAnimation(const OffsetF& velocity);
+    void Fling(const OffsetF& velocity);
+    void StopScrollAnimation();
+    void HandleAnimationUpdate(const OffsetF& currentValue);
+    void HandleAnimationEnd();
 
     /**
      * @brief clamp position to be within the scrollable area.
      */
-    void ClampFinalPosition(OffsetF& finalPos) const;
+    OffsetF ClampPosition(const OffsetF& finalPos) const;
+
+    /**
+     * @brief Check if the new offset would reach any edges. If so, fire corresponding user callbacks.
+     * @return true if any edge is reached, false otherwise.
+     */
+    bool CheckCrashEdge(const OffsetF& newOffset, const SizeF& scrollableArea) const;
+
+    /**
+     * @brief triggers onWillScroll user callback
+     * @return user-modified delta
+     */
+    OffsetF FireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const;
+    void FireOnDidScroll(const OffsetF& delta, ScrollState state) const;
+    void FireOnScrollStart() const;
+    void FireOnScrollEnd() const;
+    void FireOnScrollEdge(const std::vector<ScrollEdge>& edges) const;
 
     ScrollPattern& pattern_;
     RefPtr<NodeAnimatablePropertyOffsetF> offset_;
     OffsetF prevOffset_;
     RefPtr<PanRecognizer> freePanGesture_;
     RefPtr<TouchEventImpl> freeTouch_;
-    float friction_ = 0.0f;
-    bool duringPan_ = false;
+    ScrollState state_ = ScrollState::IDLE;
     bool enableScroll_ = true;
 };
 

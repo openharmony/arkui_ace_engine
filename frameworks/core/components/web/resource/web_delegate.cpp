@@ -728,8 +728,12 @@ WebDelegateObserver::~WebDelegateObserver() {}
 void WebDelegateObserver::NotifyDestory()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "NotifyDestory start");
+    uint32_t destructDelayTime = DESTRUCT_DELAY_MILLISECONDS;
     if (delegate_) {
         delegate_->UnRegisterScreenLockFunction();
+        if (delegate_->GetWebDestroyMode() == WebDestroyMode::NORMAL_MODE) {
+            destructDelayTime = 0;
+        }
     }
     auto context = context_.Upgrade();
     if (!context) {
@@ -751,7 +755,7 @@ void WebDelegateObserver::NotifyDestory()
                     observer->delegate_.Reset();
                 }
             },
-            DESTRUCT_DELAY_MILLISECONDS);
+            destructDelayTime);
         return;
     }
     auto taskExecutor = context->GetTaskExecutor();
@@ -771,7 +775,7 @@ void WebDelegateObserver::NotifyDestory()
                 observer->delegate_.Reset();
             }
         },
-        TaskExecutor::TaskType::UI, DESTRUCT_DELAY_MILLISECONDS, "ArkUIWebNotifyDestory");
+        TaskExecutor::TaskType::UI, destructDelayTime, "ArkUIWebNotifyDestory");
 }
 
 void WebDelegateObserver::OnAttachContext(const RefPtr<NG::PipelineContext> &context)
@@ -1971,6 +1975,16 @@ bool WebDelegate::IsActivePolicyDisable()
         return nweb_->IsActivePolicyDisable();
     }
     return false;
+}
+
+OHOS::NWeb::WebDestroyMode WebDelegate::GetWebDestroyMode()
+{
+    CHECK_NULL_RETURN(nweb_ != nullptr, 
+        OHOS::NWeb::WebDestroyMode::NORMAL_MODE);
+    if (nweb_) {
+        return nweb_->GetWebDestroyMode();
+    }
+    return OHOS::NWeb::WebDestroyMode::NORMAL_MODE;
 }
 
 void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface)
@@ -3343,6 +3357,7 @@ void WebDelegate::InitWebViewWithSurface()
             auto pattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->InitDataDetector();
+            pattern->InitAIDetectResult();
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebInitWebViewWithSurface");
 }
@@ -7632,6 +7647,16 @@ void WebDelegate::OnNativeEmbedMouseEvent(std::shared_ptr<OHOS::NWeb::NWebNative
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
         webPattern->RequestFocus();
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto button = static_cast<MouseButton>(event->GetButton());
+        bool isSupportMouse = button == MouseButton::LEFT_BUTTON
+            || button == MouseButton::RIGHT_BUTTON || button == MouseButton::MIDDLE_BUTTON;
+        if (OnNativeEmbedMouseEventV2_ && isSupportMouse) {
+            auto gestureEventHub = webEventHub->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gestureEventHub);
+            gestureEventHub->SetRecognizerDelayStatus(RecognizerDelayStatus::END);
+        }
         return;
     }
     CHECK_NULL_VOID(taskExecutor_);
@@ -8787,6 +8812,40 @@ void WebDelegate::SetViewportScaleState()
 {
     CHECK_NULL_VOID(nweb_);
     nweb_->SetViewportScaleState();
+}
+
+void WebDelegate::OnPdfScrollAtBottom(const std::string& url)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), url]() {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnPdfScrollAtBottom, fire event task");
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnPdfScrollAtBottomEvent(std::make_shared<PdfScrollEvent>(url));
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebPdfScrollAtBottom");
+}
+
+void WebDelegate::OnPdfLoadEvent(int32_t result, const std::string& url)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), result, url]() {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnPdfLoadEvent, fire event task");
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnPdfLoadEvent(std::make_shared<PdfLoadEvent>(result, url));
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebPdfLoadEvent");
 }
 
 } // namespace OHOS::Ace

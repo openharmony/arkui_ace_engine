@@ -1152,7 +1152,7 @@ void PipelineBase::SetDestroyed() {}
 
 RefPtr<Frontend> PipelineBase::GetFrontend() const
 {
-    return nullptr;
+    return weakFrontend_.Upgrade();
 }
 
 void PipelineBase::SetTouchPipeline(const WeakPtr<PipelineBase>& context) {}
@@ -1461,6 +1461,11 @@ bool NG::PipelineContext::CheckSourceTypeChange(SourceType currentSourceType)
         lastSourceType_ = currentSourceType;
     }
     return ret;
+}
+
+const RefPtr<NG::PostEventManager>& NG::PipelineContext::GetPostEventManager()
+{
+    return postEventManager_;
 }
 
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,

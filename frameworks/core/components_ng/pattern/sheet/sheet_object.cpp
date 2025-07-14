@@ -214,7 +214,9 @@ void SheetObject::SetFinishEventForAnimationOption(
             const auto& overlay = pattern->GetOverlayManager();
             CHECK_NULL_VOID(overlay);
             pattern->FireOnDetentsDidChange(overlay->GetSheetHeight());
-            pattern->FireOnHeightDidChange();
+            auto sheetObject = pattern->GetSheetObject();
+            CHECK_NULL_VOID(sheetObject);
+            sheetObject->FireHeightDidChange();
         });
     } else {
         option.SetOnFinishEvent([sheetWK = WeakClaim(RawPtr(sheetNode))] {
@@ -575,6 +577,7 @@ void SheetObject::ModifyFireSheetTransition(float dragVelocity)
         } else {
             ref->SetAnimationBreak(false);
         }
+        ref->SetStartProp(0.0);
         ref->AvoidAiBar();
         ref->SetIsNeedProcessHeight(false);
         ref->FireOnDetentsDidChange(ref->GetHeight());
@@ -584,6 +587,9 @@ void SheetObject::ModifyFireSheetTransition(float dragVelocity)
 
     sheetPattern->SetAnimationProcess(true);
     sheetPattern->HandleDragEndAccessibilityEvent();
+    if (NearZero(sheetPattern->GetStartProp())) {
+        return;
+    }
     property->Set(sheetPattern->GetStartProp());
     sheetPattern->SetBottomStyleHotAreaInSubwindow();
     std::shared_ptr<AnimationUtils::Animation> animation = AnimationUtils::StartAnimation(option,
@@ -679,4 +685,12 @@ void SheetObject::AvoidKeyboard(bool forceAvoid)
     CHECK_NULL_VOID(sheetPattern);
     sheetPattern->AvoidKeyboard(forceAvoid);
 }
+
+void SheetObject::FireHeightDidChange()
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->FireOnHeightDidChange();
+}
+
 } // namespace OHOS::Ace::NG

@@ -77,8 +77,6 @@ public:
     }
     double GetDensity() const
     {
-        // double density = OHOS::Ace::PipelineBase::GetCurrentDensity();
-        // return ((GetUnit() == OHOS::Ace::CanvasUnit::DEFAULT) && !OHOS::Ace::NearZero(density)) ? density : 1.0;
         return 0;
     }
     void SetTransform(const OHOS::Ace::TransformParam& param)
@@ -95,8 +93,6 @@ public:
     }
     double GetDensity()
     {
-        // double density = OHOS::Ace::PipelineBase::GetCurrentDensity();
-        // return ((GetUnit() == OHOS::Ace::CanvasUnit::DEFAULT) && !OHOS::Ace::NearZero(density)) ? density : 1.0;
         return 0;
     }
 

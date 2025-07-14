@@ -260,9 +260,10 @@ public:
     void RegisterUIExtGetPageModeCallback(RefPtr<NG::UIExtensionManager>& uiExtManager) override;
     void UpdateFrameNodeState(int32_t nodeId) override;
 
+    void ReleaseCacheEvent();
     void UpdatePageMode(const std::string& pageMode) override
     {
-        pageMode_ = pageMode;
+        pageMode_ = std::make_optional(pageMode);
     }
 
     bool SendAccessibilitySyncEvent(
@@ -296,8 +297,8 @@ public:
     void SearchElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
         std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
         const int64_t uiExtensionOffset = 0) override;
-    void FindUIExtensionAccessibilityElement(RefPtr<NG::FrameNode> checkNode, const std::string &customId,
-        std::list<AccessibilityElementInfo> &treeInfos, std::list<AccessibilityElementInfo> &infos,
+    bool FindUIExtensionAccessibilityElement(const RefPtr<NG::FrameNode>& checkNode, const std::string &customId,
+        const CommonProperty& commonProperty, std::list<AccessibilityElementInfo> &infos,
         const RefPtr<PipelineBase>& context);
     bool SetAccessibilityCustomId(RefPtr<NG::FrameNode> checkNode, const std::string &customId,
         CommonProperty &commonProperty, std::list<AccessibilityElementInfo> &infos,
@@ -444,7 +445,7 @@ public:
     bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) override;
 
     void AddHoverTransparentCallback(const RefPtr<NG::FrameNode>& node) override;
-    bool IsInHoverTransparentCallbackList(const RefPtr<NG::FrameNode>& node) override;
+    bool CheckHoverTransparentCallbackListEmpty(int32_t containerId) override;
 
     int64_t CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node);
     void ChooseDumpEvent(const std::vector<std::string>& params,
@@ -849,7 +850,8 @@ private:
     std::function<void(AccessibilityParentRectInfo&)> getParentRectHandlerNew_;
     bool isUseJson_ = false;
     bool reentrantLimit_ = false;
-    std::string pageMode_;
+    std::optional<std::string> pageMode_ = std::nullopt;
+    std::queue<AccessibilityEvent> eventQueue_;
     std::vector<AccessibilityEvent> cacheEventVec_;
     std::list<WeakPtr<NG::FrameNode>> defaultFocusList_;
     std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>> extensionComponentStatusVec_;

@@ -70,7 +70,7 @@ public:
 
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
 
     void SetTextNode(RefPtr<FrameNode> textNode)
     {
@@ -165,6 +165,7 @@ private:
         const RefPtr<SafeAreaManager>& safeAreaManager, float safeAreaTop, float safeAreaBottom);
     Dimension GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper);
     Dimension GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     double GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper);
     double GetTextMaxHeight();

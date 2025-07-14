@@ -26,7 +26,7 @@ bool IsBuilderRootNode(const RefPtr<NG::UINode>& node)
 
 void GetBuilderNodes(const RefPtr<NG::UINode>& node, std::list<RefPtr<NG::UINode>>& nodes)
 {
-    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(node && !node->IsCNode());
     if (IsBuilderRootNode(node)) {
         nodes.push_back(node);
     } else {
@@ -85,6 +85,23 @@ void RemoveBuilderFromContainer(const RefPtr<NG::UINode>& node, const std::list<
     frontend->BuilderNodeFunc("__deleteBuilderNode__", argv);
 }
 
+void ClearChildInBuilderContainer(int32_t nodeId, std::list<RefPtr<NG::UINode>>& nodes)
+{
+    NG::ScopedViewStackProcessor builder;
+    CHECK_NULL_VOID(!nodes.empty());
+    auto node = nodes.front();
+    CHECK_NULL_VOID(node);
+    auto context = node->GetContext();
+    CHECK_NULL_VOID(context);
+    auto frontend = context->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    std::vector<int32_t> argv = { nodeId };
+    for (const auto& child : nodes) {
+        argv.push_back(child->GetJsBuilderNodeId());
+    }
+    frontend->BuilderNodeFunc("__deleteBuilderNode__", argv);
+}
+
 void RemoveBuilderFromBuilder(const RefPtr<NG::UINode>& node, const std::list<RefPtr<NG::UINode>>& nodes)
 {
     NG::ScopedViewStackProcessor builder;
@@ -102,12 +119,9 @@ void RemoveBuilderFromBuilder(const RefPtr<NG::UINode>& node, const std::list<Re
 
 void AddBuilderToParent(const RefPtr<NG::UINode>& node, std::list<RefPtr<NG::UINode>> nodes)
 {
-    CHECK_NULL_VOID(node);
-    if (nodes.empty()) {
-        return;
-    }
-    auto parent = node->GetParent();
-    while (parent) {
+    auto parent = node;
+    CHECK_NULL_VOID(parent && !nodes.empty());
+    while (parent && !parent->IsCNode()) {
         if (IsBuilderContainer(parent)) {
             AddBuilderToContainer(parent, nodes);
             return;
@@ -125,30 +139,14 @@ void AddBuilderToParent(const RefPtr<NG::UINode>& parentNode, const RefPtr<NG::U
     CHECK_NULL_VOID(childNode && parentNode);
     std::list<RefPtr<NG::UINode>> nodes;
     BuilderUtils::GetBuilderNodes(childNode, nodes);
-    CHECK_NULL_VOID(!nodes.empty());
-    auto parent = parentNode;
-    while (parent) {
-        if (IsBuilderContainer(parent)) {
-            AddBuilderToContainer(parent, nodes);
-            return;
-        }
-        if (IsBuilderRootNode(parent)) {
-            AddBuilderToBuilder(parent, nodes);
-            return;
-        }
-        parent = parent->GetParent();
-    }
+    BuilderUtils::AddBuilderToParent(parentNode, nodes);
 }
 
 void RemoveBuilderFromParent(const RefPtr<NG::UINode>& node, std::list<RefPtr<NG::UINode>> nodes)
 {
-    CHECK_NULL_VOID(node);
-    if (nodes.empty()) {
-        return;
-    }
-    auto parent = node->GetParent();
-    CHECK_NULL_VOID(parent);
-    while (parent) {
+    auto parent = node;
+    CHECK_NULL_VOID(parent && !nodes.empty());
+    while (parent && !parent->IsCNode()) {
         if (IsBuilderContainer(parent)) {
             RemoveBuilderFromContainer(parent, nodes);
             return;
@@ -166,19 +164,7 @@ void RemoveBuilderFromParent(const RefPtr<NG::UINode>& parentNode, const RefPtr<
     CHECK_NULL_VOID(childNode && parentNode);
     std::list<RefPtr<NG::UINode>> nodes;
     BuilderUtils::GetBuilderNodes(childNode, nodes);
-    CHECK_NULL_VOID(!nodes.empty());
-    auto parent = parentNode;
-    while (parent) {
-        if (IsBuilderContainer(parent)) {
-            RemoveBuilderFromContainer(parent, nodes);
-            return;
-        }
-        if (IsBuilderRootNode(parent)) {
-            RemoveBuilderFromBuilder(parent, nodes);
-            return;
-        }
-        parent = parent->GetParent();
-    }
+    BuilderUtils::RemoveBuilderFromParent(parentNode, nodes);
 }
 
 void GetFirstBuilderNode(const RefPtr<NG::UINode>& node, std::list<RefPtr<NG::UINode>>& nodes)
@@ -196,7 +182,7 @@ void GetFirstBuilderNode(const RefPtr<NG::UINode>& node, std::list<RefPtr<NG::UI
             nodes.push_back(currentNode);
             continue;
         }
-        if (currentNode->GetTag() == V2::NODE_CONTAINER_ETS_TAG || currentNode->GetTag() == V2::JS_NODE_SLOT_ETS_TAG) {
+        if (IsBuilderContainer(currentNode) || currentNode->IsCNode()) {
             continue;
         }
         auto currentChildren = currentNode->GetChildren();

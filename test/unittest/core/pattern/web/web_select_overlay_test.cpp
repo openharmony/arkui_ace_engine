@@ -3051,6 +3051,8 @@ HWTEST_F(WebSelectOverlayTest, OnMenuItemAction_003, TestSize.Level1)
     overlay.SetMenuOptions(selectInfo, params, callback);
     overlay.OnMenuItemAction(OptionMenuActionId::PASTE, OptionMenuType::TOUCH_MENU);
     EXPECT_EQ(overlay.quickMenuCallback_, callback);
+    overlay.OnMenuItemAction(OptionMenuActionId::ASK_CELIA, OptionMenuType::TOUCH_MENU);
+    EXPECT_EQ(overlay.isShowHandle_, false);
     g_editStateFlags = flags;
 #endif
 }
@@ -5536,6 +5538,75 @@ HWTEST_F(WebSelectOverlayTest, UpdateAIMenuTest001, TestSize.Level1)
     EXPECT_EQ(overlay.aiMenuType_, TextDataDetectType::INVALID);
     overlay.UpdateAISelectMenu(TextDataDetectType::PHONE_NUMBER, "13323332333");
     EXPECT_EQ(overlay.aiMenuType_, TextDataDetectType::PHONE_NUMBER);
+}
+
+/**
+ * @tc.name: HandleOnAskCelia001
+ * @tc.desc: Test HandleOnAskCelia.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, HandleOnAskCelia001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WebSelectOverlay g_overlay(webPattern);
+    webPattern->GetCoordinatePoint();
+    std::shared_ptr<NWebTouchHandleState> touchHandle = std::make_shared<NWebTouchHandleStateMock>();
+    g_overlay.ComputeTouchHandleRect(touchHandle);
+    g_Y = -1;
+    g_overlay.ComputeTouchHandleRect(touchHandle);
+    std::shared_ptr<NWebQuickMenuParams> params = std::make_shared<NWebQuickMenuParamsMock>();
+    std::shared_ptr<NWebQuickMenuCallback> callback = std::make_shared<NWebQuickMenuCallbackMock>();
+    SelectOverlayInfo selectInfo;
+    g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY;
+    g_overlay.HandleOnAskCelia();
+    FuncVariant funcAskCelia = []() -> std::string { return "askCelia"; };
+    FuncVariant funcCopy = []() -> std::string { return "copy"; };
+    FuncVariant funcSelectText = []() -> std::string { return "selectText"; };
+    FuncVariant funcLocation = [](int32_t id, std::string content) {};
+    webPattern->textDetectResult_.menuOptionAndAction["askCelia"] = { { "funcAskCelia", funcAskCelia },
+        { "copy", funcCopy }, { "selectText", funcSelectText } };
+    g_overlay.HandleOnAskCelia();
+    FuncVariant funcAskCelia2 = [](int32_t id, std::string content) {};
+    webPattern->textDetectResult_.menuOptionAndAction["askCelia"] = { { "askCelia1", funcAskCelia2 },
+        { "askCelia2", funcLocation } };
+    g_overlay.HandleOnAskCelia();
+}
+
+/**
+ * @tc.name: InitAIDetectResult_001
+ * @tc.desc: Test InitAIDetectResult.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, InitAIDetectResult_001, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    webPattern->InitAIDetectResult();
+    ASSERT_EQ(webPattern->textDetectResult_.menuOptionAndAction.empty(), true);
+    FuncVariant funcAskCelia = [](int32_t id, std::string content) {};
+    webPattern->textDetectResult_.menuOptionAndAction["askCelia"] = { { "askCelia", funcAskCelia } };
+    webPattern->InitAIDetectResult();
+    ASSERT_EQ(webPattern->textDetectResult_.menuOptionAndAction.empty(), false);
+    MockPipelineContext::TearDown();
+#endif
 }
 
 /**

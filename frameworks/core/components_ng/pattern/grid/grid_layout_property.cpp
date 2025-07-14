@@ -77,7 +77,7 @@ void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("irregularIndexes", irregularIndexesArray, filter);
     json->PutExtAttr("alignItems", GetAlignItems().value_or(GridItemAlignment::DEFAULT) ==
         GridItemAlignment::DEFAULT ? "GridItemAlignment.Default" : "GridItemAlignment.Stretch", filter);
-    json->PutExtAttr("syncLoad", propSyncLoad_.value_or(false), filter);
+    json->PutExtAttr("syncLoad", propSyncLoad_.value_or(true), filter);
 }
 
 std::string GridLayoutProperty::GetGridDirectionStr() const

@@ -393,7 +393,6 @@ export abstract class ClassElement extends Node<arkts.AstNode> implements ts.Cla
 export type MemberName = Identifier | PrivateIdentifier;
 
 // TODO: support
-// export type PropertyName = Identifier | StringLiteral | NumericLiteral | ts.ComputedPropertyName | PrivateIdentifier;
 export type PropertyName = Identifier | StringLiteral | NumericLiteral | PrivateIdentifier;
 
 // TODO: support
@@ -426,7 +425,6 @@ export interface FunctionLikeDeclarationBase extends SignatureDeclarationBase {
 }
 
 // TODO: support
-// export type FunctionLikeDeclaration = FunctionDeclaration | MethodDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration | ConstructorDeclaration | FunctionExpression | ArrowFunction;
 export type FunctionLikeDeclaration = FunctionDeclaration | MethodDeclaration | ConstructorDeclaration | FunctionExpression | ArrowFunction;
 
 export class MethodSignature extends Node<arkts.AstNode> implements ts.MethodSignature, SignatureDeclarationBase {

@@ -52,6 +52,26 @@ FormModel* FormModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
+bool ParseFormId(RequestFormInfo formInfo, JSRef<JSVal> id)
+{
+    if (id->IsString()) {
+        if (!StringUtils::IsNumber(id->ToString())) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "Invalid form id : %{public}s", id->ToString().c_str());
+            return false;
+        }
+        int64_t inputFormId = StringUtils::StringToLongInt(id->ToString().c_str(), -1);
+        if (inputFormId == -1) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "StringToLongInt failed : %{public}s", id->ToString().c_str());
+            return false;
+        }
+        formInfo.id = inputFormId;
+    } else if (id->IsNumber()) {
+        formInfo.id = id->ToNumber<int64_t>();
+    }
+    TAG_LOGI(AceLogTag::ACE_FORM, "JSForm Create, info.id: %{public}" PRId64, formInfo.id);
+    return true;
+}
+
 void JSForm::Create(const JSCallbackInfo& info)
 {
     if (info.Length() == 0 || !info[0]->IsObject()) {
@@ -68,26 +88,16 @@ void JSForm::Create(const JSCallbackInfo& info)
     JSRef<JSVal> wantValue = obj->GetProperty("want");
     JSRef<JSVal> renderingMode = obj->GetProperty("renderingMode");
     JSRef<JSVal> shape = obj->GetProperty("shape");
+    JSRef<JSVal> exemptAppLock = obj->GetProperty("exemptAppLock");
     RequestFormInfo formInfo;
-    if (id->IsString()) {
-        if (!StringUtils::IsNumber(id->ToString())) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "Invalid form id : %{public}s", id->ToString().c_str());
-            return;
-        }
-        int64_t inputFormId = StringUtils::StringToLongInt(id->ToString().c_str(), -1);
-        if (inputFormId == -1) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "StringToLongInt failed : %{public}s", id->ToString().c_str());
-            return;
-        }
-        formInfo.id = inputFormId;
-    } else if (id->IsNumber()) {
-        formInfo.id = id->ToNumber<int64_t>();
+    if (!ParseFormId(formInfo, id)) {
+        return;
     }
-    TAG_LOGI(AceLogTag::ACE_FORM, "JSForm Create, info.id: %{public}" PRId64, formInfo.id);
     formInfo.cardName = name->ToString();
     formInfo.bundleName = bundle->ToString();
     formInfo.abilityName = ability->ToString();
     formInfo.moduleName = module->ToString();
+    formInfo.exemptAppLock = exemptAppLock->ToBoolean();
     if (!dimension->IsNull() && !dimension->IsEmpty()) {
         formInfo.dimension = dimension->ToNumber<int32_t>();
     }

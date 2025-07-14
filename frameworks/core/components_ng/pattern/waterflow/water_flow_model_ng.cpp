@@ -411,9 +411,9 @@ void WaterFlowModelNG::SetSyncLoad(FrameNode* frameNode, bool syncLoad)
 
 bool WaterFlowModelNG::GetSyncLoad(FrameNode* frameNode)
 {
-    bool result = false;
+    bool result = true;
     CHECK_NULL_RETURN(frameNode, result);
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, SyncLoad, result, frameNode, false);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, SyncLoad, result, frameNode, true);
     return result;
 }
 

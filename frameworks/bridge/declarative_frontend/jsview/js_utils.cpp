@@ -143,9 +143,9 @@ const Rosen::Filter* CreateRSFilterFromNapiValue(JSRef<JSVal> obj)
     return filterPtr;
 }
 
-const Rosen::BrightnessBlender* CreateRSBrightnessBlenderFromNapiValue(JSRef<JSVal> obj)
+const Rosen::Blender* CreateRSBlenderFromNapiValue(JSRef<JSVal> obj)
 {
-    auto blenderPtr = static_cast<Rosen::BrightnessBlender*>(UnwrapNapiValue(obj));
+    auto blenderPtr = static_cast<Rosen::Blender*>(UnwrapNapiValue(obj));
     return blenderPtr;
 }
 

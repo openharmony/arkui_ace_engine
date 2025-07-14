@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -173,6 +173,9 @@ void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     }
     if (HasHoverModeChangedCallbackId()) {
         pipeline->UnRegisterHalfFoldHoverChangedCallback(hoverModeChangedCallbackId_.value_or(-1));
+    }
+    if (onWillDismissRelease_) {
+        onWillDismissRelease_();
     }
     UnRegisterAvoidInfoChangeListener(frameNode);
 }
@@ -2137,35 +2140,6 @@ bool DialogPattern::IsShowInFloatingWindow()
         }
     }
     return container->IsFloatingWindow();
-}
-
-void DialogPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
-{
-    json->Put("Type", DialogTypeUtils::ConvertDialogTypeToString(dialogProperties_.type).c_str());
-    if (!dialogProperties_.title.empty()) {
-        json->Put("Title", dialogProperties_.title.c_str());
-    }
-    if (!dialogProperties_.subtitle.empty()) {
-        json->Put("Subtitle", dialogProperties_.subtitle.c_str());
-    }
-    if (!dialogProperties_.content.empty()) {
-        json->Put("Content", dialogProperties_.content.c_str());
-    }
-    if (dialogProperties_.buttonDirection != DialogButtonDirection::AUTO) {
-        json->Put("ButtonDirection",
-            DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(
-                dialogProperties_.buttonDirection).c_str());
-    }
-    if (dialogProperties_.backgroundBlurStyle.has_value() && dialogProperties_.backgroundBlurStyle.value() != 0) {
-        json->Put("BackgroundBlurStyle", std::to_string(dialogProperties_.backgroundBlurStyle.value()).c_str());
-    }
-    if (dialogProperties_.backgroundColor.value_or(Color::TRANSPARENT) != Color::TRANSPARENT) {
-        json->Put("BackgroundColor", dialogProperties_.backgroundColor.value_or(Color::TRANSPARENT).ToString().c_str());
-    }
-    DumpSimplifySizeProperty(json);
-    DumpSimplifyBorderProperty(json);
-    DumpSimplifyBoolProperty(json);
-    DumpSimplifyObjectProperty(json);
 }
 
 void DialogPattern::DumpSimplifyBorderProperty(std::unique_ptr<JsonValue>& json)

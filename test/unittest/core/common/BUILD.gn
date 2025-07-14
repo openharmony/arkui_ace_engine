@@ -30,7 +30,6 @@ ace_unittest("common_test") {
     "builder_util/builder_util_test.cpp",
     "clipboard/clipboard_test.cpp",
     "environment/environment_test.cpp",
-    "ime/ime_test.cpp",
     "multi_thread_build_manager/multi_thread_build_manager_test.cpp",
     "others/thread_checker_test.cpp",
     "recorder/event_recorder_test.cpp",
@@ -49,6 +48,7 @@ group("core_common_unittest") {
   deps = [
     ":common_test",
     "form:form_manager_test",
+    "ime:ime_test",
     "key_event_manager:key_event_manager_test",
     "plugin:plugin_manager_test",
   ]

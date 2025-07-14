@@ -144,6 +144,7 @@ private:
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type);
     void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
     GestureJudgeResult TriggerGestureJudgeCallback();
+    void UpdateGestureEventInfo(std::shared_ptr<LongPressGestureEvent>& info);
     void OnResetStatus() override;
     double ConvertPxToVp(double offset) const;
     void ThumbnailTimer(int32_t time);

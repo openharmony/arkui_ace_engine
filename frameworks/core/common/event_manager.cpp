@@ -28,6 +28,7 @@
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
+constexpr int32_t DUMP_DOUBLE_NUMBER = 2;
 constexpr int32_t DUMP_START_NUMBER = 3;
 constexpr int32_t DUMP_LIMIT_SIZE = 500;
 constexpr int64_t EVENT_CLEAR_DURATION = 2000;
@@ -890,6 +891,8 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
     NotifyDragTouchEventListener(point);
 
     CheckUpEvent(event);
+    auto item = touchTestResults_.find(event.id);
+    passThroughResult_ = (item != touchTestResults_.end() && !item->second.empty());
     UpdateInfoWhenFinishDispatch(point, sendOnTouch);
     return true;
 }
@@ -963,6 +966,8 @@ void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
         for (auto stateHistory : stateHistorys) {
             if (stateHistory.procedure.find("Down") != std::string::npos) {
                 gestureLog += ", prcd: Down";
+            } else if (stateHistory.procedure.find("Move") != std::string::npos) {
+                gestureLog += ", prcd: Move";
             } else {
                 gestureLog += ", prcd: Up";
             }
@@ -1100,7 +1105,6 @@ void EventManager::DispatchTouchEventToTouchTestResult(const TouchEvent& touchEv
             eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                 std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
         }
-        passThroughResult_ = isStopTouchEvent;
     }
 }
 
@@ -1551,6 +1555,8 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
     }
     lastHoverNode_ = currHoverNode_;
     currHoverNode_ = hoverNode;
+    auto item = currMouseTestResultsMap_.find(event.id);
+    passThroughResult_ = (item != currMouseTestResultsMap_.end() && !item->second.empty());
 }
 
 bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
@@ -1588,7 +1594,6 @@ bool EventManager::DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event
         }
     }
     auto result = DispatchMouseEventToCurResults(event, handledResults, isStopPropagation);
-    passThroughResult_ = isStopPropagation;
     if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL) {
         DoSingleMouseActionRelease(key);
     }
@@ -1880,6 +1885,8 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
     touchRestrict.inputEventType = InputEventType::AXIS;
     touchRestrict.touchEvent = ConvertAxisEventToTouchEvent(event);
     frameNode->AxisTest(point, point, point, touchRestrict, axisTestResultsMap_[event.id]);
+    auto item = axisTestResultsMap_.find(event.id);
+    passThroughResult_ = (item != axisTestResultsMap_.end() && !item->second.empty());
 }
 
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
@@ -1890,7 +1897,6 @@ bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
             !event.isRotationEvent) {
             axisTestResultsMap_[event.id].clear();
             axisTestResultsMap_.erase(event.id);
-            passThroughResult_  = false;
             return false;
         }
     }
@@ -1898,13 +1904,11 @@ bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
         if (axisTarget && axisTarget->HandleAxisEvent(event)) {
             axisTestResultsMap_[event.id].clear();
             axisTestResultsMap_.erase(event.id);
-            passThroughResult_  = true;
             return true;
         }
     }
     axisTestResultsMap_[event.id].clear();
     axisTestResultsMap_.erase(event.id);
-    passThroughResult_ = false;
     return true;
 }
 
@@ -2201,7 +2205,6 @@ bool EventManager::TryResampleTouchEvent(std::vector<TouchEvent>& history,
     std::vector<TouchEvent> events(history);
     events.insert(events.end(), current.begin(), current.end());
     ResamplePoint slope;
-    resample = GetLatestPoint(events, nanoTimeStamp);
     bool ret = CheckDifferentTargetDisplay({}, events) &&
         ResampleAlgo::GetResamplePointerEvent(events, nanoTimeStamp, resample, slope);
     if (ret) {
@@ -2213,19 +2216,8 @@ bool EventManager::TryResampleTouchEvent(std::vector<TouchEvent>& history,
 
     // update history and store the last 2 samples.
     history.clear();
-    auto penultimateIter = events.end() - 2; // cannot be used directly, maybe out of bounds.
-    if (ret && resample.time > penultimateIter->time) { // there are at least 2 samples if the resample exists.
-        if (resample.time > events.back().time) {
-            history.emplace_back(resample);
-            history.emplace_back(events.back());
-        } else {
-            history.emplace_back(events.back());
-            history.emplace_back(resample);
-        }
-    } else {
-        auto historyBegin = events.size() > 1 ? penultimateIter : events.begin();
-        history.assign(historyBegin, events.end());
-    }
+    auto historyBegin = (events.size() > 1) ? (events.end() - 2) : events.begin();
+    history.assign(historyBegin, events.end());
 
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, SEC_PLD(,
@@ -2478,8 +2470,10 @@ void EventManager::DumpEventWithCount(const std::vector<std::string>& params, NG
     if (params.size() == MIN_PARAM_SIZE) {
         DumpEvent(type, hasJson);
         return;
-    }
-    if (params.size() >= COUNT_PARAM_SIZE) {
+    } else if (params.size() == DUMP_DOUBLE_NUMBER && hasJson) {
+        DumpEvent(type, hasJson);
+        return;
+    } else if (params.size() >= COUNT_PARAM_SIZE) {
         if (params[1] != "-n") {
             DumpEvent(type, hasJson);
             return;
@@ -2506,7 +2500,7 @@ void EventManager::DumpEventWithCount(const std::vector<std::string>& params, NG
     }
 }
 
-TouchDelegateHdl EventManager::AddTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate> delegater)
+TouchDelegateHdl EventManager::AddTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate>& delegater)
 {
     touchDelegatesMap_[touchId].emplace_back(delegater);
     TouchDelegatesIter iter = std::prev(touchDelegatesMap_[touchId].end());
@@ -2515,7 +2509,7 @@ TouchDelegateHdl EventManager::AddTouchDelegate(const int32_t touchId, const Ref
     return handler;
 }
 
-TouchDelegateHdl EventManager::ReplaceTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate> delegater)
+TouchDelegateHdl EventManager::UpdateTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate>& delegater)
 {
     if (touchDelegatesMap_.find(touchId) == touchDelegatesMap_.end() || touchDelegatesMap_[touchId].empty()) {
         touchDelegatesMap_[touchId].emplace_back(delegater);
@@ -2525,7 +2519,7 @@ TouchDelegateHdl EventManager::ReplaceTouchDelegate(const int32_t touchId, const
         touchDelegatesMap_[touchId].emplace_back(delegater);
     }
     TouchDelegatesIter iter = std::prev(touchDelegatesMap_[touchId].end());
-    LOGD("ReplaceTouchDelegate successful");
+    LOGD("UpdateTouchDelegate successful");
     TouchDelegateHdl handler(touchId, iter);
     return handler;
 }

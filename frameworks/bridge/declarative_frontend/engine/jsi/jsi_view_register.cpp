@@ -1313,8 +1313,6 @@ void JsRegisterFormViews(
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetI18nResource));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "$m"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetMediaResource));
-    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getArkUINativeModule"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NG::ArkUINativeModule::GetArkUINativeModuleForm));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorNodes"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodes));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorNodeById"),

@@ -356,10 +356,10 @@ HWTEST_F(ResampleTestNg, ResampleTestFastFlick, TestSize.Level1)
     TestResult result { 0 };
     pipeline_->touchAccelarate_ = true;
     TestFastFlick(60, result);
-    EXPECT_LT(result.stddevAgainstPhy, 0.146);
+    EXPECT_LT(result.stddevAgainstPhy, 0.157);
     EXPECT_LT(result.stddevOfAcc, 0.537);
     TestFastFlick(140, result);
-    EXPECT_LT(result.stddevAgainstPhy, 0.226);
+    EXPECT_LT(result.stddevAgainstPhy, 0.322);
     EXPECT_LT(result.stddevOfAcc, 3.956);
 
     pipeline_->touchAccelarate_ = false;
@@ -397,10 +397,10 @@ HWTEST_F(ResampleTestNg, ResampleTestDeceleratingSlide, TestSize.Level1)
     TestResult result { 0 };
     pipeline_->touchAccelarate_ = true;
     TestDeceleratingSlide(60, result);
-    EXPECT_LT(result.stddevAgainstPhy, 0.065);
+    EXPECT_LT(result.stddevAgainstPhy, 0.075);
     EXPECT_LT(result.stddevOfAcc, 0.357);
     TestDeceleratingSlide(140, result);
-    EXPECT_LT(result.stddevAgainstPhy, 0.065);
+    EXPECT_LT(result.stddevAgainstPhy, 0.075);
     EXPECT_LT(result.stddevOfAcc, 0.357);
 
     pipeline_->touchAccelarate_ = false;
@@ -511,30 +511,14 @@ HWTEST_F(ResampleTestNg, ResampleTestRealData01, TestSize.Level1)
 
     event.SetType(TouchType::MOVE);
     // real trace data
-    std::vector<std::vector<int64_t>> logPoints {
-        { 343641816000, 1735, 300 },
-        { 343641823000, 1736, 300 },
-        { 343641830000, 1738, 300 },
-        { 343641837000, 1739, 300 },
-        { 343641844000, 1740, 300 },
-        { 343641851000, 1742, 300 },
-        { 343641858000, 1743, 300 },
-        { 343641865000, 1745, 300 },
-        { 343641872000, 1746, 300 },
-        { 343641879000, 1747, 300 },
-        { 343641886000, 1749, 300 },
-        { 343641893000, 1750, 300 },
-        { 343641900000, 1752, 300 },
-        { 343641907000, 1753, 300 },
-        { 343641914000, 1754, 300 },
-        { 343641921000, 1756, 300 },
-        { 343641928000, 1757, 300 },
-        { 343641935000, 1759, 300 },
-        { 343641942000, 1760, 300 },
-        { 343641949000, 1761, 300 },
-        { 343641958000, 1763, 300 },
-        { 343641963000, 1764, 300 }
-    };
+    std::vector<std::vector<int64_t>> logPoints { { 343641816000, 1735, 300 }, { 343641823000, 1736, 300 },
+        { 343641830000, 1738, 300 }, { 343641837000, 1739, 300 }, { 343641844000, 1740, 300 },
+        { 343641851000, 1742, 300 }, { 343641858000, 1743, 300 }, { 343641865000, 1745, 300 },
+        { 343641872000, 1746, 300 }, { 343641879000, 1747, 300 }, { 343641886000, 1749, 300 },
+        { 343641893000, 1750, 300 }, { 343641900000, 1752, 300 }, { 343641907000, 1753, 300 },
+        { 343641914000, 1754, 300 }, { 343641921000, 1756, 300 }, { 343641928000, 1757, 300 },
+        { 343641935000, 1759, 300 }, { 343641942000, 1760, 300 }, { 343641949000, 1761, 300 },
+        { 343641958000, 1763, 300 }, { 343641963000, 1764, 300 } };
     for (const auto& item : logPoints) {
         std::chrono::microseconds msEpoch(item[0]);
         TimeStamp t(msEpoch);

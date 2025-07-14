@@ -45,8 +45,6 @@
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/sheet/content_cover/sheet_content_cover_object.h"
-#include "core/components_ng/pattern/sheet/content_cover/sheet_content_cover_layout_algorithm.h"
 #include "core/components_ng/pattern/sheet/sheet_mask_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -1454,6 +1452,78 @@ HWTEST_F(SheetShowInSubwindowTestNg, PostProcessBorderWidth, TestSize.Level1)
 
 /**
  * @tc.name: SheetShowInSubwindowTestNg
+ * @tc.desc: Test SheetSideObject::DirtyLayoutProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, DirtyLayoutProcess001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_SIDE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. create renderContext, layoutAlgorithmT and layoutAlgorithmWrapper,
+     *                   set sheetHeight_ is 1.0f.
+     */
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto layoutAlgorithmT = AceType::MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithmT, nullptr);
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithmT);
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    layoutAlgorithmT->sheetHeight_ = 1.0f;
+    /**
+     * @tc.steps: step. DirtyLayoutProcess.
+     * @tc.expected: sheetHeight_ = 1.0f.
+     */
+    object->DirtyLayoutProcess(layoutAlgorithmWrapper);
+    EXPECT_EQ(object->sheetHeight_, 1.0f);
+}
+
+/**
+ * @tc.name: SheetShowInSubwindowTestNg
+ * @tc.desc: Test SheetSideObject::FireHeightDidChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, FireHeightDidChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_SIDE;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. set preDidHeight and sheetHeight_, call FireHeightDidChange and check result.
+     * @tc.expected: preDidHeight_ is updated to match sheetHeight_.
+     */
+    sheetPattern->SetPreDidHeight(1.0f);
+    object->sheetHeight_ = 1.0f;
+    object->FireHeightDidChange();
+    EXPECT_EQ(sheetPattern->GetPreDidHeight(), 1.0f);
+    object->sheetHeight_ = 5.0f;
+    object->FireHeightDidChange();
+    EXPECT_EQ(sheetPattern->GetPreDidHeight(), 5.0f);
+}
+
+/**
+ * @tc.name: SheetShowInSubwindowTestNg
  * @tc.desc: Test SheetPresentationPattern::UpdateSheetObject
  * @tc.type: FUNC
  */
@@ -1622,730 +1692,26 @@ HWTEST_F(SheetShowInSubwindowTestNg, TestSideSheetAvoidKeyboard2, TestSize.Level
 }
 
 /**
- * @tc.name: InitScrollProps001
- * @tc.desc: Test SheetObject::InitScrollProps Function
+ * @tc.name: UpdateDragBarStatus001
+ * @tc.desc: UpdateDragBarStatus Layout
  * @tc.type: FUNC
  */
-HWTEST_F(SheetShowInSubwindowTestNg, InitScrollProps001, TestSize.Level1)
-{
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 201,
-        AceType::MakeRefPtr<SheetPresentationPattern>(301, "SheetObject", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto scrollNode =
-        FrameNode::CreateFrameNode("Scroll", 501, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scrollNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
-    sheetPattern->InitSheetObject();
-    auto sheetObject = sheetPattern->GetSheetObject();
-    ASSERT_NE(sheetObject, nullptr);
-    sheetPattern->sheetEffectEdge_ = SheetEffectEdge::NONE;
-    sheetObject->InitScrollProps();
-    EXPECT_EQ(scrollPattern->edgeEffect_, EdgeEffect::NONE);
-    EXPECT_FALSE(scrollPattern->edgeEffectAlwaysEnabled_);
-    EXPECT_EQ(scrollPattern->effectEdge_, EffectEdge::ALL);
-}
-
-/**
- * @tc.name: InitScrollProps002
- * @tc.desc: Test SheetObject::InitScrollProps Function
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, InitScrollProps002, TestSize.Level1)
-{
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 201,
-        AceType::MakeRefPtr<SheetPresentationPattern>(301, "SheetObject", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto scrollNode =
-        FrameNode::CreateFrameNode("Scroll", 501, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scrollNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
-    sheetPattern->InitSheetObject();
-    auto sheetObject = sheetPattern->GetSheetObject();
-    ASSERT_NE(sheetObject, nullptr);
-    sheetPattern->sheetEffectEdge_ = SheetEffectEdge::ALL;
-    sheetObject->InitScrollProps();
-    EXPECT_EQ(scrollPattern->edgeEffect_, EdgeEffect::SPRING);
-    EXPECT_FALSE(scrollPattern->edgeEffectAlwaysEnabled_);
-    EXPECT_EQ(scrollPattern->effectEdge_, EffectEdge::ALL);
-}
-
-/**
- * @tc.name: PostProcessBorderWidth001
- * @tc.desc: Test SheetContentCoverObject::PostProcessBorderWidth
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, PostProcessBorderWidth001, TestSize.Level1)
+HWTEST_F(SheetShowInSubwindowTestNg, UpdateDragBarStatus001, TestSize.Level1)
 {
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
     ASSERT_NE(sheetNode, nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->sheetType_ = SheetType::SHEET_SIDE;
     sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
+    auto sheetDragBar = sheetPattern->GetDragBarNode();
+    CHECK_NULL_VOID(sheetDragBar);
+    auto dragBarLayoutProperty = sheetDragBar->GetLayoutProperty();
+    CHECK_NULL_VOID(dragBarLayoutProperty);
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
     ASSERT_NE(object, nullptr);
-    auto result = object->PostProcessBorderWidth(NG::BorderWidthProperty());
-    EXPECT_EQ(result.topDimen, 0.0_vp);
-    EXPECT_EQ(result.bottomDimen, 0.0_vp);
-    EXPECT_EQ(result.leftDimen, 0.0_vp);
-    EXPECT_EQ(result.rightDimen, 0.0_vp);
-}
-
-/**
- * @tc.name: ContentCoverClipSheetNode
- * @tc.desc: Test SheetContentCoverObject::ClipSheetNode
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, ContentCoverClipSheetNode, TestSize.Level1)
-{
-    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
-    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    BorderRadiusProperty borderRadius(5.0_vp);
-    SheetStyle sheetStyle;
-    sheetStyle.radius = borderRadius;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    EXPECT_TRUE(renderContext->GetBorderRadius() == std::nullopt);
-    /**
-     * @tc.steps: step2. test BorderRadius.
-     */
-    Dimension radius = 0.0_px;
-    object->ClipSheetNode();
-    EXPECT_FLOAT_EQ(renderContext->GetBorderRadius()->radiusTopLeft->ConvertToPx(), radius.ConvertToPx());
-    EXPECT_FLOAT_EQ(renderContext->GetBorderRadius()->radiusTopRight->ConvertToPx(), radius.ConvertToPx());
-    EXPECT_FLOAT_EQ(renderContext->GetBorderRadius()->radiusBottomLeft->ConvertToPx(), radius.ConvertToPx());
-    EXPECT_FLOAT_EQ(renderContext->GetBorderRadius()->radiusBottomRight->ConvertToPx(), radius.ConvertToPx());
-    EXPECT_FLOAT_EQ(renderContext->GetOuterBorderRadius()->radiusTopLeft->ConvertToPx(), radius.ConvertToPx());
-    EXPECT_FLOAT_EQ(renderContext->GetOuterBorderRadius()->radiusTopRight->ConvertToPx(), radius.ConvertToPx());
-    EXPECT_FLOAT_EQ(renderContext->GetOuterBorderRadius()->radiusBottomLeft->ConvertToPx(), radius.ConvertToPx());
-    EXPECT_FLOAT_EQ(renderContext->GetOuterBorderRadius()->radiusBottomRight->ConvertToPx(), radius.ConvertToPx());
-    EXPECT_EQ(renderContext->GetClipShape(), nullptr);
-    EXPECT_EQ(renderContext->GetBackShadow(), Shadow());
-}
-
-/**
- * @tc.name: GetAnimationOptionForOverlay001
- * @tc.desc: Test SheetContentCoverObject::GetAnimationOptionForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, GetAnimationOptionForOverlay001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    SheetStyle sheetStyle;
-    sheetStyle.modalTransition = ModalTransition::ALPHA;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    /**
-     * @tc.steps: step2. parameter setting for test option.
-     */
-    auto option = object->GetAnimationOptionForOverlay(true, true);
-    EXPECT_EQ(option.GetCurve(), Curves::FRICTION);
-    EXPECT_EQ(option.GetDuration(), 200);
-    EXPECT_EQ(option.GetFillMode(), FillMode::FORWARDS);
-}
-
-/**
- * @tc.name: GetAnimationOptionForOverlay002
- * @tc.desc: Test SheetContentCoverObject::GetAnimationOptionForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, GetAnimationOptionForOverlay002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    SheetStyle sheetStyle;
-    sheetStyle.modalTransition = ModalTransition::NONE;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    /**
-     * @tc.steps: step2. parameter setting for test option.
-     */
-    auto option = object->GetAnimationOptionForOverlay(true, true);
-    EXPECT_EQ(option.GetDuration(), 0);
-}
-
-/**
- * @tc.name: InitAnimationForOverlay001
- * @tc.desc: Test SheetContentCoverObject::InitAnimationForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, InitAnimationForOverlay001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    SheetStyle sheetStyle;
-    sheetStyle.modalTransition = ModalTransition::ALPHA;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    /**
-     * @tc.steps: step2. test the setting of opacity.
-     */
-    object->InitAnimationForOverlay(true, true);
-    EXPECT_EQ(renderContext->GetOpacity().value(), 0.0);
-}
-
-/**
- * @tc.name: InitAnimationForOverlay002
- * @tc.desc: Test SheetContentCoverObject::InitAnimationForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, InitAnimationForOverlay002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    SheetStyle sheetStyle;
-    sheetStyle.modalTransition = ModalTransition::ALPHA;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    /**
-     * @tc.steps: step2. test the setting of opacity.
-     */
-    object->InitAnimationForOverlay(false, true);
-    EXPECT_EQ(renderContext->GetOpacity().value(), 1.0);
-}
-
-/**
- * @tc.name: InitAnimationForOverlay003
- * @tc.desc: Test SheetContentCoverObject::InitAnimationForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, InitAnimationForOverlay003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    SheetStyle sheetStyle;
-    sheetStyle.modalTransition = ModalTransition::NONE;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    /**
-     * @tc.steps: step2. test the setting of opacity.
-     */
-    object->InitAnimationForOverlay(true, true);
-    EXPECT_EQ(renderContext->GetOpacity().value(), 1.0);
-}
-
-/**
- * @tc.name: InitAnimationForOverlay004
- * @tc.desc: Test SheetContentCoverObject::InitAnimationForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, InitAnimationForOverlay004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    SheetStyle sheetStyle;
-    sheetStyle.modalTransition = ModalTransition::NONE;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    /**
-     * @tc.steps: step2. test the setting of opacity.
-     */
-    object->InitAnimationForOverlay(false, true);
-    EXPECT_EQ(renderContext->GetOpacity().value(), 0.0);
-}
-
-/**
- * @tc.name: InitAnimationForOverlay005
- * @tc.desc: Test SheetContentCoverObject::InitAnimationForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, InitAnimationForOverlay005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    SheetStyle sheetStyle;
-    sheetStyle.modalTransition = ModalTransition::DEFAULT;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto geometryNode = sheetNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto height = geometryNode->GetFrameSize().Height();
-    /**
-     * @tc.steps: step2. test the update function.
-     */
-    object->InitAnimationForOverlay(true, true);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), 0.0f);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), height);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->z.ConvertToPx(), 0.0f);
-}
-
-/**
- * @tc.name: InitAnimationForOverlay006
- * @tc.desc: Test SheetContentCoverObject::InitAnimationForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, InitAnimationForOverlay006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    SheetStyle sheetStyle;
-    sheetStyle.modalTransition = ModalTransition::DEFAULT;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    /**
-     * @tc.steps: step2. test the update function.
-     */
-    object->InitAnimationForOverlay(false, true);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), 0.0f);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 0.0f);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->z.ConvertToPx(), 0.0f);
-}
-
-/**
- * @tc.name: GetAnimationPropertyCallForOverlay001
- * @tc.desc: Test SheetContentCoverObject::GetAnimationPropertyCallForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, GetAnimationPropertyCallForOverlay001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    SheetStyle sheetStyle;
-    sheetStyle.modalTransition = ModalTransition::ALPHA;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    /**
-     * @tc.steps: step2. test the setting of opacity.
-     */
-    auto callback1 = object->GetAnimationPropertyCallForOverlay(true);
-    ASSERT_NE(callback1, nullptr);
-    callback1();
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    EXPECT_EQ(renderContext->GetOpacity().value(), 1.0f);
-}
-
-/**
- * @tc.name: GetAnimationPropertyCallForOverlay002
- * @tc.desc: Test SheetContentCoverObject::GetAnimationPropertyCallForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, GetAnimationPropertyCallForOverlay002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    SheetStyle sheetStyle;
-    sheetStyle.modalTransition = ModalTransition::ALPHA;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    /**
-     * @tc.steps: step2. test the setting of opacity.
-     */
-    auto callback1 = object->GetAnimationPropertyCallForOverlay(false);
-    ASSERT_NE(callback1, nullptr);
-    callback1();
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    EXPECT_EQ(renderContext->GetOpacity().value(), 0.0f);
-}
-
-/**
- * @tc.name: GetAnimationPropertyCallForOverlay003
- * @tc.desc: Test SheetContentCoverObject::GetAnimationPropertyCallForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, GetAnimationPropertyCallForOverlay003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    SheetStyle sheetStyle;
-    sheetStyle.modalTransition = ModalTransition::NONE;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    /**
-     * @tc.steps: step2. test the setting of opacity.
-     */
-    auto callback1 = object->GetAnimationPropertyCallForOverlay(true);
-    ASSERT_NE(callback1, nullptr);
-    callback1();
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    EXPECT_EQ(renderContext->GetOpacity().value(), 1.0f);
-}
-
-/**
- * @tc.name: GetAnimationPropertyCallForOverlay004
- * @tc.desc: Test SheetContentCoverObject::GetAnimationPropertyCallForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, GetAnimationPropertyCallForOverlay004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    SheetStyle sheetStyle;
-    sheetStyle.modalTransition = ModalTransition::NONE;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    /**
-     * @tc.steps: step2. test the setting of opacity.
-     */
-    auto callback1 = object->GetAnimationPropertyCallForOverlay(false);
-    ASSERT_NE(callback1, nullptr);
-    callback1();
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    EXPECT_EQ(renderContext->GetOpacity().value(), 0.0f);
-}
-
-/**
- * @tc.name: GetAnimationPropertyCallForOverlay005
- * @tc.desc: Test SheetContentCoverObject::GetAnimationPropertyCallForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, GetAnimationPropertyCallForOverlay005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    SheetStyle sheetStyle;
-    sheetStyle.modalTransition = ModalTransition::DEFAULT;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    /**
-     * @tc.steps: step2. test the update function.
-     */
-    auto callback1 = object->GetAnimationPropertyCallForOverlay(true);
-    ASSERT_NE(callback1, nullptr);
-    callback1();
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), 0.0f);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 0.0f);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->z.ConvertToPx(), 0.0f);
-}
-
-/**
- * @tc.name: GetAnimationPropertyCallForOverlay006
- * @tc.desc: Test SheetContentCoverObject::GetAnimationPropertyCallForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, GetAnimationPropertyCallForOverlay006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet pattern and object.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    SheetStyle sheetStyle;
-    sheetStyle.modalTransition = ModalTransition::DEFAULT;
-    layoutProperty->UpdateSheetStyle(sheetStyle);
-    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
-    sheetPattern->InitSheetObject();
-    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
-    ASSERT_NE(object, nullptr);
-    auto geometryNode = sheetNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto height = geometryNode->GetFrameSize().Height();
-    /**
-     * @tc.steps: step2. test the update function.
-     */
-    auto callback1 = object->GetAnimationPropertyCallForOverlay(false);
-    ASSERT_NE(callback1, nullptr);
-    callback1();
-    auto renderContext = sheetNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), 0.0f);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), height);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->z.ConvertToPx(), 0.0f);
-}
-
-/**
- * @tc.name: ContentCoverSheetLayoutAlgorithm1
- * @tc.desc: ContentCoverSheetLayoutAlgorithm Width Measure
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, ContentCoverSheetLayoutAlgorithm1, TestSize.Level1)
-{
-    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
-    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
-    /**
-     * @tc.steps: step1: create sheetNode, init builder func
-     * @tc.expected: targetNode != nullptr
-     */
-    SheetStyle style;
-    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto callback = [](const std::string&) {};
-    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
-    ASSERT_NE(layoutProperty, nullptr);
-    LayoutConstraintF layoutConstraint;
-    layoutConstraint.maxSize = { 1000, 1000 };
-    sheetNode->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
-    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
-    layoutProperty->UpdateContentConstraint();
-    /**
-     * @tc.steps: step2. side width = defaultWidth.
-     */
-    auto algorithm = AceType::MakeRefPtr<SheetContentCoverLayoutAlgorithm>();
-    ASSERT_NE(algorithm, nullptr);
-    algorithm->Measure(AceType::RawPtr(sheetNode));
-    EXPECT_FLOAT_EQ(algorithm->sheetWidth_, 1000);
-    EXPECT_FLOAT_EQ(algorithm->sheetHeight_, 1000);
-}
-
-/**
- * @tc.name: ContentCoverSheetLayoutAlgorithm2
- * @tc.desc: SheetPresentationSideLayoutAlgorithm Layout
- * @tc.type: FUNC
- */
-HWTEST_F(SheetShowInSubwindowTestNg, ContentCoverSheetLayoutAlgorithm2, TestSize.Level1)
-{
-    Dimension closeIconButtonWidth = 1.0_vp;
-    Dimension titleTextMargin = 2.0_vp;
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
-    pipelineContext->SetDisplayWindowRectInfo({ 0, 0, 1000, 1600 });
-    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
-    sheetTheme->closeIconButtonWidth_ = closeIconButtonWidth;
-    sheetTheme->titleTextMargin_ = titleTextMargin;
-    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
-    /**
-     * @tc.steps: step1. create sheet node.
-     */
-    SheetStyle style;
-    style.sheetType = SheetType::SHEET_CONTENT_COVER;
-    style.sheetTitle = "mainTitle";
-    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto callback = [](const std::string&) {};
-    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
-    ASSERT_NE(sheetNode, nullptr);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto geometryNode = sheetNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    LayoutConstraintF layoutConstraint;
-    layoutConstraint.maxSize = { 1000, 1000 };
-    geometryNode->SetParentLayoutConstraint(layoutConstraint);
-    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
-    layoutProperty->UpdateContentConstraint();
-    /**
-     * @tc.steps: step2. test sheetNode Layout.
-     */
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-    auto layoutAlgorithm =
-        AceType::DynamicCast<SheetContentCoverLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    layoutAlgorithm->sheetHeight_ = 1000;
-    layoutAlgorithm->sheetWidth_ = 1000;
-    layoutAlgorithm->Layout(AceType::RawPtr(sheetNode));
-    EXPECT_FLOAT_EQ(geometryNode->GetMarginFrameOffset().GetX(), 0);
-    EXPECT_FLOAT_EQ(geometryNode->GetMarginFrameOffset().GetY(), 0);
-
-    auto padding = sheetPattern->GetSheetObject()->GetSheetSafeAreaPadding();
-    auto builderNode = sheetPattern->GetTitleBuilderNode();
-    ASSERT_NE(builderNode, nullptr);
-    auto buildGeometryNode = builderNode->GetGeometryNode();
-    ASSERT_NE(buildGeometryNode, nullptr);
-    EXPECT_FLOAT_EQ(buildGeometryNode->GetMarginFrameOffset().GetX(), 0.0f);
-    EXPECT_FLOAT_EQ(buildGeometryNode->GetMarginFrameOffset().GetY(), padding.top.value_or(0.0f));
+    object->UpdateDragBarStatus();
+    EXPECT_EQ(dragBarLayoutProperty->propVisibility_, VisibleType::INVISIBLE);
 }
 } // namespace OHOS::Ace::NG

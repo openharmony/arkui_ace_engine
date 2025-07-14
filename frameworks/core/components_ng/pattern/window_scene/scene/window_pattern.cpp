@@ -538,6 +538,7 @@ void WindowPattern::CreateStartingWindow()
     startingWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     startingWindow_->SetHitTestMode(HitTestMode::HTMNONE);
     auto sourceInfo = ImageSourceInfo(
@@ -632,6 +633,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     snapshotWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto imagePaintProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();
     imagePaintProperty->UpdateImageInterpolation(ImageInterpolation::LOW);
@@ -656,8 +658,9 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         auto scenePersistence = session_->GetScenePersistence();
         CHECK_NULL_VOID(scenePersistence);
         auto key = session_->GetWindowStatus();
-        auto isSavingSnapshot = scenePersistence->IsSavingSnapshot(key, session_->freeMultiWindow_);
-        auto hasSnapshot = scenePersistence->HasSnapshot(key, session_->freeMultiWindow_);
+        auto freeMultiWindow = session_->freeMultiWindow_.load();
+        auto isSavingSnapshot = scenePersistence->IsSavingSnapshot(key, freeMultiWindow);
+        auto hasSnapshot = scenePersistence->HasSnapshot(key, freeMultiWindow);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "id: %{public}d isSavingSnapshot: %{public}d, hasSnapshot: %{public}d",
             persistentId, isSavingSnapshot, hasSnapshot);
@@ -679,7 +682,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             Rosen::SceneSessionManager::GetInstance().VisitSnapshotFromCache(persistentId);
         } else {
             sourceInfo = ImageSourceInfo("file://" + scenePersistence->GetSnapshotFilePath(key, matchSnapshot,
-                session_->freeMultiWindow_));
+                freeMultiWindow));
             auto snapshotRotation =
                 static_cast<uint32_t>(scenePersistence->rotate_[key.first][key.second]);
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
@@ -692,7 +695,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             }
         }
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
-        ClearImageCache(sourceInfo, key, session_->freeMultiWindow_);
+        ClearImageCache(sourceInfo, key, freeMultiWindow);
         auto eventHub = snapshotWindow_->GetOrCreateEventHub<ImageEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnError([weakThis = WeakClaim(this)](const LoadImageFailEvent& info) {

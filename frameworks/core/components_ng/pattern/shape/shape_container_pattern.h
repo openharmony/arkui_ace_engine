@@ -37,6 +37,8 @@ public:
     ShapeContainerPattern() = default;
     ~ShapeContainerPattern() override = default;
 
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
+
     bool IsEnableMatchParent() override
     {
         return true;

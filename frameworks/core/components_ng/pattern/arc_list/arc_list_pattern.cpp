@@ -98,6 +98,11 @@ void ArcListPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     Register2DragDropManager();
     SetAccessibilityAction();
+    auto fadingEdge = GetFadingEdge(paintProperty);
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && fadingEdge) {
+        CreateAnalyzerOverlay(host);
+    }
 }
 
 bool ArcListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

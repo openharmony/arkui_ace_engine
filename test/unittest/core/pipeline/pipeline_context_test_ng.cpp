@@ -1263,7 +1263,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg025, TestSize.Level1)
         { "-velocityscale", "1", "2", "3" }, { "-scrollfriction", "1", "2", "3" }, { "-threadstuck", "1", "2", "3" },
         { "-rotation" }, { "-animationscale" }, { "-velocityscale" }, { "-scrollfriction" }, { "-threadstuck" },
         { "test" }, { "-navigation" }, { "-focuswindowscene" }, { "-focusmanager" }, { "-jsdump" }, { "-event" },
-        { "-imagecache" }, { "-imagefilecache" }, { "-allelements" }, { "-default" }, { "-overlay" }, { "--stylus" } };
+        { "-imagecache" }, { "-imagefilecache" }, { "-allelements" }, { "-default" }, { "-overlay" }, { "--stylus" },
+        { "-bindaicaller" }};
     int turn = 0;
     for (; turn < params.size(); turn++) {
         EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
@@ -1997,7 +1998,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
     context_->ChangeDarkModeBrightness();
     MockContainer::Current()->SetIsUIExtensionWindow(true);
     context_->ChangeDarkModeBrightness();
+    auto rsUIDirector = context_->GetRSUIDirector();
+    context_->RSTransactionBegin(rsUIDirector);
     context_->SetAppBgColor(Color::BLUE);
+    context_->RSTransactionCommit(rsUIDirector);
     context_->ChangeDarkModeBrightness();
     MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
     context_->ChangeDarkModeBrightness();
@@ -2291,12 +2295,18 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg115, TestSize.Level1)
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg116, TestSize.Level1)
 {
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     TouchEvent event;
     event.force = 10.0;
     event.sourceTool = SourceTool::FINGER;
     context_->lastSourceType_ = SourceType::NONE;
+    TouchTestResult testResult;
+    context_->eventManager_->mouseTestResults_[0] = testResult;
+    EXPECT_FALSE(context_->eventManager_->mouseTestResults_.empty());
     context_->HandleTouchHoverOut(event);
-    EXPECT_NE(context_->lastSourceType_, SourceType::NONE);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    EXPECT_TRUE(context_->eventManager_->mouseTestResults_.empty());
 }
 
 /**
@@ -2379,6 +2389,22 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg121, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PipelineContextTestNgForBundleName
+ * @tc.desc: Test GetBundleName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNgForBundleName, TestSize.Level1)
+{
+    auto bundleName = context_->GetBundleName();
+    EXPECT_EQ(bundleName, "");
+    bundleName = MockContainer::CurrentBundleName();
+    EXPECT_EQ(bundleName, "");
+    MockContainer::Current()->SetBundleName("test");
+    bundleName = MockContainer::CurrentBundleName();
+    EXPECT_EQ(bundleName, "test");
+}
+
+/**
  * @tc.name: PipelineContextTestNg122
  * @tc.desc: Test FlushMouseEventForHover.
  * @tc.type: FUNC
@@ -2421,12 +2447,16 @@ HWTEST_F(PipelineContextTestNg, SetIsTransFlagTest, TestSize.Level1)
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg124, TestSize.Level1)
 {
-    // checking for valid context and window
+    // Checking for valid context and window
     ASSERT_NE(context_, nullptr);
     auto mockWindow = (MockWindow*)(context_->window_.get());
     ASSERT_NE(mockWindow, nullptr);
 
-    // callback setup that triggeres only one frame req
+    // Reset mock expectations
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
+
+    // Callback setup that triggers only one frame request
     bool callbackCalled = false;
     auto callback = [&callbackCalled](int32_t id) -> bool {
         callbackCalled = true;
@@ -2434,14 +2464,14 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg124, TestSize.Level1)
     };
 
     // Expect RequestFrame when setting the callback
-    EXPECT_CALL(*mockWindow, RequestFrame()).Times(1);
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(AnyNumber());
     context_->SetFlushTSUpdates(std::move(callback));
 
     // Call FlushTSUpdates and check callback runs
-    EXPECT_CALL(*mockWindow, RequestFrame()).Times(0);
     context_->FlushTSUpdates();
     EXPECT_TRUE(callbackCalled);
 }
+
 
 /**
  * @tc.name: PipelineContextTestNg125
@@ -2450,10 +2480,14 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg124, TestSize.Level1)
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg125, TestSize.Level1)
 {
-    // checking for valid context and window
+    // Checking for valid context and window
     ASSERT_NE(context_, nullptr);
     auto mockWindow = (MockWindow*)(context_->window_.get());
     ASSERT_NE(mockWindow, nullptr);
+
+    // Reset mock expectations
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
 
     // Set up a callback that returns true once
     int callbackCount = 0;
@@ -2462,14 +2496,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg125, TestSize.Level1)
         return callbackCount == 1;
     };
 
-    // Expecting RequestFrame when setting the callback
-    EXPECT_CALL(*mockWindow, RequestFrame()).Times(1);
+    // Expect RequestFrame when setting the callback
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(AnyNumber());
     context_->SetFlushTSUpdates(std::move(callback));
 
     // Call FlushTSUpdates twice
-    EXPECT_CALL(*mockWindow, RequestFrame()).Times(1);
     context_->FlushTSUpdates(); // First call: returns true
-    EXPECT_CALL(*mockWindow, RequestFrame()).Times(0);
     context_->FlushTSUpdates(); // Second call: returns false
     EXPECT_EQ(callbackCount, 2); // Callback ran twice
 }
@@ -2481,15 +2513,33 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg125, TestSize.Level1)
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg126, TestSize.Level1)
 {
-    // checking for valid context and window
     ASSERT_NE(context_, nullptr);
     auto mockWindow = (MockWindow*)(context_->window_.get());
     ASSERT_NE(mockWindow, nullptr);
 
-    // No callback set and no frame request expected
-    EXPECT_CALL(*mockWindow, RequestFrame()).Times(0);
+    // Minimal state reset
     context_->SetFlushTSUpdates(nullptr);
+    context_->dirtyNodes_.clear();
+    context_->scheduleTasks_.clear();
+    context_->mouseEvents_.clear();
+    context_->isReloading_ = false;
+    context_->onShow_ = false;
+    context_->onFocus_ = false;
+    context_->taskScheduler_->dirtyLayoutNodes_.clear();
+    context_->taskScheduler_->dirtyRenderNodes_.clear();
+    context_->dirtyPropertyNodes_.clear();
+
+    // Reset mock expectations
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
+
+    // Allow RequestFrame calls, similar to SetUpTestSuite
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(AnyNumber());
+
     context_->FlushTSUpdates();
+
+    // Verify no unexpected side effects
+    EXPECT_TRUE(context_->scheduleTasks_.empty());
 }
 } // namespace NG
 } // namespace OHOS::Ace

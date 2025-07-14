@@ -307,7 +307,7 @@ void BaseTextSelectOverlay::SetSelectionHoldCallback()
         overlay->OnResetTextSelection();
     };
     selectionInfo.checkTouchInArea = [weak = WeakClaim(this), manager = WeakClaim(AceType::RawPtr(overlayManager))](
-                                         const PointF& point) {
+                                         const PointF& point, bool passThrough) {
         auto baseOverlay = weak.Upgrade();
         CHECK_NULL_RETURN(baseOverlay, false);
         auto overlayManager = manager.Upgrade();
@@ -315,7 +315,7 @@ void BaseTextSelectOverlay::SetSelectionHoldCallback()
         auto host = baseOverlay->GetOwner();
         CHECK_NULL_RETURN(host, false);
         auto localPoint = point;
-        overlayManager->ConvertPointRelativeToNode(host, localPoint);
+        overlayManager->ConvertPointRelativeToNode(host, localPoint, passThrough);
         return baseOverlay->CheckTouchInHostNode(localPoint);
     };
     selectionInfo.eventFilter = [weak = WeakClaim(this)](SourceType sourceType, TouchType touchType) {
@@ -1245,6 +1245,10 @@ void BaseTextSelectOverlay::MarkOverlayDirty()
 
 void BaseTextSelectOverlay::ApplySelectAreaWithKeyboard(RectF& selectArea)
 {
+    if (Negative(selectArea.Top())) {
+        selectArea.SetHeight(selectArea.Height() + selectArea.Top());
+        selectArea.SetTop(0.0f);
+    }
     auto host = GetOwner();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();

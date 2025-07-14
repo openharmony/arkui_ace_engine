@@ -49,10 +49,6 @@ namespace PatternLockModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = PatternLockModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 } // PatternLockModifier
@@ -66,11 +62,6 @@ void SetPatternLockOptionsImpl(Ark_NativePointer node,
 
     auto controllerPtr = Converter::OptConvert<Ark_PatternLockController>(*controller);
     if (controllerPtr.has_value()) {
-        // auto internalController = PatternLockModelNG::GetController(frameNode);
-        // auto peerImplPtr = reinterpret_cast<PatternLockControllerPeerImpl *>(controllerPtr.value());
-        // CHECK_NULL_VOID(peerImplPtr);
-        // // pass the internal controller to external management
-        // peerImplPtr->SetHandler(internalController);
     }
 }
 } // PatternLockInterfaceModifier
@@ -83,7 +74,6 @@ void SideLengthImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(convValue);
-    // PatternLockModelNG::SetSideLength(frameNode, convValue);
 }
 void CircleRadiusImpl(Ark_NativePointer node,
                       const Ark_Length* value)
@@ -93,7 +83,6 @@ void CircleRadiusImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(convValue);
-    // PatternLockModelNG::SetCircleRadius(frameNode, convValue);
 }
 void BackgroundColorImpl(Ark_NativePointer node,
                          const Ark_ResourceColor* value)
@@ -102,7 +91,6 @@ void BackgroundColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Color>(*value);
-    // ViewAbstract::SetBackgroundColor(frameNode, convValue);
 }
 void RegularColorImpl(Ark_NativePointer node,
                       const Ark_ResourceColor* value)
@@ -111,7 +99,6 @@ void RegularColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Color>(*value);
-    // PatternLockModelNG::SetRegularColor(frameNode, convValue);
 }
 void SelectedColorImpl(Ark_NativePointer node,
                        const Ark_ResourceColor* value)
@@ -120,7 +107,6 @@ void SelectedColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Color>(*value);
-    // PatternLockModelNG::SetSelectedColor(frameNode, convValue);
 }
 void ActiveColorImpl(Ark_NativePointer node,
                      const Ark_ResourceColor* value)
@@ -129,7 +115,6 @@ void ActiveColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Color>(*value);
-    // PatternLockModelNG::SetActiveColor(frameNode, convValue);
 }
 void PathColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
@@ -138,7 +123,6 @@ void PathColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Color>(*value);
-    // PatternLockModelNG::SetPathColor(frameNode, convValue);
 }
 void PathStrokeWidthImpl(Ark_NativePointer node,
                          const Ark_Union_Number_String* value)
@@ -147,7 +131,6 @@ void PathStrokeWidthImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
-    // PatternLockModelNG::SetStrokeWidth(frameNode, convValue);
 }
 void OnPatternCompleteImpl(Ark_NativePointer node,
                            const Callback_Array_Number_Void* value)
@@ -191,10 +174,6 @@ void ActivateCircleStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = value ? Converter::OptConvert<CircleStyleOptions>(*value) : std::nullopt;
     if (convValue) {
-        // need check
-        // PatternLockModelNG::SetActiveCircleColor(frameNode, convValue->color);
-        // PatternLockModelNG::SetEnableWaveEffect(frameNode, convValue->enableWaveEffect);
-        // PatternLockModelNG::SetActiveCircleRadius(frameNode, convValue->radius);
     }
 }
 } // PatternLockAttributeModifier

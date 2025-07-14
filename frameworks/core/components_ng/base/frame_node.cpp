@@ -93,7 +93,6 @@ constexpr float WIDTH_RATIO_LIMIT = 1.0f;
 constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
 namespace OHOS::Ace::NG {
-
 namespace {
 void ClearAccessibilityFocus(const RefPtr<AccessibilityProperty>& accessibilityProperty,
     const RefPtr<RenderContext>& renderContext)
@@ -962,7 +961,7 @@ void FrameNode::DumpOverlayInfo()
         std::string("OverlayOffset: ").append(offsetX.ToString()).append(std::string(", ")).append(offsetY.ToString()));
 }
 
-void FrameNode::DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json)
+void FrameNode::DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json)
 {
     json->Put("$rect", GetTransformRectRelativeToWindow().ToBounds().c_str());
     json->Put("$debugLine", "");
@@ -1049,12 +1048,12 @@ bool FrameNode::CheckVisibleOrActive()
     }
 }
 
-void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+void FrameNode::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(json);
     DumpSimplifyCommonInfo(json);
     if (pattern_) {
-        auto child = JsonUtil::Create();
+        auto child = JsonUtil::CreateSharedPtrJson();
         pattern_->DumpSimplifyInfo(child);
         json->Put("$attrs", std::move(child));
     }
@@ -4237,7 +4236,7 @@ void FrameNode::OnRecycle()
     layoutProperty_->ResetGeometryTransition();
     pattern_->OnRecycle();
     UINode::OnRecycle();
-    
+
     auto accessibilityProperty = GetAccessibilityProperty<NG::AccessibilityProperty>();
     auto renderContext = GetRenderContext();
     ClearAccessibilityFocus(accessibilityProperty, renderContext);
@@ -4477,8 +4476,9 @@ bool FrameNode::RemoveImmediately() const
 
 std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<int32_t>& set)
 {
+    std::vector<int32_t> ids(set.begin(), set.end());
     std::vector<RefPtr<FrameNode>> nodes;
-    for (auto nodeId : set) {
+    for (auto nodeId : ids) {
         auto uiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
         if (!uiNode) {
             continue;
@@ -5224,7 +5224,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
     if (arkoalaLazyAdapter_) {
-        return ArkoalaGetOrCreateChild(index);
+        return ArkoalaGetOrCreateChild(index, addToRenderTree);
     }
     auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
@@ -5345,7 +5345,7 @@ void FrameNode::ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cac
     arkoalaLazyAdapter_->SetActiveRange(liveStart, liveEnd);
 }
 
-RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index)
+RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index, bool active)
 {
     CHECK_NULL_RETURN(arkoalaLazyAdapter_, nullptr);
     if (auto node = arkoalaLazyAdapter_->GetChild(index)) {
@@ -5354,7 +5354,7 @@ RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index)
     auto node = arkoalaLazyAdapter_->GetOrCreateChild(index);
     CHECK_NULL_RETURN(node, nullptr);
     AddChild(node);
-    node->SetActive(true);
+    node->SetActive(active);
     return node;
 }
 /* ============================== Arkoala LazyForEach adapter section END ================================*/
@@ -6000,6 +6000,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     EventTarget eventTarget;
     eventTarget.id = GetInspectorId().value_or("").c_str();
     event.SetTarget(eventTarget);
+    event.SetPressedKeyCodes(touchEvent.pressedKeyCodes_);
     auto result = onTouchIntercept(event);
     SetHitTestMode(result);
     return result;
@@ -6463,7 +6464,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
                 status = child->FindSuggestOpIncNode(path, boundary, depth + 1, axis);
             }
             if (status == OPINC_INVALID) {
-                    return OPINC_INVALID;
+                return OPINC_INVALID;
             }
         }
         return OPINC_PARENT_POSSIBLE;
@@ -7209,5 +7210,23 @@ void FrameNode::CleanupPipelineResources()
         pipeline->RemoveFrameNodeChangeListener(nodeId_);
         pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
     }
+}
+
+void FrameNode::SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper)
+{
+    aiCallerHelper_ = aiCallerHelper;
+}
+
+uint32_t FrameNode::CallAIFunction(const std::string& functionName, const std::string& params)
+{
+    static constexpr uint32_t AI_CALL_SUCCESS = 0;
+    static constexpr uint32_t AI_CALLER_INVALID = 1;
+    static constexpr uint32_t AI_CALL_FUNCNAME_INVALID = 2;
+    if (aiCallerHelper_) {
+        return aiCallerHelper_->onAIFunctionCaller(functionName, params) ?
+                AI_CALL_SUCCESS :
+                AI_CALL_FUNCNAME_INVALID;
+    }
+    return AI_CALLER_INVALID;
 }
 } // namespace OHOS::Ace::NG

@@ -2292,4 +2292,36 @@ HWTEST_F(SwiperTestNg, NotifyDataChange006, TestSize.Level1)
     swiperPattern->NotifyDataChange(0, 1);
     EXPECT_EQ(swiperPattern->jumpIndex_, 1);
 }
+
+/**
+ * @tc.name: CustomizeSafeAreaPadding001
+ * @tc.desc: Test SwiperPattern CustomizeSafeAreaPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CustomizeSafeAreaPadding001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    PaddingPropertyF padding { 10, 10, 10, 10 };
+    padding = swiperPattern->CustomizeSafeAreaPadding(padding, false);
+    EXPECT_EQ(padding.top, 10);
+    EXPECT_EQ(padding.bottom, 10);
+    EXPECT_EQ(padding.left, std::nullopt);
+    EXPECT_EQ(padding.right, std::nullopt);
+}
+
+/**
+ * @tc.name: CustomizeSafeAreaPadding002
+ * @tc.desc: Test SwiperPattern CustomizeSafeAreaPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CustomizeSafeAreaPadding002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    PaddingPropertyF padding { 10, 10, 10, 10 };
+    padding = swiperPattern->CustomizeSafeAreaPadding(padding, true);
+    EXPECT_EQ(padding.top, std::nullopt);
+    EXPECT_EQ(padding.bottom, std::nullopt);
+    EXPECT_EQ(padding.left, 10);
+    EXPECT_EQ(padding.right, 10);
+}
 } // namespace OHOS::Ace::NG

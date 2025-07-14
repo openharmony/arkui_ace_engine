@@ -243,6 +243,8 @@ public:
     void SetDataDetectorConfig(const TextDetectConfig& config) override;
     void SetBypassVsyncCondition(WebBypassVsyncCondition condition) override;
     void SetGestureFocusMode(GestureFocusMode mode) override;
+    void SetOnPdfScrollAtBottom(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
 
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);

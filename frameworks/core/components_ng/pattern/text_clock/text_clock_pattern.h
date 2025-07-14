@@ -122,6 +122,11 @@ public:
         return textClockLayoutProperty->GetPrefixHourValue(ZeroPrefixType::AUTO);
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -141,7 +146,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnLanguageConfigurationUpdate() override;
     void DumpInfo() override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void OnColorConfigurationUpdate() override;
     void InitTextClockController();
 

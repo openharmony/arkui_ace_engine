@@ -377,7 +377,7 @@ public:
     virtual bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) {return true;}
 
     virtual void AddHoverTransparentCallback(const RefPtr<NG::FrameNode>& node) {};
-    virtual bool IsInHoverTransparentCallbackList(const RefPtr<NG::FrameNode>& node) { return false; };
+    virtual bool CheckHoverTransparentCallbackListEmpty(int32_t containerId) {return true;};
 
 protected:
     int32_t treeId_ = 0;

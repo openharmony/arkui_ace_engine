@@ -459,6 +459,7 @@ void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
     }
     Color bgColor;
     RefPtr<ResourceObject> resObj;
+    bool isValidValue = true;
     if (!ParseJsColor(info[0], bgColor, resObj)) {
         if (info[0]->IsUndefined() || info[0]->IsNull()) {
             auto pipeline = PipelineBase::GetCurrentContext();
@@ -466,11 +467,13 @@ void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
             auto theme = pipeline->GetTheme<SelectTheme>();
             CHECK_NULL_VOID(theme);
             bgColor = theme->GetSelectedColor();
+            isValidValue = false;
         } else {
             return;
         }
     }
     if (SystemProperties::ConfigChangePerform()) {
+        SelectModel::GetInstance()->SetSelectedOptionBgColorByUser(isValidValue);
         SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::SELECTED_OPTION_BG_COLOR);
     }
     SelectModel::GetInstance()->SetSelectedOptionBgColor(bgColor);
@@ -499,6 +502,7 @@ void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
     }
     Color textColor;
     RefPtr<ResourceObject> resObj;
+    bool isValidValue = true;
     if (!ParseJsColor(info[0], textColor, resObj)) {
         if (info[0]->IsNull() || info[0]->IsUndefined()) {
             auto pipeline = PipelineBase::GetCurrentContext();
@@ -506,11 +510,13 @@ void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
             auto theme = pipeline->GetTheme<SelectTheme>();
             CHECK_NULL_VOID(theme);
             textColor = theme->GetSelectedColorText();
+            isValidValue = false;
         } else {
             return;
         }
     }
     if (SystemProperties::ConfigChangePerform()) {
+        SelectModel::GetInstance()->SetSelectedOptionFontColorByUser(isValidValue);
         SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::SELECTED_OPTION_FONT_COLOR);
     }
     SelectModel::GetInstance()->SetSelectedOptionFontColor(textColor);
@@ -523,6 +529,7 @@ void JSSelect::OptionBgColor(const JSCallbackInfo& info)
     }
     Color bgColor;
     RefPtr<ResourceObject> resObj;
+    bool isValidValue = true;
     if (!ParseJsColor(info[0], bgColor, resObj)) {
         if (!(info[0]->IsUndefined() || info[0]->IsNull())) {
             return;
@@ -532,9 +539,11 @@ void JSSelect::OptionBgColor(const JSCallbackInfo& info)
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
         bgColor = theme->GetBackgroundColor();
+        isValidValue = false;
     }
     SelectModel::GetInstance()->SetOptionBgColor(bgColor);
     if (SystemProperties::ConfigChangePerform()) {
+        SelectModel::GetInstance()->SetOptionBgColorByUser(isValidValue);
         SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::OPTION_BG_COLOR);
     }
 }
@@ -562,7 +571,7 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
     }
     Color textColor;
     RefPtr<ResourceObject> resObj;
-    bool isNormal = true;
+    bool isValidValue = true;
     if (!ParseJsColor(info[0], textColor, resObj)) {
         if (info[0]->IsUndefined() || info[0]->IsNull()) {
             auto pipeline = PipelineBase::GetCurrentContext();
@@ -570,13 +579,13 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
             auto theme = pipeline->GetTheme<SelectTheme>();
             CHECK_NULL_VOID(theme);
             textColor = theme->GetMenuFontColor();
-            isNormal = false;
+            isValidValue = false;
         } else {
             return;
         }
     }
     if (SystemProperties::ConfigChangePerform()) {
-        SelectModel::GetInstance()->SetOptionFontColorByUser(isNormal);
+        SelectModel::GetInstance()->SetOptionFontColorByUser(isValidValue);
         SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::OPTION_FONT_COLOR);
     }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set option font color %{public}s", textColor.ColorToString().c_str());

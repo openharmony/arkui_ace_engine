@@ -15,9 +15,18 @@
 
 #include "core/components_ng/syntax/content_slot_node.h"
 
+#include "core/common/builder_util.h"
 #include "core/pipeline/base/element_register.h"
 namespace OHOS::Ace::NG {
 
+ContentSlotNode::~ContentSlotNode()
+{
+    std::list<RefPtr<NG::UINode>> nodes;
+    for (const auto& child : GetChildren()) {
+        BuilderUtils::GetBuilderNodes(child, nodes);
+    }
+    BuilderUtils::ClearChildInBuilderContainer(GetId(), nodes);
+}
 RefPtr<ContentSlotNode> ContentSlotNode::GetOrCreateContentSlot(int32_t nodeId)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<ContentSlotNode>(nodeId);

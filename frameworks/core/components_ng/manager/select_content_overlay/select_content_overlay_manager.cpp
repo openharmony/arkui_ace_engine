@@ -164,11 +164,6 @@ void SelectContentOverlayManager::NotifyAccessibilityOwner()
     context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(owner)), weakManager = WeakClaim(this)]() {
         auto owner = weakNode.Upgrade();
         CHECK_NULL_VOID(owner);
-        auto manager = weakManager.Upgrade();
-        CHECK_NULL_VOID(manager);
-        if (!manager->IsMenuShow()) {
-            return;
-        }
         owner->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
     });
 }
@@ -806,7 +801,7 @@ bool SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     auto menuNode = menuNode_.Upgrade();
     auto handleNode = handleNode_.Upgrade();
     auto owner = selectOverlayHolder_->GetOwner();
-    if (owner) {
+    if (owner && IsMenuShow()) {
         auto ownerTag = owner->GetTag();
         if (ownerTag != V2::RICH_EDITOR_ETS_TAG ||
             (reason != CloseReason::CLOSE_REASON_SELECT_ALL && reason != CloseReason::CLOSE_REASON_BY_RECREATE)) {
@@ -1039,7 +1034,7 @@ void SelectContentOverlayManager::HandleGlobalEvent(const TouchEvent& touchEvent
         HandleSelectionEvent(point, touchEvent);
         if (selectOverlayHolder_ && selectOverlayHolder_->GetCallback() && selectOverlayHolder_->GetOwner()) {
             auto localPoint = point;
-            ConvertPointRelativeToNode(selectOverlayHolder_->GetOwner(), localPoint);
+            ConvertPointRelativeToNode(selectOverlayHolder_->GetOwner(), localPoint, touchEvent.passThrough);
             selectOverlayHolder_->GetCallback()->OnHandleGlobalEvent(point, localPoint, touchEvent);
         }
     }
@@ -1100,7 +1095,7 @@ void SelectContentOverlayManager::HandleSelectionEvent(const PointF& point, cons
     CHECK_NULL_VOID(holdSelectionInfo_->checkTouchInArea);
     CHECK_NULL_VOID(holdSelectionInfo_->resetSelectionCallback);
     if (holdSelectionInfo_->IsAcceptEvent(rawTouchEvent.sourceType, rawTouchEvent.type) &&
-        !holdSelectionInfo_->checkTouchInArea(point) && !IsOpen()) {
+        !holdSelectionInfo_->checkTouchInArea(point, rawTouchEvent.passThrough) && !IsOpen()) {
         ResetSelectionRect();
     }
 }
@@ -1170,10 +1165,22 @@ float SelectContentOverlayManager::GetHandleDiameter()
     return SelectOverlayPattern::GetHandleDiameter();
 }
 
-void SelectContentOverlayManager::ConvertPointRelativeToNode(const RefPtr<FrameNode>& node, PointF& point)
+void SelectContentOverlayManager::ConvertPointRelativeToNode(
+    const RefPtr<FrameNode>& node, PointF& point, bool passThrough)
 {
     CHECK_NULL_VOID(node);
-    auto rootNode = GetSelectOverlayRoot();
+    RefPtr<FrameNode> rootNode;
+    // for post mouse event, need change the root node to the post node
+    if (passThrough) {
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        if (pipeline) {
+            auto postEventManager = pipeline->GetPostEventManager();
+            rootNode = postEventManager ? postEventManager->GetPostTargetNode() : nullptr;
+        }
+    }
+    if (!rootNode) {
+        rootNode = GetSelectOverlayRoot();
+    }
     CHECK_NULL_VOID(rootNode);
     std::stack<RefPtr<FrameNode>> nodeStack;
     auto parent = node;

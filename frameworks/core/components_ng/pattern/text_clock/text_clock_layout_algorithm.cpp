@@ -25,7 +25,10 @@ void TextClockLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto& minSize = constraint->minSize;
+    auto& maxSize = constraint->maxSize;
     auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(textWrapper);
     if (pattern->UseContentModifier()) {
@@ -41,6 +44,16 @@ void TextClockLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     } else {
         auto childConstraint = layoutProperty->CreateChildConstraint();
+        if (layoutPolicy.has_value() && layoutPolicy->IsFix()) {
+            if (layoutPolicy->IsWidthFix()) {
+                maxSize.SetWidth(std::numeric_limits<float>::max());
+                childConstraint.maxSize.SetWidth(std::numeric_limits<float>::max());
+            }
+            if (layoutPolicy->IsHeightFix()) {
+                maxSize.SetHeight(std::numeric_limits<float>::max());
+                childConstraint.maxSize.SetHeight(std::numeric_limits<float>::max());
+            }
+        }
         textWrapper->Measure(childConstraint);
     }
 
@@ -48,15 +61,20 @@ void TextClockLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     OptionalSizeF textClockFrameSize = { textSize.Width(), textSize.Height() };
     auto padding = layoutProperty->CreatePaddingAndBorder();
     AddPaddingToSize(padding, textClockFrameSize);
-    auto constraint = layoutProperty->GetLayoutConstraint();
-    const auto& minSize = constraint->minSize;
-    const auto& maxSize = constraint->maxSize;
     textClockFrameSize.Constrain(minSize, maxSize);
     if (constraint->selfIdealSize.Width()) {
         textClockFrameSize.SetWidth(constraint->selfIdealSize.Width().value());
     }
     if (constraint->selfIdealSize.Height()) {
         textClockFrameSize.SetHeight(constraint->selfIdealSize.Height().value());
+    }
+    if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
+        if (layoutPolicy->IsWidthMatch()) {
+            textClockFrameSize.SetWidth(constraint->parentIdealSize.Width().value());
+        }
+        if (layoutPolicy->IsHeightMatch()) {
+            textClockFrameSize.SetHeight(constraint->parentIdealSize.Height().value());
+        }
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(textClockFrameSize.ConvertToSizeT());
 }

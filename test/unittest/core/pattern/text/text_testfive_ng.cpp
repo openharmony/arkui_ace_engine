@@ -2685,6 +2685,58 @@ HWTEST_F(TextTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateRectForSymbolShadow001
+ * @tc.desc: test text_pattern.cpp UpdateRectForSymbolShadow function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateRectForSymbolShadow001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    TextModelNG text;
+    text.Create(u"text");
+    text.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    Shadow textShadow;
+    text.SetTextShadow({ textShadow });
+    RectF rectsForPlaceholders(0, 0, 10, 10);
+    textPattern->UpdateRectForSymbolShadow(rectsForPlaceholders, 1, 1, 1.0);
+    EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
+        TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    EXPECT_EQ(*textLayoutProperty->GetTextShadowValue({ textShadow }).begin(), textShadow);
+}
+
+/**
+ * @tc.name: UpdateRectForSymbolShadow002
+ * @tc.desc: test text_pattern.cpp UpdateRectForSymbolShadow function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateRectForSymbolShadow002, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    TextModelNG text;
+    text.Create(u"text");
+    text.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    Shadow textShadow;
+    text.SetTextShadow({ textShadow });
+    RectF rectsForPlaceholders(0, 0, 10, 10);
+    textPattern->UpdateRectForSymbolShadow(rectsForPlaceholders, -1, -1, 1.0);
+    EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
+        TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    EXPECT_EQ(*textLayoutProperty->GetTextShadowValue({ textShadow }).begin(), textShadow);
+}
+
+/**
  * @tc.name: UpdateContainerChildren001
  * @tc.desc: test text_pattern.cpp UpdateContainerChildren function
  * @tc.type: FUNC
@@ -3348,7 +3400,7 @@ HWTEST_F(TextTestFiveNg, TextEnableAutoSpacing, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
 
     /**
-     * @tc.expected: Get EnableAutoSpacing Value
+     * @tc.expected: Get EnableAutoSpacing Value.
      */
     EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), true);
     EXPECT_EQ(TextModelNG::GetEnableAutoSpacing(frameNode), true);

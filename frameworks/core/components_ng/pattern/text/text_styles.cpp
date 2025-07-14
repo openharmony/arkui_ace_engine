@@ -50,14 +50,41 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
     return textStyle;
 }
 
-void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
-    TextStyle& textStyle, bool isSymbol)
+void CreateTextStyleUsingTheme(
+    const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme, TextStyle& textStyle, bool isSymbol)
 {
-    UseSelfStyleWithTheme(property, textStyle, textTheme, isSymbol);
+    if (!isSymbol) {
+        UseSelfStyleWithTheme(property, textStyle, textTheme);
+    } else {
+        SymbolUseSelfStyleWithTheme(property, textStyle, textTheme);
+    }
 }
 
-void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
-    const RefPtr<TextTheme>& textTheme, bool isSymbol)
+void SymbolUseSelfStyleWithTheme(
+    const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle, const RefPtr<TextTheme>& textTheme)
+{
+    CHECK_NULL_VOID(textTheme);
+    auto& fontStyle = property->GetFontStyle();
+    // The setting of MinFontScale, MaxFontScale must be done before any Dimension-type properties that
+    // depend on its value.
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MinFontScale, MinFontScale);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MaxFontScale, MaxFontScale);
+
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontSize, FontSize);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontWeight, FontWeight);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolColorList, SymbolColorList);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectOptions, SymbolEffectOptions);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolShadow, SymbolShadow);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, ShaderStyle, ShaderStyle);
+    textStyle.SetSymbolType(property->GetSymbolTypeValue(SymbolType::SYSTEM));
+    auto renderStrategy = property->GetSymbolRenderingStrategyValue(0);
+    auto effectStrategy = property->GetSymbolEffectStrategyValue(0);
+    textStyle.SetRenderStrategy(renderStrategy < 0 ? 0 : renderStrategy);
+    textStyle.SetEffectStrategy(effectStrategy < 0 ? 0 : effectStrategy);
+}
+
+void UseSelfStyleWithTheme(
+    const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle, const RefPtr<TextTheme>& textTheme)
 {
     CHECK_NULL_VOID(textTheme);
     auto& fontStyle = property->GetFontStyle();
@@ -84,16 +111,6 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, VariableFontWeight, VariableFontWeight);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, EnableVariableFontWeight, EnableVariableFontWeight);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontForegroudGradiantColor, FontForegroudGradiantColor);
-
-    if (isSymbol) {
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolColorList, SymbolColorList);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolRenderingStrategy, RenderStrategy);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectStrategy, EffectStrategy);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectOptions, SymbolEffectOptions);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolType, SymbolType);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolShadow, SymbolShadow);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, ShaderStyle, ShaderStyle);
-    }
 
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, BaselineOffset, BaselineOffset);

@@ -256,18 +256,24 @@ class TextpickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
-        this.value?.font?.style ?? undefined);
+        this.value?.font?.style ?? undefined,
+        this.value?.minFontSize ?? undefined,
+        this.value?.maxFontSize ?? undefined,
+        this.value?.overflow ?? undefined);
     }
   }
 
   checkObjectDiff(): boolean {
     if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
-      this.stageValue?.font?.style === this.value?.font?.style)) {
+      this.stageValue?.font?.style === this.value?.font?.style &&
+      this.stageValue?.overflow === this.value?.overflow)) {
       return true;
     } else {
       return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
         !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family) ||
+        !isBaseOrResourceEqual(this.stageValue?.minFontSize, this.value?.minFontSize) ||
+        !isBaseOrResourceEqual(this.stageValue?.maxFontSize, this.value?.maxFontSize);
     }
   }
 }
@@ -285,18 +291,24 @@ class TextpickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyl
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
-        this.value?.font?.style ?? undefined);
+        this.value?.font?.style ?? undefined,
+        this.value?.minFontSize ?? undefined,
+        this.value?.maxFontSize ?? undefined,
+        this.value?.overflow ?? undefined);
     }
   }
 
   checkObjectDiff(): boolean {
     if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
-      this.stageValue?.font?.style === this.value?.font?.style)) {
+      this.stageValue?.font?.style === this.value?.font?.style &&
+      this.stageValue?.overflow === this.value?.overflow)) {
       return true;
     } else {
       return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
         !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family) ||
+        !isBaseOrResourceEqual(this.stageValue?.minFontSize, this.value?.minFontSize) ||
+        !isBaseOrResourceEqual(this.stageValue?.maxFontSize, this.value?.maxFontSize);
     }
   }
 }
@@ -314,18 +326,24 @@ class TextpickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
-        this.value?.font?.style ?? undefined);
+        this.value?.font?.style ?? undefined,
+        this.value?.minFontSize ?? undefined,
+        this.value?.maxFontSize ?? undefined,
+        this.value?.overflow ?? undefined);
     }
   }
 
   checkObjectDiff(): boolean {
     if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
-      this.stageValue?.font?.style === this.value?.font?.style)) {
+      this.stageValue?.font?.style === this.value?.font?.style &&
+      this.stageValue?.overflow === this.value?.overflow)) {
       return true;
     } else {
       return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
         !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family) ||
+        !isBaseOrResourceEqual(this.stageValue?.minFontSize, this.value?.minFontSize) ||
+        !isBaseOrResourceEqual(this.stageValue?.maxFontSize, this.value?.maxFontSize);
     }
   }
 }

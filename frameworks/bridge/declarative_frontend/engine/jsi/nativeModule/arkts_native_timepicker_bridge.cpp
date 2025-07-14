@@ -96,12 +96,17 @@ ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    ArkUIPickerTextStyleStruct textStyleStruct;
     Color color;
     RefPtr<ResourceObject> textColorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (colorArg->IsNull() || colorArg->IsUndefined() ||
         !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, textColorResObj, nodeInfo)) {
         color.SetValue(DEFAULT_TIME_PICKER_TEXT_COLOR);
+        textStyleStruct.textColorSetByUser = false;
+    } else {
+        textStyleStruct.textColorSetByUser = true;
     }
 
     RefPtr<ResourceObject> fontSizeResObj;
@@ -123,7 +128,6 @@ ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     std::string fontInfo = StringUtils::FormatString(
         FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = color.GetValue();
     textStyleStruct.fontStyle = styleVal;
     textStyleStruct.fontInfo = fontInfo.c_str();
@@ -146,12 +150,17 @@ ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    ArkUIPickerTextStyleStruct textStyleStruct;
     Color color;
     RefPtr<ResourceObject> textColorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (colorArg->IsNull() || colorArg->IsUndefined() ||
         !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, textColorResObj, nodeInfo)) {
         color.SetValue(DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR);
+        textStyleStruct.textColorSetByUser = false;
+    } else {
+        textStyleStruct.textColorSetByUser = true;
     }
 
     RefPtr<ResourceObject> fontSizeResObj;
@@ -173,7 +182,6 @@ ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     std::string fontInfo = StringUtils::FormatString(
         FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = color.GetValue();
     textStyleStruct.fontStyle = styleVal;
     textStyleStruct.fontInfo = fontInfo.c_str();
@@ -196,12 +204,17 @@ ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    ArkUIPickerTextStyleStruct textStyleStruct;
     Color color;
     RefPtr<ResourceObject> textColorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (colorArg->IsNull() || colorArg->IsUndefined() ||
         !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, textColorResObj, nodeInfo)) {
         color.SetValue(DEFAULT_TIME_PICKER_TEXT_COLOR);
+        textStyleStruct.textColorSetByUser = false;
+    } else {
+        textStyleStruct.textColorSetByUser = true;
     }
 
     RefPtr<ResourceObject> fontSizeResObj;
@@ -223,7 +236,6 @@ ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     std::string fontInfo = StringUtils::FormatString(
         FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColor = color.GetValue();
     textStyleStruct.fontStyle = styleVal;
     textStyleStruct.fontInfo = fontInfo.c_str();

@@ -57,6 +57,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/inspector_node.h"
 
+#include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
+
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
@@ -852,7 +854,7 @@ public:
     OffsetF GetParentGlobalOffsetDuringLayout() const;
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override {};
 
-    // layoutwrapper function override
+    // layout wrapper function override
     const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) override;
 
     bool PreMeasure(const std::optional<LayoutConstraintF>& parentConstraint);
@@ -1263,6 +1265,16 @@ public:
         dragHitTestBlock_ = dragHitTestBlock;
     }
 
+    void SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper);
+    /**
+     * @description: this callback triggered by ai assistant by ui_session proxy.
+     * @param funcName function name of the target function.
+     * @param params params for target function in json format.
+     * @return check ai function call success or not:
+     * 0 means success, 1 means aiCallerHelper_ is null, 2 means functionName not found
+     */
+    uint32_t CallAIFunction(const std::string& functionName, const std::string& params);
+
     void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
 
     /* ============================== Arkoala LazyForEach adapter section START ==============================*/
@@ -1272,7 +1284,7 @@ public:
     void ArkoalaRemoveItemsOnChange(int32_t changeIndex);
 
 private:
-    RefPtr<LayoutWrapper> ArkoalaGetOrCreateChild(uint32_t index);
+    RefPtr<LayoutWrapper> ArkoalaGetOrCreateChild(uint32_t index, bool active);
     void ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached);
 
     /* temporary adapter to provide LazyForEach feature in Arkoala */
@@ -1463,7 +1475,7 @@ protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
     void OnCollectRemoved() override;
 
 private:
@@ -1508,7 +1520,7 @@ private:
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpCommonInfo(std::unique_ptr<JsonValue>& json);
-    void DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json);
     void DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json);
     void DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label,
@@ -1556,7 +1568,7 @@ private:
 
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
-    // set costom background layoutConstraint
+    // set custom background layoutConstraint
     void SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode);
 
     void GetPercentSensitive();
@@ -1778,6 +1790,7 @@ private:
 
     std::vector<RefPtr<FrameNode>> delayMeasureChildren_;
     std::vector<RefPtr<FrameNode>> delayLayoutChildren_;
+    std::shared_ptr<AICallerHelper> aiCallerHelper_;
 };
 } // namespace OHOS::Ace::NG
 

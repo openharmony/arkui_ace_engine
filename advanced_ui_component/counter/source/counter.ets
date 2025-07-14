@@ -258,9 +258,9 @@ export struct CounterComponent {
   private controller1: TextInputController = new TextInputController();
   private controller2: TextInputController = new TextInputController();
   private controller3: TextInputController = new TextInputController();
-  private initFlag = true;
-  private increaseStr: string = getContext().resourceManager.getStringSync(125834852);
-  private reduceStr: string = getContext().resourceManager.getStringSync(125834853);
+  private initFlag: boolean = true;
+  private increaseStrCache: string | undefined = undefined;
+  private reduceStrCache: string | undefined = undefined;
 
   getTextInputFontSize() {
     let fontSize = this.resourceToVp(CounterResource.COUNTER_NUMBER_SIZE);
@@ -1250,6 +1250,20 @@ export struct CounterComponent {
     }
   }
 
+  private getIncreaseStr(): string {
+    if (this.increaseStrCache === undefined) {
+      this.increaseStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+    }
+    return this.increaseStrCache;
+  }
+
+  private getReduceStr(): string {
+    if (this.reduceStrCache === undefined) {
+      this.reduceStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+    }
+    return this.reduceStrCache;
+  }
+
   build() {
     if (this.type === CounterType.LIST) {
       RelativeContainer() {
@@ -1277,7 +1291,7 @@ export struct CounterComponent {
               .opacity(this.subOpacity)
             Button({ type: ButtonType.Circle, stateEffect: this.subBtnStateEffect })
               .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
-              .accessibilityDescription(this.value === this.min ? '' : this.reduceStr)
+              .accessibilityDescription(this.value === this.min ? '' : this.getReduceStr())
               .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
@@ -1428,7 +1442,7 @@ export struct CounterComponent {
               .opacity(this.addOpacity)
             Button({ type: ButtonType.Circle, stateEffect: this.addBtnStateEffect })
               .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
-              .accessibilityDescription(this.value === this.max ? '' : this.increaseStr)
+              .accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr())
               .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
@@ -1567,7 +1581,7 @@ export struct CounterComponent {
               .opacity(this.subOpacity)
             Button({ type: ButtonType.Circle, stateEffect: this.subBtnStateEffect })
               .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
-              .accessibilityDescription(this.value === this.min ? '' : this.reduceStr)
+              .accessibilityDescription(this.value === this.min ? '' : this.getReduceStr())
               .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
@@ -1716,7 +1730,7 @@ export struct CounterComponent {
               .opacity(this.addOpacity)
             Button({ type: ButtonType.Circle, stateEffect: this.addBtnStateEffect })
               .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
-              .accessibilityDescription(this.value === this.max ? '' : this.increaseStr)
+              .accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr())
               .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
@@ -2163,7 +2177,7 @@ export struct CounterComponent {
 
             Button({ type: ButtonType.Normal, stateEffect: this.addBtnStateEffect })
               .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
-              .accessibilityDescription(this.value === this.max ? '' : this.increaseStr)
+              .accessibilityDescription(this.value === this.max ? '' : this.getIncreaseStr())
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
               .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
@@ -2263,7 +2277,7 @@ export struct CounterComponent {
               .opacity(this.subOpacity)
             Button({ type: ButtonType.Normal, stateEffect: this.subBtnStateEffect })
               .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
-              .accessibilityDescription(this.value === this.min ? '' : this.reduceStr)
+              .accessibilityDescription(this.value === this.min ? '' : this.getReduceStr())
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
               .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)

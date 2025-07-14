@@ -24,4 +24,5 @@ ace_unittest("image_test_ng") {
     "image_testthree_ng.cpp",
     "image_testtwo_ng.cpp",
   ]
+  defines = [ "ENABLE_ROSEN_BACKEND" ]
 }

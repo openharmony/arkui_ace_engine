@@ -43,7 +43,6 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/stage/content_root_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -81,6 +80,8 @@ constexpr Dimension ARROW_CORNER_P4_OFFSET_Y = 6.0_vp;
 constexpr Dimension ARROW_RADIUS = 2.0_vp;
 constexpr Dimension SUBWINDOW_SHEET_TRANSLATION = 80.0_vp;
 } // namespace
+
+// MarkModifyDone must be called after UpdateSheetObject. InitSheetMode depends on SheetObject.
 void SheetPresentationPattern::OnModifyDone()
 {
     Pattern::CheckLocalized();
@@ -109,8 +110,6 @@ void SheetPresentationPattern::OnModifyDone()
     }
     InitPanEvent();
     InitPageHeight();
-    UpdateSheetType();
-    UpdateSheetObject(sheetType_);
     InitSheetMode();
     sheetObject_->InitScrollProps();
     InitFoldCreaseRegion();
@@ -1877,6 +1876,41 @@ void SheetPresentationPattern::SheetTransitionAction(float offset, bool isFirstT
     }
 }
 
+SheetType SheetPresentationPattern::GetSheetTypeFromSheetManager() const
+{
+    SheetType sheetType = SheetType::SHEET_BOTTOM;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, sheetType);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+        return SHEET_BOTTOM;
+    }
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, sheetType);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (sheetStyle.showInSubWindow.value_or(false)) {
+        return ComputeSheetTypeInSubWindow();
+    }
+    if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM) {
+        return sheetStyle.bottomOffset.has_value() && IsPcOrPadFreeMultiWindowMode() ?
+            SheetType::SHEET_BOTTOM_OFFSET : SheetType::SHEET_BOTTOM;
+    }
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, sheetType);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, sheetType);
+    auto widthBreakpoints = windowManager->GetWidthBreakpointCallback();
+    auto heightBreakpoints = windowManager->GetHeightBreakpointCallback();
+    auto state =
+        SheetManager::GetInstance().CreateBreakPointState(widthBreakpoints, heightBreakpoints);
+    sheetType = state->HandleType(sheetStyle);
+    // When hasValidTargetNode is false, meaning the target node has not been provided,
+    // set popup style actually takes effect as the center style.
+    if (sheetType == SheetType::SHEET_POPUP && !sheetKey_.hasValidTargetNode) {
+        sheetType = SheetType::SHEET_CENTER;
+    }
+    return sheetType;
+}
+
 SheetType SheetPresentationPattern::GetSheetType() const
 {
     SheetType sheetType = SheetType::SHEET_BOTTOM;
@@ -2944,7 +2978,7 @@ void SheetPresentationPattern::SetSheetOuterBorderWidth(
         BorderColorProperty outBorderColor;
         borderWidth.SetBorderWidth(0.0_vp);
         outBorderWidth.SetBorderWidth(0.0_vp);
-        if (sheetType != SheetType::SHEET_POPUP) {
+        if (sheetObject_->CheckIfNeedSetOuterBorderProp()) {
             borderColor.SetColor(sheetTheme->GetSheetInnerBorderColor());
             outBorderColor.SetColor(sheetTheme->GetSheetOuterBorderColor());
             renderContext->UpdateOuterBorderColor(outBorderColor);
@@ -3016,7 +3050,8 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     bool isCurrentFocus = host->GetFocusHub()->IsCurrentFocus();
-    if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE || !isCurrentFocus) {
+    if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE || !isCurrentFocus ||
+        keyboardAvoidMode_ == SheetKeyboardAvoidMode::POPUP_SHEET) {
         TAG_LOGD(AceLogTag::ACE_SHEET,
             "Sheet will not avoid keyboard.keyboardAvoidMode:%{public}d, isCurrentFocus:%{public}d.",
             keyboardAvoidMode_, isCurrentFocus);
@@ -3031,8 +3066,7 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
     keyboardHeight_ = manager->GetKeyboardInset().Length();
 
     if (isDismissProcess_) {
-        TAG_LOGD(AceLogTag::ACE_SHEET,
-            "The sheet will disappear, so there's no need to handle canceling keyboard avoidance here.");
+        TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet will disappear, not need to handle canceling keyboard avoidance here.");
         return;
     }
     StopModifySheetTransition();
@@ -3162,7 +3196,7 @@ void SheetPresentationPattern::GetCurrentScrollHeight()
 
 void SheetPresentationPattern::UpdateSheetWhenSheetTypeChanged()
 {
-    auto sheetType = GetSheetType();
+    auto sheetType = GetSheetTypeFromSheetManager();
     if (sheetType_ != sheetType) {
         // It can only be MarkOuterBorder When the SheetType switches and the sheetType_ was SHEET_POPUP
         if (sheetType_ == SheetType::SHEET_POPUP) {
@@ -3276,7 +3310,7 @@ Rect SheetPresentationPattern::GetFoldScreenRect() const
 
 Shadow SheetPresentationPattern::GetShadowFromTheme(ShadowStyle shadowStyle)
 {
-    if (shadowStyle == ShadowStyle::None) {
+    if (shadowStyle == ShadowStyle::None || !sheetObject_->CheckIfNeedShadowByDefault()) {
         return Shadow();
     }
     auto host = GetHost();
@@ -3841,7 +3875,7 @@ void SheetPresentationPattern::SendMessagesAfterTransitionOut(FrameNode* sheetNo
 
 void SheetPresentationPattern::UpdateSheetType()
 {
-    auto sheetType = GetSheetType();
+    auto sheetType = GetSheetTypeFromSheetManager();
     if (sheetType_ != sheetType) {
         // It can only be MarkOuterBorder When the SheetType switches and the sheetType_ was SHEET_POPUP
         if (sheetType_ == SheetType::SHEET_POPUP) {
@@ -3870,6 +3904,22 @@ void SheetPresentationPattern::InitSheetObject()
     // and the data is not updated to the pattern.
 }
 
+/**
+ * @brief Update SheetObject according to the new SheetType
+ *
+ * UpdateSheetObject must be called after Update sheetType.
+ *
+ * UpdateSheetRender is a function which can handle the differentiating capabilities of 2in1.
+ * The capabilities are include about default shadow, double border.
+ * UpdateSheetObject must be called before UpdateSheetRender.
+ * Default shadow and double border depend on new SheetObject.
+ *
+ * MarkModifyDone will be called after UpdateSheetRender.
+ *
+ * UpdateSheetType -> UpdateSheetObject -> UpdateSheetRender -> MarkModifyDone
+ *
+ * @param newType new SheetType
+ */
 void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
 {
     CHECK_NULL_VOID(sheetObject_);

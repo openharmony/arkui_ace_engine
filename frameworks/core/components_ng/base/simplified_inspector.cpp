@@ -112,7 +112,7 @@ RefPtr<UINode> GetNodeById(const RefPtr<FrameNode>& root, int32_t id)
             return current;
         }
 
-        const auto& children = current->GetChildrenForInspector();
+        const auto& children = current->GetChildrenForInspector(true);
         for (const auto& child : children) {
             elements.push(child);
         }
@@ -158,6 +158,21 @@ int32_t ScrollToTarget(const ScrollCommand& command, const RefPtr<NG::FrameNode>
     return ERR_OK;
 }
 } // namespace
+
+void SimplifiedInspector::TestScrollToTarget(
+    const std::vector<std::string>& params, const RefPtr<FrameNode>& pageRootNode)
+{
+    CHECK_NULL_VOID(pageRootNode);
+    // -element -lastpage ${nodeid} ${offset} ${align}
+    const int32_t PARAM_NODE_ID = 2;
+    const int32_t PARAM_OFFSET = 3;
+    const int32_t PARAM_ALIGN = 4;
+    auto id = std::stoi(params[PARAM_NODE_ID]);
+    auto offset = std::stof(params[PARAM_OFFSET]);
+    auto align = std::stoi(params[PARAM_ALIGN]);
+    ScrollCommand command { TargetType::NODE, id, offset, static_cast<ScrollAlign>(align) };
+    ScrollToTarget(command, pageRootNode);
+}
 
 SimplifiedInspector::SimplifiedInspector(int32_t containerId, const TreeParams& params)
     : containerId_(containerId), params_(params), inspectorCfg_({ params.isContentOnly, !params.enableBackground }),
@@ -227,7 +242,7 @@ bool SimplifiedInspector::GetInspectorStep2(
 
     pageId_ = pageRootNode->GetPageId();
     std::list<RefPtr<NG::UINode>> children;
-    for (const auto& item : pageRootNode->GetChildrenForInspector()) {
+    for (const auto& item : pageRootNode->GetChildrenForInspector(params_.enableCacheNode)) {
         GetFrameNodeChildren(item, children);
     }
     auto overlayNode = GetOverlayNode(pageRootNode);
@@ -268,7 +283,7 @@ void SimplifiedInspector::GetFrameNodeChildren(
             }
         }
     }
-    for (const auto& frameChild : uiNode->GetChildrenForInspector()) {
+    for (const auto& frameChild : uiNode->GetChildrenForInspector(params_.enableCacheNode)) {
         GetFrameNodeChildren(frameChild, children);
     }
 }
@@ -306,7 +321,7 @@ void SimplifiedInspector::GetInspectorChildren(
     GetWebContentIfNeed(node);
     FillInspectorAttrs(parent, jsonNode);
     std::list<RefPtr<NG::UINode>> children;
-    for (const auto& item : parent->GetChildrenForInspector()) {
+    for (const auto& item : parent->GetChildrenForInspector(params_.enableCacheNode)) {
         GetFrameNodeChildren(item, children);
     }
     auto jsonChildrenArray = JsonUtil::CreateArray(true);
@@ -491,7 +506,7 @@ void SimplifiedInspector::GetInspectorTreeNode(
 {
     collector_->RetainNode(pageRootNode);
     std::list<RefPtr<NG::UINode>> children;
-    for (const auto& item : pageRootNode->GetChildrenForInspector()) {
+    for (const auto& item : pageRootNode->GetChildrenForInspector(params_.enableCacheNode)) {
         GetFrameNodeChildren(item, children);
     }
     auto overlayNode2 = GetOverlayNode(pageRootNode);
@@ -527,7 +542,7 @@ void SimplifiedInspector::GetInspectorTreeNodeChildren(
     }
     treeNode->node = parent;
     std::list<RefPtr<NG::UINode>> children;
-    for (const auto& item : parent->GetChildrenForInspector()) {
+    for (const auto& item : parent->GetChildrenForInspector(params_.enableCacheNode)) {
         GetFrameNodeChildren(item, children);
     }
     for (auto uiNode : children) {
@@ -570,7 +585,7 @@ void SimplifiedInspector::GetInspectorChildrenBackground(
     GetWebContentIfNeed(node);
     FillInspectorAttrs(parent, jsonNode);
     std::list<RefPtr<NG::UINode>> children;
-    for (const auto& item : parent->GetChildrenForInspector()) {
+    for (const auto& item : parent->GetChildrenForInspector(params_.enableCacheNode)) {
         GetFrameNodeChildren(item, children);
     }
     auto jsonChildrenArray = JsonUtil::CreateArray(true);

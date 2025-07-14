@@ -54,8 +54,6 @@ void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
 void AssignArkValue(Ark_RichEditorInsertValue& dst, const RichEditorInsertValue& src)
 {
     dst.insertOffset = Converter::ArkValue<Ark_Number>(src.GetInsertOffset());
-    // dst.insertValue = Converter::ArkValue<Ark_String>(src.GetInsertValue());
-    // dst.previewText = Converter::ArkValue<Opt_String>(src.GetPreviewText());
 }
 
 void AssignArkValue(Ark_RichEditorSpanPosition& dst, const RichEditorAbstractSpanResult& src)
@@ -91,7 +89,6 @@ void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstract
     dst.fontWeight = Converter::ArkValue<Ark_Number>(src.GetFontWeight());
     dst.fontFamily = Converter::ArkValue<Ark_String>(src.GetFontFamily());
     dst.decoration = Converter::ArkValue<Ark_DecorationStyleResult>(src);
-    // dst.textShadow = implement it
     LOGW("RichEditor modifier :: textShadow conversion is not implemented yet.");
     dst.letterSpacing = Converter::ArkValue<Opt_Number>(src.GetLetterspacing());
     dst.lineHeight = Converter::ArkValue<Opt_Number>(src.GetLineHeight());
@@ -117,13 +114,11 @@ void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *c
 void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src, ConvContext *ctx)
 {
     dst.spanPosition = Converter::ArkValue<Ark_RichEditorSpanPosition>(src);
-    // dst.value = Converter::ArkValue<Ark_String>(src.GetValue());
     dst.textStyle = Converter::ArkValue<Ark_RichEditorTextStyleResult>(src);
     dst.symbolSpanStyle.value = Converter::ArkValue<Ark_RichEditorSymbolSpanStyle>(src.GetSymbolSpanStyle(), ctx);
     if (src.GetValueResource()) {
         dst.valueResource.value = Converter::ArkValue<Ark_Resource>(*src.GetValueResource(), ctx);
     }
-    // dst.previewText = Converter::ArkValue<Opt_String>(src.GetPreviewText());
 }
 
 void AssignArkValue(Ark_TextRange& dst, const TextRange& src)
@@ -163,11 +158,6 @@ namespace RichEditorModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // need check
-    // auto frameNode = RichEditorModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 } // RichEditorModifier
@@ -181,11 +171,7 @@ void SetRichEditorOptions0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value->controller);
     // obtain the internal RichEditorController
     // need check
-    // RefPtr<RichEditorBaseControllerBase> controller = RichEditorModelNG::GetRichEditorController(frameNode);
-    // CHECK_NULL_VOID(controller);
-
     // // pass the internal controller to external management
-    // value->controller->AddTargetController(controller);
 }
 void SetRichEditorOptions1Impl(Ark_NativePointer node,
                                const Ark_RichEditorStyledStringOptions* options)
@@ -193,15 +179,6 @@ void SetRichEditorOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    // RichEditorModelNG::SetStyledStringMode(frameNode, true);
-    // CHECK_NULL_VOID(options->controller);
-    // obtain the internal Styled String RichEditorController
-    // need check
-    // RefPtr<RichEditorBaseControllerBase> controller =
-    //     RichEditorModelNG::GetRichEditorStyledStringController(frameNode);
-    // CHECK_NULL_VOID(controller);
-
-    // options->controller->AddTargetController(controller);
 }
 } // RichEditorInterfaceModifier
 namespace RichEditorAttributeModifier {
@@ -367,7 +344,6 @@ void CaretColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Color>(*value);
     // need check
-    // RichEditorModelNG::SetCaretColor(frameNode, convValue);
 }
 void SelectedBackgroundColorImpl(Ark_NativePointer node,
                                  const Ark_ResourceColor* value)
@@ -377,7 +353,6 @@ void SelectedBackgroundColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Color>(*value);
     // need check
-    // RichEditorModelNG::SetSelectedBackgroundColor(frameNode, convValue);
 }
 void OnEditingChangeImpl(Ark_NativePointer node,
                          const Callback_Boolean_Void* value)
@@ -398,7 +373,6 @@ void EnterKeyTypeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<TextInputAction>(value);
     // need check
-    // RichEditorModelNG::SetEnterKeyType(frameNode, convValue);
 }
 void OnSubmitImpl(Ark_NativePointer node,
                   const SubmitCallback* value)
@@ -485,9 +459,6 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //RichEditorModelNG::SetEditMenuOptions(frameNode, convValue);
     LOGW("RichEditor modifier :: EditMenuOptionsImpl() needs onCreateMenuCallback, onMenuItemClick input");
 }
 void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
@@ -504,8 +475,6 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    // need check
-    // RichEditorModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
 void BarStateImpl(Ark_NativePointer node,
                   Ark_BarState value)
@@ -514,7 +483,6 @@ void BarStateImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<DisplayMode>(value);
     // need check
-    // RichEditorModelNG::SetBarState(frameNode, convValue);
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_RichEditorSpanType spanType,
@@ -539,9 +507,6 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     }
     auto convMenuParam = Converter::OptConvert<SelectMenuParam>(*options);
     if (convMenuParam.has_value()) {
-        // need check
-        // RichEditorModelNG::BindSelectionMenu(
-        //     frameNode, span, response, convBuildFunc, convMenuParam.value());
     }
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
@@ -561,7 +526,6 @@ void CustomKeyboardImpl(Ark_NativePointer node,
         NG::ViewStackProcessor::GetInstance()->Push(builderNode);
     };
     // need check
-    // RichEditorModelNG::SetCustomKeyboard(frameNode, std::move(builder), supportAvoidance);
 }
 void PlaceholderImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,
@@ -576,8 +540,6 @@ void PlaceholderImpl(Ark_NativePointer node,
         options = *value;
     }
     // need check
-    // options.value = Converter::OptConvert<std::string>(*value);
-    // RichEditorModelNG::SetPlaceholder(frameNode, options);
 }
 } // RichEditorAttributeModifier
 const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()

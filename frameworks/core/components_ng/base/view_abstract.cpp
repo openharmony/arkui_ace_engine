@@ -3668,8 +3668,10 @@ void ViewAbstract::UpdatePopupParamResource(const RefPtr<PopupParam>& param, con
         type = POPUPTYPE_POPUPCOLOR;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, popupColorResourceObject, type);
         type = POPUPTYPE_MASKCOLOR;
-        auto maskColorResourceObject = param->GetMaskColorResourceObject();
-        ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, maskColorResourceObject, type);
+        if (!param->GetIsWithTheme()) {
+            auto maskColorResourceObject = param->GetMaskColorResourceObject();
+            ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, maskColorResourceObject, type);
+        }
         auto maskResourceObject = param->GetMaskResourceObject();
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, maskResourceObject);
         auto widthResourceObject = param->GetWidthResourceObject();
@@ -4565,12 +4567,12 @@ void ViewAbstract::SetFgDynamicBrightness(const BrightnessOption& brightnessOpti
     ACE_UPDATE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption);
 }
 
-void ViewAbstract::SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+void ViewAbstract::SetBlender(const OHOS::Rosen::Blender* blender)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender);
+    ACE_UPDATE_RENDER_CONTEXT(Blender, blender);
 }
 
 void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
@@ -5691,6 +5693,22 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), strategy](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorStrategy, strategy, frameNode);
+            ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        };
+        pattern->AddResObj("foregroundColorStrategy", resObj, std::move(updateFunc));
+    }
 }
 
 void ViewAbstract::SetKeyboardShortcut(
@@ -6588,6 +6606,20 @@ void ViewAbstract::SetForegroundColorStrategy(FrameNode* frameNode, const Foregr
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorStrategy, strategy, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), strategy](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorStrategy, strategy, frameNode);
+            ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        };
+        pattern->AddResObj("foregroundColorStrategy", resObj, std::move(updateFunc));
+    }
 }
 
 void ViewAbstract::SetLightPosition(
@@ -7598,10 +7630,10 @@ void ViewAbstract::SetFgDynamicBrightness(FrameNode* frameNode, const Brightness
     ACE_UPDATE_NODE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption, frameNode);
 }
 
-void ViewAbstract::SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+void ViewAbstract::SetBlender(FrameNode* frameNode, const OHOS::Rosen::Blender* blender)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Blender, blender, frameNode);
 }
 
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)

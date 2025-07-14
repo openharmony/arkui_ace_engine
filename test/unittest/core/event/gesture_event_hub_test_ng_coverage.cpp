@@ -706,4 +706,41 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage015, TestSize
     EXPECT_EQ(gestureEvent.GetSourceDevice(), SourceType::TOUCH);
     EXPECT_EQ(gestureEvent.GetSourceTool(), SourceTool::MOUSE);
 }
+
+/**
+ * @tc.name: GestureEventHubTestCollectRecognizers001
+ * @tc.desc: test ProcessParallelPriorityGesture
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCollectRecognizers001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    Offset offset = Offset(0, 0);
+    int32_t touchId = 0;
+    RefPtr<TargetComponent> targetComponent = nullptr;
+    RefPtr<FrameNode> host = nullptr;
+    RefPtr<NGGestureRecognizer> current = nullptr;
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    std::list<RefPtr<NGGestureRecognizer>> recognizers { 1, clickRecognizer };
+    int32_t parallelIndex = 0;
+    std::vector<RefPtr<NGGestureRecognizer>> parallelVc;
+    parallelVc.push_back(clickRecognizer);
+    auto parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(parallelVc);
+
+    gestureEventHub->externalParallelRecognizer_.push_back(parallelRecognizer);
+    gestureEventHub->ProcessParallelPriorityGesture(
+        offset, touchId, targetComponent, host, current, recognizers, parallelIndex);
+    ASSERT_NE(gestureEventHub->externalParallelRecognizer_[parallelIndex], nullptr);
+    auto touchPoint = gestureEventHub->externalParallelRecognizer_[parallelIndex]->GetTouchPoints();
+    EXPECT_EQ(touchPoint.size(), 1);
+    EXPECT_EQ(parallelIndex, 0);
+    EXPECT_EQ(current, clickRecognizer);
+}
 } // namespace OHOS::Ace::NG

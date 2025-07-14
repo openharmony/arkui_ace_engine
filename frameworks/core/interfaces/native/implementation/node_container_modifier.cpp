@@ -32,8 +32,6 @@ void SetNodeContainerOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(controller);
-    //auto convValue = Converter::OptConvert<type_name>(*controller);
-    //NodeContainerModelNG::SetSetNodeContainerOptions(frameNode, convValue);
 }
 } // NodeContainerInterfaceModifier
 const GENERATED_ArkUINodeContainerModifier* GetNodeContainerModifier()

@@ -722,6 +722,11 @@ typedef enum {
     ARKUI_SCROLL_DIRECTION_HORIZONTAL,
     /** Scrolling is not allowed. */
     ARKUI_SCROLL_DIRECTION_NONE = 3,
+    /**
+     * @brief Scrolling is allowed in both horizontal and vertical directions. Only available in Scroll component.
+     * @since 20
+     */
+    ARKUI_SCROLL_DIRECTION_FREE = 4,
 } ArkUI_ScrollDirection;
 
 /**

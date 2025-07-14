@@ -1920,27 +1920,7 @@ void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& 
 }
 
 template<>
-void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src)
-{
-    // need check
-    // auto colorMode = SystemProperties::GetColorMode();
-    // ShadowStyle shadowStyle = Converter::OptConvert<ShadowStyle>(src).value_or(ShadowStyle::None);
-    // if (shadowStyle == ShadowStyle::None) {
-    //     return;
-    // }
-
-    // auto container = Container::Current();
-    // CHECK_NULL_VOID(container);
-    // auto pipelineContext = container->GetPipelineContext();
-    // CHECK_NULL_VOID(pipelineContext);
-
-    // auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
-    // if (!shadowTheme) {
-    //     return;
-    // }
-
-    // dst = shadowTheme->GetShadow(shadowStyle, colorMode);
-}
+void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src) {}
 
 template<>
 void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src)

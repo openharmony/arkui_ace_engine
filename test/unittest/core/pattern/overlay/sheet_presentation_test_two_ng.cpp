@@ -778,6 +778,14 @@ HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode002, TestSize.Level
     EXPECT_NE(sheetPattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::NONE);
     EXPECT_EQ(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
     sheetPattern->AvoidKeyboardBySheetMode();
+    safeAreaManager->keyboardInset_ = SafeAreaInsets::Inset();
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::POPUP_SHEET;
+    host->GetFocusHub()->currentFocus_ = true;
+    sheetPattern->AvoidKeyboardBySheetMode();
+    EXPECT_EQ(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::RESIZE_ONLY;
+    sheetPattern->AvoidKeyboardBySheetMode();
+    EXPECT_EQ(sheetPattern->keyboardHeight_, 0);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
@@ -1723,7 +1731,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset004, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-
     /**
      * @tc.steps: step2. set up sheet style
      * @tc.expected: sheet type is bottom style.
@@ -1734,7 +1741,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset004, TestSize.Level1)
     layoutProperty->propSheetStyle_ = sheetStyle;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
-
     /**
      * @tc.steps: step3. set up device type
      * @tc.expected: SHEET_BOTTOM_OFFSET only valid in TWO_IN_ONE.
@@ -1750,7 +1756,8 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset004, TestSize.Level1)
     manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
     auto sheetType1 = sheetPattern->GetSheetType();
     EXPECT_EQ(sheetType1, SheetType::SHEET_BOTTOM_OFFSET);
-
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     /**
      * @tc.steps: step4. set up sheet theme.
      * @tc.expected: SHEET_BOTTOM_OFFSET can obtain render properties.

@@ -40,6 +40,7 @@ public:
         const RefPtr<Curve>& curve, bool smooth, bool canOverScroll) override;
 
     bool operator==(const Ace::RefPtr<Scroller>& other) const override;
+    RefPtr<FrameNode> GetBindingFrameNode() override;
 
 private:
     RefPtr<Framework::JSScroller> jsScroller_;

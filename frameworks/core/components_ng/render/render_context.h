@@ -51,7 +51,7 @@ class DrawCmdList;
 class VisualEffect;
 class Filter;
 enum class Gravity;
-class BrightnessBlender;
+class Blender;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
@@ -348,7 +348,7 @@ public:
     virtual void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {}
     virtual void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {}
     virtual void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {}
-    virtual void UpdateBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) {}
+    virtual void UpdateBlender(const OHOS::Rosen::Blender* blender) {}
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
     virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
@@ -367,6 +367,8 @@ public:
     virtual void SetShadowElevation(float elevation) {}
     virtual void SetShadowRadius(float radius) {}
     virtual void SetScale(float scaleX, float scaleY) {}
+    virtual void SetScrollScale(float scale) {}
+    virtual void ResetScrollScale() {}
     virtual void SetBackgroundColor(uint32_t colorValue) {}
     virtual void SetRenderPivot(float pivotX, float pivotY) {}
     virtual void SetFrame(float positionX, float positionY, float width, float height) {}
@@ -456,11 +458,12 @@ public:
 
     virtual void ClearDrawCommands() {}
 
+    virtual void RemoveOverlayModifier(const RefPtr<OverlayModifier>& modifier) {}
     virtual void RemoveContentModifier(const RefPtr<ContentModifier>& ContentModifier) {}
 
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
-    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
+    virtual void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
 

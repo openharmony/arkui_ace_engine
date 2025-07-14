@@ -140,7 +140,7 @@ bool DotIndicatorPaintMethod::NeedBottomAnimation() const
     if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
             if (currentIndexActual == 0 && targetIndex_ && targetIndex_.value() == 0 &&
-                std::abs(touchBottomPageRate_) < FIFTY_PERCENT) {
+                std::abs(touchBottomPageRate_) < FIFTY_PERCENT && !NearZero(touchBottomPageRate_)) {
                 return true;
             }
 
@@ -149,6 +149,10 @@ bool DotIndicatorPaintMethod::NeedBottomAnimation() const
 
         if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
             if (currentIndexActual == firstIndex && std::abs(touchBottomPageRate_) > FIFTY_PERCENT) {
+                return false;
+            }
+            // NearZero(touchBottomPageRate_) is Actual judgment, others are Preconditions.
+            if (currentIndexActual == itemCount_ - 1 && firstIndex == 0 && NearZero(touchBottomPageRate_)) {
                 return false;
             }
 
@@ -729,7 +733,7 @@ bool DotIndicatorPaintMethod::AdjustPointCenterXForTouchBottomNew(StarAndEndPoin
     bool releaseRightBottom = (gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT &&
                                touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
     if ((releaseLeftBottom && (!NearZero(touchBottomPageRate_) && pageRate <= FIFTY_PERCENT)) ||
-        (releaseRightBottom && pageRate >= FIFTY_PERCENT)) {
+        (releaseRightBottom && (pageRate >= FIFTY_PERCENT || NearZero(pageRate)))) {
         return true;
     }
 
@@ -814,6 +818,8 @@ std::pair<float, float> DotIndicatorPaintMethod::ForwardCalculation(
     LinearVector<float> endVectorBlackPointCenterX(itemCount_);
 
     auto [startCurrentIndex, endCurrentIndex] = GetStartAndEndIndex(index);
+    startCurrentIndex = std::clamp(startCurrentIndex, 0, itemCount_ - 1);
+    endCurrentIndex = std::clamp(endCurrentIndex, 0, itemCount_ - 1);
     for (int32_t i = 0; i < itemCount_; ++i) {
         if (i != startCurrentIndex) {
             startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[ITEM_HALF_WIDTH];

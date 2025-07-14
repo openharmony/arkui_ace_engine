@@ -61,6 +61,11 @@ const int64_t RENDER_EVENT_ID = 10;
 constexpr int32_t EXCEPTIONAL_CURSOR = 99;
 constexpr int8_t RENDERINGMODE_FULL_COLOR = 0;
 constexpr int8_t RENDERINGMODE_SINGLE_COLOR = 1;
+constexpr uint32_t AI_CALL_SUCCESS = 0;
+constexpr uint32_t AI_CALLER_INVALID = 1;
+constexpr uint32_t AI_CALL_FUNCNAME_INVALID = 2;
+constexpr uint32_t AI_CALL_NODE_INVALID = 3;
+constexpr uint32_t AI_CALL_ENV_INVALID = 4;
 } // namespace
 
 class PipelineContextTestNg : public testing::Test {

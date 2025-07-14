@@ -119,6 +119,12 @@ enum class InputEventType {
     KEYBOARD,
 };
 
+enum class RecognizerDelayStatus {
+    NONE = 0,
+    START,
+    END,
+};
+
 struct PanDirection final {
     static constexpr uint32_t NONE = 0;
     static constexpr uint32_t LEFT = 1;

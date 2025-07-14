@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/nav_destination_modifier.h"
 
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t DEFAULT_SAFE_AREA_TYPE = 0b1;
@@ -269,13 +270,28 @@ void ResetTitle(ArkUINodeHandle node)
     NavDestinationModelNG::SetTitlebarOptions(frameNode, std::move(options));
 }
 
+void UpdateNavDestSymbolAndAction(const RefPtr<FrameNode>& frameNode, std::vector<NG::BarItem>& menuItems)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto titleBarMenuItems = navDestinationPattern->GetTitleBarMenuItems();
+    for (size_t i = 0; i < menuItems.size() && i < titleBarMenuItems.size(); i++) {
+        menuItems[i].action = titleBarMenuItems[i].action;
+        if (titleBarMenuItems[i].iconSymbol.has_value()) {
+            menuItems[i].iconSymbol = titleBarMenuItems[i].iconSymbol.value();
+        }
+    }
+}
+
 void UpdateNavDestinationMenuItem(FrameNode* frameNode, ArkUIBarItem* items, ArkUI_Uint32 length)
 {
     CHECK_NULL_VOID(frameNode);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-    auto&& updateFunc = [wekNode = AceType::WeakClaim(frameNode),
-                            items = std::vector<ArkUIBarItem>(items, items + length)](
-                            const RefPtr<ResourceObject>& resObj) mutable {
+    auto updateFunc = [wekNode = AceType::WeakClaim(frameNode),
+                          items = std::vector<ArkUIBarItem>(items, items + length)](
+                          const RefPtr<ResourceObject>& resObj) mutable {
         for (uint32_t i = 0; i < items.size(); i++) {
             items[i].ReloadResources();
         }
@@ -301,9 +317,10 @@ void UpdateNavDestinationMenuItem(FrameNode* frameNode, ArkUIBarItem* items, Ark
                 items[i].icon.value = nullptr;
             }
         }
-        auto localMenuItems = menuItems;
         auto frameNode = wekNode.Upgrade();
         CHECK_NULL_VOID(frameNode);
+        UpdateNavDestSymbolAndAction(frameNode, menuItems);
+        auto localMenuItems = menuItems;
         NavDestinationModelNG::SetMenuItems(AceType::RawPtr(frameNode), std::move(localMenuItems));
         frameNode->MarkModifyDone();
         frameNode->MarkDirtyNode();

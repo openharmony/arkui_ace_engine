@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/rating/rating_paint_method.h"
 #include "core/components_ng/pattern/rating/rating_pattern.h"
 #include "core/components_ng/pattern/rating/rating_render_property.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/render/mock_canvas_image.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
@@ -2404,5 +2405,152 @@ HWTEST_F(RatingTestNg, LayoutPolicyIsMatchParentTest001, TestSize.Level1)
     contentConstraint.selfIdealSize.SetWidth(TEST_WIDTH_50);
     ret = ratingLayoutAlgorithm->LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, stars);
     EXPECT_EQ(ret, SizeF({ TEST_WIDTH_50, TEST_SIZE_200.Height() }));
+}
+
+
+/**
+ * @tc.name: CreateWithMediaResourceObj
+ * @tc.desc: Test CreateWithMediaResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, CreateWithMediaResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a RatingModelNG instance and get the main frame node.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string key = "rating" + rating.StringTypeToStr(RatingUriType::BACKGROUND_URI);
+
+    /**
+     * @tc.steps: step2. Test CreateWithMediaResourceObj with a valid ResourceObject.
+     * @tc.expected: count is equal to 1.
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    rating.CreateWithMediaResourceObj(resObj, RatingUriType::BACKGROUND_URI);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    auto count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+    pattern->OnColorModeChange(1);
+
+    /**
+     * @tc.steps: step3. Test CreateWithMediaResourceObj with a null ResourceObject.
+     * @tc.expected: The resource manager should be null.
+     */
+    rating.CreateWithMediaResourceObj(nullptr, RatingUriType::BACKGROUND_URI);
+    resMgr = pattern->resourceMgr_;
+    EXPECT_EQ(resMgr, nullptr);
+
+    /**
+     * @tc.steps: step4. Test CreateWithMediaResourceObj with a ResourceObject containing parameters.
+     * @tc.expected: count is equal to 1.
+     */
+    ResourceObjectParams params { .value = "", .type = ResourceObjectParamType::NONE };
+    RefPtr<ResourceObject> resObjWithParams =
+        AceType::MakeRefPtr<ResourceObject>(1, 10003, std::vector<ResourceObjectParams> { params }, "", "", 100000);
+    rating.CreateWithMediaResourceObj(resObjWithParams, RatingUriType::BACKGROUND_URI);
+    resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+    pattern->OnColorModeChange(1);
+}
+
+/**
+ * @tc.name: UpdateStarStyleImage
+ * @tc.desc: Test UpdateStarStyleImage
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, UpdateStarStyleImage, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up the theme manager and pipeline context.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == RatingTheme::TypeId()) {
+            return AceType::MakeRefPtr<RatingTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    /**
+     * @tc.steps: step2. Create a RatingModelNG instance and get the main frame node.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto ratingLayoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. Test UpdateStarStyleImage for background URI.
+     * @tc.expected: result is equal to RATING_BACKGROUND_URL.
+     */
+    rating.UpdateStarStyleImage(frameNode, RatingUriType::BACKGROUND_URI, RATING_BACKGROUND_URL);
+    EXPECT_EQ(ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
+        RATING_BACKGROUND_URL);
+
+    /**
+     * @tc.steps: step4. Test UpdateStarStyleImage for foreground URI.
+     * @tc.expected: result is equal to RATING_FOREGROUND_URL.
+     */
+    rating.UpdateStarStyleImage(frameNode, RatingUriType::FOREGROUND_URI, RATING_FOREGROUND_URL);
+    EXPECT_EQ(ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
+        RATING_FOREGROUND_URL);
+
+    /**
+     * @tc.steps: step5. Test UpdateStarStyleImage for secondary URI.
+     * @tc.expected: result is equal to RATING_SECONDARY_URL.
+     */
+    rating.UpdateStarStyleImage(frameNode, RatingUriType::SECONDARY_URI, RATING_SECONDARY_URL);
+    EXPECT_EQ(ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
+        RATING_SECONDARY_URL);
+
+    /**
+     * @tc.steps: step6. Test UpdateStarStyleImage with an empty secondary URI.
+     * @tc.expected: result is equal to "".
+     */
+    rating.UpdateStarStyleImage(frameNode, RatingUriType::SECONDARY_URI, "");
+    EXPECT_EQ(ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(), "");
+
+    /**
+     * @tc.steps: step7. Test UpdateStarStyleImage with an invalid URI type.
+     */
+    int32_t defaultValue = 999;
+    rating.UpdateStarStyleImage(frameNode, static_cast<RatingUriType>(defaultValue), "");
+    EXPECT_EQ(ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
+        RATING_BACKGROUND_URL);
+}
+
+/**
+ * @tc.name: StringTypeToStr
+ * @tc.desc: test StringTypeToStr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, StringTypeToStr, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Define a list of RatingUriType and their expected string values.
+     * @tc.expected: The StringTypeToStr function should return the correct string values.
+     */
+    std::vector<std::pair<RatingUriType, std::string>> types = {
+        { RatingUriType::BACKGROUND_URI, "BackgroundUri" },
+        { RatingUriType::FOREGROUND_URI, "ForegroundUri" },
+        { RatingUriType::SECONDARY_URI, "SecondaryUri" } };
+    for (const auto& [type, val] : types) {
+        auto ret = RatingModelNG::StringTypeToStr(type);
+        EXPECT_EQ(val, ret);
+    }
 }
 } // namespace OHOS::Ace::NG

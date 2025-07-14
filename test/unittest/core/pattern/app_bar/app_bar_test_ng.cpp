@@ -1111,4 +1111,24 @@ HWTEST_F(AppBarTestNg, TestOnBackPressedCallback032, TestSize.Level1)
     appBar->CreateServicePanel(bundleName, abilityName, params);
     EXPECT_EQ(appBar->sessionId_, 0);
 }
+
+/**
+ * @tc.name: BuildAppbar001
+ * @tc.desc: Test BuildAppbar
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, BuildAppbar001, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    EXPECT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    EXPECT_NE(atom, nullptr);;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    AppBarView::BuildAppbar(pipeline);
+    EXPECT_EQ(atom, appBar->atomicService_.Upgrade());
+}
 } // namespace OHOS::Ace::NG

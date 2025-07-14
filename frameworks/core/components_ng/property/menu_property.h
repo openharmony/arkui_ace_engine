@@ -149,6 +149,8 @@ struct MenuParam {
     std::optional<AvailableLayoutAreaMode> availableLayoutAreaMode;
     OffsetF anchorPosition;
     bool isAnchorPosition = false;
+    bool isDarkMode = false;
+    bool isWithTheme = false;
 };
 
 } // namespace OHOS::Ace::NG

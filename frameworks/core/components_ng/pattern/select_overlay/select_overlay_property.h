@@ -205,7 +205,7 @@ enum class CloseReason {
 };
 
 struct HoldSelectionInfo {
-    std::function<bool(const PointF&)> checkTouchInArea;
+    std::function<bool(const PointF&, bool)> checkTouchInArea;
     std::function<void()> resetSelectionCallback;
     std::function<bool(SourceType, TouchType)> eventFilter;
 

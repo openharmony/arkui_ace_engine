@@ -194,12 +194,13 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
             return;
         }
-        auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
-        if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+        if (CheckLimitFinger()) {
+            extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return;
         }
-        if (CheckLimitFinger()) {
+        auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
+        if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return;
         }
@@ -328,6 +329,7 @@ void SwipeRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
 void SwipeRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    extraInfo_ += "cancel received.";
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -340,6 +342,7 @@ void SwipeRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void SwipeRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
+    extraInfo_ += "cancel received.";
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -471,6 +474,15 @@ GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
         return GestureJudgeResult::CONTINUE;
     }
     auto info = std::make_shared<SwipeGestureEvent>();
+    UpdateGestureEventInfo(info);
+    if (gestureRecognizerJudgeFunc) {
+        return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
+    }
+    return callback(gestureInfo_, info);
+}
+
+void SwipeRecognizer::UpdateGestureEventInfo(std::shared_ptr<SwipeGestureEvent>& info)
+{
     info->SetTimeStamp(time_);
     info->SetDeviceId(deviceId_);
     UpdateFingerListInfo();
@@ -503,10 +515,11 @@ GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEventType(inputEventType_);
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
-    if (gestureRecognizerJudgeFunc) {
-        return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
+    if (inputEventType_ == InputEventType::AXIS) {
+        info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+    } else {
+        info->SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
     }
-    return callback(gestureInfo_, info);
 }
 
 bool SwipeRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)

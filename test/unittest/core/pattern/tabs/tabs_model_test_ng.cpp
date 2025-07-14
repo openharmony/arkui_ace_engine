@@ -327,4 +327,85 @@ HWTEST_F(TabsModelTestNg, HandleScrollableBarMarginTest001, TestSize.Level1)
     CreateDone();
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: HandleBackgroundEffectColorTest001
+ * @tc.desc: Verify TabsModelNG::HandleBackgroundEffectColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModelTestNg, HandleBackgroundEffectColorTest001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    TabsModelNG::HandleBackgroundEffectColor(frameNode, resObj);
+    pattern_->resourceMgr_->ReloadResources();
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(AceType::Claim<FrameNode>(frameNode));
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    ASSERT_NE(tabBarNode, nullptr);
+    auto target = tabBarNode->GetRenderContext();
+    ASSERT_NE(target, nullptr);
+    auto currentEffect = target->GetBackgroundEffect();
+
+    EXPECT_TRUE(currentEffect.has_value());
+    CreateDone();
+}
+
+/**
+ * @tc.name: HandleBackgroundEffectInactiveColorTest001
+ * @tc.desc: Verify TabsModelNG::HandleBackgroundEffectInactiveColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModelTestNg, HandleBackgroundEffectInactiveColorTest001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    TabsModelNG::HandleBackgroundEffectInactiveColor(frameNode, resObj);
+    pattern_->resourceMgr_->ReloadResources();
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(AceType::Claim<FrameNode>(frameNode));
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    ASSERT_NE(tabBarNode, nullptr);
+    auto target = tabBarNode->GetRenderContext();
+    ASSERT_NE(target, nullptr);
+    auto currentEffect = target->GetBackgroundEffect();
+
+    EXPECT_TRUE(currentEffect.has_value());
+    CreateDone();
+}
+
+/**
+ * @tc.name: HandleBackgroundBlurStyleInactiveColorTest001
+ * @tc.desc: Verify TabsModelNG::HandleBackgroundBlurStyleInactiveColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModelTestNg, HandleBackgroundBlurStyleInactiveColorTest001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    TabsModelNG::HandleBackgroundBlurStyleInactiveColor(frameNode, resObj);
+    pattern_->resourceMgr_->ReloadResources();
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(AceType::Claim<FrameNode>(frameNode));
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    ASSERT_NE(tabBarNode, nullptr);
+    auto target = tabBarNode->GetRenderContext();
+    ASSERT_NE(target, nullptr);
+    auto currentOption = target->GetBackBlurStyle();
+
+    EXPECT_TRUE(currentOption.has_value());
+    CreateDone();
+}
 } // namespace OHOS::Ace::NG

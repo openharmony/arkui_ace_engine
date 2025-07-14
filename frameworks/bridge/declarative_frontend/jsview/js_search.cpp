@@ -269,19 +269,17 @@ void JSSearch::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseSearchValueObject(info, changeEventVal);
     }
-    if (placeholderResult && SystemProperties::ConfigChangePerform()) {
-        if (placeholderObject) {
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterResource("placeholder");
+        if (placeholderObject && placeholderResult) {
             RegisterResource<std::u16string>("placeholder", placeholderObject, placeholder);
-        } else {
-            UnregisterResource("placeholder");
         }
     }
 
-    if (textResult && SystemProperties::ConfigChangePerform()) {
-        if (textObject) {
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterResource("text");
+        if (textObject && textResult) {
             RegisterResource<std::u16string>("text", textObject, text);
-        } else {
-            UnregisterResource("text");
         }
     }
 }
@@ -406,6 +404,11 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 
 void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterResource("searchIconSize");
+        UnregisterResource("searchButtonIconSrc");
+        UnregisterResource("searchIconColor");
+    }
     if (info[0]->IsUndefined() || info[0]->IsNull()) {
         SetSearchDefaultIcon();
         return;
@@ -529,7 +532,6 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     CalcDimension size;
     auto sizeProp = param->GetProperty("size");
     RefPtr<ResourceObject> sizeObject;
-    UnregisterResource("searchIconSize");
     if (!sizeProp->IsUndefined() && !sizeProp->IsNull() &&
         ParseJsDimensionVpNG(sizeProp, size, sizeObject)) {
         if (LessNotEqual(size.Value(), 0.0) || size.Unit() == DimensionUnit::PERCENT) {
@@ -544,7 +546,6 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     // set icon src
     std::string src;
     RefPtr<ResourceObject> mediaObject;
-    UnregisterResource("searchButtonIconSrc");
     auto srcPathProp = param->GetProperty("src");
     if (srcPathProp->IsUndefined() || srcPathProp->IsNull() || !ParseJsMedia(srcPathProp, src, mediaObject)) {
         src = "";
@@ -558,7 +559,6 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     // set icon color
     Color colorVal;
     RefPtr<ResourceObject> colorObject;
-    UnregisterResource("searchIconColor");
     NG::IconOptions searchIconOptions;
     auto colorProp = param->GetProperty("color");
     if (!colorProp->IsUndefined() && !colorProp->IsNull() && ParseJsColor(colorProp, colorVal, colorObject)) {

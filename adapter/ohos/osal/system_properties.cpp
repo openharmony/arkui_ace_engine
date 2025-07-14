@@ -151,6 +151,11 @@ bool IsBuildTraceEnabled()
     return (system::GetParameter("persist.ace.trace.build.enabled", "false") == "true");
 }
 
+bool IsDynamicDetectionTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.dynamicdetection.enabled", "false") == "true");
+}
+
 bool IsSyncDebugTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.sync.debug.enabled", "false") == "true");
@@ -611,6 +616,7 @@ bool SystemProperties::imageFrameworkEnable_ = IsImageFrameworkEnabled();
 std::atomic<bool> SystemProperties::traceInputEventEnable_(IsTraceInputEventEnabled() && developerModeOn_);
 std::atomic<bool> SystemProperties::stateManagerEnable_(IsStateManagerEnable());
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
+bool SystemProperties::dynamicDetectionTraceEnable_ = IsDynamicDetectionTraceEnabled();
 bool SystemProperties::cacheNavigationNodeEnable_ = IsCacheNavigationNodeEnable();
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
@@ -835,6 +841,7 @@ void SystemProperties::InitDeviceInfo(
     traceInputEventEnable_.store(IsTraceInputEventEnabled() && developerModeOn_);
     stateManagerEnable_.store(IsStateManagerEnable());
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
+    dynamicDetectionTraceEnable_ = IsDynamicDetectionTraceEnabled();
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
     measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
     safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();

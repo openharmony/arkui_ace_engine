@@ -187,7 +187,7 @@ public:
     }
 
     // Return children for get inspector tree calling, return cache children directly
-    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector() const
+    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector(bool needCacheNode = false) const
     {
         return children_;
     }
@@ -250,7 +250,7 @@ public:
     // DFX info.
     virtual void DumpTree(int32_t depth, bool hasJson = false);
     void DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json);
-    void DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current);
+    void DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current);
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
@@ -1098,6 +1098,8 @@ public:
         afterAttachMainTreeTasks_.emplace_back(std::move(task));
     }
 
+    void FindTopNavDestination(RefPtr<FrameNode>& result);
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1128,7 +1130,7 @@ protected:
     // dump self info.
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
-    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
+    virtual void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}

@@ -69,6 +69,7 @@ void ViewAbstractModelTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+    ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 /**

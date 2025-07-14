@@ -1,13 +1,12 @@
 {
     "groups": {
-        "https://gitee.com/arkui-auto-tdd": [
-            "https://gitee.com/ileft2019",
-            "https://gitee.com/zhongjianfei",
-            "https://gitee.com/uniquexch",
+        "https://gitee.com/arkui-default": [
+            "https://gitee.com/cc520bf",
+            "https://gitee.com/raulnaruto_admin",
+            "https://gitee.com/bad-eleven",
             "https://gitee.com/gongpingde"
         ],
         "https://gitee.com/arkui_superman": [
-            "https://gitee.com/raulnaruto_admin",
             "https://gitee.com/jiangdayuan",
             "https://gitee.com/tsj_2020",
             "https://gitee.com/cheng-feiwang",
@@ -59,7 +58,6 @@
             "https://gitee.com/guido_grassel"
         ],
         "https://gitee.com/arkuiscroll": [
-            "https://gitee.com/cc520bf",
             "https://gitee.com/yangcan18",
             "https://gitee.com/yeyinglong_admin",
             "https://gitee.com/zcdqs",
@@ -75,7 +73,6 @@
             "https://gitee.com/Armstrong15",
             "https://gitee.com/fredtt",
             "https://gitee.com/futurescape",
-            "https://gitee.com/luoying_ace_admin",
             "https://gitee.com/houguobiao"
         ],
         "https://gitee.com/huawei_g_five": [
@@ -118,25 +115,21 @@
         ]
     },
     "userInfos": {
-        "https://gitee.com/ileft2019": {
-            "info": "[自测试管理 zuopengpeng]",
-            "group": "https://gitee.com/arkui-auto-tdd"
+        "https://gitee.com/cc520bf": {
+            "info": "[公共 caocan]",
+            "group": "https://gitee.com/arkui-default"
         },
-        "https://gitee.com/zhongjianfei": {
-            "info": "[自测试管理 zhongjianfei]",
-            "group": "https://gitee.com/arkui-auto-tdd"
-        },
-        "https://gitee.com/uniquexch": {
-            "info": "[自测试管理 xuchenghua]",
-            "group": "https://gitee.com/arkui-auto-tdd"
+        "https://gitee.com/bad-eleven": {
+            "info": "[公共 yeliangfeng]",
+            "group": "https://gitee.com/arkui-default"
         },
         "https://gitee.com/gongpingde": {
-            "info": "[自测试管理 chengongping]",
-            "group": "https://gitee.com/arkui-auto-tdd"
+            "info": "[公共 chengongping]",
+            "group": "https://gitee.com/arkui-default"
         },
         "https://gitee.com/raulnaruto_admin": {
-            "info": "[导航/模态公共 laoyitong]",
-            "group": "https://gitee.com/arkui_superman"
+            "info": "[公共 laoyitong]",
+            "group": "https://gitee.com/arkui-default"
         },
         "https://gitee.com/jiangdayuan": {
             "info": "[导航/模态 jiangdayuan]",
@@ -285,10 +278,6 @@
         "https://gitee.com/guido_grassel": {
             "info": "[状态管理 guido]",
             "group": "https://gitee.com/arkuistatemgmt"
-        },
-        "https://gitee.com/cc520bf": {
-            "info": "[滚动组件公共 caocan]",
-            "group": "https://gitee.com/arkuiscroll"
         },
         "https://gitee.com/yangcan18": {
             "info": "[Tabs组件 yangcan]",

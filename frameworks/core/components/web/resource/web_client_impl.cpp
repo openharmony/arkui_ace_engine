@@ -1498,4 +1498,24 @@ bool WebClientImpl::OnBeforeUnloadByJSV2(
     return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD, result, url, message, "",
         delegate->GetTaskExecutor(), isReload);
 }
+
+void WebClientImpl::OnPdfScrollAtBottom(const std::string& url)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebClientImpl::OnPdfScrollAtBottom, url: %{public}s", url.c_str());
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnPdfScrollAtBottom(url);
+}
+
+void WebClientImpl::OnPdfLoadEvent(int32_t result, const std::string& url)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebClientImpl::OnPdfLoadEvent, result: %{public}d, url: %{public}s", result, url.c_str());
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnPdfLoadEvent(result, url);
+}
 } // namespace OHOS::Ace

@@ -158,7 +158,7 @@ public:
 
     void CollectScrollableTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        ResponseLinkResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult, int32_t touchId);
 
 private:
     Axis axis_ = Axis::VERTICAL;
@@ -207,7 +207,7 @@ public:
     void CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint,
         const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        ResponseLinkResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult, int32_t touchId);
 
     void InitClickRecognizer(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,

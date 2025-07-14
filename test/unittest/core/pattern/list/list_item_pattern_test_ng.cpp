@@ -303,6 +303,23 @@ HWTEST_F(ListItemPatternTestNg, HandleDragUpdate003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnRecycle001
+ * @tc.desc: Test ListItemPatternTestNg OnRecycle001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, OnRecycle001, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    listItemPattern->OnRecycle();
+    EXPECT_EQ(listItemPattern->swipeActionState_, SwipeActionState::COLLAPSED);
+}
+
+
+/**
  * @tc.name: HandleDragEnd001
  * @tc.desc: Test ListItemPattern HandleDragEnd
  * @tc.type: FUNC

@@ -763,6 +763,7 @@ let ScrollDirection;
   ScrollDirection[ScrollDirection.Horizontal = 1] = 'Horizontal';
   ScrollDirection[ScrollDirection.Free = 2] = 'Free';
   ScrollDirection[ScrollDirection.None = 3] = 'None';
+  ScrollDirection[ScrollDirection.FREE = 4] = 'FREE';
 })(ScrollDirection || (ScrollDirection = {}));
 
 let Sticky;
@@ -815,7 +816,6 @@ let FormDimension;
   FormDimension.DIMENSION_6_4 = 7;
   FormDimension.DIMENSION_2_3 = 8;
   FormDimension.DIMENSION_3_3 = 9;
-  FormDimension.DIMENSION_3_4 = 10;
 })(FormDimension || (FormDimension = {}));
 
 let FormShape;
@@ -1643,6 +1643,18 @@ class QuickReplaceSymbolEffect extends SymbolEffect {
   scope(value) {
     this.scope = value;
     return this;
+  }
+}
+
+class ContentTransition{
+}
+
+class NumericTextTransition extends ContentTransition {
+  constructor(options) {
+    super();
+    this.type = 'NumericTextTransition';
+    this.flipDirection = options.flipDirection;
+    this.enableBlur = options.enableBlur;
   }
 }
 
@@ -4256,3 +4268,12 @@ let GestureFocusMode;
   GestureFocusMode[GestureFocusMode.DEFAULT = 0] = 'DEFAULT';
   GestureFocusMode[GestureFocusMode.GESTURE_TAP_AND_LONG_PRESS = 1] = 'GESTURE_TAP_AND_LONG_PRESS';
 })(GestureFocusMode || (GestureFocusMode = {}));
+
+let PdfLoadResult;
+(function (PdfLoadResult) {
+  PdfLoadResult[PdfLoadResult.LOAD_SUCCESS = 0] = 'LOAD_SUCCESS';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_FILE = 1] = 'PARSE_ERROR_FILE';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_FORMAT = 2] = 'PARSE_ERROR_FORMAT';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_PASSWORD = 3] = 'PARSE_ERROR_PASSWORD';
+  PdfLoadResult[PdfLoadResult.PARSE_ERROR_HANDLER = 4] = 'PARSE_ERROR_HANDLER';
+})(PdfLoadResult || (PdfLoadResult = {}));

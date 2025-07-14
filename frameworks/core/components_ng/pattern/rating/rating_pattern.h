@@ -116,18 +116,19 @@ public:
         return true;
     }
 
-private:
-    void OnAttachToFrameNode() override;
-    void UpdateRatingScore(double ratingScore);
-    void MarkDirtyNode(const PropertyChangeFlag& flag);
-    void OnModifyDone() override;
-    void ConstrainsRatingScore(const RefPtr<RatingLayoutProperty>& layoutProperty);
     void LoadForeground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
         const RefPtr<IconTheme>& iconTheme);
     void LoadSecondary(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
         const RefPtr<IconTheme>& iconTheme);
     void LoadBackground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
         const RefPtr<IconTheme>& iconTheme);
+
+private:
+    void OnAttachToFrameNode() override;
+    void UpdateRatingScore(double ratingScore);
+    void MarkDirtyNode(const PropertyChangeFlag& flag);
+    void OnModifyDone() override;
+    void ConstrainsRatingScore(const RefPtr<RatingLayoutProperty>& layoutProperty);
     void LoadFocusBackground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
         const RefPtr<IconTheme>& iconTheme);
     void UpdatePaintConfig();

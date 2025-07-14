@@ -210,6 +210,7 @@ void WindowScene::OnAttachToFrameNode()
     context->SetRSNode(surfaceNode);
     surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
+    Rosen::SceneSessionManager::GetInstance().OnAttachToFrameNode(session_->GetPersistentId());
     RegisterFocusCallback();
     WindowPattern::OnAttachToFrameNode();
 }
@@ -719,7 +720,6 @@ void WindowScene::OnLayoutFinished()
             self->BufferAvailableCallback();
             return;
         }
-        CHECK_EQUAL_VOID(self->session_->IsAnco(), true);
         if (self->session_->GetBufferAvailableCallbackEnable()) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "buffer available callback enable is true, no need remove blank.");
             return;
@@ -743,10 +743,6 @@ void WindowScene::OnDrawingCompleted()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
-        if (self->blankWindow_) {
-            self->BufferAvailableCallbackForBlank(true);
-            return;
-        }
         CHECK_NULL_VOID(self->snapshotWindow_);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
@@ -896,6 +892,7 @@ void WindowScene::OnPreLoadStartingWindowFinished()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         auto imageLayoutProperty = self->startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
         const auto& sessionInfo = self->session_->GetSessionInfo();
         auto preLoadPixelMap = Rosen::SceneSessionManager::GetInstance().GetPreLoadStartingWindow(sessionInfo);
         CHECK_NULL_VOID(preLoadPixelMap);

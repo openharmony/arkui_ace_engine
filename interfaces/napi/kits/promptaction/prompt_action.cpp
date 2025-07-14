@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2234,6 +2234,19 @@ napi_value JSRemoveCustomDialog(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
+void ParseDialogReleaseCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
+    std::function<void()>& onWillDismissRelease)
+{
+    onWillDismissRelease = [env = asyncContext->env, onWillDismissRef = asyncContext->onWillDismissRef]() {
+        if (onWillDismissRef) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(env, &scope);
+            napi_delete_reference(env, onWillDismissRef);
+            napi_close_handle_scope(env, scope);
+        }
+    };
+}
+
 void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
     std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss)
 {
@@ -2627,11 +2640,14 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
     napi_create_promise(env, &asyncContext->deferred, &result);
 
     std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss = nullptr;
+    std::function<void()> onWillDismissRelease = nullptr;
     if (asyncContext->onWillDismissRef) {
         ParseDialogCallback(asyncContext, onWillDismiss);
+        ParseDialogReleaseCallback(asyncContext, onWillDismissRelease);
     }
     std::function<void(int32_t)> openCallback = nullptr;
     PromptDialogAttr promptDialogAttr = GetPromptActionDialog(env, asyncContext, onWillDismiss);
+    promptDialogAttr.customOnWillDismissRelease = std::move(onWillDismissRelease);
     if (!asyncContext->builderRef) {
         ParseCustomDialogContentCallback(asyncContext, openCallback);
         promptDialogAttr.customStyle = true;
@@ -2771,14 +2787,17 @@ napi_value JSPromptOpenCustomDialogWithController(napi_env env, napi_callback_in
     napi_create_promise(env, &asyncContext->deferred, &result);
 
     std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss = nullptr;
+    std::function<void()> onWillDismissRelease = nullptr;
     if (asyncContext->onWillDismissRef) {
         ParseDialogCallback(asyncContext, onWillDismiss);
+        ParseDialogReleaseCallback(asyncContext, onWillDismissRelease);
     }
 
     PromptDialogAttr promptDialogAttr = GetPromptActionDialog(env, asyncContext, onWillDismiss);
     promptDialogAttr.customStyle = true;
     promptDialogAttr.customBuilder = nullptr;
     promptDialogAttr.dialogCallback = GetDialogCallback(controller);
+    promptDialogAttr.customOnWillDismissRelease = std::move(onWillDismissRelease);
 
     std::function<void(int32_t)> openCallback = nullptr;
     ParseCustomDialogContentCallback(asyncContext, openCallback);
@@ -2839,13 +2858,16 @@ napi_value JSPromptPresentCustomDialog(napi_env env, napi_callback_info info)
     napi_create_promise(env, &asyncContext->deferred, &result);
 
     std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss = nullptr;
+    std::function<void()> onWillDismissRelease = nullptr;
     if (asyncContext->onWillDismissRef) {
         ParseDialogCallback(asyncContext, onWillDismiss);
+        ParseDialogReleaseCallback(asyncContext, onWillDismissRelease);
     }
 
     PromptDialogAttr promptDialogAttr = GetPromptActionDialog(env, asyncContext, onWillDismiss);
     auto builder = GetCustomBuilderWithId(env, asyncContext);
     promptDialogAttr.customBuilderWithId = std::move(builder);
+    promptDialogAttr.customOnWillDismissRelease = std::move(onWillDismissRelease);
     if (controller) {
         promptDialogAttr.dialogCallback = GetDialogCallback(controller);
     }

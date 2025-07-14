@@ -131,7 +131,7 @@ RefPtr<Container> Container::GetDefault()
     return defaultContainer;
 }
 
-RefPtr<Container> Container::GetFoucsed()
+RefPtr<Container> Container::GetFocused()
 {
     RefPtr<Container> foucsContainer;
     AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
@@ -185,6 +185,13 @@ ColorMode Container::CurrentColorMode()
     auto curContainer = CurrentSafely();
     CHECK_NULL_RETURN(curContainer, ColorMode::LIGHT);
     return curContainer->GetColorMode();
+}
+
+std::string Container::CurrentBundleName()
+{
+    auto curContainer = CurrentSafely();
+    CHECK_NULL_RETURN(curContainer, "");
+    return curContainer->GetBundleName();
 }
 
 bool Container::UpdateState(const Frontend::State& state)

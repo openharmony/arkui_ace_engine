@@ -298,6 +298,8 @@ public:
 
     bool CheckBlurReason();
 
+    bool NeedSetScrollRect();
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -1214,7 +1216,7 @@ public:
     }
 
     void DumpInfo() override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void DumpAdvanceInfo() override;
     void DumpPlaceHolderInfo();
     void DumpTextEngineInfo();
@@ -2183,7 +2185,6 @@ private:
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
-    bool isPreviewTextOverCount_ = false;
     bool isCaretTwinkling_ = false;
     bool isPasswordSymbol_ = true;
     bool isEnableHapticFeedback_ = true;
@@ -2208,6 +2209,8 @@ private:
     bool cancelButtonTouched_ = false;
     KeyboardGradientMode imeGradientMode_ = KeyboardGradientMode::NONE;
     KeyboardFluidLightMode imeFluidLightMode_ = KeyboardFluidLightMode::NONE;
+    OverflowMode lastOverflowMode_ = OverflowMode::SCROLL;
+    TextOverflow lastTextOverflow_ = TextOverflow::ELLIPSIS;
 };
 } // namespace OHOS::Ace::NG
 

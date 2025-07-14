@@ -245,6 +245,8 @@ public:
     void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
     void AddPanEvent(
         const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap);
+    void AddPanEvent(const RefPtr<PanEvent>& panEvent,
+        PanDirection direction, int32_t fingers, const PanDistanceMapDimension& distanceMap);
     void RemovePanEvent(const RefPtr<PanEvent>& panEvent);
     void SetPanEventType(GestureTypeName typeName);
     void SetLongPressEventType(GestureTypeName typeName);
@@ -398,6 +400,7 @@ public:
 
     bool IsDragNewFwk() const;
     bool TriggerTouchEvent(const TouchEvent& point);
+    void SetRecognizerDelayStatus(const RecognizerDelayStatus& recognizerDelayStatus = RecognizerDelayStatus::NONE);
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,

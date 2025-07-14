@@ -63,6 +63,21 @@ constexpr int32_t INNER_BORDER_LINEAR_GRADIENT = 1;
 const std::vector<std::string> BORDER_WIDTH_TYPE = {"outlineWidth", "borderWidth"};
 const std::vector<std::string> BORDER_LINEAR_GRADIENT_TYPE = {"outlineLinearGradient", "borderLinearGradient"};
 
+const char* START_PROPERTY = "start";
+const char* END_PROPERTY = "end";
+const char* TOP_PROPERTY = "top";
+const char* BOTTOM_PROPERTY = "bottom";
+const char* LEFT_PROPERTY = "left";
+const char* RIGHT_PROPERTY = "right";
+const char* TOP_START_PROPERTY = "topStart";
+const char* TOP_END_PROPERTY = "topEnd";
+const char* TOP_LEFT_PROPERTY = "topLeft";
+const char* TOP_RIGHT_PROPERTY = "topRight";
+const char* BOTTOM_START_PROPERTY = "bottomStart";
+const char* BOTTOM_END_PROPERTY = "bottomEnd";
+const char* BOTTOM_LEFT_PROPERTY = "bottomLeft";
+const char* BOTTOM_RIGHT_PROPERTY = "bottomRight";
+
 using DoubleBindCallback = std::function<void(const std::string&)>;
 
 #ifndef WEARABLE_PRODUCT
@@ -409,6 +424,12 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         if (popupParam) {
             popupParam->SetArrowOffset(offset);
         }
+    }
+
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (targetNode) {
+        bool isWithTheme = targetNode->GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED;
+        popupParam->SetIsWithTheme(isWithTheme);
     }
 
     auto arrowPointPosition = popupObj->GetProperty("arrowPointPosition");
@@ -1037,13 +1058,22 @@ void JSViewPopups::ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::M
     if (enableArrowValue->IsBoolean()) {
         menuParam.enableArrow = enableArrowValue->ToBoolean();
     }
-
+    auto enableArrow = menuParam.enableArrow.has_value() && menuParam.enableArrow.value();
+    RefPtr<ResourceObject> arrowOffsetResObj;
     auto arrowOffset = menuOptions->GetProperty("arrowOffset");
     CalcDimension offset;
-    if (JSViewAbstract::ParseJsDimensionVp(arrowOffset, offset)) {
+    if (enableArrow && JSViewAbstract::ParseJsDimensionVp(arrowOffset, offset, arrowOffsetResObj)) {
         menuParam.arrowOffset = offset;
     }
-
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::MenuParam& menuParam) {
+        CalcDimension offset;
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, offset)) {
+            menuParam.arrowOffset = offset;
+        }
+    };
+    if (enableArrow && arrowOffsetResObj) {
+        menuParam.AddResource("arrowOffset", arrowOffsetResObj, std::move(updateFunc));
+    }
     // if enableArrow is true and placement not set, set placement default value to top.
     if (menuParam.enableArrow.has_value() && !menuParam.placement.has_value() && menuParam.enableArrow.value()) {
         menuParam.placement = Placement::TOP;
@@ -1516,6 +1546,16 @@ void JSViewPopups::ParseMenuoffsetParam(const JSRef<JSObject>& offsetObj, NG::Me
     }
 }
 
+void JSViewPopups::InitMenuParamColorMode(NG::MenuParam& menuParam)
+{
+    auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(node);
+    auto localColorMode = node->GetLocalColorMode();
+    menuParam.isWithTheme = (localColorMode != ColorMode::COLOR_MODE_UNDEFINED);
+    auto colorMode = Container::CurrentColorMode();
+    menuParam.isDarkMode = (colorMode == ColorMode::DARK);
+}
+
 void JSViewPopups::ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
 {
     if (!info[optionIndex]->IsObject()) {
@@ -1530,6 +1570,7 @@ void JSViewPopups::ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuPara
         };
         menuParam.AddResource("title", titleResObj, std::move(updateFunc));
     }
+    JSViewPopups::InitMenuParamColorMode(menuParam);
     JSViewPopups::ParseMenuParam(info, menuOptions, menuParam);
 }
 
@@ -1599,7 +1640,7 @@ void ParsePreviewBorderRadiusParam(const JSRef<JSObject>& menuContentOptions, NG
     }
     auto previewBorderRadiusValue = menuContentOptions->GetProperty("previewBorderRadius");
     NG::BorderRadiusProperty previewBorderRadius;
-    JSViewAbstract::ParseBorderRadius(previewBorderRadiusValue, previewBorderRadius, false);
+    JSViewPopups::ParseMenuPreviewBorderRadius(previewBorderRadiusValue, previewBorderRadius);
     menuParam.previewBorderRadius = previewBorderRadius;
 }
 
@@ -1610,6 +1651,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
         return;
     }
     auto menuContentOptions = JSRef<JSObject>::Cast(args);
+    JSViewPopups::InitMenuParamColorMode(menuParam);
     JSViewPopups::ParseMenuParam(info, menuContentOptions, menuParam);
     RefPtr<JsFunction> previewBuilderFunc;
     auto preview = menuContentOptions->GetProperty("preview");
@@ -2165,9 +2207,12 @@ void JSViewAbstract::ParseSheetStyle(
         }
     }
 
-    bool isInteractive = (NG::SheetType::SHEET_CONTENT_COVER == sheetStyle.sheetType);
-    ParseJsBool(interactive, isInteractive);
-    sheetStyle.interactive = isInteractive;
+    bool isInteractive = false;
+    if (ParseJsBool(interactive, isInteractive)) {
+        sheetStyle.interactive = isInteractive;
+    } else if (!isPartialUpdate && NG::SheetType::SHEET_CONTENT_COVER == sheetStyle.sheetType) {
+        sheetStyle.interactive = true;
+    }
 
     bool showClose = true;
     if (NG::SheetType::SHEET_CONTENT_COVER == sheetStyle.sheetType) {
@@ -2805,6 +2850,7 @@ void JSViewAbstract::ParseContentMenuCommonParam(
     }
     JSViewPopups::GetMenuShowInSubwindow(menuParam);
     CHECK_EQUAL_VOID(menuObj->IsEmpty(), true);
+    JSViewPopups::InitMenuParamColorMode(menuParam);
     JSViewPopups::ParseMenuParam(info, menuObj, menuParam);
     JSViewPopups::ParseMenuShowInSubWindowParam(menuObj, menuParam, false);
     auto preview = menuObj->GetProperty("preview");
@@ -3056,8 +3102,8 @@ void JSViewPopups::ParseMenuOutlineWidthWithResourceObj(const RefPtr<ResourceObj
     if (leftResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& outlineWidth) {
             CalcDimension left;
-            ResourceParseUtils::ParseResDimensionVp(resObj, left);
-            if (left.Unit() == DimensionUnit::PERCENT) {
+            if (!ResourceParseUtils::ParseResDimensionVp(resObj, left) ||
+                left.Unit() == DimensionUnit::PERCENT || left.IsNegative()) {
                 left.Reset();
             }
             outlineWidth.leftDimen = left;
@@ -3067,8 +3113,8 @@ void JSViewPopups::ParseMenuOutlineWidthWithResourceObj(const RefPtr<ResourceObj
     if (rightResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& outlineWidth) {
             CalcDimension right;
-            ResourceParseUtils::ParseResDimensionVp(resObj, right);
-            if (right.Unit() == DimensionUnit::PERCENT) {
+            if (!ResourceParseUtils::ParseResDimensionVp(resObj, right) ||
+                right.Unit() == DimensionUnit::PERCENT || right.IsNegative()) {
                 right.Reset();
             }
             outlineWidth.rightDimen = right;
@@ -3078,8 +3124,8 @@ void JSViewPopups::ParseMenuOutlineWidthWithResourceObj(const RefPtr<ResourceObj
     if (topResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& outlineWidth) {
             CalcDimension top;
-            ResourceParseUtils::ParseResDimensionVp(resObj, top);
-            if (top.Unit() == DimensionUnit::PERCENT) {
+            if (!ResourceParseUtils::ParseResDimensionVp(resObj, top) ||
+                top.Unit() == DimensionUnit::PERCENT || top.IsNegative()) {
                 top.Reset();
             }
             outlineWidth.topDimen = top;
@@ -3089,8 +3135,8 @@ void JSViewPopups::ParseMenuOutlineWidthWithResourceObj(const RefPtr<ResourceObj
     if (bottomResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& outlineWidth) {
             CalcDimension bottom;
-            ResourceParseUtils::ParseResDimensionVp(resObj, bottom);
-            if (bottom.Unit() == DimensionUnit::PERCENT) {
+            if (!ResourceParseUtils::ParseResDimensionVp(resObj, bottom) ||
+                bottom.Unit() == DimensionUnit::PERCENT || bottom.IsNegative()) {
                 bottom.Reset();
             }
             outlineWidth.bottomDimen = bottom;
@@ -3202,5 +3248,158 @@ void JSViewPopups::ParseMenuOutlineColorWithResourceObj(const RefPtr<ResourceObj
         };
         outlineColor.AddResource("outlineColor.bottom", bottomColorResObj, std::move(updateFunc));
     }
+}
+
+bool JSViewPopups::ParseMenuPreviewBorderRadiusObject(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props)
+{
+    CalcDimension borderRadius;
+    RefPtr<ResourceObject> resObj;
+    if (!JSViewAbstract::ParseJsDimensionVpNG(args, borderRadius, resObj)) {
+        return false;
+    }
+    props.SetRadius(borderRadius);
+    props.multiValued = false;
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& props) {
+        CalcDimension radiusValue;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, radiusValue);
+        props.SetRadius(radiusValue);
+        props.multiValued = false;
+    };
+    props.AddResource("menu.borderRadius", resObj, std::move(updateFunc));
+    return true;
+}
+
+void JSViewPopups::SetBorderRadiusProps(
+    const CalcDimension& dim, NG::BorderRadiusProperty& props, const char* propName)
+{
+    if (dim.IsNegative() || propName == nullptr) {
+        return;
+    }
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (propName == BOTTOM_LEFT_PROPERTY) {
+        props.radiusBottomLeft = dim;
+    } else if (propName == BOTTOM_RIGHT_PROPERTY) {
+        props.radiusBottomRight = dim;
+    } else if (propName == TOP_LEFT_PROPERTY) {
+        props.radiusTopLeft = dim;
+    } else if (propName == TOP_RIGHT_PROPERTY) {
+        props.radiusTopRight = dim;
+    } else if (propName == TOP_START_PROPERTY || propName == TOP_END_PROPERTY) {
+        if (isRightToLeft) {
+            props.radiusTopRight = dim;
+            return;
+        }
+        props.radiusTopLeft = dim;
+    } else if (propName == BOTTOM_START_PROPERTY || propName == BOTTOM_END_PROPERTY) {
+        if (isRightToLeft) {
+            props.radiusBottomRight = dim;
+            return;
+        }
+        props.radiusBottomLeft = dim;
+    }
+}
+
+void JSViewPopups::ParseBorderRadiusProps(
+    const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props)
+{
+    CHECK_NULL_VOID(key);
+    if (!object->HasProperty(key)) {
+        return;
+    }
+    CalcDimension radius;
+    RefPtr<ResourceObject> resObj;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(key), radius, resObj)) {
+        SetBorderRadiusProps(radius, props, key);
+    }
+    if (!resObj) {
+        return;
+    }
+    auto&& updateFunc = [key](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& props) {
+        CalcDimension value;
+        if (ResourceParseUtils::ParseResDimensionVpNG(resObj, value)) {
+            SetBorderRadiusProps(value, props, key);
+        }
+    };
+    props.AddResource("menu.borderRadius." + std::string(key), resObj, std::move(updateFunc));
+}
+
+void CheckDimensionUnit(CalcDimension& checkDimension, bool notPercent)
+{
+    if (notPercent && checkDimension.Unit() == DimensionUnit::PERCENT) {
+        checkDimension.Reset();
+        return;
+    }
+}
+
+void JSViewPopups::ParseBorderRadiusPropsByLengthMetrics(
+    const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props)
+{
+    CHECK_NULL_VOID(key);
+    if (!object->HasProperty(key) || !object->GetProperty(key)->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> radiusObj = JSRef<JSObject>::Cast(object->GetProperty(key));
+    CalcDimension radius;
+    RefPtr<ResourceObject> resObj = nullptr;
+    if (JSViewAbstract::ParseJsLengthMetricsVpWithResObj(radiusObj, radius, resObj)) {
+        CheckDimensionUnit(radius, false);
+        SetBorderRadiusProps(radius, props, key);
+    }
+    if (!resObj) {
+        return;
+    }
+    auto unit = radius.Unit();
+    auto&& updateFunc = [unit, key](
+                            const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& props) {
+        CalcDimension value;
+        if (ResourceParseUtils::ParseResDimension(resObj, value, unit)) {
+            CheckDimensionUnit(value, false);
+            SetBorderRadiusProps(value, props, key);
+        }
+    };
+    props.AddResource("menu.borderRadius." + std::string(key), resObj, std::move(updateFunc));
+}
+
+void JSViewPopups::ParseMenuPreviewBorderRadiusMultiObject(
+    const JSRef<JSObject>& object, NG::BorderRadiusProperty& props)
+{
+    if (JSViewAbstract::CheckLengthMetrics(object)) {
+        ParseBorderRadiusPropsByLengthMetrics(BOTTOM_START_PROPERTY, object, props);
+        ParseBorderRadiusPropsByLengthMetrics(BOTTOM_END_PROPERTY, object, props);
+        ParseBorderRadiusPropsByLengthMetrics(TOP_START_PROPERTY, object, props);
+        ParseBorderRadiusPropsByLengthMetrics(TOP_END_PROPERTY, object, props);
+        return;
+    }
+    ParseBorderRadiusProps(TOP_LEFT_PROPERTY, object, props);
+    ParseBorderRadiusProps(TOP_RIGHT_PROPERTY, object, props);
+    ParseBorderRadiusProps(BOTTOM_LEFT_PROPERTY, object, props);
+    ParseBorderRadiusProps(BOTTOM_RIGHT_PROPERTY, object, props);
+}
+
+void JSViewPopups::ParseMenuPreviewBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius)
+{
+    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        if (ParseMenuPreviewBorderRadiusObject(args, radius)) {
+            return;
+        }
+        if (args->IsObject()) {
+            JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+            ParseMenuPreviewBorderRadiusMultiObject(object, radius);
+            radius.multiValued = true;
+            return;
+        }
+    }
+    CalcDimension borderRadius;
+    if (JSViewAbstract::ParseJsDimensionVpNG(args, borderRadius, true)) {
+        radius = NG::BorderRadiusProperty(borderRadius);
+        radius.multiValued = false;
+    } else if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        JSViewAbstract::ParseCommonBorderRadiusProps(object, radius, false);
+    }
+    return;
 }
 }

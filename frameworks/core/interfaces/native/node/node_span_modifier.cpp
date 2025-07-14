@@ -331,11 +331,13 @@ void ResetSpanLetterSpacing(ArkUINodeHandle node)
     }
 }
 
-void SetSpanBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+void SetSpanBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resourceRawPtr)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     SpanModelNG::SetBaselineOffset(uiNode, CalcDimension(value, (DimensionUnit)unit));
+    NodeModifier::ProcessResourceObj<CalcDimension>(
+        uiNode, "baselineOffset", CalcDimension(value, (DimensionUnit)unit), resourceRawPtr);
 }
 
 float GetSpanBaselineOffset(ArkUINodeHandle node)
@@ -350,6 +352,11 @@ void ResetSpanBaselineOffset(ArkUINodeHandle node)
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     SpanModelNG::SetBaselineOffset(uiNode, DEFAULT_BASELINE_OFFSET);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
+        CHECK_NULL_VOID(spanNode);
+        spanNode->UnregisterResource("baselineOffset");
+    }
 }
 
 void SetSpanFont(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo)

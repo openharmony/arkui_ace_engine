@@ -44,7 +44,6 @@ Ark_GestureGroupInterface OnCancelImpl(Ark_GestureGroupInterface peer,
     auto callback = [arkCallback = CallbackHelper(*event)]() {
         arkCallback.Invoke();
     };
-    // peer->gesture->SetOnActionCancelId(std::move(callback));
     return peer;
 }
 } // GestureGroupInterfaceAccessor

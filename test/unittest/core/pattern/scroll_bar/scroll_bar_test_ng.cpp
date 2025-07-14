@@ -1186,4 +1186,25 @@ HWTEST_F(ScrollBarTestNg, SetScrollBarColorTest, TestSize.Level1)
     // scrollBarModel.SetScrollBarColor(Color::FromString(SCROLLBAR_COLOR_BLUE));
     EXPECT_EQ(paintProperty->GetScrollBarColor()->GetValue(), Color::FromString(SCROLLBAR_COLOR_BLUE).GetValue());
 }
+
+/**
+ * @tc.name: SetScrollBarColorTest002
+ * @tc.desc: Test SetScrollBarColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, SetScrollBarColorTest002, TestSize.Level1)
+{
+    ScrollModelNG model;
+    model.Create();
+    model.SetAxis(Axis::FREE);
+    scrollNode_ = CreateMainFrameNode();
+    CHECK_NULL_VOID(scrollNode_);
+    scrollPattern_ = scrollNode_->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern_);
+
+    model.SetScrollBarColor(Color::BLUE);
+    auto scrollBar = scrollPattern_->GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+    EXPECT_EQ(scrollBar->GetForegroundColor(), Color::BLUE);
+}
 } // namespace OHOS::Ace::NG

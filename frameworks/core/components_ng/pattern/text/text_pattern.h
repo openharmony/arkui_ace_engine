@@ -180,7 +180,7 @@ public:
 
     void DumpAdvanceInfo() override;
     void DumpInfo() override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
@@ -408,6 +408,7 @@ public:
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     std::string GetFontInJson() const;
     std::string GetBindSelectionMenuInJson() const;
+    std::unique_ptr<JsonValue> GetShaderStyleInJson() const;
     virtual void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const {}
     std::string GetFontSizeWithThemeInJson(const std::optional<Dimension>& value) const;
 
@@ -866,18 +867,26 @@ public:
     RefPtr<TextEffect> GetOrCreateTextEffect(const std::u16string& content, bool& needUpdateTypography);
     void RelayoutResetOrUpdateTextEffect();
     void ResetTextEffect();
-    bool ResetTextEffectBeforeLayout();
+    bool ResetTextEffectBeforeLayout(bool onlyReset = true);
 
-    void HandleOnAskCelia();
-    
+    virtual void HandleOnAskCelia();
+
     void SetIsAskCeliaEnabled(bool isAskCeliaEnabled)
     {
-        isAskCeliaEnabled_ = isAskCeliaEnabled;
+        isAskCeliaEnabled_ = isAskCeliaEnabled && IsNeedAskCelia();
     }
     
     bool IsAskCeliaEnabled() const
     {
         return isAskCeliaEnabled_;
+    }
+    bool IsNeedAskCelia() const
+    {
+        // placeholder and symbol not support
+        auto start = GetTextSelector().GetTextStart();
+        auto end = GetTextSelector().GetTextEnd();
+        auto content = UtfUtils::Str16DebugToStr8(GetSelectedText(start, end));
+        return !std::regex_match(content, std::regex("^\\s*$"));
     }
     void UpdateTextSelectorSecondHandle(const RectF& rect)
     {
@@ -914,7 +923,7 @@ protected:
     void RecoverSelection();
     virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
-    Offset GetIndexByOffset(const Offset& pos, int32_t& extend);
+    void GetIndexByOffset(const Offset& pos, int32_t& extend);
     void StartVibratorByLongPress();
     void HandleLongPress(GestureEvent& info);
     void HandleClickEvent(GestureEvent& info);
@@ -1092,6 +1101,7 @@ private:
     void CollectTextSpanNodes(const RefPtr<SpanNode>& child, bool& isSpanHasClick, bool& isSpanHasLongPress);
     void UpdateContainerChildren(const RefPtr<UINode>& parent, const RefPtr<UINode>& child);
     RefPtr<RenderContext> GetRenderContext();
+    void UpdateRectForSymbolShadow(RectF& rect, float offsetX, float offsetY, float blurRadius) const;
     void ProcessBoundRectByTextShadow(RectF& rect);
     void FireOnSelectionChange(int32_t start, int32_t end);
     void FireOnMarqueeStateChange(const TextMarqueeState& state);

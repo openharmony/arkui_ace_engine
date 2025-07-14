@@ -37,6 +37,7 @@ public:
     static void SetDividerColor(FrameNode* frameNode, std::optional<Color> colorOpt, bool isSetByUser);
     static void SetDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, bool isSetByUser);
     static void SetVertical(FrameNode* frameNode, const bool& value);
+    static void ResetDividerColor(FrameNode* frameNode);
     static void ResetResObj(FrameNode* frameNode, const std::string& key);
 };
 } // namespace OHOS::Ace::NG

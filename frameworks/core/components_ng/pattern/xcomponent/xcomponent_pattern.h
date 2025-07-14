@@ -138,10 +138,13 @@ public:
         }
     }
 
-    std::string GetId() const
+    std::string GetId(FrameNode* frameNode = nullptr) const
     {
         if (id_.has_value()) {
             return id_.value();
+        }
+        if (frameNode) {
+            return "nodeId:" + std::to_string(frameNode->GetId());
         }
         auto host = GetHost();
         return "nodeId:" + (host ? std::to_string(host->GetId()) : "-1");
@@ -413,7 +416,7 @@ protected:
 
 private:
     void OnAreaChangedInner() override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
@@ -472,6 +475,9 @@ private:
     void RegisterTransformHintCallback(PipelineContext* context);
     void RegisterSurfaceRenderContext();
     void UnregisterSurfaceRenderContext();
+    std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(const RefPtr<FrameNode>& frameNode);
+    void RegisterNode();
+    void UnregisterNode();
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);

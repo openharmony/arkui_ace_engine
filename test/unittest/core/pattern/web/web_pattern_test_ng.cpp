@@ -515,8 +515,10 @@ HWTEST_F(WebPatternTestNg, InitDragEvent006, TestSize.Level1)
     WeakPtr<EventHub> eventHub = nullptr;
     RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_NE(gestureHub, nullptr);
+    MockPipelineContext::SetUp();
     bool rerult = webPattern->NotifyStartDragTask();
     EXPECT_TRUE(rerult);
+    MockPipelineContext::TearDown();
     webPattern->isDisableDrag_ = true;
     rerult = webPattern->NotifyStartDragTask();
     EXPECT_FALSE(rerult);
@@ -5037,6 +5039,66 @@ HWTEST_F(WebPatternTestNg, GetVisibleViewportAvoidHeight001, TestSize.Level1)
     webPattern->OnModifyDone();
     avoidHeight = webPattern->GetVisibleViewportAvoidHeight();
     EXPECT_EQ(avoidHeight, 0);
+#endif
+}
+
+/**
+ * @tc.name: HandleMouseEvent_003
+ * @tc.desc: HandleMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, HandleMouseEvent_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    MouseInfo info;
+    auto mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 1);
+
+    auto uiCallback = [](const std::shared_ptr<BaseEventInfo>& info) {};
+    webPattern->delegate_->OnNativeEmbedGestureEventV2_ = uiCallback;
+    info.SetButton(MouseButton::NONE_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 1);
+
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 2);
+    
+    info.SetAction(MouseAction::RELEASE);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 3);
+
+    info.SetAction(MouseAction::MOVE);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 3);
+
+    info.SetAction(MouseAction::PRESS);
+    webPattern->delegate_ = nullptr;
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 4);
 #endif
 }
 } // namespace OHOS::Ace::NG

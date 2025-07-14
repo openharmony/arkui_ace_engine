@@ -459,9 +459,6 @@ void NavDestinationLayoutAlgorithm::ReCalcNavDestinationSize(LayoutWrapper* layo
         size.AddWidth(padding.left.value_or(0.0f) + padding.right.value_or(0.0f));
         size.AddHeight(padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
     }
-    auto realSize = UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(size.Width(), size.Height()),
-        navDestinationLayoutProperty->GetCalcLayoutConstraint(),
-        navDestinationLayoutProperty->GetLayoutConstraint()->percentReference);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
+    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 } // namespace OHOS::Ace::NG

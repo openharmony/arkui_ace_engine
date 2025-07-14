@@ -91,43 +91,6 @@ export class FunctionTransformer extends AbstractVisitor {
         this.tracer.trace(msg)
     }
 
-
-/*
-// The context.compute rewrite with lambda
-
-function foo0(p1, p2) {
-    const ps1 = context.parState()
-    const ps2 = context.parState()
-    return context.compute(__contex, __id + "id", () => {
-        if (a) return "1"
-        return "2"
-        // body
-    })
-}
-
-// The lambda-less rewrite
-
-function foo1(p1, p2): R {
-    const scope = __context().scope<R>(__id() + "id", 2)
-    const ps1 = scope.param(0, p1, "name p1")
-    const ps2 = scope.param(1, p2, "name p2")
-    if (scope.unchanged) return scope.cached
-
-    // body
-    if (a) return scope.recache("1")
-    return scope.recache("2")
-}
-*/
-
-    // Given a function parameter
-    //
-    // /** @memo */
-    // function foo(width: number)
-    //
-    // produces a tracking state variable for it
-    //
-    // const __memo_state_width = context.param(width)
-    //
     parameterStateStatement(parameter: ts.ParameterDeclaration, parameterIndex: number): ts.Statement|undefined {
         if (!ts.isIdentifier(parameter.name)) return undefined
         const parameterNameString = ts.idText(parameter.name)

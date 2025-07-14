@@ -252,6 +252,11 @@ void NativeView::CreateRecycle(
     } else {
         node = view->CreateUI();
     }
+
+    auto customNodeBase = AceType::DynamicCast<NG::CustomNodeBase>(node);
+    if (customNodeBase) {
+        customNodeBase->SetReuseId(nodeName);
+    }
     auto* stack = NG::ViewStackProcessor::GetInstance();
     auto dummyNode = NG::RecycleDummyNode::WrapRecycleDummyNode(node, stack->GetRecycleNodeId());
     ViewStackModel::GetInstance()->Push(dummyNode, true);

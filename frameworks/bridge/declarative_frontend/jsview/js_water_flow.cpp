@@ -527,7 +527,7 @@ void JSWaterFlow::SetEdgeEffect(const JSCallbackInfo& info)
 
 void JSWaterFlow::SetSyncLoad(const JSCallbackInfo& info)
 {
-    bool syncLoad = false;
+    bool syncLoad = true;
     if (info.Length() >= 1) {
         auto value = info[0];
         if (value->IsBoolean()) {

@@ -45,8 +45,8 @@ public:
         return isShow_;
     }
 
-    static void CreatePreviewMenu(
-        TextDataDetectType type, const std::string& content, std::function<void()> disappearCallback);
+    static void CreatePreviewMenu(TextDataDetectType type, const std::string& content,
+        std::function<void()> disappearCallback = nullptr, std::map<std::string, std::string> AIparams = {});
 
 private:
     void CreateAIEntityMenu();
@@ -66,6 +66,10 @@ private:
         const std::string& content, std::function<void()>&& disappearCallback);
     std::function<void()> GetDisappearCallback();
     static std::function<void()> GetLinkingCallback(const std::string& appName);
+    static void CreateWantConfig(TextDataDetectType type, std::string& bundleName, std::string& abilityName,
+        std::map<std::string, std::string>& params, const std::map<std::string, std::string>& AIparams);
+    static void PreviewNodeClickCallback(TextDataDetectType type, const RefPtr<FrameNode>& previewNode,
+        const std::map<std::string, std::string>& AIparams);
 
     MenuParam menuParam_;
     std::function<void()> menuBuilder_ = nullptr;

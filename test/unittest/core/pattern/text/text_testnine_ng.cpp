@@ -16,9 +16,12 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "text_base.h"
+#include "ui/base/geometry/dimension.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/property/layout_constraint.h"
 
 namespace OHOS::Ace::NG {
 
@@ -837,7 +840,7 @@ HWTEST_F(TextTestNineNg, UpdateShaderStyle004, TestSize.Level1)
     multipleAlgorithm->UpdateShaderStyle(layoutProperty, textStyle);
     EXPECT_EQ(textStyle.GetColorShaderStyle().value(), Color::GREEN);
 }
- 
+
 /**
  * @tc.name: UpdateShaderStyle005
  * @tc.desc: Test UpdateShaderStyle.
@@ -868,6 +871,36 @@ HWTEST_F(TextTestNineNg, UpdateShaderStyle005, TestSize.Level1)
     layoutProperty->ResetGradientShaderStyle();
     auto gradientValue1 = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
     EXPECT_EQ(gradientValue1.GetLinearGradient(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateShaderStyle006
+ * @tc.desc: Test UpdateShaderStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, UpdateShaderStyle006, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test2", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    auto value = 5.0;
+    auto values = CalcDimension(value);
+    gradient.GetRadialGradient()->radialCenterX = values;
+    gradient.GetRadialGradient()->radialCenterY = values;
+    layoutProperty->UpdateGradientShaderStyle(gradient);
+
+    auto gradientValue = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    AnimatableDimension result(value);
+    ASSERT_NE(gradientValue.GetRadialGradient(), nullptr);
+    EXPECT_EQ(gradientValue.GetRadialGradient()->radialCenterX, result);
+    EXPECT_EQ(gradientValue.GetRadialGradient()->radialCenterY, result);
+    layoutProperty->ResetGradientShaderStyle();
+    auto gradientValue1 = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    EXPECT_EQ(gradientValue1.GetRadialGradient(), nullptr);
 }
 
 /**
@@ -930,6 +963,7 @@ HWTEST_F(TextTestNineNg, IsFixIdealSizeAndNoMaxSize, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
     auto ret = textLayoutAlgorithm->IsFixIdealSizeAndNoMaxSize(AccessibilityManager::RawPtr(layoutWrapper), true);
@@ -963,6 +997,7 @@ HWTEST_F(TextTestNineNg, MeasureWithMatchParent, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
     auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
     /**
@@ -978,5 +1013,61 @@ HWTEST_F(TextTestNineNg, MeasureWithMatchParent, TestSize.Level1)
     textLayoutAlgorithm->MeasureWithMatchParent(AceType::RawPtr(layoutWrapper));
     frameSize = geometryNode->GetFrameSize();
     EXPECT_EQ(frameSize, SizeF(100.0f, 100.0f));
+}
+
+/**
+ * @tc.name: CalcContentConstraint
+ * @tc.desc: Test CalcContentConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, CalcContentConstraint, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and Create function
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    /**
+     * @tc.steps: step2. call CalcContentConstraint.
+     */
+    LayoutConstraintF constraint;
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    auto newContentConstraint = textLayoutAlgorithm->CalcContentConstraint(constraint, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(newContentConstraint.maxSize.Width(), std::numeric_limits<double>::infinity());
+    EXPECT_EQ(newContentConstraint.maxSize.Height(), std::numeric_limits<double>::infinity());
+
+    MeasureProperty measureProp;
+    measureProp.maxSize = CalcSize(CalcLength(200.0f, DimensionUnit::PX), CalcLength(200.0f, DimensionUnit::PX));
+    measureProp.minSize = CalcSize(CalcLength(100.0f, DimensionUnit::PX), CalcLength(100.0f, DimensionUnit::PX));
+    layoutProperty->UpdateCalcLayoutProperty(measureProp);
+    LayoutConstraintF layoutConstraint;
+    layoutProperty->layoutConstraint_ = layoutConstraint;
+    newContentConstraint = textLayoutAlgorithm->CalcContentConstraint(constraint, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(newContentConstraint.maxSize.Width(), 200.0f);
+    EXPECT_EQ(newContentConstraint.maxSize.Height(), 200.0f);
+
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    constraint.parentIdealSize = OptionalSizeF(1000.0f, 2000.0f);
+    newContentConstraint = textLayoutAlgorithm->CalcContentConstraint(constraint, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(newContentConstraint.selfIdealSize.Width(), 1000.0f);
+    EXPECT_EQ(newContentConstraint.selfIdealSize.Height(), 2000.0f);
+
+    constraint.maxSize = SizeF(500.0f, 500.0f);
+    newContentConstraint = textLayoutAlgorithm->CalcContentConstraint(constraint, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(newContentConstraint.selfIdealSize.Width(), 500.0f);
+    EXPECT_EQ(newContentConstraint.selfIdealSize.Height(), 500.0f);
 }
 } // namespace OHOS::Ace::NG

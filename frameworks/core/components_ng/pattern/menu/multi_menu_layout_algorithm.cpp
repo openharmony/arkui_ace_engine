@@ -241,6 +241,34 @@ void MultiMenuLayoutAlgorithm::UpdateMenuDefaultConstraintByDevice(const RefPtr<
     }
 }
 
+void MultiMenuLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(
+    const RefPtr<LayoutWrapper>& childLayoutWrapper, OffsetF& translate, bool isEmbed, OffsetF& embedCorrect)
+{
+    CHECK_NULL_VOID(childLayoutWrapper);
+    auto childNode = childLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(childNode);
+    auto property = childNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    if (!property->IsIgnoreOptsValid()) {
+        return;
+    };
+    auto saeCorrect = translate;
+    IgnoreLayoutSafeAreaOpts& opts = *(property->GetIgnoreLayoutSafeAreaOpts());
+    auto sae = childNode->GetAccumulatedSafeAreaExpand(false, opts);
+    auto offsetX = sae.left.value_or(0.0f);
+    auto offsetY = sae.top.value_or(0.0f);
+    if (isEmbed) {
+        if (sae.left.has_value())
+            offsetX += embedCorrect.GetX();
+        if (sae.top.has_value())
+            offsetY += embedCorrect.GetY();
+    }
+    OffsetF saeTrans = OffsetF(offsetX, offsetY);
+    saeCorrect -= saeTrans;
+    childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(saeCorrect);
+    translate.AddY(-offsetY);
+}
+
 void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -258,14 +286,26 @@ void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     OffsetF translate(0.0f, 0.0f);
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    const auto& safeAreaPadding = layoutProperty->GetOrCreateSafeAreaPadding();
     auto outPadding = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
     if (!pattern->IsEmbedded()) {
         translate.AddX(padding.left.value_or(outPadding));
         translate.AddY(padding.top.value_or(outPadding));
+    } else {
+        translate.AddX(safeAreaPadding.left.value_or(0.0f));
+        translate.AddY(safeAreaPadding.top.value_or(0.0f));
     }
     // translate each option by the height of previous options
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
+        OffsetF embedCorrect(0.0f, 0.0f);
+        bool isEmbed = pattern->IsEmbedded();
+        if (isEmbed) {
+            embedCorrect.AddX(padding.left.value_or(0.0f) - safeAreaPadding.left.value_or(0.0f));
+            embedCorrect.AddY(padding.top.value_or(0.0f) - safeAreaPadding.top.value_or(0.0f));
+        }
+        UpdateChildPositionWidthIgnoreLayoutSafeArea(child, translate, isEmbed, embedCorrect);
+
         child->Layout();
         translate.AddY(child->GetGeometryNode()->GetMarginFrameSize().Height());
     }

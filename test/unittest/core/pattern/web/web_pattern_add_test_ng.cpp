@@ -38,7 +38,6 @@
 #include "nweb_date_time_chooser.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_spring_loading/drag_drop_spring_loading_detector.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -408,15 +407,6 @@ public:
         return size;
     }
     NWeb::DateTimeChooserType ret = NWeb::DateTimeChooserType::DTC_DATE;
-};
-
-class MockDragDropManager : public OHOS::Ace::NG::DragDropManager {
-    DECLARE_ACE_TYPE(MockDragDropManager, OHOS::Ace::NG::DragDropManager);
-public:
-    MockDragDropManager() : OHOS::Ace::NG::DragDropManager()
-    {
-        dragDropState_ = OHOS::Ace::NG::DragDropMgrState::DRAGGING;
-    }
 };
 
 /**
@@ -1192,8 +1182,12 @@ HWTEST_F(WebPatternAddTestNg, NotifyStartDragTask001, TestSize.Level1)
     RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_NE(gestureHub, nullptr);
     auto pipeline = MockPipelineContext::GetCurrentContext();
-    pipeline->dragDropManager_ = AceType::MakeRefPtr<MockDragDropManager>();
+    auto dragDropManager = pipeline->dragDropManager_;
+    dragDropManager->dragDropState_ = OHOS::Ace::NG::DragDropMgrState::DRAGGING;
     bool result = webPattern->NotifyStartDragTask(false);
+    EXPECT_FALSE(result);
+    pipeline->dragDropManager_ = nullptr;
+    result = webPattern->NotifyStartDragTask(false);
     EXPECT_FALSE(result);
 #endif
 }

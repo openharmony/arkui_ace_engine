@@ -50,9 +50,15 @@ void JSPath::Create(const JSCallbackInfo& info)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> commands = obj->GetProperty("commands");
         std::string strRet;
-        if (ParseJsString(commands, strRet)) {
-            PathModel::GetInstance()->SetCommands(strRet);
+        RefPtr<ResourceObject> commandsResObj;
+        if (!ParseJsString(commands, strRet, commandsResObj)) {
+            return;
         }
+        UnRegisterResource("PathCommands");
+        if (SystemProperties::ConfigChangePerform() && commandsResObj) {
+            RegisterResource<std::string>("PathCommands", commandsResObj, strRet);
+        }
+        PathModel::GetInstance()->SetCommands(strRet);
     }
 }
 
@@ -62,14 +68,20 @@ void JSPath::SetCommands(const JSCallbackInfo& info)
         return;
     }
 
+    UnRegisterResource("PathCommands");
     if (info[0]->IsUndefined()) {
         PathModel::GetInstance()->SetCommands("undefined");
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> commandsObj = JSRef<JSObject>::Cast(info[0]);
         std::string strRet;
-        if (ParseJsString(commandsObj, strRet)) {
-            PathModel::GetInstance()->SetCommands(strRet);
+        RefPtr<ResourceObject> commandsResObj;
+        if (!ParseJsString(commandsObj, strRet, commandsResObj)) {
+            return;
         }
+        if (SystemProperties::ConfigChangePerform() && commandsResObj) {
+            RegisterResource<std::string>("PathCommands", commandsResObj, strRet);
+        }
+        PathModel::GetInstance()->SetCommands(strRet);
     } else if (info[0]->IsString()) {
         PathModel::GetInstance()->SetCommands(info[0]->ToString());
     }

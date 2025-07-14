@@ -1013,6 +1013,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     if (itemPosition_.empty() || !IsOutOfBoundary() || !isScrollable_) {
         auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
+        userOffset = FireObserverOnWillScroll(userOffset);
         currentDelta_ = lastDelta + userOffset;
         return true;
     }
@@ -1028,6 +1029,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
 
     auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
+    userOffset = FireObserverOnWillScroll(userOffset);
     currentDelta_ = lastDelta + userOffset;
     MarkScrollBarProxyDirty();
     return true;

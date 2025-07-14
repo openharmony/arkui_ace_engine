@@ -609,6 +609,8 @@ HWTEST_F(TextPatternTestNg, RecoverCopyOption006, TestSize.Level1)
     textPattern->enabled_ = false;
     textPattern->dataDetectorAdapter_->aiDetectInitialized_ = true;
     textPattern->RecoverCopyOption();
+    GestureEvent info;
+    textPattern->HandleSingleClickEvent(info);
     EXPECT_EQ(textPattern->dataDetectorAdapter_->textForAI_, textPattern->textForDisplay_);
 }
 
@@ -735,13 +737,20 @@ HWTEST_F(TextPatternTestNg, HandleMouseLeftButton002, TestSize.Level1)
  */
 HWTEST_F(TextPatternTestNg, HandleMouseLeftButton003, TestSize.Level1)
 {
-    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    TextModelNG textModelNG;
+    textModelNG.Create(u"Hello World");
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    auto host = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(host, nullptr);
+    auto textPattern = host->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     MouseInfo info;
     Offset textOffset;
     info.action_ = MouseAction::RELEASE;
     textPattern->HandleMouseLeftButton(info, textOffset);
     EXPECT_EQ(textPattern->mouseStatus_, MouseStatus::RELEASED);
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate).WillOnce(Return(1));
 }
 
 /**

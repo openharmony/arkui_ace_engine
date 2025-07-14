@@ -1169,6 +1169,7 @@ HWTEST_F(BarStyleTestNg, SetToolbarOptions001, TestSize.Level1)
     navBarPattern->OnColorModeChange(1);
     EXPECT_NE(navBarNode->GetToolBarNode(), nullptr);
     auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
+    ASSERT_NE(toolbarNode, nullptr);
     auto toolBarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
     ASSERT_NE(toolBarPattern, nullptr);
     EXPECT_TRUE(toolBarPattern->options_.bgOptions.color.has_value());

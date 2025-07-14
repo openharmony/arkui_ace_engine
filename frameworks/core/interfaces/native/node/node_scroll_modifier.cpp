@@ -233,6 +233,10 @@ void SetScrollScrollable(ArkUINodeHandle node, ArkUI_Int32 scrollDirection)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (scrollDirection == ArkUI_ScrollDirection::ARKUI_SCROLL_DIRECTION_FREE) {
+        ScrollModelNG::SetAxis(frameNode, Axis::FREE);
+        return;
+    }
     ScrollModelNG::SetAxis(frameNode, static_cast<Axis>(scrollDirection));
 }
 
@@ -603,12 +607,150 @@ void CreateWithResourceObjFriction(ArkUINodeHandle node, void* resObj)
     ScrollModelNG::CreateWithResourceObjFriction(frameNode, AceType::Claim(resourceObj));
 }
 
-void CreateWithResourceObjSnapPaginations(ArkUINodeHandle node, void* resObjs)
+void CreateWithResourceObjSnap(ArkUINodeHandle node, const ArkUI_Float32* paginationValue, ArkUI_Int32 paginationSize,
+    const int32_t* paginationParam, void* resObjs)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+
+    std::vector<Dimension> snapPagination;
+    if (paginationSize > 0) {
+        auto isArray = false;
+        auto isArrayIndex = paginationSize + 3;
+        isArray = static_cast<bool>(paginationParam[isArrayIndex]);
+        if (isArray) {
+            for (auto i = 0; i < paginationSize; i++) {
+                auto pValue = paginationValue[i];
+                auto pUnit = static_cast<DimensionUnit>(paginationParam[i]);
+                CalcDimension dms = Dimension(pValue, pUnit);
+                snapPagination.push_back(dms);
+            }
+        }
+    }
+
     auto* resourceObj = reinterpret_cast<std::vector<RefPtr<ResourceObject>>*>(resObjs);
-    ScrollModelNG::CreateWithResourceObjSnapPaginations(frameNode, *resourceObj);
+    ScrollModelNG::CreateWithResourceObjIntervalSize(frameNode, *resourceObj);
+    ScrollModelNG::CreateWithResourceObjSnapPaginations(frameNode, snapPagination, *resourceObj);
+}
+
+void SetMaxZoomScale(ArkUINodeHandle node, ArkUI_Float32 scale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetMaxZoomScale(frameNode, scale);
+}
+
+void ResetMaxZoomScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetMaxZoomScale(frameNode, 1.0f);
+}
+
+ArkUI_Float32 GetMaxZoomScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    return ScrollModelNG::GetMaxZoomScale(frameNode);
+}
+
+void SetMinZoomScale(ArkUINodeHandle node, ArkUI_Float32 scale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetMinZoomScale(frameNode, scale);
+}
+
+void ResetMinZoomScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetMinZoomScale(frameNode, 1.0f);
+}
+
+ArkUI_Float32 GetMinZoomScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    return ScrollModelNG::GetMinZoomScale(frameNode);
+}
+
+void SetZoomScale(ArkUINodeHandle node, ArkUI_Float32 scale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetZoomScale(frameNode, scale);
+}
+
+void ResetZoomScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::ResetZoomScale(frameNode);
+}
+
+ArkUI_Float32 GetZoomScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    return ScrollModelNG::GetZoomScale(frameNode);
+}
+
+void SetEnableBouncesZoom(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetEnableBouncesZoom(frameNode, enable);
+}
+
+void ResetEnableBouncesZoom(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetEnableBouncesZoom(frameNode, true);
+}
+
+ArkUI_Bool GetEnableBouncesZoom(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    return ScrollModelNG::GetEnableBouncesZoom(frameNode);
+}
+
+void SetScrollOnDidZoom(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onDidZoom = reinterpret_cast<std::function<void(float)>*>(callback);
+        ScrollModelNG::SetOnDidZoom(frameNode, std::move(*onDidZoom));
+    } else {
+        ScrollModelNG::SetOnDidZoom(frameNode, nullptr);
+    }
+}
+
+void SetScrollOnZoomStart(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEnd = reinterpret_cast<std::function<void()>*>(callback);
+        ScrollModelNG::SetOnZoomStart(frameNode, std::move(*onEnd));
+    } else {
+        ScrollModelNG::SetOnZoomStart(frameNode, nullptr);
+    }
+}
+
+void SetScrollOnZoomStop(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEnd = reinterpret_cast<std::function<void()>*>(callback);
+        ScrollModelNG::SetOnZoomStop(frameNode, std::move(*onEnd));
+    } else {
+        ScrollModelNG::SetOnZoomStop(frameNode, nullptr);
+    }
 }
 } // namespace
 
@@ -686,7 +828,22 @@ const ArkUIScrollModifier* GetScrollModifier()
         .setScrollFling = SetScrollFling,
         .getScrollContentSize = GetScrollContentSize,
         .createWithResourceObjFriction = CreateWithResourceObjFriction,
-        .createWithResourceObjSnapPaginations = CreateWithResourceObjSnapPaginations,
+        .createWithResourceObjSnap = CreateWithResourceObjSnap,
+        .setMaxZoomScale = SetMaxZoomScale,
+        .resetMaxZoomScale = ResetMaxZoomScale,
+        .getMaxZoomScale = GetMaxZoomScale,
+        .setMinZoomScale = SetMinZoomScale,
+        .resetMinZoomScale = ResetMinZoomScale,
+        .getMinZoomScale = GetMinZoomScale,
+        .setZoomScale = SetZoomScale,
+        .resetZoomScale = ResetZoomScale,
+        .getZoomScale = GetZoomScale,
+        .setEnableBouncesZoom = SetEnableBouncesZoom,
+        .resetEnableBouncesZoom = ResetEnableBouncesZoom,
+        .getEnableBouncesZoom = GetEnableBouncesZoom,
+        .setScrollOnDidZoom = SetScrollOnDidZoom,
+        .setScrollOnZoomStart = SetScrollOnZoomStart,
+        .setScrollOnZoomStop = SetScrollOnZoomStop,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     /* clang-format on */
@@ -921,6 +1078,52 @@ void SetOnScrollReachEnd(ArkUINodeHandle node, void* extraParam)
     ScrollModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
 
+void SetOnDidZoom(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onDidZoom = [nodeId, node, extraParam](float scale) -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SCROLL_DID_ZOOM;
+        event.componentAsyncEvent.data[0].f32 = scale;
+        SendArkUISyncEvent(&event);
+    };
+    ScrollModelNG::SetOnDidZoom(frameNode, std::move(onDidZoom));
+}
+
+void SetOnZoomStart(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onZoomStart = [nodeId, node, extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SCROLL_ZOOM_START;
+        SendArkUISyncEvent(&event);
+    };
+    ScrollModelNG::SetOnZoomStart(frameNode, std::move(onZoomStart));
+}
+
+void SetOnZoomStop(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onZoomStop = [nodeId, node, extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SCROLL_ZOOM_STOP;
+        SendArkUISyncEvent(&event);
+    };
+    ScrollModelNG::SetOnZoomStop(frameNode, std::move(onZoomStop));
+}
+
 void ResetOnScroll(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -974,6 +1177,27 @@ void ResetOnScrollReachEnd(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ScrollModelNG::SetOnReachEnd(frameNode, nullptr);
+}
+
+void ResetOnDidZoom(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnDidZoom(frameNode, nullptr);
+}
+
+void ResetOnZoomStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnZoomStart(frameNode, nullptr);
+}
+
+void ResetOnZoomStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnZoomStop(frameNode, nullptr);
 }
 
 void SetScrollOnScrollStart(ArkUINodeHandle node, void* callback)

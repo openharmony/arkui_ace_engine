@@ -289,16 +289,14 @@ void XComponentPatternV2::InitSurface()
     }
     surfaceId_ = renderSurface_->GetUniqueId();
     if (type_ == XComponentType::SURFACE) {
-        XComponentInnerSurfaceController::RegisterSurfaceRenderContext(
-            surfaceId_, WeakPtr(renderContextForSurface_));
+        XComponentInnerSurfaceController::RegisterNode(surfaceId_, WeakPtr(host));
     }
 }
 
 void XComponentPatternV2::DisposeSurface()
 {
     if (type_ == XComponentType::SURFACE) {
-        XComponentInnerSurfaceController::UnregisterSurfaceRenderContext(
-            surfaceId_);
+        XComponentInnerSurfaceController::UnregisterNode(surfaceId_);
         surfaceId_ = "";
     }
     if (renderSurface_) {

@@ -155,6 +155,7 @@ private:
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<OHOS::Rosen::VsyncCallback> vsyncCallback_;
     bool isFirstRequestVsync_ = true;
+    bool directorFromWindow_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenWindow);
 };

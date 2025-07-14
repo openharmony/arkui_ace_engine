@@ -165,6 +165,16 @@ public:
         isModifierInitiatedBgColor_ = value;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void UpdateGradientColor(const NG::Gradient& gradient, bool isFirstLoad);
     void UpdateColor(const Color& color, bool isFirstLoad);
@@ -180,7 +190,7 @@ private:
     void OnModifyDone() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void OnLanguageConfigurationUpdate() override;
     void InitTouchEvent();
     void RemoveTouchEvent();

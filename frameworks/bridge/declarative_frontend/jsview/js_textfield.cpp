@@ -212,18 +212,16 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
     }
 
     TextFieldModel::GetInstance()->SetFocusableAndFocusNode();
-    if (placeholderResult && SystemProperties::ConfigChangePerform()) {
-        if (placeholderObject) {
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterResource("placeholder");
+        if (placeholderResult && placeholderObject) {
             RegisterResource<std::u16string>("placeholder", placeholderObject, placeholder);
-        } else {
-            UnregisterResource("placeholder");
         }
     }
-    if (textResult && SystemProperties::ConfigChangePerform()) {
-        if (textObject) {
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterResource("text");
+        if (textResult && textObject) {
             RegisterResource<std::u16string>("text", textObject, text);
-        } else {
-            UnregisterResource("text");
         }
     }
 }
@@ -264,18 +262,16 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
     }
 
     TextFieldModel::GetInstance()->SetFocusableAndFocusNode();
-    if (placeholderResult && SystemProperties::ConfigChangePerform()) {
-        if (placeholderObject) {
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterResource("placeholder");
+        if (placeholderResult && placeholderObject) {
             RegisterResource<std::u16string>("placeholder", placeholderObject, placeholder);
-        } else {
-            UnregisterResource("placeholder");
         }
     }
-    if (textResult && SystemProperties::ConfigChangePerform()) {
-        if (textObject) {
+    if (SystemProperties::ConfigChangePerform()) {
+        UnregisterResource("text");
+        if (textResult && textObject) {
             RegisterResource<std::u16string>("text", textObject, text);
-        } else {
-            UnregisterResource("text");
         }
     }
 }
@@ -380,16 +376,14 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
     }
 
     auto fontFamily = paramObject->GetProperty("family");
+    UnregisterResource("placeholderFontFamily");
     if (!fontFamily->IsNull()) {
         std::vector<std::string> fontFamilies;
         RefPtr<ResourceObject> resourceObject;
-        auto ret = ParseJsFontFamilies(fontFamily, fontFamilies, resourceObject);
-        if (ret) {
+        if (ParseJsFontFamilies(fontFamily, fontFamilies, resourceObject)) {
             font.fontFamilies = fontFamilies;
             if (SystemProperties::ConfigChangePerform() && resourceObject) {
                 RegisterResource<std::vector<std::string>>("placeholderFontFamily", resourceObject, fontFamilies);
-            } else {
-                UnregisterResource("placeholderFontFamily");
             }
         }
     }
@@ -498,6 +492,8 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    UnregisterResource("caretWidth");
+    UnregisterResource("caretColor");
     auto jsValue = info[0];
     if (jsValue->IsObject()) {
         CaretStyle caretStyle;
@@ -513,7 +509,6 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
         } else {
             CalcDimension width;
             RefPtr<ResourceObject> widthObject;
-            UnregisterResource("caretWidth");
             if (!ParseJsDimensionVpNG(caretWidth, width, widthObject, false)) {
                 width = theme->GetCursorWidth();
             }
@@ -534,7 +529,6 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
         } else {
             auto caretColorProp = paramObject->GetProperty("color");
             RefPtr<ResourceObject> colorObject;
-            UnregisterResource("caretColor");
             if (caretColorProp->IsUndefined() || caretColorProp->IsNull()
                 || !ParseJsColor(caretColorProp, caretColor, colorObject)) {
                 caretColor = theme->GetCursorColor();
@@ -1440,9 +1434,12 @@ void JSTextField::SetShowUnderline(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetShowUnderline(jsValue->ToBoolean());
 }
 
-void JSTextField::SetUnderlineColorObject(const JSRef<JSVal>& jsValue)
+void JSTextField::SetUnderlineColorObject(const JSRef<JSObject>& param)
 {
-    auto param = JSRef<JSObject>::Cast(jsValue);
+    UnregisterResource("underlineColorTyping");
+    UnregisterResource("underlineColorNormal");
+    UnregisterResource("underlineColorError");
+    UnregisterResource("underlineColorDisable");
     UserUnderlineColor userColor = UserUnderlineColor();
     auto typingColorProp = param->GetProperty("typing");
     Color typing;
@@ -1451,8 +1448,6 @@ void JSTextField::SetUnderlineColorObject(const JSRef<JSVal>& jsValue)
         userColor.typing = typing;
         if (SystemProperties::ConfigChangePerform() && typingObject) {
             RegisterResource<Color>("underlineColorTyping", typingObject, typing);
-        } else {
-            UnregisterResource("underlineColorTyping");
         }
     }
     auto normalColorProp = param->GetProperty("normal");
@@ -1462,8 +1457,6 @@ void JSTextField::SetUnderlineColorObject(const JSRef<JSVal>& jsValue)
         userColor.normal = normal;
         if (SystemProperties::ConfigChangePerform() && normalObject) {
             RegisterResource<Color>("underlineColorNormal", normalObject, normal);
-        } else {
-            UnregisterResource("underlineColorNormal");
         }
     }
     auto errorColorProp = param->GetProperty("error");
@@ -1473,8 +1466,6 @@ void JSTextField::SetUnderlineColorObject(const JSRef<JSVal>& jsValue)
         userColor.error = error;
         if (SystemProperties::ConfigChangePerform() && errorObject) {
             RegisterResource<Color>("underlineColorError", errorObject, error);
-        } else {
-            UnregisterResource("underlineColorError");
         }
     }
     auto disableColorProp = param->GetProperty("disable");
@@ -1484,8 +1475,6 @@ void JSTextField::SetUnderlineColorObject(const JSRef<JSVal>& jsValue)
         userColor.disable = disable;
         if (SystemProperties::ConfigChangePerform() && disableObject) {
             RegisterResource<Color>("underlineColorDisable", disableObject, disable);
-        } else {
-            UnregisterResource("underlineColorDisable");
         }
     }
     TextFieldModel::GetInstance()->SetUserUnderlineColor(userColor);
@@ -1507,7 +1496,7 @@ void JSTextField::SetUnderlineColor(const JSCallbackInfo& info)
             UnregisterResource("underlineColorNormal");
         }
     } else if (jsValue->IsObject()) {
-        SetUnderlineColorObject(jsValue);
+        SetUnderlineColorObject(JSRef<JSObject>::Cast(jsValue));
     } else {
         TextFieldModel::GetInstance()->SetUserUnderlineColor(UserUnderlineColor());
         if (SystemProperties::ConfigChangePerform()) {
@@ -1962,13 +1951,12 @@ void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
     // set icon color
     Color iconColor;
     RefPtr<ResourceObject> colorObject;
+    UnregisterResource("cancelButtonIconColor");
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() &&
         ParseJsColor(iconColorProp, iconColor, colorObject)) {
         if (SystemProperties::ConfigChangePerform() && colorObject) {
             RegisterResource<Color>("cancelButtonIconColor", colorObject, iconColor);
-        } else {
-            UnregisterResource("cancelButtonIconColor");
         }
         TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
         return;

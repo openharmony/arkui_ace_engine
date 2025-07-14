@@ -51,8 +51,10 @@ void SheetSideObject::DirtyLayoutProcess(const RefPtr<LayoutAlgorithmWrapper>& l
     if (sideSheetLayoutAlgorithm->GetSideSheetMaxWidth() > 0) {
         sheetMaxWidth_ = sideSheetLayoutAlgorithm->GetSideSheetMaxWidth();
         sheetWidth_ = sideSheetLayoutAlgorithm->GetSideSheetWidth();
-        pattern->SetCenterHeight(sideSheetLayoutAlgorithm->GetCenterHeight());
         pattern->SetSheetMaxHeight(sideSheetLayoutAlgorithm->GetSideSheetMaxHeight());
+    }
+    if (GreatNotEqual(sideSheetLayoutAlgorithm->GetSheetHeight(), 0.0f)) {
+        SetSheetHeight(sideSheetLayoutAlgorithm->GetSheetHeight());
     }
     UpdateDragBarStatus();
     UpdateSidePosition();
@@ -65,9 +67,9 @@ void SheetSideObject::UpdateDragBarStatus()
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
 
-    auto titleColumn = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_VOID(titleColumn);
-    auto sheetDragBar = AceType::DynamicCast<FrameNode>(titleColumn->GetFirstChild());
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto sheetDragBar = sheetPattern->GetDragBarNode();
     CHECK_NULL_VOID(sheetDragBar);
     auto dragBarLayoutProperty = sheetDragBar->GetLayoutProperty();
     CHECK_NULL_VOID(dragBarLayoutProperty);
@@ -88,7 +90,7 @@ void SheetSideObject::UpdateSidePosition()
     if (!sheetPattern->IsOnAppearing()
         && !sheetPattern->IsOnDisappearing() && !sheetPattern->IsDragging()) {
         sheetPattern->FireOnWidthDidChange();
-        sheetPattern->FireOnHeightDidChange();
+        FireHeightDidChange();
         bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
         if (!isRTL) {
             context->UpdateTransformTranslate({ sheetMaxWidth_ - sheetWidth_, 0.0f, 0.0f });
@@ -209,7 +211,7 @@ void SheetSideObject::InitAnimationForOverlay(bool isTransitionIn, bool isFirstT
             sheetPattern->GetBuilderInitHeight();
         }
         sheetPattern->FireOnTypeDidChange();
-        sheetPattern->FireOnHeightDidChange();
+        FireHeightDidChange();
         ACE_SCOPED_TRACE("Side Sheet starts the entrance animation");
     }
 }
@@ -587,18 +589,18 @@ void SheetSideObject::AvoidKeyboard(bool forceAvoid)
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetSafeAreaManager();
-    auto keyboradHeight = manager->GetKeyboardInset().Length();
-    if (sheetPattern->GetKeyboardHeight() == keyboradHeight && !forceAvoid) {
+    auto keyboardHeight = manager->GetKeyboardInset().Length();
+    if (sheetPattern->GetKeyboardHeight() == keyboardHeight && !forceAvoid) {
         return;
     }
-    sheetPattern->SetKeyboardHeight(keyboradHeight);
+    sheetPattern->SetKeyboardHeight(keyboardHeight);
     if (sheetPattern->GetDismissProcess()) {
         TAG_LOGD(AceLogTag::ACE_SHEET,
             "The sheet will disappear, so there's no need to handle canceling keyboard avoidance here.");
         return;
     }
     // 1.handle non upward logic: avoidKeyboardMode::RESIZE_ONLY or avoidKeyboardMode::TRANSLATE_AND_RESIZE
-    resizeDecreasedHeight_ = keyboradHeight;
+    resizeDecreasedHeight_ = keyboardHeight;
     auto heightUp = isCurrentFocus ? GetUpOffsetCaretNeed() : 0.0f;
     // 2.Side Sheet is not to handle upward logic
 
@@ -637,7 +639,7 @@ float SheetSideObject::GetUpOffsetCaretNeed()
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardHeight = manager->GetKeyboardInset().Length();
     if (keyboardHeight == 0) {
-        return 0.f;
+        return 0.0f;
     }
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipelineContext->GetTextFieldManager());
     // inputH : Distance from input component's Caret to bottom of screen
@@ -645,7 +647,7 @@ float SheetSideObject::GetUpOffsetCaretNeed()
     if (textFieldManager && !textFieldManager->GetOptionalClickPosition().has_value() &&
         !pipelineContext->UsingCaretAvoidMode()) {
         TAG_LOGD(AceLogTag::ACE_SHEET, "illegal caret position, don't calc height this time");
-        return .0f;
+        return 0.0f;
     }
     float inputH = textFieldManager ? (pipelineContext->GetRootHeight() -
         textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight()) : 0.f;
@@ -656,9 +658,21 @@ float SheetSideObject::GetUpOffsetCaretNeed()
     if (inputH >= inputMinH) {
         // Caret needs not up
         TAG_LOGD(AceLogTag::ACE_SHEET, "Caret witch in Sheet needs not up");
-        return .0f;
+        return 0.0f;
     }
     // The expected height of the Caret to be lifted
     return inputMinH - inputH;
+}
+
+void SheetSideObject::FireHeightDidChange()
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto preDidHeight = pattern->GetPreDidHeight();
+    if (NearEqual(preDidHeight, sheetHeight_)) {
+        return;
+    }
+    pattern->OnHeightDidChange(sheetHeight_);
+    pattern->SetPreDidHeight(sheetHeight_);
 }
 } // namespace OHOS::Ace::NG

@@ -65,6 +65,21 @@ public:
     virtual void InitScrollProps();
     ScrollResult HandleScrollWithSheet(float scrollOffset);
 
+    virtual uint32_t GetPanDirection() const
+    {
+        return PanDirection::VERTICAL;
+    }
+
+    virtual bool CheckIfNeedSetOuterBorderProp() const
+    {
+        return sheetType_ != SheetType::SHEET_POPUP;
+    }
+
+    virtual bool CheckIfNeedShadowByDefault() const
+    {
+        return true;
+    }
+
     void BindPattern(const WeakPtr<SheetPresentationPattern>& pattern)
     {
         auto patternPtr = pattern.Upgrade();
@@ -104,11 +119,6 @@ public:
         sheetWidth_ = other->sheetWidth_;
         sheetHeight_ = other->sheetHeight_;
     }
-
-    virtual uint32_t GetPanDirection()
-    {
-        return PanDirection::VERTICAL;
-    }
     
     virtual bool CheckIfUpdateObject(SheetType newType)
     {
@@ -119,6 +129,8 @@ public:
     {
         return true;
     }
+
+    virtual void FireHeightDidChange();
 
     void SetCurrentOffset(float value)
     {

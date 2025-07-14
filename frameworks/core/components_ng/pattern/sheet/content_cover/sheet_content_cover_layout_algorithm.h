@@ -42,12 +42,14 @@ public:
     void LayoutCloseIcon(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
     void LayoutScrollNode(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
 
+    float GetSheetHeight() const
+    {
+        return sheetHeight_;
+    }
 
 private:
     float sheetWidth_ = 0.0f;
     float sheetHeight_ = 0.0f;
-    float sheetOffsetX_ = 0.0f;
-    float sheetOffsetY_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 #endif // CORE_COMPONENTS_NG_PATTERN_SHEET_CONTENT_COVER_SHEET_CONTENT_COVER_LAYOUT_ALGORITHM_H

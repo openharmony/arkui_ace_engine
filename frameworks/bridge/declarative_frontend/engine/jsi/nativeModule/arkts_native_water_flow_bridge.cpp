@@ -492,7 +492,7 @@ ArkUINativeModuleValue WaterFlowBridge::SetSyncLoad(ArkUIRuntimeCallInfo* runtim
 
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
-    bool syncLoad = false;
+    bool syncLoad = true;
     if (!argSyncLoad->IsUndefined() && !argSyncLoad->IsNull()) {
         syncLoad = argSyncLoad->BooleaValue(vm);
     }

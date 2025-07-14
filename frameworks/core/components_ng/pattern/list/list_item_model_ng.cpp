@@ -30,7 +30,6 @@ void ListItemModelNG::Create(
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::LIST_ITEM_ETS_TAG, nodeId);
     if (deepRenderFunc) {
         auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
             CHECK_NULL_RETURN(deepRenderFunc, nullptr);
@@ -54,6 +53,7 @@ void ListItemModelNG::Create(
         }
         stack->Push(frameNode);
     } else {
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::LIST_ITEM_ETS_TAG, nodeId);
         auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
             [listItemStyle]() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, listItemStyle); });
         stack->Push(frameNode);

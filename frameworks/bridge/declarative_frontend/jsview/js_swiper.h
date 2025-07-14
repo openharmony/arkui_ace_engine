@@ -77,6 +77,8 @@ protected:
     static void SetPageFlipMode(const JSCallbackInfo& info);
     static void SetOnSelected(const JSCallbackInfo& info);
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resourceObj);
     static void GetAutoPlayOptionsInfo(const JSRef<JSObject>& obj, SwiperAutoPlayOptions& swiperAutoPlayOptions);
     static void SetIndicatorController(const JSCallbackInfo& info);
     static void ResetSwiperNode(const JSCallbackInfo& info);

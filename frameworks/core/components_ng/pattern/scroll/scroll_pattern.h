@@ -19,7 +19,9 @@
 #include "base/geometry/axis.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/pattern/scroll/free_scroll_controller.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_2d.h"
 #include "core/components_ng/pattern/scroll/scroll_accessibility_property.h"
 #include "core/components_ng/pattern/scroll/scroll_content_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
@@ -28,6 +30,7 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_paint_method.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scroll/zoom_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
@@ -244,15 +247,6 @@ public:
             scrollSnapUpdate_ = true;
         }
     }
-    void SetKeepSnapPaginations(const std::vector<Dimension>& snapPaginations)
-    {
-        keepSnapPaginations_ = snapPaginations;
-    }
-
-    std::vector<Dimension> GetKeepSnapPaginations()
-    {
-        return keepSnapPaginations_;
-    }
 
     std::vector<Dimension> GetSnapPaginations() const
     {
@@ -432,6 +426,7 @@ private:
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
     bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
     std::string GetScrollSnapPagination() const;
+    void OnColorModeChange(uint32_t colorMode) override;
 
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
@@ -444,37 +439,56 @@ private:
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
 
+    /* ============================= zoom Enhancements ============================= */
+public:
+    void SetMaxZoomScale(float scale);
+    float GetMaxZoomScale() const;
+    void SetMinZoomScale(float scale);
+    float GetMinZoomScale() const;
+    void SetZoomScale(std::optional<float> scale);
+    float GetZoomScale() const;
+    void UpdateZoomScale(float scale);
+    void SetEnableBouncesZoom(bool enable);
+    bool GetEnableBouncesZoom() const;
+    void ProcessZoomScale();
+    void SetChildScale(std::optional<float> scale);
+private:
+    void UpdatePinchGesture();
+    friend class ZoomController;
+    RefPtr<ZoomController> zoomCtrl_;
+    float maxZoomScale_ = 1.0f;
+    float minZoomScale_ = 1.0f;
+    std::optional<float> zoomScale_;
+    std::optional<float> childScale_;
+    float enableBouncesZoom_ = true;
+    /* ============================================================================== */
+
     /* ============================= Free Scroll Enhancements ============================= */
 public:
     /**
      * @return Pan gesture recognizer configured for Axis::FREE mode
      */
-    RefPtr<NGGestureRecognizer> GetOverrideRecognizer() const
+    RefPtr<NGGestureRecognizer> GetOverrideRecognizer();
+    RefPtr<ScrollBar2D> Get2DScrollBar() const
     {
-        if (freeScroll_) {
-            return freeScroll_->GetFreePanGesture();
-        }
-        return nullptr;
+        return scrollBar2d_;
     }
 
     Offset GetFreeScrollOffset() const final;
-
-    /**
-     * @brief triggers onWillScroll user callback
-     * @return user-modified delta
-     */
-    OffsetF FreeModeFireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const;
-
-    void FreeModeFireOnDidScroll(const OffsetF& delta, ScrollState state) const;
+    bool FreeScrollBy(const OffsetF& delta) final;
+    bool FreeScrollPage(bool reverse, bool smooth) final;
+    bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std::optional<float>& velocity) final;
+    void FreeScrollTo(const ScrollControllerBase::ScrollToParam& param) final;
 
 private:
+    RefPtr<ParallelRecognizer> gestureGroup_;
     RefPtr<FreeScrollController> freeScroll_;
+    RefPtr<ScrollBar2D> scrollBar2d_;
     /* ============================================================================== */
 
     // scrollSnap
     std::vector<float> snapOffsets_;
     std::vector<Dimension> snapPaginations_;
-    std::vector<Dimension> keepSnapPaginations_;
     std::pair<bool, bool> enableSnapToSide_ = { true, true };
     Dimension intervalSize_;
     bool scrollSnapUpdate_ = false;

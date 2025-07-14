@@ -43,7 +43,8 @@ ArkUINativeModuleValue ContainerSpanBridge::SetTextBackgroundStyle(ArkUIRuntimeC
         style);
     ArkTSUtils::SetTextBackgroundStyle(style, color, colorResObj, radiusArray.data(), valueUnits.data());
     GetArkUINodeModifiers()->getContainerSpanModifier()->setContainerSpanTextBackgroundStyle(nativeNode,
-        color.GetValue(), radiusArray.data(), valueUnits.data(), static_cast<int32_t>(radiusArray.size()));
+        color.GetValue(), radiusArray.data(), valueUnits.data(), static_cast<int32_t>(radiusArray.size()),
+        style.get());
     return panda::JSValueRef::Undefined(vm);
 }
 

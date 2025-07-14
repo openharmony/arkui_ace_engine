@@ -1203,11 +1203,49 @@ HWTEST_F(SwiperIndicatorModifierTestNg, AdjustPointCenterXForTouchBottom001, Tes
     paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
     paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
     paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    paintMethod->touchBottomPageRate_ = 0.2;
     pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
     paintMethod->AdjustPointCenterXForTouchBottom(
         pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex, selectedItemWidth, 0);
     EXPECT_EQ(pointCenter.startLongPointRightCenterX, endVectorBlackPointCenterX[0]);
     EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[0]);
+}
+
+/**
+ * @tc.name: AdjustPointCenterXForTouchBottomNew
+ * @tc.desc: Test AdjustPointCenterXForTouchBottomNew
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, AdjustPointCenterXForTouchBottomNew001, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    DotIndicatorPaintMethod::StarAndEndPointCenter pointCenter;
+    LinearVector<float> endVectorBlackPointCenterX;
+    for (int32_t i = 0; i < totalCount; ++i) {
+        endVectorBlackPointCenterX.emplace_back(static_cast<float>(i + 1));
+    }
+
+    int32_t endCurrentIndex = totalCount - 1;
+    float selectedItemWidth = 0.0f;
+
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    paintMethod->touchBottomPageRate_ = 0.2;
+    pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
+    paintMethod->touchBottomPageRate_ = 0;
+    EXPECT_TRUE(paintMethod->AdjustPointCenterXForTouchBottomNew(pointCenter, endVectorBlackPointCenterX,
+        endCurrentIndex, selectedItemWidth));
+
+    paintMethod->touchBottomPageRate_ = 0.2;
+    EXPECT_FALSE(paintMethod->AdjustPointCenterXForTouchBottomNew(pointCenter, endVectorBlackPointCenterX,
+        endCurrentIndex, selectedItemWidth));
 }
 
 /**
@@ -1971,6 +2009,47 @@ HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier012, TestSize.Level1
     dotIndicatorModifier.headCurve_ = AceType::MakeRefPtr<InterpolatingSpring>(0.1f, 0.1f, 0.1f, 0.1f);
     auto result = dotIndicatorModifier.GetLoopOpacityDuration();
     EXPECT_EQ(result, defaultOpacityAnimationDuration);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier013
+ * @tc.desc: Test PaintBackground and GetTouchBottomCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    LinearVector<float> vectorBlackPointCenterX;
+    for (float i = 0.0f; i <= 300.0f ; i += 10.0f) {
+        vectorBlackPointCenterX.emplace_back(i);
+    }
+    contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX;
+    LinearVector<float> itemHalfSizes = { 20.f, 30.f, 40.f, 50.f };
+
+    contentProperty.itemHalfSizes = itemHalfSizes;
+    DotIndicatorModifier dotIndicatorModifier;
+    contentProperty.backgroundColor.colorValue_.value = 0xff000000;
+    dotIndicatorModifier.backgroundWidthDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.225f);
+    dotIndicatorModifier.backgroundHeightDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.8f);
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, 100.f, 100.f };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DetachBrush()).Times(AtLeast(1)).WillRepeatedly(ReturnRef(canvas));
+    /**
+     * @tc.steps: step2.Call PaintBackground
+     * @tc.expected: The PaintBackground executed successfuly
+     */
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::START;
+    dotIndicatorModifier.isCustomSize_ = true;
+    dotIndicatorModifier.PaintBackground(context, contentProperty);
+
+    dotIndicatorModifier.axis_ = Axis::HORIZONTAL;
+    dotIndicatorModifier.PaintBackground(context, contentProperty);
 }
 
 /**

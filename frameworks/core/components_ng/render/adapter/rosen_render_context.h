@@ -241,7 +241,7 @@ public:
     void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) override;
     void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override;
     void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
-    void UpdateBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) override;
+    void UpdateBlender(const OHOS::Rosen::Blender* blender) override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
@@ -351,6 +351,7 @@ public:
 
     void ClearDrawCommands() override;
 
+    void RemoveOverlayModifier(const RefPtr<OverlayModifier>& modifier) override;
     void RemoveContentModifier(const RefPtr<ContentModifier>& modifier) override;
 
     void OpacityAnimation(const AnimationOption& option, double begin, double end) override;
@@ -375,7 +376,6 @@ public:
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyStagingProperties(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
@@ -443,6 +443,8 @@ public:
     void SetShadowRadius(float radius) override;
     void SetRenderFrameOffset(const OffsetF& offset) override;
     void SetScale(float scaleX, float scaleY) override;
+    void SetScrollScale(float scale) override;
+    void ResetScrollScale() override;
     void SetBackgroundColor(uint32_t colorValue) override;
     void SetRenderPivot(float pivotX, float pivotY) override;
     void SetFrame(float positionX, float positionY, float width, float height) override;
@@ -839,6 +841,7 @@ protected:
     std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> rotationZUserModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> cameraDistanceUserModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> scaleXYUserModifier_;
+    std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> scrollScaleModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSAlphaModifier> alphaUserModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSAlphaModifier> alphaModifier_;
     // translate modifiers for interruption
@@ -862,6 +865,7 @@ protected:
     std::shared_ptr<Rosen::RSRotationModifier> rotationZUserModifier_;
     std::shared_ptr<Rosen::RSCameraDistanceModifier> cameraDistanceUserModifier_;
     std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
+    std::shared_ptr<Rosen::RSScaleModifier> scrollScaleModifier_;
     std::shared_ptr<Rosen::RSAlphaModifier> alphaUserModifier_;
     std::shared_ptr<Rosen::RSAlphaModifier> alphaModifier_;
     // translate modifiers for interruption

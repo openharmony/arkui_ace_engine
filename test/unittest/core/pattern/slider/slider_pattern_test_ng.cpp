@@ -125,6 +125,9 @@ constexpr float PLAY_HAPTIC_FEEDBACK_RATIO_HALF = 0.5f;
 constexpr float PLAY_HAPTIC_FEEDBACK_RATIO_ZERO = 0.0f;
 const SliderModel::SliderShowStepOptions OPTIONS_MAP = {
     { 0, "step 0" }, { 50, "step 50" }, { 1, "step 1" }, { 8, "step 8" }, { 5, "step 5" }};
+constexpr float OUTSET_HOT_BLOCK_SHADOW_WIDTH = 20.0f;
+constexpr float INSET_HOT_BLOCK_SHADOW_WIDTH = 30.0f;
+constexpr float TRACK_THICKNESS = 40.0f;
 } // namespace
 class SliderPatternTestNg : public testing::Test {
 public:
@@ -375,11 +378,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest003, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
-    sliderTheme->outsetHotBlockShadowWidth_ = Dimension(20.0f);
-    sliderTheme->insetHotBlockShadowWidth_ = Dimension(30.0f);
+    sliderTheme->outsetHotBlockShadowWidth_ = Dimension(OUTSET_HOT_BLOCK_SHADOW_WIDTH);
+    sliderTheme->insetHotBlockShadowWidth_ = Dimension(INSET_HOT_BLOCK_SHADOW_WIDTH);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
-    sliderLayoutAlgorithm->trackThickness_ = 40.0f;
+    sliderLayoutAlgorithm->trackThickness_ = TRACK_THICKNESS;
 
     auto imageId = ElementRegister::GetInstance()->MakeUniqueId();
     sliderPattern->imageFrameNode_ =
@@ -499,6 +502,9 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest005, TestSize.Level1)
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
     sliderLayoutAlgorithm->trackThickness_ = SLIDER_INSET_TRACK_THICKNRESS.Value();
     sliderLayoutAlgorithm->blockSize_ = SizeF(SLIDER_INSET_BLOCK_SIZE.Value(), SLIDER_INSET_BLOCK_SIZE.Value());
+    sliderLayoutAlgorithm->blockHotSize_ = SizeF(SLIDER_INSET_BLOCK_SIZE.Value(), SLIDER_INSET_BLOCK_SIZE.Value());
+    sliderPattern->UpdateSliderParams(sliderLayoutAlgorithm->trackThickness_, sliderLayoutAlgorithm->blockSize_,
+        sliderLayoutAlgorithm->blockHotSize_);
     EXPECT_TRUE(sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false));
     EXPECT_EQ(sliderPattern->borderBlank_, SLIDER_INSET_TRACK_THICKNRESS.Value() * HALF + HOT_BLOCK_SHADOW_WIDTH);
 
@@ -509,6 +515,9 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest005, TestSize.Level1)
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::OUTSET);
     sliderLayoutAlgorithm->trackThickness_ = SLIDER_OUTSET_TRACK_THICKNRESS.Value();
     sliderLayoutAlgorithm->blockSize_ = SizeF(SLIDER_OUTSET_BLOCK_SIZE.Value(), SLIDER_OUTSET_BLOCK_SIZE.Value());
+    sliderLayoutAlgorithm->blockHotSize_ = SizeF(SLIDER_OUTSET_BLOCK_SIZE.Value(), SLIDER_OUTSET_BLOCK_SIZE.Value());
+    sliderPattern->UpdateSliderParams(sliderLayoutAlgorithm->trackThickness_, sliderLayoutAlgorithm->blockSize_,
+        sliderLayoutAlgorithm->blockHotSize_);
     EXPECT_TRUE(sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false));
     EXPECT_EQ(sliderPattern->borderBlank_,
         std::max(SLIDER_OUTSET_BLOCK_SIZE.Value(), SLIDER_OUTSET_TRACK_THICKNRESS.Value()) * HALF +
@@ -519,6 +528,10 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest005, TestSize.Level1)
      */
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::NONE);
     sliderLayoutAlgorithm->trackThickness_ = SLIDER_NONE_TRACK_THICKNRESS.Value();
+    sliderLayoutAlgorithm->blockSize_ = SizeF(SLIDER_OUTSET_BLOCK_SIZE.Value(), SLIDER_OUTSET_BLOCK_SIZE.Value());
+    sliderLayoutAlgorithm->blockHotSize_ = SizeF(SLIDER_OUTSET_BLOCK_SIZE.Value(), SLIDER_OUTSET_BLOCK_SIZE.Value());
+    sliderPattern->UpdateSliderParams(sliderLayoutAlgorithm->trackThickness_, sliderLayoutAlgorithm->blockSize_,
+        sliderLayoutAlgorithm->blockHotSize_);
     EXPECT_TRUE(sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false));
     EXPECT_EQ(sliderPattern->borderBlank_, 0);
 }

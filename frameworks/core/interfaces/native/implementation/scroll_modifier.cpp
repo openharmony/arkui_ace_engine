@@ -103,15 +103,6 @@ void SetScrollOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(scroller);
     RefPtr<ScrollControllerBase> positionController = ScrollModelNG::GetOrCreateController(frameNode);
-    // need check
-    // RefPtr<ScrollProxy> scrollBarProxy = ScrollModelNG::GetOrCreateScrollBarProxy(frameNode);
-
-    // auto abstPeerPtrOpt = Converter::OptConvert<Ark_Scroller>(*scroller);
-    // CHECK_NULL_VOID(abstPeerPtrOpt);
-    // auto peerImplPtr = abstPeerPtrOpt.value();
-    // CHECK_NULL_VOID(peerImplPtr);
-    // peerImplPtr->SetController(positionController);
-    // peerImplPtr->SetScrollBarProxy(scrollBarProxy);
 }
 } // ScrollInterfaceModifier
 namespace ScrollAttributeModifier {

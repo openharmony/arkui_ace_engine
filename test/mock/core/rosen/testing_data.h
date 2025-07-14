@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_DATA_H
 
 #include <cstddef>
-
+#include <memory>
 namespace OHOS::Ace::Testing {
 class TestingData {
 public:
@@ -35,6 +35,26 @@ public:
     }
 
     virtual void* GetData() const
+    {
+        return nullptr;
+    }
+
+    static std::shared_ptr<TestingData> MakeFromFileName(const char path[])
+    {
+        return std::make_shared<TestingData>();
+    }
+
+    virtual bool BuildFromMalloc(const void* data, size_t length)
+    {
+        return true;
+    }
+
+    virtual bool BuildUninitialized(size_t length)
+    {
+        return true;
+    }
+
+    virtual void* WritableData()
     {
         return nullptr;
     }

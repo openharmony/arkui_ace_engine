@@ -39,6 +39,7 @@ ohos_unittest("ui_input_event_test") {
     "oh_arkui_hoverevent_ishovered.cpp",
     "oh_arkui_mouseevent_getrawdeltax.cpp",
     "oh_arkui_mouseevent_getrawdeltay.cpp",
+    "oh_arkui_pointerevent_createclonedevent_test.cpp",
     "oh_arkui_pointerevent_gethistorypointerid_test.cpp",
     "oh_arkui_pointerevent_getpressedtimebyindex.cpp",
     "oh_arkui_pointerevent_gethistoryx_test.cpp",

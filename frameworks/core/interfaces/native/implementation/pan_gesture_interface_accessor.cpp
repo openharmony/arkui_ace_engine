@@ -81,7 +81,6 @@ Ark_PanGestureInterface OnActionCancelImpl(Ark_PanGestureInterface peer,
     auto onActionCancel = [arkCallback = CallbackHelper(*event)]() {
         arkCallback.Invoke();
     };
-    // peer->gesture->SetOnActionCancelId(std::move(onActionCancel));
     return peer;
 }
 } // PanGestureInterfaceAccessor

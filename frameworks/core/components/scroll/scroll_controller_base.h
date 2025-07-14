@@ -92,6 +92,21 @@ public:
     {
         return true;
     }
+
+    /* Free Scroll mode */
+    struct ScrollToParam {
+        Dimension xOffset;
+        Dimension yOffset;
+        float duration = 0.0f;
+        RefPtr<Curve> curve;
+        bool smooth = false;
+        bool canOverScroll = false;
+    };
+    virtual bool FreeScrollTo(const ScrollToParam& param)
+    {
+        return false;
+    }
+
     virtual void SetCanStayOverScroll(bool canStayOverScroll) {}
     virtual void ScrollBy(double pixelX, double pixelY, bool smooth) {}
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, float velocity) {}

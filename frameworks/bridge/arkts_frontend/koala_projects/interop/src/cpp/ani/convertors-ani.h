@@ -213,7 +213,6 @@ struct InteropTypeConverter<KInt*> {
     static KInt* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
       KInt* result = nullptr;
-      //env->Array_Pin(value, (void**)&result);
       ani_size length = 0;
       env->Array_GetLength(value, &length);
       KInt* data = new KInt[length];
@@ -227,7 +226,6 @@ struct InteropTypeConverter<KInt*> {
         env->Array_GetLength(value, &length);
         env->Array_SetRegion_Int(value, 0, length, (ani_int*)converted);
       }
-      //if (converted) env->Array_Unpin(value, converted);
       delete [] converted;
     }
 };
@@ -237,8 +235,6 @@ struct InteropTypeConverter<KFloat*> {
     using InteropType = ani_array_float;
     static KFloat* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
-      //KFloat* result = nullptr;
-      //env->Array_Pin(value, (void**)&result);
       ani_size length = 0;
       env->Array_GetLength(value, &length);
       KFloat* data = new KFloat[length];
@@ -252,7 +248,6 @@ struct InteropTypeConverter<KFloat*> {
         env->Array_GetLength(value, &length);
         env->Array_SetRegion_Float(value, 0, length, (ani_float*)converted);
       }
-      //if (converted) env->Array_Unpin(value, converted);
       delete [] converted;
     }
 };
@@ -262,8 +257,6 @@ struct InteropTypeConverter<KByte*> {
     using InteropType = ani_array_byte;
     static KByte* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
-      //KByte* result = nullptr;
-      //env->Array_Pin(value, (void**)&result);
       ani_size length = 0;
       env->Array_GetLength(value, &length);
       KByte* data = new KByte[length];
@@ -277,7 +270,6 @@ struct InteropTypeConverter<KByte*> {
         env->Array_GetLength(value, &length);
         env->Array_SetRegion_Byte(value, 0, length, (ani_byte*)converted);
       }
-      // if (converted) env->Array_Unpin(value, converted);
       delete[] converted;
     }
 };

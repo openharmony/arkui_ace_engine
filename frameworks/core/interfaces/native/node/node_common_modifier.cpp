@@ -3856,9 +3856,10 @@ void SetForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "foregroundColor");
+    ViewAbstractModelNG::RemoveResObj(frameNode, "foregroundColorStrategy");
     if (isColor) {
         if (SystemProperties::ConfigChangePerform() && fgColorRawPtr) {
-            ViewAbstractModelNG::RemoveResObj(frameNode, "foregroundColor");
             auto* fgColor = reinterpret_cast<ResourceObject*>(fgColorRawPtr);
             auto colorResObj = AceType::Claim(fgColor);
             ViewAbstract::SetForegroundColor(frameNode, Color(color), colorResObj);
@@ -3876,6 +3877,7 @@ void ResetForegroundColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::RemoveResObj(frameNode, "foregroundColor");
+    ViewAbstractModelNG::RemoveResObj(frameNode, "foregroundColorStrategy");
 }
 
 void SetMotionPath(ArkUINodeHandle node, ArkUI_CharPtr path, ArkUI_Float32 from, ArkUI_Float32 to, ArkUI_Bool rotatable)
@@ -6602,6 +6604,7 @@ void ResetOutline(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    SetOutlineRemoveResObj(frameNode);
     CalcDimension borderWidth;
     ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
     ViewAbstract::SetOuterBorderColor(frameNode, Color::BLACK);
@@ -8183,8 +8186,8 @@ void SetBlendModeByBlender(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    OHOS::Rosen::BrightnessBlender* brightnessBlender = reinterpret_cast<OHOS::Rosen::BrightnessBlender*>(blender);
-    ViewAbstractModelNG::SetBrightnessBlender(frameNode, brightnessBlender);
+    OHOS::Rosen::Blender* rsBlender = reinterpret_cast<OHOS::Rosen::Blender*>(blender);
+    ViewAbstractModelNG::SetBlender(frameNode, rsBlender);
     ViewAbstractModelNG::SetBlendApplyType(frameNode, static_cast<OHOS::Ace::BlendApplyType>(blendApplyTypeValue));
 }
 

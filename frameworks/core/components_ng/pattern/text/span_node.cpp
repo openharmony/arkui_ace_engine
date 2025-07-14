@@ -596,6 +596,7 @@ void SpanNode::UpdatePropertyImpl(
         DEFINE_SPAN_PROP_HANDLER(letterSpacing, CalcDimension, UpdateLetterSpacing),
         DEFINE_SPAN_PROP_HANDLER(decorationColor, Color, UpdateTextDecorationColor),
         DEFINE_SPAN_PROP_HANDLER(lineHeight, CalcDimension, UpdateLineHeight),
+        DEFINE_SPAN_PROP_HANDLER(baselineOffset, CalcDimension, UpdateBaselineOffset),
         DEFINE_SPAN_PROP_HANDLER(value, std::u16string, UpdateContent),
         DEFINE_SPAN_PROP_HANDLER(fontFamily, std::vector<std::string>, UpdateFontFamily),
     };

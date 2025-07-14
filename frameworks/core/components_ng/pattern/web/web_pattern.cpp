@@ -1792,6 +1792,21 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
+
+    auto button = static_cast<MouseButton>(info.GetButton());
+    bool isSupportMouse = button == MouseButton::LEFT_BUTTON
+        || button == MouseButton::RIGHT_BUTTON || button == MouseButton::MIDDLE_BUTTON;
+    if (delegate_ && delegate_->HasOnNativeEmbedGestureEventV2() && isSupportMouse) {
+        auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        if (info.GetAction() == MouseAction::PRESS) {
+            // start RecognizerDelay
+            gestureHub->SetRecognizerDelayStatus(RecognizerDelayStatus::START);
+        } else if (info.GetAction() == MouseAction::RELEASE) {
+            gestureHub->SetRecognizerDelayStatus(RecognizerDelayStatus::NONE);
+        }
+    }
+
     auto mouseEventCallback = eventHub->GetOnMouseEvent();
     CHECK_NULL_VOID(mouseEventCallback);
     mouseEventCallback(info);
@@ -2380,6 +2395,7 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     dragEvent_ = MakeRefPtr<DragEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->SetCustomDragEvent(dragEvent_, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetRecognizerDelayStatus(RecognizerDelayStatus::NONE);
 }
 
 void WebPattern::HandleDragStart(int32_t x, int32_t y)
@@ -2842,8 +2858,7 @@ void WebPattern::KeyboardReDispatch(
         }
     }
     if (keyEvent == webKeyEvent_.rend()) {
-        TAG_LOGW(AceLogTag::ACE_WEB,
-            "KeyEvent is not find keycode:%{public}d, action:%{public}d", event->GetKeyCode(), event->GetAction());
+        TAG_LOGW(AceLogTag::ACE_WEB, "KeyEvent is not find keycode");
         return;
     }
     if (!isUsed) {
@@ -2851,14 +2866,12 @@ void WebPattern::KeyboardReDispatch(
             event = *keyEvent] () {
             auto pipelineContext = context.Upgrade();
             CHECK_NULL_VOID(pipelineContext);
-            TAG_LOGD(AceLogTag::ACE_WEB,
-                "WebPattern::KeyboardReDispatch key:%{public}s", event.ToString().c_str());
+            TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::KeyboardReDispatch");
             pipelineContext->ReDispatch(const_cast<KeyEvent&>(event));
             },
             TaskExecutor::TaskType::UI, "ArkUIWebKeyboardReDispatch");
     }
-    TAG_LOGD(AceLogTag::ACE_WEB,
-        "WebPattern::KeyboardReDispatch erase key:%{public}s", keyEvent->ToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::KeyboardReDispatch erase key");
     webKeyEvent_.erase((++keyEvent).base());
 }
 
@@ -6885,6 +6898,7 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
             renderContext->ResetAccessibilityFocusRect();
             renderContext->UpdateAccessibilityFocus(false);
         } else {
+            renderContext->UpdateAccessibilityFocus(false);
             renderContext->UpdateAccessibilityFocusRect(rect);
             renderContext->UpdateAccessibilityFocus(true);
         }
@@ -8115,6 +8129,28 @@ void WebPattern::InitDataDetector()
     CHECK_NULL_VOID(webDataDetectorAdapter_);
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::InitDataDetector");
     webDataDetectorAdapter_->Init();
+}
+
+void WebPattern::InitAIDetectResult()
+{
+    if (!textDetectResult_.menuOptionAndAction.empty()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web InitAIDetectResult");
+    uiTaskExecutor.PostTask(
+        [weak = AceType::WeakClaim(this), instanceId = context->GetInstanceId()] {
+            ContainerScope scope(instanceId);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            TAG_LOGI(AceLogTag::ACE_WEB, "Get AI entity menu from ai_engine");
+            DataDetectorMgr::GetInstance().GetAIEntityMenu(pattern->textDetectResult_);
+        },
+        "ArkUITextInitDataDetect");
 }
 
 void WebPattern::CloseDataDetectorMenu()

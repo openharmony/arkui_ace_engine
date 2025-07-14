@@ -542,13 +542,18 @@ void JSText::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     JSRef<JSVal> args = info[0];
-    if (!ParseLengthMetricsToPositiveDimension(args, value)) {
+    UnRegisterResource("LineSpacing");
+    RefPtr<ResourceObject> resObj;
+    if (!ParseLengthMetricsToPositiveDimension(args, value, resObj)) {
         value.Reset();
     }
     if (value.IsNegative()) {
         value.Reset();
     }
     TextModel::GetInstance()->SetLineSpacing(value);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("LineSpacing", resObj, value);
+    }
     if (info.Length() < 2) { // 2 : two args
         TextModel::GetInstance()->SetIsOnlyBetweenLines(false);
         return;
@@ -874,6 +879,10 @@ void JSText::Create(const JSCallbackInfo& info)
     }
 
     RefPtr<TextControllerBase> controller = TextModel::GetInstance()->GetTextController();
+    if (!controller) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "JSText::Create controller is null");
+    }
+
     if (jsController) {
         jsController->SetController(controller);
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
@@ -1148,6 +1157,10 @@ void JSText::SetShaderStyle(const JSCallbackInfo& info)
 void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient)
 {
     CalcDimension value;
+    if (info.Length() < 1 || (info.Length() > 0 && !info[0]->IsObject())) {
+        TextModel::GetInstance()->ResetGradientShaderStyle();
+        return;
+    }
     auto shaderStyleObj = JSRef<JSObject>::Cast(info[0]);
     if (shaderStyleObj->HasProperty("center") && shaderStyleObj->HasProperty("radius")) {
         NewJsRadialGradient(info, gradient);
@@ -1155,6 +1168,11 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
     } else if (shaderStyleObj->HasProperty("colors")) {
         NewJsLinearGradient(info, gradient);
         TextModel::GetInstance()->SetGradientShaderStyle(gradient);
+    } else if (shaderStyleObj->HasProperty("color")) {
+        Color textColor;
+        auto infoColor = shaderStyleObj->GetProperty("color");
+        ParseJsColor(infoColor, textColor);
+        TextModel::GetInstance()->SetColorShaderStyle(textColor);
     } else {
         TextModel::GetInstance()->ResetGradientShaderStyle();
     }

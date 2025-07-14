@@ -91,22 +91,23 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         if (window && window->GetSurfaceNode()) {
             auto surfaceNode = window->GetSurfaceNode();
             rsUIDirector_->SetRSSurfaceNode(surfaceNode);
-            LOGI("ArkUI SetRSSurfaceNode %{public}llu", static_cast<unsigned long long>(surfaceNode->GetId()));
+            LOGI("SetRSSurfaceNode %{public}llu", static_cast<unsigned long long>(surfaceNode->GetId()));
         }
         rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
         rsUIDirector_->Init();
     } else {
         auto rsUIDirector = window->GetRSUIDirector();
         if (rsUIDirector) {
+            directorFromWindow_ = true;
             rsUIDirector_ = rsUIDirector;
         } else {
+            directorFromWindow_ = false;
             rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
         }
         if (window && window->GetSurfaceNode()) {
             auto surfaceNode = window->GetSurfaceNode();
             rsUIDirector_->SetRSSurfaceNode(surfaceNode);
-            LOGI("ArkUI SetRSSurfaceNode %{public}llu with rs multi",
-                static_cast<unsigned long long>(surfaceNode->GetId()));
+            LOGI("SetRSSurfaceNode %{public}llu with rs multi", static_cast<unsigned long long>(surfaceNode->GetId()));
         }
         rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
         rsUIDirector_->Init(true, true);
@@ -252,7 +253,9 @@ void RosenWindow::Destroy()
     rsWindow_ = nullptr;
     vsyncCallback_.reset();
     rsUIDirector_->SendMessages();
-    rsUIDirector_->Destroy();
+    if (!directorFromWindow_) {
+        rsUIDirector_->Destroy();
+    }
     rsUIDirector_.reset();
     callbacks_.clear();
 }
@@ -270,7 +273,7 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
     auto rootNode = rosenRenderContext->GetRSNode();
     if (rootNode) {
         CHECK_NULL_VOID(rsUIDirector_);
-        LOGI("Rosenwindow set root frame node, rsId:%{public}llu", static_cast<unsigned long long>(rootNode->GetId()));
+        LOGI("Rosenwindow set root, rsId:%{public}llu", static_cast<unsigned long long>(rootNode->GetId()));
         rsUIDirector_->SetRSRootNode(Rosen::RSNode::ReinterpretCast<Rosen::RSRootNode>(rootNode));
     }
 }

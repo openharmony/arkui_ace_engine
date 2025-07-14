@@ -1075,6 +1075,7 @@ void JSTextPickerParser::ParseTextStyle(
     Color textColor;
     if (ParseJsColor(fontColor, textColor, textStyle.textColorResObj)) {
         textStyle.textColor = textColor;
+        textStyle.textColorSetByUser = true;
     }
 
     ParseDefaultTextStyle(paramObj, textStyle);
@@ -1412,6 +1413,7 @@ void JSTextPicker::SetDivider(const JSCallbackInfo& info)
         ParseDivider(obj, divider);
     } else if (info.Length() >= 1 && info[0]->IsNull()) {
         divider.strokeWidth = 0.0_vp;
+        divider.isNull = true;
     }
 
     TextPickerModel::GetInstance()->SetDivider(divider);

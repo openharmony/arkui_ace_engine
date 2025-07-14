@@ -33,6 +33,8 @@ public:
     CalendarPickerPattern() : LinearLayoutPattern(false) {};
     ~CalendarPickerPattern() override = default;
 
+    void BeforeCreateLayoutWrapper() override;
+
     bool IsEnableMatchParent() override
     {
         return true;

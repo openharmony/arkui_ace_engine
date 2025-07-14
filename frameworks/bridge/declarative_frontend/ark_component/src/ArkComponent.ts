@@ -660,12 +660,14 @@ class ShadowModifier extends ModifierWithKey<ShadowOptions | ArkShadowStyle> {
     if (isNumber(this.value.shadowStyle)) {
       return true;
     }
-    return !((this.stageValue as ShadowOptions).radius === (this.value as ShadowOptions).radius &&
-      (this.stageValue as ShadowOptions).type === (this.value as ShadowOptions).type &&
-      (this.stageValue as ShadowOptions).color === (this.value as ShadowOptions).color &&
-      (this.stageValue as ShadowOptions).offsetX === (this.value as ShadowOptions).offsetX &&
-      (this.stageValue as ShadowOptions).offsetY === (this.value as ShadowOptions).offsetY &&
-      (this.stageValue as ShadowOptions).fill === (this.value as ShadowOptions).fill);
+    const stageValue = this.stageValue as ShadowOptions;
+    const value = this.value as ShadowOptions;
+    return !(isBaseOrResourceEqual(stageValue.radius, value.radius) &&
+      stageValue.type === value.type &&
+      isBaseOrResourceEqual(stageValue.color, value.color) &&
+      isBaseOrResourceEqual(stageValue.offsetX, value.offsetX) &&
+      isBaseOrResourceEqual(stageValue.offsetY, value.offsetY) &&
+      stageValue.fill === value.fill);
   }
 }
 
@@ -1326,7 +1328,7 @@ class OutlineModifier extends ModifierWithKey<OutlineOptions> {
           topColor = this.value.color;
           bottomColor = this.value.color;
         } else {
-          const localizedEdgeColors = this.value.color as LocalizedEdgeColors);
+          const localizedEdgeColors = this.value.color as LocalizedEdgeColors;
           if (localizedEdgeColors.start || localizedEdgeColors.end) {
             leftColor = localizedEdgeColors.start;
             rightColor = localizedEdgeColors.end;
@@ -1406,11 +1408,7 @@ class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle
   }
 
   checkObjectDiff(): boolean {
-    return !((this.stageValue as ArkForegroundBlurStyle).blurStyle === (this.value as ArkForegroundBlurStyle).blurStyle &&
-      (this.stageValue as ArkForegroundBlurStyle).colorMode === (this.value as ArkForegroundBlurStyle).colorMode &&
-      (this.stageValue as ArkForegroundBlurStyle).adaptiveColor === (this.value as ArkForegroundBlurStyle).adaptiveColor &&
-      (this.stageValue as ArkForegroundBlurStyle).scale === (this.value as ArkForegroundBlurStyle).scale &&
-      (this.stageValue as ArkForegroundBlurStyle).blurOptions === (this.value as ArkForegroundBlurStyle).blurOptions);
+    return true;
   }
 }
 
@@ -3005,7 +3003,7 @@ class BackgroundEffectModifier extends ModifierWithKey<BackgroundEffectOptions> 
       isBaseOrResourceEqual(this.stageValue.color, this.value.color) &&
       this.value.adaptiveColor === this.stageValue.adaptiveColor &&
       this.value.policy === this.stageValue.policy &&
-      this.value.inactiveColor === this.stageValue.inactiveColor &&
+      isBaseOrResourceEqual(this.stageValue.inactiveColor, this.value.inactiveColor) &&
       this.value.type === this.stageValue.type &&
       this.value.blurOptions?.grayscale === this.stageValue.blurOptions?.grayscale);
   }

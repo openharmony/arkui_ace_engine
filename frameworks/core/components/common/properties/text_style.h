@@ -123,31 +123,6 @@ enum class FontStyle {
     NONE
 };
 
-struct FontForegroudGradiantColor {
-    std::vector<NG::PointF> points;
-    std::vector<float> scalars;
-    std::vector<Color> colors;
-
-    bool IsValid() const
-    {
-        // 2 points including begin and end
-        return points.size() == 2 && scalars.size() == colors.size();
-    }
-
-    bool operator==(const FontForegroudGradiantColor& fontForegroudGradiantColor) const
-    {
-        auto isScalarEq = true;
-        if (scalars.size() != fontForegroudGradiantColor.scalars.size()) {
-            isScalarEq = false;
-        }
-        for (size_t i = 0; i < scalars.size() && isScalarEq; i++) {
-            isScalarEq = NearEqual(scalars[i], fontForegroudGradiantColor.scalars[i]);
-        }
-        return isScalarEq && (points == fontForegroudGradiantColor.points) &&
-               (colors == fontForegroudGradiantColor.colors);
-    }
-};
-
 enum class SuperscriptStyle {
     NORMAL,
     SUPERSCRIPT,
@@ -737,6 +712,88 @@ public:                                                                         
         advancedTextStyle_->Set##name(newValue);                                     \
     }
 
+#define ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE_WITH_FLAG(name, type, changeflag)  \
+    std::optional<type> Get##name() const                                               \
+    {                                                                                   \
+        CHECK_NULL_RETURN(advancedTextStyle_, std::nullopt);                            \
+        return advancedTextStyle_->Get##name();                                         \
+    }                                                                                   \
+    void Set##name(const type& newValue)                                                \
+    {                                                                                   \
+        if (!advancedTextStyle_) {                                                      \
+            advancedTextStyle_ = AceType::MakeRefPtr<AdvancedTextStyle>();              \
+        }                                                                               \
+        CHECK_NULL_VOID(advancedTextStyle_);                                            \
+        if (Has##name()) {                                                              \
+            if (NearEqual(advancedTextStyle_->Get##name().value(), newValue)) {         \
+                return;                                                                 \
+            }                                                                           \
+        }                                                                               \
+        advancedTextStyle_->Set##name(newValue);                                        \
+        auto flag = static_cast<int32_t>(changeflag);                                   \
+        if (GreatOrEqual(flag, 0)) {                                                    \
+            reLayoutParagraphStyleBitmap_.set(flag);                                    \
+        } else {                                                                        \
+            needReCreateParagraph_ = true;                                              \
+        }                                                                               \
+    }                                                                                   \
+    void Set##name(const std::optional<type> newValue)                                  \
+    {                                                                                   \
+        if (!advancedTextStyle_ && !newValue.has_value()) {                             \
+            return;                                                                     \
+        }                                                                               \
+        if (!advancedTextStyle_) {                                                      \
+            advancedTextStyle_ = AceType::MakeRefPtr<AdvancedTextStyle>();              \
+        }                                                                               \
+        CHECK_NULL_VOID(advancedTextStyle_);                                            \
+        if (!advancedTextStyle_->Get##name().has_value() && !newValue.has_value()) {    \
+            return;                                                                     \
+        }                                                                               \
+        if (Has##name() && newValue.has_value()) {                                      \
+            if (NearEqual(advancedTextStyle_->Get##name().value(), newValue.value())) { \
+                return;                                                                 \
+            }                                                                           \
+        }                                                                               \
+        advancedTextStyle_->Set##name(newValue);                                        \
+        auto flag = static_cast<int32_t>(changeflag);                                   \
+        if (GreatOrEqual(flag, 0)) {                                                    \
+            reLayoutParagraphStyleBitmap_.set(flag);                                    \
+        } else {                                                                        \
+            needReCreateParagraph_ = true;                                              \
+        }                                                                               \
+    }                                                                                   \
+    bool Has##name() const                                                              \
+    {                                                                                   \
+        CHECK_NULL_RETURN(advancedTextStyle_, false);                                   \
+        return advancedTextStyle_->Get##name().has_value();                             \
+    }                                                                                   \
+    const type& Get##name##Value(const type& defaultValue) const                        \
+    {                                                                                   \
+        if (!Has##name()) {                                                             \
+            return defaultValue;                                                        \
+        }                                                                               \
+        return advancedTextStyle_->Get##name().value();                                 \
+    }                                                                                   \
+    void Set##name##WithoutMark(const std::optional<type> newValue)                     \
+    {                                                                                   \
+        if (!advancedTextStyle_ && !newValue.has_value()) {                             \
+            return;                                                                     \
+        }                                                                               \
+        if (!advancedTextStyle_) {                                                      \
+            advancedTextStyle_ = AceType::MakeRefPtr<AdvancedTextStyle>();              \
+        }                                                                               \
+        CHECK_NULL_VOID(advancedTextStyle_);                                            \
+        if (!advancedTextStyle_->Get##name().has_value() && !newValue.has_value()) {    \
+            return;                                                                     \
+        }                                                                               \
+        if (Has##name() && newValue.has_value()) {                                      \
+            if (NearEqual(advancedTextStyle_->Get##name().value(), newValue.value())) { \
+                return;                                                                 \
+            }                                                                           \
+        }                                                                               \
+        advancedTextStyle_->Set##name(newValue);                                        \
+    }
+
 class ACE_EXPORT TextStyle final {
 public:
     TextStyle() = default;
@@ -820,17 +877,12 @@ public:
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         StrokeWidth, Dimension, Dimension(0.0f, DimensionUnit::PX), TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE(StrokeColor, Color, TextStyleAttribute::RE_CREATE);
-    ACE_DEFINE_TEXT_STYLE(ColorShaderStyle, std::optional<Color>, TextStyleAttribute::FOREGROUND_BRUSH);
+    ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(ColorShaderStyle, Color, TextStyleAttribute::FOREGROUND_BRUSH);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         Superscript, SuperscriptStyle, SuperscriptStyle::NORMAL, TextStyleAttribute::RE_CREATE);
 
-    // used for gradiant color
-    ACE_DEFINE_PARAGRAPH_STYLE(FontForegroudGradiantColor, FontForegroudGradiantColor,
-        TextStyleAttribute::RE_CREATE);
-
     // for Symbol
     ACE_DEFINE_SYMBOL_STYLE(RenderColors, std::vector<Color>, SymbolStyleAttribute::COLOR_LIST);
-    ACE_DEFINE_SYMBOL_STYLE(SymbolShadowProp, SymbolShadow, SymbolStyleAttribute::SYMBOL_SHADOW);
     ACE_DEFINE_SYMBOL_STYLE(GradientColorProp, std::vector<SymbolGradient>, SymbolStyleAttribute::GRADIENT_COLOR);
     ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(RenderStrategy, int32_t, 0, SymbolStyleAttribute::RENDER_MODE);
     ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(EffectStrategy, int32_t, 0, SymbolStyleAttribute::EFFECT_STRATEGY);
@@ -839,6 +891,9 @@ public:
     ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE(Gradient, Gradient);
 
 public:
+    ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE_WITH_FLAG(
+        FontForegroudGradiantColor, FontForegroudGradiantColor, TextStyleAttribute::RE_CREATE);
+
     void SetFontSize(const Dimension& fontSize)
     {
         auto actualValue = fontSize.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale(), IsAllowScale());
@@ -1104,7 +1159,7 @@ public:
 
     const std::optional<NG::SymbolEffectOptions> GetSymbolEffectOptions() const
     {
-        return symbolEffectOptions_;
+        return GetInnerSymbolEffectOptions();
     }
 
     std::string ToString() const;
@@ -1167,16 +1222,16 @@ public:
 
     void SetSymbolShadow(const SymbolShadow& symbolShadow)
     {
-        if (propSymbolShadowProp_ == symbolShadow) {
+        if (GetInnerSymbolShadowProp().has_value() && GetInnerSymbolShadowProp().value() == symbolShadow) {
             return;
         }
-        propSymbolShadowProp_ = symbolShadow;
+        SetInnerSymbolShadowProp(symbolShadow);
         reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::SYMBOL_SHADOW));
     }
 
     SymbolShadow GetSymbolShadow() const
     {
-        return propSymbolShadowProp_;
+        return GetInnerSymbolShadowProp().value_or(SymbolShadow());
     }
 
     void SetShaderStyle(const std::vector<SymbolGradient>& shaderStyle)
@@ -1198,6 +1253,10 @@ public:
     }
 
 private:
+    ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE_WITH_FLAG(
+        InnerSymbolEffectOptions, NG::SymbolEffectOptions, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE_WITH_FLAG(
+        InnerSymbolShadowProp, SymbolShadow, SymbolStyleAttribute::SYMBOL_SHADOW);
     std::bitset<static_cast<size_t>(TextStyleAttribute::MAX_TEXT_STYLE)> reLayoutTextStyleBitmap_;
     std::bitset<static_cast<size_t>(ParagraphStyleAttribute::MAX_TEXT_STYLE)> reLayoutParagraphStyleBitmap_;
     std::bitset<static_cast<size_t>(SymbolStyleAttribute::MAX_SYMBOL_STYLE)> reLayoutSymbolStyleBitmap_;
@@ -1219,8 +1278,6 @@ private:
     bool hasHeightOverride_ = false;
     bool adaptTextSize_ = false;
     bool adaptHeight_ = false; // whether adjust text size with height.
-    // for Symbol
-    std::optional<NG::SymbolEffectOptions> symbolEffectOptions_;
 
     RefPtr<AdvancedTextStyle> advancedTextStyle_;
 };

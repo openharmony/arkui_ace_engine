@@ -2246,6 +2246,16 @@ HWTEST_F(PinchRecognizerTestNg, TriggerGestureJudgeCallback001, TestSize.Level1)
     pinchRecognizerPtr->SetTargetComponent(targetComponent);
     EXPECT_NE(pinchRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::CONTINUE);
 
+    pinchRecognizerPtr->inputEventType_ = InputEventType::AXIS;
+    AxisEvent axisEvent;
+    pinchRecognizerPtr->lastAxisEvent_ = axisEvent;
+    EXPECT_EQ(pinchRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+
+    pinchRecognizerPtr->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    TouchEvent touchEvent;
+    pinchRecognizerPtr->lastTouchEvent_ = touchEvent;
+    EXPECT_EQ(pinchRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+
     RefPtr<PinchRecognizer> pinchRecognizerPtr2 =
         AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
     RefPtr<NG::TargetComponent> targetComponent2 = AceType::MakeRefPtr<NG::TargetComponent>();

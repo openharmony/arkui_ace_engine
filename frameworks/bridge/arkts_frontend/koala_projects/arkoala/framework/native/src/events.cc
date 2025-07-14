@@ -5,6 +5,7 @@
 #include "events.h"
 #include "common-interop.h"
 #include "interop-types.h"
+#include "securec.h"
 
 static std::deque<EventBuffer> eventQueue;
 
@@ -19,7 +20,10 @@ KInt impl_CheckArkoalaGeneratedEvents(KByte* result, KInt size) {
     if (!eventQueue.size())
         return 0;
 
-    memcpy(result, eventQueue.front().buffer, sizeof(EventBuffer::buffer));
+    if (memcpy_s(result, sizeof(EventBuffer::buffer), eventQueue.front().buffer,
+        sizeof(EventBuffer::buffer)) != 0) {
+        return 0;
+    }
     eventQueue.pop_front();
     return 1;
 }
@@ -30,7 +34,9 @@ KInt impl_InjectEvent(KByte* data, KInt size) {
         return 0;
 
     EventBuffer event;
-    memcpy(event.buffer, data, size);
+    if (memcpy_s(event.buffer, sizeof(EventBuffer::buffer), data, size) != 0) {
+        return 0;
+    }
 
     sendEvent(&event);
     return 1;
@@ -38,14 +44,4 @@ KInt impl_InjectEvent(KByte* data, KInt size) {
 KOALA_INTEROP_2(InjectEvent, KInt, KByte*, KInt)
 
 void impl_EmulateTextInputEvent(KInt nodeId, const KStringPtr& text) {
-    /*
-    Ark_String str {
-        .chars = text.c_str(),
-        .length = static_cast<Ark_Int32>(text.length())
-    };
-    Opt_PreviewText preview;
-    preview.tag = ARK_TAG_UNDEFINED;
-    GetFullImpl()->getEventsAPI()->getTextInputEventsReceiver()->onChange(nodeId, str, preview);
-    */
 }
-// KOALA_INTEROP_V2(EmulateTextInputEvent, KInt, KStringPtr) // TODO Where to place it?

@@ -26,10 +26,12 @@ void NodeContent::AttachToNode(UINode* node)
         DetachFromNode();
     }
     nodeSlot_ = WeakClaim(node);
+    std::list<RefPtr<NG::UINode>> nodes;
     for (const auto& child : children_) {
         node->AddChild(child);
-        BuilderUtils::AddBuilderToParent(Claim(node), child);
+        BuilderUtils::GetBuilderNodes(child, nodes);
     }
+    BuilderUtils::AddBuilderToParent(Claim(node), nodes);
     node->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     if (node->IsOnMainTree()) {
         OnAttachToMainTree();
@@ -43,9 +45,11 @@ void NodeContent::DetachFromNode()
     if (slot) {
         children_ = slot->GetChildren();
         slot->Clean();
+        std::list<RefPtr<NG::UINode>> nodes;
         for (const auto& child : children_) {
-            BuilderUtils::RemoveBuilderFromParent(slot, child);
+            BuilderUtils::GetBuilderNodes(child, nodes);
         }
+        BuilderUtils::RemoveBuilderFromParent(slot, nodes);
         if (slot->IsOnMainTree()) {
             OnDetachFromMainTree();
         }

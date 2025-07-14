@@ -153,6 +153,11 @@ public:
     {
         return false;
     };
+
+    virtual void RegisterPipeLineExeAppAIFunction(
+        std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) {};
+    virtual void ExeAppAIFunction(const std::string& funcName, const std::string& params) {};
+    virtual void SendExeAppAIFunctionResult(uint32_t result) {};
 protected:
     static std::mutex mutex_;
     static std::shared_mutex reportObjectMutex_;
@@ -179,6 +184,7 @@ protected:
     static std::shared_mutex translateManagerMutex_;
     std::function<std::string()> pipelineContextPageNameCallback_;
     SendCommandFunction sendCommandFunction_ = 0;
+    std::function<uint32_t(const std::string& funcName, const std::string& params)> pipelineExeAppAIFunctionCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H

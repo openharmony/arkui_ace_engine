@@ -345,13 +345,14 @@ public:
     static RefPtr<Container> GetContainer(int32_t containerId);
     static RefPtr<Container> GetActive();
     static RefPtr<Container> GetDefault();
-    static RefPtr<Container> GetFoucsed();
+    static RefPtr<Container> GetFocused();
     static RefPtr<Container> GetByWindowId(uint32_t windowId);
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
     static void UpdateCurrent(int32_t id);
     static ColorMode CurrentColorMode();
+    static std::string CurrentBundleName();
 
     void SetUseNewPipeline()
     {

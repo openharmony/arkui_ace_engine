@@ -41,6 +41,7 @@ public:
     bool PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEvent&& mouseEvent);
     bool PostAxisEvent(const RefPtr<NG::UINode>& uiNode, AxisEvent&& axisEvent);
     void SetPassThroughResult(bool passThroughResult);
+    RefPtr<FrameNode> GetPostTargetNode();
 
 private:
     bool CheckPointValidity(const TouchEvent& touchEvent);
@@ -59,6 +60,7 @@ private:
     std::list<PostEventAction> postEventAction_;
     std::list<PostEventAction> postInputEventAction_;
     std::map<int32_t, PostEventAction> lastEventMap_;
+    WeakPtr<FrameNode> targetNode_;
     bool passThroughResult_ = false;
 };
 } // namespace OHOS::Ace::NG

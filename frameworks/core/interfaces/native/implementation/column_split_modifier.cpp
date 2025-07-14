@@ -28,20 +28,6 @@ struct DividerOptions {
 }
 }
 namespace OHOS::Ace::NG::Converter {
-// template<>
-// ColumnSplitDivider Convert(const Ark_ColumnSplitDividerStyle& src)
-// {
-//     ColumnSplitDivider divider;
-//     auto margin = OptConvert<Dimension>(src.startMargin);
-//     if (margin.has_value()) {
-//         divider.startMargin = margin.value();
-//     }
-//     margin = OptConvert<Dimension>(src.endMargin);
-//     if (margin.has_value()) {
-//         divider.endMargin = margin.value();
-//     }
-//     return divider;
-// }
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColumnSplitModifier {

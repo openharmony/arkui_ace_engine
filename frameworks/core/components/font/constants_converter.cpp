@@ -560,7 +560,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         brush.SetColor(textStyle.GetTextColor().GetValue());
         txtStyle.foregroundBrush = brush;
     }
-    if (textStyle.GetColorShaderStyle().has_value() && textStyle.GetStrokeWidth().Value() >= DEFAULT_STROKE_WIDTH) {
+    if (textStyle.GetColorShaderStyle().has_value() && textStyle.GetStrokeWidth().Value() == DEFAULT_STROKE_WIDTH) {
         RSBrush brush;
         auto shaderEffect =
             RSRecordingShaderEffect::CreateColorShader(textStyle.GetColorShaderStyle().value().GetValue());
@@ -599,7 +599,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtStyle.fontFeatures = features;
     }
 
-    auto gradiantColor = textStyle.GetFontForegroudGradiantColor();
+    auto gradiantColor = textStyle.GetFontForegroudGradiantColor().value_or(FontForegroudGradiantColor());
     if (gradiantColor.IsValid()) {
         ConvertGradiantColor(textStyle, context, txtStyle, gradiantColor);
     }
@@ -674,7 +674,7 @@ NG::Gradient ToGradient(const Gradient& gradient)
 
 void ConvertForegroundPaint(const TextStyle& textStyle, double width, double height, Rosen::TextStyle& txtStyle)
 {
-    if (!textStyle.GetGradient().has_value()) {
+    if (!textStyle.GetGradient().has_value() || textStyle.GetStrokeWidth().Value() != DEFAULT_STROKE_WIDTH) {
         return;
     }
     txtStyle.textStyleUid = static_cast<unsigned long>(textStyle.GetTextStyleUid());
@@ -840,7 +840,7 @@ std::shared_ptr<Rosen::SymbolGradient> CreateNativeGradient(const SymbolGradient
             return gradient;
         }
         case SymbolGradientType::LINEAR_GRADIENT: {
-            auto gradient = std::make_shared<Rosen::SymbolLineGradient>(grad.angle.value());
+            auto gradient = std::make_shared<Rosen::SymbolLineGradient>(grad.angle.value_or(0.0f));
             gradient->SetColors(ConvertColors(grad.symbolColor));
             gradient->SetPositions(grad.symbolOpacities);
             gradient->SetTileMode(grad.repeating ?
@@ -848,9 +848,19 @@ std::shared_ptr<Rosen::SymbolGradient> CreateNativeGradient(const SymbolGradient
             return gradient;
         }
         case SymbolGradientType::RADIAL_GRADIENT: {
-            Rosen::Drawing::Point centerPt(grad.center.x, grad.center.y);
-            auto gradient = std::make_shared<Rosen::SymbolRadialGradient>(centerPt, grad.radius);
-            gradient->SetRadius(grad.radius);
+            auto getCoord = [](const std::optional<Dimension>& dim) {
+                if (!dim) return Dimension(0.0).ConvertToPx();
+                return dim->Unit() == DimensionUnit::PERCENT ? dim->Value() : dim->ConvertToPx();
+            };
+            Rosen::Drawing::Point centerPt(
+                static_cast<float>(getCoord(grad.radialCenterX)),
+                static_cast<float>(getCoord(grad.radialCenterY))
+            );
+            auto gradient = std::make_shared<Rosen::SymbolRadialGradient>
+                            (centerPt, grad.radius.value_or(Dimension(0.0)).Value());
+            if (grad.radius.has_value() && grad.radius.value().Unit() != DimensionUnit::PERCENT) {
+                gradient->SetRadius(static_cast<float>(grad.radius.value().ConvertToPx()));
+            }
             gradient->SetColors(ConvertColors(grad.symbolColor));
             gradient->SetPositions(grad.symbolOpacities);
             gradient->SetTileMode(grad.repeating ?

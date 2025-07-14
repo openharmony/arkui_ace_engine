@@ -627,33 +627,6 @@ void ParseJsLengthMetricsToDimension(const JSRef<JSObject>& obj, Dimension& resu
     return;
 }
 
-bool CheckLengthMetrics(const JSRef<JSObject>& object)
-{
-    if (object->HasProperty(static_cast<int32_t>(ArkUIIndex::START)) ||
-        object->HasProperty(static_cast<int32_t>(ArkUIIndex::END)) ||
-        object->HasProperty(static_cast<int32_t>(ArkUIIndex::TOP_START)) ||
-        object->HasProperty(static_cast<int32_t>(ArkUIIndex::TOP_END)) ||
-        object->HasProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM_START)) ||
-        object->HasProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM_END))) {
-        return true;
-    }
-    auto jsTop = object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
-    if (jsTop->IsObject()) {
-        JSRef<JSObject> topObj = JSRef<JSObject>::Cast(jsTop);
-        if (topObj->HasProperty(static_cast<int32_t>(ArkUIIndex::VALUE))) {
-            return true;
-        }
-    }
-    auto jsBottom = object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM));
-    if (jsBottom->IsObject()) {
-        JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(jsBottom);
-        if (bottomObj->HasProperty(static_cast<int32_t>(ArkUIIndex::VALUE))) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool ParseLocalizedEdges(const JSRef<JSObject>& LocalizeEdgesObj, EdgesParam& edges)
 {
     bool useLocalizedEdges = false;
@@ -1553,7 +1526,7 @@ void ParseLocalizedEdgeWidthsProps(const JSRef<JSObject>& object, LocalizedCalcD
 
 bool ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension, bool notNegative)
 {
-    if (CheckLengthMetrics(object)) {
+    if (JSViewAbstract::CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseLocalizedEdgeWidths(object, localizedCalcDimension, notNegative);
         commonCalcDimension.top = localizedCalcDimension.top;
@@ -1570,7 +1543,7 @@ bool ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& c
 
 bool ParseCommonEdgeWidthsForDashParams(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
-    if (CheckLengthMetrics(object)) {
+    if (JSViewAbstract::CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseLocalizedEdgeWidths(object, localizedCalcDimension, false);
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -1586,7 +1559,7 @@ bool ParseCommonEdgeWidthsForDashParams(const JSRef<JSObject>& object, CommonCal
 
 void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
-    if (CheckLengthMetrics(object)) {
+    if (JSViewAbstract::CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseLocalizedEdgeWidthsProps(object, localizedCalcDimension);
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -2737,6 +2710,10 @@ void JSViewAbstract::JsSize(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
 {
+    ViewAbstractModel::GetInstance()->ResetResObj("constraintSize.minWidth");
+    ViewAbstractModel::GetInstance()->ResetResObj("constraintSize.maxWidth");
+    ViewAbstractModel::GetInstance()->ResetResObj("constraintSize.minHeight");
+    ViewAbstractModel::GetInstance()->ResetResObj("constraintSize.maxHeight");
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsConstraintSize", jsVal, checkList)) {
@@ -4483,9 +4460,12 @@ bool JSViewAbstract::ParseCommonMarginOrPaddingCorner(
 
 void JSViewAbstract::JsOutline(const JSCallbackInfo& info)
 {
-    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderWidth");
+    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderWidthRes");
     ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderColorRes");
     ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderRadiusRes");
+    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderWidth");
+    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderColor");
+    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderRadius");
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsOutline", jsVal, checkList)) {
@@ -4521,6 +4501,7 @@ void JSViewAbstract::JsOutline(const JSCallbackInfo& info)
 void JSViewAbstract::JsOutlineWidth(const JSCallbackInfo& info)
 {
     ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderWidth");
+    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderWidthRes");
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
@@ -4534,12 +4515,14 @@ void JSViewAbstract::JsOutlineWidth(const JSCallbackInfo& info)
 void JSViewAbstract::JsOutlineColor(const JSCallbackInfo& info)
 {
     ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderColorRes");
+    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderColor");
     ParseOuterBorderColor(info[0]);
 }
 
 void JSViewAbstract::JsOutlineRadius(const JSCallbackInfo& info)
 {
     ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderRadius");
+    ViewAbstractModel::GetInstance()->RemoveResObj("outerBorderRadiusRes");
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
@@ -6985,10 +6968,17 @@ void JSViewAbstract::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& res
         resObj = nullptr;
         return;
     }
-
-    auto colorMode = Container::CurrentColorMode();
     bool hasDarkRes = CheckDarkResource(resObj);
-    if ((colorMode == ColorMode::DARK || localColorMode == ColorMode::DARK) && (!resObj || !hasDarkRes)) {
+    if (localColorMode == ColorMode::DARK) {
+        if (!hasDarkRes) {
+            color = Color(invertFunc(color.GetValue()));
+        }
+        resObj = nullptr;
+        return;
+    }
+    auto colorMode = Container::CurrentColorMode();
+    Color curColor = color;
+    if ((colorMode == ColorMode::DARK) && !hasDarkRes) {
         color = Color(invertFunc(color.GetValue()));
     }
     if (!resObj) {
@@ -6999,7 +6989,7 @@ void JSViewAbstract::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& res
     resObj->SetNodeTag(nodeTag);
     resObj->SetColorMode(colorMode);
     resObj->SetHasDarkRes(hasDarkRes);
-    resObj->SetColor(color);
+    resObj->SetColor(((colorMode == ColorMode::DARK) ? curColor : color));
 }
 
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
@@ -8694,8 +8684,8 @@ void JSViewAbstract::JsAdvancedBlendMode(const JSCallbackInfo& info)
             blendMode = BlendMode::BACK_COMPAT_SOURCE_IN;
         }
     } else if (info[0]->IsObject()) {
-        auto blender = CreateRSBrightnessBlenderFromNapiValue(info[0]);
-        ViewAbstractModel::GetInstance()->SetBrightnessBlender(blender);
+        auto blender = CreateRSBlenderFromNapiValue(info[0]);
+        ViewAbstractModel::GetInstance()->SetBlender(blender);
     }
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto blendApplyTypeNum = info[1]->ToNumber<int32_t>();
@@ -11478,6 +11468,7 @@ void JSViewAbstract::JsOnChildTouchTest(const JSCallbackInfo& info)
 void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
 {
     ViewAbstractModel::GetInstance()->RemoveResObj("foregroundColor");
+    ViewAbstractModel::GetInstance()->RemoveResObj("foregroundColorStrategy");
     Color foregroundColor = Color::TRANSPARENT;
     ForegroundColorStrategy strategy;
     if (ParseJsColorStrategy(info[0], strategy)) {
@@ -13577,4 +13568,32 @@ void JSViewAbstract::SetBorderRadiusWithCheck(std::optional<NG::BorderRadiusProp
         result = borderRadius;
     }
 }
+
+bool JSViewAbstract::CheckLengthMetrics(const JSRef<JSObject>& object)
+{
+    if (object->HasProperty(static_cast<int32_t>(ArkUIIndex::START)) ||
+        object->HasProperty(static_cast<int32_t>(ArkUIIndex::END)) ||
+        object->HasProperty(static_cast<int32_t>(ArkUIIndex::TOP_START)) ||
+        object->HasProperty(static_cast<int32_t>(ArkUIIndex::TOP_END)) ||
+        object->HasProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM_START)) ||
+        object->HasProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM_END))) {
+        return true;
+    }
+    auto jsTop = object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
+    if (jsTop->IsObject()) {
+        JSRef<JSObject> topObj = JSRef<JSObject>::Cast(jsTop);
+        if (topObj->HasProperty(static_cast<int32_t>(ArkUIIndex::VALUE))) {
+            return true;
+        }
+    }
+    auto jsBottom = object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM));
+    if (jsBottom->IsObject()) {
+        JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(jsBottom);
+        if (bottomObj->HasProperty(static_cast<int32_t>(ArkUIIndex::VALUE))) {
+            return true;
+        }
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace::Framework
