@@ -26,6 +26,7 @@
 #include "frameworks/core/interfaces/native/implementation/transition_effect_peer_impl.h"
 
 constexpr int32_t CALLBACK_PARAM_LENGTH = 2;
+constexpr int32_t PRIMARY_BUTTON_COUNT_MAX = 1;
 
 bool GetButtonInfo(ani_env* env, ani_ref resultRef, OHOS::Ace::ButtonInfo& result)
 {
@@ -77,6 +78,16 @@ bool GetButtonArray(ani_env *env, ani_object object, const char *name, std::vect
         OHOS::Ace::ButtonInfo button;
         if (GetButtonInfo(env, itemRef, button)) {
             buttonArray.emplace_back(button);
+        }
+    }
+
+    std::function<bool(OHOS::Ace::ButtonInfo)> isPrimary = [](OHOS::Ace::ButtonInfo button) {
+        return button.isPrimary;
+    };
+    int32_t primaryButtonCount = std::count_if(buttonArray.begin(), buttonArray.end(), isPrimary);
+    if (primaryButtonCount > PRIMARY_BUTTON_COUNT_MAX) {
+        for (auto& button : buttonArray) {
+            button.isPrimary = false;
         }
     }
     result = buttonArray;
@@ -519,6 +530,12 @@ bool GetActionMenuButtons(ani_env *env, ani_object object, std::vector<OHOS::Ace
         return button.isPrimary;
     };
     int32_t primaryButtonCount = std::count_if(buttonArray.begin(), buttonArray.end(), isPrimary);
+    if (primaryButtonCount > PRIMARY_BUTTON_COUNT_MAX) {
+        for (auto& button : buttonArray) {
+            button.isPrimary = false;
+        }
+    }
+
     OHOS::Ace::ButtonInfo cancelButton = {
         .text = OHOS::Ace::Localization::GetInstance()->GetEntryLetters("common.cancel"),
         .textColor = "",
@@ -862,7 +879,7 @@ bool GetCornerRadius(ani_env *env, ani_object object, std::optional<OHOS::Ace::N
 
     ani_object resultObj = static_cast<ani_object>(resultRef);
     OHOS::Ace::CalcDimension dimension;
-    if (GetDimesionParam(env, resultObj, dimension)) {
+    if (GetDimensionParam(env, resultObj, dimension)) {
         CheckDimension(dimension);
         result = OHOS::Ace::NG::BorderRadiusProperty(dimension);
         return true;
@@ -870,25 +887,25 @@ bool GetCornerRadius(ani_env *env, ani_object object, std::optional<OHOS::Ace::N
 
     OHOS::Ace::NG::BorderRadiusProperty borderRadius;
     OHOS::Ace::CalcDimension topLeft;
-    if (GetDimesionParam(env, resultObj, "topLeft", topLeft)) {
+    if (GetDimensionParam(env, resultObj, "topLeft", topLeft)) {
         CheckDimension(topLeft);
         borderRadius.radiusTopLeft = topLeft;
     }
 
     OHOS::Ace::CalcDimension topRight;
-    if (GetDimesionParam(env, resultObj, "topRight", topRight)) {
+    if (GetDimensionParam(env, resultObj, "topRight", topRight)) {
         CheckDimension(topRight);
         borderRadius.radiusTopRight = topRight;
     }
 
     OHOS::Ace::CalcDimension bottomLeft;
-    if (GetDimesionParam(env, resultObj, "bottomLeft", bottomLeft)) {
+    if (GetDimensionParam(env, resultObj, "bottomLeft", bottomLeft)) {
         CheckDimension(bottomLeft);
         borderRadius.radiusBottomLeft = bottomLeft;
     }
 
     OHOS::Ace::CalcDimension bottomRight;
-    if (GetDimesionParam(env, resultObj, "bottomRight", bottomRight)) {
+    if (GetDimensionParam(env, resultObj, "bottomRight", bottomRight)) {
         CheckDimension(bottomRight);
         borderRadius.radiusBottomRight = bottomRight;
     }
@@ -911,7 +928,7 @@ bool GetBorderWidth(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG
 
     ani_object resultObj = static_cast<ani_object>(resultRef);
     OHOS::Ace::CalcDimension dimension;
-    if (GetDimesionParam(env, resultObj, dimension)) {
+    if (GetDimensionParam(env, resultObj, dimension)) {
         CheckDimension(dimension);
         result = OHOS::Ace::NG::BorderWidthProperty({ dimension, dimension, dimension, dimension });
         return true;
@@ -919,25 +936,25 @@ bool GetBorderWidth(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG
 
     OHOS::Ace::NG::BorderWidthProperty borderWidth;
     OHOS::Ace::CalcDimension left;
-    if (GetDimesionParam(env, resultObj, "left", left)) {
+    if (GetDimensionParam(env, resultObj, "left", left)) {
         CheckDimension(left);
         borderWidth.leftDimen = left;
     }
 
     OHOS::Ace::CalcDimension right;
-    if (GetDimesionParam(env, resultObj, "right", right)) {
+    if (GetDimensionParam(env, resultObj, "right", right)) {
         CheckDimension(left);
         borderWidth.rightDimen = right;
     }
 
     OHOS::Ace::CalcDimension top;
-    if (GetDimesionParam(env, resultObj, "top", top)) {
+    if (GetDimensionParam(env, resultObj, "top", top)) {
         CheckDimension(top);
         borderWidth.topDimen = top;
     }
 
     OHOS::Ace::CalcDimension bottom;
-    if (GetDimesionParam(env, resultObj, "bottom", bottom)) {
+    if (GetDimensionParam(env, resultObj, "bottom", bottom)) {
         CheckDimension(bottom);
         borderWidth.bottomDimen = bottom;
     }
@@ -1068,8 +1085,8 @@ bool GetCustomDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogPr
     GetBaseDialogOptions(env, object, dialogProps);
     GetResourceColorParamOpt(env, object, "backgroundColor", dialogProps.backgroundColor);
     GetCornerRadius(env, object, dialogProps.borderRadius);
-    GetDimesionParamOpt(env, object, "width", dialogProps.width);
-    GetDimesionParamOpt(env, object, "height", dialogProps.height);
+    GetDimensionParamOpt(env, object, "width", dialogProps.width);
+    GetDimensionParamOpt(env, object, "height", dialogProps.height);
     GetBorderWidth(env, object, dialogProps.borderWidth);
     GetBorderColor(env, object, dialogProps.borderColor);
     GetBorderStyle(env, object, dialogProps.borderStyle);
@@ -1207,8 +1224,8 @@ bool GetDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperti
     GetBaseDialogOptions(env, object, dialogProps);
     GetResourceColorParamOpt(env, object, "backgroundColor", dialogProps.backgroundColor);
     GetCornerRadius(env, object, dialogProps.borderRadius);
-    GetDimesionParamOpt(env, object, "width", dialogProps.width);
-    GetDimesionParamOpt(env, object, "height", dialogProps.height);
+    GetDimensionParamOpt(env, object, "width", dialogProps.width);
+    GetDimensionParamOpt(env, object, "height", dialogProps.height);
     GetBorderWidth(env, object, dialogProps.borderWidth);
     GetBorderColor(env, object, dialogProps.borderColor);
     GetBorderStyle(env, object, dialogProps.borderStyle);

@@ -404,7 +404,7 @@ bool GetEnumIntOpt(ani_env* env, ani_object object, const char *name, const char
 
 bool GetEnumString(ani_env* env, ani_object resultObj, const char *enum_descriptor, std::string& result)
 {
-    if (IsEnum(env, resultObj, enum_descriptor)) {
+    if (!IsEnum(env, resultObj, enum_descriptor)) {
         return false;
     }
 
@@ -775,9 +775,11 @@ bool GetResourceParam(ani_env *env, ani_object object, ResourceInfo& result)
     }
 
     CompleteResourceParam(env, object);
-    double id = 0;
-    GetDoubleParam(env, object, "id", id);
-    result.resId = static_cast<int32_t>(id);
+    ani_double id;
+    ani_status status = env->Object_GetPropertyByName_Double(object, "id", &id);
+    if (status == ANI_OK) {
+        result.resId = static_cast<int32_t>(id);
+    }
     GetStringParamOpt(env, object, "bundleName", result.bundleName);
     GetStringParamOpt(env, object, "moduleName", result.moduleName);
     double type = 0;
@@ -1482,7 +1484,7 @@ bool ResourceIntegerToString(const ResourceInfo& resourceInfo, std::string& resu
     return true;
 }
 
-bool GetDimesionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension& result)
+bool GetDimensionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension& result)
 {
     double resultDouble;
     if (GetDoubleParam(env, object, resultDouble)) {
@@ -1504,8 +1506,8 @@ bool GetDimesionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension&
     }
 
     std::string resourceStr;
-    if (ResourceToString(resourceInfo, resourceStr)) {
-        return true;
+    if (!ResourceToString(resourceInfo, resourceStr)) {
+        return false;
     }
 
     if (!ResourceIntegerToString(resourceInfo, resourceStr)) {
@@ -1515,13 +1517,13 @@ bool GetDimesionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension&
     return true;
 }
 
-bool GetDimesionParam(ani_env* env, ani_ref ref, OHOS::Ace::CalcDimension& result)
+bool GetDimensionParam(ani_env* env, ani_ref ref, OHOS::Ace::CalcDimension& result)
 {
     ani_object object = static_cast<ani_object>(ref);
-    return GetDimesionParam(env, object, result);
+    return GetDimensionParam(env, object, result);
 }
 
-bool GetDimesionParam(ani_env* env, ani_object object, const char *name, OHOS::Ace::CalcDimension& result)
+bool GetDimensionParam(ani_env* env, ani_object object, const char *name, OHOS::Ace::CalcDimension& result)
 {
     ani_ref resultRef;
     ani_status status = env->Object_GetPropertyByName_Ref(object, name, &resultRef);
@@ -1532,14 +1534,14 @@ bool GetDimesionParam(ani_env* env, ani_object object, const char *name, OHOS::A
     if (IsUndefinedObject(env, resultRef)) {
         return false;
     }
-    return GetDimesionParam(env, resultRef, result);
+    return GetDimensionParam(env, resultRef, result);
 }
 
-bool GetDimesionParamOpt(ani_env* env, ani_object object, const char *name,
+bool GetDimensionParamOpt(ani_env* env, ani_object object, const char *name,
     std::optional<OHOS::Ace::CalcDimension>& result)
 {
     OHOS::Ace::CalcDimension dimension;
-    if (!GetDimesionParam(env, object, name, dimension)) {
+    if (!GetDimensionParam(env, object, name, dimension)) {
         return false;
     }
     result = std::make_optional<OHOS::Ace::CalcDimension>(dimension);
