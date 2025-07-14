@@ -1113,7 +1113,7 @@ public:
 
     bool IsWindowFocused() const override
     {
-        return isWindowHasFocused_ && GetOnFoucs();
+        return isWindowHasFocused_ && GetOnFocus();
     }
 
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);

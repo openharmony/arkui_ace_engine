@@ -118,7 +118,7 @@ public:
 
     void SetContainerInfo(const std::string& windowName, int32_t id, bool foreground);
     void SetFocusContainerInfo(const std::string& windowName, int32_t id);
-    int32_t GetContainerId(bool isFoucs = true);
+    int32_t GetContainerId(bool isFocus = true);
     const std::string& GetPageUrl();
     const std::string& GetNavDstName() const;
     void FillWebJsCode(std::optional<WebJsItem>& scriptItems) const;

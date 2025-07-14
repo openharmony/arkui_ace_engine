@@ -1320,7 +1320,7 @@ public:
         return hasSupportedPreviewText_;
     }
 
-    bool GetOnFoucs() const
+    bool GetOnFocus() const
     {
         return onFocus_;
     }
@@ -1464,7 +1464,7 @@ public:
 #endif
     virtual bool IsWindowFocused() const
     {
-        return GetOnFoucs();
+        return GetOnFocus();
     }
 
     virtual bool IsWindowActivated() const
