@@ -650,6 +650,69 @@ HWTEST_F(TextFieldAlgorithmTest, AddAdaptFontSizeAndAnimations001, TestSize.Leve
 }
 
 /**
+ * @tc.name: AddAdaptFontSizeAndAnimations002
+ * @tc.desc: Test the function AddAdaptFontSizeAndAnimations
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, AddAdaptFontSizeAndAnimations002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    });
+    TextStyle textStyle;
+    LayoutConstraintF layoutConstraint;
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    textInputLayoutAlgorithm->BuildInlineFocusLayoutConstraint(layoutConstraint, &layoutWrapper);
+    EXPECT_TRUE(textInputLayoutAlgorithm->AddAdaptFontSizeAndAnimations(
+        textStyle, layoutProperty_, layoutConstraint, &layoutWrapper));
+}
+
+/**
+ * @tc.name: AddAdaptFontSizeAndAnimations003
+ * @tc.desc: Test the function AddAdaptFontSizeAndAnimations
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, AddAdaptFontSizeAndAnimations003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    });
+    TextStyle textStyle;
+    LayoutConstraintF layoutConstraint;
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    textInputLayoutAlgorithm->BuildInlineFocusLayoutConstraint(layoutConstraint, &layoutWrapper);
+    EXPECT_TRUE(textInputLayoutAlgorithm->AddAdaptFontSizeAndAnimations(
+        textStyle, layoutProperty_, layoutConstraint, &layoutWrapper));
+}
+
+/**
+ * @tc.name: AddAdaptFontSizeAndAnimations004
+ * @tc.desc: Test the function AddAdaptFontSizeAndAnimations
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, AddAdaptFontSizeAndAnimations004, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    });
+    TextStyle textStyle;
+    LayoutConstraintF layoutConstraint;
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    textInputLayoutAlgorithm->BuildInlineFocusLayoutConstraint(layoutConstraint, &layoutWrapper);
+    EXPECT_TRUE(textInputLayoutAlgorithm->AddAdaptFontSizeAndAnimations(
+        textStyle, layoutProperty_, layoutConstraint, &layoutWrapper));
+}
+
+/**
  * @tc.name: IsInlineFocusAdaptMinExceedLimit
  * @tc.desc: Test the function IsInlineFocusAdaptMinExceedLimit
  * @tc.type: FUNC
