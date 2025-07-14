@@ -1892,6 +1892,99 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest016, TestSize.Level
 }
 
 /**
+ * @tc.name: FireOnTerminatedCallbackTest
+ * @tc.desc: Test FireOnTerminated Callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, FireOnTerminatedCallbackTestNg, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get UIExtensionPattern.
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachToMainTree();
+    ValidSessionWrapper(pattern);
+    ValidSession(pattern);
+    /**
+     * @tc.steps: step2. set onTerminatedFuntionQE.
+     */
+    auto onTerminatedFuntionEQ =
+        [](int32_t code, const RefPtr<WantWrap>& wantWrap) { EXPECT_EQ(code, CODE); };
+    pattern->SetOnTerminatedCallback(onTerminatedFuntionEQ);
+    /**
+     * @tc.steps: step3. fire onTerminatedFuntion.
+     */
+    pattern->FireOnTerminatedCallback(CODE, nullptr);
+    auto onTerminatedFuntion =
+        [](int32_t code, const RefPtr<WantWrap>& wantWrap) {};
+    /**
+     * @tc.steps: step4. set onTerminatedFuntion.
+     */
+    pattern->SetOnTerminatedCallback(onTerminatedFuntion);
+    InValidSession(pattern);
+    /**
+     * @tc.steps: step5. fire onTerminatedFuntion when InValidSession.
+     */
+    pattern->FireOnTerminatedCallback(CODE, nullptr);
+    InValidSessionWrapper(pattern);
+    /**
+     * @tc.steps: step6. fire onTerminatedFuntion when InValidSessionWrapper.
+     */
+    pattern->FireOnTerminatedCallback(CODE, nullptr);
+    EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::DESTRUCTION);
+}
+
+/**
+ * @tc.name: FireOnResultCallbackTestNg
+ * @tc.desc: Test FireOnResult Callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, FireOnResultCallbackTestNg, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get UIExtensionPattern.
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachToMainTree();
+    ValidSessionWrapper(pattern);
+    ValidSession(pattern);
+    OHOS::AAFwk::Want myWant;
+    /**
+     * @tc.steps: step2. set onResultFuntionQE.
+     */
+    auto onResultFuntionEQ =
+        [](int32_t code, const AAFwk::Want& want) { EXPECT_EQ(code, CODE); };
+    pattern->SetOnResultCallback(onResultFuntionEQ);
+    /**
+     * @tc.steps: step3. fire onResultFuntion.
+     */
+    pattern->FireOnResultCallback(CODE, myWant);
+    auto onResultFuntion =
+        [](int32_t code, const AAFwk::Want& want) {};
+    /**
+     * @tc.steps: step4. set onResultFuntion.
+     */
+    pattern->SetOnResultCallback(onResultFuntion);
+    InValidSession(pattern);
+    /**
+     * @tc.steps: step5. fire onResultFuntion when InValidSession.
+     */
+    pattern->FireOnResultCallback(CODE, myWant);
+    InValidSessionWrapper(pattern);
+    /**
+     * @tc.steps: step6. fire onResultFuntion when InValidSessionWrapper.
+     */
+    pattern->FireOnResultCallback(CODE, myWant);
+    EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::DESTRUCTION);
+}
+
+/**
  * @tc.name: UIExtensionComponentOnDrawReadyTestNg
  * @tc.desc: Test pattern OnDrawReady
  * @tc.type: FUNC
