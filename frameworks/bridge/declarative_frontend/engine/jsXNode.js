@@ -1587,6 +1587,10 @@ class TypedFrameNode extends FrameNode {
         super(uiContext, type, options);
         this.attrCreator_ = attrCreator;
     }
+    dispose(){
+        this._nativeRef?.dispose();
+        super.dispose();
+    }
     initialize(...args) {
         return this.attribute.initialize(args);
     }

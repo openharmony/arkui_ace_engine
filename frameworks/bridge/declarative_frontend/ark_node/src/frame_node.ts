@@ -836,6 +836,11 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
     this.attrCreator_ = attrCreator;
   }
 
+  dispose(){
+    this._nativeRef?.dispose();
+    super.dispose();
+  }
+
   initialize(...args: Object[]): T {
     return this.attribute.initialize(args);
   }
