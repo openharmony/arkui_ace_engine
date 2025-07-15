@@ -2526,5 +2526,22 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg405, TestSize.Level1)
     context_->OnHide();
     EXPECT_TRUE(context_->isNeedCallbackAreaChange_);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg406
+ * @tc.desc: Test ContainerModalUnFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg406, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call function RequireSummary;
+     * @tc.expected: The windowModal_ is not equal to CONTAINER_MODAL
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->windowModal_ = WindowModal::DIALOG_MODAL;
+    context_->ContainerModalUnFocus();
+    EXPECT_TRUE(context_->windowModal_ != WindowModal::CONTAINER_MODAL);
+}
 } // namespace NG
 } // namespace OHOS::Ace
