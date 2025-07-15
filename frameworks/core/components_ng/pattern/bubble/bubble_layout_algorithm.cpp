@@ -1430,10 +1430,7 @@ OffsetF BubbleLayoutAlgorithm::GetAdjustPosition(std::vector<Placement>& current
             }
         }
         position = AdjustPosition(childPosition, width, height, targetSpace_.ConvertToPx());
-        if (!NearEqual(position, OffsetF(0.0f, 0.0f))) {
-            break;
-        }
-        if (len - i <= step) {
+        if ((!NearEqual(position, OffsetF(0.0f, 0.0f))) || (len - i <= step)) {
             break;
         }
         i += step;
