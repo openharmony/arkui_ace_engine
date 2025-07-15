@@ -235,7 +235,8 @@ void TextStyle::SetSymbolEffectOptions(const std::optional<NG::SymbolEffectOptio
         if (oldOptions.GetEffectType() != options.GetEffectType()) {
             reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::EFFECT_STRATEGY));
         }
-        if (oldOptions.GetIsTxtActive() != options.GetIsTxtActive()) {
+        if (oldOptions.GetIsTxtActive() != options.GetIsTxtActive() ||
+            (options.GetTriggerNum().has_value() && options.GetIsTxtActive())) {
             reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::ANIMATION_START));
         }
         CompareCommonSubType(options, oldOptions);

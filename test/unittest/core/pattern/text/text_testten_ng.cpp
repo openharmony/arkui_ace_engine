@@ -2582,7 +2582,8 @@ HWTEST_F(TextFieldTenPatternNg, LeftMouseRelease, TestSize.Level1)
     EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _))
         .WillOnce(Return(5))
         .WillOnce(Return(10))
-        .WillOnce(Return(15));
+        .WillOnce(Return(15))
+        .WillRepeatedly(Return(0));
     ParagraphManager::ParagraphInfo pInfo = { .paragraph = paragraph };
     pattern->pManager_->AddParagraph(std::move(pInfo));
 
@@ -2601,7 +2602,7 @@ HWTEST_F(TextFieldTenPatternNg, LeftMouseRelease, TestSize.Level1)
     mouseInfo.SetAction(MouseAction::RELEASE);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_EQ(pattern->GetTextSelector().GetStart(), 5);
-    EXPECT_EQ(pattern->GetTextSelector().GetEnd(), 10);
+    EXPECT_EQ(pattern->GetTextSelector().GetEnd(), 15);
 
     mouseInfo.SetAction(MouseAction::PRESS);
     pattern->HandleMouseEvent(mouseInfo);
