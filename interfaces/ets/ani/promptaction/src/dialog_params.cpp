@@ -220,7 +220,8 @@ bool GetGrayscale(ani_env* env, ani_object object, std::vector<float>& result)
         ani_object itemObj = static_cast<ani_object>(itemRef);
         double itemValue;
         if (GetDoubleParam(env, itemObj, itemValue)) {
-            floatArray.emplace_back(static_cast<float>(itemValue));
+            uint32_t itemInt32 = static_cast<int32_t>(itemValue);
+            floatArray.emplace_back(static_cast<float>(itemInt32));
         }
     }
     result = floatArray;
@@ -285,7 +286,9 @@ bool GetBackgroundBlurStyleOptions(ani_env* env, ani_object object, std::optiona
     GetDoubleParam(env, resultObj, "scale", blurStyleOption.scale);
     GetBlurOptions(env, resultObj, blurStyleOption.blurOption);
     GetBlurStyleActivePolicy(env, resultObj, blurStyleOption.policy);
-    GetResourceColorParam(env, resultObj, "inactiveColor", blurStyleOption.inactiveColor);
+    if (GetResourceColorParam(env, resultObj, "inactiveColor", blurStyleOption.inactiveColor)) {
+        blurStyleOption.isValidColor = true;
+    }
     result = std::make_optional<OHOS::Ace::BlurStyleOption>(blurStyleOption);
     return true;
 }
@@ -308,7 +311,7 @@ bool GetBackgroundEffectOptions(ani_env* env, ani_object object, std::optional<O
     }
 
     OHOS::Ace::EffectOption effectOption;
-    double radius = 0;
+    double radius = 0.0f;
     ani_double aniRadius;
     status = env->Object_GetPropertyByName_Double(resultObj, "radius", &aniRadius);
     if (status == ANI_OK) {
@@ -317,12 +320,12 @@ bool GetBackgroundEffectOptions(ani_env* env, ani_object object, std::optional<O
     radius = OHOS::Ace::LessNotEqual(radius, 0.0f) ? 0.0f : radius;
     effectOption.radius = OHOS::Ace::CalcDimension(radius, OHOS::Ace::DimensionUnit::VP);
 
-    double saturation = 0;
+    double saturation = 1.0f;
     GetDoubleParam(env, resultObj, "saturation", saturation);
     effectOption.saturation = (OHOS::Ace::GreatNotEqual(saturation, 0.0f) || OHOS::Ace::NearZero(saturation)) ?
         saturation : 1.0f;
 
-    double brightness = 0;
+    double brightness = 1.0f;
     GetDoubleParam(env, resultObj, "brightness", brightness);
     effectOption.brightness = (OHOS::Ace::GreatNotEqual(brightness, 0.0f) || OHOS::Ace::NearZero(brightness)) ?
         brightness : 1.0f;
@@ -331,7 +334,9 @@ bool GetBackgroundEffectOptions(ani_env* env, ani_object object, std::optional<O
     GetAdaptiveColor(env, resultObj, effectOption.adaptiveColor);
     GetBlurOptions(env, resultObj, effectOption.blurOption);
     GetBlurStyleActivePolicy(env, resultObj, effectOption.policy);
-    GetResourceColorParam(env, resultObj, "inactiveColor", effectOption.inactiveColor);
+    if (GetResourceColorParam(env, resultObj, "inactiveColor", effectOption.inactiveColor)) {
+        effectOption.isValidColor = true;
+    }
     result = std::make_optional<OHOS::Ace::EffectOption>(effectOption);
     return true;
 }
@@ -377,6 +382,7 @@ bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetResourceColorParamOpt(env, object, "backgroundColor", dialogProps.backgroundColor);
     GetBackgroundBlurStyleParamOpt(env, object, dialogProps.backgroundBlurStyle);
     GetBackgroundBlurStyleOptions(env, object, dialogProps.blurStyleOption);
+    GetBackgroundEffectOptions(env, object, dialogProps.effectOption);
     GetShadowParamOpt(env, object, dialogProps.shadow);
     GetBoolParam(env, object, "enableHoverMode", dialogProps.enableHoverMode);
     GetHoverModeAreaParamOpt(env, object, dialogProps.hoverModeArea);
@@ -466,7 +472,7 @@ std::function<void(int32_t, int32_t)> GetShowDialogCallback(std::shared_ptr<Prom
 
             std::vector<ani_ref> args(CALLBACK_PARAM_LENGTH);
             if (errorCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
-                args[0] = CreateBusinessError(asyncContext->env, 0, "");
+                asyncContext->env->GetNull(&args[0]);
             } else {
                 args[0] = CreateBusinessError(asyncContext->env, errorCode, "cancel");
             }
@@ -676,7 +682,7 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuCallback(
 
             std::vector<ani_ref> args(CALLBACK_PARAM_LENGTH);
             if (errorCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
-                args[0] = CreateBusinessError(asyncContext->env, 0, "");
+                asyncContext->env->GetNull(&args[0]);
             } else {
                 args[0] = CreateBusinessError(asyncContext->env, errorCode, "cancel");
             }
