@@ -199,9 +199,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   }
  
   public getUIContext(): object {
-    if (typeof globalThis.__getUIContext__ === 'function') {
-      return globalThis.__getUIContext__(this.getInstanceId());
-    }
     return this.nativeViewPartialUpdate.getUIContext();
   }
  
