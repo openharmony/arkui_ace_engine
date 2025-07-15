@@ -71,11 +71,15 @@ private:
     void HandleTouchUpOrCancel();
 
     /**
+     * @brief update callback of AnimatableProperty @c offset_.
+     */
+    void HandleOffsetUpdate(const OffsetF& currentValue);
+
+    /**
      * @brief Start the scroll animation if possible with the given velocity and offset_.
      */
     void Fling(const OffsetF& velocity);
     void StopScrollAnimation();
-    void HandleAnimationUpdate(const OffsetF& currentValue);
     void HandleAnimationEnd();
 
     /**
@@ -111,7 +115,7 @@ public:
         DRAG,
         FLING,
         EXTERNAL_FLING, // used for external animations like scroller animation
-        BOUNCE, // used for edge effects
+        BOUNCE, // used for bounce animation transitioned from FLING when reaching edge
     };
 private:
     State state_ = State::IDLE;

@@ -26,7 +26,7 @@ FreeScrollController::FreeScrollController(ScrollPattern& pattern) : pattern_(pa
     offset_ = MakeRefPtr<NodeAnimatablePropertyOffsetF>(OffsetF {}, [weak = WeakClaim(this)](const OffsetF& newOffset) {
         auto controller = weak.Upgrade();
         if (controller) {
-            controller->HandleAnimationUpdate(newOffset);
+            controller->HandleOffsetUpdate(newOffset);
         }
     });
     auto* renderCtx = pattern_.GetRenderContext();
@@ -95,7 +95,7 @@ ScrollSource ToScrollSource(State state)
 {
     switch (state) {
         case State::IDLE:
-            return ScrollSource::OTHER_USER_INPUT;
+            return ScrollSource::SCROLLER;
         case State::DRAG:
             return ScrollSource::DRAG;
         case State::FLING:
@@ -249,24 +249,26 @@ void FreeScrollController::Fling(const OffsetF& velocity)
     });
 }
 
-void FreeScrollController::HandleAnimationUpdate(const OffsetF& currentValue)
+void FreeScrollController::HandleOffsetUpdate(const OffsetF& currentValue)
 {
-    pattern_.MarkDirty();
     if (state_ == State::DRAG) {
-        return;
+        return; // callbacks and checks already handled in HandlePanUpdate
     }
+    pattern_.MarkDirty();
 
-    FireOnWillScroll(currentValue - prevOffset_, ScrollState::FLING, ToScrollSource(state_));
+    FireOnWillScroll(currentValue - prevOffset_, ToScrollState(state_), ToScrollSource(state_));
     const bool reachedEdge = CheckCrashEdge(currentValue, pattern_.GetViewPortExtent() - pattern_.GetViewSize());
     if (state_ == State::FLING && reachedEdge) {
         // change friction during animation and transition to BOUNCE animation
         const auto finalPos = ClampPosition(offset_->GetStagingValue());
         AnimationUtils::Animate(
-            CreateSpringOption(EDGE_FRICTION), [weak = WeakPtr(offset_), finalPos]() {
+            CreateSpringOption(EDGE_FRICTION),
+            [weak = WeakPtr(offset_), finalPos]() {
                 auto prop = weak.Upgrade();
                 CHECK_NULL_VOID(prop);
                 prop->Set(finalPos);
-            }, [weak = WeakClaim(this)]() {
+            },
+            [weak = WeakClaim(this)]() {
                 auto self = weak.Upgrade();
                 CHECK_NULL_VOID(self);
                 self->HandleAnimationEnd();
@@ -318,6 +320,9 @@ void FreeScrollController::InitializeTouchEvent()
 
 void FreeScrollController::HandleTouchDown()
 {
+    if (state_ == State::DRAG) {
+        return; // ignore touch down of second finger
+    }
     StopScrollAnimation();
 }
 
@@ -379,7 +384,6 @@ void FreeScrollController::SetOffset(OffsetF newPos, bool allowOverScroll)
     }
     if (newPos != offset_->Get()) {
         offset_->Set(newPos);
-        pattern_.MarkDirty();
     }
 }
 

@@ -390,6 +390,39 @@ TEST_F(FreeScrollTest, OverScroll002)
 }
 
 /**
+ * @tc.name: Touch001
+ * @tc.desc: Test multiple touch
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Touch001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    TouchDown();
+    PanStart({});
+    PanUpdate({ DELTA_X, DELTA_Y });
+    auto&& controller = pattern_->freeScroll_;
+    EXPECT_EQ(controller->state_, State::DRAG);
+    TouchDown(); // second finger down
+    EXPECT_EQ(controller->state_, State::DRAG); // should not change state
+    PanUpdate({ DELTA_X, DELTA_Y });
+    EXPECT_EQ(controller->state_, State::DRAG); // should not change state
+    TouchUp(); // first finger up
+    EXPECT_EQ(controller->state_, State::DRAG); // should not change state
+    TouchUp(); // second finger up
+    PanEnd({ DELTA_X, DELTA_Y }, { VELOCITY_X, VELOCITY_Y });
+    EXPECT_EQ(controller->state_, State::FLING);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, 0)); // bounced back to boundary
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+    EXPECT_EQ(controller->state_, State::IDLE);
+}
+
+/**
  * @tc.name: Animation001
  * @tc.desc: Test normal animation with Axis::FREE
  * @tc.type: FUNC
@@ -715,6 +748,13 @@ TEST_F(FreeScrollTest, Scroller001)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
+    static int32_t willScrollCalled = 0;
+    model.SetOnWillScroll([](const Dimension& xOffset, const Dimension& yOffset, ScrollState state, ScrollSource source) {
+        EXPECT_EQ(state, ScrollState::IDLE);
+        EXPECT_EQ(source, ScrollSource::SCROLLER);
+        ++willScrollCalled;
+        return TwoDimensionScrollResult { .xOffset = xOffset, .yOffset = yOffset };
+    });
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
     auto scroller = AceType::MakeRefPtr<ScrollableController>();
@@ -731,10 +771,12 @@ TEST_F(FreeScrollTest, Scroller001)
         scroller->GetCurrentOffset().ToString(), Offset(CONTENT_W - WIDTH, CONTENT_H - HEIGHT).ToString()); // clamped
     FlushUITasks();
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-CONTENT_W + WIDTH, -CONTENT_H + HEIGHT));
+    EXPECT_EQ(willScrollCalled, 2);
 
     scroller->ScrollBy(-DELTA_X, -DELTA_Y, false);
     FlushUITasks();
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-CONTENT_W + WIDTH + DELTA_X, -CONTENT_H + HEIGHT + DELTA_Y));
+    EXPECT_EQ(willScrollCalled, 3);
 }
 
 /**
@@ -1066,6 +1108,7 @@ TEST_F(FreeScrollTest, OnScrollEdge001)
     const auto& controller = pattern_->freeScroll_;
     ASSERT_TRUE(controller && controller->offset_);
 
+    PanStart({});
     PanUpdate({ -1, 0.0f });
     // Now scroll back right to cross the LEFT edge (from negative to 0/positive)
     PanUpdate({ LARGE_DELTA_X, 0.0f }); // Scroll back right to trigger LEFT edge
@@ -1107,6 +1150,7 @@ TEST_F(FreeScrollTest, OnScrollEdge002)
 
     controller->SetOffset(OffsetF { -(CONTENT_W - WIDTH) + 1, -1 });
     FlushUITasks(frameNode_);
+    PanStart({});
     PanUpdate({ -LARGE_DELTA_X, LARGE_DELTA_Y }); // Try to trigger TOP and RIGHT edges
     EXPECT_EQ(triggeredEdges.size(), 2);
     EXPECT_EQ(triggeredEdges.front(), ScrollEdge::RIGHT);
