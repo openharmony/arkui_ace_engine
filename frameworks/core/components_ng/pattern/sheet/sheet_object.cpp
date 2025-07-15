@@ -85,6 +85,7 @@ std::function<void()> SheetObject::GetSheetTransitionFinishEvent(bool isTransiti
                 pattern->SetAnimationBreak(false);
             }
             pattern->AvoidAiBar();
+            pattern->HandleMultiDetentKeyboardAvoid();
             pattern->FireOnDetentsDidChange(pattern->GetHeight());
             pattern->SetSpringBack(false);
         } else {

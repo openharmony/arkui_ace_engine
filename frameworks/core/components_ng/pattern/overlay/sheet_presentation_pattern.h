@@ -1106,6 +1106,7 @@ public:
         const WeakPtr<FrameNode>& sheetNodeWK);
     void RegisterBorderWidthOrColorRes(const RefPtr<FrameNode>& sheetNode,
         RefPtr<ResourceObject>& resObjWidth);
+    void HandleMultiDetentKeyboardAvoid();
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;

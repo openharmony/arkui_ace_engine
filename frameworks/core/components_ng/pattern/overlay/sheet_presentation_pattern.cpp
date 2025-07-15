@@ -3712,6 +3712,9 @@ bool SheetPresentationPattern::IsNeedChangeScrollHeight(float height)
     if (it == sheetDetentHeight_.end()) {
         return false;
     }
+    if (IsAvoidingKeyboard()) {
+        return false;
+    }
     float lowestDetentHeight = *it;
     bool isNeedChangeScrollHeight =
         scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && GreatOrEqual(height, lowestDetentHeight);
@@ -4114,6 +4117,17 @@ void SheetPresentationPattern::RegisterBorderWidthOrColorRes(const RefPtr<FrameN
     };
     resObjWidth = resObjWidth ? resObjWidth : AceType::MakeRefPtr<ResourceObject>();
     pattern->AddResObj("sheetPage.border", resObjWidth, std::move(updateFunc));
+}
+
+void SheetPresentationPattern::HandleMultiDetentKeyboardAvoid()
+{
+    // This function is used to handle the scenario where the semi-modal multi-detent sheet switches to a higher detent
+    // when avoiding the keyboard.
+    // height_: Target height of the displacement
+    // preDetentsHeight_: Height of the previous detent
+    if (IsAvoidingKeyboard() && GreatNotEqual(height_, preDetentsHeight_)) {
+        isScrolling_ = true;
+    }
 }
 
 void SheetPresentationPattern::RegisterTitleRes(const RefPtr<FrameNode>& sheetNode,
