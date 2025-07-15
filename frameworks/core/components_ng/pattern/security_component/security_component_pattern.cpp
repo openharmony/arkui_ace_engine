@@ -390,7 +390,9 @@ void SecurityComponentPattern::ToJsonValueIconNode(std::unique_ptr<JsonValue>& j
     } else {
         json->PutExtAttr("iconSize", theme->GetIconSize().ToString().c_str(), filter);
     }
-    json->PutExtAttr("iconColor", iconProp->GetImageSourceInfo()->GetFillColor().
+    auto imageSourceInfo = iconProp->GetImageSourceInfo();
+    CHECK_NULL_VOID(imageSourceInfo);
+    json->PutExtAttr("iconColor", imageSourceInfo->GetFillColor().
         value_or(theme->GetIconColor()).ColorToString().c_str(), filter);
     auto iconBorderRadius = iconRenderContext->GetBorderRadius();
     if (iconBorderRadius.has_value()) {
@@ -563,7 +565,9 @@ FocusPattern SecurityComponentPattern::GetFocusPattern() const
     RefPtr<FrameNode> buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
     if (buttonNode != nullptr) {
         auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
-        return buttonPattern->GetFocusPattern();
+        if (buttonPattern != nullptr) {
+            return buttonPattern->GetFocusPattern();
+        }
     }
 
     return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
@@ -609,28 +613,30 @@ void SecurityComponentPattern::UpdateIconProperty(RefPtr<FrameNode>& scNode, Ref
 
 void SecurityComponentPattern::UpdateSymbolProperty(const RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& symbolNode)
 {
-    auto iconProp = symbolNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(iconProp);
+    auto symbolProp = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolProp);
     auto scLayoutProp = scNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(scLayoutProp);
     if (scLayoutProp->GetIconSize().has_value()) {
         auto iconSize = scLayoutProp->GetIconSize().value();
-        iconProp->UpdateFontSize(iconSize);
+        symbolProp->UpdateFontSize(iconSize);
     }
 
     auto scPaintProp = scNode->GetPaintProperty<SecurityComponentPaintProperty>();
     CHECK_NULL_VOID(scPaintProp);
-    if (scPaintProp->GetIconColor().has_value() && iconProp->GetSymbolSourceInfo().has_value()) {
-        iconProp->UpdateSymbolColorList({scPaintProp->GetIconColor().value()});
-        auto iconSrcInfo = iconProp->GetSymbolSourceInfo().value();
-        iconProp->UpdateSymbolSourceInfo(iconSrcInfo);
+    if (scPaintProp->GetIconColor().has_value() && symbolProp->GetSymbolSourceInfo().has_value()) {
+        symbolProp->UpdateSymbolColorList({scPaintProp->GetIconColor().value()});
+        auto iconSrcInfo = symbolProp->GetSymbolSourceInfo().value();
+        symbolProp->UpdateSymbolSourceInfo(iconSrcInfo);
     }
 }
 
 void SecurityComponentPattern::UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode)
 {
     auto scLayoutProp = scNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(scLayoutProp);
     auto textLayoutProp = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
     if (scLayoutProp->GetFontSize().has_value()) {
         textLayoutProp->UpdateFontSize(scLayoutProp->GetFontSize().value());
     }
@@ -763,8 +769,7 @@ void SecurityComponentPattern::OnModifyDone()
 
     auto scLayoutProp = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(scLayoutProp);
-    auto symbolIconNode = GetSecCompChildNode(frameNode, V2::SYMBOL_ETS_TAG);
-    if (((iconNode == nullptr) && (symbolIconNode == nullptr)) || (textNode == nullptr)) {
+    if (((iconNode == nullptr) && (symbolNode == nullptr)) || (textNode == nullptr)) {
         scLayoutProp->UpdateTextIconSpace(Dimension(0.0));
     }
 
