@@ -649,4 +649,38 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest0015, Tes
     EXPECT_NE(scaleData->scale, 1.0f);
 }
 
+/**
+ * @tc.name: DragDropControllerFuncWrapperTest016
+ * @tc.desc: Test GetTouchPointOffset when DimensionUnit is PERCENT.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragControllerFuncWrapperTestNg, DragDropControllerFuncWrapperTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare darg data and asyncCtxData.
+     */
+    int32_t containerId = 100;
+    bool hasTouchPoint = true;
+    DragPointerEvent dragPointerEvent(100, 100);
+    NG::DragPreviewOption previewOption;
+    auto touchPointX = Dimension(0.1, DimensionUnit::PERCENT);
+    auto touchPointY = Dimension(0.1, DimensionUnit::PERCENT);
+    DimensionOffset touchPoint = DimensionOffset(touchPointX, touchPointY);
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(voidPtr);
+
+    NG::PreparedInfoForDrag data = { false, 10, 0.5f, false, NG::OffsetF(),
+        NG::DragControllerFuncWrapper::GetUpdateDragMovePosition(containerId), refPixelMap };
+    NG::PreparedAsyncCtxForAnimate asyncCtxData = { containerId, hasTouchPoint, dragPointerEvent, previewOption,
+        touchPoint, pixelMapList };
+
+    /**
+     * @tc.steps: step2. call GetTouchPointOffset.
+     * @tc.expected: step2. touchPointOffset is equal to NG::OffsetF(0, 0).
+     */
+    auto touchPointOffset = NG::DragControllerFuncWrapper::GetTouchPointOffset(data, asyncCtxData);
+    EXPECT_EQ(touchPointOffset, NG::OffsetF(0, 0));
+}
 } // namespace OHOS::Ace::NG
