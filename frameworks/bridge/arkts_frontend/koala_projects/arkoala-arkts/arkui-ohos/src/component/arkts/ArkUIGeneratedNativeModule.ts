@@ -6670,9 +6670,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebContextMenuParam_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _WebContextMenuParam_x(ptr: KPointer): number
+    native static _WebContextMenuParam_x(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _WebContextMenuParam_y(ptr: KPointer): number
+    native static _WebContextMenuParam_y(ptr: KPointer): int32
     @ani.unsafe.Quick
     native static _WebContextMenuParam_getLinkUrl(ptr: KPointer): string
     @ani.unsafe.Quick
@@ -6692,11 +6692,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebContextMenuParam_isEditable(ptr: KPointer): boolean
     @ani.unsafe.Direct
-    native static _WebContextMenuParam_getEditStateFlags(ptr: KPointer): number
+    native static _WebContextMenuParam_getEditStateFlags(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _WebContextMenuParam_getPreviewWidth(ptr: KPointer): number
+    native static _WebContextMenuParam_getPreviewWidth(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _WebContextMenuParam_getPreviewHeight(ptr: KPointer): number
+    native static _WebContextMenuParam_getPreviewHeight(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _WebContextMenuResult_ctor(): KPointer
     @ani.unsafe.Direct

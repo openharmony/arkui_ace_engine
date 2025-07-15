@@ -589,8 +589,8 @@ export class Deserializer extends DeserializerBase {
     }
     readOnOverScrollEvent(): OnOverScrollEvent {
         let valueDeserializer : Deserializer = this
-        const xOffset_result : number = (valueDeserializer.readNumber() as number)
-        const yOffset_result : number = (valueDeserializer.readNumber() as number)
+        const xOffset_result : float32 = valueDeserializer.readFloat32().toFloat()
+        const yOffset_result : float32 = valueDeserializer.readFloat32().toFloat()
         let value : OnOverScrollEvent = ({xOffset: xOffset_result, yOffset: yOffset_result} as OnOverScrollEvent)
         return value
     }
@@ -602,15 +602,15 @@ export class Deserializer extends DeserializerBase {
     }
     readOnScaleChangeEvent(): OnScaleChangeEvent {
         let valueDeserializer : Deserializer = this
-        const oldScale_result : number = (valueDeserializer.readNumber() as number)
-        const newScale_result : number = (valueDeserializer.readNumber() as number)
+        const oldScale_result : float32 = valueDeserializer.readFloat32().toFloat()
+        const newScale_result : float32 = valueDeserializer.readFloat32().toFloat()
         let value : OnScaleChangeEvent = ({oldScale: oldScale_result, newScale: newScale_result} as OnScaleChangeEvent)
         return value
     }
     readOnScrollEvent(): OnScrollEvent {
         let valueDeserializer : Deserializer = this
-        const xOffset_result : number = (valueDeserializer.readNumber() as number)
-        const yOffset_result : number = (valueDeserializer.readNumber() as number)
+        const xOffset_result : float32 = valueDeserializer.readFloat32().toFloat()
+        const yOffset_result : float32 = valueDeserializer.readFloat32().toFloat()
         let value : OnScrollEvent = ({xOffset: xOffset_result, yOffset: yOffset_result} as OnScrollEvent)
         return value
     }

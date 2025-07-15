@@ -1413,7 +1413,7 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     textZoomAtio(textZoomAtio: number): this;
     textZoomRatio(textZoomRatio: number): this;
     databaseAccess(databaseAccess: boolean): this;
-    initialScale(percent: number): this;
+    initialScale(percent: double): this;
     userAgent(userAgent: string): this;
     onPageEnd(callback: (event?: {
         url: string;

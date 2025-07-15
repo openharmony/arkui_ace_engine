@@ -466,7 +466,7 @@ void DatabaseAccessImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void InitialScaleImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Float32* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);

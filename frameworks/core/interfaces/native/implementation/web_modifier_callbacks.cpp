@@ -428,8 +428,8 @@ void OnScaleChange(const CallbackHelper<Callback_OnScaleChangeEvent_Void>& arkCa
     auto* eventInfo = TypeInfoHelper::DynamicCast<ScaleChangeEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_OnScaleChangeEvent parameter;
-    parameter.newScale = Converter::ArkValue<Ark_Number>(eventInfo->GetOnScaleChangeNewScale());
-    parameter.oldScale = Converter::ArkValue<Ark_Number>(eventInfo->GetOnScaleChangeOldScale());
+    parameter.newScale = Converter::ArkValue<Ark_Float32>(eventInfo->GetOnScaleChangeNewScale());
+    parameter.oldScale = Converter::ArkValue<Ark_Float32>(eventInfo->GetOnScaleChangeOldScale());
     arkCallback.Invoke(parameter);
 }
 
@@ -566,8 +566,8 @@ void OnScroll(const CallbackHelper<Callback_OnScrollEvent_Void>& arkCallback,
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnScrollEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_OnScrollEvent parameter;
-    parameter.xOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetX());
-    parameter.yOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetY());
+    parameter.xOffset = Converter::ArkValue<Ark_Float32>(eventInfo->GetX());
+    parameter.yOffset = Converter::ArkValue<Ark_Float32>(eventInfo->GetY());
     arkCallback.Invoke(parameter);
 }
 
@@ -992,8 +992,8 @@ void OnOverScroll(const CallbackHelper<Callback_OnOverScrollEvent_Void>& arkCall
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnOverScrollEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_OnOverScrollEvent parameter;
-    parameter.xOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetX());
-    parameter.yOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetY());
+    parameter.xOffset = Converter::ArkValue<Ark_Float32>(eventInfo->GetX());
+    parameter.yOffset = Converter::ArkValue<Ark_Float32>(eventInfo->GetY());
     arkCallback.Invoke(parameter);
 }
 

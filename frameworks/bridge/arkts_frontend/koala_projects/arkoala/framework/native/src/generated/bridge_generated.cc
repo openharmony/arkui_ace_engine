@@ -29292,14 +29292,14 @@ void impl_WebAttribute_initialScale(Ark_NativePointer thisPtr, KSerializerBuffer
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number value_value_buf = {};
+        Opt_Float32 value_value_buf = {};
         value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
         {
-            value_value_buf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            value_value_buf.value = static_cast<Ark_Float32>(thisDeserializer.readFloat32());
         }
-        Opt_Number value_value = value_value_buf;;
-        GetNodeModifiers()->getWebModifier()->setInitialScale(self, (const Opt_Number*)&value_value);
+        Opt_Float32 value_value = value_value_buf;;
+        GetNodeModifiers()->getWebModifier()->setInitialScale(self, (const Opt_Float32*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_initialScale, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_userAgent(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -43443,16 +43443,16 @@ Ark_NativePointer impl_WebContextMenuParam_getFinalizer() {
         return GetAccessors()->getWebContextMenuParamAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(WebContextMenuParam_getFinalizer, Ark_NativePointer)
-Ark_Number impl_WebContextMenuParam_x(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_WebContextMenuParam_x(Ark_NativePointer thisPtr) {
         Ark_WebContextMenuParam self = reinterpret_cast<Ark_WebContextMenuParam>(thisPtr);
         return GetAccessors()->getWebContextMenuParamAccessor()->x(self);
 }
-KOALA_INTEROP_DIRECT_1(WebContextMenuParam_x, KInteropNumber, Ark_NativePointer)
-Ark_Number impl_WebContextMenuParam_y(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_1(WebContextMenuParam_x, Ark_Int32, Ark_NativePointer)
+Ark_Int32 impl_WebContextMenuParam_y(Ark_NativePointer thisPtr) {
         Ark_WebContextMenuParam self = reinterpret_cast<Ark_WebContextMenuParam>(thisPtr);
         return GetAccessors()->getWebContextMenuParamAccessor()->y(self);
 }
-KOALA_INTEROP_DIRECT_1(WebContextMenuParam_y, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(WebContextMenuParam_y, Ark_Int32, Ark_NativePointer)
 Ark_String impl_WebContextMenuParam_getLinkUrl(Ark_NativePointer thisPtr) {
         Ark_WebContextMenuParam self = reinterpret_cast<Ark_WebContextMenuParam>(thisPtr);
         return GetAccessors()->getWebContextMenuParamAccessor()->getLinkUrl(self);
@@ -43498,21 +43498,21 @@ Ark_Boolean impl_WebContextMenuParam_isEditable(Ark_NativePointer thisPtr) {
         return GetAccessors()->getWebContextMenuParamAccessor()->isEditable(self);
 }
 KOALA_INTEROP_DIRECT_1(WebContextMenuParam_isEditable, Ark_Boolean, Ark_NativePointer)
-Ark_Number impl_WebContextMenuParam_getEditStateFlags(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_WebContextMenuParam_getEditStateFlags(Ark_NativePointer thisPtr) {
         Ark_WebContextMenuParam self = reinterpret_cast<Ark_WebContextMenuParam>(thisPtr);
         return GetAccessors()->getWebContextMenuParamAccessor()->getEditStateFlags(self);
 }
-KOALA_INTEROP_DIRECT_1(WebContextMenuParam_getEditStateFlags, KInteropNumber, Ark_NativePointer)
-Ark_Number impl_WebContextMenuParam_getPreviewWidth(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_1(WebContextMenuParam_getEditStateFlags, Ark_Int32, Ark_NativePointer)
+Ark_Int32 impl_WebContextMenuParam_getPreviewWidth(Ark_NativePointer thisPtr) {
         Ark_WebContextMenuParam self = reinterpret_cast<Ark_WebContextMenuParam>(thisPtr);
         return GetAccessors()->getWebContextMenuParamAccessor()->getPreviewWidth(self);
 }
-KOALA_INTEROP_DIRECT_1(WebContextMenuParam_getPreviewWidth, KInteropNumber, Ark_NativePointer)
-Ark_Number impl_WebContextMenuParam_getPreviewHeight(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_1(WebContextMenuParam_getPreviewWidth, Ark_Int32, Ark_NativePointer)
+Ark_Int32 impl_WebContextMenuParam_getPreviewHeight(Ark_NativePointer thisPtr) {
         Ark_WebContextMenuParam self = reinterpret_cast<Ark_WebContextMenuParam>(thisPtr);
         return GetAccessors()->getWebContextMenuParamAccessor()->getPreviewHeight(self);
 }
-KOALA_INTEROP_DIRECT_1(WebContextMenuParam_getPreviewHeight, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(WebContextMenuParam_getPreviewHeight, Ark_Int32, Ark_NativePointer)
 Ark_NativePointer impl_WebContextMenuResult_ctor() {
         return GetAccessors()->getWebContextMenuResultAccessor()->ctor();
 }

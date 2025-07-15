@@ -7240,8 +7240,8 @@ typedef struct Opt_OnFoldStatusChangeInfo {
     Ark_OnFoldStatusChangeInfo value;
 } Opt_OnFoldStatusChangeInfo;
 typedef struct Ark_OnOverScrollEvent {
-    Ark_Number xOffset;
-    Ark_Number yOffset;
+    Ark_Float32 xOffset;
+    Ark_Float32 yOffset;
 } Ark_OnOverScrollEvent;
 typedef struct Opt_OnOverScrollEvent {
     Ark_Tag tag;
@@ -7255,16 +7255,16 @@ typedef struct Opt_OnProgressChangeEvent {
     Ark_OnProgressChangeEvent value;
 } Opt_OnProgressChangeEvent;
 typedef struct Ark_OnScaleChangeEvent {
-    Ark_Number oldScale;
-    Ark_Number newScale;
+    Ark_Float32 oldScale;
+    Ark_Float32 newScale;
 } Ark_OnScaleChangeEvent;
 typedef struct Opt_OnScaleChangeEvent {
     Ark_Tag tag;
     Ark_OnScaleChangeEvent value;
 } Opt_OnScaleChangeEvent;
 typedef struct Ark_OnScrollEvent {
-    Ark_Number xOffset;
-    Ark_Number yOffset;
+    Ark_Float32 xOffset;
+    Ark_Float32 yOffset;
 } Ark_OnScrollEvent;
 typedef struct Opt_OnScrollEvent {
     Ark_Tag tag;
@@ -23283,7 +23283,7 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setDatabaseAccess)(Ark_NativePointer node,
                               const Opt_Boolean* value);
     void (*setInitialScale)(Ark_NativePointer node,
-                            const Opt_Number* value);
+                            const Opt_Float32* value);
     void (*setUserAgent)(Ark_NativePointer node,
                          const Opt_String* value);
     void (*setMetaViewport)(Ark_NativePointer node,
@@ -26999,8 +26999,8 @@ typedef struct GENERATED_ArkUIWebContextMenuParamAccessor {
     void (*destroyPeer)(Ark_WebContextMenuParam peer);
     Ark_WebContextMenuParam (*ctor)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*x)(Ark_WebContextMenuParam peer);
-    Ark_Number (*y)(Ark_WebContextMenuParam peer);
+    Ark_Int32 (*x)(Ark_WebContextMenuParam peer);
+    Ark_Int32 (*y)(Ark_WebContextMenuParam peer);
     Ark_String (*getLinkUrl)(Ark_WebContextMenuParam peer);
     Ark_String (*getUnfilteredLinkUrl)(Ark_WebContextMenuParam peer);
     Ark_String (*getSourceUrl)(Ark_WebContextMenuParam peer);
@@ -27010,9 +27010,9 @@ typedef struct GENERATED_ArkUIWebContextMenuParamAccessor {
     Ark_ContextMenuSourceType (*getSourceType)(Ark_WebContextMenuParam peer);
     Ark_ContextMenuInputFieldType (*getInputFieldType)(Ark_WebContextMenuParam peer);
     Ark_Boolean (*isEditable)(Ark_WebContextMenuParam peer);
-    Ark_Number (*getEditStateFlags)(Ark_WebContextMenuParam peer);
-    Ark_Number (*getPreviewWidth)(Ark_WebContextMenuParam peer);
-    Ark_Number (*getPreviewHeight)(Ark_WebContextMenuParam peer);
+    Ark_Int32 (*getEditStateFlags)(Ark_WebContextMenuParam peer);
+    Ark_Int32 (*getPreviewWidth)(Ark_WebContextMenuParam peer);
+    Ark_Int32 (*getPreviewHeight)(Ark_WebContextMenuParam peer);
 } GENERATED_ArkUIWebContextMenuParamAccessor;
 
 typedef struct GENERATED_ArkUIWebContextMenuResultAccessor {

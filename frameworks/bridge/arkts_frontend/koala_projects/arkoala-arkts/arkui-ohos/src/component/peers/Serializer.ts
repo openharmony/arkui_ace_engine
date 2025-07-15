@@ -503,10 +503,10 @@ export class Serializer extends SerializerBase {
     }
     writeOnOverScrollEvent(value: OnOverScrollEvent): void {
         let valueSerializer : Serializer = this
-        const value_xOffset  = value.xOffset
-        valueSerializer.writeNumber(value_xOffset)
-        const value_yOffset  = value.yOffset
-        valueSerializer.writeNumber(value_yOffset)
+        const value_xOffset  = value.xOffset.toFloat()
+        valueSerializer.writeFloat32(value_xOffset)
+        const value_yOffset  = value.yOffset.toFloat()
+        valueSerializer.writeFloat32(value_yOffset)
     }
     writeOnProgressChangeEvent(value: OnProgressChangeEvent): void {
         let valueSerializer : Serializer = this
@@ -515,17 +515,17 @@ export class Serializer extends SerializerBase {
     }
     writeOnScaleChangeEvent(value: OnScaleChangeEvent): void {
         let valueSerializer : Serializer = this
-        const value_oldScale  = value.oldScale
-        valueSerializer.writeNumber(value_oldScale)
-        const value_newScale  = value.newScale
-        valueSerializer.writeNumber(value_newScale)
+        const value_oldScale  = value.oldScale.toFloat()
+        valueSerializer.writeFloat32(value_oldScale)
+        const value_newScale  = value.newScale.toFloat()
+        valueSerializer.writeFloat32(value_newScale)
     }
     writeOnScrollEvent(value: OnScrollEvent): void {
         let valueSerializer : Serializer = this
-        const value_xOffset  = value.xOffset
-        valueSerializer.writeNumber(value_xOffset)
-        const value_yOffset  = value.yOffset
-        valueSerializer.writeNumber(value_yOffset)
+        const value_xOffset  = value.xOffset.toFloat()
+        valueSerializer.writeFloat32(value_xOffset)
+        const value_yOffset  = value.yOffset.toFloat()
+        valueSerializer.writeFloat32(value_yOffset)
     }
     writeOnScrollFrameBeginHandlerResult(value: OnScrollFrameBeginHandlerResult): void {
         let valueSerializer : Serializer = this

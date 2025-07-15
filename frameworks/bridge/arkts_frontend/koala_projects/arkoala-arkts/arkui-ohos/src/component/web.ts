@@ -635,10 +635,10 @@ export class WebContextMenuParam implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._WebContextMenuParam_getFinalizer()
     }
-    public x(): number {
+    public x(): int32 {
         return this.x_serialize()
     }
-    public y(): number {
+    public y(): int32 {
         return this.y_serialize()
     }
     public getLinkUrl(): string {
@@ -668,20 +668,20 @@ export class WebContextMenuParam implements MaterializedBase {
     public isEditable(): boolean {
         return this.isEditable_serialize()
     }
-    public getEditStateFlags(): number {
+    public getEditStateFlags(): int32 {
         return this.getEditStateFlags_serialize()
     }
-    public getPreviewWidth(): number {
+    public getPreviewWidth(): int32 {
         return this.getPreviewWidth_serialize()
     }
-    public getPreviewHeight(): number {
+    public getPreviewHeight(): int32 {
         return this.getPreviewHeight_serialize()
     }
-    private x_serialize(): number {
+    private x_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_x(this.peer!.ptr)
         return retval
     }
-    private y_serialize(): number {
+    private y_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_y(this.peer!.ptr)
         return retval
     }
@@ -721,15 +721,15 @@ export class WebContextMenuParam implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_isEditable(this.peer!.ptr)
         return retval
     }
-    private getEditStateFlags_serialize(): number {
+    private getEditStateFlags_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getEditStateFlags(this.peer!.ptr)
         return retval
     }
-    private getPreviewWidth_serialize(): number {
+    private getPreviewWidth_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getPreviewWidth(this.peer!.ptr)
         return retval
     }
-    private getPreviewHeight_serialize(): number {
+    private getPreviewHeight_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getPreviewHeight(this.peer!.ptr)
         return retval
     }
@@ -1781,14 +1781,14 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_databaseAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    initialScaleAttribute(value: number | undefined): void {
+    initialScaleAttribute(value: double | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            const value_value  = value!.toFloat()
+            thisSerializer.writeFloat32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_initialScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -3505,8 +3505,8 @@ export interface OnResourceLoadEvent {
     url: string;
 }
 export interface OnScaleChangeEvent {
-    oldScale: number;
-    newScale: number;
+    oldScale: double;
+    newScale: double;
 }
 export interface OnHttpAuthRequestEvent {
     handler: HttpAuthHandler;
@@ -3532,8 +3532,8 @@ export interface OnSearchResultReceiveEvent {
     isDoneCounting: boolean;
 }
 export interface OnScrollEvent {
-    xOffset: number;
-    yOffset: number;
+    xOffset: double;
+    yOffset: double;
 }
 export interface OnSslErrorEventReceiveEvent {
     handler: SslErrorHandler;
@@ -3577,8 +3577,8 @@ export interface OnLoadInterceptEvent {
     data: WebResourceRequest;
 }
 export interface OnOverScrollEvent {
-    xOffset: number;
-    yOffset: number;
+    xOffset: double;
+    yOffset: double;
 }
 export interface JavaScriptProxy {
     object_: Object;
@@ -3685,7 +3685,7 @@ export interface WebAttribute extends CommonMethod {
     textZoomAtio(value: number | undefined): this
     textZoomRatio(value: number | undefined): this
     databaseAccess(value: boolean | undefined): this
-    initialScale(value: number | undefined): this
+    initialScale(value: double | undefined): this
     userAgent(value: string | undefined): this
     metaViewport(value: boolean | undefined): this
     onPageEnd(value: ((parameter: OnPageEndEvent) => void) | undefined): this
@@ -3814,7 +3814,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     textZoomAtio_value?: number | undefined
     textZoomRatio_value?: number | undefined
     databaseAccess_value?: boolean | undefined
-    initialScale_value?: number | undefined
+    initialScale_value?: double | undefined
     userAgent_value?: string | undefined
     metaViewport_value?: boolean | undefined
     onPageEnd_value?: ((parameter: OnPageEndEvent) => void) | undefined
@@ -3983,7 +3983,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     public databaseAccess(value: boolean | undefined): this {
         return this
     }
-    public initialScale(value: number | undefined): this {
+    public initialScale(value: double | undefined): this {
         return this
     }
     public userAgent(value: string | undefined): this {
@@ -4514,9 +4514,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public initialScale(value: number | undefined): this {
+    public initialScale(value: double | undefined): this {
         if (this.checkPriority("initialScale")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.initialScaleAttribute(value_casted)
             return this
         }
@@ -5367,7 +5367,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
