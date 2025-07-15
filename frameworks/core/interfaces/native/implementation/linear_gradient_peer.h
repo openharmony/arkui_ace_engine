@@ -17,8 +17,16 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
-struct LinearGradientPeer {
-    std::vector<std::pair<std::optional<OHOS::Ace::Color>, OHOS::Ace::Dimension>> colorStops;
+using LinearGradientColorSteps = std::vector<std::pair<std::optional<OHOS::Ace::Color>, OHOS::Ace::Dimension>>;
+
+struct LinearGradientPeer final {
+    LinearGradientColorSteps colorStops;
+
+protected:
+    explicit LinearGradientPeer(const LinearGradientColorSteps& src) : colorStops(src) {}
+    ~LinearGradientPeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_LINEAR_GRADIENT_PEER_H
