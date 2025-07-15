@@ -3057,6 +3057,11 @@ interfaces/inner_api/xcomponent_controller/ @arkuilayout
 interfaces/inner_api/ace_kit/include/ @arkui_architecture
 interfaces/inner_api/ace_kit/src/ @arkuiframework
 
+[Arkoala]
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyForEachImpl.ts @zhoutianer
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyItemNode.ts @zhoutianer
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/RepeatImpl.ts @liubihao
+
 [NAPI Interfaces]
 interfaces/napi/kits/animator/ @arkui_superman
 interfaces/napi/kits/atomic_service_bar/ @arkuievent
