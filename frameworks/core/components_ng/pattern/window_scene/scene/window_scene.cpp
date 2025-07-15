@@ -37,7 +37,7 @@ const uint32_t CLEAN_WINDOW_DELAY_TIME = 1000;
 const uint32_t REMOVE_STARTING_WINDOW_TIMEOUT_MS = 5000;
 const int32_t ANIMATION_DURATION = 200;
 const uint32_t REMOVE_SNAPSHOT_WINDOW_DELAY_TIME = 100;
-std::unordered_map<NodeId, int> surfaceNodeCountMap_;
+std::unordered_map<uint64_t, int> surfaceNodeCountMap_;
 } // namespace
 
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)

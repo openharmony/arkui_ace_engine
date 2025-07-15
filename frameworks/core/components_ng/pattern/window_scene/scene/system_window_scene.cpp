@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t DELAY_TIME = 3000;
-std::unordered_map<NodeId, int> surfaceNodeCountMap_;
+std::unordered_map<uint64_t, int> surfaceNodeCountMap_;
 } // namespace
 
 SystemWindowScene::SystemWindowScene(const sptr<Rosen::Session>& session) : session_(session)
