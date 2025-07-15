@@ -840,6 +840,12 @@ public:
         return targetIndex_;
     }
 
+    void OnFontScaleConfigurationUpdate() override;
+    void SetMainSizeIsMeasured(bool mainSizeIsMeasured)
+    {
+        mainSizeIsMeasured_ = mainSizeIsMeasured;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);

@@ -7688,4 +7688,16 @@ void SwiperPattern::OnColorModeChange(uint32_t colorMode)
     InitArrow();
     swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
+
+void SwiperPattern::OnFontScaleConfigurationUpdate()
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterReloadAnimationTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetMainSizeIsMeasured(false);
+        pattern->MarkDirtyNodeSelf();
+    });
+}
 } // namespace OHOS::Ace::NG

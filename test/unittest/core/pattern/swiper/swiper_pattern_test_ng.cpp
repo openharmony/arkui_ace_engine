@@ -1723,4 +1723,29 @@ HWTEST_F(SwiperPatternTestNg, HandleTouchBottomLoopOnRTL001, TestSize.Level1)
     pattern_->HandleTouchBottomLoopOnRTL();
     EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
 }
+
+/**
+ * @tc.name: OnFontScaleConfigurationUpdate001
+ * @tc.desc: Test SwiperPattern OnFontScaleConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, OnFontScaleConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper, mainSizeIsMeasured_ is false after first layout.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->mainSizeIsMeasured_, true);
+
+    /**
+     * @tc.steps: step2. mainSizeIsMeasured_ needs to be changed to false after OnFontScaleConfigurationUpdate called.
+     */
+    pattern_->OnFontScaleConfigurationUpdate();
+    auto pipelineContext = pattern_->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->OnFlushReloadFinish();
+    EXPECT_EQ(pattern_->mainSizeIsMeasured_, false);
+}
 } // namespace OHOS::Ace::NG
