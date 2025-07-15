@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { NavPathStack, NavigationOperation, NavBar, ResourceStr, Resource } from "@ohos.arkui.component"
+import { NavPathStack, NavigationOperation, NavBar, ResourceStr, Resource, NavDestinationMode } from "@ohos.arkui.component"
 import { UIContext } from "@ohos.arkui.UIContext"
 import UIAbilityContext from 'application.UIAbilityContext';
 import type { Callback } from '@ohos.base';
@@ -102,6 +102,8 @@ import hilog from '@ohos.hilog'
         index: number;
         param?: Object;
         navDestinationId: string;
+        uniqueId: number;
+        mode: NavDestinationMode;
     }
 
     export class NavDestinationInfoImpl implements NavDestinationInfo {
@@ -111,6 +113,8 @@ import hilog from '@ohos.hilog'
         index: number;
         param?: Object;
         navDestinationId: string;
+        uniqueId: number;
+        mode: NavDestinationMode;
         static castToNavDestinationInfo(value: number): NavDestinationState {
             if (value === 0) {
                 return NavDestinationState.ON_SHOWN;
