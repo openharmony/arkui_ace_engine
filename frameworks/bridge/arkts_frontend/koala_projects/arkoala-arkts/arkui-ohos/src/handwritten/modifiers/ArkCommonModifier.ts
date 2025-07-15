@@ -34,6 +34,7 @@ import { int32} from "@koalaui/common"
 import { PeerNode } from '../../PeerNode';
 import { InteropNativeModule } from '@koalaui/interop';
 import { CommonMethodModifier } from '../../CommonMethodModifier';
+
 export enum ModifierType {
    ORIGIN = 0,
    STATE = 1,
