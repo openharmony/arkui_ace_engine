@@ -54,7 +54,8 @@ public:
         ScrollTestNg::TearDownTestSuite();
         MockAnimationManager::Enable(false);
     }
-    void TearDown() override {
+    void TearDown() override
+    {
         ScrollTestNg::TearDown();
         MockAnimationManager::GetInstance().SetTicks(1);
     }
@@ -406,13 +407,13 @@ TEST_F(FreeScrollTest, Touch001)
     PanUpdate({ DELTA_X, DELTA_Y });
     auto&& controller = pattern_->freeScroll_;
     EXPECT_EQ(controller->state_, State::DRAG);
-    TouchDown(); // second finger down
+    TouchDown();                                // second finger down
     EXPECT_EQ(controller->state_, State::DRAG); // should not change state
     PanUpdate({ DELTA_X, DELTA_Y });
     EXPECT_EQ(controller->state_, State::DRAG); // should not change state
-    TouchUp(); // first finger up
+    TouchUp();                                  // first finger up
     EXPECT_EQ(controller->state_, State::DRAG); // should not change state
-    TouchUp(); // second finger up
+    TouchUp();                                  // second finger up
     PanEnd({ DELTA_X, DELTA_Y }, { VELOCITY_X, VELOCITY_Y });
     EXPECT_EQ(controller->state_, State::FLING);
     MockAnimationManager::GetInstance().Tick();
@@ -471,7 +472,7 @@ TEST_F(FreeScrollTest, Animation001)
     PanEnd({}, { 0, -VELOCITY_Y });
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VELOCITY_Y / (friction2 * -FRICTION_SCALE));
+    EXPECT_EQ(GetChildY(frameNode_, 0), -VELOCITY_Y * FLING_SCALE_K / (friction2 * -FRICTION_SCALE));
 }
 
 /**
@@ -567,7 +568,8 @@ TEST_F(FreeScrollTest, Animation004)
     MockAnimationManager::GetInstance().SetTicks(2);
     PanEnd({ -LARGE_DELTA_X, -LARGE_DELTA_Y }, { VELOCITY_X, VELOCITY_Y });
     EXPECT_EQ(pattern_->freeScroll_->state_, State::FLING);
-    EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue().GetX(), -1 + VELOCITY_X / (friction * -FRICTION_SCALE));
+    EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue().GetX(),
+        -1 + VELOCITY_X * FLING_SCALE_K / (friction * -FRICTION_SCALE));
     MockAnimationManager::GetInstance().Tick(); // switched to high-friction spring motion after reaching edge
     EXPECT_EQ(pattern_->freeScroll_->state_, State::BOUNCE);
     EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue(), OffsetF());
@@ -720,12 +722,8 @@ TEST_F(FreeScrollTest, Event003)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
-    model.SetOnReachStart([]() {
-        ADD_FAILURE() << "onReachStart should not be called in FreeScroll mode";
-    });
-    model.SetOnReachEnd([]() {
-        ADD_FAILURE() << "onReachEnd should not be called in FreeScroll mode";
-    });
+    model.SetOnReachStart([]() { ADD_FAILURE() << "onReachStart should not be called in FreeScroll mode"; });
+    model.SetOnReachEnd([]() { ADD_FAILURE() << "onReachEnd should not be called in FreeScroll mode"; });
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
 
@@ -749,12 +747,13 @@ TEST_F(FreeScrollTest, Scroller001)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
     static int32_t willScrollCalled = 0;
-    model.SetOnWillScroll([](const Dimension& xOffset, const Dimension& yOffset, ScrollState state, ScrollSource source) {
-        EXPECT_EQ(state, ScrollState::IDLE);
-        EXPECT_EQ(source, ScrollSource::SCROLLER);
-        ++willScrollCalled;
-        return TwoDimensionScrollResult { .xOffset = xOffset, .yOffset = yOffset };
-    });
+    model.SetOnWillScroll(
+        [](const Dimension& xOffset, const Dimension& yOffset, ScrollState state, ScrollSource source) {
+            EXPECT_EQ(state, ScrollState::IDLE);
+            EXPECT_EQ(source, ScrollSource::SCROLLER);
+            ++willScrollCalled;
+            return TwoDimensionScrollResult { .xOffset = xOffset, .yOffset = yOffset };
+        });
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
     auto scroller = AceType::MakeRefPtr<ScrollableController>();
@@ -882,7 +881,8 @@ TEST_F(FreeScrollTest, Scroller004)
 
     MockAnimationManager::GetInstance().SetTicks(2);
 
-    scroller->FreeScrollTo({ .xOffset = Dimension(CONTENT_W), .yOffset = Dimension(CONTENT_H), .smooth = true, .canOverScroll = true });
+    scroller->FreeScrollTo(
+        { .xOffset = Dimension(CONTENT_W), .yOffset = Dimension(CONTENT_H), .smooth = true, .canOverScroll = true });
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     MockAnimationManager::GetInstance().Tick();

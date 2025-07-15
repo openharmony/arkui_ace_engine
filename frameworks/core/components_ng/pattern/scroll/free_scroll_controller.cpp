@@ -228,7 +228,7 @@ void FreeScrollController::Fling(const OffsetF& velocity)
         return;
     }
 
-    OffsetF finalPos = offset_->Get() + velocity / friction;
+    OffsetF finalPos = offset_->Get() + velocity * FLING_SCALE_K / friction;
     if (outOfBounds) {
         finalPos = ClampPosition(finalPos);
     } // when not out of bounds, finalPos doesn't need clamping because we would clamp it later during the
