@@ -843,4 +843,215 @@ HWTEST_F(ScrollModelNGTestNg, GetOnScrollEdge007, TestSize.Level1)
     auto result = scrollModelNG.GetOnScrollEdge(AceType::RawPtr(scrollNode));
     EXPECT_EQ(result, ScrollEdgeType::SCROLL_NONE);
 }
+
+/**
+ * @tc.name: SetScrollController
+ * @tc.desc: Test ScrollModelNG SetScrollController
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetScrollController, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    RefPtr<ScrollableController> scroller = AceType::MakeRefPtr<ScrollableController>();
+    RefPtr<ScrollBarProxy> proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+
+    /**
+     * @tc.steps: step2. Calling the SetScrollController function
+     * @tc.expected: The GetScrollBarProxy() of scrollPattern returns proxy
+     */
+    scrollModelNG.SetScrollController(AceType::RawPtr(scrollNode), scroller, proxy);
+    EXPECT_EQ(scrollPattern->GetScrollBarProxy(), proxy);
+}
+
+/**
+ * @tc.name: SetOnScrollFrameBegin_TwoParameters
+ * @tc.desc: Test ScrollModelNG SetOnScrollFrameBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetOnScrollFrameBegin_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    auto eventHub = scrollNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto scrollHandler = [](Dimension delta, ScrollState state) -> ScrollFrameResult {
+        Dimension newOffset;
+
+        switch (state) {
+            case ScrollState::IDLE:
+                newOffset.SetValue(0.0);
+                break;
+
+            case ScrollState::SCROLL:
+                newOffset.SetValue(delta.Value());
+                break;
+
+            case ScrollState::FLING:
+                newOffset.SetValue(delta.Value() * 0.8);
+                break;
+        }
+
+        return { newOffset };
+    };
+
+    /**
+     * @tc.steps: step2. Calling the SetOnScrollFrameBegin function
+     * @tc.expected: Calling the onScrollFrameBeginEvent returns 8.0
+     */
+    scrollModelNG.SetOnScrollFrameBegin(AceType::RawPtr(scrollNode), scrollHandler);
+    auto onScrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
+    auto onScrollFrameBegin = onScrollFrameBeginEvent(Dimension(10.0), ScrollState::FLING);
+    EXPECT_EQ(onScrollFrameBegin.offset.Value(), 8.0);
+}
+
+/**
+ * @tc.name: SetOnScrollBegin_OneParameter
+ * @tc.desc: Test ScrollModelNG SetOnScrollBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetOnScrollBegin_OneParameter, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    stack->Push(scrollNode);
+    scrollNode->layoutSeperately_ = true;
+    auto eventHub = scrollNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto scrollBeginHandler = [](Dimension initialDeltaX, Dimension initialDeltaY) -> ScrollInfo {
+        return { initialDeltaX, initialDeltaY };
+    };
+
+    /**
+     * @tc.steps: step2. Calling the SetOnScrollBegin function
+     * @tc.expected: Calling the onScrollBeginEvent returns {10.0, 5.0}
+     */
+    scrollModelNG.SetOnScrollBegin(scrollBeginHandler);
+    auto onScrollBeginEvent = eventHub->GetScrollBeginEvent();
+    auto onScrollBegin = onScrollBeginEvent(Dimension(10.0), Dimension(5.0));
+    EXPECT_EQ(onScrollBegin.dx.Value(), 10.0);
+    EXPECT_EQ(onScrollBegin.dy.Value(), 5.0);
+}
+
+/**
+ * @tc.name: SetOnScrollFrameBegin_OneParameter
+ * @tc.desc: Test ScrollModelNG SetOnScrollFrameBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetOnScrollFrameBegin_OneParameter, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    stack->Push(scrollNode);
+    scrollNode->layoutSeperately_ = true;
+    auto eventHub = scrollNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto scrollHandler = [](Dimension delta, ScrollState state) -> ScrollFrameResult {
+        Dimension newOffset;
+
+        switch (state) {
+            case ScrollState::IDLE:
+                newOffset.SetValue(0.0);
+                break;
+
+            case ScrollState::SCROLL:
+                newOffset.SetValue(delta.Value());
+                break;
+
+            case ScrollState::FLING:
+                newOffset.SetValue(delta.Value() * 0.8);
+                break;
+        }
+
+        return { newOffset };
+    };
+
+    /**
+     * @tc.steps: step2. Calling the SetOnScrollFrameBegin function
+     * @tc.expected: Calling the onScrollFrameBeginEvent returns 10.0
+     */
+    scrollModelNG.SetOnScrollFrameBegin(scrollHandler);
+    auto onScrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
+    EXPECT_EQ(onScrollFrameBeginEvent(Dimension(10.0), ScrollState::SCROLL).offset.Value(), 10.0);
+}
+
+/**
+ * @tc.name: SetOnWillScroll_TwoParameters
+ * @tc.desc: Test ScrollModelNG SetOnWillScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetOnWillScroll_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    auto eventHub = scrollNode->GetOrCreateEventHub<ScrollEventHub>();
+    auto scrollHandler = [](Dimension deltaX, Dimension deltaY, ScrollState state,
+                             ScrollSource source) -> TwoDimensionScrollResult {
+        TwoDimensionScrollResult result;
+
+        bool isHorizontalAllowed = true;
+        bool isVerticalAllowed = true;
+
+        if (source == ScrollSource::SCROLL_BAR) {
+            if (std::abs(deltaX.Value()) > std::abs(deltaY.Value())) {
+                isVerticalAllowed = false;
+            } else {
+                isHorizontalAllowed = false;
+            }
+        }
+
+        double stateMultiplier = 1.0;
+        switch (state) {
+            case ScrollState::IDLE:
+                stateMultiplier = 0.0;
+                break;
+            case ScrollState::SCROLL:
+                stateMultiplier = 1.0;
+                break;
+            case ScrollState::FLING:
+                stateMultiplier = 1.2;
+                break;
+        }
+
+        result.xOffset.value_ = isHorizontalAllowed ? deltaX.Value() * stateMultiplier : 0.0;
+        result.yOffset.value_ = isVerticalAllowed ? deltaY.Value() * stateMultiplier : 0.0;
+
+        return result;
+    };
+
+    /**
+     * @tc.steps: step2. Calling the SetOnWillScroll function
+     * @tc.expected: Calling the onWillScrollEvent returns {12.0, 0.0}
+     */
+    scrollModelNG.SetOnWillScroll(AceType::RawPtr(scrollNode), scrollHandler);
+    auto onWillScrollEvent = eventHub->GetOnWillScrollEvent();
+    auto scrollEventWithReturn =
+        onWillScrollEvent(Dimension(10.0), Dimension(5.0), ScrollState::FLING, ScrollSource::SCROLL_BAR);
+    EXPECT_EQ(scrollEventWithReturn.xOffset.Value(), 12.0);
+    EXPECT_EQ(scrollEventWithReturn.yOffset.Value(), 0.0);
+}
 } // namespace OHOS::Ace::NG
