@@ -11,3 +11,4 @@ export * from './base/types';
 export * from './decoratorImpl/decoratorWatch';
 export * from './decorator';
 export * from './utils';
+export * from './remember';

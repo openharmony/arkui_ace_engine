@@ -18,6 +18,7 @@
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -236,6 +237,11 @@ void SetOverlayComponent(ani_long node, ani_long builderPtr, AniOverlayOptions o
     ViewAbstract::SetOverlayBuilder(frameNode, overlayNode, align, x, y);
 }
 
+void SetParallelScoped(ani_boolean parallel)
+{
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(parallel);
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -255,7 +261,9 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .onMeasureInnerMeasure = OHOS::Ace::NG::OnMeasureInnerMeasure,
         .onLayoutInnerLayout = OHOS::Ace::NG::OnLayoutInnerLayout,
         .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode,
-        .setOverlayComponent = OHOS::Ace::NG::SetOverlayComponent };
+        .setOverlayComponent = OHOS::Ace::NG::SetOverlayComponent,
+        .setParallelScoped = OHOS::Ace::NG::SetParallelScoped
+    };
     return &impl;
 }
 
