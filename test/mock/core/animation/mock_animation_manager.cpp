@@ -46,6 +46,9 @@ std::vector<RefPtr<MockImplicitAnimation>> MockAnimationManager::CloseAnimation(
     for (const auto& prop : activeProps_) {
         auto anim = propToAnimation_[prop].Upgrade();
         if (anim) {
+            if (!anim->Finished()) {
+                anim->End(); // call previous animation's end callback
+            }
             // update existing animation instead
             anim->Update(params_.callbacks, ticks_);
             continue;

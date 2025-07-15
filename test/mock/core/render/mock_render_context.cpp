@@ -31,9 +31,7 @@ void InitProp(const RefPtr<PropertyBase>& propBase)
             [weak = WeakPtr(prop)]() { return MockAnimationProxy<float>::GetInstance().GetValue(weak.Upgrade()); },
             [weak = WeakPtr(prop)](
                 float value) { MockAnimationProxy<float>::GetInstance().RecordPropChange(weak, value); },
-            [weak = WeakPtr(prop)]() {
-                return MockAnimationProxy<float>::GetInstance().GetEndValue(weak.Upgrade());
-            });
+            [weak = WeakPtr(prop)]() { return MockAnimationProxy<float>::GetInstance().GetEndValue(weak.Upgrade()); });
     }
 
     if (auto prop = AceType::DynamicCast<AnimatablePropertyOffsetF>(propBase); prop) {
