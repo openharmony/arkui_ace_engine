@@ -298,7 +298,7 @@ export class SerializerBase {
     writeString(value: string) {
         this.checkCapacity(4 + value.length * 4) // length, data
         let encodedLength =
-            InteropNativeModule._ManagedStringWrite(value, new Uint8Array(this.view.buffer, 0), this.position + 4)
+            InteropNativeModule._ManagedStringWrite(value, new Uint8Array(this.view.buffer, 0), this.view.buffer.byteLength, this.position + 4)
         this.view.setInt32(this.position, encodedLength, true)
         this.position += encodedLength + 4
     }

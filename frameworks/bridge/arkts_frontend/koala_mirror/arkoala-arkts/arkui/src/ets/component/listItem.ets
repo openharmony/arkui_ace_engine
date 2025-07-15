@@ -103,6 +103,12 @@ export class ArkListItemPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ListItemAttribute_setOnSelect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_selectedAttribute(callback_: ((selected: boolean | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._ListItemAttribute_set_onChangeEvent_selected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum SwipeEdgeEffect {
     SPRING = 0,
@@ -142,6 +148,7 @@ export interface ListItemAttribute extends CommonMethod {
     selected(value: boolean | undefined): this
     swipeAction(value: SwipeActionOptions | undefined): this
     onSelect(value: ((isSelected: boolean) => void) | undefined): this
+    _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void
     attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAttribute {
@@ -161,6 +168,9 @@ export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAt
     }
     public onSelect(value: ((isSelected: boolean) => void) | undefined): this {
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -221,6 +231,14 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
             return this
         }
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_selected")) {
+            const callback__casted = callback_ as (((selected: boolean | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_selectedAttribute(callback__casted)
+            return
+        }
+        return
     }
     public attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
@@ -285,6 +303,8 @@ export class ArkListItemSet extends ArkCommonMethodSet implements ListItemAttrib
     _swipeAction0_value?: SwipeActionOptions | undefined
     _onSelect_flag?: boolean
     _onSelect0_value?: ((isSelected: boolean) => void) | undefined
+    __onChangeEvent_selected_flag?: boolean
+    __onChangeEvent_selected0_value?: ((selected: boolean | undefined) => void)
     applyModifierPatch(component: ListItemAttribute): void {
         if (this._selectable_flag)
             component.selectable((this._selectable0_value as boolean | undefined))
@@ -314,6 +334,8 @@ export class ArkListItemSet extends ArkCommonMethodSet implements ListItemAttrib
         this._onSelect_flag = true
         this._onSelect0_value = value
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

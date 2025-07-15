@@ -22,6 +22,7 @@
 #include <cmath>
 
 #include "interop-types.h"
+#include "interop-utils.h"
 
 #ifdef _MSC_VER
 #define KOALA_EXECUTE(name, code) \
@@ -43,11 +44,11 @@
 
 struct KStringPtrImpl {
     KStringPtrImpl(const uint8_t* str) : _value(nullptr), _owned(true) {
-      int len = str ? strlen((const char*)str) : 0;
+      int len = str ? interop_strlen((const char*)str) : 0;
       assign((const char*)str, len);
     }
     KStringPtrImpl(const char* str) : _value(nullptr), _owned(true) {
-        int len = str ? strlen(str) : 0;
+        int len = str ? interop_strlen(str) : 0;
         assign(str, len);
     }
     KStringPtrImpl(const char* str, int len, bool owned) : _value(nullptr), _owned(owned) {
@@ -87,7 +88,7 @@ struct KStringPtrImpl {
     }
 
     void assign(const char* data) {
-        assign(data, data ? strlen(data) : 0);
+        assign(data, data ? interop_strlen(data) : 0);
     }
 
     void assign(const char* data, int len) {
@@ -95,11 +96,7 @@ struct KStringPtrImpl {
         if (data) {
           if (_owned) {
             _value = reinterpret_cast<char*>(malloc(len + 1));
-            #ifdef __STDC_LIB_EXT1__
-              memcpy_s(_value, len, data, len);
-            #else
-              memcpy(_value, data, len);
-            #endif
+            interop_memcpy(_value, len, data, len);
             _value[len] = 0;
           } else {
             _value = const_cast<char*>(data);

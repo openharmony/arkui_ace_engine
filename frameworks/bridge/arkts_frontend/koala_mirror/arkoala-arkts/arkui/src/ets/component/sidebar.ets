@@ -286,6 +286,12 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMinContentWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_showSideBarAttribute(callback_: ((showSideBar: boolean | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_set_onChangeEvent_showSideBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum SideBarContainerType {
     EMBED = 0,
@@ -327,6 +333,7 @@ export interface SideBarContainerAttribute extends CommonMethod {
     sideBarPosition(value: SideBarPosition | undefined): this
     divider(value: DividerStyle | undefined): this
     minContentWidth(value: Dimension | undefined): this
+    _onChangeEvent_showSideBar(callback_: ((showSideBar: boolean | undefined) => void)): void
     attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements SideBarContainerAttribute {
@@ -383,6 +390,9 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     }
     public minContentWidth(value: Dimension | undefined): this {
         return this
+    }
+    public _onChangeEvent_showSideBar(callback_: ((showSideBar: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -538,6 +548,14 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
+    public _onChangeEvent_showSideBar(callback_: ((showSideBar: boolean | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_showSideBar")) {
+            const callback__casted = callback_ as (((showSideBar: boolean | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_showSideBarAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -615,6 +633,8 @@ export class ArkSideBarContainerSet extends ArkCommonMethodSet implements SideBa
     _divider0_value?: DividerStyle | undefined
     _minContentWidth_flag?: boolean
     _minContentWidth0_value?: Dimension | undefined
+    __onChangeEvent_showSideBar_flag?: boolean
+    __onChangeEvent_showSideBar0_value?: ((showSideBar: boolean | undefined) => void)
     applyModifierPatch(component: SideBarContainerAttribute): void {
         if (this._showSideBar_flag)
             component.showSideBar((this._showSideBar0_value as boolean | undefined))
@@ -693,6 +713,8 @@ export class ArkSideBarContainerSet extends ArkCommonMethodSet implements SideBa
         this._minContentWidth_flag = true
         this._minContentWidth0_value = value
         return this
+    }
+    public _onChangeEvent_showSideBar(callback_: ((showSideBar: boolean | undefined) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

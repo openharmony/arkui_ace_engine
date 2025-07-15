@@ -1051,6 +1051,12 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setCustomKeyboard(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_textAttribute(callback_: ((text: ResourceStr | Resource | string) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._TextAreaAttribute_set_onChangeEvent_text(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface TextAreaOptions {
     placeholder?: ResourceStr;
@@ -1127,6 +1133,7 @@ export interface TextAreaAttribute extends CommonMethod {
     inputFilter(value: ResourceStr | undefined, error?: ((value: string) => void)): this
     showCounter(value: boolean | undefined, options?: InputCounterOptions): this
     customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
+    _onChangeEvent_text(callback_: ((text: ResourceStr | Resource | string) => void)): void
     attributeModifier(value: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAttribute {
@@ -1367,6 +1374,9 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     }
     public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
         return this
+    }
+    public _onChangeEvent_text(callback_: ((text: ResourceStr | Resource | string) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -1985,6 +1995,14 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
+    public _onChangeEvent_text(callback_: ((text: ResourceStr | Resource | string) => void)): void {
+        if (this.checkPriority("_onChangeEvent_text")) {
+            const callback__casted = callback_ as (((text: ResourceStr | Resource | string) => void))
+            this.getPeer()?.set_onChangeEvent_textAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -2163,6 +2181,8 @@ export class ArkTextAreaSet extends ArkCommonMethodSet implements TextAreaAttrib
     _customKeyboard_flag?: boolean
     _customKeyboard0_value?: CustomBuilder | undefined
     _customKeyboard1_value?: KeyboardOptions | undefined
+    __onChangeEvent_text_flag?: boolean
+    __onChangeEvent_text0_value?: ((text: ResourceStr | Resource | string) => void)
     applyModifierPatch(component: TextAreaAttribute): void {
         if (this._placeholderColor_flag)
             component.placeholderColor((this._placeholderColor0_value as ResourceColor | undefined))
@@ -2587,6 +2607,8 @@ export class ArkTextAreaSet extends ArkCommonMethodSet implements TextAreaAttrib
         this._customKeyboard0_value = value
         this._customKeyboard1_value = options
         return this
+    }
+    public _onChangeEvent_text(callback_: ((text: ResourceStr | Resource | string) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

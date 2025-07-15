@@ -532,6 +532,12 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SliderAttribute_setShowTips(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_valueAttribute(callback_: ((value: number | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._SliderAttribute_set_onChangeEvent_value(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum SliderStyle {
     OUT_SET = 0,
@@ -607,6 +613,7 @@ export interface SliderAttribute extends CommonMethod {
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     enableHapticFeedback(value: boolean | undefined): this
     showTips(value: boolean | undefined, content?: ResourceStr): this
+    _onChangeEvent_value(callback_: ((value: number | undefined) => void)): void
     attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttribute {
@@ -693,6 +700,9 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     }
     public showTips(value: boolean | undefined, content?: ResourceStr): this {
         return this
+    }
+    public _onChangeEvent_value(callback_: ((value: number | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -923,6 +933,14 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         }
         return this
     }
+    public _onChangeEvent_value(callback_: ((value: number | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_value")) {
+            const callback__casted = callback_ as (((value: number | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_valueAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -1021,6 +1039,8 @@ export class ArkSliderSet extends ArkCommonMethodSet implements SliderAttribute 
     _showTips_flag?: boolean
     _showTips0_value?: boolean | undefined
     _showTips1_value?: ResourceStr | undefined
+    __onChangeEvent_value_flag?: boolean
+    __onChangeEvent_value0_value?: ((value: number | undefined) => void)
     applyModifierPatch(component: SliderAttribute): void {
         if (this._blockColor_flag)
             component.blockColor((this._blockColor0_value as ResourceColor | undefined))
@@ -1170,6 +1190,8 @@ export class ArkSliderSet extends ArkCommonMethodSet implements SliderAttribute 
         this._showTips0_value = value
         this._showTips1_value = content
         return this
+    }
+    public _onChangeEvent_value(callback_: ((value: number | undefined) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

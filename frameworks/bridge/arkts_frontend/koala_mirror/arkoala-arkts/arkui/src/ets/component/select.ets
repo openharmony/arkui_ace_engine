@@ -622,6 +622,18 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_setMenuAlign(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_selectedAttribute(callback_: ((selected: number | Resource | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._SelectAttribute_set_onChangeEvent_selected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    set_onChangeEvent_valueAttribute(callback_: ((value: ResourceStr | string | Resource | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._SelectAttribute_set_onChangeEvent_value(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface SelectOption {
     value: ResourceStr;
@@ -675,6 +687,8 @@ export interface SelectAttribute extends CommonMethod {
     avoidance(value: AvoidanceMode | undefined): this
     menuOutline(value: MenuOutlineOptions | undefined): this
     menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this
+    _onChangeEvent_selected(callback_: ((selected: number | Resource | undefined) => void)): void
+    _onChangeEvent_value(callback_: ((value: ResourceStr | string | Resource | undefined) => void)): void
     attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttribute {
@@ -789,6 +803,12 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     }
     public menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((selected: number | Resource | undefined) => void)): void {
+        throw new Error("Unimplemented")
+    }
+    public _onChangeEvent_value(callback_: ((value: ResourceStr | string | Resource | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -1096,6 +1116,22 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         }
         return this
     }
+    public _onChangeEvent_selected(callback_: ((selected: number | Resource | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_selected")) {
+            const callback__casted = callback_ as (((selected: number | Resource | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_selectedAttribute(callback__casted)
+            return
+        }
+        return
+    }
+    public _onChangeEvent_value(callback_: ((value: ResourceStr | string | Resource | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_value")) {
+            const callback__casted = callback_ as (((value: ResourceStr | string | Resource | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_valueAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -1208,6 +1244,10 @@ export class ArkSelectSet extends ArkCommonMethodSet implements SelectAttribute 
     _menuAlign_flag?: boolean
     _menuAlign0_value?: MenuAlignType | undefined
     _menuAlign1_value?: Offset | undefined
+    __onChangeEvent_selected_flag?: boolean
+    __onChangeEvent_selected0_value?: ((selected: number | Resource | undefined) => void)
+    __onChangeEvent_value_flag?: boolean
+    __onChangeEvent_value0_value?: ((value: ResourceStr | string | Resource | undefined) => void)
     applyModifierPatch(component: SelectAttribute): void {
         if (this._selected_flag)
             component.selected((this._selected0_value as number | Resource | undefined))
@@ -1406,6 +1446,10 @@ export class ArkSelectSet extends ArkCommonMethodSet implements SelectAttribute 
         this._menuAlign0_value = alignType
         this._menuAlign1_value = offset
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((selected: number | Resource | undefined) => void)): void {
+    }
+    public _onChangeEvent_value(callback_: ((value: ResourceStr | string | Resource | undefined) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

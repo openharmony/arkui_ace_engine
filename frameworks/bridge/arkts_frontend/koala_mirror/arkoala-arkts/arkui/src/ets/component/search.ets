@@ -853,6 +853,12 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setCustomKeyboard(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_valueAttribute(callback_: ((value0: string) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._SearchAttribute_set_onChangeEvent_value(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum CancelButtonStyle {
     CONSTANT = 0,
@@ -940,6 +946,7 @@ export interface SearchAttribute extends CommonMethod {
     searchButton(value: string | undefined, option?: SearchButtonOptions): this
     inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this
     customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
+    _onChangeEvent_value(callback_: ((value0: string) => void)): void
     attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttribute {
@@ -1128,6 +1135,9 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     }
     public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
         return this
+    }
+    public _onChangeEvent_value(callback_: ((value0: string) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -1616,6 +1626,14 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         }
         return this
     }
+    public _onChangeEvent_value(callback_: ((value0: string) => void)): void {
+        if (this.checkPriority("_onChangeEvent_value")) {
+            const callback__casted = callback_ as (((value0: string) => void))
+            this.getPeer()?.set_onChangeEvent_valueAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -1768,6 +1786,8 @@ export class ArkSearchSet extends ArkCommonMethodSet implements SearchAttribute 
     _customKeyboard_flag?: boolean
     _customKeyboard0_value?: CustomBuilder | undefined
     _customKeyboard1_value?: KeyboardOptions | undefined
+    __onChangeEvent_value_flag?: boolean
+    __onChangeEvent_value0_value?: ((value0: string) => void)
     applyModifierPatch(component: SearchAttribute): void {
         if (this._fontColor_flag)
             component.fontColor((this._fontColor0_value as ResourceColor | undefined))
@@ -2101,6 +2121,8 @@ export class ArkSearchSet extends ArkCommonMethodSet implements SearchAttribute 
         this._customKeyboard0_value = value
         this._customKeyboard1_value = options
         return this
+    }
+    public _onChangeEvent_value(callback_: ((value0: string) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

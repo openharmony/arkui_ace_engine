@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 import { KoalaCallsiteKey, int32 } from "@koalaui/common"
 import { __context, __id } from "../internals"
 import { memoEntry1, memoEntry2 } from "./entry"
-import { __memo_context_type, __memo_id_type } from "../internals"
 
 /**
  * Sequentially repeats the {@link action}.

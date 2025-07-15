@@ -583,6 +583,12 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._AlphabetIndexerAttribute_setAlignStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_selectedAttribute(callback_: ((selected: number | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._AlphabetIndexerAttribute_set_onChangeEvent_selected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum IndexerAlign {
     LEFT = 0,
@@ -626,6 +632,7 @@ export interface AlphabetIndexerAttribute extends CommonMethod {
     popupTitleBackground(value: ResourceColor | undefined): this
     enableHapticFeedback(value: boolean | undefined): this
     alignStyle(value: IndexerAlign | undefined, offset?: Length): this
+    _onChangeEvent_selected(callback_: ((selected: number | undefined) => void)): void
     attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements AlphabetIndexerAttribute {
@@ -732,6 +739,9 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
     }
     public alignStyle(value: IndexerAlign | undefined, offset?: Length): this {
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((selected: number | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -1012,6 +1022,14 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
+    public _onChangeEvent_selected(callback_: ((selected: number | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_selected")) {
+            const callback__casted = callback_ as (((selected: number | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_selectedAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -1120,6 +1138,8 @@ export class ArkAlphabetIndexerSet extends ArkCommonMethodSet implements Alphabe
     _alignStyle_flag?: boolean
     _alignStyle0_value?: IndexerAlign | undefined
     _alignStyle1_value?: Length | undefined
+    __onChangeEvent_selected_flag?: boolean
+    __onChangeEvent_selected0_value?: ((selected: number | undefined) => void)
     applyModifierPatch(component: AlphabetIndexerAttribute): void {
         if (this._color_flag)
             component.color((this._color0_value as ResourceColor | undefined))
@@ -1304,6 +1324,8 @@ export class ArkAlphabetIndexerSet extends ArkCommonMethodSet implements Alphabe
         this._alignStyle0_value = value
         this._alignStyle1_value = offset
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((selected: number | undefined) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

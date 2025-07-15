@@ -164,6 +164,12 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._DatePickerAttribute_setEnableHapticFeedback(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_selectedAttribute(callback_: ((value0: Date) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._DatePickerAttribute_set_onChangeEvent_selected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface DatePickerResult {
     year?: number;
@@ -189,6 +195,7 @@ export interface DatePickerAttribute extends CommonMethod {
     onDateChange(value: ((value0: Date) => void) | undefined): this
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     enableHapticFeedback(value: boolean | undefined): this
+    _onChangeEvent_selected(callback_: ((value0: Date) => void)): void
     attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePickerAttribute {
@@ -220,6 +227,9 @@ export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePick
     }
     public enableHapticFeedback(value: boolean | undefined): this {
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((value0: Date) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -347,6 +357,14 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+    public _onChangeEvent_selected(callback_: ((value0: Date) => void)): void {
+        if (this.checkPriority("_onChangeEvent_selected")) {
+            const callback__casted = callback_ as (((value0: Date) => void))
+            this.getPeer()?.set_onChangeEvent_selectedAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -416,6 +434,8 @@ export class ArkDatePickerSet extends ArkCommonMethodSet implements DatePickerAt
     _digitalCrownSensitivity0_value?: CrownSensitivity | undefined
     _enableHapticFeedback_flag?: boolean
     _enableHapticFeedback0_value?: boolean | undefined
+    __onChangeEvent_selected_flag?: boolean
+    __onChangeEvent_selected0_value?: ((value0: Date) => void)
     applyModifierPatch(component: DatePickerAttribute): void {
         if (this._lunar_flag)
             component.lunar((this._lunar0_value as boolean | undefined))
@@ -466,6 +486,8 @@ export class ArkDatePickerSet extends ArkCommonMethodSet implements DatePickerAt
         this._enableHapticFeedback_flag = true
         this._enableHapticFeedback0_value = value
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((value0: Date) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

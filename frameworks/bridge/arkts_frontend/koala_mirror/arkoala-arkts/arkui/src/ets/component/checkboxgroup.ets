@@ -168,6 +168,12 @@ export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._CheckboxGroupAttribute_setCheckboxShape(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_selectAllAttribute(callback_: ((selectAll: boolean | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._CheckboxGroupAttribute_set_onChangeEvent_selectAll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum SelectStatus {
     ALL = 0,
@@ -192,6 +198,7 @@ export interface CheckboxGroupAttribute extends CommonMethod {
     mark(value: MarkStyle | undefined): this
     onChange(value: OnCheckboxGroupChangeCallback | undefined): this
     checkboxShape(value: CheckBoxShape | undefined): this
+    _onChangeEvent_selectAll(callback_: ((selectAll: boolean | undefined) => void)): void
     attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkCheckboxGroupStyle extends ArkCommonMethodStyle implements CheckboxGroupAttribute {
@@ -219,6 +226,9 @@ export class ArkCheckboxGroupStyle extends ArkCommonMethodStyle implements Check
     }
     public checkboxShape(value: CheckBoxShape | undefined): this {
         return this
+    }
+    public _onChangeEvent_selectAll(callback_: ((selectAll: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -300,6 +310,14 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
+    public _onChangeEvent_selectAll(callback_: ((selectAll: boolean | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_selectAll")) {
+            const callback__casted = callback_ as (((selectAll: boolean | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_selectAllAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -367,6 +385,8 @@ export class ArkCheckboxGroupSet extends ArkCommonMethodSet implements CheckboxG
     _onChange0_value?: OnCheckboxGroupChangeCallback | undefined
     _checkboxShape_flag?: boolean
     _checkboxShape0_value?: CheckBoxShape | undefined
+    __onChangeEvent_selectAll_flag?: boolean
+    __onChangeEvent_selectAll0_value?: ((selectAll: boolean | undefined) => void)
     applyModifierPatch(component: CheckboxGroupAttribute): void {
         if (this._selectAll_flag)
             component.selectAll((this._selectAll0_value as boolean | undefined))
@@ -410,6 +430,8 @@ export class ArkCheckboxGroupSet extends ArkCommonMethodSet implements CheckboxG
         this._checkboxShape_flag = true
         this._checkboxShape0_value = value
         return this
+    }
+    public _onChangeEvent_selectAll(callback_: ((selectAll: boolean | undefined) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

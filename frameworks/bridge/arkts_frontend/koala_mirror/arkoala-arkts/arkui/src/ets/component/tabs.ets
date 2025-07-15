@@ -614,6 +614,12 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setCachedMaxCount(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_indexAttribute(callback_: ((value0: number) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._TabsAttribute_set_onChangeEvent_index(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum BarMode {
     SCROLLABLE = 0,
@@ -699,6 +705,7 @@ export interface TabsAttribute extends CommonMethod {
     barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this
     barBackgroundBlurStyle(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): this
     cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this
+    _onChangeEvent_index(callback_: ((value0: number) => void)): void
     attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute {
@@ -811,6 +818,9 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     }
     public cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this {
         return this
+    }
+    public _onChangeEvent_index(callback_: ((value0: number) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -1113,6 +1123,14 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         }
         return this
     }
+    public _onChangeEvent_index(callback_: ((value0: number) => void)): void {
+        if (this.checkPriority("_onChangeEvent_index")) {
+            const callback__casted = callback_ as (((value0: number) => void))
+            this.getPeer()?.set_onChangeEvent_indexAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -1225,6 +1243,8 @@ export class ArkTabsSet extends ArkCommonMethodSet implements TabsAttribute {
     _cachedMaxCount_flag?: boolean
     _cachedMaxCount0_value?: number | undefined
     _cachedMaxCount1_value?: TabsCacheMode | undefined
+    __onChangeEvent_index_flag?: boolean
+    __onChangeEvent_index0_value?: ((value0: number) => void)
     applyModifierPatch(component: TabsAttribute): void {
         if (this._vertical_flag)
             component.vertical((this._vertical0_value as boolean | undefined))
@@ -1418,6 +1438,8 @@ export class ArkTabsSet extends ArkCommonMethodSet implements TabsAttribute {
         this._cachedMaxCount0_value = count
         this._cachedMaxCount1_value = mode
         return this
+    }
+    public _onChangeEvent_index(callback_: ((value0: number) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

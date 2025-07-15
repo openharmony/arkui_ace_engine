@@ -97,6 +97,12 @@ export class ArkRadioPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RadioAttribute_setContentModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_checkedAttribute(callback_: ((checked: boolean | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._RadioAttribute_set_onChangeEvent_checked(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum RadioIndicatorType {
     TICK = 0,
@@ -120,6 +126,7 @@ export interface RadioAttribute extends CommonMethod {
     onChange(value: OnRadioChangeCallback | undefined): this
     radioStyle(value: RadioStyle | undefined): this
     contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this
+    _onChangeEvent_checked(callback_: ((checked: boolean | undefined) => void)): void
     attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkRadioStyle extends ArkCommonMethodStyle implements RadioAttribute {
@@ -139,6 +146,9 @@ export class ArkRadioStyle extends ArkCommonMethodStyle implements RadioAttribut
     }
     public contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this {
         return this
+    }
+    public _onChangeEvent_checked(callback_: ((checked: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -205,6 +215,14 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
         }
         return this
     }
+    public _onChangeEvent_checked(callback_: ((checked: boolean | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_checked")) {
+            const callback__casted = callback_ as (((checked: boolean | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_checkedAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -268,6 +286,8 @@ export class ArkRadioSet extends ArkCommonMethodSet implements RadioAttribute {
     _radioStyle0_value?: RadioStyle | undefined
     _contentModifier_flag?: boolean
     _contentModifier0_value?: ContentModifier<RadioConfiguration> | undefined
+    __onChangeEvent_checked_flag?: boolean
+    __onChangeEvent_checked0_value?: ((checked: boolean | undefined) => void)
     applyModifierPatch(component: RadioAttribute): void {
         if (this._checked_flag)
             component.checked((this._checked0_value as boolean | undefined))
@@ -297,6 +317,8 @@ export class ArkRadioSet extends ArkCommonMethodSet implements RadioAttribute {
         this._contentModifier_flag = true
         this._contentModifier0_value = value
         return this
+    }
+    public _onChangeEvent_checked(callback_: ((checked: boolean | undefined) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

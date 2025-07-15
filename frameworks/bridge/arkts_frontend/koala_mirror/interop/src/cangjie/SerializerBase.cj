@@ -313,7 +313,7 @@ public open class SerializerBase {
     }
     public func writeString(value: String): Unit {
         this.checkCapacity(Int32(4 + value.size * 4 + 1)) // length, data
-        let encodedLength = InteropNativeModule._ManagedStringWrite(value, this.asBuffer(), this.position + 4)
+        let encodedLength = InteropNativeModule._ManagedStringWrite(value, this.asBuffer(), this._length, this.position + 4)
         this.writeInt32(encodedLength)
         this.position += encodedLength
     }

@@ -16,7 +16,7 @@
 package arkui.stateManagement.decorator
 
 import { int32, observableProxy, propDeepCopy } from "@koalaui/common"
-import { mutableState, scheduleCallback, MutableState, GlobalStateManager, InternalScope } from "@koalaui/runtime"
+import { mutableState, scheduleCallback, MutableState, GlobalStateManager } from "@koalaui/runtime"
 import { SubscribedAbstractProperty } from "./ArkState"
 import { AppStorage, LocalStorage } from "./Storage"
 

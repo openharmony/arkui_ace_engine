@@ -791,6 +791,12 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SwiperAttribute_setNextMargin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_indexAttribute(callback_: ((index: number | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._SwiperAttribute_set_onChangeEvent_index(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface SwiperAutoFill {
     minSize: VP;
@@ -857,6 +863,7 @@ export interface SwiperAttribute extends CommonMethod {
     displayCount(value: number | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this
     prevMargin(value: Length | undefined, ignoreBlank?: boolean): this
     nextMargin(value: Length | undefined, ignoreBlank?: boolean): this
+    _onChangeEvent_index(callback_: ((index: number | undefined) => void)): void
     attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttribute {
@@ -974,6 +981,9 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     }
     public nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
         return this
+    }
+    public _onChangeEvent_index(callback_: ((index: number | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -1300,6 +1310,14 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         }
         return this
     }
+    public _onChangeEvent_index(callback_: ((index: number | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_index")) {
+            const callback__casted = callback_ as (((index: number | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_indexAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -1419,6 +1437,8 @@ export class ArkSwiperSet extends ArkCommonMethodSet implements SwiperAttribute 
     _nextMargin_flag?: boolean
     _nextMargin0_value?: Length | undefined
     _nextMargin1_value?: boolean | undefined
+    __onChangeEvent_index_flag?: boolean
+    __onChangeEvent_index0_value?: ((index: number | undefined) => void)
     applyModifierPatch(component: SwiperAttribute): void {
         if (this._index_flag)
             component.index((this._index0_value as number | undefined))
@@ -1629,6 +1649,8 @@ export class ArkSwiperSet extends ArkCommonMethodSet implements SwiperAttribute 
         this._nextMargin0_value = value
         this._nextMargin1_value = ignoreBlank
         return this
+    }
+    public _onChangeEvent_index(callback_: ((index: number | undefined) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

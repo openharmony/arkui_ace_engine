@@ -121,6 +121,12 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RefreshAttribute_setPullDownRatio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_refreshingAttribute(callback_: ((refreshing: boolean) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._RefreshAttribute_set_onChangeEvent_refreshing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum RefreshStatus {
     INACTIVE = 0,
@@ -147,6 +153,7 @@ export interface RefreshAttribute extends CommonMethod {
     pullToRefresh(value: boolean | undefined): this
     onOffsetChange(value: ((value0: number) => void) | undefined): this
     pullDownRatio(value: number | undefined): this
+    _onChangeEvent_refreshing(callback_: ((refreshing: boolean) => void)): void
     attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttribute {
@@ -174,6 +181,9 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
     }
     public pullDownRatio(value: number | undefined): this {
         return this
+    }
+    public _onChangeEvent_refreshing(callback_: ((refreshing: boolean) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -255,6 +265,14 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
         }
         return this
     }
+    public _onChangeEvent_refreshing(callback_: ((refreshing: boolean) => void)): void {
+        if (this.checkPriority("_onChangeEvent_refreshing")) {
+            const callback__casted = callback_ as (((refreshing: boolean) => void))
+            this.getPeer()?.set_onChangeEvent_refreshingAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -322,6 +340,8 @@ export class ArkRefreshSet extends ArkCommonMethodSet implements RefreshAttribut
     _onOffsetChange0_value?: ((value0: number) => void) | undefined
     _pullDownRatio_flag?: boolean
     _pullDownRatio0_value?: number | undefined
+    __onChangeEvent_refreshing_flag?: boolean
+    __onChangeEvent_refreshing0_value?: ((refreshing: boolean) => void)
     applyModifierPatch(component: RefreshAttribute): void {
         if (this._onStateChange_flag)
             component.onStateChange((this._onStateChange0_value as ((state: RefreshStatus) => void) | undefined))
@@ -365,6 +385,8 @@ export class ArkRefreshSet extends ArkCommonMethodSet implements RefreshAttribut
         this._pullDownRatio_flag = true
         this._pullDownRatio0_value = value
         return this
+    }
+    public _onChangeEvent_refreshing(callback_: ((refreshing: boolean) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

@@ -21,6 +21,7 @@
 #include "convertors-jsc.h"
 
 #include "interop-logging.h"
+#include "interop-utils.h"
 
 // See https://github.com/BabylonJS/BabylonNative/blob/master/Dependencies/napi/napi-direct/source/js_native_api_javascriptcore.cc
 // for convertors logic.
@@ -146,11 +147,7 @@ static JSValueRef u64ToBigInt(JSContextRef context, uint64_t value) {
     bigint = JSObjectCallAsFunction(context, bigIntFromParts, nullptr, 2, parts, nullptr);
 #else
     char buffer[128] = {0};
-    #ifdef __STDC_LIB_EXT1__ 
-        std::snprintf_s(buffer, sizeof(buffer) - 1, "%zun", static_cast<size_t>(value));
-    #else
-        std::snprintf(buffer, sizeof(buffer) - 1, "%zun", static_cast<size_t>(value));
-    #endif 
+    interop_snprintf(buffer, sizeof(buffer) - 1, "%zun", static_cast<size_t>(value));
     JSStringRef script = JSStringCreateWithUTF8CString(buffer);
     bigint = JSEvaluateScript(context, script, nullptr, nullptr, 0, nullptr);
     JSStringRelease(script);

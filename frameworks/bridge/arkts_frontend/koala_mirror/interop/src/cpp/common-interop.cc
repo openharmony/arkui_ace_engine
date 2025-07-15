@@ -28,6 +28,7 @@
 #include "common-interop.h"
 #include "interop-logging.h"
 #include "dynamic-loader.h"
+#include "interop-utils.h"
 
 #ifdef KOALA_FOREIGN_NAPI
 #ifndef KOALA_FOREIGN_NAPI_OHOS
@@ -146,11 +147,7 @@ KOALA_INTEROP_1(StringLength, KInt, KNativePointer)
 void impl_StringData(KNativePointer ptr, KByte* bytes, KInt size) {
     string* s = reinterpret_cast<string*>(ptr);
     if (s) {
-        #ifdef __STDC_LIB_EXT1__
-            memcpy_s(bytes, size, s->c_str(), size);
-        #else
-            memcpy(bytes, s->c_str(), size);
-        #endif
+        interop_memcpy(bytes, size, s->c_str(), size);
     }
 }
 KOALA_INTEROP_V3(StringData, KNativePointer, KByte*, KInt)
@@ -172,11 +169,11 @@ KNativePointer impl_StringMake(const KStringPtr& str) {
 KOALA_INTEROP_1(StringMake, KNativePointer, KStringPtr)
 
 // For slow runtimes w/o fast encoders.
-KInt impl_ManagedStringWrite(const KStringPtr& string, KSerializerBuffer buffer, KInt offset) {
-    memcpy((uint8_t*)buffer + offset, string.c_str(), string.length() + 1);
+KInt impl_ManagedStringWrite(const KStringPtr& string, KSerializerBuffer buffer, KInt bufferSize, KInt offset) {
+    interop_memcpy((uint8_t*)buffer + offset, bufferSize, string.c_str(), string.length() + 1);
     return string.length() + 1;
 }
-KOALA_INTEROP_3(ManagedStringWrite, KInt, KStringPtr, KSerializerBuffer, KInt)
+KOALA_INTEROP_4(ManagedStringWrite, KInt, KStringPtr, KSerializerBuffer, KInt, KInt)
 
 void stringFinalizer(string* ptr) {
     delete ptr;
@@ -329,7 +326,7 @@ KStringPtr impl_LoadView(const KStringPtr& className, const KStringPtr& params) 
     static LoadView_t impl = nullptr;
     if (!impl) impl = reinterpret_cast<LoadView_t>(getImpl(nullptr, "LoadView"));
     const char* result = impl(className.c_str(), params.c_str());
-    return KStringPtr(result, strlen(result), true);
+    return KStringPtr(result, interop_strlen(result), true);
 }
 KOALA_INTEROP_2(LoadView, KStringPtr, KStringPtr, KStringPtr)
 #endif  // KOALA_ANI
@@ -382,11 +379,7 @@ void impl_WriteByte(KNativePointer data, KInt index, KLong length, KInt value) {
 KOALA_INTEROP_DIRECT_V4(WriteByte, KNativePointer, KLong, KLong, KInt)
 
 void impl_CopyArray(KNativePointer data, KLong length, KByte* array) {
-    #ifdef __STDC_LIB_EXT1__
-        memcpy_s(data, length, array, length);
-    #else
-        memcpy(data, array, length);
-    #endif
+    interop_memcpy(data, length, array, length);
 }
 KOALA_INTEROP_V3(CopyArray, KNativePointer, KLong, KByte*)
 
@@ -721,7 +714,7 @@ KOALA_INTEROP_CTX_3(Utf8ToString, KStringPtr, KByte*, KInt, KInt)
 #if  defined(KOALA_NAPI)  || defined(KOALA_ANI)
 KStringPtr impl_RawUtf8ToString(KVMContext vmContext, KNativePointer data) {
     auto string = (const char*)data;
-    KStringPtr result(string, strlen(string), false);
+    KStringPtr result(string, interop_strlen(string), false);
     return result;
 }
 KOALA_INTEROP_CTX_1(RawUtf8ToString, KStringPtr, KNativePointer)
@@ -737,11 +730,7 @@ KOALA_INTEROP_CTX_1(StdStringToString, KStringPtr, KNativePointer)
 
 KInteropReturnBuffer impl_RawReturnData(KVMContext vmContext, KInt v1, KInt v2) {
     void* data = new int8_t[v1];
-    #ifdef __STDC_LIB_EXT1__
-        memset_s(data, v1, v2, v1);
-    #else
-        memset(data, v2, v1);
-    #endif
+    interop_memset(data, v1, v2, v1);
     KInteropReturnBuffer buffer = { v1, data, [](KNativePointer ptr, KInt) { delete[] (int8_t*)ptr; }};
     return buffer;
 }

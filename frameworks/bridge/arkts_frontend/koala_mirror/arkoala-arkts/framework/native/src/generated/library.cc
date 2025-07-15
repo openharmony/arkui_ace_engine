@@ -18,6 +18,7 @@
 #include "interop-types.h"
 #include "dynamic-loader.h"
 #include "interop-logging.h"
+#include "interop-utils.h"
 
 #ifndef GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANY_API_H
 #define GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANY_API_H
@@ -145,7 +146,7 @@ const OH_AnyAPI* GetAnyImpl(int kind, int version, std::string* result) {
         if (impl->version != version) {
             if (result) {
                 char buffer[256];
-                snprintf(buffer, sizeof(buffer), "FATAL: API version mismatch, expected %d got %d",
+                interop_snprintf(buffer, sizeof(buffer), "FATAL: API version mismatch, expected %d got %d",
                     version, impl->version);
                 *result = buffer;
             } else {

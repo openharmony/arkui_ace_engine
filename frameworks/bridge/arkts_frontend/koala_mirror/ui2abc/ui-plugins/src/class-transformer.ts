@@ -16,7 +16,7 @@
 import * as arkts from "@koalaui/libarkts"
 
 import { classProperties, mangle } from "./common/arkts-utils"
-import { createETSTypeReference, CustomComponentNames, getCompatPackage, getComponentPackage, Importer } from "./utils"
+import { createETSTypeReference, getRuntimePackage, getComponentPackage, Importer } from "./utils"
 import { DecoratorNames, hasDecorator, isDecoratorAnnotation } from "./property-translators/utils";
 import { fieldOf } from "./property-transformers";
 
@@ -49,15 +49,15 @@ export class ClassTransformer extends arkts.AbstractVisitor {
             ...clazz.definition?.implements ?? [],
         ]
         if (isObserved) {
-            this.importer.add('observableProxy', getCompatPackage())
-            this.importer.add('ObservableClass', getCompatPackage())
+            this.importer.add('observableProxy', getRuntimePackage())
+            this.importer.add('ObservableClass', getRuntimePackage())
             classImplements.push(arkts.factory.createTSClassImplements(
                 createETSTypeReference("ObservableClass"))
             )
         }
         if (properties.length > 0 || isObserved) {
             if (properties.find(trackPropVerifier)) {
-                this.importer.add('TrackableProps', getCompatPackage())
+                this.importer.add('TrackableProps', getRuntimePackage())
                 classImplements.push(arkts.factory.createTSClassImplements(
                     createETSTypeReference("TrackableProps"))
                 )

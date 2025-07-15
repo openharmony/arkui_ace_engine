@@ -1290,6 +1290,12 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setShowCounter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_textAttribute(callback_: ((text: ResourceStr | Resource | string) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._TextInputAttribute_set_onChangeEvent_text(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum InputType {
     NORMAL = 0,
@@ -1455,6 +1461,7 @@ export interface TextInputAttribute extends CommonMethod {
     inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this
     customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
     showCounter(value: boolean | undefined, options?: InputCounterOptions): this
+    _onChangeEvent_text(callback_: ((text: ResourceStr | Resource | string) => void)): void
     attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInputAttribute {
@@ -1739,6 +1746,9 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     }
     public showCounter(value: boolean | undefined, options?: InputCounterOptions): this {
         return this
+    }
+    public _onChangeEvent_text(callback_: ((text: ResourceStr | Resource | string) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -2467,6 +2477,14 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
+    public _onChangeEvent_text(callback_: ((text: ResourceStr | Resource | string) => void)): void {
+        if (this.checkPriority("_onChangeEvent_text")) {
+            const callback__casted = callback_ as (((text: ResourceStr | Resource | string) => void))
+            this.getPeer()?.set_onChangeEvent_textAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -2667,6 +2685,8 @@ export class ArkTextInputSet extends ArkCommonMethodSet implements TextInputAttr
     _showCounter_flag?: boolean
     _showCounter0_value?: boolean | undefined
     _showCounter1_value?: InputCounterOptions | undefined
+    __onChangeEvent_text_flag?: boolean
+    __onChangeEvent_text0_value?: ((text: ResourceStr | Resource | string) => void)
     applyModifierPatch(component: TextInputAttribute): void {
         if (this._type_flag)
             component.type((this._type0_value as InputType | undefined))
@@ -3168,6 +3188,8 @@ export class ArkTextInputSet extends ArkCommonMethodSet implements TextInputAttr
         this._showCounter0_value = value
         this._showCounter1_value = options
         return this
+    }
+    public _onChangeEvent_text(callback_: ((text: ResourceStr | Resource | string) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

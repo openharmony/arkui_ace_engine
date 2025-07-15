@@ -150,6 +150,12 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ToggleAttribute_setSwitchStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_isOnAttribute(callback_: ((isOn: boolean | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._ToggleAttribute_set_onChangeEvent_isOn(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum ToggleType {
     CHECKBOX = 0,
@@ -180,6 +186,7 @@ export interface ToggleAttribute extends CommonMethod {
     selectedColor(value: ResourceColor | undefined): this
     switchPointColor(value: ResourceColor | undefined): this
     switchStyle(value: SwitchStyle | undefined): this
+    _onChangeEvent_isOn(callback_: ((isOn: boolean | undefined) => void)): void
     attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkToggleStyle extends ArkCommonMethodStyle implements ToggleAttribute {
@@ -203,6 +210,9 @@ export class ArkToggleStyle extends ArkCommonMethodStyle implements ToggleAttrib
     }
     public switchStyle(value: SwitchStyle | undefined): this {
         return this
+    }
+    public _onChangeEvent_isOn(callback_: ((isOn: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -274,6 +284,14 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements Togg
         }
         return this
     }
+    public _onChangeEvent_isOn(callback_: ((isOn: boolean | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_isOn")) {
+            const callback__casted = callback_ as (((isOn: boolean | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_isOnAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -339,6 +357,8 @@ export class ArkToggleSet extends ArkCommonMethodSet implements ToggleAttribute 
     _switchPointColor0_value?: ResourceColor | undefined
     _switchStyle_flag?: boolean
     _switchStyle0_value?: SwitchStyle | undefined
+    __onChangeEvent_isOn_flag?: boolean
+    __onChangeEvent_isOn0_value?: ((isOn: boolean | undefined) => void)
     applyModifierPatch(component: ToggleAttribute): void {
         if (this._onChange_flag)
             component.onChange((this._onChange0_value as ((value0: boolean) => void) | undefined))
@@ -375,6 +395,8 @@ export class ArkToggleSet extends ArkCommonMethodSet implements ToggleAttribute 
         this._switchStyle_flag = true
         this._switchStyle0_value = value
         return this
+    }
+    public _onChangeEvent_isOn(callback_: ((isOn: boolean | undefined) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

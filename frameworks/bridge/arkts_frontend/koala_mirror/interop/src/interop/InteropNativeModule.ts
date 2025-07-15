@@ -31,10 +31,10 @@ export class InteropNativeModule {
     public static _InvokeFinalizer(ptr1: KPointer, ptr2: KPointer): void { throw "method not loaded" }
     public static _GetPtrVectorElement(ptr1: KPointer, arg: int32): KPointer { throw "method not loaded" }
     public static _StringLength(ptr1: KPointer): int32 { throw "method not loaded" }
-    public static _StringData(ptr1: KPointer, arr: KUint8ArrayPtr, i: int32): void { throw "method not loaded" }
+    public static _StringData(ptr1: KPointer, array: KUint8ArrayPtr, arrayLength: int32): void { throw "method not loaded" }
     public static _StringMake(str1: KStringPtr): KPointer { throw "method not loaded" }
     public static _GetPtrVectorSize(ptr1: KPointer): int32 { throw "method not loaded" }
-    public static _ManagedStringWrite(str1: string, arr: Uint8Array, arg: int32): int32 { throw "method not loaded" }
+    public static _ManagedStringWrite(str1: string, array: Uint8Array, arrayLength: int32, arg: int32): int32 { throw "method not loaded" }
     public static _NativeLog(str1: string): void { throw "method not loaded" }
     public static _Utf8ToString(data: KSerializerBuffer, offset: int32, length: int32): string { throw "method not loaded" }
     public static _StdStringToString(cstring: KPointer): string { throw "method not loaded" }

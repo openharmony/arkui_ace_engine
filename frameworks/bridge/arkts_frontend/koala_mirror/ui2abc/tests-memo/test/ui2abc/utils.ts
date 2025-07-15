@@ -15,7 +15,7 @@
 
 import { Assert, suite, test } from "@koalaui/harness"
 import { asArray, int32 } from "@koalaui/common"
-import { TestNode, testRoot, testTick, mutableState, GlobalStateManager, StateContext, MutableState } from "@koalaui/runtime"
+import { GlobalStateManager, MutableState } from "@koalaui/runtime"
 import { __id, __key, __context } from "@koalaui/runtime"
 
 export class SharedLog {

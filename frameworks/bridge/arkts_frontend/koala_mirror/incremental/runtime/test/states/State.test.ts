@@ -14,7 +14,7 @@
  */
 
 import { Assert as assert, suite, test } from "@koalaui/harness"
-import { toKoalaCallsiteKey as key } from "@koalaui/common"
+import { hashCodeFromString as key } from "@koalaui/common"
 import { IncrementalNode, MutableState, State, TestNode, testUpdate, ValueTracker } from "../../src"
 import { createStateManager } from "../../src/states/State"
 
@@ -137,7 +137,7 @@ suite("State", () => {
         const manager = createStateManager()
         manager.computableState(context => {
             const scope = context.scope<void>(0, 1)
-            const param = scope.param(0, 200, undefined, name, true) // can be found by name
+            const param = scope.paramEx(0, 200, undefined, name, true) // can be found by name
             if (scope.unchanged) return scope.cached
             const state = manager.stateBy<number>(name)!
             assert.isDefined(state)
@@ -151,7 +151,7 @@ suite("State", () => {
         const manager = createStateManager()
         manager.computableState(context => {
             const scope = context.scope<void>(0, 1)
-            const param = scope.param(0, 200, undefined, name, true) // can be found by name
+            const param = scope.paramEx(0, 200, undefined, name, true) // can be found by name
             if (scope.unchanged) return scope.cached
             const state = manager.stateBy<number>(name)!
             assert.isDefined(state)

@@ -1250,6 +1250,42 @@ void deserializeAndCallSyncCallback_MouseEvent_Void(Ark_VMContext vmContext, KSe
     Ark_MouseEvent event = static_cast<Ark_MouseEvent>(MouseEvent_serializer::read(thisDeserializer));
     _callSync(vmContext, _resourceId, event);
 }
+void deserializeAndCallCallback_NativeEmbedDataInfo_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativeEmbedDataInfo event)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_NativeEmbedDataInfo event = NativeEmbedDataInfo_serializer::read(thisDeserializer);
+    _call(_resourceId, event);
+}
+void deserializeAndCallSyncCallback_NativeEmbedDataInfo_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativeEmbedDataInfo event)>(thisDeserializer.readPointer());
+    Ark_NativeEmbedDataInfo event = NativeEmbedDataInfo_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, event);
+}
+void deserializeAndCallCallback_NativeEmbedTouchInfo_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativeEmbedTouchInfo event)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_NativeEmbedTouchInfo event = NativeEmbedTouchInfo_serializer::read(thisDeserializer);
+    _call(_resourceId, event);
+}
+void deserializeAndCallSyncCallback_NativeEmbedTouchInfo_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativeEmbedTouchInfo event)>(thisDeserializer.readPointer());
+    Ark_NativeEmbedTouchInfo event = NativeEmbedTouchInfo_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, event);
+}
 void deserializeAndCallCallback_NavDestinationActiveReason_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -1546,6 +1582,328 @@ void deserializeAndCallSyncCallback_Object_Void(Ark_VMContext vmContext, KSerial
     Ark_Object value0 = static_cast<Ark_Object>(thisDeserializer.readObject());
     _callSync(vmContext, _resourceId, value0);
 }
+void deserializeAndCallCallback_OnAlertEvent_Boolean(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnAlertEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnAlertEvent value0 = OnAlertEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _call(_resourceId, value0, _continuation);
+}
+void deserializeAndCallSyncCallback_OnAlertEvent_Boolean(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnAlertEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    Ark_OnAlertEvent value0 = OnAlertEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _callSync(vmContext, _resourceId, value0, _continuation);
+}
+void deserializeAndCallCallback_OnAudioStateChangedEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnAudioStateChangedEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnAudioStateChangedEvent value0 = OnAudioStateChangedEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnAudioStateChangedEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnAudioStateChangedEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnAudioStateChangedEvent value0 = OnAudioStateChangedEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnBeforeUnloadEvent_Boolean(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnBeforeUnloadEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnBeforeUnloadEvent value0 = OnBeforeUnloadEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _call(_resourceId, value0, _continuation);
+}
+void deserializeAndCallSyncCallback_OnBeforeUnloadEvent_Boolean(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnBeforeUnloadEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    Ark_OnBeforeUnloadEvent value0 = OnBeforeUnloadEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _callSync(vmContext, _resourceId, value0, _continuation);
+}
+void deserializeAndCallCallback_OnClientAuthenticationEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnClientAuthenticationEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnClientAuthenticationEvent value0 = OnClientAuthenticationEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnClientAuthenticationEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnClientAuthenticationEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnClientAuthenticationEvent value0 = OnClientAuthenticationEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnConfirmEvent_Boolean(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnConfirmEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnConfirmEvent value0 = OnConfirmEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _call(_resourceId, value0, _continuation);
+}
+void deserializeAndCallSyncCallback_OnConfirmEvent_Boolean(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnConfirmEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    Ark_OnConfirmEvent value0 = OnConfirmEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _callSync(vmContext, _resourceId, value0, _continuation);
+}
+void deserializeAndCallCallback_OnConsoleEvent_Boolean(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnConsoleEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnConsoleEvent value0 = OnConsoleEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _call(_resourceId, value0, _continuation);
+}
+void deserializeAndCallSyncCallback_OnConsoleEvent_Boolean(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnConsoleEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    Ark_OnConsoleEvent value0 = OnConsoleEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _callSync(vmContext, _resourceId, value0, _continuation);
+}
+void deserializeAndCallCallback_OnContextMenuShowEvent_Boolean(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnContextMenuShowEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnContextMenuShowEvent value0 = OnContextMenuShowEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _call(_resourceId, value0, _continuation);
+}
+void deserializeAndCallSyncCallback_OnContextMenuShowEvent_Boolean(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnContextMenuShowEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    Ark_OnContextMenuShowEvent value0 = OnContextMenuShowEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _callSync(vmContext, _resourceId, value0, _continuation);
+}
+void deserializeAndCallCallback_OnDataResubmittedEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnDataResubmittedEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnDataResubmittedEvent value0 = OnDataResubmittedEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnDataResubmittedEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnDataResubmittedEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnDataResubmittedEvent value0 = OnDataResubmittedEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnDownloadStartEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnDownloadStartEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnDownloadStartEvent value0 = OnDownloadStartEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnDownloadStartEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnDownloadStartEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnDownloadStartEvent value0 = OnDownloadStartEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnErrorReceiveEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnErrorReceiveEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnErrorReceiveEvent value0 = OnErrorReceiveEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnErrorReceiveEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnErrorReceiveEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnErrorReceiveEvent value0 = OnErrorReceiveEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnFaviconReceivedEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnFaviconReceivedEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnFaviconReceivedEvent value0 = OnFaviconReceivedEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnFaviconReceivedEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnFaviconReceivedEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnFaviconReceivedEvent value0 = OnFaviconReceivedEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnFirstContentfulPaintEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnFirstContentfulPaintEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnFirstContentfulPaintEvent value0 = OnFirstContentfulPaintEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnFirstContentfulPaintEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnFirstContentfulPaintEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnFirstContentfulPaintEvent value0 = OnFirstContentfulPaintEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnGeolocationShowEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnGeolocationShowEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnGeolocationShowEvent value0 = OnGeolocationShowEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnGeolocationShowEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnGeolocationShowEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnGeolocationShowEvent value0 = OnGeolocationShowEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnHttpAuthRequestEvent_Boolean(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnHttpAuthRequestEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnHttpAuthRequestEvent value0 = OnHttpAuthRequestEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _call(_resourceId, value0, _continuation);
+}
+void deserializeAndCallSyncCallback_OnHttpAuthRequestEvent_Boolean(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnHttpAuthRequestEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    Ark_OnHttpAuthRequestEvent value0 = OnHttpAuthRequestEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _callSync(vmContext, _resourceId, value0, _continuation);
+}
+void deserializeAndCallCallback_OnHttpErrorReceiveEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnHttpErrorReceiveEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnHttpErrorReceiveEvent value0 = OnHttpErrorReceiveEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnHttpErrorReceiveEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnHttpErrorReceiveEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnHttpErrorReceiveEvent value0 = OnHttpErrorReceiveEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnInterceptRequestEvent_WebResourceResponse(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnInterceptRequestEvent value0, const Callback_WebResourceResponse_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnInterceptRequestEvent value0 = OnInterceptRequestEvent_serializer::read(thisDeserializer);
+    Callback_WebResourceResponse_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_WebResourceResponse value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_WebResourceResponse_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_WebResourceResponse value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_WebResourceResponse_Void))))};
+    _call(_resourceId, value0, _continuation);
+}
+void deserializeAndCallSyncCallback_OnInterceptRequestEvent_WebResourceResponse(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnInterceptRequestEvent value0, const Callback_WebResourceResponse_Void continuation)>(thisDeserializer.readPointer());
+    Ark_OnInterceptRequestEvent value0 = OnInterceptRequestEvent_serializer::read(thisDeserializer);
+    Callback_WebResourceResponse_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_WebResourceResponse value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_WebResourceResponse_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_WebResourceResponse value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_WebResourceResponse_Void))))};
+    _callSync(vmContext, _resourceId, value0, _continuation);
+}
+void deserializeAndCallCallback_OnLoadInterceptEvent_Boolean(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnLoadInterceptEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnLoadInterceptEvent value0 = OnLoadInterceptEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _call(_resourceId, value0, _continuation);
+}
+void deserializeAndCallSyncCallback_OnLoadInterceptEvent_Boolean(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnLoadInterceptEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    Ark_OnLoadInterceptEvent value0 = OnLoadInterceptEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _callSync(vmContext, _resourceId, value0, _continuation);
+}
 void deserializeAndCallCallback_onMeasureSize_SizeResult(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -1584,6 +1942,96 @@ void deserializeAndCallSyncCallback_onMeasureSize_SizeResult(Ark_VMContext vmCon
     Callback_SizeResult_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_SizeResult value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_SizeResult_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_SizeResult value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_SizeResult_Void))))};
     _callSync(vmContext, _resourceId, selfLayoutInfo, children, constraint, _continuation);
 }
+void deserializeAndCallCallback_OnOverScrollEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnOverScrollEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnOverScrollEvent value0 = OnOverScrollEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnOverScrollEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnOverScrollEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnOverScrollEvent value0 = OnOverScrollEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnPageBeginEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnPageBeginEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnPageBeginEvent value0 = OnPageBeginEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnPageBeginEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnPageBeginEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnPageBeginEvent value0 = OnPageBeginEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnPageEndEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnPageEndEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnPageEndEvent value0 = OnPageEndEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnPageEndEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnPageEndEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnPageEndEvent value0 = OnPageEndEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnPageVisibleEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnPageVisibleEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnPageVisibleEvent value0 = OnPageVisibleEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnPageVisibleEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnPageVisibleEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnPageVisibleEvent value0 = OnPageVisibleEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnPermissionRequestEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnPermissionRequestEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnPermissionRequestEvent value0 = OnPermissionRequestEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnPermissionRequestEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnPermissionRequestEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnPermissionRequestEvent value0 = OnPermissionRequestEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
 void deserializeAndCallCallback_onPlaceChildren_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -1620,6 +2068,152 @@ void deserializeAndCallSyncCallback_onPlaceChildren_Void(Ark_VMContext vmContext
     Ark_ConstraintSizeOptions constraint = ConstraintSizeOptions_serializer::read(thisDeserializer);
     _callSync(vmContext, _resourceId, selfLayoutInfo, children, constraint);
 }
+void deserializeAndCallCallback_OnProgressChangeEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnProgressChangeEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnProgressChangeEvent value0 = OnProgressChangeEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnProgressChangeEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnProgressChangeEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnProgressChangeEvent value0 = OnProgressChangeEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnPromptEvent_Boolean(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnPromptEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnPromptEvent value0 = OnPromptEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _call(_resourceId, value0, _continuation);
+}
+void deserializeAndCallSyncCallback_OnPromptEvent_Boolean(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnPromptEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    Ark_OnPromptEvent value0 = OnPromptEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _callSync(vmContext, _resourceId, value0, _continuation);
+}
+void deserializeAndCallCallback_OnRefreshAccessedHistoryEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnRefreshAccessedHistoryEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnRefreshAccessedHistoryEvent value0 = OnRefreshAccessedHistoryEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnRefreshAccessedHistoryEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnRefreshAccessedHistoryEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnRefreshAccessedHistoryEvent value0 = OnRefreshAccessedHistoryEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnRenderExitedEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnRenderExitedEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnRenderExitedEvent value0 = OnRenderExitedEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnRenderExitedEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnRenderExitedEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnRenderExitedEvent value0 = OnRenderExitedEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnResourceLoadEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnResourceLoadEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnResourceLoadEvent value0 = OnResourceLoadEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnResourceLoadEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnResourceLoadEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnResourceLoadEvent value0 = OnResourceLoadEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnScaleChangeEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnScaleChangeEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnScaleChangeEvent value0 = OnScaleChangeEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnScaleChangeEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnScaleChangeEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnScaleChangeEvent value0 = OnScaleChangeEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnScreenCaptureRequestEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnScreenCaptureRequestEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnScreenCaptureRequestEvent value0 = OnScreenCaptureRequestEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnScreenCaptureRequestEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnScreenCaptureRequestEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnScreenCaptureRequestEvent value0 = OnScreenCaptureRequestEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnScrollEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnScrollEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnScrollEvent value0 = OnScrollEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnScrollEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnScrollEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnScrollEvent value0 = OnScrollEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
 void deserializeAndCallCallback_OnScrollFrameBeginHandlerResult_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -1637,6 +2231,116 @@ void deserializeAndCallSyncCallback_OnScrollFrameBeginHandlerResult_Void(Ark_VMC
     const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnScrollFrameBeginHandlerResult value)>(thisDeserializer.readPointer());
     Ark_OnScrollFrameBeginHandlerResult value = OnScrollFrameBeginHandlerResult_serializer::read(thisDeserializer);
     _callSync(vmContext, _resourceId, value);
+}
+void deserializeAndCallCallback_OnSearchResultReceiveEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnSearchResultReceiveEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnSearchResultReceiveEvent value0 = OnSearchResultReceiveEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnSearchResultReceiveEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnSearchResultReceiveEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnSearchResultReceiveEvent value0 = OnSearchResultReceiveEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnShowFileSelectorEvent_Boolean(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnShowFileSelectorEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnShowFileSelectorEvent value0 = OnShowFileSelectorEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _call(_resourceId, value0, _continuation);
+}
+void deserializeAndCallSyncCallback_OnShowFileSelectorEvent_Boolean(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnShowFileSelectorEvent value0, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    Ark_OnShowFileSelectorEvent value0 = OnShowFileSelectorEvent_serializer::read(thisDeserializer);
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _callSync(vmContext, _resourceId, value0, _continuation);
+}
+void deserializeAndCallCallback_OnSslErrorEventReceiveEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnSslErrorEventReceiveEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnSslErrorEventReceiveEvent value0 = OnSslErrorEventReceiveEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnSslErrorEventReceiveEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnSslErrorEventReceiveEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnSslErrorEventReceiveEvent value0 = OnSslErrorEventReceiveEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnTitleReceiveEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnTitleReceiveEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnTitleReceiveEvent value0 = OnTitleReceiveEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnTitleReceiveEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnTitleReceiveEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnTitleReceiveEvent value0 = OnTitleReceiveEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnTouchIconUrlReceivedEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnTouchIconUrlReceivedEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnTouchIconUrlReceivedEvent value0 = OnTouchIconUrlReceivedEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnTouchIconUrlReceivedEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnTouchIconUrlReceivedEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnTouchIconUrlReceivedEvent value0 = OnTouchIconUrlReceivedEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
+}
+void deserializeAndCallCallback_OnWindowNewEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnWindowNewEvent value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_OnWindowNewEvent value0 = OnWindowNewEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_OnWindowNewEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnWindowNewEvent value0)>(thisDeserializer.readPointer());
+    Ark_OnWindowNewEvent value0 = OnWindowNewEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value0);
 }
 void deserializeAndCallCallback_Opt_Array_FontDescriptor_Opt_Array_String_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -1882,6 +2586,38 @@ void deserializeAndCallSyncCallback_Opt_Array_String_Void(Ark_VMContext vmContex
     Opt_Array_String error = error_buf;
     _callSync(vmContext, _resourceId, error);
 }
+void deserializeAndCallCallback_Opt_Boolean_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Boolean select)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    const auto select_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Boolean select_buf = {};
+    select_buf.tag = select_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (select_buf_runtimeType))
+    {
+        select_buf.value = thisDeserializer.readBoolean();
+    }
+    Opt_Boolean select = select_buf;
+    _call(_resourceId, select);
+}
+void deserializeAndCallSyncCallback_Opt_Boolean_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Boolean select)>(thisDeserializer.readPointer());
+    const auto select_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Boolean select_buf = {};
+    select_buf.tag = select_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (select_buf_runtimeType))
+    {
+        select_buf.value = thisDeserializer.readBoolean();
+    }
+    Opt_Boolean select = select_buf;
+    _callSync(vmContext, _resourceId, select);
+}
 void deserializeAndCallCallback_Opt_CustomBuilder_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -2007,6 +2743,70 @@ void deserializeAndCallSyncCallback_Opt_NavigationAnimatedTransition_Void(Ark_VM
     }
     Opt_NavigationAnimatedTransition value = value_buf;
     _callSync(vmContext, _resourceId, value);
+}
+void deserializeAndCallCallback_Opt_Number_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Number selected)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    const auto selected_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Number selected_buf = {};
+    selected_buf.tag = selected_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (selected_buf_runtimeType))
+    {
+        selected_buf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    }
+    Opt_Number selected = selected_buf;
+    _call(_resourceId, selected);
+}
+void deserializeAndCallSyncCallback_Opt_Number_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Number selected)>(thisDeserializer.readPointer());
+    const auto selected_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Number selected_buf = {};
+    selected_buf.tag = selected_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (selected_buf_runtimeType))
+    {
+        selected_buf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    }
+    Opt_Number selected = selected_buf;
+    _callSync(vmContext, _resourceId, selected);
+}
+void deserializeAndCallCallback_Opt_Object_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Object value0)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    const auto value0_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Object value0_buf = {};
+    value0_buf.tag = value0_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (value0_buf_runtimeType))
+    {
+        value0_buf.value = static_cast<Ark_Object>(thisDeserializer.readObject());
+    }
+    Opt_Object value0 = value0_buf;
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_Opt_Object_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Object value0)>(thisDeserializer.readPointer());
+    const auto value0_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Object value0_buf = {};
+    value0_buf.tag = value0_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (value0_buf_runtimeType))
+    {
+        value0_buf.value = static_cast<Ark_Object>(thisDeserializer.readObject());
+    }
+    Opt_Object value0 = value0_buf;
+    _callSync(vmContext, _resourceId, value0);
 }
 void deserializeAndCallCallback_Opt_OffsetResult_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -2288,6 +3088,162 @@ void deserializeAndCallSyncCallback_Opt_TabContentAnimatedTransition_Void(Ark_VM
         value_buf.value = TabContentAnimatedTransition_serializer::read(thisDeserializer);
     }
     Opt_TabContentAnimatedTransition value = value_buf;
+    _callSync(vmContext, _resourceId, value);
+}
+void deserializeAndCallCallback_Opt_Union_Number_Resource_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Union_Number_Resource selected)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    const auto selected_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Union_Number_Resource selected_buf = {};
+    selected_buf.tag = selected_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (selected_buf_runtimeType))
+    {
+        const Ark_Int8 selected_buf__selector = thisDeserializer.readInt8();
+        Ark_Union_Number_Resource selected_buf_ = {};
+        selected_buf_.selector = selected_buf__selector;
+        if (selected_buf__selector == 0) {
+            selected_buf_.selector = 0;
+            selected_buf_.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        }
+        else if (selected_buf__selector == 1) {
+            selected_buf_.selector = 1;
+            selected_buf_.value1 = Resource_serializer::read(thisDeserializer);
+        }
+        else {
+            INTEROP_FATAL("One of the branches for selected_buf_ has to be chosen through deserialisation.");
+        }
+        selected_buf.value = static_cast<Ark_Union_Number_Resource>(selected_buf_);
+    }
+    Opt_Union_Number_Resource selected = selected_buf;
+    _call(_resourceId, selected);
+}
+void deserializeAndCallSyncCallback_Opt_Union_Number_Resource_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Union_Number_Resource selected)>(thisDeserializer.readPointer());
+    const auto selected_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Union_Number_Resource selected_buf = {};
+    selected_buf.tag = selected_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (selected_buf_runtimeType))
+    {
+        const Ark_Int8 selected_buf__selector = thisDeserializer.readInt8();
+        Ark_Union_Number_Resource selected_buf_ = {};
+        selected_buf_.selector = selected_buf__selector;
+        if (selected_buf__selector == 0) {
+            selected_buf_.selector = 0;
+            selected_buf_.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        }
+        else if (selected_buf__selector == 1) {
+            selected_buf_.selector = 1;
+            selected_buf_.value1 = Resource_serializer::read(thisDeserializer);
+        }
+        else {
+            INTEROP_FATAL("One of the branches for selected_buf_ has to be chosen through deserialisation.");
+        }
+        selected_buf.value = static_cast<Ark_Union_Number_Resource>(selected_buf_);
+    }
+    Opt_Union_Number_Resource selected = selected_buf;
+    _callSync(vmContext, _resourceId, selected);
+}
+void deserializeAndCallCallback_Opt_Union_ResourceStr_String_Resource_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Union_ResourceStr_String_Resource value)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Union_ResourceStr_String_Resource value_buf = {};
+    value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    {
+        const Ark_Int8 value_buf__selector = thisDeserializer.readInt8();
+        Ark_Union_ResourceStr_String_Resource value_buf_ = {};
+        value_buf_.selector = value_buf__selector;
+        if (value_buf__selector == 0) {
+            value_buf_.selector = 0;
+            const Ark_Int8 value_buf__u_selector = thisDeserializer.readInt8();
+            Ark_ResourceStr value_buf__u = {};
+            value_buf__u.selector = value_buf__u_selector;
+            if (value_buf__u_selector == 0) {
+                value_buf__u.selector = 0;
+                value_buf__u.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+            }
+            else if (value_buf__u_selector == 1) {
+                value_buf__u.selector = 1;
+                value_buf__u.value1 = Resource_serializer::read(thisDeserializer);
+            }
+            else {
+                INTEROP_FATAL("One of the branches for value_buf__u has to be chosen through deserialisation.");
+            }
+            value_buf_.value0 = static_cast<Ark_ResourceStr>(value_buf__u);
+        }
+        else if (value_buf__selector == 1) {
+            value_buf_.selector = 1;
+            value_buf_.value1 = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        else if (value_buf__selector == 2) {
+            value_buf_.selector = 2;
+            value_buf_.value2 = Resource_serializer::read(thisDeserializer);
+        }
+        else {
+            INTEROP_FATAL("One of the branches for value_buf_ has to be chosen through deserialisation.");
+        }
+        value_buf.value = static_cast<Ark_Union_ResourceStr_String_Resource>(value_buf_);
+    }
+    Opt_Union_ResourceStr_String_Resource value = value_buf;
+    _call(_resourceId, value);
+}
+void deserializeAndCallSyncCallback_Opt_Union_ResourceStr_String_Resource_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Union_ResourceStr_String_Resource value)>(thisDeserializer.readPointer());
+    const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Union_ResourceStr_String_Resource value_buf = {};
+    value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    {
+        const Ark_Int8 value_buf__selector = thisDeserializer.readInt8();
+        Ark_Union_ResourceStr_String_Resource value_buf_ = {};
+        value_buf_.selector = value_buf__selector;
+        if (value_buf__selector == 0) {
+            value_buf_.selector = 0;
+            const Ark_Int8 value_buf__u_selector = thisDeserializer.readInt8();
+            Ark_ResourceStr value_buf__u = {};
+            value_buf__u.selector = value_buf__u_selector;
+            if (value_buf__u_selector == 0) {
+                value_buf__u.selector = 0;
+                value_buf__u.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+            }
+            else if (value_buf__u_selector == 1) {
+                value_buf__u.selector = 1;
+                value_buf__u.value1 = Resource_serializer::read(thisDeserializer);
+            }
+            else {
+                INTEROP_FATAL("One of the branches for value_buf__u has to be chosen through deserialisation.");
+            }
+            value_buf_.value0 = static_cast<Ark_ResourceStr>(value_buf__u);
+        }
+        else if (value_buf__selector == 1) {
+            value_buf_.selector = 1;
+            value_buf_.value1 = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        else if (value_buf__selector == 2) {
+            value_buf_.selector = 2;
+            value_buf_.value2 = Resource_serializer::read(thisDeserializer);
+        }
+        else {
+            INTEROP_FATAL("One of the branches for value_buf_ has to be chosen through deserialisation.");
+        }
+        value_buf.value = static_cast<Ark_Union_ResourceStr_String_Resource>(value_buf_);
+    }
+    Opt_Union_ResourceStr_String_Resource value = value_buf;
     _callSync(vmContext, _resourceId, value);
 }
 void deserializeAndCallCallback_PlaybackInfo_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -3088,37 +4044,263 @@ void deserializeAndCallSyncCallback_Union_CustomBuilder_DragItemInfo_Void(Ark_VM
     Ark_Union_CustomBuilder_DragItemInfo value = static_cast<Ark_Union_CustomBuilder_DragItemInfo>(value_buf);
     _callSync(vmContext, _resourceId, value);
 }
-void deserializeAndCallCallback_Union_Object_Undefined_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+void deserializeAndCallCallback_Union_Number_Array_Number_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Object value0)>(thisDeserializer.readPointer());
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_Number_Array_Number selected)>(thisDeserializer.readPointer());
     thisDeserializer.readPointer();
-    const auto value0_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-    Opt_Object value0_buf = {};
-    value0_buf.tag = value0_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value0_buf_runtimeType))
-    {
-        value0_buf.value = static_cast<Ark_Object>(thisDeserializer.readObject());
+    const Ark_Int8 selected_buf_selector = thisDeserializer.readInt8();
+    Ark_Union_Number_Array_Number selected_buf = {};
+    selected_buf.selector = selected_buf_selector;
+    if (selected_buf_selector == 0) {
+        selected_buf.selector = 0;
+        selected_buf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
     }
-    Opt_Object value0 = value0_buf;
-    _call(_resourceId, value0);
+    else if (selected_buf_selector == 1) {
+        selected_buf.selector = 1;
+        const Ark_Int32 selected_buf_u_length = thisDeserializer.readInt32();
+        Array_Number selected_buf_u = {};
+        thisDeserializer.resizeArray<std::decay<decltype(selected_buf_u)>::type,
+        std::decay<decltype(*selected_buf_u.array)>::type>(&selected_buf_u, selected_buf_u_length);
+        for (int selected_buf_u_i = 0; selected_buf_u_i < selected_buf_u_length; selected_buf_u_i++) {
+            selected_buf_u.array[selected_buf_u_i] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        }
+        selected_buf.value1 = selected_buf_u;
+    }
+    else {
+        INTEROP_FATAL("One of the branches for selected_buf has to be chosen through deserialisation.");
+    }
+    Ark_Union_Number_Array_Number selected = static_cast<Ark_Union_Number_Array_Number>(selected_buf);
+    _call(_resourceId, selected);
 }
-void deserializeAndCallSyncCallback_Union_Object_Undefined_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+void deserializeAndCallSyncCallback_Union_Number_Array_Number_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Object value0)>(thisDeserializer.readPointer());
-    const auto value0_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-    Opt_Object value0_buf = {};
-    value0_buf.tag = value0_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value0_buf_runtimeType))
-    {
-        value0_buf.value = static_cast<Ark_Object>(thisDeserializer.readObject());
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_Number_Array_Number selected)>(thisDeserializer.readPointer());
+    const Ark_Int8 selected_buf_selector = thisDeserializer.readInt8();
+    Ark_Union_Number_Array_Number selected_buf = {};
+    selected_buf.selector = selected_buf_selector;
+    if (selected_buf_selector == 0) {
+        selected_buf.selector = 0;
+        selected_buf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
     }
-    Opt_Object value0 = value0_buf;
-    _callSync(vmContext, _resourceId, value0);
+    else if (selected_buf_selector == 1) {
+        selected_buf.selector = 1;
+        const Ark_Int32 selected_buf_u_length = thisDeserializer.readInt32();
+        Array_Number selected_buf_u = {};
+        thisDeserializer.resizeArray<std::decay<decltype(selected_buf_u)>::type,
+        std::decay<decltype(*selected_buf_u.array)>::type>(&selected_buf_u, selected_buf_u_length);
+        for (int selected_buf_u_i = 0; selected_buf_u_i < selected_buf_u_length; selected_buf_u_i++) {
+            selected_buf_u.array[selected_buf_u_i] = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        }
+        selected_buf.value1 = selected_buf_u;
+    }
+    else {
+        INTEROP_FATAL("One of the branches for selected_buf has to be chosen through deserialisation.");
+    }
+    Ark_Union_Number_Array_Number selected = static_cast<Ark_Union_Number_Array_Number>(selected_buf);
+    _callSync(vmContext, _resourceId, selected);
+}
+void deserializeAndCallCallback_Union_ResourceStr_Array_ResourceStr_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_ResourceStr_Array_ResourceStr value)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    const Ark_Int8 value_buf_selector = thisDeserializer.readInt8();
+    Ark_Union_ResourceStr_Array_ResourceStr value_buf = {};
+    value_buf.selector = value_buf_selector;
+    if (value_buf_selector == 0) {
+        value_buf.selector = 0;
+        const Ark_Int8 value_buf_u_selector = thisDeserializer.readInt8();
+        Ark_ResourceStr value_buf_u = {};
+        value_buf_u.selector = value_buf_u_selector;
+        if (value_buf_u_selector == 0) {
+            value_buf_u.selector = 0;
+            value_buf_u.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        else if (value_buf_u_selector == 1) {
+            value_buf_u.selector = 1;
+            value_buf_u.value1 = Resource_serializer::read(thisDeserializer);
+        }
+        else {
+            INTEROP_FATAL("One of the branches for value_buf_u has to be chosen through deserialisation.");
+        }
+        value_buf.value0 = static_cast<Ark_ResourceStr>(value_buf_u);
+    }
+    else if (value_buf_selector == 1) {
+        value_buf.selector = 1;
+        const Ark_Int32 value_buf_u_length = thisDeserializer.readInt32();
+        Array_ResourceStr value_buf_u = {};
+        thisDeserializer.resizeArray<std::decay<decltype(value_buf_u)>::type,
+        std::decay<decltype(*value_buf_u.array)>::type>(&value_buf_u, value_buf_u_length);
+        for (int value_buf_u_i = 0; value_buf_u_i < value_buf_u_length; value_buf_u_i++) {
+            const Ark_Int8 value_buf_u_buf_selector = thisDeserializer.readInt8();
+            Ark_ResourceStr value_buf_u_buf = {};
+            value_buf_u_buf.selector = value_buf_u_buf_selector;
+            if (value_buf_u_buf_selector == 0) {
+                value_buf_u_buf.selector = 0;
+                value_buf_u_buf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+            }
+            else if (value_buf_u_buf_selector == 1) {
+                value_buf_u_buf.selector = 1;
+                value_buf_u_buf.value1 = Resource_serializer::read(thisDeserializer);
+            }
+            else {
+                INTEROP_FATAL("One of the branches for value_buf_u_buf has to be chosen through deserialisation.");
+            }
+            value_buf_u.array[value_buf_u_i] = static_cast<Ark_ResourceStr>(value_buf_u_buf);
+        }
+        value_buf.value1 = value_buf_u;
+    }
+    else {
+        INTEROP_FATAL("One of the branches for value_buf has to be chosen through deserialisation.");
+    }
+    Ark_Union_ResourceStr_Array_ResourceStr value = static_cast<Ark_Union_ResourceStr_Array_ResourceStr>(value_buf);
+    _call(_resourceId, value);
+}
+void deserializeAndCallSyncCallback_Union_ResourceStr_Array_ResourceStr_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_ResourceStr_Array_ResourceStr value)>(thisDeserializer.readPointer());
+    const Ark_Int8 value_buf_selector = thisDeserializer.readInt8();
+    Ark_Union_ResourceStr_Array_ResourceStr value_buf = {};
+    value_buf.selector = value_buf_selector;
+    if (value_buf_selector == 0) {
+        value_buf.selector = 0;
+        const Ark_Int8 value_buf_u_selector = thisDeserializer.readInt8();
+        Ark_ResourceStr value_buf_u = {};
+        value_buf_u.selector = value_buf_u_selector;
+        if (value_buf_u_selector == 0) {
+            value_buf_u.selector = 0;
+            value_buf_u.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        else if (value_buf_u_selector == 1) {
+            value_buf_u.selector = 1;
+            value_buf_u.value1 = Resource_serializer::read(thisDeserializer);
+        }
+        else {
+            INTEROP_FATAL("One of the branches for value_buf_u has to be chosen through deserialisation.");
+        }
+        value_buf.value0 = static_cast<Ark_ResourceStr>(value_buf_u);
+    }
+    else if (value_buf_selector == 1) {
+        value_buf.selector = 1;
+        const Ark_Int32 value_buf_u_length = thisDeserializer.readInt32();
+        Array_ResourceStr value_buf_u = {};
+        thisDeserializer.resizeArray<std::decay<decltype(value_buf_u)>::type,
+        std::decay<decltype(*value_buf_u.array)>::type>(&value_buf_u, value_buf_u_length);
+        for (int value_buf_u_i = 0; value_buf_u_i < value_buf_u_length; value_buf_u_i++) {
+            const Ark_Int8 value_buf_u_buf_selector = thisDeserializer.readInt8();
+            Ark_ResourceStr value_buf_u_buf = {};
+            value_buf_u_buf.selector = value_buf_u_buf_selector;
+            if (value_buf_u_buf_selector == 0) {
+                value_buf_u_buf.selector = 0;
+                value_buf_u_buf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+            }
+            else if (value_buf_u_buf_selector == 1) {
+                value_buf_u_buf.selector = 1;
+                value_buf_u_buf.value1 = Resource_serializer::read(thisDeserializer);
+            }
+            else {
+                INTEROP_FATAL("One of the branches for value_buf_u_buf has to be chosen through deserialisation.");
+            }
+            value_buf_u.array[value_buf_u_i] = static_cast<Ark_ResourceStr>(value_buf_u_buf);
+        }
+        value_buf.value1 = value_buf_u;
+    }
+    else {
+        INTEROP_FATAL("One of the branches for value_buf has to be chosen through deserialisation.");
+    }
+    Ark_Union_ResourceStr_Array_ResourceStr value = static_cast<Ark_Union_ResourceStr_Array_ResourceStr>(value_buf);
+    _callSync(vmContext, _resourceId, value);
+}
+void deserializeAndCallCallback_Union_ResourceStr_Resource_String_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_ResourceStr_Resource_String text)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    const Ark_Int8 text_buf_selector = thisDeserializer.readInt8();
+    Ark_Union_ResourceStr_Resource_String text_buf = {};
+    text_buf.selector = text_buf_selector;
+    if (text_buf_selector == 0) {
+        text_buf.selector = 0;
+        const Ark_Int8 text_buf_u_selector = thisDeserializer.readInt8();
+        Ark_ResourceStr text_buf_u = {};
+        text_buf_u.selector = text_buf_u_selector;
+        if (text_buf_u_selector == 0) {
+            text_buf_u.selector = 0;
+            text_buf_u.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        else if (text_buf_u_selector == 1) {
+            text_buf_u.selector = 1;
+            text_buf_u.value1 = Resource_serializer::read(thisDeserializer);
+        }
+        else {
+            INTEROP_FATAL("One of the branches for text_buf_u has to be chosen through deserialisation.");
+        }
+        text_buf.value0 = static_cast<Ark_ResourceStr>(text_buf_u);
+    }
+    else if (text_buf_selector == 1) {
+        text_buf.selector = 1;
+        text_buf.value1 = Resource_serializer::read(thisDeserializer);
+    }
+    else if (text_buf_selector == 2) {
+        text_buf.selector = 2;
+        text_buf.value2 = static_cast<Ark_String>(thisDeserializer.readString());
+    }
+    else {
+        INTEROP_FATAL("One of the branches for text_buf has to be chosen through deserialisation.");
+    }
+    Ark_Union_ResourceStr_Resource_String text = static_cast<Ark_Union_ResourceStr_Resource_String>(text_buf);
+    _call(_resourceId, text);
+}
+void deserializeAndCallSyncCallback_Union_ResourceStr_Resource_String_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_ResourceStr_Resource_String text)>(thisDeserializer.readPointer());
+    const Ark_Int8 text_buf_selector = thisDeserializer.readInt8();
+    Ark_Union_ResourceStr_Resource_String text_buf = {};
+    text_buf.selector = text_buf_selector;
+    if (text_buf_selector == 0) {
+        text_buf.selector = 0;
+        const Ark_Int8 text_buf_u_selector = thisDeserializer.readInt8();
+        Ark_ResourceStr text_buf_u = {};
+        text_buf_u.selector = text_buf_u_selector;
+        if (text_buf_u_selector == 0) {
+            text_buf_u.selector = 0;
+            text_buf_u.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        else if (text_buf_u_selector == 1) {
+            text_buf_u.selector = 1;
+            text_buf_u.value1 = Resource_serializer::read(thisDeserializer);
+        }
+        else {
+            INTEROP_FATAL("One of the branches for text_buf_u has to be chosen through deserialisation.");
+        }
+        text_buf.value0 = static_cast<Ark_ResourceStr>(text_buf_u);
+    }
+    else if (text_buf_selector == 1) {
+        text_buf.selector = 1;
+        text_buf.value1 = Resource_serializer::read(thisDeserializer);
+    }
+    else if (text_buf_selector == 2) {
+        text_buf.selector = 2;
+        text_buf.value2 = static_cast<Ark_String>(thisDeserializer.readString());
+    }
+    else {
+        INTEROP_FATAL("One of the branches for text_buf has to be chosen through deserialisation.");
+    }
+    Ark_Union_ResourceStr_Resource_String text = static_cast<Ark_Union_ResourceStr_Resource_String>(text_buf);
+    _callSync(vmContext, _resourceId, text);
 }
 void deserializeAndCallCallback_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -3135,6 +4317,42 @@ void deserializeAndCallSyncCallback_Void(Ark_VMContext vmContext, KSerializerBuf
     thisDeserializer.readPointer();
     const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointer());
     _callSync(vmContext, _resourceId);
+}
+void deserializeAndCallCallback_WebKeyboardOptions_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_WebKeyboardOptions value)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_WebKeyboardOptions value = WebKeyboardOptions_serializer::read(thisDeserializer);
+    _call(_resourceId, value);
+}
+void deserializeAndCallSyncCallback_WebKeyboardOptions_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_WebKeyboardOptions value)>(thisDeserializer.readPointer());
+    Ark_WebKeyboardOptions value = WebKeyboardOptions_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, value);
+}
+void deserializeAndCallCallback_WebResourceResponse_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_WebResourceResponse value)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_WebResourceResponse value = static_cast<Ark_WebResourceResponse>(WebResourceResponse_serializer::read(thisDeserializer));
+    _call(_resourceId, value);
+}
+void deserializeAndCallSyncCallback_WebResourceResponse_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_WebResourceResponse value)>(thisDeserializer.readPointer());
+    Ark_WebResourceResponse value = static_cast<Ark_WebResourceResponse>(WebResourceResponse_serializer::read(thisDeserializer));
+    _callSync(vmContext, _resourceId, value);
 }
 void deserializeAndCallCheckBoxModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -3806,6 +5024,24 @@ void deserializeAndCallSyncNavExtender_OnUpdateStack(Ark_VMContext vmContext, KS
     const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointer());
     _callSync(vmContext, _resourceId);
 }
+void deserializeAndCallOnAdsBlockedCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_AdsBlockedDetails details)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_AdsBlockedDetails details = AdsBlockedDetails_serializer::read(thisDeserializer);
+    _call(_resourceId, details);
+}
+void deserializeAndCallSyncOnAdsBlockedCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_AdsBlockedDetails details)>(thisDeserializer.readPointer());
+    Ark_AdsBlockedDetails details = AdsBlockedDetails_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, details);
+}
 void deserializeAndCallOnAlphabetIndexerPopupSelectCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -3918,6 +5154,22 @@ void deserializeAndCallSyncOnContentScrollCallback(Ark_VMContext vmContext, KSer
     Ark_Number totalOffsetY = static_cast<Ark_Number>(thisDeserializer.readNumber());
     _callSync(vmContext, _resourceId, totalOffsetX, totalOffsetY);
 }
+void deserializeAndCallOnContextMenuHideCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    _call(_resourceId);
+}
+void deserializeAndCallSyncOnContextMenuHideCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointer());
+    _callSync(vmContext, _resourceId);
+}
 void deserializeAndCallOnCreateMenuCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -4006,6 +5258,24 @@ void deserializeAndCallSyncOnDragEventCallback(Ark_VMContext vmContext, KSeriali
     Opt_String extraParams = extraParams_buf;
     _callSync(vmContext, _resourceId, event, extraParams);
 }
+void deserializeAndCallOnFirstMeaningfulPaintCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_FirstMeaningfulPaint firstMeaningfulPaint)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_FirstMeaningfulPaint firstMeaningfulPaint = FirstMeaningfulPaint_serializer::read(thisDeserializer);
+    _call(_resourceId, firstMeaningfulPaint);
+}
+void deserializeAndCallSyncOnFirstMeaningfulPaintCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_FirstMeaningfulPaint firstMeaningfulPaint)>(thisDeserializer.readPointer());
+    Ark_FirstMeaningfulPaint firstMeaningfulPaint = FirstMeaningfulPaint_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, firstMeaningfulPaint);
+}
 void deserializeAndCallOnFoldStatusChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -4022,6 +5292,24 @@ void deserializeAndCallSyncOnFoldStatusChangeCallback(Ark_VMContext vmContext, K
     thisDeserializer.readPointer();
     const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnFoldStatusChangeInfo event)>(thisDeserializer.readPointer());
     Ark_OnFoldStatusChangeInfo event = OnFoldStatusChangeInfo_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, event);
+}
+void deserializeAndCallOnFullScreenEnterCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_FullScreenEnterEvent event)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_FullScreenEnterEvent event = FullScreenEnterEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, event);
+}
+void deserializeAndCallSyncOnFullScreenEnterCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_FullScreenEnterEvent event)>(thisDeserializer.readPointer());
+    Ark_FullScreenEnterEvent event = FullScreenEnterEvent_serializer::read(thisDeserializer);
     _callSync(vmContext, _resourceId, event);
 }
 void deserializeAndCallOnHoverCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -4062,6 +5350,24 @@ void deserializeAndCallSyncOnHoverStatusChangeCallback(Ark_VMContext vmContext, 
     Ark_HoverEventParam param = HoverEventParam_serializer::read(thisDeserializer);
     _callSync(vmContext, _resourceId, param);
 }
+void deserializeAndCallOnIntelligentTrackingPreventionCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_IntelligentTrackingPreventionDetails details)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_IntelligentTrackingPreventionDetails details = IntelligentTrackingPreventionDetails_serializer::read(thisDeserializer);
+    _call(_resourceId, details);
+}
+void deserializeAndCallSyncOnIntelligentTrackingPreventionCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_IntelligentTrackingPreventionDetails details)>(thisDeserializer.readPointer());
+    Ark_IntelligentTrackingPreventionDetails details = IntelligentTrackingPreventionDetails_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, details);
+}
 void deserializeAndCallOnItemDragStartCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -4083,6 +5389,24 @@ void deserializeAndCallSyncOnItemDragStartCallback(Ark_VMContext vmContext, KSer
     Ark_Number itemIndex = static_cast<Ark_Number>(thisDeserializer.readNumber());
     Callback_Opt_CustomBuilder_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_CustomNodeBuilder value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_CustomBuilder_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_CustomNodeBuilder value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_CustomBuilder_Void))))};
     _callSync(vmContext, _resourceId, event, itemIndex, _continuation);
+}
+void deserializeAndCallOnLargestContentfulPaintCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_LargestContentfulPaint largestContentfulPaint)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_LargestContentfulPaint largestContentfulPaint = LargestContentfulPaint_serializer::read(thisDeserializer);
+    _call(_resourceId, largestContentfulPaint);
+}
+void deserializeAndCallSyncOnLargestContentfulPaintCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_LargestContentfulPaint largestContentfulPaint)>(thisDeserializer.readPointer());
+    Ark_LargestContentfulPaint largestContentfulPaint = LargestContentfulPaint_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, largestContentfulPaint);
 }
 void deserializeAndCallOnLazyLoadingFunc(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -4164,6 +5488,24 @@ void deserializeAndCallSyncOnMoveHandler(Ark_VMContext vmContext, KSerializerBuf
     Ark_Number to = static_cast<Ark_Number>(thisDeserializer.readNumber());
     _callSync(vmContext, _resourceId, from, to);
 }
+void deserializeAndCallOnNativeEmbedVisibilityChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativeEmbedVisibilityInfo nativeEmbedVisibilityInfo)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_NativeEmbedVisibilityInfo nativeEmbedVisibilityInfo = NativeEmbedVisibilityInfo_serializer::read(thisDeserializer);
+    _call(_resourceId, nativeEmbedVisibilityInfo);
+}
+void deserializeAndCallSyncOnNativeEmbedVisibilityChangeCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativeEmbedVisibilityInfo nativeEmbedVisibilityInfo)>(thisDeserializer.readPointer());
+    Ark_NativeEmbedVisibilityInfo nativeEmbedVisibilityInfo = NativeEmbedVisibilityInfo_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, nativeEmbedVisibilityInfo);
+}
 void deserializeAndCallOnNativeLoadCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -4195,6 +5537,44 @@ void deserializeAndCallSyncOnNativeLoadCallback(Ark_VMContext vmContext, KSerial
     }
     Opt_Object event = event_buf;
     _callSync(vmContext, _resourceId, event);
+}
+void deserializeAndCallOnNavigationEntryCommittedCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_LoadCommittedDetails loadCommittedDetails)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_LoadCommittedDetails loadCommittedDetails = LoadCommittedDetails_serializer::read(thisDeserializer);
+    _call(_resourceId, loadCommittedDetails);
+}
+void deserializeAndCallSyncOnNavigationEntryCommittedCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_LoadCommittedDetails loadCommittedDetails)>(thisDeserializer.readPointer());
+    Ark_LoadCommittedDetails loadCommittedDetails = LoadCommittedDetails_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, loadCommittedDetails);
+}
+void deserializeAndCallOnOverrideUrlLoadingCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_WebResourceRequest webResourceRequest, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_WebResourceRequest webResourceRequest = static_cast<Ark_WebResourceRequest>(WebResourceRequest_serializer::read(thisDeserializer));
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _call(_resourceId, webResourceRequest, _continuation);
+}
+void deserializeAndCallSyncOnOverrideUrlLoadingCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_WebResourceRequest webResourceRequest, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointer());
+    Ark_WebResourceRequest webResourceRequest = static_cast<Ark_WebResourceRequest>(WebResourceRequest_serializer::read(thisDeserializer));
+    Callback_Boolean_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
+    _callSync(vmContext, _resourceId, webResourceRequest, _continuation);
 }
 void deserializeAndCallOnPasteCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -4251,6 +5631,58 @@ void deserializeAndCallSyncOnRatingChangeCallback(Ark_VMContext vmContext, KSeri
     const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number rating)>(thisDeserializer.readPointer());
     Ark_Number rating = static_cast<Ark_Number>(thisDeserializer.readNumber());
     _callSync(vmContext, _resourceId, rating);
+}
+void deserializeAndCallOnRenderProcessNotRespondingCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_RenderProcessNotRespondingData data)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_RenderProcessNotRespondingData data = RenderProcessNotRespondingData_serializer::read(thisDeserializer);
+    _call(_resourceId, data);
+}
+void deserializeAndCallSyncOnRenderProcessNotRespondingCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_RenderProcessNotRespondingData data)>(thisDeserializer.readPointer());
+    Ark_RenderProcessNotRespondingData data = RenderProcessNotRespondingData_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, data);
+}
+void deserializeAndCallOnRenderProcessRespondingCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    _call(_resourceId);
+}
+void deserializeAndCallSyncOnRenderProcessRespondingCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointer());
+    _callSync(vmContext, _resourceId);
+}
+void deserializeAndCallOnSafeBrowsingCheckResultCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_ThreatType threatType)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_ThreatType threatType = static_cast<Ark_ThreatType>(thisDeserializer.readInt32());
+    _call(_resourceId, threatType);
+}
+void deserializeAndCallSyncOnSafeBrowsingCheckResultCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_ThreatType threatType)>(thisDeserializer.readPointer());
+    Ark_ThreatType threatType = static_cast<Ark_ThreatType>(thisDeserializer.readInt32());
+    _callSync(vmContext, _resourceId, threatType);
 }
 void deserializeAndCallOnScrollCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -4351,6 +5783,24 @@ void deserializeAndCallSyncOnSelectCallback(Ark_VMContext vmContext, KSerializer
     Ark_Number index = static_cast<Ark_Number>(thisDeserializer.readNumber());
     Ark_String selectStr = static_cast<Ark_String>(thisDeserializer.readString());
     _callSync(vmContext, _resourceId, index, selectStr);
+}
+void deserializeAndCallOnSslErrorEventCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_SslErrorEvent sslErrorEvent)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_SslErrorEvent sslErrorEvent = SslErrorEvent_serializer::read(thisDeserializer);
+    _call(_resourceId, sslErrorEvent);
+}
+void deserializeAndCallSyncOnSslErrorEventCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_SslErrorEvent sslErrorEvent)>(thisDeserializer.readPointer());
+    Ark_SslErrorEvent sslErrorEvent = SslErrorEvent_serializer::read(thisDeserializer);
+    _callSync(vmContext, _resourceId, sslErrorEvent);
 }
 void deserializeAndCallOnSubmitCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -4677,6 +6127,24 @@ void deserializeAndCallSyncOnTotalCountFunc(Ark_VMContext vmContext, KSerializer
     const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Callback_Number_Void continuation)>(thisDeserializer.readPointer());
     Callback_Number_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void))))};
     _callSync(vmContext, _resourceId, _continuation);
+}
+void deserializeAndCallOnViewportFitChangedCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_ViewportFit viewportFit)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_ViewportFit viewportFit = static_cast<Ark_ViewportFit>(thisDeserializer.readInt32());
+    _call(_resourceId, viewportFit);
+}
+void deserializeAndCallSyncOnViewportFitChangedCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_ViewportFit viewportFit)>(thisDeserializer.readPointer());
+    Ark_ViewportFit viewportFit = static_cast<Ark_ViewportFit>(thisDeserializer.readInt32());
+    _callSync(vmContext, _resourceId, viewportFit);
 }
 void deserializeAndCallOnWillScrollCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -5800,249 +7268,331 @@ void deserializeAndCallSyncVoidCallback(Ark_VMContext vmContext, KSerializerBuff
     const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointer());
     _callSync(vmContext, _resourceId);
 }
+void deserializeAndCallWebKeyboardCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_WebKeyboardCallbackInfo keyboardCallbackInfo, const Callback_WebKeyboardOptions_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_WebKeyboardCallbackInfo keyboardCallbackInfo = WebKeyboardCallbackInfo_serializer::read(thisDeserializer);
+    Callback_WebKeyboardOptions_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_WebKeyboardOptions value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_WebKeyboardOptions_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_WebKeyboardOptions value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_WebKeyboardOptions_Void))))};
+    _call(_resourceId, keyboardCallbackInfo, _continuation);
+}
+void deserializeAndCallSyncWebKeyboardCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_WebKeyboardCallbackInfo keyboardCallbackInfo, const Callback_WebKeyboardOptions_Void continuation)>(thisDeserializer.readPointer());
+    Ark_WebKeyboardCallbackInfo keyboardCallbackInfo = WebKeyboardCallbackInfo_serializer::read(thisDeserializer);
+    Callback_WebKeyboardOptions_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_WebKeyboardOptions value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_WebKeyboardOptions_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_WebKeyboardOptions value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_WebKeyboardOptions_Void))))};
+    _callSync(vmContext, _resourceId, keyboardCallbackInfo, _continuation);
+}
 void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
-    switch (kind) {
-        case 589030517/*Kind_AccessibilityCallback*/: return deserializeAndCallAccessibilityCallback(thisArray, thisLength);
-        case 1715445305/*Kind_AccessibilityFocusCallback*/: return deserializeAndCallAccessibilityFocusCallback(thisArray, thisLength);
-        case 1289587365/*Kind_AsyncCallback_image_PixelMap_Void*/: return deserializeAndCallAsyncCallback_image_PixelMap_Void(thisArray, thisLength);
-        case -2004118094/*Kind_ButtonModifierBuilder*/: return deserializeAndCallButtonModifierBuilder(thisArray, thisLength);
-        case -1964292933/*Kind_ButtonTriggerClickCallback*/: return deserializeAndCallButtonTriggerClickCallback(thisArray, thisLength);
-        case -2024393616/*Kind_Callback_Area_Area_Void*/: return deserializeAndCallCallback_Area_Area_Void(thisArray, thisLength);
-        case 582384234/*Kind_Callback_Array_Number_Void*/: return deserializeAndCallCallback_Array_Number_Void(thisArray, thisLength);
-        case -440782244/*Kind_Callback_Array_String_Void*/: return deserializeAndCallCallback_Array_String_Void(thisArray, thisLength);
-        case 528588498/*Kind_Callback_Array_TextMenuItem_Void*/: return deserializeAndCallCallback_Array_TextMenuItem_Void(thisArray, thisLength);
-        case -547276916/*Kind_Callback_Array_TouchTestInfo_TouchResult*/: return deserializeAndCallCallback_Array_TouchTestInfo_TouchResult(thisArray, thisLength);
-        case 109087936/*Kind_Callback_AxisEvent_Void*/: return deserializeAndCallCallback_AxisEvent_Void(thisArray, thisLength);
-        case -1541107680/*Kind_Callback_Boolean*/: return deserializeAndCallCallback_Boolean(thisArray, thisLength);
-        case -916602978/*Kind_Callback_Boolean_HoverEvent_Void*/: return deserializeAndCallCallback_Boolean_HoverEvent_Void(thisArray, thisLength);
-        case 313269291/*Kind_Callback_Boolean_Void*/: return deserializeAndCallCallback_Boolean_Void(thisArray, thisLength);
-        case 908731311/*Kind_Callback_Buffer_Void*/: return deserializeAndCallCallback_Buffer_Void(thisArray, thisLength);
-        case 1074619005/*Kind_Callback_CalendarRequestedData_Void*/: return deserializeAndCallCallback_CalendarRequestedData_Void(thisArray, thisLength);
-        case -289198976/*Kind_Callback_CalendarSelectedDate_Void*/: return deserializeAndCallCallback_CalendarSelectedDate_Void(thisArray, thisLength);
-        case 1097178637/*Kind_Callback_ClickEvent_Void*/: return deserializeAndCallCallback_ClickEvent_Void(thisArray, thisLength);
-        case -494015096/*Kind_Callback_CompatibleComponentInfo_Void*/: return deserializeAndCallCallback_CompatibleComponentInfo_Void(thisArray, thisLength);
-        case -1270343661/*Kind_Callback_ComputedBarAttribute_Void*/: return deserializeAndCallCallback_ComputedBarAttribute_Void(thisArray, thisLength);
-        case -120437466/*Kind_Callback_CopyEvent_Void*/: return deserializeAndCallCallback_CopyEvent_Void(thisArray, thisLength);
-        case -2019730059/*Kind_Callback_CreateItem*/: return deserializeAndCallCallback_CreateItem(thisArray, thisLength);
-        case -827253372/*Kind_Callback_CrownEvent_Void*/: return deserializeAndCallCallback_CrownEvent_Void(thisArray, thisLength);
-        case -378918566/*Kind_Callback_CustomSpanMeasureInfo_CustomSpanMetrics*/: return deserializeAndCallCallback_CustomSpanMeasureInfo_CustomSpanMetrics(thisArray, thisLength);
-        case 1362306791/*Kind_Callback_CustomSpanMetrics_Void*/: return deserializeAndCallCallback_CustomSpanMetrics_Void(thisArray, thisLength);
-        case -1875695871/*Kind_Callback_CutEvent_Void*/: return deserializeAndCallCallback_CutEvent_Void(thisArray, thisLength);
-        case 1405382363/*Kind_Callback_Date_Void*/: return deserializeAndCallCallback_Date_Void(thisArray, thisLength);
-        case -1357792883/*Kind_Callback_DeleteValue_Boolean*/: return deserializeAndCallCallback_DeleteValue_Boolean(thisArray, thisLength);
-        case -126251459/*Kind_Callback_DeleteValue_Void*/: return deserializeAndCallCallback_DeleteValue_Void(thisArray, thisLength);
-        case -1283506641/*Kind_Callback_DismissContentCoverAction_Void*/: return deserializeAndCallCallback_DismissContentCoverAction_Void(thisArray, thisLength);
-        case -2095828093/*Kind_Callback_DismissDialogAction_Void*/: return deserializeAndCallCallback_DismissDialogAction_Void(thisArray, thisLength);
-        case -2004166751/*Kind_Callback_DismissPopupAction_Void*/: return deserializeAndCallCallback_DismissPopupAction_Void(thisArray, thisLength);
-        case 889549796/*Kind_Callback_DismissSheetAction_Void*/: return deserializeAndCallCallback_DismissSheetAction_Void(thisArray, thisLength);
-        case -2091703923/*Kind_Callback_DragEvent_Opt_String_Void*/: return deserializeAndCallCallback_DragEvent_Opt_String_Void(thisArray, thisLength);
-        case -2106022018/*Kind_Callback_DrawContext_CustomSpanDrawInfo_Void*/: return deserializeAndCallCallback_DrawContext_CustomSpanDrawInfo_Void(thisArray, thisLength);
-        case 38085488/*Kind_Callback_DrawContext_Void*/: return deserializeAndCallCallback_DrawContext_Void(thisArray, thisLength);
-        case -602545319/*Kind_Callback_EditableTextChangeValue_Boolean*/: return deserializeAndCallCallback_EditableTextChangeValue_Boolean(thisArray, thisLength);
-        case -1802605016/*Kind_Callback_EnterKeyType_Void*/: return deserializeAndCallCallback_EnterKeyType_Void(thisArray, thisLength);
-        case 1187455675/*Kind_Callback_ErrorInformation_Void*/: return deserializeAndCallCallback_ErrorInformation_Void(thisArray, thisLength);
-        case -733525640/*Kind_Callback_Extender_OnFinish*/: return deserializeAndCallCallback_Extender_OnFinish(thisArray, thisLength);
-        case 1264236374/*Kind_Callback_Extender_OnProgress*/: return deserializeAndCallCallback_Extender_OnProgress(thisArray, thisLength);
-        case 394781580/*Kind_Callback_FocusAxisEvent_Void*/: return deserializeAndCallCallback_FocusAxisEvent_Void(thisArray, thisLength);
-        case 758395742/*Kind_Callback_FormCallbackInfo_Void*/: return deserializeAndCallCallback_FormCallbackInfo_Void(thisArray, thisLength);
-        case 583294398/*Kind_Callback_FullscreenInfo_Void*/: return deserializeAndCallCallback_FullscreenInfo_Void(thisArray, thisLength);
-        case -1143194492/*Kind_Callback_GestureEvent_Void*/: return deserializeAndCallCallback_GestureEvent_Void(thisArray, thisLength);
-        case 1319043556/*Kind_Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult*/: return deserializeAndCallCallback_GestureInfo_BaseGestureEvent_GestureJudgeResult(thisArray, thisLength);
-        case -684588584/*Kind_Callback_GestureJudgeResult_Void*/: return deserializeAndCallCallback_GestureJudgeResult_Void(thisArray, thisLength);
-        case 776202910/*Kind_Callback_GestureRecognizer_Void*/: return deserializeAndCallCallback_GestureRecognizer_Void(thisArray, thisLength);
-        case -1755111025/*Kind_Callback_HitTestMode_Void*/: return deserializeAndCallCallback_HitTestMode_Void(thisArray, thisLength);
-        case -1576788379/*Kind_Callback_HoverEvent_Void*/: return deserializeAndCallCallback_HoverEvent_Void(thisArray, thisLength);
-        case -383025085/*Kind_Callback_InsertValue_Boolean*/: return deserializeAndCallCallback_InsertValue_Boolean(thisArray, thisLength);
-        case -1121207885/*Kind_Callback_InsertValue_Void*/: return deserializeAndCallCallback_InsertValue_Void(thisArray, thisLength);
-        case -1627362945/*Kind_Callback_ItemDragInfo_Number_Number_Boolean_Void*/: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Boolean_Void(thisArray, thisLength);
-        case -918805852/*Kind_Callback_ItemDragInfo_Number_Number_Void*/: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Void(thisArray, thisLength);
-        case 296908152/*Kind_Callback_ItemDragInfo_Number_Void*/: return deserializeAndCallCallback_ItemDragInfo_Number_Void(thisArray, thisLength);
-        case 137353252/*Kind_Callback_ItemDragInfo_Void*/: return deserializeAndCallCallback_ItemDragInfo_Void(thisArray, thisLength);
-        case -2061548092/*Kind_Callback_KeyEvent_Boolean*/: return deserializeAndCallCallback_KeyEvent_Boolean(thisArray, thisLength);
-        case 707696468/*Kind_Callback_KeyEvent_Void*/: return deserializeAndCallCallback_KeyEvent_Void(thisArray, thisLength);
-        case -1146723341/*Kind_Callback_Map_String_Object_Void*/: return deserializeAndCallCallback_Map_String_Object_Void(thisArray, thisLength);
-        case -716263454/*Kind_Callback_MarqueeState_Void*/: return deserializeAndCallCallback_MarqueeState_Void(thisArray, thisLength);
-        case -1382640094/*Kind_Callback_MouseEvent_Void*/: return deserializeAndCallCallback_MouseEvent_Void(thisArray, thisLength);
-        case 634825762/*Kind_Callback_NavDestinationActiveReason_Void*/: return deserializeAndCallCallback_NavDestinationActiveReason_Void(thisArray, thisLength);
-        case -1642725259/*Kind_Callback_NavDestinationContext_Void*/: return deserializeAndCallCallback_NavDestinationContext_Void(thisArray, thisLength);
-        case 960690982/*Kind_Callback_NavigationMode_Void*/: return deserializeAndCallCallback_NavigationMode_Void(thisArray, thisLength);
-        case 1685437830/*Kind_Callback_NavigationTitleMode_Void*/: return deserializeAndCallCallback_NavigationTitleMode_Void(thisArray, thisLength);
-        case -1375731066/*Kind_Callback_NavigationTransitionProxy_Void*/: return deserializeAndCallCallback_NavigationTransitionProxy_Void(thisArray, thisLength);
-        case -1427334496/*Kind_Callback_Number_Number_Boolean*/: return deserializeAndCallCallback_Number_Number_Boolean(thisArray, thisLength);
-        case -1923888037/*Kind_Callback_Number_Number_Boolean_Boolean*/: return deserializeAndCallCallback_Number_Number_Boolean_Boolean(thisArray, thisLength);
-        case -3987624/*Kind_Callback_Number_Number_ComputedBarAttribute*/: return deserializeAndCallCallback_Number_Number_ComputedBarAttribute(thisArray, thisLength);
-        case -352942292/*Kind_Callback_Number_Number_Number_Void*/: return deserializeAndCallCallback_Number_Number_Number_Void(thisArray, thisLength);
-        case 1894574320/*Kind_Callback_Number_Number_Void*/: return deserializeAndCallCallback_Number_Number_Void(thisArray, thisLength);
-        case 88697971/*Kind_Callback_Number_SliderChangeMode_Void*/: return deserializeAndCallCallback_Number_SliderChangeMode_Void(thisArray, thisLength);
-        case 1602877440/*Kind_Callback_Number_Tuple_Number_Number*/: return deserializeAndCallCallback_Number_Tuple_Number_Number(thisArray, thisLength);
-        case 1618565120/*Kind_Callback_Number_Tuple_Number_Number_Number_Number*/: return deserializeAndCallCallback_Number_Tuple_Number_Number_Number_Number(thisArray, thisLength);
-        case 36519084/*Kind_Callback_Number_Void*/: return deserializeAndCallCallback_Number_Void(thisArray, thisLength);
-        case -1782529222/*Kind_Callback_Object_Void*/: return deserializeAndCallCallback_Object_Void(thisArray, thisLength);
-        case -1356285653/*Kind_Callback_onMeasureSize_SizeResult*/: return deserializeAndCallCallback_onMeasureSize_SizeResult(thisArray, thisLength);
-        case -738620506/*Kind_Callback_onPlaceChildren_Void*/: return deserializeAndCallCallback_onPlaceChildren_Void(thisArray, thisLength);
-        case 1637092936/*Kind_Callback_OnScrollFrameBeginHandlerResult_Void*/: return deserializeAndCallCallback_OnScrollFrameBeginHandlerResult_Void(thisArray, thisLength);
-        case -296989211/*Kind_Callback_Opt_Array_FontDescriptor_Opt_Array_String_Void*/: return deserializeAndCallCallback_Opt_Array_FontDescriptor_Opt_Array_String_Void(thisArray, thisLength);
-        case 406871767/*Kind_Callback_Opt_Array_NavDestinationTransition_Void*/: return deserializeAndCallCallback_Opt_Array_NavDestinationTransition_Void(thisArray, thisLength);
-        case 287839344/*Kind_Callback_Opt_Array_String_Opt_Array_String_Void*/: return deserializeAndCallCallback_Opt_Array_String_Opt_Array_String_Void(thisArray, thisLength);
-        case -543655128/*Kind_Callback_Opt_Array_String_Void*/: return deserializeAndCallCallback_Opt_Array_String_Void(thisArray, thisLength);
-        case 859020393/*Kind_Callback_Opt_CustomBuilder_Void*/: return deserializeAndCallCallback_Opt_CustomBuilder_Void(thisArray, thisLength);
-        case 11877731/*Kind_Callback_Opt_FontDescriptor_Opt_Array_String_Void*/: return deserializeAndCallCallback_Opt_FontDescriptor_Opt_Array_String_Void(thisArray, thisLength);
-        case -2035339519/*Kind_Callback_Opt_NavigationAnimatedTransition_Void*/: return deserializeAndCallCallback_Opt_NavigationAnimatedTransition_Void(thisArray, thisLength);
-        case 1321949695/*Kind_Callback_Opt_OffsetResult_Void*/: return deserializeAndCallCallback_Opt_OffsetResult_Void(thisArray, thisLength);
-        case 514173789/*Kind_Callback_Opt_Scene_Opt_Array_String_Void*/: return deserializeAndCallCallback_Opt_Scene_Opt_Array_String_Void(thisArray, thisLength);
-        case 648568223/*Kind_Callback_Opt_ScrollResult_Void*/: return deserializeAndCallCallback_Opt_ScrollResult_Void(thisArray, thisLength);
-        case 1813490422/*Kind_Callback_Opt_String_Opt_Array_String_Void*/: return deserializeAndCallCallback_Opt_String_Opt_Array_String_Void(thisArray, thisLength);
-        case -756319131/*Kind_Callback_Opt_StyledString_Opt_Array_String_Void*/: return deserializeAndCallCallback_Opt_StyledString_Opt_Array_String_Void(thisArray, thisLength);
-        case -143931627/*Kind_Callback_Opt_TabContentAnimatedTransition_Void*/: return deserializeAndCallCallback_Opt_TabContentAnimatedTransition_Void(thisArray, thisLength);
-        case -2058966418/*Kind_Callback_PlaybackInfo_Void*/: return deserializeAndCallCallback_PlaybackInfo_Void(thisArray, thisLength);
-        case 721562324/*Kind_Callback_Pointer_Void*/: return deserializeAndCallCallback_Pointer_Void(thisArray, thisLength);
-        case 624053870/*Kind_Callback_PopInfo_Void*/: return deserializeAndCallCallback_PopInfo_Void(thisArray, thisLength);
-        case 463894668/*Kind_Callback_PreDragStatus_Void*/: return deserializeAndCallCallback_PreDragStatus_Void(thisArray, thisLength);
-        case 1300890372/*Kind_Callback_PreparedInfo_Void*/: return deserializeAndCallCallback_PreparedInfo_Void(thisArray, thisLength);
-        case 797834474/*Kind_Callback_RangeUpdate*/: return deserializeAndCallCallback_RangeUpdate(thisArray, thisLength);
-        case 934309126/*Kind_Callback_RefreshStatus_Void*/: return deserializeAndCallCallback_RefreshStatus_Void(thisArray, thisLength);
-        case 1465860515/*Kind_Callback_RichEditorChangeValue_Boolean*/: return deserializeAndCallCallback_RichEditorChangeValue_Boolean(thisArray, thisLength);
-        case 667698748/*Kind_Callback_RichEditorDeleteValue_Boolean*/: return deserializeAndCallCallback_RichEditorDeleteValue_Boolean(thisArray, thisLength);
-        case -319221262/*Kind_Callback_RichEditorInsertValue_Boolean*/: return deserializeAndCallCallback_RichEditorInsertValue_Boolean(thisArray, thisLength);
-        case -62253375/*Kind_Callback_RichEditorRange_Void*/: return deserializeAndCallCallback_RichEditorRange_Void(thisArray, thisLength);
-        case -963852514/*Kind_Callback_RichEditorSelection_Void*/: return deserializeAndCallCallback_RichEditorSelection_Void(thisArray, thisLength);
-        case 1980824326/*Kind_Callback_RichEditorTextSpanResult_Void*/: return deserializeAndCallCallback_RichEditorTextSpanResult_Void(thisArray, thisLength);
-        case 1688035159/*Kind_Callback_RotationGesture*/: return deserializeAndCallCallback_RotationGesture(thisArray, thisLength);
-        case 924806076/*Kind_Callback_RotationGesture_Void*/: return deserializeAndCallCallback_RotationGesture_Void(thisArray, thisLength);
-        case 22609082/*Kind_Callback_SheetDismiss_Void*/: return deserializeAndCallCallback_SheetDismiss_Void(thisArray, thisLength);
-        case -224451112/*Kind_Callback_SheetType_Void*/: return deserializeAndCallCallback_SheetType_Void(thisArray, thisLength);
-        case 1318865891/*Kind_Callback_SizeResult_Void*/: return deserializeAndCallCallback_SizeResult_Void(thisArray, thisLength);
-        case 1536231691/*Kind_Callback_SpringBackAction_Void*/: return deserializeAndCallCallback_SpringBackAction_Void(thisArray, thisLength);
-        case -1872286415/*Kind_Callback_StateStylesChange*/: return deserializeAndCallCallback_StateStylesChange(thisArray, thisLength);
-        case -683652998/*Kind_Callback_String_PasteEvent_Void*/: return deserializeAndCallCallback_String_PasteEvent_Void(thisArray, thisLength);
-        case -1736208400/*Kind_Callback_String_SurfaceRect_Void*/: return deserializeAndCallCallback_String_SurfaceRect_Void(thisArray, thisLength);
-        case 814634522/*Kind_Callback_String_Void*/: return deserializeAndCallCallback_String_Void(thisArray, thisLength);
-        case 2116745428/*Kind_Callback_StyledStringChangeValue_Boolean*/: return deserializeAndCallCallback_StyledStringChangeValue_Boolean(thisArray, thisLength);
-        case -1198150682/*Kind_Callback_StyledStringMarshallingValue_Void*/: return deserializeAndCallCallback_StyledStringMarshallingValue_Void(thisArray, thisLength);
-        case -301561698/*Kind_Callback_SwipeActionState_Void*/: return deserializeAndCallCallback_SwipeActionState_Void(thisArray, thisLength);
-        case 1824461051/*Kind_Callback_SwipeGesture*/: return deserializeAndCallCallback_SwipeGesture(thisArray, thisLength);
-        case -768726640/*Kind_Callback_SwipeGesture_Void*/: return deserializeAndCallCallback_SwipeGesture_Void(thisArray, thisLength);
-        case -416053361/*Kind_Callback_SwiperContentTransitionProxy_Void*/: return deserializeAndCallCallback_SwiperContentTransitionProxy_Void(thisArray, thisLength);
-        case -1223938478/*Kind_Callback_TabContentTransitionProxy_Void*/: return deserializeAndCallCallback_TabContentTransitionProxy_Void(thisArray, thisLength);
-        case 691098197/*Kind_Callback_TerminationInfo_Void*/: return deserializeAndCallCallback_TerminationInfo_Void(thisArray, thisLength);
-        case 1290504509/*Kind_Callback_TextPickerResult_Void*/: return deserializeAndCallCallback_TextPickerResult_Void(thisArray, thisLength);
-        case 811915501/*Kind_Callback_TextRange_Void*/: return deserializeAndCallCallback_TextRange_Void(thisArray, thisLength);
-        case 1557859605/*Kind_Callback_TimePickerResult_Void*/: return deserializeAndCallCallback_TimePickerResult_Void(thisArray, thisLength);
-        case -274419246/*Kind_Callback_TouchEvent_HitTestMode*/: return deserializeAndCallCallback_TouchEvent_HitTestMode(thisArray, thisLength);
-        case -1676021850/*Kind_Callback_TouchEvent_Void*/: return deserializeAndCallCallback_TouchEvent_Void(thisArray, thisLength);
-        case 1943507619/*Kind_Callback_TouchResult_Void*/: return deserializeAndCallCallback_TouchResult_Void(thisArray, thisLength);
-        case 148489367/*Kind_Callback_Tuple_Number_Number_Number_Number_Void*/: return deserializeAndCallCallback_Tuple_Number_Number_Number_Number_Void(thisArray, thisLength);
-        case -607365481/*Kind_Callback_Tuple_Number_Number_Void*/: return deserializeAndCallCallback_Tuple_Number_Number_Void(thisArray, thisLength);
-        case -1063506522/*Kind_Callback_UIExtensionProxy_Void*/: return deserializeAndCallCallback_UIExtensionProxy_Void(thisArray, thisLength);
-        case -620935067/*Kind_Callback_Union_CustomBuilder_DragItemInfo_Void*/: return deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void(thisArray, thisLength);
-        case 411311059/*Kind_Callback_Union_Object_Undefined_Void*/: return deserializeAndCallCallback_Union_Object_Undefined_Void(thisArray, thisLength);
-        case -1867723152/*Kind_Callback_Void*/: return deserializeAndCallCallback_Void(thisArray, thisLength);
-        case 1317697111/*Kind_CheckBoxModifierBuilder*/: return deserializeAndCallCheckBoxModifierBuilder(thisArray, thisLength);
-        case 1482532871/*Kind_CompatibleInitCallback*/: return deserializeAndCallCompatibleInitCallback(thisArray, thisLength);
-        case 434420460/*Kind_CompatibleUpdateCallback*/: return deserializeAndCallCompatibleUpdateCallback(thisArray, thisLength);
-        case 1532328438/*Kind_ContentDidScrollCallback*/: return deserializeAndCallContentDidScrollCallback(thisArray, thisLength);
-        case -2146044511/*Kind_ContentWillScrollCallback*/: return deserializeAndCallContentWillScrollCallback(thisArray, thisLength);
-        case 260483890/*Kind_Context_getGroupDir_Callback*/: return deserializeAndCallContext_getGroupDir_Callback(thisArray, thisLength);
-        case 1766817632/*Kind_CustomNodeBuilder*/: return deserializeAndCallCustomNodeBuilder(thisArray, thisLength);
-        case -1565709723/*Kind_CustomStyles*/: return deserializeAndCallCustomStyles(thisArray, thisLength);
-        case -238036926/*Kind_DataPanelModifierBuilder*/: return deserializeAndCallDataPanelModifierBuilder(thisArray, thisLength);
-        case -1729563209/*Kind_EditableTextOnChangeCallback*/: return deserializeAndCallEditableTextOnChangeCallback(thisArray, thisLength);
-        case -1936519453/*Kind_ErrorCallback*/: return deserializeAndCallErrorCallback(thisArray, thisLength);
-        case 255469205/*Kind_GaugeModifierBuilder*/: return deserializeAndCallGaugeModifierBuilder(thisArray, thisLength);
-        case -2119548940/*Kind_GestureRecognizerJudgeBeginCallback*/: return deserializeAndCallGestureRecognizerJudgeBeginCallback(thisArray, thisLength);
-        case -2076995110/*Kind_GetItemMainSizeByIndex*/: return deserializeAndCallGetItemMainSizeByIndex(thisArray, thisLength);
-        case 68560477/*Kind_HoverCallback*/: return deserializeAndCallHoverCallback(thisArray, thisLength);
-        case -1180567691/*Kind_ImageCompleteCallback*/: return deserializeAndCallImageCompleteCallback(thisArray, thisLength);
-        case 1906248580/*Kind_ImageErrorCallback*/: return deserializeAndCallImageErrorCallback(thisArray, thisLength);
-        case 541056756/*Kind_ImageOnCompleteCallback*/: return deserializeAndCallImageOnCompleteCallback(thisArray, thisLength);
-        case 1502213270/*Kind_InterceptionModeCallback*/: return deserializeAndCallInterceptionModeCallback(thisArray, thisLength);
-        case 1852781814/*Kind_InterceptionShowCallback*/: return deserializeAndCallInterceptionShowCallback(thisArray, thisLength);
-        case 56854815/*Kind_LoadingProgressModifierBuilder*/: return deserializeAndCallLoadingProgressModifierBuilder(thisArray, thisLength);
-        case 810927048/*Kind_MenuCallback*/: return deserializeAndCallMenuCallback(thisArray, thisLength);
-        case -1928323454/*Kind_MenuItemModifierBuilder*/: return deserializeAndCallMenuItemModifierBuilder(thisArray, thisLength);
-        case -614475458/*Kind_MenuOnAppearCallback*/: return deserializeAndCallMenuOnAppearCallback(thisArray, thisLength);
-        case -1026503952/*Kind_ModifierKeyStateGetter*/: return deserializeAndCallModifierKeyStateGetter(thisArray, thisLength);
-        case -1066063065/*Kind_NavDestinationTransitionDelegate*/: return deserializeAndCallNavDestinationTransitionDelegate(thisArray, thisLength);
-        case -588228933/*Kind_NavExtender_OnUpdateStack*/: return deserializeAndCallNavExtender_OnUpdateStack(thisArray, thisLength);
-        case 726938390/*Kind_OnAlphabetIndexerPopupSelectCallback*/: return deserializeAndCallOnAlphabetIndexerPopupSelectCallback(thisArray, thisLength);
-        case -1956514817/*Kind_OnAlphabetIndexerRequestPopupDataCallback*/: return deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(thisArray, thisLength);
-        case -1189721220/*Kind_OnAlphabetIndexerSelectCallback*/: return deserializeAndCallOnAlphabetIndexerSelectCallback(thisArray, thisLength);
-        case -1198592337/*Kind_OnCheckboxChangeCallback*/: return deserializeAndCallOnCheckboxChangeCallback(thisArray, thisLength);
-        case -1053064240/*Kind_OnCheckboxGroupChangeCallback*/: return deserializeAndCallOnCheckboxGroupChangeCallback(thisArray, thisLength);
-        case -419979106/*Kind_OnContentScrollCallback*/: return deserializeAndCallOnContentScrollCallback(thisArray, thisLength);
-        case 312701677/*Kind_OnCreateMenuCallback*/: return deserializeAndCallOnCreateMenuCallback(thisArray, thisLength);
-        case 1648184341/*Kind_OnDidChangeCallback*/: return deserializeAndCallOnDidChangeCallback(thisArray, thisLength);
-        case 1451593190/*Kind_OnDragEventCallback*/: return deserializeAndCallOnDragEventCallback(thisArray, thisLength);
-        case 2050387049/*Kind_OnFoldStatusChangeCallback*/: return deserializeAndCallOnFoldStatusChangeCallback(thisArray, thisLength);
-        case -2025767812/*Kind_OnHoverCallback*/: return deserializeAndCallOnHoverCallback(thisArray, thisLength);
-        case 9040430/*Kind_OnHoverStatusChangeCallback*/: return deserializeAndCallOnHoverStatusChangeCallback(thisArray, thisLength);
-        case 949409727/*Kind_OnItemDragStartCallback*/: return deserializeAndCallOnItemDragStartCallback(thisArray, thisLength);
-        case -405536347/*Kind_OnLazyLoadingFunc*/: return deserializeAndCallOnLazyLoadingFunc(thisArray, thisLength);
-        case -968773856/*Kind_OnLinearIndicatorChangeCallback*/: return deserializeAndCallOnLinearIndicatorChangeCallback(thisArray, thisLength);
-        case -1106041422/*Kind_OnMenuItemClickCallback*/: return deserializeAndCallOnMenuItemClickCallback(thisArray, thisLength);
-        case -1200281222/*Kind_OnMoveHandler*/: return deserializeAndCallOnMoveHandler(thisArray, thisLength);
-        case -823037763/*Kind_OnNativeLoadCallback*/: return deserializeAndCallOnNativeLoadCallback(thisArray, thisLength);
-        case 1738363337/*Kind_OnPasteCallback*/: return deserializeAndCallOnPasteCallback(thisArray, thisLength);
-        case 511412333/*Kind_OnRadioChangeCallback*/: return deserializeAndCallOnRadioChangeCallback(thisArray, thisLength);
-        case -551895045/*Kind_OnRatingChangeCallback*/: return deserializeAndCallOnRatingChangeCallback(thisArray, thisLength);
-        case -160015401/*Kind_OnScrollCallback*/: return deserializeAndCallOnScrollCallback(thisArray, thisLength);
-        case -1259214476/*Kind_OnScrollEdgeCallback*/: return deserializeAndCallOnScrollEdgeCallback(thisArray, thisLength);
-        case -2133791987/*Kind_OnScrollFrameBeginCallback*/: return deserializeAndCallOnScrollFrameBeginCallback(thisArray, thisLength);
-        case 625641334/*Kind_OnScrollVisibleContentChangeCallback*/: return deserializeAndCallOnScrollVisibleContentChangeCallback(thisArray, thisLength);
-        case -1486869198/*Kind_OnSelectCallback*/: return deserializeAndCallOnSelectCallback(thisArray, thisLength);
-        case -1961646162/*Kind_OnSubmitCallback*/: return deserializeAndCallOnSubmitCallback(thisArray, thisLength);
-        case -143686583/*Kind_OnSwiperAnimationEndCallback*/: return deserializeAndCallOnSwiperAnimationEndCallback(thisArray, thisLength);
-        case 876602502/*Kind_OnSwiperAnimationStartCallback*/: return deserializeAndCallOnSwiperAnimationStartCallback(thisArray, thisLength);
-        case 606029871/*Kind_OnSwiperGestureSwipeCallback*/: return deserializeAndCallOnSwiperGestureSwipeCallback(thisArray, thisLength);
-        case 1942856551/*Kind_OnTabsAnimationEndCallback*/: return deserializeAndCallOnTabsAnimationEndCallback(thisArray, thisLength);
-        case -147408344/*Kind_OnTabsAnimationStartCallback*/: return deserializeAndCallOnTabsAnimationStartCallback(thisArray, thisLength);
-        case -349727249/*Kind_OnTabsContentWillChangeCallback*/: return deserializeAndCallOnTabsContentWillChangeCallback(thisArray, thisLength);
-        case 253696833/*Kind_OnTabsGestureSwipeCallback*/: return deserializeAndCallOnTabsGestureSwipeCallback(thisArray, thisLength);
-        case -1902343417/*Kind_OnTextPickerChangeCallback*/: return deserializeAndCallOnTextPickerChangeCallback(thisArray, thisLength);
-        case 695228737/*Kind_OnTextSelectionChangeCallback*/: return deserializeAndCallOnTextSelectionChangeCallback(thisArray, thisLength);
-        case 994429103/*Kind_OnTimePickerChangeCallback*/: return deserializeAndCallOnTimePickerChangeCallback(thisArray, thisLength);
-        case 782080172/*Kind_OnTotalCountFunc*/: return deserializeAndCallOnTotalCountFunc(thisArray, thisLength);
-        case 1483622345/*Kind_OnWillScrollCallback*/: return deserializeAndCallOnWillScrollCallback(thisArray, thisLength);
-        case 256377244/*Kind_PageMapBuilder*/: return deserializeAndCallPageMapBuilder(thisArray, thisLength);
-        case 1627123591/*Kind_PageTransitionCallback*/: return deserializeAndCallPageTransitionCallback(thisArray, thisLength);
-        case 1501373374/*Kind_PasteButtonCallback*/: return deserializeAndCallPasteButtonCallback(thisArray, thisLength);
-        case 919057028/*Kind_PasteEventCallback*/: return deserializeAndCallPasteEventCallback(thisArray, thisLength);
-        case -1992671958/*Kind_PluginErrorCallback*/: return deserializeAndCallPluginErrorCallback(thisArray, thisLength);
-        case -1444325632/*Kind_PopupStateChangeCallback*/: return deserializeAndCallPopupStateChangeCallback(thisArray, thisLength);
-        case -2049749383/*Kind_ProgressModifierBuilder*/: return deserializeAndCallProgressModifierBuilder(thisArray, thisLength);
-        case -327322091/*Kind_RadioModifierBuilder*/: return deserializeAndCallRadioModifierBuilder(thisArray, thisLength);
-        case 1013330403/*Kind_RatingModifierBuilder*/: return deserializeAndCallRatingModifierBuilder(thisArray, thisLength);
-        case -1213708823/*Kind_RestrictedWorker_onerror_Callback*/: return deserializeAndCallRestrictedWorker_onerror_Callback(thisArray, thisLength);
-        case -2095497263/*Kind_RestrictedWorker_onexit_Callback*/: return deserializeAndCallRestrictedWorker_onexit_Callback(thisArray, thisLength);
-        case 1614214490/*Kind_RestrictedWorker_onmessage_Callback*/: return deserializeAndCallRestrictedWorker_onmessage_Callback(thisArray, thisLength);
-        case 1110529154/*Kind_ReuseIdCallback*/: return deserializeAndCallReuseIdCallback(thisArray, thisLength);
-        case -1634474996/*Kind_SaveButtonCallback*/: return deserializeAndCallSaveButtonCallback(thisArray, thisLength);
-        case -1265626662/*Kind_ScrollOnScrollCallback*/: return deserializeAndCallScrollOnScrollCallback(thisArray, thisLength);
-        case -721521596/*Kind_ScrollOnWillScrollCallback*/: return deserializeAndCallScrollOnWillScrollCallback(thisArray, thisLength);
-        case 1717691617/*Kind_SearchSubmitCallback*/: return deserializeAndCallSearchSubmitCallback(thisArray, thisLength);
-        case 2049289694/*Kind_SearchValueCallback*/: return deserializeAndCallSearchValueCallback(thisArray, thisLength);
-        case -250780276/*Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisArray, thisLength);
-        case -1716637992/*Kind_SizeChangeCallback*/: return deserializeAndCallSizeChangeCallback(thisArray, thisLength);
-        case 553138561/*Kind_SliderModifierBuilder*/: return deserializeAndCallSliderModifierBuilder(thisArray, thisLength);
-        case 711649376/*Kind_SliderTriggerChangeCallback*/: return deserializeAndCallSliderTriggerChangeCallback(thisArray, thisLength);
-        case 1095217433/*Kind_StyledStringMarshallCallback*/: return deserializeAndCallStyledStringMarshallCallback(thisArray, thisLength);
-        case 1359717794/*Kind_StyledStringUnmarshallCallback*/: return deserializeAndCallStyledStringUnmarshallCallback(thisArray, thisLength);
-        case -712186065/*Kind_SubmitCallback*/: return deserializeAndCallSubmitCallback(thisArray, thisLength);
-        case 221706282/*Kind_TabsCustomContentTransitionCallback*/: return deserializeAndCallTabsCustomContentTransitionCallback(thisArray, thisLength);
-        case -401980571/*Kind_TextAreaSubmitCallback*/: return deserializeAndCallTextAreaSubmitCallback(thisArray, thisLength);
-        case -987272911/*Kind_TextClockModifierBuilder*/: return deserializeAndCallTextClockModifierBuilder(thisArray, thisLength);
-        case 18061455/*Kind_TextFieldValueCallback*/: return deserializeAndCallTextFieldValueCallback(thisArray, thisLength);
-        case -202014218/*Kind_TextPickerEnterSelectedAreaCallback*/: return deserializeAndCallTextPickerEnterSelectedAreaCallback(thisArray, thisLength);
-        case -1928298699/*Kind_TextPickerScrollStopCallback*/: return deserializeAndCallTextPickerScrollStopCallback(thisArray, thisLength);
-        case 505330174/*Kind_TextTimerModifierBuilder*/: return deserializeAndCallTextTimerModifierBuilder(thisArray, thisLength);
-        case -879751946/*Kind_ToggleModifierBuilder*/: return deserializeAndCallToggleModifierBuilder(thisArray, thisLength);
-        case -1878458553/*Kind_TransitionFinishCallback*/: return deserializeAndCallTransitionFinishCallback(thisArray, thisLength);
-        case -201932855/*Kind_Type_CommonMethod_onDragStart*/: return deserializeAndCallType_CommonMethod_onDragStart(thisArray, thisLength);
-        case -1209910992/*Kind_Type_NavigationAttribute_customNavContentTransition*/: return deserializeAndCallType_NavigationAttribute_customNavContentTransition(thisArray, thisLength);
-        case -448105339/*Kind_UpdateTransitionCallback*/: return deserializeAndCallUpdateTransitionCallback(thisArray, thisLength);
-        case 541663396/*Kind_VisibleAreaChangeCallback*/: return deserializeAndCallVisibleAreaChangeCallback(thisArray, thisLength);
-        case -2038961969/*Kind_VoidCallback*/: return deserializeAndCallVoidCallback(thisArray, thisLength);
+    switch (static_cast<CallbackKind>(kind)) {
+        case Kind_AccessibilityCallback: return deserializeAndCallAccessibilityCallback(thisArray, thisLength);
+        case Kind_AccessibilityFocusCallback: return deserializeAndCallAccessibilityFocusCallback(thisArray, thisLength);
+        case Kind_AsyncCallback_image_PixelMap_Void: return deserializeAndCallAsyncCallback_image_PixelMap_Void(thisArray, thisLength);
+        case Kind_ButtonModifierBuilder: return deserializeAndCallButtonModifierBuilder(thisArray, thisLength);
+        case Kind_ButtonTriggerClickCallback: return deserializeAndCallButtonTriggerClickCallback(thisArray, thisLength);
+        case Kind_Callback_Area_Area_Void: return deserializeAndCallCallback_Area_Area_Void(thisArray, thisLength);
+        case Kind_Callback_Array_Number_Void: return deserializeAndCallCallback_Array_Number_Void(thisArray, thisLength);
+        case Kind_Callback_Array_String_Void: return deserializeAndCallCallback_Array_String_Void(thisArray, thisLength);
+        case Kind_Callback_Array_TextMenuItem_Void: return deserializeAndCallCallback_Array_TextMenuItem_Void(thisArray, thisLength);
+        case Kind_Callback_Array_TouchTestInfo_TouchResult: return deserializeAndCallCallback_Array_TouchTestInfo_TouchResult(thisArray, thisLength);
+        case Kind_Callback_AxisEvent_Void: return deserializeAndCallCallback_AxisEvent_Void(thisArray, thisLength);
+        case Kind_Callback_Boolean: return deserializeAndCallCallback_Boolean(thisArray, thisLength);
+        case Kind_Callback_Boolean_HoverEvent_Void: return deserializeAndCallCallback_Boolean_HoverEvent_Void(thisArray, thisLength);
+        case Kind_Callback_Boolean_Void: return deserializeAndCallCallback_Boolean_Void(thisArray, thisLength);
+        case Kind_Callback_Buffer_Void: return deserializeAndCallCallback_Buffer_Void(thisArray, thisLength);
+        case Kind_Callback_CalendarRequestedData_Void: return deserializeAndCallCallback_CalendarRequestedData_Void(thisArray, thisLength);
+        case Kind_Callback_CalendarSelectedDate_Void: return deserializeAndCallCallback_CalendarSelectedDate_Void(thisArray, thisLength);
+        case Kind_Callback_ClickEvent_Void: return deserializeAndCallCallback_ClickEvent_Void(thisArray, thisLength);
+        case Kind_Callback_CompatibleComponentInfo_Void: return deserializeAndCallCallback_CompatibleComponentInfo_Void(thisArray, thisLength);
+        case Kind_Callback_ComputedBarAttribute_Void: return deserializeAndCallCallback_ComputedBarAttribute_Void(thisArray, thisLength);
+        case Kind_Callback_CopyEvent_Void: return deserializeAndCallCallback_CopyEvent_Void(thisArray, thisLength);
+        case Kind_Callback_CreateItem: return deserializeAndCallCallback_CreateItem(thisArray, thisLength);
+        case Kind_Callback_CrownEvent_Void: return deserializeAndCallCallback_CrownEvent_Void(thisArray, thisLength);
+        case Kind_Callback_CustomSpanMeasureInfo_CustomSpanMetrics: return deserializeAndCallCallback_CustomSpanMeasureInfo_CustomSpanMetrics(thisArray, thisLength);
+        case Kind_Callback_CustomSpanMetrics_Void: return deserializeAndCallCallback_CustomSpanMetrics_Void(thisArray, thisLength);
+        case Kind_Callback_CutEvent_Void: return deserializeAndCallCallback_CutEvent_Void(thisArray, thisLength);
+        case Kind_Callback_Date_Void: return deserializeAndCallCallback_Date_Void(thisArray, thisLength);
+        case Kind_Callback_DeleteValue_Boolean: return deserializeAndCallCallback_DeleteValue_Boolean(thisArray, thisLength);
+        case Kind_Callback_DeleteValue_Void: return deserializeAndCallCallback_DeleteValue_Void(thisArray, thisLength);
+        case Kind_Callback_DismissContentCoverAction_Void: return deserializeAndCallCallback_DismissContentCoverAction_Void(thisArray, thisLength);
+        case Kind_Callback_DismissDialogAction_Void: return deserializeAndCallCallback_DismissDialogAction_Void(thisArray, thisLength);
+        case Kind_Callback_DismissPopupAction_Void: return deserializeAndCallCallback_DismissPopupAction_Void(thisArray, thisLength);
+        case Kind_Callback_DismissSheetAction_Void: return deserializeAndCallCallback_DismissSheetAction_Void(thisArray, thisLength);
+        case Kind_Callback_DragEvent_Opt_String_Void: return deserializeAndCallCallback_DragEvent_Opt_String_Void(thisArray, thisLength);
+        case Kind_Callback_DrawContext_CustomSpanDrawInfo_Void: return deserializeAndCallCallback_DrawContext_CustomSpanDrawInfo_Void(thisArray, thisLength);
+        case Kind_Callback_DrawContext_Void: return deserializeAndCallCallback_DrawContext_Void(thisArray, thisLength);
+        case Kind_Callback_EditableTextChangeValue_Boolean: return deserializeAndCallCallback_EditableTextChangeValue_Boolean(thisArray, thisLength);
+        case Kind_Callback_EnterKeyType_Void: return deserializeAndCallCallback_EnterKeyType_Void(thisArray, thisLength);
+        case Kind_Callback_ErrorInformation_Void: return deserializeAndCallCallback_ErrorInformation_Void(thisArray, thisLength);
+        case Kind_Callback_Extender_OnFinish: return deserializeAndCallCallback_Extender_OnFinish(thisArray, thisLength);
+        case Kind_Callback_Extender_OnProgress: return deserializeAndCallCallback_Extender_OnProgress(thisArray, thisLength);
+        case Kind_Callback_FocusAxisEvent_Void: return deserializeAndCallCallback_FocusAxisEvent_Void(thisArray, thisLength);
+        case Kind_Callback_FormCallbackInfo_Void: return deserializeAndCallCallback_FormCallbackInfo_Void(thisArray, thisLength);
+        case Kind_Callback_FullscreenInfo_Void: return deserializeAndCallCallback_FullscreenInfo_Void(thisArray, thisLength);
+        case Kind_Callback_GestureEvent_Void: return deserializeAndCallCallback_GestureEvent_Void(thisArray, thisLength);
+        case Kind_Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult: return deserializeAndCallCallback_GestureInfo_BaseGestureEvent_GestureJudgeResult(thisArray, thisLength);
+        case Kind_Callback_GestureJudgeResult_Void: return deserializeAndCallCallback_GestureJudgeResult_Void(thisArray, thisLength);
+        case Kind_Callback_GestureRecognizer_Void: return deserializeAndCallCallback_GestureRecognizer_Void(thisArray, thisLength);
+        case Kind_Callback_HitTestMode_Void: return deserializeAndCallCallback_HitTestMode_Void(thisArray, thisLength);
+        case Kind_Callback_HoverEvent_Void: return deserializeAndCallCallback_HoverEvent_Void(thisArray, thisLength);
+        case Kind_Callback_InsertValue_Boolean: return deserializeAndCallCallback_InsertValue_Boolean(thisArray, thisLength);
+        case Kind_Callback_InsertValue_Void: return deserializeAndCallCallback_InsertValue_Void(thisArray, thisLength);
+        case Kind_Callback_ItemDragInfo_Number_Number_Boolean_Void: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Boolean_Void(thisArray, thisLength);
+        case Kind_Callback_ItemDragInfo_Number_Number_Void: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Void(thisArray, thisLength);
+        case Kind_Callback_ItemDragInfo_Number_Void: return deserializeAndCallCallback_ItemDragInfo_Number_Void(thisArray, thisLength);
+        case Kind_Callback_ItemDragInfo_Void: return deserializeAndCallCallback_ItemDragInfo_Void(thisArray, thisLength);
+        case Kind_Callback_KeyEvent_Boolean: return deserializeAndCallCallback_KeyEvent_Boolean(thisArray, thisLength);
+        case Kind_Callback_KeyEvent_Void: return deserializeAndCallCallback_KeyEvent_Void(thisArray, thisLength);
+        case Kind_Callback_Map_String_Object_Void: return deserializeAndCallCallback_Map_String_Object_Void(thisArray, thisLength);
+        case Kind_Callback_MarqueeState_Void: return deserializeAndCallCallback_MarqueeState_Void(thisArray, thisLength);
+        case Kind_Callback_MouseEvent_Void: return deserializeAndCallCallback_MouseEvent_Void(thisArray, thisLength);
+        case Kind_Callback_NativeEmbedDataInfo_Void: return deserializeAndCallCallback_NativeEmbedDataInfo_Void(thisArray, thisLength);
+        case Kind_Callback_NativeEmbedTouchInfo_Void: return deserializeAndCallCallback_NativeEmbedTouchInfo_Void(thisArray, thisLength);
+        case Kind_Callback_NavDestinationActiveReason_Void: return deserializeAndCallCallback_NavDestinationActiveReason_Void(thisArray, thisLength);
+        case Kind_Callback_NavDestinationContext_Void: return deserializeAndCallCallback_NavDestinationContext_Void(thisArray, thisLength);
+        case Kind_Callback_NavigationMode_Void: return deserializeAndCallCallback_NavigationMode_Void(thisArray, thisLength);
+        case Kind_Callback_NavigationTitleMode_Void: return deserializeAndCallCallback_NavigationTitleMode_Void(thisArray, thisLength);
+        case Kind_Callback_NavigationTransitionProxy_Void: return deserializeAndCallCallback_NavigationTransitionProxy_Void(thisArray, thisLength);
+        case Kind_Callback_Number_Number_Boolean: return deserializeAndCallCallback_Number_Number_Boolean(thisArray, thisLength);
+        case Kind_Callback_Number_Number_Boolean_Boolean: return deserializeAndCallCallback_Number_Number_Boolean_Boolean(thisArray, thisLength);
+        case Kind_Callback_Number_Number_ComputedBarAttribute: return deserializeAndCallCallback_Number_Number_ComputedBarAttribute(thisArray, thisLength);
+        case Kind_Callback_Number_Number_Number_Void: return deserializeAndCallCallback_Number_Number_Number_Void(thisArray, thisLength);
+        case Kind_Callback_Number_Number_Void: return deserializeAndCallCallback_Number_Number_Void(thisArray, thisLength);
+        case Kind_Callback_Number_SliderChangeMode_Void: return deserializeAndCallCallback_Number_SliderChangeMode_Void(thisArray, thisLength);
+        case Kind_Callback_Number_Tuple_Number_Number: return deserializeAndCallCallback_Number_Tuple_Number_Number(thisArray, thisLength);
+        case Kind_Callback_Number_Tuple_Number_Number_Number_Number: return deserializeAndCallCallback_Number_Tuple_Number_Number_Number_Number(thisArray, thisLength);
+        case Kind_Callback_Number_Void: return deserializeAndCallCallback_Number_Void(thisArray, thisLength);
+        case Kind_Callback_Object_Void: return deserializeAndCallCallback_Object_Void(thisArray, thisLength);
+        case Kind_Callback_OnAlertEvent_Boolean: return deserializeAndCallCallback_OnAlertEvent_Boolean(thisArray, thisLength);
+        case Kind_Callback_OnAudioStateChangedEvent_Void: return deserializeAndCallCallback_OnAudioStateChangedEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnBeforeUnloadEvent_Boolean: return deserializeAndCallCallback_OnBeforeUnloadEvent_Boolean(thisArray, thisLength);
+        case Kind_Callback_OnClientAuthenticationEvent_Void: return deserializeAndCallCallback_OnClientAuthenticationEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnConfirmEvent_Boolean: return deserializeAndCallCallback_OnConfirmEvent_Boolean(thisArray, thisLength);
+        case Kind_Callback_OnConsoleEvent_Boolean: return deserializeAndCallCallback_OnConsoleEvent_Boolean(thisArray, thisLength);
+        case Kind_Callback_OnContextMenuShowEvent_Boolean: return deserializeAndCallCallback_OnContextMenuShowEvent_Boolean(thisArray, thisLength);
+        case Kind_Callback_OnDataResubmittedEvent_Void: return deserializeAndCallCallback_OnDataResubmittedEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnDownloadStartEvent_Void: return deserializeAndCallCallback_OnDownloadStartEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnErrorReceiveEvent_Void: return deserializeAndCallCallback_OnErrorReceiveEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnFaviconReceivedEvent_Void: return deserializeAndCallCallback_OnFaviconReceivedEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnFirstContentfulPaintEvent_Void: return deserializeAndCallCallback_OnFirstContentfulPaintEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnGeolocationShowEvent_Void: return deserializeAndCallCallback_OnGeolocationShowEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnHttpAuthRequestEvent_Boolean: return deserializeAndCallCallback_OnHttpAuthRequestEvent_Boolean(thisArray, thisLength);
+        case Kind_Callback_OnHttpErrorReceiveEvent_Void: return deserializeAndCallCallback_OnHttpErrorReceiveEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnInterceptRequestEvent_WebResourceResponse: return deserializeAndCallCallback_OnInterceptRequestEvent_WebResourceResponse(thisArray, thisLength);
+        case Kind_Callback_OnLoadInterceptEvent_Boolean: return deserializeAndCallCallback_OnLoadInterceptEvent_Boolean(thisArray, thisLength);
+        case Kind_Callback_onMeasureSize_SizeResult: return deserializeAndCallCallback_onMeasureSize_SizeResult(thisArray, thisLength);
+        case Kind_Callback_OnOverScrollEvent_Void: return deserializeAndCallCallback_OnOverScrollEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnPageBeginEvent_Void: return deserializeAndCallCallback_OnPageBeginEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnPageEndEvent_Void: return deserializeAndCallCallback_OnPageEndEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnPageVisibleEvent_Void: return deserializeAndCallCallback_OnPageVisibleEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnPermissionRequestEvent_Void: return deserializeAndCallCallback_OnPermissionRequestEvent_Void(thisArray, thisLength);
+        case Kind_Callback_onPlaceChildren_Void: return deserializeAndCallCallback_onPlaceChildren_Void(thisArray, thisLength);
+        case Kind_Callback_OnProgressChangeEvent_Void: return deserializeAndCallCallback_OnProgressChangeEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnPromptEvent_Boolean: return deserializeAndCallCallback_OnPromptEvent_Boolean(thisArray, thisLength);
+        case Kind_Callback_OnRefreshAccessedHistoryEvent_Void: return deserializeAndCallCallback_OnRefreshAccessedHistoryEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnRenderExitedEvent_Void: return deserializeAndCallCallback_OnRenderExitedEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnResourceLoadEvent_Void: return deserializeAndCallCallback_OnResourceLoadEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnScaleChangeEvent_Void: return deserializeAndCallCallback_OnScaleChangeEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnScreenCaptureRequestEvent_Void: return deserializeAndCallCallback_OnScreenCaptureRequestEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnScrollEvent_Void: return deserializeAndCallCallback_OnScrollEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnScrollFrameBeginHandlerResult_Void: return deserializeAndCallCallback_OnScrollFrameBeginHandlerResult_Void(thisArray, thisLength);
+        case Kind_Callback_OnSearchResultReceiveEvent_Void: return deserializeAndCallCallback_OnSearchResultReceiveEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnShowFileSelectorEvent_Boolean: return deserializeAndCallCallback_OnShowFileSelectorEvent_Boolean(thisArray, thisLength);
+        case Kind_Callback_OnSslErrorEventReceiveEvent_Void: return deserializeAndCallCallback_OnSslErrorEventReceiveEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnTitleReceiveEvent_Void: return deserializeAndCallCallback_OnTitleReceiveEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnTouchIconUrlReceivedEvent_Void: return deserializeAndCallCallback_OnTouchIconUrlReceivedEvent_Void(thisArray, thisLength);
+        case Kind_Callback_OnWindowNewEvent_Void: return deserializeAndCallCallback_OnWindowNewEvent_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_Array_FontDescriptor_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_Array_FontDescriptor_Opt_Array_String_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_Array_NavDestinationTransition_Void: return deserializeAndCallCallback_Opt_Array_NavDestinationTransition_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_Array_String_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_Array_String_Opt_Array_String_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_Array_String_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_Boolean_Void: return deserializeAndCallCallback_Opt_Boolean_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_CustomBuilder_Void: return deserializeAndCallCallback_Opt_CustomBuilder_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_FontDescriptor_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_FontDescriptor_Opt_Array_String_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_NavigationAnimatedTransition_Void: return deserializeAndCallCallback_Opt_NavigationAnimatedTransition_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_Number_Void: return deserializeAndCallCallback_Opt_Number_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_Object_Void: return deserializeAndCallCallback_Opt_Object_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_OffsetResult_Void: return deserializeAndCallCallback_Opt_OffsetResult_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_Scene_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_Scene_Opt_Array_String_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_ScrollResult_Void: return deserializeAndCallCallback_Opt_ScrollResult_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_String_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_String_Opt_Array_String_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_StyledString_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_StyledString_Opt_Array_String_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_TabContentAnimatedTransition_Void: return deserializeAndCallCallback_Opt_TabContentAnimatedTransition_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_Union_Number_Resource_Void: return deserializeAndCallCallback_Opt_Union_Number_Resource_Void(thisArray, thisLength);
+        case Kind_Callback_Opt_Union_ResourceStr_String_Resource_Void: return deserializeAndCallCallback_Opt_Union_ResourceStr_String_Resource_Void(thisArray, thisLength);
+        case Kind_Callback_PlaybackInfo_Void: return deserializeAndCallCallback_PlaybackInfo_Void(thisArray, thisLength);
+        case Kind_Callback_Pointer_Void: return deserializeAndCallCallback_Pointer_Void(thisArray, thisLength);
+        case Kind_Callback_PopInfo_Void: return deserializeAndCallCallback_PopInfo_Void(thisArray, thisLength);
+        case Kind_Callback_PreDragStatus_Void: return deserializeAndCallCallback_PreDragStatus_Void(thisArray, thisLength);
+        case Kind_Callback_PreparedInfo_Void: return deserializeAndCallCallback_PreparedInfo_Void(thisArray, thisLength);
+        case Kind_Callback_RangeUpdate: return deserializeAndCallCallback_RangeUpdate(thisArray, thisLength);
+        case Kind_Callback_RefreshStatus_Void: return deserializeAndCallCallback_RefreshStatus_Void(thisArray, thisLength);
+        case Kind_Callback_RichEditorChangeValue_Boolean: return deserializeAndCallCallback_RichEditorChangeValue_Boolean(thisArray, thisLength);
+        case Kind_Callback_RichEditorDeleteValue_Boolean: return deserializeAndCallCallback_RichEditorDeleteValue_Boolean(thisArray, thisLength);
+        case Kind_Callback_RichEditorInsertValue_Boolean: return deserializeAndCallCallback_RichEditorInsertValue_Boolean(thisArray, thisLength);
+        case Kind_Callback_RichEditorRange_Void: return deserializeAndCallCallback_RichEditorRange_Void(thisArray, thisLength);
+        case Kind_Callback_RichEditorSelection_Void: return deserializeAndCallCallback_RichEditorSelection_Void(thisArray, thisLength);
+        case Kind_Callback_RichEditorTextSpanResult_Void: return deserializeAndCallCallback_RichEditorTextSpanResult_Void(thisArray, thisLength);
+        case Kind_Callback_RotationGesture: return deserializeAndCallCallback_RotationGesture(thisArray, thisLength);
+        case Kind_Callback_RotationGesture_Void: return deserializeAndCallCallback_RotationGesture_Void(thisArray, thisLength);
+        case Kind_Callback_SheetDismiss_Void: return deserializeAndCallCallback_SheetDismiss_Void(thisArray, thisLength);
+        case Kind_Callback_SheetType_Void: return deserializeAndCallCallback_SheetType_Void(thisArray, thisLength);
+        case Kind_Callback_SizeResult_Void: return deserializeAndCallCallback_SizeResult_Void(thisArray, thisLength);
+        case Kind_Callback_SpringBackAction_Void: return deserializeAndCallCallback_SpringBackAction_Void(thisArray, thisLength);
+        case Kind_Callback_StateStylesChange: return deserializeAndCallCallback_StateStylesChange(thisArray, thisLength);
+        case Kind_Callback_String_PasteEvent_Void: return deserializeAndCallCallback_String_PasteEvent_Void(thisArray, thisLength);
+        case Kind_Callback_String_SurfaceRect_Void: return deserializeAndCallCallback_String_SurfaceRect_Void(thisArray, thisLength);
+        case Kind_Callback_String_Void: return deserializeAndCallCallback_String_Void(thisArray, thisLength);
+        case Kind_Callback_StyledStringChangeValue_Boolean: return deserializeAndCallCallback_StyledStringChangeValue_Boolean(thisArray, thisLength);
+        case Kind_Callback_StyledStringMarshallingValue_Void: return deserializeAndCallCallback_StyledStringMarshallingValue_Void(thisArray, thisLength);
+        case Kind_Callback_SwipeActionState_Void: return deserializeAndCallCallback_SwipeActionState_Void(thisArray, thisLength);
+        case Kind_Callback_SwipeGesture: return deserializeAndCallCallback_SwipeGesture(thisArray, thisLength);
+        case Kind_Callback_SwipeGesture_Void: return deserializeAndCallCallback_SwipeGesture_Void(thisArray, thisLength);
+        case Kind_Callback_SwiperContentTransitionProxy_Void: return deserializeAndCallCallback_SwiperContentTransitionProxy_Void(thisArray, thisLength);
+        case Kind_Callback_TabContentTransitionProxy_Void: return deserializeAndCallCallback_TabContentTransitionProxy_Void(thisArray, thisLength);
+        case Kind_Callback_TerminationInfo_Void: return deserializeAndCallCallback_TerminationInfo_Void(thisArray, thisLength);
+        case Kind_Callback_TextPickerResult_Void: return deserializeAndCallCallback_TextPickerResult_Void(thisArray, thisLength);
+        case Kind_Callback_TextRange_Void: return deserializeAndCallCallback_TextRange_Void(thisArray, thisLength);
+        case Kind_Callback_TimePickerResult_Void: return deserializeAndCallCallback_TimePickerResult_Void(thisArray, thisLength);
+        case Kind_Callback_TouchEvent_HitTestMode: return deserializeAndCallCallback_TouchEvent_HitTestMode(thisArray, thisLength);
+        case Kind_Callback_TouchEvent_Void: return deserializeAndCallCallback_TouchEvent_Void(thisArray, thisLength);
+        case Kind_Callback_TouchResult_Void: return deserializeAndCallCallback_TouchResult_Void(thisArray, thisLength);
+        case Kind_Callback_Tuple_Number_Number_Number_Number_Void: return deserializeAndCallCallback_Tuple_Number_Number_Number_Number_Void(thisArray, thisLength);
+        case Kind_Callback_Tuple_Number_Number_Void: return deserializeAndCallCallback_Tuple_Number_Number_Void(thisArray, thisLength);
+        case Kind_Callback_UIExtensionProxy_Void: return deserializeAndCallCallback_UIExtensionProxy_Void(thisArray, thisLength);
+        case Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void(thisArray, thisLength);
+        case Kind_Callback_Union_Number_Array_Number_Void: return deserializeAndCallCallback_Union_Number_Array_Number_Void(thisArray, thisLength);
+        case Kind_Callback_Union_ResourceStr_Array_ResourceStr_Void: return deserializeAndCallCallback_Union_ResourceStr_Array_ResourceStr_Void(thisArray, thisLength);
+        case Kind_Callback_Union_ResourceStr_Resource_String_Void: return deserializeAndCallCallback_Union_ResourceStr_Resource_String_Void(thisArray, thisLength);
+        case Kind_Callback_Void: return deserializeAndCallCallback_Void(thisArray, thisLength);
+        case Kind_Callback_WebKeyboardOptions_Void: return deserializeAndCallCallback_WebKeyboardOptions_Void(thisArray, thisLength);
+        case Kind_Callback_WebResourceResponse_Void: return deserializeAndCallCallback_WebResourceResponse_Void(thisArray, thisLength);
+        case Kind_CheckBoxModifierBuilder: return deserializeAndCallCheckBoxModifierBuilder(thisArray, thisLength);
+        case Kind_CompatibleInitCallback: return deserializeAndCallCompatibleInitCallback(thisArray, thisLength);
+        case Kind_CompatibleUpdateCallback: return deserializeAndCallCompatibleUpdateCallback(thisArray, thisLength);
+        case Kind_ContentDidScrollCallback: return deserializeAndCallContentDidScrollCallback(thisArray, thisLength);
+        case Kind_ContentWillScrollCallback: return deserializeAndCallContentWillScrollCallback(thisArray, thisLength);
+        case Kind_Context_getGroupDir_Callback: return deserializeAndCallContext_getGroupDir_Callback(thisArray, thisLength);
+        case Kind_CustomNodeBuilder: return deserializeAndCallCustomNodeBuilder(thisArray, thisLength);
+        case Kind_CustomStyles: return deserializeAndCallCustomStyles(thisArray, thisLength);
+        case Kind_DataPanelModifierBuilder: return deserializeAndCallDataPanelModifierBuilder(thisArray, thisLength);
+        case Kind_EditableTextOnChangeCallback: return deserializeAndCallEditableTextOnChangeCallback(thisArray, thisLength);
+        case Kind_ErrorCallback: return deserializeAndCallErrorCallback(thisArray, thisLength);
+        case Kind_GaugeModifierBuilder: return deserializeAndCallGaugeModifierBuilder(thisArray, thisLength);
+        case Kind_GestureRecognizerJudgeBeginCallback: return deserializeAndCallGestureRecognizerJudgeBeginCallback(thisArray, thisLength);
+        case Kind_GetItemMainSizeByIndex: return deserializeAndCallGetItemMainSizeByIndex(thisArray, thisLength);
+        case Kind_HoverCallback: return deserializeAndCallHoverCallback(thisArray, thisLength);
+        case Kind_ImageCompleteCallback: return deserializeAndCallImageCompleteCallback(thisArray, thisLength);
+        case Kind_ImageErrorCallback: return deserializeAndCallImageErrorCallback(thisArray, thisLength);
+        case Kind_ImageOnCompleteCallback: return deserializeAndCallImageOnCompleteCallback(thisArray, thisLength);
+        case Kind_InterceptionModeCallback: return deserializeAndCallInterceptionModeCallback(thisArray, thisLength);
+        case Kind_InterceptionShowCallback: return deserializeAndCallInterceptionShowCallback(thisArray, thisLength);
+        case Kind_LoadingProgressModifierBuilder: return deserializeAndCallLoadingProgressModifierBuilder(thisArray, thisLength);
+        case Kind_MenuCallback: return deserializeAndCallMenuCallback(thisArray, thisLength);
+        case Kind_MenuItemModifierBuilder: return deserializeAndCallMenuItemModifierBuilder(thisArray, thisLength);
+        case Kind_MenuOnAppearCallback: return deserializeAndCallMenuOnAppearCallback(thisArray, thisLength);
+        case Kind_ModifierKeyStateGetter: return deserializeAndCallModifierKeyStateGetter(thisArray, thisLength);
+        case Kind_NavDestinationTransitionDelegate: return deserializeAndCallNavDestinationTransitionDelegate(thisArray, thisLength);
+        case Kind_NavExtender_OnUpdateStack: return deserializeAndCallNavExtender_OnUpdateStack(thisArray, thisLength);
+        case Kind_OnAdsBlockedCallback: return deserializeAndCallOnAdsBlockedCallback(thisArray, thisLength);
+        case Kind_OnAlphabetIndexerPopupSelectCallback: return deserializeAndCallOnAlphabetIndexerPopupSelectCallback(thisArray, thisLength);
+        case Kind_OnAlphabetIndexerRequestPopupDataCallback: return deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(thisArray, thisLength);
+        case Kind_OnAlphabetIndexerSelectCallback: return deserializeAndCallOnAlphabetIndexerSelectCallback(thisArray, thisLength);
+        case Kind_OnCheckboxChangeCallback: return deserializeAndCallOnCheckboxChangeCallback(thisArray, thisLength);
+        case Kind_OnCheckboxGroupChangeCallback: return deserializeAndCallOnCheckboxGroupChangeCallback(thisArray, thisLength);
+        case Kind_OnContentScrollCallback: return deserializeAndCallOnContentScrollCallback(thisArray, thisLength);
+        case Kind_OnContextMenuHideCallback: return deserializeAndCallOnContextMenuHideCallback(thisArray, thisLength);
+        case Kind_OnCreateMenuCallback: return deserializeAndCallOnCreateMenuCallback(thisArray, thisLength);
+        case Kind_OnDidChangeCallback: return deserializeAndCallOnDidChangeCallback(thisArray, thisLength);
+        case Kind_OnDragEventCallback: return deserializeAndCallOnDragEventCallback(thisArray, thisLength);
+        case Kind_OnFirstMeaningfulPaintCallback: return deserializeAndCallOnFirstMeaningfulPaintCallback(thisArray, thisLength);
+        case Kind_OnFoldStatusChangeCallback: return deserializeAndCallOnFoldStatusChangeCallback(thisArray, thisLength);
+        case Kind_OnFullScreenEnterCallback: return deserializeAndCallOnFullScreenEnterCallback(thisArray, thisLength);
+        case Kind_OnHoverCallback: return deserializeAndCallOnHoverCallback(thisArray, thisLength);
+        case Kind_OnHoverStatusChangeCallback: return deserializeAndCallOnHoverStatusChangeCallback(thisArray, thisLength);
+        case Kind_OnIntelligentTrackingPreventionCallback: return deserializeAndCallOnIntelligentTrackingPreventionCallback(thisArray, thisLength);
+        case Kind_OnItemDragStartCallback: return deserializeAndCallOnItemDragStartCallback(thisArray, thisLength);
+        case Kind_OnLargestContentfulPaintCallback: return deserializeAndCallOnLargestContentfulPaintCallback(thisArray, thisLength);
+        case Kind_OnLazyLoadingFunc: return deserializeAndCallOnLazyLoadingFunc(thisArray, thisLength);
+        case Kind_OnLinearIndicatorChangeCallback: return deserializeAndCallOnLinearIndicatorChangeCallback(thisArray, thisLength);
+        case Kind_OnMenuItemClickCallback: return deserializeAndCallOnMenuItemClickCallback(thisArray, thisLength);
+        case Kind_OnMoveHandler: return deserializeAndCallOnMoveHandler(thisArray, thisLength);
+        case Kind_OnNativeEmbedVisibilityChangeCallback: return deserializeAndCallOnNativeEmbedVisibilityChangeCallback(thisArray, thisLength);
+        case Kind_OnNativeLoadCallback: return deserializeAndCallOnNativeLoadCallback(thisArray, thisLength);
+        case Kind_OnNavigationEntryCommittedCallback: return deserializeAndCallOnNavigationEntryCommittedCallback(thisArray, thisLength);
+        case Kind_OnOverrideUrlLoadingCallback: return deserializeAndCallOnOverrideUrlLoadingCallback(thisArray, thisLength);
+        case Kind_OnPasteCallback: return deserializeAndCallOnPasteCallback(thisArray, thisLength);
+        case Kind_OnRadioChangeCallback: return deserializeAndCallOnRadioChangeCallback(thisArray, thisLength);
+        case Kind_OnRatingChangeCallback: return deserializeAndCallOnRatingChangeCallback(thisArray, thisLength);
+        case Kind_OnRenderProcessNotRespondingCallback: return deserializeAndCallOnRenderProcessNotRespondingCallback(thisArray, thisLength);
+        case Kind_OnRenderProcessRespondingCallback: return deserializeAndCallOnRenderProcessRespondingCallback(thisArray, thisLength);
+        case Kind_OnSafeBrowsingCheckResultCallback: return deserializeAndCallOnSafeBrowsingCheckResultCallback(thisArray, thisLength);
+        case Kind_OnScrollCallback: return deserializeAndCallOnScrollCallback(thisArray, thisLength);
+        case Kind_OnScrollEdgeCallback: return deserializeAndCallOnScrollEdgeCallback(thisArray, thisLength);
+        case Kind_OnScrollFrameBeginCallback: return deserializeAndCallOnScrollFrameBeginCallback(thisArray, thisLength);
+        case Kind_OnScrollVisibleContentChangeCallback: return deserializeAndCallOnScrollVisibleContentChangeCallback(thisArray, thisLength);
+        case Kind_OnSelectCallback: return deserializeAndCallOnSelectCallback(thisArray, thisLength);
+        case Kind_OnSslErrorEventCallback: return deserializeAndCallOnSslErrorEventCallback(thisArray, thisLength);
+        case Kind_OnSubmitCallback: return deserializeAndCallOnSubmitCallback(thisArray, thisLength);
+        case Kind_OnSwiperAnimationEndCallback: return deserializeAndCallOnSwiperAnimationEndCallback(thisArray, thisLength);
+        case Kind_OnSwiperAnimationStartCallback: return deserializeAndCallOnSwiperAnimationStartCallback(thisArray, thisLength);
+        case Kind_OnSwiperGestureSwipeCallback: return deserializeAndCallOnSwiperGestureSwipeCallback(thisArray, thisLength);
+        case Kind_OnTabsAnimationEndCallback: return deserializeAndCallOnTabsAnimationEndCallback(thisArray, thisLength);
+        case Kind_OnTabsAnimationStartCallback: return deserializeAndCallOnTabsAnimationStartCallback(thisArray, thisLength);
+        case Kind_OnTabsContentWillChangeCallback: return deserializeAndCallOnTabsContentWillChangeCallback(thisArray, thisLength);
+        case Kind_OnTabsGestureSwipeCallback: return deserializeAndCallOnTabsGestureSwipeCallback(thisArray, thisLength);
+        case Kind_OnTextPickerChangeCallback: return deserializeAndCallOnTextPickerChangeCallback(thisArray, thisLength);
+        case Kind_OnTextSelectionChangeCallback: return deserializeAndCallOnTextSelectionChangeCallback(thisArray, thisLength);
+        case Kind_OnTimePickerChangeCallback: return deserializeAndCallOnTimePickerChangeCallback(thisArray, thisLength);
+        case Kind_OnTotalCountFunc: return deserializeAndCallOnTotalCountFunc(thisArray, thisLength);
+        case Kind_OnViewportFitChangedCallback: return deserializeAndCallOnViewportFitChangedCallback(thisArray, thisLength);
+        case Kind_OnWillScrollCallback: return deserializeAndCallOnWillScrollCallback(thisArray, thisLength);
+        case Kind_PageMapBuilder: return deserializeAndCallPageMapBuilder(thisArray, thisLength);
+        case Kind_PageTransitionCallback: return deserializeAndCallPageTransitionCallback(thisArray, thisLength);
+        case Kind_PasteButtonCallback: return deserializeAndCallPasteButtonCallback(thisArray, thisLength);
+        case Kind_PasteEventCallback: return deserializeAndCallPasteEventCallback(thisArray, thisLength);
+        case Kind_PluginErrorCallback: return deserializeAndCallPluginErrorCallback(thisArray, thisLength);
+        case Kind_PopupStateChangeCallback: return deserializeAndCallPopupStateChangeCallback(thisArray, thisLength);
+        case Kind_ProgressModifierBuilder: return deserializeAndCallProgressModifierBuilder(thisArray, thisLength);
+        case Kind_RadioModifierBuilder: return deserializeAndCallRadioModifierBuilder(thisArray, thisLength);
+        case Kind_RatingModifierBuilder: return deserializeAndCallRatingModifierBuilder(thisArray, thisLength);
+        case Kind_RestrictedWorker_onerror_Callback: return deserializeAndCallRestrictedWorker_onerror_Callback(thisArray, thisLength);
+        case Kind_RestrictedWorker_onexit_Callback: return deserializeAndCallRestrictedWorker_onexit_Callback(thisArray, thisLength);
+        case Kind_RestrictedWorker_onmessage_Callback: return deserializeAndCallRestrictedWorker_onmessage_Callback(thisArray, thisLength);
+        case Kind_ReuseIdCallback: return deserializeAndCallReuseIdCallback(thisArray, thisLength);
+        case Kind_SaveButtonCallback: return deserializeAndCallSaveButtonCallback(thisArray, thisLength);
+        case Kind_ScrollOnScrollCallback: return deserializeAndCallScrollOnScrollCallback(thisArray, thisLength);
+        case Kind_ScrollOnWillScrollCallback: return deserializeAndCallScrollOnWillScrollCallback(thisArray, thisLength);
+        case Kind_SearchSubmitCallback: return deserializeAndCallSearchSubmitCallback(thisArray, thisLength);
+        case Kind_SearchValueCallback: return deserializeAndCallSearchValueCallback(thisArray, thisLength);
+        case Kind_ShouldBuiltInRecognizerParallelWithCallback: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisArray, thisLength);
+        case Kind_SizeChangeCallback: return deserializeAndCallSizeChangeCallback(thisArray, thisLength);
+        case Kind_SliderModifierBuilder: return deserializeAndCallSliderModifierBuilder(thisArray, thisLength);
+        case Kind_SliderTriggerChangeCallback: return deserializeAndCallSliderTriggerChangeCallback(thisArray, thisLength);
+        case Kind_StyledStringMarshallCallback: return deserializeAndCallStyledStringMarshallCallback(thisArray, thisLength);
+        case Kind_StyledStringUnmarshallCallback: return deserializeAndCallStyledStringUnmarshallCallback(thisArray, thisLength);
+        case Kind_SubmitCallback: return deserializeAndCallSubmitCallback(thisArray, thisLength);
+        case Kind_TabsCustomContentTransitionCallback: return deserializeAndCallTabsCustomContentTransitionCallback(thisArray, thisLength);
+        case Kind_TextAreaSubmitCallback: return deserializeAndCallTextAreaSubmitCallback(thisArray, thisLength);
+        case Kind_TextClockModifierBuilder: return deserializeAndCallTextClockModifierBuilder(thisArray, thisLength);
+        case Kind_TextFieldValueCallback: return deserializeAndCallTextFieldValueCallback(thisArray, thisLength);
+        case Kind_TextPickerEnterSelectedAreaCallback: return deserializeAndCallTextPickerEnterSelectedAreaCallback(thisArray, thisLength);
+        case Kind_TextPickerScrollStopCallback: return deserializeAndCallTextPickerScrollStopCallback(thisArray, thisLength);
+        case Kind_TextTimerModifierBuilder: return deserializeAndCallTextTimerModifierBuilder(thisArray, thisLength);
+        case Kind_ToggleModifierBuilder: return deserializeAndCallToggleModifierBuilder(thisArray, thisLength);
+        case Kind_TransitionFinishCallback: return deserializeAndCallTransitionFinishCallback(thisArray, thisLength);
+        case Kind_Type_CommonMethod_onDragStart: return deserializeAndCallType_CommonMethod_onDragStart(thisArray, thisLength);
+        case Kind_Type_NavigationAttribute_customNavContentTransition: return deserializeAndCallType_NavigationAttribute_customNavContentTransition(thisArray, thisLength);
+        case Kind_UpdateTransitionCallback: return deserializeAndCallUpdateTransitionCallback(thisArray, thisLength);
+        case Kind_VisibleAreaChangeCallback: return deserializeAndCallVisibleAreaChangeCallback(thisArray, thisLength);
+        case Kind_VoidCallback: return deserializeAndCallVoidCallback(thisArray, thisLength);
+        case Kind_WebKeyboardCallback: return deserializeAndCallWebKeyboardCallback(thisArray, thisLength);
     }
     printf("Unknown callback kind\n");
 }
@@ -6111,6 +7661,8 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case -1146723341/*Kind_Callback_Map_String_Object_Void*/: return deserializeAndCallSyncCallback_Map_String_Object_Void(vmContext, thisArray, thisLength);
         case -716263454/*Kind_Callback_MarqueeState_Void*/: return deserializeAndCallSyncCallback_MarqueeState_Void(vmContext, thisArray, thisLength);
         case -1382640094/*Kind_Callback_MouseEvent_Void*/: return deserializeAndCallSyncCallback_MouseEvent_Void(vmContext, thisArray, thisLength);
+        case 477481563/*Kind_Callback_NativeEmbedDataInfo_Void*/: return deserializeAndCallSyncCallback_NativeEmbedDataInfo_Void(vmContext, thisArray, thisLength);
+        case -1090303858/*Kind_Callback_NativeEmbedTouchInfo_Void*/: return deserializeAndCallSyncCallback_NativeEmbedTouchInfo_Void(vmContext, thisArray, thisLength);
         case 634825762/*Kind_Callback_NavDestinationActiveReason_Void*/: return deserializeAndCallSyncCallback_NavDestinationActiveReason_Void(vmContext, thisArray, thisLength);
         case -1642725259/*Kind_Callback_NavDestinationContext_Void*/: return deserializeAndCallSyncCallback_NavDestinationContext_Void(vmContext, thisArray, thisLength);
         case 960690982/*Kind_Callback_NavigationMode_Void*/: return deserializeAndCallSyncCallback_NavigationMode_Void(vmContext, thisArray, thisLength);
@@ -6126,22 +7678,63 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case 1618565120/*Kind_Callback_Number_Tuple_Number_Number_Number_Number*/: return deserializeAndCallSyncCallback_Number_Tuple_Number_Number_Number_Number(vmContext, thisArray, thisLength);
         case 36519084/*Kind_Callback_Number_Void*/: return deserializeAndCallSyncCallback_Number_Void(vmContext, thisArray, thisLength);
         case -1782529222/*Kind_Callback_Object_Void*/: return deserializeAndCallSyncCallback_Object_Void(vmContext, thisArray, thisLength);
+        case 806070428/*Kind_Callback_OnAlertEvent_Boolean*/: return deserializeAndCallSyncCallback_OnAlertEvent_Boolean(vmContext, thisArray, thisLength);
+        case -1559789631/*Kind_Callback_OnAudioStateChangedEvent_Void*/: return deserializeAndCallSyncCallback_OnAudioStateChangedEvent_Void(vmContext, thisArray, thisLength);
+        case -873162122/*Kind_Callback_OnBeforeUnloadEvent_Boolean*/: return deserializeAndCallSyncCallback_OnBeforeUnloadEvent_Boolean(vmContext, thisArray, thisLength);
+        case 608991355/*Kind_Callback_OnClientAuthenticationEvent_Void*/: return deserializeAndCallSyncCallback_OnClientAuthenticationEvent_Void(vmContext, thisArray, thisLength);
+        case 317864672/*Kind_Callback_OnConfirmEvent_Boolean*/: return deserializeAndCallSyncCallback_OnConfirmEvent_Boolean(vmContext, thisArray, thisLength);
+        case 893367077/*Kind_Callback_OnConsoleEvent_Boolean*/: return deserializeAndCallSyncCallback_OnConsoleEvent_Boolean(vmContext, thisArray, thisLength);
+        case 332449533/*Kind_Callback_OnContextMenuShowEvent_Boolean*/: return deserializeAndCallSyncCallback_OnContextMenuShowEvent_Boolean(vmContext, thisArray, thisLength);
+        case 118631204/*Kind_Callback_OnDataResubmittedEvent_Void*/: return deserializeAndCallSyncCallback_OnDataResubmittedEvent_Void(vmContext, thisArray, thisLength);
+        case 1834611702/*Kind_Callback_OnDownloadStartEvent_Void*/: return deserializeAndCallSyncCallback_OnDownloadStartEvent_Void(vmContext, thisArray, thisLength);
+        case -1792851375/*Kind_Callback_OnErrorReceiveEvent_Void*/: return deserializeAndCallSyncCallback_OnErrorReceiveEvent_Void(vmContext, thisArray, thisLength);
+        case -243916553/*Kind_Callback_OnFaviconReceivedEvent_Void*/: return deserializeAndCallSyncCallback_OnFaviconReceivedEvent_Void(vmContext, thisArray, thisLength);
+        case -1852060212/*Kind_Callback_OnFirstContentfulPaintEvent_Void*/: return deserializeAndCallSyncCallback_OnFirstContentfulPaintEvent_Void(vmContext, thisArray, thisLength);
+        case -941896815/*Kind_Callback_OnGeolocationShowEvent_Void*/: return deserializeAndCallSyncCallback_OnGeolocationShowEvent_Void(vmContext, thisArray, thisLength);
+        case 780282803/*Kind_Callback_OnHttpAuthRequestEvent_Boolean*/: return deserializeAndCallSyncCallback_OnHttpAuthRequestEvent_Boolean(vmContext, thisArray, thisLength);
+        case -2066745559/*Kind_Callback_OnHttpErrorReceiveEvent_Void*/: return deserializeAndCallSyncCallback_OnHttpErrorReceiveEvent_Void(vmContext, thisArray, thisLength);
+        case 1442698200/*Kind_Callback_OnInterceptRequestEvent_WebResourceResponse*/: return deserializeAndCallSyncCallback_OnInterceptRequestEvent_WebResourceResponse(vmContext, thisArray, thisLength);
+        case 1231444306/*Kind_Callback_OnLoadInterceptEvent_Boolean*/: return deserializeAndCallSyncCallback_OnLoadInterceptEvent_Boolean(vmContext, thisArray, thisLength);
         case -1356285653/*Kind_Callback_onMeasureSize_SizeResult*/: return deserializeAndCallSyncCallback_onMeasureSize_SizeResult(vmContext, thisArray, thisLength);
+        case -860386431/*Kind_Callback_OnOverScrollEvent_Void*/: return deserializeAndCallSyncCallback_OnOverScrollEvent_Void(vmContext, thisArray, thisLength);
+        case -2040193994/*Kind_Callback_OnPageBeginEvent_Void*/: return deserializeAndCallSyncCallback_OnPageBeginEvent_Void(vmContext, thisArray, thisLength);
+        case -130135362/*Kind_Callback_OnPageEndEvent_Void*/: return deserializeAndCallSyncCallback_OnPageEndEvent_Void(vmContext, thisArray, thisLength);
+        case 1805946367/*Kind_Callback_OnPageVisibleEvent_Void*/: return deserializeAndCallSyncCallback_OnPageVisibleEvent_Void(vmContext, thisArray, thisLength);
+        case 529980696/*Kind_Callback_OnPermissionRequestEvent_Void*/: return deserializeAndCallSyncCallback_OnPermissionRequestEvent_Void(vmContext, thisArray, thisLength);
         case -738620506/*Kind_Callback_onPlaceChildren_Void*/: return deserializeAndCallSyncCallback_onPlaceChildren_Void(vmContext, thisArray, thisLength);
+        case 1018740377/*Kind_Callback_OnProgressChangeEvent_Void*/: return deserializeAndCallSyncCallback_OnProgressChangeEvent_Void(vmContext, thisArray, thisLength);
+        case -1826742986/*Kind_Callback_OnPromptEvent_Boolean*/: return deserializeAndCallSyncCallback_OnPromptEvent_Boolean(vmContext, thisArray, thisLength);
+        case 1978364344/*Kind_Callback_OnRefreshAccessedHistoryEvent_Void*/: return deserializeAndCallSyncCallback_OnRefreshAccessedHistoryEvent_Void(vmContext, thisArray, thisLength);
+        case -1413785559/*Kind_Callback_OnRenderExitedEvent_Void*/: return deserializeAndCallSyncCallback_OnRenderExitedEvent_Void(vmContext, thisArray, thisLength);
+        case 793995118/*Kind_Callback_OnResourceLoadEvent_Void*/: return deserializeAndCallSyncCallback_OnResourceLoadEvent_Void(vmContext, thisArray, thisLength);
+        case -1782102148/*Kind_Callback_OnScaleChangeEvent_Void*/: return deserializeAndCallSyncCallback_OnScaleChangeEvent_Void(vmContext, thisArray, thisLength);
+        case -1972321573/*Kind_Callback_OnScreenCaptureRequestEvent_Void*/: return deserializeAndCallSyncCallback_OnScreenCaptureRequestEvent_Void(vmContext, thisArray, thisLength);
+        case -172908881/*Kind_Callback_OnScrollEvent_Void*/: return deserializeAndCallSyncCallback_OnScrollEvent_Void(vmContext, thisArray, thisLength);
         case 1637092936/*Kind_Callback_OnScrollFrameBeginHandlerResult_Void*/: return deserializeAndCallSyncCallback_OnScrollFrameBeginHandlerResult_Void(vmContext, thisArray, thisLength);
+        case -1495570/*Kind_Callback_OnSearchResultReceiveEvent_Void*/: return deserializeAndCallSyncCallback_OnSearchResultReceiveEvent_Void(vmContext, thisArray, thisLength);
+        case -636069598/*Kind_Callback_OnShowFileSelectorEvent_Boolean*/: return deserializeAndCallSyncCallback_OnShowFileSelectorEvent_Boolean(vmContext, thisArray, thisLength);
+        case 1624791665/*Kind_Callback_OnSslErrorEventReceiveEvent_Void*/: return deserializeAndCallSyncCallback_OnSslErrorEventReceiveEvent_Void(vmContext, thisArray, thisLength);
+        case -318085495/*Kind_Callback_OnTitleReceiveEvent_Void*/: return deserializeAndCallSyncCallback_OnTitleReceiveEvent_Void(vmContext, thisArray, thisLength);
+        case 1657893064/*Kind_Callback_OnTouchIconUrlReceivedEvent_Void*/: return deserializeAndCallSyncCallback_OnTouchIconUrlReceivedEvent_Void(vmContext, thisArray, thisLength);
+        case -2052382574/*Kind_Callback_OnWindowNewEvent_Void*/: return deserializeAndCallSyncCallback_OnWindowNewEvent_Void(vmContext, thisArray, thisLength);
         case -296989211/*Kind_Callback_Opt_Array_FontDescriptor_Opt_Array_String_Void*/: return deserializeAndCallSyncCallback_Opt_Array_FontDescriptor_Opt_Array_String_Void(vmContext, thisArray, thisLength);
         case 406871767/*Kind_Callback_Opt_Array_NavDestinationTransition_Void*/: return deserializeAndCallSyncCallback_Opt_Array_NavDestinationTransition_Void(vmContext, thisArray, thisLength);
         case 287839344/*Kind_Callback_Opt_Array_String_Opt_Array_String_Void*/: return deserializeAndCallSyncCallback_Opt_Array_String_Opt_Array_String_Void(vmContext, thisArray, thisLength);
         case -543655128/*Kind_Callback_Opt_Array_String_Void*/: return deserializeAndCallSyncCallback_Opt_Array_String_Void(vmContext, thisArray, thisLength);
+        case -1777674145/*Kind_Callback_Opt_Boolean_Void*/: return deserializeAndCallSyncCallback_Opt_Boolean_Void(vmContext, thisArray, thisLength);
         case 859020393/*Kind_Callback_Opt_CustomBuilder_Void*/: return deserializeAndCallSyncCallback_Opt_CustomBuilder_Void(vmContext, thisArray, thisLength);
         case 11877731/*Kind_Callback_Opt_FontDescriptor_Opt_Array_String_Void*/: return deserializeAndCallSyncCallback_Opt_FontDescriptor_Opt_Array_String_Void(vmContext, thisArray, thisLength);
         case -2035339519/*Kind_Callback_Opt_NavigationAnimatedTransition_Void*/: return deserializeAndCallSyncCallback_Opt_NavigationAnimatedTransition_Void(vmContext, thisArray, thisLength);
+        case -233776232/*Kind_Callback_Opt_Number_Void*/: return deserializeAndCallSyncCallback_Opt_Number_Void(vmContext, thisArray, thisLength);
+        case 252363534/*Kind_Callback_Opt_Object_Void*/: return deserializeAndCallSyncCallback_Opt_Object_Void(vmContext, thisArray, thisLength);
         case 1321949695/*Kind_Callback_Opt_OffsetResult_Void*/: return deserializeAndCallSyncCallback_Opt_OffsetResult_Void(vmContext, thisArray, thisLength);
         case 514173789/*Kind_Callback_Opt_Scene_Opt_Array_String_Void*/: return deserializeAndCallSyncCallback_Opt_Scene_Opt_Array_String_Void(vmContext, thisArray, thisLength);
         case 648568223/*Kind_Callback_Opt_ScrollResult_Void*/: return deserializeAndCallSyncCallback_Opt_ScrollResult_Void(vmContext, thisArray, thisLength);
         case 1813490422/*Kind_Callback_Opt_String_Opt_Array_String_Void*/: return deserializeAndCallSyncCallback_Opt_String_Opt_Array_String_Void(vmContext, thisArray, thisLength);
         case -756319131/*Kind_Callback_Opt_StyledString_Opt_Array_String_Void*/: return deserializeAndCallSyncCallback_Opt_StyledString_Opt_Array_String_Void(vmContext, thisArray, thisLength);
         case -143931627/*Kind_Callback_Opt_TabContentAnimatedTransition_Void*/: return deserializeAndCallSyncCallback_Opt_TabContentAnimatedTransition_Void(vmContext, thisArray, thisLength);
+        case 1906972865/*Kind_Callback_Opt_Union_Number_Resource_Void*/: return deserializeAndCallSyncCallback_Opt_Union_Number_Resource_Void(vmContext, thisArray, thisLength);
+        case 447525143/*Kind_Callback_Opt_Union_ResourceStr_String_Resource_Void*/: return deserializeAndCallSyncCallback_Opt_Union_ResourceStr_String_Resource_Void(vmContext, thisArray, thisLength);
         case -2058966418/*Kind_Callback_PlaybackInfo_Void*/: return deserializeAndCallSyncCallback_PlaybackInfo_Void(vmContext, thisArray, thisLength);
         case 721562324/*Kind_Callback_Pointer_Void*/: return deserializeAndCallSyncCallback_Pointer_Void(vmContext, thisArray, thisLength);
         case 624053870/*Kind_Callback_PopInfo_Void*/: return deserializeAndCallSyncCallback_PopInfo_Void(vmContext, thisArray, thisLength);
@@ -6183,8 +7776,12 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case -607365481/*Kind_Callback_Tuple_Number_Number_Void*/: return deserializeAndCallSyncCallback_Tuple_Number_Number_Void(vmContext, thisArray, thisLength);
         case -1063506522/*Kind_Callback_UIExtensionProxy_Void*/: return deserializeAndCallSyncCallback_UIExtensionProxy_Void(vmContext, thisArray, thisLength);
         case -620935067/*Kind_Callback_Union_CustomBuilder_DragItemInfo_Void*/: return deserializeAndCallSyncCallback_Union_CustomBuilder_DragItemInfo_Void(vmContext, thisArray, thisLength);
-        case 411311059/*Kind_Callback_Union_Object_Undefined_Void*/: return deserializeAndCallSyncCallback_Union_Object_Undefined_Void(vmContext, thisArray, thisLength);
+        case -1111620998/*Kind_Callback_Union_Number_Array_Number_Void*/: return deserializeAndCallSyncCallback_Union_Number_Array_Number_Void(vmContext, thisArray, thisLength);
+        case -1438068294/*Kind_Callback_Union_ResourceStr_Array_ResourceStr_Void*/: return deserializeAndCallSyncCallback_Union_ResourceStr_Array_ResourceStr_Void(vmContext, thisArray, thisLength);
+        case 1035300803/*Kind_Callback_Union_ResourceStr_Resource_String_Void*/: return deserializeAndCallSyncCallback_Union_ResourceStr_Resource_String_Void(vmContext, thisArray, thisLength);
         case -1867723152/*Kind_Callback_Void*/: return deserializeAndCallSyncCallback_Void(vmContext, thisArray, thisLength);
+        case -1376223390/*Kind_Callback_WebKeyboardOptions_Void*/: return deserializeAndCallSyncCallback_WebKeyboardOptions_Void(vmContext, thisArray, thisLength);
+        case 831645046/*Kind_Callback_WebResourceResponse_Void*/: return deserializeAndCallSyncCallback_WebResourceResponse_Void(vmContext, thisArray, thisLength);
         case 1317697111/*Kind_CheckBoxModifierBuilder*/: return deserializeAndCallSyncCheckBoxModifierBuilder(vmContext, thisArray, thisLength);
         case 1482532871/*Kind_CompatibleInitCallback*/: return deserializeAndCallSyncCompatibleInitCallback(vmContext, thisArray, thisLength);
         case 434420460/*Kind_CompatibleUpdateCallback*/: return deserializeAndCallSyncCompatibleUpdateCallback(vmContext, thisArray, thisLength);
@@ -6212,32 +7809,45 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case -1026503952/*Kind_ModifierKeyStateGetter*/: return deserializeAndCallSyncModifierKeyStateGetter(vmContext, thisArray, thisLength);
         case -1066063065/*Kind_NavDestinationTransitionDelegate*/: return deserializeAndCallSyncNavDestinationTransitionDelegate(vmContext, thisArray, thisLength);
         case -588228933/*Kind_NavExtender_OnUpdateStack*/: return deserializeAndCallSyncNavExtender_OnUpdateStack(vmContext, thisArray, thisLength);
+        case 1572284740/*Kind_OnAdsBlockedCallback*/: return deserializeAndCallSyncOnAdsBlockedCallback(vmContext, thisArray, thisLength);
         case 726938390/*Kind_OnAlphabetIndexerPopupSelectCallback*/: return deserializeAndCallSyncOnAlphabetIndexerPopupSelectCallback(vmContext, thisArray, thisLength);
         case -1956514817/*Kind_OnAlphabetIndexerRequestPopupDataCallback*/: return deserializeAndCallSyncOnAlphabetIndexerRequestPopupDataCallback(vmContext, thisArray, thisLength);
         case -1189721220/*Kind_OnAlphabetIndexerSelectCallback*/: return deserializeAndCallSyncOnAlphabetIndexerSelectCallback(vmContext, thisArray, thisLength);
         case -1198592337/*Kind_OnCheckboxChangeCallback*/: return deserializeAndCallSyncOnCheckboxChangeCallback(vmContext, thisArray, thisLength);
         case -1053064240/*Kind_OnCheckboxGroupChangeCallback*/: return deserializeAndCallSyncOnCheckboxGroupChangeCallback(vmContext, thisArray, thisLength);
         case -419979106/*Kind_OnContentScrollCallback*/: return deserializeAndCallSyncOnContentScrollCallback(vmContext, thisArray, thisLength);
+        case 1788572278/*Kind_OnContextMenuHideCallback*/: return deserializeAndCallSyncOnContextMenuHideCallback(vmContext, thisArray, thisLength);
         case 312701677/*Kind_OnCreateMenuCallback*/: return deserializeAndCallSyncOnCreateMenuCallback(vmContext, thisArray, thisLength);
         case 1648184341/*Kind_OnDidChangeCallback*/: return deserializeAndCallSyncOnDidChangeCallback(vmContext, thisArray, thisLength);
         case 1451593190/*Kind_OnDragEventCallback*/: return deserializeAndCallSyncOnDragEventCallback(vmContext, thisArray, thisLength);
+        case 767275770/*Kind_OnFirstMeaningfulPaintCallback*/: return deserializeAndCallSyncOnFirstMeaningfulPaintCallback(vmContext, thisArray, thisLength);
         case 2050387049/*Kind_OnFoldStatusChangeCallback*/: return deserializeAndCallSyncOnFoldStatusChangeCallback(vmContext, thisArray, thisLength);
+        case 81230317/*Kind_OnFullScreenEnterCallback*/: return deserializeAndCallSyncOnFullScreenEnterCallback(vmContext, thisArray, thisLength);
         case -2025767812/*Kind_OnHoverCallback*/: return deserializeAndCallSyncOnHoverCallback(vmContext, thisArray, thisLength);
         case 9040430/*Kind_OnHoverStatusChangeCallback*/: return deserializeAndCallSyncOnHoverStatusChangeCallback(vmContext, thisArray, thisLength);
+        case -1377876844/*Kind_OnIntelligentTrackingPreventionCallback*/: return deserializeAndCallSyncOnIntelligentTrackingPreventionCallback(vmContext, thisArray, thisLength);
         case 949409727/*Kind_OnItemDragStartCallback*/: return deserializeAndCallSyncOnItemDragStartCallback(vmContext, thisArray, thisLength);
+        case 1390640532/*Kind_OnLargestContentfulPaintCallback*/: return deserializeAndCallSyncOnLargestContentfulPaintCallback(vmContext, thisArray, thisLength);
         case -405536347/*Kind_OnLazyLoadingFunc*/: return deserializeAndCallSyncOnLazyLoadingFunc(vmContext, thisArray, thisLength);
         case -968773856/*Kind_OnLinearIndicatorChangeCallback*/: return deserializeAndCallSyncOnLinearIndicatorChangeCallback(vmContext, thisArray, thisLength);
         case -1106041422/*Kind_OnMenuItemClickCallback*/: return deserializeAndCallSyncOnMenuItemClickCallback(vmContext, thisArray, thisLength);
         case -1200281222/*Kind_OnMoveHandler*/: return deserializeAndCallSyncOnMoveHandler(vmContext, thisArray, thisLength);
+        case -1641338704/*Kind_OnNativeEmbedVisibilityChangeCallback*/: return deserializeAndCallSyncOnNativeEmbedVisibilityChangeCallback(vmContext, thisArray, thisLength);
         case -823037763/*Kind_OnNativeLoadCallback*/: return deserializeAndCallSyncOnNativeLoadCallback(vmContext, thisArray, thisLength);
+        case -398722176/*Kind_OnNavigationEntryCommittedCallback*/: return deserializeAndCallSyncOnNavigationEntryCommittedCallback(vmContext, thisArray, thisLength);
+        case 865258467/*Kind_OnOverrideUrlLoadingCallback*/: return deserializeAndCallSyncOnOverrideUrlLoadingCallback(vmContext, thisArray, thisLength);
         case 1738363337/*Kind_OnPasteCallback*/: return deserializeAndCallSyncOnPasteCallback(vmContext, thisArray, thisLength);
         case 511412333/*Kind_OnRadioChangeCallback*/: return deserializeAndCallSyncOnRadioChangeCallback(vmContext, thisArray, thisLength);
         case -551895045/*Kind_OnRatingChangeCallback*/: return deserializeAndCallSyncOnRatingChangeCallback(vmContext, thisArray, thisLength);
+        case 47282303/*Kind_OnRenderProcessNotRespondingCallback*/: return deserializeAndCallSyncOnRenderProcessNotRespondingCallback(vmContext, thisArray, thisLength);
+        case 1334389194/*Kind_OnRenderProcessRespondingCallback*/: return deserializeAndCallSyncOnRenderProcessRespondingCallback(vmContext, thisArray, thisLength);
+        case -1099824577/*Kind_OnSafeBrowsingCheckResultCallback*/: return deserializeAndCallSyncOnSafeBrowsingCheckResultCallback(vmContext, thisArray, thisLength);
         case -160015401/*Kind_OnScrollCallback*/: return deserializeAndCallSyncOnScrollCallback(vmContext, thisArray, thisLength);
         case -1259214476/*Kind_OnScrollEdgeCallback*/: return deserializeAndCallSyncOnScrollEdgeCallback(vmContext, thisArray, thisLength);
         case -2133791987/*Kind_OnScrollFrameBeginCallback*/: return deserializeAndCallSyncOnScrollFrameBeginCallback(vmContext, thisArray, thisLength);
         case 625641334/*Kind_OnScrollVisibleContentChangeCallback*/: return deserializeAndCallSyncOnScrollVisibleContentChangeCallback(vmContext, thisArray, thisLength);
         case -1486869198/*Kind_OnSelectCallback*/: return deserializeAndCallSyncOnSelectCallback(vmContext, thisArray, thisLength);
+        case -399603614/*Kind_OnSslErrorEventCallback*/: return deserializeAndCallSyncOnSslErrorEventCallback(vmContext, thisArray, thisLength);
         case -1961646162/*Kind_OnSubmitCallback*/: return deserializeAndCallSyncOnSubmitCallback(vmContext, thisArray, thisLength);
         case -143686583/*Kind_OnSwiperAnimationEndCallback*/: return deserializeAndCallSyncOnSwiperAnimationEndCallback(vmContext, thisArray, thisLength);
         case 876602502/*Kind_OnSwiperAnimationStartCallback*/: return deserializeAndCallSyncOnSwiperAnimationStartCallback(vmContext, thisArray, thisLength);
@@ -6250,6 +7860,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case 695228737/*Kind_OnTextSelectionChangeCallback*/: return deserializeAndCallSyncOnTextSelectionChangeCallback(vmContext, thisArray, thisLength);
         case 994429103/*Kind_OnTimePickerChangeCallback*/: return deserializeAndCallSyncOnTimePickerChangeCallback(vmContext, thisArray, thisLength);
         case 782080172/*Kind_OnTotalCountFunc*/: return deserializeAndCallSyncOnTotalCountFunc(vmContext, thisArray, thisLength);
+        case 1847083191/*Kind_OnViewportFitChangedCallback*/: return deserializeAndCallSyncOnViewportFitChangedCallback(vmContext, thisArray, thisLength);
         case 1483622345/*Kind_OnWillScrollCallback*/: return deserializeAndCallSyncOnWillScrollCallback(vmContext, thisArray, thisLength);
         case 256377244/*Kind_PageMapBuilder*/: return deserializeAndCallSyncPageMapBuilder(vmContext, thisArray, thisLength);
         case 1627123591/*Kind_PageTransitionCallback*/: return deserializeAndCallSyncPageTransitionCallback(vmContext, thisArray, thisLength);
@@ -6290,6 +7901,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case -448105339/*Kind_UpdateTransitionCallback*/: return deserializeAndCallSyncUpdateTransitionCallback(vmContext, thisArray, thisLength);
         case 541663396/*Kind_VisibleAreaChangeCallback*/: return deserializeAndCallSyncVisibleAreaChangeCallback(vmContext, thisArray, thisLength);
         case -2038961969/*Kind_VoidCallback*/: return deserializeAndCallSyncVoidCallback(vmContext, thisArray, thisLength);
+        case -1829763354/*Kind_WebKeyboardCallback*/: return deserializeAndCallSyncWebKeyboardCallback(vmContext, thisArray, thisLength);
     }
     printf("Unknown callback kind\n");
 }

@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-import { Array_from_set, className, float64ToInt, int32, KoalaCallsiteKey, KoalaCallsiteKeys, KoalaProfiler, MarkableQueue, markableQueue, Observable, ObservableHandler, refEqual, uint32 } from "@koalaui/common"
+import { Array_from_set, className, float64ToInt, int32, KoalaCallsiteKey, KoalaCallsiteKeys, Observable, ObservableHandler, refEqual, uint32 } from "@koalaui/common"
 import { Dependency, ScopeToStates, StateToScopes } from "./Dependency"
 import { Disposable, disposeContent, disposeContentBackward } from "./Disposable"
 import { Changes, Journal } from "./Journal"
+import { markableQueue } from "../common/MarkableQueue"
+import { RuntimeProfiler } from "../common/RuntimeProfiler"
 import { IncrementalNode } from "../tree/IncrementalNode"
 import { ReadonlyTreeNode } from "../tree/ReadonlyTreeNode"
 
@@ -45,6 +47,10 @@ export function createStateManager(): StateManager {
  */
 export interface StateManager extends StateContext {
     readonly currentScopeId: KoalaCallsiteKey | undefined
+    contextData: object | undefined
+    isDebugMode: boolean
+    setThreadChecker(callback: () => boolean): void
+
     syncChanges(): void
     isUpdateNeeded(): boolean
     updateSnapshot(): uint32
@@ -111,6 +117,10 @@ export interface ComputableState<Value> extends Disposable, State<Value> {
      * If value will be recomputed on access.
      */
     readonly recomputeNeeded: boolean
+    /**
+     * force a complete rerender / update by executing all update functions
+     */
+    forceCompleteRerender(): void
 }
 
 /**
@@ -129,8 +139,9 @@ export interface StateContext {
     namedState<Value>(name: string, create: () => Value, global?: boolean, equivalent?: Equivalent<Value>, tracker?: ValueTracker<Value>): MutableState<Value>
     stateBy<Value>(name: string, global?: boolean): MutableState<Value> | undefined
     valueBy<Value>(name: string, global?: boolean): Value
+    scope<Value>(id: KoalaCallsiteKey, paramCount: int32): IncrementalScope<Value>
     /** @internal */
-    scope<Value>(
+    scopeEx<Value>(
         id: KoalaCallsiteKey,
         paramCount: int32,
         create?: () => IncrementalNode,
@@ -138,7 +149,7 @@ export interface StateContext {
         cleanup?: (value: Value | undefined) => void,
         once?: boolean,
         reuseKey?: string
-    ): InternalScope<Value>
+    ): IncrementalScope<Value>
     controlledScope(id: KoalaCallsiteKey, invalidate: () => void): ControlledScope
 }
 
@@ -161,7 +172,7 @@ export interface ValueTracker<Value> {
 }
 
 /** @internal */
-export interface InternalScope<Value> {
+export interface IncrementalScope<Value> {
     /** @returns true if internal value can be returned as is */
     readonly unchanged: boolean
     /** @returns internal value if it is already computed */
@@ -169,7 +180,8 @@ export interface InternalScope<Value> {
     /** @returns internal value updated after the computation */
     recache(newValue?: Value): Value
     /** @returns internal state for parameter */
-    param<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V>
+    param<V>(index: int32, value: V): State<V>
+    paramEx<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V>
 }
 
 /**
@@ -223,6 +235,7 @@ interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
         reuseKey?: string
     ): ScopeImpl<Value>
     increment(count: uint32, skip: boolean): void
+    invalidateRecursively(predicate?: (scope: ManagedScope) => boolean): void
 }
 
 class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> {
@@ -310,6 +323,7 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
 
     checkSetProhibited() {
         if (this.dependencies?.empty != false) return // no dependencies
+        this.manager?.checkThread()
         const scope = this.manager?.current
         if (scope === undefined) return // outside the incremental update
         if (scope?.node === undefined && scope?.parent === undefined) return // during animation
@@ -546,8 +560,12 @@ class StateManagerImpl implements StateManager {
     external: Dependency | undefined = undefined
     updateNeeded: boolean = false
     frozen: boolean = false
-    private readonly callbacks: MarkableQueue = markableQueue()
+    private readonly callbacks = markableQueue()
     readonly journal: Journal = new Journal()
+
+    contextData: object | undefined = undefined
+    isDebugMode: boolean = false
+    private threadCheckerCallback?: () => boolean
 
     get currentScopeId(): KoalaCallsiteKey | undefined {
         return this.current?.id
@@ -583,7 +601,7 @@ class StateManagerImpl implements StateManager {
     }
 
     updateSnapshot(): uint32 {
-        KoalaProfiler.counters?.updateSnapshotEnter()
+        RuntimeProfiler.instance?.updateSnapshotEnter()
         this.checkForStateComputing()
         // optimization: all states are valid and not modified
         if (!this.updateNeeded) return 0
@@ -602,7 +620,7 @@ class StateManagerImpl implements StateManager {
             }
         }
         changes?.clear()
-        KoalaProfiler.counters?.updateSnapshot(modified, created)
+        RuntimeProfiler.instance?.updateSnapshot(modified, created)
         // recompute dirty scopes only
         while (this.dirtyScopes.size > 0) {
             const scopes = Array_from_set<ManagedScope>(this.dirtyScopes)
@@ -612,9 +630,9 @@ class StateManagerImpl implements StateManager {
                 if (scopes[i].modified) modified++
             }
         }
-        KoalaProfiler.counters?.updateSnapshot(modified)
+        RuntimeProfiler.instance?.updateSnapshot(modified)
         this.updateNeeded = modified > 0 // reset modified on next update
-        KoalaProfiler.counters?.updateSnapshotExit()
+        RuntimeProfiler.instance?.updateSnapshotExit()
         return modified
     }
 
@@ -694,8 +712,12 @@ class StateManagerImpl implements StateManager {
         return this.external
     }
 
-    scope<Value>(id: KoalaCallsiteKey, paramCount: int32, create?: () => IncrementalNode, compute?: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean, reuseKey?: string): InternalScope<Value> {
-        const counters = KoalaProfiler.counters
+    scope<Value>(id: KoalaCallsiteKey, paramCount: int32): IncrementalScope<Value> {
+        return this.scopeEx<Value>(id, paramCount)
+    }
+
+    scopeEx<Value>(id: KoalaCallsiteKey, paramCount: int32, create?: () => IncrementalNode, compute?: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean, reuseKey?: string): IncrementalScope<Value> {
+        const counters = RuntimeProfiler.instance
         if (counters) {
             create ? counters.build() : counters.compute()
         }
@@ -705,12 +727,12 @@ class StateManagerImpl implements StateManager {
     }
 
     controlledScope(id: KoalaCallsiteKey, invalidate: () => void): ControlledScope {
-        const scope = this.scope<ControlledScopeImpl>(id, 0, undefined, undefined, ControlledScopeImpl.cleanup, true)
+        const scope = this.scopeEx<ControlledScopeImpl>(id, 0, undefined, undefined, ControlledScopeImpl.cleanup, true)
         return scope.unchanged ? scope.cached : scope.recache(new ControlledScopeImpl(this, invalidate))
     }
 
     attach<Node extends IncrementalNode>(id: KoalaCallsiteKey, create: () => Node, update: () => void, cleanup?: () => void): void {
-        const scope = this.scope<undefined>(id, 0, create, undefined, cleanup === undefined ? undefined : (value: undefined): void => {
+        const scope = this.scopeEx<undefined>(id, 0, create, undefined, cleanup === undefined ? undefined : (value: undefined): void => {
             cleanup?.()
         })
         if (scope.unchanged) {
@@ -722,7 +744,7 @@ class StateManagerImpl implements StateManager {
     }
 
     compute<Value>(id: KoalaCallsiteKey, compute: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean): Value {
-        const scope = this.scope<Value>(id, 0, undefined, undefined, cleanup, once)
+        const scope = this.scopeEx<Value>(id, 0, undefined, undefined, cleanup, once)
         return scope.unchanged ? scope.cached : scope.recache(compute())
     }
 
@@ -804,9 +826,22 @@ class StateManagerImpl implements StateManager {
         const scope = this.current
         if (scope) throw new Error("prohibited when computing scope(" + KoalaCallsiteKeys.asString(scope.id) + ")")
     }
+
+    setThreadChecker(callback: () => boolean): void {
+        this.threadCheckerCallback = callback
+    }
+
+    checkThread(): void {
+        if (this.isDebugMode) {
+            let isUIThread = this.threadCheckerCallback!()
+            if (isUIThread !== true) {
+                throw new Error("prohibited to modify a state when not in UI thread")
+            }
+        }
+    }
 }
 
-class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, ComputableState<Value> {
+class ScopeImpl<Value> implements ManagedScope, IncrementalScope<Value>, ComputableState<Value> {
     recomputeNeeded: boolean = true
     manager: StateManagerImpl | undefined = undefined
     dependencies: StateToScopes | undefined = undefined
@@ -892,6 +927,18 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         return this._reuseKey
     }
 
+    invalidateRecursively(predicate?: (scope: ManagedScope) => boolean) {
+        this.recomputeNeeded = true
+        for (let child = this.child; child; child = child?.next) {
+            if (predicate && !predicate(child!)) break
+            if (!child!.once) child!.invalidateRecursively(predicate)
+        }
+    }
+
+    forceCompleteRerender(): void {
+        this.invalidateRecursively()
+    }
+
     addCreatedState(state: Disposable): void {
         let statesCreated = this.statesCreated
         if (statesCreated === undefined) {
@@ -933,12 +980,8 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         const scope = reused ? reused as ScopeImpl<Value> : ScopeImpl.create<Value>(id, paramCount, compute, cleanup, reuseKey)
         scope.manager = manager
         if (reused) {
-            scope.recomputeNeeded = true
             scope._id = id // children scope IDs are independent from Reusable parent
-            // recompute children because of memoEntry that introduces additional scope
-            for (let childR = scope.child; childR; childR = childR!.next) {
-                if (!childR!.once) childR!.recomputeNeeded = true
-            }
+            scope.invalidateRecursively(noIncrementalNode)
         } else if (create) {
             // create node within a scope
             scope._once = true
@@ -1040,7 +1083,11 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         return this.myValue as Value
     }
 
-    param<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V> {
+    param<V>(index: int32, value: V): State<V> {
+        return this.paramEx(index, value)
+    }
+
+    paramEx<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V> {
         const manager = this.manager
         const params = this.params
         if (manager === undefined || params === undefined) throw new Error("Wrong use of Internal API")
@@ -1069,7 +1116,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         let scope: ManagedScope = this
         while (true) {
             if (scope === current) break // parameters should not invalidate whole hierarchy
-            if (!scope.recomputeNeeded) KoalaProfiler.counters?.invalidation()
+            if (!scope.recomputeNeeded) RuntimeProfiler.instance?.invalidation()
             else if (current === undefined) break // all parent scopes were already invalidated
             scope.recomputeNeeded = true
             const parent = scope.parent
@@ -1203,6 +1250,10 @@ class ControlledScopeImpl implements Dependency, ControlledScope {
 
 function isModified<Value>(oldV: Value, newV: Value, equivalent?: Equivalent<Value>): boolean {
     return !refEqual<Value>(oldV, newV) && (equivalent?.(oldV, newV) != true)
+}
+
+function noIncrementalNode(scope: ManagedScope): boolean {
+    return scope.node === undefined
 }
 
 class TrackedScope {

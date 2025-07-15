@@ -15,7 +15,7 @@
 
 // TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
 import { Assert, suite, test } from "@koalaui/harness"
-import { float64, int32, toKoalaCallsiteKey as key } from "@koalaui/common"
+import { float64, int32, hashCodeFromString as key } from "@koalaui/common"
 import { IncrementalNode, State, StateContext, TestNode, testUpdate, ValueTracker } from "../../src"
 import { createStateManager } from "../../src/states/State"
 
@@ -138,7 +138,7 @@ suite("State", () => {
         const manager = createStateManager()
         manager.computableState((context: StateContext) => {
             const scope = context.scope<void>(0, 1)
-            const param = scope.param<int32>(0, 200, undefined, name, true) // can be found by name
+            const param = scope.paramEx<int32>(0, 200, undefined, name, true) // can be found by name
             if (scope.unchanged) { scope.cached } else {
                 const state = manager.stateBy<int32>(name)!
                 Assert.isDefined(state)
@@ -154,7 +154,7 @@ suite("State", () => {
         const manager = createStateManager()
         manager.computableState((context: StateContext) => {
             const scope = context.scope<void>(0, 1)
-            const param = scope.param<int32>(0, 200, undefined, name, true) // can be found by name
+            const param = scope.paramEx<int32>(0, 200, undefined, name, true) // can be found by name
             if (scope.unchanged) { scope.cached } else {
                 const state = manager.stateBy<int32>(name)!
                 Assert.isDefined(state)

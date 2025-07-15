@@ -22,6 +22,7 @@
 
 #include "koala-types.h"
 #include "interop-logging.h"
+#include "interop-utils.h"
 
 struct KotlinInteropBuffer {
     int32_t length;
@@ -136,11 +137,7 @@ struct InteropTypeConverter<KInteropBuffer> {
       void *data = nullptr;
       if (value.length > 0) {
         data = malloc(value.length);
-        #ifdef __STDC_LIB_EXT1__
-          memcpy_s(data, value.length, value.data, value.length);
-        #else
-          memcpy(data, value.data, value.length);
-        #endif
+        interop_memcpy(data, value.length, value.data, value.length);
       }
       InteropType result = {
         .length = static_cast<int32_t>(value.length),
@@ -189,11 +186,7 @@ struct InteropTypeConverter<KStringPtr> {
       }
       size_t bufferSize = value.length() + 1;
       char *result = reinterpret_cast<char*>(malloc(bufferSize));
-      #ifdef __STDC_LIB_EXT1__
-        strcpy_s(result, bufferSize, value.c_str());
-      #else
-        strcpy(result, value.c_str());
-      #endif
+      interop_strcpy(result, bufferSize, value.c_str());
       return result;
     }
     static void release(InteropType value, const KStringPtr& converted) {}

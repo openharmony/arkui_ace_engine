@@ -212,6 +212,12 @@ export class ArkTimePickerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TimePickerAttribute_setEnableCascade(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_selectedAttribute(callback_: ((selected: Date) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._TimePickerAttribute_set_onChangeEvent_selected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface TimePickerResult {
     hour: number;
@@ -241,6 +247,7 @@ export interface TimePickerAttribute extends CommonMethod {
     enableHapticFeedback(value: boolean | undefined): this
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     enableCascade(value: boolean | undefined): this
+    _onChangeEvent_selected(callback_: ((selected: Date) => void)): void
     attributeModifier(value: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTimePickerStyle extends ArkCommonMethodStyle implements TimePickerAttribute {
@@ -288,6 +295,9 @@ export class ArkTimePickerStyle extends ArkCommonMethodStyle implements TimePick
     }
     public enableCascade(value: boolean | undefined): this {
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((selected: Date) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -448,6 +458,14 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+    public _onChangeEvent_selected(callback_: ((selected: Date) => void)): void {
+        if (this.checkPriority("_onChangeEvent_selected")) {
+            const callback__casted = callback_ as (((selected: Date) => void))
+            this.getPeer()?.set_onChangeEvent_selectedAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -525,6 +543,8 @@ export class ArkTimePickerSet extends ArkCommonMethodSet implements TimePickerAt
     _digitalCrownSensitivity0_value?: CrownSensitivity | undefined
     _enableCascade_flag?: boolean
     _enableCascade0_value?: boolean | undefined
+    __onChangeEvent_selected_flag?: boolean
+    __onChangeEvent_selected0_value?: ((selected: Date) => void)
     applyModifierPatch(component: TimePickerAttribute): void {
         if (this._useMilitaryTime_flag)
             component.useMilitaryTime((this._useMilitaryTime0_value as boolean | undefined))
@@ -603,6 +623,8 @@ export class ArkTimePickerSet extends ArkCommonMethodSet implements TimePickerAt
         this._enableCascade_flag = true
         this._enableCascade0_value = value
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((selected: Date) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

@@ -302,6 +302,18 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextPickerAttribute_setDigitalCrownSensitivity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_selectedAttribute(callback_: ((selected: number | Array<number>) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._TextPickerAttribute_set_onChangeEvent_selected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    set_onChangeEvent_valueAttribute(callback_: ((value: ResourceStr | Array<ResourceStr>) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._TextPickerAttribute_set_onChangeEvent_value(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface TextPickerRangeContent {
     icon: string | Resource;
@@ -347,6 +359,8 @@ export interface TextPickerAttribute extends CommonMethod {
     gradientHeight(value: Dimension | undefined): this
     enableHapticFeedback(value: boolean | undefined): this
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
+    _onChangeEvent_selected(callback_: ((selected: number | Array<number>) => void)): void
+    _onChangeEvent_value(callback_: ((value: ResourceStr | Array<ResourceStr>) => void)): void
     attributeModifier(value: AttributeModifier<TextPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTextPickerStyle extends ArkCommonMethodStyle implements TextPickerAttribute {
@@ -410,6 +424,12 @@ export class ArkTextPickerStyle extends ArkCommonMethodStyle implements TextPick
     }
     public digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((selected: number | Array<number>) => void)): void {
+        throw new Error("Unimplemented")
+    }
+    public _onChangeEvent_value(callback_: ((value: ResourceStr | Array<ResourceStr>) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<TextPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -616,6 +636,22 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+    public _onChangeEvent_selected(callback_: ((selected: number | Array<number>) => void)): void {
+        if (this.checkPriority("_onChangeEvent_selected")) {
+            const callback__casted = callback_ as (((selected: number | Array<number>) => void))
+            this.getPeer()?.set_onChangeEvent_selectedAttribute(callback__casted)
+            return
+        }
+        return
+    }
+    public _onChangeEvent_value(callback_: ((value: ResourceStr | Array<ResourceStr>) => void)): void {
+        if (this.checkPriority("_onChangeEvent_value")) {
+            const callback__casted = callback_ as (((value: ResourceStr | Array<ResourceStr>) => void))
+            this.getPeer()?.set_onChangeEvent_valueAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<TextPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -701,6 +737,10 @@ export class ArkTextPickerSet extends ArkCommonMethodSet implements TextPickerAt
     _enableHapticFeedback0_value?: boolean | undefined
     _digitalCrownSensitivity_flag?: boolean
     _digitalCrownSensitivity0_value?: CrownSensitivity | undefined
+    __onChangeEvent_selected_flag?: boolean
+    __onChangeEvent_selected0_value?: ((selected: number | Array<number>) => void)
+    __onChangeEvent_value_flag?: boolean
+    __onChangeEvent_value0_value?: ((value: ResourceStr | Array<ResourceStr>) => void)
     applyModifierPatch(component: TextPickerAttribute): void {
         if (this._defaultPickerItemHeight_flag)
             component.defaultPickerItemHeight((this._defaultPickerItemHeight0_value as number | string | undefined))
@@ -807,6 +847,10 @@ export class ArkTextPickerSet extends ArkCommonMethodSet implements TextPickerAt
         this._digitalCrownSensitivity_flag = true
         this._digitalCrownSensitivity0_value = value
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((selected: number | Array<number>) => void)): void {
+    }
+    public _onChangeEvent_value(callback_: ((value: ResourceStr | Array<ResourceStr>) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<TextPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

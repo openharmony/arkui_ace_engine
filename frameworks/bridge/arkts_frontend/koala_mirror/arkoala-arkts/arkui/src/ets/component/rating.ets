@@ -113,6 +113,12 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RatingAttribute_setContentModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_ratingAttribute(callback_: ((rating: number | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._RatingAttribute_set_onChangeEvent_rating(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface RatingOptions {
     rating: number | undefined;
@@ -137,6 +143,7 @@ export interface RatingAttribute extends CommonMethod {
     starStyle(value: StarStyleOptions | undefined): this
     onChange(value: OnRatingChangeCallback | undefined): this
     contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this
+    _onChangeEvent_rating(callback_: ((rating: number | undefined) => void)): void
     attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttribute {
@@ -160,6 +167,9 @@ export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttrib
     }
     public contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
         return this
+    }
+    public _onChangeEvent_rating(callback_: ((rating: number | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -231,6 +241,14 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
         }
         return this
     }
+    public _onChangeEvent_rating(callback_: ((rating: number | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_rating")) {
+            const callback__casted = callback_ as (((rating: number | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_ratingAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -296,6 +314,8 @@ export class ArkRatingSet extends ArkCommonMethodSet implements RatingAttribute 
     _onChange0_value?: OnRatingChangeCallback | undefined
     _contentModifier_flag?: boolean
     _contentModifier0_value?: ContentModifier<RatingConfiguration> | undefined
+    __onChangeEvent_rating_flag?: boolean
+    __onChangeEvent_rating0_value?: ((rating: number | undefined) => void)
     applyModifierPatch(component: RatingAttribute): void {
         if (this._stars_flag)
             component.stars((this._stars0_value as number | undefined))
@@ -332,6 +352,8 @@ export class ArkRatingSet extends ArkCommonMethodSet implements RatingAttribute 
         this._contentModifier_flag = true
         this._contentModifier0_value = value
         return this
+    }
+    public _onChangeEvent_rating(callback_: ((rating: number | undefined) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

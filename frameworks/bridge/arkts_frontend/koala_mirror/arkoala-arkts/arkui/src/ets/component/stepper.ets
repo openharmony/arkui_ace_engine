@@ -111,6 +111,12 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._StepperAttribute_setOnPrevious(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_indexAttribute(callback_: ((index: number) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._StepperAttribute_set_onChangeEvent_index(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface StepperOptions {
     index?: number;
@@ -121,6 +127,7 @@ export interface StepperAttribute extends CommonMethod {
     onChange(value: ((prevIndex: number,index: number) => void) | undefined): this
     onNext(value: ((prevIndex: number,index: number) => void) | undefined): this
     onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this
+    _onChangeEvent_index(callback_: ((index: number) => void)): void
     attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttribute {
@@ -144,6 +151,9 @@ export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttr
     }
     public onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this {
         return this
+    }
+    public _onChangeEvent_index(callback_: ((index: number) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -215,6 +225,14 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements Ste
         }
         return this
     }
+    public _onChangeEvent_index(callback_: ((index: number) => void)): void {
+        if (this.checkPriority("_onChangeEvent_index")) {
+            const callback__casted = callback_ as (((index: number) => void))
+            this.getPeer()?.set_onChangeEvent_indexAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -280,6 +298,8 @@ export class ArkStepperSet extends ArkCommonMethodSet implements StepperAttribut
     _onNext0_value?: ((prevIndex: number,index: number) => void) | undefined
     _onPrevious_flag?: boolean
     _onPrevious0_value?: ((prevIndex: number,index: number) => void) | undefined
+    __onChangeEvent_index_flag?: boolean
+    __onChangeEvent_index0_value?: ((index: number) => void)
     applyModifierPatch(component: StepperAttribute): void {
         if (this._onFinish_flag)
             component.onFinish((this._onFinish0_value as (() => void) | undefined))
@@ -316,6 +336,8 @@ export class ArkStepperSet extends ArkCommonMethodSet implements StepperAttribut
         this._onPrevious_flag = true
         this._onPrevious0_value = value
         return this
+    }
+    public _onChangeEvent_index(callback_: ((index: number) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

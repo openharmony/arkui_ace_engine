@@ -220,6 +220,12 @@ export class ArkMenuItemPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._MenuItemAttribute_setLabelFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    set_onChangeEvent_selectedAttribute(callback_: ((selected: boolean | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._MenuItemAttribute_set_onChangeEvent_selected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface MenuItemOptions {
     startIcon?: ResourceStr;
@@ -238,6 +244,7 @@ export interface MenuItemAttribute extends CommonMethod {
     contentFontColor(value: ResourceColor | undefined): this
     labelFont(value: Font | undefined): this
     labelFontColor(value: ResourceColor | undefined): this
+    _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void
     attributeModifier(value: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkMenuItemStyle extends ArkCommonMethodStyle implements MenuItemAttribute {
@@ -269,6 +276,9 @@ export class ArkMenuItemStyle extends ArkCommonMethodStyle implements MenuItemAt
     }
     public labelFontColor(value: ResourceColor | undefined): this {
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -360,6 +370,14 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements Me
         }
         return this
     }
+    public _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_selected")) {
+            const callback__casted = callback_ as (((selected: boolean | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_selectedAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -429,6 +447,8 @@ export class ArkMenuItemSet extends ArkCommonMethodSet implements MenuItemAttrib
     _labelFont0_value?: Font | undefined
     _labelFontColor_flag?: boolean
     _labelFontColor0_value?: ResourceColor | undefined
+    __onChangeEvent_selected_flag?: boolean
+    __onChangeEvent_selected0_value?: ((selected: boolean | undefined) => void)
     applyModifierPatch(component: MenuItemAttribute): void {
         if (this._selected_flag)
             component.selected((this._selected0_value as boolean | undefined))
@@ -479,6 +499,8 @@ export class ArkMenuItemSet extends ArkCommonMethodSet implements MenuItemAttrib
         this._labelFontColor_flag = true
         this._labelFontColor0_value = value
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
