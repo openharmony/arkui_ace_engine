@@ -699,4 +699,27 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest001, TestSize.Leve
     EXPECT_NE(hash1, hash2);
 }
 
+/**
+ * @tc.name: RichEditorLayoutAlgorithmTest002
+ * @tc.desc: test RichEditorLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest002, TestSize.Level1)
+{
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    SizeF textSize;
+    ASSERT_EQ(textSize.Width(), 0.0f);
+    layoutAlgorithm->allSpans_.clear();
+    layoutAlgorithm->HandleTextSizeWhenEmpty(AceType::RawPtr(layoutWrapper), textSize);
+    EXPECT_NE(textSize.Width(), 0.0f);
+}
+
 } // namespace OHOS::Ace::NG
