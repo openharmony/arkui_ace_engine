@@ -1292,7 +1292,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback03, TestSize.Level
 
 /**
  * @tc.name: FrameNodIsFrameDisappear01
- * @tc.desc: Test the function IsFrameDisappear
+ * @tc.desc: Test the function IsFrameDisappear.
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear01, TestSize.Level1)

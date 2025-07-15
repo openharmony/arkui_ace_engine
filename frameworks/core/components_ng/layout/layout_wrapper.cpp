@@ -159,12 +159,14 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
             auto usingRect = RectF(OffsetF(x, keyboardOffset), geometryNode->GetFrameSize());
             renderContext->UpdatePaintRect(usingRect);
             geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
+            pipeline->SetAreaChangeNodeMinDepth(host->GetDepth());
             renderContext->SyncPartialRsProperties();
             return true;
         }
         auto usingRect = RectF(OffsetF(x, safeArea.top_.Length() + keyboardOffset), geometryNode->GetFrameSize());
         renderContext->UpdatePaintRect(usingRect);
         geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
+        pipeline->SetAreaChangeNodeMinDepth(host->GetDepth());
         renderContext->SyncPartialRsProperties();
         return true;
     }
@@ -269,6 +271,7 @@ void LayoutWrapper::AdjustNotExpandNode()
         adjustedRect += geometryNode->GetParentAdjust();
     }
     geometryNode->SetSelfAdjust(adjustedRect - geometryNode->GetFrameRect());
+    pipeline->SetAreaChangeNodeMinDepth(host->GetDepth());
     renderContext->UpdatePaintRect(adjustedRect + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
     if (SystemProperties::GetSafeAreaDebugTraceEnabled()) {
         ACE_SAFE_AREA_SCOPED_TRACE("AdjustNotExpandNode[%s][self:%d][parent:%d][key:%s][paintRectRect:%s]",
@@ -332,6 +335,7 @@ void LayoutWrapper::ExpandSafeArea()
     }
     auto selfAdjust = frame - geometryNode->GetFrameRect();
     geometryNode->SetSelfAdjust(selfAdjust);
+    pipeline->SetAreaChangeNodeMinDepth(host->GetDepth());
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdatePaintRect(frame + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
