@@ -4954,4 +4954,24 @@ HWTEST_F(OverlayManagerTestNg, PlaySheetTransition001, TestSize.Level1)
     overlayManager->PlaySheetTransition(sheetNode, true, true);
     EXPECT_TRUE(NearZero(overlayManager->sheetHeight_));
 }
+
+/**
+ * @tc.name: RebuildCustomBuilder001
+ * @tc.desc: Test OverlayManager::RebuildCustomBuilder
+ * @tc.type: FUNC
+ */
+ HWTEST_F(OverlayManagerTestNg, RebuildCustomBuilder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create overlayManager
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    RefPtr<UINode> customNode;
+    /**
+     * @tc.steps: step2. test RebuildCustomBuilder
+     */
+    auto result = overlayManager->RebuildCustomBuilder(customNode);
+    EXPECT_EQ(result, nullptr);
+}
 }
