@@ -18,6 +18,7 @@
 #ifdef USE_NEW_SKIA
 #include "include/core/SkPixmap.h"
 #include "include/core/SkData.h"
+#include "include/encode/SkPngEncoder.h"
 #include "src/base/SkBase64.h"
 #else
 #include "include/utils/SkBase64.h"
@@ -393,6 +394,9 @@ void LayoutInspector::BuildInfoForIDE(uint64_t id, const std::shared_ptr<Media::
     image = SkImages::RasterFromPixmap(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
     CHECK_NULL_VOID(image);
     auto data = image->refEncodedData();
+    if (!data) {
+        data = SkPngEncoder::Encode(nullptr, image.get(), {});
+    }
 #else
     image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
     CHECK_NULL_VOID(image);
@@ -521,6 +525,9 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     image = SkImages::RasterFromPixmap(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
     CHECK_NULL_VOID(image);
     auto data = image->refEncodedData();
+    if (!data) {
+        data = SkPngEncoder::Encode(nullptr, image.get(), {});
+    }
 #else
     image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(acePixelMap));
     CHECK_NULL_VOID(image);
