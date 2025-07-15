@@ -5908,7 +5908,8 @@ struct ArkUITextPickerModifier {
     void (*setTextPickerDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*setTextPickerDividerWithResObj)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
-        const ArkUI_Int32* units, ArkUI_Int32 length, const struct ArkUIPickerDividerResObjStruct* dividerResObjStr);
+        const ArkUI_Int32* units, ArkUI_Int32 length, const struct ArkUIPickerDividerResObjStruct* dividerResObjStr,
+        ArkUI_Bool isDefaultColor);
     void (*resetTextPickerDivider)(ArkUINodeHandle node);
     void (*setTextPickerGradientHeight)(ArkUINodeHandle node, ArkUI_Float32 dVal, ArkUI_Int32 dUnit);
     void (*setTextPickerGradientHeightWithResObj)(
