@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <ctime>
-
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -31,16 +29,7 @@ Ark_NativePointer RegisterTimePickerSelectedCallbackImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode && callback, nullptr);
 
-    std::time_t time = static_cast<std::time_t>(selected);
-    std::tm* loc = std::localtime(&time);
-    CHECK_NULL_RETURN(loc, nullptr);
-
-    const uint32_t hours = loc->tm_hour;
-    const uint32_t minutes = loc->tm_min;
-    const uint32_t seconds = loc->tm_sec;
-
-    PickerTime pickerTime(hours, minutes, seconds);
-    TimePickerModelStatic::SetSelectedTime(frameNode, pickerTime);
+    TimePickerModelStatic::SetSelectedTime(frameNode, selected);
 
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* event) {

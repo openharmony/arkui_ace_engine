@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <ctime>
-
 #include "arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/picker/datepicker_model_static.h"
@@ -31,15 +29,7 @@ Ark_NativePointer RegisterDatePickerSelectedCallbackImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode && callback, nullptr);
 
-    std::time_t time = static_cast<std::time_t>(selected);
-    std::tm* loc = std::localtime(&time);
-    CHECK_NULL_RETURN(loc, nullptr);
-
-    int year = loc->tm_year + 1900;
-    int month = loc->tm_mon + 1;
-    int day = loc->tm_mday;
-    DatePickerModelStatic::SetSelectedDate(
-        frameNode, PickerDate(static_cast<uint32_t>(year), static_cast<uint32_t>(month), static_cast<uint32_t>(day)));
+    DatePickerModelStatic::SetSelectedDate(frameNode, selected);
 
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* event) {

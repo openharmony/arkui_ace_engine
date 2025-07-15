@@ -28207,7 +28207,6 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILayeredDrawableDescriptorAccessor* (*getLayeredDrawableDescriptorAccessor)();
     const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* (*getPixelMapDrawableDescriptorAccessor)();
     const GENERATED_ArkUIAnimatedDrawableDescriptorAccessor* (*getAnimatedDrawableDescriptorAccessor)();
-	const GENERATED_ArkUIDatePickerSelectedOpsAccessor* (*getDatePickerSelectedOpsAccessor)();
     const GENERATED_ArkUIDrawingColorFilterAccessor* (*getDrawingColorFilterAccessor)();
     const GENERATED_ArkUIDrawingLatticeAccessor* (*getDrawingLatticeAccessor)();
     const GENERATED_ArkUIDrawingCanvasAccessor* (*getDrawingCanvasAccessor)();
@@ -28243,6 +28242,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIGridItemOpsAccessor* (*getGridItemOpsAccessor)();
     const GENERATED_ArkUIFilterAccessor* (*getFilterAccessor)();
     const GENERATED_ArkUIVisualEffectAccessor* (*getVisualEffectAccessor)();
+    const GENERATED_ArkUIDatePickerSelectedOpsAccessor* (*getDatePickerSelectedOpsAccessor)();
     const GENERATED_ArkUINavigationOpsAccessor* (*getNavigationOpsAccessor)();
     const GENERATED_ArkUICheckboxGroupOpsAccessor* (*getCheckboxGroupOpsAccessor)();
     const GENERATED_ArkUICheckboxOpsAccessor* (*getCheckboxOpsAccessor)();
