@@ -76,7 +76,7 @@ private:
     void SubWindowAttachToFrameNode(sptr<Rosen::Session>& session);
     void SetSubSessionVisible();
     bool IsMainSessionRecent();
-    void InserSurfaceNodeId(uint64_t nodeId);
+    void InsertSurfaceNodeId(uint64_t nodeId);
     void ClearSurfaceNodeId(uint64_t nodeId);
 
     bool destroyed_ = false;

@@ -101,7 +101,7 @@ void SystemWindowScene::OnAttachToFrameNode()
     session_->SetUINodeId(host->GetAccessibilityId());
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
-    InserSurfaceNodeId(surfaceNode->GetId());
+    InsertSurfaceNodeId(surfaceNode->GetId());
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
@@ -136,7 +136,7 @@ void SystemWindowScene::OnAttachToFrameNode()
     SetWindowScenePosition();
 }
 
-void SystemWindowScene::InserSurfaceNodeId(uint64_t nodeId)
+void SystemWindowScene::InsertSurfaceNodeId(uint64_t nodeId)
 {
     auto iter = surfaceNodeCountMap_.find(nodeId);
     if (iter == surfaceNodeCountMap_.end()) {

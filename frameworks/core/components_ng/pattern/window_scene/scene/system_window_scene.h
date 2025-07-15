@@ -90,7 +90,7 @@ private:
     void PostCheckContextTransparentTask();
     void PostFaultInjectTask();
     void SetWindowScenePosition();
-    void InserSurfaceNodeId(uint64_t nodeId);
+    void InsertSurfaceNodeId(uint64_t nodeId);
     void ClearSurfaceNodeId(uint64_t nodeId);
 
     int32_t instanceId_ = Container::CurrentId();

@@ -193,7 +193,7 @@ void WindowScene::OnAttachToFrameNode()
     if (!IsMainWindow()) {
         auto surfaceNode = session_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
-        InserSurfaceNodeId(surfaceNode->GetId());
+        InsertSurfaceNodeId(surfaceNode->GetId());
         auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
@@ -208,7 +208,7 @@ void WindowScene::OnAttachToFrameNode()
 
     auto surfaceNode = CreateLeashWindowNode();
     CHECK_NULL_VOID(surfaceNode);
-    InserSurfaceNodeId(surfaceNode->GetId());
+    InsertSurfaceNodeId(surfaceNode->GetId());
     session_->SetLeashWinSurfaceNode(surfaceNode);
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
@@ -220,7 +220,7 @@ void WindowScene::OnAttachToFrameNode()
     WindowPattern::OnAttachToFrameNode();
 }
 
-void WindowScene::InserSurfaceNodeId(uint64_t nodeId)
+void WindowScene::InsertSurfaceNodeId(uint64_t nodeId)
 {
     auto iter = surfaceNodeCountMap_.find(nodeId);
     if (iter == surfaceNodeCountMap_.end()) {
