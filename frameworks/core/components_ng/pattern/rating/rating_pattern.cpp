@@ -1149,4 +1149,29 @@ RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
     RatingConfiguration ratingConfiguration(starNum, isIndicator, ratingScore, stepSize, enabled);
     return (makeFunc_.value())(ratingConfiguration);
 }
+
+void RatingPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+    CHECK_NULL_VOID(ratingTheme);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
+    auto layoutProperty = host->GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    LoadForeground(layoutProperty, ratingTheme, iconTheme);
+    LoadSecondary(layoutProperty, ratingTheme, iconTheme);
+    LoadBackground(layoutProperty, ratingTheme, iconTheme);
+    if (IsNeedFocusStyle()) {
+        LoadFocusBackground(layoutProperty, ratingTheme, iconTheme);
+    }
+}
 } // namespace OHOS::Ace::NG

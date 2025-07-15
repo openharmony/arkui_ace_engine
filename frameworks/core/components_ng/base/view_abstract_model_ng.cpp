@@ -1440,7 +1440,6 @@ void ViewAbstractModelNG::CreateWithColorResourceObj(
         auto node = pattern->GetHost();
         ViewAbstractModelNG::UpdateColor(node, type, result);
     };
-    updateFunc(ColorResObj);
     pattern->AddResObj(key, ColorResObj, std::move(updateFunc));
 }
 
