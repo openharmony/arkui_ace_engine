@@ -3441,7 +3441,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
     ScrollResult result = HandleScroll(static_cast<float>(mainDelta),
         SCROLL_FROM_UPDATE, NestedState::GESTURE, velocity);
-    if (!result.reachEdge || (result.reachEdge && GetEdgeEffect() == EdgeEffect::SPRING
+    if (!result.reachEdge || (result.reachEdge && GetEdgeEffect() == EdgeEffect::SPRING && !NearZero(mainDelta, 0.0)
         && CheckContentWillScroll(mainDelta, mainDelta))) {
         FireScrollStateEvent(ScrollState::SCROLL);
     }
