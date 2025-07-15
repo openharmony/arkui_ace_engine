@@ -31,7 +31,6 @@ void DestroyPeerImpl(Ark_TextStyle_styled_string peer)
 }
 Ark_TextStyle_styled_string CtorImpl(const Opt_TextStyleInterface* value)
 {
-    auto peer = new TextStyle_styled_stringPeer();
     Font font;
 
     auto options = value ? Converter::OptConvert<Ark_TextStyleInterface>(*value) : std::nullopt;
@@ -63,6 +62,7 @@ Ark_TextStyle_styled_string CtorImpl(const Opt_TextStyleInterface* value)
         font.fontFamiliesNG = fontFamilies;
         font.fontStyle = Converter::OptConvert<Ace::FontStyle>(options->fontStyle).value_or(Ace::FontStyle::NORMAL);
     }
+    auto peer = new TextStyle_styled_stringPeer();
     peer->span = Referenced::MakeRefPtr<FontSpan>(font);
 
     return peer;

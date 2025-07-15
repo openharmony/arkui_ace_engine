@@ -235,7 +235,7 @@ void AssignArkValue(Ark_Date& dst, const PickerDate& src)
         date = start;
     }
     std::tm tm {};
-    tm.tm_year = date.GetYear() - STD_TM_START_YEAR; // tm_year is years since 1900
+    tm.tm_year = static_cast<int32_t>(date.GetYear()) - STD_TM_START_YEAR; // tm_year is years since 1900
     tm.tm_mon = date.GetMonth() - 1; // tm_mon from 0 to 11
     tm.tm_mday = date.GetDay();
     time_t time = std::mktime(&tm);
@@ -460,7 +460,7 @@ std::optional<float> ResourceConverter::ToFloat()
         if (id_ == -1 && params_.size() > 0) {
             optFloat = static_cast<float>(themeConstants_->GetDoubleByName(params_[0]));
         } else {
-            optFloat = static_cast<float>(themeConstants_->GetDouble(id_));
+            optFloat = static_cast<float>(themeConstants_->GetDouble(static_cast<uint32_t>(id_)));
         }
     }
     return optFloat;
@@ -507,7 +507,7 @@ std::optional<Color> ResourceConverter::ToColor()
             break;
 
         case ResourceType::COLOR:
-            result = themeConstants_->GetColor(id_);
+            result = themeConstants_->GetColor(static_cast<uint32_t>(id_));
             break;
 
         default:
@@ -2199,7 +2199,7 @@ std::vector<uint32_t> Convert(const Ark_Buffer& src)
     auto array = (src.data != nullptr) ? static_cast<uint32_t*>(src.data) : nullptr;
     auto size = src.length / sizeof(uint32_t);
     if (array && size > 0) {
-        for (int64_t idx = 0; idx < size; idx++) {
+        for (int64_t idx = 0; idx < static_cast<int64_t>(size); idx++) {
             dataArray.push_back(array[idx]);
         }
     }
