@@ -242,6 +242,40 @@ void SetParallelScoped(ani_boolean parallel)
     MultiThreadBuildManager::SetIsThreadSafeNodeScope(parallel);
 }
 
+static void SetCustomPropertyCallBack(
+    ani_env* env, ArkUINodeHandle node, std::function<void()>&& func,
+    std::function<std::string(const std::string&)>&& getFunc)
+{
+    auto id = Container::CurrentIdSafelyWithCheck();
+    ContainerScope scope(id);
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGF_ABORT("SetCustomPropertyCallBack doesn't run on UI thread");
+    }
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetCustomPropertyCallback(std::move(func), std::move(getFunc));
+}
+
+static std::string GetCustomProperty(ani_env* env, ArkUINodeHandle node, std::string& key)
+{
+    auto id = Container::CurrentIdSafelyWithCheck();
+    ContainerScope scope(id);
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGF_ABORT("GetCustomProperty doesn't run on UI thread");
+    }
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+
+    std::string capiCustomProperty;
+    if (frameNode->GetCapiCustomProperty(key, capiCustomProperty)) {
+        return capiCustomProperty;
+    } else {
+        return nullptr;
+    }
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -262,7 +296,9 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .onLayoutInnerLayout = OHOS::Ace::NG::OnLayoutInnerLayout,
         .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode,
         .setOverlayComponent = OHOS::Ace::NG::SetOverlayComponent,
-        .setParallelScoped = OHOS::Ace::NG::SetParallelScoped
+        .setParallelScoped = OHOS::Ace::NG::SetParallelScoped,
+        .setCustomPropertyCallBack = OHOS::Ace::NG::SetCustomPropertyCallBack,
+        .getCustomProperty = OHOS::Ace::NG::GetCustomProperty
     };
     return &impl;
 }

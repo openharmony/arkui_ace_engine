@@ -452,6 +452,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "Z:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetParallelScoped)
         },
+        ani_native_function {
+            "_Common_SetCustomPropertyCallBack",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomPropertyCallBack)
+        },
+        ani_native_function {
+            "_Common_getCustomProperty",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetCustomProperty)
+        },
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());

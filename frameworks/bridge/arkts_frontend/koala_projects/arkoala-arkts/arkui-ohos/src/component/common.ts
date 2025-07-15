@@ -62,7 +62,10 @@ import { rememberMutableState } from '@koalaui/runtime'
 import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl, hookOnDrop, hookDragEventStartDataLoading } from "../handwritten/ArkDragDrop"
 import { ArkUIAniModule } from "arkui.ani"
 import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType, DataSyncOptions } from "#external"
-import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl, hookCommonMethodPriorityGestureImpl, hookCommonMethodVisualEffectImpl, hookCommonMethodBackgroundFilterImpl, hookCommonMethodForegroundFilterImpl, hookCommonMethodCompositingFilterImpl, hookCommonMethodAdvancedBlendModeImpl } from "../handwritten/CommonHandWritten"
+import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl,
+    hookCommonMethodPriorityGestureImpl, hookCommonMethodVisualEffectImpl, hookCommonMethodBackgroundFilterImpl,
+    hookCommonMethodForegroundFilterImpl, hookCommonMethodCompositingFilterImpl,
+    hookCommonMethodAdvancedBlendModeImpl, hookCustomPropertyImpl } from "../handwritten/CommonHandWritten"
 import { CommonMethodModifier } from "../CommonMethodModifier"
 import { ICurve as ICurve_} from "#external"
 export type ICurve = ICurve_
@@ -1856,6 +1859,7 @@ export class GestureModifierInternal implements MaterializedBase,GestureModifier
         return obj
     }
 }
+export type CustomProperty = Object | undefined | Record<string, CustomProperty>;
 export class ArkCommonMethodPeer extends PeerNode {
     _attributeSet?: CommonMethodModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -5449,25 +5453,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_accessibilityFocusDrawLevel(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    customPropertyAttribute(name: string | undefined, value: Object | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let name_type : int32 = RuntimeType.UNDEFINED
-        name_type = runtimeType(name)
-        thisSerializer.writeInt8(name_type as int32)
-        if ((RuntimeType.UNDEFINED) != (name_type)) {
-            const name_value  = name!
-            thisSerializer.writeString(name_value)
-        }
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteObject(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_customProperty(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     expandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
         const thisSerializer : Serializer = Serializer.hold()
         let types_type : int32 = RuntimeType.UNDEFINED
@@ -8157,7 +8142,7 @@ export interface CommonMethod {
     onTouchIntercept(value: ((parameter: TouchEvent) => HitTestMode) | undefined): this {return this;}
     onSizeChange(value: SizeChangeCallback | undefined): this {return this;}
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {return this;}
-    customProperty(name: string | undefined, value: Object | undefined): this {return this;}
+    customProperty(name: string, value: CustomProperty): this {return this;}
     expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {return this;}
     background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {return this;}
     backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {return this;}
@@ -8833,7 +8818,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         return this
     }
-    public customProperty(name: string | undefined, value: Object | undefined): this {
+    public customProperty(name: string, value: CustomProperty): this {
         return this
     }
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
@@ -11023,14 +11008,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public customProperty(name: string | undefined, value: Object | undefined): this {
+    public customProperty(name: string, value: CustomProperty): this {
         if (this.checkPriority("customProperty")) {
-            const name_casted = name as (string | undefined)
-            const value_casted = value as (Object | undefined)
-            this.getPeer()?.customPropertyAttribute(name_casted, value_casted)
-            return this
+            hookCustomPropertyImpl(this, name, value);
         }
-        return this
+        return this;
     }
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
         if (this.checkPriority("expandSafeArea")) {
