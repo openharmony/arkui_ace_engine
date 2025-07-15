@@ -119,6 +119,9 @@ private:
     void SecondMeasureInGrowOrShrink();
     void PopOutOfDispayMagicNodesInPriorityMode(const std::list<MagicLayoutNode>& childList,
         FlexItemProperties& flexItemProperties);
+    void CalcMainExpand(
+        const ExpandEdges& mainExpand, ExpandEdges& sae, bool isHorizontal, bool isExpandConstraintNeeded);
+    bool CheckReCalcMainExpand(const FlexAlign& crossAlign);
 
     template<typename T>
     void PatternOperator(T pattern, FlexOperatorType operation, FlexMeasureResult& measureResult,
