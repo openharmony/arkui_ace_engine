@@ -21567,37 +21567,37 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Ark_Length* width)
     {
         if (!needGroupedLog(1))
-            return (Ark_BaseShape) 300;
+            return reinterpret_cast<Ark_BaseShape>(300);
         string out("width(");
         WriteToString(&out, width);
         out.append(") \n");
-        out.append("[return (Ark_BaseShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_BaseShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_BaseShape) 300;
+        return reinterpret_cast<Ark_BaseShape>(300);
     }
     Ark_BaseShape HeightImpl(Ark_BaseShape peer,
                              const Ark_Length* height)
     {
         if (!needGroupedLog(1))
-            return (Ark_BaseShape) 300;
+            return reinterpret_cast<Ark_BaseShape>(300);
         string out("height(");
         WriteToString(&out, height);
         out.append(") \n");
-        out.append("[return (Ark_BaseShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_BaseShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_BaseShape) 300;
+        return reinterpret_cast<Ark_BaseShape>(300);
     }
     Ark_BaseShape SizeImpl(Ark_BaseShape peer,
                            const Ark_SizeOptions* size)
     {
         if (!needGroupedLog(1))
-            return (Ark_BaseShape) 300;
+            return reinterpret_cast<Ark_BaseShape>(300);
         string out("size(");
         WriteToString(&out, size);
         out.append(") \n");
-        out.append("[return (Ark_BaseShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_BaseShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_BaseShape) 300;
+        return reinterpret_cast<Ark_BaseShape>(300);
     }
     } // BaseShapeAccessor
     namespace BounceSymbolEffectAccessor {
@@ -22313,7 +22313,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                 const Ark_Number* y1)
     {
         if (!needGroupedLog(1))
-            return (Ark_CanvasGradient) 300;
+            return reinterpret_cast<Ark_CanvasGradient>(300);
         string out("createLinearGradient(");
         WriteToString(&out, x0);
         out.append(", ");
@@ -22323,9 +22323,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, y1);
         out.append(") \n");
-        out.append("[return (Ark_CanvasGradient) 300] \n");
+        out.append("[return reinterpret_cast<Ark_CanvasGradient>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_CanvasGradient) 300;
+        return reinterpret_cast<Ark_CanvasGradient>(300);
     }
     Opt_CanvasPattern CreatePatternImpl(Ark_CanvasRenderer peer,
                                         Ark_ImageBitmap image,
@@ -22351,7 +22351,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                 const Ark_Number* r1)
     {
         if (!needGroupedLog(1))
-            return (Ark_CanvasGradient) 300;
+            return reinterpret_cast<Ark_CanvasGradient>(300);
         string out("createRadialGradient(");
         WriteToString(&out, x0);
         out.append(", ");
@@ -22365,9 +22365,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, r1);
         out.append(") \n");
-        out.append("[return (Ark_CanvasGradient) 300] \n");
+        out.append("[return reinterpret_cast<Ark_CanvasGradient>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_CanvasGradient) 300;
+        return reinterpret_cast<Ark_CanvasGradient>(300);
     }
     Ark_CanvasGradient CreateConicGradientImpl(Ark_CanvasRenderer peer,
                                                const Ark_Number* startAngle,
@@ -22375,7 +22375,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                const Ark_Number* y)
     {
         if (!needGroupedLog(1))
-            return (Ark_CanvasGradient) 300;
+            return reinterpret_cast<Ark_CanvasGradient>(300);
         string out("createConicGradient(");
         WriteToString(&out, startAngle);
         out.append(", ");
@@ -22383,36 +22383,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, y);
         out.append(") \n");
-        out.append("[return (Ark_CanvasGradient) 300] \n");
+        out.append("[return reinterpret_cast<Ark_CanvasGradient>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_CanvasGradient) 300;
+        return reinterpret_cast<Ark_CanvasGradient>(300);
     }
     Ark_ImageData CreateImageData0Impl(Ark_CanvasRenderer peer,
                                        const Ark_Number* sw,
                                        const Ark_Number* sh)
     {
         if (!needGroupedLog(1))
-            return (Ark_ImageData) 300;
+            return reinterpret_cast<Ark_ImageData>(300);
         string out("createImageData0(");
         WriteToString(&out, sw);
         out.append(", ");
         WriteToString(&out, sh);
         out.append(") \n");
-        out.append("[return (Ark_ImageData) 300] \n");
+        out.append("[return reinterpret_cast<Ark_ImageData>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_ImageData) 300;
+        return reinterpret_cast<Ark_ImageData>(300);
     }
     Ark_ImageData CreateImageData1Impl(Ark_CanvasRenderer peer,
                                        Ark_ImageData imagedata)
     {
         if (!needGroupedLog(1))
-            return (Ark_ImageData) 300;
+            return reinterpret_cast<Ark_ImageData>(300);
         string out("createImageData1(");
         WriteToString(&out, imagedata);
         out.append(") \n");
-        out.append("[return (Ark_ImageData) 300] \n");
+        out.append("[return reinterpret_cast<Ark_ImageData>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_ImageData) 300;
+        return reinterpret_cast<Ark_ImageData>(300);
     }
     Ark_ImageData GetImageDataImpl(Ark_CanvasRenderer peer,
                                    const Ark_Number* sx,
@@ -22421,7 +22421,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                    const Ark_Number* sh)
     {
         if (!needGroupedLog(1))
-            return (Ark_ImageData) 300;
+            return reinterpret_cast<Ark_ImageData>(300);
         string out("getImageData(");
         WriteToString(&out, sx);
         out.append(", ");
@@ -22431,9 +22431,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, sh);
         out.append(") \n");
-        out.append("[return (Ark_ImageData) 300] \n");
+        out.append("[return reinterpret_cast<Ark_ImageData>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_ImageData) 300;
+        return reinterpret_cast<Ark_ImageData>(300);
     }
     Ark_image_PixelMap GetPixelMapImpl(Ark_CanvasRenderer peer,
                                        const Ark_Number* sx,
@@ -22442,7 +22442,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                        const Ark_Number* sh)
     {
         if (!needGroupedLog(1))
-            return (Ark_image_PixelMap) 300;
+            return reinterpret_cast<Ark_image_PixelMap>(300);
         string out("getPixelMap(");
         WriteToString(&out, sx);
         out.append(", ");
@@ -22452,9 +22452,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, sh);
         out.append(") \n");
-        out.append("[return (Ark_image_PixelMap) 300] \n");
+        out.append("[return reinterpret_cast<Ark_image_PixelMap>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_image_PixelMap) 300;
+        return reinterpret_cast<Ark_image_PixelMap>(300);
     }
     void PutImageData0Impl(Ark_CanvasRenderer peer,
                            Ark_ImageData imagedata,
@@ -22646,12 +22646,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_Matrix2D GetTransformImpl(Ark_CanvasRenderer peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_Matrix2D) 300;
+            return reinterpret_cast<Ark_Matrix2D>(300);
         string out("getTransform(");
         out.append(") \n");
-        out.append("[return (Ark_Matrix2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_Matrix2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_Matrix2D) 300;
+        return reinterpret_cast<Ark_Matrix2D>(300);
     }
     void ResetTransformImpl(Ark_CanvasRenderer peer)
     {
@@ -23378,12 +23378,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_FrameNode GetCanvasImpl(Ark_CanvasRenderingContext2D peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_FrameNode) 300;
+            return reinterpret_cast<Ark_FrameNode>(300);
         string out("getCanvas(");
         out.append(") \n");
-        out.append("[return (Ark_FrameNode) 300] \n");
+        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_FrameNode) 300;
+        return reinterpret_cast<Ark_FrameNode>(300);
     }
     void SetCanvasImpl(Ark_CanvasRenderingContext2D peer,
                        Ark_FrameNode canvas)
@@ -23510,73 +23510,73 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Ark_Position* offset)
     {
         if (!needGroupedLog(1))
-            return (Ark_CircleShape) 300;
+            return reinterpret_cast<Ark_CircleShape>(300);
         string out("offset(");
         WriteToString(&out, offset);
         out.append(") \n");
-        out.append("[return (Ark_CircleShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_CircleShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_CircleShape) 300;
+        return reinterpret_cast<Ark_CircleShape>(300);
     }
     Ark_CircleShape FillImpl(Ark_CircleShape peer,
                              const Ark_ResourceColor* color)
     {
         if (!needGroupedLog(1))
-            return (Ark_CircleShape) 300;
+            return reinterpret_cast<Ark_CircleShape>(300);
         string out("fill(");
         WriteToString(&out, color);
         out.append(") \n");
-        out.append("[return (Ark_CircleShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_CircleShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_CircleShape) 300;
+        return reinterpret_cast<Ark_CircleShape>(300);
     }
     Ark_CircleShape PositionImpl(Ark_CircleShape peer,
                                  const Ark_Position* position)
     {
         if (!needGroupedLog(1))
-            return (Ark_CircleShape) 300;
+            return reinterpret_cast<Ark_CircleShape>(300);
         string out("position(");
         WriteToString(&out, position);
         out.append(") \n");
-        out.append("[return (Ark_CircleShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_CircleShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_CircleShape) 300;
+        return reinterpret_cast<Ark_CircleShape>(300);
     }
     Ark_CircleShape WidthImpl(Ark_CircleShape peer,
                               const Ark_Length* width)
     {
         if (!needGroupedLog(1))
-            return (Ark_CircleShape) 300;
+            return reinterpret_cast<Ark_CircleShape>(300);
         string out("width(");
         WriteToString(&out, width);
         out.append(") \n");
-        out.append("[return (Ark_CircleShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_CircleShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_CircleShape) 300;
+        return reinterpret_cast<Ark_CircleShape>(300);
     }
     Ark_CircleShape HeightImpl(Ark_CircleShape peer,
                                const Ark_Length* height)
     {
         if (!needGroupedLog(1))
-            return (Ark_CircleShape) 300;
+            return reinterpret_cast<Ark_CircleShape>(300);
         string out("height(");
         WriteToString(&out, height);
         out.append(") \n");
-        out.append("[return (Ark_CircleShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_CircleShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_CircleShape) 300;
+        return reinterpret_cast<Ark_CircleShape>(300);
     }
     Ark_CircleShape SizeImpl(Ark_CircleShape peer,
                              const Ark_SizeOptions* size)
     {
         if (!needGroupedLog(1))
-            return (Ark_CircleShape) 300;
+            return reinterpret_cast<Ark_CircleShape>(300);
         string out("size(");
         WriteToString(&out, size);
         out.append(") \n");
-        out.append("[return (Ark_CircleShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_CircleShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_CircleShape) 300;
+        return reinterpret_cast<Ark_CircleShape>(300);
     }
     } // CircleShapeAccessor
     namespace ClickEventAccessor {
@@ -23870,12 +23870,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_ColorContent GetORIGINImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_ColorContent) 300;
+            return reinterpret_cast<Ark_ColorContent>(300);
         string out("getORIGIN(");
         out.append(") \n");
-        out.append("[return (Ark_ColorContent) 300] \n");
+        out.append("[return reinterpret_cast<Ark_ColorContent>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_ColorContent) 300;
+        return reinterpret_cast<Ark_ColorContent>(300);
     }
     } // ColorContentAccessor
     namespace ColorFilterAccessor {
@@ -23941,13 +23941,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_ColorMetrics NumericImpl(const Ark_Number* value)
     {
         if (!needGroupedLog(1))
-            return (Ark_ColorMetrics) 300;
+            return reinterpret_cast<Ark_ColorMetrics>(300);
         string out("numeric(");
         WriteToString(&out, value);
         out.append(") \n");
-        out.append("[return (Ark_ColorMetrics) 300] \n");
+        out.append("[return reinterpret_cast<Ark_ColorMetrics>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_ColorMetrics) 300;
+        return reinterpret_cast<Ark_ColorMetrics>(300);
     }
     Ark_ColorMetrics RgbaImpl(const Ark_Number* red,
                               const Ark_Number* green,
@@ -23955,7 +23955,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                               const Ark_Number* alpha)
     {
         if (!needGroupedLog(1))
-            return (Ark_ColorMetrics) 300;
+            return reinterpret_cast<Ark_ColorMetrics>(300);
         string out("rgba(");
         WriteToString(&out, red);
         out.append(", ");
@@ -23965,32 +23965,32 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, alpha);
         out.append(") \n");
-        out.append("[return (Ark_ColorMetrics) 300] \n");
+        out.append("[return reinterpret_cast<Ark_ColorMetrics>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_ColorMetrics) 300;
+        return reinterpret_cast<Ark_ColorMetrics>(300);
     }
     Ark_ColorMetrics ResourceColorImpl(const Ark_ResourceColor* color)
     {
         if (!needGroupedLog(1))
-            return (Ark_ColorMetrics) 300;
+            return reinterpret_cast<Ark_ColorMetrics>(300);
         string out("resourceColor(");
         WriteToString(&out, color);
         out.append(") \n");
-        out.append("[return (Ark_ColorMetrics) 300] \n");
+        out.append("[return reinterpret_cast<Ark_ColorMetrics>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_ColorMetrics) 300;
+        return reinterpret_cast<Ark_ColorMetrics>(300);
     }
     Ark_ColorMetrics BlendColorImpl(Ark_ColorMetrics peer,
                                     Ark_ColorMetrics overlayColor)
     {
         if (!needGroupedLog(1))
-            return (Ark_ColorMetrics) 300;
+            return reinterpret_cast<Ark_ColorMetrics>(300);
         string out("blendColor(");
         WriteToString(&out, overlayColor);
         out.append(") \n");
-        out.append("[return (Ark_ColorMetrics) 300] \n");
+        out.append("[return reinterpret_cast<Ark_ColorMetrics>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_ColorMetrics) 300;
+        return reinterpret_cast<Ark_ColorMetrics>(300);
     }
     Ark_String ColorImpl(Ark_ColorMetrics peer)
     {
@@ -24077,26 +24077,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                const Ark_String* bundleName)
     {
         if (!needGroupedLog(1))
-            return (Ark_common_Context) 300;
+            return reinterpret_cast<Ark_common_Context>(300);
         string out("createBundleContext(");
         WriteToString(&out, bundleName);
         out.append(") \n");
-        out.append("[return (Ark_common_Context) 300] \n");
+        out.append("[return reinterpret_cast<Ark_common_Context>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_common_Context) 300;
+        return reinterpret_cast<Ark_common_Context>(300);
     }
     Ark_common_Context CreateModuleContext0Impl(Ark_VMContext vmContext,
                                                 Ark_common_Context peer,
                                                 const Ark_String* moduleName)
     {
         if (!needGroupedLog(1))
-            return (Ark_common_Context) 300;
+            return reinterpret_cast<Ark_common_Context>(300);
         string out("createModuleContext0(");
         WriteToString(&out, moduleName);
         out.append(") \n");
-        out.append("[return (Ark_common_Context) 300] \n");
+        out.append("[return reinterpret_cast<Ark_common_Context>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_common_Context) 300;
+        return reinterpret_cast<Ark_common_Context>(300);
     }
     Ark_common_Context CreateModuleContext1Impl(Ark_VMContext vmContext,
                                                 Ark_common_Context peer,
@@ -24104,15 +24104,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                 const Ark_String* moduleName)
     {
         if (!needGroupedLog(1))
-            return (Ark_common_Context) 300;
+            return reinterpret_cast<Ark_common_Context>(300);
         string out("createModuleContext1(");
         WriteToString(&out, bundleName);
         out.append(", ");
         WriteToString(&out, moduleName);
         out.append(") \n");
-        out.append("[return (Ark_common_Context) 300] \n");
+        out.append("[return reinterpret_cast<Ark_common_Context>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_common_Context) 300;
+        return reinterpret_cast<Ark_common_Context>(300);
     }
     void GetGroupDir0Impl(Ark_VMContext vmContext,
                           Ark_common_Context peer,
@@ -24357,37 +24357,37 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Ark_Position* offset)
     {
         if (!needGroupedLog(1))
-            return (Ark_CommonShape) 300;
+            return reinterpret_cast<Ark_CommonShape>(300);
         string out("offset(");
         WriteToString(&out, offset);
         out.append(") \n");
-        out.append("[return (Ark_CommonShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_CommonShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_CommonShape) 300;
+        return reinterpret_cast<Ark_CommonShape>(300);
     }
     Ark_CommonShape FillImpl(Ark_CommonShape peer,
                              const Ark_ResourceColor* color)
     {
         if (!needGroupedLog(1))
-            return (Ark_CommonShape) 300;
+            return reinterpret_cast<Ark_CommonShape>(300);
         string out("fill(");
         WriteToString(&out, color);
         out.append(") \n");
-        out.append("[return (Ark_CommonShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_CommonShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_CommonShape) 300;
+        return reinterpret_cast<Ark_CommonShape>(300);
     }
     Ark_CommonShape PositionImpl(Ark_CommonShape peer,
                                  const Ark_Position* position)
     {
         if (!needGroupedLog(1))
-            return (Ark_CommonShape) 300;
+            return reinterpret_cast<Ark_CommonShape>(300);
         string out("position(");
         WriteToString(&out, position);
         out.append(") \n");
-        out.append("[return (Ark_CommonShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_CommonShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_CommonShape) 300;
+        return reinterpret_cast<Ark_CommonShape>(300);
     }
     } // CommonShapeAccessor
     namespace ComponentContentAccessor {
@@ -25196,12 +25196,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_unifiedDataChannel_UnifiedData) 300;
+            return reinterpret_cast<Ark_unifiedDataChannel_UnifiedData>(300);
         string out("getData(");
         out.append(") \n");
-        out.append("[return (Ark_unifiedDataChannel_UnifiedData) 300] \n");
+        out.append("[return reinterpret_cast<Ark_unifiedDataChannel_UnifiedData>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_unifiedDataChannel_UnifiedData) 300;
+        return reinterpret_cast<Ark_unifiedDataChannel_UnifiedData>(300);
     }
     Ark_unifiedDataChannel_Summary GetSummaryImpl(Ark_DragEvent peer)
     {
@@ -25388,12 +25388,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_image_PixelMap GetPixelMapImpl(Ark_DrawableDescriptor peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_image_PixelMap) 300;
+            return reinterpret_cast<Ark_image_PixelMap>(300);
         string out("getPixelMap(");
         out.append(") \n");
-        out.append("[return (Ark_image_PixelMap) 300] \n");
+        out.append("[return reinterpret_cast<Ark_image_PixelMap>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_image_PixelMap) 300;
+        return reinterpret_cast<Ark_image_PixelMap>(300);
     }
     } // DrawableDescriptorAccessor
     namespace DrawContextAccessor {
@@ -25448,12 +25448,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_drawing_Canvas CanvasImpl(Ark_DrawContext peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Canvas) 300;
+            return reinterpret_cast<Ark_drawing_Canvas>(300);
         string out("canvas(");
         out.append(") \n");
-        out.append("[return (Ark_drawing_Canvas) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Canvas>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Canvas) 300;
+        return reinterpret_cast<Ark_drawing_Canvas>(300);
     }
     } // DrawContextAccessor
     namespace drawing_BrushAccessor {
@@ -25468,23 +25468,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_drawing_Brush Construct0Impl()
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Brush) 300;
+            return reinterpret_cast<Ark_drawing_Brush>(300);
         string out("construct0(");
         out.append(") \n");
-        out.append("[return (Ark_drawing_Brush) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Brush>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Brush) 300;
+        return reinterpret_cast<Ark_drawing_Brush>(300);
     }
     Ark_drawing_Brush Construct1Impl(Ark_drawing_Brush brush)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Brush) 300;
+            return reinterpret_cast<Ark_drawing_Brush>(300);
         string out("construct1(");
         WriteToString(&out, brush);
         out.append(") \n");
-        out.append("[return (Ark_drawing_Brush) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Brush>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Brush) 300;
+        return reinterpret_cast<Ark_drawing_Brush>(300);
     }
     Ark_NativePointer GetFinalizerImpl()
     {
@@ -25608,12 +25608,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_drawing_ColorFilter GetColorFilterImpl(Ark_drawing_Brush peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ColorFilter) 300;
+            return reinterpret_cast<Ark_drawing_ColorFilter>(300);
         string out("getColorFilter(");
         out.append(") \n");
-        out.append("[return (Ark_drawing_ColorFilter) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ColorFilter>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ColorFilter) 300;
+        return reinterpret_cast<Ark_drawing_ColorFilter>(300);
     }
     void SetImageFilterImpl(Ark_drawing_Brush peer,
                             const Opt_drawing_ImageFilter* filter)
@@ -26239,12 +26239,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_drawing_Matrix GetTotalMatrixImpl(Ark_drawing_Canvas peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Matrix) 300;
+            return reinterpret_cast<Ark_drawing_Matrix>(300);
         string out("getTotalMatrix(");
         out.append(") \n");
-        out.append("[return (Ark_drawing_Matrix) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Matrix>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Matrix) 300;
+        return reinterpret_cast<Ark_drawing_Matrix>(300);
     }
     void ScaleImpl(Ark_drawing_Canvas peer,
                    const Ark_Number* sx,
@@ -26434,84 +26434,84 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                             Ark_drawing_BlendMode mode)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ColorFilter) 300;
+            return reinterpret_cast<Ark_drawing_ColorFilter>(300);
         string out("createBlendModeColorFilter0(");
         WriteToString(&out, color);
         out.append(", ");
         WriteToString(&out, mode);
         out.append(") \n");
-        out.append("[return (Ark_drawing_ColorFilter) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ColorFilter>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ColorFilter) 300;
+        return reinterpret_cast<Ark_drawing_ColorFilter>(300);
     }
     Ark_drawing_ColorFilter CreateBlendModeColorFilter1Impl(const Ark_Number* color,
                                                             Ark_drawing_BlendMode mode)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ColorFilter) 300;
+            return reinterpret_cast<Ark_drawing_ColorFilter>(300);
         string out("createBlendModeColorFilter1(");
         WriteToString(&out, color);
         out.append(", ");
         WriteToString(&out, mode);
         out.append(") \n");
-        out.append("[return (Ark_drawing_ColorFilter) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ColorFilter>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ColorFilter) 300;
+        return reinterpret_cast<Ark_drawing_ColorFilter>(300);
     }
     Ark_drawing_ColorFilter CreateComposeColorFilterImpl(Ark_drawing_ColorFilter outer,
                                                          Ark_drawing_ColorFilter inner)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ColorFilter) 300;
+            return reinterpret_cast<Ark_drawing_ColorFilter>(300);
         string out("createComposeColorFilter(");
         WriteToString(&out, outer);
         out.append(", ");
         WriteToString(&out, inner);
         out.append(") \n");
-        out.append("[return (Ark_drawing_ColorFilter) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ColorFilter>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ColorFilter) 300;
+        return reinterpret_cast<Ark_drawing_ColorFilter>(300);
     }
     Ark_drawing_ColorFilter CreateLinearToSRGBGammaImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ColorFilter) 300;
+            return reinterpret_cast<Ark_drawing_ColorFilter>(300);
         string out("createLinearToSRGBGamma(");
         out.append(") \n");
-        out.append("[return (Ark_drawing_ColorFilter) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ColorFilter>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ColorFilter) 300;
+        return reinterpret_cast<Ark_drawing_ColorFilter>(300);
     }
     Ark_drawing_ColorFilter CreateSRGBGammaToLinearImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ColorFilter) 300;
+            return reinterpret_cast<Ark_drawing_ColorFilter>(300);
         string out("createSRGBGammaToLinear(");
         out.append(") \n");
-        out.append("[return (Ark_drawing_ColorFilter) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ColorFilter>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ColorFilter) 300;
+        return reinterpret_cast<Ark_drawing_ColorFilter>(300);
     }
     Ark_drawing_ColorFilter CreateLumaColorFilterImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ColorFilter) 300;
+            return reinterpret_cast<Ark_drawing_ColorFilter>(300);
         string out("createLumaColorFilter(");
         out.append(") \n");
-        out.append("[return (Ark_drawing_ColorFilter) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ColorFilter>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ColorFilter) 300;
+        return reinterpret_cast<Ark_drawing_ColorFilter>(300);
     }
     Ark_drawing_ColorFilter CreateMatrixColorFilterImpl(const Array_Number* matrix)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ColorFilter) 300;
+            return reinterpret_cast<Ark_drawing_ColorFilter>(300);
         string out("createMatrixColorFilter(");
         WriteToString(&out, matrix);
         out.append(") \n");
-        out.append("[return (Ark_drawing_ColorFilter) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ColorFilter>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ColorFilter) 300;
+        return reinterpret_cast<Ark_drawing_ColorFilter>(300);
     }
     } // drawing_ColorFilterAccessor
     namespace drawing_FontAccessor {
@@ -26606,12 +26606,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_drawing_Typeface GetTypefaceImpl(Ark_drawing_Font peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Typeface) 300;
+            return reinterpret_cast<Ark_drawing_Typeface>(300);
         string out("getTypeface(");
         out.append(") \n");
-        out.append("[return (Ark_drawing_Typeface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Typeface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Typeface) 300;
+        return reinterpret_cast<Ark_drawing_Typeface>(300);
     }
     Ark_drawing_FontMetrics GetMetricsImpl(Ark_drawing_Font peer)
     {
@@ -26863,13 +26863,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                             const Ark_Number* index)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Path) 300;
+            return reinterpret_cast<Ark_drawing_Path>(300);
         string out("createPathForGlyph(");
         WriteToString(&out, index);
         out.append(") \n");
-        out.append("[return (Ark_drawing_Path) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Path>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Path) 300;
+        return reinterpret_cast<Ark_drawing_Path>(300);
     }
     Array_common2D_Rect GetBoundsImpl(Ark_drawing_Font peer,
                                       const Array_Number* glyphs)
@@ -26890,7 +26890,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                      const Ark_Number* y)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Path) 300;
+            return reinterpret_cast<Ark_drawing_Path>(300);
         string out("getTextPath(");
         WriteToString(&out, text);
         out.append(", ");
@@ -26900,9 +26900,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, y);
         out.append(") \n");
-        out.append("[return (Ark_drawing_Path) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Path>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Path) 300;
+        return reinterpret_cast<Ark_drawing_Path>(300);
     }
     } // drawing_FontAccessor
     namespace drawing_ImageFilterAccessor {
@@ -26940,7 +26940,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                       const Opt_drawing_ImageFilter* imageFilter)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ImageFilter) 300;
+            return reinterpret_cast<Ark_drawing_ImageFilter>(300);
         string out("createBlurImageFilter(");
         WriteToString(&out, sigmaX);
         out.append(", ");
@@ -26950,23 +26950,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, imageFilter);
         out.append(") \n");
-        out.append("[return (Ark_drawing_ImageFilter) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ImageFilter>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ImageFilter) 300;
+        return reinterpret_cast<Ark_drawing_ImageFilter>(300);
     }
     Ark_drawing_ImageFilter CreateFromColorFilterImpl(Ark_drawing_ColorFilter colorFilter,
                                                       const Opt_drawing_ImageFilter* imageFilter)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ImageFilter) 300;
+            return reinterpret_cast<Ark_drawing_ImageFilter>(300);
         string out("createFromColorFilter(");
         WriteToString(&out, colorFilter);
         out.append(", ");
         WriteToString(&out, imageFilter);
         out.append(") \n");
-        out.append("[return (Ark_drawing_ImageFilter) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ImageFilter>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ImageFilter) 300;
+        return reinterpret_cast<Ark_drawing_ImageFilter>(300);
     }
     } // drawing_ImageFilterAccessor
     namespace drawing_LatticeAccessor {
@@ -27007,7 +27007,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                const Opt_Array_CustomObject* fColors)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Lattice) 300;
+            return reinterpret_cast<Ark_drawing_Lattice>(300);
         string out("createImageLattice(");
         WriteToString(&out, xDivs);
         out.append(", ");
@@ -27023,9 +27023,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, fColors);
         out.append(") \n");
-        out.append("[return (Ark_drawing_Lattice) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Lattice>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Lattice) 300;
+        return reinterpret_cast<Ark_drawing_Lattice>(300);
     }
     } // drawing_LatticeAccessor
     namespace drawing_MaskFilterAccessor {
@@ -27061,15 +27061,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                     const Ark_Number* sigma)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_MaskFilter) 300;
+            return reinterpret_cast<Ark_drawing_MaskFilter>(300);
         string out("createBlurMaskFilter(");
         WriteToString(&out, blurType);
         out.append(", ");
         WriteToString(&out, sigma);
         out.append(") \n");
-        out.append("[return (Ark_drawing_MaskFilter) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_MaskFilter>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_MaskFilter) 300;
+        return reinterpret_cast<Ark_drawing_MaskFilter>(300);
     }
     } // drawing_MaskFilterAccessor
     namespace drawing_MatrixAccessor {
@@ -27405,23 +27405,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_drawing_Path Construct0Impl()
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Path) 300;
+            return reinterpret_cast<Ark_drawing_Path>(300);
         string out("construct0(");
         out.append(") \n");
-        out.append("[return (Ark_drawing_Path) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Path>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Path) 300;
+        return reinterpret_cast<Ark_drawing_Path>(300);
     }
     Ark_drawing_Path Construct1Impl(Ark_drawing_Path path)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Path) 300;
+            return reinterpret_cast<Ark_drawing_Path>(300);
         string out("construct1(");
         WriteToString(&out, path);
         out.append(") \n");
-        out.append("[return (Ark_drawing_Path) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Path>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Path) 300;
+        return reinterpret_cast<Ark_drawing_Path>(300);
     }
     Ark_NativePointer GetFinalizerImpl()
     {
@@ -27818,15 +27818,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                 const Ark_Number* dy)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Path) 300;
+            return reinterpret_cast<Ark_drawing_Path>(300);
         string out("offset(");
         WriteToString(&out, dx);
         out.append(", ");
         WriteToString(&out, dy);
         out.append(") \n");
-        out.append("[return (Ark_drawing_Path) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Path>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Path) 300;
+        return reinterpret_cast<Ark_drawing_Path>(300);
     }
     void ResetImpl(Ark_drawing_Path peer)
     {
@@ -27946,26 +27946,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                     const Ark_Number* phase)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_PathEffect) 300;
+            return reinterpret_cast<Ark_drawing_PathEffect>(300);
         string out("createDashPathEffect(");
         WriteToString(&out, intervals);
         out.append(", ");
         WriteToString(&out, phase);
         out.append(") \n");
-        out.append("[return (Ark_drawing_PathEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_PathEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_PathEffect) 300;
+        return reinterpret_cast<Ark_drawing_PathEffect>(300);
     }
     Ark_drawing_PathEffect CreateCornerPathEffectImpl(const Ark_Number* radius)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_PathEffect) 300;
+            return reinterpret_cast<Ark_drawing_PathEffect>(300);
         string out("createCornerPathEffect(");
         WriteToString(&out, radius);
         out.append(") \n");
-        out.append("[return (Ark_drawing_PathEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_PathEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_PathEffect) 300;
+        return reinterpret_cast<Ark_drawing_PathEffect>(300);
     }
     } // drawing_PathEffectAccessor
     namespace drawing_PenAccessor {
@@ -27980,23 +27980,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_drawing_Pen Construct0Impl()
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Pen) 300;
+            return reinterpret_cast<Ark_drawing_Pen>(300);
         string out("construct0(");
         out.append(") \n");
-        out.append("[return (Ark_drawing_Pen) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Pen>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Pen) 300;
+        return reinterpret_cast<Ark_drawing_Pen>(300);
     }
     Ark_drawing_Pen Construct1Impl(Ark_drawing_Pen pen)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Pen) 300;
+            return reinterpret_cast<Ark_drawing_Pen>(300);
         string out("construct1(");
         WriteToString(&out, pen);
         out.append(") \n");
-        out.append("[return (Ark_drawing_Pen) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Pen>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Pen) 300;
+        return reinterpret_cast<Ark_drawing_Pen>(300);
     }
     Ark_NativePointer GetFinalizerImpl()
     {
@@ -28170,12 +28170,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_drawing_ColorFilter GetColorFilterImpl(Ark_drawing_Pen peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ColorFilter) 300;
+            return reinterpret_cast<Ark_drawing_ColorFilter>(300);
         string out("getColorFilter(");
         out.append(") \n");
-        out.append("[return (Ark_drawing_ColorFilter) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ColorFilter>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ColorFilter) 300;
+        return reinterpret_cast<Ark_drawing_ColorFilter>(300);
     }
     void SetImageFilterImpl(Ark_drawing_Pen peer,
                             const Opt_drawing_ImageFilter* filter)
@@ -28520,23 +28520,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_drawing_SamplingOptions Construct0Impl()
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_SamplingOptions) 300;
+            return reinterpret_cast<Ark_drawing_SamplingOptions>(300);
         string out("construct0(");
         out.append(") \n");
-        out.append("[return (Ark_drawing_SamplingOptions) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_SamplingOptions>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_SamplingOptions) 300;
+        return reinterpret_cast<Ark_drawing_SamplingOptions>(300);
     }
     Ark_drawing_SamplingOptions Construct1Impl(Ark_drawing_FilterMode filterMode)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_SamplingOptions) 300;
+            return reinterpret_cast<Ark_drawing_SamplingOptions>(300);
         string out("construct1(");
         WriteToString(&out, filterMode);
         out.append(") \n");
-        out.append("[return (Ark_drawing_SamplingOptions) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_SamplingOptions>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_SamplingOptions) 300;
+        return reinterpret_cast<Ark_drawing_SamplingOptions>(300);
     }
     Ark_NativePointer GetFinalizerImpl()
     {
@@ -28581,13 +28581,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_drawing_ShaderEffect CreateColorShaderImpl(const Ark_Number* color)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ShaderEffect) 300;
+            return reinterpret_cast<Ark_drawing_ShaderEffect>(300);
         string out("createColorShader(");
         WriteToString(&out, color);
         out.append(") \n");
-        out.append("[return (Ark_drawing_ShaderEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ShaderEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ShaderEffect) 300;
+        return reinterpret_cast<Ark_drawing_ShaderEffect>(300);
     }
     Ark_drawing_ShaderEffect CreateLinearGradientImpl(const Ark_common2D_Point* startPt,
                                                       const Ark_common2D_Point* endPt,
@@ -28597,7 +28597,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                       const Opt_drawing_Matrix* matrix)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ShaderEffect) 300;
+            return reinterpret_cast<Ark_drawing_ShaderEffect>(300);
         string out("createLinearGradient(");
         WriteToString(&out, startPt);
         out.append(", ");
@@ -28611,9 +28611,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, matrix);
         out.append(") \n");
-        out.append("[return (Ark_drawing_ShaderEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ShaderEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ShaderEffect) 300;
+        return reinterpret_cast<Ark_drawing_ShaderEffect>(300);
     }
     Ark_drawing_ShaderEffect CreateRadialGradientImpl(const Ark_common2D_Point* centerPt,
                                                       const Ark_Number* radius,
@@ -28623,7 +28623,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                       const Opt_drawing_Matrix* matrix)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ShaderEffect) 300;
+            return reinterpret_cast<Ark_drawing_ShaderEffect>(300);
         string out("createRadialGradient(");
         WriteToString(&out, centerPt);
         out.append(", ");
@@ -28637,9 +28637,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, matrix);
         out.append(") \n");
-        out.append("[return (Ark_drawing_ShaderEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ShaderEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ShaderEffect) 300;
+        return reinterpret_cast<Ark_drawing_ShaderEffect>(300);
     }
     Ark_drawing_ShaderEffect CreateSweepGradientImpl(const Ark_common2D_Point* centerPt,
                                                      const Array_Number* colors,
@@ -28650,7 +28650,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                      const Opt_drawing_Matrix* matrix)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ShaderEffect) 300;
+            return reinterpret_cast<Ark_drawing_ShaderEffect>(300);
         string out("createSweepGradient(");
         WriteToString(&out, centerPt);
         out.append(", ");
@@ -28666,9 +28666,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, matrix);
         out.append(") \n");
-        out.append("[return (Ark_drawing_ShaderEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ShaderEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ShaderEffect) 300;
+        return reinterpret_cast<Ark_drawing_ShaderEffect>(300);
     }
     Ark_drawing_ShaderEffect CreateConicalGradientImpl(const Ark_common2D_Point* startPt,
                                                        const Ark_Number* startRadius,
@@ -28680,7 +28680,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                        const Opt_drawing_Matrix* matrix)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ShaderEffect) 300;
+            return reinterpret_cast<Ark_drawing_ShaderEffect>(300);
         string out("createConicalGradient(");
         WriteToString(&out, startPt);
         out.append(", ");
@@ -28698,9 +28698,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, matrix);
         out.append(") \n");
-        out.append("[return (Ark_drawing_ShaderEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ShaderEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ShaderEffect) 300;
+        return reinterpret_cast<Ark_drawing_ShaderEffect>(300);
     }
     } // drawing_ShaderEffectAccessor
     namespace drawing_ShadowLayerAccessor {
@@ -28738,7 +28738,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                         const Ark_common2D_Color* color)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ShadowLayer) 300;
+            return reinterpret_cast<Ark_drawing_ShadowLayer>(300);
         string out("create0(");
         WriteToString(&out, blurRadius);
         out.append(", ");
@@ -28748,9 +28748,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, color);
         out.append(") \n");
-        out.append("[return (Ark_drawing_ShadowLayer) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ShadowLayer>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ShadowLayer) 300;
+        return reinterpret_cast<Ark_drawing_ShadowLayer>(300);
     }
     Ark_drawing_ShadowLayer Create1Impl(const Ark_Number* blurRadius,
                                         const Ark_Number* x,
@@ -28758,7 +28758,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                         const Ark_Number* color)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_ShadowLayer) 300;
+            return reinterpret_cast<Ark_drawing_ShadowLayer>(300);
         string out("create1(");
         WriteToString(&out, blurRadius);
         out.append(", ");
@@ -28768,9 +28768,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, color);
         out.append(") \n");
-        out.append("[return (Ark_drawing_ShadowLayer) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_ShadowLayer>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_ShadowLayer) 300;
+        return reinterpret_cast<Ark_drawing_ShadowLayer>(300);
     }
     } // drawing_ShadowLayerAccessor
     namespace drawing_TextBlobAccessor {
@@ -28807,7 +28807,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                             Ark_drawing_TextEncoding encoding)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_TextBlob) 300;
+            return reinterpret_cast<Ark_drawing_TextBlob>(300);
         string out("makeFromString(");
         WriteToString(&out, text);
         out.append(", ");
@@ -28815,9 +28815,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, encoding);
         out.append(") \n");
-        out.append("[return (Ark_drawing_TextBlob) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_TextBlob>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_TextBlob) 300;
+        return reinterpret_cast<Ark_drawing_TextBlob>(300);
     }
     Ark_drawing_TextBlob MakeFromPosTextImpl(const Ark_String* text,
                                              const Ark_Number* len,
@@ -28825,7 +28825,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                              Ark_drawing_Font font)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_TextBlob) 300;
+            return reinterpret_cast<Ark_drawing_TextBlob>(300);
         string out("makeFromPosText(");
         WriteToString(&out, text);
         out.append(", ");
@@ -28835,16 +28835,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, font);
         out.append(") \n");
-        out.append("[return (Ark_drawing_TextBlob) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_TextBlob>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_TextBlob) 300;
+        return reinterpret_cast<Ark_drawing_TextBlob>(300);
     }
     Ark_drawing_TextBlob MakeFromRunBufferImpl(const Array_drawing_TextBlobRunBuffer* pos,
                                                Ark_drawing_Font font,
                                                const Ark_common2D_Rect* bounds)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_TextBlob) 300;
+            return reinterpret_cast<Ark_drawing_TextBlob>(300);
         string out("makeFromRunBuffer(");
         WriteToString(&out, pos);
         out.append(", ");
@@ -28852,9 +28852,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, bounds);
         out.append(") \n");
-        out.append("[return (Ark_drawing_TextBlob) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_TextBlob>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_TextBlob) 300;
+        return reinterpret_cast<Ark_drawing_TextBlob>(300);
     }
     Ark_common2D_Rect BoundsImpl(Ark_drawing_TextBlob peer)
     {
@@ -28919,13 +28919,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_drawing_Typeface MakeFromFileImpl(const Ark_String* filePath)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Typeface) 300;
+            return reinterpret_cast<Ark_drawing_Typeface>(300);
         string out("makeFromFile(");
         WriteToString(&out, filePath);
         out.append(") \n");
-        out.append("[return (Ark_drawing_Typeface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Typeface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Typeface) 300;
+        return reinterpret_cast<Ark_drawing_Typeface>(300);
     }
     } // drawing_TypefaceAccessor
     namespace DrawingRenderingContextAccessor {
@@ -29081,73 +29081,73 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                 const Ark_Position* offset)
     {
         if (!needGroupedLog(1))
-            return (Ark_EllipseShape) 300;
+            return reinterpret_cast<Ark_EllipseShape>(300);
         string out("offset(");
         WriteToString(&out, offset);
         out.append(") \n");
-        out.append("[return (Ark_EllipseShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_EllipseShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_EllipseShape) 300;
+        return reinterpret_cast<Ark_EllipseShape>(300);
     }
     Ark_EllipseShape FillImpl(Ark_EllipseShape peer,
                               const Ark_ResourceColor* color)
     {
         if (!needGroupedLog(1))
-            return (Ark_EllipseShape) 300;
+            return reinterpret_cast<Ark_EllipseShape>(300);
         string out("fill(");
         WriteToString(&out, color);
         out.append(") \n");
-        out.append("[return (Ark_EllipseShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_EllipseShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_EllipseShape) 300;
+        return reinterpret_cast<Ark_EllipseShape>(300);
     }
     Ark_EllipseShape PositionImpl(Ark_EllipseShape peer,
                                   const Ark_Position* position)
     {
         if (!needGroupedLog(1))
-            return (Ark_EllipseShape) 300;
+            return reinterpret_cast<Ark_EllipseShape>(300);
         string out("position(");
         WriteToString(&out, position);
         out.append(") \n");
-        out.append("[return (Ark_EllipseShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_EllipseShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_EllipseShape) 300;
+        return reinterpret_cast<Ark_EllipseShape>(300);
     }
     Ark_EllipseShape WidthImpl(Ark_EllipseShape peer,
                                const Ark_Length* width)
     {
         if (!needGroupedLog(1))
-            return (Ark_EllipseShape) 300;
+            return reinterpret_cast<Ark_EllipseShape>(300);
         string out("width(");
         WriteToString(&out, width);
         out.append(") \n");
-        out.append("[return (Ark_EllipseShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_EllipseShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_EllipseShape) 300;
+        return reinterpret_cast<Ark_EllipseShape>(300);
     }
     Ark_EllipseShape HeightImpl(Ark_EllipseShape peer,
                                 const Ark_Length* height)
     {
         if (!needGroupedLog(1))
-            return (Ark_EllipseShape) 300;
+            return reinterpret_cast<Ark_EllipseShape>(300);
         string out("height(");
         WriteToString(&out, height);
         out.append(") \n");
-        out.append("[return (Ark_EllipseShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_EllipseShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_EllipseShape) 300;
+        return reinterpret_cast<Ark_EllipseShape>(300);
     }
     Ark_EllipseShape SizeImpl(Ark_EllipseShape peer,
                               const Ark_SizeOptions* size)
     {
         if (!needGroupedLog(1))
-            return (Ark_EllipseShape) 300;
+            return reinterpret_cast<Ark_EllipseShape>(300);
         string out("size(");
         WriteToString(&out, size);
         out.append(") \n");
-        out.append("[return (Ark_EllipseShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_EllipseShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_EllipseShape) 300;
+        return reinterpret_cast<Ark_EllipseShape>(300);
     }
     } // EllipseShapeAccessor
     namespace EventEmulatorAccessor {
@@ -29289,12 +29289,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_UIContext GetUIContextImpl(Ark_ExtendableComponent peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_UIContext) 300;
+            return reinterpret_cast<Ark_UIContext>(300);
         string out("getUIContext(");
         out.append(") \n");
-        out.append("[return (Ark_UIContext) 300] \n");
+        out.append("[return reinterpret_cast<Ark_UIContext>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_UIContext) 300;
+        return reinterpret_cast<Ark_UIContext>(300);
     }
     Ark_Int32 GetUniqueIdImpl(Ark_ExtendableComponent peer)
     {
@@ -29594,55 +29594,55 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Ark_Number* expandMode)
     {
         if (!needGroupedLog(1))
-            return (Ark_FrameNode) 300;
+            return reinterpret_cast<Ark_FrameNode>(300);
         string out("getChild(");
         WriteToString(&out, index);
         out.append(", ");
         WriteToString(&out, expandMode);
         out.append(") \n");
-        out.append("[return (Ark_FrameNode) 300] \n");
+        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_FrameNode) 300;
+        return reinterpret_cast<Ark_FrameNode>(300);
     }
     Ark_FrameNode GetFirstChildImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_FrameNode) 300;
+            return reinterpret_cast<Ark_FrameNode>(300);
         string out("getFirstChild(");
         out.append(") \n");
-        out.append("[return (Ark_FrameNode) 300] \n");
+        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_FrameNode) 300;
+        return reinterpret_cast<Ark_FrameNode>(300);
     }
     Ark_FrameNode GetNextSiblingImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_FrameNode) 300;
+            return reinterpret_cast<Ark_FrameNode>(300);
         string out("getNextSibling(");
         out.append(") \n");
-        out.append("[return (Ark_FrameNode) 300] \n");
+        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_FrameNode) 300;
+        return reinterpret_cast<Ark_FrameNode>(300);
     }
     Ark_FrameNode GetPreviousSiblingImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_FrameNode) 300;
+            return reinterpret_cast<Ark_FrameNode>(300);
         string out("getPreviousSibling(");
         out.append(") \n");
-        out.append("[return (Ark_FrameNode) 300] \n");
+        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_FrameNode) 300;
+        return reinterpret_cast<Ark_FrameNode>(300);
     }
     Ark_FrameNode GetParentImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_FrameNode) 300;
+            return reinterpret_cast<Ark_FrameNode>(300);
         string out("getParent(");
         out.append(") \n");
-        out.append("[return (Ark_FrameNode) 300] \n");
+        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_FrameNode) 300;
+        return reinterpret_cast<Ark_FrameNode>(300);
     }
     Ark_Int32 GetChildrenCountImpl(Ark_FrameNode peer)
     {
@@ -29839,13 +29839,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_FrameNode GetFrameNodeByKeyImpl(const Ark_String* name)
     {
         if (!needGroupedLog(1))
-            return (Ark_FrameNode) 300;
+            return reinterpret_cast<Ark_FrameNode>(300);
         string out("getFrameNodeByKey(");
         WriteToString(&out, name);
         out.append(") \n");
-        out.append("[return (Ark_FrameNode) 300] \n");
+        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_FrameNode) 300;
+        return reinterpret_cast<Ark_FrameNode>(300);
     }
     Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode peer,
                                     Ark_FrameNode node)
@@ -29895,35 +29895,35 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_FrameNode GetAttachedFrameNodeByIdImpl(const Ark_String* id)
     {
         if (!needGroupedLog(1))
-            return (Ark_FrameNode) 300;
+            return reinterpret_cast<Ark_FrameNode>(300);
         string out("getAttachedFrameNodeById(");
         WriteToString(&out, id);
         out.append(") \n");
-        out.append("[return (Ark_FrameNode) 300] \n");
+        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_FrameNode) 300;
+        return reinterpret_cast<Ark_FrameNode>(300);
     }
     Ark_FrameNode GetFrameNodeByIdImpl(const Ark_Number* id)
     {
         if (!needGroupedLog(1))
-            return (Ark_FrameNode) 300;
+            return reinterpret_cast<Ark_FrameNode>(300);
         string out("getFrameNodeById(");
         WriteToString(&out, id);
         out.append(") \n");
-        out.append("[return (Ark_FrameNode) 300] \n");
+        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_FrameNode) 300;
+        return reinterpret_cast<Ark_FrameNode>(300);
     }
     Ark_FrameNode GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
     {
         if (!needGroupedLog(1))
-            return (Ark_FrameNode) 300;
+            return reinterpret_cast<Ark_FrameNode>(300);
         string out("getFrameNodeByUniqueId(");
         WriteToString(&out, id);
         out.append(") \n");
-        out.append("[return (Ark_FrameNode) 300] \n");
+        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_FrameNode) 300;
+        return reinterpret_cast<Ark_FrameNode>(300);
     }
     void ReuseImpl(Ark_FrameNode peer)
     {
@@ -29955,13 +29955,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_FrameNode CreateTypedFrameNodeImpl(const Ark_String* type)
     {
         if (!needGroupedLog(1))
-            return (Ark_FrameNode) 300;
+            return reinterpret_cast<Ark_FrameNode>(300);
         string out("createTypedFrameNode(");
         WriteToString(&out, type);
         out.append(") \n");
-        out.append("[return (Ark_FrameNode) 300] \n");
+        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_FrameNode) 300;
+        return reinterpret_cast<Ark_FrameNode>(300);
     }
     } // FrameNodeAccessor
     namespace FrictionMotionAccessor {
@@ -30396,13 +30396,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                            const Callback_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_GestureGroupInterface) 300;
+            return reinterpret_cast<Ark_GestureGroupInterface>(300);
         string out("onCancel(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_GestureGroupInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_GestureGroupInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_GestureGroupInterface) 300;
+        return reinterpret_cast<Ark_GestureGroupInterface>(300);
     }
     } // GestureGroupInterfaceAccessor
     namespace GestureModifierAccessor {
@@ -30537,12 +30537,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_GestureRecognizer peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_EventTargetInfo) 300;
+            return reinterpret_cast<Ark_EventTargetInfo>(300);
         string out("getEventTargetInfo(");
         out.append(") \n");
-        out.append("[return (Ark_EventTargetInfo) 300] \n");
+        out.append("[return reinterpret_cast<Ark_EventTargetInfo>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_EventTargetInfo) 300;
+        return reinterpret_cast<Ark_EventTargetInfo>(300);
     }
     Ark_Boolean IsValidImpl(Ark_GestureRecognizer peer)
     {
@@ -31189,12 +31189,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_image_PixelMap GetValueImpl(Ark_ImageAttachment peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_image_PixelMap) 300;
+            return reinterpret_cast<Ark_image_PixelMap>(300);
         string out("getValue(");
         out.append(") \n");
-        out.append("[return (Ark_image_PixelMap) 300] \n");
+        out.append("[return reinterpret_cast<Ark_image_PixelMap>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_image_PixelMap) 300;
+        return reinterpret_cast<Ark_image_PixelMap>(300);
     }
     Opt_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
     {
@@ -32227,12 +32227,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_LayoutPolicy GetMatchParentImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_LayoutPolicy) 300;
+            return reinterpret_cast<Ark_LayoutPolicy>(300);
         string out("getMatchParent(");
         out.append(") \n");
-        out.append("[return (Ark_LayoutPolicy) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LayoutPolicy>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LayoutPolicy) 300;
+        return reinterpret_cast<Ark_LayoutPolicy>(300);
     }
     } // LayoutPolicyAccessor
     namespace LazyForEachOpsAccessor {
@@ -32291,68 +32291,68 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_LengthMetrics PxImpl(const Ark_Number* value)
     {
         if (!needGroupedLog(1))
-            return (Ark_LengthMetrics) 300;
+            return reinterpret_cast<Ark_LengthMetrics>(300);
         string out("px(");
         WriteToString(&out, value);
         out.append(") \n");
-        out.append("[return (Ark_LengthMetrics) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LengthMetrics>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LengthMetrics) 300;
+        return reinterpret_cast<Ark_LengthMetrics>(300);
     }
     Ark_LengthMetrics VpImpl(const Ark_Number* value)
     {
         if (!needGroupedLog(1))
-            return (Ark_LengthMetrics) 300;
+            return reinterpret_cast<Ark_LengthMetrics>(300);
         string out("vp(");
         WriteToString(&out, value);
         out.append(") \n");
-        out.append("[return (Ark_LengthMetrics) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LengthMetrics>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LengthMetrics) 300;
+        return reinterpret_cast<Ark_LengthMetrics>(300);
     }
     Ark_LengthMetrics FpImpl(const Ark_Number* value)
     {
         if (!needGroupedLog(1))
-            return (Ark_LengthMetrics) 300;
+            return reinterpret_cast<Ark_LengthMetrics>(300);
         string out("fp(");
         WriteToString(&out, value);
         out.append(") \n");
-        out.append("[return (Ark_LengthMetrics) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LengthMetrics>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LengthMetrics) 300;
+        return reinterpret_cast<Ark_LengthMetrics>(300);
     }
     Ark_LengthMetrics PercentImpl(const Ark_Number* value)
     {
         if (!needGroupedLog(1))
-            return (Ark_LengthMetrics) 300;
+            return reinterpret_cast<Ark_LengthMetrics>(300);
         string out("percent(");
         WriteToString(&out, value);
         out.append(") \n");
-        out.append("[return (Ark_LengthMetrics) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LengthMetrics>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LengthMetrics) 300;
+        return reinterpret_cast<Ark_LengthMetrics>(300);
     }
     Ark_LengthMetrics LpxImpl(const Ark_Number* value)
     {
         if (!needGroupedLog(1))
-            return (Ark_LengthMetrics) 300;
+            return reinterpret_cast<Ark_LengthMetrics>(300);
         string out("lpx(");
         WriteToString(&out, value);
         out.append(") \n");
-        out.append("[return (Ark_LengthMetrics) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LengthMetrics>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LengthMetrics) 300;
+        return reinterpret_cast<Ark_LengthMetrics>(300);
     }
     Ark_LengthMetrics ResourceImpl(const Ark_Resource* value)
     {
         if (!needGroupedLog(1))
-            return (Ark_LengthMetrics) 300;
+            return reinterpret_cast<Ark_LengthMetrics>(300);
         string out("resource(");
         WriteToString(&out, value);
         out.append(") \n");
-        out.append("[return (Ark_LengthMetrics) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LengthMetrics>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LengthMetrics) 300;
+        return reinterpret_cast<Ark_LengthMetrics>(300);
     }
     Ark_LengthUnit GetUnitImpl(Ark_LengthMetrics peer)
     {
@@ -32468,13 +32468,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_LevelOrder ClampImpl(const Ark_Number* order)
     {
         if (!needGroupedLog(1))
-            return (Ark_LevelOrder) 300;
+            return reinterpret_cast<Ark_LevelOrder>(300);
         string out("clamp(");
         WriteToString(&out, order);
         out.append(") \n");
-        out.append("[return (Ark_LevelOrder) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LevelOrder>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LevelOrder) 300;
+        return reinterpret_cast<Ark_LevelOrder>(300);
     }
     Ark_Number GetOrderImpl(Ark_LevelOrder peer)
     {
@@ -32863,49 +32863,49 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                const Callback_GestureEvent_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_LongPressGestureInterface) 300;
+            return reinterpret_cast<Ark_LongPressGestureInterface>(300);
         string out("onAction(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_LongPressGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LongPressGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LongPressGestureInterface) 300;
+        return reinterpret_cast<Ark_LongPressGestureInterface>(300);
     }
     Ark_LongPressGestureInterface OnActionEndImpl(Ark_LongPressGestureInterface peer,
                                                   const Callback_GestureEvent_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_LongPressGestureInterface) 300;
+            return reinterpret_cast<Ark_LongPressGestureInterface>(300);
         string out("onActionEnd(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_LongPressGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LongPressGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LongPressGestureInterface) 300;
+        return reinterpret_cast<Ark_LongPressGestureInterface>(300);
     }
     Ark_LongPressGestureInterface OnActionCancel0Impl(Ark_LongPressGestureInterface peer,
                                                       const Callback_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_LongPressGestureInterface) 300;
+            return reinterpret_cast<Ark_LongPressGestureInterface>(300);
         string out("onActionCancel0(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_LongPressGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LongPressGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LongPressGestureInterface) 300;
+        return reinterpret_cast<Ark_LongPressGestureInterface>(300);
     }
     Ark_LongPressGestureInterface OnActionCancel1Impl(Ark_LongPressGestureInterface peer,
                                                       const Callback_GestureEvent_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_LongPressGestureInterface) 300;
+            return reinterpret_cast<Ark_LongPressGestureInterface>(300);
         string out("onActionCancel1(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_LongPressGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LongPressGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LongPressGestureInterface) 300;
+        return reinterpret_cast<Ark_LongPressGestureInterface>(300);
     }
     } // LongPressGestureInterfaceAccessor
     namespace LongPressRecognizerAccessor {
@@ -32970,23 +32970,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_Matrix2D Construct0Impl()
     {
         if (!needGroupedLog(1))
-            return (Ark_Matrix2D) 300;
+            return reinterpret_cast<Ark_Matrix2D>(300);
         string out("construct0(");
         out.append(") \n");
-        out.append("[return (Ark_Matrix2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_Matrix2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_Matrix2D) 300;
+        return reinterpret_cast<Ark_Matrix2D>(300);
     }
     Ark_Matrix2D Construct1Impl(Ark_LengthMetricsUnit unit)
     {
         if (!needGroupedLog(1))
-            return (Ark_Matrix2D) 300;
+            return reinterpret_cast<Ark_Matrix2D>(300);
         string out("construct1(");
         WriteToString(&out, unit);
         out.append(") \n");
-        out.append("[return (Ark_Matrix2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_Matrix2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_Matrix2D) 300;
+        return reinterpret_cast<Ark_Matrix2D>(300);
     }
     Ark_NativePointer GetFinalizerImpl()
     {
@@ -33001,22 +33001,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_Matrix2D IdentityImpl(Ark_Matrix2D peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_Matrix2D) 300;
+            return reinterpret_cast<Ark_Matrix2D>(300);
         string out("identity(");
         out.append(") \n");
-        out.append("[return (Ark_Matrix2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_Matrix2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_Matrix2D) 300;
+        return reinterpret_cast<Ark_Matrix2D>(300);
     }
     Ark_Matrix2D InvertImpl(Ark_Matrix2D peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_Matrix2D) 300;
+            return reinterpret_cast<Ark_Matrix2D>(300);
         string out("invert(");
         out.append(") \n");
-        out.append("[return (Ark_Matrix2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_Matrix2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_Matrix2D) 300;
+        return reinterpret_cast<Ark_Matrix2D>(300);
     }
     Ark_Matrix2D RotateImpl(Ark_Matrix2D peer,
                             const Ark_Number* degree,
@@ -33024,7 +33024,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Opt_Number* ry)
     {
         if (!needGroupedLog(1))
-            return (Ark_Matrix2D) 300;
+            return reinterpret_cast<Ark_Matrix2D>(300);
         string out("rotate(");
         WriteToString(&out, degree);
         out.append(", ");
@@ -33032,39 +33032,39 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, ry);
         out.append(") \n");
-        out.append("[return (Ark_Matrix2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_Matrix2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_Matrix2D) 300;
+        return reinterpret_cast<Ark_Matrix2D>(300);
     }
     Ark_Matrix2D TranslateImpl(Ark_Matrix2D peer,
                                const Opt_Number* tx,
                                const Opt_Number* ty)
     {
         if (!needGroupedLog(1))
-            return (Ark_Matrix2D) 300;
+            return reinterpret_cast<Ark_Matrix2D>(300);
         string out("translate(");
         WriteToString(&out, tx);
         out.append(", ");
         WriteToString(&out, ty);
         out.append(") \n");
-        out.append("[return (Ark_Matrix2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_Matrix2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_Matrix2D) 300;
+        return reinterpret_cast<Ark_Matrix2D>(300);
     }
     Ark_Matrix2D ScaleImpl(Ark_Matrix2D peer,
                            const Opt_Number* sx,
                            const Opt_Number* sy)
     {
         if (!needGroupedLog(1))
-            return (Ark_Matrix2D) 300;
+            return reinterpret_cast<Ark_Matrix2D>(300);
         string out("scale(");
         WriteToString(&out, sx);
         out.append(", ");
         WriteToString(&out, sy);
         out.append(") \n");
-        out.append("[return (Ark_Matrix2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_Matrix2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_Matrix2D) 300;
+        return reinterpret_cast<Ark_Matrix2D>(300);
     }
     Opt_Number GetScaleXImpl(Ark_Matrix2D peer)
     {
@@ -33219,85 +33219,85 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_matrix4_Matrix4Transit CopyImpl(Ark_matrix4_Matrix4Transit peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_matrix4_Matrix4Transit) 300;
+            return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
         string out("copy(");
         out.append(") \n");
-        out.append("[return (Ark_matrix4_Matrix4Transit) 300] \n");
+        out.append("[return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_matrix4_Matrix4Transit) 300;
+        return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
     }
     Ark_matrix4_Matrix4Transit InvertImpl(Ark_matrix4_Matrix4Transit peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_matrix4_Matrix4Transit) 300;
+            return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
         string out("invert(");
         out.append(") \n");
-        out.append("[return (Ark_matrix4_Matrix4Transit) 300] \n");
+        out.append("[return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_matrix4_Matrix4Transit) 300;
+        return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
     }
     Ark_matrix4_Matrix4Transit CombineImpl(Ark_matrix4_Matrix4Transit peer,
                                            Ark_matrix4_Matrix4Transit options)
     {
         if (!needGroupedLog(1))
-            return (Ark_matrix4_Matrix4Transit) 300;
+            return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
         string out("combine(");
         WriteToString(&out, options);
         out.append(") \n");
-        out.append("[return (Ark_matrix4_Matrix4Transit) 300] \n");
+        out.append("[return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_matrix4_Matrix4Transit) 300;
+        return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
     }
     Ark_matrix4_Matrix4Transit TranslateImpl(Ark_matrix4_Matrix4Transit peer,
                                              const Ark_TranslateOptions* options)
     {
         if (!needGroupedLog(1))
-            return (Ark_matrix4_Matrix4Transit) 300;
+            return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
         string out("translate(");
         WriteToString(&out, options);
         out.append(") \n");
-        out.append("[return (Ark_matrix4_Matrix4Transit) 300] \n");
+        out.append("[return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_matrix4_Matrix4Transit) 300;
+        return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
     }
     Ark_matrix4_Matrix4Transit ScaleImpl(Ark_matrix4_Matrix4Transit peer,
                                          const Ark_ScaleOptions* options)
     {
         if (!needGroupedLog(1))
-            return (Ark_matrix4_Matrix4Transit) 300;
+            return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
         string out("scale(");
         WriteToString(&out, options);
         out.append(") \n");
-        out.append("[return (Ark_matrix4_Matrix4Transit) 300] \n");
+        out.append("[return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_matrix4_Matrix4Transit) 300;
+        return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
     }
     Ark_matrix4_Matrix4Transit SkewImpl(Ark_matrix4_Matrix4Transit peer,
                                         const Ark_Number* x,
                                         const Ark_Number* y)
     {
         if (!needGroupedLog(1))
-            return (Ark_matrix4_Matrix4Transit) 300;
+            return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
         string out("skew(");
         WriteToString(&out, x);
         out.append(", ");
         WriteToString(&out, y);
         out.append(") \n");
-        out.append("[return (Ark_matrix4_Matrix4Transit) 300] \n");
+        out.append("[return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_matrix4_Matrix4Transit) 300;
+        return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
     }
     Ark_matrix4_Matrix4Transit RotateImpl(Ark_matrix4_Matrix4Transit peer,
                                           const Ark_RotateOptions* options)
     {
         if (!needGroupedLog(1))
-            return (Ark_matrix4_Matrix4Transit) 300;
+            return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
         string out("rotate(");
         WriteToString(&out, options);
         out.append(") \n");
-        out.append("[return (Ark_matrix4_Matrix4Transit) 300] \n");
+        out.append("[return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_matrix4_Matrix4Transit) 300;
+        return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
     }
     Ark_matrix4_Matrix4TransformPoint TransformPointImpl(Ark_matrix4_Matrix4Transit peer,
                                                          const Ark_matrix4_Matrix4TransformPoint* options)
@@ -33315,13 +33315,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                  const Ark_matrix4_PolyToPolyOptions* options)
     {
         if (!needGroupedLog(1))
-            return (Ark_matrix4_Matrix4Transit) 300;
+            return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
         string out("setPolyToPoly(");
         WriteToString(&out, options);
         out.append(") \n");
-        out.append("[return (Ark_matrix4_Matrix4Transit) 300] \n");
+        out.append("[return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_matrix4_Matrix4Transit) 300;
+        return reinterpret_cast<Ark_matrix4_Matrix4Transit>(300);
     }
     } // matrix4_Matrix4TransitAccessor
     namespace MeasurableAccessor {
@@ -33900,12 +33900,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_NavPathInfo GetPathInfoImpl(Ark_NavDestinationContext peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_NavPathInfo) 300;
+            return reinterpret_cast<Ark_NavPathInfo>(300);
         string out("getPathInfo(");
         out.append(") \n");
-        out.append("[return (Ark_NavPathInfo) 300] \n");
+        out.append("[return reinterpret_cast<Ark_NavPathInfo>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_NavPathInfo) 300;
+        return reinterpret_cast<Ark_NavPathInfo>(300);
     }
     void SetPathInfoImpl(Ark_NavDestinationContext peer,
                          Ark_NavPathInfo pathInfo)
@@ -33920,12 +33920,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_NavPathStack GetPathStackImpl(Ark_NavDestinationContext peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_NavPathStack) 300;
+            return reinterpret_cast<Ark_NavPathStack>(300);
         string out("getPathStack(");
         out.append(") \n");
-        out.append("[return (Ark_NavPathStack) 300] \n");
+        out.append("[return reinterpret_cast<Ark_NavPathStack>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_NavPathStack) 300;
+        return reinterpret_cast<Ark_NavPathStack>(300);
     }
     void SetPathStackImpl(Ark_NavDestinationContext peer,
                           Ark_NavPathStack pathStack)
@@ -35009,24 +35009,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_ImageBitmap TransferToImageBitmapImpl(Ark_OffscreenCanvas peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_ImageBitmap) 300;
+            return reinterpret_cast<Ark_ImageBitmap>(300);
         string out("transferToImageBitmap(");
         out.append(") \n");
-        out.append("[return (Ark_ImageBitmap) 300] \n");
+        out.append("[return reinterpret_cast<Ark_ImageBitmap>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_ImageBitmap) 300;
+        return reinterpret_cast<Ark_ImageBitmap>(300);
     }
     Ark_OffscreenCanvasRenderingContext2D GetContext2dImpl(Ark_OffscreenCanvas peer,
                                                            const Opt_RenderingContextSettings* options)
     {
         if (!needGroupedLog(1))
-            return (Ark_OffscreenCanvasRenderingContext2D) 300;
+            return reinterpret_cast<Ark_OffscreenCanvasRenderingContext2D>(300);
         string out("getContext2d(");
         WriteToString(&out, options);
         out.append(") \n");
-        out.append("[return (Ark_OffscreenCanvasRenderingContext2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_OffscreenCanvasRenderingContext2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_OffscreenCanvasRenderingContext2D) 300;
+        return reinterpret_cast<Ark_OffscreenCanvasRenderingContext2D>(300);
     }
     Ark_Number GetHeightImpl(Ark_OffscreenCanvas peer)
     {
@@ -35126,12 +35126,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_ImageBitmap TransferToImageBitmapImpl(Ark_OffscreenCanvasRenderingContext2D peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_ImageBitmap) 300;
+            return reinterpret_cast<Ark_ImageBitmap>(300);
         string out("transferToImageBitmap(");
         out.append(") \n");
-        out.append("[return (Ark_ImageBitmap) 300] \n");
+        out.append("[return reinterpret_cast<Ark_ImageBitmap>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_ImageBitmap) 300;
+        return reinterpret_cast<Ark_ImageBitmap>(300);
     }
     } // OffscreenCanvasRenderingContext2DAccessor
     namespace PageLifeCycleAccessor {
@@ -35372,61 +35372,61 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                               const Callback_GestureEvent_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_PanGestureInterface) 300;
+            return reinterpret_cast<Ark_PanGestureInterface>(300);
         string out("onActionStart(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_PanGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PanGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PanGestureInterface) 300;
+        return reinterpret_cast<Ark_PanGestureInterface>(300);
     }
     Ark_PanGestureInterface OnActionUpdateImpl(Ark_PanGestureInterface peer,
                                                const Callback_GestureEvent_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_PanGestureInterface) 300;
+            return reinterpret_cast<Ark_PanGestureInterface>(300);
         string out("onActionUpdate(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_PanGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PanGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PanGestureInterface) 300;
+        return reinterpret_cast<Ark_PanGestureInterface>(300);
     }
     Ark_PanGestureInterface OnActionEndImpl(Ark_PanGestureInterface peer,
                                             const Callback_GestureEvent_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_PanGestureInterface) 300;
+            return reinterpret_cast<Ark_PanGestureInterface>(300);
         string out("onActionEnd(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_PanGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PanGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PanGestureInterface) 300;
+        return reinterpret_cast<Ark_PanGestureInterface>(300);
     }
     Ark_PanGestureInterface OnActionCancel0Impl(Ark_PanGestureInterface peer,
                                                 const Callback_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_PanGestureInterface) 300;
+            return reinterpret_cast<Ark_PanGestureInterface>(300);
         string out("onActionCancel0(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_PanGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PanGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PanGestureInterface) 300;
+        return reinterpret_cast<Ark_PanGestureInterface>(300);
     }
     Ark_PanGestureInterface OnActionCancel1Impl(Ark_PanGestureInterface peer,
                                                 const Callback_GestureEvent_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_PanGestureInterface) 300;
+            return reinterpret_cast<Ark_PanGestureInterface>(300);
         string out("onActionCancel1(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_PanGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PanGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PanGestureInterface) 300;
+        return reinterpret_cast<Ark_PanGestureInterface>(300);
     }
     } // PanGestureInterfaceAccessor
     namespace PanGestureOptionsAccessor {
@@ -35542,12 +35542,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_PanGestureOptions GetPanGestureOptionsImpl(Ark_PanRecognizer peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_PanGestureOptions) 300;
+            return reinterpret_cast<Ark_PanGestureOptions>(300);
         string out("getPanGestureOptions(");
         out.append(") \n");
-        out.append("[return (Ark_PanGestureOptions) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PanGestureOptions>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PanGestureOptions) 300;
+        return reinterpret_cast<Ark_PanGestureOptions>(300);
     }
     } // PanRecognizerAccessor
     namespace ParagraphStyleAccessor {
@@ -35663,73 +35663,73 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_Path2D Construct0Impl()
     {
         if (!needGroupedLog(1))
-            return (Ark_Path2D) 300;
+            return reinterpret_cast<Ark_Path2D>(300);
         string out("construct0(");
         out.append(") \n");
-        out.append("[return (Ark_Path2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_Path2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_Path2D) 300;
+        return reinterpret_cast<Ark_Path2D>(300);
     }
     Ark_Path2D Construct1Impl(Ark_LengthMetricsUnit unit)
     {
         if (!needGroupedLog(1))
-            return (Ark_Path2D) 300;
+            return reinterpret_cast<Ark_Path2D>(300);
         string out("construct1(");
         WriteToString(&out, unit);
         out.append(") \n");
-        out.append("[return (Ark_Path2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_Path2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_Path2D) 300;
+        return reinterpret_cast<Ark_Path2D>(300);
     }
     Ark_Path2D Construct2Impl(Ark_Path2D path)
     {
         if (!needGroupedLog(1))
-            return (Ark_Path2D) 300;
+            return reinterpret_cast<Ark_Path2D>(300);
         string out("construct2(");
         WriteToString(&out, path);
         out.append(") \n");
-        out.append("[return (Ark_Path2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_Path2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_Path2D) 300;
+        return reinterpret_cast<Ark_Path2D>(300);
     }
     Ark_Path2D Construct3Impl(Ark_Path2D path,
                               Ark_LengthMetricsUnit unit)
     {
         if (!needGroupedLog(1))
-            return (Ark_Path2D) 300;
+            return reinterpret_cast<Ark_Path2D>(300);
         string out("construct3(");
         WriteToString(&out, path);
         out.append(", ");
         WriteToString(&out, unit);
         out.append(") \n");
-        out.append("[return (Ark_Path2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_Path2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_Path2D) 300;
+        return reinterpret_cast<Ark_Path2D>(300);
     }
     Ark_Path2D Construct4Impl(const Ark_String* d)
     {
         if (!needGroupedLog(1))
-            return (Ark_Path2D) 300;
+            return reinterpret_cast<Ark_Path2D>(300);
         string out("construct4(");
         WriteToString(&out, d);
         out.append(") \n");
-        out.append("[return (Ark_Path2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_Path2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_Path2D) 300;
+        return reinterpret_cast<Ark_Path2D>(300);
     }
     Ark_Path2D Construct5Impl(const Ark_String* description,
                               Ark_LengthMetricsUnit unit)
     {
         if (!needGroupedLog(1))
-            return (Ark_Path2D) 300;
+            return reinterpret_cast<Ark_Path2D>(300);
         string out("construct5(");
         WriteToString(&out, description);
         out.append(", ");
         WriteToString(&out, unit);
         out.append(") \n");
-        out.append("[return (Ark_Path2D) 300] \n");
+        out.append("[return reinterpret_cast<Ark_Path2D>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_Path2D) 300;
+        return reinterpret_cast<Ark_Path2D>(300);
     }
     Ark_NativePointer GetFinalizerImpl()
     {
@@ -35789,49 +35789,49 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Ark_Position* offset)
     {
         if (!needGroupedLog(1))
-            return (Ark_PathShape) 300;
+            return reinterpret_cast<Ark_PathShape>(300);
         string out("offset(");
         WriteToString(&out, offset);
         out.append(") \n");
-        out.append("[return (Ark_PathShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PathShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PathShape) 300;
+        return reinterpret_cast<Ark_PathShape>(300);
     }
     Ark_PathShape FillImpl(Ark_PathShape peer,
                            const Ark_ResourceColor* color)
     {
         if (!needGroupedLog(1))
-            return (Ark_PathShape) 300;
+            return reinterpret_cast<Ark_PathShape>(300);
         string out("fill(");
         WriteToString(&out, color);
         out.append(") \n");
-        out.append("[return (Ark_PathShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PathShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PathShape) 300;
+        return reinterpret_cast<Ark_PathShape>(300);
     }
     Ark_PathShape PositionImpl(Ark_PathShape peer,
                                const Ark_Position* position)
     {
         if (!needGroupedLog(1))
-            return (Ark_PathShape) 300;
+            return reinterpret_cast<Ark_PathShape>(300);
         string out("position(");
         WriteToString(&out, position);
         out.append(") \n");
-        out.append("[return (Ark_PathShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PathShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PathShape) 300;
+        return reinterpret_cast<Ark_PathShape>(300);
     }
     Ark_PathShape CommandsImpl(Ark_PathShape peer,
                                const Ark_String* commands)
     {
         if (!needGroupedLog(1))
-            return (Ark_PathShape) 300;
+            return reinterpret_cast<Ark_PathShape>(300);
         string out("commands(");
         WriteToString(&out, commands);
         out.append(") \n");
-        out.append("[return (Ark_PathShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PathShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PathShape) 300;
+        return reinterpret_cast<Ark_PathShape>(300);
     }
     } // PathShapeAccessor
     namespace PatternLockControllerAccessor {
@@ -36074,61 +36074,61 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                 const Callback_GestureEvent_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_PinchGestureInterface) 300;
+            return reinterpret_cast<Ark_PinchGestureInterface>(300);
         string out("onActionStart(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_PinchGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PinchGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PinchGestureInterface) 300;
+        return reinterpret_cast<Ark_PinchGestureInterface>(300);
     }
     Ark_PinchGestureInterface OnActionUpdateImpl(Ark_PinchGestureInterface peer,
                                                  const Callback_GestureEvent_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_PinchGestureInterface) 300;
+            return reinterpret_cast<Ark_PinchGestureInterface>(300);
         string out("onActionUpdate(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_PinchGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PinchGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PinchGestureInterface) 300;
+        return reinterpret_cast<Ark_PinchGestureInterface>(300);
     }
     Ark_PinchGestureInterface OnActionEndImpl(Ark_PinchGestureInterface peer,
                                               const Callback_GestureEvent_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_PinchGestureInterface) 300;
+            return reinterpret_cast<Ark_PinchGestureInterface>(300);
         string out("onActionEnd(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_PinchGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PinchGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PinchGestureInterface) 300;
+        return reinterpret_cast<Ark_PinchGestureInterface>(300);
     }
     Ark_PinchGestureInterface OnActionCancel0Impl(Ark_PinchGestureInterface peer,
                                                   const Callback_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_PinchGestureInterface) 300;
+            return reinterpret_cast<Ark_PinchGestureInterface>(300);
         string out("onActionCancel0(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_PinchGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PinchGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PinchGestureInterface) 300;
+        return reinterpret_cast<Ark_PinchGestureInterface>(300);
     }
     Ark_PinchGestureInterface OnActionCancel1Impl(Ark_PinchGestureInterface peer,
                                                   const Callback_GestureEvent_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_PinchGestureInterface) 300;
+            return reinterpret_cast<Ark_PinchGestureInterface>(300);
         string out("onActionCancel1(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_PinchGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_PinchGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_PinchGestureInterface) 300;
+        return reinterpret_cast<Ark_PinchGestureInterface>(300);
     }
     } // PinchGestureInterfaceAccessor
     namespace PinchRecognizerAccessor {
@@ -36484,109 +36484,109 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Ark_Position* offset)
     {
         if (!needGroupedLog(1))
-            return (Ark_RectShape) 300;
+            return reinterpret_cast<Ark_RectShape>(300);
         string out("offset(");
         WriteToString(&out, offset);
         out.append(") \n");
-        out.append("[return (Ark_RectShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_RectShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_RectShape) 300;
+        return reinterpret_cast<Ark_RectShape>(300);
     }
     Ark_RectShape FillImpl(Ark_RectShape peer,
                            const Ark_ResourceColor* color)
     {
         if (!needGroupedLog(1))
-            return (Ark_RectShape) 300;
+            return reinterpret_cast<Ark_RectShape>(300);
         string out("fill(");
         WriteToString(&out, color);
         out.append(") \n");
-        out.append("[return (Ark_RectShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_RectShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_RectShape) 300;
+        return reinterpret_cast<Ark_RectShape>(300);
     }
     Ark_RectShape PositionImpl(Ark_RectShape peer,
                                const Ark_Position* position)
     {
         if (!needGroupedLog(1))
-            return (Ark_RectShape) 300;
+            return reinterpret_cast<Ark_RectShape>(300);
         string out("position(");
         WriteToString(&out, position);
         out.append(") \n");
-        out.append("[return (Ark_RectShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_RectShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_RectShape) 300;
+        return reinterpret_cast<Ark_RectShape>(300);
     }
     Ark_RectShape WidthImpl(Ark_RectShape peer,
                             const Ark_Length* width)
     {
         if (!needGroupedLog(1))
-            return (Ark_RectShape) 300;
+            return reinterpret_cast<Ark_RectShape>(300);
         string out("width(");
         WriteToString(&out, width);
         out.append(") \n");
-        out.append("[return (Ark_RectShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_RectShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_RectShape) 300;
+        return reinterpret_cast<Ark_RectShape>(300);
     }
     Ark_RectShape HeightImpl(Ark_RectShape peer,
                              const Ark_Length* height)
     {
         if (!needGroupedLog(1))
-            return (Ark_RectShape) 300;
+            return reinterpret_cast<Ark_RectShape>(300);
         string out("height(");
         WriteToString(&out, height);
         out.append(") \n");
-        out.append("[return (Ark_RectShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_RectShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_RectShape) 300;
+        return reinterpret_cast<Ark_RectShape>(300);
     }
     Ark_RectShape SizeImpl(Ark_RectShape peer,
                            const Ark_SizeOptions* size)
     {
         if (!needGroupedLog(1))
-            return (Ark_RectShape) 300;
+            return reinterpret_cast<Ark_RectShape>(300);
         string out("size(");
         WriteToString(&out, size);
         out.append(") \n");
-        out.append("[return (Ark_RectShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_RectShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_RectShape) 300;
+        return reinterpret_cast<Ark_RectShape>(300);
     }
     Ark_RectShape RadiusWidthImpl(Ark_RectShape peer,
                                   const Ark_Union_Number_String* rWidth)
     {
         if (!needGroupedLog(1))
-            return (Ark_RectShape) 300;
+            return reinterpret_cast<Ark_RectShape>(300);
         string out("radiusWidth(");
         WriteToString(&out, rWidth);
         out.append(") \n");
-        out.append("[return (Ark_RectShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_RectShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_RectShape) 300;
+        return reinterpret_cast<Ark_RectShape>(300);
     }
     Ark_RectShape RadiusHeightImpl(Ark_RectShape peer,
                                    const Ark_Union_Number_String* rHeight)
     {
         if (!needGroupedLog(1))
-            return (Ark_RectShape) 300;
+            return reinterpret_cast<Ark_RectShape>(300);
         string out("radiusHeight(");
         WriteToString(&out, rHeight);
         out.append(") \n");
-        out.append("[return (Ark_RectShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_RectShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_RectShape) 300;
+        return reinterpret_cast<Ark_RectShape>(300);
     }
     Ark_RectShape RadiusImpl(Ark_RectShape peer,
                              const Ark_Union_Number_String_Array_Union_Number_String* radius)
     {
         if (!needGroupedLog(1))
-            return (Ark_RectShape) 300;
+            return reinterpret_cast<Ark_RectShape>(300);
         string out("radius(");
         WriteToString(&out, radius);
         out.append(") \n");
-        out.append("[return (Ark_RectShape) 300] \n");
+        out.append("[return reinterpret_cast<Ark_RectShape>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_RectShape) 300;
+        return reinterpret_cast<Ark_RectShape>(300);
     }
     } // RectShapeAccessor
     namespace RenderingContextSettingsAccessor {
@@ -37201,12 +37201,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_ShapeMask GetShapeMaskImpl(Ark_RenderNode peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_ShapeMask) 300;
+            return reinterpret_cast<Ark_ShapeMask>(300);
         string out("getShapeMask(");
         out.append(") \n");
-        out.append("[return (Ark_ShapeMask) 300] \n");
+        out.append("[return reinterpret_cast<Ark_ShapeMask>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_ShapeMask) 300;
+        return reinterpret_cast<Ark_ShapeMask>(300);
     }
     void SetShapeMaskImpl(Ark_RenderNode peer,
                           Ark_ShapeMask shapeMask)
@@ -37221,12 +37221,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_ShapeClip GetShapeClipImpl(Ark_RenderNode peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_ShapeClip) 300;
+            return reinterpret_cast<Ark_ShapeClip>(300);
         string out("getShapeClip(");
         out.append(") \n");
-        out.append("[return (Ark_ShapeClip) 300] \n");
+        out.append("[return reinterpret_cast<Ark_ShapeClip>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_ShapeClip) 300;
+        return reinterpret_cast<Ark_ShapeClip>(300);
     }
     void SetShapeClipImpl(Ark_RenderNode peer,
                           Ark_ShapeClip shapeClip)
@@ -37730,12 +37730,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_LayoutManager GetLayoutManagerImpl(Ark_RichEditorBaseController peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_LayoutManager) 300;
+            return reinterpret_cast<Ark_LayoutManager>(300);
         string out("getLayoutManager(");
         out.append(") \n");
-        out.append("[return (Ark_LayoutManager) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LayoutManager>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LayoutManager) 300;
+        return reinterpret_cast<Ark_LayoutManager>(300);
     }
     Ark_PreviewText GetPreviewTextImpl(Ark_RichEditorBaseController peer)
     {
@@ -37927,13 +37927,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                         const Ark_RichEditorRange* value)
     {
         if (!needGroupedLog(1))
-            return (Ark_StyledString) 300;
+            return reinterpret_cast<Ark_StyledString>(300);
         string out("toStyledString(");
         WriteToString(&out, value);
         out.append(") \n");
-        out.append("[return (Ark_StyledString) 300] \n");
+        out.append("[return reinterpret_cast<Ark_StyledString>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_StyledString) 300;
+        return reinterpret_cast<Ark_StyledString>(300);
     }
     } // RichEditorControllerAccessor
     namespace RichEditorStyledStringControllerAccessor {
@@ -37978,12 +37978,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_MutableStyledString) 300;
+            return reinterpret_cast<Ark_MutableStyledString>(300);
         string out("getStyledString(");
         out.append(") \n");
-        out.append("[return (Ark_MutableStyledString) 300] \n");
+        out.append("[return reinterpret_cast<Ark_MutableStyledString>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_MutableStyledString) 300;
+        return reinterpret_cast<Ark_MutableStyledString>(300);
     }
     Ark_RichEditorRange GetSelectionImpl(Ark_RichEditorStyledStringController peer)
     {
@@ -38039,15 +38039,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                           const Opt_RotationGestureHandlerOptions* value)
     {
         if (!needGroupedLog(1))
-            return (Ark_RotationGesture) 300;
+            return reinterpret_cast<Ark_RotationGesture>(300);
         string out("$_instantiate(");
         WriteToString(&out, factory);
         out.append(", ");
         WriteToString(&out, value);
         out.append(") \n");
-        out.append("[return (Ark_RotationGesture) 300] \n");
+        out.append("[return reinterpret_cast<Ark_RotationGesture>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_RotationGesture) 300;
+        return reinterpret_cast<Ark_RotationGesture>(300);
     }
     void OnActionStartImpl(Ark_RotationGesture peer,
                            const Callback_GestureEvent_Void* event)
@@ -39177,15 +39177,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                          const Opt_Number* length)
     {
         if (!needGroupedLog(1))
-            return (Ark_StyledString) 300;
+            return reinterpret_cast<Ark_StyledString>(300);
         string out("subStyledString(");
         WriteToString(&out, start);
         out.append(", ");
         WriteToString(&out, length);
         out.append(") \n");
-        out.append("[return (Ark_StyledString) 300] \n");
+        out.append("[return reinterpret_cast<Ark_StyledString>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_StyledString) 300;
+        return reinterpret_cast<Ark_StyledString>(300);
     }
     void FromHtmlImpl(Ark_VMContext vmContext,
                       Ark_AsyncWorkerPtr asyncWorker,
@@ -39321,12 +39321,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_MutableStyledString GetStyledStringImpl(Ark_StyledStringController peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_MutableStyledString) 300;
+            return reinterpret_cast<Ark_MutableStyledString>(300);
         string out("getStyledString(");
         out.append(") \n");
-        out.append("[return (Ark_MutableStyledString) 300] \n");
+        out.append("[return reinterpret_cast<Ark_MutableStyledString>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_MutableStyledString) 300;
+        return reinterpret_cast<Ark_MutableStyledString>(300);
     }
     } // StyledStringControllerAccessor
     namespace SubmitEventAccessor {
@@ -39420,15 +39420,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                        const Opt_SwipeGestureHandlerOptions* value)
     {
         if (!needGroupedLog(1))
-            return (Ark_SwipeGesture) 300;
+            return reinterpret_cast<Ark_SwipeGesture>(300);
         string out("$_instantiate(");
         WriteToString(&out, factory);
         out.append(", ");
         WriteToString(&out, value);
         out.append(") \n");
-        out.append("[return (Ark_SwipeGesture) 300] \n");
+        out.append("[return reinterpret_cast<Ark_SwipeGesture>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_SwipeGesture) 300;
+        return reinterpret_cast<Ark_SwipeGesture>(300);
     }
     void OnActionImpl(Ark_SwipeGesture peer,
                       const Callback_GestureEvent_Void* event)
@@ -40169,13 +40169,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                          const Callback_GestureEvent_Void* event)
     {
         if (!needGroupedLog(1))
-            return (Ark_TapGestureInterface) 300;
+            return reinterpret_cast<Ark_TapGestureInterface>(300);
         string out("onAction(");
         WriteToString(&out, event);
         out.append(") \n");
-        out.append("[return (Ark_TapGestureInterface) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TapGestureInterface>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TapGestureInterface) 300;
+        return reinterpret_cast<Ark_TapGestureInterface>(300);
     }
     } // TapGestureInterfaceAccessor
     namespace TapRecognizerAccessor {
@@ -40250,12 +40250,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_text_FontCollection GetGlobalInstanceImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_text_FontCollection) 300;
+            return reinterpret_cast<Ark_text_FontCollection>(300);
         string out("getGlobalInstance(");
         out.append(") \n");
-        out.append("[return (Ark_text_FontCollection) 300] \n");
+        out.append("[return reinterpret_cast<Ark_text_FontCollection>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_text_FontCollection) 300;
+        return reinterpret_cast<Ark_text_FontCollection>(300);
     }
     void LoadFontSyncImpl(Ark_text_FontCollection peer,
                           const Ark_String* name,
@@ -40346,15 +40346,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                      const Ark_Number* count)
     {
         if (!needGroupedLog(1))
-            return (Ark_text_TextLine) 300;
+            return reinterpret_cast<Ark_text_TextLine>(300);
         string out("createLine(");
         WriteToString(&out, startIndex);
         out.append(", ");
         WriteToString(&out, count);
         out.append(") \n");
-        out.append("[return (Ark_text_TextLine) 300] \n");
+        out.append("[return reinterpret_cast<Ark_text_TextLine>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_text_TextLine) 300;
+        return reinterpret_cast<Ark_text_TextLine>(300);
     }
     } // text_LineTypesetAccessor
     namespace text_ParagraphAccessor {
@@ -40747,22 +40747,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_text_Paragraph BuildImpl(Ark_text_ParagraphBuilder peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_text_Paragraph) 300;
+            return reinterpret_cast<Ark_text_Paragraph>(300);
         string out("build(");
         out.append(") \n");
-        out.append("[return (Ark_text_Paragraph) 300] \n");
+        out.append("[return reinterpret_cast<Ark_text_Paragraph>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_text_Paragraph) 300;
+        return reinterpret_cast<Ark_text_Paragraph>(300);
     }
     Ark_text_LineTypeset BuildLineTypesetImpl(Ark_text_ParagraphBuilder peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_text_LineTypeset) 300;
+            return reinterpret_cast<Ark_text_LineTypeset>(300);
         string out("buildLineTypeset(");
         out.append(") \n");
-        out.append("[return (Ark_text_LineTypeset) 300] \n");
+        out.append("[return reinterpret_cast<Ark_text_LineTypeset>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_text_LineTypeset) 300;
+        return reinterpret_cast<Ark_text_LineTypeset>(300);
     }
     void AddSymbolImpl(Ark_text_ParagraphBuilder peer,
                        const Ark_Number* symbolId)
@@ -40871,12 +40871,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_drawing_Font GetFontImpl(Ark_text_Run peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Font) 300;
+            return reinterpret_cast<Ark_drawing_Font>(300);
         string out("getFont(");
         out.append(") \n");
-        out.append("[return (Ark_drawing_Font) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Font>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Font) 300;
+        return reinterpret_cast<Ark_drawing_Font>(300);
     }
     void PaintImpl(Ark_text_Run peer,
                    Ark_drawing_Canvas canvas,
@@ -41018,7 +41018,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                               const Ark_String* ellipsis)
     {
         if (!needGroupedLog(1))
-            return (Ark_text_TextLine) 300;
+            return reinterpret_cast<Ark_text_TextLine>(300);
         string out("createTruncatedLine(");
         WriteToString(&out, width);
         out.append(", ");
@@ -41026,9 +41026,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, ellipsis);
         out.append(") \n");
-        out.append("[return (Ark_text_TextLine) 300] \n");
+        out.append("[return reinterpret_cast<Ark_text_TextLine>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_text_TextLine) 300;
+        return reinterpret_cast<Ark_text_TextLine>(300);
     }
     Ark_text_TypographicBounds GetTypographicBoundsImpl(Ark_text_TextLine peer)
     {
@@ -41230,12 +41230,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_LayoutManager GetLayoutManagerImpl(Ark_TextBaseController peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_LayoutManager) 300;
+            return reinterpret_cast<Ark_LayoutManager>(300);
         string out("getLayoutManager(");
         out.append(") \n");
-        out.append("[return (Ark_LayoutManager) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LayoutManager>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LayoutManager) 300;
+        return reinterpret_cast<Ark_LayoutManager>(300);
     }
     } // TextBaseControllerAccessor
     namespace TextClockControllerAccessor {
@@ -41449,12 +41449,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_LayoutManager GetLayoutManagerImpl(Ark_TextController peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_LayoutManager) 300;
+            return reinterpret_cast<Ark_LayoutManager>(300);
         string out("getLayoutManager(");
         out.append(") \n");
-        out.append("[return (Ark_LayoutManager) 300] \n");
+        out.append("[return reinterpret_cast<Ark_LayoutManager>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_LayoutManager) 300;
+        return reinterpret_cast<Ark_LayoutManager>(300);
     }
     } // TextControllerAccessor
     namespace TextEditControllerExAccessor {
@@ -41832,13 +41832,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_TextMenuItemId OfImpl(const Ark_ResourceStr* id)
     {
         if (!needGroupedLog(1))
-            return (Ark_TextMenuItemId) 300;
+            return reinterpret_cast<Ark_TextMenuItemId>(300);
         string out("of(");
         WriteToString(&out, id);
         out.append(") \n");
-        out.append("[return (Ark_TextMenuItemId) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TextMenuItemId>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TextMenuItemId) 300;
+        return reinterpret_cast<Ark_TextMenuItemId>(300);
     }
     Ark_Boolean EqualsImpl(Ark_TextMenuItemId peer,
                            Ark_TextMenuItemId id)
@@ -41855,102 +41855,102 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_TextMenuItemId GetCUTImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_TextMenuItemId) 300;
+            return reinterpret_cast<Ark_TextMenuItemId>(300);
         string out("getCUT(");
         out.append(") \n");
-        out.append("[return (Ark_TextMenuItemId) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TextMenuItemId>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TextMenuItemId) 300;
+        return reinterpret_cast<Ark_TextMenuItemId>(300);
     }
     Ark_TextMenuItemId GetCOPYImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_TextMenuItemId) 300;
+            return reinterpret_cast<Ark_TextMenuItemId>(300);
         string out("getCOPY(");
         out.append(") \n");
-        out.append("[return (Ark_TextMenuItemId) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TextMenuItemId>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TextMenuItemId) 300;
+        return reinterpret_cast<Ark_TextMenuItemId>(300);
     }
     Ark_TextMenuItemId GetPASTEImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_TextMenuItemId) 300;
+            return reinterpret_cast<Ark_TextMenuItemId>(300);
         string out("getPASTE(");
         out.append(") \n");
-        out.append("[return (Ark_TextMenuItemId) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TextMenuItemId>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TextMenuItemId) 300;
+        return reinterpret_cast<Ark_TextMenuItemId>(300);
     }
     Ark_TextMenuItemId GetSELECT_ALLImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_TextMenuItemId) 300;
+            return reinterpret_cast<Ark_TextMenuItemId>(300);
         string out("getSELECT_ALL(");
         out.append(") \n");
-        out.append("[return (Ark_TextMenuItemId) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TextMenuItemId>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TextMenuItemId) 300;
+        return reinterpret_cast<Ark_TextMenuItemId>(300);
     }
     Ark_TextMenuItemId GetCOLLABORATION_SERVICEImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_TextMenuItemId) 300;
+            return reinterpret_cast<Ark_TextMenuItemId>(300);
         string out("getCOLLABORATION_SERVICE(");
         out.append(") \n");
-        out.append("[return (Ark_TextMenuItemId) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TextMenuItemId>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TextMenuItemId) 300;
+        return reinterpret_cast<Ark_TextMenuItemId>(300);
     }
     Ark_TextMenuItemId GetCAMERA_INPUTImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_TextMenuItemId) 300;
+            return reinterpret_cast<Ark_TextMenuItemId>(300);
         string out("getCAMERA_INPUT(");
         out.append(") \n");
-        out.append("[return (Ark_TextMenuItemId) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TextMenuItemId>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TextMenuItemId) 300;
+        return reinterpret_cast<Ark_TextMenuItemId>(300);
     }
     Ark_TextMenuItemId GetAI_WRITERImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_TextMenuItemId) 300;
+            return reinterpret_cast<Ark_TextMenuItemId>(300);
         string out("getAI_WRITER(");
         out.append(") \n");
-        out.append("[return (Ark_TextMenuItemId) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TextMenuItemId>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TextMenuItemId) 300;
+        return reinterpret_cast<Ark_TextMenuItemId>(300);
     }
     Ark_TextMenuItemId GetTRANSLATEImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_TextMenuItemId) 300;
+            return reinterpret_cast<Ark_TextMenuItemId>(300);
         string out("getTRANSLATE(");
         out.append(") \n");
-        out.append("[return (Ark_TextMenuItemId) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TextMenuItemId>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TextMenuItemId) 300;
+        return reinterpret_cast<Ark_TextMenuItemId>(300);
     }
     Ark_TextMenuItemId GetSEARCHImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_TextMenuItemId) 300;
+            return reinterpret_cast<Ark_TextMenuItemId>(300);
         string out("getSEARCH(");
         out.append(") \n");
-        out.append("[return (Ark_TextMenuItemId) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TextMenuItemId>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TextMenuItemId) 300;
+        return reinterpret_cast<Ark_TextMenuItemId>(300);
     }
     Ark_TextMenuItemId GetSHAREImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_TextMenuItemId) 300;
+            return reinterpret_cast<Ark_TextMenuItemId>(300);
         string out("getSHARE(");
         out.append(") \n");
-        out.append("[return (Ark_TextMenuItemId) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TextMenuItemId>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TextMenuItemId) 300;
+        return reinterpret_cast<Ark_TextMenuItemId>(300);
     }
     } // TextMenuItemIdAccessor
     namespace TextPickerDialogAccessor {
@@ -42380,79 +42380,79 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_TransitionEffect Construct0Impl(const Ark_String* type)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("construct0(");
         WriteToString(&out, type);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect Construct1Impl(const Ark_Number* effect)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("construct1(");
         WriteToString(&out, effect);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect Construct2Impl(Ark_TransitionEdge effect)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("construct2(");
         WriteToString(&out, effect);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect Construct3Impl(const Ark_TranslateOptions* effect)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("construct3(");
         WriteToString(&out, effect);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect Construct4Impl(const Ark_RotateOptions* effect)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("construct4(");
         WriteToString(&out, effect);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect Construct5Impl(const Ark_ScaleOptions* effect)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("construct5(");
         WriteToString(&out, effect);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect Construct6Impl(const Ark_AsymmetricTransitionOption* effect)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("construct6(");
         WriteToString(&out, effect);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_NativePointer GetFinalizerImpl()
     {
@@ -42467,135 +42467,135 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_TransitionEffect TranslateImpl(const Ark_TranslateOptions* options)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("translate(");
         WriteToString(&out, options);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect RotateImpl(const Ark_RotateOptions* options)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("rotate(");
         WriteToString(&out, options);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect ScaleImpl(const Ark_ScaleOptions* options)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("scale(");
         WriteToString(&out, options);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect OpacityImpl(const Ark_Number* alpha)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("opacity(");
         WriteToString(&out, alpha);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect MoveImpl(Ark_TransitionEdge edge)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("move(");
         WriteToString(&out, edge);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect AsymmetricImpl(Ark_TransitionEffect appear,
                                         Ark_TransitionEffect disappear)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("asymmetric(");
         WriteToString(&out, appear);
         out.append(", ");
         WriteToString(&out, disappear);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect AnimationImpl(Ark_TransitionEffect peer,
                                        const Ark_AnimateParam* value)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("animation(");
         WriteToString(&out, value);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect CombineImpl(Ark_TransitionEffect peer,
                                      Ark_TransitionEffect transitionEffect)
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("combine(");
         WriteToString(&out, transitionEffect);
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect GetIDENTITYImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("getIDENTITY(");
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect GetOPACITYImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("getOPACITY(");
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect GetSLIDEImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("getSLIDE(");
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     Ark_TransitionEffect GetSLIDE_SWITCHImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_TransitionEffect) 300;
+            return reinterpret_cast<Ark_TransitionEffect>(300);
         string out("getSLIDE_SWITCH(");
         out.append(") \n");
-        out.append("[return (Ark_TransitionEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_TransitionEffect) 300;
+        return reinterpret_cast<Ark_TransitionEffect>(300);
     }
     } // TransitionEffectAccessor
     namespace UICommonEventAccessor {
@@ -42773,12 +42773,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_drawing_Font GetFontImpl(Ark_UIContext peer)
     {
         if (!needGroupedLog(1))
-            return (Ark_drawing_Font) 300;
+            return reinterpret_cast<Ark_drawing_Font>(300);
         string out("getFont(");
         out.append(") \n");
-        out.append("[return (Ark_drawing_Font) 300] \n");
+        out.append("[return reinterpret_cast<Ark_drawing_Font>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_drawing_Font) 300;
+        return reinterpret_cast<Ark_drawing_Font>(300);
     }
     Ark_String GetFilteredInspectorTreeImpl(Ark_VMContext vmContext,
                                             Ark_UIContext peer,
@@ -43151,13 +43151,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                          const Ark_uiEffect_BrightnessBlender* blender)
     {
         if (!needGroupedLog(1))
-            return (Ark_uiEffect_VisualEffect) 300;
+            return reinterpret_cast<Ark_uiEffect_VisualEffect>(300);
         string out("backgroundColorBlender(");
         WriteToString(&out, blender);
         out.append(") \n");
-        out.append("[return (Ark_uiEffect_VisualEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_uiEffect_VisualEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_uiEffect_VisualEffect) 300;
+        return reinterpret_cast<Ark_uiEffect_VisualEffect>(300);
     }
     } // uiEffect_VisualEffectAccessor
     namespace UIExtensionProxyAccessor {
@@ -44798,12 +44798,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_uiEffect_VisualEffect UiEffect_createEffectImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_uiEffect_VisualEffect) 300;
+            return reinterpret_cast<Ark_uiEffect_VisualEffect>(300);
         string out("uiEffect_createEffect(");
         out.append(") \n");
-        out.append("[return (Ark_uiEffect_VisualEffect) 300] \n");
+        out.append("[return reinterpret_cast<Ark_uiEffect_VisualEffect>(300)] \n");
         appendGroupedLog(1, out);
-        return (Ark_uiEffect_VisualEffect) 300;
+        return reinterpret_cast<Ark_uiEffect_VisualEffect>(300);
     }
     Ark_Number Vp2pxImpl(const Ark_Number* value)
     {
