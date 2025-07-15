@@ -300,8 +300,6 @@ export class Application {
         }
         // Here we request to draw a frame and call custom components callbacks.
         rootState!.value;
-        let root = this.rootState!.value
-        ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr);
         // Call callbacks and sync
         callScheduledCallbacks();
     }

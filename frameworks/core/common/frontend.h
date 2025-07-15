@@ -359,6 +359,7 @@ public:
     {
         return "";
     }
+    virtual void* GetEnv() { return nullptr; }
 
 protected:
     virtual bool MaybeRelease() override;
