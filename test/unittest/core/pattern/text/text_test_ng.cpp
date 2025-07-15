@@ -21,10 +21,12 @@
 #include "text_base.h"
 #include "ui/base/geometry/dimension.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -3204,6 +3206,26 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
         textLayoutAlgorithm->AdaptMaxTextSize(textStyle, u"abc", parentLayoutConstraint,
         AceType::RawPtr(textFrameNode)),
         true);
+}
+
+/**
+ * @tc.name: CreateTextStyleUsingTheme001
+ * @tc.desc: test CreateTextStyleUsingTheme().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CreateTextStyleUsingTheme001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    auto pipeline = textFrameNode->GetContextRefPtr();
+    TextStyle textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(),
+        textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>(), true);
+    EXPECT_EQ(textStyle.GetTextAlign(), TextAlign::CENTER);
 }
 
 /**

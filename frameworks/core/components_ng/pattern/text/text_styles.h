@@ -306,10 +306,9 @@ void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const
 
 void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
     TextStyle& textStyle, bool isSymbol = false);
-void UseSelfStyleWithTheme(
-    const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle, const RefPtr<TextTheme>& textTheme);
-void SymbolUseSelfStyleWithTheme(
-    const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle, const RefPtr<TextTheme>& textTheme);
+
+void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
+    const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
 
 std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value);
 std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);
