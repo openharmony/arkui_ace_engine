@@ -2685,4 +2685,34 @@ HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay016, TestSize.Level1)
     EXPECT_EQ(isHandleVisible, false);
 }
 
+/**
+ * @tc.name: BaseTextSelectOverlay017
+ * @tc.desc: test base_text_select_overlay.cpp SetTransformPaintInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call SetTransformPaintInfo and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    SelectHandleInfo handleInfo;
+    RectF rect;
+    pattern->selectOverlay_->hasTransform_ = true;
+    pattern->selectOverlay_->SetTransformPaintInfo(handleInfo, rect);
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+}
+
 } // namespace OHOS::Ace
