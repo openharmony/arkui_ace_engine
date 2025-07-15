@@ -26,7 +26,33 @@ RefPtr<FrameNode> RichEditorModelStatic::CreateFrameNode(int32_t nodeId)
     auto richEditorPattern = AceType::MakeRefPtr<RichEditorPattern>();
     richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
     richEditorPattern->GetRichEditorController()->SetPattern(WeakPtr(richEditorPattern));
-    return FrameNode::CreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId, richEditorPattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId, richEditorPattern);
+    InitRichEditorModel(frameNode);
+    return frameNode;
+}
+
+void RichEditorModelStatic::InitRichEditorModel(RefPtr<FrameNode> frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, TextAlign::START, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, WordBreak::BREAK_WORD, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT, frameNode);
+    richEditorPattern->InitSurfaceChangedCallback();
+    richEditorPattern->InitSurfacePositionChangedCallback();
+    richEditorPattern->ClearSelectionMenu();
+    auto host = richEditorPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    richEditorPattern->SetSupportPreviewText(pipelineContext->GetSupportPreviewText());
+    CHECK_NULL_VOID(frameNode->IsFirstBuilding());
+    auto draggable = pipelineContext->GetDraggable<RichEditorTheme>();
+    frameNode->SetDraggable(draggable);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetTextDraggable(true);
 }
 
 RefPtr<RichEditorBaseControllerBase> RichEditorModelStatic::GetRichEditorController(FrameNode* frameNode)
