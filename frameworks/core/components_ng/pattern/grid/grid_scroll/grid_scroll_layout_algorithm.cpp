@@ -106,7 +106,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (gridLayoutProperty->GetAlignItems().value_or(GridItemAlignment::DEFAULT) == GridItemAlignment::STRETCH) {
         GridLayoutBaseAlgorithm::AdjustChildrenHeight(layoutWrapper);
     }
-
+    // update layout info.
+    info_.prevOffset_ = info_.currentOffset_;
     // update cache info.
     const int32_t cacheCnt =
         static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * crossCount_);
