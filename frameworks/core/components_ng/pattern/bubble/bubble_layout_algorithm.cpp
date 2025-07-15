@@ -1393,7 +1393,8 @@ OffsetF BubbleLayoutAlgorithm::GetAdjustPosition(std::vector<Placement>& current
     OffsetF position;
     float width = 0.0f;
     float height = 0.0f;
-    for (size_t i = 0, len = currentPlacementStates.size(); i < len;) {
+    size_t len = currentPlacementStates.size();
+    for (size_t i = 0; i < len;) {
         placement_ = currentPlacementStates[i];
         if (placement_ == Placement::NONE) {
             break;
@@ -1429,11 +1430,13 @@ OffsetF BubbleLayoutAlgorithm::GetAdjustPosition(std::vector<Placement>& current
             }
         }
         position = AdjustPosition(childPosition, width, height, targetSpace_.ConvertToPx());
-        if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
-            i += step;
-            continue;
+        if (!NearEqual(position, OffsetF(0.0f, 0.0f))) {
+            break;
         }
-        break;
+        if (len - i <= step) {
+            break;
+        }
+        i += step;
     }
     return position;
 }
