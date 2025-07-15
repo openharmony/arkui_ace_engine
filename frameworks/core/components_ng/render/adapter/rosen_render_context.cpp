@@ -6817,6 +6817,9 @@ void RosenRenderContext::PaintPixmapBgImage()
         rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
     }
     rsNode_->SetBgImage(rosenImage);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("PaintPixmapBgImage_node(%s/%d)", host->GetTag().c_str(), host->GetId());
 }
 
 void RosenRenderContext::OnRenderGroupUpdate(bool isRenderGroup)
