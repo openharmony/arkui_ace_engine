@@ -21,6 +21,7 @@ group("advanced_ui_component_static") {
       "swiperefresher:swipeRefresher",
       "splitlayout:splitLayout",
       "subheader:subHeader",
+      "editabletitlebar:editableTitleBar",
     ]
   }
 }
