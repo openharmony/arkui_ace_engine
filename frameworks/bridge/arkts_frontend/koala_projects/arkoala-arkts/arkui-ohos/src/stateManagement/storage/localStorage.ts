@@ -31,7 +31,7 @@ import { ExtendableComponent } from '../../component/extendableComponent';
  * @since 20
  */
 export class LocalStorage {
-    private store_ = new StorageBase();
+    protected store_ = new StorageBase();
 
     /**
      * Construct new instance of LocalStorage
