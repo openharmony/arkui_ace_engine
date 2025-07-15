@@ -83,6 +83,56 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWebControllerControllerHandler)
         },
         ani_native_function {
+            "_TransferJsResultToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferJsResultToStatic)
+        },
+        ani_native_function {
+            "_TransferFileSelectorResultToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferFileSelectorResultToStatic)
+        },
+        ani_native_function {
+            "_TransferFileSelectorParamToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferFileSelectorParamToStatic)
+        },
+        ani_native_function {
+            "_TransferWebContextMenuResultToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebContextMenuResultToStatic)
+        },
+        ani_native_function {
+            "_TransferWebContextMenuParamToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebContextMenuParamToStatic)
+        },
+        ani_native_function {
+            "_TransferJsResultToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferJsResultToDynamic)
+        },
+        ani_native_function {
+            "_TransferFileSelectorResultToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferFileSelectorResultToDynamic)
+        },
+        ani_native_function {
+            "_TransferFileSelectorParamToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferFileSelectorParamToDynamic)
+        },
+        ani_native_function {
+            "_TransferWebContextMenuResultToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebContextMenuResultToDynamic)
+        },
+        ani_native_function {
+            "_TransferWebContextMenuParamToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebContextMenuParamToDynamic)
+        },
+        ani_native_function {
             "_ConvertUtils_ConvertFromPixelMapAni",
             "L@ohos/multimedia/image/image/PixelMap;:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertFromPixelMapAni)
