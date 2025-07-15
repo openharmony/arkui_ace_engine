@@ -34,7 +34,9 @@
 #include "frameworks/core/components_ng/pattern/toast/toast_layout_property.h"
 #include "frameworks/core/components_ng/pattern/overlay/dialog_manager_static.h"
 #include "frameworks/core/components_ng/pattern/overlay/overlay_manager.h"
+#include "frameworks/core/interfaces/native/ani/ani_utils.cpp"
 #include "frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "frameworks/core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ace_kit/include/ui/base/referenced.h"
 
 namespace OHOS::Ace::NG {
@@ -471,6 +473,95 @@ static ani_object PresentCustomDialog(ani_env* env, ani_long builder, ani_object
     return result;
 }
 
+static ani_status CreateAniDouble(ani_env* env, double value, ani_object& result)
+{
+    ani_status state;
+    ani_class doubleClass;
+    if ((state = env->FindClass("Lstd/core/Double;", &doubleClass)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FindClass std/core/doubleClass failed, %{public}d", state);
+        return state;
+    }
+    ani_method doubleClassCtor;
+    if ((state = env->Class_FindMethod(doubleClass, "<ctor>", "D:V", &doubleClassCtor)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "Class_FindMethod Double ctor failed, %{public}d", state);
+        return state;
+    }
+    ani_double aniValue = value;
+    if ((state = env->Object_New(doubleClass, doubleClassCtor, &result, aniValue)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "New Double object failed, %{public}d", state);
+        return state;
+    }
+    return state;
+}
+
+static ani_object GetTopOrder(ani_env* env)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] GetTopOrder enter.");
+    ani_object aniOrder = nullptr;
+    ani_ref undefinedRef = nullptr;
+    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
+        return aniOrder;
+    }
+    aniOrder = static_cast<ani_object>(undefinedRef);
+
+    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, aniOrder);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, aniOrder);
+    auto orderValue = overlayManager->GetTopOrder();
+    if (orderValue.has_value()) {
+        CreateAniDouble(env, orderValue.value(), aniOrder);
+    }
+    return aniOrder;
+}
+
+static ani_object GetBottomOrder(ani_env* env)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] GetBottomOrder enter.");
+    ani_object aniOrder = nullptr;
+    ani_ref undefinedRef = nullptr;
+    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
+        return aniOrder;
+    }
+    aniOrder = static_cast<ani_object>(undefinedRef);
+
+    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, aniOrder);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, aniOrder);
+    auto orderValue = overlayManager->GetBottomOrder();
+    if (orderValue.has_value()) {
+        CreateAniDouble(env, orderValue.value(), aniOrder);
+    }
+    return aniOrder;
+}
+
+static void CreateCommonController(ani_env* env, ani_object object)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] CreateCommonController.");
+}
+
+static void CommonControllerClose(ani_env* env, ani_object object)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] CommonControllerClose.");
+}
+
+static ani_enum_item CommonControllerGetState(ani_env* env, ani_object object)
+{
+    ani_enum_item enumItem = nullptr;
+    ani_enum enumType;
+    ani_status status = env->FindEnum("L@ohos/promptAction/promptAction/CommonState;", &enumType);
+    if (status != ANI_OK) {
+        return enumItem;
+    }
+
+    status = env->Enum_GetEnumItemByName(enumType, "UNINITIALIZED", &enumItem);
+    if (status != ANI_OK) {
+        return enumItem;
+    }
+    return enumItem;
+}
+
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "PromptAction ANI_Constructor start.");
@@ -504,6 +595,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"openCustomDialogWithController", nullptr,
             reinterpret_cast<void *>(OpenCustomDialogWithController)},
         ani_native_function {"presentCustomDialog", nullptr, reinterpret_cast<void *>(PresentCustomDialog)},
+        ani_native_function {"getTopOrder", nullptr, reinterpret_cast<void *>(GetTopOrder)},
+        ani_native_function {"getBottomOrder", nullptr, reinterpret_cast<void *>(GetBottomOrder)},
     };
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
     if (status != ANI_OK) {
@@ -522,6 +615,23 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY,
             "PromptAction BindDismissDialogAction fail. status: %{public}d", status);
+        return ANI_ERROR;
+    }
+
+    ani_class commonControllerCls;
+    status = env->FindClass("L@ohos/promptAction/promptAction/CommonController;", &commonControllerCls);
+    if (status != ANI_OK) {
+        return ANI_ERROR;
+    }
+
+    std::array commonControllerMethods = {
+        ani_native_function { "<ctor>", ":V", reinterpret_cast<void*>(CreateCommonController) },
+        ani_native_function { "close", nullptr, reinterpret_cast<void*>(CommonControllerClose) },
+        ani_native_function { "getState", nullptr, reinterpret_cast<void*>(CommonControllerGetState) },
+    };
+    status = env->Class_BindNativeMethods(
+        commonControllerCls, commonControllerMethods.data(), commonControllerMethods.size());
+    if (status != ANI_OK) {
         return ANI_ERROR;
     }
 

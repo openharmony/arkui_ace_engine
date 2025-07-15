@@ -935,6 +935,22 @@ export class PromptActionImpl extends PromptAction {
         return retval;
     }
 
+    getTopOrder(): LevelOrder {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let orderValue: number = promptAction.getTopOrder();
+        let order: LevelOrder = LevelOrder.clamp(orderValue);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return order;
+    }
+
+    getBottomOrder(): LevelOrder {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let orderValue: number = promptAction.getBottomOrder();
+        let order: LevelOrder = LevelOrder.clamp(orderValue);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return order;
+    }
+
     openPopup(content: ComponentContent, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
         const content_casted = content as (ComponentContent)
         const target_casted = target as (TargetInfo)
