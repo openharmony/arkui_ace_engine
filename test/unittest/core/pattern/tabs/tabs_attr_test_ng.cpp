@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 class TabsAttrTestNg : public TabsTestNg {
@@ -1589,6 +1590,7 @@ HWTEST_F(TabsAttrTestNg, CachedMaxCount001, TestSize.Level1)
     ChangeIndex(2);
     EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 0);
 
+    MockAnimationManager::GetInstance().Reset();
     /**
      * @tc.steps: step2. test SwipeToSwipeToWithoutAnimation.
      */
@@ -1602,6 +1604,7 @@ HWTEST_F(TabsAttrTestNg, CachedMaxCount001, TestSize.Level1)
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 0);
 
+    MockAnimationManager::GetInstance().Reset();
     /**
      * @tc.steps: step3. test SwipeTo.
      */
