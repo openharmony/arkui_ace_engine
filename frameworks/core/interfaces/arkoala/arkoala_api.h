@@ -6990,7 +6990,7 @@ struct ArkUIThemeModifier {
     ArkUINodeHandle (*createTheme)(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, const ArkUI_Uint32* darkColors,
         ArkUI_Int32 colorMode, const void* lightResObjs, const void* darkResObjs);
     void (*createThemeScope)(ArkUINodeHandle node, ArkUINodeHandle theme);
-    void (*setDefaultTheme)(const ArkUI_Uint32* colors, ArkUI_Bool isDark);
+    void (*setDefaultTheme)(const ArkUI_Uint32* colors, ArkUI_Bool isDark, const void* resObjs);
     void (*removeFromCache)(ArkUI_Int32 themeId);
     void (*setOnThemeScopeDestroy)(ArkUINodeHandle node, void* callback);
     ArkUI_Int32 (*getThemeScopeId)(ArkUINodeHandle node);

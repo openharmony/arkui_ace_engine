@@ -18,6 +18,7 @@
 
 #include "ui/base/ace_type.h"
 #include "ui/properties/color.h"
+#include "ui/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -162,8 +163,25 @@ public:
 
     static const TokenColorData& GetTokenColorDataByIndex(int32_t idx);
 
+    void SetResObjs(std::vector<RefPtr<ResourceObject>>&& resObjs)
+    {
+        resObjs_ = std::move(resObjs);
+    }
+
+    const std::vector<RefPtr<ResourceObject>>& GetResObjs() const
+    {
+        return resObjs_;
+    }
+
+    void SetColorMode(ColorMode colorMode)
+    {
+        colorMode_ = colorMode;
+    }
 private:
-    std::vector<Color> colors_ = std::vector<Color> (TokenColors::TOTAL_NUMBER);;
+    Color GetColorWithResourceObject(int32_t colorIndex) const;
+    std::vector<Color> colors_ = std::vector<Color>(TokenColors::TOTAL_NUMBER);
+    std::vector<RefPtr<ResourceObject>> resObjs_;
+    ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
 };
 
 } // namespace OHOS::Ace::NG
