@@ -27810,7 +27810,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIGridItemOpsAccessor* (*getGridItemOpsAccessor)();
     const GENERATED_ArkUIFilterAccessor* (*getFilterAccessor)();
     const GENERATED_ArkUIVisualEffectAccessor* (*getVisualEffectAccessor)();
-	const GENERATED_ArkUIDatePickerSelectedOpsAccessor* (*getDatePickerSelectedOpsAccessor)();
+    const GENERATED_ArkUIDatePickerSelectedOpsAccessor* (*getDatePickerSelectedOpsAccessor)();
     const GENERATED_ArkUINavigationOpsAccessor* (*getNavigationOpsAccessor)();
     const GENERATED_ArkUICheckboxGroupOpsAccessor* (*getCheckboxGroupOpsAccessor)();
     const GENERATED_ArkUICheckboxOpsAccessor* (*getCheckboxOpsAccessor)();
