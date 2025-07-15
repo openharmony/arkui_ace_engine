@@ -1373,6 +1373,13 @@ public:
 
     RefPtr<Clipboard> GetClipboard() override
     {
+        if (!clipboard_) {
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, clipboard_);
+            auto context = host->GetContext();
+            CHECK_NULL_RETURN(context, clipboard_);
+            clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
+        }
         return clipboard_;
     }
 
@@ -1850,7 +1857,6 @@ private:
     void SetAccessibilityActionOverlayAndSelection();
     void SetAccessibilityEditAction();
     void SetAccessibilityMoveTextAction();
-    void SetAccessibilityErrotText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();
     void SetAccessibilityUnitAction();

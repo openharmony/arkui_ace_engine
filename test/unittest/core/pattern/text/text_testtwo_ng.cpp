@@ -1557,6 +1557,7 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent005, TestSize.Level1)
     aiSpan2.end = AI_SPAN_END_II;
     aiSpan2.content = SPAN_URL;
     aiSpan2.type = TextDataDetectType::URL;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_[AI_SPAN_START] = aiSpan1;
     pattern->dataDetectorAdapter_->aiSpanMap_[AI_SPAN_START_II] = aiSpan2;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();

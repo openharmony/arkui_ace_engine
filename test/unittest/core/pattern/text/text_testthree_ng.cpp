@@ -1415,6 +1415,7 @@ HWTEST_F(TextTestThreeNg, TextLayoutAlgorithmTest009, TestSize.Level1)
     std::map<int32_t, AISpan> aiSpanMap;
     aiSpanMap[AI_SPAN_START] = aiSpan1;
     aiSpanMap[AI_SPAN_START_II] = aiSpan2;
+    ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     textPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     textPattern->dataDetectorAdapter_->textForAI_ = U16TEXT_FOR_AI;
 
@@ -1471,6 +1472,7 @@ HWTEST_F(TextTestThreeNg, HandleClickAISpanEvent, TestSize.Level1)
     std::map<int32_t, Ace::AISpan> aiSpanMap;
     aiSpanMap[AI_SPAN_START] = aiSpan1;
     aiSpanMap[AI_SPAN_START_II] = aiSpan2;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
 
     /**
@@ -1920,6 +1922,7 @@ HWTEST_F(TextTestThreeNg, SetTextDetectTypes001, TestSize.Level1)
     textModelNG.SetTextDetectConfig(textDetectConfig);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_EQ(pattern->dataDetectorAdapter_->aiDetectInitialized_, false);
     pattern->dataDetectorAdapter_->InitTextDetect(0, "orange");
 }
@@ -2589,6 +2592,7 @@ HWTEST_F(TextTestThreeNg, PrepareAIMenuOptions001, TestSize.Level1)
     std::map<int32_t, Ace::AISpan> aiSpanMap;
     aiSpanMap[aiSpan1.start] = aiSpan1;
     aiSpanMap[aiSpan2.start] = aiSpan2;
+    ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     textPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
 
     /**
@@ -2639,6 +2643,7 @@ HWTEST_F(TextTestThreeNg, PrepareAIMenuOptions002, TestSize.Level1)
     std::map<int32_t, Ace::AISpan> aiSpanMap;
     aiSpanMap[aiSpan1.start] = aiSpan1;
     aiSpanMap[aiSpan2.start] = aiSpan2;
+    ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     textPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
 
     /**
