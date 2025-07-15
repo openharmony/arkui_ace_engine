@@ -745,12 +745,14 @@ HWTEST_F(TextPatternTestNg, HandleMouseLeftButton003, TestSize.Level1)
     auto textPattern = host->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate).WillOnce(Return(1));
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     MouseInfo info;
     Offset textOffset;
     info.action_ = MouseAction::RELEASE;
     textPattern->HandleMouseLeftButton(info, textOffset);
     EXPECT_EQ(textPattern->mouseStatus_, MouseStatus::RELEASED);
-    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate).WillOnce(Return(1));
+    textPattern->pManager_.Reset();
 }
 
 /**
