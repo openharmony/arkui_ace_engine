@@ -18,6 +18,7 @@
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng_static.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 
@@ -80,14 +81,14 @@ void AlignItemsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ColumnModelNG::SetAlignItems(frameNode, Converter::OptConvert<FlexAlign>(value));
+    ColumnModelNGStatic::SetAlignItems(frameNode, Converter::OptConvert<FlexAlign>(value));
 }
 void JustifyContentImpl(Ark_NativePointer node,
                         Ark_FlexAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ColumnModelNG::SetJustifyContent(frameNode, Converter::OptConvert<FlexAlign>(value));
+    ColumnModelNGStatic::SetJustifyContent(frameNode, Converter::OptConvert<FlexAlign>(value));
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)

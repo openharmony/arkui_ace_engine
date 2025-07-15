@@ -18,6 +18,7 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
+#include "core/components_ng/pattern/folder_stack/folder_stack_model_ng_static.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
@@ -26,7 +27,7 @@ namespace FolderStackModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = FolderStackModelNG::CreateFrameNode(id);
+    auto frameNode = FolderStackModelNGStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -43,7 +44,7 @@ void SetFolderStackOptionsImpl(Ark_NativePointer node,
     if (arkOpts) {
         auto list = Converter::OptConvert<std::vector<std::string>>(arkOpts->upperItems);
         if (list) {
-            FolderStackModelNG::SetUpdateUpperItems(frameNode, *list);
+            FolderStackModelNGStatic::SetUpdateUpperItems(frameNode, *list);
         }
     }
 }
@@ -54,7 +55,7 @@ void AlignContentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    FolderStackModelNG::SetAlignment(frameNode, Converter::OptConvert<Alignment>(value));
+    FolderStackModelNGStatic::SetAlignment(frameNode, Converter::OptConvert<Alignment>(value));
 }
 void OnFolderStateChangeImpl(Ark_NativePointer node,
                              const OnFoldStatusChangeCallback* value)

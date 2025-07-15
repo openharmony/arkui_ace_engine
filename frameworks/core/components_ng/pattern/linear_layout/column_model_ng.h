@@ -33,8 +33,8 @@ public:
     void CreateWithWrap() override {}
     static void SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static void SetSpace(FrameNode* frameNode, const RefPtr<ResourceObject>& spaceResObj);
-    static void SetJustifyContent(FrameNode* frameNode, const std::optional<FlexAlign>& valueOpt);
-    static void SetAlignItems(FrameNode* frameNode, const std::optional<FlexAlign>& valueOpt);
+    static void SetJustifyContent(FrameNode* frameNode, FlexAlign flexAlign);
+    static void SetAlignItems(FrameNode* frameNode, FlexAlign flexAlign);
     static void SetIsReverse(FrameNode* frameNode, bool isReverse);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static FlexAlign GetJustifyContent(FrameNode* frameNode);
