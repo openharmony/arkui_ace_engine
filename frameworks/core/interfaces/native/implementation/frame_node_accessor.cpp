@@ -595,6 +595,7 @@ static GENERATED_Ark_NodeType ParseNodeType(std::string& type)
         { "TextArea", GENERATED_ARKUI_TEXT_AREA },
         { "TextInput", GENERATED_ARKUI_TEXT_INPUT },
         { "Text", GENERATED_ARKUI_TEXT },
+        { "XComponent", GENERATED_ARKUI_XCOMPONENT },
     };
     GENERATED_Ark_NodeType nodeType = GENERATED_ARKUI_CUSTOM_NODE;
     auto iter = typeMap.find(type);

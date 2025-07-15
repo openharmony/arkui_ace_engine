@@ -34,6 +34,7 @@ import { ArkListNode } from './handwritten/modifiers/ArkListNode'
 import { ArkSearchNode } from './handwritten/modifiers/ArkSearchNode'
 import { ArkTextAreaNode } from './handwritten/modifiers/ArkTextAreaNode'
 import { ArkTextInputNode } from './handwritten/modifiers/ArkTextInputNode'
+import { ArkXComponentNode } from "./handwritten/modifiers/ArkXComponentNode"
 import { ModifierType } from './handwritten/modifiers/ArkCommonModifier'
 import { ListOptions, ListAttribute, ArkListPeer } from './component/list'
 import { SearchOptions, SearchAttribute, ArkSearchPeer } from './component/search'
@@ -41,6 +42,7 @@ import { TextAreaOptions, TextAreaAttribute, ArkTextAreaPeer } from './component
 import { TextInputOptions, TextInputAttribute, ArkTextInputPeer } from './component/textInput'
 import { ArkTextNode } from './handwritten/modifiers/ArkTextNode'
 import { TextOptions, TextAttribute, ArkTextPeer } from './component/text'
+import { XComponentParameter, XComponentOptions, NativeXComponentParameters, XComponentAttribute, TypedXComponentPeerInternal } from "./component/xcomponent"
 import { Deserializer } from "./component/peers/Deserializer";
 import { ComponentContent } from './ComponentContent';
 import { DrawContext } from './Graphics';
@@ -1013,7 +1015,25 @@ export namespace typeNode {
         }
     }
 
-    overload createNode { createListNode, createSearchNode, createTextAreaNode, createTextInputNode, createTextNode }
+    class XComponentFrameNode extends TypedFrameNode<ArkXComponentNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkXComponentNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(value: XComponentParameter): XComponentAttribute {
+            let arkXComponentNode = this.attribute as ArkXComponentNode;
+            return arkXComponentNode!.initialize(value);
+        }
+        initialize(value: XComponentOptions): XComponentAttribute {
+            let arkXComponentNode = this.attribute as ArkXComponentNode;
+            return arkXComponentNode!.initialize(value);
+        }
+        initialize(value: NativeXComponentParameters): XComponentAttribute {
+            let arkXComponentNode = this.attribute as ArkXComponentNode;
+            return arkXComponentNode!.initialize(value);
+        }
+    }
+
+    overload createNode { createListNode, createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createXComponentNode, createXComponentNodeWithOptions, createXComponentNodeWithParameters }
 
     // @ts-ignore
     function createListNode(context: UIContext, type: string): ListFrameNode {
@@ -1069,4 +1089,41 @@ export namespace typeNode {
            return arknode;
        });
    }
+
+    // @ts-ignore
+    function createXComponentNode(context: UIContext, type: string): XComponentFrameNode {
+        return new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
+            let arknode = new ArkXComponentNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new TypedXComponentPeerInternal(retval, node._nodeId as int32, "XComponent", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createXComponentNodeWithOptions(context: UIContext, type: string, options: XComponentOptions): XComponentFrameNode {
+        let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
+            let arknode = new ArkXComponentNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new TypedXComponentPeerInternal(retval, node._nodeId as int32, "XComponent", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+        xcFrameNode.initialize(options);
+        return xcFrameNode;
+    }
+
+    // @ts-ignore
+    function createXComponentNodeWithParameters(context: UIContext, type: string, parameters: NativeXComponentParameters): XComponentFrameNode {
+        let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
+            let arknode = new ArkXComponentNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new TypedXComponentPeerInternal(retval, node._nodeId as int32, "XComponent", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+        xcFrameNode.initialize(parameters);
+        return xcFrameNode;
+    }
 }
