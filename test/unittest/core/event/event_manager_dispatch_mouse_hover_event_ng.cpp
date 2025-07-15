@@ -162,7 +162,6 @@ HWTEST_F(EventManagerDispatchMouseHoverEventNG, EventManagerDispatchMouseHoverEv
      * @tc.steps: step2. Inject mock mouseEvent, suppose mock mouse event not leave current node
      * @tc.expected: when some one stop progration ohter targets can not be invoked.
      */
-
     for (auto i = 0; i < 10; i++) {
         MouseEvent event;
         event.action = MouseAction::MOVE;
