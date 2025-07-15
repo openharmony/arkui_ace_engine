@@ -153,6 +153,7 @@ static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_object 
         return;
     }
     GetShowDialogOptionsInternal(env, optionsInternal, dialogProps);
+    dialogProps.type = OHOS::Ace::DialogType::ALERT_DIALOG;
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
@@ -180,6 +181,7 @@ static ani_object ShowDialog(ani_env* env, ani_object options, ani_object option
         return nullptr;
     }
     GetShowDialogOptionsInternal(env, optionsInternal, dialogProps);
+    dialogProps.type = OHOS::Ace::DialogType::ALERT_DIALOG;
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
@@ -209,6 +211,8 @@ static void ShowActionMenuWithCallback(ani_env* env, ani_object options, ani_obj
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show action menu options fail.");
         return;
     }
+    dialogProps.autoCancel = true;
+    dialogProps.isMenu = true;
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
@@ -235,6 +239,8 @@ static ani_object ShowActionMenu(ani_env* env, ani_object options)
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show action menu options fail.");
         return nullptr;
     }
+    dialogProps.autoCancel = true;
+    dialogProps.isMenu = true;
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
@@ -329,6 +335,8 @@ static ani_object UpdateCustomDialog(ani_env* env, ani_long content, ani_object 
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse open custom dialog options fail.");
         return nullptr;
     }
+    dialogProps.isSysBlurStyle = false;
+
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
