@@ -29,16 +29,8 @@ void InitProp(const RefPtr<PropertyBase>& propBase)
         // setup proxy for Set, Get, GetStageValue
         prop->SetUpCallbacks(
             [weak = WeakPtr(prop)]() { return MockAnimationProxy<float>::GetInstance().GetValue(weak.Upgrade()); },
-            [weak = WeakPtr(prop)](float value) {
-                auto prop = weak.Upgrade();
-                CHECK_NULL_VOID(prop);
-                if (!MockAnimationManager::GetInstance().IsAnimationOpen()) {
-                    if (auto cb = prop->GetUpdateCallback()) {
-                        cb(value); // call update callback immediately if not within animation scope
-                    }
-                }
-                MockAnimationProxy<float>::GetInstance().RecordPropChange(weak, value);
-            },
+            [weak = WeakPtr(prop)](
+                float value) { MockAnimationProxy<float>::GetInstance().RecordPropChange(weak, value); },
             [weak = WeakPtr(prop)]() { return MockAnimationProxy<float>::GetInstance().GetEndValue(weak.Upgrade()); });
     }
 
