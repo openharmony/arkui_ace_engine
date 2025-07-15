@@ -91,6 +91,15 @@ ScrollablePattern::~ScrollablePattern()
     if (scrollBarProxy_) {
         scrollBarProxy_->UnRegisterNestScrollableNode(AceType::WeakClaim(this));
     }
+    if (!backToTop_) {
+        return;
+    }
+    auto* eventProxy = StatusBarEventProxy::GetInstance();
+    if (!eventProxy) {
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StatusBarEventProxy is null");
+        return;
+    }
+    eventProxy->UnRegister(WeakClaim(this));
 }
 
 RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
