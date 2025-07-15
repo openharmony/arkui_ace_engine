@@ -1891,11 +1891,7 @@ void NavigationPattern::DialogAnimation(const RefPtr<NavDestinationGroupNode>& p
 void NavigationPattern::StartDefaultAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
     const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible)
 {
-    auto currentProxy = GetTopNavigationProxy();
-    if (currentProxy) {
-        currentProxy->SetIsFinished(true);
-    }
-    ClearRecoveryList();
+    ClearNavigationCustomTransition();
     bool isPreDialog = preTopNavDestination &&
         preTopNavDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG;
     bool isNewDialog = newTopNavDestination &&
@@ -5676,5 +5672,15 @@ void NavigationPattern::UpdateChildLayoutPolicy()
         navBarNode->GetLayoutProperty()->UpdateLayoutPolicyProperty(
             layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH), false);
     }
+}
+
+void NavigationPattern::ClearNavigationCustomTransition()
+{
+    auto currentProxy = GetTopNavigationProxy();
+    if (currentProxy) {
+        currentProxy->SetIsFinished(true);
+        RemoveProxyById(currentProxy->GetProxyId());
+    }
+    ClearRecoveryList();
 }
 } // namespace OHOS::Ace::NG
