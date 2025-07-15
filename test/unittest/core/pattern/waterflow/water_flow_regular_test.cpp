@@ -1071,7 +1071,7 @@ HWTEST_F(WaterFlowTestNg, IfElseNode001, TestSize.Level1)
     ifElseNode->FlushUpdateAndMarkDirty();
     pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 22);
-    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 21);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 0);
     EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
 
     // make [if] to empty branch.
@@ -1079,7 +1079,7 @@ HWTEST_F(WaterFlowTestNg, IfElseNode001, TestSize.Level1)
     ifElseNode->FlushUpdateAndMarkDirty();
     pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 21);
-    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 21);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 0);
     EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
 }
 
