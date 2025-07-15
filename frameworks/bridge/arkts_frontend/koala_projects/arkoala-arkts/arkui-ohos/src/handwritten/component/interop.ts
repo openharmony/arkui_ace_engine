@@ -225,3 +225,98 @@ export function registerCreateStaticObservedCallback(): void {
     registerCallback.invoke(makeObservedcallback);
     return;
 }
+
+/** @memo */
+export function compatibleWrappedBuilder(builder: Any, ...args: FixedArray<ESValue>): void {
+    compatibleComponent((() => {
+        const global = ESValue.getGlobal();
+        const viewStackProcessor = global.getProperty('ViewStackProcessor');
+        const createId = viewStackProcessor.getProperty('AllocateNewElmetIdForNextComponent');
+        const elmtId = createId.invoke();
+
+        let component: ESValue;
+        let createCompatibleNode: ESValue;
+        switch (args.length) {
+            case 0:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFuncVoid');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId);
+                break;
+            case 1:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0]);
+                break;
+            case 2:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc2');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], args[1]);
+                break;
+            case 3:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc3');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                    args[1], args[2]);
+                break;
+            case 4:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc4');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                    args[1], args[2], args[3]);
+                break;
+            case 5:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc5');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                    args[1], args[2], args[3], args[4]);
+                break;
+            case 6:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc6');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5]);
+                break;
+            case 7:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc7');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6]);
+                break;
+            case 8:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc8');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
+                break;
+            case 9:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc9');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
+                break;
+            case 10:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc10');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+                break;
+            default:
+                throw Error('Error arguments in Legacy Builder Function');
+        }
+        const viewPUCreate = global.getProperty('viewPUCreate');
+        viewPUCreate.invoke(component);
+        return {
+            component: component,
+            name: 'compatibleWrappedBuilder',
+        };
+    }), ((instance: ESValue) => {
+        if (args.length !== 1) {
+            return;
+        }
+        const param = args[0]
+        if (param.typeOf() !== 'object') {
+            return;
+        }
+        let it = param.keys();
+        const stateParam = instance.getProperty('arg1') as ESValue;
+        while (true) {
+            const result = it.next()
+            if (result.done) {
+                break;
+            }
+            stateParam.setProperty(result.value as ESValue, param.getProperty(result.value as ESValue));
+        }
+        const global = ESValue.getGlobal();
+        const runPendingJobs = global.getProperty('runPendingJobs');
+        runPendingJobs.invoke();
+    }));
+}
