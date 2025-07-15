@@ -15,18 +15,19 @@
 
 import { doTest, TestKind } from "../arkts/shared"
 export { Assert, Assert as assert } from "./assert"
+export { TestFilter, setTestFilter } from "../arkts/shared"
 
 export function test(name: string, content?: () => void) {
-    doTest(TestKind.PASS, `test: "${name}"`, content)
+    doTest(TestKind.PASS, name, `test: "${name}"`, content)
 }
 
 export namespace test {
     export function skip(name: string, content?: () => void) {
-        doTest(TestKind.SKIP, `test: "${name}"`, content)
+        doTest(TestKind.SKIP, name, `test: "${name}"`, content)
     }
 
     export function expectFailure(reason: string, name: string, content?: () => void) {
-        doTest(TestKind.FAIL, `test: "${name}"; reason: "${reason}"`, content)
+        doTest(TestKind.FAIL, name, `test: "${name}"; reason: "${reason}"`, content)
     }
 
     export function conditional(condition: boolean, name: string, content?: () => void) {
@@ -47,11 +48,11 @@ export namespace test {
 }
 
 export function suite(name: string, content?: () => void) {
-    doTest(TestKind.PASS, `suite: "${name}"`, content, true)
+    doTest(TestKind.PASS, name, `suite: "${name}"`, content, true)
 }
 
 export namespace suite {
     export function skip(name: string, content?: () => void) {
-        doTest(TestKind.SKIP, `suite: "${name}"`, content)
+        doTest(TestKind.SKIP, name, `suite: "${name}"`, content)
     }
 }

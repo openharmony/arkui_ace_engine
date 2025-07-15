@@ -233,7 +233,7 @@ class MutableAnimatedStateImpl<Value> implements MutableAnimatedState<Value> {
     }
 
     set value(value: Value) {
-        this.animatedState.setAnimation(this.animationProvider(this.value, value))
+        this.animatedState.setAnimation(this.animationProvider(this.animatedState.value, value))
     }
 
     get running(): boolean {

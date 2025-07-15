@@ -42,6 +42,7 @@ export {
     int8Array,
     errorAsString,
     unsafeCast,
+    CoroutineLocalValue,
     scheduleCoroutine,
     memoryStats,
     launchJob
@@ -58,6 +59,7 @@ export * from "./Matrix33"
 export * from "./Matrix44"
 export * from "./Point3"
 export * from "./Point"
+export * from "./Unique"
 export { SHA1Hash, createSha1 } from "./sha1"
 export { UniqueId } from "./uniqueId"
 export * from "./koalaKey"

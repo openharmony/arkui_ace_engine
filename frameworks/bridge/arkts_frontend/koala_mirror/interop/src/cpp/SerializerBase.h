@@ -183,6 +183,20 @@ public:
         position += 4;
     }
 
+    void writeFloat64(InteropFloat64 value) {
+        check(8);
+#ifdef KOALA_NO_UNALIGNED_ACCESS
+        #ifdef __STDC_LIB_EXT1__
+            memcpy_s(data + position, dataLength, &value, 8);
+        #else
+            memcpy(data + position, &value, 8);
+        #endif
+#else
+        *((InteropFloat64*)(data + position)) = value;
+#endif
+        position += 8;
+    }
+
     void writePointer(InteropNativePointer value) {
         check(8);
         int64_t value64 = static_cast<int64_t>(reinterpret_cast<uintptr_t>(value));

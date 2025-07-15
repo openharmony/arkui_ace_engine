@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import { ArktsObject } from './ArktsObject';
+import { ArktsObject } from '../../../arkts-api/peers/ArktsObject';
 import { global } from '../static/global';
 import { KNativePointer } from '@koalaui/interop';
 import { DiagnosticKind } from './DiagnosticKind';
 import { passStringArray } from '../utilities/private';
-import { SourcePosition } from './SourcePosition';
+import { SourcePosition } from '../../../arkts-api/peers/SourcePosition';
 import { SourceRange } from './SourceRange';
 import { DiagnosticInfo } from './DiagnosticInfo';
 import { SuggestionInfo } from './SuggestionInfo';

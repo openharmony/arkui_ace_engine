@@ -1,7 +1,7 @@
 
 import { AnimatedState as AnimatedState, one as one } from "./library";
 
-let x: AnimatedState<number> | undefined;
+let x: (AnimatedState<number> | undefined);
 
 function main(): void {}
 

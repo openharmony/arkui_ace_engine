@@ -16,7 +16,7 @@
 import * as arkts from "@koalaui/libarkts"
 import { factory } from "./MemoFactory"
 import { KPointer } from "@koalaui/interop"
-import { isMemoParametersDeclaration, PositionalIdTracker, RuntimeNames } from "./utils"
+import { PositionalIdTracker, RuntimeNames } from "./utils"
 
 export type ParamInfo = {
     ident: arkts.Identifier,
@@ -61,9 +61,7 @@ export class ParameterTransformer extends arkts.AbstractVisitor {
     }
 
     visitor(beforeChildren: arkts.AstNode): arkts.AstNode {
-        // TODO: temporary checking skip nodes by comparison with expected skip nodes
-        // Should be fixed when update procedure implemented properly
-        if (/* beforeChildren === this.skipNode */ isMemoParametersDeclaration(beforeChildren)) {
+        if (beforeChildren === this.skipNode) {
             return beforeChildren
         }
         if (arkts.isVariableDeclaration(beforeChildren) && this.rewriteIdentifiers?.has(beforeChildren.declarators[0].id!.originalPeer)) {

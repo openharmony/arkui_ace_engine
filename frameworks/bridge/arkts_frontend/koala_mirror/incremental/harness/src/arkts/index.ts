@@ -15,23 +15,24 @@
 
 import { doTest, TestKind } from "./shared"
 export { Assert, assert } from "./assert"
+export { TestFilter, setTestFilter } from "./shared"
 
 export class test {
     static $_invoke(name: string, content?: () => void) {
-        doTest(TestKind.PASS, `test: "${name}"`, content)
+        doTest(TestKind.PASS, name, `test: "${name}"`, content)
     }
 
     static skip(name: string, content?: () => void) {
-        doTest(TestKind.SKIP, `test: "${name}"`, content)
+        doTest(TestKind.SKIP, name, `test: "${name}"`, content)
     }
 
     static expectFailure(reason: string, name: string, content?: () => void) {
-        doTest(TestKind.FAIL, `test: "${name}"; reason: "${reason}"`, content)
+        doTest(TestKind.FAIL, name, `test: "${name}"; reason: "${reason}"`, content)
     }
 
     static conditional(condition: boolean, name: string, content?: () => void) {
         if (condition) {
-            doTest(TestKind.PASS, `test: "${name}"`, content)
+            doTest(TestKind.PASS, name, `test: "${name}"`, content)
         } else {
             test.skip(name, content)
         }
@@ -39,7 +40,7 @@ export class test {
 
     static expect(expectSuccess: boolean, name: string, content?: () => void) {
         if (expectSuccess) {
-            doTest(TestKind.PASS, `test: "${name}"`, content)
+            doTest(TestKind.PASS, name, `test: "${name}"`, content)
         } else {
             test.expectFailure("Description of the problem", name, content)
         }
@@ -48,11 +49,11 @@ export class test {
 
 export class suite {
     static $_invoke(name: string, content?: () => void) {
-        doTest(TestKind.PASS, `suite: "${name}"`, content, true)
+        doTest(TestKind.PASS, name, `suite: "${name}"`, content, true)
     }
 
     static skip(name: string, content?: () => void) {
-        doTest(TestKind.SKIP, `suite: "${name}"`, content)
+        doTest(TestKind.SKIP, name, `suite: "${name}"`, content)
     }
 }
 

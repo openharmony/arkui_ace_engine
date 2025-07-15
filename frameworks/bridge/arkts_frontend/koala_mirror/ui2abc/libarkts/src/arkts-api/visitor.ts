@@ -65,13 +65,13 @@ import {
     isUpdateExpression,
     isVariableDeclaration,
     isVariableDeclarator,
-    isWhileStatement
+    isWhileStatement,
+    Statement
 } from "../generated"
 import { Es2pandaImportKinds } from "../generated/Es2pandaEnums"
 import { factory } from "./factory/nodeFactory"
 import { AstNode } from "./peers/AstNode"
 import { global } from "./static/global"
-import { updateETSModuleByStatements } from "./utilities/public"
 
 type Visitor = (node: AstNode, options?: object) => AstNode
 
@@ -146,9 +146,12 @@ export function visitEachChild(
 ): AstNode {
     global.profiler.nodeVisited()
     if (isETSModule(node)) {
-        return updateETSModuleByStatements(
+        return factory.updateETSModule(
             node,
-            nodesVisitor(node.statements, visitor)
+            nodesVisitor(node.statements, visitor),
+            nodeVisitor(node.ident, visitor),
+            node.getNamespaceFlag(),
+            node.program,
         )
     }
     if (isCallExpression(node)) {
@@ -256,7 +259,6 @@ export function visitEachChild(
             nodeVisitor(node.ident, visitor),
             node.isOptional,
             nodeVisitor(node.initializer, visitor),
-            nodeVisitor(node.typeAnnotation, visitor),
             nodesVisitor(node.annotations, visitor),
         )
     }

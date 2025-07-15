@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { float32 } from "@koalaui/compat"
+import { float32, float64To32 } from "@koalaui/compat"
 
 export class Point {
     coordinates: Float32Array
@@ -25,11 +25,11 @@ export class Point {
     }
 
     get x(): float32 {
-        return this.coordinates[0] as float32
+        return float64To32(this.coordinates[0])
     }
 
     get y(): float32 {
-        return this.coordinates[1] as float32
+        return float64To32(this.coordinates[1])
     }
 
     offsetXY(dx: float32, dy: float32): Point {
@@ -48,7 +48,7 @@ export class Point {
         return new Point(this.x * sx, this.y * sy)
     }
 
-    static ZERO = new Point(0.0 as float32, 0.0 as float32)
+    static ZERO = new Point(float64To32(0.0), float64To32(0.0))
 
     toArray(): Float32Array {
         return this.coordinates

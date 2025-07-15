@@ -34,3 +34,13 @@ export function launchJob(job: () => void): Promise<void> {
         }, 0)
     )
 }
+
+export class CoroutineLocalValue<T> {
+    private value: T | undefined = undefined
+    get(): T | undefined {
+        return this.value
+    }
+    set(value: T | undefined) {
+        this.value = value
+    }
+}

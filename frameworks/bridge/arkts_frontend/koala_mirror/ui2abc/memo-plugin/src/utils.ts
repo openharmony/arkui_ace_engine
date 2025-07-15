@@ -36,11 +36,11 @@ export enum RuntimeNames {
     ANNOTATION_INTRINSIC = "memo_intrinsic",
     ANNOTATION_SKIP = "memo_skip",
     ANNOTATION_STABLE = "memo_stable",
+    ANNOTATION_WRAP = "memo_wrap",
     COMPUTE = "compute",
     CONTENT = "content",
     CONTEXT = "__memo_context",
     CONTEXT_TYPE = "__memo_context_type",
-    CONTEXT_TYPE_DEFAULT_IMPORT = "@koalaui/runtime",
     GENSYM = "gensym%%_",
     HASH = "__hash",
     ID = "__memo_id",
@@ -147,6 +147,12 @@ export function hasMemoStableAnnotation(node: MemoStableAnnotatable) {
     )
 }
 
+export function hasWrapAnnotation(node: arkts.ETSParameterExpression) {
+    return node.annotations.some((it) =>
+        it.expr !== undefined && arkts.isIdentifier(it.expr) && it.expr.name === RuntimeNames.ANNOTATION_WRAP
+    )
+}
+
 export function getMemoFunctionKind(node: MemoAnnotatable): MemoFunctionKind {
     const mask = (+hasMemoEntryAnnotation(node) << 2) + (+hasMemoIntrinsicAnnotation(node) << 1) + (+hasMemoAnnotation(node))
     switch (mask) {
@@ -173,7 +179,7 @@ export function isTrackableParam(node: arkts.ETSParameterExpression, isLast: boo
 }
 
 export function shouldWrap(param: arkts.ETSParameterExpression, isLastParam: boolean, trackContentParam: boolean, arg: arkts.Expression) {
-    return isWrappable(param.typeAnnotation, arg) && isTrackableParam(param, isLastParam, trackContentParam)
+    return (isWrappable(param.typeAnnotation, arg) && isTrackableParam(param, isLastParam, trackContentParam)) || hasWrapAnnotation(param)
 }
 
 function filterGensym(value: string): string {
@@ -187,64 +193,6 @@ export function dumpAstToFile(node: arkts.AstNode, keepTransformed: string, stab
     fs.mkdirSync(path.dirname(fileName), { recursive: true })
     const astDump = node.dumpSrc()
     fs.writeFileSync(fileName, stableForTests ? filterGensym(astDump) : astDump )
-}
-
-/**
- * Checks that node was obtained from MemoFactory.createSyntheticReturnStatement
- *
- * TODO: remove when node updates are done in place
- * @deprecated
- */
-export function isSyntheticReturnStatement(node: arkts.AstNode) {
-    return (
-        arkts.isReturnStatement(node) &&
-        node.argument && arkts.isMemberExpression(node.argument) &&
-        arkts.isIdentifier(node.argument.object) &&
-        node.argument.object.name === RuntimeNames.SCOPE &&
-        arkts.isIdentifier(node.argument.property) &&
-        node.argument.property.name === RuntimeNames.INTERNAL_VALUE
-    ) || (
-        arkts.isBlockStatement(node) &&
-        node.statements.length === 2 &&
-        arkts.isExpressionStatement(node.statements[0]) &&
-        arkts.isMemberExpression(node.statements[0].expression) &&
-        arkts.isIdentifier(node.statements[0].expression.object) &&
-        node.statements[0].expression.object.name === RuntimeNames.SCOPE &&
-        arkts.isIdentifier(node.statements[0].expression.property) &&
-        node.statements[0].expression.property.name === RuntimeNames.INTERNAL_VALUE &&
-        arkts.isReturnStatement(node.statements[1]) &&
-        node.statements[1].argument &&
-        arkts.isThisExpression(node.statements[1].argument)
-    ) || (
-        arkts.isBlockStatement(node) &&
-        node.statements.length === 2 &&
-        arkts.isExpressionStatement(node.statements[0]) &&
-        arkts.isMemberExpression(node.statements[0].expression) &&
-        arkts.isIdentifier(node.statements[0].expression.object) &&
-        node.statements[0].expression.object.name === RuntimeNames.SCOPE &&
-        arkts.isIdentifier(node.statements[0].expression.property) &&
-        node.statements[0].expression.property.name === RuntimeNames.INTERNAL_VALUE &&
-        arkts.isReturnStatement(node.statements[1]) &&
-        node.statements[1].argument == undefined
-    )
-}
-
-/**
- * Checks that node was obtained from MemoFactory.createMemoParameterDeclaration
- *
- * TODO: remove when node updates are done in place
- * @deprecated
- */
-export function isMemoParametersDeclaration(node: arkts.AstNode) {
-    return arkts.isVariableDeclaration(node) &&
-        node.declarators.every(
-            (it) => {
-                if (!arkts.isIdentifier(it.id)) {
-                    return false
-                }
-                return it.id.name.startsWith(RuntimeNames.PARAMETER)
-            }
-        )
 }
 
 
@@ -290,4 +238,16 @@ export function isMemoCall(node: arkts.AstNode): boolean {
     const decl = getDecl(node.callee)
     if (!arkts.isMethodDefinition(decl)) return false
     return isMemo(decl)
+}
+
+function isKoalaWorkspace() {
+    return process.env.KOALA_WORKSPACE == "1"
+}
+
+export function getRuntimePackage(): string {
+    if (isKoalaWorkspace()) {
+        return '@koalaui/runtime'
+    } else {
+        return 'arkui.stateManagement.runtime'
+    }
 }

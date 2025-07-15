@@ -14,7 +14,7 @@
  */
 
 import { Identifier } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { VariableDeclarator } from '../types';
 import { attachModifiers, updateThenAttach } from '../utilities/private';
 import { Es2pandaVariableDeclaratorFlag } from '../../../generated/Es2pandaEnums';

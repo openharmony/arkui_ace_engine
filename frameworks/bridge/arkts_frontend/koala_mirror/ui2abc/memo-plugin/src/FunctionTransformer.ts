@@ -21,6 +21,7 @@ import {
     RuntimeNames,
     getDeclResolveGensym,
     hasMemoStableAnnotation,
+    hasWrapAnnotation,
     isTrackableParam,
     moveToFront,
     shouldWrap,
@@ -104,7 +105,7 @@ function updateFunctionBody(
     const gensymParamsCount = fixGensymParams(parameterIdentifiers, node)
     const parameterNames = [...(shouldCreateMemoThisParam ? [RuntimeNames.THIS.valueOf()] : []), ...parameterIdentifiers.map(it => it.ident.name)]
     const scopeDeclaration = factory.createScopeDeclaration(
-        arkts.isTSThisType(returnTypeAnnotation) ? arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID) : returnTypeAnnotation,
+        arkts.isTSThisType(returnTypeAnnotation) ? undefined : returnTypeAnnotation,
         hash, parameterNames.length
     )
     const memoParametersDeclaration = parameterNames.length ? factory.createMemoParameterDeclaration(parameterNames) : undefined
@@ -176,10 +177,10 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
     }
 
     fixObjectArg(arg: arkts.Expression, param: arkts.ETSParameterExpression) {
-        if (param.typeAnnotation && arkts.isObjectExpression(arg)) {
+        if (param.typeAnnotation && (arkts.isObjectExpression(arg) || hasWrapAnnotation(param))) {
             return arkts.factory.createTSAsExpression(
                 arg,
-                param.typeAnnotation,
+                param.typeAnnotation.clone(),
                 false
             )
         }

@@ -73,4 +73,7 @@ export class global {
     }
 
     public static profiler = new Profiler()
+
+    // Check node type values during node creation
+    public static validatePeerTypes = false
 }

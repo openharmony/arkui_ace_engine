@@ -21,22 +21,22 @@ function main(): void {}
 });
 
 interface A {
-  @memo() abstract set a(a: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void))
+  @memo() set a(a: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void))
   
   @memo() get a(): ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void)
   
 }
 
 class AA {
-  @memo() public a: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined;
+  @memo() public a: (((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined);
   
   constructor() {
     this(undefined);
   }
   
-  public constructor(arg: A | undefined) {
-    this.a = ({let gensym%%_273 = arg;
-    (((gensym%%_273) == (null)) ? undefined : gensym%%_273.a)});
+  public constructor(arg: (A | undefined)) {
+    this.a = ({let gensym_XXX = arg;
+    (((gensym_XXX) == (null)) ? undefined : gensym_XXX.a)});
   }
   
   @memo() public build(__memo_context: __memo_context_type, __memo_id: __memo_id_type): void {
@@ -46,8 +46,8 @@ class AA {
       __memo_scope.cached;
       return;
     }
-    ({let gensym%%_274 = __memo_parameter_this.value.a;
-    (((gensym%%_274) == (null)) ? undefined : gensym%%_274(__memo_context, ((__memo_id) + (__hash("id_a_@test/HQ/property-constructor.ets")))))});
+    ({let gensym_XXX = __memo_parameter_this.value.a;
+    (((gensym_XXX) == (null)) ? undefined : gensym_XXX(__memo_context, ((__memo_id) + (__hash("id_a_@test/HQ/property-constructor.ets")))))});
     {
       __memo_scope.recache();
       return;

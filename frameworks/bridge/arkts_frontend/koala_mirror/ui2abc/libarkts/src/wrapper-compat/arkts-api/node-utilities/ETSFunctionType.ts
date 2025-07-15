@@ -14,7 +14,7 @@
  */
 
 import { ETSFunctionType, FunctionSignature } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { attachModifiers, updateThenAttach } from '../utilities/private';
 import { Es2pandaScriptFunctionFlags } from '../../../generated/Es2pandaEnums';
 

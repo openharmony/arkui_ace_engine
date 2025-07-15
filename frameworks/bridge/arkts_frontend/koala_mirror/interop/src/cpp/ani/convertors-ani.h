@@ -131,22 +131,22 @@ struct InteropTypeConverter<KVMObjectHandle> {
 
 template<>
 struct InteropTypeConverter<KInteropBuffer> {
-    using InteropType = ani_array_byte;
+    using InteropType = ani_fixedarray_byte;
     static inline KInteropBuffer convertFrom(ani_env* env, InteropType value) {
       if (value == nullptr) return KInteropBuffer();
       ani_size length = 0;
-      CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
+      CHECK_ANI_FATAL(env->FixedArray_GetLength(value, &length));
       KByte* data = new KByte[length];
-      CHECK_ANI_FATAL(env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data));
+      CHECK_ANI_FATAL(env->FixedArray_GetRegion_Byte(value, 0, length, (ani_byte*)data));
       KInteropBuffer result = { 0 };
       result.data = data;
       result.length = length;
       return result;
     }
     static inline InteropType convertTo(ani_env* env, KInteropBuffer value) {
-      ani_array_byte result;
+      ani_fixedarray_byte result;
       CHECK_ANI_FATAL(env->FixedArray_New_Byte(value.length, &result));
-      CHECK_ANI_FATAL(env->Array_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data)));
+      CHECK_ANI_FATAL(env->FixedArray_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data)));
       value.dispose(value.resourceId);
       return result;
     }
@@ -167,12 +167,12 @@ struct InteropTypeConverter<KSerializerBuffer> {
 
 template<>
 struct InteropTypeConverter<KInteropReturnBuffer> {
-    using InteropType = ani_array_byte;
+    using InteropType = ani_fixedarray_byte;
     static inline KInteropReturnBuffer convertFrom(ani_env* env, InteropType value) = delete;
     static inline InteropType convertTo(ani_env* env, KInteropReturnBuffer value) {
-      ani_array_byte result;
+      ani_fixedarray_byte result;
       CHECK_ANI_FATAL(env->FixedArray_New_Byte(value.length, &result));
-      CHECK_ANI_FATAL(env->Array_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data)));
+      CHECK_ANI_FATAL(env->FixedArray_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data)));
       value.dispose(value.data, value.length);
       return result;
     };
@@ -266,7 +266,9 @@ struct InteropTypeConverter<KByte*> {
       ani_size length = 0;
       CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
       KByte* data = new KByte[length];
-      CHECK_ANI_FATAL(env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data));
+      if (length > 0) {
+          CHECK_ANI_FATAL(env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data));
+      }
       return data;
     }
     static InteropType convertTo(ani_env* env, KByte* value) = delete;
@@ -274,7 +276,9 @@ struct InteropTypeConverter<KByte*> {
       if (converted) {
         ani_size length = 0;
         CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
-        CHECK_ANI_FATAL(env->Array_SetRegion_Byte(value, 0, length, (ani_byte*)converted));
+        if (length > 0) {
+            CHECK_ANI_FATAL(env->Array_SetRegion_Byte(value, 0, length, (ani_byte*)converted));
+        }
       }
       delete[] converted;
     }
@@ -613,7 +617,7 @@ MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3
 MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6, 0)
 
 #define KOALA_INTEROP_8(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7) \
-  InteropTypeConverter<Ret>::InteropType Ani_##name(ani_env *env, \
+  InteropTypeConverter<Ret>::InteropType Ani_##name(ani_env *env, ani_class clazz, \
     InteropTypeConverter<P0>::InteropType _p0, \
     InteropTypeConverter<P1>::InteropType _p1, \
     InteropTypeConverter<P2>::InteropType _p2, \
@@ -900,7 +904,7 @@ MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3
 MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7 "|" #P8 "|" #P9 "|" #P10 "|" #P11 "|" #P12 "|" #P13, 0)
 
 #define KOALA_INTEROP_V0(name) \
-  void Ani_##name(ani_env *env) { \
+  void Ani_##name(ani_env *env, ani_class clazz) { \
       KOALA_MAYBE_LOG(name)                   \
       impl_##name(); \
   } \

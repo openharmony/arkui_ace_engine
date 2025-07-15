@@ -15,7 +15,7 @@
 
 import { LabelPair } from '../../../generated/peers/LabelPair';
 import { BlockStatement, CatchClause, Statement, TryStatement } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { attachModifiers, updateThenAttach } from '../utilities/private';
 
 export function updateTryStatement(

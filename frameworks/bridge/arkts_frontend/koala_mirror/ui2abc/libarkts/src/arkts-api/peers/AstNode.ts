@@ -20,6 +20,7 @@ import { throwError } from "../../utils"
 import { Es2pandaModifierFlags } from "../../generated/Es2pandaEnums"
 import { ArktsObject } from "./ArktsObject"
 import { SourcePosition } from "./SourcePosition"
+import { NodeCache } from "../node-cache"
 
 export abstract class AstNode extends ArktsObject {
     protected constructor(peer: KNativePointer) {
@@ -28,7 +29,8 @@ export abstract class AstNode extends ArktsObject {
             throwError(`attempted to create AstNode from nullptr`)
         }
         super(peer)
-        this.updateChildren()
+        this.setChildrenParentPtr()
+        NodeCache.addToCache(peer, this)
     }
 
     public get originalPeer(): KNativePointer {
@@ -55,13 +57,6 @@ export abstract class AstNode extends ArktsObject {
             },
             [this]
         )
-    }
-
-    public updateChildren(): void {
-        if (this.peer === nullptr) {
-            throwError('updateChildren called on NULLPTR')
-        }
-        global.es2panda._AstNodeUpdateChildren(global.context, this.peer)
     }
 
     public updateModifiers(modifierFlags: KInt | undefined): this {
@@ -148,8 +143,19 @@ export abstract class AstNode extends ArktsObject {
         this.modifierFlags = flags
     }
 
-    public override onUpdate(node: AstNode): void {
-        global.generatedEs2panda._AstNodeSetOriginalNode(global.context, node.peer, this.originalPeer)
+    public setChildrenParentPtr(): void {
+        if (this.peer === nullptr) {
+            throwError('setChildrenParentPtr called on NULLPTR')
+        }
+        global.es2panda._AstNodeSetChildrenParentPtr(global.context, this.peer)
+    }
+
+    public override onUpdate(original: AstNode): void {
+        // TODO Update modifiers only for specific AST nodes in the generated factory code
+        this.modifierFlags = original.modifierFlags
+        global.generatedEs2panda._AstNodeSetOriginalNode(global.context, this.peer, original.originalPeer)
+        global.generatedEs2panda._AstNodeSetParent(global.context, this.peer, global.generatedEs2panda._AstNodeParent(global.context, original.peer))
+        this.setChildrenParentPtr()
     }
 
     public get isExport(): boolean {

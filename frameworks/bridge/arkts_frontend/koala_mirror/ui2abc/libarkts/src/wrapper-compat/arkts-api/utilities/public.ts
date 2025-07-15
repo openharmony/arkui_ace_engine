@@ -40,7 +40,7 @@ import {
 } from '../../../generated';
 import { Program } from '../peers/Program';
 import { clearNodeCache, nodeByType } from '../class-by-peer';
-import { SourcePosition } from '../peers/SourcePosition';
+import { SourcePosition } from '../../../arkts-api/peers/SourcePosition';
 import { MemberExpression } from '../to-be-generated/MemberExpression';
 
 export function proceedToState(state: Es2pandaContextState, context: KNativePointer, forceDtsEmit = false): void {

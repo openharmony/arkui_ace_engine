@@ -24,13 +24,15 @@
 
 static const char* KOALAUI_OHOS_LOG_ROOT = "/data/storage/el2/base/files/logs";
 
+#ifdef __STDC_LIB_EXT1__
 #define APPLY_LOG_FILE_PATTERN(buf, bufLen, t, ms, pid) \
-    #ifdef __STDC_LIB_EXT1__ \
-        sprintf_s(buf, bufLen, "%s/%d_%d_%d_%lld.pid%d.log", \
-    #else \
-        sprintf(buf, "%s/%d_%d_%d_%lld.pid%d.log", \
-    #endif \
+    sprintf_s(buf, bufLen, "%s/%d_%d_%d_%lld.pid%d.log", \
     KOALAUI_OHOS_LOG_ROOT, (t).tm_year + 1900, (t).tm_mon + 1, (t).tm_mday, (ms).tv_sec, pid)
+#else
+#define APPLY_LOG_FILE_PATTERN(buf, bufLen, t, ms, pid) \
+    sprintf(buf, "%s/%d_%d_%d_%lld.pid%d.log", \
+    KOALAUI_OHOS_LOG_ROOT, (t).tm_year + 1900, (t).tm_mon + 1, (t).tm_mday, (ms).tv_sec, pid)
+#endif
 
 const char* oh_sk_log_type_str(oh_sk_log_type type) {
     switch (type) {
