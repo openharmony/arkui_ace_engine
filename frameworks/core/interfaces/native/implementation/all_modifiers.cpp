@@ -632,7 +632,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetGridItemOpsAccessor,
         GetFilterAccessor,
         GetVisualEffectAccessor,
-		GetDatePickerSelectedOpsAccessor,
+        GetDatePickerSelectedOpsAccessor,
         GetNavigationOpsAccessor,
         GetCheckboxGroupOpsAccessor,
         GetCheckboxOpsAccessor,
