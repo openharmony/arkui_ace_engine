@@ -55,6 +55,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
         });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
+    pattern->SetModalRequestFocus(config.isModalRequestFocus);
     pattern->SetDensityDpi(config.isDensityFollowHost);
     pattern->SetIsWindowModeFollowHost(config.isWindowModeFollowHost);
     pattern->UpdateWant(want);

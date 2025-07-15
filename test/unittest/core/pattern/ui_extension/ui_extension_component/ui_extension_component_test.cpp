@@ -1933,4 +1933,49 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentOnDrawReadyTestNg, Test
     EXPECT_EQ(pattern->curPlaceholderType_, PlaceholderType::NONE);
 #endif
 }
+
+/**
+ * @tc.name: ModalUIExtensionTestNg
+ * @tc.desc: Test Modal UIExtension
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, ModalUIExtensionTestNgTestNg, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get UIExtensionPattern.
+     */
+    UIExtensionModelNG uecNG;
+    /**
+     * @tc.steps: step2. test Create with return FrameNode
+     */
+    OHOS::AAFwk::Want want;
+    want.SetElementName("com.example", "testuea");
+    want.SetParam("ability.want.params.uiExtensionType", std::string("sys/CommonUI"));
+    ModalUIExtensionCallbacks callbacks;
+    InnerModalUIExtensionConfig innerConfig;
+    auto node1 = uecNG.Create(want, callbacks, innerConfig);
+    ASSERT_NE(node1, nullptr);
+    auto pattern1 = node1->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern1, nullptr);
+    pattern1->OnAttachToMainTree();
+    ValidSessionWrapper(pattern1);
+    ValidSession(pattern1);
+    ASSERT_NE(pattern1->sessionWrapper_, nullptr);
+    pattern1->usage_ = UIExtensionUsage::MODAL;
+    auto focusHub1 = node1->GetFocusHub();
+    ASSERT_NE(focusHub1, nullptr);
+    pattern1->OnConnect();
+    innerConfig.isModalRequestFocus = false;
+    auto node2 = uecNG.Create(want, callbacks, innerConfig);
+    ASSERT_NE(node2, nullptr);
+    auto pattern2 = node2->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern2, nullptr);
+    pattern2->OnAttachToMainTree();
+    ValidSessionWrapper(pattern2);
+    ValidSession(pattern2);
+    ASSERT_NE(pattern2->sessionWrapper_, nullptr);
+    pattern1->usage_ = UIExtensionUsage::MODAL;
+    pattern2->OnConnect();
+    EXPECT_EQ(pattern2->isModalRequestFocus_, false);
+}
 } // namespace OHOS::Ace::NG
