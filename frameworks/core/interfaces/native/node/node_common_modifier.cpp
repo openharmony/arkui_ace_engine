@@ -90,6 +90,7 @@ constexpr int32_t DEFAULT_GRIDSPAN = 1;
 constexpr uint32_t DEFAULT_ALIGN_RULES_SIZE = 6;
 constexpr uint8_t DEFAULT_SAFE_AREA_TYPE = 0b111;
 constexpr uint8_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
+constexpr int32_t LAYOUT_SAFE_AREA_EDGE_LIMIT = 6;
 constexpr Dimension DEFAULT_FLEX_BASIS { 0.0, DimensionUnit::AUTO };
 constexpr int32_t DEFAULT_DISPLAY_PRIORITY = 0;
 constexpr int32_t DEFAULT_ID = 0;
@@ -951,6 +952,66 @@ void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, Ar
     }
     bgImgPosition.SetSizeX(animatableDimensionX);
     bgImgPosition.SetSizeY(animatableDimensionY);
+}
+
+LayoutSafeAreaEdge ParseIgnoresLayoutSafeAreaEdges(
+    const ArkUI_Int32* ignoreEdges, ArkUI_Int32 size, LayoutSafeAreaEdge defaultVal)
+{
+    if (ignoreEdges == nullptr || size <= 0) {
+        return NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    }
+    static std::vector<uint32_t> layoutEdgeEnum {
+        NG::LAYOUT_SAFE_AREA_EDGE_TOP,
+        NG::LAYOUT_SAFE_AREA_EDGE_BOTTOM,
+        NG::LAYOUT_SAFE_AREA_EDGE_START,
+        NG::LAYOUT_SAFE_AREA_EDGE_END,
+        NG::LAYOUT_SAFE_AREA_EDGE_VERTICAL,
+        NG::LAYOUT_SAFE_AREA_EDGE_HORIZONTAL,
+        NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    };
+    NG::LayoutSafeAreaEdge edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    for (int32_t i = 0; i < size; ++i) {
+        if (ignoreEdges[i] < 0 || ignoreEdges[i] > LAYOUT_SAFE_AREA_EDGE_LIMIT) {
+            return defaultVal;
+        }
+        edges |= layoutEdgeEnum[ignoreEdges[i]];
+    }
+    return edges;
+}
+
+void SetBackground(ArkUINodeHandle node, const ArkUIBackgroundContent* content, const ArkUIBackgroundOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(content);
+    CHECK_NULL_VOID(options);
+
+    ViewAbstract::SetIsTransitionBackground(frameNode, true);
+    ViewAbstract::SetIsBuilderBackground(frameNode, false);
+    Alignment alignment = ParseAlignment(options->align);
+    ViewAbstract::SetBackgroundAlign(frameNode, alignment);
+    LayoutSafeAreaEdge edges = ParseIgnoresLayoutSafeAreaEdges(
+        options->ignoresLayoutSafeAreaEdges, options->ignoresLayoutSafeAreaEdgesSize,
+        LAYOUT_SAFE_AREA_EDGE_ALL);
+    ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, edges);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* resObj = reinterpret_cast<ResourceObject*>(content->bgColorRawPtr);
+        auto backgroundColorResObj = AceType::Claim(resObj);
+        ViewAbstract::SetCustomBackgroundColorWithResourceObj(frameNode, Color(content->color), backgroundColorResObj);
+    } else {
+        ViewAbstract::SetCustomBackgroundColor(frameNode, Color(content->color));
+    }
+}
+
+void ResetBackground(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetIsTransitionBackground(frameNode, true);
+    ViewAbstract::SetIsBuilderBackground(frameNode, false);
+    ViewAbstract::SetBackgroundAlign(frameNode, Alignment::CENTER);
+    ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, LAYOUT_SAFE_AREA_EDGE_ALL);
+    ViewAbstract::SetCustomBackgroundColor(frameNode, Color::TRANSPARENT);
 }
 
 void SetBackgroundColor(ArkUINodeHandle node, uint32_t color, void* bgColorRawPtr)
@@ -8753,6 +8814,8 @@ const ArkUICommonModifier* GetCommonModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICommonModifier modifier = {
         .setOnTouchTestDoneCallback = SetOnTouchTestDoneCallback,
+        .setBackground = SetBackground,
+        .resetBackground = ResetBackground,
         .setBackgroundColor = SetBackgroundColor,
         .setBackgroundColorWithColorSpace = SetBackgroundColorWithColorSpace,
         .resetBackgroundColor = ResetBackgroundColor,

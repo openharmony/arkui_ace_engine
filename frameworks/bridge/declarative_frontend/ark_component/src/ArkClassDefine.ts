@@ -568,6 +568,26 @@ class ArkRegisterNativeEmbedRule {
   }
 }
 
+class ArkBackground {
+  content: ResourceColor | undefined;
+  align?: Alignment | undefined;
+  ignoresLayoutSafeAreaEdges?: Array<LayoutSafeAreaEdge> | undefined;
+
+  constructor() {
+    this.content = undefined;
+    this.align = undefined;
+    this.ignoresLayoutSafeAreaEdges = undefined;
+  }
+
+  isEqual(another: ArkBackground): boolean {
+    return (
+      this.content === another.content &&
+      this.align === another.align &&
+      deepCompareArrays(this.ignoresLayoutSafeAreaEdges, another.ignoresLayoutSafeAreaEdges)
+    );
+  }
+}
+
 class ArkBackgroundBlurStyle {
   blurStyle: number | undefined;
   colorMode: number | undefined;

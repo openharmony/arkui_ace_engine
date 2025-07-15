@@ -190,6 +190,8 @@ public:
         std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units);
     static void ParseJsAngle(const EcmaVM* vm, const Local<JSValueRef>& value, std::optional<float>& angle);
     static bool ParseJsInt32(const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& result);
+    static bool ParseJsIgnoresLayoutSafeAreaEdges(
+        const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUI_Int32>& edges);
     static void ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& value,
         std::vector<ArkUIInt32orFloat32>& values, std::vector<RefPtr<ResourceObject>>& vectorResObj);
     static void ParseGradientCenter(

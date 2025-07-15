@@ -76,9 +76,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     padding(value: Padding | Length): this;
     safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding): this;
     margin(value: Margin | Length): this;
-    background(builder: CustomBuilder, options?: {
-        align?: Alignment;
-    }): this;
+    background(content: CustomBuilder | ResourceColor, options?: BackgroundOptions): this;
     backgroundColor(value: ResourceColor): this;
     backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this;
     backgroundImageSize(value: SizeOptions | ImageSize): this;
