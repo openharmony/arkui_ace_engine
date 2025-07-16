@@ -43,6 +43,13 @@ napi_value CreateJSFileSelectorResultObject(napi_env env, const RefPtr<FileSelec
 napi_value CreateJSFileSelectorParamObject(napi_env env, const RefPtr<WebFileSelectorParam>& value);
 napi_value CreateJSContextMenuResultObject(napi_env env, const RefPtr<ContextMenuResult>& value);
 napi_value CreateJSContextMenuParamObject(napi_env env, const RefPtr<WebContextMenuParam>& value);
+napi_value CreateJSWebHttpAuthObject(napi_env env, const RefPtr<AuthResult>& value);
+napi_value CreateJSWebResourceResponseObject(napi_env env, const RefPtr<WebResponse>& value);
+napi_value CreateJSWebResourceRequestObject(napi_env env, const RefPtr<WebRequest>& value);
+napi_value CreateJSWebConsoleLogObject(napi_env env, const RefPtr<WebConsoleLog>& value);
+napi_value CreateJSDataResubmittedObject(napi_env env, const RefPtr<DataResubmitted>& value);
+napi_value CreateJSWebSslSelectCertObject(napi_env env, const RefPtr<SslSelectCertResult>& value);
+napi_value CreateJSWebSslErrorObject(napi_env env, const RefPtr<SslErrorResult>& value);
 }
 } // namespace OHOS::Ace
 
