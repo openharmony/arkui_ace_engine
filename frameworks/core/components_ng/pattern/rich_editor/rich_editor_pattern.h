@@ -907,7 +907,7 @@ public:
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
-    void InitAiSelection(const Offset& globalOffset);
+    void InitAiSelection(const Offset& globalOffset, bool isBetweenSelection = false);
     bool CheckAIPreviewMenuEnable();
     void CreateDragNode();
     float GetMaxSelectedWidth();
