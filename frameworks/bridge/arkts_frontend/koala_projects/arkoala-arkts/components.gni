@@ -127,6 +127,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/component/commonOps.ets",
   "arkui-preprocessed/arkui/component/commonTsEtsApi.ets",
   "arkui-preprocessed/arkui/component/component3d.ets",
+  "arkui-preprocessed/arkui/component/conditionScope.ets",
   "arkui-preprocessed/arkui/component/containerSpan.ets",
   "arkui-preprocessed/arkui/component/contentSlot.ets",
   "arkui-preprocessed/arkui/component/contextMenu.ets",

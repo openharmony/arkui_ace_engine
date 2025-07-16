@@ -13,32 +13,15 @@
  * limitations under the License.
  */
 
-import { conditionScopeImpl, conditionBranchImpl } from './conditionScope'
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_CONDITION_SCOPE_NODE_ANI_MODIFIER
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_CONDITION_SCOPE_NODE_ANI_MODIFIER
 
-export class WrappedBuilder<T> {
-    /** @memo */
-    builder: T;
-    constructor(t: T) {
-        this.builder = t;
-    }
-}
+#include "core/interfaces/ani/ani_api.h"
 
-export function wrapBuilder<T>(builder: T): WrappedBuilder<T> {
-    return new WrappedBuilder<T>(builder);
-}
+namespace OHOS::Ace::NG {
 
-/** @memo */
-export function ConditionScope(
-    /** @memo */
-    content: () => void
-): void {
-    conditionScopeImpl(content);
-}
+const ArkUIAniConditionScopeModifier* GetConditionScopeAniModifier();
 
-/** @memo */
-export function ConditionBranch(
-    /** @memo */
-    content: () => void
-): void {
-    conditionBranchImpl(content);
-}
+} // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_CONDITION_SCOPE_NODE_ANI_MODIFIER

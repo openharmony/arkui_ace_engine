@@ -13,32 +13,22 @@
  * limitations under the License.
  */
 
-import { conditionScopeImpl, conditionBranchImpl } from './conditionScope'
+#include "condition_scope.h"
+#include "load.h"
 
-export class WrappedBuilder<T> {
-    /** @memo */
-    builder: T;
-    constructor(t: T) {
-        this.builder = t;
+#include <memory>
+
+namespace OHOS::Ace::Ani {
+
+ani_long ConstructConditionScope(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return 0;
     }
+
+    // ani_object obj from ts is supposed to be processed here
+    return modifier->getArkUIAniConditionScopeModifier()->constructConditionScope(id);
 }
 
-export function wrapBuilder<T>(builder: T): WrappedBuilder<T> {
-    return new WrappedBuilder<T>(builder);
-}
-
-/** @memo */
-export function ConditionScope(
-    /** @memo */
-    content: () => void
-): void {
-    conditionScopeImpl(content);
-}
-
-/** @memo */
-export function ConditionBranch(
-    /** @memo */
-    content: () => void
-): void {
-    conditionBranchImpl(content);
-}
+} // namespace OHOS::Ace::Ani
