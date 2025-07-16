@@ -384,20 +384,22 @@ export class SerializerBase implements Disposable {
     }
     final writeString(value: string) {
         const encodedLength = unsafeMemory.getStringSizeInBytes(value)
-
+        const stringLenOccupiedBytes = 4
+        // Every character occupies 2 bytes when it is an utf16 string, and 1 byte when only contains latin.
+        const terminatorLen = encodedLength == value.length ? 1 : 2
+        const needCapacity = stringLenOccupiedBytes + encodedLength + terminatorLen
         let pos = this._position
-        if (pos + encodedLength + 5 > this._last) {
-            this.updateCapacity(encodedLength + 5)
+        if (pos + needCapacity > this._last) {
+            this.updateCapacity(needCapacity)
             pos = this._position
         }
 
+        unsafeMemory.writeInt32(pos, encodedLength + terminatorLen)
+
         if (encodedLength > 0)
-            unsafeMemory.writeString(pos + 4, value)
-        // NOTE: add \0 for supporting C char* reading from buffer for utf8-strings,
-        // need check native part fot utf16 cases and probably change this solution.
-        unsafeMemory.writeInt8(pos + encodedLength + 4, 0 as byte)
-        unsafeMemory.writeInt32(pos, encodedLength + 1)
-        this._position = pos + encodedLength + 4 + 1
+            unsafeMemory.writeString(pos + stringLenOccupiedBytes, value)
+
+        this._position = pos + needCapacity
     }
     //TODO: Needs to be implemented
     final writeBuffer(value: NativeBuffer) {
