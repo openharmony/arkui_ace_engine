@@ -186,12 +186,12 @@ export class Application {
     private rootState: ComputableState<PeerNode> | undefined = undefined
 
     constructor(useNativeLog: boolean, moduleName: string, startUrl: string, startParam: string, userView?: UserView, entryPoint?: EntryPoint) {
-        this.useNativeLog = useNativeLog
+        this.userView = userView
+        this.entryPoint = entryPoint
         this.moduleName = moduleName
         this.startUrl = startUrl
         this.startParam = startParam
-        this.userView = userView
-        this.entryPoint = entryPoint
+        this.useNativeLog = useNativeLog
     }
 
     static createMemoRootState(manager: StateManager,
@@ -360,7 +360,6 @@ export class Application {
         if (this.withLog) InteropNativeModule._NativeLog("ARKTS: render")
     }
     enter(arg0: int32, arg1: int32, foreignContext: pointer): boolean {
-        // TODO: maybe
         enterForeignContext(foreignContext)
         if (this.withLog) UserView.startNativeLog(1)
 

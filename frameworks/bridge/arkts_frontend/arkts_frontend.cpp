@@ -67,14 +67,6 @@ const AppInfo KOALA_APP_INFO = {
     "JILstd/core/String;:Z",
 };
 
-// void TryEmitError(EtsEnv& env)
-// {
-//     if (env.ErrorCheck()) {
-//         env.ErrorDescribe();
-//         env.ErrorClear();
-//     }
-// }
-
 std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* property)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "called");
@@ -146,11 +138,6 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
         LOGE("[%{public}s] Call enter method failed", __func__);
         return;
     }
-    // auto terminate = env.CallBooleanMethod((ets_object)(app), (ets_method)(enter), (ets_int)0, (ets_int)0);
-    // TryEmitError(env);
-    // if (terminate) {
-    //     exit(0);
-    // }
 }
 
 // fire all arkoala callbacks at the tail of vsync (PipelineContext::FlushVsync)
