@@ -763,14 +763,6 @@ BackgroundImageSize Convert(const Ark_ImageSize& src)
 }
 
 template<>
-std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src)
-{
-    auto x = OptConvert<Dimension>(src.x);
-    auto y = OptConvert<Dimension>(src.y);
-    return {x, y};
-}
-
-template<>
 TranslateOpt Convert(const Ark_TranslateOptions& src)
 {
     TranslateOpt translateOptions;
@@ -829,15 +821,21 @@ float Convert(const Ark_ForegroundEffectOptions& src)
 }
 
 template<>
-BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)
+OverlayOptions Convert(const Ark_OverlayOptions& src)
 {
-    BlurStyleOption dst;
-    dst.colorMode = OptConvert<ThemeColorMode>(src.colorMode).value_or(dst.colorMode);
-    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
-    if (auto scaleOpt = OptConvert<float>(src.scale); scaleOpt) {
-        dst.scale = static_cast<double>(*scaleOpt);
+    OverlayOptions dst;
+    auto align = Converter::OptConvert<Alignment>(src.align);
+    if (align) {
+        dst.align = align.value();
     }
-    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
+    auto x = Converter::OptConvert<Dimension>(src.offset.value.x);
+    if (x) {
+        dst.x = x.value();
+    }
+    auto y = Converter::OptConvert<Dimension>(src.offset.value.y);
+    if (y) {
+        dst.y = y.value();
+    }
     return dst;
 }
 

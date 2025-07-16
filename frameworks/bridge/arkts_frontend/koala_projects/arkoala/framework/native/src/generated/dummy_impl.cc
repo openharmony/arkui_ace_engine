@@ -29321,6 +29321,31 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         const Callback_Opt_Array_String_Void* promiseValue)
     {
     }
+    void OpenMenuImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Ark_TargetInfo* targetInfo,
+        const Opt_MenuOptions* options,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void UpdateMenuImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Ark_MenuOptions* options,
+        const Opt_Boolean* partialUpdate,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void CloseMenuImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
     } // PromptActionAccessor
 
     namespace SpringPropAccessor {
@@ -44968,6 +44993,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             PromptActionAccessor::OpenPopupImpl,
             PromptActionAccessor::UpdatePopupImpl,
             PromptActionAccessor::ClosePopupImpl,
+            PromptActionAccessor::OpenMenuImpl,
+            PromptActionAccessor::UpdateMenuImpl,
+            PromptActionAccessor::CloseMenuImpl,
         };
         return &PromptActionAccessorImpl;
     }

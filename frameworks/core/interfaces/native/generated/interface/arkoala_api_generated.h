@@ -27534,6 +27534,25 @@ typedef struct GENERATED_ArkUIPromptActionAccessor {
                             Ark_PromptAction peer,
                             Ark_NativePointer content,
                             const Callback_Opt_Array_String_Void* promiseValue);
+    void (*openMenu)(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                        Ark_PromptAction peer,
+                        Ark_NativePointer content,
+                        const Ark_TargetInfo* targetInfo,
+                        const Opt_MenuOptions* options,
+                        const Callback_Opt_Array_String_Void* promiseValue);
+    void (*updateMenu)(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                         Ark_PromptAction peer,
+                         Ark_NativePointer content,
+                         const Ark_MenuOptions* options,
+                         const Opt_Boolean* partialUpdate,
+                         const Callback_Opt_Array_String_Void* promiseValue);
+    void (*closeMenu)(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
+                            Ark_PromptAction peer,
+                            Ark_NativePointer content,
+                            const Callback_Opt_Array_String_Void* promiseValue);
 } GENERATED_ArkUIPromptActionAccessor;
 
 typedef struct GENERATED_ArkUIRouterExtenderAccessor {

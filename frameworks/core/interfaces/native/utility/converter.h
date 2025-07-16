@@ -477,6 +477,7 @@ namespace Converter {
     template<> Ark_CharPtr Convert(const Ark_Undefined& src);
     template<> BlurOption Convert(const Ark_BlurOptions& src);
     template<> BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src);
+    template<> BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src);
     template<> BorderColorProperty Convert(const Ark_EdgeColors& src);
     template<> BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src);
     template<> BorderColorProperty Convert(const Ark_ResourceColor& src);
@@ -623,6 +624,7 @@ namespace Converter {
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src);
     template<> std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src);
+    template<> std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src);
     template<> std::set<SourceTool> Convert(const Array_SourceTool& src);
     template<> std::set<std::string> Convert(const Array_UniformDataType& src);
     template<> std::string Convert(const Ark_CommandPath& src);
