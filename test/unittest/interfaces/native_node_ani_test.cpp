@@ -56,3 +56,17 @@ HWTEST_F(NativeNodeAniTest, NativeNodeAniTest002, TestSize.Level1)
     int32_t code = OH_ArkUI_NativeModule_GetNodeHandleFromAniValue(env, value, nodeHandle);
     EXPECT_EQ(code, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
+
+/**
+ * @tc.name: NativeNodeAniTest003
+ * @tc.desc: Test OH_ArkUI_NativeModule_GetNodeContentFromAniValue function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeAniTest, NativeNodeAniTest003, TestSize.Level1)
+{
+    ani_env* env = nullptr;
+    ani_object value = nullptr;
+    ArkUI_NodeContentHandle* content = nullptr;
+    int32_t code = OH_ArkUI_NativeModule_GetNodeContentFromAniValue(env, value, content);
+    EXPECT_EQ(code, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
