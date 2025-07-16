@@ -16,6 +16,7 @@
 import { TypeChecker } from "#components"
 import { ArkUIAniModule } from "arkui.ani"
 import { registerNativeModuleLibraryName } from '@koalaui/interop'
+import { ClientAuthenticationHandler, ConsoleMessage, DataResubmissionHandler, HttpAuthHandler, SslErrorHandler, WebResourceRequest, WebResourceResponse } from "src/component"
 
 function registerAllNativeModuleLibraryName() {
     registerNativeModuleLibraryName('InteropNativeModule', 'ArkoalaNative_ark.z')
@@ -118,5 +119,138 @@ export class ArkWebTransfer {
         }
         const value_casted = value as WebContextMenuResult
         return ArkUIAniModule._TransferWebContextMenuResultToDynamic(value_casted.peer!.ptr)
+    }
+
+    public static transferHttpAuthHandlerToStatic(value: Object | undefined | null): Object {
+        registerAllNativeModuleLibraryName()
+        if (value === undefined || value === null) {
+            throw new Error('dynamic object is null or undefined')
+        }
+        let result: HttpAuthHandler = new HttpAuthHandler()
+        if (!ArkUIAniModule._TransferHttpAuthHandlerToStatic(result.peer!.ptr, value)) {
+            throw new Error('transfer failed')
+        }
+        return result as Object
+    }
+    public static transferHttpAuthHandlerToDynamic(value: Object): Object | undefined | null {
+        if (!TypeChecker.isHttpAuthHandler(value)) {
+            throw new Error('static object type mismatch')
+        }
+        const value_casted = value as HttpAuthHandler
+        return ArkUIAniModule._TransferHttpAuthHandlerToDynamic(value_casted.peer!.ptr)
+    }
+
+    public static transferWebResourceReponseToStatic(value: Object | undefined | null): Object {
+        registerAllNativeModuleLibraryName()
+        if (value === undefined || value === null) {
+            throw new Error('dynamic object is null or undefined')
+        }
+        let result: WebResourceResponse = new WebResourceResponse()
+        if (!ArkUIAniModule._TransferWebResourceReponseToStatic(result.peer!.ptr, value)) {
+            throw new Error('transfer failed')
+        }
+        return result as Object
+    }
+    public static transferWebResourceReponseToDynamic(value: Object): Object | undefined | null {
+        if (!TypeChecker.isWebResourceResponse(value)) {
+            throw new Error('static object type mismatch')
+        }
+        const value_casted = value as WebResourceResponse
+        return ArkUIAniModule._TransferWebResourceReponseToDynamic(value_casted.peer!.ptr)
+    }
+
+    public static transferWebResourceRequestToStatic(value: Object | undefined | null): Object {
+        registerAllNativeModuleLibraryName()
+        if (value === undefined || value === null) {
+            throw new Error('dynamic object is null or undefined')
+        }
+        let result: WebResourceRequest = new WebResourceRequest()
+        if (!ArkUIAniModule._TransferWebResourceRequestToStatic(result.peer!.ptr, value)) {
+            throw new Error('transfer failed')
+        }
+        return result as Object
+    }
+    public static transferWebResourceRequestToDynamic(value: Object): Object | undefined | null {
+        if (!TypeChecker.isWebResourceRequest(value)) {
+            throw new Error('static object type mismatch')
+        }
+        const value_casted = value as WebResourceRequest
+        return ArkUIAniModule._TransferWebResourceRequestToDynamic(value_casted.peer!.ptr)
+    }
+
+    public static transferConsoleMessageToStatic(value: Object | undefined | null): Object {
+        registerAllNativeModuleLibraryName()
+        if (value === undefined || value === null) {
+            throw new Error('dynamic object is null or undefined')
+        }
+        let result: ConsoleMessage = new ConsoleMessage()
+        if (!ArkUIAniModule._TransferConsoleMessageToStatic(result.peer!.ptr, value)) {
+            throw new Error('transfer failed')
+        }
+        return result as Object
+    }
+    public static transferConsoleMessageToDynamic(value: Object): Object | undefined | null {
+        if (!TypeChecker.isConsoleMessage(value)) {
+            throw new Error('static object type mismatch')
+        }
+        const value_casted = value as ConsoleMessage
+        return ArkUIAniModule._TransferConsoleMessageToDynamic(value_casted.peer!.ptr)
+    }
+
+    public static transferDataResubmissionHandlerToStatic(value: Object | undefined | null): Object {
+        registerAllNativeModuleLibraryName()
+        if (value === undefined || value === null) {
+            throw new Error('dynamic object is null or undefined')
+        }
+        let result: DataResubmissionHandler = new DataResubmissionHandler()
+        if (!ArkUIAniModule._TransferDataResubmissionHandlerToStatic(result.peer!.ptr, value)) {
+            throw new Error('transfer failed')
+        }
+        return result as Object
+    }
+    public static transferDataResubmissionHandlerToDynamic(value: Object): Object | undefined | null {
+        if (!TypeChecker.isDataResubmissionHandler(value)) {
+            throw new Error('static object type mismatch')
+        }
+        const value_casted = value as DataResubmissionHandler
+        return ArkUIAniModule._TransferDataResubmissionHandlerToDynamic(value_casted.peer!.ptr)
+    }
+
+    public static transferClientAuthenticationHandlerToStatic(value: Object | undefined | null): Object {
+        registerAllNativeModuleLibraryName()
+        if (value === undefined || value === null) {
+            throw new Error('dynamic object is null or undefined')
+        }
+        let result: ClientAuthenticationHandler = new ClientAuthenticationHandler()
+        if (!ArkUIAniModule._TransferClientAuthenticationHandlerToStatic(result.peer!.ptr, value)) {
+            throw new Error('transfer failed')
+        }
+        return result as Object
+    }
+    public static transferClientAuthenticationHandlerToDynamic(value: Object): Object | undefined | null {
+        if (!TypeChecker.isClientAuthenticationHandler(value)) {
+            throw new Error('static object type mismatch')
+        }
+        const value_casted = value as ClientAuthenticationHandler
+        return ArkUIAniModule._TransferClientAuthenticationHandlerToDynamic(value_casted.peer!.ptr)
+    }
+
+    public static transferSslErrorHandlerToStatic(value: Object | undefined | null): Object {
+        registerAllNativeModuleLibraryName()
+        if (value === undefined || value === null) {
+            throw new Error('dynamic object is null or undefined')
+        }
+        let result: SslErrorHandler = new SslErrorHandler()
+        if (!ArkUIAniModule._TransferSslErrorHandlerToStatic(result.peer!.ptr, value)) {
+            throw new Error('transfer failed')
+        }
+        return result as Object
+    }
+    public static transferSslErrorHandlerToDynamic(value: Object): Object | undefined | null {
+        if (!TypeChecker.isWebContextMenuResult(value)) {
+            throw new Error('static object type mismatch')
+        }
+        const value_casted = value as SslErrorHandler
+        return ArkUIAniModule._TransferSslErrorHandlerToDynamic(value_casted.peer!.ptr)
     }
 }

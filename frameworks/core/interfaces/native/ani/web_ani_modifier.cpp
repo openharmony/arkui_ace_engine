@@ -25,6 +25,13 @@
 #include "core/interfaces/native/implementation/js_result_peer_impl.h"
 #include "core/interfaces/native/implementation/web_context_menu_param_peer_impl.h"
 #include "core/interfaces/native/implementation/web_context_menu_result_peer_impl.h"
+#include "core/interfaces/native/implementation/http_auth_handler_peer_impl.h"
+#include "core/interfaces/native/implementation/web_resource_response_peer_impl.h"
+#include "core/interfaces/native/implementation/web_resource_request_peer_impl.h"
+#include "core/interfaces/native/implementation/console_message_peer_impl.h"
+#include "core/interfaces/native/implementation/data_resubmission_handler_peer_impl.h"
+#include "core/interfaces/native/implementation/client_authentication_handler_peer_impl.h"
+#include "core/interfaces/native/implementation/ssl_error_handler_peer_impl.h"
 
 #include "core/components/web/web_transfer_api.h"
 #endif
@@ -192,6 +199,181 @@ napi_value TransferWebContextMenuParamToDynamic(napi_env env, void* peer)
 #endif // WEB_SUPPORTED
 }
 
+bool TransferHttpAuthHandlerToStatic(void* peer, void* nativePtr)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<HttpAuthHandlerPeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, false);
+    auto* transfer = reinterpret_cast<WebTransferBase<RefPtr<AuthResult>>*>(nativePtr);
+    CHECK_NULL_RETURN(transfer, false);
+    objectPeer->handler = transfer->get<0>();
+    return true;
+#else
+    return false;
+#endif // WEB_SUPPORTED
+}
+
+napi_value TransferHttpAuthHandlerToDynamic(napi_env env, void* peer)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<HttpAuthHandlerPeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, nullptr);
+    return OHOS::Ace::Framework::CreateJSWebHttpAuthObject(env, objectPeer->handler);
+#else
+    return nullptr;
+#endif // WEB_SUPPORTED
+}
+
+bool TransferWebResourceReponseToStatic(void* peer, void* nativePtr)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<WebResourceResponsePeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, false);
+    auto* transfer = reinterpret_cast<WebTransferBase<RefPtr<WebResponse>>*>(nativePtr);
+    CHECK_NULL_RETURN(transfer, false);
+    objectPeer->handler = transfer->get<0>();
+    return true;
+#else
+    return false;
+#endif // WEB_SUPPORTED
+}
+
+napi_value TransferWebResourceReponseToDynamic(napi_env env, void* peer)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<WebResourceResponsePeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, nullptr);
+    return OHOS::Ace::Framework::CreateJSWebResourceResponseObject(env, objectPeer->handler);
+#else
+    return nullptr;
+#endif // WEB_SUPPORTED
+}
+
+bool TransferWebResourceRequestToStatic(void* peer, void* nativePtr)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<WebResourceRequestPeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, false);
+    auto* transfer = reinterpret_cast<WebTransferBase<RefPtr<WebRequest>>*>(nativePtr);
+    CHECK_NULL_RETURN(transfer, false);
+    objectPeer->handler = transfer->get<0>();
+    return true;
+#else
+    return false;
+#endif // WEB_SUPPORTED
+}
+
+napi_value TransferWebResourceRequestToDynamic(napi_env env, void* peer)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<WebResourceRequestPeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, nullptr);
+    return OHOS::Ace::Framework::CreateJSWebResourceRequestObject(env, objectPeer->handler);
+#else
+    return nullptr;
+#endif // WEB_SUPPORTED
+}
+
+bool TransferConsoleMessageToStatic(void* peer, void* nativePtr)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<ConsoleMessagePeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, false);
+    auto* transfer = reinterpret_cast<WebTransferBase<RefPtr<WebConsoleLog>>*>(nativePtr);
+    CHECK_NULL_RETURN(transfer, false);
+    objectPeer->handler = transfer->get<0>();
+    return true;
+#else
+    return false;
+#endif // WEB_SUPPORTED
+}
+
+napi_value TransferConsoleMessageToDynamic(napi_env env, void* peer)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<ConsoleMessagePeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, nullptr);
+    return OHOS::Ace::Framework::CreateJSWebConsoleLogObject(env, objectPeer->handler);
+#else
+    return nullptr;
+#endif // WEB_SUPPORTED
+}
+
+bool TransferDataResubmissionHandlerToStatic(void* peer, void* nativePtr)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<DataResubmissionHandlerPeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, false);
+    auto* transfer = reinterpret_cast<WebTransferBase<RefPtr<DataResubmitted>>*>(nativePtr);
+    CHECK_NULL_RETURN(transfer, false);
+    objectPeer->handler = transfer->get<0>();
+    return true;
+#else
+    return false;
+#endif // WEB_SUPPORTED
+}
+
+napi_value TransferDataResubmissionHandlerToDynamic(napi_env env, void* peer)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<DataResubmissionHandlerPeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, nullptr);
+    return OHOS::Ace::Framework::CreateJSDataResubmittedObject(env, objectPeer->handler);
+#else
+    return nullptr;
+#endif // WEB_SUPPORTED
+}
+
+bool TransferClientAuthenticationHandlerToStatic(void* peer, void* nativePtr)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<ClientAuthenticationHandlerPeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, false);
+    auto* transfer = reinterpret_cast<WebTransferBase<RefPtr<SslSelectCertResult>>*>(nativePtr);
+    CHECK_NULL_RETURN(transfer, false);
+    objectPeer->handler = transfer->get<0>();
+    return true;
+#else
+    return false;
+#endif // WEB_SUPPORTED
+}
+
+napi_value TransferClientAuthenticationHandlerToDynamic(napi_env env, void* peer)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<ClientAuthenticationHandlerPeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, nullptr);
+    return OHOS::Ace::Framework::CreateJSWebSslSelectCertObject(env, objectPeer->handler);
+#else
+    return nullptr;
+#endif // WEB_SUPPORTED
+}
+
+bool TransferSslErrorHandlerToStatic(void* peer, void* nativePtr)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<SslErrorHandlerPeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, false);
+    auto* transfer = reinterpret_cast<WebTransferBase<RefPtr<SslErrorResult>>*>(nativePtr);
+    CHECK_NULL_RETURN(transfer, false);
+    objectPeer->handler = transfer->get<0>();
+    return true;
+#else
+    return false;
+#endif // WEB_SUPPORTED
+}
+
+napi_value TransferSslErrorHandlerToDynamic(napi_env env, void* peer)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<SslErrorHandlerPeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, nullptr);
+    return OHOS::Ace::Framework::CreateJSWebSslErrorObject(env, objectPeer->handler);
+#else
+    return nullptr;
+#endif // WEB_SUPPORTED
+}
+
 const ArkUIAniWebModifier* GetWebAniModifier()
 {
     static const ArkUIAniWebModifier impl = {
@@ -202,11 +384,25 @@ const ArkUIAniWebModifier* GetWebAniModifier()
         .transferFileSelectorParamToStatic = OHOS::Ace::NG::TransferFileSelectorParamToStatic,
         .transferWebContextMenuResultToStatic = OHOS::Ace::NG::TransferWebContextMenuResultToStatic,
         .transferWebContextMenuParamToStatic = OHOS::Ace::NG::TransferWebContextMenuParamToStatic,
+        .transferHttpAuthHandlerToStatic = OHOS::Ace::NG::TransferHttpAuthHandlerToStatic,
+        .transferWebResourceReponseToStatic = OHOS::Ace::NG::TransferWebResourceReponseToStatic,
+        .transferWebResourceRequestToStatic = OHOS::Ace::NG::TransferWebResourceRequestToStatic,
+        .transferConsoleMessageToStatic = OHOS::Ace::NG::TransferConsoleMessageToStatic,
+        .transferDataResubmissionHandlerToStatic = OHOS::Ace::NG::TransferDataResubmissionHandlerToStatic,
+        .transferClientAuthenticationHandlerToStatic = OHOS::Ace::NG::TransferDataResubmissionHandlerToStatic,
+        .transferSslErrorHandlerToStatic = OHOS::Ace::NG::TransferSslErrorHandlerToStatic,
         .transferJsResultToDynamic = OHOS::Ace::NG::TransferJsResultToDynamic,
         .transferFileSelectorResultToDynamic = OHOS::Ace::NG::TransferFileSelectorResultToDynamic,
         .transferFileSelectorParamToDynamic = OHOS::Ace::NG::TransferFileSelectorParamToDynamic,
         .transferWebContextMenuResultToDynamic = OHOS::Ace::NG::TransferWebContextMenuResultToDynamic,
         .transferWebContextMenuParamToDynamic = OHOS::Ace::NG::TransferWebContextMenuParamToDynamic,
+        .transferHttpAuthHandlerToDynamic = OHOS::Ace::NG::TransferHttpAuthHandlerToDynamic,
+        .transferWebResourceReponseToDynamic = OHOS::Ace::NG::TransferWebResourceReponseToDynamic,
+        .transferWebResourceRequestToDynamic = OHOS::Ace::NG::TransferWebResourceRequestToDynamic,
+        .transferConsoleMessageToDynamic = OHOS::Ace::NG::TransferConsoleMessageToDynamic,
+        .transferDataResubmissionHandlerToDynamic = OHOS::Ace::NG::TransferDataResubmissionHandlerToDynamic,
+        .transferClientAuthenticationHandlerToDynamic = OHOS::Ace::NG::TransferClientAuthenticationHandlerToDynamic,
+        .transferSslErrorHandlerToDynamic = OHOS::Ace::NG::TransferClientAuthenticationHandlerToDynamic,
     };
     return &impl;
 }
