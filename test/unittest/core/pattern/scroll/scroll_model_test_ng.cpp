@@ -1054,4 +1054,312 @@ HWTEST_F(ScrollModelNGTestNg, SetOnWillScroll_TwoParameters, TestSize.Level1)
     EXPECT_EQ(scrollEventWithReturn.xOffset.Value(), 12.0);
     EXPECT_EQ(scrollEventWithReturn.yOffset.Value(), 0.0);
 }
+
+/**
+ * @tc.name: SetOnDidScroll_TwoParameters
+ * @tc.desc: Test ScrollModelNG SetOnDidScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetOnDidScroll_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    auto eventHub = scrollNode->GetOrCreateEventHub<ScrollEventHub>();
+    bool scrollCallback = false;
+    auto scrollHandler = [&scrollCallback](Dimension deltaX, Dimension deltaY, ScrollState state) {
+        switch (state) {
+            case ScrollState::IDLE: {
+                scrollCallback = false;
+                break;
+            }
+            case ScrollState::SCROLL: {
+                scrollCallback = true;
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    };
+
+    /**
+     * @tc.steps: step2. Calling the SetOnDidScroll function
+     * @tc.expected: The scrollCallback from false to true
+     */
+    scrollModelNG.SetOnDidScroll(AceType::RawPtr(scrollNode), scrollHandler);
+    auto onDidScrollEvent = eventHub->GetOnDidScrollEvent();
+    onDidScrollEvent(Dimension(10.0), Dimension(5.0), ScrollState::SCROLL);
+    EXPECT_TRUE(scrollCallback);
+}
+
+/**
+ * @tc.name: SetOnReachStart_TwoParameters
+ * @tc.desc: Test ScrollModelNG SetOnReachStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetOnReachStart_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    auto eventHub = scrollNode->GetOrCreateEventHub<ScrollableEventHub>();
+    bool onStart = false;
+    auto onReachStart = [&onStart]() { onStart = true; };
+
+    /**
+     * @tc.steps: step2. Calling the SetOnReachStart function
+     * @tc.expected: The onStart from false to true
+     */
+    scrollModelNG.SetOnReachStart(AceType::RawPtr(scrollNode), onReachStart);
+    auto onReachStartEvent = eventHub->GetOnReachStart();
+    onReachStartEvent();
+    EXPECT_TRUE(onStart);
+}
+
+/**
+ * @tc.name: SetOnReachEnd_TwoParameters
+ * @tc.desc: Test ScrollModelNG SetOnReachEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetOnReachEnd_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    auto eventHub = scrollNode->GetOrCreateEventHub<ScrollableEventHub>();
+    bool onEnd = false;
+    auto onReachEnd = [&onEnd]() { onEnd = true; };
+
+    /**
+     * @tc.steps: step2. Calling the SetOnReachEnd function
+     * @tc.expected: The onEnd from false to true
+     */
+    scrollModelNG.SetOnReachEnd(AceType::RawPtr(scrollNode), onReachEnd);
+    auto onReachEndEvent = eventHub->GetOnReachEnd();
+    onReachEndEvent();
+    EXPECT_TRUE(onEnd);
+}
+
+/**
+ * @tc.name: SetScrollSnap_FiveParameters001
+ * @tc.desc: Test ScrollModelNG SetScrollSnap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetScrollSnap_FiveParameters001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    scrollPattern->SetScrollSnapUpdate(false);
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    RefPtr<ScrollLayoutProperty> layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::CENTER);
+    scrollNode->SetLayoutProperty(layoutProperty);
+    scrollPattern->frameNode_ = scrollNode;
+    Dimension intervalSize(10.0);
+    std::vector<Dimension> snapPaginations = { Dimension(2.0), Dimension(4.0) };
+    std::pair<bool, bool> enableSnapToSide = std::make_pair(true, false);
+    scrollPattern->scrollSnapUpdate_ = false;
+
+    /**
+     * @tc.steps: step2. Set the scrollSnapAlign to NONE
+     * @tc.expected: The scrollSnapUpdate_ return true
+     */
+    scrollModelNG.SetScrollSnap(
+        AceType::RawPtr(scrollNode), ScrollSnapAlign::NONE, intervalSize, snapPaginations, enableSnapToSide);
+    auto endElement = scrollPattern->GetSnapPaginations().back();
+    EXPECT_EQ(endElement.Value(), 4.0);
+    EXPECT_TRUE(scrollPattern->GetEnableSnapToSide().first);
+    EXPECT_TRUE(scrollPattern->GetScrollSnapUpdate());
+}
+
+/**
+ * @tc.name: SetScrollSnap_FiveParameters002
+ * @tc.desc: Test ScrollModelNG SetScrollSnap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetScrollSnap_FiveParameters002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    scrollPattern->SetIntervalSize(Dimension(6.0));
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    RefPtr<ScrollLayoutProperty> layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::CENTER);
+    scrollNode->SetLayoutProperty(layoutProperty);
+    scrollPattern->frameNode_ = scrollNode;
+    Dimension intervalSize(10.0);
+    std::vector<Dimension> snapPaginations = { Dimension(2.0), Dimension(4.0) };
+    std::pair<bool, bool> enableSnapToSide = std::make_pair(true, false);
+
+    /**
+     * @tc.steps: step2. Set the scrollSnapAlign to CENTER
+     * @tc.expected: The value of intervalSize_ return 10.0
+     */
+    scrollModelNG.SetScrollSnap(
+        AceType::RawPtr(scrollNode), ScrollSnapAlign::CENTER, intervalSize, snapPaginations, enableSnapToSide);
+    auto headElement = scrollPattern->GetSnapPaginations().front();
+    EXPECT_EQ(headElement.Value(), 2.0);
+    EXPECT_EQ(scrollPattern->GetIntervalSize().Value(), 10.0);
+}
+
+/**
+ * @tc.name: SetScrollBarColor_OneParameter
+ * @tc.desc: Test ScrollModelNG SetScrollBarColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetScrollBarColor_OneParameter, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->layoutSeperately_ = true;
+    RefPtr<ScrollablePaintProperty> paintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
+    scrollNode->paintProperty_ = paintProperty;
+    stack->Push(scrollNode);
+    Color color = Color::TRANSPARENT;
+
+    /**
+     * @tc.steps: step2. Calling the SetScrollBarColor function
+     * @tc.expected: The GetScrollBarColor returns TRANSPARENT
+     */
+    scrollModelNG.SetScrollBarColor(color);
+    EXPECT_EQ(scrollModelNG.GetScrollBarColor(AceType::RawPtr(scrollNode)), color.GetValue());
+}
+
+/**
+ * @tc.name: SetScrollEnabled_OneParameter
+ * @tc.desc: Test ScrollModelNG SetScrollEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetScrollEnabled_OneParameter, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->layoutSeperately_ = true;
+    RefPtr<ScrollLayoutProperty> layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    scrollNode->SetLayoutProperty(layoutProperty);
+    stack->Push(scrollNode);
+
+    /**
+     * @tc.steps: step2. Calling the SetScrollEnabled function
+     * @tc.expected: The GetScrollEnabled returns TRUE
+     */
+    scrollModelNG.SetScrollEnabled(true);
+    EXPECT_TRUE(scrollModelNG.GetScrollEnabled(AceType::RawPtr(scrollNode)));
+}
+
+/**
+ * @tc.name: SetOnScrollEdge_TwoParameters
+ * @tc.desc: Test ScrollModelNG SetOnScrollEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetOnScrollEdge_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    auto eventHub = scrollNode->GetOrCreateEventHub<ScrollEventHub>();
+    bool edgeEvent = false;
+    auto edgeHandler = [&edgeEvent](ScrollEdge edge) {
+        if (edge == ScrollEdge::TOP || edge == ScrollEdge::BOTTOM) {
+            edgeEvent = true;
+        } else {
+            edgeEvent = false;
+        }
+    };
+
+    /**
+     * @tc.steps: step2. Calling the SetOnScrollEdge function
+     * @tc.expected: The edgeEvent from false to true
+     */
+    scrollModelNG.SetOnScrollEdge(AceType::RawPtr(scrollNode), edgeHandler);
+    auto onEdgeEvent = eventHub->GetScrollEdgeEvent();
+    onEdgeEvent(ScrollEdge::BOTTOM);
+    EXPECT_TRUE(edgeEvent);
+}
+
+/**
+ * @tc.name: SetInitialOffset_TwoParameters
+ * @tc.desc: Test ScrollModelNG SetInitialOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetInitialOffset_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    OffsetT<CalcDimension> offset(CalcDimension(2.0), CalcDimension(4.0));
+
+    /**
+     * @tc.steps: step2. Calling the SetOnScrollEdge function
+     * @tc.expected: The value of initialOffset_ return {2.0, 4.0}
+     */
+    scrollModelNG.SetInitialOffset(AceType::RawPtr(scrollNode), offset);
+    EXPECT_EQ(scrollPattern->GetInitialOffset().GetX().Value(), 2.0);
+    EXPECT_EQ(scrollPattern->GetInitialOffset().GetY().Value(), 4.0);
+}
+
+/**
+ * @tc.name: SetScrollBarProxy_TwoParameters
+ * @tc.desc: Test ScrollModelNG SetScrollBarProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, SetScrollBarProxy_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ScrollModelNG scrollModelNG;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    RefPtr<ScrollBarProxy> proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+
+    /**
+     * @tc.steps: step2. Calling the SetScrollBarProxy function
+     * @tc.expected: The GetScrollBarProxy() of scrollPattern returns proxy
+     */
+    scrollModelNG.SetScrollBarProxy(AceType::RawPtr(scrollNode), proxy);
+    EXPECT_EQ(scrollPattern->GetScrollBarProxy(), proxy);
+}
 } // namespace OHOS::Ace::NG
