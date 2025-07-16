@@ -366,7 +366,6 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/modifiers/ArkSymbolGlyphNode.ets",
   "arkui-preprocessed/arkui/handwritten/modifiers/ArkTextAreaNode.ets",
   "arkui-preprocessed/arkui/handwritten/modifiers/ArkTextInputNode.ets",
-  "arkui-preprocessed/arkui/handwritten/modifiers/ArkTextModifier.ets",
   "arkui-preprocessed/arkui/handwritten/modifiers/ArkTextNode.ets",
   "arkui-preprocessed/arkui/index.ets",
   "arkui-preprocessed/arkui/ohos.arkui.modifier.ets",
