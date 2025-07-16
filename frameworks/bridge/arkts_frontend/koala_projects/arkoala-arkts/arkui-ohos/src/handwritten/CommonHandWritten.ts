@@ -35,10 +35,10 @@ export function hookCommonMethodGestureImpl(commonMethod: ArkCommonMethodCompone
 export function hookCommonMethodPriorityGestureImpl(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
     if (gesture instanceof Gesture) {
         let singleGesture = gesture as Gesture;
-        singleGesture.setGesture(2, commonMethod.getPeer(), mask);
+        singleGesture.setGesture(1, commonMethod.getPeer(), mask);
     } else {
         let gestureGroup = gesture as GestureGroup;
-        gestureGroup.addGestureGroupToNode(2, commonMethod.getPeer(), mask)
+        gestureGroup.addGestureGroupToNode(1, commonMethod.getPeer(), mask)
     }
 }
 
