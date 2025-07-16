@@ -49,6 +49,8 @@ bool GetBackgroundBlurStyleOptions(ani_env* env, ani_object object, std::optiona
 bool GetBackgroundEffectOptions(ani_env* env, ani_object object, std::optional<OHOS::Ace::EffectOption>& result);
 bool GetLevelMode(ani_env* env, ani_object object, OHOS::Ace::LevelMode& result);
 bool GetImmersiveMode(ani_env* env, ani_object object, OHOS::Ace::ImmersiveMode& result);
+void UpdateDialogAlignment(OHOS::Ace::DialogAlignment& alignment);
+bool GetOnLanguageChange(OHOS::Ace::DialogProperties& dialogProps);
 bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
 bool GetShowDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
 ani_ref CreateShowDialogSuccessResponse(ani_env* env, int32_t index);
