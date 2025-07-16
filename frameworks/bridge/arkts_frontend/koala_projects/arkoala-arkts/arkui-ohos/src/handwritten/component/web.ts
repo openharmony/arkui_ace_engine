@@ -25,6 +25,25 @@ function registerAllNativeModuleLibraryName() {
 }
 
 export class ArkWebTransfer {
+    public static transferScreenCaptureHandlerStatic(value: Object | undefined | null): Object {
+        registerAllNativeModuleLibraryName()
+        if (value === undefined || value === null) {
+            throw new Error("dynamicObject is null or undefined")
+        }
+        let result: ScreenCaptureHandler = new ScreenCaptureHandler();
+        if (!ArkUIAniModule._TransferScreenCaptureHandlerToStatic(result.peer!.ptr, value)) {
+            throw new Error("transfer failed")
+        }
+        return result as Object
+    }
+    public static transferScreenCaptureHandlerDynamic(value: Object): Object | undefined | null {
+        if (!TypeChecker.isScreenCaptureHandler(value)) {
+            throw new Error("staticObject type mismatch")
+        }
+        const value_casted = value as ScreenCaptureHandler
+        return ArkUIAniModule._TransferScreenCaptureHandlerToDynamic(value_casted.peer!.ptr)
+    }
+
     public static transferFileSelectorParamStatic(value: Object | undefined | null): Object {
         registerAllNativeModuleLibraryName()
         if (value === undefined || value === null) {
