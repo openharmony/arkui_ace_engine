@@ -50,11 +50,45 @@ export default namespace matrix4 {
     class Matrix4TransitInner implements Matrix4Transit {
         private matrix4Object:long = 0;
 
+        static {
+            loadLibrary("matrix4_ani");
+        }
+
         constructor(context:long) {
             if(this.matrix4Object == 0){
                 this.matrix4Object = context;
             }
         }
+
+        static matrixTransferStatic(input: Any): Any {
+            let inputVal = ESValue.wrap(input) as ESValue;
+            if (inputVal && inputVal.getProperty("matrix4x4")) {
+                let matrixTuple = inputVal.getProperty("matrix4x4");
+                let arrVal: number[] = new Array<number>
+                for (let i = 0; i < 16; i++) {
+                    arrVal.push(matrixTuple.getProperty(i).toNumber());
+                }
+                return Matrix4TransitInner.nativeTransferStatic(arrVal);
+            }
+            return undefined;
+        }
+
+        static matrixTransferDynamic(input: Any): Any {
+            let matrixObj = input as Matrix4TransitInner;
+            if (matrixObj) {
+                let addr = matrixObj.matrix4Object;
+                let module = ESValue.load("@ohos.matrix4");
+                let initFunc = module.getProperty("__InitTransfer__")
+                if (initFunc) {
+                    let initArr = initFunc.invoke(ESObject.wrap(addr));
+                    return initArr;
+                }
+            }
+            return undefined;
+        }
+
+        private static native nativeTransferStatic(input: Any): Any;
+
         public native copy():Matrix4Transit;
         public native invert():Matrix4Transit;
         public native combine(options: Matrix4Transit): Matrix4Transit;

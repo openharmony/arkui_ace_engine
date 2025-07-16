@@ -164,9 +164,19 @@ public:
         return animator_;
     }
 
+    void SetAnimator(RefPtr<Animator>& animator)
+    {
+        animator_ = animator;
+    }
+
     std::shared_ptr<AnimatorOption> GetAnimatorOption() const
     {
         return option_;
+    }
+
+    void SetAnimatorOption(std::shared_ptr<AnimatorOption> option)
+    {
+        option_ = option;
     }
 
     napi_ref GetOnframeRef() const
