@@ -121,6 +121,10 @@ void PluginSubContainer::Destroy()
 {
     TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "PluginSubContainer Destroy.");
     ContainerScope scope(instanceId_);
+    auto frameNode = pluginNode_.Upgrade();
+    if (frameNode) {
+        frameNode->RemoveChild(pageNode_.Upgrade());
+    }
     ResourceManager::GetInstance().RemoveResourceAdapter("", "", instanceId_);
     if (frontend_) {
         frontend_->Destroy();

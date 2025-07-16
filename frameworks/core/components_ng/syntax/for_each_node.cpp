@@ -156,7 +156,6 @@ void ForEachNode::MappingChildWithId(std::unordered_set<std::string>& oldIdsSet,
                 // foreach node use some swap magic to re add every child to children_ list,
                 // so we reset parent here to avoid the double add check in AddChild.
                 (*newCompsIter)->SetAncestor(nullptr);
-                (*newCompsIter)->SetParent(nullptr, false);
                 // Call AddChild to execute AttachToMainTree of new child.
                 // Allow adding default transition.
                 AddChild(*newCompsIter, DEFAULT_NODE_SLOT, false, true);
@@ -169,7 +168,6 @@ void ForEachNode::MappingChildWithId(std::unordered_set<std::string>& oldIdsSet,
                 // foreach node use some swap magic to re add every child to children_ list,
                 // so we reset parent here to avoid the double add check in AddChild.
                 iter->second->SetAncestor(nullptr);
-                iter->second->SetParent(nullptr, false);
                 AddChild(iter->second, DEFAULT_NODE_SLOT, true);
             }
         }
