@@ -16142,7 +16142,7 @@ typedef struct Opt_WebKeyboardOptions {
     Ark_WebKeyboardOptions value;
 } Opt_WebKeyboardOptions;
 typedef struct Ark_WebMediaOptions {
-    Opt_Number resumeInterval;
+    Opt_Int32 resumeInterval;
     Opt_Boolean audioExclusive;
 } Ark_WebMediaOptions;
 typedef struct Opt_WebMediaOptions {

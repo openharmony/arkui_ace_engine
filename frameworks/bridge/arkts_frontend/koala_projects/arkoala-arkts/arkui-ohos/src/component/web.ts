@@ -3221,7 +3221,7 @@ export enum ThreatType {
     THREAT_WARNING = 3
 }
 export interface WebMediaOptions {
-    resumeInterval?: number;
+    resumeInterval?: int32;
     audioExclusive?: boolean;
 }
 export interface ScreenCaptureConfig {

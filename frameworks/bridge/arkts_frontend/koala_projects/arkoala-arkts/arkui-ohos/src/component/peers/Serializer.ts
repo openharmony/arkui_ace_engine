@@ -8078,7 +8078,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_resumeInterval_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_resumeInterval_type)) {
             const value_resumeInterval_value  = value_resumeInterval!
-            valueSerializer.writeNumber(value_resumeInterval_value)
+            valueSerializer.writeInt32(value_resumeInterval_value)
         }
         const value_audioExclusive  = value.audioExclusive
         let value_audioExclusive_type : int32 = RuntimeType.UNDEFINED

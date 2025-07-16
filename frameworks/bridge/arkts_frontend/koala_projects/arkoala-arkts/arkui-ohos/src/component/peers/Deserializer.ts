@@ -12849,12 +12849,12 @@ export class Deserializer extends DeserializerBase {
     readWebMediaOptions(): WebMediaOptions {
         let valueDeserializer : Deserializer = this
         const resumeInterval_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let resumeInterval_buf : number | undefined
+        let resumeInterval_buf : int32 | undefined
         if ((RuntimeType.UNDEFINED) != (resumeInterval_buf_runtimeType))
         {
-            resumeInterval_buf = (valueDeserializer.readNumber() as number)
+            resumeInterval_buf = (valueDeserializer.readInt32().toInt())
         }
-        const resumeInterval_result : number | undefined = resumeInterval_buf
+        const resumeInterval_result : int32 | undefined = resumeInterval_buf
         const audioExclusive_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let audioExclusive_buf : boolean | undefined
         if ((RuntimeType.UNDEFINED) != (audioExclusive_buf_runtimeType))
