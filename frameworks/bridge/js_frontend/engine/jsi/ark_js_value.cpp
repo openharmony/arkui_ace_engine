@@ -29,6 +29,18 @@ int32_t ArkJSValue::ToInt32(shared_ptr<JsRuntime> runtime)
     return value_->Int32Value(vm);
 }
 
+int64_t ArkJSValue::ToInt64(const shared_ptr<JsRuntime>& runtime)
+{
+    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    const EcmaVM* vm = pandaRuntime->GetEcmaVm();
+    LocalScope scope(vm);
+    if (CheckException(pandaRuntime)) {
+        LOGE("ArkJSValue::ToInt64 occurs exception, return 0 directly");
+        return 0;
+    }
+    return value_->IntegerValue(vm);
+}
+
 double ArkJSValue::ToDouble(shared_ptr<JsRuntime> runtime)
 {
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
