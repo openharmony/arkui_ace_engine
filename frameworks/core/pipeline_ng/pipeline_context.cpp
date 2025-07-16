@@ -708,7 +708,7 @@ void PipelineContext::UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string
     }
 }
 
-void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
 {
     CHECK_RUN_ON(UI);
     if (IsDestroyed()) {
@@ -717,7 +717,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     SetVsyncTime(nanoTimestamp);
     ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64 "][instanceID:%d]",
-        nanoTimestamp, static_cast<uint64_t>(frameCount), instanceId_);
+        nanoTimestamp, frameCount, instanceId_);
     window_->Lock();
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
                                                ? GetBundleName()
@@ -738,7 +738,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     ProcessDelayTasks();
     DispatchDisplaySync(nanoTimestamp);
     FlushAnimation(nanoTimestamp);
-    FlushFrameCallback(nanoTimestamp);
+    FlushFrameCallback(nanoTimestamp, frameCount);
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushDragEvents();
@@ -5892,23 +5892,34 @@ void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, Axis
     eventManager_->CheckAndLogLastConsumedAxisEventInfo(eventId, action);
 }
 
-void PipelineContext::FlushFrameCallback(uint64_t nanoTimestamp)
+void PipelineContext::FlushFrameCallback(uint64_t nanoTimestamp, uint64_t frameCount)
 {
+    // UINT64_MAX means recover vsync, just request frame.
+    if (frameCount == UINT64_MAX) {
+        RequestFrame();
+        return;
+    }
     if (!frameCallbackFuncs_.empty()) {
-        decltype(frameCallbackFuncs_) tasks(std::move(frameCallbackFuncs_));
+        decltype(frameCallbackFuncs_) tasks;
+        std::swap(tasks, frameCallbackFuncs_);
         for (const auto& frameCallbackFunc : tasks) {
             frameCallbackFunc(nanoTimestamp);
         }
     }
 }
 
-void PipelineContext::FlushFrameCallbackFromCAPI(uint64_t nanoTimestamp, uint32_t frameCount)
+void PipelineContext::FlushFrameCallbackFromCAPI(uint64_t nanoTimestamp, uint64_t frameCount)
 {
+    // UINT64_MAX means recover vsync, just request frame.
+    if (frameCount == UINT64_MAX) {
+        RequestFrame();
+        return;
+    }
     if (!frameCallbackFuncsFromCAPI_.empty()) {
         decltype(frameCallbackFuncsFromCAPI_) tasks;
         std::swap(tasks, frameCallbackFuncsFromCAPI_);
         for (const auto& frameCallbackFuncFromCAPI : tasks) {
-            frameCallbackFuncFromCAPI(nanoTimestamp, frameCount);
+            frameCallbackFuncFromCAPI(nanoTimestamp, static_cast<uint32_t>(frameCount));
         }
     }
 }

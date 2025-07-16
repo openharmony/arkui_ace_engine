@@ -1984,7 +1984,7 @@ void PipelineContext::SetCardViewAccessibilityParams(const std::string& key, boo
     accessibilityManager->SetCardViewParams(key, focus);
 }
 
-void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
