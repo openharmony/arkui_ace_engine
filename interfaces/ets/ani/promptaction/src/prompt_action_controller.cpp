@@ -130,13 +130,13 @@ static ani_enum_item CommonControllerGetState(ani_env* env, ani_object object)
     ani_enum enumType;
     ani_status status = env->FindEnum("L@ohos/promptAction/promptAction/CommonState;", &enumType);
     if (status != ANI_OK) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "CommonState FindEnum fail. status: %{public}d", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "CommonState FindEnum fail. status: %{public}d", status);
         return enumItem;
     }
 
     status = env->Enum_GetEnumItemByName(enumType, "UNINITIALIZED", &enumItem);
     if (status != ANI_OK) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "Get UNINITIALIZED fail. status: %{public}d", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "Get UNINITIALIZED fail. status: %{public}d", status);
         return enumItem;
     }
     return enumItem;
@@ -147,7 +147,7 @@ ani_status BindCommonController(ani_env* env)
     ani_class commonControllerCls;
     ani_status status = env->FindClass("L@ohos/promptAction/promptAction/CommonController;", &commonControllerCls);
     if (status != ANI_OK) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "CommonController FindClass fail. status: %{public}d", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "CommonController FindClass fail. status: %{public}d", status);
         return ANI_ERROR;
     }
 
@@ -159,7 +159,7 @@ ani_status BindCommonController(ani_env* env)
     status = env->Class_BindNativeMethods(
         commonControllerCls, commonControllerMethods.data(), commonControllerMethods.size());
     if (status != ANI_OK) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "CommonController BindMethods fail. status: %{public}d", status);
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "CommonController BindMethods fail. status: %{public}d", status);
         return ANI_ERROR;
     }
     return ANI_OK;
