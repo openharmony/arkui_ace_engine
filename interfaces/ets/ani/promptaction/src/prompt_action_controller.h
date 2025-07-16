@@ -52,6 +52,7 @@ ani_long ANICreateDialogController(ani_env* env, ani_object object);
 void ANICloseDialog(ani_env* env, ani_object object);
 void ANICleanDialogController(ani_env* env, ani_object object);
 ani_status BindDialogController(ani_env* env);
+ani_status BindCommonController(ani_env* env);
 bool GetDialogController(ani_env* env, ani_object object,
     std::function<void(RefPtr<NG::FrameNode> dialogNode)>& result);
 

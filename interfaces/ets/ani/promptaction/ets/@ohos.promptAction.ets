@@ -301,6 +301,6 @@ export default namespace promptAction {
     export native function presentCustomDialog(builder: long, controller?: DialogController, options?: DialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<number>;
 
-    export native function getTopOrder(): number;
-    export native function getBottomOrder(): number;
+    export native function getTopOrder(): number | undefined;
+    export native function getBottomOrder(): number | undefined;
 }
