@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/particle/particle_model.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/slider/slider_model.h"
@@ -686,6 +687,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src);
     template<> void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButtonDirection& src);
     template<> void AssignCast(std::optional<DialogButtonStyle>& dst, const Ark_DialogButtonStyle& src);
+    template<> void AssignCast(std::optional<DistributionType>& dst, const Ark_DistributionType& src);
     template<> void AssignCast(std::optional<Dimension>& dst, const Ark_ArrowPointPosition& src);
     template<> void AssignCast(std::optional<DimensionUnit>& dst, const Ark_LengthUnit& src);
     template<> void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);
@@ -759,6 +761,10 @@ namespace Converter {
     template<> void AssignCast(std::optional<BlurOnKeyboardHideMode>& dst, const Ark_BlurOnKeyboardHideMode& src);
     template<> void AssignCast(std::optional<PanDirection>& dst, const Ark_PanDirection& src);
     template<> void AssignCast(std::optional<PanelMode>& dst, const Ark_PanelMode& src);
+    template<> void AssignCast(std::optional<ParticleEmitterShape>& dst, const Ark_ParticleEmitterShape& src);
+    template<> void AssignCast(std::optional<ParticleType>& dst, const Ark_ParticleType& src);
+    template<> void AssignCast(std::optional<UpdaterType>& dst, const Ark_ParticleUpdater& src);
+    template<> void AssignCast(std::optional<ParticleDisturbanceShapeType>& dst, const Ark_DisturbanceFieldShape& src);
     template<> void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src);
     template<> void AssignCast(std::optional<Placement>& dst, const Ark_Placement& src);
     template<> void AssignCast(std::optional<RectHeightStyle>& dst, const Ark_RectHeightStyle& src);
