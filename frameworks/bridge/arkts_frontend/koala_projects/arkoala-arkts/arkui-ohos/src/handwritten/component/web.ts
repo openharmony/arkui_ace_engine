@@ -16,6 +16,7 @@
 import { TypeChecker } from "#components"
 import { ArkUIAniModule } from "arkui.ani"
 import { registerNativeModuleLibraryName } from '@koalaui/interop'
+import { ClientAuthenticationHandler, ConsoleMessage, DataResubmissionHandler, HttpAuthHandler, SslErrorHandler, WebResourceRequest, WebResourceResponse } from "src/component"
 
 function registerAllNativeModuleLibraryName() {
     registerNativeModuleLibraryName('InteropNativeModule', 'ArkoalaNative_ark.z')
