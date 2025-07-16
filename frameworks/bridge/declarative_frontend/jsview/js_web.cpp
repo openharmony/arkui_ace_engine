@@ -829,7 +829,7 @@ private:
     RefPtr<WebScreenCaptureRequest> request_;
 };
 
-class JSNativeEmbedGestureRequest : public Referenced {
+class JSNativeEmbedGestureRequest : public WebTransferBase<RefPtr<GestureEventResult>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -843,6 +843,7 @@ public:
     void SetResult(const RefPtr<GestureEventResult>& result)
     {
         eventResult_ = result;
+        transferValues_ = std::make_tuple(eventResult_);
     }
 
     void SetGestureEventResult(const JSCallbackInfo& args)
@@ -5502,6 +5503,7 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSNativeEmbedGestureRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedGestureRequest>());
     requestEvent->SetResult(eventInfo.GetResult());
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(requestEvent.GetRawPtr()));
     obj->SetPropertyObject("result", requestObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -6203,6 +6205,7 @@ void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
 }
 
 ARKWEB_CREATE_JS_OBJECT(Result, JSWebDialog, SetResult, value)
+ARKWEB_CREATE_JS_OBJECT(GestureEventResult, JSNativeEmbedGestureRequest, SetResult, value)
 ARKWEB_CREATE_JS_OBJECT(FileSelectorResult, JSFileSelectorResult, SetResult, FileSelectorEvent(nullptr, value))
 ARKWEB_CREATE_JS_OBJECT(WebFileSelectorParam, JSFileSelectorParam, SetParam, FileSelectorEvent(value, nullptr))
 ARKWEB_CREATE_JS_OBJECT(ContextMenuResult, JSContextMenuResult, SetResult, ContextMenuEvent(nullptr, value))
