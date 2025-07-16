@@ -57,7 +57,7 @@ public:
     void TearDown() override
     {
         ScrollTestNg::TearDown();
-        MockAnimationManager::GetInstance().SetTicks(1);
+        MockAnimationManager::GetInstance().Reset();
     }
 
     static GestureEvent MakePanGesture(const Offset& delta, const Velocity& velocity = Velocity())
@@ -388,6 +388,27 @@ TEST_F(FreeScrollTest, OverScroll002)
     controller->offset_->Set(OffsetF { -X, -Y });
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(alignX, alignY - Y).ToString());
+}
+
+/**
+ * @tc.name: ScrollTo001
+ * @tc.desc: Test ScrollTo animation interrupt
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollTo001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    PanStart({});
+    PanUpdate({ -DELTA_X, -DELTA_Y });
+    PanEnd({}, { -VELOCITY_X, -VELOCITY_Y });
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::FLING);
+
+    pattern_->freeScroll_->ScrollTo(
+        OffsetF(-DELTA_X, -DELTA_Y), {});
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::IDLE); // destination reached immediately, previous animation is stopped
 }
 
 /**
@@ -1085,6 +1106,42 @@ TEST_F(FreeScrollTest, ScrollBar006)
     FlushUITasks(frameNode_);
     EXPECT_EQ(horizontalBar.opacityAnimationType_, OpacityAnimationType::NONE);
     EXPECT_EQ(painter.opacity_->Get(), 0);
+}
+
+/**
+ * @tc.name: ScrollBar007
+ * @tc.desc: Test scrollBar overScroll
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollBar007)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    PanStart({});
+    PanUpdate({ DELTA_X, DELTA_Y });
+    auto& bar = *pattern_->scrollBar2d_->horizontal_;
+    EXPECT_GT(GetChildX(frameNode_, 0), 0);
+    EXPECT_GT(bar.GetOutBoundary(), 0);
+
+    ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::NONE, true, EffectEdge::ALL);
+    pattern_->OnModifyDone();
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0);
+    EXPECT_EQ(bar.GetOutBoundary(), 0);
+
+    MockAnimationManager::GetInstance().SetTicks(2);
+    PanEnd({}, {VELOCITY_X, VELOCITY_Y});
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::FLING);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(bar.GetOutBoundary(), 0);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(bar.GetOutBoundary(), 0);
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::IDLE);
 }
 
 /**
