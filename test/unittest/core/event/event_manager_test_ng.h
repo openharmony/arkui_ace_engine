@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
+#include "core/event/resample_algo.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
