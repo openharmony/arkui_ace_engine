@@ -672,8 +672,8 @@ public:
     static void SetDashWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBackShadow(FrameNode* frameNode, const Shadow& shadow);
     static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
-    static void SetPosition(FrameNode* frameNode, const Dimension& x, const Dimension& y,
-        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj);
+    static void SetPosition(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj,
+        const RefPtr<ResourceObject>& yresObj);
     static void SetPositionX(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj);
     static void SetPositionY(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& yresObj);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);

@@ -6123,11 +6123,10 @@ void ViewAbstract::SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& v
     ACE_UPDATE_NODE_RENDER_CONTEXT(Position, value, frameNode);
 }
 
-void ViewAbstract::SetPosition(FrameNode* frameNode, const Dimension& x, const Dimension& y,
-    const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj)
+void ViewAbstract::SetPosition(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj,
+    const RefPtr<ResourceObject>& yresObj)
 {
     CHECK_NULL_VOID(frameNode);
-    OffsetT<Dimension> value = { x, y };
     SetPositionX(frameNode, value, xresObj);
     SetPositionY(frameNode, value, yresObj);
     CheckIfParentNeedMarkDirty(frameNode);

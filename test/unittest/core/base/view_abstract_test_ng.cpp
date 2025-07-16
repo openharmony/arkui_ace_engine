@@ -3488,6 +3488,36 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0083, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ViewAbstractTestNg0084
+ * @tc.desc: Test the operation of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0084, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    OffsetT<Dimension> value = { ZERO, ZERO };
+    ViewAbstract::SetPosition(frameNode, value, resObj, resObj);
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    g_isConfigChangePerform = true;
+    ViewAbstract::SetPosition(frameNode, value, resObj, resObj);
+    pattern->OnColorModeChange(1);
+    g_isConfigChangePerform = false;
+
+    auto context = frameNode->GetRenderContext();
+    EXPECT_NE(context, nullptr);
+    OffsetT<Dimension> defaultDimension = { WIDTH, HEIGHT };
+    auto positionValue = context->GetPositionValue(OffsetT<Dimension>(defaultDimension));
+    EXPECT_EQ(positionValue.GetX(), ZERO);
+    EXPECT_EQ(positionValue.GetY(), ZERO);
+}
+
+/**
  * @tc.name: ViewAbstractSetClickFocusTest001
  * @tc.desc: Test that container node becomes focusable when click event is set and no focusable children exist.
  * @tc.type: FUNC
