@@ -88,6 +88,14 @@ void FreeScrollController::InitializePanRecognizer()
     freePanGesture_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
     freePanGesture_->SetIsSystemGesture(true);
     freePanGesture_->SetIsAllowMouse(false);
+    freePanGesture_->SetSysGestureJudge([](const RefPtr<GestureInfo>& gestureInfo,
+                                           const std::shared_ptr<BaseGestureEvent>& info) {
+        if (gestureInfo->GetInputEventType() == InputEventType::AXIS &&
+            (info->IsKeyPressed(KeyCode::KEY_CTRL_LEFT) || info->IsKeyPressed(KeyCode::KEY_CTRL_RIGHT))) {
+            return GestureJudgeResult::REJECT;
+        }
+        return GestureJudgeResult::CONTINUE;
+    });
 }
 
 namespace {

@@ -214,6 +214,11 @@ public:
         pressedKeyCodes_ = pressedKeyCodes;
     }
 
+    bool IsKeyPressed(KeyCode code) const
+    {
+        return (std::find(pressedKeyCodes_.begin(), pressedKeyCodes_.end(), code) != pressedKeyCodes_.end());
+    }
+
     int32_t GetPostEventNodeId() const
     {
         return postEventNodeId_;
