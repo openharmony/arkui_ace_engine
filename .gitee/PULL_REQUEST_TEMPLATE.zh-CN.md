@@ -3,10 +3,10 @@
 **Sig**: SIG_ApplicationFramework
 **Feature or Bugfix**: (需求填Feature,缺陷填Bugfix)
 **Binary Source**: No(涉及则Yes)
-**是否涉及非兼容变更**: (是/否/不涉及)
+**是否涉及非兼容变更**: (是/否)
 **TDD自验结果(如有失败用例需提供基线执行情况)**: (Pass/Fail/不涉及)
 **XTS自验结果(如有失败用例需提供基线执行情况)**: (Pass/Fail/不涉及)
-**检视意见是否都已闭环(无检视意见请填Yes)**: (Yes/No)
+**检视意见是否都已闭环(无检视意见填是)**: (是/否)
 
 ### 是否已执行L0用例
 - [ ] 已验证
