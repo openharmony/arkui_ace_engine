@@ -188,7 +188,8 @@ ani_boolean TransferScreenCaptureHandlerToStatic(ani_env* env, ani_class aniClas
         HILOGE("TransferScreenCaptureHandlerToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
-    return modifier->getWebAniModifier()->transferScreenCaptureHandlerToStatic(reinterpret_cast<void*>(node), nativePtr);
+    return modifier->getWebAniModifier()->
+        transferScreenCaptureHandlerToStatic(reinterpret_cast<void*>(node), nativePtr);
 }
 
 ani_boolean TransferJsResultToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
