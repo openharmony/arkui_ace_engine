@@ -269,6 +269,14 @@ public:
                      holder.end());
     }
 
+    void UnRegisterWillDrawCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb) {}
+
+    void RegisterWillDrawCallback(int32_t uiContextInstanceId, ani_ref& cb) {}
+
+    void UnRegisterDidLayoutCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb) {}
+
+    void RegisterDidLayoutCallback(int32_t uiContextInstanceId, ani_ref& cb) {}
+
     void RegisterDidClickCallback(int32_t uiContextInstanceId, ani_ref& cb)
     {
         id_ = uiContextInstanceId;
@@ -479,12 +487,15 @@ static void On([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object
         observer->RegisterWillClickCallback(idMs, fnObjGlobalRef);
     } else if (typeStr == "didClick") {
         observer->RegisterDidClickCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "willDraw") {
+        observer->RegisterWillDrawCallback(idMs, fnObjGlobalRef);
+    } else if (typeStr == "didLayout") {
+        observer->RegisterDidLayoutCallback(idMs, fnObjGlobalRef);
     }
 }
 
 static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_string type, ani_fn_object fnObj)
 {
-    LOGE("lzr in off");
     auto* observer = Unwrapp(env, object);
     if (observer == nullptr) {
         LOGE("observer-ani context is null.");
@@ -509,6 +520,10 @@ static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object objec
         observer->UnRegisterWillClickCallback(env, idMs, fnObjGlobalRef);
     } else if (typeStr == "didClick") {
         observer->UnRegisterDidClickCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "willDraw") {
+        observer->UnRegisterWillDrawCallback(env, idMs, fnObjGlobalRef);
+    } else if (typeStr == "didLayout") {
+        observer->UnRegisterDidLayoutCallback(env, idMs, fnObjGlobalRef);
     }
 }
 
