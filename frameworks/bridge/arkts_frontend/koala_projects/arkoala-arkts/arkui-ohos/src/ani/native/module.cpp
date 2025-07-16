@@ -83,6 +83,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWebControllerControllerHandler)
         },
         ani_native_function {
+            "_TransferScreenCaptureHandlerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferScreenCaptureHandlerToStatic)
+        },
+        ani_native_function {
             "_TransferJsResultToStatic",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferJsResultToStatic)
@@ -106,6 +111,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_TransferWebContextMenuParamToStatic",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebContextMenuParamToStatic)
+        },
+        ani_native_function {
+            "_TransferScreenCaptureHandlerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferScreenCaptureHandlerToDynamic)
         },
         ani_native_function {
             "_TransferJsResultToDynamic",
