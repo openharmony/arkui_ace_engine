@@ -188,22 +188,33 @@ void ScrollBar2D::Update(const std::unique_ptr<ScrollBarProperty>& props)
     UpdateBorderRadius(*horizontal_, renderContext);
 }
 
+namespace {
+struct LayoutData {
+    SizeF viewSize;
+    Axis axis;
+    OffsetF offset;
+    float contentLength = 0.0f;
+    bool canOverScroll = true;
+};
+void SyncScrollBarLayout(ScrollBar& bar, const LayoutData& data)
+{
+    const float scrollableArea = data.contentLength - data.viewSize.MainSize(data.axis);
+    bar.SetScrollable(Positive(scrollableArea));
+    bar.ScheduleDisappearDelayTask();
+    bar.SetOutBoundary(data.canOverScroll ? GetOverScroll(data.offset.GetMainOffset(data.axis), scrollableArea) : 0.0f);
+
+    bar.UpdateScrollBarRegion({}, { data.viewSize.Width(), data.viewSize.Height() },
+        { -data.offset.GetX(), -data.offset.GetY() }, data.contentLength, 0);
+    bar.MarkNeedRender();
+}
+} // namespace
+
 void ScrollBar2D::SyncLayout(const OffsetF& offset, const SizeF& viewSize, const SizeF& content)
 {
     CHECK_NULL_VOID(vertical_ && horizontal_);
-    const auto scrollableArea = content - viewSize;
-    vertical_->SetScrollable(Positive(scrollableArea.Height()));
-    horizontal_->SetScrollable(Positive(scrollableArea.Width()));
-    vertical_->ScheduleDisappearDelayTask();
-    horizontal_->ScheduleDisappearDelayTask();
-    vertical_->SetOutBoundary(GetOverScroll(offset.GetY(), content.Height() - viewSize.Height()));
-    horizontal_->SetOutBoundary(GetOverScroll(offset.GetX(), content.Width() - viewSize.Width()));
-
-    const Size sizeDouble { viewSize.Width(), viewSize.Height() };
-    vertical_->UpdateScrollBarRegion({}, sizeDouble, { 0.0, -offset.GetY() }, content.Height(), 0);
-    horizontal_->UpdateScrollBarRegion({}, sizeDouble, { -offset.GetX(), 0.0 }, content.Width(), 0);
-    vertical_->MarkNeedRender();
-    horizontal_->MarkNeedRender();
+    const bool canOverScroll = pattern_.GetEdgeEffect() == EdgeEffect::SPRING;
+    SyncScrollBarLayout(*vertical_, { viewSize, Axis::VERTICAL, offset, content.Height(), canOverScroll });
+    SyncScrollBarLayout(*horizontal_, { viewSize, Axis::HORIZONTAL, offset, content.Width(), canOverScroll });
 }
 
 void ScrollBar2D::ResetAnimationSignals()

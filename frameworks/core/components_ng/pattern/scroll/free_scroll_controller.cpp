@@ -519,6 +519,7 @@ using std::optional;
 void FreeScrollController::ScrollTo(OffsetF finalPos, const optional<float>& velocity, optional<int32_t> duration,
     RefPtr<Curve> curve, bool allowOverScroll)
 {
+    StopScrollAnimation();
     if (!allowOverScroll) {
         finalPos = ClampPosition(finalPos);
     }
