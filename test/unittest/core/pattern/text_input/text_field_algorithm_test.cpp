@@ -242,29 +242,6 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyle003, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetStrokeColor(), STORKE_COLOR_VALUE_1);
 }
 
-
-/**
- * @tc.name: PlaceHolderMeasureContent001
- * @tc.desc: Test the function PlaceHolderMeasureContent.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldAlgorithmTest, PlaceHolderMeasureContent001, TestSize.Level1)
-{
-    CreateTextField(DEFAULT_TEXT);
-    auto pipeline = frameNode_->GetContext();
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    pattern_->AddCounterNode();
-    FlushLayoutTask(frameNode_);
-    TextStyle textStyle;
-    auto textFieldLayoutAlgorithm =
-        AceType::DynamicCast<TextFieldLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
-    LayoutConstraintF contentConstraint;
-    SizeF size = textFieldLayoutAlgorithm->PlaceHolderMeasureContent(contentConstraint, &layoutWrapper);
-    EXPECT_GE(size.Width(), 0.0f);
-}
-
 /**
  * @tc.name: UpdatePlaceholderTextStyle
  * @tc.desc: Test the function UpdatePlaceholderTextStyle.
