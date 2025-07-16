@@ -77,6 +77,18 @@ function setFindProvideInterop(callback: (providedPropName: string) => any, view
     }
 }
 
+function setFindLocalStorageInterop(callback: () => any, view?: ViewPU): void {
+    if (view == null) {
+        ViewPU._findLocalStorage_ViewPU_Interop = callback;
+    } else {
+        view.findLocalStorageInterop = callback;
+    }
+}
+
+function resetViewPUFindLocalStorageInterop(): void {
+    ViewPU._resetFindLocalStorage_ViewPU_Interop();
+}
+
 function openInterop(): void {
     InteropConfigureStateMgmt.instance.openInterop();
 }
