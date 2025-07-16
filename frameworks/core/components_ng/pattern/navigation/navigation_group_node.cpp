@@ -219,7 +219,7 @@ bool NavigationGroupNode::ReorderNavDestination(
         navDestinationPattern->SetName(childNode.first);
         navDestinationPattern->SetCustomNode(uiNode);
         navDestinationPattern->SetIndex(static_cast<int32_t>(i));
-        if (stack) {
+        if (i == navDestinationNodes.size() - 1 && stack) {
             navDestinationPattern->UpdateSerializedParam(stack->GetSerializedParamSafely(static_cast<int32_t>(i)));
         }
         SetBackButtonEvent(navDestination);
