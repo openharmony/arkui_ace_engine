@@ -21,6 +21,7 @@
 
 #include "core/animation/native_curve_helper.h"
 #include "core/components/remote_window/rosen_render_remote_window.h"
+#include "core/pipeline/base/rs_node_adapter.h"
 #endif
 
 #include "base/log/dump_log.h"
@@ -2176,15 +2177,7 @@ std::shared_ptr<RSNode> RenderNode::CreateRSNode() const
     if (!SystemProperties::GetMultiInstanceEnabled()) {
         return Rosen::RSCanvasNode::Create();
     }
-    auto pipelineContext = GetContext().Upgrade();
-    if (pipelineContext) {
-        auto rsUIDirector = pipelineContext->GetRSUIDirector();
-        if (rsUIDirector) {
-            auto rsContext = rsUIDirector->GetRSUIContext();
-            return Rosen::RSCanvasNode::Create(false, false, rsContext);
-        }
-    }
-    return Rosen::RSCanvasNode::Create();
+    return RsNodeAdapter::CreateCanvasNode();
 #else
     return nullptr;
 #endif
