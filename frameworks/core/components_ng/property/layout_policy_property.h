@@ -81,19 +81,19 @@ struct LayoutPolicyProperty {
     {
         return IsWidthFix() || IsHeightFix();
     }
-    bool IsWidthMatch()
+    bool IsWidthMatch() const
     {
         return widthLayoutPolicy_.has_value() && widthLayoutPolicy_.value() == LayoutCalPolicy::MATCH_PARENT;
     }
-    bool IsHeightMatch()
+    bool IsHeightMatch() const
     {
         return heightLayoutPolicy_.has_value() && heightLayoutPolicy_.value() == LayoutCalPolicy::MATCH_PARENT;
     }
-    bool IsMatch()
+    bool IsMatch() const
     {
         return IsWidthMatch() || IsHeightMatch();
     }
-    bool IsAllMatch()
+    bool IsAllMatch() const
     {
         return IsWidthMatch() && IsHeightMatch();
     }

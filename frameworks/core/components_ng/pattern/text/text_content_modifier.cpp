@@ -444,7 +444,7 @@ void TextContentModifier::DrawActualText(DrawingContext& drawingContext, const R
     if (!marqueeSet_) {
         auto textEffect = textPattern->GetTextEffect();
         if (!textEffect) {
-            DrawText(canvas, pManager);
+            DrawText(canvas, pManager, textPattern);
         } else {
             if (SystemProperties::GetTextTraceEnabled()) {
                 ACE_TEXT_SCOPED_TRACE("TextContentModifier::DrawContent StartEffect");
@@ -485,16 +485,33 @@ void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingCon
 #endif
 }
 
-void TextContentModifier::DrawText(RSCanvas& canvas, RefPtr<ParagraphManager> pManager)
+void TextContentModifier::DrawText(
+    RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern)
 {
     auto paintOffsetY = paintOffset_.GetY();
     auto paragraphs = pManager->GetParagraphs();
+    std::u16string paragraphContent;
     for (auto&& info : paragraphs) {
         auto paragraph = info.paragraph;
         CHECK_NULL_VOID(paragraph);
         ChangeParagraphColor(paragraph);
         paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
         paintOffsetY += paragraph->GetHeight();
+        paragraphContent += paragraph->GetParagraphText();
+    }
+    auto host = textPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(paragraphContent.length() == 1 && host->GetHostTag() == V2::TEXT_ETS_TAG);
+    RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&canvas);
+    if (recordingCanvas != nullptr && recordingCanvas->GetDrawCmdList() != nullptr &&
+        recordingCanvas->GetDrawCmdList()->IsEmpty()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT,
+            "TextContentModifier::DrawText GetDrawCmdList empty! id:%{public}d LongestLineWithIndent:%{public}f "
+            "MaxIntrinsicWidth:%{public}f MaxWidth:%{public}f height:%{public}f lineCount:%{public}d paragraphs "
+            "size:%{public}d",
+            host->GetId(), pManager->GetLongestLineWithIndent(), pManager->GetMaxIntrinsicWidth(),
+            pManager->GetMaxWidth(), pManager->GetHeight(), static_cast<int32_t>(pManager->GetLineCount()),
+            static_cast<int32_t>(paragraphs.size()));
     }
 }
 

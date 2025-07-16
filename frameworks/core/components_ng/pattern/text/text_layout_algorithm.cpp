@@ -116,8 +116,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         auto result = BuildTextRaceParagraph(textStyle_, textLayoutProperty, contentConstraint, layoutWrapper);
         return result;
     }
-    if (host->GetTag() == V2::SYMBOL_ETS_TAG ||
-        (isSpanStringMode_ && host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN))) {
+    if (isSpanStringMode_ && host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         BuildParagraph(textStyle_, textLayoutProperty, contentConstraint, layoutWrapper);
     } else {
         if (!AddPropertiesAndAnimations(textStyle_, textLayoutProperty, contentConstraint, layoutWrapper)) {

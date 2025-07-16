@@ -21,6 +21,7 @@
 typedef struct __ani_env ani_env;
 typedef class __ani_object* ani_object;
 typedef class __ani_ref* ani_ref;
+typedef struct __ani_vm ani_vm;
 
 namespace OHOS::Ace {
 class ArktsAniUtils final {
@@ -34,6 +35,11 @@ public:
      * Get AbcRuntimeLinkder to load application class.
      */
     static int32_t GetNearestNonBootRuntimeLinker(ani_env*, ani_ref& result);
+
+    /**
+     * Get ani env from ani vm.
+     */
+    static ani_env* GetAniEnv(ani_vm* vm);
 };
 } // namespace OHOS::Ace
 

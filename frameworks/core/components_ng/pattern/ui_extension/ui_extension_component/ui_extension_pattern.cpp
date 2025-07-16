@@ -539,7 +539,7 @@ void UIExtensionPattern::OnConnect()
     surfaceNode->SetForeground(usage_ == UIExtensionUsage::MODAL);
     FireOnRemoteReadyCallback();
     auto focusHub = host->GetFocusHub();
-    if ((usage_ == UIExtensionUsage::MODAL) && focusHub) {
+    if ((usage_ == UIExtensionUsage::MODAL) && focusHub && isModalRequestFocus_) {
         focusHub->RequestFocusImmediately();
     }
     bool isFocused = focusHub && focusHub->IsCurrentFocus();

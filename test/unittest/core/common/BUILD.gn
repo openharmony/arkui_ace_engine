@@ -31,10 +31,7 @@ ace_unittest("common_test") {
     "clipboard/clipboard_test.cpp",
     "environment/environment_test.cpp",
     "multi_thread_build_manager/multi_thread_build_manager_test.cpp",
-    "others/thread_checker_test.cpp",
-    "recorder/event_recorder_test.cpp",
     "resource/pattern_resource_manager_test.cpp",
-    "resource/resource_manager_test.cpp",
     "resource/resource_parse_utils_test.cpp",
     "rosen/rosen_test.cpp",
     "sharedata/sharedata_test.cpp",
@@ -51,5 +48,8 @@ group("core_common_unittest") {
     "ime:ime_test",
     "key_event_manager:key_event_manager_test",
     "plugin:plugin_manager_test",
+    "resource:resource_manager_test",
+    "recorder:event_recorder_test",
+    "others:thread_checker_test",
   ]
 }

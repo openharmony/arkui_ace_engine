@@ -162,6 +162,7 @@ HWTEST_F(SpanAccessibilityTestNg, GetSubComponentInfos003, TestSize.Level1)
     aiSpan1.start = 0;
     aiSpan1.end = aiSpan1.content.length();
     aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, aiSpan1));
 
     /**
@@ -279,6 +280,7 @@ HWTEST_F(SpanAccessibilityTestNg, ExecSubComponent002, TestSize.Level1)
     aiSpan1.start = 0;
     aiSpan1.end = aiSpan1.content.length();
     aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, aiSpan1));
 
     std::vector<SubComponentInfo> subComponentInfos;

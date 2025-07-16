@@ -3046,18 +3046,21 @@ OffsetF MenuLayoutAlgorithm::GetAdjustPosition(std::vector<Placement>& currentPl
 {
     OffsetF childPosition;
     OffsetF position;
-    for (size_t i = 0, len = currentPlacementStates.size(); i < len;) {
+    size_t len = currentPlacementStates.size();
+    for (size_t i = 0; i < len;) {
         placement_ = currentPlacementStates[i];
         if (placement_ == Placement::NONE) {
             break;
         }
         childPosition = GetPositionWithPlacement(childSize, topPosition, bottomPosition);
         position = AdjustPosition(childPosition, childSize.Width(), childSize.Height(), targetSecurity_);
-        if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
-            i += step;
-            continue;
+        if (!NearEqual(position, OffsetF(0.0f, 0.0f))) {
+            break;
         }
-        break;
+        if (len - i <= step) {
+            break;
+        }
+        i += step;
     }
     return position;
 }

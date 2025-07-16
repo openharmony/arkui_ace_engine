@@ -19,7 +19,7 @@
 #include "core/components_ng/pattern/symbol/constants.h"
 
 struct SymbolEffectPeer {
-    OHOS::Ace::SymbolEffectType type;
+    OHOS::Ace::SymbolEffectType type = OHOS::Ace::SymbolEffectType::NONE;
     std::optional<OHOS::Ace::ScopeType> scope;
     std::optional<OHOS::Ace::CommonSubType> direction;
     std::optional<OHOS::Ace::FillStyle> fillStyle;

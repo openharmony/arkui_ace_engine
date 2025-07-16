@@ -190,6 +190,7 @@ private:
         const ParagraphStyle& paraStyle, const std::map<int32_t, AISpan>& aiSpanMap) override;
     void HandleAISpan(const std::list<RefPtr<SpanItem>>& spans, const AISpanLayoutInfo& aiSpanLayoutInfo);
     void HandleAISpan(const std::list<RefPtr<SpanItem>>& spans, const std::map<int32_t, AISpan>& aiSpanMap);
+    void HandleTextSizeWhenEmpty(LayoutWrapper* layoutWrapper, SizeF& textSize);
     std::string SpansToString();
 
     const std::list<RefPtr<SpanItem>>& GetSpans() const

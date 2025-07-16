@@ -202,8 +202,8 @@ void ShaderInputBufferImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     std::vector<float> shaderInputVec = Converter::Convert<std::vector<float>>(*value);
-    int32_t length = shaderInputVec.size();
-    if (length <= 0) {
+    size_t length = shaderInputVec.size();
+    if (length == 0) {
         return;
     }
     std::shared_ptr<OHOS::Render3D::ShaderInputBuffer> buffer = nullptr;
@@ -211,7 +211,7 @@ void ShaderInputBufferImpl(Ark_NativePointer node,
     if (!buffer->Alloc(length)) {
         return;
     }
-    for (int32_t i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
         buffer->Update(shaderInputVec.at(i), i);
     }
     ModelViewNG::AddShaderInputBuffer(frameNode, buffer);

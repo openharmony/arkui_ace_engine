@@ -54,7 +54,8 @@ public:
         ScrollTestNg::TearDownTestSuite();
         MockAnimationManager::Enable(false);
     }
-    void TearDown() override {
+    void TearDown() override
+    {
         ScrollTestNg::TearDown();
         MockAnimationManager::GetInstance().SetTicks(1);
     }
@@ -165,6 +166,38 @@ TEST_F(FreeScrollTest, RecognizerOverride001)
 }
 
 /**
+ * @tc.name: GestureJudge001
+ * @tc.desc: Test GestureJudge
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, GestureJudge001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateScrollDone();
+    const auto& controller = pattern_->freeScroll_;
+    ASSERT_TRUE(controller->freePanGesture_);
+    ASSERT_TRUE(controller->freePanGesture_->sysJudge_);
+    std::vector<KeyCode> keys1 = { KeyCode::KEY_CTRL_LEFT };
+    std::vector<KeyCode> keys2 = { KeyCode::KEY_CTRL_RIGHT };
+    auto info = std::make_shared<PanGestureEvent>();
+    info->SetPressedKeyCodes(keys1);
+    RefPtr<GestureInfo> gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo->SetInputEventType(InputEventType::AXIS);
+    auto res = controller->freePanGesture_->sysJudge_(gestureInfo, info);
+    EXPECT_EQ(res, GestureJudgeResult::REJECT);
+
+    info->SetPressedKeyCodes(keys2);
+    res = controller->freePanGesture_->sysJudge_(gestureInfo, info);
+    EXPECT_EQ(res, GestureJudgeResult::REJECT);
+
+    gestureInfo->SetInputEventType(InputEventType::TOUCH_SCREEN);
+    res = controller->freePanGesture_->sysJudge_(gestureInfo, info);
+    EXPECT_EQ(res, GestureJudgeResult::CONTINUE);
+}
+
+/**
  * @tc.name: Measure001
  * @tc.desc: Test child constraint with Axis::FREE
  * @tc.type: FUNC
@@ -217,10 +250,10 @@ TEST_F(FreeScrollTest, EnableScroll001)
     EXPECT_TRUE(pattern_->scrollableEvent_->GetEnabled());
     PanUpdate({ -DELTA_X, -DELTA_Y });
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, -DELTA_Y));
-    EXPECT_FALSE(pattern_->scrollBar2d_->horizontal_.NeedPaint());
-    EXPECT_TRUE(pattern_->scrollBar2d_->vertical_.NeedPaint());
-    EXPECT_EQ(pattern_->scrollBar2d_->painter_->horizontal_.GetOpacity(), 0);
-    EXPECT_NE(pattern_->scrollBar2d_->painter_->vertical_.GetOpacity(), 0);
+    EXPECT_FALSE(pattern_->scrollBar2d_->horizontal_->NeedPaint());
+    EXPECT_TRUE(pattern_->scrollBar2d_->vertical_->NeedPaint());
+    EXPECT_EQ(pattern_->scrollBar2d_->painter_->horizontal_->GetOpacity(), 0);
+    EXPECT_NE(pattern_->scrollBar2d_->painter_->vertical_->GetOpacity(), 0);
 }
 
 /**
@@ -406,13 +439,13 @@ TEST_F(FreeScrollTest, Touch001)
     PanUpdate({ DELTA_X, DELTA_Y });
     auto&& controller = pattern_->freeScroll_;
     EXPECT_EQ(controller->state_, State::DRAG);
-    TouchDown(); // second finger down
+    TouchDown();                                // second finger down
     EXPECT_EQ(controller->state_, State::DRAG); // should not change state
     PanUpdate({ DELTA_X, DELTA_Y });
     EXPECT_EQ(controller->state_, State::DRAG); // should not change state
-    TouchUp(); // first finger up
+    TouchUp();                                  // first finger up
     EXPECT_EQ(controller->state_, State::DRAG); // should not change state
-    TouchUp(); // second finger up
+    TouchUp();                                  // second finger up
     PanEnd({ DELTA_X, DELTA_Y }, { VELOCITY_X, VELOCITY_Y });
     EXPECT_EQ(controller->state_, State::FLING);
     MockAnimationManager::GetInstance().Tick();
@@ -471,7 +504,7 @@ TEST_F(FreeScrollTest, Animation001)
     PanEnd({}, { 0, -VELOCITY_Y });
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VELOCITY_Y / (friction2 * -FRICTION_SCALE));
+    EXPECT_EQ(GetChildY(frameNode_, 0), -VELOCITY_Y * FLING_SCALE_K / (friction2 * -FRICTION_SCALE));
 }
 
 /**
@@ -567,7 +600,8 @@ TEST_F(FreeScrollTest, Animation004)
     MockAnimationManager::GetInstance().SetTicks(2);
     PanEnd({ -LARGE_DELTA_X, -LARGE_DELTA_Y }, { VELOCITY_X, VELOCITY_Y });
     EXPECT_EQ(pattern_->freeScroll_->state_, State::FLING);
-    EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue().GetX(), -1 + VELOCITY_X / (friction * -FRICTION_SCALE));
+    EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue().GetX(),
+        -1 + VELOCITY_X * FLING_SCALE_K / (friction * -FRICTION_SCALE));
     MockAnimationManager::GetInstance().Tick(); // switched to high-friction spring motion after reaching edge
     EXPECT_EQ(pattern_->freeScroll_->state_, State::BOUNCE);
     EXPECT_EQ(pattern_->freeScroll_->offset_->GetStagingValue(), OffsetF());
@@ -720,12 +754,8 @@ TEST_F(FreeScrollTest, Event003)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
-    model.SetOnReachStart([]() {
-        ADD_FAILURE() << "onReachStart should not be called in FreeScroll mode";
-    });
-    model.SetOnReachEnd([]() {
-        ADD_FAILURE() << "onReachEnd should not be called in FreeScroll mode";
-    });
+    model.SetOnReachStart([]() { ADD_FAILURE() << "onReachStart should not be called in FreeScroll mode"; });
+    model.SetOnReachEnd([]() { ADD_FAILURE() << "onReachEnd should not be called in FreeScroll mode"; });
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
 
@@ -749,12 +779,13 @@ TEST_F(FreeScrollTest, Scroller001)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
     static int32_t willScrollCalled = 0;
-    model.SetOnWillScroll([](const Dimension& xOffset, const Dimension& yOffset, ScrollState state, ScrollSource source) {
-        EXPECT_EQ(state, ScrollState::IDLE);
-        EXPECT_EQ(source, ScrollSource::SCROLLER);
-        ++willScrollCalled;
-        return TwoDimensionScrollResult { .xOffset = xOffset, .yOffset = yOffset };
-    });
+    model.SetOnWillScroll(
+        [](const Dimension& xOffset, const Dimension& yOffset, ScrollState state, ScrollSource source) {
+            EXPECT_EQ(state, ScrollState::IDLE);
+            EXPECT_EQ(source, ScrollSource::SCROLLER);
+            ++willScrollCalled;
+            return TwoDimensionScrollResult { .xOffset = xOffset, .yOffset = yOffset };
+        });
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
     auto scroller = AceType::MakeRefPtr<ScrollableController>();
@@ -882,7 +913,8 @@ TEST_F(FreeScrollTest, Scroller004)
 
     MockAnimationManager::GetInstance().SetTicks(2);
 
-    scroller->FreeScrollTo({ .xOffset = Dimension(CONTENT_W), .yOffset = Dimension(CONTENT_H), .smooth = true, .canOverScroll = true });
+    scroller->FreeScrollTo(
+        { .xOffset = Dimension(CONTENT_W), .yOffset = Dimension(CONTENT_H), .smooth = true, .canOverScroll = true });
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     MockAnimationManager::GetInstance().Tick();
@@ -910,22 +942,22 @@ TEST_F(FreeScrollTest, ScrollBar001)
 
     const auto scrollBar = pattern_->scrollBar2d_;
     ASSERT_TRUE(scrollBar);
-    EXPECT_EQ(scrollBar->vertical_.GetActiveRect().ToString(), "Rect (236.00, 8.00) - [4.00 x 76.80]");
-    EXPECT_EQ(scrollBar->horizontal_.GetActiveRect().ToString(), "Rect (8.00, 396.00) - [26.88 x 4.00]");
-    EXPECT_EQ(scrollBar->vertical_.GetActiveWidth(), NORMAL_BAR_WIDTH * 2);
-    EXPECT_EQ(scrollBar->horizontal_.GetActiveWidth(), NORMAL_BAR_WIDTH * 2);
-    EXPECT_EQ(scrollBar->vertical_.GetTouchRegion().ToString(), "Rect (208.00, 8.00) - [32.00 x 76.80]");
-    EXPECT_EQ(scrollBar->vertical_.GetNormalWidth(), NORMAL_BAR_WIDTH);
+    EXPECT_EQ(scrollBar->vertical_->GetActiveRect().ToString(), "Rect (236.00, 8.00) - [4.00 x 76.80]");
+    EXPECT_EQ(scrollBar->horizontal_->GetActiveRect().ToString(), "Rect (8.00, 396.00) - [26.88 x 4.00]");
+    EXPECT_EQ(scrollBar->vertical_->GetActiveWidth(), NORMAL_BAR_WIDTH * 2);
+    EXPECT_EQ(scrollBar->horizontal_->GetActiveWidth(), NORMAL_BAR_WIDTH * 2);
+    EXPECT_EQ(scrollBar->vertical_->GetTouchRegion().ToString(), "Rect (208.00, 8.00) - [32.00 x 76.80]");
+    EXPECT_EQ(scrollBar->vertical_->GetNormalWidth(), NORMAL_BAR_WIDTH);
 
     const Dimension NEW_BAR_WIDTH = 10.0_vp;
     ScrollModelNG::SetScrollBarWidth(frameNode_.GetRawPtr(), NEW_BAR_WIDTH);
     pattern_->OnModifyDone();
-    EXPECT_EQ(scrollBar->vertical_.GetNormalWidth(), NEW_BAR_WIDTH);
+    EXPECT_EQ(scrollBar->vertical_->GetNormalWidth(), NEW_BAR_WIDTH);
 
     ASSERT_TRUE(scrollBar->painter_);
-    EXPECT_EQ(scrollBar->painter_->vertical_.GetHoverAnimatingType(), HoverAnimationType::NONE);
-    EXPECT_EQ(scrollBar->painter_->horizontal_.GetBarColor()->Get().ToString(), "#66182431");
-    EXPECT_EQ(scrollBar->vertical_.GetScrollBarMargin(), ScrollBar2D::DEFAULT_MARGIN);
+    EXPECT_EQ(scrollBar->painter_->vertical_->GetHoverAnimatingType(), HoverAnimationType::NONE);
+    EXPECT_EQ(scrollBar->painter_->horizontal_->GetBarColor()->Get().ToString(), "#66182431");
+    EXPECT_EQ(scrollBar->vertical_->GetScrollBarMargin(), ScrollBar2D::DEFAULT_MARGIN);
 }
 
 /**
@@ -945,13 +977,13 @@ TEST_F(FreeScrollTest, ScrollBar002)
     FlushUITasks(frameNode_);
     const auto scrollBar = pattern_->scrollBar2d_;
     ASSERT_TRUE(scrollBar);
-    EXPECT_EQ(scrollBar->vertical_.GetActiveRect().ToString(), "Rect (236.00, 315.20) - [4.00 x 76.80]");
-    EXPECT_EQ(scrollBar->horizontal_.GetActiveRect().ToString(), "Rect (205.12, 396.00) - [26.88 x 4.00]");
+    EXPECT_EQ(scrollBar->vertical_->GetActiveRect().ToString(), "Rect (236.00, 315.20) - [4.00 x 76.80]");
+    EXPECT_EQ(scrollBar->horizontal_->GetActiveRect().ToString(), "Rect (205.12, 396.00) - [26.88 x 4.00]");
 
     ScrollModelNG::SetScrollBarColor(frameNode_.GetRawPtr(), Color::BLUE);
     pattern_->OnModifyDone();
     FlushUITasks(frameNode_);
-    EXPECT_EQ(scrollBar->painter_->horizontal_.GetBarColor()->Get(), Color::BLUE);
+    EXPECT_EQ(scrollBar->painter_->horizontal_->GetBarColor()->Get(), Color::BLUE);
 }
 
 /**
@@ -966,14 +998,14 @@ TEST_F(FreeScrollTest, ScrollBar003)
     model.SetAxis(Axis::FREE);
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
-    EXPECT_EQ(pattern_->scrollBar2d_->painter_->vertical_.GetOpacity(), UINT8_MAX);
+    EXPECT_EQ(pattern_->scrollBar2d_->painter_->vertical_->GetOpacity(), UINT8_MAX);
 
     ScrollModelNG::SetScrollBar(frameNode_.GetRawPtr(), DisplayMode::OFF);
     pattern_->OnModifyDone();
-    EXPECT_EQ(pattern_->scrollBar2d_->vertical_.GetDisplayMode(), DisplayMode::OFF);
-    EXPECT_EQ(pattern_->scrollBar2d_->horizontal_.GetDisplayMode(), DisplayMode::OFF);
+    EXPECT_EQ(pattern_->scrollBar2d_->vertical_->GetDisplayMode(), DisplayMode::OFF);
+    EXPECT_EQ(pattern_->scrollBar2d_->horizontal_->GetDisplayMode(), DisplayMode::OFF);
     FlushUITasks(frameNode_);
-    EXPECT_EQ(pattern_->scrollBar2d_->painter_->horizontal_.GetOpacity(), 0);
+    EXPECT_EQ(pattern_->scrollBar2d_->painter_->horizontal_->GetOpacity(), 0);
 }
 
 /**
@@ -1001,7 +1033,7 @@ TEST_F(FreeScrollTest, ScrollBar004)
     responseLinkResult.clear();
     actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, nullptr, responseLinkResult, 1);
     EXPECT_EQ(responseLinkResult.size(), 3);
-    EXPECT_EQ(responseLinkResult.front(), pattern_->scrollBar2d_->vertical_.GetPanRecognizer());
+    EXPECT_EQ(responseLinkResult.front(), pattern_->scrollBar2d_->vertical_->GetPanRecognizer());
 
     constexpr int32_t expectedRecognizerCount = 3; // 2 from scrollBars, 1 from pan recognizer
     localPoint = PointF(10, 398);
@@ -1009,7 +1041,7 @@ TEST_F(FreeScrollTest, ScrollBar004)
     responseLinkResult.clear();
     actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, nullptr, responseLinkResult, 1);
     EXPECT_EQ(responseLinkResult.size(), expectedRecognizerCount);
-    EXPECT_EQ(*std::next(responseLinkResult.begin()), pattern_->scrollBar2d_->horizontal_.GetPanRecognizer());
+    EXPECT_EQ(*std::next(responseLinkResult.begin()), pattern_->scrollBar2d_->horizontal_->GetPanRecognizer());
 
     TouchRestrict restrict;
     restrict.sourceType = SourceType::MOUSE;
@@ -1017,7 +1049,7 @@ TEST_F(FreeScrollTest, ScrollBar004)
     responseLinkResult.clear();
     actuator->CollectTouchTarget({}, {}, {}, result, localPoint, frameNode_, nullptr, responseLinkResult, 1);
     EXPECT_EQ(responseLinkResult.size(), expectedRecognizerCount);
-    EXPECT_EQ(*std::next(responseLinkResult.begin()), pattern_->scrollBar2d_->horizontal_.GetPanRecognizer());
+    EXPECT_EQ(*std::next(responseLinkResult.begin()), pattern_->scrollBar2d_->horizontal_->GetPanRecognizer());
 }
 
 /**
@@ -1064,9 +1096,9 @@ TEST_F(FreeScrollTest, ScrollBar006)
     CreateScrollDone();
     ASSERT_FALSE(pattern_->scrollBar_);
     ASSERT_TRUE(pattern_->scrollBar2d_);
-    const auto& verticalBar = pattern_->scrollBar2d_->vertical_;
-    const auto& horizontalBar = pattern_->scrollBar2d_->horizontal_;
-    const auto& painter = pattern_->scrollBar2d_->painter_->horizontal_;
+    const auto& verticalBar = *pattern_->scrollBar2d_->vertical_;
+    const auto& horizontalBar = *pattern_->scrollBar2d_->horizontal_;
+    const auto& painter = *pattern_->scrollBar2d_->painter_->horizontal_;
     mockTaskExecutor
         ->RunDelayTask(); // testing horizontal to avoid MockTaskExecutor's bug (only running last added task)
     EXPECT_EQ(horizontalBar.opacityAnimationType_, OpacityAnimationType::DISAPPEAR);

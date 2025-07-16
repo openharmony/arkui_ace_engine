@@ -2811,6 +2811,25 @@ bool ArkTSUtils::ParseJsInt32(const EcmaVM *vm, const Local<JSValueRef> &value, 
     return false;
 }
 
+bool ArkTSUtils::ParseJsIgnoresLayoutSafeAreaEdges(
+    const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUI_Int32>& edges)
+{
+    if (!value->IsArray(vm)) {
+        return false;
+    }
+    auto array = panda::Local<panda::ArrayRef>(value);
+    auto length = array->Length(vm);
+    for (uint32_t index = 0; index < length; index++) {
+        auto item = panda::ArrayRef::GetValueAt(vm, array, index);
+        ArkUI_Int32 edge;
+        if (!ArkTSUtils::ParseJsInt32(vm, item, edge)) {
+            return false;
+        }
+        edges.push_back(edge);
+    }
+    return true;
+}
+
 void ArkTSUtils::ParseGradientCenter(
     const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values)
 {

@@ -160,6 +160,7 @@ HWTEST_F(PreviewMenuControllerTest, CreatePreviewMenuTest, TestSize.Level1)
     aiSpan1.content = SPAN_PHONE;
     aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
     aiSpanMap[0] = aiSpan1;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     auto textForAI = u"Test1234";
     pattern->dataDetectorAdapter_->textForAI_ = textForAI;

@@ -163,6 +163,7 @@ private:
     bool PlaceholderSpanMeasure(const RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
         const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain);
     void UpdateFontFamilyWithSymbol(TextStyle& textStyle, std::vector<std::string>& fontFamilies, bool isSymbol);
+    void UpdateSymbolStyle(TextStyle& textStyle, bool isSymbol);
     std::optional<OHOS::Ace::Gradient> ToGradient(const NG::Gradient& gradient);
     AnimatableDimension ToAnimatableDimension(const Dimension& dimension);
     void MeasureWithFixAtIdealSize(LayoutWrapper* layoutWrapper);

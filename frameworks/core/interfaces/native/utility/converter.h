@@ -177,7 +177,7 @@ namespace Converter {
             ResourceType type_;
             std::string bundleName_;
             std::string moduleName_;
-            int32_t id_;
+            int32_t id_ = 0;
             StringArray params_;
     };
 

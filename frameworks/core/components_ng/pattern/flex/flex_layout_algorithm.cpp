@@ -352,16 +352,16 @@ void FlexLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWra
     auto context = host->GetContext();
     IgnoreLayoutSafeAreaBundle bundle;
     for (const auto& child : layoutPolicyChildren_) {
-        child->Measure(layoutConstraint);
         auto childNode = child->GetHostNode();
         if (childNode && childNode->GetLayoutProperty() && childNode->GetLayoutProperty()->IsExpandConstraintNeeded()) {
             bundle.first.emplace_back(childNode);
             child->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
-            SetNeedPostponeForIgnore();
             continue;
         }
+        child->Measure(layoutConstraint);
     }
-    if (context && GetNeedPostponeForIgnore()) {
+    if (context && !bundle.first.empty()) {
+        host->SetDelaySelfLayoutForIgnore();
         bundle.second = host;
         context->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
     }
@@ -1185,11 +1185,6 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (children.empty()) {
         return;
     }
-    auto host = layoutWrapper->GetHostNode();
-    if (host && !host->GetIgnoreLayoutProcess() && GetNeedPostponeForIgnore()) {
-        return;
-    }
-
     if (!hasMeasured_) {
         ApplyPatternOperation(layoutWrapper, FlexOperatorType::RESTORE_MEASURE_RESULT);
     }
@@ -1357,34 +1352,74 @@ float FlexLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(const Re
     }
     auto isExpandConstraintNeeded = childNode->GetLayoutProperty()->IsExpandConstraintNeeded();
     IgnoreLayoutSafeAreaOpts& opts = *(childNode->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts());
-    auto sae = isExpandConstraintNeeded ? host->GetAccumulatedSafeAreaExpand(true, opts)
-                                        : childNode->GetAccumulatedSafeAreaExpand(false, opts);
+    auto sae = host->GetAccumulatedSafeAreaExpand(true, opts);
     float offsetX = 0.0f;
     float offsetY = 0.0f;
     float offsetEdgeExpand = 0.0f;
     if (IsHorizontal(direction_)) {
+        CalcMainExpand(childNode->GetAccumulatedSafeAreaExpand(false, opts, IgnoreStrategy::FROM_MARGIN), sae, true,
+            isExpandConstraintNeeded);
         offsetX = originOffset.GetX();
         offsetEdgeExpand = needExpandMainAxis ? (IsStartTopLeft(direction_, textDir_) ? sae.left.value_or(0.0f)
                                                                                       : -sae.right.value_or(0.0f))
                                               : 0.0f;
         offsetX -= offsetEdgeExpand;
-        auto adjustedChildPos = crossAxisSize_ + sae.Height();
-        SetCrossPos(childLayoutWrapper, offsetY, adjustedChildPos);
-        offsetY -= (sae.top.value_or(0.0f) - paddingOffset.GetY());
+        if (!CheckReCalcMainExpand(GetSelfAlign(childLayoutWrapper))) {
+            offsetY = originOffset.GetY();
+        } else {
+            auto adjustedChildPos = crossAxisSize_ + sae.Height();
+            SetCrossPos(childLayoutWrapper, offsetY, adjustedChildPos);
+            offsetY -= (sae.top.value_or(0.0f) - paddingOffset.GetY());
+        }
     } else {
+        CalcMainExpand(childNode->GetAccumulatedSafeAreaExpand(false, opts, IgnoreStrategy::FROM_MARGIN), sae, false,
+            isExpandConstraintNeeded);
         offsetY = originOffset.GetY();
         offsetEdgeExpand = needExpandMainAxis ? (IsStartTopLeft(direction_, textDir_) ? sae.top.value_or(0.0f)
                                                                                       : -sae.bottom.value_or(0.0f))
                                               : 0.0f;
         offsetY -= offsetEdgeExpand;
-        auto adjustedChildPos = crossAxisSize_ + sae.Width();
-        SetCrossPos(childLayoutWrapper, offsetX, adjustedChildPos);
-        offsetX -= (sae.left.value_or(0.0f) - paddingOffset.GetX());
+        if (!CheckReCalcMainExpand(GetSelfAlign(childLayoutWrapper))) {
+            offsetX = originOffset.GetX();
+        } else {
+            auto adjustedChildPos = crossAxisSize_ + sae.Width();
+            SetCrossPos(childLayoutWrapper, offsetX, adjustedChildPos);
+            offsetX -= (sae.left.value_or(0.0f) - paddingOffset.GetX());
+        }
     }
     OffsetF saeTrans = OffsetF(offsetX, offsetY);
     childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(saeTrans);
     return isExpandConstraintNeeded ? offsetEdgeExpand : 0.0f;
 }
+
+void FlexLayoutAlgorithm::CalcMainExpand(
+    const ExpandEdges& mainExpand, ExpandEdges& sae, bool isHorizontal, bool isExpandConstraintNeeded)
+{
+    if (isExpandConstraintNeeded) {
+        return;
+    }
+    if (isHorizontal) {
+        sae.left = mainExpand.left;
+        sae.right = mainExpand.right;
+    } else {
+        sae.top = mainExpand.top;
+        sae.bottom = mainExpand.bottom;
+    }
+}
+
+bool FlexLayoutAlgorithm::CheckReCalcMainExpand(const FlexAlign& crossAlign)
+{
+    if (crossAxisAlign_ == FlexAlign::BASELINE) {
+        return false;
+    }
+    switch (crossAlign) {
+        case FlexAlign::BASELINE:
+            return false;
+        default:
+            return true;
+    }
+}
+
 FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
     const auto& flexItemProperty = layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();

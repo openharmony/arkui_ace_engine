@@ -146,7 +146,7 @@ void StrokeDashArrayImpl(Ark_NativePointer node,
             strokeDashArray.emplace_back(optStrokeDash.value());
         }
     }
-    if (length == static_cast<int32_t>(strokeDashArray.size()) && (length & 1)) {
+    if (length == static_cast<int32_t>(strokeDashArray.size()) && (static_cast<uint32_t>(length) & 1)) {
         for (int32_t i = 0; i < length; ++i) {
             strokeDashArray.emplace_back(strokeDashArray[i]);
         }

@@ -274,11 +274,18 @@ public:
     static void NotifyDragStartRequest(DragStartRequestStatus dragStatus);
     // customBackground
     static void SetBackgroundAlign(const Alignment &align);
+    static void SetBackgroundAlign(FrameNode* frameNode, const Alignment& align);
     static void SetCustomBackgroundColor(const Color& color);
+    static void SetCustomBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetCustomBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj);
+    static void SetCustomBackgroundColorWithResourceObj(
+        FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj);
     static void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t layoutSafeAreaEdges);
+    static void SetBackgroundIgnoresLayoutSafeAreaEdges(FrameNode* frameNode, const uint32_t layoutSafeAreaEdges);
     static void SetIsTransitionBackground(bool val);
+    static void SetIsTransitionBackground(FrameNode* frameNode, bool val);
     static void SetIsBuilderBackground(bool val);
+    static void SetIsBuilderBackground(FrameNode* frameNode, bool val);
 
     // decoration
     static void SetBackdropBlur(

@@ -50,7 +50,7 @@ Ark_String ConvContext::Store(const std::string_view& src)
     ptr[src.length()] = 0;
     Ark_String result;
     result.chars = ptr;
-    result.length = src.length();
+    result.length = static_cast<int32_t>(src.length());
     return result;
 }
 
@@ -297,10 +297,10 @@ void AssignArkValue(Ark_Date& dst, const std::string& src)
 
     std::tm tm {};
     tm.tm_year = date.GetYear() - STD_TM_START_YEAR; // tm_year is years since 1900
-    tm.tm_mon = date.GetMonth() - 1; // tm_mon from 0 to 11
+    tm.tm_mon = static_cast<int>(date.GetMonth()) - 1; // tm_mon from 0 to 11
     tm.tm_mday = date.GetDay();
     tm.tm_hour = time.GetHour();
-    tm.tm_min = time.GetMinute();
+    tm.tm_min = static_cast<int>(time.GetMinute());
     tm.tm_sec = time.GetSecond();
     auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
     auto duration = timestamp.time_since_epoch();
@@ -342,7 +342,7 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
 void AssignArkValue(Ark_Buffer& dst, const std::string& src)
 {
     dst.data = const_cast<char*>(src.data());
-    dst.length = src.size();
+    dst.length = static_cast<int64_t>(src.size());
 }
 
 template<>

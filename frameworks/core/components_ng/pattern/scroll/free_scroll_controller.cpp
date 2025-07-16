@@ -88,6 +88,14 @@ void FreeScrollController::InitializePanRecognizer()
     freePanGesture_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
     freePanGesture_->SetIsSystemGesture(true);
     freePanGesture_->SetIsAllowMouse(false);
+    freePanGesture_->SetSysGestureJudge([](const RefPtr<GestureInfo>& gestureInfo,
+                                           const std::shared_ptr<BaseGestureEvent>& info) {
+        if (gestureInfo->GetInputEventType() == InputEventType::AXIS &&
+            (info->IsKeyPressed(KeyCode::KEY_CTRL_LEFT) || info->IsKeyPressed(KeyCode::KEY_CTRL_RIGHT))) {
+            return GestureJudgeResult::REJECT;
+        }
+        return GestureJudgeResult::CONTINUE;
+    });
 }
 
 namespace {
@@ -229,7 +237,7 @@ void FreeScrollController::Fling(const OffsetF& velocity)
         return;
     }
 
-    OffsetF finalPos = offset_->Get() + velocity / friction;
+    OffsetF finalPos = offset_->Get() + velocity * FLING_SCALE_K / friction;
     if (outOfBounds) {
         finalPos = ClampPosition(finalPos);
     } // when not out of bounds, finalPos doesn't need clamping because we would clamp it later during the

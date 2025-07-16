@@ -266,7 +266,7 @@ HWTEST_F(TextPickerResourceTest, ParseSingleIconTextResourceObj002, TestSize.Lev
 
 /**
  * @tc.name: ParseDividerResObj001
- * @tc.desc: Test ParseDividerResObj when divider is null.
+ * @tc.desc: Test ParseDividerResObj when divider resourceObj is null.
  * @tc.type: FUNC
  */
 HWTEST_F(TextPickerResourceTest, ParseDividerResObj001, TestSize.Level1)
@@ -276,6 +276,7 @@ HWTEST_F(TextPickerResourceTest, ParseDividerResObj001, TestSize.Level1)
      */
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
 
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
@@ -294,6 +295,7 @@ HWTEST_F(TextPickerResourceTest, ParseDividerResObj001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
     ASSERT_NE(pattern->resourceMgr_, nullptr);
+    auto& resMap = pattern->resourceMgr_->resMap_;
 
     /**
      * @tc.steps: step3. Call ParseDividerResObj to register the resourceObject callback function.
@@ -302,18 +304,15 @@ HWTEST_F(TextPickerResourceTest, ParseDividerResObj001, TestSize.Level1)
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
     NG::ItemDivider newDivider;
-    newDivider.isNull = true;
+    newDivider.isDefaultColor = true;
     newDivider.strokeWidth = 0.0_vp;
     TextPickerModelNG::ParseDividerResObj(frameNode, newDivider);
-    pattern->resourceMgr_->ReloadResources();
-    NG::ItemDivider curDivider = textPickerPattern->GetDivider();
-    EXPECT_NE(curDivider.strokeWidth, theme->GetDividerThickness());
-    EXPECT_EQ(curDivider.strokeWidth, newDivider.strokeWidth);
+    EXPECT_TRUE(resMap.find("textPicker.divider") == resMap.end());
 }
 
 /**
  * @tc.name: ParseDividerResObj002
- * @tc.desc: Test ParseDividerResObj when divider is null.
+ * @tc.desc: Test ParseDividerResObj when divider resourceObj is not null.
  * @tc.type: FUNC
  */
 HWTEST_F(TextPickerResourceTest, ParseDividerResObj002, TestSize.Level1)
@@ -323,6 +322,7 @@ HWTEST_F(TextPickerResourceTest, ParseDividerResObj002, TestSize.Level1)
      */
     auto pipeline = MockPipelineContext::GetCurrent();
     auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
 
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
@@ -349,7 +349,8 @@ HWTEST_F(TextPickerResourceTest, ParseDividerResObj002, TestSize.Level1)
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
     NG::ItemDivider newDivider;
-    newDivider.isNull = false;
+    newDivider.isDefaultColor = false;
+    newDivider.colorResObj = AceType::MakeRefPtr<ResourceObject>();
     newDivider.strokeWidth = 0.0_vp;
     TextPickerModelNG::ParseDividerResObj(frameNode, newDivider);
     pattern->resourceMgr_->ReloadResources();

@@ -21,10 +21,12 @@
 #include "text_base.h"
 #include "ui/base/geometry/dimension.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -173,6 +175,7 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     textModelNG.SetOnDetectResultUpdate(frameNode, std::move(textDetectConfig.onResult));
+    ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_NE(textPattern->dataDetectorAdapter_->onResult_, nullptr);
 
     FONT_FEATURES_LIST value;
@@ -280,6 +283,7 @@ HWTEST_F(TextTestNg, SetTextDetectConfig001, TestSize.Level1)
     textModelNG.SetTextDetectConfig(textDetectConfig);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_EQ(pattern->dataDetectorAdapter_->textDetectTypes_, "");
     EXPECT_EQ(pattern->dataDetectorAdapter_->onResult_, nullptr);
     EXPECT_EQ(pattern->dataDetectorAdapter_->entityColor_, theme->GetTextColor());
@@ -298,6 +302,7 @@ HWTEST_F(TextTestNg, SetTextDetectConfig001, TestSize.Level1)
     textDetectConfig.entityDecorationColor = Color::BLACK;
     textDetectConfig.entityDecorationStyle = TextDecorationStyle ::DOUBLE;
     textModelNG.SetTextDetectConfig(textDetectConfig);
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_EQ(pattern->dataDetectorAdapter_->textDetectTypes_, TEXT_DETECT_TYPES);
     EXPECT_NE(pattern->dataDetectorAdapter_->onResult_, nullptr);
     EXPECT_EQ(pattern->dataDetectorAdapter_->entityColor_, TEXT_COLOR_VALUE);
@@ -335,6 +340,7 @@ HWTEST_F(TextTestNg, SetTextDetectConfig002, TestSize.Level1)
     textModelNG.SetTextDetectConfig(frameNode, textDetectConfig);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_EQ(pattern->dataDetectorAdapter_->textDetectTypes_, TEXT_DETECT_TYPES);
     EXPECT_NE(pattern->dataDetectorAdapter_->onResult_, nullptr);
     EXPECT_EQ(pattern->dataDetectorAdapter_->entityColor_, TEXT_COLOR_VALUE);
@@ -1133,6 +1139,7 @@ HWTEST_F(TextTestNg, UpdateParagraphForAISpan001, TestSize.Level1)
     std::map<int32_t, AISpan> aiSpanMap;
     AISpan aiSpan0;
     aiSpanMap[0] = aiSpan0;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     std::u16string textForAI = u"";
     pattern->dataDetectorAdapter_->textForAI_ = textForAI;
@@ -1210,6 +1217,7 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan001, TestSize.Level1)
     dragSpanPosition.spanEnd = 3;
     std::string textForAI = "Test1234";
     auto wTextForAI = StringUtils::Str8ToStr16(textForAI);
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->textForAI_ = wTextForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
     EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dataDetectorAdapter_->textForAI_), textForAI);
@@ -1271,6 +1279,7 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan002, TestSize.Level1)
     dragSpanPosition.spanEnd = 4;
     std::string textForAI = "Test1234";
     auto wTextForAI = StringUtils::Str8ToStr16(textForAI);
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->textForAI_ = wTextForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
     EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dataDetectorAdapter_->textForAI_), textForAI);
@@ -1332,6 +1341,7 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan003, TestSize.Level1)
     dragSpanPosition.spanEnd = 20;
     std::string textForAI = "Test1234";
     auto wTextForAI = StringUtils::Str8ToStr16(textForAI);
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->textForAI_ = wTextForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
     EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dataDetectorAdapter_->textForAI_), textForAI);
@@ -3207,6 +3217,26 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreateTextStyleUsingTheme001
+ * @tc.desc: test CreateTextStyleUsingTheme().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CreateTextStyleUsingTheme001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    auto pipeline = textFrameNode->GetContextRefPtr();
+    TextStyle textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(),
+        textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>(), true);
+    EXPECT_EQ(textStyle.GetTextAlign(), TextAlign::CENTER);
+}
+
+/**
  * @tc.name: TextSelectOverlayTestGetFirstHandleInfo001
  * @tc.desc: Verify GetFirstHandleInfo
  * @tc.type: FUNC
@@ -3989,6 +4019,7 @@ HWTEST_F(TextTestNg, TextPattern009, TestSize.Level1)
      * @tc.steps: step1. create frameNode and test pattern ProcessSpanString
      */
     auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
     pattern->ProcessSpanString();
     EXPECT_EQ(pattern->textForDisplay_.length(), 0);

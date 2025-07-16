@@ -465,6 +465,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest043, TestSize.Level1)
     event.pullType = TouchType::PULL_MOVE;
     ret = eventManager->DispatchTouchEvent(event);
     EXPECT_FALSE(ret);
+
+    event.type = TouchType::CANCEL;
+    ret = eventManager->DispatchTouchEvent(event);
+    EXPECT_FALSE(ret);
 }
 
 /**
@@ -628,6 +632,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest048, TestSize.Level1)
     bool isMousePressAtSelectedNode = false;
     eventManager->GetTouchTestIds(event, touchTestIds, isMousePressAtSelectedNode, 1);
     EXPECT_FALSE(isMousePressAtSelectedNode);
+
+    EXPECT_EQ(touchTestIds.size(), 2);
+    auto num = std::stoi(touchTestIds.back());
+    eventManager->GetTouchTestIds(event, touchTestIds, isMousePressAtSelectedNode, num);
+    EXPECT_FALSE(isMousePressAtSelectedNode);
 }
 
 /**
@@ -757,8 +766,12 @@ HWTEST_F(EventManagerTestNg, EventManagerTest053, TestSize.Level1)
 
     eventManager->LogPrintMouseTest();
     auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
-    std::list<RefPtr<MouseEventTarget>> MouseTestResult = {mouseEventTarget};
+    std::list<RefPtr<MouseEventTarget>> MouseTestResult = {};
     eventManager->currMouseTestResultsMap_[0] = MouseTestResult;
+    eventManager->LogPrintMouseTest();
+    MouseTestResult = {mouseEventTarget};
+    eventManager->currMouseTestResultsMap_[0] = MouseTestResult;
+    eventManager->LogPrintMouseTest();
     
     auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(MOUSE, NODEID);
     std::list<RefPtr<HoverEventTarget>> HoverTestResult = {hoverEventTarget};
@@ -942,7 +955,12 @@ HWTEST_F(EventManagerTestNg, EventManagerTest060, TestSize.Level1)
     ASSERT_NE(eventManager, nullptr);
     int eventId = 1;
     bool logImmediately = true;
+    
+    SystemProperties::debugEnabled_ = false;
+    eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
+    EXPECT_TRUE(eventManager->lastReceivedEvent_.eventId == -1);
 
+    SystemProperties::debugEnabled_ = true;
     eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
     EXPECT_TRUE(eventManager->lastReceivedEvent_.eventId == -1);
 
@@ -955,8 +973,16 @@ HWTEST_F(EventManagerTestNg, EventManagerTest060, TestSize.Level1)
     auto lastLogTimeStamp = currentTime - 1000 * 1000000 - 1000;
     eventManager->lastReceivedEvent_.lastLogTimeStamp = lastLogTimeStamp;
     eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
-    EXPECT_TRUE(eventManager->lastReceivedEvent_.lastLogTimeStamp > currentTime);
-    
+    EXPECT_FALSE(eventManager->lastReceivedEvent_.lastLogTimeStamp > currentTime);
+
+    eventManager->lastReceivedEvent_.lastLogTimeStamp = lastLogTimeStamp - 1;
+    eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
+    EXPECT_FALSE(eventManager->lastReceivedEvent_.lastLogTimeStamp == currentTime);
+
+    SystemProperties::debugEnabled_ = false;
+    eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
+    EXPECT_FALSE(eventManager->lastReceivedEvent_.lastLogTimeStamp == currentTime);
+
     eventManager->lastReceivedEvent_.lastLogTimeStamp = lastLogTimeStamp + 20000;
     eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
     EXPECT_TRUE(eventManager->lastReceivedEvent_.lastLogTimeStamp == lastLogTimeStamp + 20000);
@@ -989,7 +1015,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest061, TestSize.Level1)
     auto lastLogTimeStamp = currentTime - 1000 * 1000000 - 1000;
     eventManager->lastConsumedEvent_.lastLogTimeStamp = lastLogTimeStamp;
     eventManager->CheckAndLogLastConsumedEventInfo(eventId, logImmediately);
-    EXPECT_TRUE(eventManager->lastConsumedEvent_.lastLogTimeStamp > currentTime);
+    EXPECT_FALSE(eventManager->lastConsumedEvent_.lastLogTimeStamp > currentTime);
+
+    eventManager->lastConsumedEvent_.lastLogTimeStamp = lastLogTimeStamp - 1;
+    eventManager->CheckAndLogLastConsumedEventInfo(eventId, logImmediately);
+    EXPECT_FALSE(eventManager->lastConsumedEvent_.lastLogTimeStamp == currentTime);
     
     eventManager->lastReceivedEvent_.lastLogTimeStamp = lastLogTimeStamp + 20000;
     eventManager->lastConsumedEvent_.lastLogTimeStamp = lastLogTimeStamp + 20000;
@@ -1305,14 +1335,29 @@ HWTEST_F(EventManagerTestNg, EventManagerTest070, TestSize.Level1)
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pagePattern);
 
     MouseEvent event;
+    TouchRestrict touchRestrict;
+    event.action = MouseAction::PULL_MOVE;
+    eventManager->MouseTest(event, pageNode, touchRestrict);
+    EXPECT_FALSE(touchRestrict.touchEvent.isMouseTouchTest);
+
+    event.action = MouseAction::MOVE;
+    event.button = MouseButton::NONE_BUTTON;
+    eventManager->MouseTest(event, pageNode, touchRestrict);
+    EXPECT_FALSE(touchRestrict.touchEvent.isMouseTouchTest);
+
+    event.action = MouseAction::PRESS;
+    event.button = MouseButton::LEFT_BUTTON;
+    eventManager->MouseTest(event, pageNode, touchRestrict);
+    EXPECT_TRUE(touchRestrict.touchEvent.isMouseTouchTest);
+    
     event.action = MouseAction::MOVE;
     event.button = MouseButton::RIGHT_BUTTON;
-    TouchRestrict touchRestrict;
     eventManager->MouseTest(event, pageNode, touchRestrict);
     
     event.action = MouseAction::WINDOW_ENTER;
     eventManager->MouseTest(event, pageNode, touchRestrict);
-    EXPECT_FALSE(touchRestrict.touchEvent.isMouseTouchTest);
+    EXPECT_TRUE(touchRestrict.touchEvent.isMouseTouchTest);
+
     event.button = MouseButton::LEFT_BUTTON;
     eventManager->MouseTest(event, pageNode, touchRestrict);
     EXPECT_TRUE(touchRestrict.touchEvent.isMouseTouchTest);
@@ -1614,6 +1659,16 @@ HWTEST_F(EventManagerTestNg, EventManagerAccessibilityHoverTest001, TestSize.Lev
     eventManager->lastAccessibilityHoverResults_.push_back(hoverEventTarget);
     eventManager->AccessibilityHoverTest(event, frameNode, touchRestrict);
     EXPECT_TRUE(eventManager->lastAccessibilityHoverResults_.empty());
+    EXPECT_TRUE(eventManager->curAccessibilityHoverResults_.empty());
+
+    /**
+     * @tc.steps: step4. Call MouseTest with MouseAction::HOVER
+     * @tc.expected: lastHoverTestResults_ is empty and currHoverTestResults_ is empty
+     */
+    event.type = TouchType::HOVER_CANCEL;
+    eventManager->curAccessibilityHoverResults_.push_back(hoverEventTarget);
+    eventManager->AccessibilityHoverTest(event, frameNode, touchRestrict);
+    EXPECT_FALSE(eventManager->lastAccessibilityHoverResults_.empty());
     EXPECT_TRUE(eventManager->curAccessibilityHoverResults_.empty());
 }
 

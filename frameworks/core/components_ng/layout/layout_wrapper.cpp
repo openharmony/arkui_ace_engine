@@ -460,7 +460,7 @@ ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpandForAllEdges(StartPoint st
     }
     // CreateMargin does get or create
     auto hostMargin = layoutProperty->CreateMargin();
-    if (hostMargin.AllSidesFilled(true)) {
+    if (startPoint != StartPoint::FROM_MARGIN && hostMargin.AllSidesFilled(true)) {
         return totalExpand;
     }
     // total expanding distance of four sides used to calculate cache
@@ -740,7 +740,9 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
         if (layoutProperty->GetCalcLayoutConstraint()) {
             idealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
         }
-        auto greaterThanApiTen = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
+        auto host = GetHostNode();
+        auto greaterThanApiTen = host ? host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)
+                                      : Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
         constraint.ApplyAspectRatio(magicItemProperty.GetAspectRatioValue(), idealSize, greaterThanApiTen);
     }
 

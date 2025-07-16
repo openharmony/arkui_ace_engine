@@ -822,7 +822,7 @@ void MenuPattern::AddGroupFooterDivider(RefPtr<UINode>& previousNode, const RefP
         }
     }
     // When the group is not the last item of the menu.
-    if (parent->GetChildIndex(groupNode) < parent->GetChildren().size() - 1) {
+    if (parent->GetChildIndex(groupNode) < static_cast<int32_t>(parent->GetChildren().size()) - 1) {
         UpdateDividerProperty(groupPattern->GetBottomDivider(), property->GetItemGroupDivider());
         if (itemDividerMode == DividerMode::FLOATING_ABOVE_MENU) {
             groupPattern->RemoveBottomDivider();

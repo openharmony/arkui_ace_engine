@@ -2186,10 +2186,23 @@ struct ArkUIPaddingRes {
     void* rightObj = nullptr;
 };
 
+struct ArkUIBackgroundContent {
+    ArkUI_Int32 color;
+    void* bgColorRawPtr;
+};
+
+struct ArkUIBackgroundOptions {
+    ArkUI_Int32 align;
+    ArkUI_Int32* ignoresLayoutSafeAreaEdges;
+    ArkUI_Int32 ignoresLayoutSafeAreaEdgesSize;
+};
 struct ArkUICommonModifier {
     ArkUI_Int32 (*setOnTouchTestDoneCallback)(ArkUINodeHandle node, void* userData,
         void (*touchTestDone)(
             ArkUIGestureEvent* event, ArkUIGestureRecognizerHandleArray recognizers, int32_t count, void* userData));
+    void (*setBackground)(
+        ArkUINodeHandle node, const ArkUIBackgroundContent* content, const ArkUIBackgroundOptions* options);
+    void (*resetBackground)(ArkUINodeHandle node);
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* bgColorRawPtr);
     void (*setBackgroundColorWithColorSpace)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* bgColorRawPtr);
@@ -5908,7 +5921,8 @@ struct ArkUITextPickerModifier {
     void (*setTextPickerDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*setTextPickerDividerWithResObj)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
-        const ArkUI_Int32* units, ArkUI_Int32 length, const struct ArkUIPickerDividerResObjStruct* dividerResObjStr);
+        const ArkUI_Int32* units, ArkUI_Int32 length, const struct ArkUIPickerDividerResObjStruct* dividerResObjStr,
+        ArkUI_Bool isDefaultColor);
     void (*resetTextPickerDivider)(ArkUINodeHandle node);
     void (*setTextPickerGradientHeight)(ArkUINodeHandle node, ArkUI_Float32 dVal, ArkUI_Int32 dUnit);
     void (*setTextPickerGradientHeightWithResObj)(
