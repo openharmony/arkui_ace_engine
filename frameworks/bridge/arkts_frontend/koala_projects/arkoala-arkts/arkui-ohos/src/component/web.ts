@@ -1757,14 +1757,14 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_textZoomAtio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    textZoomRatioAttribute(value: number | undefined): void {
+    textZoomRatioAttribute(value: int32 | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_textZoomRatio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2393,50 +2393,50 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_webCursiveFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    defaultFixedFontSizeAttribute(value: number | undefined): void {
+    defaultFixedFontSizeAttribute(value: int32 | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_defaultFixedFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    defaultFontSizeAttribute(value: number | undefined): void {
+    defaultFontSizeAttribute(value: int32 | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_defaultFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    minFontSizeAttribute(value: number | undefined): void {
+    minFontSizeAttribute(value: int32 | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_minFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    minLogicalFontSizeAttribute(value: number | undefined): void {
+    minLogicalFontSizeAttribute(value: int32 | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_minLogicalFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -3397,8 +3397,8 @@ export interface NativeEmbedInfo {
     type?: string;
     src?: string;
     position?: Position;
-    width?: number;
-    height?: number;
+    width?: int32;
+    height?: int32;
     url?: string;
     tag?: string;
     params?: Map<string, string>;
@@ -3419,16 +3419,16 @@ export interface NativeEmbedTouchInfo {
     result?: EventResult;
 }
 export interface FirstMeaningfulPaint {
-    navigationStartTime?: number;
-    firstMeaningfulPaintTime?: number;
+    navigationStartTime?: long;
+    firstMeaningfulPaintTime?: long;
 }
 export interface LargestContentfulPaint {
-    navigationStartTime?: number;
-    largestImagePaintTime?: number;
-    largestTextPaintTime?: number;
-    imageBPP?: number;
-    largestImageLoadStartTime?: number;
-    largestImageLoadEndTime?: number;
+    navigationStartTime?: long;
+    largestImagePaintTime?: long;
+    largestTextPaintTime?: long;
+    imageBPP?: double;
+    largestImageLoadStartTime?: long;
+    largestImageLoadEndTime?: long;
 }
 export interface RenderProcessNotRespondingData {
     jsStack: string;
@@ -3570,8 +3570,8 @@ export interface OnAudioStateChangedEvent {
     playing: boolean;
 }
 export interface OnFirstContentfulPaintEvent {
-    navigationStartTick: number;
-    firstContentfulPaintMs: number;
+    navigationStartTick: long;
+    firstContentfulPaintMs: long;
 }
 export interface OnLoadInterceptEvent {
     data: WebResourceRequest;
@@ -3683,7 +3683,7 @@ export interface WebAttribute extends CommonMethod {
     overScrollMode(value: OverScrollMode | undefined): this
     blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this
     textZoomAtio(value: number | undefined): this
-    textZoomRatio(value: number | undefined): this
+    textZoomRatio(value: int32 | undefined): this
     databaseAccess(value: boolean | undefined): this
     initialScale(value: number | undefined): this
     userAgent(value: string | undefined): this
@@ -3735,10 +3735,10 @@ export interface WebAttribute extends CommonMethod {
     webFixedFont(value: string | undefined): this
     webFantasyFont(value: string | undefined): this
     webCursiveFont(value: string | undefined): this
-    defaultFixedFontSize(value: number | undefined): this
-    defaultFontSize(value: number | undefined): this
-    minFontSize(value: number | undefined): this
-    minLogicalFontSize(value: number | undefined): this
+    defaultFixedFontSize(value: int32 | undefined): this
+    defaultFontSize(value: int32 | undefined): this
+    minFontSize(value: int32 | undefined): this
+    minLogicalFontSize(value: int32 | undefined): this
     defaultTextEncodingFormat(value: string | undefined): this
     forceDisplayScrollBar(value: boolean | undefined): this
     blockNetwork(value: boolean | undefined): this
@@ -3812,7 +3812,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     overScrollMode_value?: OverScrollMode | undefined
     blurOnKeyboardHideMode_value?: BlurOnKeyboardHideMode | undefined
     textZoomAtio_value?: number | undefined
-    textZoomRatio_value?: number | undefined
+    textZoomRatio_value?: int32 | undefined
     databaseAccess_value?: boolean | undefined
     initialScale_value?: number | undefined
     userAgent_value?: string | undefined
@@ -3864,10 +3864,10 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     webFixedFont_value?: string | undefined
     webFantasyFont_value?: string | undefined
     webCursiveFont_value?: string | undefined
-    defaultFixedFontSize_value?: number | undefined
-    defaultFontSize_value?: number | undefined
-    minFontSize_value?: number | undefined
-    minLogicalFontSize_value?: number | undefined
+    defaultFixedFontSize_value?: int32 | undefined
+    defaultFontSize_value?: int32 | undefined
+    minFontSize_value?: int32 | undefined
+    minLogicalFontSize_value?: int32 | undefined
     defaultTextEncodingFormat_value?: string | undefined
     forceDisplayScrollBar_value?: boolean | undefined
     blockNetwork_value?: boolean | undefined
@@ -3977,7 +3977,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     public textZoomAtio(value: number | undefined): this {
         return this
     }
-    public textZoomRatio(value: number | undefined): this {
+    public textZoomRatio(value: int32 | undefined): this {
         return this
     }
     public databaseAccess(value: boolean | undefined): this {
@@ -4133,16 +4133,16 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     public webCursiveFont(value: string | undefined): this {
         return this
     }
-    public defaultFixedFontSize(value: number | undefined): this {
+    public defaultFixedFontSize(value: int32 | undefined): this {
         return this
     }
-    public defaultFontSize(value: number | undefined): this {
+    public defaultFontSize(value: int32 | undefined): this {
         return this
     }
-    public minFontSize(value: number | undefined): this {
+    public minFontSize(value: int32 | undefined): this {
         return this
     }
-    public minLogicalFontSize(value: number | undefined): this {
+    public minLogicalFontSize(value: int32 | undefined): this {
         return this
     }
     public defaultTextEncodingFormat(value: string | undefined): this {
@@ -4498,9 +4498,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public textZoomRatio(value: number | undefined): this {
+    public textZoomRatio(value: int32 | undefined): this {
         if (this.checkPriority("textZoomRatio")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.textZoomRatioAttribute(value_casted)
             return this
         }
@@ -4923,33 +4923,33 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public defaultFixedFontSize(value: number | undefined): this {
+    public defaultFixedFontSize(value: int32 | undefined): this {
         if (this.checkPriority("defaultFixedFontSize")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.defaultFixedFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public defaultFontSize(value: number | undefined): this {
+    public defaultFontSize(value: int32 | undefined): this {
         if (this.checkPriority("defaultFontSize")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.defaultFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public minFontSize(value: number | undefined): this {
+    public minFontSize(value: int32 | undefined): this {
         if (this.checkPriority("minFontSize")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.minFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public minLogicalFontSize(value: number | undefined): this {
+    public minLogicalFontSize(value: int32 | undefined): this {
         if (this.checkPriority("minLogicalFontSize")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.minLogicalFontSizeAttribute(value_casted)
             return this
         }

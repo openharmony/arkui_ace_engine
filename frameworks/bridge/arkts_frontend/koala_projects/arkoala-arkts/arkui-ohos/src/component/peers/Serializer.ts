@@ -492,9 +492,9 @@ export class Serializer extends SerializerBase {
     writeOnFirstContentfulPaintEvent(value: OnFirstContentfulPaintEvent): void {
         let valueSerializer : Serializer = this
         const value_navigationStartTick  = value.navigationStartTick
-        valueSerializer.writeNumber(value_navigationStartTick)
+        valueSerializer.writeInt64(value_navigationStartTick)
         const value_firstContentfulPaintMs  = value.firstContentfulPaintMs
-        valueSerializer.writeNumber(value_firstContentfulPaintMs)
+        valueSerializer.writeInt64(value_firstContentfulPaintMs)
     }
     writeOnFoldStatusChangeInfo(value: OnFoldStatusChangeInfo): void {
         let valueSerializer : Serializer = this
@@ -3112,7 +3112,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_navigationStartTime_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_navigationStartTime_type)) {
             const value_navigationStartTime_value  = value_navigationStartTime!
-            valueSerializer.writeNumber(value_navigationStartTime_value)
+            valueSerializer.writeInt64(value_navigationStartTime_value)
         }
         const value_firstMeaningfulPaintTime  = value.firstMeaningfulPaintTime
         let value_firstMeaningfulPaintTime_type : int32 = RuntimeType.UNDEFINED
@@ -3120,7 +3120,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_firstMeaningfulPaintTime_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_firstMeaningfulPaintTime_type)) {
             const value_firstMeaningfulPaintTime_value  = value_firstMeaningfulPaintTime!
-            valueSerializer.writeNumber(value_firstMeaningfulPaintTime_value)
+            valueSerializer.writeInt64(value_firstMeaningfulPaintTime_value)
         }
     }
     writeFocusMovement(value: FocusMovement): void {
@@ -3855,7 +3855,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_navigationStartTime_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_navigationStartTime_type)) {
             const value_navigationStartTime_value  = value_navigationStartTime!
-            valueSerializer.writeNumber(value_navigationStartTime_value)
+            valueSerializer.writeInt64(value_navigationStartTime_value)
         }
         const value_largestImagePaintTime  = value.largestImagePaintTime
         let value_largestImagePaintTime_type : int32 = RuntimeType.UNDEFINED
@@ -3863,7 +3863,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_largestImagePaintTime_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_largestImagePaintTime_type)) {
             const value_largestImagePaintTime_value  = value_largestImagePaintTime!
-            valueSerializer.writeNumber(value_largestImagePaintTime_value)
+            valueSerializer.writeInt64(value_largestImagePaintTime_value)
         }
         const value_largestTextPaintTime  = value.largestTextPaintTime
         let value_largestTextPaintTime_type : int32 = RuntimeType.UNDEFINED
@@ -3871,7 +3871,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_largestTextPaintTime_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_largestTextPaintTime_type)) {
             const value_largestTextPaintTime_value  = value_largestTextPaintTime!
-            valueSerializer.writeNumber(value_largestTextPaintTime_value)
+            valueSerializer.writeInt64(value_largestTextPaintTime_value)
         }
         const value_imageBPP  = value.imageBPP
         let value_imageBPP_type : int32 = RuntimeType.UNDEFINED
@@ -3879,7 +3879,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_imageBPP_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_imageBPP_type)) {
             const value_imageBPP_value  = value_imageBPP!
-            valueSerializer.writeNumber(value_imageBPP_value)
+            valueSerializer.writeFloat32(value_imageBPP_value as float32)
         }
         const value_largestImageLoadStartTime  = value.largestImageLoadStartTime
         let value_largestImageLoadStartTime_type : int32 = RuntimeType.UNDEFINED
@@ -3887,7 +3887,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_largestImageLoadStartTime_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_largestImageLoadStartTime_type)) {
             const value_largestImageLoadStartTime_value  = value_largestImageLoadStartTime!
-            valueSerializer.writeNumber(value_largestImageLoadStartTime_value)
+            valueSerializer.writeInt64(value_largestImageLoadStartTime_value)
         }
         const value_largestImageLoadEndTime  = value.largestImageLoadEndTime
         let value_largestImageLoadEndTime_type : int32 = RuntimeType.UNDEFINED
@@ -3895,7 +3895,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_largestImageLoadEndTime_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_largestImageLoadEndTime_type)) {
             const value_largestImageLoadEndTime_value  = value_largestImageLoadEndTime!
-            valueSerializer.writeNumber(value_largestImageLoadEndTime_value)
+            valueSerializer.writeInt64(value_largestImageLoadEndTime_value)
         }
     }
     writeLayoutConstraint(value: LayoutConstraint): void {
@@ -14175,7 +14175,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_width_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_width_type)) {
             const value_width_value  = value_width!
-            valueSerializer.writeNumber(value_width_value)
+            valueSerializer.writeInt32(value_width_value)
         }
         const value_height  = value.height
         let value_height_type : int32 = RuntimeType.UNDEFINED
@@ -14183,7 +14183,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_height_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_height_type)) {
             const value_height_value  = value_height!
-            valueSerializer.writeNumber(value_height_value)
+            valueSerializer.writeInt32(value_height_value)
         }
         const value_url  = value.url
         let value_url_type : int32 = RuntimeType.UNDEFINED

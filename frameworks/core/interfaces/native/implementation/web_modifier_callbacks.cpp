@@ -885,9 +885,9 @@ void OnFirstContentfulPaint(const CallbackHelper<Callback_OnFirstContentfulPaint
         auto* eventInfo = TypeInfoHelper::DynamicCast<FirstContentfulPaintEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
         Ark_OnFirstContentfulPaintEvent parameter;
-        parameter.firstContentfulPaintMs = Converter::ArkValue<Ark_Number>(
+        parameter.firstContentfulPaintMs = Converter::ArkValue<Ark_Int64>(
             eventInfo->GetFirstContentfulPaintMs());
-        parameter.navigationStartTick = Converter::ArkValue<Ark_Number>(eventInfo->GetNavigationStartTick());
+        parameter.navigationStartTick = Converter::ArkValue<Ark_Int64>(eventInfo->GetNavigationStartTick());
         arkCallback.Invoke(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
@@ -908,8 +908,8 @@ void OnFirstMeaningfulPaint(const CallbackHelper<OnFirstMeaningfulPaintCallback>
         auto* eventInfo = TypeInfoHelper::DynamicCast<FirstMeaningfulPaintEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
         Ark_FirstMeaningfulPaint parameter;
-        parameter.firstMeaningfulPaintTime = Converter::ArkValue<Opt_Number>(eventInfo->GetFirstMeaningfulPaintTime());
-        parameter.navigationStartTime = Converter::ArkValue<Opt_Number>(eventInfo->GetNavigationStartTime());
+        parameter.firstMeaningfulPaintTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetFirstMeaningfulPaintTime());
+        parameter.navigationStartTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetNavigationStartTime());
         arkCallback.Invoke(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
@@ -930,13 +930,13 @@ void OnLargestContentfulPaint(const CallbackHelper<OnLargestContentfulPaintCallb
         auto* eventInfo = TypeInfoHelper::DynamicCast<LargestContentfulPaintEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
         Ark_LargestContentfulPaint parameter;
-        parameter.imageBPP = Converter::ArkValue<Opt_Number>(eventInfo->GetImageBPP());
-        parameter.largestImageLoadEndTime = Converter::ArkValue<Opt_Number>(eventInfo->GetLargestImageLoadEndTime());
-        parameter.largestImageLoadStartTime = Converter::ArkValue<Opt_Number>(
+        parameter.imageBPP = Converter::ArkValue<Opt_Float32>(static_cast<float>(eventInfo->GetImageBPP()));
+        parameter.largestImageLoadEndTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetLargestImageLoadEndTime());
+        parameter.largestImageLoadStartTime = Converter::ArkValue<Opt_Int64>(
             eventInfo->GetLargestImageLoadStartTime());
-        parameter.largestImagePaintTime = Converter::ArkValue<Opt_Number>(eventInfo->GetLargestImagePaintTime());
-        parameter.largestTextPaintTime = Converter::ArkValue<Opt_Number>(eventInfo->GetLargestTextPaintTime());
-        parameter.navigationStartTime = Converter::ArkValue<Opt_Number>(eventInfo->GetNavigationStartTime());
+        parameter.largestImagePaintTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetLargestImagePaintTime());
+        parameter.largestTextPaintTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetLargestTextPaintTime());
+        parameter.navigationStartTime = Converter::ArkValue<Opt_Int64>(eventInfo->GetNavigationStartTime());
         arkCallback.Invoke(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
