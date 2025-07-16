@@ -38,6 +38,7 @@ protected:
 };
 
 namespace Framework {
+napi_value CreateJSScreenCaptureRequestObject(napi_env env, const RefPtr<WebScreenCaptureRequest>& value);
 napi_value CreateJSWebDialogObject(napi_env env, const RefPtr<Result>& value);
 napi_value CreateJSFileSelectorResultObject(napi_env env, const RefPtr<FileSelectorResult>& value);
 napi_value CreateJSFileSelectorParamObject(napi_env env, const RefPtr<WebFileSelectorParam>& value);
