@@ -81,6 +81,11 @@ public:
     MOCK_METHOD(RefPtr<DataLoadParams>, TransformDataLoadParams, (napi_env env, napi_value napiValue), (override));
     MOCK_METHOD(RefPtr<DataLoadParams>, TransformDataLoadParamsForNative, (void* rawData), (override));
     MOCK_METHOD(int32_t, SetDelayInfo, (RefPtr<DataLoadParams> dataLoadParams, std::string& key), (override));
+#if defined(ACE_STATIC)
+    MOCK_METHOD(RefPtr<UnifiedData>, TransformUnifiedDataFromANI, (void* rawData), (override));
+    MOCK_METHOD(void, TransformSummaryANI, ((std::map<std::string, int64_t>& summaryMap), void* summaryPtr),
+        (override));
+#endif
 };
 class MockUnifiedData : public UnifiedData {
     DECLARE_ACE_TYPE(MockUnifiedData, UnifiedData);

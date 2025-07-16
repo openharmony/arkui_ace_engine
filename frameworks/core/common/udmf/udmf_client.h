@@ -88,6 +88,10 @@ public:
     virtual bool GetFileUriEntry(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri) = 0;
     virtual std::vector<uint8_t> GetSpanStringEntry(const RefPtr<UnifiedData>& unifiedData) = 0;
     virtual bool IsBelongsTo(const std::string& summary, const std::string& allowDropType) = 0;
+#if defined(ACE_STATIC)
+    virtual RefPtr<UnifiedData> TransformUnifiedDataFromANI(void* rawData) = 0;
+    virtual void TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr) = 0;
+#endif
 };
 } // namespace OHOS::Ace
 #endif

@@ -209,4 +209,14 @@ bool UdmfClientImpl::IsBelongsTo(const std::string& summary, const std::string& 
 {
     return false;
 }
+
+#if defined(ACE_STATIC)
+RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataFromANI(void* rawData)
+{
+    return nullptr;
+}
+
+void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr)
+{}
+#endif
 } // namespace OHOS::Ace
