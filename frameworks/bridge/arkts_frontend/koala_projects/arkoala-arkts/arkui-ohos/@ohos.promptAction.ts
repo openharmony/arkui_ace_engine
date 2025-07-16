@@ -283,8 +283,8 @@ declare namespace promptAction {
     export function presentCustomDialog(builder: KPointer, controller?: DialogController,
         options?: DialogOptions, optionsInternal?: DialogOptionsInternal): Promise<number>;
 
-    export function getTopOrder(): number;
-    export function getBottomOrder(): number;
+    export function getTopOrder(): number | undefined;
+    export function getBottomOrder(): number | undefined;
 }
 
 export default promptAction
