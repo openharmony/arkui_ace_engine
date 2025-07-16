@@ -20,6 +20,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/level_order_peer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "ui/base/referenced.h"
 
@@ -119,7 +120,7 @@ static bool GetOverlayManagerInfo(ani_env* env, ani_object options, NG::OverlayM
 
 static ani_boolean SetOverlayManagerOptions(ani_env* env, ani_object options)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "ani SetOverlayManagerOptions enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "ani SetOverlayManagerOptions enter");
     ani_boolean ret = ANI_FALSE;
     RefPtr<NG::PipelineContext> context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, ret);
@@ -218,9 +219,42 @@ static void AddComponentContent(ani_env* env, ani_long aniNode, ani_int aniIndex
     PostOverlayTask(std::move(task), instanceId, "ani AddComponentContent");
 }
 
-static void AddComponentContentWithOrder([[maybe_unused]] ani_env* env, ani_long aniNode, ani_object aniLevelOrder)
+static void AddComponentContentWithOrder(ani_env* env, ani_long aniNode, ani_object aniLevelOrder)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "ani AddComponentContentWithOrder enter");
+    std::optional<double> orderNumber = std::nullopt;
+    if (aniLevelOrder != 0) {
+        ani_class levelOrderCls;
+        ani_status status = env->FindClass("L@ohos/promptAction/LevelOrder;", &levelOrderCls);
+        if (status != ANI_OK) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY, "Find LevelOrder failed(%{public}d)", status);
+            return;
+        }
+
+        ani_method getOrderMethod;
+        status = env->Class_FindMethod(levelOrderCls, "getOrder", nullptr, &getOrderMethod);
+        if (status != ANI_OK) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY, "Find getOrder failed(%{public}d)", status);
+            return;
+        }
+
+        ani_double orderValue;
+        status = env->Object_CallMethod_Double(aniLevelOrder, getOrderMethod, &orderValue);
+        if (status != ANI_OK) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY, "Call getOrder failed(%{public}d)", status);
+            return;
+        }
+        orderNumber = std::make_optional(orderValue);
+    }
+
+    Ark_FrameNode peerNode = (Ark_FrameNode)aniNode;
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->AddFrameNodeWithOrder(frameNode, orderNumber);
 }
 
 static void RemoveComponentContent(ani_env* env, ani_long aniNode)
