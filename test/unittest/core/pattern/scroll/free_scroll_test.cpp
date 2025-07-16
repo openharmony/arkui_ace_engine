@@ -166,6 +166,38 @@ TEST_F(FreeScrollTest, RecognizerOverride001)
 }
 
 /**
+ * @tc.name: GestureJudge001
+ * @tc.desc: Test GestureJudge
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, GestureJudge001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateScrollDone();
+    const auto& controller = pattern_->freeScroll_;
+    ASSERT_TRUE(controller->freePanGesture_);
+    ASSERT_TRUE(controller->freePanGesture_->sysJudge_);
+    std::vector<KeyCode> keys1 = { KeyCode::KEY_CTRL_LEFT };
+    std::vector<KeyCode> keys2 = { KeyCode::KEY_CTRL_RIGHT };
+    auto info = std::make_shared<PanGestureEvent>();
+    info->SetPressedKeyCodes(keys1);
+    RefPtr<GestureInfo> gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo->SetInputEventType(InputEventType::AXIS);
+    auto res = controller->freePanGesture_->sysJudge_(gestureInfo, info);
+    EXPECT_EQ(res, GestureJudgeResult::REJECT);
+
+    info->SetPressedKeyCodes(keys2);
+    res = controller->freePanGesture_->sysJudge_(gestureInfo, info);
+    EXPECT_EQ(res, GestureJudgeResult::REJECT);
+
+    gestureInfo->SetInputEventType(InputEventType::TOUCH_SCREEN);
+    res = controller->freePanGesture_->sysJudge_(gestureInfo, info);
+    EXPECT_EQ(res, GestureJudgeResult::CONTINUE);
+}
+
+/**
  * @tc.name: Measure001
  * @tc.desc: Test child constraint with Axis::FREE
  * @tc.type: FUNC
