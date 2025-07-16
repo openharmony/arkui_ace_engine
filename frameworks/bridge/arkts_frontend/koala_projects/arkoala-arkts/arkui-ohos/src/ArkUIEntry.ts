@@ -161,7 +161,7 @@ function drawCurrentCrash(crash: Object) {
 }
 
 function registerSyncCallbackProcessor() {
-    wrapSystemCallback(1, (buff:KSerializerBuffer, len:int32) => {
+    wrapSystemCallback(1, (buff: KSerializerBuffer, len: int32) => {
         deserializeAndCallCallback(new Deserializer(buff, len))
         return 0
     })
