@@ -260,7 +260,6 @@ export class CustomComponent<T extends CustomComponent<T, OptionsT>, OptionsT ex
 // Improve: implement this
 export interface SubscribaleAbstract { }
 export interface CommonTransition { }
-export { AbstractProperty } from "@koalaui/arkui-common"
 export interface IPropertySubscriber { }
 export interface ISinglePropertyChangeSubscriber { }
 

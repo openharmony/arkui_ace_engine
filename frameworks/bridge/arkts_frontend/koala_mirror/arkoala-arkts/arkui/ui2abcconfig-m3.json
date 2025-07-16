@@ -5,7 +5,6 @@
         "baseUrl": "./src/ets",
         "paths": {
             "#components": ["./generated/arkts"],
-            "@koalaui/arkui-common": ["../../../arkui-common/src"],
             "@koalaui/interop": ["../../../../interop/src/arkts"],
             "@koalaui/common": ["../../../../incremental/common/src"],
             "@koalaui/compat": ["../../../../incremental/compat/src/arkts"],
@@ -29,7 +28,6 @@
         "./src/ets/sdk/**/*.ets"
     ],
     "dependencies": {
-        "@koalaui/arkui-common": ["../arkui-common/ui2abcconfig.json"],
         "@koalaui/runtime": ["../../incremental/runtime/ui2abcconfig.json"]
     }
 }

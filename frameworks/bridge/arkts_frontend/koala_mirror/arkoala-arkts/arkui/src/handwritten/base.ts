@@ -58,7 +58,6 @@ export interface UICommonBase {
 // TODO: implement this
 export interface SubscribaleAbstract {}
 export interface CommonTransition {}
-export { AbstractProperty } from "@koalaui/arkui-common"
 export interface IPropertySubscriber {}
 export interface ISinglePropertyChangeSubscriber {}
 

@@ -149,26 +149,11 @@ npm_cmd("arkoala_install") {
     install = true
 }
 
-npm_cmd("arkui_common.abc") {
-    outputs = [
-        "$target_out_dir/arkui-common.abc"
-    ]
-    deps = [
-      ":arkoala_install",
-      "$koala_root/incremental:incremental",
-    ]
-    project_path = rebase_path("./arkui-common")
-    target_out_path = rebase_path("$target_out_dir")
-    built_file_path = rebase_path("./arkui-common/build-m3/arkui-common.abc")
-    run_tasks = [ "build:arkui-common:inc:ui2abc:recheck" ]
-}
-
 npm_cmd("arkui.abc") {
     outputs = [
         "$target_out_dir/arkui.abc"
     ]
     deps = [
-      ":arkui_common.abc",
       "$koala_root/interop:interop",
     ]
     project_path = rebase_path("./arkui")

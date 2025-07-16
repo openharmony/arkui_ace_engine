@@ -8,7 +8,6 @@
     ],
     "configs": [
         "ui2abcconfig-m3.json",
-        "../arkui-common/tsconfig.json",
         "../../interop/arktsconfig.json",
         "../../incremental/common/arktsconfig.json",
         "../../incremental/compat/arktsconfig.json",
