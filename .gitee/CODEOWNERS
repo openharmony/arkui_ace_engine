@@ -175,7 +175,7 @@ adapter/ohos/osal/stylus_detector_callback.cpp @huawei_g_five
 adapter/ohos/osal/system_bar_style_ohos.cpp @arkuievent
 adapter/ohos/osal/system_bar_style_ohos.h @arkuievent
 adapter/ohos/osal/system_properties.cpp @arkuiframework
-adapter/ohos/osal/system_properties_multi_thread.cpp @wangyang2022
+adapter/ohos/osal/system_properties_multi_thread.cpp @arkuiframework
 adapter/ohos/osal/text_share_adapter.cpp @huawei_g_five
 adapter/ohos/osal/text_share_loader.cpp @huawei_g_five
 adapter/ohos/osal/text_share_mgr.cpp @huawei_g_five
@@ -202,41 +202,41 @@ advanced_ui_component/atomicserviceweb/ @giteewzp
 advanced_ui_component/BUILD.gn @arkuistatemgmt
 advanced_ui_component/chipgroup/ @arkuistatemgmt
 advanced_ui_component/chip/ @arkuistatemgmt
-advanced_ui_component/composelistitem/ @guozonghao11
-advanced_ui_component/composetitlebar/ @guozonghao11
+advanced_ui_component/composelistitem/ @arkuiadvanceduicomponent
+advanced_ui_component/composetitlebar/ @arkuiadvanceduicomponent
 advanced_ui_component/counter/ @arkuistatemgmt
-advanced_ui_component/dialog/ @guozonghao11
-advanced_ui_component/dialogv2/ @guozonghao11
+advanced_ui_component/dialog/ @arkuiadvanceduicomponent
+advanced_ui_component/dialogv2/ @arkuiadvanceduicomponent
 advanced_ui_component/downloadfilebutton/
-advanced_ui_component/editabletitlebar/ @guozonghao11
-advanced_ui_component/exceptionprompt/ @guozonghao11
-advanced_ui_component/filter/ @guozonghao11
+advanced_ui_component/editabletitlebar/ @arkuiadvanceduicomponent
+advanced_ui_component/exceptionprompt/ @arkuiadvanceduicomponent
+advanced_ui_component/filter/ @arkuiadvanceduicomponent
 advanced_ui_component/foldsplitcontainer/ @arkuilayout
 advanced_ui_component/formmenu/
 advanced_ui_component/fullscreenlaunchcomponent/ @arkuiabilitygroup
-advanced_ui_component/gridobjectsortcomponent/ @guozonghao11
+advanced_ui_component/gridobjectsortcomponent/ @arkuiadvanceduicomponent
 advanced_ui_component/interstitialdialogaction/ @giteewzp
 advanced_ui_component/popup/ @arkuipopupwindow
-advanced_ui_component/progressbutton/ @guozonghao11
-advanced_ui_component/progressbuttonv2/ @guozonghao11
+advanced_ui_component/progressbutton/ @arkuiadvanceduicomponent
+advanced_ui_component/progressbuttonv2/ @arkuiadvanceduicomponent
 advanced_ui_component/segmentbutton/ @arkuistatemgmt
 advanced_ui_component/segmentbuttonv2/ @arkuistatemgmt
 advanced_ui_component/selectionmenu/ @huawei_g_five
-advanced_ui_component/selecttitlebar/ @guozonghao11
-advanced_ui_component/splitlayout/ @guozonghao11
-advanced_ui_component/subheader/ @guozonghao11
-advanced_ui_component/subheaderv2/ @guozonghao11
-advanced_ui_component/swiperefresher/ @guozonghao11
-advanced_ui_component/tabtitlebar/ @guozonghao11
-advanced_ui_component/toolbar/ @guozonghao11
-advanced_ui_component/toolbarv2/ @guozonghao11
-advanced_ui_component/treeview/ @guozonghao11
+advanced_ui_component/selecttitlebar/ @arkuiadvanceduicomponent
+advanced_ui_component/splitlayout/ @arkuiadvanceduicomponent
+advanced_ui_component/subheader/ @arkuiadvanceduicomponent
+advanced_ui_component/subheaderv2/ @arkuiadvanceduicomponent
+advanced_ui_component/swiperefresher/ @arkuiadvanceduicomponent
+advanced_ui_component/tabtitlebar/ @arkuiadvanceduicomponent
+advanced_ui_component/toolbar/ @arkuiadvanceduicomponent
+advanced_ui_component/toolbarv2/ @arkuiadvanceduicomponent
+advanced_ui_component/treeview/ @arkuiadvanceduicomponent
 
 [Extend UI Components]
 component_ext/arc_swiper/
 component_ext/BUILD.gn @arkui_architecture
 component_ext/ext_common/
-component_ext/movingphoto/ @wangrunsen
+component_ext/movingphoto/ @arkuiadvanceduicomponent
 
 [Examples]
 examples/ @arkuipopupwindow
@@ -572,7 +572,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkRect.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRefresh.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRelativeContainer.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRemoteWindow.ts
-frameworks/bridge/declarative_frontend/ark_component/src/ArkRichEditor.ts @zhuweifeng94
+frameworks/bridge/declarative_frontend/ark_component/src/ArkRichEditor.ts @arkui_rich_editor
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRichText.ts @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRowSplit.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRow.ts @arkuilayout
@@ -663,7 +663,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/rating_modifier.ts @arku
 frameworks/bridge/declarative_frontend/ark_modifier/src/rect_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/refresh_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/relative_container_modifier.ts @arkuilayout
-frameworks/bridge/declarative_frontend/ark_modifier/src/rich_editor_modifier.ts @zhuweifeng94
+frameworks/bridge/declarative_frontend/ark_modifier/src/rich_editor_modifier.ts @arkui_rich_editor
 frameworks/bridge/declarative_frontend/ark_modifier/src/row_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/row_split_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/scroll_modifier.ts @arkuiscroll
@@ -695,7 +695,7 @@ frameworks/bridge/declarative_frontend/ark_mock/ @arkuiframework
 frameworks/bridge/declarative_frontend/ark_node/ @arkuiframework
 frameworks/bridge/declarative_frontend/ark_prefetcher/ @arkuistatemgmt
 frameworks/bridge/declarative_frontend/ark_shape/ @arkui_superman
-frameworks/bridge/declarative_frontend/ark_theme/ @guozonghao11
+frameworks/bridge/declarative_frontend/ark_theme/ @arkuiadvanceduicomponent
 frameworks/bridge/declarative_frontend/BUILD.gn @arkui_architecture
 frameworks/bridge/declarative_frontend/declarative_frontend.cpp @arkuiframework
 frameworks/bridge/declarative_frontend/declarative_frontend.h @arkuiframework
@@ -929,8 +929,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rend
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h @arkuiframework
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_resource_bridge.cpp @arkuiframework
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_resource_bridge.h @arkuiframework
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.cpp @zhuweifeng94
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h @zhuweifeng94
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.cpp @arkui_rich_editor
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h @arkui_rich_editor
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_bridge.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_split_bridge.cpp @arkuilayout
@@ -975,8 +975,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h @arkui_image
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.cpp @arkui_image
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.h @arkui_image
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.cpp @guozonghao11
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.h @guozonghao11
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.cpp @arkuiadvanceduicomponent
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.h @arkuiadvanceduicomponent
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.cpp @arkui_image
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h @arkui_image
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.cpp @arkuipopupwindow
@@ -1137,8 +1137,8 @@ frameworks/bridge/declarative_frontend/jsview/js_isolated_component.cpp @arkuiab
 frameworks/bridge/declarative_frontend/jsview/js_isolated_component.h @arkuiabilitygroup
 frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h @arkuilayout
-frameworks/bridge/declarative_frontend/jsview/js_layout_manager.cpp @zhuweifeng94
-frameworks/bridge/declarative_frontend/jsview/js_layout_manager.h @zhuweifeng94
+frameworks/bridge/declarative_frontend/jsview/js_layout_manager.cpp @arkui_rich_editor
+frameworks/bridge/declarative_frontend/jsview/js_layout_manager.h @arkui_rich_editor
 frameworks/bridge/declarative_frontend/jsview/js_layoutable_view.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_layoutable_view.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_actuator.h @arkuistatemgmt
@@ -1250,8 +1250,8 @@ frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.cpp @arku
 frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.cpp @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.h @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/js_richeditor.cpp @zhuweifeng94
-frameworks/bridge/declarative_frontend/jsview/js_richeditor.h @zhuweifeng94
+frameworks/bridge/declarative_frontend/jsview/js_richeditor.cpp @arkui_rich_editor
+frameworks/bridge/declarative_frontend/jsview/js_richeditor.h @arkui_rich_editor
 frameworks/bridge/declarative_frontend/jsview/js_richtext.cpp @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/jsview/js_richtext.h @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/jsview/js_row.cpp @arkuilayout
@@ -1502,8 +1502,8 @@ frameworks/bridge/declarative_frontend/jsview/models/relative_container_model_im
 frameworks/bridge/declarative_frontend/jsview/models/relative_container_model_impl.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/remote_window_model_impl.cpp
 frameworks/bridge/declarative_frontend/jsview/models/remote_window_model_impl.h
-frameworks/bridge/declarative_frontend/jsview/models/richeditor_model_impl.cpp @zhuweifeng94
-frameworks/bridge/declarative_frontend/jsview/models/richeditor_model_impl.h @zhuweifeng94
+frameworks/bridge/declarative_frontend/jsview/models/richeditor_model_impl.cpp @arkui_rich_editor
+frameworks/bridge/declarative_frontend/jsview/models/richeditor_model_impl.h @arkui_rich_editor
 frameworks/bridge/declarative_frontend/jsview/models/richtext_model_impl.cpp @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/jsview/models/richtext_model_impl.h @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/jsview/models/row_model_impl.cpp @arkuilayout
@@ -1855,8 +1855,8 @@ frameworks/core/common/lru/count_limit_lru.inl @arkuiframework
 frameworks/core/common/manager_interface.h @arkuiframework
 frameworks/core/common/message_bridge.h @arkuiframework
 frameworks/core/common/modal_ui_extension.h @arkuiabilitygroup
-frameworks/core/common/multi_thread_build_manager.cpp @wangyang2022
-frameworks/core/common/multi_thread_build_manager.h @wangyang2022
+frameworks/core/common/multi_thread_build_manager.cpp @arkuiframework
+frameworks/core/common/multi_thread_build_manager.h @arkuiframework
 frameworks/core/common/page_url_checker.h @arkui_superman
 frameworks/core/common/platform_bridge.cpp @arkuiframework
 frameworks/core/common/platform_bridge.h @arkuiframework
@@ -2327,7 +2327,7 @@ frameworks/core/components_ng/base/distributed_ui.h @arkuiframework
 frameworks/core/components_ng/base/extension_handler.cpp @arkuiframework
 frameworks/core/components_ng/base/extension_handler.h @arkuiframework
 frameworks/core/components_ng/base/frame_node.cpp @arkui_architecture
-frameworks/core/components_ng/base/frame_node_multi_thread.cpp @wangyang2022
+frameworks/core/components_ng/base/frame_node_multi_thread.cpp @arkuiframework
 frameworks/core/components_ng/base/frame_node.h @arkui_architecture
 frameworks/core/components_ng/base/frame_scene_status.h @arkuiframework
 frameworks/core/components_ng/base/geometry_node.cpp @arkuiframework
@@ -2495,8 +2495,8 @@ frameworks/core/components_ng/pattern/refresh/ @arkuiscroll
 frameworks/core/components_ng/pattern/relative_container/ @arkuilayout
 frameworks/core/components_ng/pattern/remote_window/
 frameworks/core/components_ng/pattern/render_node/ @arkuiframework
-frameworks/core/components_ng/pattern/rich_editor/ @zhuweifeng94
-frameworks/core/components_ng/pattern/rich_editor_drag/ @zhuweifeng94
+frameworks/core/components_ng/pattern/rich_editor/ @arkui_rich_editor
+frameworks/core/components_ng/pattern/rich_editor_drag/ @arkui_rich_editor
 frameworks/core/components_ng/pattern/root/ @arkuievent
 frameworks/core/components_ng/pattern/scrollable/ @arkuiscroll
 frameworks/core/components_ng/pattern/scroll_bar/ @arkuiscroll
@@ -2576,8 +2576,8 @@ frameworks/core/components_ng/property/measure_utils.cpp @arkuilayout
 frameworks/core/components_ng/property/measure_utils.h @arkuilayout
 frameworks/core/components_ng/property/menu_property.h @arkuipopupwindow
 frameworks/core/components_ng/property/overlay_property.h @arkuipopupwindow
-frameworks/core/components_ng/property/particle_property_animation.h @aarkui_superman
-frameworks/core/components_ng/property/particle_property.h @aarkui_superman
+frameworks/core/components_ng/property/particle_property_animation.h @arkui_superman
+frameworks/core/components_ng/property/particle_property.h @arkui_superman
 frameworks/core/components_ng/property/position_property.h @arkui_superman
 frameworks/core/components_ng/property/progress_mask_property.h @arkui_superman
 frameworks/core/components_ng/property/property.cpp @arkuievent
@@ -2706,7 +2706,7 @@ frameworks/core/components_ng/render/polygon_painter.h @arkuilayout
 frameworks/core/components_ng/render/rect_painter.cpp @arkuilayout
 frameworks/core/components_ng/render/rect_painter.h @arkuilayout
 frameworks/core/components_ng/render/render_context.cpp @arkuiframework
-frameworks/core/components_ng/render/render_context_multi_thread.cpp @wangyang2022
+frameworks/core/components_ng/render/render_context_multi_thread.cpp @arkuiframework
 frameworks/core/components_ng/render/render_context_creator.cpp @arkuiframework
 frameworks/core/components_ng/render/render_context.h @arkuiframework
 frameworks/core/components_ng/render/render_property.cpp @arkuiframework
@@ -2716,7 +2716,7 @@ frameworks/core/components_ng/render/render_surface.h @arkuilayout
 frameworks/core/components_ng/render/shape_painter.cpp @arkuilayout
 frameworks/core/components_ng/render/shape_painter.h @arkuilayout
 frameworks/core/components_ng/render/snapshot_param.h @arkuievent
-frameworks/core/components_ng/token_theme/ @guozonghao11
+frameworks/core/components_ng/token_theme/ @arkuiadvanceduicomponent
 frameworks/core/pipeline_ng/ @arkui_architecture
 
 [Native Node Interfaces]
@@ -2760,8 +2760,8 @@ frameworks/core/interfaces/native/node/form_component_modifier.cpp @arondave
 frameworks/core/interfaces/native/node/form_component_modifier.h @arondave
 frameworks/core/interfaces/native/node/frame_node_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/node/frame_node_modifier.h @arkuiframework
-frameworks/core/interfaces/native/node/frame_node_modifier_multi_thread.cpp @wangyang2022
-frameworks/core/interfaces/native/node/frame_node_modifier_multi_thread.h @wangyang2022
+frameworks/core/interfaces/native/node/frame_node_modifier_multi_thread.cpp @arkuiframework
+frameworks/core/interfaces/native/node/frame_node_modifier_multi_thread.h @arkuiframework
 frameworks/core/interfaces/native/node/gauge_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/gauge_modifier.h @arkui_image
 frameworks/core/interfaces/native/node/grid_col_modifier.cpp @arkuilayout
@@ -2802,8 +2802,8 @@ frameworks/core/interfaces/native/node/node_animate.cpp @arkuiframework
 frameworks/core/interfaces/native/node/node_animate.h @arkuiframework
 frameworks/core/interfaces/native/node/node_api.cpp @arkui_architecture
 frameworks/core/interfaces/native/node/node_api.h @arkui_architecture
-frameworks/core/interfaces/native/node/node_api_multi_thread.cpp @wangyang2022
-frameworks/core/interfaces/native/node/node_api_multi_thread.h @wangyang2022
+frameworks/core/interfaces/native/node/node_api_multi_thread.cpp @arkuiframework
+frameworks/core/interfaces/native/node/node_api_multi_thread.h @arkuiframework
 frameworks/core/interfaces/native/node/node_canvas_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/node_canvas_modifier.h @arkuilayout
 frameworks/core/interfaces/native/node/node_checkbox_modifier.cpp @arkuipopupwindow
@@ -2900,8 +2900,8 @@ frameworks/core/interfaces/native/node/rect_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/rect_modifier.h @arkuilayout
 frameworks/core/interfaces/native/node/render_node_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/node/render_node_modifier.h @arkuiframework
-frameworks/core/interfaces/native/node/rich_editor_modifier.cpp @zhuweifeng94
-frameworks/core/interfaces/native/node/rich_editor_modifier.h @zhuweifeng94
+frameworks/core/interfaces/native/node/rich_editor_modifier.cpp @arkui_rich_editor
+frameworks/core/interfaces/native/node/rich_editor_modifier.h @arkui_rich_editor
 frameworks/core/interfaces/native/node/row_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/row_modifier.h @arkuilayout
 frameworks/core/interfaces/native/node/row_split_modifier.cpp @arkuilayout
@@ -2928,8 +2928,8 @@ frameworks/core/interfaces/native/node/text_clock_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/text_clock_modifier.h @arkui_image
 frameworks/core/interfaces/native/node/text_timer_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/text_timer_modifier.h @arkui_image
-frameworks/core/interfaces/native/node/theme_modifier.cpp @guozonghao11
-frameworks/core/interfaces/native/node/theme_modifier.h @guozonghao11
+frameworks/core/interfaces/native/node/theme_modifier.cpp @arkuiadvanceduicomponent
+frameworks/core/interfaces/native/node/theme_modifier.h @arkuiadvanceduicomponent
 frameworks/core/interfaces/native/node/touch_event_convertor.h @arkuievent
 frameworks/core/interfaces/native/node/util_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/node/util_modifier.h @arkuiframework
@@ -2937,7 +2937,7 @@ frameworks/core/interfaces/native/node/video_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/video_modifier.h @arkuilayout
 frameworks/core/interfaces/native/node/view_model.cpp @arkuiframework
 frameworks/core/interfaces/native/node/view_model.h @arkuiframework
-frameworks/core/interfaces/native/node/view_model_multi_thread.cpp @wangyang2022
+frameworks/core/interfaces/native/node/view_model_multi_thread.cpp @arkuiframework
 frameworks/core/interfaces/native/node/water_flow_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/water_flow_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/web_modifier.cpp @arkwebinarkuireview
@@ -2985,8 +2985,8 @@ interfaces/native/node/node_adapter_impl.cpp @arkuiframework
 interfaces/native/node/node_animate.cpp @arkui_superman
 interfaces/native/node/node_extened.cpp @arkuiframework
 interfaces/native/node/node_extened.h @arkuiframework
-interfaces/native/node/node_model_safely.cpp @wangyang2022
-interfaces/native/node/node_model_safely.h @wangyang2022
+interfaces/native/node/node_model_safely.cpp @arkuiframework
+interfaces/native/node/node_model_safely.h @arkuiframework
 interfaces/native/node/node_model.cpp @arkuiframework
 interfaces/native/node/node_model.h @arkuiframework
 interfaces/native/node/node_node_relative_container.cpp @arkuilayout
@@ -3058,9 +3058,9 @@ interfaces/inner_api/ace_kit/include/ @arkui_architecture
 interfaces/inner_api/ace_kit/src/ @arkuiframework
 
 [Arkoala]
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyForEachImpl.ts @zhoutianer
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyItemNode.ts @zhoutianer
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/RepeatImpl.ts @liubihao
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyForEachImpl.ts @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyItemNode.ts @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/RepeatImpl.ts @arkuistatemgmt
 
 [NAPI Interfaces]
 interfaces/napi/kits/animator/ @arkui_superman
@@ -3092,7 +3092,6 @@ interfaces/napi/kits/utils/ @arkuiframework
 
 
 [Test source]
-test/mock/  @zhoulianhai5
 test/mock/core/event/ @arkuievent
 test/mock/core/accessibility/ @arkuiabilitygroup
 test/mock/core/animation/ @arkui_superman
@@ -3100,15 +3099,14 @@ test/mock/core/image_provider/ @arkui_image
 test/mock/core/svg/ @arkui_image
 test/mock/interfaces/ @arkui_architecture
 
-test/mock/core/animation/mock_animation_manager.h @zhoutianer
-test/mock/core/animation/mock_animation_manager.cpp @zhoutianer
-test/mock/core/animation/mock_animation_proxy.h @zhoutianer
-test/mock/core/animation/mock_implicit_animation.h @zhoutianer
-test/mock/core/animation/mock_implicit_animation.cpp @zhoutianer
+test/mock/core/animation/mock_animation_manager.h @arkuiscroll
+test/mock/core/animation/mock_animation_manager.cpp @arkuiscroll
+test/mock/core/animation/mock_animation_proxy.h @arkuiscroll
+test/mock/core/animation/mock_implicit_animation.h @arkuiscroll
+test/mock/core/animation/mock_implicit_animation.cpp @arkuiscroll
 
-test/unittest/ @zhoulianhai5
 test/unittest/core/accessibility/ @arkuiabilitygroup
-test/unittest/core/animation/ @aarkui_superman
+test/unittest/core/animation/ @arkui_superman
 test/unittest/core/common/ace_engine/ @arkuiframework
 test/unittest/core/common/asset/ @arkuiframework
 test/unittest/core/common/clipboard/ @huawei_g_five
@@ -3189,12 +3187,12 @@ test/unittest/core/pattern/progress/ @arkui_image
 test/unittest/core/pattern/qrcode/ @arkui_image
 test/unittest/core/pattern/radio/ @arkuipopupwindow
 test/unittest/core/pattern/rating/ @arkuipopupwindow
-test/unittest/core/pattern/recycle_node/ @Divanolin
+test/unittest/core/pattern/recycle_node/ 
 test/unittest/core/pattern/refresh/ @arkuiscroll
 test/unittest/core/pattern/relative_container/
 test/unittest/core/pattern/render_node/ @arkuiframework
-test/unittest/core/pattern/rich_editor/ @zhuweifeng94
-test/unittest/core/pattern/rich_editor_drag/ @zhuweifeng94
+test/unittest/core/pattern/rich_editor/ @arkui_rich_editor
+test/unittest/core/pattern/rich_editor_drag/ @arkui_rich_editor
 test/unittest/core/pattern/scroll/ @arkuiscroll
 test/unittest/core/pattern/scroll_bar/ @arkuiscroll
 test/unittest/core/pattern/scrollable/ @arkuiscroll
@@ -3231,7 +3229,6 @@ test/unittest/core/pattern/xcomponent/ @arkuilayout
 test/unittest/core/pattern/test_ng.cpp @arkuiscroll
 test/unittest/core/pattern/test_ng.h @arkuiscroll
 test/unittest/core/pipeline/ @arkuiframework
-test/unittest/core/property/ @zhoulianhai5
 test/unittest/core/render/ @arkuiframework
 test/unittest/core/rosen/ @arkuiframework
 test/unittest/core/svg/ @arkui_image
@@ -3240,5 +3237,5 @@ test/unittest/interfaces/ @arkuiframework
 test/unittest/interfaces/ui_input_event_test.cpp @arkuievent
 
 [Generated source]
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/ @guozejun
-frameworks/core/interfaces/native/generated/ @guozejun
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/ @arkui-idlize
+frameworks/core/interfaces/native/generated/ @arkui-idlize
