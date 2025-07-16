@@ -302,6 +302,15 @@ void RichEditorLayoutAlgorithm::UpdateConstraintByLayoutPolicy(
     IF_TRUE(finalSize.Height().has_value(), constraint.maxSize.SetHeight(finalSize.Height().value()));
 }
 
+void RichEditorLayoutAlgorithm::HandleTextSizeWhenEmpty(LayoutWrapper* layoutWrapper, SizeF& textSize)
+{
+    CHECK_NULL_VOID(layoutWrapper && allSpans_.empty());
+    auto pattern = GetRichEditorPattern(layoutWrapper);
+    CHECK_NULL_VOID(pattern);
+    float minWidth = std::ceil(pattern->GetCaretWidth());
+    textSize.SetWidth(std::max(textSize.Width(), minWidth));
+}
+
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
@@ -311,6 +320,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     auto optionalTextSize = MeasureContentSize(contentConstraint, layoutWrapper);
     CHECK_NULL_RETURN(optionalTextSize.has_value(), {});
     auto newContentConstraint = ReMeasureContent(optionalTextSize.value(), contentConstraint, layoutWrapper);
+    HandleTextSizeWhenEmpty(layoutWrapper, optionalTextSize.value());
     SizeF res = optionalTextSize.value();
     res.AddHeight(spans_.empty() ? 0 : shadowOffset_);
     CHECK_NULL_RETURN(res.IsNonNegative(), {});
