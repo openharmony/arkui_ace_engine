@@ -408,7 +408,9 @@ bool GetShowDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::Di
         return false;
     }
 
-    GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
+    if (!dialogProps.isShowInSubWindow) {
+        GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
+    }
     return true;
 }
 
@@ -900,7 +902,9 @@ bool GetDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::Dialog
     GetTransitionEffectParam(env, object, "transition", dialogProps.transitionEffect);
     GetTransitionEffectParam(env, object, "dialogTransition", dialogProps.dialogTransitionEffect);
     GetTransitionEffectParam(env, object, "maskTransition", dialogProps.maskTransitionEffect);
-    GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
+    if (!dialogProps.isShowInSubWindow) {
+        GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
+    }
     return true;
 }
 
