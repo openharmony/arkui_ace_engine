@@ -937,16 +937,22 @@ export class PromptActionImpl extends PromptAction {
 
     getTopOrder(): LevelOrder {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let orderValue: number = promptAction.getTopOrder();
-        let order: LevelOrder = LevelOrder.clamp(orderValue);
+        let orderValue: number | undefined = promptAction.getTopOrder();
+        let order: LevelOrder = LevelOrder.clamp(0);
+        if (orderValue !== undefined) {
+            order = LevelOrder.clamp(orderValue as number);
+        }
         ArkUIAniModule._Common_Restore_InstanceId();
         return order;
     }
 
     getBottomOrder(): LevelOrder {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let orderValue: number = promptAction.getBottomOrder();
-        let order: LevelOrder = LevelOrder.clamp(orderValue);
+        let orderValue: number | undefined = promptAction.getBottomOrder();
+        let order: LevelOrder = LevelOrder.clamp(0);
+        if (orderValue !== undefined) {
+            order = LevelOrder.clamp(orderValue as number);
+        }
         ArkUIAniModule._Common_Restore_InstanceId();
         return order;
     }
