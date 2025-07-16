@@ -397,6 +397,8 @@ auto g_bindMenuOptionsParam = [](
     menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
     menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
     menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
+    menuParam.layoutRegionMargin->start = menuParam.layoutRegionMargin->left;
+    menuParam.layoutRegionMargin->end = menuParam.layoutRegionMargin->right;
     menuParam.hapticFeedbackMode =
         OptConvert<HapticFeedbackMode>(menuOptions.hapticFeedbackMode).value_or(menuParam.hapticFeedbackMode);
     menuParam.outlineColor = OptConvert<BorderColorProperty>(menuOptions.outlineColor);
@@ -761,14 +763,6 @@ BackgroundImageSize Convert(const Ark_ImageSize& src)
 }
 
 template<>
-std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src)
-{
-    auto x = OptConvert<Dimension>(src.x);
-    auto y = OptConvert<Dimension>(src.y);
-    return {x, y};
-}
-
-template<>
 TranslateOpt Convert(const Ark_TranslateOptions& src)
 {
     TranslateOpt translateOptions;
@@ -824,19 +818,6 @@ template<>
 float Convert(const Ark_ForegroundEffectOptions& src)
 {
     return Convert<float>(src.radius);
-}
-
-template<>
-BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)
-{
-    BlurStyleOption dst;
-    dst.colorMode = OptConvert<ThemeColorMode>(src.colorMode).value_or(dst.colorMode);
-    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
-    if (auto scaleOpt = OptConvert<float>(src.scale); scaleOpt) {
-        dst.scale = static_cast<double>(*scaleOpt);
-    }
-    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
-    return dst;
 }
 
 template<>

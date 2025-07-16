@@ -1160,6 +1160,14 @@ std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src)
 }
 
 template<>
+std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src)
+{
+    auto x = OptConvert<Dimension>(src.x);
+    auto y = OptConvert<Dimension>(src.y);
+    return {x, y};
+}
+
+template<>
 Gradient Convert(const Ark_LinearGradient_common& value)
 {
     NG::Gradient gradient;
@@ -2229,6 +2237,19 @@ BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src)
         dst.inactiveColor = color.value();
         dst.isValidColor = true;
     }
+    return dst;
+}
+
+template<>
+BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)
+{
+    BlurStyleOption dst;
+    dst.colorMode = OptConvert<ThemeColorMode>(src.colorMode).value_or(dst.colorMode);
+    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
+    if (auto scaleOpt = OptConvert<float>(src.scale); scaleOpt) {
+        dst.scale = static_cast<double>(*scaleOpt);
+    }
+    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
     return dst;
 }
 
