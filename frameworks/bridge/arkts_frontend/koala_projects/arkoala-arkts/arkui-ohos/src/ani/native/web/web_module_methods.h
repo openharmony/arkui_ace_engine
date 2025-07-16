@@ -32,7 +32,8 @@ ani_boolean TransferWebResourceReponseToStatic(ani_env* env, ani_class aniClass,
 ani_boolean TransferWebResourceRequestToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 ani_boolean TransferConsoleMessageToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 ani_boolean TransferDataResubmissionHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
-ani_boolean TransferClientAuthenticationHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
+ani_boolean TransferClientAuthenticationHandlerToStatic(
+    ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 ani_boolean TransferSslErrorHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 
 ani_object TransferJsResultToDynamic(ani_env* env, ani_class aniClass, ani_long node);
