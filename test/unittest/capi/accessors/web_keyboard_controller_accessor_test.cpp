@@ -77,9 +77,9 @@ HWTEST_F(WebKeyboardControllerAccessorTest, deleteForwardTest, TestSize.Level1)
     int32_t invalid1 = -1;
     int32_t invalid2 = 0;
 
-    Ark_Int32 arkLength= Converter::ArkValue<Ark_Int32>(length);
-    Ark_Int32 arkInvalid1= Converter::ArkValue<Ark_Int32>(invalid1);
-    Ark_Int32 arkInvalid2= Converter::ArkValue<Ark_Int32>(invalid2);
+    Ark_Number arkLength= Converter::ArkValue<Ark_Number>(length);
+    Ark_Number arkInvalid1= Converter::ArkValue<Ark_Number>(invalid1);
+    Ark_Number arkInvalid2= Converter::ArkValue<Ark_Number>(invalid2);
 
     EXPECT_CALL(*mockHandler_, DeleteForward(length)).Times(1);
     accessor_->deleteForward(peer_, &arkInvalid1);
@@ -100,9 +100,9 @@ HWTEST_F(WebKeyboardControllerAccessorTest, deleteBackwardTest, TestSize.Level1)
     int32_t invalid1 = -1;
     int32_t invalid2 = 0;
 
-    Ark_Int32 arkLength= Converter::ArkValue<Ark_Int32>(length);
-    Ark_Int32 arkInvalid1= Converter::ArkValue<Ark_Int32>(invalid1);
-    Ark_Int32 arkInvalid2= Converter::ArkValue<Ark_Int32>(invalid2);
+    Ark_Number arkLength= Converter::ArkValue<Ark_Number>(length);
+    Ark_Number arkInvalid1= Converter::ArkValue<Ark_Number>(invalid1);
+    Ark_Number arkInvalid2= Converter::ArkValue<Ark_Number>(invalid2);
 
     EXPECT_CALL(*mockHandler_, DeleteBackward(length)).Times(1);
     accessor_->deleteBackward(peer_, &arkInvalid1);
@@ -121,7 +121,7 @@ HWTEST_F(WebKeyboardControllerAccessorTest, sendFunctionKeyTest, TestSize.Level1
 
     int32_t key = 5;
 
-    Ark_Int32 arkKey= Converter::ArkValue<Ark_Int32>(key);
+    Ark_Number arkKey= Converter::ArkValue<Ark_Number>(key);
 
     EXPECT_CALL(*mockHandler_, SendFunctionKey(key)).Times(1);
     accessor_->sendFunctionKey(peer_, &arkKey);

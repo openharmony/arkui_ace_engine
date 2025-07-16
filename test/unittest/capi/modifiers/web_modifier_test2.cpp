@@ -477,7 +477,7 @@ HWTEST_F(WebModifierTest2, onInterceptKeyboardAttachTest, TestSize.Level1)
         };
         CallbackHelper(continuation).InvokeSync(Ark_WebKeyboardOptions {
             .useSystemKeyboard = Converter::ArkValue<Ark_Boolean>(callResult),
-            .enterKeyType = Converter::ArkValue<Opt_Int32>(Ark_Empty()),
+            .enterKeyType = Converter::ArkValue<Opt_Number>(Ark_Empty()),
             .customKeyboard = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         });
     };

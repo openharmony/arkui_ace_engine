@@ -14231,7 +14231,7 @@ typedef struct Opt_RenderNode {
 } Opt_RenderNode;
 typedef struct Ark_RenderProcessNotRespondingData {
     Ark_String jsStack;
-    Ark_Int32 pid;
+    Ark_Number pid;
     Ark_RenderProcessNotRespondingReason reason;
 } Ark_RenderProcessNotRespondingData;
 typedef struct Opt_RenderProcessNotRespondingData {
@@ -16134,7 +16134,7 @@ typedef struct Opt_WebKeyboardCallbackInfo {
 } Opt_WebKeyboardCallbackInfo;
 typedef struct Ark_WebKeyboardOptions {
     Ark_Boolean useSystemKeyboard;
-    Opt_Int32 enterKeyType;
+    Opt_Number enterKeyType;
     Opt_CustomNodeBuilder customKeyboard;
 } Ark_WebKeyboardOptions;
 typedef struct Opt_WebKeyboardOptions {
@@ -26882,11 +26882,11 @@ typedef struct GENERATED_ArkUIWebKeyboardControllerAccessor {
     void (*insertText)(Ark_WebKeyboardController peer,
                        const Ark_String* text);
     void (*deleteForward)(Ark_WebKeyboardController peer,
-                          const Ark_Int32* length);
+                          const Ark_Number* length);
     void (*deleteBackward)(Ark_WebKeyboardController peer,
-                           const Ark_Int32* length);
+                           const Ark_Number* length);
     void (*sendFunctionKey)(Ark_WebKeyboardController peer,
-                            const Ark_Int32* key);
+                            const Ark_Number* key);
     void (*close)(Ark_WebKeyboardController peer);
 } GENERATED_ArkUIWebKeyboardControllerAccessor;
 
