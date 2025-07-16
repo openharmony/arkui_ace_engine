@@ -830,6 +830,7 @@ class ArkThemeScopeManager {
         this.lastThemeScopeId = 0;
         this.listeners = [];
         this.defaultTheme = undefined;
+        this.themeIdStack = [];
     }
     onComponentCreateEnter(componentName, elmtId, isFirstRender, ownerComponent) {
         this.handledIsFirstRender = isFirstRender;
@@ -865,6 +866,9 @@ class ArkThemeScopeManager {
         if (scope === undefined) {
             scope = this.scopeForElmtId(elmtId);
         }
+        if (scope === undefined && (this.themeIdStack.length > 0)) {
+            scope = this.themeScopes.find(item => item.getWithThemeId() === this.themeIdStack[this.themeIdStack.length - 1]);
+        }
         this.handledColorMode = scope === null || scope === void 0 ? void 0 : scope.colorMode();
         if (this.handledColorMode === ThemeColorMode.LIGHT || this.handledColorMode === ThemeColorMode.DARK) {
             this.onEnterLocalColorMode(this.handledColorMode);
@@ -874,6 +878,9 @@ class ArkThemeScopeManager {
         }
         this.handledThemeScope = scope;
         this.handleThemeScopeChange(this.handledThemeScope);
+        if (scope) {
+            this.themeIdStack.push(scope.getWithThemeId());
+        }
     }
     onComponentCreateExit(elmtId) {
         if (this.handledColorMode === ThemeColorMode.LIGHT || this.handledColorMode === ThemeColorMode.DARK) {
@@ -881,6 +888,9 @@ class ArkThemeScopeManager {
         }
         this.handledThemeScope = undefined;
         this.handledComponentElmtId = undefined;
+        if (this.themeIdStack.length > 0) {
+            this.themeIdStack.pop();
+        }
     }
     onScopeEnter(withThemeId, withThemeOptions, theme) {
         this.lastThemeScopeId = withThemeId;
