@@ -172,6 +172,25 @@ void SetWebControllerControllerHandler(ani_env* env, ani_class aniClass, ani_lon
     });
 }
 
+ani_boolean TransferScreenCaptureHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    ani_object esValue = ESValueWrap(env, input);
+    if (!esValue) {
+        HILOGE("TransferScreenCaptureHandlerToStatic ESValueWrap failed");
+        return ANI_FALSE;
+    }
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+        HILOGE("TransferScreenCaptureHandlerToStatic arkts_esvalue_unwrap failed");
+        return ANI_FALSE;
+    }
+    return modifier->getWebAniModifier()->transferScreenCaptureHandlerToStatic(reinterpret_cast<void*>(node), nativePtr);
+}
+
 ani_boolean TransferJsResultToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -266,6 +285,29 @@ ani_boolean TransferWebContextMenuParamToStatic(ani_env* env, ani_class aniClass
         return ANI_FALSE;
     }
     return modifier->getWebAniModifier()->transferWebContextMenuParamToStatic(reinterpret_cast<void*>(node), nativePtr);
+}
+
+ani_object TransferScreenCaptureHandlerToDynamic(ani_env* env, ani_class aniClass, ani_long node)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref undefinedRef;
+    env->GetUndefined(&undefinedRef);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier()) {
+        return reinterpret_cast<ani_object>(undefinedRef);
+    }
+    ani_ref result = nullptr;
+    {
+        napi_env jsenv {};
+        bool success = arkts_napi_scope_open(env, &jsenv);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+        napi_value dynamic =
+            modifier->getWebAniModifier()->transferScreenCaptureHandlerToDynamic(jsenv, reinterpret_cast<void*>(node));
+        CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
+        success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+    }
+    return reinterpret_cast<ani_object>(result);
 }
 
 ani_object TransferJsResultToDynamic(ani_env* env, ani_class aniClass, ani_long node)
