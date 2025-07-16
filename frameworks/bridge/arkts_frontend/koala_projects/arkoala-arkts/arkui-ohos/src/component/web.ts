@@ -1235,11 +1235,15 @@ export class EventResult implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._EventResult_getFinalizer()
     }
-    public setGestureEventResult(result: boolean, stopPropagation?: boolean): void {
-        const result_type = runtimeType(result)
-        const stopPropagation_type = runtimeType(stopPropagation)
-        const result_casted = result as (boolean)
+    public setGestureEventResult(result: boolean): void {
+        const result_casted = result.toBoolean()
         this.setGestureEventResult0_serialize(result_casted)
+        return
+    }
+    public setGestureEventResult(result: boolean, stopPropagation: boolean): void {
+        const result_casted = result.toBoolean()
+        const stopPropagation_casted = stopPropagation.toBoolean()
+        this.setGestureEventResult1_serialize(result_casted, stopPropagation_casted)
         return
     }
     private setGestureEventResult0_serialize(result: boolean): void {
