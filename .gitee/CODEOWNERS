@@ -211,41 +211,41 @@ advanced_ui_component/atomicserviceweb/ @giteewzp
 advanced_ui_component/BUILD.gn @arkuistatemgmt
 advanced_ui_component/chipgroup/ @arkuistatemgmt
 advanced_ui_component/chip/ @arkuistatemgmt
-advanced_ui_component/composelistitem/ @arkui_advanced_ui_component
-advanced_ui_component/composetitlebar/ @arkui_advanced_ui_component
+advanced_ui_component/composelistitem/ @arkuiadvanceduicomponent
+advanced_ui_component/composetitlebar/ @arkuiadvanceduicomponent
 advanced_ui_component/counter/ @arkuistatemgmt
-advanced_ui_component/dialog/ @arkui_advanced_ui_component
-advanced_ui_component/dialogv2/ @arkui_advanced_ui_component
+advanced_ui_component/dialog/ @arkuiadvanceduicomponent
+advanced_ui_component/dialogv2/ @arkuiadvanceduicomponent
 advanced_ui_component/downloadfilebutton/
-advanced_ui_component/editabletitlebar/ @arkui_advanced_ui_component
-advanced_ui_component/exceptionprompt/ @arkui_advanced_ui_component
-advanced_ui_component/filter/ @arkui_advanced_ui_component
+advanced_ui_component/editabletitlebar/ @arkuiadvanceduicomponent
+advanced_ui_component/exceptionprompt/ @arkuiadvanceduicomponent
+advanced_ui_component/filter/ @arkuiadvanceduicomponent
 advanced_ui_component/foldsplitcontainer/ @arkuilayout
 advanced_ui_component/formmenu/
 advanced_ui_component/fullscreenlaunchcomponent/ @arkuiabilitygroup
-advanced_ui_component/gridobjectsortcomponent/ @arkui_advanced_ui_component
+advanced_ui_component/gridobjectsortcomponent/ @arkuiadvanceduicomponent
 advanced_ui_component/interstitialdialogaction/ @giteewzp
 advanced_ui_component/popup/ @arkuipopupwindow
-advanced_ui_component/progressbutton/ @arkui_advanced_ui_component
-advanced_ui_component/progressbuttonv2/ @arkui_advanced_ui_component
+advanced_ui_component/progressbutton/ @arkuiadvanceduicomponent
+advanced_ui_component/progressbuttonv2/ @arkuiadvanceduicomponent
 advanced_ui_component/segmentbutton/ @arkuistatemgmt
 advanced_ui_component/segmentbuttonv2/ @arkuistatemgmt
 advanced_ui_component/selectionmenu/ @huawei_g_five
-advanced_ui_component/selecttitlebar/ @arkui_advanced_ui_component
-advanced_ui_component/splitlayout/ @arkui_advanced_ui_component
-advanced_ui_component/subheader/ @arkui_advanced_ui_component
-advanced_ui_component/subheaderv2/ @arkui_advanced_ui_component
-advanced_ui_component/swiperefresher/ @arkui_advanced_ui_component
-advanced_ui_component/tabtitlebar/ @arkui_advanced_ui_component
-advanced_ui_component/toolbar/ @arkui_advanced_ui_component
-advanced_ui_component/toolbarv2/ @arkui_advanced_ui_component
-advanced_ui_component/treeview/ @arkui_advanced_ui_component
+advanced_ui_component/selecttitlebar/ @arkuiadvanceduicomponent
+advanced_ui_component/splitlayout/ @arkuiadvanceduicomponent
+advanced_ui_component/subheader/ @arkuiadvanceduicomponent
+advanced_ui_component/subheaderv2/ @arkuiadvanceduicomponent
+advanced_ui_component/swiperefresher/ @arkuiadvanceduicomponent
+advanced_ui_component/tabtitlebar/ @arkuiadvanceduicomponent
+advanced_ui_component/toolbar/ @arkuiadvanceduicomponent
+advanced_ui_component/toolbarv2/ @arkuiadvanceduicomponent
+advanced_ui_component/treeview/ @arkuiadvanceduicomponent
 
 [Extend UI Components]
 component_ext/arc_swiper/
 component_ext/BUILD.gn @arkui_architecture
 component_ext/ext_common/
-component_ext/movingphoto/ @arkui_advanced_ui_component
+component_ext/movingphoto/ @arkuiadvanceduicomponent
 
 [Examples]
 examples/ @arkuipopupwindow

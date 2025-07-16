@@ -483,6 +483,10 @@
         "https://gitee.com/wxwg_admin": {
             "info": "[高级UI组件 xuyinjie]",
             "group": "https://gitee.com/arkui_advanced_ui_component"
+        },
+        "https://gitee.com/guozonghao11": {
+            "info": "[高级UI组件 guozonghao]",
+            "group": "https://gitee.com/arkui_advanced_ui_component"
         }
     }
 }
