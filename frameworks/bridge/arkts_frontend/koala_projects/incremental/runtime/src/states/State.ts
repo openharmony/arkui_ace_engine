@@ -1057,7 +1057,6 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             if (parent) {
                 // TODO/DEBUG: investigate a case when invalid node has valid parent
                 // Button.IsHovered does not work properly with the optimization above
-                // if (this.myRecomputeNeeded && !parent.myRecomputeNeeded) console.log("parent of invalid scope is valid unexpectedly")
                 scope = parent
             } else {
                 // mark top-level computable state as dirty if it has dependencies.

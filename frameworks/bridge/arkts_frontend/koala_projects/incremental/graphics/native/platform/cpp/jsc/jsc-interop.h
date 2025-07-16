@@ -430,7 +430,6 @@ struct JscCallback {
     JSValueRef callCallback() {
         JSObjectRef callback = this->callback;
         JSObjectRef receiver = this->receiver;
-        //JSObjectRef object = this->object;
         JSValueRef result = JSObjectCallAsFunction(context, callback, receiver, 0, nullptr, nullptr);
 
         return result;

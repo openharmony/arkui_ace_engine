@@ -29,7 +29,6 @@ class AlignContentModifier extends ModifierWithKey<Alignment | undefined> {
     applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
         let stackPeerNode = node as ArkStackPeer
         if (reset) {
-            // stackPeerNode.resetAlignContentAttribute();
         } else {
             if (this.value != undefined) {
                 stackPeerNode.alignContentAttribute(this.value as Alignment);

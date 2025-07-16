@@ -33,17 +33,6 @@ export abstract class AbstractVisitor {
             transformedBody as ts.Block
         )
 
-        /*
-        const oldOriginal = ts.getOriginalNode(node, ts.isEtsComponentExpression)
-        const newOriginal = ts.getOriginalNode(newEts, ts.isEtsComponentExpression)
-
-        if (oldOriginal !== newOriginal) {
-            console.log("NO MATCH!")
-            console.log(oldOriginal)
-            console.log(newOriginal)
-        }
-        */
-
         return newEts
     }
 

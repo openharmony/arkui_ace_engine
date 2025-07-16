@@ -88,7 +88,6 @@ void busyWait(Ark_Int64 nsDelay) {
             std::next_permutation(buf.begin(), buf.end());
         }
     }
-    //ARKOALA_LOG("Requested wait %f ms, actual %f ms\n", nsDelay/1000000.0f, (now - start).count()/1000000.0f);
 }
 
 const int MAX_NODE_TYPE = 200;
