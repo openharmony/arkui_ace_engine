@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace {
 using ScriptItems = std::map<std::string, std::vector<std::string>>;
+using SetFaviconCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
 class ACE_FORCE_EXPORT WebModel {
 public:
     static WebModel* GetInstance();
@@ -191,6 +192,7 @@ public:
     virtual void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetOpenAppLinkFunction(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetWebDetachFunction(std::function<void(int32_t)>&& jsCallback) {};
+    virtual void SetFaviconFunction(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetIntelligentTrackingPreventionResultId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
             intelligentTrackingPreventionResultId) {};

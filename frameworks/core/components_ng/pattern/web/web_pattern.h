@@ -134,6 +134,7 @@ public:
     using OnControllerAttachedCallback = std::function<void()>;
     using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using OnOpenAppLinkCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using SetFaviconCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using WebNodeInfoCallback = const std::function<void(std::shared_ptr<JsonValue>& jsonNodeArray, int32_t webId)>;
     using TextBlurCallback = std::function<void(int64_t, const std::string)>;
@@ -337,6 +338,16 @@ public:
     OnOpenAppLinkCallback GetOnOpenAppLinkCallback() const
     {
         return onOpenAppLinkCallback_;
+    }
+
+    void SetFaviconFunction(SetFaviconCallback&& callback)
+    {
+        setFaviconCallback_ = std::move(callback);
+    }
+
+    SetFaviconCallback GetSetFaviconFunction() const
+    {
+        return setFaviconCallback_;
     }
 
     void SetRenderMode(RenderMode renderMode);
@@ -1171,6 +1182,7 @@ private:
     SetWebDetachCallback setWebDetachCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
+    SetFaviconCallback setFaviconCallback_ = nullptr;
     DefaultFileSelectorShowCallback defaultFileSelectorShowCallback_ = nullptr;
     RenderMode renderMode_;
     bool incognitoMode_ = false;

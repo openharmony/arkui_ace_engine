@@ -31,6 +31,7 @@
 #include <EGL/eglext.h>
 #include <GLES3/gl3.h>
 #include "base/image/pixel_map.h"
+#include "base/memory/ace_type.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
@@ -39,6 +40,7 @@
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "frameworks/core/components_ng/pattern/web/web_model_ng.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "nweb_accessibility_node_info.h"
 #include "surface_delegate.h"
@@ -466,19 +468,28 @@ public:
         size_t height,
         OHOS::NWeb::ImageColorType colorType,
         OHOS::NWeb::ImageAlphaType alphaType)
-        : data_(data), width_(width), height_(height), colorType_(colorType), alphaType_(alphaType)  {}
+        : data_(data), width_(width), height_(height), colorType_(colorType), alphaType_(alphaType)
+        {
+            SetPixelMap();
+        }
     const void* GetData() override;
     size_t GetWidth() override;
     size_t GetHeight() override;
     int GetColorType() override;
     int GetAlphaType() override;
+    Media::PixelFormat GetMediaPixelFormat() override;
+    Media::AlphaType GetMediaAlphaType() override;
+    std::shared_ptr<Media::PixelMap> GetPixelMap() override;
 
 private:
+    void SetPixelMap() override;
+
     const void* data_ = nullptr;
     size_t width_ = 0;
     size_t height_ = 0;
     OHOS::NWeb::ImageColorType colorType_ = OHOS::NWeb::ImageColorType::COLOR_TYPE_UNKNOWN;
     OHOS::NWeb::ImageAlphaType alphaType_ = OHOS::NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN;
+    std::shared_ptr<Media::PixelMap> pixelMap_;
 };
 
 class WebSurfaceCallback : public OHOS::SurfaceDelegate::ISurfaceCallback {
@@ -1173,6 +1184,7 @@ public:
     void Backward();
     bool AccessBackward();
     bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
+    bool OnSetFaviconCallback(std::shared_ptr<FaviconReceivedEvent> param);
 
     void OnRenderProcessNotResponding(
         const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason);

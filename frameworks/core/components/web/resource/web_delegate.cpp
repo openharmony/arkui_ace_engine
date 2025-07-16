@@ -133,6 +133,36 @@ static bool GetWebOptimizationValue()
 {
     return OHOS::system::GetBoolParameter("web.optimization", true);
 }
+
+Media::PixelFormat GetPixelFormat(NG::TransImageColorType colorType)
+{
+    switch (colorType) {
+        case NG::TransImageColorType::COLOR_TYPE_UNKNOWN:
+            return Media::PixelFormat::UNKNOWN;
+        case NG::TransImageColorType::COLOR_TYPE_RGBA_8888:
+            return Media::PixelFormat::RGBA_8888;
+        case NG::TransImageColorType::COLOR_TYPE_BGRA_8888:
+            return Media::PixelFormat::BGRA_8888;
+        default:
+            return Media::PixelFormat::UNKNOWN;
+    }
+}
+
+Media::AlphaType GetAlphaType(NG::TransImageAlphaType alphaType)
+{
+    switch (alphaType) {
+        case NG::TransImageAlphaType::ALPHA_TYPE_UNKNOWN:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+        case NG::TransImageAlphaType::ALPHA_TYPE_OPAQUE:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+        case NG::TransImageAlphaType::ALPHA_TYPE_PREMULTIPLIED:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+        case NG::TransImageAlphaType::ALPHA_TYPE_POSTMULTIPLIED:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
+        default:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+    }
+}
 } // namespace
 
 #define EGLCONFIG_VERSION 3
@@ -709,6 +739,39 @@ int FaviconReceivedOhos::GetColorType()
 int FaviconReceivedOhos::GetAlphaType()
 {
     return static_cast<int>(alphaType_);
+}
+
+Media::PixelFormat FaviconReceivedOhos::GetMediaPixelFormat()
+{
+    return GetPixelFormat(NG::TransImageColorType(colorType_));
+}
+
+Media::AlphaType FaviconReceivedOhos::GetMediaAlphaType()
+{
+    return ::OHOS::Ace::GetAlphaType(NG::TransImageAlphaType(alphaType_));
+}
+
+void FaviconReceivedOhos::SetPixelMap()
+{
+    Media::InitializationOptions opt;
+    opt.size.width = static_cast<int32_t>(width_);
+    opt.size.height = static_cast<int32_t>(height_);
+    opt.pixelFormat = GetMediaPixelFormat();
+    opt.alphaType = GetMediaAlphaType();
+    opt.editable = true;
+    pixelMap_ = Media::PixelMap::Create(opt);
+    if (!pixelMap_) {
+        return;
+    }
+
+    uint32_t stride = width_ << 2;
+    uint64_t bufferSize = stride * height_;
+    pixelMap_->WritePixels(static_cast<const uint8_t*>(data_), bufferSize);
+}
+
+std::shared_ptr<Media::PixelMap> FaviconReceivedOhos::GetPixelMap()
+{
+    return pixelMap_;
 }
 
 NWebScreenLockCallbackImpl::NWebScreenLockCallbackImpl(const WeakPtr<PipelineBase>& context) : context_(context) {}
@@ -6457,6 +6520,8 @@ void WebDelegate::OnFaviconReceived(const void* data, size_t width, size_t heigh
     auto param = std::make_shared<FaviconReceivedEvent>(
         AceType::MakeRefPtr<FaviconReceivedOhos>(data, width, height, colorType, alphaType));
     if (Container::IsCurrentUseNewPipeline()) {
+        OnSetFaviconCallback(param);
+
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
         auto webEventHub = webPattern->GetWebEventHub();
@@ -8007,6 +8072,29 @@ bool WebDelegate::OnOpenAppLink(
             AceType::MakeRefPtr<WebAppLinkCallbackOhos>(callback)));
         }, "ArkUIWebOnOpenAppLink");
     return true;
+}
+
+bool WebDelegate::OnSetFaviconCallback(std::shared_ptr<FaviconReceivedEvent> param)
+{
+    if (!param) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "Set Favicon callback is nullptr");
+        return false;
+    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), param, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto setFaviconCallback = webPattern->GetSetFaviconFunction();
+        CHECK_NULL_VOID(setFaviconCallback);
+        setFaviconCallback(param);
+        result = true;
+        }, "SetFavicon");
+    return result;
 }
 
 std::string WebDelegate::GetCanonicalEncodingName(const std::string& alias_name) const
