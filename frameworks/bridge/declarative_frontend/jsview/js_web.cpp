@@ -5503,7 +5503,7 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSNativeEmbedGestureRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedGestureRequest>());
     requestEvent->SetResult(eventInfo.GetResult());
-    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(requestEvent.GetRawPtr()));
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     obj->SetPropertyObject("result", requestObj);
     return JSRef<JSVal>::Cast(obj);
 }
