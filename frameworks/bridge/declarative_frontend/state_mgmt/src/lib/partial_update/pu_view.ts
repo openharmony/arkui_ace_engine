@@ -112,10 +112,31 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`${this.debugInfo__()}: uses stateMgmt version ${this.isViewV2 === true ? 3 : 2}`);
   }
 
+  static _findLocalStorage_ViewPU_Interop?: () => any;
+
+  findLocalStorageInterop?: () => any;
+
+  static _resetFindLocalStorage_ViewPU_Interop() {
+    if (typeof ViewPU._findLocalStorage_ViewPU_Interop === 'function') {
+      ViewPU._findLocalStorage_ViewPU_Interop = undefined;
+    }
+  }
+
   public get localStorage_(): LocalStorage {
     if (!this.localStoragebackStore_ && this.getParent()) {
       stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: get localStorage_ : Using LocalStorage instance of the parent View.`);
       this.localStoragebackStore_ = this.getParent().localStorage_;
+    }
+
+    // for interop
+    if (InteropConfigureStateMgmt.instance.needsInterop()) {
+      if (!this.localStoragebackStore_) {
+        if (this.findLocalStorageInterop !== undefined && typeof this.findLocalStorageInterop === 'function') {
+          this.localStoragebackStore_ = this.findLocalStorageInterop();
+        } else if (ViewPU._findLocalStorage_ViewPU_Interop !== undefined && typeof ViewPU._findLocalStorage_ViewPU_Interop === 'function') {
+          this.localStoragebackStore_ = ViewPU._findLocalStorage_ViewPU_Interop();
+        }
+      }
     }
 
     if (!this.localStoragebackStore_) {
