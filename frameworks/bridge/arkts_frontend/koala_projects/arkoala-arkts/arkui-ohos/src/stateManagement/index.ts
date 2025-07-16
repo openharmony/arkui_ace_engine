@@ -5,6 +5,8 @@ export * from './decoratorImpl/decoratorProp';
 export * from './decoratorImpl/decoratorProvide';
 export * from './decoratorImpl/decoratorConsume';
 export * from './decoratorImpl/decoratorBase';
+export * from './decoratorImpl/decoratorComputed';
+export * from './decoratorImpl/decoratorMonitor';
 export * from './storage/appStorage';
 export * from './storage/localStorage';
 export * from './base/types';
