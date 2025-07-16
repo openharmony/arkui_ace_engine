@@ -113,6 +113,9 @@ export function hookCommonMethodAdvancedBlendModeImpl(commonMethod: ArkCommonMet
     const node_casted = commonMethod.getPeer().peer.ptr as (KPointer)
     const type_casted = type as (BlendApplyType | undefined)
     if (runtimeType(effect) == RuntimeType.OBJECT) {
+        if (!effect.hasOwnProperty('brightnessBlenderNativeObj')) {
+            return;
+        }
         const value_casted = Object.values(effect)[0] as (int64)
         commonMethodOps.AdvancedBlendModeObjectImpl(node_casted, value_casted, type_casted)
     } else {
