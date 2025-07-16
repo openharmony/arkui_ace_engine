@@ -238,6 +238,7 @@
       OHOS::Ace::RenderStack::*;
       OHOS::Ace::RenderElement::*;
       OHOS::Ace::FocusNode::*;
+      OHOS::Ace::FocusHub::*;
       OHOS::Ace::Gradient::*;
       OHOS::Ace::CanvasPath2D::*;
       OHOS::Ace::NG::Matrix2D::*;
