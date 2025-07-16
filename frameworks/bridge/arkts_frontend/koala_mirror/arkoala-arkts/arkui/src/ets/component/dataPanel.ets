@@ -50,8 +50,8 @@ export class LinearGradient implements MaterializedBase {
     static construct(colorStops: Array<ColorStop>): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((colorStops.length).toInt())
-        for (let i = 0; i < colorStops.length; i++) {
-            const colorStops_element : ColorStop = colorStops[i]
+        for (let colorStops_counter_i = 0; colorStops_counter_i < colorStops.length; colorStops_counter_i++) {
+            const colorStops_element : ColorStop = colorStops[colorStops_counter_i]
             ColorStop_serializer.write(thisSerializer, colorStops_element)
         }
         const retval  = ArkUIGeneratedNativeModule._LinearGradient_construct(thisSerializer.asBuffer(), thisSerializer.length())
@@ -84,7 +84,7 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -96,11 +96,11 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeInt32((value_value.length).toInt())
-            for (let i = 0; i < value_value.length; i++) {
-                const value_value_element : ResourceColor | LinearGradient = value_value[i]
+            for (let value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
+                const value_value_element : ResourceColor | LinearGradient = value_value[value_value_counter_i]
                 let value_value_element_type : int32 = RuntimeType.UNDEFINED
                 value_value_element_type = runtimeType(value_value_element)
                 if ((TypeChecker.isColor(value_value_element)) || (RuntimeType.NUMBER == value_value_element_type) || (RuntimeType.STRING == value_value_element_type) || (RuntimeType.OBJECT == value_value_element_type)) {
@@ -144,7 +144,7 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -177,7 +177,7 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -205,7 +205,7 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             DataPanelShadowOptions_serializer.write(thisSerializer, value_value)
         }
@@ -217,7 +217,7 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteObject(value_value)
         }
@@ -497,8 +497,8 @@ export class DataPanelConfiguration_serializer {
         valueSerializer.holdAndWriteObject(value_contentModifier)
         const value_values  = value.values
         valueSerializer.writeInt32((value_values.length).toInt())
-        for (let i = 0; i < value_values.length; i++) {
-            const value_values_element : number = value_values[i]
+        for (let value_values_counter_i = 0; value_values_counter_i < value_values.length; value_values_counter_i++) {
+            const value_values_element : number = value_values[value_values_counter_i]
             valueSerializer.writeNumber(value_values_element)
         }
         const value_maxValue  = value.maxValue
@@ -524,15 +524,15 @@ export class DataPanelOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const value_values  = value.values
         valueSerializer.writeInt32((value_values.length).toInt())
-        for (let i = 0; i < value_values.length; i++) {
-            const value_values_element : number = value_values[i]
+        for (let value_values_counter_i = 0; value_values_counter_i < value_values.length; value_values_counter_i++) {
+            const value_values_element : number = value_values[value_values_counter_i]
             valueSerializer.writeNumber(value_values_element)
         }
         const value_max  = value.max
         let value_max_type : int32 = RuntimeType.UNDEFINED
         value_max_type = runtimeType(value_max)
         valueSerializer.writeInt8((value_max_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_max_type)) {
+        if ((value_max_type) != (RuntimeType.UNDEFINED)) {
             const value_max_value  = value_max!
             valueSerializer.writeNumber(value_max_value)
         }
@@ -540,7 +540,7 @@ export class DataPanelOptions_serializer {
         let value_type_type : int32 = RuntimeType.UNDEFINED
         value_type_type = runtimeType(value_type)
         valueSerializer.writeInt8((value_type_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type_type)) {
+        if ((value_type_type) != (RuntimeType.UNDEFINED)) {
             const value_type_value  = (value_type as DataPanelType)
             valueSerializer.writeInt32(TypeChecker.DataPanelType_ToNumeric(value_type_value))
         }
@@ -555,14 +555,14 @@ export class DataPanelOptions_serializer {
         const values_result : Array<number> = values_buf
         const max_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let max_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (max_buf_runtimeType))
+        if ((max_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             max_buf = (valueDeserializer.readNumber() as number)
         }
         const max_result : number | undefined = max_buf
         const type_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let type_buf : DataPanelType | undefined
-        if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
+        if ((type_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             type_buf = TypeChecker.DataPanelType_FromNumeric(valueDeserializer.readInt32())
         }
@@ -578,7 +578,7 @@ export class DataPanelShadowOptions_serializer {
         let value_radius_type : int32 = RuntimeType.UNDEFINED
         value_radius_type = runtimeType(value_radius)
         valueSerializer.writeInt8((value_radius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_radius_type)) {
+        if ((value_radius_type) != (RuntimeType.UNDEFINED)) {
             const value_radius_value  = value_radius!
             let value_radius_value_type : int32 = RuntimeType.UNDEFINED
             value_radius_value_type = runtimeType(value_radius_value)
@@ -597,7 +597,7 @@ export class DataPanelShadowOptions_serializer {
         let value_offsetX_type : int32 = RuntimeType.UNDEFINED
         value_offsetX_type = runtimeType(value_offsetX)
         valueSerializer.writeInt8((value_offsetX_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offsetX_type)) {
+        if ((value_offsetX_type) != (RuntimeType.UNDEFINED)) {
             const value_offsetX_value  = value_offsetX!
             let value_offsetX_value_type : int32 = RuntimeType.UNDEFINED
             value_offsetX_value_type = runtimeType(value_offsetX_value)
@@ -616,7 +616,7 @@ export class DataPanelShadowOptions_serializer {
         let value_offsetY_type : int32 = RuntimeType.UNDEFINED
         value_offsetY_type = runtimeType(value_offsetY)
         valueSerializer.writeInt8((value_offsetY_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offsetY_type)) {
+        if ((value_offsetY_type) != (RuntimeType.UNDEFINED)) {
             const value_offsetY_value  = value_offsetY!
             let value_offsetY_value_type : int32 = RuntimeType.UNDEFINED
             value_offsetY_value_type = runtimeType(value_offsetY_value)
@@ -635,11 +635,11 @@ export class DataPanelShadowOptions_serializer {
         let value_colors_type : int32 = RuntimeType.UNDEFINED
         value_colors_type = runtimeType(value_colors)
         valueSerializer.writeInt8((value_colors_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_colors_type)) {
+        if ((value_colors_type) != (RuntimeType.UNDEFINED)) {
             const value_colors_value  = value_colors!
             valueSerializer.writeInt32((value_colors_value.length).toInt())
-            for (let i = 0; i < value_colors_value.length; i++) {
-                const value_colors_value_element : ResourceColor | LinearGradient = value_colors_value[i]
+            for (let value_colors_value_counter_i = 0; value_colors_value_counter_i < value_colors_value.length; value_colors_value_counter_i++) {
+                const value_colors_value_element : ResourceColor | LinearGradient = value_colors_value[value_colors_value_counter_i]
                 let value_colors_value_element_type : int32 = RuntimeType.UNDEFINED
                 value_colors_value_element_type = runtimeType(value_colors_value_element)
                 if ((TypeChecker.isColor(value_colors_value_element)) || (RuntimeType.NUMBER == value_colors_value_element_type) || (RuntimeType.STRING == value_colors_value_element_type) || (RuntimeType.OBJECT == value_colors_value_element_type)) {
@@ -680,7 +680,7 @@ export class DataPanelShadowOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const radius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let radius_buf : number | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (radius_buf_runtimeType))
+        if ((radius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const radius_buf__selector : int32 = valueDeserializer.readInt8()
             let radius_buf_ : number | Resource | undefined
@@ -698,7 +698,7 @@ export class DataPanelShadowOptions_serializer {
         const radius_result : number | Resource | undefined = radius_buf
         const offsetX_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offsetX_buf : number | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (offsetX_buf_runtimeType))
+        if ((offsetX_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const offsetX_buf__selector : int32 = valueDeserializer.readInt8()
             let offsetX_buf_ : number | Resource | undefined
@@ -716,7 +716,7 @@ export class DataPanelShadowOptions_serializer {
         const offsetX_result : number | Resource | undefined = offsetX_buf
         const offsetY_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offsetY_buf : number | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (offsetY_buf_runtimeType))
+        if ((offsetY_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const offsetY_buf__selector : int32 = valueDeserializer.readInt8()
             let offsetY_buf_ : number | Resource | undefined
@@ -734,7 +734,7 @@ export class DataPanelShadowOptions_serializer {
         const offsetY_result : number | Resource | undefined = offsetY_buf
         const colors_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let colors_buf : Array<ResourceColor | LinearGradient> | undefined
-        if ((RuntimeType.UNDEFINED) != (colors_buf_runtimeType))
+        if ((colors_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const colors_buf__length : int32 = valueDeserializer.readInt32()
             let colors_buf_ : Array<ResourceColor | LinearGradient> = new Array<ResourceColor | LinearGradient>(colors_buf__length)

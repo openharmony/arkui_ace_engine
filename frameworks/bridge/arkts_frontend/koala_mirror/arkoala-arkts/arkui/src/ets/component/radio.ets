@@ -54,7 +54,7 @@ export class ArkRadioPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -66,7 +66,7 @@ export class ArkRadioPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -78,7 +78,7 @@ export class ArkRadioPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             RadioStyle_serializer.write(thisSerializer, value_value)
         }
@@ -90,7 +90,7 @@ export class ArkRadioPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteObject(value_value)
         }
@@ -371,7 +371,7 @@ export class RadioOptions_serializer {
         let value_indicatorType_type : int32 = RuntimeType.UNDEFINED
         value_indicatorType_type = runtimeType(value_indicatorType)
         valueSerializer.writeInt8((value_indicatorType_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_indicatorType_type)) {
+        if ((value_indicatorType_type) != (RuntimeType.UNDEFINED)) {
             const value_indicatorType_value  = (value_indicatorType as RadioIndicatorType)
             valueSerializer.writeInt32(TypeChecker.RadioIndicatorType_ToNumeric(value_indicatorType_value))
         }
@@ -379,7 +379,7 @@ export class RadioOptions_serializer {
         let value_indicatorBuilder_type : int32 = RuntimeType.UNDEFINED
         value_indicatorBuilder_type = runtimeType(value_indicatorBuilder)
         valueSerializer.writeInt8((value_indicatorBuilder_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_indicatorBuilder_type)) {
+        if ((value_indicatorBuilder_type) != (RuntimeType.UNDEFINED)) {
             const value_indicatorBuilder_value  = value_indicatorBuilder!
             valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_indicatorBuilder_value))
         }
@@ -390,14 +390,14 @@ export class RadioOptions_serializer {
         const value_result : string = (valueDeserializer.readString() as string)
         const indicatorType_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let indicatorType_buf : RadioIndicatorType | undefined
-        if ((RuntimeType.UNDEFINED) != (indicatorType_buf_runtimeType))
+        if ((indicatorType_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             indicatorType_buf = TypeChecker.RadioIndicatorType_FromNumeric(valueDeserializer.readInt32())
         }
         const indicatorType_result : RadioIndicatorType | undefined = indicatorType_buf
         const indicatorBuilder_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let indicatorBuilder_buf : CustomBuilder | undefined
-        if ((RuntimeType.UNDEFINED) != (indicatorBuilder_buf_runtimeType))
+        if ((indicatorBuilder_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const indicatorBuilder_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const indicatorBuilder_buf__call : KPointer = valueDeserializer.readPointer()
@@ -423,7 +423,7 @@ export class RadioStyle_serializer {
         let value_checkedBackgroundColor_type : int32 = RuntimeType.UNDEFINED
         value_checkedBackgroundColor_type = runtimeType(value_checkedBackgroundColor)
         valueSerializer.writeInt8((value_checkedBackgroundColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_checkedBackgroundColor_type)) {
+        if ((value_checkedBackgroundColor_type) != (RuntimeType.UNDEFINED)) {
             const value_checkedBackgroundColor_value  = value_checkedBackgroundColor!
             let value_checkedBackgroundColor_value_type : int32 = RuntimeType.UNDEFINED
             value_checkedBackgroundColor_value_type = runtimeType(value_checkedBackgroundColor_value)
@@ -452,7 +452,7 @@ export class RadioStyle_serializer {
         let value_uncheckedBorderColor_type : int32 = RuntimeType.UNDEFINED
         value_uncheckedBorderColor_type = runtimeType(value_uncheckedBorderColor)
         valueSerializer.writeInt8((value_uncheckedBorderColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_uncheckedBorderColor_type)) {
+        if ((value_uncheckedBorderColor_type) != (RuntimeType.UNDEFINED)) {
             const value_uncheckedBorderColor_value  = value_uncheckedBorderColor!
             let value_uncheckedBorderColor_value_type : int32 = RuntimeType.UNDEFINED
             value_uncheckedBorderColor_value_type = runtimeType(value_uncheckedBorderColor_value)
@@ -481,7 +481,7 @@ export class RadioStyle_serializer {
         let value_indicatorColor_type : int32 = RuntimeType.UNDEFINED
         value_indicatorColor_type = runtimeType(value_indicatorColor)
         valueSerializer.writeInt8((value_indicatorColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_indicatorColor_type)) {
+        if ((value_indicatorColor_type) != (RuntimeType.UNDEFINED)) {
             const value_indicatorColor_value  = value_indicatorColor!
             let value_indicatorColor_value_type : int32 = RuntimeType.UNDEFINED
             value_indicatorColor_value_type = runtimeType(value_indicatorColor_value)
@@ -511,7 +511,7 @@ export class RadioStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const checkedBackgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let checkedBackgroundColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (checkedBackgroundColor_buf_runtimeType))
+        if ((checkedBackgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const checkedBackgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
             let checkedBackgroundColor_buf_ : Color | number | string | Resource | undefined
@@ -535,7 +535,7 @@ export class RadioStyle_serializer {
         const checkedBackgroundColor_result : ResourceColor | undefined = checkedBackgroundColor_buf
         const uncheckedBorderColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let uncheckedBorderColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (uncheckedBorderColor_buf_runtimeType))
+        if ((uncheckedBorderColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const uncheckedBorderColor_buf__selector : int32 = valueDeserializer.readInt8()
             let uncheckedBorderColor_buf_ : Color | number | string | Resource | undefined
@@ -559,7 +559,7 @@ export class RadioStyle_serializer {
         const uncheckedBorderColor_result : ResourceColor | undefined = uncheckedBorderColor_buf
         const indicatorColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let indicatorColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (indicatorColor_buf_runtimeType))
+        if ((indicatorColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const indicatorColor_buf__selector : int32 = valueDeserializer.readInt8()
             let indicatorColor_buf_ : Color | number | string | Resource | undefined

@@ -28,7 +28,7 @@ export function updateETSFunctionType(
         isSameNativeObject(signature?.returnType, original.returnType) &&
         isSameNativeObject(signature?.params, original.params) &&
         isSameNativeObject(funcFlags, original.flags)
-        /* TODO: no getter for signature's hasReceiver */
+        /* Improve: no getter for signature's hasReceiver */
     ) {
         return original;
     }

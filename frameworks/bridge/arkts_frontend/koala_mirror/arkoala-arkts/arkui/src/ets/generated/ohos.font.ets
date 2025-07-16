@@ -61,20 +61,20 @@ export class font_UIFontConfig_serializer {
         let valueSerializer : SerializerBase = buffer
         const value_fontDir  = value.fontDir
         valueSerializer.writeInt32((value_fontDir.length).toInt())
-        for (let i = 0; i < value_fontDir.length; i++) {
-            const value_fontDir_element : string = value_fontDir[i]
+        for (let value_fontDir_counter_i = 0; value_fontDir_counter_i < value_fontDir.length; value_fontDir_counter_i++) {
+            const value_fontDir_element : string = value_fontDir[value_fontDir_counter_i]
             valueSerializer.writeString(value_fontDir_element)
         }
         const value_generic  = value.generic
         valueSerializer.writeInt32((value_generic.length).toInt())
-        for (let i = 0; i < value_generic.length; i++) {
-            const value_generic_element : font.UIFontGenericInfo = value_generic[i]
+        for (let value_generic_counter_i = 0; value_generic_counter_i < value_generic.length; value_generic_counter_i++) {
+            const value_generic_element : font.UIFontGenericInfo = value_generic[value_generic_counter_i]
             font_UIFontGenericInfo_serializer.write(valueSerializer, value_generic_element)
         }
         const value_fallbackGroups  = value.fallbackGroups
         valueSerializer.writeInt32((value_fallbackGroups.length).toInt())
-        for (let i = 0; i < value_fallbackGroups.length; i++) {
-            const value_fallbackGroups_element : font.UIFontFallbackGroupInfo = value_fallbackGroups[i]
+        for (let value_fallbackGroups_counter_i = 0; value_fallbackGroups_counter_i < value_fallbackGroups.length; value_fallbackGroups_counter_i++) {
+            const value_fallbackGroups_element : font.UIFontFallbackGroupInfo = value_fallbackGroups[value_fallbackGroups_counter_i]
             font_UIFontFallbackGroupInfo_serializer.write(valueSerializer, value_fallbackGroups_element)
         }
     }
@@ -109,8 +109,8 @@ export class font_UIFontFallbackGroupInfo_serializer {
         valueSerializer.writeString(value_fontSetName)
         const value_fallback  = value.fallback
         valueSerializer.writeInt32((value_fallback.length).toInt())
-        for (let i = 0; i < value_fallback.length; i++) {
-            const value_fallback_element : font.UIFontFallbackInfo = value_fallback[i]
+        for (let value_fallback_counter_i = 0; value_fallback_counter_i < value_fallback.length; value_fallback_counter_i++) {
+            const value_fallback_element : font.UIFontFallbackInfo = value_fallback[value_fallback_counter_i]
             font_UIFontFallbackInfo_serializer.write(valueSerializer, value_fallback_element)
         }
     }
@@ -150,14 +150,14 @@ export class font_UIFontGenericInfo_serializer {
         valueSerializer.writeString(value_family)
         const value_alias  = value.alias
         valueSerializer.writeInt32((value_alias.length).toInt())
-        for (let i = 0; i < value_alias.length; i++) {
-            const value_alias_element : font.UIFontAliasInfo = value_alias[i]
+        for (let value_alias_counter_i = 0; value_alias_counter_i < value_alias.length; value_alias_counter_i++) {
+            const value_alias_element : font.UIFontAliasInfo = value_alias[value_alias_counter_i]
             font_UIFontAliasInfo_serializer.write(valueSerializer, value_alias_element)
         }
         const value_adjust  = value.adjust
         valueSerializer.writeInt32((value_adjust.length).toInt())
-        for (let i = 0; i < value_adjust.length; i++) {
-            const value_adjust_element : font.UIFontAdjustInfo = value_adjust[i]
+        for (let value_adjust_counter_i = 0; value_adjust_counter_i < value_adjust.length; value_adjust_counter_i++) {
+            const value_adjust_element : font.UIFontAdjustInfo = value_adjust[value_adjust_counter_i]
             font_UIFontAdjustInfo_serializer.write(valueSerializer, value_adjust_element)
         }
     }

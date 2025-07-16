@@ -31,7 +31,7 @@ export function parseLength(parentValue: number, value: number, unit: int32): nu
     switch (unit) {
         //PX
         case 0: {
-            const scale = 1 // TODO: need getting current device scale
+            const scale = 1 // Improve: need getting current device scale
             return value * scale
         }
         //PERCENTAGE
@@ -39,7 +39,7 @@ export function parseLength(parentValue: number, value: number, unit: int32): nu
             return parentValue / 100 * value
         }
         default:
-            // VP, FP, LPX, UndefinedDimensionUnit: TODO: parse properly this units
+            // VP, FP, LPX, UndefinedDimensionUnit: Improve: parse properly this units
             return value
     }
 }

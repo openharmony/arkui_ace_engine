@@ -47,7 +47,7 @@ export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             ListItemGroupOptions_serializer.write(thisSerializer, options_value)
         }
@@ -59,7 +59,7 @@ export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             ListDividerOptions_serializer.write(thisSerializer, value_value)
         }
@@ -71,7 +71,7 @@ export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             ChildrenMainSize_serializer.write(thisSerializer, value_value)
         }
@@ -232,7 +232,7 @@ export class ListItemGroupOptions_serializer {
         let value_header_type : int32 = RuntimeType.UNDEFINED
         value_header_type = runtimeType(value_header)
         valueSerializer.writeInt8((value_header_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_header_type)) {
+        if ((value_header_type) != (RuntimeType.UNDEFINED)) {
             const value_header_value  = value_header!
             valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_header_value))
         }
@@ -240,7 +240,7 @@ export class ListItemGroupOptions_serializer {
         let value_headerComponent_type : int32 = RuntimeType.UNDEFINED
         value_headerComponent_type = runtimeType(value_headerComponent)
         valueSerializer.writeInt8((value_headerComponent_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_headerComponent_type)) {
+        if ((value_headerComponent_type) != (RuntimeType.UNDEFINED)) {
             const value_headerComponent_value  = value_headerComponent!
             ComponentContent_serializer.write(valueSerializer, value_headerComponent_value)
         }
@@ -248,7 +248,7 @@ export class ListItemGroupOptions_serializer {
         let value_footer_type : int32 = RuntimeType.UNDEFINED
         value_footer_type = runtimeType(value_footer)
         valueSerializer.writeInt8((value_footer_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_footer_type)) {
+        if ((value_footer_type) != (RuntimeType.UNDEFINED)) {
             const value_footer_value  = value_footer!
             valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_footer_value))
         }
@@ -256,7 +256,7 @@ export class ListItemGroupOptions_serializer {
         let value_footerComponent_type : int32 = RuntimeType.UNDEFINED
         value_footerComponent_type = runtimeType(value_footerComponent)
         valueSerializer.writeInt8((value_footerComponent_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_footerComponent_type)) {
+        if ((value_footerComponent_type) != (RuntimeType.UNDEFINED)) {
             const value_footerComponent_value  = value_footerComponent!
             ComponentContent_serializer.write(valueSerializer, value_footerComponent_value)
         }
@@ -264,7 +264,7 @@ export class ListItemGroupOptions_serializer {
         let value_space_type : int32 = RuntimeType.UNDEFINED
         value_space_type = runtimeType(value_space)
         valueSerializer.writeInt8((value_space_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_space_type)) {
+        if ((value_space_type) != (RuntimeType.UNDEFINED)) {
             const value_space_value  = value_space!
             let value_space_value_type : int32 = RuntimeType.UNDEFINED
             value_space_value_type = runtimeType(value_space_value)
@@ -283,7 +283,7 @@ export class ListItemGroupOptions_serializer {
         let value_style_type : int32 = RuntimeType.UNDEFINED
         value_style_type = runtimeType(value_style)
         valueSerializer.writeInt8((value_style_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_style_type)) {
+        if ((value_style_type) != (RuntimeType.UNDEFINED)) {
             const value_style_value  = (value_style as ListItemGroupStyle)
             valueSerializer.writeInt32(TypeChecker.ListItemGroupStyle_ToNumeric(value_style_value))
         }
@@ -292,7 +292,7 @@ export class ListItemGroupOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const header_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let header_buf : CustomBuilder | undefined
-        if ((RuntimeType.UNDEFINED) != (header_buf_runtimeType))
+        if ((header_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const header_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const header_buf__call : KPointer = valueDeserializer.readPointer()
@@ -309,14 +309,14 @@ export class ListItemGroupOptions_serializer {
         const header_result : CustomBuilder | undefined = header_buf
         const headerComponent_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let headerComponent_buf : ComponentContent | undefined
-        if ((RuntimeType.UNDEFINED) != (headerComponent_buf_runtimeType))
+        if ((headerComponent_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             headerComponent_buf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }
         const headerComponent_result : ComponentContent | undefined = headerComponent_buf
         const footer_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let footer_buf : CustomBuilder | undefined
-        if ((RuntimeType.UNDEFINED) != (footer_buf_runtimeType))
+        if ((footer_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const footer_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const footer_buf__call : KPointer = valueDeserializer.readPointer()
@@ -333,14 +333,14 @@ export class ListItemGroupOptions_serializer {
         const footer_result : CustomBuilder | undefined = footer_buf
         const footerComponent_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let footerComponent_buf : ComponentContent | undefined
-        if ((RuntimeType.UNDEFINED) != (footerComponent_buf_runtimeType))
+        if ((footerComponent_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             footerComponent_buf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }
         const footerComponent_result : ComponentContent | undefined = footerComponent_buf
         const space_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let space_buf : number | string | undefined
-        if ((RuntimeType.UNDEFINED) != (space_buf_runtimeType))
+        if ((space_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const space_buf__selector : int32 = valueDeserializer.readInt8()
             let space_buf_ : number | string | undefined
@@ -358,7 +358,7 @@ export class ListItemGroupOptions_serializer {
         const space_result : number | string | undefined = space_buf
         const style_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let style_buf : ListItemGroupStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
+        if ((style_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             style_buf = TypeChecker.ListItemGroupStyle_FromNumeric(valueDeserializer.readInt32())
         }

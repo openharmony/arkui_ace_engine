@@ -67,8 +67,8 @@ export class LayoutCallbackInternal implements MaterializedBase,LayoutCallback {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         GeometryInfo_serializer.write(thisSerializer, selfLayoutInfo)
         thisSerializer.writeInt32((children.length).toInt())
-        for (let i = 0; i < children.length; i++) {
-            const children_element : Layoutable = children[i]
+        for (let children_counter_i = 0; children_counter_i < children.length; children_counter_i++) {
+            const children_element : Layoutable = children[children_counter_i]
             Layoutable_serializer.write(thisSerializer, children_element)
         }
         ConstraintSizeOptions_serializer.write(thisSerializer, constraint)
@@ -79,8 +79,8 @@ export class LayoutCallbackInternal implements MaterializedBase,LayoutCallback {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         GeometryInfo_serializer.write(thisSerializer, selfLayoutInfo)
         thisSerializer.writeInt32((children.length).toInt())
-        for (let i = 0; i < children.length; i++) {
-            const children_element : Measurable = children[i]
+        for (let children_counter_i = 0; children_counter_i < children.length; children_counter_i++) {
+            const children_element : Measurable = children[children_counter_i]
             Measurable_serializer.write(thisSerializer, children_element)
         }
         ConstraintSizeOptions_serializer.write(thisSerializer, constraint)
@@ -157,7 +157,7 @@ export class PageLifeCycleInternal implements MaterializedBase,PageLifeCycle {
         let param_type : int32 = RuntimeType.UNDEFINED
         param_type = runtimeType(param)
         thisSerializer.writeInt8((param_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (param_type)) {
+        if ((param_type) != (RuntimeType.UNDEFINED)) {
             const param_value  = param!
             thisSerializer.holdAndWriteObject(param_value)
         }

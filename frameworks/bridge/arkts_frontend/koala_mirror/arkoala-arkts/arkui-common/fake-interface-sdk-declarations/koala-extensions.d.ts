@@ -21,7 +21,7 @@ declare interface CommonMethod<T> {
     __applyStyle(style: (instance: T, ...args: any) => this, ...args: any): T
 
     /**
-     * TODO: adding .$fields should be done before the type checker.
+     * Improve: adding .$fields should be done before the type checker.
      * we workaround that by allowing any fields on structs.
      */
     [key: string]: any;

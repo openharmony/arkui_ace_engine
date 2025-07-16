@@ -752,7 +752,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
                 return nullptr;
             }
         }
-        // TODO: pass app entry point!
+        // Improve: pass app entry point!
         return reinterpret_cast<KNativePointer>(etsEnv->CallLongMethod((ets_object)(app), start, &g_vmEntry.foreignVMContext));
     }
 #endif
@@ -857,7 +857,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
         }
 
         ani_long ptr = 0;
-        // TODO: pass app entry point!
+        // Improve: pass app entry point!
         status = env->Object_CallMethod_Long(static_cast<ani_object>(appInstance), start, &ptr,
             reinterpret_cast<ani_long>(&g_vmEntry.foreignVMContext), loopIterations);
         if (status != ANI_OK) {

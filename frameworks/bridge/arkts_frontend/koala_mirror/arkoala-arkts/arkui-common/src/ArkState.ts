@@ -307,25 +307,25 @@ export class ConsumeDecoratorProperty<Value> implements AbstractProperty<Value> 
 
 export class StorageLinkDecoratorProperty<Value> extends LinkDecoratorProperty<Value> {
     constructor(name: string) {
-        super(name) // TODO: get state from app-storage
+        super(name) // Improve: get state from app-storage
     }
 }
 
 export class LocalStorageLinkDecoratorProperty<Value> extends LinkDecoratorProperty<Value> {
     constructor(name: string) {
-        super(name) // TODO: get state from local-storage
+        super(name) // Improve: get state from local-storage
     }
 }
 
 export class StoragePropDecoratorProperty<Value> extends LinkDecoratorProperty<Value> {
     constructor(name: string) {
-        super(name) // TODO: get state from app-storage
+        super(name) // Improve: get state from app-storage
     }
 }
 
 export class LocalStoragePropDecoratorProperty<Value> extends LinkDecoratorProperty<Value> {
     constructor(name: string) {
-        super(name) // TODO: get state from local-storage
+        super(name) // Improve: get state from local-storage
     }
 }
 

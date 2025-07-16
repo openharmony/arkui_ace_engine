@@ -249,7 +249,7 @@ inline typename InteropTypeConverter<T>::InteropType makeResult(T value) {
     return InteropTypeConverter<T>::convertTo(value);
 }
 
-// TODO: Rewrite all others to typed convertors.
+// Improve: Rewrite all others to typed convertors.
 
 #define KOALA_INTEROP_0(name, Ret)                                         \
 KOALA_INTEROP_EXPORT Ret name() {                                          \
@@ -1012,13 +1012,13 @@ KOALA_INTEROP_EXPORT void name(                                            \
 
 #define KOALA_INTEROP_THROW(vmContext, object, ...) \
    do { \
-     ASSERT(false); /* TODO: implement*/ \
+     ASSERT(false); /* Improve: implement*/ \
      return __VA_ARGS__; \
    } while (0)
 
 #define KOALA_INTEROP_THROW_STRING(vmContext, message, ...) \
    do { \
-      ASSERT(false); /* TODO: implement*/ \
+      ASSERT(false); /* Improve: implement*/ \
      return __VA_ARGS__; \
    } while (0)
 

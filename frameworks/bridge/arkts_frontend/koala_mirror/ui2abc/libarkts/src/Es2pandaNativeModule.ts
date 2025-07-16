@@ -29,7 +29,7 @@ import * as path from "path"
 import * as fs from "fs"
 import { Es2pandaPluginDiagnosticType } from "./generated/Es2pandaEnums"
 
-// TODO: this type should be in interop
+// Improve: this type should be in interop
 export type KPtrArray = BigUint64Array
 
 export class Es2pandaNativeModule {

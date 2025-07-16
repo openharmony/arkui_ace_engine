@@ -234,7 +234,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -246,7 +246,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -258,7 +258,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -270,7 +270,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -282,7 +282,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -294,7 +294,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -641,7 +641,7 @@ export class SurfaceRect_serializer {
         let value_offsetX_type : int32 = RuntimeType.UNDEFINED
         value_offsetX_type = runtimeType(value_offsetX)
         valueSerializer.writeInt8((value_offsetX_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offsetX_type)) {
+        if ((value_offsetX_type) != (RuntimeType.UNDEFINED)) {
             const value_offsetX_value  = value_offsetX!
             valueSerializer.writeNumber(value_offsetX_value)
         }
@@ -649,7 +649,7 @@ export class SurfaceRect_serializer {
         let value_offsetY_type : int32 = RuntimeType.UNDEFINED
         value_offsetY_type = runtimeType(value_offsetY)
         valueSerializer.writeInt8((value_offsetY_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offsetY_type)) {
+        if ((value_offsetY_type) != (RuntimeType.UNDEFINED)) {
             const value_offsetY_value  = value_offsetY!
             valueSerializer.writeNumber(value_offsetY_value)
         }
@@ -662,14 +662,14 @@ export class SurfaceRect_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const offsetX_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offsetX_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (offsetX_buf_runtimeType))
+        if ((offsetX_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             offsetX_buf = (valueDeserializer.readNumber() as number)
         }
         const offsetX_result : number | undefined = offsetX_buf
         const offsetY_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offsetY_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (offsetY_buf_runtimeType))
+        if ((offsetY_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             offsetY_buf = (valueDeserializer.readNumber() as number)
         }
@@ -687,7 +687,7 @@ export class SurfaceRotationOptions_serializer {
         let value_lock_type : int32 = RuntimeType.UNDEFINED
         value_lock_type = runtimeType(value_lock)
         valueSerializer.writeInt8((value_lock_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_lock_type)) {
+        if ((value_lock_type) != (RuntimeType.UNDEFINED)) {
             const value_lock_value  = value_lock!
             valueSerializer.writeBoolean(value_lock_value)
         }
@@ -696,7 +696,7 @@ export class SurfaceRotationOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const lock_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let lock_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (lock_buf_runtimeType))
+        if ((lock_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             lock_buf = valueDeserializer.readBoolean()
         }
@@ -725,7 +725,7 @@ export class NativeXComponentParameters_serializer {
         let value_imageAIOptions_type : int32 = RuntimeType.UNDEFINED
         value_imageAIOptions_type = runtimeType(value_imageAIOptions)
         valueSerializer.writeInt8((value_imageAIOptions_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_imageAIOptions_type)) {
+        if ((value_imageAIOptions_type) != (RuntimeType.UNDEFINED)) {
             const value_imageAIOptions_value  = value_imageAIOptions!
             ImageAIOptions_serializer.write(valueSerializer, value_imageAIOptions_value)
         }
@@ -735,7 +735,7 @@ export class NativeXComponentParameters_serializer {
         const type_result : XComponentType = TypeChecker.XComponentType_FromNumeric(valueDeserializer.readInt32())
         const imageAIOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let imageAIOptions_buf : ImageAIOptions | undefined
-        if ((RuntimeType.UNDEFINED) != (imageAIOptions_buf_runtimeType))
+        if ((imageAIOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             imageAIOptions_buf = ImageAIOptions_serializer.read(valueDeserializer)
         }
@@ -755,7 +755,7 @@ export class XComponentOptions_serializer {
         let value_imageAIOptions_type : int32 = RuntimeType.UNDEFINED
         value_imageAIOptions_type = runtimeType(value_imageAIOptions)
         valueSerializer.writeInt8((value_imageAIOptions_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_imageAIOptions_type)) {
+        if ((value_imageAIOptions_type) != (RuntimeType.UNDEFINED)) {
             const value_imageAIOptions_value  = value_imageAIOptions!
             ImageAIOptions_serializer.write(valueSerializer, value_imageAIOptions_value)
         }
@@ -763,7 +763,7 @@ export class XComponentOptions_serializer {
         let value_screenId_type : int32 = RuntimeType.UNDEFINED
         value_screenId_type = runtimeType(value_screenId)
         valueSerializer.writeInt8((value_screenId_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_screenId_type)) {
+        if ((value_screenId_type) != (RuntimeType.UNDEFINED)) {
             const value_screenId_value  = value_screenId!
             valueSerializer.writeNumber(value_screenId_value)
         }
@@ -774,14 +774,14 @@ export class XComponentOptions_serializer {
         const controller_result : XComponentController = (XComponentController_serializer.read(valueDeserializer) as XComponentController)
         const imageAIOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let imageAIOptions_buf : ImageAIOptions | undefined
-        if ((RuntimeType.UNDEFINED) != (imageAIOptions_buf_runtimeType))
+        if ((imageAIOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             imageAIOptions_buf = ImageAIOptions_serializer.read(valueDeserializer)
         }
         const imageAIOptions_result : ImageAIOptions | undefined = imageAIOptions_buf
         const screenId_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let screenId_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (screenId_buf_runtimeType))
+        if ((screenId_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             screenId_buf = (valueDeserializer.readNumber() as number)
         }
@@ -801,7 +801,7 @@ export class XComponentParameter_serializer {
         let value_libraryname_type : int32 = RuntimeType.UNDEFINED
         value_libraryname_type = runtimeType(value_libraryname)
         valueSerializer.writeInt8((value_libraryname_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_libraryname_type)) {
+        if ((value_libraryname_type) != (RuntimeType.UNDEFINED)) {
             const value_libraryname_value  = value_libraryname!
             valueSerializer.writeString(value_libraryname_value)
         }
@@ -809,7 +809,7 @@ export class XComponentParameter_serializer {
         let value_controller_type : int32 = RuntimeType.UNDEFINED
         value_controller_type = runtimeType(value_controller)
         valueSerializer.writeInt8((value_controller_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_controller_type)) {
+        if ((value_controller_type) != (RuntimeType.UNDEFINED)) {
             const value_controller_value  = value_controller!
             XComponentController_serializer.write(valueSerializer, value_controller_value)
         }
@@ -820,14 +820,14 @@ export class XComponentParameter_serializer {
         const type_result : XComponentType = TypeChecker.XComponentType_FromNumeric(valueDeserializer.readInt32())
         const libraryname_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let libraryname_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (libraryname_buf_runtimeType))
+        if ((libraryname_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             libraryname_buf = (valueDeserializer.readString() as string)
         }
         const libraryname_result : string | undefined = libraryname_buf
         const controller_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let controller_buf : XComponentController | undefined
-        if ((RuntimeType.UNDEFINED) != (controller_buf_runtimeType))
+        if ((controller_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             controller_buf = (XComponentController_serializer.read(valueDeserializer) as XComponentController)
         }

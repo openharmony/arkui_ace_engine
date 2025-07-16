@@ -41,7 +41,7 @@ export class BusinessError_serializer {
         let value_stack_type : int32 = RuntimeType.UNDEFINED
         value_stack_type = runtimeType(value_stack)
         valueSerializer.writeInt8((value_stack_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_stack_type)) {
+        if ((value_stack_type) != (RuntimeType.UNDEFINED)) {
             const value_stack_value  = value_stack!
             valueSerializer.writeString(value_stack_value)
         }
@@ -54,7 +54,7 @@ export class BusinessError_serializer {
         const message_result : string = (valueDeserializer.readString() as string)
         const stack_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let stack_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (stack_buf_runtimeType))
+        if ((stack_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             stack_buf = (valueDeserializer.readString() as string)
         }

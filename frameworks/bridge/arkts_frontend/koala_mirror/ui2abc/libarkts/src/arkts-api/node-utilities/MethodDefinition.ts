@@ -39,7 +39,7 @@ export function createMethodDefinition(
     )
     if (overloads) {
         res.setOverloads(overloads)
-        // TODO: once node utilities are generated, this would be made in methodDefinitionUpdateChildren
+        // Improve: once node utilities are generated, this would be made in methodDefinitionUpdateChildren
         overloads.forEach(it => {
             it.setBaseOverloadMethod(res)
             it.parent = res

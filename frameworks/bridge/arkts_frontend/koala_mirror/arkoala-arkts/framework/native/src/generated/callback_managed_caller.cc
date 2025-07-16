@@ -163,8 +163,8 @@ void callManagedCallback_Array_Number_Void(Ark_Int32 resourceId, Array_Number in
     argsSerializer.writeInt32(Kind_Callback_Array_Number_Void);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(input.length);
-    for (int i = 0; i < input.length; i++) {
-        const Ark_Number input_element = input.array[i];
+    for (int input_counter_i = 0; input_counter_i < input.length; input_counter_i++) {
+        const Ark_Number input_element = input.array[input_counter_i];
         argsSerializer.writeNumber(input_element);
     }
     enqueueCallback(&_buffer);
@@ -176,8 +176,8 @@ void callManagedCallback_Array_Number_VoidSync(Ark_VMContext vmContext, Ark_Int3
     argsSerializer.writeInt32(Kind_Callback_Array_Number_Void);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(input.length);
-    for (int i = 0; i < input.length; i++) {
-        const Ark_Number input_element = input.array[i];
+    for (int input_counter_i = 0; input_counter_i < input.length; input_counter_i++) {
+        const Ark_Number input_element = input.array[input_counter_i];
         argsSerializer.writeNumber(input_element);
     }
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
@@ -191,8 +191,8 @@ void callManagedCallback_Array_String_Void(Ark_Int32 resourceId, Array_String va
     argsSerializer.writeInt32(Kind_Callback_Array_String_Void);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(value.length);
-    for (int i = 0; i < value.length; i++) {
-        const Ark_String value_element = value.array[i];
+    for (int value_counter_i = 0; value_counter_i < value.length; value_counter_i++) {
+        const Ark_String value_element = value.array[value_counter_i];
         argsSerializer.writeString(value_element);
     }
     enqueueCallback(&_buffer);
@@ -204,8 +204,8 @@ void callManagedCallback_Array_String_VoidSync(Ark_VMContext vmContext, Ark_Int3
     argsSerializer.writeInt32(Kind_Callback_Array_String_Void);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(value.length);
-    for (int i = 0; i < value.length; i++) {
-        const Ark_String value_element = value.array[i];
+    for (int value_counter_i = 0; value_counter_i < value.length; value_counter_i++) {
+        const Ark_String value_element = value.array[value_counter_i];
         argsSerializer.writeString(value_element);
     }
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
@@ -219,8 +219,8 @@ void callManagedCallback_Array_TextMenuItem_Void(Ark_Int32 resourceId, Array_Tex
     argsSerializer.writeInt32(Kind_Callback_Array_TextMenuItem_Void);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(value.length);
-    for (int i = 0; i < value.length; i++) {
-        const Ark_TextMenuItem value_element = value.array[i];
+    for (int value_counter_i = 0; value_counter_i < value.length; value_counter_i++) {
+        const Ark_TextMenuItem value_element = value.array[value_counter_i];
         TextMenuItem_serializer::write(argsSerializer, value_element);
     }
     enqueueCallback(&_buffer);
@@ -232,8 +232,8 @@ void callManagedCallback_Array_TextMenuItem_VoidSync(Ark_VMContext vmContext, Ar
     argsSerializer.writeInt32(Kind_Callback_Array_TextMenuItem_Void);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(value.length);
-    for (int i = 0; i < value.length; i++) {
-        const Ark_TextMenuItem value_element = value.array[i];
+    for (int value_counter_i = 0; value_counter_i < value.length; value_counter_i++) {
+        const Ark_TextMenuItem value_element = value.array[value_counter_i];
         TextMenuItem_serializer::write(argsSerializer, value_element);
     }
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
@@ -247,8 +247,8 @@ void callManagedCallback_Array_TouchTestInfo_TouchResult(Ark_Int32 resourceId, A
     argsSerializer.writeInt32(Kind_Callback_Array_TouchTestInfo_TouchResult);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(value.length);
-    for (int i = 0; i < value.length; i++) {
-        const Ark_TouchTestInfo value_element = value.array[i];
+    for (int value_counter_i = 0; value_counter_i < value.length; value_counter_i++) {
+        const Ark_TouchTestInfo value_element = value.array[value_counter_i];
         TouchTestInfo_serializer::write(argsSerializer, value_element);
     }
     argsSerializer.writeCallbackResource(continuation.resource);
@@ -263,8 +263,8 @@ void callManagedCallback_Array_TouchTestInfo_TouchResultSync(Ark_VMContext vmCon
     argsSerializer.writeInt32(Kind_Callback_Array_TouchTestInfo_TouchResult);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(value.length);
-    for (int i = 0; i < value.length; i++) {
-        const Ark_TouchTestInfo value_element = value.array[i];
+    for (int value_counter_i = 0; value_counter_i < value.length; value_counter_i++) {
+        const Ark_TouchTestInfo value_element = value.array[value_counter_i];
         TouchTestInfo_serializer::write(argsSerializer, value_element);
     }
     argsSerializer.writeCallbackResource(continuation.resource);
@@ -768,7 +768,7 @@ void callManagedCallback_DragEvent_Opt_String_Void(Ark_Int32 resourceId, Ark_Dra
     Ark_Int32 extraParams_type = INTEROP_RUNTIME_UNDEFINED;
     extraParams_type = runtimeType(extraParams);
     argsSerializer.writeInt8(extraParams_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (extraParams_type)) {
+    if ((extraParams_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto extraParams_value = extraParams.value;
         argsSerializer.writeString(extraParams_value);
     }
@@ -784,7 +784,7 @@ void callManagedCallback_DragEvent_Opt_String_VoidSync(Ark_VMContext vmContext, 
     Ark_Int32 extraParams_type = INTEROP_RUNTIME_UNDEFINED;
     extraParams_type = runtimeType(extraParams);
     argsSerializer.writeInt8(extraParams_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (extraParams_type)) {
+    if ((extraParams_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto extraParams_value = extraParams.value;
         argsSerializer.writeString(extraParams_value);
     }
@@ -2166,8 +2166,8 @@ void callManagedCallback_onMeasureSize_SizeResult(Ark_Int32 resourceId, Ark_Geom
     argsSerializer.writeInt32(resourceId);
     GeometryInfo_serializer::write(argsSerializer, selfLayoutInfo);
     argsSerializer.writeInt32(children.length);
-    for (int i = 0; i < children.length; i++) {
-        const Ark_Measurable children_element = children.array[i];
+    for (int children_counter_i = 0; children_counter_i < children.length; children_counter_i++) {
+        const Ark_Measurable children_element = children.array[children_counter_i];
         Measurable_serializer::write(argsSerializer, children_element);
     }
     ConstraintSizeOptions_serializer::write(argsSerializer, constraint);
@@ -2184,8 +2184,8 @@ void callManagedCallback_onMeasureSize_SizeResultSync(Ark_VMContext vmContext, A
     argsSerializer.writeInt32(resourceId);
     GeometryInfo_serializer::write(argsSerializer, selfLayoutInfo);
     argsSerializer.writeInt32(children.length);
-    for (int i = 0; i < children.length; i++) {
-        const Ark_Measurable children_element = children.array[i];
+    for (int children_counter_i = 0; children_counter_i < children.length; children_counter_i++) {
+        const Ark_Measurable children_element = children.array[children_counter_i];
         Measurable_serializer::write(argsSerializer, children_element);
     }
     ConstraintSizeOptions_serializer::write(argsSerializer, constraint);
@@ -2304,8 +2304,8 @@ void callManagedCallback_onPlaceChildren_Void(Ark_Int32 resourceId, Ark_Geometry
     argsSerializer.writeInt32(resourceId);
     GeometryInfo_serializer::write(argsSerializer, selfLayoutInfo);
     argsSerializer.writeInt32(children.length);
-    for (int i = 0; i < children.length; i++) {
-        const Ark_Layoutable children_element = children.array[i];
+    for (int children_counter_i = 0; children_counter_i < children.length; children_counter_i++) {
+        const Ark_Layoutable children_element = children.array[children_counter_i];
         Layoutable_serializer::write(argsSerializer, children_element);
     }
     ConstraintSizeOptions_serializer::write(argsSerializer, constraint);
@@ -2319,8 +2319,8 @@ void callManagedCallback_onPlaceChildren_VoidSync(Ark_VMContext vmContext, Ark_I
     argsSerializer.writeInt32(resourceId);
     GeometryInfo_serializer::write(argsSerializer, selfLayoutInfo);
     argsSerializer.writeInt32(children.length);
-    for (int i = 0; i < children.length; i++) {
-        const Ark_Layoutable children_element = children.array[i];
+    for (int children_counter_i = 0; children_counter_i < children.length; children_counter_i++) {
+        const Ark_Layoutable children_element = children.array[children_counter_i];
         Layoutable_serializer::write(argsSerializer, children_element);
     }
     ConstraintSizeOptions_serializer::write(argsSerializer, constraint);
@@ -2649,22 +2649,22 @@ void callManagedCallback_Opt_Array_FontDescriptor_Opt_Array_String_Void(Ark_Int3
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         argsSerializer.writeInt32(value_value.length);
-        for (int i = 0; i < value_value.length; i++) {
-            const Ark_CustomObject value_value_element = value_value.array[i];
+        for (int value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
+            const Ark_CustomObject value_value_element = value_value.array[value_value_counter_i];
             argsSerializer.writeCustomObject("object", value_value_element);
         }
     }
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         argsSerializer.writeInt32(error_value.length);
-        for (int i = 0; i < error_value.length; i++) {
-            const Ark_String error_value_element = error_value.array[i];
+        for (int error_value_counter_i = 0; error_value_counter_i < error_value.length; error_value_counter_i++) {
+            const Ark_String error_value_element = error_value.array[error_value_counter_i];
             argsSerializer.writeString(error_value_element);
         }
     }
@@ -2679,22 +2679,22 @@ void callManagedCallback_Opt_Array_FontDescriptor_Opt_Array_String_VoidSync(Ark_
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         argsSerializer.writeInt32(value_value.length);
-        for (int i = 0; i < value_value.length; i++) {
-            const Ark_CustomObject value_value_element = value_value.array[i];
+        for (int value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
+            const Ark_CustomObject value_value_element = value_value.array[value_value_counter_i];
             argsSerializer.writeCustomObject("object", value_value_element);
         }
     }
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         argsSerializer.writeInt32(error_value.length);
-        for (int i = 0; i < error_value.length; i++) {
-            const Ark_String error_value_element = error_value.array[i];
+        for (int error_value_counter_i = 0; error_value_counter_i < error_value.length; error_value_counter_i++) {
+            const Ark_String error_value_element = error_value.array[error_value_counter_i];
             argsSerializer.writeString(error_value_element);
         }
     }
@@ -2711,11 +2711,11 @@ void callManagedCallback_Opt_Array_NavDestinationTransition_Void(Ark_Int32 resou
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         argsSerializer.writeInt32(value_value.length);
-        for (int i = 0; i < value_value.length; i++) {
-            const Ark_NavDestinationTransition value_value_element = value_value.array[i];
+        for (int value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
+            const Ark_NavDestinationTransition value_value_element = value_value.array[value_value_counter_i];
             NavDestinationTransition_serializer::write(argsSerializer, value_value_element);
         }
     }
@@ -2730,11 +2730,11 @@ void callManagedCallback_Opt_Array_NavDestinationTransition_VoidSync(Ark_VMConte
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         argsSerializer.writeInt32(value_value.length);
-        for (int i = 0; i < value_value.length; i++) {
-            const Ark_NavDestinationTransition value_value_element = value_value.array[i];
+        for (int value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
+            const Ark_NavDestinationTransition value_value_element = value_value.array[value_value_counter_i];
             NavDestinationTransition_serializer::write(argsSerializer, value_value_element);
         }
     }
@@ -2751,22 +2751,22 @@ void callManagedCallback_Opt_Array_String_Opt_Array_String_Void(Ark_Int32 resour
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         argsSerializer.writeInt32(value_value.length);
-        for (int i = 0; i < value_value.length; i++) {
-            const Ark_String value_value_element = value_value.array[i];
+        for (int value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
+            const Ark_String value_value_element = value_value.array[value_value_counter_i];
             argsSerializer.writeString(value_value_element);
         }
     }
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         argsSerializer.writeInt32(error_value.length);
-        for (int i = 0; i < error_value.length; i++) {
-            const Ark_String error_value_element = error_value.array[i];
+        for (int error_value_counter_i = 0; error_value_counter_i < error_value.length; error_value_counter_i++) {
+            const Ark_String error_value_element = error_value.array[error_value_counter_i];
             argsSerializer.writeString(error_value_element);
         }
     }
@@ -2781,22 +2781,22 @@ void callManagedCallback_Opt_Array_String_Opt_Array_String_VoidSync(Ark_VMContex
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         argsSerializer.writeInt32(value_value.length);
-        for (int i = 0; i < value_value.length; i++) {
-            const Ark_String value_value_element = value_value.array[i];
+        for (int value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
+            const Ark_String value_value_element = value_value.array[value_value_counter_i];
             argsSerializer.writeString(value_value_element);
         }
     }
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         argsSerializer.writeInt32(error_value.length);
-        for (int i = 0; i < error_value.length; i++) {
-            const Ark_String error_value_element = error_value.array[i];
+        for (int error_value_counter_i = 0; error_value_counter_i < error_value.length; error_value_counter_i++) {
+            const Ark_String error_value_element = error_value.array[error_value_counter_i];
             argsSerializer.writeString(error_value_element);
         }
     }
@@ -2813,11 +2813,11 @@ void callManagedCallback_Opt_Array_String_Void(Ark_Int32 resourceId, Opt_Array_S
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         argsSerializer.writeInt32(error_value.length);
-        for (int i = 0; i < error_value.length; i++) {
-            const Ark_String error_value_element = error_value.array[i];
+        for (int error_value_counter_i = 0; error_value_counter_i < error_value.length; error_value_counter_i++) {
+            const Ark_String error_value_element = error_value.array[error_value_counter_i];
             argsSerializer.writeString(error_value_element);
         }
     }
@@ -2832,11 +2832,11 @@ void callManagedCallback_Opt_Array_String_VoidSync(Ark_VMContext vmContext, Ark_
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         argsSerializer.writeInt32(error_value.length);
-        for (int i = 0; i < error_value.length; i++) {
-            const Ark_String error_value_element = error_value.array[i];
+        for (int error_value_counter_i = 0; error_value_counter_i < error_value.length; error_value_counter_i++) {
+            const Ark_String error_value_element = error_value.array[error_value_counter_i];
             argsSerializer.writeString(error_value_element);
         }
     }
@@ -2853,7 +2853,7 @@ void callManagedCallback_Opt_Boolean_Void(Ark_Int32 resourceId, Opt_Boolean sele
     Ark_Int32 select_type = INTEROP_RUNTIME_UNDEFINED;
     select_type = runtimeType(select);
     argsSerializer.writeInt8(select_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (select_type)) {
+    if ((select_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto select_value = select.value;
         argsSerializer.writeBoolean(select_value);
     }
@@ -2868,7 +2868,7 @@ void callManagedCallback_Opt_Boolean_VoidSync(Ark_VMContext vmContext, Ark_Int32
     Ark_Int32 select_type = INTEROP_RUNTIME_UNDEFINED;
     select_type = runtimeType(select);
     argsSerializer.writeInt8(select_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (select_type)) {
+    if ((select_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto select_value = select.value;
         argsSerializer.writeBoolean(select_value);
     }
@@ -2885,7 +2885,7 @@ void callManagedCallback_Opt_CustomBuilder_Void(Ark_Int32 resourceId, Opt_Custom
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         argsSerializer.writeCallbackResource(value_value.resource);
         argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(value_value.call));
@@ -2902,7 +2902,7 @@ void callManagedCallback_Opt_CustomBuilder_VoidSync(Ark_VMContext vmContext, Ark
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         argsSerializer.writeCallbackResource(value_value.resource);
         argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(value_value.call));
@@ -2921,18 +2921,18 @@ void callManagedCallback_Opt_FontDescriptor_Opt_Array_String_Void(Ark_Int32 reso
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         argsSerializer.writeCustomObject("object", value_value);
     }
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         argsSerializer.writeInt32(error_value.length);
-        for (int i = 0; i < error_value.length; i++) {
-            const Ark_String error_value_element = error_value.array[i];
+        for (int error_value_counter_i = 0; error_value_counter_i < error_value.length; error_value_counter_i++) {
+            const Ark_String error_value_element = error_value.array[error_value_counter_i];
             argsSerializer.writeString(error_value_element);
         }
     }
@@ -2947,18 +2947,18 @@ void callManagedCallback_Opt_FontDescriptor_Opt_Array_String_VoidSync(Ark_VMCont
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         argsSerializer.writeCustomObject("object", value_value);
     }
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         argsSerializer.writeInt32(error_value.length);
-        for (int i = 0; i < error_value.length; i++) {
-            const Ark_String error_value_element = error_value.array[i];
+        for (int error_value_counter_i = 0; error_value_counter_i < error_value.length; error_value_counter_i++) {
+            const Ark_String error_value_element = error_value.array[error_value_counter_i];
             argsSerializer.writeString(error_value_element);
         }
     }
@@ -2975,7 +2975,7 @@ void callManagedCallback_Opt_NavigationAnimatedTransition_Void(Ark_Int32 resourc
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         NavigationAnimatedTransition_serializer::write(argsSerializer, value_value);
     }
@@ -2990,7 +2990,7 @@ void callManagedCallback_Opt_NavigationAnimatedTransition_VoidSync(Ark_VMContext
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         NavigationAnimatedTransition_serializer::write(argsSerializer, value_value);
     }
@@ -3007,7 +3007,7 @@ void callManagedCallback_Opt_Number_Void(Ark_Int32 resourceId, Opt_Number select
     Ark_Int32 selected_type = INTEROP_RUNTIME_UNDEFINED;
     selected_type = runtimeType(selected);
     argsSerializer.writeInt8(selected_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (selected_type)) {
+    if ((selected_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto selected_value = selected.value;
         argsSerializer.writeNumber(selected_value);
     }
@@ -3022,7 +3022,7 @@ void callManagedCallback_Opt_Number_VoidSync(Ark_VMContext vmContext, Ark_Int32 
     Ark_Int32 selected_type = INTEROP_RUNTIME_UNDEFINED;
     selected_type = runtimeType(selected);
     argsSerializer.writeInt8(selected_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (selected_type)) {
+    if ((selected_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto selected_value = selected.value;
         argsSerializer.writeNumber(selected_value);
     }
@@ -3039,7 +3039,7 @@ void callManagedCallback_Opt_Object_Void(Ark_Int32 resourceId, Opt_Object value0
     Ark_Int32 value0_type = INTEROP_RUNTIME_UNDEFINED;
     value0_type = runtimeType(value0);
     argsSerializer.writeInt8(value0_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value0_type)) {
+    if ((value0_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value0_value = value0.value;
         argsSerializer.writeObject(value0_value);
     }
@@ -3054,7 +3054,7 @@ void callManagedCallback_Opt_Object_VoidSync(Ark_VMContext vmContext, Ark_Int32 
     Ark_Int32 value0_type = INTEROP_RUNTIME_UNDEFINED;
     value0_type = runtimeType(value0);
     argsSerializer.writeInt8(value0_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value0_type)) {
+    if ((value0_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value0_value = value0.value;
         argsSerializer.writeObject(value0_value);
     }
@@ -3071,7 +3071,7 @@ void callManagedCallback_Opt_OffsetResult_Void(Ark_Int32 resourceId, Opt_OffsetR
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         OffsetResult_serializer::write(argsSerializer, value_value);
     }
@@ -3086,7 +3086,7 @@ void callManagedCallback_Opt_OffsetResult_VoidSync(Ark_VMContext vmContext, Ark_
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         OffsetResult_serializer::write(argsSerializer, value_value);
     }
@@ -3103,18 +3103,18 @@ void callManagedCallback_Opt_Scene_Opt_Array_String_Void(Ark_Int32 resourceId, O
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         Scene_serializer::write(argsSerializer, value_value);
     }
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         argsSerializer.writeInt32(error_value.length);
-        for (int i = 0; i < error_value.length; i++) {
-            const Ark_String error_value_element = error_value.array[i];
+        for (int error_value_counter_i = 0; error_value_counter_i < error_value.length; error_value_counter_i++) {
+            const Ark_String error_value_element = error_value.array[error_value_counter_i];
             argsSerializer.writeString(error_value_element);
         }
     }
@@ -3129,18 +3129,18 @@ void callManagedCallback_Opt_Scene_Opt_Array_String_VoidSync(Ark_VMContext vmCon
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         Scene_serializer::write(argsSerializer, value_value);
     }
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         argsSerializer.writeInt32(error_value.length);
-        for (int i = 0; i < error_value.length; i++) {
-            const Ark_String error_value_element = error_value.array[i];
+        for (int error_value_counter_i = 0; error_value_counter_i < error_value.length; error_value_counter_i++) {
+            const Ark_String error_value_element = error_value.array[error_value_counter_i];
             argsSerializer.writeString(error_value_element);
         }
     }
@@ -3157,7 +3157,7 @@ void callManagedCallback_Opt_ScrollResult_Void(Ark_Int32 resourceId, Opt_ScrollR
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         ScrollResult_serializer::write(argsSerializer, value_value);
     }
@@ -3172,7 +3172,7 @@ void callManagedCallback_Opt_ScrollResult_VoidSync(Ark_VMContext vmContext, Ark_
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         ScrollResult_serializer::write(argsSerializer, value_value);
     }
@@ -3189,18 +3189,18 @@ void callManagedCallback_Opt_String_Opt_Array_String_Void(Ark_Int32 resourceId, 
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         argsSerializer.writeString(value_value);
     }
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         argsSerializer.writeInt32(error_value.length);
-        for (int i = 0; i < error_value.length; i++) {
-            const Ark_String error_value_element = error_value.array[i];
+        for (int error_value_counter_i = 0; error_value_counter_i < error_value.length; error_value_counter_i++) {
+            const Ark_String error_value_element = error_value.array[error_value_counter_i];
             argsSerializer.writeString(error_value_element);
         }
     }
@@ -3215,18 +3215,18 @@ void callManagedCallback_Opt_String_Opt_Array_String_VoidSync(Ark_VMContext vmCo
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         argsSerializer.writeString(value_value);
     }
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         argsSerializer.writeInt32(error_value.length);
-        for (int i = 0; i < error_value.length; i++) {
-            const Ark_String error_value_element = error_value.array[i];
+        for (int error_value_counter_i = 0; error_value_counter_i < error_value.length; error_value_counter_i++) {
+            const Ark_String error_value_element = error_value.array[error_value_counter_i];
             argsSerializer.writeString(error_value_element);
         }
     }
@@ -3243,18 +3243,18 @@ void callManagedCallback_Opt_StyledString_Opt_Array_String_Void(Ark_Int32 resour
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         StyledString_serializer::write(argsSerializer, value_value);
     }
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         argsSerializer.writeInt32(error_value.length);
-        for (int i = 0; i < error_value.length; i++) {
-            const Ark_String error_value_element = error_value.array[i];
+        for (int error_value_counter_i = 0; error_value_counter_i < error_value.length; error_value_counter_i++) {
+            const Ark_String error_value_element = error_value.array[error_value_counter_i];
             argsSerializer.writeString(error_value_element);
         }
     }
@@ -3269,18 +3269,18 @@ void callManagedCallback_Opt_StyledString_Opt_Array_String_VoidSync(Ark_VMContex
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         StyledString_serializer::write(argsSerializer, value_value);
     }
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         argsSerializer.writeInt32(error_value.length);
-        for (int i = 0; i < error_value.length; i++) {
-            const Ark_String error_value_element = error_value.array[i];
+        for (int error_value_counter_i = 0; error_value_counter_i < error_value.length; error_value_counter_i++) {
+            const Ark_String error_value_element = error_value.array[error_value_counter_i];
             argsSerializer.writeString(error_value_element);
         }
     }
@@ -3297,7 +3297,7 @@ void callManagedCallback_Opt_TabContentAnimatedTransition_Void(Ark_Int32 resourc
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         TabContentAnimatedTransition_serializer::write(argsSerializer, value_value);
     }
@@ -3312,7 +3312,7 @@ void callManagedCallback_Opt_TabContentAnimatedTransition_VoidSync(Ark_VMContext
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         TabContentAnimatedTransition_serializer::write(argsSerializer, value_value);
     }
@@ -3329,7 +3329,7 @@ void callManagedCallback_Opt_Union_Number_Resource_Void(Ark_Int32 resourceId, Op
     Ark_Int32 selected_type = INTEROP_RUNTIME_UNDEFINED;
     selected_type = runtimeType(selected);
     argsSerializer.writeInt8(selected_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (selected_type)) {
+    if ((selected_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto selected_value = selected.value;
         Ark_Int32 selected_value_type = INTEROP_RUNTIME_UNDEFINED;
         selected_value_type = selected_value.selector;
@@ -3355,7 +3355,7 @@ void callManagedCallback_Opt_Union_Number_Resource_VoidSync(Ark_VMContext vmCont
     Ark_Int32 selected_type = INTEROP_RUNTIME_UNDEFINED;
     selected_type = runtimeType(selected);
     argsSerializer.writeInt8(selected_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (selected_type)) {
+    if ((selected_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto selected_value = selected.value;
         Ark_Int32 selected_value_type = INTEROP_RUNTIME_UNDEFINED;
         selected_value_type = selected_value.selector;
@@ -3383,7 +3383,7 @@ void callManagedCallback_Opt_Union_ResourceStr_String_Resource_Void(Ark_Int32 re
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         Ark_Int32 value_value_type = INTEROP_RUNTIME_UNDEFINED;
         value_value_type = value_value.selector;
@@ -3425,7 +3425,7 @@ void callManagedCallback_Opt_Union_ResourceStr_String_Resource_VoidSync(Ark_VMCo
     Ark_Int32 value_type = INTEROP_RUNTIME_UNDEFINED;
     value_type = runtimeType(value);
     argsSerializer.writeInt8(value_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_type)) {
+    if ((value_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto value_value = value.value;
         Ark_Int32 value_value_type = INTEROP_RUNTIME_UNDEFINED;
         value_value_type = value_value.selector;
@@ -4387,8 +4387,8 @@ void callManagedCallback_Union_Number_Array_Number_Void(Ark_Int32 resourceId, Ar
         argsSerializer.writeInt8(1);
         const auto selected_1 = selected.value1;
         argsSerializer.writeInt32(selected_1.length);
-        for (int i = 0; i < selected_1.length; i++) {
-            const Ark_Number selected_1_element = selected_1.array[i];
+        for (int selected_1_counter_i = 0; selected_1_counter_i < selected_1.length; selected_1_counter_i++) {
+            const Ark_Number selected_1_element = selected_1.array[selected_1_counter_i];
             argsSerializer.writeNumber(selected_1_element);
         }
     }
@@ -4411,8 +4411,8 @@ void callManagedCallback_Union_Number_Array_Number_VoidSync(Ark_VMContext vmCont
         argsSerializer.writeInt8(1);
         const auto selected_1 = selected.value1;
         argsSerializer.writeInt32(selected_1.length);
-        for (int i = 0; i < selected_1.length; i++) {
-            const Ark_Number selected_1_element = selected_1.array[i];
+        for (int selected_1_counter_i = 0; selected_1_counter_i < selected_1.length; selected_1_counter_i++) {
+            const Ark_Number selected_1_element = selected_1.array[selected_1_counter_i];
             argsSerializer.writeNumber(selected_1_element);
         }
     }
@@ -4448,8 +4448,8 @@ void callManagedCallback_Union_ResourceStr_Array_ResourceStr_Void(Ark_Int32 reso
         argsSerializer.writeInt8(1);
         const auto value_1 = value.value1;
         argsSerializer.writeInt32(value_1.length);
-        for (int i = 0; i < value_1.length; i++) {
-            const Ark_ResourceStr value_1_element = value_1.array[i];
+        for (int value_1_counter_i = 0; value_1_counter_i < value_1.length; value_1_counter_i++) {
+            const Ark_ResourceStr value_1_element = value_1.array[value_1_counter_i];
             Ark_Int32 value_1_element_type = INTEROP_RUNTIME_UNDEFINED;
             value_1_element_type = value_1_element.selector;
             if (value_1_element_type == 0) {
@@ -4494,8 +4494,8 @@ void callManagedCallback_Union_ResourceStr_Array_ResourceStr_VoidSync(Ark_VMCont
         argsSerializer.writeInt8(1);
         const auto value_1 = value.value1;
         argsSerializer.writeInt32(value_1.length);
-        for (int i = 0; i < value_1.length; i++) {
-            const Ark_ResourceStr value_1_element = value_1.array[i];
+        for (int value_1_counter_i = 0; value_1_counter_i < value_1.length; value_1_counter_i++) {
+            const Ark_ResourceStr value_1_element = value_1.array[value_1_counter_i];
             Ark_Int32 value_1_element_type = INTEROP_RUNTIME_UNDEFINED;
             value_1_element_type = value_1_element.selector;
             if (value_1_element_type == 0) {
@@ -4874,14 +4874,14 @@ void callManagedEditableTextOnChangeCallback(Ark_Int32 resourceId, Ark_String va
     Ark_Int32 previewText_type = INTEROP_RUNTIME_UNDEFINED;
     previewText_type = runtimeType(previewText);
     argsSerializer.writeInt8(previewText_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (previewText_type)) {
+    if ((previewText_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto previewText_value = previewText.value;
         PreviewText_serializer::write(argsSerializer, previewText_value);
     }
     Ark_Int32 options_type = INTEROP_RUNTIME_UNDEFINED;
     options_type = runtimeType(options);
     argsSerializer.writeInt8(options_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (options_type)) {
+    if ((options_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto options_value = options.value;
         TextChangeOptions_serializer::write(argsSerializer, options_value);
     }
@@ -4897,14 +4897,14 @@ void callManagedEditableTextOnChangeCallbackSync(Ark_VMContext vmContext, Ark_In
     Ark_Int32 previewText_type = INTEROP_RUNTIME_UNDEFINED;
     previewText_type = runtimeType(previewText);
     argsSerializer.writeInt8(previewText_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (previewText_type)) {
+    if ((previewText_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto previewText_value = previewText.value;
         PreviewText_serializer::write(argsSerializer, previewText_value);
     }
     Ark_Int32 options_type = INTEROP_RUNTIME_UNDEFINED;
     options_type = runtimeType(options);
     argsSerializer.writeInt8(options_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (options_type)) {
+    if ((options_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto options_value = options.value;
         TextChangeOptions_serializer::write(argsSerializer, options_value);
     }
@@ -4969,8 +4969,8 @@ void callManagedGestureRecognizerJudgeBeginCallback(Ark_Int32 resourceId, Ark_Ba
     BaseGestureEvent_serializer::write(argsSerializer, event);
     GestureRecognizer_serializer::write(argsSerializer, current);
     argsSerializer.writeInt32(recognizers.length);
-    for (int i = 0; i < recognizers.length; i++) {
-        const Ark_GestureRecognizer recognizers_element = recognizers.array[i];
+    for (int recognizers_counter_i = 0; recognizers_counter_i < recognizers.length; recognizers_counter_i++) {
+        const Ark_GestureRecognizer recognizers_element = recognizers.array[recognizers_counter_i];
         GestureRecognizer_serializer::write(argsSerializer, recognizers_element);
     }
     argsSerializer.writeCallbackResource(continuation.resource);
@@ -4987,8 +4987,8 @@ void callManagedGestureRecognizerJudgeBeginCallbackSync(Ark_VMContext vmContext,
     BaseGestureEvent_serializer::write(argsSerializer, event);
     GestureRecognizer_serializer::write(argsSerializer, current);
     argsSerializer.writeInt32(recognizers.length);
-    for (int i = 0; i < recognizers.length; i++) {
-        const Ark_GestureRecognizer recognizers_element = recognizers.array[i];
+    for (int recognizers_counter_i = 0; recognizers_counter_i < recognizers.length; recognizers_counter_i++) {
+        const Ark_GestureRecognizer recognizers_element = recognizers.array[recognizers_counter_i];
         GestureRecognizer_serializer::write(argsSerializer, recognizers_element);
     }
     argsSerializer.writeCallbackResource(continuation.resource);
@@ -5095,7 +5095,7 @@ void callManagedImageOnCompleteCallback(Ark_Int32 resourceId, Opt_ImageCompleteE
     Ark_Int32 loadEvent_type = INTEROP_RUNTIME_UNDEFINED;
     loadEvent_type = runtimeType(loadEvent);
     argsSerializer.writeInt8(loadEvent_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (loadEvent_type)) {
+    if ((loadEvent_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto loadEvent_value = loadEvent.value;
         ImageCompleteEvent_serializer::write(argsSerializer, loadEvent_value);
     }
@@ -5110,7 +5110,7 @@ void callManagedImageOnCompleteCallbackSync(Ark_VMContext vmContext, Ark_Int32 r
     Ark_Int32 loadEvent_type = INTEROP_RUNTIME_UNDEFINED;
     loadEvent_type = runtimeType(loadEvent);
     argsSerializer.writeInt8(loadEvent_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (loadEvent_type)) {
+    if ((loadEvent_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto loadEvent_value = loadEvent.value;
         ImageCompleteEvent_serializer::write(argsSerializer, loadEvent_value);
     }
@@ -5315,8 +5315,8 @@ void callManagedModifierKeyStateGetter(Ark_Int32 resourceId, Array_String keys, 
     argsSerializer.writeInt32(Kind_ModifierKeyStateGetter);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(keys.length);
-    for (int i = 0; i < keys.length; i++) {
-        const Ark_String keys_element = keys.array[i];
+    for (int keys_counter_i = 0; keys_counter_i < keys.length; keys_counter_i++) {
+        const Ark_String keys_element = keys.array[keys_counter_i];
         argsSerializer.writeString(keys_element);
     }
     argsSerializer.writeCallbackResource(continuation.resource);
@@ -5331,8 +5331,8 @@ void callManagedModifierKeyStateGetterSync(Ark_VMContext vmContext, Ark_Int32 re
     argsSerializer.writeInt32(Kind_ModifierKeyStateGetter);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(keys.length);
-    for (int i = 0; i < keys.length; i++) {
-        const Ark_String keys_element = keys.array[i];
+    for (int keys_counter_i = 0; keys_counter_i < keys.length; keys_counter_i++) {
+        const Ark_String keys_element = keys.array[keys_counter_i];
         argsSerializer.writeString(keys_element);
     }
     argsSerializer.writeCallbackResource(continuation.resource);
@@ -5561,8 +5561,8 @@ void callManagedOnCreateMenuCallback(Ark_Int32 resourceId, Array_TextMenuItem me
     argsSerializer.writeInt32(Kind_OnCreateMenuCallback);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(menuItems.length);
-    for (int i = 0; i < menuItems.length; i++) {
-        const Ark_TextMenuItem menuItems_element = menuItems.array[i];
+    for (int menuItems_counter_i = 0; menuItems_counter_i < menuItems.length; menuItems_counter_i++) {
+        const Ark_TextMenuItem menuItems_element = menuItems.array[menuItems_counter_i];
         TextMenuItem_serializer::write(argsSerializer, menuItems_element);
     }
     argsSerializer.writeCallbackResource(continuation.resource);
@@ -5577,8 +5577,8 @@ void callManagedOnCreateMenuCallbackSync(Ark_VMContext vmContext, Ark_Int32 reso
     argsSerializer.writeInt32(Kind_OnCreateMenuCallback);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(menuItems.length);
-    for (int i = 0; i < menuItems.length; i++) {
-        const Ark_TextMenuItem menuItems_element = menuItems.array[i];
+    for (int menuItems_counter_i = 0; menuItems_counter_i < menuItems.length; menuItems_counter_i++) {
+        const Ark_TextMenuItem menuItems_element = menuItems.array[menuItems_counter_i];
         TextMenuItem_serializer::write(argsSerializer, menuItems_element);
     }
     argsSerializer.writeCallbackResource(continuation.resource);
@@ -5620,7 +5620,7 @@ void callManagedOnDragEventCallback(Ark_Int32 resourceId, Ark_DragEvent event, O
     Ark_Int32 extraParams_type = INTEROP_RUNTIME_UNDEFINED;
     extraParams_type = runtimeType(extraParams);
     argsSerializer.writeInt8(extraParams_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (extraParams_type)) {
+    if ((extraParams_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto extraParams_value = extraParams.value;
         argsSerializer.writeString(extraParams_value);
     }
@@ -5636,7 +5636,7 @@ void callManagedOnDragEventCallbackSync(Ark_VMContext vmContext, Ark_Int32 resou
     Ark_Int32 extraParams_type = INTEROP_RUNTIME_UNDEFINED;
     extraParams_type = runtimeType(extraParams);
     argsSerializer.writeInt8(extraParams_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (extraParams_type)) {
+    if ((extraParams_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto extraParams_value = extraParams.value;
         argsSerializer.writeString(extraParams_value);
     }
@@ -5935,7 +5935,7 @@ void callManagedOnNativeLoadCallback(Ark_Int32 resourceId, Opt_Object event)
     Ark_Int32 event_type = INTEROP_RUNTIME_UNDEFINED;
     event_type = runtimeType(event);
     argsSerializer.writeInt8(event_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_type)) {
+    if ((event_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto event_value = event.value;
         argsSerializer.writeObject(event_value);
     }
@@ -5950,7 +5950,7 @@ void callManagedOnNativeLoadCallbackSync(Ark_VMContext vmContext, Ark_Int32 reso
     Ark_Int32 event_type = INTEROP_RUNTIME_UNDEFINED;
     event_type = runtimeType(event);
     argsSerializer.writeInt8(event_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_type)) {
+    if ((event_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto event_value = event.value;
         argsSerializer.writeObject(event_value);
     }
@@ -6461,8 +6461,8 @@ void callManagedOnTextPickerChangeCallback(Ark_Int32 resourceId, Ark_Union_Strin
         argsSerializer.writeInt8(1);
         const auto selectItem_1 = selectItem.value1;
         argsSerializer.writeInt32(selectItem_1.length);
-        for (int i = 0; i < selectItem_1.length; i++) {
-            const Ark_String selectItem_1_element = selectItem_1.array[i];
+        for (int selectItem_1_counter_i = 0; selectItem_1_counter_i < selectItem_1.length; selectItem_1_counter_i++) {
+            const Ark_String selectItem_1_element = selectItem_1.array[selectItem_1_counter_i];
             argsSerializer.writeString(selectItem_1_element);
         }
     }
@@ -6477,8 +6477,8 @@ void callManagedOnTextPickerChangeCallback(Ark_Int32 resourceId, Ark_Union_Strin
         argsSerializer.writeInt8(1);
         const auto index_1 = index.value1;
         argsSerializer.writeInt32(index_1.length);
-        for (int i = 0; i < index_1.length; i++) {
-            const Ark_Number index_1_element = index_1.array[i];
+        for (int index_1_counter_i = 0; index_1_counter_i < index_1.length; index_1_counter_i++) {
+            const Ark_Number index_1_element = index_1.array[index_1_counter_i];
             argsSerializer.writeNumber(index_1_element);
         }
     }
@@ -6501,8 +6501,8 @@ void callManagedOnTextPickerChangeCallbackSync(Ark_VMContext vmContext, Ark_Int3
         argsSerializer.writeInt8(1);
         const auto selectItem_1 = selectItem.value1;
         argsSerializer.writeInt32(selectItem_1.length);
-        for (int i = 0; i < selectItem_1.length; i++) {
-            const Ark_String selectItem_1_element = selectItem_1.array[i];
+        for (int selectItem_1_counter_i = 0; selectItem_1_counter_i < selectItem_1.length; selectItem_1_counter_i++) {
+            const Ark_String selectItem_1_element = selectItem_1.array[selectItem_1_counter_i];
             argsSerializer.writeString(selectItem_1_element);
         }
     }
@@ -6517,8 +6517,8 @@ void callManagedOnTextPickerChangeCallbackSync(Ark_VMContext vmContext, Ark_Int3
         argsSerializer.writeInt8(1);
         const auto index_1 = index.value1;
         argsSerializer.writeInt32(index_1.length);
-        for (int i = 0; i < index_1.length; i++) {
-            const Ark_Number index_1_element = index_1.array[i];
+        for (int index_1_counter_i = 0; index_1_counter_i < index_1.length; index_1_counter_i++) {
+            const Ark_Number index_1_element = index_1.array[index_1_counter_i];
             argsSerializer.writeNumber(index_1_element);
         }
     }
@@ -6652,7 +6652,7 @@ void callManagedPageMapBuilder(Ark_Int32 resourceId, Ark_String name, Opt_Object
     Ark_Int32 param_type = INTEROP_RUNTIME_UNDEFINED;
     param_type = runtimeType(param);
     argsSerializer.writeInt8(param_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (param_type)) {
+    if ((param_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto param_value = param.value;
         argsSerializer.writeObject(param_value);
     }
@@ -6668,7 +6668,7 @@ void callManagedPageMapBuilderSync(Ark_VMContext vmContext, Ark_Int32 resourceId
     Ark_Int32 param_type = INTEROP_RUNTIME_UNDEFINED;
     param_type = runtimeType(param);
     argsSerializer.writeInt8(param_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (param_type)) {
+    if ((param_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto param_value = param.value;
         argsSerializer.writeObject(param_value);
     }
@@ -6709,7 +6709,7 @@ void callManagedPasteButtonCallback(Ark_Int32 resourceId, Ark_ClickEvent event, 
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         BusinessError_serializer::write(argsSerializer, error_value);
     }
@@ -6726,7 +6726,7 @@ void callManagedPasteButtonCallbackSync(Ark_VMContext vmContext, Ark_Int32 resou
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         BusinessError_serializer::write(argsSerializer, error_value);
     }
@@ -6743,7 +6743,7 @@ void callManagedPasteEventCallback(Ark_Int32 resourceId, Opt_PasteEvent event)
     Ark_Int32 event_type = INTEROP_RUNTIME_UNDEFINED;
     event_type = runtimeType(event);
     argsSerializer.writeInt8(event_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_type)) {
+    if ((event_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto event_value = event.value;
         PasteEvent_serializer::write(argsSerializer, event_value);
     }
@@ -6758,7 +6758,7 @@ void callManagedPasteEventCallbackSync(Ark_VMContext vmContext, Ark_Int32 resour
     Ark_Int32 event_type = INTEROP_RUNTIME_UNDEFINED;
     event_type = runtimeType(event);
     argsSerializer.writeInt8(event_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_type)) {
+    if ((event_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto event_value = event.value;
         PasteEvent_serializer::write(argsSerializer, event_value);
     }
@@ -6985,7 +6985,7 @@ void callManagedSaveButtonCallback(Ark_Int32 resourceId, Ark_ClickEvent event, A
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         BusinessError_serializer::write(argsSerializer, error_value);
     }
@@ -7002,7 +7002,7 @@ void callManagedSaveButtonCallbackSync(Ark_VMContext vmContext, Ark_Int32 resour
     Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
     error_type = runtimeType(error);
     argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
+    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto error_value = error.value;
         BusinessError_serializer::write(argsSerializer, error_value);
     }
@@ -7076,7 +7076,7 @@ void callManagedSearchSubmitCallback(Ark_Int32 resourceId, Ark_String searchCont
     Ark_Int32 event_type = INTEROP_RUNTIME_UNDEFINED;
     event_type = runtimeType(event);
     argsSerializer.writeInt8(event_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_type)) {
+    if ((event_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto event_value = event.value;
         SubmitEvent_serializer::write(argsSerializer, event_value);
     }
@@ -7092,7 +7092,7 @@ void callManagedSearchSubmitCallbackSync(Ark_VMContext vmContext, Ark_Int32 reso
     Ark_Int32 event_type = INTEROP_RUNTIME_UNDEFINED;
     event_type = runtimeType(event);
     argsSerializer.writeInt8(event_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_type)) {
+    if ((event_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto event_value = event.value;
         SubmitEvent_serializer::write(argsSerializer, event_value);
     }
@@ -7128,8 +7128,8 @@ void callManagedShouldBuiltInRecognizerParallelWithCallback(Ark_Int32 resourceId
     argsSerializer.writeInt32(resourceId);
     GestureRecognizer_serializer::write(argsSerializer, current);
     argsSerializer.writeInt32(others.length);
-    for (int i = 0; i < others.length; i++) {
-        const Ark_GestureRecognizer others_element = others.array[i];
+    for (int others_counter_i = 0; others_counter_i < others.length; others_counter_i++) {
+        const Ark_GestureRecognizer others_element = others.array[others_counter_i];
         GestureRecognizer_serializer::write(argsSerializer, others_element);
     }
     argsSerializer.writeCallbackResource(continuation.resource);
@@ -7145,8 +7145,8 @@ void callManagedShouldBuiltInRecognizerParallelWithCallbackSync(Ark_VMContext vm
     argsSerializer.writeInt32(resourceId);
     GestureRecognizer_serializer::write(argsSerializer, current);
     argsSerializer.writeInt32(others.length);
-    for (int i = 0; i < others.length; i++) {
-        const Ark_GestureRecognizer others_element = others.array[i];
+    for (int others_counter_i = 0; others_counter_i < others.length; others_counter_i++) {
+        const Ark_GestureRecognizer others_element = others.array[others_counter_i];
         GestureRecognizer_serializer::write(argsSerializer, others_element);
     }
     argsSerializer.writeCallbackResource(continuation.resource);
@@ -7340,7 +7340,7 @@ void callManagedTextAreaSubmitCallback(Ark_Int32 resourceId, Ark_EnterKeyType en
     Ark_Int32 event_type = INTEROP_RUNTIME_UNDEFINED;
     event_type = runtimeType(event);
     argsSerializer.writeInt8(event_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_type)) {
+    if ((event_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto event_value = event.value;
         SubmitEvent_serializer::write(argsSerializer, event_value);
     }
@@ -7356,7 +7356,7 @@ void callManagedTextAreaSubmitCallbackSync(Ark_VMContext vmContext, Ark_Int32 re
     Ark_Int32 event_type = INTEROP_RUNTIME_UNDEFINED;
     event_type = runtimeType(event);
     argsSerializer.writeInt8(event_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_type)) {
+    if ((event_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto event_value = event.value;
         SubmitEvent_serializer::write(argsSerializer, event_value);
     }
@@ -7451,8 +7451,8 @@ void callManagedTextPickerEnterSelectedAreaCallback(Ark_Int32 resourceId, Ark_Un
         argsSerializer.writeInt8(1);
         const auto value_1 = value.value1;
         argsSerializer.writeInt32(value_1.length);
-        for (int i = 0; i < value_1.length; i++) {
-            const Ark_String value_1_element = value_1.array[i];
+        for (int value_1_counter_i = 0; value_1_counter_i < value_1.length; value_1_counter_i++) {
+            const Ark_String value_1_element = value_1.array[value_1_counter_i];
             argsSerializer.writeString(value_1_element);
         }
     }
@@ -7467,8 +7467,8 @@ void callManagedTextPickerEnterSelectedAreaCallback(Ark_Int32 resourceId, Ark_Un
         argsSerializer.writeInt8(1);
         const auto index_1 = index.value1;
         argsSerializer.writeInt32(index_1.length);
-        for (int i = 0; i < index_1.length; i++) {
-            const Ark_Number index_1_element = index_1.array[i];
+        for (int index_1_counter_i = 0; index_1_counter_i < index_1.length; index_1_counter_i++) {
+            const Ark_Number index_1_element = index_1.array[index_1_counter_i];
             argsSerializer.writeNumber(index_1_element);
         }
     }
@@ -7491,8 +7491,8 @@ void callManagedTextPickerEnterSelectedAreaCallbackSync(Ark_VMContext vmContext,
         argsSerializer.writeInt8(1);
         const auto value_1 = value.value1;
         argsSerializer.writeInt32(value_1.length);
-        for (int i = 0; i < value_1.length; i++) {
-            const Ark_String value_1_element = value_1.array[i];
+        for (int value_1_counter_i = 0; value_1_counter_i < value_1.length; value_1_counter_i++) {
+            const Ark_String value_1_element = value_1.array[value_1_counter_i];
             argsSerializer.writeString(value_1_element);
         }
     }
@@ -7507,8 +7507,8 @@ void callManagedTextPickerEnterSelectedAreaCallbackSync(Ark_VMContext vmContext,
         argsSerializer.writeInt8(1);
         const auto index_1 = index.value1;
         argsSerializer.writeInt32(index_1.length);
-        for (int i = 0; i < index_1.length; i++) {
-            const Ark_Number index_1_element = index_1.array[i];
+        for (int index_1_counter_i = 0; index_1_counter_i < index_1.length; index_1_counter_i++) {
+            const Ark_Number index_1_element = index_1.array[index_1_counter_i];
             argsSerializer.writeNumber(index_1_element);
         }
     }
@@ -7533,8 +7533,8 @@ void callManagedTextPickerScrollStopCallback(Ark_Int32 resourceId, Ark_Union_Str
         argsSerializer.writeInt8(1);
         const auto value_1 = value.value1;
         argsSerializer.writeInt32(value_1.length);
-        for (int i = 0; i < value_1.length; i++) {
-            const Ark_String value_1_element = value_1.array[i];
+        for (int value_1_counter_i = 0; value_1_counter_i < value_1.length; value_1_counter_i++) {
+            const Ark_String value_1_element = value_1.array[value_1_counter_i];
             argsSerializer.writeString(value_1_element);
         }
     }
@@ -7549,8 +7549,8 @@ void callManagedTextPickerScrollStopCallback(Ark_Int32 resourceId, Ark_Union_Str
         argsSerializer.writeInt8(1);
         const auto index_1 = index.value1;
         argsSerializer.writeInt32(index_1.length);
-        for (int i = 0; i < index_1.length; i++) {
-            const Ark_Number index_1_element = index_1.array[i];
+        for (int index_1_counter_i = 0; index_1_counter_i < index_1.length; index_1_counter_i++) {
+            const Ark_Number index_1_element = index_1.array[index_1_counter_i];
             argsSerializer.writeNumber(index_1_element);
         }
     }
@@ -7573,8 +7573,8 @@ void callManagedTextPickerScrollStopCallbackSync(Ark_VMContext vmContext, Ark_In
         argsSerializer.writeInt8(1);
         const auto value_1 = value.value1;
         argsSerializer.writeInt32(value_1.length);
-        for (int i = 0; i < value_1.length; i++) {
-            const Ark_String value_1_element = value_1.array[i];
+        for (int value_1_counter_i = 0; value_1_counter_i < value_1.length; value_1_counter_i++) {
+            const Ark_String value_1_element = value_1.array[value_1_counter_i];
             argsSerializer.writeString(value_1_element);
         }
     }
@@ -7589,8 +7589,8 @@ void callManagedTextPickerScrollStopCallbackSync(Ark_VMContext vmContext, Ark_In
         argsSerializer.writeInt8(1);
         const auto index_1 = index.value1;
         argsSerializer.writeInt32(index_1.length);
-        for (int i = 0; i < index_1.length; i++) {
-            const Ark_Number index_1_element = index_1.array[i];
+        for (int index_1_counter_i = 0; index_1_counter_i < index_1.length; index_1_counter_i++) {
+            const Ark_Number index_1_element = index_1.array[index_1_counter_i];
             argsSerializer.writeNumber(index_1_element);
         }
     }
@@ -7684,7 +7684,7 @@ void callManagedType_CommonMethod_onDragStart(Ark_Int32 resourceId, Ark_DragEven
     Ark_Int32 extraParams_type = INTEROP_RUNTIME_UNDEFINED;
     extraParams_type = runtimeType(extraParams);
     argsSerializer.writeInt8(extraParams_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (extraParams_type)) {
+    if ((extraParams_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto extraParams_value = extraParams.value;
         argsSerializer.writeString(extraParams_value);
     }
@@ -7703,7 +7703,7 @@ void callManagedType_CommonMethod_onDragStartSync(Ark_VMContext vmContext, Ark_I
     Ark_Int32 extraParams_type = INTEROP_RUNTIME_UNDEFINED;
     extraParams_type = runtimeType(extraParams);
     argsSerializer.writeInt8(extraParams_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (extraParams_type)) {
+    if ((extraParams_type) != (INTEROP_RUNTIME_UNDEFINED)) {
         const auto extraParams_value = extraParams.value;
         argsSerializer.writeString(extraParams_value);
     }

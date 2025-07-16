@@ -79,7 +79,7 @@ export function runtimeType<T>(value: T): int32 {
 }
 
 export function registerCallback(value: object): int32 {
-    // TODO: fix me!
+    // Improve: fix me!
     return 42
 }
 
@@ -411,7 +411,7 @@ export class SerializerBase implements Disposable {
         unsafeMemory.writeInt32(pos, encodedLength + 1)
         this.position = pos + encodedLength + 4 + 1
     }
-    //TODO: Needs to be implemented
+    // Improve: Needs to be implemented
     final writeBuffer(value: NativeBuffer) {
         this.holdAndWriteObject(value)
         this.writePointer(value.data)

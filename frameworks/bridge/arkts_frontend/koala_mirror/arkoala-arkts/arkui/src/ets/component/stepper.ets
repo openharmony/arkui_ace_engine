@@ -44,7 +44,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             StepperOptions_serializer.write(thisSerializer, value_value)
         }
@@ -56,7 +56,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -68,7 +68,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -80,7 +80,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -92,7 +92,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -104,7 +104,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -350,7 +350,7 @@ export class StepperOptions_serializer {
         let value_index_type : int32 = RuntimeType.UNDEFINED
         value_index_type = runtimeType(value_index)
         valueSerializer.writeInt8((value_index_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_index_type)) {
+        if ((value_index_type) != (RuntimeType.UNDEFINED)) {
             const value_index_value  = value_index!
             valueSerializer.writeNumber(value_index_value)
         }
@@ -359,7 +359,7 @@ export class StepperOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const index_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let index_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (index_buf_runtimeType))
+        if ((index_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             index_buf = (valueDeserializer.readNumber() as number)
         }

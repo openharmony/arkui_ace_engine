@@ -73,7 +73,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             DatePickerOptions_serializer.write(thisSerializer, options_value)
         }
@@ -85,7 +85,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -97,7 +97,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PickerTextStyle_serializer.write(thisSerializer, value_value)
         }
@@ -109,7 +109,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PickerTextStyle_serializer.write(thisSerializer, value_value)
         }
@@ -121,7 +121,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PickerTextStyle_serializer.write(thisSerializer, value_value)
         }
@@ -133,7 +133,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -145,7 +145,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as CrownSensitivity)
             thisSerializer.writeInt32(TypeChecker.CrownSensitivity_ToNumeric(value_value))
         }
@@ -157,7 +157,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -511,7 +511,7 @@ export class DatePickerOptions_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             valueSerializer.writeInt64(value_start_value.getTime().toLong())
         }
@@ -519,7 +519,7 @@ export class DatePickerOptions_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             valueSerializer.writeInt64(value_end_value.getTime().toLong())
         }
@@ -527,7 +527,7 @@ export class DatePickerOptions_serializer {
         let value_selected_type : int32 = RuntimeType.UNDEFINED
         value_selected_type = runtimeType(value_selected)
         valueSerializer.writeInt8((value_selected_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_selected_type)) {
+        if ((value_selected_type) != (RuntimeType.UNDEFINED)) {
             const value_selected_value  = value_selected!
             valueSerializer.writeInt64(value_selected_value.getTime().toLong())
         }
@@ -535,7 +535,7 @@ export class DatePickerOptions_serializer {
         let value_mode_type : int32 = RuntimeType.UNDEFINED
         value_mode_type = runtimeType(value_mode)
         valueSerializer.writeInt8((value_mode_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_mode_type)) {
+        if ((value_mode_type) != (RuntimeType.UNDEFINED)) {
             const value_mode_value  = (value_mode as DatePickerMode)
             valueSerializer.writeInt32(TypeChecker.DatePickerMode_ToNumeric(value_mode_value))
         }
@@ -544,28 +544,28 @@ export class DatePickerOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             start_buf = new Date(valueDeserializer.readInt64())
         }
         const start_result : Date | undefined = start_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             end_buf = new Date(valueDeserializer.readInt64())
         }
         const end_result : Date | undefined = end_buf
         const selected_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let selected_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
+        if ((selected_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             selected_buf = new Date(valueDeserializer.readInt64())
         }
         const selected_result : Date | undefined = selected_buf
         const mode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let mode_buf : DatePickerMode | undefined
-        if ((RuntimeType.UNDEFINED) != (mode_buf_runtimeType))
+        if ((mode_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             mode_buf = TypeChecker.DatePickerMode_FromNumeric(valueDeserializer.readInt32())
         }

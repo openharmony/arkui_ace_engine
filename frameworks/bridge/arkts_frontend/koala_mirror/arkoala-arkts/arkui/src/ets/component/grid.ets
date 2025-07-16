@@ -49,14 +49,14 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let scroller_type : int32 = RuntimeType.UNDEFINED
         scroller_type = runtimeType(scroller)
         thisSerializer.writeInt8((scroller_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scroller_type)) {
+        if ((scroller_type) != (RuntimeType.UNDEFINED)) {
             const scroller_value  = scroller!
             Scroller_serializer.write(thisSerializer, scroller_value)
         }
         let layoutOptions_type : int32 = RuntimeType.UNDEFINED
         layoutOptions_type = runtimeType(layoutOptions)
         thisSerializer.writeInt8((layoutOptions_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (layoutOptions_type)) {
+        if ((layoutOptions_type) != (RuntimeType.UNDEFINED)) {
             const layoutOptions_value  = layoutOptions!
             GridLayoutOptions_serializer.write(thisSerializer, layoutOptions_value)
         }
@@ -68,7 +68,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeString(value_value)
         }
@@ -80,7 +80,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeString(value_value)
         }
@@ -92,7 +92,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -120,7 +120,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -148,7 +148,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -160,7 +160,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -172,7 +172,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -184,7 +184,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -196,7 +196,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -208,7 +208,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -220,7 +220,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -232,7 +232,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -244,7 +244,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as GridDirection)
             thisSerializer.writeInt32(TypeChecker.GridDirection_ToNumeric(value_value))
         }
@@ -256,7 +256,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -268,7 +268,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -280,7 +280,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -292,7 +292,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -304,7 +304,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -316,7 +316,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -328,7 +328,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as GridItemAlignment)
             thisSerializer.writeInt32(TypeChecker.GridItemAlignment_ToNumeric(value_value))
         }
@@ -340,7 +340,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -352,7 +352,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -364,7 +364,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -376,14 +376,14 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         let count_type : int32 = RuntimeType.UNDEFINED
         count_type = runtimeType(count)
         thisSerializer.writeInt8((count_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (count_type)) {
+        if ((count_type) != (RuntimeType.UNDEFINED)) {
             const count_value  = count!
             thisSerializer.writeNumber(count_value)
         }
         let show_type : int32 = RuntimeType.UNDEFINED
         show_type = runtimeType(show)
         thisSerializer.writeInt8((show_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (show_type)) {
+        if ((show_type) != (RuntimeType.UNDEFINED)) {
             const show_value  = show!
             thisSerializer.writeBoolean(show_value)
         }
@@ -1097,11 +1097,11 @@ export class GridLayoutOptions_serializer {
         let value_irregularIndexes_type : int32 = RuntimeType.UNDEFINED
         value_irregularIndexes_type = runtimeType(value_irregularIndexes)
         valueSerializer.writeInt8((value_irregularIndexes_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_irregularIndexes_type)) {
+        if ((value_irregularIndexes_type) != (RuntimeType.UNDEFINED)) {
             const value_irregularIndexes_value  = value_irregularIndexes!
             valueSerializer.writeInt32((value_irregularIndexes_value.length).toInt())
-            for (let i = 0; i < value_irregularIndexes_value.length; i++) {
-                const value_irregularIndexes_value_element : number = value_irregularIndexes_value[i]
+            for (let value_irregularIndexes_value_counter_i = 0; value_irregularIndexes_value_counter_i < value_irregularIndexes_value.length; value_irregularIndexes_value_counter_i++) {
+                const value_irregularIndexes_value_element : number = value_irregularIndexes_value[value_irregularIndexes_value_counter_i]
                 valueSerializer.writeNumber(value_irregularIndexes_value_element)
             }
         }
@@ -1109,7 +1109,7 @@ export class GridLayoutOptions_serializer {
         let value_onGetIrregularSizeByIndex_type : int32 = RuntimeType.UNDEFINED
         value_onGetIrregularSizeByIndex_type = runtimeType(value_onGetIrregularSizeByIndex)
         valueSerializer.writeInt8((value_onGetIrregularSizeByIndex_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onGetIrregularSizeByIndex_type)) {
+        if ((value_onGetIrregularSizeByIndex_type) != (RuntimeType.UNDEFINED)) {
             const value_onGetIrregularSizeByIndex_value  = value_onGetIrregularSizeByIndex!
             valueSerializer.holdAndWriteCallback(value_onGetIrregularSizeByIndex_value)
         }
@@ -1117,7 +1117,7 @@ export class GridLayoutOptions_serializer {
         let value_onGetRectByIndex_type : int32 = RuntimeType.UNDEFINED
         value_onGetRectByIndex_type = runtimeType(value_onGetRectByIndex)
         valueSerializer.writeInt8((value_onGetRectByIndex_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onGetRectByIndex_type)) {
+        if ((value_onGetRectByIndex_type) != (RuntimeType.UNDEFINED)) {
             const value_onGetRectByIndex_value  = value_onGetRectByIndex!
             valueSerializer.holdAndWriteCallback(value_onGetRectByIndex_value)
         }
@@ -1129,7 +1129,7 @@ export class GridLayoutOptions_serializer {
         const regularSize_result : [ number, number ] = ([regularSize_buf_value0, regularSize_buf_value1] as [ number, number ])
         const irregularIndexes_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let irregularIndexes_buf : Array<number> | undefined
-        if ((RuntimeType.UNDEFINED) != (irregularIndexes_buf_runtimeType))
+        if ((irregularIndexes_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const irregularIndexes_buf__length : int32 = valueDeserializer.readInt32()
             let irregularIndexes_buf_ : Array<number> = new Array<number>(irregularIndexes_buf__length)
@@ -1141,7 +1141,7 @@ export class GridLayoutOptions_serializer {
         const irregularIndexes_result : Array<number> | undefined = irregularIndexes_buf
         const onGetIrregularSizeByIndex_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onGetIrregularSizeByIndex_buf : ((index: number) => [ number, number ]) | undefined
-        if ((RuntimeType.UNDEFINED) != (onGetIrregularSizeByIndex_buf_runtimeType))
+        if ((onGetIrregularSizeByIndex_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onGetIrregularSizeByIndex_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onGetIrregularSizeByIndex_buf__call : KPointer = valueDeserializer.readPointer()
@@ -1162,7 +1162,7 @@ export class GridLayoutOptions_serializer {
         const onGetIrregularSizeByIndex_result : ((index: number) => [ number, number ]) | undefined = onGetIrregularSizeByIndex_buf
         const onGetRectByIndex_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onGetRectByIndex_buf : ((index: number) => [ number, number, number, number ]) | undefined
-        if ((RuntimeType.UNDEFINED) != (onGetRectByIndex_buf_runtimeType))
+        if ((onGetRectByIndex_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onGetRectByIndex_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onGetRectByIndex_buf__call : KPointer = valueDeserializer.readPointer()

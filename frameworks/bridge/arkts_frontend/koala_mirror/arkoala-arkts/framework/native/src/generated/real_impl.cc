@@ -181,7 +181,7 @@ void DumpTree(TreeNode *node, Ark_Int32 indent) {
     }
 }
 
-// TODO: remove in favour of callbackCallerInstance!
+// Improve: remove in favour of callbackCallerInstance!
 GENERATED_Ark_APICallbackMethod *callbacks = nullptr;
 
 int TreeNode::_globalId = 1;
@@ -191,7 +191,7 @@ Ark_Float32 parseLength(Ark_Float32 parentValue, Ark_Float32 value, Ark_Int32 un
     switch (unit) {
         //PX
         case 0: {
-            const Ark_Float32 scale = 1; // TODO: need getting current device scale
+            const Ark_Float32 scale = 1; // Improve: need getting current device scale
             return value * scale;
         }
         //PERCENTAGE
@@ -199,7 +199,7 @@ Ark_Float32 parseLength(Ark_Float32 parentValue, Ark_Float32 value, Ark_Int32 un
             return parentValue / 100 * value;
         }
         default:
-            // VP, FP, LPX, UndefinedDimensionUnit: TODO: parse properly this units
+            // VP, FP, LPX, UndefinedDimensionUnit: Improve: parse properly this units
             return value;
     }
 }
@@ -307,12 +307,12 @@ float TreeNode::measure(Ark_VMContext vmContext, float* data) {
 
     measureResult = &data[0];
 
-    // TODO: use return flag for dirty bits propagation.
+    // Improve: use return flag for dirty bits propagation.
     return 0;
 }
 
 Ark_CanvasHandle getCanvas(TreeNode* node) {
-    // TODO: real canvas.
+    // Improve: real canvas.
     return reinterpret_cast<Ark_CanvasHandle>(0x123456789aLL);
 }
 
@@ -336,7 +336,7 @@ float TreeNode::layout(Ark_VMContext vmContext, float* data) {
 
     layoutResult = &data[0];
 
-    // TODO: use return flag for dirty bits propagation.
+    // Improve: use return flag for dirty bits propagation.
     return 0;
 }
 
@@ -552,7 +552,7 @@ Ark_Int32 AddChild(Ark_NodeHandle parent, Ark_NodeHandle child) {
     out.append(")");
     appendGroupedLog(1, out);
 
-    // TODO: implement test
+    // Improve: implement test
     return result;
 }
 
@@ -834,8 +834,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Opt_Callback_ClickEvent_Void* event)
     {
         RegisterOnClick(node, &event->value);
-        if (!needGroupedLog(1))
+        if (!needGroupedLog(1)) {
             return;
+        }
         string out("onClick(");
         WriteToString(&out, event);
         out.append(") \n");
@@ -846,8 +847,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Opt_Number* distanceThreshold)
     {
         RegisterOnClick(node, &event->value);
-        if (!needGroupedLog(1))
+        if (!needGroupedLog(1)) {
             return;
+        }
         string out("onClick(");
         WriteToString(&out, event);
         out.append(", ");
@@ -860,8 +862,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         const Ark_Number* distanceThreshold)
     {
         RegisterOnClick(node, event);
-        if (!needGroupedLog(1))
-        return;
+        if (!needGroupedLog(1)) {
+            return;
+        }
         string out("onClick(");
         WriteToString(&out, event);
         out.append(", ");
@@ -876,8 +879,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             auto frameNode = AsNode(node);
             frameNode->setDrawModifier(value->value);
         }
-        if (!needGroupedLog(1))
+        if (!needGroupedLog(1)) {
             return;
+        }
         string out("drawModifier(");
         WriteToString(&out, value);
         out.append(") \n");
@@ -896,8 +900,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace RenderServiceNodeAccessor {
         Ark_Int32 GetNodeIdImpl(const Ark_String* nodeId)
         {
-            if (!needGroupedLog(1))
+            if (!needGroupedLog(1)) {
                 return 42;
+            }
             string out("getNodeId(");
             WriteToString(&out, nodeId);
             out.append(") \n");
@@ -910,8 +915,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void InvalidateImpl(Ark_DrawModifier peer)
         {
             CallDrawModifierCallbacks(peer);
-            if (!needGroupedLog(1))
+            if (!needGroupedLog(1)) {
                 return;
+            }
             string out("invalidate(");
             out.append(") \n");
             appendGroupedLog(1, out);
@@ -920,8 +926,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                         const Callback_DrawContext_Void* drawBehind_callback)
         {
             RegisterDrawModifierCallback(peer, drawBehind_callback, DrawBehind);
-            if (!needGroupedLog(1))
+            if (!needGroupedLog(1)) {
                 return;
+            }
             string out("setDrawBehind(");
             WriteToString(&out, drawBehind_callback);
             out.append(") \n");
@@ -931,8 +938,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                         const Callback_DrawContext_Void* drawContent_callback)
         {
             RegisterDrawModifierCallback(peer, drawContent_callback, DrawContent);
-            if (!needGroupedLog(1))
+            if (!needGroupedLog(1)) {
                 return;
+            }
             string out("setDrawContent(");
             WriteToString(&out, drawContent_callback);
             out.append(") \n");
@@ -942,8 +950,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                     const Callback_DrawContext_Void* drawFront_callback)
         {
             RegisterDrawModifierCallback(peer, drawFront_callback, DrawFront);
-            if (!needGroupedLog(1))
+            if (!needGroupedLog(1)) {
                 return;
+            }
             string out("setDrawFront(");
             WriteToString(&out, drawFront_callback);
             out.append(") \n");
@@ -26037,7 +26046,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &extendedNodeAPIImpl;
     }
 
-    // TODO: remove me!
+    // Improve: remove me!
     const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI()
     {
         static const GENERATED_ArkUIFullNodeAPI fullAPIImpl = {

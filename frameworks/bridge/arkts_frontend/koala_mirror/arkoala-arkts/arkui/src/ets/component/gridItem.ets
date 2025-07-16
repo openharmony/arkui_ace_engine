@@ -44,7 +44,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             GridItemOptions_serializer.write(thisSerializer, value_value)
         }
@@ -56,7 +56,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -68,7 +68,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -80,7 +80,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -92,7 +92,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -104,7 +104,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -116,7 +116,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -128,7 +128,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -426,7 +426,7 @@ export class GridItemOptions_serializer {
         let value_style_type : int32 = RuntimeType.UNDEFINED
         value_style_type = runtimeType(value_style)
         valueSerializer.writeInt8((value_style_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_style_type)) {
+        if ((value_style_type) != (RuntimeType.UNDEFINED)) {
             const value_style_value  = (value_style as GridItemStyle)
             valueSerializer.writeInt32(TypeChecker.GridItemStyle_ToNumeric(value_style_value))
         }
@@ -435,7 +435,7 @@ export class GridItemOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const style_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let style_buf : GridItemStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
+        if ((style_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             style_buf = TypeChecker.GridItemStyle_FromNumeric(valueDeserializer.readInt32())
         }

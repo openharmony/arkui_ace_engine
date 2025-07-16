@@ -50,11 +50,11 @@ export class ArkRelativeContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeInt32((value_value.length).toInt())
-            for (let i = 0; i < value_value.length; i++) {
-                const value_value_element : GuideLineStyle = value_value[i]
+            for (let value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
+                const value_value_element : GuideLineStyle = value_value[value_value_counter_i]
                 GuideLineStyle_serializer.write(thisSerializer, value_value_element)
             }
         }
@@ -66,11 +66,11 @@ export class ArkRelativeContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeInt32((value_value.length).toInt())
-            for (let i = 0; i < value_value.length; i++) {
-                const value_value_element : BarrierStyle = value_value[i]
+            for (let value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
+                const value_value_element : BarrierStyle = value_value[value_value_counter_i]
                 BarrierStyle_serializer.write(thisSerializer, value_value_element)
             }
         }
@@ -251,8 +251,8 @@ export class BarrierStyle_serializer {
         valueSerializer.writeInt32(TypeChecker.BarrierDirection_ToNumeric(value_direction))
         const value_referencedId  = value.referencedId
         valueSerializer.writeInt32((value_referencedId.length).toInt())
-        for (let i = 0; i < value_referencedId.length; i++) {
-            const value_referencedId_element : string = value_referencedId[i]
+        for (let value_referencedId_counter_i = 0; value_referencedId_counter_i < value_referencedId.length; value_referencedId_counter_i++) {
+            const value_referencedId_element : string = value_referencedId[value_referencedId_counter_i]
             valueSerializer.writeString(value_referencedId_element)
         }
     }
@@ -277,7 +277,7 @@ export class GuideLinePosition_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             let value_start_value_type : int32 = RuntimeType.UNDEFINED
             value_start_value_type = runtimeType(value_start_value)
@@ -301,7 +301,7 @@ export class GuideLinePosition_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             let value_end_value_type : int32 = RuntimeType.UNDEFINED
             value_end_value_type = runtimeType(value_end_value)
@@ -326,7 +326,7 @@ export class GuideLinePosition_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const start_buf__selector : int32 = valueDeserializer.readInt8()
             let start_buf_ : string | number | Resource | undefined
@@ -347,7 +347,7 @@ export class GuideLinePosition_serializer {
         const start_result : Dimension | undefined = start_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const end_buf__selector : int32 = valueDeserializer.readInt8()
             let end_buf_ : string | number | Resource | undefined

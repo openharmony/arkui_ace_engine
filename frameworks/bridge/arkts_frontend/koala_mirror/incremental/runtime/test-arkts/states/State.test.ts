@@ -1780,7 +1780,7 @@ suite("ArrayState", () => {
         Assert.equal(testUpdate(false, manager), 0)
         Assert.equal(result.value, "<= one three two =>")
         Assert.isEmpty(computing)
-/* TODO: [TID 00edbb] F/ets: Failed to create the collator for en (US)
+/* Improve: [TID 00edbb] F/ets: Failed to create the collator for en (US)
         // compute state only when snapshot updated
         array.sort((s1: string, s2: string) => s1.length < s2.length ? -1 : s1.length > s2.length ? 1 : s1.localeCompare(s2))
         Assert.equal(testUpdate(false, manager), 1)

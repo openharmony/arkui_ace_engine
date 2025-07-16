@@ -68,7 +68,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             ButtonOptions_serializer.write(thisSerializer, options_value)
         }
@@ -80,7 +80,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as ButtonType)
             thisSerializer.writeInt32(TypeChecker.ButtonType_ToNumeric(value_value))
         }
@@ -92,7 +92,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -104,7 +104,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as ButtonStyleMode)
             thisSerializer.writeInt32(TypeChecker.ButtonStyleMode_ToNumeric(value_value))
         }
@@ -116,7 +116,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as ControlSize)
             thisSerializer.writeInt32(TypeChecker.ControlSize_ToNumeric(value_value))
         }
@@ -128,7 +128,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as ButtonRole)
             thisSerializer.writeInt32(TypeChecker.ButtonRole_ToNumeric(value_value))
         }
@@ -140,7 +140,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -173,7 +173,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -201,7 +201,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -229,7 +229,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as FontStyle)
             thisSerializer.writeInt32(TypeChecker.FontStyle_ToNumeric(value_value))
         }
@@ -241,7 +241,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -264,7 +264,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteObject(value_value)
         }
@@ -276,7 +276,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             ButtonLabelStyle_serializer.write(thisSerializer, value_value)
         }
@@ -288,7 +288,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -311,7 +311,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -915,7 +915,7 @@ export class ButtonOptions_serializer {
         let value_type_type : int32 = RuntimeType.UNDEFINED
         value_type_type = runtimeType(value_type)
         valueSerializer.writeInt8((value_type_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type_type)) {
+        if ((value_type_type) != (RuntimeType.UNDEFINED)) {
             const value_type_value  = (value_type as ButtonType)
             valueSerializer.writeInt32(TypeChecker.ButtonType_ToNumeric(value_type_value))
         }
@@ -923,7 +923,7 @@ export class ButtonOptions_serializer {
         let value_stateEffect_type : int32 = RuntimeType.UNDEFINED
         value_stateEffect_type = runtimeType(value_stateEffect)
         valueSerializer.writeInt8((value_stateEffect_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_stateEffect_type)) {
+        if ((value_stateEffect_type) != (RuntimeType.UNDEFINED)) {
             const value_stateEffect_value  = value_stateEffect!
             valueSerializer.writeBoolean(value_stateEffect_value)
         }
@@ -931,7 +931,7 @@ export class ButtonOptions_serializer {
         let value_buttonStyle_type : int32 = RuntimeType.UNDEFINED
         value_buttonStyle_type = runtimeType(value_buttonStyle)
         valueSerializer.writeInt8((value_buttonStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_buttonStyle_type)) {
+        if ((value_buttonStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_buttonStyle_value  = (value_buttonStyle as ButtonStyleMode)
             valueSerializer.writeInt32(TypeChecker.ButtonStyleMode_ToNumeric(value_buttonStyle_value))
         }
@@ -939,7 +939,7 @@ export class ButtonOptions_serializer {
         let value_controlSize_type : int32 = RuntimeType.UNDEFINED
         value_controlSize_type = runtimeType(value_controlSize)
         valueSerializer.writeInt8((value_controlSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_controlSize_type)) {
+        if ((value_controlSize_type) != (RuntimeType.UNDEFINED)) {
             const value_controlSize_value  = (value_controlSize as ControlSize)
             valueSerializer.writeInt32(TypeChecker.ControlSize_ToNumeric(value_controlSize_value))
         }
@@ -947,7 +947,7 @@ export class ButtonOptions_serializer {
         let value_role_type : int32 = RuntimeType.UNDEFINED
         value_role_type = runtimeType(value_role)
         valueSerializer.writeInt8((value_role_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_role_type)) {
+        if ((value_role_type) != (RuntimeType.UNDEFINED)) {
             const value_role_value  = (value_role as ButtonRole)
             valueSerializer.writeInt32(TypeChecker.ButtonRole_ToNumeric(value_role_value))
         }
@@ -956,35 +956,35 @@ export class ButtonOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const type_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let type_buf : ButtonType | undefined
-        if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
+        if ((type_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             type_buf = TypeChecker.ButtonType_FromNumeric(valueDeserializer.readInt32())
         }
         const type_result : ButtonType | undefined = type_buf
         const stateEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let stateEffect_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (stateEffect_buf_runtimeType))
+        if ((stateEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             stateEffect_buf = valueDeserializer.readBoolean()
         }
         const stateEffect_result : boolean | undefined = stateEffect_buf
         const buttonStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let buttonStyle_buf : ButtonStyleMode | undefined
-        if ((RuntimeType.UNDEFINED) != (buttonStyle_buf_runtimeType))
+        if ((buttonStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buttonStyle_buf = TypeChecker.ButtonStyleMode_FromNumeric(valueDeserializer.readInt32())
         }
         const buttonStyle_result : ButtonStyleMode | undefined = buttonStyle_buf
         const controlSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let controlSize_buf : ControlSize | undefined
-        if ((RuntimeType.UNDEFINED) != (controlSize_buf_runtimeType))
+        if ((controlSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             controlSize_buf = TypeChecker.ControlSize_FromNumeric(valueDeserializer.readInt32())
         }
         const controlSize_result : ControlSize | undefined = controlSize_buf
         const role_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let role_buf : ButtonRole | undefined
-        if ((RuntimeType.UNDEFINED) != (role_buf_runtimeType))
+        if ((role_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             role_buf = TypeChecker.ButtonRole_FromNumeric(valueDeserializer.readInt32())
         }
@@ -1000,7 +1000,7 @@ export class ButtonLabelStyle_serializer {
         let value_overflow_type : int32 = RuntimeType.UNDEFINED
         value_overflow_type = runtimeType(value_overflow)
         valueSerializer.writeInt8((value_overflow_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_overflow_type)) {
+        if ((value_overflow_type) != (RuntimeType.UNDEFINED)) {
             const value_overflow_value  = (value_overflow as TextOverflow)
             valueSerializer.writeInt32(TypeChecker.TextOverflow_ToNumeric(value_overflow_value))
         }
@@ -1008,7 +1008,7 @@ export class ButtonLabelStyle_serializer {
         let value_maxLines_type : int32 = RuntimeType.UNDEFINED
         value_maxLines_type = runtimeType(value_maxLines)
         valueSerializer.writeInt8((value_maxLines_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_maxLines_type)) {
+        if ((value_maxLines_type) != (RuntimeType.UNDEFINED)) {
             const value_maxLines_value  = value_maxLines!
             valueSerializer.writeNumber(value_maxLines_value)
         }
@@ -1016,7 +1016,7 @@ export class ButtonLabelStyle_serializer {
         let value_minFontSize_type : int32 = RuntimeType.UNDEFINED
         value_minFontSize_type = runtimeType(value_minFontSize)
         valueSerializer.writeInt8((value_minFontSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_minFontSize_type)) {
+        if ((value_minFontSize_type) != (RuntimeType.UNDEFINED)) {
             const value_minFontSize_value  = value_minFontSize!
             let value_minFontSize_value_type : int32 = RuntimeType.UNDEFINED
             value_minFontSize_value_type = runtimeType(value_minFontSize_value)
@@ -1046,7 +1046,7 @@ export class ButtonLabelStyle_serializer {
         let value_maxFontSize_type : int32 = RuntimeType.UNDEFINED
         value_maxFontSize_type = runtimeType(value_maxFontSize)
         valueSerializer.writeInt8((value_maxFontSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_maxFontSize_type)) {
+        if ((value_maxFontSize_type) != (RuntimeType.UNDEFINED)) {
             const value_maxFontSize_value  = value_maxFontSize!
             let value_maxFontSize_value_type : int32 = RuntimeType.UNDEFINED
             value_maxFontSize_value_type = runtimeType(value_maxFontSize_value)
@@ -1076,7 +1076,7 @@ export class ButtonLabelStyle_serializer {
         let value_heightAdaptivePolicy_type : int32 = RuntimeType.UNDEFINED
         value_heightAdaptivePolicy_type = runtimeType(value_heightAdaptivePolicy)
         valueSerializer.writeInt8((value_heightAdaptivePolicy_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_heightAdaptivePolicy_type)) {
+        if ((value_heightAdaptivePolicy_type) != (RuntimeType.UNDEFINED)) {
             const value_heightAdaptivePolicy_value  = (value_heightAdaptivePolicy as TextHeightAdaptivePolicy)
             valueSerializer.writeInt32(TypeChecker.TextHeightAdaptivePolicy_ToNumeric(value_heightAdaptivePolicy_value))
         }
@@ -1084,7 +1084,7 @@ export class ButtonLabelStyle_serializer {
         let value_font_type : int32 = RuntimeType.UNDEFINED
         value_font_type = runtimeType(value_font)
         valueSerializer.writeInt8((value_font_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_font_type)) {
+        if ((value_font_type) != (RuntimeType.UNDEFINED)) {
             const value_font_value  = value_font!
             Font_serializer.write(valueSerializer, value_font_value)
         }
@@ -1093,21 +1093,21 @@ export class ButtonLabelStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const overflow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let overflow_buf : TextOverflow | undefined
-        if ((RuntimeType.UNDEFINED) != (overflow_buf_runtimeType))
+        if ((overflow_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             overflow_buf = TypeChecker.TextOverflow_FromNumeric(valueDeserializer.readInt32())
         }
         const overflow_result : TextOverflow | undefined = overflow_buf
         const maxLines_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maxLines_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (maxLines_buf_runtimeType))
+        if ((maxLines_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             maxLines_buf = (valueDeserializer.readNumber() as number)
         }
         const maxLines_result : number | undefined = maxLines_buf
         const minFontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let minFontSize_buf : number | ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (minFontSize_buf_runtimeType))
+        if ((minFontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const minFontSize_buf__selector : int32 = valueDeserializer.readInt8()
             let minFontSize_buf_ : number | ResourceStr | undefined
@@ -1136,7 +1136,7 @@ export class ButtonLabelStyle_serializer {
         const minFontSize_result : number | ResourceStr | undefined = minFontSize_buf
         const maxFontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maxFontSize_buf : number | ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (maxFontSize_buf_runtimeType))
+        if ((maxFontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const maxFontSize_buf__selector : int32 = valueDeserializer.readInt8()
             let maxFontSize_buf_ : number | ResourceStr | undefined
@@ -1165,14 +1165,14 @@ export class ButtonLabelStyle_serializer {
         const maxFontSize_result : number | ResourceStr | undefined = maxFontSize_buf
         const heightAdaptivePolicy_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let heightAdaptivePolicy_buf : TextHeightAdaptivePolicy | undefined
-        if ((RuntimeType.UNDEFINED) != (heightAdaptivePolicy_buf_runtimeType))
+        if ((heightAdaptivePolicy_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             heightAdaptivePolicy_buf = TypeChecker.TextHeightAdaptivePolicy_FromNumeric(valueDeserializer.readInt32())
         }
         const heightAdaptivePolicy_result : TextHeightAdaptivePolicy | undefined = heightAdaptivePolicy_buf
         const font_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let font_buf : Font | undefined
-        if ((RuntimeType.UNDEFINED) != (font_buf_runtimeType))
+        if ((font_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             font_buf = Font_serializer.read(valueDeserializer)
         }

@@ -48,7 +48,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -76,7 +76,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as SecurityComponentLayoutDirection)
             thisSerializer.writeInt32(TypeChecker.SecurityComponentLayoutDirection_ToNumeric(value_value))
         }
@@ -88,7 +88,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             Position_serializer.write(thisSerializer, value_value)
         }
@@ -100,7 +100,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             Position_serializer.write(thisSerializer, value_value)
         }
@@ -112,7 +112,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -140,7 +140,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -168,7 +168,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as FontStyle)
             thisSerializer.writeInt32(TypeChecker.FontStyle_ToNumeric(value_value))
         }
@@ -180,7 +180,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -208,7 +208,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -231,7 +231,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -264,7 +264,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -297,7 +297,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -330,7 +330,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as BorderStyle)
             thisSerializer.writeInt32(TypeChecker.BorderStyle_ToNumeric(value_value))
         }
@@ -342,7 +342,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -370,7 +370,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -403,7 +403,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let radius_type : int32 = RuntimeType.UNDEFINED
         radius_type = runtimeType(radius)
         thisSerializer.writeInt8((radius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (radius_type)) {
+        if ((radius_type) != (RuntimeType.UNDEFINED)) {
             const radius_value  = radius!
             let radius_value_type : int32 = RuntimeType.UNDEFINED
             radius_value_type = runtimeType(radius_value)
@@ -442,7 +442,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -481,7 +481,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -509,7 +509,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeString(value_value)
         }
@@ -521,7 +521,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -549,7 +549,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -577,7 +577,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             SizeOptions_serializer.write(thisSerializer, value_value)
         }
@@ -589,7 +589,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             ConstraintSizeOptions_serializer.write(thisSerializer, value_value)
         }
@@ -601,7 +601,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let alignType_type : int32 = RuntimeType.UNDEFINED
         alignType_type = runtimeType(alignType)
         thisSerializer.writeInt8((alignType_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (alignType_type)) {
+        if ((alignType_type) != (RuntimeType.UNDEFINED)) {
             const alignType_value  = (alignType as Alignment)
             thisSerializer.writeInt32(TypeChecker.Alignment_ToNumeric(alignType_value))
         }
@@ -613,7 +613,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let alignRule_type : int32 = RuntimeType.UNDEFINED
         alignRule_type = runtimeType(alignRule)
         thisSerializer.writeInt8((alignRule_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (alignRule_type)) {
+        if ((alignRule_type) != (RuntimeType.UNDEFINED)) {
             const alignRule_value  = alignRule!
             AlignRuleOption_serializer.write(thisSerializer, alignRule_value)
         }
@@ -625,7 +625,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let alignRule_type : int32 = RuntimeType.UNDEFINED
         alignRule_type = runtimeType(alignRule)
         thisSerializer.writeInt8((alignRule_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (alignRule_type)) {
+        if ((alignRule_type) != (RuntimeType.UNDEFINED)) {
             const alignRule_value  = alignRule!
             LocalizedAlignRuleOptions_serializer.write(thisSerializer, alignRule_value)
         }
@@ -637,7 +637,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let description_type : int32 = RuntimeType.UNDEFINED
         description_type = runtimeType(description)
         thisSerializer.writeInt8((description_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (description_type)) {
+        if ((description_type) != (RuntimeType.UNDEFINED)) {
             const description_value  = description!
             thisSerializer.writeString(description_value)
         }
@@ -649,14 +649,14 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let direction_type : int32 = RuntimeType.UNDEFINED
         direction_type = runtimeType(direction)
         thisSerializer.writeInt8((direction_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (direction_type)) {
+        if ((direction_type) != (RuntimeType.UNDEFINED)) {
             const direction_value  = (direction as Axis)
             thisSerializer.writeInt32(TypeChecker.Axis_ToNumeric(direction_value))
         }
         let style_type : int32 = RuntimeType.UNDEFINED
         style_type = runtimeType(style)
         thisSerializer.writeInt8((style_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (style_type)) {
+        if ((style_type) != (RuntimeType.UNDEFINED)) {
             const style_value  = (style as ChainStyle)
             thisSerializer.writeInt32(TypeChecker.ChainStyle_ToNumeric(style_value))
         }
@@ -668,7 +668,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let scale_type : int32 = RuntimeType.UNDEFINED
         scale_type = runtimeType(scale)
         thisSerializer.writeInt8((scale_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scale_type)) {
+        if ((scale_type) != (RuntimeType.UNDEFINED)) {
             const scale_value  = scale!
             let scale_value_type : int32 = RuntimeType.UNDEFINED
             scale_value_type = runtimeType(scale_value)
@@ -691,7 +691,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let scale_type : int32 = RuntimeType.UNDEFINED
         scale_type = runtimeType(scale)
         thisSerializer.writeInt8((scale_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scale_type)) {
+        if ((scale_type) != (RuntimeType.UNDEFINED)) {
             const scale_value  = scale!
             let scale_value_type : int32 = RuntimeType.UNDEFINED
             scale_value_type = runtimeType(scale_value)
@@ -714,7 +714,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let line_type : int32 = RuntimeType.UNDEFINED
         line_type = runtimeType(line)
         thisSerializer.writeInt8((line_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (line_type)) {
+        if ((line_type) != (RuntimeType.UNDEFINED)) {
             const line_value  = line!
             thisSerializer.writeInt32(line_value)
         }
@@ -726,7 +726,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let minSize_type : int32 = RuntimeType.UNDEFINED
         minSize_type = runtimeType(minSize)
         thisSerializer.writeInt8((minSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (minSize_type)) {
+        if ((minSize_type) != (RuntimeType.UNDEFINED)) {
             const minSize_value  = minSize!
             let minSize_value_type : int32 = RuntimeType.UNDEFINED
             minSize_value_type = runtimeType(minSize_value)
@@ -754,7 +754,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let maxSize_type : int32 = RuntimeType.UNDEFINED
         maxSize_type = runtimeType(maxSize)
         thisSerializer.writeInt8((maxSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (maxSize_type)) {
+        if ((maxSize_type) != (RuntimeType.UNDEFINED)) {
             const maxSize_value  = maxSize!
             let maxSize_value_type : int32 = RuntimeType.UNDEFINED
             maxSize_value_type = runtimeType(maxSize_value)
@@ -782,7 +782,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let policy_type : int32 = RuntimeType.UNDEFINED
         policy_type = runtimeType(policy)
         thisSerializer.writeInt8((policy_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (policy_type)) {
+        if ((policy_type) != (RuntimeType.UNDEFINED)) {
             const policy_value  = (policy as TextHeightAdaptivePolicy)
             thisSerializer.writeInt32(TypeChecker.TextHeightAdaptivePolicy_ToNumeric(policy_value))
         }
@@ -794,7 +794,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         let respond_type : int32 = RuntimeType.UNDEFINED
         respond_type = runtimeType(respond)
         thisSerializer.writeInt8((respond_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (respond_type)) {
+        if ((respond_type) != (RuntimeType.UNDEFINED)) {
             const respond_value  = respond!
             thisSerializer.writeBoolean(respond_value)
         }

@@ -105,7 +105,7 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
         return 0;
     }
     const CallbackEventKind frontEventKind = callbackEventsQueue.front();
-    interop_memcpy(result, size, &frontEventKind, 4);
+    interop_memcpy(result, size, &frontEventKind, sizeof(int32_t));
 
     switch (frontEventKind)
     {
@@ -116,7 +116,7 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
         case Event_HoldManagedResource:
         case Event_ReleaseManagedResource: {
             const InteropInt32 resourceId = callbackResourceSubqueue.front();
-            interop_memcpy(result + 4, size, &resourceId, 4);
+            interop_memcpy(result + 4, size, &resourceId, sizeof(InteropInt32));
             break;
         }
         default:

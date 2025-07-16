@@ -23,7 +23,7 @@ interface IsScriptFunctionRoot {
     isScriptFunctionRoot: boolean
 }
 
-// TODO: this is to workaround compiler not beeing able to infer return type on recheck
+// Improve: this is to workaround compiler not beeing able to infer return type on recheck
 class CheckReturns extends AbstractVisitor {
     visitor(node: AstNode, options?: IsScriptFunctionRoot): AstNode {
         if (isReturnStatement(node) && node.argument !== undefined) {

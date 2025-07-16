@@ -117,7 +117,7 @@ export class Scroller implements MaterializedBase {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             ScrollEdgeOptions_serializer.write(thisSerializer, options_value)
         }
@@ -144,21 +144,21 @@ export class Scroller implements MaterializedBase {
         let smooth_type : int32 = RuntimeType.UNDEFINED
         smooth_type = runtimeType(smooth)
         thisSerializer.writeInt8((smooth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (smooth_type)) {
+        if ((smooth_type) != (RuntimeType.UNDEFINED)) {
             const smooth_value  = smooth!
             thisSerializer.writeBoolean(smooth_value)
         }
         let align_type : int32 = RuntimeType.UNDEFINED
         align_type = runtimeType(align)
         thisSerializer.writeInt8((align_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (align_type)) {
+        if ((align_type) != (RuntimeType.UNDEFINED)) {
             const align_value  = (align as ScrollAlign)
             thisSerializer.writeInt32(TypeChecker.ScrollAlign_ToNumeric(align_value))
         }
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             ScrollToIndexOptions_serializer.write(thisSerializer, options_value)
         }
@@ -235,7 +235,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let scroller_type : int32 = RuntimeType.UNDEFINED
         scroller_type = runtimeType(scroller)
         thisSerializer.writeInt8((scroller_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scroller_type)) {
+        if ((scroller_type) != (RuntimeType.UNDEFINED)) {
             const scroller_value  = scroller!
             Scroller_serializer.write(thisSerializer, scroller_value)
         }
@@ -247,7 +247,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as ScrollDirection)
             thisSerializer.writeInt32(TypeChecker.ScrollDirection_ToNumeric(value_value))
         }
@@ -259,7 +259,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -271,7 +271,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -283,7 +283,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -295,7 +295,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -307,7 +307,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -319,7 +319,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as BarState)
             thisSerializer.writeInt32(TypeChecker.BarState_ToNumeric(value_value))
         }
@@ -331,7 +331,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -359,7 +359,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -382,7 +382,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -394,7 +394,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             NestedScrollOptions_serializer.write(thisSerializer, value_value)
         }
@@ -406,7 +406,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -418,7 +418,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -441,7 +441,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             ScrollSnapOptions_serializer.write(thisSerializer, value_value)
         }
@@ -453,7 +453,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -465,7 +465,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             OffsetOptions_serializer.write(thisSerializer, value_value)
         }
@@ -477,14 +477,14 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         let edgeEffect_type : int32 = RuntimeType.UNDEFINED
         edgeEffect_type = runtimeType(edgeEffect)
         thisSerializer.writeInt8((edgeEffect_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (edgeEffect_type)) {
+        if ((edgeEffect_type) != (RuntimeType.UNDEFINED)) {
             const edgeEffect_value  = (edgeEffect as EdgeEffect)
             thisSerializer.writeInt32(TypeChecker.EdgeEffect_ToNumeric(edgeEffect_value))
         }
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             EdgeEffectOptions_serializer.write(thisSerializer, options_value)
         }
@@ -1088,7 +1088,7 @@ export class ScrollAnimationOptions_serializer {
         let value_duration_type : int32 = RuntimeType.UNDEFINED
         value_duration_type = runtimeType(value_duration)
         valueSerializer.writeInt8((value_duration_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_duration_type)) {
+        if ((value_duration_type) != (RuntimeType.UNDEFINED)) {
             const value_duration_value  = value_duration!
             valueSerializer.writeNumber(value_duration_value)
         }
@@ -1096,7 +1096,7 @@ export class ScrollAnimationOptions_serializer {
         let value_curve_type : int32 = RuntimeType.UNDEFINED
         value_curve_type = runtimeType(value_curve)
         valueSerializer.writeInt8((value_curve_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_curve_type)) {
+        if ((value_curve_type) != (RuntimeType.UNDEFINED)) {
             const value_curve_value  = value_curve!
             let value_curve_value_type : int32 = RuntimeType.UNDEFINED
             value_curve_value_type = runtimeType(value_curve_value)
@@ -1115,7 +1115,7 @@ export class ScrollAnimationOptions_serializer {
         let value_canOverScroll_type : int32 = RuntimeType.UNDEFINED
         value_canOverScroll_type = runtimeType(value_canOverScroll)
         valueSerializer.writeInt8((value_canOverScroll_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_canOverScroll_type)) {
+        if ((value_canOverScroll_type) != (RuntimeType.UNDEFINED)) {
             const value_canOverScroll_value  = value_canOverScroll!
             valueSerializer.writeBoolean(value_canOverScroll_value)
         }
@@ -1124,14 +1124,14 @@ export class ScrollAnimationOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const duration_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let duration_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (duration_buf_runtimeType))
+        if ((duration_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             duration_buf = (valueDeserializer.readNumber() as number)
         }
         const duration_result : number | undefined = duration_buf
         const curve_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let curve_buf : Curve | ICurve | undefined
-        if ((RuntimeType.UNDEFINED) != (curve_buf_runtimeType))
+        if ((curve_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const curve_buf__selector : int32 = valueDeserializer.readInt8()
             let curve_buf_ : Curve | ICurve | undefined
@@ -1149,7 +1149,7 @@ export class ScrollAnimationOptions_serializer {
         const curve_result : Curve | ICurve | undefined = curve_buf
         const canOverScroll_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let canOverScroll_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (canOverScroll_buf_runtimeType))
+        if ((canOverScroll_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             canOverScroll_buf = valueDeserializer.readBoolean()
         }
@@ -1165,7 +1165,7 @@ export class ScrollEdgeOptions_serializer {
         let value_velocity_type : int32 = RuntimeType.UNDEFINED
         value_velocity_type = runtimeType(value_velocity)
         valueSerializer.writeInt8((value_velocity_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_velocity_type)) {
+        if ((value_velocity_type) != (RuntimeType.UNDEFINED)) {
             const value_velocity_value  = value_velocity!
             valueSerializer.writeNumber(value_velocity_value)
         }
@@ -1174,7 +1174,7 @@ export class ScrollEdgeOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const velocity_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let velocity_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (velocity_buf_runtimeType))
+        if ((velocity_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             velocity_buf = (valueDeserializer.readNumber() as number)
         }
@@ -1192,7 +1192,7 @@ export class ScrollPageOptions_serializer {
         let value_animation_type : int32 = RuntimeType.UNDEFINED
         value_animation_type = runtimeType(value_animation)
         valueSerializer.writeInt8((value_animation_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_animation_type)) {
+        if ((value_animation_type) != (RuntimeType.UNDEFINED)) {
             const value_animation_value  = value_animation!
             valueSerializer.writeBoolean(value_animation_value)
         }
@@ -1202,7 +1202,7 @@ export class ScrollPageOptions_serializer {
         const next_result : boolean = valueDeserializer.readBoolean()
         const animation_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let animation_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (animation_buf_runtimeType))
+        if ((animation_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             animation_buf = valueDeserializer.readBoolean()
         }
@@ -1244,7 +1244,7 @@ export class ScrollOptions_serializer {
         let value_animation_type : int32 = RuntimeType.UNDEFINED
         value_animation_type = runtimeType(value_animation)
         valueSerializer.writeInt8((value_animation_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_animation_type)) {
+        if ((value_animation_type) != (RuntimeType.UNDEFINED)) {
             const value_animation_value  = value_animation!
             let value_animation_value_type : int32 = RuntimeType.UNDEFINED
             value_animation_value_type = runtimeType(value_animation_value)
@@ -1288,7 +1288,7 @@ export class ScrollOptions_serializer {
         const yOffset_result : number | string = (yOffset_buf as number | string)
         const animation_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let animation_buf : ScrollAnimationOptions | boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (animation_buf_runtimeType))
+        if ((animation_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const animation_buf__selector : int32 = valueDeserializer.readInt8()
             let animation_buf_ : ScrollAnimationOptions | boolean | undefined
@@ -1315,7 +1315,7 @@ export class ScrollToIndexOptions_serializer {
         let value_extraOffset_type : int32 = RuntimeType.UNDEFINED
         value_extraOffset_type = runtimeType(value_extraOffset)
         valueSerializer.writeInt8((value_extraOffset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_extraOffset_type)) {
+        if ((value_extraOffset_type) != (RuntimeType.UNDEFINED)) {
             const value_extraOffset_value  = value_extraOffset!
             LengthMetrics_serializer.write(valueSerializer, value_extraOffset_value)
         }
@@ -1324,7 +1324,7 @@ export class ScrollToIndexOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const extraOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let extraOffset_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (extraOffset_buf_runtimeType))
+        if ((extraOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             extraOffset_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
@@ -1340,7 +1340,7 @@ export class OffsetOptions_serializer {
         let value_xOffset_type : int32 = RuntimeType.UNDEFINED
         value_xOffset_type = runtimeType(value_xOffset)
         valueSerializer.writeInt8((value_xOffset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_xOffset_type)) {
+        if ((value_xOffset_type) != (RuntimeType.UNDEFINED)) {
             const value_xOffset_value  = value_xOffset!
             let value_xOffset_value_type : int32 = RuntimeType.UNDEFINED
             value_xOffset_value_type = runtimeType(value_xOffset_value)
@@ -1364,7 +1364,7 @@ export class OffsetOptions_serializer {
         let value_yOffset_type : int32 = RuntimeType.UNDEFINED
         value_yOffset_type = runtimeType(value_yOffset)
         valueSerializer.writeInt8((value_yOffset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_yOffset_type)) {
+        if ((value_yOffset_type) != (RuntimeType.UNDEFINED)) {
             const value_yOffset_value  = value_yOffset!
             let value_yOffset_value_type : int32 = RuntimeType.UNDEFINED
             value_yOffset_value_type = runtimeType(value_yOffset_value)
@@ -1389,7 +1389,7 @@ export class OffsetOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const xOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let xOffset_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (xOffset_buf_runtimeType))
+        if ((xOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const xOffset_buf__selector : int32 = valueDeserializer.readInt8()
             let xOffset_buf_ : string | number | Resource | undefined
@@ -1410,7 +1410,7 @@ export class OffsetOptions_serializer {
         const xOffset_result : Dimension | undefined = xOffset_buf
         const yOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let yOffset_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (yOffset_buf_runtimeType))
+        if ((yOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const yOffset_buf__selector : int32 = valueDeserializer.readInt8()
             let yOffset_buf_ : string | number | Resource | undefined
@@ -1442,7 +1442,7 @@ export class ScrollSnapOptions_serializer {
         let value_snapPagination_type : int32 = RuntimeType.UNDEFINED
         value_snapPagination_type = runtimeType(value_snapPagination)
         valueSerializer.writeInt8((value_snapPagination_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_snapPagination_type)) {
+        if ((value_snapPagination_type) != (RuntimeType.UNDEFINED)) {
             const value_snapPagination_value  = value_snapPagination!
             let value_snapPagination_value_type : int32 = RuntimeType.UNDEFINED
             value_snapPagination_value_type = runtimeType(value_snapPagination_value)
@@ -1471,8 +1471,8 @@ export class ScrollSnapOptions_serializer {
                 valueSerializer.writeInt8((1).toChar())
                 const value_snapPagination_value_1  = value_snapPagination_value as Array<Dimension>
                 valueSerializer.writeInt32((value_snapPagination_value_1.length).toInt())
-                for (let i = 0; i < value_snapPagination_value_1.length; i++) {
-                    const value_snapPagination_value_1_element : Dimension = value_snapPagination_value_1[i]
+                for (let value_snapPagination_value_1_counter_i = 0; value_snapPagination_value_1_counter_i < value_snapPagination_value_1.length; value_snapPagination_value_1_counter_i++) {
+                    const value_snapPagination_value_1_element : Dimension = value_snapPagination_value_1[value_snapPagination_value_1_counter_i]
                     let value_snapPagination_value_1_element_type : int32 = RuntimeType.UNDEFINED
                     value_snapPagination_value_1_element_type = runtimeType(value_snapPagination_value_1_element)
                     if (RuntimeType.STRING == value_snapPagination_value_1_element_type) {
@@ -1497,7 +1497,7 @@ export class ScrollSnapOptions_serializer {
         let value_enableSnapToStart_type : int32 = RuntimeType.UNDEFINED
         value_enableSnapToStart_type = runtimeType(value_enableSnapToStart)
         valueSerializer.writeInt8((value_enableSnapToStart_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_enableSnapToStart_type)) {
+        if ((value_enableSnapToStart_type) != (RuntimeType.UNDEFINED)) {
             const value_enableSnapToStart_value  = value_enableSnapToStart!
             valueSerializer.writeBoolean(value_enableSnapToStart_value)
         }
@@ -1505,7 +1505,7 @@ export class ScrollSnapOptions_serializer {
         let value_enableSnapToEnd_type : int32 = RuntimeType.UNDEFINED
         value_enableSnapToEnd_type = runtimeType(value_enableSnapToEnd)
         valueSerializer.writeInt8((value_enableSnapToEnd_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_enableSnapToEnd_type)) {
+        if ((value_enableSnapToEnd_type) != (RuntimeType.UNDEFINED)) {
             const value_enableSnapToEnd_value  = value_enableSnapToEnd!
             valueSerializer.writeBoolean(value_enableSnapToEnd_value)
         }
@@ -1515,7 +1515,7 @@ export class ScrollSnapOptions_serializer {
         const snapAlign_result : ScrollSnapAlign = TypeChecker.ScrollSnapAlign_FromNumeric(valueDeserializer.readInt32())
         const snapPagination_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let snapPagination_buf : Dimension | Array<Dimension> | undefined
-        if ((RuntimeType.UNDEFINED) != (snapPagination_buf_runtimeType))
+        if ((snapPagination_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const snapPagination_buf__selector : int32 = valueDeserializer.readInt8()
             let snapPagination_buf_ : Dimension | Array<Dimension> | undefined
@@ -1566,14 +1566,14 @@ export class ScrollSnapOptions_serializer {
         const snapPagination_result : Dimension | Array<Dimension> | undefined = snapPagination_buf
         const enableSnapToStart_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableSnapToStart_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (enableSnapToStart_buf_runtimeType))
+        if ((enableSnapToStart_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             enableSnapToStart_buf = valueDeserializer.readBoolean()
         }
         const enableSnapToStart_result : boolean | undefined = enableSnapToStart_buf
         const enableSnapToEnd_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableSnapToEnd_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (enableSnapToEnd_buf_runtimeType))
+        if ((enableSnapToEnd_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             enableSnapToEnd_buf = valueDeserializer.readBoolean()
         }

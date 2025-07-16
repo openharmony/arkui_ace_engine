@@ -26,8 +26,8 @@ export function updateObjectExpression(
 ): ObjectExpression {
     if (
         isSameNativeObject(properties, original.properties)
-        /* TODO: no getter for nodeType */
-        /* TODO: no getter for trailingComma */
+        /* Improve: no getter for nodeType */
+        /* Improve: no getter for trailingComma */
     ) {
         return original;
     }

@@ -45,7 +45,7 @@ export class ArkStackPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             StackOptions_serializer.write(thisSerializer, options_value)
         }
@@ -57,7 +57,7 @@ export class ArkStackPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as Alignment)
             thisSerializer.writeInt32(TypeChecker.Alignment_ToNumeric(value_value))
         }
@@ -69,7 +69,7 @@ export class ArkStackPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PointLightStyle_serializer.write(thisSerializer, value_value)
         }
@@ -221,7 +221,7 @@ export class StackOptions_serializer {
         let value_alignContent_type : int32 = RuntimeType.UNDEFINED
         value_alignContent_type = runtimeType(value_alignContent)
         valueSerializer.writeInt8((value_alignContent_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_alignContent_type)) {
+        if ((value_alignContent_type) != (RuntimeType.UNDEFINED)) {
             const value_alignContent_value  = (value_alignContent as Alignment)
             valueSerializer.writeInt32(TypeChecker.Alignment_ToNumeric(value_alignContent_value))
         }
@@ -230,7 +230,7 @@ export class StackOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const alignContent_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let alignContent_buf : Alignment | undefined
-        if ((RuntimeType.UNDEFINED) != (alignContent_buf_runtimeType))
+        if ((alignContent_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             alignContent_buf = TypeChecker.Alignment_FromNumeric(valueDeserializer.readInt32())
         }

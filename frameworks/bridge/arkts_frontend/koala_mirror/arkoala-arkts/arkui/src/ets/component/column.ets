@@ -46,7 +46,7 @@ export class ArkColumnPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             let options_value_type : int32 = RuntimeType.UNDEFINED
             options_value_type = runtimeType(options_value)
@@ -69,7 +69,7 @@ export class ArkColumnPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as HorizontalAlign)
             thisSerializer.writeInt32(TypeChecker.HorizontalAlign_ToNumeric(value_value))
         }
@@ -81,7 +81,7 @@ export class ArkColumnPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as FlexAlign)
             thisSerializer.writeInt32(TypeChecker.FlexAlign_ToNumeric(value_value))
         }
@@ -93,7 +93,7 @@ export class ArkColumnPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PointLightStyle_serializer.write(thisSerializer, value_value)
         }
@@ -105,7 +105,7 @@ export class ArkColumnPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -309,7 +309,7 @@ export class ColumnOptions_serializer {
         let value_space_type : int32 = RuntimeType.UNDEFINED
         value_space_type = runtimeType(value_space)
         valueSerializer.writeInt8((value_space_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_space_type)) {
+        if ((value_space_type) != (RuntimeType.UNDEFINED)) {
             const value_space_value  = value_space!
             let value_space_value_type : int32 = RuntimeType.UNDEFINED
             value_space_value_type = runtimeType(value_space_value)
@@ -329,7 +329,7 @@ export class ColumnOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const space_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let space_buf : string | number | undefined
-        if ((RuntimeType.UNDEFINED) != (space_buf_runtimeType))
+        if ((space_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const space_buf__selector : int32 = valueDeserializer.readInt8()
             let space_buf_ : string | number | undefined

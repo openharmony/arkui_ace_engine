@@ -201,7 +201,7 @@ function main(configPath: string, linkName: string) {
 }
 
 
-// TODO: move all AOT stuff away from here
+// Improve: move all AOT stuff away from here
 function archDir(): string {
     const arch = process.arch
     let sdkArch = "";

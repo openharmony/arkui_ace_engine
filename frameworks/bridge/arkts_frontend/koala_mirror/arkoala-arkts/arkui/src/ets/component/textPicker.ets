@@ -73,7 +73,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             TextPickerOptions_serializer.write(thisSerializer, options_value)
         }
@@ -85,7 +85,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -108,7 +108,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -120,7 +120,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PickerTextStyle_serializer.write(thisSerializer, value_value)
         }
@@ -132,7 +132,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PickerTextStyle_serializer.write(thisSerializer, value_value)
         }
@@ -144,7 +144,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PickerTextStyle_serializer.write(thisSerializer, value_value)
         }
@@ -156,7 +156,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -168,7 +168,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             TextPickerTextStyle_serializer.write(thisSerializer, value_value)
         }
@@ -180,7 +180,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -192,7 +192,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -204,7 +204,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -216,7 +216,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -229,8 +229,8 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toChar())
                 const value_value_1  = value_value as Array<number>
                 thisSerializer.writeInt32((value_value_1.length).toInt())
-                for (let i = 0; i < value_value_1.length; i++) {
-                    const value_value_1_element : number = value_value_1[i]
+                for (let value_value_1_counter_i = 0; value_value_1_counter_i < value_value_1.length; value_value_1_counter_i++) {
+                    const value_value_1_element : number = value_value_1[value_value_1_counter_i]
                     thisSerializer.writeNumber(value_value_1_element)
                 }
             }
@@ -243,7 +243,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             DividerOptions_serializer.write(thisSerializer, value_value)
         }
@@ -255,7 +255,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -283,7 +283,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -295,7 +295,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as CrownSensitivity)
             thisSerializer.writeInt32(TypeChecker.CrownSensitivity_ToNumeric(value_value))
         }
@@ -887,11 +887,11 @@ export class TextCascadePickerRangeContent_serializer {
         let value_children_type : int32 = RuntimeType.UNDEFINED
         value_children_type = runtimeType(value_children)
         valueSerializer.writeInt8((value_children_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_children_type)) {
+        if ((value_children_type) != (RuntimeType.UNDEFINED)) {
             const value_children_value  = value_children!
             valueSerializer.writeInt32((value_children_value.length).toInt())
-            for (let i = 0; i < value_children_value.length; i++) {
-                const value_children_value_element : TextCascadePickerRangeContent = value_children_value[i]
+            for (let value_children_value_counter_i = 0; value_children_value_counter_i < value_children_value.length; value_children_value_counter_i++) {
+                const value_children_value_element : TextCascadePickerRangeContent = value_children_value[value_children_value_counter_i]
                 TextCascadePickerRangeContent_serializer.write(valueSerializer, value_children_value_element)
             }
         }
@@ -912,7 +912,7 @@ export class TextCascadePickerRangeContent_serializer {
         const text_result : string | Resource = (text_buf as string | Resource)
         const children_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let children_buf : Array<TextCascadePickerRangeContent> | undefined
-        if ((RuntimeType.UNDEFINED) != (children_buf_runtimeType))
+        if ((children_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const children_buf__length : int32 = valueDeserializer.readInt32()
             let children_buf_ : Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>(children_buf__length)
@@ -936,8 +936,8 @@ export class TextPickerOptions_serializer {
             valueSerializer.writeInt8((0).toChar())
             const value_range_0  = value_range as Array<string>
             valueSerializer.writeInt32((value_range_0.length).toInt())
-            for (let i = 0; i < value_range_0.length; i++) {
-                const value_range_0_element : string = value_range_0[i]
+            for (let value_range_0_counter_i = 0; value_range_0_counter_i < value_range_0.length; value_range_0_counter_i++) {
+                const value_range_0_element : string = value_range_0[value_range_0_counter_i]
                 valueSerializer.writeString(value_range_0_element)
             }
         }
@@ -945,11 +945,11 @@ export class TextPickerOptions_serializer {
             valueSerializer.writeInt8((1).toChar())
             const value_range_1  = value_range as Array<Array<string>>
             valueSerializer.writeInt32((value_range_1.length).toInt())
-            for (let i = 0; i < value_range_1.length; i++) {
-                const value_range_1_element : Array<string> = value_range_1[i]
+            for (let value_range_1_counter_i = 0; value_range_1_counter_i < value_range_1.length; value_range_1_counter_i++) {
+                const value_range_1_element : Array<string> = value_range_1[value_range_1_counter_i]
                 valueSerializer.writeInt32((value_range_1_element.length).toInt())
-                for (let i = 0; i < value_range_1_element.length; i++) {
-                    const value_range_1_element_element : string = value_range_1_element[i]
+                for (let value_range_1_element_counter_i = 0; value_range_1_element_counter_i < value_range_1_element.length; value_range_1_element_counter_i++) {
+                    const value_range_1_element_element : string = value_range_1_element[value_range_1_element_counter_i]
                     valueSerializer.writeString(value_range_1_element_element)
                 }
             }
@@ -963,8 +963,8 @@ export class TextPickerOptions_serializer {
             valueSerializer.writeInt8((3).toChar())
             const value_range_3  = value_range as Array<TextPickerRangeContent>
             valueSerializer.writeInt32((value_range_3.length).toInt())
-            for (let i = 0; i < value_range_3.length; i++) {
-                const value_range_3_element : TextPickerRangeContent = value_range_3[i]
+            for (let value_range_3_counter_i = 0; value_range_3_counter_i < value_range_3.length; value_range_3_counter_i++) {
+                const value_range_3_element : TextPickerRangeContent = value_range_3[value_range_3_counter_i]
                 TextPickerRangeContent_serializer.write(valueSerializer, value_range_3_element)
             }
         }
@@ -972,8 +972,8 @@ export class TextPickerOptions_serializer {
             valueSerializer.writeInt8((4).toChar())
             const value_range_4  = value_range as Array<TextCascadePickerRangeContent>
             valueSerializer.writeInt32((value_range_4.length).toInt())
-            for (let i = 0; i < value_range_4.length; i++) {
-                const value_range_4_element : TextCascadePickerRangeContent = value_range_4[i]
+            for (let value_range_4_counter_i = 0; value_range_4_counter_i < value_range_4.length; value_range_4_counter_i++) {
+                const value_range_4_element : TextCascadePickerRangeContent = value_range_4[value_range_4_counter_i]
                 TextCascadePickerRangeContent_serializer.write(valueSerializer, value_range_4_element)
             }
         }
@@ -981,7 +981,7 @@ export class TextPickerOptions_serializer {
         let value_value_type : int32 = RuntimeType.UNDEFINED
         value_value_type = runtimeType(value_value)
         valueSerializer.writeInt8((value_value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_value_type)) {
+        if ((value_value_type) != (RuntimeType.UNDEFINED)) {
             const value_value_value  = value_value!
             let value_value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_value_type = runtimeType(value_value_value)
@@ -1005,8 +1005,8 @@ export class TextPickerOptions_serializer {
                 valueSerializer.writeInt8((1).toChar())
                 const value_value_value_1  = value_value_value as Array<ResourceStr>
                 valueSerializer.writeInt32((value_value_value_1.length).toInt())
-                for (let i = 0; i < value_value_value_1.length; i++) {
-                    const value_value_value_1_element : ResourceStr = value_value_value_1[i]
+                for (let value_value_value_1_counter_i = 0; value_value_value_1_counter_i < value_value_value_1.length; value_value_value_1_counter_i++) {
+                    const value_value_value_1_element : ResourceStr = value_value_value_1[value_value_value_1_counter_i]
                     let value_value_value_1_element_type : int32 = RuntimeType.UNDEFINED
                     value_value_value_1_element_type = runtimeType(value_value_value_1_element)
                     if (RuntimeType.STRING == value_value_value_1_element_type) {
@@ -1026,7 +1026,7 @@ export class TextPickerOptions_serializer {
         let value_selected_type : int32 = RuntimeType.UNDEFINED
         value_selected_type = runtimeType(value_selected)
         valueSerializer.writeInt8((value_selected_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_selected_type)) {
+        if ((value_selected_type) != (RuntimeType.UNDEFINED)) {
             const value_selected_value  = value_selected!
             let value_selected_value_type : int32 = RuntimeType.UNDEFINED
             value_selected_value_type = runtimeType(value_selected_value)
@@ -1039,8 +1039,8 @@ export class TextPickerOptions_serializer {
                 valueSerializer.writeInt8((1).toChar())
                 const value_selected_value_1  = value_selected_value as Array<number>
                 valueSerializer.writeInt32((value_selected_value_1.length).toInt())
-                for (let i = 0; i < value_selected_value_1.length; i++) {
-                    const value_selected_value_1_element : number = value_selected_value_1[i]
+                for (let value_selected_value_1_counter_i = 0; value_selected_value_1_counter_i < value_selected_value_1.length; value_selected_value_1_counter_i++) {
+                    const value_selected_value_1_element : number = value_selected_value_1[value_selected_value_1_counter_i]
                     valueSerializer.writeNumber(value_selected_value_1_element)
                 }
             }
@@ -1049,11 +1049,11 @@ export class TextPickerOptions_serializer {
         let value_columnWidths_type : int32 = RuntimeType.UNDEFINED
         value_columnWidths_type = runtimeType(value_columnWidths)
         valueSerializer.writeInt8((value_columnWidths_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_columnWidths_type)) {
+        if ((value_columnWidths_type) != (RuntimeType.UNDEFINED)) {
             const value_columnWidths_value  = value_columnWidths!
             valueSerializer.writeInt32((value_columnWidths_value.length).toInt())
-            for (let i = 0; i < value_columnWidths_value.length; i++) {
-                const value_columnWidths_value_element : LengthMetrics = value_columnWidths_value[i]
+            for (let value_columnWidths_value_counter_i = 0; value_columnWidths_value_counter_i < value_columnWidths_value.length; value_columnWidths_value_counter_i++) {
+                const value_columnWidths_value_element : LengthMetrics = value_columnWidths_value[value_columnWidths_value_counter_i]
                 LengthMetrics_serializer.write(valueSerializer, value_columnWidths_value_element)
             }
         }
@@ -1108,7 +1108,7 @@ export class TextPickerOptions_serializer {
         const range_result : Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent> = (range_buf as Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent>)
         const value_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let value_buf : ResourceStr | Array<ResourceStr> | undefined
-        if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+        if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const value_buf__selector : int32 = valueDeserializer.readInt8()
             let value_buf_ : ResourceStr | Array<ResourceStr> | undefined
@@ -1153,7 +1153,7 @@ export class TextPickerOptions_serializer {
         const value_result : ResourceStr | Array<ResourceStr> | undefined = value_buf
         const selected_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let selected_buf : number | Array<number> | undefined
-        if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
+        if ((selected_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const selected_buf__selector : int32 = valueDeserializer.readInt8()
             let selected_buf_ : number | Array<number> | undefined
@@ -1176,7 +1176,7 @@ export class TextPickerOptions_serializer {
         const selected_result : number | Array<number> | undefined = selected_buf
         const columnWidths_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let columnWidths_buf : Array<LengthMetrics> | undefined
-        if ((RuntimeType.UNDEFINED) != (columnWidths_buf_runtimeType))
+        if ((columnWidths_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const columnWidths_buf__length : int32 = valueDeserializer.readInt32()
             let columnWidths_buf_ : Array<LengthMetrics> = new Array<LengthMetrics>(columnWidths_buf__length)
@@ -1210,7 +1210,7 @@ export class TextPickerRangeContent_serializer {
         let value_text_type : int32 = RuntimeType.UNDEFINED
         value_text_type = runtimeType(value_text)
         valueSerializer.writeInt8((value_text_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_text_type)) {
+        if ((value_text_type) != (RuntimeType.UNDEFINED)) {
             const value_text_value  = value_text!
             let value_text_value_type : int32 = RuntimeType.UNDEFINED
             value_text_value_type = runtimeType(value_text_value)
@@ -1242,7 +1242,7 @@ export class TextPickerRangeContent_serializer {
         const icon_result : string | Resource = (icon_buf as string | Resource)
         const text_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let text_buf : string | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (text_buf_runtimeType))
+        if ((text_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const text_buf__selector : int32 = valueDeserializer.readInt8()
             let text_buf_ : string | Resource | undefined
@@ -1277,8 +1277,8 @@ export class TextPickerResult_serializer {
             valueSerializer.writeInt8((1).toChar())
             const value_value_1  = value_value as Array<string>
             valueSerializer.writeInt32((value_value_1.length).toInt())
-            for (let i = 0; i < value_value_1.length; i++) {
-                const value_value_1_element : string = value_value_1[i]
+            for (let value_value_1_counter_i = 0; value_value_1_counter_i < value_value_1.length; value_value_1_counter_i++) {
+                const value_value_1_element : string = value_value_1[value_value_1_counter_i]
                 valueSerializer.writeString(value_value_1_element)
             }
         }
@@ -1294,8 +1294,8 @@ export class TextPickerResult_serializer {
             valueSerializer.writeInt8((1).toChar())
             const value_index_1  = value_index as Array<number>
             valueSerializer.writeInt32((value_index_1.length).toInt())
-            for (let i = 0; i < value_index_1.length; i++) {
-                const value_index_1_element : number = value_index_1[i]
+            for (let value_index_1_counter_i = 0; value_index_1_counter_i < value_index_1.length; value_index_1_counter_i++) {
+                const value_index_1_element : number = value_index_1[value_index_1_counter_i]
                 valueSerializer.writeNumber(value_index_1_element)
             }
         }
@@ -1347,7 +1347,7 @@ export class DividerOptions_serializer {
         let value_strokeWidth_type : int32 = RuntimeType.UNDEFINED
         value_strokeWidth_type = runtimeType(value_strokeWidth)
         valueSerializer.writeInt8((value_strokeWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_strokeWidth_type)) {
+        if ((value_strokeWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_strokeWidth_value  = value_strokeWidth!
             let value_strokeWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_strokeWidth_value_type = runtimeType(value_strokeWidth_value)
@@ -1371,7 +1371,7 @@ export class DividerOptions_serializer {
         let value_color_type : int32 = RuntimeType.UNDEFINED
         value_color_type = runtimeType(value_color)
         valueSerializer.writeInt8((value_color_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_color_type)) {
+        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
             const value_color_value  = value_color!
             let value_color_value_type : int32 = RuntimeType.UNDEFINED
             value_color_value_type = runtimeType(value_color_value)
@@ -1400,7 +1400,7 @@ export class DividerOptions_serializer {
         let value_startMargin_type : int32 = RuntimeType.UNDEFINED
         value_startMargin_type = runtimeType(value_startMargin)
         valueSerializer.writeInt8((value_startMargin_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_startMargin_type)) {
+        if ((value_startMargin_type) != (RuntimeType.UNDEFINED)) {
             const value_startMargin_value  = value_startMargin!
             let value_startMargin_value_type : int32 = RuntimeType.UNDEFINED
             value_startMargin_value_type = runtimeType(value_startMargin_value)
@@ -1424,7 +1424,7 @@ export class DividerOptions_serializer {
         let value_endMargin_type : int32 = RuntimeType.UNDEFINED
         value_endMargin_type = runtimeType(value_endMargin)
         valueSerializer.writeInt8((value_endMargin_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_endMargin_type)) {
+        if ((value_endMargin_type) != (RuntimeType.UNDEFINED)) {
             const value_endMargin_value  = value_endMargin!
             let value_endMargin_value_type : int32 = RuntimeType.UNDEFINED
             value_endMargin_value_type = runtimeType(value_endMargin_value)
@@ -1449,7 +1449,7 @@ export class DividerOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const strokeWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeWidth_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (strokeWidth_buf_runtimeType))
+        if ((strokeWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const strokeWidth_buf__selector : int32 = valueDeserializer.readInt8()
             let strokeWidth_buf_ : string | number | Resource | undefined
@@ -1470,7 +1470,7 @@ export class DividerOptions_serializer {
         const strokeWidth_result : Dimension | undefined = strokeWidth_buf
         const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let color_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
+        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const color_buf__selector : int32 = valueDeserializer.readInt8()
             let color_buf_ : Color | number | string | Resource | undefined
@@ -1494,7 +1494,7 @@ export class DividerOptions_serializer {
         const color_result : ResourceColor | undefined = color_buf
         const startMargin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let startMargin_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (startMargin_buf_runtimeType))
+        if ((startMargin_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const startMargin_buf__selector : int32 = valueDeserializer.readInt8()
             let startMargin_buf_ : string | number | Resource | undefined
@@ -1515,7 +1515,7 @@ export class DividerOptions_serializer {
         const startMargin_result : Dimension | undefined = startMargin_buf
         const endMargin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let endMargin_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (endMargin_buf_runtimeType))
+        if ((endMargin_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const endMargin_buf__selector : int32 = valueDeserializer.readInt8()
             let endMargin_buf_ : string | number | Resource | undefined
@@ -1545,7 +1545,7 @@ export class TextPickerTextStyle_serializer {
         let value_color_type : int32 = RuntimeType.UNDEFINED
         value_color_type = runtimeType(value_color)
         valueSerializer.writeInt8((value_color_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_color_type)) {
+        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
             const value_color_value  = value_color!
             let value_color_value_type : int32 = RuntimeType.UNDEFINED
             value_color_value_type = runtimeType(value_color_value)
@@ -1574,7 +1574,7 @@ export class TextPickerTextStyle_serializer {
         let value_font_type : int32 = RuntimeType.UNDEFINED
         value_font_type = runtimeType(value_font)
         valueSerializer.writeInt8((value_font_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_font_type)) {
+        if ((value_font_type) != (RuntimeType.UNDEFINED)) {
             const value_font_value  = value_font!
             Font_serializer.write(valueSerializer, value_font_value)
         }
@@ -1582,7 +1582,7 @@ export class TextPickerTextStyle_serializer {
         let value_minFontSize_type : int32 = RuntimeType.UNDEFINED
         value_minFontSize_type = runtimeType(value_minFontSize)
         valueSerializer.writeInt8((value_minFontSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_minFontSize_type)) {
+        if ((value_minFontSize_type) != (RuntimeType.UNDEFINED)) {
             const value_minFontSize_value  = value_minFontSize!
             let value_minFontSize_value_type : int32 = RuntimeType.UNDEFINED
             value_minFontSize_value_type = runtimeType(value_minFontSize_value)
@@ -1606,7 +1606,7 @@ export class TextPickerTextStyle_serializer {
         let value_maxFontSize_type : int32 = RuntimeType.UNDEFINED
         value_maxFontSize_type = runtimeType(value_maxFontSize)
         valueSerializer.writeInt8((value_maxFontSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_maxFontSize_type)) {
+        if ((value_maxFontSize_type) != (RuntimeType.UNDEFINED)) {
             const value_maxFontSize_value  = value_maxFontSize!
             let value_maxFontSize_value_type : int32 = RuntimeType.UNDEFINED
             value_maxFontSize_value_type = runtimeType(value_maxFontSize_value)
@@ -1630,7 +1630,7 @@ export class TextPickerTextStyle_serializer {
         let value_overflow_type : int32 = RuntimeType.UNDEFINED
         value_overflow_type = runtimeType(value_overflow)
         valueSerializer.writeInt8((value_overflow_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_overflow_type)) {
+        if ((value_overflow_type) != (RuntimeType.UNDEFINED)) {
             const value_overflow_value  = (value_overflow as TextOverflow)
             valueSerializer.writeInt32(TypeChecker.TextOverflow_ToNumeric(value_overflow_value))
         }
@@ -1639,7 +1639,7 @@ export class TextPickerTextStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let color_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
+        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const color_buf__selector : int32 = valueDeserializer.readInt8()
             let color_buf_ : Color | number | string | Resource | undefined
@@ -1663,14 +1663,14 @@ export class TextPickerTextStyle_serializer {
         const color_result : ResourceColor | undefined = color_buf
         const font_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let font_buf : Font | undefined
-        if ((RuntimeType.UNDEFINED) != (font_buf_runtimeType))
+        if ((font_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             font_buf = Font_serializer.read(valueDeserializer)
         }
         const font_result : Font | undefined = font_buf
         const minFontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let minFontSize_buf : number | string | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (minFontSize_buf_runtimeType))
+        if ((minFontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const minFontSize_buf__selector : int32 = valueDeserializer.readInt8()
             let minFontSize_buf_ : number | string | Resource | undefined
@@ -1691,7 +1691,7 @@ export class TextPickerTextStyle_serializer {
         const minFontSize_result : number | string | Resource | undefined = minFontSize_buf
         const maxFontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maxFontSize_buf : number | string | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (maxFontSize_buf_runtimeType))
+        if ((maxFontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const maxFontSize_buf__selector : int32 = valueDeserializer.readInt8()
             let maxFontSize_buf_ : number | string | Resource | undefined
@@ -1712,7 +1712,7 @@ export class TextPickerTextStyle_serializer {
         const maxFontSize_result : number | string | Resource | undefined = maxFontSize_buf
         const overflow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let overflow_buf : TextOverflow | undefined
-        if ((RuntimeType.UNDEFINED) != (overflow_buf_runtimeType))
+        if ((overflow_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             overflow_buf = TypeChecker.TextOverflow_FromNumeric(valueDeserializer.readInt32())
         }
@@ -1731,8 +1731,8 @@ export class TextPickerDialogOptions_serializer {
             valueSerializer.writeInt8((0).toChar())
             const value_range_0  = value_range as Array<string>
             valueSerializer.writeInt32((value_range_0.length).toInt())
-            for (let i = 0; i < value_range_0.length; i++) {
-                const value_range_0_element : string = value_range_0[i]
+            for (let value_range_0_counter_i = 0; value_range_0_counter_i < value_range_0.length; value_range_0_counter_i++) {
+                const value_range_0_element : string = value_range_0[value_range_0_counter_i]
                 valueSerializer.writeString(value_range_0_element)
             }
         }
@@ -1740,11 +1740,11 @@ export class TextPickerDialogOptions_serializer {
             valueSerializer.writeInt8((1).toChar())
             const value_range_1  = value_range as Array<Array<string>>
             valueSerializer.writeInt32((value_range_1.length).toInt())
-            for (let i = 0; i < value_range_1.length; i++) {
-                const value_range_1_element : Array<string> = value_range_1[i]
+            for (let value_range_1_counter_i = 0; value_range_1_counter_i < value_range_1.length; value_range_1_counter_i++) {
+                const value_range_1_element : Array<string> = value_range_1[value_range_1_counter_i]
                 valueSerializer.writeInt32((value_range_1_element.length).toInt())
-                for (let i = 0; i < value_range_1_element.length; i++) {
-                    const value_range_1_element_element : string = value_range_1_element[i]
+                for (let value_range_1_element_counter_i = 0; value_range_1_element_counter_i < value_range_1_element.length; value_range_1_element_counter_i++) {
+                    const value_range_1_element_element : string = value_range_1_element[value_range_1_element_counter_i]
                     valueSerializer.writeString(value_range_1_element_element)
                 }
             }
@@ -1758,8 +1758,8 @@ export class TextPickerDialogOptions_serializer {
             valueSerializer.writeInt8((3).toChar())
             const value_range_3  = value_range as Array<TextPickerRangeContent>
             valueSerializer.writeInt32((value_range_3.length).toInt())
-            for (let i = 0; i < value_range_3.length; i++) {
-                const value_range_3_element : TextPickerRangeContent = value_range_3[i]
+            for (let value_range_3_counter_i = 0; value_range_3_counter_i < value_range_3.length; value_range_3_counter_i++) {
+                const value_range_3_element : TextPickerRangeContent = value_range_3[value_range_3_counter_i]
                 TextPickerRangeContent_serializer.write(valueSerializer, value_range_3_element)
             }
         }
@@ -1767,8 +1767,8 @@ export class TextPickerDialogOptions_serializer {
             valueSerializer.writeInt8((4).toChar())
             const value_range_4  = value_range as Array<TextCascadePickerRangeContent>
             valueSerializer.writeInt32((value_range_4.length).toInt())
-            for (let i = 0; i < value_range_4.length; i++) {
-                const value_range_4_element : TextCascadePickerRangeContent = value_range_4[i]
+            for (let value_range_4_counter_i = 0; value_range_4_counter_i < value_range_4.length; value_range_4_counter_i++) {
+                const value_range_4_element : TextCascadePickerRangeContent = value_range_4[value_range_4_counter_i]
                 TextCascadePickerRangeContent_serializer.write(valueSerializer, value_range_4_element)
             }
         }
@@ -1776,7 +1776,7 @@ export class TextPickerDialogOptions_serializer {
         let value_value_type : int32 = RuntimeType.UNDEFINED
         value_value_type = runtimeType(value_value)
         valueSerializer.writeInt8((value_value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_value_type)) {
+        if ((value_value_type) != (RuntimeType.UNDEFINED)) {
             const value_value_value  = value_value!
             let value_value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_value_type = runtimeType(value_value_value)
@@ -1800,8 +1800,8 @@ export class TextPickerDialogOptions_serializer {
                 valueSerializer.writeInt8((1).toChar())
                 const value_value_value_1  = value_value_value as Array<ResourceStr>
                 valueSerializer.writeInt32((value_value_value_1.length).toInt())
-                for (let i = 0; i < value_value_value_1.length; i++) {
-                    const value_value_value_1_element : ResourceStr = value_value_value_1[i]
+                for (let value_value_value_1_counter_i = 0; value_value_value_1_counter_i < value_value_value_1.length; value_value_value_1_counter_i++) {
+                    const value_value_value_1_element : ResourceStr = value_value_value_1[value_value_value_1_counter_i]
                     let value_value_value_1_element_type : int32 = RuntimeType.UNDEFINED
                     value_value_value_1_element_type = runtimeType(value_value_value_1_element)
                     if (RuntimeType.STRING == value_value_value_1_element_type) {
@@ -1821,7 +1821,7 @@ export class TextPickerDialogOptions_serializer {
         let value_selected_type : int32 = RuntimeType.UNDEFINED
         value_selected_type = runtimeType(value_selected)
         valueSerializer.writeInt8((value_selected_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_selected_type)) {
+        if ((value_selected_type) != (RuntimeType.UNDEFINED)) {
             const value_selected_value  = value_selected!
             let value_selected_value_type : int32 = RuntimeType.UNDEFINED
             value_selected_value_type = runtimeType(value_selected_value)
@@ -1834,8 +1834,8 @@ export class TextPickerDialogOptions_serializer {
                 valueSerializer.writeInt8((1).toChar())
                 const value_selected_value_1  = value_selected_value as Array<number>
                 valueSerializer.writeInt32((value_selected_value_1.length).toInt())
-                for (let i = 0; i < value_selected_value_1.length; i++) {
-                    const value_selected_value_1_element : number = value_selected_value_1[i]
+                for (let value_selected_value_1_counter_i = 0; value_selected_value_1_counter_i < value_selected_value_1.length; value_selected_value_1_counter_i++) {
+                    const value_selected_value_1_element : number = value_selected_value_1[value_selected_value_1_counter_i]
                     valueSerializer.writeNumber(value_selected_value_1_element)
                 }
             }
@@ -1844,11 +1844,11 @@ export class TextPickerDialogOptions_serializer {
         let value_columnWidths_type : int32 = RuntimeType.UNDEFINED
         value_columnWidths_type = runtimeType(value_columnWidths)
         valueSerializer.writeInt8((value_columnWidths_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_columnWidths_type)) {
+        if ((value_columnWidths_type) != (RuntimeType.UNDEFINED)) {
             const value_columnWidths_value  = value_columnWidths!
             valueSerializer.writeInt32((value_columnWidths_value.length).toInt())
-            for (let i = 0; i < value_columnWidths_value.length; i++) {
-                const value_columnWidths_value_element : LengthMetrics = value_columnWidths_value[i]
+            for (let value_columnWidths_value_counter_i = 0; value_columnWidths_value_counter_i < value_columnWidths_value.length; value_columnWidths_value_counter_i++) {
+                const value_columnWidths_value_element : LengthMetrics = value_columnWidths_value[value_columnWidths_value_counter_i]
                 LengthMetrics_serializer.write(valueSerializer, value_columnWidths_value_element)
             }
         }
@@ -1856,7 +1856,7 @@ export class TextPickerDialogOptions_serializer {
         let value_defaultPickerItemHeight_type : int32 = RuntimeType.UNDEFINED
         value_defaultPickerItemHeight_type = runtimeType(value_defaultPickerItemHeight)
         valueSerializer.writeInt8((value_defaultPickerItemHeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_defaultPickerItemHeight_type)) {
+        if ((value_defaultPickerItemHeight_type) != (RuntimeType.UNDEFINED)) {
             const value_defaultPickerItemHeight_value  = value_defaultPickerItemHeight!
             let value_defaultPickerItemHeight_value_type : int32 = RuntimeType.UNDEFINED
             value_defaultPickerItemHeight_value_type = runtimeType(value_defaultPickerItemHeight_value)
@@ -1875,7 +1875,7 @@ export class TextPickerDialogOptions_serializer {
         let value_canLoop_type : int32 = RuntimeType.UNDEFINED
         value_canLoop_type = runtimeType(value_canLoop)
         valueSerializer.writeInt8((value_canLoop_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_canLoop_type)) {
+        if ((value_canLoop_type) != (RuntimeType.UNDEFINED)) {
             const value_canLoop_value  = value_canLoop!
             valueSerializer.writeBoolean(value_canLoop_value)
         }
@@ -1883,7 +1883,7 @@ export class TextPickerDialogOptions_serializer {
         let value_disappearTextStyle_type : int32 = RuntimeType.UNDEFINED
         value_disappearTextStyle_type = runtimeType(value_disappearTextStyle)
         valueSerializer.writeInt8((value_disappearTextStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_disappearTextStyle_type)) {
+        if ((value_disappearTextStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_disappearTextStyle_value  = value_disappearTextStyle!
             PickerTextStyle_serializer.write(valueSerializer, value_disappearTextStyle_value)
         }
@@ -1891,7 +1891,7 @@ export class TextPickerDialogOptions_serializer {
         let value_textStyle_type : int32 = RuntimeType.UNDEFINED
         value_textStyle_type = runtimeType(value_textStyle)
         valueSerializer.writeInt8((value_textStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_textStyle_type)) {
+        if ((value_textStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_textStyle_value  = value_textStyle!
             PickerTextStyle_serializer.write(valueSerializer, value_textStyle_value)
         }
@@ -1899,7 +1899,7 @@ export class TextPickerDialogOptions_serializer {
         let value_acceptButtonStyle_type : int32 = RuntimeType.UNDEFINED
         value_acceptButtonStyle_type = runtimeType(value_acceptButtonStyle)
         valueSerializer.writeInt8((value_acceptButtonStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_acceptButtonStyle_type)) {
+        if ((value_acceptButtonStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_acceptButtonStyle_value  = value_acceptButtonStyle!
             PickerDialogButtonStyle_serializer.write(valueSerializer, value_acceptButtonStyle_value)
         }
@@ -1907,7 +1907,7 @@ export class TextPickerDialogOptions_serializer {
         let value_cancelButtonStyle_type : int32 = RuntimeType.UNDEFINED
         value_cancelButtonStyle_type = runtimeType(value_cancelButtonStyle)
         valueSerializer.writeInt8((value_cancelButtonStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_cancelButtonStyle_type)) {
+        if ((value_cancelButtonStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_cancelButtonStyle_value  = value_cancelButtonStyle!
             PickerDialogButtonStyle_serializer.write(valueSerializer, value_cancelButtonStyle_value)
         }
@@ -1915,7 +1915,7 @@ export class TextPickerDialogOptions_serializer {
         let value_selectedTextStyle_type : int32 = RuntimeType.UNDEFINED
         value_selectedTextStyle_type = runtimeType(value_selectedTextStyle)
         valueSerializer.writeInt8((value_selectedTextStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_selectedTextStyle_type)) {
+        if ((value_selectedTextStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_selectedTextStyle_value  = value_selectedTextStyle!
             PickerTextStyle_serializer.write(valueSerializer, value_selectedTextStyle_value)
         }
@@ -1923,7 +1923,7 @@ export class TextPickerDialogOptions_serializer {
         let value_disableTextStyleAnimation_type : int32 = RuntimeType.UNDEFINED
         value_disableTextStyleAnimation_type = runtimeType(value_disableTextStyleAnimation)
         valueSerializer.writeInt8((value_disableTextStyleAnimation_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_disableTextStyleAnimation_type)) {
+        if ((value_disableTextStyleAnimation_type) != (RuntimeType.UNDEFINED)) {
             const value_disableTextStyleAnimation_value  = value_disableTextStyleAnimation!
             valueSerializer.writeBoolean(value_disableTextStyleAnimation_value)
         }
@@ -1931,7 +1931,7 @@ export class TextPickerDialogOptions_serializer {
         let value_defaultTextStyle_type : int32 = RuntimeType.UNDEFINED
         value_defaultTextStyle_type = runtimeType(value_defaultTextStyle)
         valueSerializer.writeInt8((value_defaultTextStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_defaultTextStyle_type)) {
+        if ((value_defaultTextStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_defaultTextStyle_value  = value_defaultTextStyle!
             TextPickerTextStyle_serializer.write(valueSerializer, value_defaultTextStyle_value)
         }
@@ -1939,7 +1939,7 @@ export class TextPickerDialogOptions_serializer {
         let value_onAccept_type : int32 = RuntimeType.UNDEFINED
         value_onAccept_type = runtimeType(value_onAccept)
         valueSerializer.writeInt8((value_onAccept_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onAccept_type)) {
+        if ((value_onAccept_type) != (RuntimeType.UNDEFINED)) {
             const value_onAccept_value  = value_onAccept!
             valueSerializer.holdAndWriteCallback(value_onAccept_value)
         }
@@ -1947,7 +1947,7 @@ export class TextPickerDialogOptions_serializer {
         let value_onCancel_type : int32 = RuntimeType.UNDEFINED
         value_onCancel_type = runtimeType(value_onCancel)
         valueSerializer.writeInt8((value_onCancel_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onCancel_type)) {
+        if ((value_onCancel_type) != (RuntimeType.UNDEFINED)) {
             const value_onCancel_value  = value_onCancel!
             valueSerializer.holdAndWriteCallback(value_onCancel_value)
         }
@@ -1955,7 +1955,7 @@ export class TextPickerDialogOptions_serializer {
         let value_onChange_type : int32 = RuntimeType.UNDEFINED
         value_onChange_type = runtimeType(value_onChange)
         valueSerializer.writeInt8((value_onChange_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onChange_type)) {
+        if ((value_onChange_type) != (RuntimeType.UNDEFINED)) {
             const value_onChange_value  = value_onChange!
             valueSerializer.holdAndWriteCallback(value_onChange_value)
         }
@@ -1963,7 +1963,7 @@ export class TextPickerDialogOptions_serializer {
         let value_onScrollStop_type : int32 = RuntimeType.UNDEFINED
         value_onScrollStop_type = runtimeType(value_onScrollStop)
         valueSerializer.writeInt8((value_onScrollStop_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onScrollStop_type)) {
+        if ((value_onScrollStop_type) != (RuntimeType.UNDEFINED)) {
             const value_onScrollStop_value  = value_onScrollStop!
             valueSerializer.holdAndWriteCallback(value_onScrollStop_value)
         }
@@ -1971,7 +1971,7 @@ export class TextPickerDialogOptions_serializer {
         let value_onEnterSelectedArea_type : int32 = RuntimeType.UNDEFINED
         value_onEnterSelectedArea_type = runtimeType(value_onEnterSelectedArea)
         valueSerializer.writeInt8((value_onEnterSelectedArea_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onEnterSelectedArea_type)) {
+        if ((value_onEnterSelectedArea_type) != (RuntimeType.UNDEFINED)) {
             const value_onEnterSelectedArea_value  = value_onEnterSelectedArea!
             valueSerializer.holdAndWriteCallback(value_onEnterSelectedArea_value)
         }
@@ -1979,7 +1979,7 @@ export class TextPickerDialogOptions_serializer {
         let value_maskRect_type : int32 = RuntimeType.UNDEFINED
         value_maskRect_type = runtimeType(value_maskRect)
         valueSerializer.writeInt8((value_maskRect_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_maskRect_type)) {
+        if ((value_maskRect_type) != (RuntimeType.UNDEFINED)) {
             const value_maskRect_value  = value_maskRect!
             Rectangle_serializer.write(valueSerializer, value_maskRect_value)
         }
@@ -1987,7 +1987,7 @@ export class TextPickerDialogOptions_serializer {
         let value_alignment_type : int32 = RuntimeType.UNDEFINED
         value_alignment_type = runtimeType(value_alignment)
         valueSerializer.writeInt8((value_alignment_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_alignment_type)) {
+        if ((value_alignment_type) != (RuntimeType.UNDEFINED)) {
             const value_alignment_value  = (value_alignment as DialogAlignment)
             valueSerializer.writeInt32(TypeChecker.DialogAlignment_ToNumeric(value_alignment_value))
         }
@@ -1995,7 +1995,7 @@ export class TextPickerDialogOptions_serializer {
         let value_offset_type : int32 = RuntimeType.UNDEFINED
         value_offset_type = runtimeType(value_offset)
         valueSerializer.writeInt8((value_offset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offset_type)) {
+        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
             const value_offset_value  = value_offset!
             Offset_serializer.write(valueSerializer, value_offset_value)
         }
@@ -2003,7 +2003,7 @@ export class TextPickerDialogOptions_serializer {
         let value_backgroundColor_type : int32 = RuntimeType.UNDEFINED
         value_backgroundColor_type = runtimeType(value_backgroundColor)
         valueSerializer.writeInt8((value_backgroundColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_backgroundColor_type)) {
+        if ((value_backgroundColor_type) != (RuntimeType.UNDEFINED)) {
             const value_backgroundColor_value  = value_backgroundColor!
             let value_backgroundColor_value_type : int32 = RuntimeType.UNDEFINED
             value_backgroundColor_value_type = runtimeType(value_backgroundColor_value)
@@ -2032,7 +2032,7 @@ export class TextPickerDialogOptions_serializer {
         let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
         value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
         valueSerializer.writeInt8((value_backgroundBlurStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
+        if ((value_backgroundBlurStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
             valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
         }
@@ -2040,7 +2040,7 @@ export class TextPickerDialogOptions_serializer {
         let value_backgroundBlurStyleOptions_type : int32 = RuntimeType.UNDEFINED
         value_backgroundBlurStyleOptions_type = runtimeType(value_backgroundBlurStyleOptions)
         valueSerializer.writeInt8((value_backgroundBlurStyleOptions_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyleOptions_type)) {
+        if ((value_backgroundBlurStyleOptions_type) != (RuntimeType.UNDEFINED)) {
             const value_backgroundBlurStyleOptions_value  = value_backgroundBlurStyleOptions!
             BackgroundBlurStyleOptions_serializer.write(valueSerializer, value_backgroundBlurStyleOptions_value)
         }
@@ -2048,7 +2048,7 @@ export class TextPickerDialogOptions_serializer {
         let value_backgroundEffect_type : int32 = RuntimeType.UNDEFINED
         value_backgroundEffect_type = runtimeType(value_backgroundEffect)
         valueSerializer.writeInt8((value_backgroundEffect_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_backgroundEffect_type)) {
+        if ((value_backgroundEffect_type) != (RuntimeType.UNDEFINED)) {
             const value_backgroundEffect_value  = value_backgroundEffect!
             BackgroundEffectOptions_serializer.write(valueSerializer, value_backgroundEffect_value)
         }
@@ -2056,7 +2056,7 @@ export class TextPickerDialogOptions_serializer {
         let value_onDidAppear_type : int32 = RuntimeType.UNDEFINED
         value_onDidAppear_type = runtimeType(value_onDidAppear)
         valueSerializer.writeInt8((value_onDidAppear_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onDidAppear_type)) {
+        if ((value_onDidAppear_type) != (RuntimeType.UNDEFINED)) {
             const value_onDidAppear_value  = value_onDidAppear!
             valueSerializer.holdAndWriteCallback(value_onDidAppear_value)
         }
@@ -2064,7 +2064,7 @@ export class TextPickerDialogOptions_serializer {
         let value_onDidDisappear_type : int32 = RuntimeType.UNDEFINED
         value_onDidDisappear_type = runtimeType(value_onDidDisappear)
         valueSerializer.writeInt8((value_onDidDisappear_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onDidDisappear_type)) {
+        if ((value_onDidDisappear_type) != (RuntimeType.UNDEFINED)) {
             const value_onDidDisappear_value  = value_onDidDisappear!
             valueSerializer.holdAndWriteCallback(value_onDidDisappear_value)
         }
@@ -2072,7 +2072,7 @@ export class TextPickerDialogOptions_serializer {
         let value_onWillAppear_type : int32 = RuntimeType.UNDEFINED
         value_onWillAppear_type = runtimeType(value_onWillAppear)
         valueSerializer.writeInt8((value_onWillAppear_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onWillAppear_type)) {
+        if ((value_onWillAppear_type) != (RuntimeType.UNDEFINED)) {
             const value_onWillAppear_value  = value_onWillAppear!
             valueSerializer.holdAndWriteCallback(value_onWillAppear_value)
         }
@@ -2080,7 +2080,7 @@ export class TextPickerDialogOptions_serializer {
         let value_onWillDisappear_type : int32 = RuntimeType.UNDEFINED
         value_onWillDisappear_type = runtimeType(value_onWillDisappear)
         valueSerializer.writeInt8((value_onWillDisappear_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onWillDisappear_type)) {
+        if ((value_onWillDisappear_type) != (RuntimeType.UNDEFINED)) {
             const value_onWillDisappear_value  = value_onWillDisappear!
             valueSerializer.holdAndWriteCallback(value_onWillDisappear_value)
         }
@@ -2088,7 +2088,7 @@ export class TextPickerDialogOptions_serializer {
         let value_shadow_type : int32 = RuntimeType.UNDEFINED
         value_shadow_type = runtimeType(value_shadow)
         valueSerializer.writeInt8((value_shadow_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_shadow_type)) {
+        if ((value_shadow_type) != (RuntimeType.UNDEFINED)) {
             const value_shadow_value  = value_shadow!
             let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
             value_shadow_value_type = runtimeType(value_shadow_value)
@@ -2107,7 +2107,7 @@ export class TextPickerDialogOptions_serializer {
         let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
         value_enableHoverMode_type = runtimeType(value_enableHoverMode)
         valueSerializer.writeInt8((value_enableHoverMode_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_enableHoverMode_type)) {
+        if ((value_enableHoverMode_type) != (RuntimeType.UNDEFINED)) {
             const value_enableHoverMode_value  = value_enableHoverMode!
             valueSerializer.writeBoolean(value_enableHoverMode_value)
         }
@@ -2115,7 +2115,7 @@ export class TextPickerDialogOptions_serializer {
         let value_hoverModeArea_type : int32 = RuntimeType.UNDEFINED
         value_hoverModeArea_type = runtimeType(value_hoverModeArea)
         valueSerializer.writeInt8((value_hoverModeArea_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_hoverModeArea_type)) {
+        if ((value_hoverModeArea_type) != (RuntimeType.UNDEFINED)) {
             const value_hoverModeArea_value  = (value_hoverModeArea as HoverModeAreaType)
             valueSerializer.writeInt32(TypeChecker.HoverModeAreaType_ToNumeric(value_hoverModeArea_value))
         }
@@ -2123,7 +2123,7 @@ export class TextPickerDialogOptions_serializer {
         let value_enableHapticFeedback_type : int32 = RuntimeType.UNDEFINED
         value_enableHapticFeedback_type = runtimeType(value_enableHapticFeedback)
         valueSerializer.writeInt8((value_enableHapticFeedback_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_enableHapticFeedback_type)) {
+        if ((value_enableHapticFeedback_type) != (RuntimeType.UNDEFINED)) {
             const value_enableHapticFeedback_value  = value_enableHapticFeedback!
             valueSerializer.writeBoolean(value_enableHapticFeedback_value)
         }
@@ -2178,7 +2178,7 @@ export class TextPickerDialogOptions_serializer {
         const range_result : Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent> = (range_buf as Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent>)
         const value_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let value_buf : ResourceStr | Array<ResourceStr> | undefined
-        if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+        if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const value_buf__selector : int32 = valueDeserializer.readInt8()
             let value_buf_ : ResourceStr | Array<ResourceStr> | undefined
@@ -2223,7 +2223,7 @@ export class TextPickerDialogOptions_serializer {
         const value_result : ResourceStr | Array<ResourceStr> | undefined = value_buf
         const selected_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let selected_buf : number | Array<number> | undefined
-        if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
+        if ((selected_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const selected_buf__selector : int32 = valueDeserializer.readInt8()
             let selected_buf_ : number | Array<number> | undefined
@@ -2246,7 +2246,7 @@ export class TextPickerDialogOptions_serializer {
         const selected_result : number | Array<number> | undefined = selected_buf
         const columnWidths_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let columnWidths_buf : Array<LengthMetrics> | undefined
-        if ((RuntimeType.UNDEFINED) != (columnWidths_buf_runtimeType))
+        if ((columnWidths_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const columnWidths_buf__length : int32 = valueDeserializer.readInt32()
             let columnWidths_buf_ : Array<LengthMetrics> = new Array<LengthMetrics>(columnWidths_buf__length)
@@ -2258,7 +2258,7 @@ export class TextPickerDialogOptions_serializer {
         const columnWidths_result : Array<LengthMetrics> | undefined = columnWidths_buf
         const defaultPickerItemHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let defaultPickerItemHeight_buf : number | string | undefined
-        if ((RuntimeType.UNDEFINED) != (defaultPickerItemHeight_buf_runtimeType))
+        if ((defaultPickerItemHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const defaultPickerItemHeight_buf__selector : int32 = valueDeserializer.readInt8()
             let defaultPickerItemHeight_buf_ : number | string | undefined
@@ -2276,63 +2276,63 @@ export class TextPickerDialogOptions_serializer {
         const defaultPickerItemHeight_result : number | string | undefined = defaultPickerItemHeight_buf
         const canLoop_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let canLoop_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (canLoop_buf_runtimeType))
+        if ((canLoop_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             canLoop_buf = valueDeserializer.readBoolean()
         }
         const canLoop_result : boolean | undefined = canLoop_buf
         const disappearTextStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let disappearTextStyle_buf : PickerTextStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (disappearTextStyle_buf_runtimeType))
+        if ((disappearTextStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             disappearTextStyle_buf = PickerTextStyle_serializer.read(valueDeserializer)
         }
         const disappearTextStyle_result : PickerTextStyle | undefined = disappearTextStyle_buf
         const textStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let textStyle_buf : PickerTextStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (textStyle_buf_runtimeType))
+        if ((textStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             textStyle_buf = PickerTextStyle_serializer.read(valueDeserializer)
         }
         const textStyle_result : PickerTextStyle | undefined = textStyle_buf
         const acceptButtonStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let acceptButtonStyle_buf : PickerDialogButtonStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (acceptButtonStyle_buf_runtimeType))
+        if ((acceptButtonStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             acceptButtonStyle_buf = PickerDialogButtonStyle_serializer.read(valueDeserializer)
         }
         const acceptButtonStyle_result : PickerDialogButtonStyle | undefined = acceptButtonStyle_buf
         const cancelButtonStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let cancelButtonStyle_buf : PickerDialogButtonStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (cancelButtonStyle_buf_runtimeType))
+        if ((cancelButtonStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             cancelButtonStyle_buf = PickerDialogButtonStyle_serializer.read(valueDeserializer)
         }
         const cancelButtonStyle_result : PickerDialogButtonStyle | undefined = cancelButtonStyle_buf
         const selectedTextStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let selectedTextStyle_buf : PickerTextStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (selectedTextStyle_buf_runtimeType))
+        if ((selectedTextStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             selectedTextStyle_buf = PickerTextStyle_serializer.read(valueDeserializer)
         }
         const selectedTextStyle_result : PickerTextStyle | undefined = selectedTextStyle_buf
         const disableTextStyleAnimation_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let disableTextStyleAnimation_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (disableTextStyleAnimation_buf_runtimeType))
+        if ((disableTextStyleAnimation_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             disableTextStyleAnimation_buf = valueDeserializer.readBoolean()
         }
         const disableTextStyleAnimation_result : boolean | undefined = disableTextStyleAnimation_buf
         const defaultTextStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let defaultTextStyle_buf : TextPickerTextStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (defaultTextStyle_buf_runtimeType))
+        if ((defaultTextStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             defaultTextStyle_buf = TextPickerTextStyle_serializer.read(valueDeserializer)
         }
         const defaultTextStyle_result : TextPickerTextStyle | undefined = defaultTextStyle_buf
         const onAccept_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onAccept_buf : ((value: TextPickerResult) => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onAccept_buf_runtimeType))
+        if ((onAccept_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onAccept_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onAccept_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2350,7 +2350,7 @@ export class TextPickerDialogOptions_serializer {
         const onAccept_result : ((value: TextPickerResult) => void) | undefined = onAccept_buf
         const onCancel_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onCancel_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onCancel_buf_runtimeType))
+        if ((onCancel_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onCancel_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onCancel_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2367,7 +2367,7 @@ export class TextPickerDialogOptions_serializer {
         const onCancel_result : (() => void) | undefined = onCancel_buf
         const onChange_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onChange_buf : ((value: TextPickerResult) => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onChange_buf_runtimeType))
+        if ((onChange_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onChange_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onChange_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2385,7 +2385,7 @@ export class TextPickerDialogOptions_serializer {
         const onChange_result : ((value: TextPickerResult) => void) | undefined = onChange_buf
         const onScrollStop_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onScrollStop_buf : ((value: TextPickerResult) => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onScrollStop_buf_runtimeType))
+        if ((onScrollStop_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onScrollStop_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onScrollStop_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2403,7 +2403,7 @@ export class TextPickerDialogOptions_serializer {
         const onScrollStop_result : ((value: TextPickerResult) => void) | undefined = onScrollStop_buf
         const onEnterSelectedArea_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onEnterSelectedArea_buf : ((value: TextPickerResult) => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onEnterSelectedArea_buf_runtimeType))
+        if ((onEnterSelectedArea_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onEnterSelectedArea_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onEnterSelectedArea_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2421,28 +2421,28 @@ export class TextPickerDialogOptions_serializer {
         const onEnterSelectedArea_result : ((value: TextPickerResult) => void) | undefined = onEnterSelectedArea_buf
         const maskRect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maskRect_buf : Rectangle | undefined
-        if ((RuntimeType.UNDEFINED) != (maskRect_buf_runtimeType))
+        if ((maskRect_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             maskRect_buf = Rectangle_serializer.read(valueDeserializer)
         }
         const maskRect_result : Rectangle | undefined = maskRect_buf
         const alignment_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let alignment_buf : DialogAlignment | undefined
-        if ((RuntimeType.UNDEFINED) != (alignment_buf_runtimeType))
+        if ((alignment_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             alignment_buf = TypeChecker.DialogAlignment_FromNumeric(valueDeserializer.readInt32())
         }
         const alignment_result : DialogAlignment | undefined = alignment_buf
         const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offset_buf : Offset | undefined
-        if ((RuntimeType.UNDEFINED) != (offset_buf_runtimeType))
+        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             offset_buf = Offset_serializer.read(valueDeserializer)
         }
         const offset_result : Offset | undefined = offset_buf
         const backgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let backgroundColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (backgroundColor_buf_runtimeType))
+        if ((backgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const backgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
             let backgroundColor_buf_ : Color | number | string | Resource | undefined
@@ -2466,28 +2466,28 @@ export class TextPickerDialogOptions_serializer {
         const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
         const backgroundBlurStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let backgroundBlurStyle_buf : BlurStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (backgroundBlurStyle_buf_runtimeType))
+        if ((backgroundBlurStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
         }
         const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
         const backgroundBlurStyleOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let backgroundBlurStyleOptions_buf : BackgroundBlurStyleOptions | undefined
-        if ((RuntimeType.UNDEFINED) != (backgroundBlurStyleOptions_buf_runtimeType))
+        if ((backgroundBlurStyleOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             backgroundBlurStyleOptions_buf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
         }
         const backgroundBlurStyleOptions_result : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptions_buf
         const backgroundEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let backgroundEffect_buf : BackgroundEffectOptions | undefined
-        if ((RuntimeType.UNDEFINED) != (backgroundEffect_buf_runtimeType))
+        if ((backgroundEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             backgroundEffect_buf = BackgroundEffectOptions_serializer.read(valueDeserializer)
         }
         const backgroundEffect_result : BackgroundEffectOptions | undefined = backgroundEffect_buf
         const onDidAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onDidAppear_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onDidAppear_buf_runtimeType))
+        if ((onDidAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onDidAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidAppear_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2504,7 +2504,7 @@ export class TextPickerDialogOptions_serializer {
         const onDidAppear_result : (() => void) | undefined = onDidAppear_buf
         const onDidDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onDidDisappear_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onDidDisappear_buf_runtimeType))
+        if ((onDidDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onDidDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidDisappear_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2521,7 +2521,7 @@ export class TextPickerDialogOptions_serializer {
         const onDidDisappear_result : (() => void) | undefined = onDidDisappear_buf
         const onWillAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onWillAppear_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onWillAppear_buf_runtimeType))
+        if ((onWillAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onWillAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillAppear_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2538,7 +2538,7 @@ export class TextPickerDialogOptions_serializer {
         const onWillAppear_result : (() => void) | undefined = onWillAppear_buf
         const onWillDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onWillDisappear_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onWillDisappear_buf_runtimeType))
+        if ((onWillDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onWillDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDisappear_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2555,7 +2555,7 @@ export class TextPickerDialogOptions_serializer {
         const onWillDisappear_result : (() => void) | undefined = onWillDisappear_buf
         const shadow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let shadow_buf : ShadowOptions | ShadowStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (shadow_buf_runtimeType))
+        if ((shadow_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const shadow_buf__selector : int32 = valueDeserializer.readInt8()
             let shadow_buf_ : ShadowOptions | ShadowStyle | undefined
@@ -2573,21 +2573,21 @@ export class TextPickerDialogOptions_serializer {
         const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
         const enableHoverMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableHoverMode_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
+        if ((enableHoverMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             enableHoverMode_buf = valueDeserializer.readBoolean()
         }
         const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
         const hoverModeArea_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let hoverModeArea_buf : HoverModeAreaType | undefined
-        if ((RuntimeType.UNDEFINED) != (hoverModeArea_buf_runtimeType))
+        if ((hoverModeArea_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             hoverModeArea_buf = TypeChecker.HoverModeAreaType_FromNumeric(valueDeserializer.readInt32())
         }
         const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
         const enableHapticFeedback_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableHapticFeedback_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (enableHapticFeedback_buf_runtimeType))
+        if ((enableHapticFeedback_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             enableHapticFeedback_buf = valueDeserializer.readBoolean()
         }

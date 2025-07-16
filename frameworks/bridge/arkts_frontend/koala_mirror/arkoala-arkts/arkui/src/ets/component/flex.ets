@@ -46,7 +46,7 @@ export class ArkFlexPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             FlexOptions_serializer.write(thisSerializer, value_value)
         }
@@ -58,7 +58,7 @@ export class ArkFlexPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PointLightStyle_serializer.write(thisSerializer, value_value)
         }
@@ -195,7 +195,7 @@ export class FlexSpaceOptions_serializer {
         let value_main_type : int32 = RuntimeType.UNDEFINED
         value_main_type = runtimeType(value_main)
         valueSerializer.writeInt8((value_main_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_main_type)) {
+        if ((value_main_type) != (RuntimeType.UNDEFINED)) {
             const value_main_value  = value_main!
             LengthMetrics_serializer.write(valueSerializer, value_main_value)
         }
@@ -203,7 +203,7 @@ export class FlexSpaceOptions_serializer {
         let value_cross_type : int32 = RuntimeType.UNDEFINED
         value_cross_type = runtimeType(value_cross)
         valueSerializer.writeInt8((value_cross_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_cross_type)) {
+        if ((value_cross_type) != (RuntimeType.UNDEFINED)) {
             const value_cross_value  = value_cross!
             LengthMetrics_serializer.write(valueSerializer, value_cross_value)
         }
@@ -212,14 +212,14 @@ export class FlexSpaceOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const main_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let main_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (main_buf_runtimeType))
+        if ((main_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             main_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const main_result : LengthMetrics | undefined = main_buf
         const cross_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let cross_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (cross_buf_runtimeType))
+        if ((cross_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             cross_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
@@ -235,7 +235,7 @@ export class FlexOptions_serializer {
         let value_direction_type : int32 = RuntimeType.UNDEFINED
         value_direction_type = runtimeType(value_direction)
         valueSerializer.writeInt8((value_direction_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_direction_type)) {
+        if ((value_direction_type) != (RuntimeType.UNDEFINED)) {
             const value_direction_value  = (value_direction as FlexDirection)
             valueSerializer.writeInt32(TypeChecker.FlexDirection_ToNumeric(value_direction_value))
         }
@@ -243,7 +243,7 @@ export class FlexOptions_serializer {
         let value_wrap_type : int32 = RuntimeType.UNDEFINED
         value_wrap_type = runtimeType(value_wrap)
         valueSerializer.writeInt8((value_wrap_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_wrap_type)) {
+        if ((value_wrap_type) != (RuntimeType.UNDEFINED)) {
             const value_wrap_value  = (value_wrap as FlexWrap)
             valueSerializer.writeInt32(TypeChecker.FlexWrap_ToNumeric(value_wrap_value))
         }
@@ -251,7 +251,7 @@ export class FlexOptions_serializer {
         let value_justifyContent_type : int32 = RuntimeType.UNDEFINED
         value_justifyContent_type = runtimeType(value_justifyContent)
         valueSerializer.writeInt8((value_justifyContent_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_justifyContent_type)) {
+        if ((value_justifyContent_type) != (RuntimeType.UNDEFINED)) {
             const value_justifyContent_value  = (value_justifyContent as FlexAlign)
             valueSerializer.writeInt32(TypeChecker.FlexAlign_ToNumeric(value_justifyContent_value))
         }
@@ -259,7 +259,7 @@ export class FlexOptions_serializer {
         let value_alignItems_type : int32 = RuntimeType.UNDEFINED
         value_alignItems_type = runtimeType(value_alignItems)
         valueSerializer.writeInt8((value_alignItems_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_alignItems_type)) {
+        if ((value_alignItems_type) != (RuntimeType.UNDEFINED)) {
             const value_alignItems_value  = (value_alignItems as ItemAlign)
             valueSerializer.writeInt32(TypeChecker.ItemAlign_ToNumeric(value_alignItems_value))
         }
@@ -267,7 +267,7 @@ export class FlexOptions_serializer {
         let value_alignContent_type : int32 = RuntimeType.UNDEFINED
         value_alignContent_type = runtimeType(value_alignContent)
         valueSerializer.writeInt8((value_alignContent_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_alignContent_type)) {
+        if ((value_alignContent_type) != (RuntimeType.UNDEFINED)) {
             const value_alignContent_value  = (value_alignContent as FlexAlign)
             valueSerializer.writeInt32(TypeChecker.FlexAlign_ToNumeric(value_alignContent_value))
         }
@@ -275,7 +275,7 @@ export class FlexOptions_serializer {
         let value_space_type : int32 = RuntimeType.UNDEFINED
         value_space_type = runtimeType(value_space)
         valueSerializer.writeInt8((value_space_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_space_type)) {
+        if ((value_space_type) != (RuntimeType.UNDEFINED)) {
             const value_space_value  = value_space!
             FlexSpaceOptions_serializer.write(valueSerializer, value_space_value)
         }
@@ -284,42 +284,42 @@ export class FlexOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const direction_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let direction_buf : FlexDirection | undefined
-        if ((RuntimeType.UNDEFINED) != (direction_buf_runtimeType))
+        if ((direction_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             direction_buf = TypeChecker.FlexDirection_FromNumeric(valueDeserializer.readInt32())
         }
         const direction_result : FlexDirection | undefined = direction_buf
         const wrap_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let wrap_buf : FlexWrap | undefined
-        if ((RuntimeType.UNDEFINED) != (wrap_buf_runtimeType))
+        if ((wrap_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             wrap_buf = TypeChecker.FlexWrap_FromNumeric(valueDeserializer.readInt32())
         }
         const wrap_result : FlexWrap | undefined = wrap_buf
         const justifyContent_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let justifyContent_buf : FlexAlign | undefined
-        if ((RuntimeType.UNDEFINED) != (justifyContent_buf_runtimeType))
+        if ((justifyContent_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             justifyContent_buf = TypeChecker.FlexAlign_FromNumeric(valueDeserializer.readInt32())
         }
         const justifyContent_result : FlexAlign | undefined = justifyContent_buf
         const alignItems_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let alignItems_buf : ItemAlign | undefined
-        if ((RuntimeType.UNDEFINED) != (alignItems_buf_runtimeType))
+        if ((alignItems_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             alignItems_buf = TypeChecker.ItemAlign_FromNumeric(valueDeserializer.readInt32())
         }
         const alignItems_result : ItemAlign | undefined = alignItems_buf
         const alignContent_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let alignContent_buf : FlexAlign | undefined
-        if ((RuntimeType.UNDEFINED) != (alignContent_buf_runtimeType))
+        if ((alignContent_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             alignContent_buf = TypeChecker.FlexAlign_FromNumeric(valueDeserializer.readInt32())
         }
         const alignContent_result : FlexAlign | undefined = alignContent_buf
         const space_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let space_buf : FlexSpaceOptions | undefined
-        if ((RuntimeType.UNDEFINED) != (space_buf_runtimeType))
+        if ((space_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             space_buf = FlexSpaceOptions_serializer.read(valueDeserializer)
         }

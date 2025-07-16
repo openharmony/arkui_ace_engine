@@ -78,10 +78,10 @@ function slideTransition(size: SizeOptions, value: SlideEffect) : TranslateOptio
                 yOffset = size.height as number
                 break
             case SlideEffect.START.valueOf():
-                xOffset = -(size.width as number) // TODO: support RTL applications with x = width
+                xOffset = -(size.width as number) // Improve: support RTL applications with x = width
                 break
             case SlideEffect.END.valueOf():
-                xOffset = size.width as number //  TODO: support RTL applications with x = -width
+                xOffset = size.width as number // Improve: support RTL applications with x = -width
                 break
         }
 

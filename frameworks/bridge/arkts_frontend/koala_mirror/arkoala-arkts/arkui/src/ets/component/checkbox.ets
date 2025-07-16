@@ -48,7 +48,7 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             CheckboxOptions_serializer.write(thisSerializer, options_value)
         }
@@ -60,7 +60,7 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -72,7 +72,7 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -105,7 +105,7 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as CheckBoxShape)
             thisSerializer.writeInt32(TypeChecker.CheckBoxShape_ToNumeric(value_value))
         }
@@ -117,7 +117,7 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -150,7 +150,7 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             MarkStyle_serializer.write(thisSerializer, value_value)
         }
@@ -162,7 +162,7 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -174,7 +174,7 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteObject(value_value)
         }
@@ -512,7 +512,7 @@ export class CheckboxOptions_serializer {
         let value_name_type : int32 = RuntimeType.UNDEFINED
         value_name_type = runtimeType(value_name)
         valueSerializer.writeInt8((value_name_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_name_type)) {
+        if ((value_name_type) != (RuntimeType.UNDEFINED)) {
             const value_name_value  = value_name!
             valueSerializer.writeString(value_name_value)
         }
@@ -520,7 +520,7 @@ export class CheckboxOptions_serializer {
         let value_group_type : int32 = RuntimeType.UNDEFINED
         value_group_type = runtimeType(value_group)
         valueSerializer.writeInt8((value_group_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_group_type)) {
+        if ((value_group_type) != (RuntimeType.UNDEFINED)) {
             const value_group_value  = value_group!
             valueSerializer.writeString(value_group_value)
         }
@@ -528,7 +528,7 @@ export class CheckboxOptions_serializer {
         let value_indicatorBuilder_type : int32 = RuntimeType.UNDEFINED
         value_indicatorBuilder_type = runtimeType(value_indicatorBuilder)
         valueSerializer.writeInt8((value_indicatorBuilder_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_indicatorBuilder_type)) {
+        if ((value_indicatorBuilder_type) != (RuntimeType.UNDEFINED)) {
             const value_indicatorBuilder_value  = value_indicatorBuilder!
             valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_indicatorBuilder_value))
         }
@@ -537,21 +537,21 @@ export class CheckboxOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const name_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let name_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (name_buf_runtimeType))
+        if ((name_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             name_buf = (valueDeserializer.readString() as string)
         }
         const name_result : string | undefined = name_buf
         const group_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let group_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (group_buf_runtimeType))
+        if ((group_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             group_buf = (valueDeserializer.readString() as string)
         }
         const group_result : string | undefined = group_buf
         const indicatorBuilder_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let indicatorBuilder_buf : CustomBuilder | undefined
-        if ((RuntimeType.UNDEFINED) != (indicatorBuilder_buf_runtimeType))
+        if ((indicatorBuilder_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const indicatorBuilder_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const indicatorBuilder_buf__call : KPointer = valueDeserializer.readPointer()

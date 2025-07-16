@@ -1877,7 +1877,7 @@ bool setKoalaANICallbackDispatcher(
 );
 void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
 
-// TODO: maybe use CreateArrayBufferExternal here instead, no need for allocations.
+// Improve: maybe use CreateArrayBufferExternal here instead, no need for allocations.
 #define KOALA_INTEROP_CALL_VOID(venv, id, length, args)                                                 \
 {                                                                                                       \
   ani_class clazz = nullptr;                                                                            \

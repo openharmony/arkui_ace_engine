@@ -73,7 +73,7 @@ export class ArkTimePickerPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             TimePickerOptions_serializer.write(thisSerializer, options_value)
         }
@@ -85,7 +85,7 @@ export class ArkTimePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -97,7 +97,7 @@ export class ArkTimePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -109,7 +109,7 @@ export class ArkTimePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PickerTextStyle_serializer.write(thisSerializer, value_value)
         }
@@ -121,7 +121,7 @@ export class ArkTimePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PickerTextStyle_serializer.write(thisSerializer, value_value)
         }
@@ -133,7 +133,7 @@ export class ArkTimePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PickerTextStyle_serializer.write(thisSerializer, value_value)
         }
@@ -145,7 +145,7 @@ export class ArkTimePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             intl_DateTimeOptions_serializer.write(thisSerializer, value_value)
         }
@@ -157,7 +157,7 @@ export class ArkTimePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -169,7 +169,7 @@ export class ArkTimePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -181,7 +181,7 @@ export class ArkTimePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -193,7 +193,7 @@ export class ArkTimePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as CrownSensitivity)
             thisSerializer.writeInt32(TypeChecker.CrownSensitivity_ToNumeric(value_value))
         }
@@ -205,7 +205,7 @@ export class ArkTimePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -667,7 +667,7 @@ export class TimePickerOptions_serializer {
         let value_selected_type : int32 = RuntimeType.UNDEFINED
         value_selected_type = runtimeType(value_selected)
         valueSerializer.writeInt8((value_selected_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_selected_type)) {
+        if ((value_selected_type) != (RuntimeType.UNDEFINED)) {
             const value_selected_value  = value_selected!
             valueSerializer.writeInt64(value_selected_value.getTime().toLong())
         }
@@ -675,7 +675,7 @@ export class TimePickerOptions_serializer {
         let value_format_type : int32 = RuntimeType.UNDEFINED
         value_format_type = runtimeType(value_format)
         valueSerializer.writeInt8((value_format_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_format_type)) {
+        if ((value_format_type) != (RuntimeType.UNDEFINED)) {
             const value_format_value  = (value_format as TimePickerFormat)
             valueSerializer.writeInt32(TypeChecker.TimePickerFormat_ToNumeric(value_format_value))
         }
@@ -683,7 +683,7 @@ export class TimePickerOptions_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             valueSerializer.writeInt64(value_start_value.getTime().toLong())
         }
@@ -691,7 +691,7 @@ export class TimePickerOptions_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             valueSerializer.writeInt64(value_end_value.getTime().toLong())
         }
@@ -700,28 +700,28 @@ export class TimePickerOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const selected_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let selected_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
+        if ((selected_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             selected_buf = new Date(valueDeserializer.readInt64())
         }
         const selected_result : Date | undefined = selected_buf
         const format_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let format_buf : TimePickerFormat | undefined
-        if ((RuntimeType.UNDEFINED) != (format_buf_runtimeType))
+        if ((format_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             format_buf = TypeChecker.TimePickerFormat_FromNumeric(valueDeserializer.readInt32())
         }
         const format_result : TimePickerFormat | undefined = format_buf
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             start_buf = new Date(valueDeserializer.readInt64())
         }
         const start_result : Date | undefined = start_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             end_buf = new Date(valueDeserializer.readInt64())
         }

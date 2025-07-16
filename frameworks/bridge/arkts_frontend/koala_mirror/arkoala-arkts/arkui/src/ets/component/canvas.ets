@@ -168,7 +168,7 @@ export class CanvasPath implements MaterializedBase {
         let counterclockwise_type : int32 = RuntimeType.UNDEFINED
         counterclockwise_type = runtimeType(counterclockwise)
         thisSerializer.writeInt8((counterclockwise_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (counterclockwise_type)) {
+        if ((counterclockwise_type) != (RuntimeType.UNDEFINED)) {
             const counterclockwise_value  = counterclockwise!
             thisSerializer.writeBoolean(counterclockwise_value)
         }
@@ -189,7 +189,7 @@ export class CanvasPath implements MaterializedBase {
         let counterclockwise_type : int32 = RuntimeType.UNDEFINED
         counterclockwise_type = runtimeType(counterclockwise)
         thisSerializer.writeInt8((counterclockwise_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (counterclockwise_type)) {
+        if ((counterclockwise_type) != (RuntimeType.UNDEFINED)) {
             const counterclockwise_value  = counterclockwise!
             thisSerializer.writeBoolean(counterclockwise_value)
         }
@@ -243,7 +243,7 @@ export class CanvasPatternInternal implements MaterializedBase,CanvasPattern {
         let transform_type : int32 = RuntimeType.UNDEFINED
         transform_type = runtimeType(transform)
         thisSerializer.writeInt8((transform_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (transform_type)) {
+        if ((transform_type) != (RuntimeType.UNDEFINED)) {
             const transform_value  = transform!
             Matrix2D_serializer.write(thisSerializer, transform_value)
         }
@@ -278,7 +278,7 @@ export class DrawingRenderingContext implements MaterializedBase {
         let unit_type : int32 = RuntimeType.UNDEFINED
         unit_type = runtimeType(unit)
         thisSerializer.writeInt8((unit_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (unit_type)) {
+        if ((unit_type) != (RuntimeType.UNDEFINED)) {
             const unit_value  = (unit as LengthMetricsUnit)
             thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unit_value))
         }
@@ -362,7 +362,7 @@ export class ImageBitmap implements MaterializedBase {
         let unit_type : int32 = RuntimeType.UNDEFINED
         unit_type = runtimeType(unit)
         thisSerializer.writeInt8((unit_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (unit_type)) {
+        if ((unit_type) != (RuntimeType.UNDEFINED)) {
             const unit_value  = (unit as LengthMetricsUnit)
             thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unit_value))
         }
@@ -450,14 +450,14 @@ export class ImageData implements MaterializedBase {
         let data_type : int32 = RuntimeType.UNDEFINED
         data_type = runtimeType(data)
         thisSerializer.writeInt8((data_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (data_type)) {
+        if ((data_type) != (RuntimeType.UNDEFINED)) {
             const data_value  = data!
             thisSerializer.writeBuffer(data_value)
         }
         let unit_type : int32 = RuntimeType.UNDEFINED
         unit_type = runtimeType(unit)
         thisSerializer.writeInt8((unit_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (unit_type)) {
+        if ((unit_type) != (RuntimeType.UNDEFINED)) {
             const unit_value  = (unit as LengthMetricsUnit)
             thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unit_value))
         }
@@ -550,7 +550,7 @@ export class OffscreenCanvas implements MaterializedBase {
         let unit_type : int32 = RuntimeType.UNDEFINED
         unit_type = runtimeType(unit)
         thisSerializer.writeInt8((unit_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (unit_type)) {
+        if ((unit_type) != (RuntimeType.UNDEFINED)) {
             const unit_value  = (unit as LengthMetricsUnit)
             thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unit_value))
         }
@@ -585,7 +585,7 @@ export class OffscreenCanvas implements MaterializedBase {
         return
     }
     getContext(contextType: string, options: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
-        throw new Error("TBD")
+        throw new Error("Improve")
     }
     private transferToImageBitmap_serialize(): ImageBitmap {
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_transferToImageBitmap(this.peer!.ptr)
@@ -597,7 +597,7 @@ export class OffscreenCanvas implements MaterializedBase {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             RenderingContextSettings_serializer.write(thisSerializer, options_value)
         }
@@ -648,7 +648,7 @@ export class RenderingContextSettings implements MaterializedBase {
         let antialias_type : int32 = RuntimeType.UNDEFINED
         antialias_type = runtimeType(antialias)
         thisSerializer.writeInt8((antialias_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (antialias_type)) {
+        if ((antialias_type) != (RuntimeType.UNDEFINED)) {
             const antialias_value  = antialias!
             thisSerializer.writeBoolean(antialias_value)
         }
@@ -672,7 +672,7 @@ export class RenderingContextSettings implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = retvalDeserializer.readBoolean()
         }
@@ -684,7 +684,7 @@ export class RenderingContextSettings implements MaterializedBase {
         let antialias_type : int32 = RuntimeType.UNDEFINED
         antialias_type = runtimeType(antialias)
         thisSerializer.writeInt8((antialias_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (antialias_type)) {
+        if ((antialias_type) != (RuntimeType.UNDEFINED)) {
             const antialias_value  = antialias!
             thisSerializer.writeBoolean(antialias_value)
         }
@@ -708,7 +708,7 @@ export class ArkCanvasPeer extends ArkCommonMethodPeer {
         let context_type : int32 = RuntimeType.UNDEFINED
         context_type = runtimeType(context)
         thisSerializer.writeInt8((context_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (context_type)) {
+        if ((context_type) != (RuntimeType.UNDEFINED)) {
             const context_value  = context!
             let context_value_type : int32 = RuntimeType.UNDEFINED
             context_value_type = runtimeType(context_value)
@@ -749,7 +749,7 @@ export class ArkCanvasPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -761,7 +761,7 @@ export class ArkCanvasPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -1776,7 +1776,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let fillRule_type : int32 = RuntimeType.UNDEFINED
         fillRule_type = runtimeType(fillRule)
         thisSerializer.writeInt8((fillRule_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (fillRule_type)) {
+        if ((fillRule_type) != (RuntimeType.UNDEFINED)) {
             const fillRule_value  = fillRule!
             thisSerializer.writeString(fillRule_value)
         }
@@ -1788,7 +1788,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let fillRule_type : int32 = RuntimeType.UNDEFINED
         fillRule_type = runtimeType(fillRule)
         thisSerializer.writeInt8((fillRule_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (fillRule_type)) {
+        if ((fillRule_type) != (RuntimeType.UNDEFINED)) {
             const fillRule_value  = fillRule!
             thisSerializer.writeString(fillRule_value)
         }
@@ -1800,7 +1800,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let fillRule_type : int32 = RuntimeType.UNDEFINED
         fillRule_type = runtimeType(fillRule)
         thisSerializer.writeInt8((fillRule_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (fillRule_type)) {
+        if ((fillRule_type) != (RuntimeType.UNDEFINED)) {
             const fillRule_value  = fillRule!
             thisSerializer.writeString(fillRule_value)
         }
@@ -1812,7 +1812,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let fillRule_type : int32 = RuntimeType.UNDEFINED
         fillRule_type = runtimeType(fillRule)
         thisSerializer.writeInt8((fillRule_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (fillRule_type)) {
+        if ((fillRule_type) != (RuntimeType.UNDEFINED)) {
             const fillRule_value  = fillRule!
             thisSerializer.writeString(fillRule_value)
         }
@@ -1824,7 +1824,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let path_type : int32 = RuntimeType.UNDEFINED
         path_type = runtimeType(path)
         thisSerializer.writeInt8((path_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (path_type)) {
+        if ((path_type) != (RuntimeType.UNDEFINED)) {
             const path_value  = path!
             Path2D_serializer.write(thisSerializer, path_value)
         }
@@ -1841,7 +1841,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let repetition_type : int32 = RuntimeType.UNDEFINED
         repetition_type = runtimeType(repetition)
         thisSerializer.writeInt8((repetition_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (repetition_type)) {
+        if ((repetition_type) != (RuntimeType.UNDEFINED)) {
             const repetition_value  = repetition!
             thisSerializer.writeString(repetition_value)
         }
@@ -1850,7 +1850,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : CanvasPattern | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (CanvasPattern_serializer.read(retvalDeserializer) as CanvasPattern)
         }
@@ -2007,8 +2007,8 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private setLineDash_serialize(segments: Array<number>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((segments.length).toInt())
-        for (let i = 0; i < segments.length; i++) {
-            const segments_element : number = segments[i]
+        for (let segments_counter_i = 0; segments_counter_i < segments.length; segments_counter_i++) {
+            const segments_element : number = segments[segments_counter_i]
             thisSerializer.writeNumber(segments_element)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_setLineDash(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -2034,7 +2034,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let maxWidth_type : int32 = RuntimeType.UNDEFINED
         maxWidth_type = runtimeType(maxWidth)
         thisSerializer.writeInt8((maxWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (maxWidth_type)) {
+        if ((maxWidth_type) != (RuntimeType.UNDEFINED)) {
             const maxWidth_value  = maxWidth!
             thisSerializer.writeNumber(maxWidth_value)
         }
@@ -2052,7 +2052,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let maxWidth_type : int32 = RuntimeType.UNDEFINED
         maxWidth_type = runtimeType(maxWidth)
         thisSerializer.writeInt8((maxWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (maxWidth_type)) {
+        if ((maxWidth_type) != (RuntimeType.UNDEFINED)) {
             const maxWidth_value  = maxWidth!
             thisSerializer.writeNumber(maxWidth_value)
         }
@@ -2081,7 +2081,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let transform_type : int32 = RuntimeType.UNDEFINED
         transform_type = runtimeType(transform)
         thisSerializer.writeInt8((transform_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (transform_type)) {
+        if ((transform_type) != (RuntimeType.UNDEFINED)) {
             const transform_value  = transform!
             Matrix2D_serializer.write(thisSerializer, transform_value)
         }
@@ -2099,7 +2099,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             image_PixelMap_serializer.write(thisSerializer, value_value)
         }
@@ -2444,7 +2444,7 @@ export class Path2D extends CanvasPath implements MaterializedBase {
         let transform_type : int32 = RuntimeType.UNDEFINED
         transform_type = runtimeType(transform)
         thisSerializer.writeInt8((transform_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (transform_type)) {
+        if ((transform_type) != (RuntimeType.UNDEFINED)) {
             const transform_value  = transform!
             Matrix2D_serializer.write(thisSerializer, transform_value)
         }
@@ -2487,14 +2487,14 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         let settings_type : int32 = RuntimeType.UNDEFINED
         settings_type = runtimeType(settings)
         thisSerializer.writeInt8((settings_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (settings_type)) {
+        if ((settings_type) != (RuntimeType.UNDEFINED)) {
             const settings_value  = settings!
             RenderingContextSettings_serializer.write(thisSerializer, settings_value)
         }
         let unit_type : int32 = RuntimeType.UNDEFINED
         unit_type = runtimeType(unit)
         thisSerializer.writeInt8((unit_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (unit_type)) {
+        if ((unit_type) != (RuntimeType.UNDEFINED)) {
             const unit_value  = (unit as LengthMetricsUnit)
             thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unit_value))
         }
@@ -2563,24 +2563,24 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         return
     }
     on(type: string, callback_: (() => void)): void {
-        throw new Error("TBD")
+        throw new Error("Improve")
     }
     off(type: string, callback_: (() => void)): void {
-        throw new Error("TBD")
+        throw new Error("Improve")
     }
     private toDataURL_serialize(type?: string, quality?: number): string {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let type_type : int32 = RuntimeType.UNDEFINED
         type_type = runtimeType(type)
         thisSerializer.writeInt8((type_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (type_type)) {
+        if ((type_type) != (RuntimeType.UNDEFINED)) {
             const type_value  = type!
             thisSerializer.writeString(type_value)
         }
         let quality_type : int32 = RuntimeType.UNDEFINED
         quality_type = runtimeType(quality)
         thisSerializer.writeInt8((quality_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (quality_type)) {
+        if ((quality_type) != (RuntimeType.UNDEFINED)) {
             const quality_value  = quality!
             thisSerializer.writeNumber(quality_value)
         }
@@ -2610,7 +2610,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
         thisSerializer.writeInt8((callback__type).toChar())
-        if ((RuntimeType.UNDEFINED) != (callback__type)) {
+        if ((callback__type) != (RuntimeType.UNDEFINED)) {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
@@ -2628,7 +2628,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
         thisSerializer.writeInt8((callback__type).toChar())
-        if ((RuntimeType.UNDEFINED) != (callback__type)) {
+        if ((callback__type) != (RuntimeType.UNDEFINED)) {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
@@ -2675,14 +2675,14 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
         let settings_type : int32 = RuntimeType.UNDEFINED
         settings_type = runtimeType(settings)
         thisSerializer.writeInt8((settings_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (settings_type)) {
+        if ((settings_type) != (RuntimeType.UNDEFINED)) {
             const settings_value  = settings!
             RenderingContextSettings_serializer.write(thisSerializer, settings_value)
         }
         let unit_type : int32 = RuntimeType.UNDEFINED
         unit_type = runtimeType(unit)
         thisSerializer.writeInt8((unit_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (unit_type)) {
+        if ((unit_type) != (RuntimeType.UNDEFINED)) {
             const unit_value  = (unit as LengthMetricsUnit)
             thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unit_value))
         }
@@ -2706,14 +2706,14 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
         let type_type : int32 = RuntimeType.UNDEFINED
         type_type = runtimeType(type)
         thisSerializer.writeInt8((type_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (type_type)) {
+        if ((type_type) != (RuntimeType.UNDEFINED)) {
             const type_value  = type!
             thisSerializer.writeString(type_value)
         }
         let quality_type : int32 = RuntimeType.UNDEFINED
         quality_type = runtimeType(quality)
         thisSerializer.writeInt8((quality_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (quality_type)) {
+        if ((quality_type) != (RuntimeType.UNDEFINED)) {
             const quality_value  = quality!
             thisSerializer.writeNumber(quality_value)
         }

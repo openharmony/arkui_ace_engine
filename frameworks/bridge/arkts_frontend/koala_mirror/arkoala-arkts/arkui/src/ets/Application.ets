@@ -77,14 +77,14 @@ export function currentPartialUpdateContext<T>(): T | undefined {
     return _currentPartialUpdateContext as (T | undefined)
 }
 
-// TODO: move to Application class.
+// Improve: move to Application class.
 let detachedRoots: Map<KPointer, ComputableState<PeerNode>> = new Map<KPointer, ComputableState<PeerNode>>()
 
 
 export function createUiDetachedRoot(
     peerFactory: () => PeerNode,
     @memo
-    builder: () => void // TODO UserViewBuilder
+    builder: () => void // Improve: UserViewBuilder
 ): PeerNode {
     const manager = GlobalStateManager.instance
     const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
@@ -260,7 +260,7 @@ export class Application implements UserApplicationControl {
         this.unblockCallbackWait()
     }
     emitTask(type: int32, target: int32, arg1?: int32, arg2?: int32): UserApplicationControl {
-        // TODO: protect emulatedEvents by lock
+        // Improve: protect emulatedEvents by lock
         this.emulatedEvents.push(new UserEmulatedEvent(type, target, arg1, arg2))
         this.unblockCallbackWait()
         return this
@@ -269,12 +269,12 @@ export class Application implements UserApplicationControl {
     nextFrame(): Promise<UserApplicationControl> {
         this.unblockVsync()
         return new Promise<UserApplicationControl>((resolve, reject) => {
-            // TODO: protect vsyncWaiters by lock
+            // Improve: protect vsyncWaiters by lock
             this.vsyncWaiters.push(resolve)
         })
     }
     reloadView(): UserApplicationControl {
-        // TODO: protect emulatedEvents by lock
+        // Improve: protect emulatedEvents by lock
         this.emulatedEvents.push(new ReloadEmulatedEvent())
         this.unblockCallbackWait()
         return this
@@ -283,7 +283,7 @@ export class Application implements UserApplicationControl {
 
     static createMemoRootState(manager: StateManager,
         @memo
-        builder: () => void, // TODO UserViewBuilder
+        builder: () => void, // Improve: UserViewBuilder
         withRouter: boolean = true
     ): ComputableState<PeerNode> {
         const peer = PeerNode.generateRootPeer()
@@ -557,7 +557,7 @@ export class Application implements UserApplicationControl {
         return "OK"
     }
 
-    // TODO: make [emitEvent] suitable to get string argument
+    // Improve: make [emitEvent] suitable to get string argument
     emitEvent(type: int32, target: int32, arg0: int32, arg1: int32): string {
         console.log(`emitEvent ${type}, ${target}`)
         const node = PeerNode.findPeerByNativeId(target)
@@ -612,7 +612,7 @@ export class Application implements UserApplicationControl {
         registerNativeModuleLibraryName("TestNativeModule", `ArkoalaNative_${suffix}`)
         registerSyncCallbackProcessor()
 
-        // TODO remove this line once we fix static blocks
+        // Improve: remove this line once we fix static blocks
         loadLibrary(`ArkoalaNative_${suffix}`)
         //
 

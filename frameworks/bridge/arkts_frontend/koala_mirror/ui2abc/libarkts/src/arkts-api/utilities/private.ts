@@ -47,15 +47,15 @@ export function assertValidPeer(peer: KPtr, expectedKind: Es2pandaAstNodeType): 
     if (global.validatePeerTypes) {
         const peerType = global.generatedEs2panda._AstNodeTypeConst(global.context, peer)
         if (peerType === Es2pandaAstNodeType.AST_NODE_TYPE_STRUCT_DECLARATION && expectedKind === Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_DECLARATION) {
-            // TODO: Struct is a child class of Class
+            // Improve: Struct is a child class of Class
             return
         }
         if (peerType === Es2pandaAstNodeType.AST_NODE_TYPE_ETS_IMPORT_DECLARATION && expectedKind === Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_DECLARATION) {
-            // TODO: ETSImportDeclaration is a child of a ImportDeclaration
+            // Improve: ETSImportDeclaration is a child of a ImportDeclaration
             return
         }
         if (peerType === Es2pandaAstNodeType.AST_NODE_TYPE_ETS_MODULE && expectedKind === Es2pandaAstNodeType.AST_NODE_TYPE_BLOCK_STATEMENT) {
-            // TODO: ETSModule is a child of a BlockStatement
+            // Improve: ETSModule is a child of a BlockStatement
             return
         }
         if (peerType !== expectedKind) {
@@ -122,12 +122,12 @@ export function unpackString(peer: KNativePointer): string {
     return global.interop._RawUtf8ToString(peer)
 }
 
-// TODO: use direct string arguments instead.
+// Improve: use direct string arguments instead.
 export function passString(str: string | undefined): string {
     return str ?? ""
 }
 
-// TODO: use direct string arguments instead.
+// Improve: use direct string arguments instead.
 export function passStringArray(strings: readonly string[]): string[] {
     return withStringArray(strings, (it: string[]) => it)
 }

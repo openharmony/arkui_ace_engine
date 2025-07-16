@@ -700,7 +700,7 @@ void deserializeAndCallCallback_DragEvent_Opt_String_Void(KSerializerBuffer this
     const auto extraParams_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_String extraParams_buf = {};
     extraParams_buf.tag = extraParams_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (extraParams_buf_runtimeType))
+    if ((extraParams_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         extraParams_buf.value = static_cast<Ark_String>(thisDeserializer.readString());
     }
@@ -717,7 +717,7 @@ void deserializeAndCallSyncCallback_DragEvent_Opt_String_Void(Ark_VMContext vmCo
     const auto extraParams_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_String extraParams_buf = {};
     extraParams_buf.tag = extraParams_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (extraParams_buf_runtimeType))
+    if ((extraParams_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         extraParams_buf.value = static_cast<Ark_String>(thisDeserializer.readString());
     }
@@ -2351,7 +2351,7 @@ void deserializeAndCallCallback_Opt_Array_FontDescriptor_Opt_Array_String_Void(K
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_CustomObject value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 value_buf__length = thisDeserializer.readInt32();
         Array_CustomObject value_buf_ = {};
@@ -2366,7 +2366,7 @@ void deserializeAndCallCallback_Opt_Array_FontDescriptor_Opt_Array_String_Void(K
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 error_buf__length = thisDeserializer.readInt32();
         Array_String error_buf_ = {};
@@ -2389,7 +2389,7 @@ void deserializeAndCallSyncCallback_Opt_Array_FontDescriptor_Opt_Array_String_Vo
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_CustomObject value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 value_buf__length = thisDeserializer.readInt32();
         Array_CustomObject value_buf_ = {};
@@ -2404,7 +2404,7 @@ void deserializeAndCallSyncCallback_Opt_Array_FontDescriptor_Opt_Array_String_Vo
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 error_buf__length = thisDeserializer.readInt32();
         Array_String error_buf_ = {};
@@ -2427,7 +2427,7 @@ void deserializeAndCallCallback_Opt_Array_NavDestinationTransition_Void(KSeriali
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_NavDestinationTransition value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 value_buf__length = thisDeserializer.readInt32();
         Array_NavDestinationTransition value_buf_ = {};
@@ -2450,7 +2450,7 @@ void deserializeAndCallSyncCallback_Opt_Array_NavDestinationTransition_Void(Ark_
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_NavDestinationTransition value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 value_buf__length = thisDeserializer.readInt32();
         Array_NavDestinationTransition value_buf_ = {};
@@ -2473,7 +2473,7 @@ void deserializeAndCallCallback_Opt_Array_String_Opt_Array_String_Void(KSerializ
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 value_buf__length = thisDeserializer.readInt32();
         Array_String value_buf_ = {};
@@ -2488,7 +2488,7 @@ void deserializeAndCallCallback_Opt_Array_String_Opt_Array_String_Void(KSerializ
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 error_buf__length = thisDeserializer.readInt32();
         Array_String error_buf_ = {};
@@ -2511,7 +2511,7 @@ void deserializeAndCallSyncCallback_Opt_Array_String_Opt_Array_String_Void(Ark_V
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 value_buf__length = thisDeserializer.readInt32();
         Array_String value_buf_ = {};
@@ -2526,7 +2526,7 @@ void deserializeAndCallSyncCallback_Opt_Array_String_Opt_Array_String_Void(Ark_V
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 error_buf__length = thisDeserializer.readInt32();
         Array_String error_buf_ = {};
@@ -2549,7 +2549,7 @@ void deserializeAndCallCallback_Opt_Array_String_Void(KSerializerBuffer thisArra
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 error_buf__length = thisDeserializer.readInt32();
         Array_String error_buf_ = {};
@@ -2572,7 +2572,7 @@ void deserializeAndCallSyncCallback_Opt_Array_String_Void(Ark_VMContext vmContex
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 error_buf__length = thisDeserializer.readInt32();
         Array_String error_buf_ = {};
@@ -2595,7 +2595,7 @@ void deserializeAndCallCallback_Opt_Boolean_Void(KSerializerBuffer thisArray, Ar
     const auto select_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Boolean select_buf = {};
     select_buf.tag = select_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (select_buf_runtimeType))
+    if ((select_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         select_buf.value = thisDeserializer.readBoolean();
     }
@@ -2611,7 +2611,7 @@ void deserializeAndCallSyncCallback_Opt_Boolean_Void(Ark_VMContext vmContext, KS
     const auto select_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Boolean select_buf = {};
     select_buf.tag = select_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (select_buf_runtimeType))
+    if ((select_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         select_buf.value = thisDeserializer.readBoolean();
     }
@@ -2627,7 +2627,7 @@ void deserializeAndCallCallback_Opt_CustomBuilder_Void(KSerializerBuffer thisArr
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_CustomNodeBuilder value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
     }
@@ -2643,7 +2643,7 @@ void deserializeAndCallSyncCallback_Opt_CustomBuilder_Void(Ark_VMContext vmConte
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_CustomNodeBuilder value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
     }
@@ -2659,7 +2659,7 @@ void deserializeAndCallCallback_Opt_FontDescriptor_Opt_Array_String_Void(KSerial
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_CustomObject value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = static_cast<Ark_CustomObject>(thisDeserializer.readCustomObject("object"));
     }
@@ -2667,7 +2667,7 @@ void deserializeAndCallCallback_Opt_FontDescriptor_Opt_Array_String_Void(KSerial
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 error_buf__length = thisDeserializer.readInt32();
         Array_String error_buf_ = {};
@@ -2690,7 +2690,7 @@ void deserializeAndCallSyncCallback_Opt_FontDescriptor_Opt_Array_String_Void(Ark
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_CustomObject value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = static_cast<Ark_CustomObject>(thisDeserializer.readCustomObject("object"));
     }
@@ -2698,7 +2698,7 @@ void deserializeAndCallSyncCallback_Opt_FontDescriptor_Opt_Array_String_Void(Ark
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 error_buf__length = thisDeserializer.readInt32();
         Array_String error_buf_ = {};
@@ -2721,7 +2721,7 @@ void deserializeAndCallCallback_Opt_NavigationAnimatedTransition_Void(KSerialize
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_NavigationAnimatedTransition value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = NavigationAnimatedTransition_serializer::read(thisDeserializer);
     }
@@ -2737,7 +2737,7 @@ void deserializeAndCallSyncCallback_Opt_NavigationAnimatedTransition_Void(Ark_VM
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_NavigationAnimatedTransition value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = NavigationAnimatedTransition_serializer::read(thisDeserializer);
     }
@@ -2753,7 +2753,7 @@ void deserializeAndCallCallback_Opt_Number_Void(KSerializerBuffer thisArray, Ark
     const auto selected_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Number selected_buf = {};
     selected_buf.tag = selected_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (selected_buf_runtimeType))
+    if ((selected_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         selected_buf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
     }
@@ -2769,7 +2769,7 @@ void deserializeAndCallSyncCallback_Opt_Number_Void(Ark_VMContext vmContext, KSe
     const auto selected_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Number selected_buf = {};
     selected_buf.tag = selected_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (selected_buf_runtimeType))
+    if ((selected_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         selected_buf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
     }
@@ -2785,7 +2785,7 @@ void deserializeAndCallCallback_Opt_Object_Void(KSerializerBuffer thisArray, Ark
     const auto value0_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Object value0_buf = {};
     value0_buf.tag = value0_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value0_buf_runtimeType))
+    if ((value0_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value0_buf.value = static_cast<Ark_Object>(thisDeserializer.readObject());
     }
@@ -2801,7 +2801,7 @@ void deserializeAndCallSyncCallback_Opt_Object_Void(Ark_VMContext vmContext, KSe
     const auto value0_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Object value0_buf = {};
     value0_buf.tag = value0_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value0_buf_runtimeType))
+    if ((value0_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value0_buf.value = static_cast<Ark_Object>(thisDeserializer.readObject());
     }
@@ -2817,7 +2817,7 @@ void deserializeAndCallCallback_Opt_OffsetResult_Void(KSerializerBuffer thisArra
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_OffsetResult value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = OffsetResult_serializer::read(thisDeserializer);
     }
@@ -2833,7 +2833,7 @@ void deserializeAndCallSyncCallback_Opt_OffsetResult_Void(Ark_VMContext vmContex
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_OffsetResult value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = OffsetResult_serializer::read(thisDeserializer);
     }
@@ -2849,7 +2849,7 @@ void deserializeAndCallCallback_Opt_Scene_Opt_Array_String_Void(KSerializerBuffe
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Scene value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = static_cast<Ark_Scene>(Scene_serializer::read(thisDeserializer));
     }
@@ -2857,7 +2857,7 @@ void deserializeAndCallCallback_Opt_Scene_Opt_Array_String_Void(KSerializerBuffe
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 error_buf__length = thisDeserializer.readInt32();
         Array_String error_buf_ = {};
@@ -2880,7 +2880,7 @@ void deserializeAndCallSyncCallback_Opt_Scene_Opt_Array_String_Void(Ark_VMContex
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Scene value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = static_cast<Ark_Scene>(Scene_serializer::read(thisDeserializer));
     }
@@ -2888,7 +2888,7 @@ void deserializeAndCallSyncCallback_Opt_Scene_Opt_Array_String_Void(Ark_VMContex
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 error_buf__length = thisDeserializer.readInt32();
         Array_String error_buf_ = {};
@@ -2911,7 +2911,7 @@ void deserializeAndCallCallback_Opt_ScrollResult_Void(KSerializerBuffer thisArra
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_ScrollResult value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = static_cast<Ark_ScrollResult>(ScrollResult_serializer::read(thisDeserializer));
     }
@@ -2927,7 +2927,7 @@ void deserializeAndCallSyncCallback_Opt_ScrollResult_Void(Ark_VMContext vmContex
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_ScrollResult value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = static_cast<Ark_ScrollResult>(ScrollResult_serializer::read(thisDeserializer));
     }
@@ -2943,7 +2943,7 @@ void deserializeAndCallCallback_Opt_String_Opt_Array_String_Void(KSerializerBuff
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_String value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = static_cast<Ark_String>(thisDeserializer.readString());
     }
@@ -2951,7 +2951,7 @@ void deserializeAndCallCallback_Opt_String_Opt_Array_String_Void(KSerializerBuff
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 error_buf__length = thisDeserializer.readInt32();
         Array_String error_buf_ = {};
@@ -2974,7 +2974,7 @@ void deserializeAndCallSyncCallback_Opt_String_Opt_Array_String_Void(Ark_VMConte
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_String value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = static_cast<Ark_String>(thisDeserializer.readString());
     }
@@ -2982,7 +2982,7 @@ void deserializeAndCallSyncCallback_Opt_String_Opt_Array_String_Void(Ark_VMConte
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 error_buf__length = thisDeserializer.readInt32();
         Array_String error_buf_ = {};
@@ -3005,7 +3005,7 @@ void deserializeAndCallCallback_Opt_StyledString_Opt_Array_String_Void(KSerializ
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_StyledString value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = static_cast<Ark_StyledString>(StyledString_serializer::read(thisDeserializer));
     }
@@ -3013,7 +3013,7 @@ void deserializeAndCallCallback_Opt_StyledString_Opt_Array_String_Void(KSerializ
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 error_buf__length = thisDeserializer.readInt32();
         Array_String error_buf_ = {};
@@ -3036,7 +3036,7 @@ void deserializeAndCallSyncCallback_Opt_StyledString_Opt_Array_String_Void(Ark_V
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_StyledString value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = static_cast<Ark_StyledString>(StyledString_serializer::read(thisDeserializer));
     }
@@ -3044,7 +3044,7 @@ void deserializeAndCallSyncCallback_Opt_StyledString_Opt_Array_String_Void(Ark_V
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Array_String error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int32 error_buf__length = thisDeserializer.readInt32();
         Array_String error_buf_ = {};
@@ -3067,7 +3067,7 @@ void deserializeAndCallCallback_Opt_TabContentAnimatedTransition_Void(KSerialize
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_TabContentAnimatedTransition value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = TabContentAnimatedTransition_serializer::read(thisDeserializer);
     }
@@ -3083,7 +3083,7 @@ void deserializeAndCallSyncCallback_Opt_TabContentAnimatedTransition_Void(Ark_VM
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_TabContentAnimatedTransition value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         value_buf.value = TabContentAnimatedTransition_serializer::read(thisDeserializer);
     }
@@ -3099,7 +3099,7 @@ void deserializeAndCallCallback_Opt_Union_Number_Resource_Void(KSerializerBuffer
     const auto selected_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Union_Number_Resource selected_buf = {};
     selected_buf.tag = selected_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (selected_buf_runtimeType))
+    if ((selected_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int8 selected_buf__selector = thisDeserializer.readInt8();
         Ark_Union_Number_Resource selected_buf_ = {};
@@ -3129,7 +3129,7 @@ void deserializeAndCallSyncCallback_Opt_Union_Number_Resource_Void(Ark_VMContext
     const auto selected_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Union_Number_Resource selected_buf = {};
     selected_buf.tag = selected_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (selected_buf_runtimeType))
+    if ((selected_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int8 selected_buf__selector = thisDeserializer.readInt8();
         Ark_Union_Number_Resource selected_buf_ = {};
@@ -3159,7 +3159,7 @@ void deserializeAndCallCallback_Opt_Union_ResourceStr_String_Resource_Void(KSeri
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Union_ResourceStr_String_Resource value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int8 value_buf__selector = thisDeserializer.readInt8();
         Ark_Union_ResourceStr_String_Resource value_buf_ = {};
@@ -3207,7 +3207,7 @@ void deserializeAndCallSyncCallback_Opt_Union_ResourceStr_String_Resource_Void(A
     const auto value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Union_ResourceStr_String_Resource value_buf = {};
     value_buf.tag = value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         const Ark_Int8 value_buf__selector = thisDeserializer.readInt8();
         Ark_Union_ResourceStr_String_Resource value_buf_ = {};
@@ -4544,7 +4544,7 @@ void deserializeAndCallEditableTextOnChangeCallback(KSerializerBuffer thisArray,
     const auto previewText_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_PreviewText previewText_buf = {};
     previewText_buf.tag = previewText_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (previewText_buf_runtimeType))
+    if ((previewText_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         previewText_buf.value = PreviewText_serializer::read(thisDeserializer);
     }
@@ -4552,7 +4552,7 @@ void deserializeAndCallEditableTextOnChangeCallback(KSerializerBuffer thisArray,
     const auto options_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_TextChangeOptions options_buf = {};
     options_buf.tag = options_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (options_buf_runtimeType))
+    if ((options_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         options_buf.value = TextChangeOptions_serializer::read(thisDeserializer);
     }
@@ -4569,7 +4569,7 @@ void deserializeAndCallSyncEditableTextOnChangeCallback(Ark_VMContext vmContext,
     const auto previewText_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_PreviewText previewText_buf = {};
     previewText_buf.tag = previewText_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (previewText_buf_runtimeType))
+    if ((previewText_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         previewText_buf.value = PreviewText_serializer::read(thisDeserializer);
     }
@@ -4577,7 +4577,7 @@ void deserializeAndCallSyncEditableTextOnChangeCallback(Ark_VMContext vmContext,
     const auto options_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_TextChangeOptions options_buf = {};
     options_buf.tag = options_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (options_buf_runtimeType))
+    if ((options_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         options_buf.value = TextChangeOptions_serializer::read(thisDeserializer);
     }
@@ -4747,7 +4747,7 @@ void deserializeAndCallImageOnCompleteCallback(KSerializerBuffer thisArray, Ark_
     const auto loadEvent_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_ImageCompleteEvent loadEvent_buf = {};
     loadEvent_buf.tag = loadEvent_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (loadEvent_buf_runtimeType))
+    if ((loadEvent_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         loadEvent_buf.value = ImageCompleteEvent_serializer::read(thisDeserializer);
     }
@@ -4763,7 +4763,7 @@ void deserializeAndCallSyncImageOnCompleteCallback(Ark_VMContext vmContext, KSer
     const auto loadEvent_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_ImageCompleteEvent loadEvent_buf = {};
     loadEvent_buf.tag = loadEvent_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (loadEvent_buf_runtimeType))
+    if ((loadEvent_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         loadEvent_buf.value = ImageCompleteEvent_serializer::read(thisDeserializer);
     }
@@ -5234,7 +5234,7 @@ void deserializeAndCallOnDragEventCallback(KSerializerBuffer thisArray, Ark_Int3
     const auto extraParams_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_String extraParams_buf = {};
     extraParams_buf.tag = extraParams_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (extraParams_buf_runtimeType))
+    if ((extraParams_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         extraParams_buf.value = static_cast<Ark_String>(thisDeserializer.readString());
     }
@@ -5251,7 +5251,7 @@ void deserializeAndCallSyncOnDragEventCallback(Ark_VMContext vmContext, KSeriali
     const auto extraParams_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_String extraParams_buf = {};
     extraParams_buf.tag = extraParams_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (extraParams_buf_runtimeType))
+    if ((extraParams_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         extraParams_buf.value = static_cast<Ark_String>(thisDeserializer.readString());
     }
@@ -5515,7 +5515,7 @@ void deserializeAndCallOnNativeLoadCallback(KSerializerBuffer thisArray, Ark_Int
     const auto event_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Object event_buf = {};
     event_buf.tag = event_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         event_buf.value = static_cast<Ark_Object>(thisDeserializer.readObject());
     }
@@ -5531,7 +5531,7 @@ void deserializeAndCallSyncOnNativeLoadCallback(Ark_VMContext vmContext, KSerial
     const auto event_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Object event_buf = {};
     event_buf.tag = event_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         event_buf.value = static_cast<Ark_Object>(thisDeserializer.readObject());
     }
@@ -6180,7 +6180,7 @@ void deserializeAndCallPageMapBuilder(KSerializerBuffer thisArray, Ark_Int32 thi
     const auto param_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Object param_buf = {};
     param_buf.tag = param_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (param_buf_runtimeType))
+    if ((param_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         param_buf.value = static_cast<Ark_Object>(thisDeserializer.readObject());
     }
@@ -6197,7 +6197,7 @@ void deserializeAndCallSyncPageMapBuilder(Ark_VMContext vmContext, KSerializerBu
     const auto param_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_Object param_buf = {};
     param_buf.tag = param_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (param_buf_runtimeType))
+    if ((param_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         param_buf.value = static_cast<Ark_Object>(thisDeserializer.readObject());
     }
@@ -6235,7 +6235,7 @@ void deserializeAndCallPasteButtonCallback(KSerializerBuffer thisArray, Ark_Int3
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_BusinessError error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         error_buf.value = BusinessError_serializer::read(thisDeserializer);
     }
@@ -6253,7 +6253,7 @@ void deserializeAndCallSyncPasteButtonCallback(Ark_VMContext vmContext, KSeriali
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_BusinessError error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         error_buf.value = BusinessError_serializer::read(thisDeserializer);
     }
@@ -6269,7 +6269,7 @@ void deserializeAndCallPasteEventCallback(KSerializerBuffer thisArray, Ark_Int32
     const auto event_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_PasteEvent event_buf = {};
     event_buf.tag = event_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         event_buf.value = PasteEvent_serializer::read(thisDeserializer);
     }
@@ -6285,7 +6285,7 @@ void deserializeAndCallSyncPasteEventCallback(Ark_VMContext vmContext, KSerializ
     const auto event_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_PasteEvent event_buf = {};
     event_buf.tag = event_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         event_buf.value = PasteEvent_serializer::read(thisDeserializer);
     }
@@ -6477,7 +6477,7 @@ void deserializeAndCallSaveButtonCallback(KSerializerBuffer thisArray, Ark_Int32
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_BusinessError error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         error_buf.value = BusinessError_serializer::read(thisDeserializer);
     }
@@ -6495,7 +6495,7 @@ void deserializeAndCallSyncSaveButtonCallback(Ark_VMContext vmContext, KSerializ
     const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_BusinessError error_buf = {};
     error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         error_buf.value = BusinessError_serializer::read(thisDeserializer);
     }
@@ -6560,7 +6560,7 @@ void deserializeAndCallSearchSubmitCallback(KSerializerBuffer thisArray, Ark_Int
     const auto event_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_SubmitEvent event_buf = {};
     event_buf.tag = event_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         event_buf.value = static_cast<Ark_SubmitEvent>(SubmitEvent_serializer::read(thisDeserializer));
     }
@@ -6577,7 +6577,7 @@ void deserializeAndCallSyncSearchSubmitCallback(Ark_VMContext vmContext, KSerial
     const auto event_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_SubmitEvent event_buf = {};
     event_buf.tag = event_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         event_buf.value = static_cast<Ark_SubmitEvent>(SubmitEvent_serializer::read(thisDeserializer));
     }
@@ -6792,7 +6792,7 @@ void deserializeAndCallTextAreaSubmitCallback(KSerializerBuffer thisArray, Ark_I
     const auto event_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_SubmitEvent event_buf = {};
     event_buf.tag = event_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         event_buf.value = static_cast<Ark_SubmitEvent>(SubmitEvent_serializer::read(thisDeserializer));
     }
@@ -6809,7 +6809,7 @@ void deserializeAndCallSyncTextAreaSubmitCallback(Ark_VMContext vmContext, KSeri
     const auto event_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_SubmitEvent event_buf = {};
     event_buf.tag = event_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         event_buf.value = static_cast<Ark_SubmitEvent>(SubmitEvent_serializer::read(thisDeserializer));
     }
@@ -7164,7 +7164,7 @@ void deserializeAndCallType_CommonMethod_onDragStart(KSerializerBuffer thisArray
     const auto extraParams_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_String extraParams_buf = {};
     extraParams_buf.tag = extraParams_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (extraParams_buf_runtimeType))
+    if ((extraParams_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         extraParams_buf.value = static_cast<Ark_String>(thisDeserializer.readString());
     }
@@ -7182,7 +7182,7 @@ void deserializeAndCallSyncType_CommonMethod_onDragStart(Ark_VMContext vmContext
     const auto extraParams_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_String extraParams_buf = {};
     extraParams_buf.tag = extraParams_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (extraParams_buf_runtimeType))
+    if ((extraParams_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
     {
         extraParams_buf.value = static_cast<Ark_String>(thisDeserializer.readString());
     }
@@ -7600,308 +7600,308 @@ KOALA_EXECUTE(deserializeAndCallCallback, setCallbackCaller(static_cast<Callback
 void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     switch (kind) {
-        case 589030517/*Kind_AccessibilityCallback*/: return deserializeAndCallSyncAccessibilityCallback(vmContext, thisArray, thisLength);
-        case 1715445305/*Kind_AccessibilityFocusCallback*/: return deserializeAndCallSyncAccessibilityFocusCallback(vmContext, thisArray, thisLength);
-        case 1289587365/*Kind_AsyncCallback_image_PixelMap_Void*/: return deserializeAndCallSyncAsyncCallback_image_PixelMap_Void(vmContext, thisArray, thisLength);
-        case -2004118094/*Kind_ButtonModifierBuilder*/: return deserializeAndCallSyncButtonModifierBuilder(vmContext, thisArray, thisLength);
-        case -1964292933/*Kind_ButtonTriggerClickCallback*/: return deserializeAndCallSyncButtonTriggerClickCallback(vmContext, thisArray, thisLength);
-        case -2024393616/*Kind_Callback_Area_Area_Void*/: return deserializeAndCallSyncCallback_Area_Area_Void(vmContext, thisArray, thisLength);
-        case 582384234/*Kind_Callback_Array_Number_Void*/: return deserializeAndCallSyncCallback_Array_Number_Void(vmContext, thisArray, thisLength);
-        case -440782244/*Kind_Callback_Array_String_Void*/: return deserializeAndCallSyncCallback_Array_String_Void(vmContext, thisArray, thisLength);
-        case 528588498/*Kind_Callback_Array_TextMenuItem_Void*/: return deserializeAndCallSyncCallback_Array_TextMenuItem_Void(vmContext, thisArray, thisLength);
-        case -547276916/*Kind_Callback_Array_TouchTestInfo_TouchResult*/: return deserializeAndCallSyncCallback_Array_TouchTestInfo_TouchResult(vmContext, thisArray, thisLength);
-        case 109087936/*Kind_Callback_AxisEvent_Void*/: return deserializeAndCallSyncCallback_AxisEvent_Void(vmContext, thisArray, thisLength);
-        case -1541107680/*Kind_Callback_Boolean*/: return deserializeAndCallSyncCallback_Boolean(vmContext, thisArray, thisLength);
-        case -916602978/*Kind_Callback_Boolean_HoverEvent_Void*/: return deserializeAndCallSyncCallback_Boolean_HoverEvent_Void(vmContext, thisArray, thisLength);
-        case 313269291/*Kind_Callback_Boolean_Void*/: return deserializeAndCallSyncCallback_Boolean_Void(vmContext, thisArray, thisLength);
-        case 908731311/*Kind_Callback_Buffer_Void*/: return deserializeAndCallSyncCallback_Buffer_Void(vmContext, thisArray, thisLength);
-        case 1074619005/*Kind_Callback_CalendarRequestedData_Void*/: return deserializeAndCallSyncCallback_CalendarRequestedData_Void(vmContext, thisArray, thisLength);
-        case -289198976/*Kind_Callback_CalendarSelectedDate_Void*/: return deserializeAndCallSyncCallback_CalendarSelectedDate_Void(vmContext, thisArray, thisLength);
-        case 1097178637/*Kind_Callback_ClickEvent_Void*/: return deserializeAndCallSyncCallback_ClickEvent_Void(vmContext, thisArray, thisLength);
-        case -494015096/*Kind_Callback_CompatibleComponentInfo_Void*/: return deserializeAndCallSyncCallback_CompatibleComponentInfo_Void(vmContext, thisArray, thisLength);
-        case -1270343661/*Kind_Callback_ComputedBarAttribute_Void*/: return deserializeAndCallSyncCallback_ComputedBarAttribute_Void(vmContext, thisArray, thisLength);
-        case -120437466/*Kind_Callback_CopyEvent_Void*/: return deserializeAndCallSyncCallback_CopyEvent_Void(vmContext, thisArray, thisLength);
-        case -2019730059/*Kind_Callback_CreateItem*/: return deserializeAndCallSyncCallback_CreateItem(vmContext, thisArray, thisLength);
-        case -827253372/*Kind_Callback_CrownEvent_Void*/: return deserializeAndCallSyncCallback_CrownEvent_Void(vmContext, thisArray, thisLength);
-        case -378918566/*Kind_Callback_CustomSpanMeasureInfo_CustomSpanMetrics*/: return deserializeAndCallSyncCallback_CustomSpanMeasureInfo_CustomSpanMetrics(vmContext, thisArray, thisLength);
-        case 1362306791/*Kind_Callback_CustomSpanMetrics_Void*/: return deserializeAndCallSyncCallback_CustomSpanMetrics_Void(vmContext, thisArray, thisLength);
-        case -1875695871/*Kind_Callback_CutEvent_Void*/: return deserializeAndCallSyncCallback_CutEvent_Void(vmContext, thisArray, thisLength);
-        case 1405382363/*Kind_Callback_Date_Void*/: return deserializeAndCallSyncCallback_Date_Void(vmContext, thisArray, thisLength);
-        case -1357792883/*Kind_Callback_DeleteValue_Boolean*/: return deserializeAndCallSyncCallback_DeleteValue_Boolean(vmContext, thisArray, thisLength);
-        case -126251459/*Kind_Callback_DeleteValue_Void*/: return deserializeAndCallSyncCallback_DeleteValue_Void(vmContext, thisArray, thisLength);
-        case -1283506641/*Kind_Callback_DismissContentCoverAction_Void*/: return deserializeAndCallSyncCallback_DismissContentCoverAction_Void(vmContext, thisArray, thisLength);
-        case -2095828093/*Kind_Callback_DismissDialogAction_Void*/: return deserializeAndCallSyncCallback_DismissDialogAction_Void(vmContext, thisArray, thisLength);
-        case -2004166751/*Kind_Callback_DismissPopupAction_Void*/: return deserializeAndCallSyncCallback_DismissPopupAction_Void(vmContext, thisArray, thisLength);
-        case 889549796/*Kind_Callback_DismissSheetAction_Void*/: return deserializeAndCallSyncCallback_DismissSheetAction_Void(vmContext, thisArray, thisLength);
-        case -2091703923/*Kind_Callback_DragEvent_Opt_String_Void*/: return deserializeAndCallSyncCallback_DragEvent_Opt_String_Void(vmContext, thisArray, thisLength);
-        case -2106022018/*Kind_Callback_DrawContext_CustomSpanDrawInfo_Void*/: return deserializeAndCallSyncCallback_DrawContext_CustomSpanDrawInfo_Void(vmContext, thisArray, thisLength);
-        case 38085488/*Kind_Callback_DrawContext_Void*/: return deserializeAndCallSyncCallback_DrawContext_Void(vmContext, thisArray, thisLength);
-        case -602545319/*Kind_Callback_EditableTextChangeValue_Boolean*/: return deserializeAndCallSyncCallback_EditableTextChangeValue_Boolean(vmContext, thisArray, thisLength);
-        case -1802605016/*Kind_Callback_EnterKeyType_Void*/: return deserializeAndCallSyncCallback_EnterKeyType_Void(vmContext, thisArray, thisLength);
-        case 1187455675/*Kind_Callback_ErrorInformation_Void*/: return deserializeAndCallSyncCallback_ErrorInformation_Void(vmContext, thisArray, thisLength);
-        case -733525640/*Kind_Callback_Extender_OnFinish*/: return deserializeAndCallSyncCallback_Extender_OnFinish(vmContext, thisArray, thisLength);
-        case 1264236374/*Kind_Callback_Extender_OnProgress*/: return deserializeAndCallSyncCallback_Extender_OnProgress(vmContext, thisArray, thisLength);
-        case 394781580/*Kind_Callback_FocusAxisEvent_Void*/: return deserializeAndCallSyncCallback_FocusAxisEvent_Void(vmContext, thisArray, thisLength);
-        case 758395742/*Kind_Callback_FormCallbackInfo_Void*/: return deserializeAndCallSyncCallback_FormCallbackInfo_Void(vmContext, thisArray, thisLength);
-        case 583294398/*Kind_Callback_FullscreenInfo_Void*/: return deserializeAndCallSyncCallback_FullscreenInfo_Void(vmContext, thisArray, thisLength);
-        case -1143194492/*Kind_Callback_GestureEvent_Void*/: return deserializeAndCallSyncCallback_GestureEvent_Void(vmContext, thisArray, thisLength);
-        case 1319043556/*Kind_Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult*/: return deserializeAndCallSyncCallback_GestureInfo_BaseGestureEvent_GestureJudgeResult(vmContext, thisArray, thisLength);
-        case -684588584/*Kind_Callback_GestureJudgeResult_Void*/: return deserializeAndCallSyncCallback_GestureJudgeResult_Void(vmContext, thisArray, thisLength);
-        case 776202910/*Kind_Callback_GestureRecognizer_Void*/: return deserializeAndCallSyncCallback_GestureRecognizer_Void(vmContext, thisArray, thisLength);
-        case -1755111025/*Kind_Callback_HitTestMode_Void*/: return deserializeAndCallSyncCallback_HitTestMode_Void(vmContext, thisArray, thisLength);
-        case -1576788379/*Kind_Callback_HoverEvent_Void*/: return deserializeAndCallSyncCallback_HoverEvent_Void(vmContext, thisArray, thisLength);
-        case -383025085/*Kind_Callback_InsertValue_Boolean*/: return deserializeAndCallSyncCallback_InsertValue_Boolean(vmContext, thisArray, thisLength);
-        case -1121207885/*Kind_Callback_InsertValue_Void*/: return deserializeAndCallSyncCallback_InsertValue_Void(vmContext, thisArray, thisLength);
-        case -1627362945/*Kind_Callback_ItemDragInfo_Number_Number_Boolean_Void*/: return deserializeAndCallSyncCallback_ItemDragInfo_Number_Number_Boolean_Void(vmContext, thisArray, thisLength);
-        case -918805852/*Kind_Callback_ItemDragInfo_Number_Number_Void*/: return deserializeAndCallSyncCallback_ItemDragInfo_Number_Number_Void(vmContext, thisArray, thisLength);
-        case 296908152/*Kind_Callback_ItemDragInfo_Number_Void*/: return deserializeAndCallSyncCallback_ItemDragInfo_Number_Void(vmContext, thisArray, thisLength);
-        case 137353252/*Kind_Callback_ItemDragInfo_Void*/: return deserializeAndCallSyncCallback_ItemDragInfo_Void(vmContext, thisArray, thisLength);
-        case -2061548092/*Kind_Callback_KeyEvent_Boolean*/: return deserializeAndCallSyncCallback_KeyEvent_Boolean(vmContext, thisArray, thisLength);
-        case 707696468/*Kind_Callback_KeyEvent_Void*/: return deserializeAndCallSyncCallback_KeyEvent_Void(vmContext, thisArray, thisLength);
-        case -1146723341/*Kind_Callback_Map_String_Object_Void*/: return deserializeAndCallSyncCallback_Map_String_Object_Void(vmContext, thisArray, thisLength);
-        case -716263454/*Kind_Callback_MarqueeState_Void*/: return deserializeAndCallSyncCallback_MarqueeState_Void(vmContext, thisArray, thisLength);
-        case -1382640094/*Kind_Callback_MouseEvent_Void*/: return deserializeAndCallSyncCallback_MouseEvent_Void(vmContext, thisArray, thisLength);
-        case 477481563/*Kind_Callback_NativeEmbedDataInfo_Void*/: return deserializeAndCallSyncCallback_NativeEmbedDataInfo_Void(vmContext, thisArray, thisLength);
-        case -1090303858/*Kind_Callback_NativeEmbedTouchInfo_Void*/: return deserializeAndCallSyncCallback_NativeEmbedTouchInfo_Void(vmContext, thisArray, thisLength);
-        case 634825762/*Kind_Callback_NavDestinationActiveReason_Void*/: return deserializeAndCallSyncCallback_NavDestinationActiveReason_Void(vmContext, thisArray, thisLength);
-        case -1642725259/*Kind_Callback_NavDestinationContext_Void*/: return deserializeAndCallSyncCallback_NavDestinationContext_Void(vmContext, thisArray, thisLength);
-        case 960690982/*Kind_Callback_NavigationMode_Void*/: return deserializeAndCallSyncCallback_NavigationMode_Void(vmContext, thisArray, thisLength);
-        case 1685437830/*Kind_Callback_NavigationTitleMode_Void*/: return deserializeAndCallSyncCallback_NavigationTitleMode_Void(vmContext, thisArray, thisLength);
-        case -1375731066/*Kind_Callback_NavigationTransitionProxy_Void*/: return deserializeAndCallSyncCallback_NavigationTransitionProxy_Void(vmContext, thisArray, thisLength);
-        case -1427334496/*Kind_Callback_Number_Number_Boolean*/: return deserializeAndCallSyncCallback_Number_Number_Boolean(vmContext, thisArray, thisLength);
-        case -1923888037/*Kind_Callback_Number_Number_Boolean_Boolean*/: return deserializeAndCallSyncCallback_Number_Number_Boolean_Boolean(vmContext, thisArray, thisLength);
-        case -3987624/*Kind_Callback_Number_Number_ComputedBarAttribute*/: return deserializeAndCallSyncCallback_Number_Number_ComputedBarAttribute(vmContext, thisArray, thisLength);
-        case -352942292/*Kind_Callback_Number_Number_Number_Void*/: return deserializeAndCallSyncCallback_Number_Number_Number_Void(vmContext, thisArray, thisLength);
-        case 1894574320/*Kind_Callback_Number_Number_Void*/: return deserializeAndCallSyncCallback_Number_Number_Void(vmContext, thisArray, thisLength);
-        case 88697971/*Kind_Callback_Number_SliderChangeMode_Void*/: return deserializeAndCallSyncCallback_Number_SliderChangeMode_Void(vmContext, thisArray, thisLength);
-        case 1602877440/*Kind_Callback_Number_Tuple_Number_Number*/: return deserializeAndCallSyncCallback_Number_Tuple_Number_Number(vmContext, thisArray, thisLength);
-        case 1618565120/*Kind_Callback_Number_Tuple_Number_Number_Number_Number*/: return deserializeAndCallSyncCallback_Number_Tuple_Number_Number_Number_Number(vmContext, thisArray, thisLength);
-        case 36519084/*Kind_Callback_Number_Void*/: return deserializeAndCallSyncCallback_Number_Void(vmContext, thisArray, thisLength);
-        case -1782529222/*Kind_Callback_Object_Void*/: return deserializeAndCallSyncCallback_Object_Void(vmContext, thisArray, thisLength);
-        case 806070428/*Kind_Callback_OnAlertEvent_Boolean*/: return deserializeAndCallSyncCallback_OnAlertEvent_Boolean(vmContext, thisArray, thisLength);
-        case -1559789631/*Kind_Callback_OnAudioStateChangedEvent_Void*/: return deserializeAndCallSyncCallback_OnAudioStateChangedEvent_Void(vmContext, thisArray, thisLength);
-        case -873162122/*Kind_Callback_OnBeforeUnloadEvent_Boolean*/: return deserializeAndCallSyncCallback_OnBeforeUnloadEvent_Boolean(vmContext, thisArray, thisLength);
-        case 608991355/*Kind_Callback_OnClientAuthenticationEvent_Void*/: return deserializeAndCallSyncCallback_OnClientAuthenticationEvent_Void(vmContext, thisArray, thisLength);
-        case 317864672/*Kind_Callback_OnConfirmEvent_Boolean*/: return deserializeAndCallSyncCallback_OnConfirmEvent_Boolean(vmContext, thisArray, thisLength);
-        case 893367077/*Kind_Callback_OnConsoleEvent_Boolean*/: return deserializeAndCallSyncCallback_OnConsoleEvent_Boolean(vmContext, thisArray, thisLength);
-        case 332449533/*Kind_Callback_OnContextMenuShowEvent_Boolean*/: return deserializeAndCallSyncCallback_OnContextMenuShowEvent_Boolean(vmContext, thisArray, thisLength);
-        case 118631204/*Kind_Callback_OnDataResubmittedEvent_Void*/: return deserializeAndCallSyncCallback_OnDataResubmittedEvent_Void(vmContext, thisArray, thisLength);
-        case 1834611702/*Kind_Callback_OnDownloadStartEvent_Void*/: return deserializeAndCallSyncCallback_OnDownloadStartEvent_Void(vmContext, thisArray, thisLength);
-        case -1792851375/*Kind_Callback_OnErrorReceiveEvent_Void*/: return deserializeAndCallSyncCallback_OnErrorReceiveEvent_Void(vmContext, thisArray, thisLength);
-        case -243916553/*Kind_Callback_OnFaviconReceivedEvent_Void*/: return deserializeAndCallSyncCallback_OnFaviconReceivedEvent_Void(vmContext, thisArray, thisLength);
-        case -1852060212/*Kind_Callback_OnFirstContentfulPaintEvent_Void*/: return deserializeAndCallSyncCallback_OnFirstContentfulPaintEvent_Void(vmContext, thisArray, thisLength);
-        case -941896815/*Kind_Callback_OnGeolocationShowEvent_Void*/: return deserializeAndCallSyncCallback_OnGeolocationShowEvent_Void(vmContext, thisArray, thisLength);
-        case 780282803/*Kind_Callback_OnHttpAuthRequestEvent_Boolean*/: return deserializeAndCallSyncCallback_OnHttpAuthRequestEvent_Boolean(vmContext, thisArray, thisLength);
-        case -2066745559/*Kind_Callback_OnHttpErrorReceiveEvent_Void*/: return deserializeAndCallSyncCallback_OnHttpErrorReceiveEvent_Void(vmContext, thisArray, thisLength);
-        case 1442698200/*Kind_Callback_OnInterceptRequestEvent_WebResourceResponse*/: return deserializeAndCallSyncCallback_OnInterceptRequestEvent_WebResourceResponse(vmContext, thisArray, thisLength);
-        case 1231444306/*Kind_Callback_OnLoadInterceptEvent_Boolean*/: return deserializeAndCallSyncCallback_OnLoadInterceptEvent_Boolean(vmContext, thisArray, thisLength);
-        case -1356285653/*Kind_Callback_onMeasureSize_SizeResult*/: return deserializeAndCallSyncCallback_onMeasureSize_SizeResult(vmContext, thisArray, thisLength);
-        case -860386431/*Kind_Callback_OnOverScrollEvent_Void*/: return deserializeAndCallSyncCallback_OnOverScrollEvent_Void(vmContext, thisArray, thisLength);
-        case -2040193994/*Kind_Callback_OnPageBeginEvent_Void*/: return deserializeAndCallSyncCallback_OnPageBeginEvent_Void(vmContext, thisArray, thisLength);
-        case -130135362/*Kind_Callback_OnPageEndEvent_Void*/: return deserializeAndCallSyncCallback_OnPageEndEvent_Void(vmContext, thisArray, thisLength);
-        case 1805946367/*Kind_Callback_OnPageVisibleEvent_Void*/: return deserializeAndCallSyncCallback_OnPageVisibleEvent_Void(vmContext, thisArray, thisLength);
-        case 529980696/*Kind_Callback_OnPermissionRequestEvent_Void*/: return deserializeAndCallSyncCallback_OnPermissionRequestEvent_Void(vmContext, thisArray, thisLength);
-        case -738620506/*Kind_Callback_onPlaceChildren_Void*/: return deserializeAndCallSyncCallback_onPlaceChildren_Void(vmContext, thisArray, thisLength);
-        case 1018740377/*Kind_Callback_OnProgressChangeEvent_Void*/: return deserializeAndCallSyncCallback_OnProgressChangeEvent_Void(vmContext, thisArray, thisLength);
-        case -1826742986/*Kind_Callback_OnPromptEvent_Boolean*/: return deserializeAndCallSyncCallback_OnPromptEvent_Boolean(vmContext, thisArray, thisLength);
-        case 1978364344/*Kind_Callback_OnRefreshAccessedHistoryEvent_Void*/: return deserializeAndCallSyncCallback_OnRefreshAccessedHistoryEvent_Void(vmContext, thisArray, thisLength);
-        case -1413785559/*Kind_Callback_OnRenderExitedEvent_Void*/: return deserializeAndCallSyncCallback_OnRenderExitedEvent_Void(vmContext, thisArray, thisLength);
-        case 793995118/*Kind_Callback_OnResourceLoadEvent_Void*/: return deserializeAndCallSyncCallback_OnResourceLoadEvent_Void(vmContext, thisArray, thisLength);
-        case -1782102148/*Kind_Callback_OnScaleChangeEvent_Void*/: return deserializeAndCallSyncCallback_OnScaleChangeEvent_Void(vmContext, thisArray, thisLength);
-        case -1972321573/*Kind_Callback_OnScreenCaptureRequestEvent_Void*/: return deserializeAndCallSyncCallback_OnScreenCaptureRequestEvent_Void(vmContext, thisArray, thisLength);
-        case -172908881/*Kind_Callback_OnScrollEvent_Void*/: return deserializeAndCallSyncCallback_OnScrollEvent_Void(vmContext, thisArray, thisLength);
-        case 1637092936/*Kind_Callback_OnScrollFrameBeginHandlerResult_Void*/: return deserializeAndCallSyncCallback_OnScrollFrameBeginHandlerResult_Void(vmContext, thisArray, thisLength);
-        case -1495570/*Kind_Callback_OnSearchResultReceiveEvent_Void*/: return deserializeAndCallSyncCallback_OnSearchResultReceiveEvent_Void(vmContext, thisArray, thisLength);
-        case -636069598/*Kind_Callback_OnShowFileSelectorEvent_Boolean*/: return deserializeAndCallSyncCallback_OnShowFileSelectorEvent_Boolean(vmContext, thisArray, thisLength);
-        case 1624791665/*Kind_Callback_OnSslErrorEventReceiveEvent_Void*/: return deserializeAndCallSyncCallback_OnSslErrorEventReceiveEvent_Void(vmContext, thisArray, thisLength);
-        case -318085495/*Kind_Callback_OnTitleReceiveEvent_Void*/: return deserializeAndCallSyncCallback_OnTitleReceiveEvent_Void(vmContext, thisArray, thisLength);
-        case 1657893064/*Kind_Callback_OnTouchIconUrlReceivedEvent_Void*/: return deserializeAndCallSyncCallback_OnTouchIconUrlReceivedEvent_Void(vmContext, thisArray, thisLength);
-        case -2052382574/*Kind_Callback_OnWindowNewEvent_Void*/: return deserializeAndCallSyncCallback_OnWindowNewEvent_Void(vmContext, thisArray, thisLength);
-        case -296989211/*Kind_Callback_Opt_Array_FontDescriptor_Opt_Array_String_Void*/: return deserializeAndCallSyncCallback_Opt_Array_FontDescriptor_Opt_Array_String_Void(vmContext, thisArray, thisLength);
-        case 406871767/*Kind_Callback_Opt_Array_NavDestinationTransition_Void*/: return deserializeAndCallSyncCallback_Opt_Array_NavDestinationTransition_Void(vmContext, thisArray, thisLength);
-        case 287839344/*Kind_Callback_Opt_Array_String_Opt_Array_String_Void*/: return deserializeAndCallSyncCallback_Opt_Array_String_Opt_Array_String_Void(vmContext, thisArray, thisLength);
-        case -543655128/*Kind_Callback_Opt_Array_String_Void*/: return deserializeAndCallSyncCallback_Opt_Array_String_Void(vmContext, thisArray, thisLength);
-        case -1777674145/*Kind_Callback_Opt_Boolean_Void*/: return deserializeAndCallSyncCallback_Opt_Boolean_Void(vmContext, thisArray, thisLength);
-        case 859020393/*Kind_Callback_Opt_CustomBuilder_Void*/: return deserializeAndCallSyncCallback_Opt_CustomBuilder_Void(vmContext, thisArray, thisLength);
-        case 11877731/*Kind_Callback_Opt_FontDescriptor_Opt_Array_String_Void*/: return deserializeAndCallSyncCallback_Opt_FontDescriptor_Opt_Array_String_Void(vmContext, thisArray, thisLength);
-        case -2035339519/*Kind_Callback_Opt_NavigationAnimatedTransition_Void*/: return deserializeAndCallSyncCallback_Opt_NavigationAnimatedTransition_Void(vmContext, thisArray, thisLength);
-        case -233776232/*Kind_Callback_Opt_Number_Void*/: return deserializeAndCallSyncCallback_Opt_Number_Void(vmContext, thisArray, thisLength);
-        case 252363534/*Kind_Callback_Opt_Object_Void*/: return deserializeAndCallSyncCallback_Opt_Object_Void(vmContext, thisArray, thisLength);
-        case 1321949695/*Kind_Callback_Opt_OffsetResult_Void*/: return deserializeAndCallSyncCallback_Opt_OffsetResult_Void(vmContext, thisArray, thisLength);
-        case 514173789/*Kind_Callback_Opt_Scene_Opt_Array_String_Void*/: return deserializeAndCallSyncCallback_Opt_Scene_Opt_Array_String_Void(vmContext, thisArray, thisLength);
-        case 648568223/*Kind_Callback_Opt_ScrollResult_Void*/: return deserializeAndCallSyncCallback_Opt_ScrollResult_Void(vmContext, thisArray, thisLength);
-        case 1813490422/*Kind_Callback_Opt_String_Opt_Array_String_Void*/: return deserializeAndCallSyncCallback_Opt_String_Opt_Array_String_Void(vmContext, thisArray, thisLength);
-        case -756319131/*Kind_Callback_Opt_StyledString_Opt_Array_String_Void*/: return deserializeAndCallSyncCallback_Opt_StyledString_Opt_Array_String_Void(vmContext, thisArray, thisLength);
-        case -143931627/*Kind_Callback_Opt_TabContentAnimatedTransition_Void*/: return deserializeAndCallSyncCallback_Opt_TabContentAnimatedTransition_Void(vmContext, thisArray, thisLength);
-        case 1906972865/*Kind_Callback_Opt_Union_Number_Resource_Void*/: return deserializeAndCallSyncCallback_Opt_Union_Number_Resource_Void(vmContext, thisArray, thisLength);
-        case 447525143/*Kind_Callback_Opt_Union_ResourceStr_String_Resource_Void*/: return deserializeAndCallSyncCallback_Opt_Union_ResourceStr_String_Resource_Void(vmContext, thisArray, thisLength);
-        case -2058966418/*Kind_Callback_PlaybackInfo_Void*/: return deserializeAndCallSyncCallback_PlaybackInfo_Void(vmContext, thisArray, thisLength);
-        case 721562324/*Kind_Callback_Pointer_Void*/: return deserializeAndCallSyncCallback_Pointer_Void(vmContext, thisArray, thisLength);
-        case 624053870/*Kind_Callback_PopInfo_Void*/: return deserializeAndCallSyncCallback_PopInfo_Void(vmContext, thisArray, thisLength);
-        case 463894668/*Kind_Callback_PreDragStatus_Void*/: return deserializeAndCallSyncCallback_PreDragStatus_Void(vmContext, thisArray, thisLength);
-        case 1300890372/*Kind_Callback_PreparedInfo_Void*/: return deserializeAndCallSyncCallback_PreparedInfo_Void(vmContext, thisArray, thisLength);
-        case 797834474/*Kind_Callback_RangeUpdate*/: return deserializeAndCallSyncCallback_RangeUpdate(vmContext, thisArray, thisLength);
-        case 934309126/*Kind_Callback_RefreshStatus_Void*/: return deserializeAndCallSyncCallback_RefreshStatus_Void(vmContext, thisArray, thisLength);
-        case 1465860515/*Kind_Callback_RichEditorChangeValue_Boolean*/: return deserializeAndCallSyncCallback_RichEditorChangeValue_Boolean(vmContext, thisArray, thisLength);
-        case 667698748/*Kind_Callback_RichEditorDeleteValue_Boolean*/: return deserializeAndCallSyncCallback_RichEditorDeleteValue_Boolean(vmContext, thisArray, thisLength);
-        case -319221262/*Kind_Callback_RichEditorInsertValue_Boolean*/: return deserializeAndCallSyncCallback_RichEditorInsertValue_Boolean(vmContext, thisArray, thisLength);
-        case -62253375/*Kind_Callback_RichEditorRange_Void*/: return deserializeAndCallSyncCallback_RichEditorRange_Void(vmContext, thisArray, thisLength);
-        case -963852514/*Kind_Callback_RichEditorSelection_Void*/: return deserializeAndCallSyncCallback_RichEditorSelection_Void(vmContext, thisArray, thisLength);
-        case 1980824326/*Kind_Callback_RichEditorTextSpanResult_Void*/: return deserializeAndCallSyncCallback_RichEditorTextSpanResult_Void(vmContext, thisArray, thisLength);
-        case 1688035159/*Kind_Callback_RotationGesture*/: return deserializeAndCallSyncCallback_RotationGesture(vmContext, thisArray, thisLength);
-        case 924806076/*Kind_Callback_RotationGesture_Void*/: return deserializeAndCallSyncCallback_RotationGesture_Void(vmContext, thisArray, thisLength);
-        case 22609082/*Kind_Callback_SheetDismiss_Void*/: return deserializeAndCallSyncCallback_SheetDismiss_Void(vmContext, thisArray, thisLength);
-        case -224451112/*Kind_Callback_SheetType_Void*/: return deserializeAndCallSyncCallback_SheetType_Void(vmContext, thisArray, thisLength);
-        case 1318865891/*Kind_Callback_SizeResult_Void*/: return deserializeAndCallSyncCallback_SizeResult_Void(vmContext, thisArray, thisLength);
-        case 1536231691/*Kind_Callback_SpringBackAction_Void*/: return deserializeAndCallSyncCallback_SpringBackAction_Void(vmContext, thisArray, thisLength);
-        case -1872286415/*Kind_Callback_StateStylesChange*/: return deserializeAndCallSyncCallback_StateStylesChange(vmContext, thisArray, thisLength);
-        case -683652998/*Kind_Callback_String_PasteEvent_Void*/: return deserializeAndCallSyncCallback_String_PasteEvent_Void(vmContext, thisArray, thisLength);
-        case -1736208400/*Kind_Callback_String_SurfaceRect_Void*/: return deserializeAndCallSyncCallback_String_SurfaceRect_Void(vmContext, thisArray, thisLength);
-        case 814634522/*Kind_Callback_String_Void*/: return deserializeAndCallSyncCallback_String_Void(vmContext, thisArray, thisLength);
-        case 2116745428/*Kind_Callback_StyledStringChangeValue_Boolean*/: return deserializeAndCallSyncCallback_StyledStringChangeValue_Boolean(vmContext, thisArray, thisLength);
-        case -1198150682/*Kind_Callback_StyledStringMarshallingValue_Void*/: return deserializeAndCallSyncCallback_StyledStringMarshallingValue_Void(vmContext, thisArray, thisLength);
-        case -301561698/*Kind_Callback_SwipeActionState_Void*/: return deserializeAndCallSyncCallback_SwipeActionState_Void(vmContext, thisArray, thisLength);
-        case 1824461051/*Kind_Callback_SwipeGesture*/: return deserializeAndCallSyncCallback_SwipeGesture(vmContext, thisArray, thisLength);
-        case -768726640/*Kind_Callback_SwipeGesture_Void*/: return deserializeAndCallSyncCallback_SwipeGesture_Void(vmContext, thisArray, thisLength);
-        case -416053361/*Kind_Callback_SwiperContentTransitionProxy_Void*/: return deserializeAndCallSyncCallback_SwiperContentTransitionProxy_Void(vmContext, thisArray, thisLength);
-        case -1223938478/*Kind_Callback_TabContentTransitionProxy_Void*/: return deserializeAndCallSyncCallback_TabContentTransitionProxy_Void(vmContext, thisArray, thisLength);
-        case 691098197/*Kind_Callback_TerminationInfo_Void*/: return deserializeAndCallSyncCallback_TerminationInfo_Void(vmContext, thisArray, thisLength);
-        case 1290504509/*Kind_Callback_TextPickerResult_Void*/: return deserializeAndCallSyncCallback_TextPickerResult_Void(vmContext, thisArray, thisLength);
-        case 811915501/*Kind_Callback_TextRange_Void*/: return deserializeAndCallSyncCallback_TextRange_Void(vmContext, thisArray, thisLength);
-        case 1557859605/*Kind_Callback_TimePickerResult_Void*/: return deserializeAndCallSyncCallback_TimePickerResult_Void(vmContext, thisArray, thisLength);
-        case -274419246/*Kind_Callback_TouchEvent_HitTestMode*/: return deserializeAndCallSyncCallback_TouchEvent_HitTestMode(vmContext, thisArray, thisLength);
-        case -1676021850/*Kind_Callback_TouchEvent_Void*/: return deserializeAndCallSyncCallback_TouchEvent_Void(vmContext, thisArray, thisLength);
-        case 1943507619/*Kind_Callback_TouchResult_Void*/: return deserializeAndCallSyncCallback_TouchResult_Void(vmContext, thisArray, thisLength);
-        case 148489367/*Kind_Callback_Tuple_Number_Number_Number_Number_Void*/: return deserializeAndCallSyncCallback_Tuple_Number_Number_Number_Number_Void(vmContext, thisArray, thisLength);
-        case -607365481/*Kind_Callback_Tuple_Number_Number_Void*/: return deserializeAndCallSyncCallback_Tuple_Number_Number_Void(vmContext, thisArray, thisLength);
-        case -1063506522/*Kind_Callback_UIExtensionProxy_Void*/: return deserializeAndCallSyncCallback_UIExtensionProxy_Void(vmContext, thisArray, thisLength);
-        case -620935067/*Kind_Callback_Union_CustomBuilder_DragItemInfo_Void*/: return deserializeAndCallSyncCallback_Union_CustomBuilder_DragItemInfo_Void(vmContext, thisArray, thisLength);
-        case -1111620998/*Kind_Callback_Union_Number_Array_Number_Void*/: return deserializeAndCallSyncCallback_Union_Number_Array_Number_Void(vmContext, thisArray, thisLength);
-        case -1438068294/*Kind_Callback_Union_ResourceStr_Array_ResourceStr_Void*/: return deserializeAndCallSyncCallback_Union_ResourceStr_Array_ResourceStr_Void(vmContext, thisArray, thisLength);
-        case 1035300803/*Kind_Callback_Union_ResourceStr_Resource_String_Void*/: return deserializeAndCallSyncCallback_Union_ResourceStr_Resource_String_Void(vmContext, thisArray, thisLength);
-        case -1867723152/*Kind_Callback_Void*/: return deserializeAndCallSyncCallback_Void(vmContext, thisArray, thisLength);
-        case -1376223390/*Kind_Callback_WebKeyboardOptions_Void*/: return deserializeAndCallSyncCallback_WebKeyboardOptions_Void(vmContext, thisArray, thisLength);
-        case 831645046/*Kind_Callback_WebResourceResponse_Void*/: return deserializeAndCallSyncCallback_WebResourceResponse_Void(vmContext, thisArray, thisLength);
-        case 1317697111/*Kind_CheckBoxModifierBuilder*/: return deserializeAndCallSyncCheckBoxModifierBuilder(vmContext, thisArray, thisLength);
-        case 1482532871/*Kind_CompatibleInitCallback*/: return deserializeAndCallSyncCompatibleInitCallback(vmContext, thisArray, thisLength);
-        case 434420460/*Kind_CompatibleUpdateCallback*/: return deserializeAndCallSyncCompatibleUpdateCallback(vmContext, thisArray, thisLength);
-        case 1532328438/*Kind_ContentDidScrollCallback*/: return deserializeAndCallSyncContentDidScrollCallback(vmContext, thisArray, thisLength);
-        case -2146044511/*Kind_ContentWillScrollCallback*/: return deserializeAndCallSyncContentWillScrollCallback(vmContext, thisArray, thisLength);
-        case 260483890/*Kind_Context_getGroupDir_Callback*/: return deserializeAndCallSyncContext_getGroupDir_Callback(vmContext, thisArray, thisLength);
-        case 1766817632/*Kind_CustomNodeBuilder*/: return deserializeAndCallSyncCustomNodeBuilder(vmContext, thisArray, thisLength);
-        case -1565709723/*Kind_CustomStyles*/: return deserializeAndCallSyncCustomStyles(vmContext, thisArray, thisLength);
-        case -238036926/*Kind_DataPanelModifierBuilder*/: return deserializeAndCallSyncDataPanelModifierBuilder(vmContext, thisArray, thisLength);
-        case -1729563209/*Kind_EditableTextOnChangeCallback*/: return deserializeAndCallSyncEditableTextOnChangeCallback(vmContext, thisArray, thisLength);
-        case -1936519453/*Kind_ErrorCallback*/: return deserializeAndCallSyncErrorCallback(vmContext, thisArray, thisLength);
-        case 255469205/*Kind_GaugeModifierBuilder*/: return deserializeAndCallSyncGaugeModifierBuilder(vmContext, thisArray, thisLength);
-        case -2119548940/*Kind_GestureRecognizerJudgeBeginCallback*/: return deserializeAndCallSyncGestureRecognizerJudgeBeginCallback(vmContext, thisArray, thisLength);
-        case -2076995110/*Kind_GetItemMainSizeByIndex*/: return deserializeAndCallSyncGetItemMainSizeByIndex(vmContext, thisArray, thisLength);
-        case 68560477/*Kind_HoverCallback*/: return deserializeAndCallSyncHoverCallback(vmContext, thisArray, thisLength);
-        case -1180567691/*Kind_ImageCompleteCallback*/: return deserializeAndCallSyncImageCompleteCallback(vmContext, thisArray, thisLength);
-        case 1906248580/*Kind_ImageErrorCallback*/: return deserializeAndCallSyncImageErrorCallback(vmContext, thisArray, thisLength);
-        case 541056756/*Kind_ImageOnCompleteCallback*/: return deserializeAndCallSyncImageOnCompleteCallback(vmContext, thisArray, thisLength);
-        case 1502213270/*Kind_InterceptionModeCallback*/: return deserializeAndCallSyncInterceptionModeCallback(vmContext, thisArray, thisLength);
-        case 1852781814/*Kind_InterceptionShowCallback*/: return deserializeAndCallSyncInterceptionShowCallback(vmContext, thisArray, thisLength);
-        case 56854815/*Kind_LoadingProgressModifierBuilder*/: return deserializeAndCallSyncLoadingProgressModifierBuilder(vmContext, thisArray, thisLength);
-        case 810927048/*Kind_MenuCallback*/: return deserializeAndCallSyncMenuCallback(vmContext, thisArray, thisLength);
-        case -1928323454/*Kind_MenuItemModifierBuilder*/: return deserializeAndCallSyncMenuItemModifierBuilder(vmContext, thisArray, thisLength);
-        case -614475458/*Kind_MenuOnAppearCallback*/: return deserializeAndCallSyncMenuOnAppearCallback(vmContext, thisArray, thisLength);
-        case -1026503952/*Kind_ModifierKeyStateGetter*/: return deserializeAndCallSyncModifierKeyStateGetter(vmContext, thisArray, thisLength);
-        case -1066063065/*Kind_NavDestinationTransitionDelegate*/: return deserializeAndCallSyncNavDestinationTransitionDelegate(vmContext, thisArray, thisLength);
-        case -588228933/*Kind_NavExtender_OnUpdateStack*/: return deserializeAndCallSyncNavExtender_OnUpdateStack(vmContext, thisArray, thisLength);
-        case 1572284740/*Kind_OnAdsBlockedCallback*/: return deserializeAndCallSyncOnAdsBlockedCallback(vmContext, thisArray, thisLength);
-        case 726938390/*Kind_OnAlphabetIndexerPopupSelectCallback*/: return deserializeAndCallSyncOnAlphabetIndexerPopupSelectCallback(vmContext, thisArray, thisLength);
-        case -1956514817/*Kind_OnAlphabetIndexerRequestPopupDataCallback*/: return deserializeAndCallSyncOnAlphabetIndexerRequestPopupDataCallback(vmContext, thisArray, thisLength);
-        case -1189721220/*Kind_OnAlphabetIndexerSelectCallback*/: return deserializeAndCallSyncOnAlphabetIndexerSelectCallback(vmContext, thisArray, thisLength);
-        case -1198592337/*Kind_OnCheckboxChangeCallback*/: return deserializeAndCallSyncOnCheckboxChangeCallback(vmContext, thisArray, thisLength);
-        case -1053064240/*Kind_OnCheckboxGroupChangeCallback*/: return deserializeAndCallSyncOnCheckboxGroupChangeCallback(vmContext, thisArray, thisLength);
-        case -419979106/*Kind_OnContentScrollCallback*/: return deserializeAndCallSyncOnContentScrollCallback(vmContext, thisArray, thisLength);
-        case 1788572278/*Kind_OnContextMenuHideCallback*/: return deserializeAndCallSyncOnContextMenuHideCallback(vmContext, thisArray, thisLength);
-        case 312701677/*Kind_OnCreateMenuCallback*/: return deserializeAndCallSyncOnCreateMenuCallback(vmContext, thisArray, thisLength);
-        case 1648184341/*Kind_OnDidChangeCallback*/: return deserializeAndCallSyncOnDidChangeCallback(vmContext, thisArray, thisLength);
-        case 1451593190/*Kind_OnDragEventCallback*/: return deserializeAndCallSyncOnDragEventCallback(vmContext, thisArray, thisLength);
-        case 767275770/*Kind_OnFirstMeaningfulPaintCallback*/: return deserializeAndCallSyncOnFirstMeaningfulPaintCallback(vmContext, thisArray, thisLength);
-        case 2050387049/*Kind_OnFoldStatusChangeCallback*/: return deserializeAndCallSyncOnFoldStatusChangeCallback(vmContext, thisArray, thisLength);
-        case 81230317/*Kind_OnFullScreenEnterCallback*/: return deserializeAndCallSyncOnFullScreenEnterCallback(vmContext, thisArray, thisLength);
-        case -2025767812/*Kind_OnHoverCallback*/: return deserializeAndCallSyncOnHoverCallback(vmContext, thisArray, thisLength);
-        case 9040430/*Kind_OnHoverStatusChangeCallback*/: return deserializeAndCallSyncOnHoverStatusChangeCallback(vmContext, thisArray, thisLength);
-        case -1377876844/*Kind_OnIntelligentTrackingPreventionCallback*/: return deserializeAndCallSyncOnIntelligentTrackingPreventionCallback(vmContext, thisArray, thisLength);
-        case 949409727/*Kind_OnItemDragStartCallback*/: return deserializeAndCallSyncOnItemDragStartCallback(vmContext, thisArray, thisLength);
-        case 1390640532/*Kind_OnLargestContentfulPaintCallback*/: return deserializeAndCallSyncOnLargestContentfulPaintCallback(vmContext, thisArray, thisLength);
-        case -405536347/*Kind_OnLazyLoadingFunc*/: return deserializeAndCallSyncOnLazyLoadingFunc(vmContext, thisArray, thisLength);
-        case -968773856/*Kind_OnLinearIndicatorChangeCallback*/: return deserializeAndCallSyncOnLinearIndicatorChangeCallback(vmContext, thisArray, thisLength);
-        case -1106041422/*Kind_OnMenuItemClickCallback*/: return deserializeAndCallSyncOnMenuItemClickCallback(vmContext, thisArray, thisLength);
-        case -1200281222/*Kind_OnMoveHandler*/: return deserializeAndCallSyncOnMoveHandler(vmContext, thisArray, thisLength);
-        case -1641338704/*Kind_OnNativeEmbedVisibilityChangeCallback*/: return deserializeAndCallSyncOnNativeEmbedVisibilityChangeCallback(vmContext, thisArray, thisLength);
-        case -823037763/*Kind_OnNativeLoadCallback*/: return deserializeAndCallSyncOnNativeLoadCallback(vmContext, thisArray, thisLength);
-        case -398722176/*Kind_OnNavigationEntryCommittedCallback*/: return deserializeAndCallSyncOnNavigationEntryCommittedCallback(vmContext, thisArray, thisLength);
-        case 865258467/*Kind_OnOverrideUrlLoadingCallback*/: return deserializeAndCallSyncOnOverrideUrlLoadingCallback(vmContext, thisArray, thisLength);
-        case 1738363337/*Kind_OnPasteCallback*/: return deserializeAndCallSyncOnPasteCallback(vmContext, thisArray, thisLength);
-        case 511412333/*Kind_OnRadioChangeCallback*/: return deserializeAndCallSyncOnRadioChangeCallback(vmContext, thisArray, thisLength);
-        case -551895045/*Kind_OnRatingChangeCallback*/: return deserializeAndCallSyncOnRatingChangeCallback(vmContext, thisArray, thisLength);
-        case 47282303/*Kind_OnRenderProcessNotRespondingCallback*/: return deserializeAndCallSyncOnRenderProcessNotRespondingCallback(vmContext, thisArray, thisLength);
-        case 1334389194/*Kind_OnRenderProcessRespondingCallback*/: return deserializeAndCallSyncOnRenderProcessRespondingCallback(vmContext, thisArray, thisLength);
-        case -1099824577/*Kind_OnSafeBrowsingCheckResultCallback*/: return deserializeAndCallSyncOnSafeBrowsingCheckResultCallback(vmContext, thisArray, thisLength);
-        case -160015401/*Kind_OnScrollCallback*/: return deserializeAndCallSyncOnScrollCallback(vmContext, thisArray, thisLength);
-        case -1259214476/*Kind_OnScrollEdgeCallback*/: return deserializeAndCallSyncOnScrollEdgeCallback(vmContext, thisArray, thisLength);
-        case -2133791987/*Kind_OnScrollFrameBeginCallback*/: return deserializeAndCallSyncOnScrollFrameBeginCallback(vmContext, thisArray, thisLength);
-        case 625641334/*Kind_OnScrollVisibleContentChangeCallback*/: return deserializeAndCallSyncOnScrollVisibleContentChangeCallback(vmContext, thisArray, thisLength);
-        case -1486869198/*Kind_OnSelectCallback*/: return deserializeAndCallSyncOnSelectCallback(vmContext, thisArray, thisLength);
-        case -399603614/*Kind_OnSslErrorEventCallback*/: return deserializeAndCallSyncOnSslErrorEventCallback(vmContext, thisArray, thisLength);
-        case -1961646162/*Kind_OnSubmitCallback*/: return deserializeAndCallSyncOnSubmitCallback(vmContext, thisArray, thisLength);
-        case -143686583/*Kind_OnSwiperAnimationEndCallback*/: return deserializeAndCallSyncOnSwiperAnimationEndCallback(vmContext, thisArray, thisLength);
-        case 876602502/*Kind_OnSwiperAnimationStartCallback*/: return deserializeAndCallSyncOnSwiperAnimationStartCallback(vmContext, thisArray, thisLength);
-        case 606029871/*Kind_OnSwiperGestureSwipeCallback*/: return deserializeAndCallSyncOnSwiperGestureSwipeCallback(vmContext, thisArray, thisLength);
-        case 1942856551/*Kind_OnTabsAnimationEndCallback*/: return deserializeAndCallSyncOnTabsAnimationEndCallback(vmContext, thisArray, thisLength);
-        case -147408344/*Kind_OnTabsAnimationStartCallback*/: return deserializeAndCallSyncOnTabsAnimationStartCallback(vmContext, thisArray, thisLength);
-        case -349727249/*Kind_OnTabsContentWillChangeCallback*/: return deserializeAndCallSyncOnTabsContentWillChangeCallback(vmContext, thisArray, thisLength);
-        case 253696833/*Kind_OnTabsGestureSwipeCallback*/: return deserializeAndCallSyncOnTabsGestureSwipeCallback(vmContext, thisArray, thisLength);
-        case -1902343417/*Kind_OnTextPickerChangeCallback*/: return deserializeAndCallSyncOnTextPickerChangeCallback(vmContext, thisArray, thisLength);
-        case 695228737/*Kind_OnTextSelectionChangeCallback*/: return deserializeAndCallSyncOnTextSelectionChangeCallback(vmContext, thisArray, thisLength);
-        case 994429103/*Kind_OnTimePickerChangeCallback*/: return deserializeAndCallSyncOnTimePickerChangeCallback(vmContext, thisArray, thisLength);
-        case 782080172/*Kind_OnTotalCountFunc*/: return deserializeAndCallSyncOnTotalCountFunc(vmContext, thisArray, thisLength);
-        case 1847083191/*Kind_OnViewportFitChangedCallback*/: return deserializeAndCallSyncOnViewportFitChangedCallback(vmContext, thisArray, thisLength);
-        case 1483622345/*Kind_OnWillScrollCallback*/: return deserializeAndCallSyncOnWillScrollCallback(vmContext, thisArray, thisLength);
-        case 256377244/*Kind_PageMapBuilder*/: return deserializeAndCallSyncPageMapBuilder(vmContext, thisArray, thisLength);
-        case 1627123591/*Kind_PageTransitionCallback*/: return deserializeAndCallSyncPageTransitionCallback(vmContext, thisArray, thisLength);
-        case 1501373374/*Kind_PasteButtonCallback*/: return deserializeAndCallSyncPasteButtonCallback(vmContext, thisArray, thisLength);
-        case 919057028/*Kind_PasteEventCallback*/: return deserializeAndCallSyncPasteEventCallback(vmContext, thisArray, thisLength);
-        case -1992671958/*Kind_PluginErrorCallback*/: return deserializeAndCallSyncPluginErrorCallback(vmContext, thisArray, thisLength);
-        case -1444325632/*Kind_PopupStateChangeCallback*/: return deserializeAndCallSyncPopupStateChangeCallback(vmContext, thisArray, thisLength);
-        case -2049749383/*Kind_ProgressModifierBuilder*/: return deserializeAndCallSyncProgressModifierBuilder(vmContext, thisArray, thisLength);
-        case -327322091/*Kind_RadioModifierBuilder*/: return deserializeAndCallSyncRadioModifierBuilder(vmContext, thisArray, thisLength);
-        case 1013330403/*Kind_RatingModifierBuilder*/: return deserializeAndCallSyncRatingModifierBuilder(vmContext, thisArray, thisLength);
-        case -1213708823/*Kind_RestrictedWorker_onerror_Callback*/: return deserializeAndCallSyncRestrictedWorker_onerror_Callback(vmContext, thisArray, thisLength);
-        case -2095497263/*Kind_RestrictedWorker_onexit_Callback*/: return deserializeAndCallSyncRestrictedWorker_onexit_Callback(vmContext, thisArray, thisLength);
-        case 1614214490/*Kind_RestrictedWorker_onmessage_Callback*/: return deserializeAndCallSyncRestrictedWorker_onmessage_Callback(vmContext, thisArray, thisLength);
-        case 1110529154/*Kind_ReuseIdCallback*/: return deserializeAndCallSyncReuseIdCallback(vmContext, thisArray, thisLength);
-        case -1634474996/*Kind_SaveButtonCallback*/: return deserializeAndCallSyncSaveButtonCallback(vmContext, thisArray, thisLength);
-        case -1265626662/*Kind_ScrollOnScrollCallback*/: return deserializeAndCallSyncScrollOnScrollCallback(vmContext, thisArray, thisLength);
-        case -721521596/*Kind_ScrollOnWillScrollCallback*/: return deserializeAndCallSyncScrollOnWillScrollCallback(vmContext, thisArray, thisLength);
-        case 1717691617/*Kind_SearchSubmitCallback*/: return deserializeAndCallSyncSearchSubmitCallback(vmContext, thisArray, thisLength);
-        case 2049289694/*Kind_SearchValueCallback*/: return deserializeAndCallSyncSearchValueCallback(vmContext, thisArray, thisLength);
-        case -250780276/*Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallSyncShouldBuiltInRecognizerParallelWithCallback(vmContext, thisArray, thisLength);
-        case -1716637992/*Kind_SizeChangeCallback*/: return deserializeAndCallSyncSizeChangeCallback(vmContext, thisArray, thisLength);
-        case 553138561/*Kind_SliderModifierBuilder*/: return deserializeAndCallSyncSliderModifierBuilder(vmContext, thisArray, thisLength);
-        case 711649376/*Kind_SliderTriggerChangeCallback*/: return deserializeAndCallSyncSliderTriggerChangeCallback(vmContext, thisArray, thisLength);
-        case 1095217433/*Kind_StyledStringMarshallCallback*/: return deserializeAndCallSyncStyledStringMarshallCallback(vmContext, thisArray, thisLength);
-        case 1359717794/*Kind_StyledStringUnmarshallCallback*/: return deserializeAndCallSyncStyledStringUnmarshallCallback(vmContext, thisArray, thisLength);
-        case -712186065/*Kind_SubmitCallback*/: return deserializeAndCallSyncSubmitCallback(vmContext, thisArray, thisLength);
-        case 221706282/*Kind_TabsCustomContentTransitionCallback*/: return deserializeAndCallSyncTabsCustomContentTransitionCallback(vmContext, thisArray, thisLength);
-        case -401980571/*Kind_TextAreaSubmitCallback*/: return deserializeAndCallSyncTextAreaSubmitCallback(vmContext, thisArray, thisLength);
-        case -987272911/*Kind_TextClockModifierBuilder*/: return deserializeAndCallSyncTextClockModifierBuilder(vmContext, thisArray, thisLength);
-        case 18061455/*Kind_TextFieldValueCallback*/: return deserializeAndCallSyncTextFieldValueCallback(vmContext, thisArray, thisLength);
-        case -202014218/*Kind_TextPickerEnterSelectedAreaCallback*/: return deserializeAndCallSyncTextPickerEnterSelectedAreaCallback(vmContext, thisArray, thisLength);
-        case -1928298699/*Kind_TextPickerScrollStopCallback*/: return deserializeAndCallSyncTextPickerScrollStopCallback(vmContext, thisArray, thisLength);
-        case 505330174/*Kind_TextTimerModifierBuilder*/: return deserializeAndCallSyncTextTimerModifierBuilder(vmContext, thisArray, thisLength);
-        case -879751946/*Kind_ToggleModifierBuilder*/: return deserializeAndCallSyncToggleModifierBuilder(vmContext, thisArray, thisLength);
-        case -1878458553/*Kind_TransitionFinishCallback*/: return deserializeAndCallSyncTransitionFinishCallback(vmContext, thisArray, thisLength);
-        case -201932855/*Kind_Type_CommonMethod_onDragStart*/: return deserializeAndCallSyncType_CommonMethod_onDragStart(vmContext, thisArray, thisLength);
-        case -1209910992/*Kind_Type_NavigationAttribute_customNavContentTransition*/: return deserializeAndCallSyncType_NavigationAttribute_customNavContentTransition(vmContext, thisArray, thisLength);
-        case -448105339/*Kind_UpdateTransitionCallback*/: return deserializeAndCallSyncUpdateTransitionCallback(vmContext, thisArray, thisLength);
-        case 541663396/*Kind_VisibleAreaChangeCallback*/: return deserializeAndCallSyncVisibleAreaChangeCallback(vmContext, thisArray, thisLength);
-        case -2038961969/*Kind_VoidCallback*/: return deserializeAndCallSyncVoidCallback(vmContext, thisArray, thisLength);
-        case -1829763354/*Kind_WebKeyboardCallback*/: return deserializeAndCallSyncWebKeyboardCallback(vmContext, thisArray, thisLength);
+        case Kind_AccessibilityCallback: return deserializeAndCallSyncAccessibilityCallback(vmContext, thisArray, thisLength);
+        case Kind_AccessibilityFocusCallback: return deserializeAndCallSyncAccessibilityFocusCallback(vmContext, thisArray, thisLength);
+        case Kind_AsyncCallback_image_PixelMap_Void: return deserializeAndCallSyncAsyncCallback_image_PixelMap_Void(vmContext, thisArray, thisLength);
+        case Kind_ButtonModifierBuilder: return deserializeAndCallSyncButtonModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_ButtonTriggerClickCallback: return deserializeAndCallSyncButtonTriggerClickCallback(vmContext, thisArray, thisLength);
+        case Kind_Callback_Area_Area_Void: return deserializeAndCallSyncCallback_Area_Area_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Array_Number_Void: return deserializeAndCallSyncCallback_Array_Number_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Array_String_Void: return deserializeAndCallSyncCallback_Array_String_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Array_TextMenuItem_Void: return deserializeAndCallSyncCallback_Array_TextMenuItem_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Array_TouchTestInfo_TouchResult: return deserializeAndCallSyncCallback_Array_TouchTestInfo_TouchResult(vmContext, thisArray, thisLength);
+        case Kind_Callback_AxisEvent_Void: return deserializeAndCallSyncCallback_AxisEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Boolean: return deserializeAndCallSyncCallback_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_Boolean_HoverEvent_Void: return deserializeAndCallSyncCallback_Boolean_HoverEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Boolean_Void: return deserializeAndCallSyncCallback_Boolean_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Buffer_Void: return deserializeAndCallSyncCallback_Buffer_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_CalendarRequestedData_Void: return deserializeAndCallSyncCallback_CalendarRequestedData_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_CalendarSelectedDate_Void: return deserializeAndCallSyncCallback_CalendarSelectedDate_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_ClickEvent_Void: return deserializeAndCallSyncCallback_ClickEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_CompatibleComponentInfo_Void: return deserializeAndCallSyncCallback_CompatibleComponentInfo_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_ComputedBarAttribute_Void: return deserializeAndCallSyncCallback_ComputedBarAttribute_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_CopyEvent_Void: return deserializeAndCallSyncCallback_CopyEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_CreateItem: return deserializeAndCallSyncCallback_CreateItem(vmContext, thisArray, thisLength);
+        case Kind_Callback_CrownEvent_Void: return deserializeAndCallSyncCallback_CrownEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_CustomSpanMeasureInfo_CustomSpanMetrics: return deserializeAndCallSyncCallback_CustomSpanMeasureInfo_CustomSpanMetrics(vmContext, thisArray, thisLength);
+        case Kind_Callback_CustomSpanMetrics_Void: return deserializeAndCallSyncCallback_CustomSpanMetrics_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_CutEvent_Void: return deserializeAndCallSyncCallback_CutEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Date_Void: return deserializeAndCallSyncCallback_Date_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_DeleteValue_Boolean: return deserializeAndCallSyncCallback_DeleteValue_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_DeleteValue_Void: return deserializeAndCallSyncCallback_DeleteValue_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_DismissContentCoverAction_Void: return deserializeAndCallSyncCallback_DismissContentCoverAction_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_DismissDialogAction_Void: return deserializeAndCallSyncCallback_DismissDialogAction_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_DismissPopupAction_Void: return deserializeAndCallSyncCallback_DismissPopupAction_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_DismissSheetAction_Void: return deserializeAndCallSyncCallback_DismissSheetAction_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_DragEvent_Opt_String_Void: return deserializeAndCallSyncCallback_DragEvent_Opt_String_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_DrawContext_CustomSpanDrawInfo_Void: return deserializeAndCallSyncCallback_DrawContext_CustomSpanDrawInfo_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_DrawContext_Void: return deserializeAndCallSyncCallback_DrawContext_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_EditableTextChangeValue_Boolean: return deserializeAndCallSyncCallback_EditableTextChangeValue_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_EnterKeyType_Void: return deserializeAndCallSyncCallback_EnterKeyType_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_ErrorInformation_Void: return deserializeAndCallSyncCallback_ErrorInformation_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Extender_OnFinish: return deserializeAndCallSyncCallback_Extender_OnFinish(vmContext, thisArray, thisLength);
+        case Kind_Callback_Extender_OnProgress: return deserializeAndCallSyncCallback_Extender_OnProgress(vmContext, thisArray, thisLength);
+        case Kind_Callback_FocusAxisEvent_Void: return deserializeAndCallSyncCallback_FocusAxisEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_FormCallbackInfo_Void: return deserializeAndCallSyncCallback_FormCallbackInfo_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_FullscreenInfo_Void: return deserializeAndCallSyncCallback_FullscreenInfo_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_GestureEvent_Void: return deserializeAndCallSyncCallback_GestureEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult: return deserializeAndCallSyncCallback_GestureInfo_BaseGestureEvent_GestureJudgeResult(vmContext, thisArray, thisLength);
+        case Kind_Callback_GestureJudgeResult_Void: return deserializeAndCallSyncCallback_GestureJudgeResult_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_GestureRecognizer_Void: return deserializeAndCallSyncCallback_GestureRecognizer_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_HitTestMode_Void: return deserializeAndCallSyncCallback_HitTestMode_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_HoverEvent_Void: return deserializeAndCallSyncCallback_HoverEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_InsertValue_Boolean: return deserializeAndCallSyncCallback_InsertValue_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_InsertValue_Void: return deserializeAndCallSyncCallback_InsertValue_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_ItemDragInfo_Number_Number_Boolean_Void: return deserializeAndCallSyncCallback_ItemDragInfo_Number_Number_Boolean_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_ItemDragInfo_Number_Number_Void: return deserializeAndCallSyncCallback_ItemDragInfo_Number_Number_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_ItemDragInfo_Number_Void: return deserializeAndCallSyncCallback_ItemDragInfo_Number_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_ItemDragInfo_Void: return deserializeAndCallSyncCallback_ItemDragInfo_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_KeyEvent_Boolean: return deserializeAndCallSyncCallback_KeyEvent_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_KeyEvent_Void: return deserializeAndCallSyncCallback_KeyEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Map_String_Object_Void: return deserializeAndCallSyncCallback_Map_String_Object_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_MarqueeState_Void: return deserializeAndCallSyncCallback_MarqueeState_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_MouseEvent_Void: return deserializeAndCallSyncCallback_MouseEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_NativeEmbedDataInfo_Void: return deserializeAndCallSyncCallback_NativeEmbedDataInfo_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_NativeEmbedTouchInfo_Void: return deserializeAndCallSyncCallback_NativeEmbedTouchInfo_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_NavDestinationActiveReason_Void: return deserializeAndCallSyncCallback_NavDestinationActiveReason_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_NavDestinationContext_Void: return deserializeAndCallSyncCallback_NavDestinationContext_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_NavigationMode_Void: return deserializeAndCallSyncCallback_NavigationMode_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_NavigationTitleMode_Void: return deserializeAndCallSyncCallback_NavigationTitleMode_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_NavigationTransitionProxy_Void: return deserializeAndCallSyncCallback_NavigationTransitionProxy_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Number_Number_Boolean: return deserializeAndCallSyncCallback_Number_Number_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_Number_Number_Boolean_Boolean: return deserializeAndCallSyncCallback_Number_Number_Boolean_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_Number_Number_ComputedBarAttribute: return deserializeAndCallSyncCallback_Number_Number_ComputedBarAttribute(vmContext, thisArray, thisLength);
+        case Kind_Callback_Number_Number_Number_Void: return deserializeAndCallSyncCallback_Number_Number_Number_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Number_Number_Void: return deserializeAndCallSyncCallback_Number_Number_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Number_SliderChangeMode_Void: return deserializeAndCallSyncCallback_Number_SliderChangeMode_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Number_Tuple_Number_Number: return deserializeAndCallSyncCallback_Number_Tuple_Number_Number(vmContext, thisArray, thisLength);
+        case Kind_Callback_Number_Tuple_Number_Number_Number_Number: return deserializeAndCallSyncCallback_Number_Tuple_Number_Number_Number_Number(vmContext, thisArray, thisLength);
+        case Kind_Callback_Number_Void: return deserializeAndCallSyncCallback_Number_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Object_Void: return deserializeAndCallSyncCallback_Object_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnAlertEvent_Boolean: return deserializeAndCallSyncCallback_OnAlertEvent_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnAudioStateChangedEvent_Void: return deserializeAndCallSyncCallback_OnAudioStateChangedEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnBeforeUnloadEvent_Boolean: return deserializeAndCallSyncCallback_OnBeforeUnloadEvent_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnClientAuthenticationEvent_Void: return deserializeAndCallSyncCallback_OnClientAuthenticationEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnConfirmEvent_Boolean: return deserializeAndCallSyncCallback_OnConfirmEvent_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnConsoleEvent_Boolean: return deserializeAndCallSyncCallback_OnConsoleEvent_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnContextMenuShowEvent_Boolean: return deserializeAndCallSyncCallback_OnContextMenuShowEvent_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnDataResubmittedEvent_Void: return deserializeAndCallSyncCallback_OnDataResubmittedEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnDownloadStartEvent_Void: return deserializeAndCallSyncCallback_OnDownloadStartEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnErrorReceiveEvent_Void: return deserializeAndCallSyncCallback_OnErrorReceiveEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnFaviconReceivedEvent_Void: return deserializeAndCallSyncCallback_OnFaviconReceivedEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnFirstContentfulPaintEvent_Void: return deserializeAndCallSyncCallback_OnFirstContentfulPaintEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnGeolocationShowEvent_Void: return deserializeAndCallSyncCallback_OnGeolocationShowEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnHttpAuthRequestEvent_Boolean: return deserializeAndCallSyncCallback_OnHttpAuthRequestEvent_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnHttpErrorReceiveEvent_Void: return deserializeAndCallSyncCallback_OnHttpErrorReceiveEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnInterceptRequestEvent_WebResourceResponse: return deserializeAndCallSyncCallback_OnInterceptRequestEvent_WebResourceResponse(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnLoadInterceptEvent_Boolean: return deserializeAndCallSyncCallback_OnLoadInterceptEvent_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_onMeasureSize_SizeResult: return deserializeAndCallSyncCallback_onMeasureSize_SizeResult(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnOverScrollEvent_Void: return deserializeAndCallSyncCallback_OnOverScrollEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnPageBeginEvent_Void: return deserializeAndCallSyncCallback_OnPageBeginEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnPageEndEvent_Void: return deserializeAndCallSyncCallback_OnPageEndEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnPageVisibleEvent_Void: return deserializeAndCallSyncCallback_OnPageVisibleEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnPermissionRequestEvent_Void: return deserializeAndCallSyncCallback_OnPermissionRequestEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_onPlaceChildren_Void: return deserializeAndCallSyncCallback_onPlaceChildren_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnProgressChangeEvent_Void: return deserializeAndCallSyncCallback_OnProgressChangeEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnPromptEvent_Boolean: return deserializeAndCallSyncCallback_OnPromptEvent_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnRefreshAccessedHistoryEvent_Void: return deserializeAndCallSyncCallback_OnRefreshAccessedHistoryEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnRenderExitedEvent_Void: return deserializeAndCallSyncCallback_OnRenderExitedEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnResourceLoadEvent_Void: return deserializeAndCallSyncCallback_OnResourceLoadEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnScaleChangeEvent_Void: return deserializeAndCallSyncCallback_OnScaleChangeEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnScreenCaptureRequestEvent_Void: return deserializeAndCallSyncCallback_OnScreenCaptureRequestEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnScrollEvent_Void: return deserializeAndCallSyncCallback_OnScrollEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnScrollFrameBeginHandlerResult_Void: return deserializeAndCallSyncCallback_OnScrollFrameBeginHandlerResult_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnSearchResultReceiveEvent_Void: return deserializeAndCallSyncCallback_OnSearchResultReceiveEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnShowFileSelectorEvent_Boolean: return deserializeAndCallSyncCallback_OnShowFileSelectorEvent_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnSslErrorEventReceiveEvent_Void: return deserializeAndCallSyncCallback_OnSslErrorEventReceiveEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnTitleReceiveEvent_Void: return deserializeAndCallSyncCallback_OnTitleReceiveEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnTouchIconUrlReceivedEvent_Void: return deserializeAndCallSyncCallback_OnTouchIconUrlReceivedEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_OnWindowNewEvent_Void: return deserializeAndCallSyncCallback_OnWindowNewEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_Array_FontDescriptor_Opt_Array_String_Void: return deserializeAndCallSyncCallback_Opt_Array_FontDescriptor_Opt_Array_String_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_Array_NavDestinationTransition_Void: return deserializeAndCallSyncCallback_Opt_Array_NavDestinationTransition_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_Array_String_Opt_Array_String_Void: return deserializeAndCallSyncCallback_Opt_Array_String_Opt_Array_String_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_Array_String_Void: return deserializeAndCallSyncCallback_Opt_Array_String_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_Boolean_Void: return deserializeAndCallSyncCallback_Opt_Boolean_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_CustomBuilder_Void: return deserializeAndCallSyncCallback_Opt_CustomBuilder_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_FontDescriptor_Opt_Array_String_Void: return deserializeAndCallSyncCallback_Opt_FontDescriptor_Opt_Array_String_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_NavigationAnimatedTransition_Void: return deserializeAndCallSyncCallback_Opt_NavigationAnimatedTransition_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_Number_Void: return deserializeAndCallSyncCallback_Opt_Number_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_Object_Void: return deserializeAndCallSyncCallback_Opt_Object_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_OffsetResult_Void: return deserializeAndCallSyncCallback_Opt_OffsetResult_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_Scene_Opt_Array_String_Void: return deserializeAndCallSyncCallback_Opt_Scene_Opt_Array_String_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_ScrollResult_Void: return deserializeAndCallSyncCallback_Opt_ScrollResult_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_String_Opt_Array_String_Void: return deserializeAndCallSyncCallback_Opt_String_Opt_Array_String_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_StyledString_Opt_Array_String_Void: return deserializeAndCallSyncCallback_Opt_StyledString_Opt_Array_String_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_TabContentAnimatedTransition_Void: return deserializeAndCallSyncCallback_Opt_TabContentAnimatedTransition_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_Union_Number_Resource_Void: return deserializeAndCallSyncCallback_Opt_Union_Number_Resource_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Opt_Union_ResourceStr_String_Resource_Void: return deserializeAndCallSyncCallback_Opt_Union_ResourceStr_String_Resource_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_PlaybackInfo_Void: return deserializeAndCallSyncCallback_PlaybackInfo_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Pointer_Void: return deserializeAndCallSyncCallback_Pointer_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_PopInfo_Void: return deserializeAndCallSyncCallback_PopInfo_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_PreDragStatus_Void: return deserializeAndCallSyncCallback_PreDragStatus_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_PreparedInfo_Void: return deserializeAndCallSyncCallback_PreparedInfo_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_RangeUpdate: return deserializeAndCallSyncCallback_RangeUpdate(vmContext, thisArray, thisLength);
+        case Kind_Callback_RefreshStatus_Void: return deserializeAndCallSyncCallback_RefreshStatus_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_RichEditorChangeValue_Boolean: return deserializeAndCallSyncCallback_RichEditorChangeValue_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_RichEditorDeleteValue_Boolean: return deserializeAndCallSyncCallback_RichEditorDeleteValue_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_RichEditorInsertValue_Boolean: return deserializeAndCallSyncCallback_RichEditorInsertValue_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_RichEditorRange_Void: return deserializeAndCallSyncCallback_RichEditorRange_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_RichEditorSelection_Void: return deserializeAndCallSyncCallback_RichEditorSelection_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_RichEditorTextSpanResult_Void: return deserializeAndCallSyncCallback_RichEditorTextSpanResult_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_RotationGesture: return deserializeAndCallSyncCallback_RotationGesture(vmContext, thisArray, thisLength);
+        case Kind_Callback_RotationGesture_Void: return deserializeAndCallSyncCallback_RotationGesture_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_SheetDismiss_Void: return deserializeAndCallSyncCallback_SheetDismiss_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_SheetType_Void: return deserializeAndCallSyncCallback_SheetType_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_SizeResult_Void: return deserializeAndCallSyncCallback_SizeResult_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_SpringBackAction_Void: return deserializeAndCallSyncCallback_SpringBackAction_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_StateStylesChange: return deserializeAndCallSyncCallback_StateStylesChange(vmContext, thisArray, thisLength);
+        case Kind_Callback_String_PasteEvent_Void: return deserializeAndCallSyncCallback_String_PasteEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_String_SurfaceRect_Void: return deserializeAndCallSyncCallback_String_SurfaceRect_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_String_Void: return deserializeAndCallSyncCallback_String_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_StyledStringChangeValue_Boolean: return deserializeAndCallSyncCallback_StyledStringChangeValue_Boolean(vmContext, thisArray, thisLength);
+        case Kind_Callback_StyledStringMarshallingValue_Void: return deserializeAndCallSyncCallback_StyledStringMarshallingValue_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_SwipeActionState_Void: return deserializeAndCallSyncCallback_SwipeActionState_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_SwipeGesture: return deserializeAndCallSyncCallback_SwipeGesture(vmContext, thisArray, thisLength);
+        case Kind_Callback_SwipeGesture_Void: return deserializeAndCallSyncCallback_SwipeGesture_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_SwiperContentTransitionProxy_Void: return deserializeAndCallSyncCallback_SwiperContentTransitionProxy_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_TabContentTransitionProxy_Void: return deserializeAndCallSyncCallback_TabContentTransitionProxy_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_TerminationInfo_Void: return deserializeAndCallSyncCallback_TerminationInfo_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_TextPickerResult_Void: return deserializeAndCallSyncCallback_TextPickerResult_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_TextRange_Void: return deserializeAndCallSyncCallback_TextRange_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_TimePickerResult_Void: return deserializeAndCallSyncCallback_TimePickerResult_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_TouchEvent_HitTestMode: return deserializeAndCallSyncCallback_TouchEvent_HitTestMode(vmContext, thisArray, thisLength);
+        case Kind_Callback_TouchEvent_Void: return deserializeAndCallSyncCallback_TouchEvent_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_TouchResult_Void: return deserializeAndCallSyncCallback_TouchResult_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Tuple_Number_Number_Number_Number_Void: return deserializeAndCallSyncCallback_Tuple_Number_Number_Number_Number_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Tuple_Number_Number_Void: return deserializeAndCallSyncCallback_Tuple_Number_Number_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_UIExtensionProxy_Void: return deserializeAndCallSyncCallback_UIExtensionProxy_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return deserializeAndCallSyncCallback_Union_CustomBuilder_DragItemInfo_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Union_Number_Array_Number_Void: return deserializeAndCallSyncCallback_Union_Number_Array_Number_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Union_ResourceStr_Array_ResourceStr_Void: return deserializeAndCallSyncCallback_Union_ResourceStr_Array_ResourceStr_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Union_ResourceStr_Resource_String_Void: return deserializeAndCallSyncCallback_Union_ResourceStr_Resource_String_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Void: return deserializeAndCallSyncCallback_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_WebKeyboardOptions_Void: return deserializeAndCallSyncCallback_WebKeyboardOptions_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_WebResourceResponse_Void: return deserializeAndCallSyncCallback_WebResourceResponse_Void(vmContext, thisArray, thisLength);
+        case Kind_CheckBoxModifierBuilder: return deserializeAndCallSyncCheckBoxModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_CompatibleInitCallback: return deserializeAndCallSyncCompatibleInitCallback(vmContext, thisArray, thisLength);
+        case Kind_CompatibleUpdateCallback: return deserializeAndCallSyncCompatibleUpdateCallback(vmContext, thisArray, thisLength);
+        case Kind_ContentDidScrollCallback: return deserializeAndCallSyncContentDidScrollCallback(vmContext, thisArray, thisLength);
+        case Kind_ContentWillScrollCallback: return deserializeAndCallSyncContentWillScrollCallback(vmContext, thisArray, thisLength);
+        case Kind_Context_getGroupDir_Callback: return deserializeAndCallSyncContext_getGroupDir_Callback(vmContext, thisArray, thisLength);
+        case Kind_CustomNodeBuilder: return deserializeAndCallSyncCustomNodeBuilder(vmContext, thisArray, thisLength);
+        case Kind_CustomStyles: return deserializeAndCallSyncCustomStyles(vmContext, thisArray, thisLength);
+        case Kind_DataPanelModifierBuilder: return deserializeAndCallSyncDataPanelModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_EditableTextOnChangeCallback: return deserializeAndCallSyncEditableTextOnChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_ErrorCallback: return deserializeAndCallSyncErrorCallback(vmContext, thisArray, thisLength);
+        case Kind_GaugeModifierBuilder: return deserializeAndCallSyncGaugeModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_GestureRecognizerJudgeBeginCallback: return deserializeAndCallSyncGestureRecognizerJudgeBeginCallback(vmContext, thisArray, thisLength);
+        case Kind_GetItemMainSizeByIndex: return deserializeAndCallSyncGetItemMainSizeByIndex(vmContext, thisArray, thisLength);
+        case Kind_HoverCallback: return deserializeAndCallSyncHoverCallback(vmContext, thisArray, thisLength);
+        case Kind_ImageCompleteCallback: return deserializeAndCallSyncImageCompleteCallback(vmContext, thisArray, thisLength);
+        case Kind_ImageErrorCallback: return deserializeAndCallSyncImageErrorCallback(vmContext, thisArray, thisLength);
+        case Kind_ImageOnCompleteCallback: return deserializeAndCallSyncImageOnCompleteCallback(vmContext, thisArray, thisLength);
+        case Kind_InterceptionModeCallback: return deserializeAndCallSyncInterceptionModeCallback(vmContext, thisArray, thisLength);
+        case Kind_InterceptionShowCallback: return deserializeAndCallSyncInterceptionShowCallback(vmContext, thisArray, thisLength);
+        case Kind_LoadingProgressModifierBuilder: return deserializeAndCallSyncLoadingProgressModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_MenuCallback: return deserializeAndCallSyncMenuCallback(vmContext, thisArray, thisLength);
+        case Kind_MenuItemModifierBuilder: return deserializeAndCallSyncMenuItemModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_MenuOnAppearCallback: return deserializeAndCallSyncMenuOnAppearCallback(vmContext, thisArray, thisLength);
+        case Kind_ModifierKeyStateGetter: return deserializeAndCallSyncModifierKeyStateGetter(vmContext, thisArray, thisLength);
+        case Kind_NavDestinationTransitionDelegate: return deserializeAndCallSyncNavDestinationTransitionDelegate(vmContext, thisArray, thisLength);
+        case Kind_NavExtender_OnUpdateStack: return deserializeAndCallSyncNavExtender_OnUpdateStack(vmContext, thisArray, thisLength);
+        case Kind_OnAdsBlockedCallback: return deserializeAndCallSyncOnAdsBlockedCallback(vmContext, thisArray, thisLength);
+        case Kind_OnAlphabetIndexerPopupSelectCallback: return deserializeAndCallSyncOnAlphabetIndexerPopupSelectCallback(vmContext, thisArray, thisLength);
+        case Kind_OnAlphabetIndexerRequestPopupDataCallback: return deserializeAndCallSyncOnAlphabetIndexerRequestPopupDataCallback(vmContext, thisArray, thisLength);
+        case Kind_OnAlphabetIndexerSelectCallback: return deserializeAndCallSyncOnAlphabetIndexerSelectCallback(vmContext, thisArray, thisLength);
+        case Kind_OnCheckboxChangeCallback: return deserializeAndCallSyncOnCheckboxChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnCheckboxGroupChangeCallback: return deserializeAndCallSyncOnCheckboxGroupChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnContentScrollCallback: return deserializeAndCallSyncOnContentScrollCallback(vmContext, thisArray, thisLength);
+        case Kind_OnContextMenuHideCallback: return deserializeAndCallSyncOnContextMenuHideCallback(vmContext, thisArray, thisLength);
+        case Kind_OnCreateMenuCallback: return deserializeAndCallSyncOnCreateMenuCallback(vmContext, thisArray, thisLength);
+        case Kind_OnDidChangeCallback: return deserializeAndCallSyncOnDidChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnDragEventCallback: return deserializeAndCallSyncOnDragEventCallback(vmContext, thisArray, thisLength);
+        case Kind_OnFirstMeaningfulPaintCallback: return deserializeAndCallSyncOnFirstMeaningfulPaintCallback(vmContext, thisArray, thisLength);
+        case Kind_OnFoldStatusChangeCallback: return deserializeAndCallSyncOnFoldStatusChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnFullScreenEnterCallback: return deserializeAndCallSyncOnFullScreenEnterCallback(vmContext, thisArray, thisLength);
+        case Kind_OnHoverCallback: return deserializeAndCallSyncOnHoverCallback(vmContext, thisArray, thisLength);
+        case Kind_OnHoverStatusChangeCallback: return deserializeAndCallSyncOnHoverStatusChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnIntelligentTrackingPreventionCallback: return deserializeAndCallSyncOnIntelligentTrackingPreventionCallback(vmContext, thisArray, thisLength);
+        case Kind_OnItemDragStartCallback: return deserializeAndCallSyncOnItemDragStartCallback(vmContext, thisArray, thisLength);
+        case Kind_OnLargestContentfulPaintCallback: return deserializeAndCallSyncOnLargestContentfulPaintCallback(vmContext, thisArray, thisLength);
+        case Kind_OnLazyLoadingFunc: return deserializeAndCallSyncOnLazyLoadingFunc(vmContext, thisArray, thisLength);
+        case Kind_OnLinearIndicatorChangeCallback: return deserializeAndCallSyncOnLinearIndicatorChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnMenuItemClickCallback: return deserializeAndCallSyncOnMenuItemClickCallback(vmContext, thisArray, thisLength);
+        case Kind_OnMoveHandler: return deserializeAndCallSyncOnMoveHandler(vmContext, thisArray, thisLength);
+        case Kind_OnNativeEmbedVisibilityChangeCallback: return deserializeAndCallSyncOnNativeEmbedVisibilityChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnNativeLoadCallback: return deserializeAndCallSyncOnNativeLoadCallback(vmContext, thisArray, thisLength);
+        case Kind_OnNavigationEntryCommittedCallback: return deserializeAndCallSyncOnNavigationEntryCommittedCallback(vmContext, thisArray, thisLength);
+        case Kind_OnOverrideUrlLoadingCallback: return deserializeAndCallSyncOnOverrideUrlLoadingCallback(vmContext, thisArray, thisLength);
+        case Kind_OnPasteCallback: return deserializeAndCallSyncOnPasteCallback(vmContext, thisArray, thisLength);
+        case Kind_OnRadioChangeCallback: return deserializeAndCallSyncOnRadioChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnRatingChangeCallback: return deserializeAndCallSyncOnRatingChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnRenderProcessNotRespondingCallback: return deserializeAndCallSyncOnRenderProcessNotRespondingCallback(vmContext, thisArray, thisLength);
+        case Kind_OnRenderProcessRespondingCallback: return deserializeAndCallSyncOnRenderProcessRespondingCallback(vmContext, thisArray, thisLength);
+        case Kind_OnSafeBrowsingCheckResultCallback: return deserializeAndCallSyncOnSafeBrowsingCheckResultCallback(vmContext, thisArray, thisLength);
+        case Kind_OnScrollCallback: return deserializeAndCallSyncOnScrollCallback(vmContext, thisArray, thisLength);
+        case Kind_OnScrollEdgeCallback: return deserializeAndCallSyncOnScrollEdgeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnScrollFrameBeginCallback: return deserializeAndCallSyncOnScrollFrameBeginCallback(vmContext, thisArray, thisLength);
+        case Kind_OnScrollVisibleContentChangeCallback: return deserializeAndCallSyncOnScrollVisibleContentChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnSelectCallback: return deserializeAndCallSyncOnSelectCallback(vmContext, thisArray, thisLength);
+        case Kind_OnSslErrorEventCallback: return deserializeAndCallSyncOnSslErrorEventCallback(vmContext, thisArray, thisLength);
+        case Kind_OnSubmitCallback: return deserializeAndCallSyncOnSubmitCallback(vmContext, thisArray, thisLength);
+        case Kind_OnSwiperAnimationEndCallback: return deserializeAndCallSyncOnSwiperAnimationEndCallback(vmContext, thisArray, thisLength);
+        case Kind_OnSwiperAnimationStartCallback: return deserializeAndCallSyncOnSwiperAnimationStartCallback(vmContext, thisArray, thisLength);
+        case Kind_OnSwiperGestureSwipeCallback: return deserializeAndCallSyncOnSwiperGestureSwipeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnTabsAnimationEndCallback: return deserializeAndCallSyncOnTabsAnimationEndCallback(vmContext, thisArray, thisLength);
+        case Kind_OnTabsAnimationStartCallback: return deserializeAndCallSyncOnTabsAnimationStartCallback(vmContext, thisArray, thisLength);
+        case Kind_OnTabsContentWillChangeCallback: return deserializeAndCallSyncOnTabsContentWillChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnTabsGestureSwipeCallback: return deserializeAndCallSyncOnTabsGestureSwipeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnTextPickerChangeCallback: return deserializeAndCallSyncOnTextPickerChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnTextSelectionChangeCallback: return deserializeAndCallSyncOnTextSelectionChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnTimePickerChangeCallback: return deserializeAndCallSyncOnTimePickerChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnTotalCountFunc: return deserializeAndCallSyncOnTotalCountFunc(vmContext, thisArray, thisLength);
+        case Kind_OnViewportFitChangedCallback: return deserializeAndCallSyncOnViewportFitChangedCallback(vmContext, thisArray, thisLength);
+        case Kind_OnWillScrollCallback: return deserializeAndCallSyncOnWillScrollCallback(vmContext, thisArray, thisLength);
+        case Kind_PageMapBuilder: return deserializeAndCallSyncPageMapBuilder(vmContext, thisArray, thisLength);
+        case Kind_PageTransitionCallback: return deserializeAndCallSyncPageTransitionCallback(vmContext, thisArray, thisLength);
+        case Kind_PasteButtonCallback: return deserializeAndCallSyncPasteButtonCallback(vmContext, thisArray, thisLength);
+        case Kind_PasteEventCallback: return deserializeAndCallSyncPasteEventCallback(vmContext, thisArray, thisLength);
+        case Kind_PluginErrorCallback: return deserializeAndCallSyncPluginErrorCallback(vmContext, thisArray, thisLength);
+        case Kind_PopupStateChangeCallback: return deserializeAndCallSyncPopupStateChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_ProgressModifierBuilder: return deserializeAndCallSyncProgressModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_RadioModifierBuilder: return deserializeAndCallSyncRadioModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_RatingModifierBuilder: return deserializeAndCallSyncRatingModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_RestrictedWorker_onerror_Callback: return deserializeAndCallSyncRestrictedWorker_onerror_Callback(vmContext, thisArray, thisLength);
+        case Kind_RestrictedWorker_onexit_Callback: return deserializeAndCallSyncRestrictedWorker_onexit_Callback(vmContext, thisArray, thisLength);
+        case Kind_RestrictedWorker_onmessage_Callback: return deserializeAndCallSyncRestrictedWorker_onmessage_Callback(vmContext, thisArray, thisLength);
+        case Kind_ReuseIdCallback: return deserializeAndCallSyncReuseIdCallback(vmContext, thisArray, thisLength);
+        case Kind_SaveButtonCallback: return deserializeAndCallSyncSaveButtonCallback(vmContext, thisArray, thisLength);
+        case Kind_ScrollOnScrollCallback: return deserializeAndCallSyncScrollOnScrollCallback(vmContext, thisArray, thisLength);
+        case Kind_ScrollOnWillScrollCallback: return deserializeAndCallSyncScrollOnWillScrollCallback(vmContext, thisArray, thisLength);
+        case Kind_SearchSubmitCallback: return deserializeAndCallSyncSearchSubmitCallback(vmContext, thisArray, thisLength);
+        case Kind_SearchValueCallback: return deserializeAndCallSyncSearchValueCallback(vmContext, thisArray, thisLength);
+        case Kind_ShouldBuiltInRecognizerParallelWithCallback: return deserializeAndCallSyncShouldBuiltInRecognizerParallelWithCallback(vmContext, thisArray, thisLength);
+        case Kind_SizeChangeCallback: return deserializeAndCallSyncSizeChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_SliderModifierBuilder: return deserializeAndCallSyncSliderModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_SliderTriggerChangeCallback: return deserializeAndCallSyncSliderTriggerChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_StyledStringMarshallCallback: return deserializeAndCallSyncStyledStringMarshallCallback(vmContext, thisArray, thisLength);
+        case Kind_StyledStringUnmarshallCallback: return deserializeAndCallSyncStyledStringUnmarshallCallback(vmContext, thisArray, thisLength);
+        case Kind_SubmitCallback: return deserializeAndCallSyncSubmitCallback(vmContext, thisArray, thisLength);
+        case Kind_TabsCustomContentTransitionCallback: return deserializeAndCallSyncTabsCustomContentTransitionCallback(vmContext, thisArray, thisLength);
+        case Kind_TextAreaSubmitCallback: return deserializeAndCallSyncTextAreaSubmitCallback(vmContext, thisArray, thisLength);
+        case Kind_TextClockModifierBuilder: return deserializeAndCallSyncTextClockModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_TextFieldValueCallback: return deserializeAndCallSyncTextFieldValueCallback(vmContext, thisArray, thisLength);
+        case Kind_TextPickerEnterSelectedAreaCallback: return deserializeAndCallSyncTextPickerEnterSelectedAreaCallback(vmContext, thisArray, thisLength);
+        case Kind_TextPickerScrollStopCallback: return deserializeAndCallSyncTextPickerScrollStopCallback(vmContext, thisArray, thisLength);
+        case Kind_TextTimerModifierBuilder: return deserializeAndCallSyncTextTimerModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_ToggleModifierBuilder: return deserializeAndCallSyncToggleModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_TransitionFinishCallback: return deserializeAndCallSyncTransitionFinishCallback(vmContext, thisArray, thisLength);
+        case Kind_Type_CommonMethod_onDragStart: return deserializeAndCallSyncType_CommonMethod_onDragStart(vmContext, thisArray, thisLength);
+        case Kind_Type_NavigationAttribute_customNavContentTransition: return deserializeAndCallSyncType_NavigationAttribute_customNavContentTransition(vmContext, thisArray, thisLength);
+        case Kind_UpdateTransitionCallback: return deserializeAndCallSyncUpdateTransitionCallback(vmContext, thisArray, thisLength);
+        case Kind_VisibleAreaChangeCallback: return deserializeAndCallSyncVisibleAreaChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_VoidCallback: return deserializeAndCallSyncVoidCallback(vmContext, thisArray, thisLength);
+        case Kind_WebKeyboardCallback: return deserializeAndCallSyncWebKeyboardCallback(vmContext, thisArray, thisLength);
     }
     printf("Unknown callback kind\n");
 }

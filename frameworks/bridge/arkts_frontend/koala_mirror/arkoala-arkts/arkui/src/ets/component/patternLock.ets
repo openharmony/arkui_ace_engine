@@ -87,7 +87,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         let controller_type : int32 = RuntimeType.UNDEFINED
         controller_type = runtimeType(controller)
         thisSerializer.writeInt8((controller_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (controller_type)) {
+        if ((controller_type) != (RuntimeType.UNDEFINED)) {
             const controller_value  = controller!
             PatternLockController_serializer.write(thisSerializer, controller_value)
         }
@@ -99,7 +99,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -127,7 +127,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -155,7 +155,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -188,7 +188,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -221,7 +221,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -254,7 +254,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -287,7 +287,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -320,7 +320,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -343,7 +343,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -355,7 +355,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -367,7 +367,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -379,7 +379,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             CircleStyleOptions_serializer.write(thisSerializer, value_value)
         }
@@ -391,7 +391,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -825,7 +825,7 @@ export class CircleStyleOptions_serializer {
         let value_color_type : int32 = RuntimeType.UNDEFINED
         value_color_type = runtimeType(value_color)
         valueSerializer.writeInt8((value_color_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_color_type)) {
+        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
             const value_color_value  = value_color!
             let value_color_value_type : int32 = RuntimeType.UNDEFINED
             value_color_value_type = runtimeType(value_color_value)
@@ -854,7 +854,7 @@ export class CircleStyleOptions_serializer {
         let value_radius_type : int32 = RuntimeType.UNDEFINED
         value_radius_type = runtimeType(value_radius)
         valueSerializer.writeInt8((value_radius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_radius_type)) {
+        if ((value_radius_type) != (RuntimeType.UNDEFINED)) {
             const value_radius_value  = value_radius!
             LengthMetrics_serializer.write(valueSerializer, value_radius_value)
         }
@@ -862,7 +862,7 @@ export class CircleStyleOptions_serializer {
         let value_enableWaveEffect_type : int32 = RuntimeType.UNDEFINED
         value_enableWaveEffect_type = runtimeType(value_enableWaveEffect)
         valueSerializer.writeInt8((value_enableWaveEffect_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_enableWaveEffect_type)) {
+        if ((value_enableWaveEffect_type) != (RuntimeType.UNDEFINED)) {
             const value_enableWaveEffect_value  = value_enableWaveEffect!
             valueSerializer.writeBoolean(value_enableWaveEffect_value)
         }
@@ -870,7 +870,7 @@ export class CircleStyleOptions_serializer {
         let value_enableForeground_type : int32 = RuntimeType.UNDEFINED
         value_enableForeground_type = runtimeType(value_enableForeground)
         valueSerializer.writeInt8((value_enableForeground_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_enableForeground_type)) {
+        if ((value_enableForeground_type) != (RuntimeType.UNDEFINED)) {
             const value_enableForeground_value  = value_enableForeground!
             valueSerializer.writeBoolean(value_enableForeground_value)
         }
@@ -879,7 +879,7 @@ export class CircleStyleOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let color_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
+        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const color_buf__selector : int32 = valueDeserializer.readInt8()
             let color_buf_ : Color | number | string | Resource | undefined
@@ -903,21 +903,21 @@ export class CircleStyleOptions_serializer {
         const color_result : ResourceColor | undefined = color_buf
         const radius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let radius_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (radius_buf_runtimeType))
+        if ((radius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             radius_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const radius_result : LengthMetrics | undefined = radius_buf
         const enableWaveEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableWaveEffect_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (enableWaveEffect_buf_runtimeType))
+        if ((enableWaveEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             enableWaveEffect_buf = valueDeserializer.readBoolean()
         }
         const enableWaveEffect_result : boolean | undefined = enableWaveEffect_buf
         const enableForeground_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableForeground_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (enableForeground_buf_runtimeType))
+        if ((enableForeground_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             enableForeground_buf = valueDeserializer.readBoolean()
         }

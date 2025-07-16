@@ -378,7 +378,7 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         forEachProperty(clazz, property => {
             this.getPropertyTransformer(property).applyBuild(property, result)
         })
-        // TODO: this is to workaround panda bug #27680
+        // Improve: this is to workaround panda bug #27680
         // It should be OptionsT, but the compiler has lost the bridge
         result.push(
             arkts.factory.createVariableDeclaration(

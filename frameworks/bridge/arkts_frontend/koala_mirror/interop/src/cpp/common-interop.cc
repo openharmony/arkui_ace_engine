@@ -106,7 +106,7 @@ void getKoalaEtsNapiCallbackDispatcher(ets_class* clazz, ets_method* method) {
 #endif
 
 
-// TODO: move callback dispetchers to convertors-<flavour>.cc.
+// Improve: move callback dispetchers to convertors-<flavour>.cc.
 #ifdef KOALA_JNI
 #include "jni.h"
 static struct {
@@ -419,7 +419,7 @@ KOALA_INTEROP_V2(CallCallbackResourceReleaser, KNativePointer, KInt)
 
 KInt impl_CallForeignVM(KNativePointer foreignContextRaw, KInt function, KSerializerBuffer data, KInt length) {
     const ForeignVMContext* foreignContext = (const ForeignVMContext*)foreignContextRaw;
-    // TODO: set actuall callbacks caller/holder/releaser.
+    // Improve: set actuall callbacks caller/holder/releaser.
     /*
     *(int64_t*)(data + 8) = impl_CallCallbackSync;
     *(int64_t*)(data + 16) = 0;
@@ -523,7 +523,7 @@ KVMDeferred* CreateDeferred(KVMContext vmContext, KVMObjectHandle* promiseHandle
     deferred->resolve = resolveDeferred;
     deferred->reject = rejectDeferred;
 #ifdef KOALA_NAPI
-    // TODO: move to interop!
+    // Improve: move to interop!
     napi_env env = (napi_env)vmContext;
     napi_value promise;
     napi_value resourceName;

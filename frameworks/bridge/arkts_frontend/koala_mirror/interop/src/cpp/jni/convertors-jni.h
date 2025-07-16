@@ -86,7 +86,7 @@ struct InteropTypeConverter<KStringPtr> {
     static inline KStringPtr convertFrom0(JNIEnv* env, InteropType value) {
         if (value == nullptr) return KStringPtr();
         jboolean isCopy;
-        // TODO: use GetStringCritical() instead and utf-8 encode manually.
+        // Improve: use GetStringCritical() instead and utf-8 encode manually.
 		    const char* str_value = env->GetStringUTFChars(value, &isCopy);
         int len = env->GetStringUTFLength(value);
         KStringPtr result(str_value, len, false);

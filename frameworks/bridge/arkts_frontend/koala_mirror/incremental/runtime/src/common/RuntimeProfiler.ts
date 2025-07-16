@@ -114,7 +114,7 @@ export class RuntimeProfiler {
         if (this.layoutTime < layoutTime) this.layoutTime = layoutTime
         if (this.drawTime < drawTime) this.drawTime = drawTime
 
-        // TODO: OHOS does not properly handle \n in template literals
+        // Improve: OHOS does not properly handle \n in template literals
         const array = Array.of<string>(
             `invalidations: ${this.invalidations}`,
             `modified states: ${this.mutableStates}/${this.updatableStates} + ${this.computableValues}`,

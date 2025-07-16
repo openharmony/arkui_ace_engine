@@ -58,7 +58,7 @@
 //             ts.ContextState.ES2PANDA_STATE_CHECKED,
 //         )
 //
-//         // TODO:
+//         // Improve:
 //         util.nativeModule._VarBinderInitTopScope(global.context)
 //         util.nativeModule._VarBinderIdentifierAnalysis(global.context)
 //         ts.proceedToState(ts.ContextState.ES2PANDA_STATE_BIN_GENERATED)

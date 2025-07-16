@@ -55,7 +55,7 @@ export function ArkComponentRoot(
                 let state = mutableState(false)
                 scheduleCallback((): void => {
                     component.aboutToAppear()
-                    // TODO: page visibility doesn't belong here, remove when router transition state properly maintained.
+                    // Improve: page visibility doesn't belong here, remove when router transition state properly maintained.
                     // component.onPageShow()
                     state.value = true
                 })
@@ -63,7 +63,7 @@ export function ArkComponentRoot(
             }, (_: MutableState<boolean> | undefined): void =>
                 scheduleCallback((): void => {
                     component.aboutToDisappear()
-                    // TODO: page visibility doesn't belong here, remove when router transition state properly maintained.
+                    // Improve: page visibility doesn't belong here, remove when router transition state properly maintained.
                     // component.onPageHide()
                 })
             )

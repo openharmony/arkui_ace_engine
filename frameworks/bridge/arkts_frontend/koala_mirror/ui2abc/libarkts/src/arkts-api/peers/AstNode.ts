@@ -151,7 +151,7 @@ export abstract class AstNode extends ArktsObject {
     }
 
     public override onUpdate(original: AstNode): void {
-        // TODO Update modifiers only for specific AST nodes in the generated factory code
+        // Improve: Update modifiers only for specific AST nodes in the generated factory code
         this.modifierFlags = original.modifierFlags
         global.generatedEs2panda._AstNodeSetOriginalNode(global.context, this.peer, original.originalPeer)
         global.generatedEs2panda._AstNodeSetParent(global.context, this.peer, global.generatedEs2panda._AstNodeParent(global.context, original.peer))

@@ -49,7 +49,7 @@ export function updateClassDefinition(
         isSameNativeObject(body, original.body) &&
         isSameNativeObject(modifiers, original.modifiers) &&
         isSameNativeObject(flags, classDefinitionFlags(original))
-        /* TODO: no getter for ctor */
+        /* Improve: no getter for ctor */
     ) {
         return original;
     }

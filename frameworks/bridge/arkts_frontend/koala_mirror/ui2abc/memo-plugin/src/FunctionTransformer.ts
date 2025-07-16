@@ -276,7 +276,7 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
         const params = getParams(decl)
         const updatedArguments = node.arguments.map((it, index) => {
             if (!params[index]) return it
-            // TODO: this is not quite correct.
+            // Improve: this is not quite correct.
             // This code is too dependent on the availability of parameter declaration and its type
             // Most of the decisions should be taken basing on the fact that this is a memo call
             if (shouldWrap(params[index], index + 1 == params.length, this.trackContentParam, it)) {

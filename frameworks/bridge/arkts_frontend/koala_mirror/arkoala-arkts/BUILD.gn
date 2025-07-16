@@ -20,7 +20,7 @@ koala_root = ".."
 koala_path = ""
 interop_root = "$koala_root/interop"
 framework_root = "./framework/native/src"
-# TODO: ugly
+# Improve: napi_headers
 napi_headers = "./node_modules/node-api-headers/include/"
 
 node_version = "v16.20.2"

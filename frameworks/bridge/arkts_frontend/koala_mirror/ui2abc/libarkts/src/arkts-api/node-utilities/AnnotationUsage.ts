@@ -16,7 +16,7 @@
 import { AnnotationUsage, Expression } from '../../generated';
 import { isSameNativeObject } from '../peers/ArktsObject';
 
-// TODO generate this function
+// Improve: generate this function
 export function updateAnnotationUsage(original: AnnotationUsage, expr?: Expression): AnnotationUsage {
     if (isSameNativeObject(expr, original.expr)) {
         return original;

@@ -96,12 +96,12 @@ export class GlobalScope {
     static $r_serialize(value: string, params: Array<Object | undefined>): Resource {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((params.length).toInt())
-        for (let i = 0; i < params.length; i++) {
-            const params_element : Object | undefined = params[i]
+        for (let params_counter_i = 0; params_counter_i < params.length; params_counter_i++) {
+            const params_element : Object | undefined = params[params_counter_i]
             let params_element_type : int32 = RuntimeType.UNDEFINED
             params_element_type = runtimeType(params_element)
             thisSerializer.writeInt8((params_element_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (params_element_type)) {
+            if ((params_element_type) != (RuntimeType.UNDEFINED)) {
                 const params_element_value  = params_element!
                 thisSerializer.holdAndWriteObject(params_element_value)
             }
@@ -213,7 +213,7 @@ export class GlobalScope {
         let compatibleComponent_type : int32 = RuntimeType.UNDEFINED
         compatibleComponent_type = runtimeType(compatibleComponent)
         thisSerializer.writeInt8((compatibleComponent_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (compatibleComponent_type)) {
+        if ((compatibleComponent_type) != (RuntimeType.UNDEFINED)) {
             const compatibleComponent_value  = compatibleComponent!
             thisSerializer.writeCustomObject("object", compatibleComponent_value)
         }

@@ -212,7 +212,7 @@ export function observableProxy<Value>(value: Value, parent?: ObservableHandler,
                     value[index] = observableProxy(value[index], observable, observed, false)
                 }
             } else {
-                // TODO: proxy fields of the given object
+                // Improve: proxy fields of the given object
             }
         }
         return value as Value
@@ -227,7 +227,7 @@ export function observableProxy<Value>(value: Value, parent?: ObservableHandler,
         return ObservableDate(value, parent, observed) as Value
     }
 
-    // TODO: Fatal error on using proxy with generic types
+    // Improve: Fatal error on using proxy with generic types
     // see: panda issue #26492
 
     const valueType = Type.of(value)

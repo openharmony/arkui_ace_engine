@@ -391,7 +391,7 @@ export function deserializeAndCallCallback_DragEvent_Opt_String_Void(thisDeseria
     let event : DragEvent = (DragEvent_serializer.read(thisDeserializer) as DragEvent)
     const extraParams_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let extraParams_buf : string | undefined
-    if ((RuntimeType.UNDEFINED) != (extraParams_buf_runtimeType))
+    if ((extraParams_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         extraParams_buf = (thisDeserializer.readString() as string)
     }
@@ -1208,7 +1208,7 @@ export function deserializeAndCallCallback_Opt_Array_FontDescriptor_Opt_Array_St
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value?: Array<object> | undefined,error?: Array<string> | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : Array<object> | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const value_buf__length : int32 = thisDeserializer.readInt32()
         let value_buf_ : Array<object> = new Array<object>(value_buf__length)
@@ -1220,7 +1220,7 @@ export function deserializeAndCallCallback_Opt_Array_FontDescriptor_Opt_Array_St
     let value : Array<object> | undefined = value_buf
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const error_buf__length : int32 = thisDeserializer.readInt32()
         let error_buf_ : Array<string> = new Array<string>(error_buf__length)
@@ -1237,7 +1237,7 @@ export function deserializeAndCallCallback_Opt_Array_NavDestinationTransition_Vo
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: Array<NavDestinationTransition> | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : Array<NavDestinationTransition> | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const value_buf__length : int32 = thisDeserializer.readInt32()
         let value_buf_ : Array<NavDestinationTransition> = new Array<NavDestinationTransition>(value_buf__length)
@@ -1254,7 +1254,7 @@ export function deserializeAndCallCallback_Opt_Array_String_Opt_Array_String_Voi
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value?: Array<string> | undefined,error?: Array<string> | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const value_buf__length : int32 = thisDeserializer.readInt32()
         let value_buf_ : Array<string> = new Array<string>(value_buf__length)
@@ -1266,7 +1266,7 @@ export function deserializeAndCallCallback_Opt_Array_String_Opt_Array_String_Voi
     let value : Array<string> | undefined = value_buf
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const error_buf__length : int32 = thisDeserializer.readInt32()
         let error_buf_ : Array<string> = new Array<string>(error_buf__length)
@@ -1283,7 +1283,7 @@ export function deserializeAndCallCallback_Opt_Array_String_Void(thisDeserialize
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((error?: Array<string> | undefined) => void))
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const error_buf__length : int32 = thisDeserializer.readInt32()
         let error_buf_ : Array<string> = new Array<string>(error_buf__length)
@@ -1300,7 +1300,7 @@ export function deserializeAndCallCallback_Opt_Boolean_Void(thisDeserializer: De
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((select: boolean | undefined) => void))
     const select_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let select_buf : boolean | undefined
-    if ((RuntimeType.UNDEFINED) != (select_buf_runtimeType))
+    if ((select_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         select_buf = thisDeserializer.readBoolean()
     }
@@ -1312,7 +1312,7 @@ export function deserializeAndCallCallback_Opt_CustomBuilder_Void(thisDeserializ
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: CustomBuilder | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : CustomBuilder | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const value_buf__resource : CallbackResource = thisDeserializer.readCallbackResource()
         const value_buf__call : KPointer = thisDeserializer.readPointer()
@@ -1334,14 +1334,14 @@ export function deserializeAndCallCallback_Opt_FontDescriptor_Opt_Array_String_V
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value?: object | undefined,error?: Array<string> | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : object | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = (thisDeserializer.readCustomObject("object") as object)
     }
     let value : object | undefined = value_buf
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const error_buf__length : int32 = thisDeserializer.readInt32()
         let error_buf_ : Array<string> = new Array<string>(error_buf__length)
@@ -1358,7 +1358,7 @@ export function deserializeAndCallCallback_Opt_NavigationAnimatedTransition_Void
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: NavigationAnimatedTransition | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : NavigationAnimatedTransition | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = NavigationAnimatedTransition_serializer.read(thisDeserializer)
     }
@@ -1370,7 +1370,7 @@ export function deserializeAndCallCallback_Opt_Number_Void(thisDeserializer: Des
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((selected: number | undefined) => void))
     const selected_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let selected_buf : number | undefined
-    if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
+    if ((selected_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         selected_buf = (thisDeserializer.readNumber() as number)
     }
@@ -1382,7 +1382,7 @@ export function deserializeAndCallCallback_Opt_Object_Void(thisDeserializer: Des
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: Object | undefined) => void))
     const value0_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value0_buf : Object | undefined
-    if ((RuntimeType.UNDEFINED) != (value0_buf_runtimeType))
+    if ((value0_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value0_buf = (thisDeserializer.readObject() as object)
     }
@@ -1394,7 +1394,7 @@ export function deserializeAndCallCallback_Opt_OffsetResult_Void(thisDeserialize
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: OffsetResult | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : OffsetResult | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = OffsetResult_serializer.read(thisDeserializer)
     }
@@ -1406,14 +1406,14 @@ export function deserializeAndCallCallback_Opt_Scene_Opt_Array_String_Void(thisD
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value?: Scene | undefined,error?: Array<string> | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : Scene | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = (Scene_serializer.read(thisDeserializer) as Scene)
     }
     let value : Scene | undefined = value_buf
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const error_buf__length : int32 = thisDeserializer.readInt32()
         let error_buf_ : Array<string> = new Array<string>(error_buf__length)
@@ -1430,7 +1430,7 @@ export function deserializeAndCallCallback_Opt_ScrollResult_Void(thisDeserialize
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: ScrollResult | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : ScrollResult | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = (ScrollResult_serializer.read(thisDeserializer) as ScrollResult)
     }
@@ -1442,14 +1442,14 @@ export function deserializeAndCallCallback_Opt_String_Opt_Array_String_Void(this
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value?: string | undefined,error?: Array<string> | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : string | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = (thisDeserializer.readString() as string)
     }
     let value : string | undefined = value_buf
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const error_buf__length : int32 = thisDeserializer.readInt32()
         let error_buf_ : Array<string> = new Array<string>(error_buf__length)
@@ -1466,14 +1466,14 @@ export function deserializeAndCallCallback_Opt_StyledString_Opt_Array_String_Voi
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value?: StyledString | undefined,error?: Array<string> | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : StyledString | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = (StyledString_serializer.read(thisDeserializer) as StyledString)
     }
     let value : StyledString | undefined = value_buf
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const error_buf__length : int32 = thisDeserializer.readInt32()
         let error_buf_ : Array<string> = new Array<string>(error_buf__length)
@@ -1490,7 +1490,7 @@ export function deserializeAndCallCallback_Opt_TabContentAnimatedTransition_Void
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: TabContentAnimatedTransition | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : TabContentAnimatedTransition | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = TabContentAnimatedTransition_serializer.read(thisDeserializer)
     }
@@ -1502,7 +1502,7 @@ export function deserializeAndCallCallback_Opt_Union_Number_Resource_Void(thisDe
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((selected: number | Resource | undefined) => void))
     const selected_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let selected_buf : number | Resource | undefined
-    if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
+    if ((selected_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const selected_buf__selector : int32 = thisDeserializer.readInt8()
         let selected_buf_ : number | Resource | undefined
@@ -1525,7 +1525,7 @@ export function deserializeAndCallCallback_Opt_Union_ResourceStr_String_Resource
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: ResourceStr | string | Resource | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : ResourceStr | string | Resource | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const value_buf__selector : int32 = thisDeserializer.readInt8()
         let value_buf_ : ResourceStr | string | Resource | undefined
@@ -2165,14 +2165,14 @@ export function deserializeAndCallEditableTextOnChangeCallback(thisDeserializer:
     let value : string = (thisDeserializer.readString() as string)
     const previewText_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let previewText_buf : PreviewText | undefined
-    if ((RuntimeType.UNDEFINED) != (previewText_buf_runtimeType))
+    if ((previewText_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         previewText_buf = PreviewText_serializer.read(thisDeserializer)
     }
     let previewText : PreviewText | undefined = previewText_buf
     const options_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let options_buf : TextChangeOptions | undefined
-    if ((RuntimeType.UNDEFINED) != (options_buf_runtimeType))
+    if ((options_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         options_buf = TextChangeOptions_serializer.read(thisDeserializer)
     }
@@ -2274,7 +2274,7 @@ export function deserializeAndCallImageOnCompleteCallback(thisDeserializer: Dese
     const _call  = (ResourceHolder.instance().get(_resourceId) as ImageOnCompleteCallback)
     const loadEvent_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let loadEvent_buf : ImageCompleteEvent | undefined
-    if ((RuntimeType.UNDEFINED) != (loadEvent_buf_runtimeType))
+    if ((loadEvent_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         loadEvent_buf = ImageCompleteEvent_serializer.read(thisDeserializer)
     }
@@ -2412,11 +2412,11 @@ export function deserializeAndCallNavDestinationTransitionDelegate(thisDeseriali
     let value_type : int32 = RuntimeType.UNDEFINED;
     value_type = runtimeType(value);
     _continuation_buf_argsSerializer.writeInt8((value_type).toChar());
-    if ((RuntimeType.UNDEFINED) != (value_type)) {
+    if ((value_type) != (RuntimeType.UNDEFINED)) {
         const value_value  = value!;
         _continuation_buf_argsSerializer.writeInt32((value_value.length).toInt());
-        for (let i = 0; i < value_value.length; i++) {
-            const value_value_element : NavDestinationTransition = value_value[i];
+        for (let value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
+            const value_value_element : NavDestinationTransition = value_value[value_value_counter_i];
             NavDestinationTransition_serializer.write(_continuation_buf_argsSerializer, value_value_element);
         }
     }
@@ -2456,8 +2456,8 @@ export function deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(this
     _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
     _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
     _continuation_buf_argsSerializer.writeInt32((value.length).toInt());
-    for (let i = 0; i < value.length; i++) {
-        const value_element : string = value[i];
+    for (let value_counter_i = 0; value_counter_i < value.length; value_counter_i++) {
+        const value_element : string = value[value_counter_i];
         _continuation_buf_argsSerializer.writeString(value_element);
     }
     InteropNativeModule._CallCallbackSync(-440782244, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
@@ -2514,8 +2514,8 @@ export function deserializeAndCallOnCreateMenuCallback(thisDeserializer: Deseria
     _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
     _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
     _continuation_buf_argsSerializer.writeInt32((value.length).toInt());
-    for (let i = 0; i < value.length; i++) {
-        const value_element : TextMenuItem = value[i];
+    for (let value_counter_i = 0; value_counter_i < value.length; value_counter_i++) {
+        const value_element : TextMenuItem = value[value_counter_i];
         TextMenuItem_serializer.write(_continuation_buf_argsSerializer, value_element);
     }
     InteropNativeModule._CallCallbackSync(528588498, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
@@ -2537,7 +2537,7 @@ export function deserializeAndCallOnDragEventCallback(thisDeserializer: Deserial
     let event : DragEvent = (DragEvent_serializer.read(thisDeserializer) as DragEvent)
     const extraParams_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let extraParams_buf : string | undefined
-    if ((RuntimeType.UNDEFINED) != (extraParams_buf_runtimeType))
+    if ((extraParams_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         extraParams_buf = (thisDeserializer.readString() as string)
     }
@@ -2597,7 +2597,7 @@ export function deserializeAndCallOnItemDragStartCallback(thisDeserializer: Dese
     let value_type : int32 = RuntimeType.UNDEFINED;
     value_type = runtimeType(value);
     _continuation_buf_argsSerializer.writeInt8((value_type).toChar());
-    if ((RuntimeType.UNDEFINED) != (value_type)) {
+    if ((value_type) != (RuntimeType.UNDEFINED)) {
         const value_value  = value!;
         _continuation_buf_argsSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value));
     }
@@ -2664,7 +2664,7 @@ export function deserializeAndCallOnNativeLoadCallback(thisDeserializer: Deseria
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnNativeLoadCallback)
     const event_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let event_buf : Object | undefined
-    if ((RuntimeType.UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         event_buf = (thisDeserializer.readObject() as object)
     }
@@ -2949,7 +2949,7 @@ export function deserializeAndCallOnWillScrollCallback(thisDeserializer: Deseria
     let value_type : int32 = RuntimeType.UNDEFINED;
     value_type = runtimeType(value);
     _continuation_buf_argsSerializer.writeInt8((value_type).toChar());
-    if ((RuntimeType.UNDEFINED) != (value_type)) {
+    if ((value_type) != (RuntimeType.UNDEFINED)) {
         const value_value  = value!;
         ScrollResult_serializer.write(_continuation_buf_argsSerializer, value_value);
     }
@@ -2965,7 +2965,7 @@ export function deserializeAndCallPageMapBuilder(thisDeserializer: DeserializerB
     let name : string = (thisDeserializer.readString() as string)
     const param_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let param_buf : Object | undefined
-    if ((RuntimeType.UNDEFINED) != (param_buf_runtimeType))
+    if ((param_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         param_buf = (thisDeserializer.readObject() as object)
     }
@@ -2986,7 +2986,7 @@ export function deserializeAndCallPasteButtonCallback(thisDeserializer: Deserial
     let result : PasteButtonOnClickResult = TypeChecker.PasteButtonOnClickResult_FromNumeric(thisDeserializer.readInt32())
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : BusinessError | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         error_buf = BusinessError_serializer.read(thisDeserializer)
     }
@@ -2998,7 +2998,7 @@ export function deserializeAndCallPasteEventCallback(thisDeserializer: Deseriali
     const _call  = (ResourceHolder.instance().get(_resourceId) as PasteEventCallback)
     const event_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let event_buf : PasteEvent | undefined
-    if ((RuntimeType.UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         event_buf = PasteEvent_serializer.read(thisDeserializer)
     }
@@ -3120,7 +3120,7 @@ export function deserializeAndCallSaveButtonCallback(thisDeserializer: Deseriali
     let result : SaveButtonOnClickResult = TypeChecker.SaveButtonOnClickResult_FromNumeric(thisDeserializer.readInt32())
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : BusinessError | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         error_buf = BusinessError_serializer.read(thisDeserializer)
     }
@@ -3153,7 +3153,7 @@ export function deserializeAndCallScrollOnWillScrollCallback(thisDeserializer: D
     let value_type : int32 = RuntimeType.UNDEFINED;
     value_type = runtimeType(value);
     _continuation_buf_argsSerializer.writeInt8((value_type).toChar());
-    if ((RuntimeType.UNDEFINED) != (value_type)) {
+    if ((value_type) != (RuntimeType.UNDEFINED)) {
         const value_value  = value!;
         OffsetResult_serializer.write(_continuation_buf_argsSerializer, value_value);
     }
@@ -3169,7 +3169,7 @@ export function deserializeAndCallSearchSubmitCallback(thisDeserializer: Deseria
     let searchContent : string = (thisDeserializer.readString() as string)
     const event_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let event_buf : SubmitEvent | undefined
-    if ((RuntimeType.UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         event_buf = (SubmitEvent_serializer.read(thisDeserializer) as SubmitEvent)
     }
@@ -3302,7 +3302,7 @@ export function deserializeAndCallTabsCustomContentTransitionCallback(thisDeseri
     let value_type : int32 = RuntimeType.UNDEFINED;
     value_type = runtimeType(value);
     _continuation_buf_argsSerializer.writeInt8((value_type).toChar());
-    if ((RuntimeType.UNDEFINED) != (value_type)) {
+    if ((value_type) != (RuntimeType.UNDEFINED)) {
         const value_value  = value!;
         TabContentAnimatedTransition_serializer.write(_continuation_buf_argsSerializer, value_value);
     }
@@ -3318,7 +3318,7 @@ export function deserializeAndCallTextAreaSubmitCallback(thisDeserializer: Deser
     let enterKeyType : EnterKeyType = TypeChecker.EnterKeyType_FromNumeric(thisDeserializer.readInt32())
     const event_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let event_buf : SubmitEvent | undefined
-    if ((RuntimeType.UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         event_buf = (SubmitEvent_serializer.read(thisDeserializer) as SubmitEvent)
     }
@@ -3492,7 +3492,7 @@ export function deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer
     let event : DragEvent = (DragEvent_serializer.read(thisDeserializer) as DragEvent)
     const extraParams_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let extraParams_buf : string | undefined
-    if ((RuntimeType.UNDEFINED) != (extraParams_buf_runtimeType))
+    if ((extraParams_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         extraParams_buf = (thisDeserializer.readString() as string)
     }
@@ -3540,7 +3540,7 @@ export function deserializeAndCallType_NavigationAttribute_customNavContentTrans
     let value_type : int32 = RuntimeType.UNDEFINED;
     value_type = runtimeType(value);
     _continuation_buf_argsSerializer.writeInt8((value_type).toChar());
-    if ((RuntimeType.UNDEFINED) != (value_type)) {
+    if ((value_type) != (RuntimeType.UNDEFINED)) {
         const value_value  = value!;
         NavigationAnimatedTransition_serializer.write(_continuation_buf_argsSerializer, value_value);
     }

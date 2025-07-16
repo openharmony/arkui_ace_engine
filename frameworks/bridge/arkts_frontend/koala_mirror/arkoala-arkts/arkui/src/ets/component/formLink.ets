@@ -149,7 +149,7 @@ export class FormLinkOptions_serializer {
         let value_moduleName_type : int32 = RuntimeType.UNDEFINED
         value_moduleName_type = runtimeType(value_moduleName)
         valueSerializer.writeInt8((value_moduleName_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_moduleName_type)) {
+        if ((value_moduleName_type) != (RuntimeType.UNDEFINED)) {
             const value_moduleName_value  = value_moduleName!
             valueSerializer.writeString(value_moduleName_value)
         }
@@ -157,7 +157,7 @@ export class FormLinkOptions_serializer {
         let value_bundleName_type : int32 = RuntimeType.UNDEFINED
         value_bundleName_type = runtimeType(value_bundleName)
         valueSerializer.writeInt8((value_bundleName_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bundleName_type)) {
+        if ((value_bundleName_type) != (RuntimeType.UNDEFINED)) {
             const value_bundleName_value  = value_bundleName!
             valueSerializer.writeString(value_bundleName_value)
         }
@@ -165,7 +165,7 @@ export class FormLinkOptions_serializer {
         let value_abilityName_type : int32 = RuntimeType.UNDEFINED
         value_abilityName_type = runtimeType(value_abilityName)
         valueSerializer.writeInt8((value_abilityName_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_abilityName_type)) {
+        if ((value_abilityName_type) != (RuntimeType.UNDEFINED)) {
             const value_abilityName_value  = value_abilityName!
             valueSerializer.writeString(value_abilityName_value)
         }
@@ -173,7 +173,7 @@ export class FormLinkOptions_serializer {
         let value_uri_type : int32 = RuntimeType.UNDEFINED
         value_uri_type = runtimeType(value_uri)
         valueSerializer.writeInt8((value_uri_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_uri_type)) {
+        if ((value_uri_type) != (RuntimeType.UNDEFINED)) {
             const value_uri_value  = value_uri!
             valueSerializer.writeString(value_uri_value)
         }
@@ -181,7 +181,7 @@ export class FormLinkOptions_serializer {
         let value_params_type : int32 = RuntimeType.UNDEFINED
         value_params_type = runtimeType(value_params)
         valueSerializer.writeInt8((value_params_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_params_type)) {
+        if ((value_params_type) != (RuntimeType.UNDEFINED)) {
             const value_params_value  = value_params!
             valueSerializer.holdAndWriteObject(value_params_value)
         }
@@ -191,35 +191,35 @@ export class FormLinkOptions_serializer {
         const action_result : string = (valueDeserializer.readString() as string)
         const moduleName_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let moduleName_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (moduleName_buf_runtimeType))
+        if ((moduleName_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             moduleName_buf = (valueDeserializer.readString() as string)
         }
         const moduleName_result : string | undefined = moduleName_buf
         const bundleName_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bundleName_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (bundleName_buf_runtimeType))
+        if ((bundleName_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             bundleName_buf = (valueDeserializer.readString() as string)
         }
         const bundleName_result : string | undefined = bundleName_buf
         const abilityName_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let abilityName_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (abilityName_buf_runtimeType))
+        if ((abilityName_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             abilityName_buf = (valueDeserializer.readString() as string)
         }
         const abilityName_result : string | undefined = abilityName_buf
         const uri_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let uri_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (uri_buf_runtimeType))
+        if ((uri_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             uri_buf = (valueDeserializer.readString() as string)
         }
         const uri_result : string | undefined = uri_buf
         const params_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let params_buf : Object | undefined
-        if ((RuntimeType.UNDEFINED) != (params_buf_runtimeType))
+        if ((params_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             params_buf = (valueDeserializer.readObject() as object)
         }

@@ -138,7 +138,7 @@ static JSObjectRef getBigIntFromParts(JSContextRef context) {
 static JSValueRef u64ToBigInt(JSContextRef context, uint64_t value) {
     JSValueRef bigint;
 #ifdef KOALA_JSC_USE_CALLBACK_CAST
-    // TODO benchmark this
+    // Improve: benchmark this
     JSObjectRef bigIntFromParts = getBigIntFromParts(context);
     JSValueRef parts[2] = {
         JSValueMakeNumber(context, (double) (value >> 32)),

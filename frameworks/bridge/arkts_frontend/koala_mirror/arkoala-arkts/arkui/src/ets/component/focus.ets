@@ -45,7 +45,7 @@ export class FocusBoxStyle_serializer {
         let value_margin_type : int32 = RuntimeType.UNDEFINED
         value_margin_type = runtimeType(value_margin)
         valueSerializer.writeInt8((value_margin_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_margin_type)) {
+        if ((value_margin_type) != (RuntimeType.UNDEFINED)) {
             const value_margin_value  = value_margin!
             LengthMetrics_serializer.write(valueSerializer, value_margin_value)
         }
@@ -53,7 +53,7 @@ export class FocusBoxStyle_serializer {
         let value_strokeColor_type : int32 = RuntimeType.UNDEFINED
         value_strokeColor_type = runtimeType(value_strokeColor)
         valueSerializer.writeInt8((value_strokeColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_strokeColor_type)) {
+        if ((value_strokeColor_type) != (RuntimeType.UNDEFINED)) {
             const value_strokeColor_value  = value_strokeColor!
             ColorMetrics_serializer.write(valueSerializer, value_strokeColor_value)
         }
@@ -61,7 +61,7 @@ export class FocusBoxStyle_serializer {
         let value_strokeWidth_type : int32 = RuntimeType.UNDEFINED
         value_strokeWidth_type = runtimeType(value_strokeWidth)
         valueSerializer.writeInt8((value_strokeWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_strokeWidth_type)) {
+        if ((value_strokeWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_strokeWidth_value  = value_strokeWidth!
             LengthMetrics_serializer.write(valueSerializer, value_strokeWidth_value)
         }
@@ -70,21 +70,21 @@ export class FocusBoxStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const margin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let margin_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (margin_buf_runtimeType))
+        if ((margin_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             margin_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const margin_result : LengthMetrics | undefined = margin_buf
         const strokeColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeColor_buf : ColorMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (strokeColor_buf_runtimeType))
+        if ((strokeColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             strokeColor_buf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
         }
         const strokeColor_result : ColorMetrics | undefined = strokeColor_buf
         const strokeWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeWidth_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (strokeWidth_buf_runtimeType))
+        if ((strokeWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             strokeWidth_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }

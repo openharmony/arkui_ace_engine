@@ -46,7 +46,7 @@ export class ArkFolderStackPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             FolderStackOptions_serializer.write(thisSerializer, options_value)
         }
@@ -58,7 +58,7 @@ export class ArkFolderStackPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as Alignment)
             thisSerializer.writeInt32(TypeChecker.Alignment_ToNumeric(value_value))
         }
@@ -70,7 +70,7 @@ export class ArkFolderStackPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -82,7 +82,7 @@ export class ArkFolderStackPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -94,7 +94,7 @@ export class ArkFolderStackPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -106,7 +106,7 @@ export class ArkFolderStackPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -355,11 +355,11 @@ export class FolderStackOptions_serializer {
         let value_upperItems_type : int32 = RuntimeType.UNDEFINED
         value_upperItems_type = runtimeType(value_upperItems)
         valueSerializer.writeInt8((value_upperItems_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_upperItems_type)) {
+        if ((value_upperItems_type) != (RuntimeType.UNDEFINED)) {
             const value_upperItems_value  = value_upperItems!
             valueSerializer.writeInt32((value_upperItems_value.length).toInt())
-            for (let i = 0; i < value_upperItems_value.length; i++) {
-                const value_upperItems_value_element : string = value_upperItems_value[i]
+            for (let value_upperItems_value_counter_i = 0; value_upperItems_value_counter_i < value_upperItems_value.length; value_upperItems_value_counter_i++) {
+                const value_upperItems_value_element : string = value_upperItems_value[value_upperItems_value_counter_i]
                 valueSerializer.writeString(value_upperItems_value_element)
             }
         }
@@ -368,7 +368,7 @@ export class FolderStackOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const upperItems_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let upperItems_buf : Array<string> | undefined
-        if ((RuntimeType.UNDEFINED) != (upperItems_buf_runtimeType))
+        if ((upperItems_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const upperItems_buf__length : int32 = valueDeserializer.readInt32()
             let upperItems_buf_ : Array<string> = new Array<string>(upperItems_buf__length)

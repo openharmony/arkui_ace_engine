@@ -41,29 +41,29 @@ export class matrix4_PolyToPolyOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const value_src  = value.src
         valueSerializer.writeInt32((value_src.length).toInt())
-        for (let i = 0; i < value_src.length; i++) {
-            const value_src_element : common2D.Point = value_src[i]
+        for (let value_src_counter_i = 0; value_src_counter_i < value_src.length; value_src_counter_i++) {
+            const value_src_element : common2D.Point = value_src[value_src_counter_i]
             common2D_Point_serializer.write(valueSerializer, value_src_element)
         }
         const value_srcIndex  = value.srcIndex
         let value_srcIndex_type : int32 = RuntimeType.UNDEFINED
         value_srcIndex_type = runtimeType(value_srcIndex)
         valueSerializer.writeInt8((value_srcIndex_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_srcIndex_type)) {
+        if ((value_srcIndex_type) != (RuntimeType.UNDEFINED)) {
             const value_srcIndex_value  = value_srcIndex!
             valueSerializer.writeNumber(value_srcIndex_value)
         }
         const value_dst  = value.dst
         valueSerializer.writeInt32((value_dst.length).toInt())
-        for (let i = 0; i < value_dst.length; i++) {
-            const value_dst_element : common2D.Point = value_dst[i]
+        for (let value_dst_counter_i = 0; value_dst_counter_i < value_dst.length; value_dst_counter_i++) {
+            const value_dst_element : common2D.Point = value_dst[value_dst_counter_i]
             common2D_Point_serializer.write(valueSerializer, value_dst_element)
         }
         const value_dstIndex  = value.dstIndex
         let value_dstIndex_type : int32 = RuntimeType.UNDEFINED
         value_dstIndex_type = runtimeType(value_dstIndex)
         valueSerializer.writeInt8((value_dstIndex_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_dstIndex_type)) {
+        if ((value_dstIndex_type) != (RuntimeType.UNDEFINED)) {
             const value_dstIndex_value  = value_dstIndex!
             valueSerializer.writeNumber(value_dstIndex_value)
         }
@@ -71,7 +71,7 @@ export class matrix4_PolyToPolyOptions_serializer {
         let value_pointCount_type : int32 = RuntimeType.UNDEFINED
         value_pointCount_type = runtimeType(value_pointCount)
         valueSerializer.writeInt8((value_pointCount_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_pointCount_type)) {
+        if ((value_pointCount_type) != (RuntimeType.UNDEFINED)) {
             const value_pointCount_value  = value_pointCount!
             valueSerializer.writeNumber(value_pointCount_value)
         }
@@ -86,7 +86,7 @@ export class matrix4_PolyToPolyOptions_serializer {
         const src_result : Array<common2D.Point> = src_buf
         const srcIndex_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let srcIndex_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (srcIndex_buf_runtimeType))
+        if ((srcIndex_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             srcIndex_buf = (valueDeserializer.readNumber() as number)
         }
@@ -99,14 +99,14 @@ export class matrix4_PolyToPolyOptions_serializer {
         const dst_result : Array<common2D.Point> = dst_buf
         const dstIndex_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dstIndex_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (dstIndex_buf_runtimeType))
+        if ((dstIndex_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             dstIndex_buf = (valueDeserializer.readNumber() as number)
         }
         const dstIndex_result : number | undefined = dstIndex_buf
         const pointCount_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let pointCount_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (pointCount_buf_runtimeType))
+        if ((pointCount_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             pointCount_buf = (valueDeserializer.readNumber() as number)
         }

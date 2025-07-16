@@ -54,7 +54,7 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -66,7 +66,7 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -78,7 +78,7 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -90,7 +90,7 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -102,7 +102,7 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -114,7 +114,7 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -401,7 +401,7 @@ export class RefreshOptions_serializer {
         let value_promptText_type : int32 = RuntimeType.UNDEFINED
         value_promptText_type = runtimeType(value_promptText)
         valueSerializer.writeInt8((value_promptText_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_promptText_type)) {
+        if ((value_promptText_type) != (RuntimeType.UNDEFINED)) {
             const value_promptText_value  = value_promptText!
             let value_promptText_value_type : int32 = RuntimeType.UNDEFINED
             value_promptText_value_type = runtimeType(value_promptText_value)
@@ -420,7 +420,7 @@ export class RefreshOptions_serializer {
         let value_builder_type : int32 = RuntimeType.UNDEFINED
         value_builder_type = runtimeType(value_builder)
         valueSerializer.writeInt8((value_builder_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_builder_type)) {
+        if ((value_builder_type) != (RuntimeType.UNDEFINED)) {
             const value_builder_value  = value_builder!
             valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_builder_value))
         }
@@ -428,7 +428,7 @@ export class RefreshOptions_serializer {
         let value_refreshingContent_type : int32 = RuntimeType.UNDEFINED
         value_refreshingContent_type = runtimeType(value_refreshingContent)
         valueSerializer.writeInt8((value_refreshingContent_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_refreshingContent_type)) {
+        if ((value_refreshingContent_type) != (RuntimeType.UNDEFINED)) {
             const value_refreshingContent_value  = value_refreshingContent!
             ComponentContent_serializer.write(valueSerializer, value_refreshingContent_value)
         }
@@ -438,7 +438,7 @@ export class RefreshOptions_serializer {
         const refreshing_result : boolean = valueDeserializer.readBoolean()
         const promptText_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let promptText_buf : ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (promptText_buf_runtimeType))
+        if ((promptText_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const promptText_buf__selector : int32 = valueDeserializer.readInt8()
             let promptText_buf_ : string | Resource | undefined
@@ -456,7 +456,7 @@ export class RefreshOptions_serializer {
         const promptText_result : ResourceStr | undefined = promptText_buf
         const builder_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let builder_buf : CustomBuilder | undefined
-        if ((RuntimeType.UNDEFINED) != (builder_buf_runtimeType))
+        if ((builder_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const builder_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const builder_buf__call : KPointer = valueDeserializer.readPointer()
@@ -473,7 +473,7 @@ export class RefreshOptions_serializer {
         const builder_result : CustomBuilder | undefined = builder_buf
         const refreshingContent_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let refreshingContent_buf : ComponentContent | undefined
-        if ((RuntimeType.UNDEFINED) != (refreshingContent_buf_runtimeType))
+        if ((refreshingContent_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             refreshingContent_buf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }

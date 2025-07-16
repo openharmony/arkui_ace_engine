@@ -105,11 +105,11 @@ export namespace webview {
             let headers_type : int32 = RuntimeType.UNDEFINED
             headers_type = runtimeType(headers)
             thisSerializer.writeInt8((headers_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (headers_type)) {
+            if ((headers_type) != (RuntimeType.UNDEFINED)) {
                 const headers_value  = headers!
                 thisSerializer.writeInt32((headers_value.length).toInt())
-                for (let i = 0; i < headers_value.length; i++) {
-                    const headers_value_element : WebHeader = headers_value[i]
+                for (let headers_value_counter_i = 0; headers_value_counter_i < headers_value.length; headers_value_counter_i++) {
+                    const headers_value_element : WebHeader = headers_value[headers_value_counter_i]
                     webview_WebHeader_serializer.write(thisSerializer, headers_value_element)
                 }
             }

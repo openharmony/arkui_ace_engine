@@ -48,7 +48,7 @@ export class ArkListItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             ListItemOptions_serializer.write(thisSerializer, value_value)
         }
@@ -60,7 +60,7 @@ export class ArkListItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -72,7 +72,7 @@ export class ArkListItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -84,7 +84,7 @@ export class ArkListItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             SwipeActionOptions_serializer.write(thisSerializer, value_value)
         }
@@ -96,7 +96,7 @@ export class ArkListItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -348,7 +348,7 @@ export class ListItemOptions_serializer {
         let value_style_type : int32 = RuntimeType.UNDEFINED
         value_style_type = runtimeType(value_style)
         valueSerializer.writeInt8((value_style_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_style_type)) {
+        if ((value_style_type) != (RuntimeType.UNDEFINED)) {
             const value_style_value  = (value_style as ListItemStyle)
             valueSerializer.writeInt32(TypeChecker.ListItemStyle_ToNumeric(value_style_value))
         }
@@ -357,7 +357,7 @@ export class ListItemOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const style_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let style_buf : ListItemStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
+        if ((style_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             style_buf = TypeChecker.ListItemStyle_FromNumeric(valueDeserializer.readInt32())
         }
@@ -373,7 +373,7 @@ export class SwipeActionItem_serializer {
         let value_builder_type : int32 = RuntimeType.UNDEFINED
         value_builder_type = runtimeType(value_builder)
         valueSerializer.writeInt8((value_builder_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_builder_type)) {
+        if ((value_builder_type) != (RuntimeType.UNDEFINED)) {
             const value_builder_value  = value_builder!
             valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_builder_value))
         }
@@ -381,7 +381,7 @@ export class SwipeActionItem_serializer {
         let value_builderComponent_type : int32 = RuntimeType.UNDEFINED
         value_builderComponent_type = runtimeType(value_builderComponent)
         valueSerializer.writeInt8((value_builderComponent_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_builderComponent_type)) {
+        if ((value_builderComponent_type) != (RuntimeType.UNDEFINED)) {
             const value_builderComponent_value  = value_builderComponent!
             ComponentContent_serializer.write(valueSerializer, value_builderComponent_value)
         }
@@ -389,7 +389,7 @@ export class SwipeActionItem_serializer {
         let value_actionAreaDistance_type : int32 = RuntimeType.UNDEFINED
         value_actionAreaDistance_type = runtimeType(value_actionAreaDistance)
         valueSerializer.writeInt8((value_actionAreaDistance_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_actionAreaDistance_type)) {
+        if ((value_actionAreaDistance_type) != (RuntimeType.UNDEFINED)) {
             const value_actionAreaDistance_value  = value_actionAreaDistance!
             let value_actionAreaDistance_value_type : int32 = RuntimeType.UNDEFINED
             value_actionAreaDistance_value_type = runtimeType(value_actionAreaDistance_value)
@@ -413,7 +413,7 @@ export class SwipeActionItem_serializer {
         let value_onAction_type : int32 = RuntimeType.UNDEFINED
         value_onAction_type = runtimeType(value_onAction)
         valueSerializer.writeInt8((value_onAction_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onAction_type)) {
+        if ((value_onAction_type) != (RuntimeType.UNDEFINED)) {
             const value_onAction_value  = value_onAction!
             valueSerializer.holdAndWriteCallback(value_onAction_value)
         }
@@ -421,7 +421,7 @@ export class SwipeActionItem_serializer {
         let value_onEnterActionArea_type : int32 = RuntimeType.UNDEFINED
         value_onEnterActionArea_type = runtimeType(value_onEnterActionArea)
         valueSerializer.writeInt8((value_onEnterActionArea_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onEnterActionArea_type)) {
+        if ((value_onEnterActionArea_type) != (RuntimeType.UNDEFINED)) {
             const value_onEnterActionArea_value  = value_onEnterActionArea!
             valueSerializer.holdAndWriteCallback(value_onEnterActionArea_value)
         }
@@ -429,7 +429,7 @@ export class SwipeActionItem_serializer {
         let value_onExitActionArea_type : int32 = RuntimeType.UNDEFINED
         value_onExitActionArea_type = runtimeType(value_onExitActionArea)
         valueSerializer.writeInt8((value_onExitActionArea_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onExitActionArea_type)) {
+        if ((value_onExitActionArea_type) != (RuntimeType.UNDEFINED)) {
             const value_onExitActionArea_value  = value_onExitActionArea!
             valueSerializer.holdAndWriteCallback(value_onExitActionArea_value)
         }
@@ -437,7 +437,7 @@ export class SwipeActionItem_serializer {
         let value_onStateChange_type : int32 = RuntimeType.UNDEFINED
         value_onStateChange_type = runtimeType(value_onStateChange)
         valueSerializer.writeInt8((value_onStateChange_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onStateChange_type)) {
+        if ((value_onStateChange_type) != (RuntimeType.UNDEFINED)) {
             const value_onStateChange_value  = value_onStateChange!
             valueSerializer.holdAndWriteCallback(value_onStateChange_value)
         }
@@ -446,7 +446,7 @@ export class SwipeActionItem_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const builder_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let builder_buf : CustomBuilder | undefined
-        if ((RuntimeType.UNDEFINED) != (builder_buf_runtimeType))
+        if ((builder_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const builder_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const builder_buf__call : KPointer = valueDeserializer.readPointer()
@@ -463,14 +463,14 @@ export class SwipeActionItem_serializer {
         const builder_result : CustomBuilder | undefined = builder_buf
         const builderComponent_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let builderComponent_buf : ComponentContent | undefined
-        if ((RuntimeType.UNDEFINED) != (builderComponent_buf_runtimeType))
+        if ((builderComponent_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             builderComponent_buf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }
         const builderComponent_result : ComponentContent | undefined = builderComponent_buf
         const actionAreaDistance_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let actionAreaDistance_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (actionAreaDistance_buf_runtimeType))
+        if ((actionAreaDistance_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const actionAreaDistance_buf__selector : int32 = valueDeserializer.readInt8()
             let actionAreaDistance_buf_ : string | number | Resource | undefined
@@ -491,7 +491,7 @@ export class SwipeActionItem_serializer {
         const actionAreaDistance_result : Length | undefined = actionAreaDistance_buf
         const onAction_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onAction_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onAction_buf_runtimeType))
+        if ((onAction_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onAction_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onAction_buf__call : KPointer = valueDeserializer.readPointer()
@@ -508,7 +508,7 @@ export class SwipeActionItem_serializer {
         const onAction_result : (() => void) | undefined = onAction_buf
         const onEnterActionArea_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onEnterActionArea_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onEnterActionArea_buf_runtimeType))
+        if ((onEnterActionArea_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onEnterActionArea_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onEnterActionArea_buf__call : KPointer = valueDeserializer.readPointer()
@@ -525,7 +525,7 @@ export class SwipeActionItem_serializer {
         const onEnterActionArea_result : (() => void) | undefined = onEnterActionArea_buf
         const onExitActionArea_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onExitActionArea_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onExitActionArea_buf_runtimeType))
+        if ((onExitActionArea_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onExitActionArea_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onExitActionArea_buf__call : KPointer = valueDeserializer.readPointer()
@@ -542,7 +542,7 @@ export class SwipeActionItem_serializer {
         const onExitActionArea_result : (() => void) | undefined = onExitActionArea_buf
         const onStateChange_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onStateChange_buf : ((state: SwipeActionState) => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onStateChange_buf_runtimeType))
+        if ((onStateChange_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onStateChange_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onStateChange_buf__call : KPointer = valueDeserializer.readPointer()
@@ -569,7 +569,7 @@ export class SwipeActionOptions_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             let value_start_value_type : int32 = RuntimeType.UNDEFINED
             value_start_value_type = runtimeType(value_start_value)
@@ -588,7 +588,7 @@ export class SwipeActionOptions_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             let value_end_value_type : int32 = RuntimeType.UNDEFINED
             value_end_value_type = runtimeType(value_end_value)
@@ -607,7 +607,7 @@ export class SwipeActionOptions_serializer {
         let value_edgeEffect_type : int32 = RuntimeType.UNDEFINED
         value_edgeEffect_type = runtimeType(value_edgeEffect)
         valueSerializer.writeInt8((value_edgeEffect_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_edgeEffect_type)) {
+        if ((value_edgeEffect_type) != (RuntimeType.UNDEFINED)) {
             const value_edgeEffect_value  = (value_edgeEffect as SwipeEdgeEffect)
             valueSerializer.writeInt32(TypeChecker.SwipeEdgeEffect_ToNumeric(value_edgeEffect_value))
         }
@@ -615,7 +615,7 @@ export class SwipeActionOptions_serializer {
         let value_onOffsetChange_type : int32 = RuntimeType.UNDEFINED
         value_onOffsetChange_type = runtimeType(value_onOffsetChange)
         valueSerializer.writeInt8((value_onOffsetChange_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onOffsetChange_type)) {
+        if ((value_onOffsetChange_type) != (RuntimeType.UNDEFINED)) {
             const value_onOffsetChange_value  = value_onOffsetChange!
             valueSerializer.holdAndWriteCallback(value_onOffsetChange_value)
         }
@@ -624,7 +624,7 @@ export class SwipeActionOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : CustomBuilder | SwipeActionItem | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const start_buf__selector : int32 = valueDeserializer.readInt8()
             let start_buf_ : CustomBuilder | SwipeActionItem | undefined
@@ -652,7 +652,7 @@ export class SwipeActionOptions_serializer {
         const start_result : CustomBuilder | SwipeActionItem | undefined = start_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : CustomBuilder | SwipeActionItem | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const end_buf__selector : int32 = valueDeserializer.readInt8()
             let end_buf_ : CustomBuilder | SwipeActionItem | undefined
@@ -680,14 +680,14 @@ export class SwipeActionOptions_serializer {
         const end_result : CustomBuilder | SwipeActionItem | undefined = end_buf
         const edgeEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let edgeEffect_buf : SwipeEdgeEffect | undefined
-        if ((RuntimeType.UNDEFINED) != (edgeEffect_buf_runtimeType))
+        if ((edgeEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             edgeEffect_buf = TypeChecker.SwipeEdgeEffect_FromNumeric(valueDeserializer.readInt32())
         }
         const edgeEffect_result : SwipeEdgeEffect | undefined = edgeEffect_buf
         const onOffsetChange_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onOffsetChange_buf : ((offset: number) => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onOffsetChange_buf_runtimeType))
+        if ((onOffsetChange_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onOffsetChange_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onOffsetChange_buf__call : KPointer = valueDeserializer.readPointer()

@@ -276,7 +276,7 @@ class StateAnimatorImpl<P, V> implements StateAnimator<P, V> {
     }
 
     onValueChange(action: (newValue: V) => void): void {
-        // TODO: rethink how we'd better subscribe appropriate scope on value change.
+        // Improve: rethink how we'd better subscribe appropriate scope on value change.
         this.value
         this.animatedState.onValueChange(action)
     }

@@ -608,7 +608,7 @@ class StateManagerImpl implements StateManager {
         let modified: uint32 = 0
         // try to update snapshot for every state, except for parameter states
         const changes = this.journal.getChanges()
-        // TODO: use compat here (toInt cast)
+        // Improve: use compat here (toInt cast)
         const created = float64ToInt(this.statesCreated.size) // amount of created states to update
         if (created > 0) {
             const it = this.statesCreated.keys()
@@ -1121,7 +1121,7 @@ class ScopeImpl<Value> implements ManagedScope, IncrementalScope<Value>, Computa
             scope.recomputeNeeded = true
             const parent = scope.parent
             if (parent) {
-                // TODO/DEBUG: investigate a case when invalid node has valid parent
+                // Improve:/DEBUG: investigate a case when invalid node has valid parent
                 // Button.IsHovered does not work properly with the optimization above
                 // if (this.myRecomputeNeeded && !parent.myRecomputeNeeded) console.log("parent of invalid scope is valid unexpectedly")
                 scope = parent

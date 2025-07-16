@@ -83,7 +83,7 @@ export class UIContext {
         return measureUtils;
     }
     public getFrameNodeById(id: string): FrameNode | null {
-        console.log(`TODO SHOPPING: @ohos.arkui.UIContext getFrameNodeById`);
+        console.log(`Improve: SHOPPING: @ohos.arkui.UIContext getFrameNodeById`);
         const id_casted = id as (string);
         ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByKey(id_casted);
@@ -97,12 +97,12 @@ export class UIContext {
     }
 
     public getComponentSnapshot() : ComponentSnapshot {
-        console.log(`TODO SHOPPING: @ohos.arkui.UIContext getComponentSnapshot`);
+        console.log(`Improve: SHOPPING: @ohos.arkui.UIContext getComponentSnapshot`);
         return new ComponentSnapshot();
     }
 
     public getComponentUtils() : ComponentUtils {
-        console.log(`TODO SHOPPING: @ohos.arkui.UIContext getComponentUtils`);
+        console.log(`Improve: SHOPPING: @ohos.arkui.UIContext getComponentUtils`);
         return new ComponentUtils();
     }
 }

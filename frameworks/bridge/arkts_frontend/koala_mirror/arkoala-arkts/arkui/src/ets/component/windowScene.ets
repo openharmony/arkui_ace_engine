@@ -49,14 +49,14 @@ export class ArkWindowScenePeer extends ArkCommonMethodPeer {
         let destination_type : int32 = RuntimeType.UNDEFINED
         destination_type = runtimeType(destination)
         thisSerializer.writeInt8((destination_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (destination_type)) {
+        if ((destination_type) != (RuntimeType.UNDEFINED)) {
             const destination_value  = destination!
             Position_serializer.write(thisSerializer, destination_value)
         }
         let fraction_type : int32 = RuntimeType.UNDEFINED
         fraction_type = runtimeType(fraction)
         thisSerializer.writeInt8((fraction_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (fraction_type)) {
+        if ((fraction_type) != (RuntimeType.UNDEFINED)) {
             const fraction_value  = fraction!
             thisSerializer.writeNumber(fraction_value)
         }

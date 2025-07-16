@@ -53,7 +53,7 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -65,7 +65,7 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteObject(value_value)
         }
@@ -77,7 +77,7 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -110,7 +110,7 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -143,7 +143,7 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             SwitchStyle_serializer.write(thisSerializer, value_value)
         }
@@ -447,7 +447,7 @@ export class ToggleOptions_serializer {
         let value_isOn_type : int32 = RuntimeType.UNDEFINED
         value_isOn_type = runtimeType(value_isOn)
         valueSerializer.writeInt8((value_isOn_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_isOn_type)) {
+        if ((value_isOn_type) != (RuntimeType.UNDEFINED)) {
             const value_isOn_value  = value_isOn!
             valueSerializer.writeBoolean(value_isOn_value)
         }
@@ -457,7 +457,7 @@ export class ToggleOptions_serializer {
         const type_result : ToggleType = TypeChecker.ToggleType_FromNumeric(valueDeserializer.readInt32())
         const isOn_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let isOn_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (isOn_buf_runtimeType))
+        if ((isOn_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             isOn_buf = valueDeserializer.readBoolean()
         }
@@ -473,7 +473,7 @@ export class SwitchStyle_serializer {
         let value_pointRadius_type : int32 = RuntimeType.UNDEFINED
         value_pointRadius_type = runtimeType(value_pointRadius)
         valueSerializer.writeInt8((value_pointRadius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_pointRadius_type)) {
+        if ((value_pointRadius_type) != (RuntimeType.UNDEFINED)) {
             const value_pointRadius_value  = value_pointRadius!
             let value_pointRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_pointRadius_value_type = runtimeType(value_pointRadius_value)
@@ -492,7 +492,7 @@ export class SwitchStyle_serializer {
         let value_unselectedColor_type : int32 = RuntimeType.UNDEFINED
         value_unselectedColor_type = runtimeType(value_unselectedColor)
         valueSerializer.writeInt8((value_unselectedColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_unselectedColor_type)) {
+        if ((value_unselectedColor_type) != (RuntimeType.UNDEFINED)) {
             const value_unselectedColor_value  = value_unselectedColor!
             let value_unselectedColor_value_type : int32 = RuntimeType.UNDEFINED
             value_unselectedColor_value_type = runtimeType(value_unselectedColor_value)
@@ -521,7 +521,7 @@ export class SwitchStyle_serializer {
         let value_pointColor_type : int32 = RuntimeType.UNDEFINED
         value_pointColor_type = runtimeType(value_pointColor)
         valueSerializer.writeInt8((value_pointColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_pointColor_type)) {
+        if ((value_pointColor_type) != (RuntimeType.UNDEFINED)) {
             const value_pointColor_value  = value_pointColor!
             let value_pointColor_value_type : int32 = RuntimeType.UNDEFINED
             value_pointColor_value_type = runtimeType(value_pointColor_value)
@@ -550,7 +550,7 @@ export class SwitchStyle_serializer {
         let value_trackBorderRadius_type : int32 = RuntimeType.UNDEFINED
         value_trackBorderRadius_type = runtimeType(value_trackBorderRadius)
         valueSerializer.writeInt8((value_trackBorderRadius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_trackBorderRadius_type)) {
+        if ((value_trackBorderRadius_type) != (RuntimeType.UNDEFINED)) {
             const value_trackBorderRadius_value  = value_trackBorderRadius!
             let value_trackBorderRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_trackBorderRadius_value_type = runtimeType(value_trackBorderRadius_value)
@@ -570,7 +570,7 @@ export class SwitchStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const pointRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let pointRadius_buf : number | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (pointRadius_buf_runtimeType))
+        if ((pointRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const pointRadius_buf__selector : int32 = valueDeserializer.readInt8()
             let pointRadius_buf_ : number | Resource | undefined
@@ -588,7 +588,7 @@ export class SwitchStyle_serializer {
         const pointRadius_result : number | Resource | undefined = pointRadius_buf
         const unselectedColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let unselectedColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (unselectedColor_buf_runtimeType))
+        if ((unselectedColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const unselectedColor_buf__selector : int32 = valueDeserializer.readInt8()
             let unselectedColor_buf_ : Color | number | string | Resource | undefined
@@ -612,7 +612,7 @@ export class SwitchStyle_serializer {
         const unselectedColor_result : ResourceColor | undefined = unselectedColor_buf
         const pointColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let pointColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (pointColor_buf_runtimeType))
+        if ((pointColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const pointColor_buf__selector : int32 = valueDeserializer.readInt8()
             let pointColor_buf_ : Color | number | string | Resource | undefined
@@ -636,7 +636,7 @@ export class SwitchStyle_serializer {
         const pointColor_result : ResourceColor | undefined = pointColor_buf
         const trackBorderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let trackBorderRadius_buf : number | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (trackBorderRadius_buf_runtimeType))
+        if ((trackBorderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const trackBorderRadius_buf__selector : int32 = valueDeserializer.readInt8()
             let trackBorderRadius_buf_ : number | Resource | undefined

@@ -581,7 +581,7 @@ export class GlobalScope_ohos_arkui_componentSnapshot {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             SnapshotOptions_serializer.write(thisSerializer, options_value)
         }
@@ -602,7 +602,7 @@ export class GlobalScope_ohos_arkui_performanceMonitor {
         let note_type : int32 = RuntimeType.UNDEFINED
         note_type = runtimeType(note)
         thisSerializer.writeInt8((note_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (note_type)) {
+        if ((note_type) != (RuntimeType.UNDEFINED)) {
             const note_value  = note!
             thisSerializer.writeString(note_value)
         }
@@ -936,7 +936,7 @@ export class RestrictedWorker implements MaterializedBase {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             WorkerOptions_serializer.write(thisSerializer, options_value)
         }
@@ -1054,8 +1054,8 @@ export class RestrictedWorker implements MaterializedBase {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(message)
         thisSerializer.writeInt32((transfer.length).toInt())
-        for (let i = 0; i < transfer.length; i++) {
-            const transfer_element : NativeBuffer = transfer[i]
+        for (let transfer_counter_i = 0; transfer_counter_i < transfer.length; transfer_counter_i++) {
+            const transfer_element : NativeBuffer = transfer[transfer_counter_i]
             thisSerializer.writeBuffer(transfer_element)
         }
         ArkUIGeneratedNativeModule._RestrictedWorker_postMessage0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -1067,7 +1067,7 @@ export class RestrictedWorker implements MaterializedBase {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             PostMessageOptions_serializer.write(thisSerializer, options_value)
         }
@@ -1080,11 +1080,11 @@ export class RestrictedWorker implements MaterializedBase {
         let transfer_type : int32 = RuntimeType.UNDEFINED
         transfer_type = runtimeType(transfer)
         thisSerializer.writeInt8((transfer_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (transfer_type)) {
+        if ((transfer_type) != (RuntimeType.UNDEFINED)) {
             const transfer_value  = transfer!
             thisSerializer.writeInt32((transfer_value.length).toInt())
-            for (let i = 0; i < transfer_value.length; i++) {
-                const transfer_value_element : NativeBuffer = transfer_value[i]
+            for (let transfer_value_counter_i = 0; transfer_value_counter_i < transfer_value.length; transfer_value_counter_i++) {
+                const transfer_value_element : NativeBuffer = transfer_value[transfer_value_counter_i]
                 thisSerializer.writeBuffer(transfer_value_element)
             }
         }
@@ -1108,7 +1108,7 @@ export class RestrictedWorker implements MaterializedBase {
         let listener_type : int32 = RuntimeType.UNDEFINED
         listener_type = runtimeType(listener)
         thisSerializer.writeInt8((listener_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (listener_type)) {
+        if ((listener_type) != (RuntimeType.UNDEFINED)) {
             const listener_value  = listener!
             WorkerEventListener_serializer.write(thisSerializer, listener_value)
         }
@@ -1136,7 +1136,7 @@ export class RestrictedWorker implements MaterializedBase {
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
         thisSerializer.writeInt8((callback__type).toChar())
-        if ((RuntimeType.UNDEFINED) != (callback__type)) {
+        if ((callback__type) != (RuntimeType.UNDEFINED)) {
             const callback__value  = callback_!
             WorkerEventListener_serializer.write(thisSerializer, callback__value)
         }
@@ -1157,7 +1157,7 @@ export class RestrictedWorker implements MaterializedBase {
         let instanceName_type : int32 = RuntimeType.UNDEFINED
         instanceName_type = runtimeType(instanceName)
         thisSerializer.writeInt8((instanceName_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (instanceName_type)) {
+        if ((instanceName_type) != (RuntimeType.UNDEFINED)) {
             const instanceName_value  = instanceName!
             thisSerializer.writeString(instanceName_value)
         }
@@ -1169,7 +1169,7 @@ export class RestrictedWorker implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RestrictedWorker_onexit_Callback | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const buffer__resource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer__call : KPointer = retvalDeserializer.readPointer()
@@ -1192,7 +1192,7 @@ export class RestrictedWorker implements MaterializedBase {
         let onexit_type : int32 = RuntimeType.UNDEFINED
         onexit_type = runtimeType(onexit)
         thisSerializer.writeInt8((onexit_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (onexit_type)) {
+        if ((onexit_type) != (RuntimeType.UNDEFINED)) {
             const onexit_value  = onexit!
             thisSerializer.holdAndWriteCallback(onexit_value)
         }
@@ -1204,7 +1204,7 @@ export class RestrictedWorker implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RestrictedWorker_onerror_Callback | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const buffer__resource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer__call : KPointer = retvalDeserializer.readPointer()
@@ -1227,7 +1227,7 @@ export class RestrictedWorker implements MaterializedBase {
         let onerror_type : int32 = RuntimeType.UNDEFINED
         onerror_type = runtimeType(onerror)
         thisSerializer.writeInt8((onerror_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (onerror_type)) {
+        if ((onerror_type) != (RuntimeType.UNDEFINED)) {
             const onerror_value  = onerror!
             thisSerializer.holdAndWriteCallback(onerror_value)
         }
@@ -1239,7 +1239,7 @@ export class RestrictedWorker implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RestrictedWorker_onmessage_Callback | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const buffer__resource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer__call : KPointer = retvalDeserializer.readPointer()
@@ -1262,7 +1262,7 @@ export class RestrictedWorker implements MaterializedBase {
         let onmessage_type : int32 = RuntimeType.UNDEFINED
         onmessage_type = runtimeType(onmessage)
         thisSerializer.writeInt8((onmessage_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (onmessage_type)) {
+        if ((onmessage_type) != (RuntimeType.UNDEFINED)) {
             const onmessage_value  = onmessage!
             thisSerializer.holdAndWriteCallback(onmessage_value)
         }
@@ -1274,7 +1274,7 @@ export class RestrictedWorker implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RestrictedWorker_onmessage_Callback | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const buffer__resource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer__call : KPointer = retvalDeserializer.readPointer()
@@ -1297,7 +1297,7 @@ export class RestrictedWorker implements MaterializedBase {
         let onmessageerror_type : int32 = RuntimeType.UNDEFINED
         onmessageerror_type = runtimeType(onmessageerror)
         thisSerializer.writeInt8((onmessageerror_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (onmessageerror_type)) {
+        if ((onmessageerror_type) != (RuntimeType.UNDEFINED)) {
             const onmessageerror_value  = onmessageerror!
             thisSerializer.holdAndWriteCallback(onmessageerror_value)
         }
@@ -1333,7 +1333,7 @@ export class Scene implements MaterializedBase {
         let uri_type : int32 = RuntimeType.UNDEFINED
         uri_type = runtimeType(uri)
         thisSerializer.writeInt8((uri_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (uri_type)) {
+        if ((uri_type) != (RuntimeType.UNDEFINED)) {
             const uri_value  = uri!
             let uri_value_type : int32 = RuntimeType.UNDEFINED
             uri_value_type = runtimeType(uri_value)
@@ -1396,8 +1396,8 @@ export class SystemOps {
     private static getResourceId_serialize(bundleName: string, moduleName: string, params: Array<string>): int32 {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((params.length).toInt())
-        for (let i = 0; i < params.length; i++) {
-            const params_element : string = params[i]
+        for (let params_counter_i = 0; params_counter_i < params.length; params_counter_i++) {
+            const params_element : string = params[params_counter_i]
             thisSerializer.writeString(params_element)
         }
         const retval  = ArkUIGeneratedNativeModule._SystemOps_getResourceId(bundleName, moduleName, thisSerializer.asBuffer(), thisSerializer.length())
@@ -2093,7 +2093,7 @@ export class BuilderNodeOptions_serializer {
         let value_selfIdealSize_type : int32 = RuntimeType.UNDEFINED
         value_selfIdealSize_type = runtimeType(value_selfIdealSize)
         valueSerializer.writeInt8((value_selfIdealSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_selfIdealSize_type)) {
+        if ((value_selfIdealSize_type) != (RuntimeType.UNDEFINED)) {
             const value_selfIdealSize_value  = value_selfIdealSize!
             Size_serializer.write(valueSerializer, value_selfIdealSize_value)
         }
@@ -2101,7 +2101,7 @@ export class BuilderNodeOptions_serializer {
         let value_type_type : int32 = RuntimeType.UNDEFINED
         value_type_type = runtimeType(value_type)
         valueSerializer.writeInt8((value_type_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type_type)) {
+        if ((value_type_type) != (RuntimeType.UNDEFINED)) {
             const value_type_value  = value_type!
             valueSerializer.writeNumber(value_type_value)
         }
@@ -2109,7 +2109,7 @@ export class BuilderNodeOptions_serializer {
         let value_surfaceId_type : int32 = RuntimeType.UNDEFINED
         value_surfaceId_type = runtimeType(value_surfaceId)
         valueSerializer.writeInt8((value_surfaceId_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_surfaceId_type)) {
+        if ((value_surfaceId_type) != (RuntimeType.UNDEFINED)) {
             const value_surfaceId_value  = value_surfaceId!
             valueSerializer.writeString(value_surfaceId_value)
         }
@@ -2118,21 +2118,21 @@ export class BuilderNodeOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const selfIdealSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let selfIdealSize_buf : Size | undefined
-        if ((RuntimeType.UNDEFINED) != (selfIdealSize_buf_runtimeType))
+        if ((selfIdealSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             selfIdealSize_buf = Size_serializer.read(valueDeserializer)
         }
         const selfIdealSize_result : Size | undefined = selfIdealSize_buf
         const type_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let type_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
+        if ((type_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             type_buf = (valueDeserializer.readNumber() as number)
         }
         const type_result : number | undefined = type_buf
         const surfaceId_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let surfaceId_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (surfaceId_buf_runtimeType))
+        if ((surfaceId_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             surfaceId_buf = (valueDeserializer.readString() as string)
         }
@@ -2176,7 +2176,7 @@ export class DoubleAnimationParam_serializer {
         let value_onProgress_type : int32 = RuntimeType.UNDEFINED
         value_onProgress_type = runtimeType(value_onProgress)
         valueSerializer.writeInt8((value_onProgress_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onProgress_type)) {
+        if ((value_onProgress_type) != (RuntimeType.UNDEFINED)) {
             const value_onProgress_value  = value_onProgress!
             valueSerializer.holdAndWriteCallback(value_onProgress_value)
         }
@@ -2184,7 +2184,7 @@ export class DoubleAnimationParam_serializer {
         let value_onFinish_type : int32 = RuntimeType.UNDEFINED
         value_onFinish_type = runtimeType(value_onFinish)
         valueSerializer.writeInt8((value_onFinish_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onFinish_type)) {
+        if ((value_onFinish_type) != (RuntimeType.UNDEFINED)) {
             const value_onFinish_value  = value_onFinish!
             valueSerializer.holdAndWriteCallback(value_onFinish_value)
         }
@@ -2213,7 +2213,7 @@ export class DoubleAnimationParam_serializer {
         const curve_result : Curve | string | ICurve = (curve_buf as Curve | string | ICurve)
         const onProgress_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onProgress_buf : Callback_Extender_OnProgress | undefined
-        if ((RuntimeType.UNDEFINED) != (onProgress_buf_runtimeType))
+        if ((onProgress_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onProgress_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onProgress_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2231,7 +2231,7 @@ export class DoubleAnimationParam_serializer {
         const onProgress_result : Callback_Extender_OnProgress | undefined = onProgress_buf
         const onFinish_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onFinish_buf : Callback_Extender_OnFinish | undefined
-        if ((RuntimeType.UNDEFINED) != (onFinish_buf_runtimeType))
+        if ((onFinish_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onFinish_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onFinish_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2363,11 +2363,11 @@ export class PostMessageOptions_serializer {
         let value_transfer_type : int32 = RuntimeType.UNDEFINED
         value_transfer_type = runtimeType(value_transfer)
         valueSerializer.writeInt8((value_transfer_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_transfer_type)) {
+        if ((value_transfer_type) != (RuntimeType.UNDEFINED)) {
             const value_transfer_value  = value_transfer!
             valueSerializer.writeInt32((value_transfer_value.length).toInt())
-            for (let i = 0; i < value_transfer_value.length; i++) {
-                const value_transfer_value_element : Object = value_transfer_value[i]
+            for (let value_transfer_value_counter_i = 0; value_transfer_value_counter_i < value_transfer_value.length; value_transfer_value_counter_i++) {
+                const value_transfer_value_element : Object = value_transfer_value[value_transfer_value_counter_i]
                 valueSerializer.holdAndWriteObject(value_transfer_value_element)
             }
         }
@@ -2376,7 +2376,7 @@ export class PostMessageOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const transfer_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let transfer_buf : Array<Object> | undefined
-        if ((RuntimeType.UNDEFINED) != (transfer_buf_runtimeType))
+        if ((transfer_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const transfer_buf__length : int32 = valueDeserializer.readInt32()
             let transfer_buf_ : Array<Object> = new Array<Object>(transfer_buf__length)
@@ -2397,7 +2397,7 @@ export class SnapshotOptions_serializer {
         let value_scale_type : int32 = RuntimeType.UNDEFINED
         value_scale_type = runtimeType(value_scale)
         valueSerializer.writeInt8((value_scale_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_scale_type)) {
+        if ((value_scale_type) != (RuntimeType.UNDEFINED)) {
             const value_scale_value  = value_scale!
             valueSerializer.writeNumber(value_scale_value)
         }
@@ -2405,7 +2405,7 @@ export class SnapshotOptions_serializer {
         let value_waitUntilRenderFinished_type : int32 = RuntimeType.UNDEFINED
         value_waitUntilRenderFinished_type = runtimeType(value_waitUntilRenderFinished)
         valueSerializer.writeInt8((value_waitUntilRenderFinished_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_waitUntilRenderFinished_type)) {
+        if ((value_waitUntilRenderFinished_type) != (RuntimeType.UNDEFINED)) {
             const value_waitUntilRenderFinished_value  = value_waitUntilRenderFinished!
             valueSerializer.writeBoolean(value_waitUntilRenderFinished_value)
         }
@@ -2414,14 +2414,14 @@ export class SnapshotOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const scale_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let scale_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (scale_buf_runtimeType))
+        if ((scale_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             scale_buf = (valueDeserializer.readNumber() as number)
         }
         const scale_result : number | undefined = scale_buf
         const waitUntilRenderFinished_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let waitUntilRenderFinished_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (waitUntilRenderFinished_buf_runtimeType))
+        if ((waitUntilRenderFinished_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             waitUntilRenderFinished_buf = valueDeserializer.readBoolean()
         }
@@ -2437,7 +2437,7 @@ export class WorkerOptions_serializer {
         let value_type_type : int32 = RuntimeType.UNDEFINED
         value_type_type = runtimeType(value_type)
         valueSerializer.writeInt8((value_type_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type_type)) {
+        if ((value_type_type) != (RuntimeType.UNDEFINED)) {
             const value_type_value  = value_type!
             valueSerializer.writeString(value_type_value)
         }
@@ -2445,7 +2445,7 @@ export class WorkerOptions_serializer {
         let value_name_type : int32 = RuntimeType.UNDEFINED
         value_name_type = runtimeType(value_name)
         valueSerializer.writeInt8((value_name_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_name_type)) {
+        if ((value_name_type) != (RuntimeType.UNDEFINED)) {
             const value_name_value  = value_name!
             valueSerializer.writeString(value_name_value)
         }
@@ -2453,7 +2453,7 @@ export class WorkerOptions_serializer {
         let value_shared_type : int32 = RuntimeType.UNDEFINED
         value_shared_type = runtimeType(value_shared)
         valueSerializer.writeInt8((value_shared_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_shared_type)) {
+        if ((value_shared_type) != (RuntimeType.UNDEFINED)) {
             const value_shared_value  = value_shared!
             valueSerializer.writeBoolean(value_shared_value)
         }
@@ -2462,21 +2462,21 @@ export class WorkerOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const type_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let type_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
+        if ((type_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             type_buf = (valueDeserializer.readString() as string)
         }
         const type_result : string | undefined = type_buf
         const name_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let name_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (name_buf_runtimeType))
+        if ((name_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             name_buf = (valueDeserializer.readString() as string)
         }
         const name_result : string | undefined = name_buf
         const shared_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let shared_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (shared_buf_runtimeType))
+        if ((shared_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             shared_buf = valueDeserializer.readBoolean()
         }
@@ -2646,7 +2646,7 @@ export class MeasureOptions_serializer {
         let value_constraintWidth_type : int32 = RuntimeType.UNDEFINED
         value_constraintWidth_type = runtimeType(value_constraintWidth)
         valueSerializer.writeInt8((value_constraintWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_constraintWidth_type)) {
+        if ((value_constraintWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_constraintWidth_value  = value_constraintWidth!
             let value_constraintWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_constraintWidth_value_type = runtimeType(value_constraintWidth_value)
@@ -2670,7 +2670,7 @@ export class MeasureOptions_serializer {
         let value_fontSize_type : int32 = RuntimeType.UNDEFINED
         value_fontSize_type = runtimeType(value_fontSize)
         valueSerializer.writeInt8((value_fontSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontSize_type)) {
+        if ((value_fontSize_type) != (RuntimeType.UNDEFINED)) {
             const value_fontSize_value  = value_fontSize!
             let value_fontSize_value_type : int32 = RuntimeType.UNDEFINED
             value_fontSize_value_type = runtimeType(value_fontSize_value)
@@ -2694,7 +2694,7 @@ export class MeasureOptions_serializer {
         let value_fontStyle_type : int32 = RuntimeType.UNDEFINED
         value_fontStyle_type = runtimeType(value_fontStyle)
         valueSerializer.writeInt8((value_fontStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontStyle_type)) {
+        if ((value_fontStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_fontStyle_value  = value_fontStyle!
             let value_fontStyle_value_type : int32 = RuntimeType.UNDEFINED
             value_fontStyle_value_type = runtimeType(value_fontStyle_value)
@@ -2713,7 +2713,7 @@ export class MeasureOptions_serializer {
         let value_fontWeight_type : int32 = RuntimeType.UNDEFINED
         value_fontWeight_type = runtimeType(value_fontWeight)
         valueSerializer.writeInt8((value_fontWeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontWeight_type)) {
+        if ((value_fontWeight_type) != (RuntimeType.UNDEFINED)) {
             const value_fontWeight_value  = value_fontWeight!
             let value_fontWeight_value_type : int32 = RuntimeType.UNDEFINED
             value_fontWeight_value_type = runtimeType(value_fontWeight_value)
@@ -2737,7 +2737,7 @@ export class MeasureOptions_serializer {
         let value_fontFamily_type : int32 = RuntimeType.UNDEFINED
         value_fontFamily_type = runtimeType(value_fontFamily)
         valueSerializer.writeInt8((value_fontFamily_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontFamily_type)) {
+        if ((value_fontFamily_type) != (RuntimeType.UNDEFINED)) {
             const value_fontFamily_value  = value_fontFamily!
             let value_fontFamily_value_type : int32 = RuntimeType.UNDEFINED
             value_fontFamily_value_type = runtimeType(value_fontFamily_value)
@@ -2756,7 +2756,7 @@ export class MeasureOptions_serializer {
         let value_letterSpacing_type : int32 = RuntimeType.UNDEFINED
         value_letterSpacing_type = runtimeType(value_letterSpacing)
         valueSerializer.writeInt8((value_letterSpacing_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_letterSpacing_type)) {
+        if ((value_letterSpacing_type) != (RuntimeType.UNDEFINED)) {
             const value_letterSpacing_value  = value_letterSpacing!
             let value_letterSpacing_value_type : int32 = RuntimeType.UNDEFINED
             value_letterSpacing_value_type = runtimeType(value_letterSpacing_value)
@@ -2775,7 +2775,7 @@ export class MeasureOptions_serializer {
         let value_textAlign_type : int32 = RuntimeType.UNDEFINED
         value_textAlign_type = runtimeType(value_textAlign)
         valueSerializer.writeInt8((value_textAlign_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_textAlign_type)) {
+        if ((value_textAlign_type) != (RuntimeType.UNDEFINED)) {
             const value_textAlign_value  = (value_textAlign as text.TextAlign)
             valueSerializer.writeInt32(TypeChecker.text_TextAlign_ToNumeric(value_textAlign_value))
         }
@@ -2783,7 +2783,7 @@ export class MeasureOptions_serializer {
         let value_overflow_type : int32 = RuntimeType.UNDEFINED
         value_overflow_type = runtimeType(value_overflow)
         valueSerializer.writeInt8((value_overflow_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_overflow_type)) {
+        if ((value_overflow_type) != (RuntimeType.UNDEFINED)) {
             const value_overflow_value  = value_overflow!
             let value_overflow_value_type : int32 = RuntimeType.UNDEFINED
             value_overflow_value_type = runtimeType(value_overflow_value)
@@ -2802,7 +2802,7 @@ export class MeasureOptions_serializer {
         let value_maxLines_type : int32 = RuntimeType.UNDEFINED
         value_maxLines_type = runtimeType(value_maxLines)
         valueSerializer.writeInt8((value_maxLines_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_maxLines_type)) {
+        if ((value_maxLines_type) != (RuntimeType.UNDEFINED)) {
             const value_maxLines_value  = value_maxLines!
             valueSerializer.writeNumber(value_maxLines_value)
         }
@@ -2810,7 +2810,7 @@ export class MeasureOptions_serializer {
         let value_lineHeight_type : int32 = RuntimeType.UNDEFINED
         value_lineHeight_type = runtimeType(value_lineHeight)
         valueSerializer.writeInt8((value_lineHeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_lineHeight_type)) {
+        if ((value_lineHeight_type) != (RuntimeType.UNDEFINED)) {
             const value_lineHeight_value  = value_lineHeight!
             let value_lineHeight_value_type : int32 = RuntimeType.UNDEFINED
             value_lineHeight_value_type = runtimeType(value_lineHeight_value)
@@ -2834,7 +2834,7 @@ export class MeasureOptions_serializer {
         let value_baselineOffset_type : int32 = RuntimeType.UNDEFINED
         value_baselineOffset_type = runtimeType(value_baselineOffset)
         valueSerializer.writeInt8((value_baselineOffset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_baselineOffset_type)) {
+        if ((value_baselineOffset_type) != (RuntimeType.UNDEFINED)) {
             const value_baselineOffset_value  = value_baselineOffset!
             let value_baselineOffset_value_type : int32 = RuntimeType.UNDEFINED
             value_baselineOffset_value_type = runtimeType(value_baselineOffset_value)
@@ -2853,7 +2853,7 @@ export class MeasureOptions_serializer {
         let value_textCase_type : int32 = RuntimeType.UNDEFINED
         value_textCase_type = runtimeType(value_textCase)
         valueSerializer.writeInt8((value_textCase_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_textCase_type)) {
+        if ((value_textCase_type) != (RuntimeType.UNDEFINED)) {
             const value_textCase_value  = value_textCase!
             let value_textCase_value_type : int32 = RuntimeType.UNDEFINED
             value_textCase_value_type = runtimeType(value_textCase_value)
@@ -2872,7 +2872,7 @@ export class MeasureOptions_serializer {
         let value_textIndent_type : int32 = RuntimeType.UNDEFINED
         value_textIndent_type = runtimeType(value_textIndent)
         valueSerializer.writeInt8((value_textIndent_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_textIndent_type)) {
+        if ((value_textIndent_type) != (RuntimeType.UNDEFINED)) {
             const value_textIndent_value  = value_textIndent!
             let value_textIndent_value_type : int32 = RuntimeType.UNDEFINED
             value_textIndent_value_type = runtimeType(value_textIndent_value)
@@ -2891,7 +2891,7 @@ export class MeasureOptions_serializer {
         let value_wordBreak_type : int32 = RuntimeType.UNDEFINED
         value_wordBreak_type = runtimeType(value_wordBreak)
         valueSerializer.writeInt8((value_wordBreak_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_wordBreak_type)) {
+        if ((value_wordBreak_type) != (RuntimeType.UNDEFINED)) {
             const value_wordBreak_value  = (value_wordBreak as text.WordBreak)
             valueSerializer.writeInt32(TypeChecker.text_WordBreak_ToNumeric(value_wordBreak_value))
         }
@@ -2912,7 +2912,7 @@ export class MeasureOptions_serializer {
         const textContent_result : string | Resource = (textContent_buf as string | Resource)
         const constraintWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let constraintWidth_buf : number | string | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (constraintWidth_buf_runtimeType))
+        if ((constraintWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const constraintWidth_buf__selector : int32 = valueDeserializer.readInt8()
             let constraintWidth_buf_ : number | string | Resource | undefined
@@ -2933,7 +2933,7 @@ export class MeasureOptions_serializer {
         const constraintWidth_result : number | string | Resource | undefined = constraintWidth_buf
         const fontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontSize_buf : number | string | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (fontSize_buf_runtimeType))
+        if ((fontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontSize_buf__selector : int32 = valueDeserializer.readInt8()
             let fontSize_buf_ : number | string | Resource | undefined
@@ -2954,7 +2954,7 @@ export class MeasureOptions_serializer {
         const fontSize_result : number | string | Resource | undefined = fontSize_buf
         const fontStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontStyle_buf : number | FontStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (fontStyle_buf_runtimeType))
+        if ((fontStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontStyle_buf__selector : int32 = valueDeserializer.readInt8()
             let fontStyle_buf_ : number | FontStyle | undefined
@@ -2972,7 +2972,7 @@ export class MeasureOptions_serializer {
         const fontStyle_result : number | FontStyle | undefined = fontStyle_buf
         const fontWeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontWeight_buf : number | string | FontWeight | undefined
-        if ((RuntimeType.UNDEFINED) != (fontWeight_buf_runtimeType))
+        if ((fontWeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontWeight_buf__selector : int32 = valueDeserializer.readInt8()
             let fontWeight_buf_ : number | string | FontWeight | undefined
@@ -2993,7 +2993,7 @@ export class MeasureOptions_serializer {
         const fontWeight_result : number | string | FontWeight | undefined = fontWeight_buf
         const fontFamily_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontFamily_buf : string | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (fontFamily_buf_runtimeType))
+        if ((fontFamily_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontFamily_buf__selector : int32 = valueDeserializer.readInt8()
             let fontFamily_buf_ : string | Resource | undefined
@@ -3011,7 +3011,7 @@ export class MeasureOptions_serializer {
         const fontFamily_result : string | Resource | undefined = fontFamily_buf
         const letterSpacing_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let letterSpacing_buf : number | string | undefined
-        if ((RuntimeType.UNDEFINED) != (letterSpacing_buf_runtimeType))
+        if ((letterSpacing_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const letterSpacing_buf__selector : int32 = valueDeserializer.readInt8()
             let letterSpacing_buf_ : number | string | undefined
@@ -3029,14 +3029,14 @@ export class MeasureOptions_serializer {
         const letterSpacing_result : number | string | undefined = letterSpacing_buf
         const textAlign_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let textAlign_buf : text.TextAlign | undefined
-        if ((RuntimeType.UNDEFINED) != (textAlign_buf_runtimeType))
+        if ((textAlign_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             textAlign_buf = TypeChecker.text_TextAlign_FromNumeric(valueDeserializer.readInt32())
         }
         const textAlign_result : text.TextAlign | undefined = textAlign_buf
         const overflow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let overflow_buf : number | TextOverflow | undefined
-        if ((RuntimeType.UNDEFINED) != (overflow_buf_runtimeType))
+        if ((overflow_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const overflow_buf__selector : int32 = valueDeserializer.readInt8()
             let overflow_buf_ : number | TextOverflow | undefined
@@ -3054,14 +3054,14 @@ export class MeasureOptions_serializer {
         const overflow_result : number | TextOverflow | undefined = overflow_buf
         const maxLines_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maxLines_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (maxLines_buf_runtimeType))
+        if ((maxLines_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             maxLines_buf = (valueDeserializer.readNumber() as number)
         }
         const maxLines_result : number | undefined = maxLines_buf
         const lineHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let lineHeight_buf : number | string | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (lineHeight_buf_runtimeType))
+        if ((lineHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const lineHeight_buf__selector : int32 = valueDeserializer.readInt8()
             let lineHeight_buf_ : number | string | Resource | undefined
@@ -3082,7 +3082,7 @@ export class MeasureOptions_serializer {
         const lineHeight_result : number | string | Resource | undefined = lineHeight_buf
         const baselineOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let baselineOffset_buf : number | string | undefined
-        if ((RuntimeType.UNDEFINED) != (baselineOffset_buf_runtimeType))
+        if ((baselineOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const baselineOffset_buf__selector : int32 = valueDeserializer.readInt8()
             let baselineOffset_buf_ : number | string | undefined
@@ -3100,7 +3100,7 @@ export class MeasureOptions_serializer {
         const baselineOffset_result : number | string | undefined = baselineOffset_buf
         const textCase_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let textCase_buf : number | TextCase | undefined
-        if ((RuntimeType.UNDEFINED) != (textCase_buf_runtimeType))
+        if ((textCase_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const textCase_buf__selector : int32 = valueDeserializer.readInt8()
             let textCase_buf_ : number | TextCase | undefined
@@ -3118,7 +3118,7 @@ export class MeasureOptions_serializer {
         const textCase_result : number | TextCase | undefined = textCase_buf
         const textIndent_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let textIndent_buf : number | string | undefined
-        if ((RuntimeType.UNDEFINED) != (textIndent_buf_runtimeType))
+        if ((textIndent_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const textIndent_buf__selector : int32 = valueDeserializer.readInt8()
             let textIndent_buf_ : number | string | undefined
@@ -3136,7 +3136,7 @@ export class MeasureOptions_serializer {
         const textIndent_result : number | string | undefined = textIndent_buf
         const wordBreak_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let wordBreak_buf : text.WordBreak | undefined
-        if ((RuntimeType.UNDEFINED) != (wordBreak_buf_runtimeType))
+        if ((wordBreak_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             wordBreak_buf = TypeChecker.text_WordBreak_FromNumeric(valueDeserializer.readInt32())
         }

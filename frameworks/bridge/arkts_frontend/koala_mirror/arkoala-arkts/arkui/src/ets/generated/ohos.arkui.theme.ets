@@ -2240,7 +2240,7 @@ export class CustomTheme_serializer {
         let value_colors_type : int32 = RuntimeType.UNDEFINED
         value_colors_type = runtimeType(value_colors)
         valueSerializer.writeInt8((value_colors_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_colors_type)) {
+        if ((value_colors_type) != (RuntimeType.UNDEFINED)) {
             const value_colors_value  = value_colors!
             Colors_serializer.write(valueSerializer, value_colors_value)
         }
@@ -2249,7 +2249,7 @@ export class CustomTheme_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const colors_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let colors_buf : Colors | undefined
-        if ((RuntimeType.UNDEFINED) != (colors_buf_runtimeType))
+        if ((colors_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             colors_buf = Colors_serializer.read(valueDeserializer)
         }

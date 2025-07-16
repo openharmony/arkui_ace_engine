@@ -149,7 +149,7 @@ struct KInteropNumber {
     }
     static inline KInteropNumber fromDouble(double value) {
       KInteropNumber result;
-      // TODO: boundary check
+      // Improve: boundary check
       if (value == std::floor(value)) {
         result.tag = INTEROP_TAG_INT32;
         result.i32 = static_cast<int>(value);

@@ -36,8 +36,8 @@ export class image_PixelMap_serializer {
 }
 export namespace image {
     export interface PixelMap {
-        readonly isEditable: boolean
-        readonly isStrideAlignment: boolean
+        isEditable: boolean
+        isStrideAlignment: boolean
         readPixelsToBufferSync(dst: NativeBuffer): void
         writeBufferToPixels(src: NativeBuffer): void
     }
@@ -46,14 +46,12 @@ export namespace image {
         public getPeer(): Finalizable | undefined {
             return this.peer
         }
-        get isEditable(): boolean {
-            return this.getIsEditable()
-        }
-        get isStrideAlignment(): boolean {
-            return this.getIsStrideAlignment()
-        }
+        isEditable: boolean
+        isStrideAlignment: boolean
         constructor(peerPtr: KPointer) {
             this.peer = new Finalizable(peerPtr, PixelMapInternal.getFinalizer())
+            this.isEditable = this.getIsEditable()
+            this.isStrideAlignment = this.getIsStrideAlignment()
         }
         constructor() {
             this(PixelMapInternal.construct())

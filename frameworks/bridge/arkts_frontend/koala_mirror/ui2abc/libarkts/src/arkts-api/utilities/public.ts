@@ -39,7 +39,7 @@ import { NodeCache } from "../node-cache"
 import { listPrograms } from "../plugins"
 
 /**
- * TODO: Replace or remove with better naming
+ * Improve: Replace or remove with better naming
  * 
  * @deprecated
  */
@@ -58,7 +58,7 @@ export function createETSModuleFromContext(): ETSModule {
 
 /**
  * Now used only in tests
- * TODO: Remove or replace with better method
+ * Improve: Remove or replace with better method
  * 
  * @deprecated
  */
@@ -165,7 +165,7 @@ export function getAnnotations(node: AstNode): readonly AnnotationUsage[] {
 
 export function getOriginalNode(node: AstNode): AstNode {
     if (node === undefined) {
-        // TODO: fix this
+        // Improve: fix this
         throwError('there is no arkts pair of ts node (unable to getOriginalNode)')
     }
     if (node.originalPeer === nullptr) {
@@ -178,7 +178,7 @@ export function getFileName(): string {
     return global.filePath
 }
 
-// TODO: It seems like Definition overrides AstNode  modifiers
+// Improve: It seems like Definition overrides AstNode  modifiers
 // with it's own modifiers which is completely unrelated set of flags.
 // Use this function if you need
 // the language level modifiers: public, declare, export, etc.
@@ -186,7 +186,7 @@ export function classDefinitionFlags(node: ClassDefinition): Es2pandaModifierFla
     return global.generatedEs2panda._AstNodeModifiers(global.context, node.peer)
 }
 
-// TODO: ClassProperty's optional flag is set by AstNode's modifiers flags.
+// Improve: ClassProperty's optional flag is set by AstNode's modifiers flags.
 export function classPropertySetOptional(node: ClassProperty, value: boolean): ClassProperty {
     if (value) {
         node.modifierFlags |= Es2pandaModifierFlags.MODIFIER_FLAGS_OPTIONAL;

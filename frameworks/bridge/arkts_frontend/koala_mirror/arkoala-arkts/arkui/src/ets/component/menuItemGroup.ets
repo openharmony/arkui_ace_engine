@@ -47,7 +47,7 @@ export class ArkMenuItemGroupPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             MenuItemGroupOptions_serializer.write(thisSerializer, value_value)
         }
@@ -152,7 +152,7 @@ export class MenuItemGroupOptions_serializer {
         let value_header_type : int32 = RuntimeType.UNDEFINED
         value_header_type = runtimeType(value_header)
         valueSerializer.writeInt8((value_header_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_header_type)) {
+        if ((value_header_type) != (RuntimeType.UNDEFINED)) {
             const value_header_value  = value_header!
             let value_header_value_type : int32 = RuntimeType.UNDEFINED
             value_header_value_type = runtimeType(value_header_value)
@@ -182,7 +182,7 @@ export class MenuItemGroupOptions_serializer {
         let value_footer_type : int32 = RuntimeType.UNDEFINED
         value_footer_type = runtimeType(value_footer)
         valueSerializer.writeInt8((value_footer_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_footer_type)) {
+        if ((value_footer_type) != (RuntimeType.UNDEFINED)) {
             const value_footer_value  = value_footer!
             let value_footer_value_type : int32 = RuntimeType.UNDEFINED
             value_footer_value_type = runtimeType(value_footer_value)
@@ -213,7 +213,7 @@ export class MenuItemGroupOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const header_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let header_buf : ResourceStr | CustomBuilder | undefined
-        if ((RuntimeType.UNDEFINED) != (header_buf_runtimeType))
+        if ((header_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const header_buf__selector : int32 = valueDeserializer.readInt8()
             let header_buf_ : ResourceStr | CustomBuilder | undefined
@@ -252,7 +252,7 @@ export class MenuItemGroupOptions_serializer {
         const header_result : ResourceStr | CustomBuilder | undefined = header_buf
         const footer_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let footer_buf : ResourceStr | CustomBuilder | undefined
-        if ((RuntimeType.UNDEFINED) != (footer_buf_runtimeType))
+        if ((footer_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const footer_buf__selector : int32 = valueDeserializer.readInt8()
             let footer_buf_ : ResourceStr | CustomBuilder | undefined

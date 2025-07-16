@@ -127,7 +127,7 @@ void impl_SetUpSoPath(KStringPtr &soPath)
 }
 KOALA_INTEROP_V1(SetUpSoPath, KStringPtr);
 
-// todo: simplify this
+// Improve: simplify this
 void* FindLibrary() {
     void *res = nullptr;
     std::vector<std::string> pathArray;
@@ -270,7 +270,7 @@ KInt impl_IdentifierIdentifierFlags(KNativePointer contextPtr, KNativePointer no
 KOALA_INTEROP_2(IdentifierIdentifierFlags, KInt, KNativePointer, KNativePointer)
 
 /*
-TODO: NOT FROM API (shouldn't be there)
+Improve: NOT FROM API (shouldn't be there)
 -----------------------------------------------------------------------------------------------------------------------------
 */
 
@@ -336,7 +336,7 @@ KOALA_INTEROP_2(AstNodeChildren, KNativePointer, KNativePointer, KNativePointer)
 */
 
 // From koala-wrapper
-// TODO check if some code should be generated
+// Improve: check if some code should be generated
 
 void impl_MemInitialize()
 {

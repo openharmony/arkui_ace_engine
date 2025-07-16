@@ -199,7 +199,7 @@ export function dumpAstToFile(node: arkts.AstNode, keepTransformed: string, stab
 /**
  * Checks type node refers to void type
  *
- * TODO: remove when es2panda API allows to read return type
+ * Improve: remove when es2panda API allows to read return type
  * @deprecated
  */
 export function isVoidType(node: arkts.TypeNode) {

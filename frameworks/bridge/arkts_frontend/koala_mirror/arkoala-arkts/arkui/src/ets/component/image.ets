@@ -48,9 +48,7 @@ export class ColorContent implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    static get ORIGIN(): ColorContent {
-        return ColorContent.getORIGIN()
-    }
+    static readonly ORIGIN: ColorContent = ColorContent.getORIGIN()
     constructor(peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ColorContent.getFinalizer())
     }
@@ -161,7 +159,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -189,7 +187,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -201,7 +199,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -213,7 +211,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -262,7 +260,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as ImageFit)
             thisSerializer.writeInt32(TypeChecker.ImageFit_ToNumeric(value_value))
         }
@@ -274,7 +272,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             matrix4_Matrix4Transit_serializer.write(thisSerializer, value_value)
         }
@@ -286,7 +284,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as ImageRepeat)
             thisSerializer.writeInt32(TypeChecker.ImageRepeat_ToNumeric(value_value))
         }
@@ -298,7 +296,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -310,7 +308,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as ImageRenderMode)
             thisSerializer.writeInt32(TypeChecker.ImageRenderMode_ToNumeric(value_value))
         }
@@ -322,7 +320,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as DynamicRangeMode)
             thisSerializer.writeInt32(TypeChecker.DynamicRangeMode_ToNumeric(value_value))
         }
@@ -334,7 +332,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as ImageInterpolation)
             thisSerializer.writeInt32(TypeChecker.ImageInterpolation_ToNumeric(value_value))
         }
@@ -346,7 +344,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             ImageSourceSize_serializer.write(thisSerializer, value_value)
         }
@@ -358,7 +356,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -370,7 +368,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -393,7 +391,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as CopyOptions)
             thisSerializer.writeInt32(TypeChecker.CopyOptions_ToNumeric(value_value))
         }
@@ -405,7 +403,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -417,7 +415,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PointLightStyle_serializer.write(thisSerializer, value_value)
         }
@@ -429,7 +427,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -441,7 +439,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -453,7 +451,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -465,7 +463,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -477,7 +475,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -489,7 +487,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             ImageAnalyzerConfig_serializer.write(thisSerializer, value_value)
         }
@@ -501,7 +499,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             ResizableOptions_serializer.write(thisSerializer, value_value)
         }
@@ -513,7 +511,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -525,7 +523,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as image.ResolutionQuality)
             thisSerializer.writeInt32(TypeChecker.image_ResolutionQuality_ToNumeric(value_value))
         }
@@ -537,7 +535,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as ImageRotateOrientation)
             thisSerializer.writeInt32(TypeChecker.ImageRotateOrientation_ToNumeric(value_value))
         }
@@ -1461,7 +1459,7 @@ export class ImageError_serializer {
         let value_error_type : int32 = RuntimeType.UNDEFINED
         value_error_type = runtimeType(value_error)
         valueSerializer.writeInt8((value_error_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_error_type)) {
+        if ((value_error_type) != (RuntimeType.UNDEFINED)) {
             const value_error_value  = value_error!
             BusinessError_serializer.write(valueSerializer, value_error_value)
         }
@@ -1473,7 +1471,7 @@ export class ImageError_serializer {
         const message_result : string = (valueDeserializer.readString() as string)
         const error_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let error_buf : BusinessError | undefined
-        if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+        if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             error_buf = BusinessError_serializer.read(valueDeserializer)
         }
@@ -1489,7 +1487,7 @@ export class ResizableOptions_serializer {
         let value_slice_type : int32 = RuntimeType.UNDEFINED
         value_slice_type = runtimeType(value_slice)
         valueSerializer.writeInt8((value_slice_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_slice_type)) {
+        if ((value_slice_type) != (RuntimeType.UNDEFINED)) {
             const value_slice_value  = value_slice!
             EdgeWidths_serializer.write(valueSerializer, value_slice_value)
         }
@@ -1497,7 +1495,7 @@ export class ResizableOptions_serializer {
         let value_lattice_type : int32 = RuntimeType.UNDEFINED
         value_lattice_type = runtimeType(value_lattice)
         valueSerializer.writeInt8((value_lattice_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_lattice_type)) {
+        if ((value_lattice_type) != (RuntimeType.UNDEFINED)) {
             const value_lattice_value  = value_lattice!
             drawing_Lattice_serializer.write(valueSerializer, value_lattice_value)
         }
@@ -1506,14 +1504,14 @@ export class ResizableOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const slice_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let slice_buf : EdgeWidths | undefined
-        if ((RuntimeType.UNDEFINED) != (slice_buf_runtimeType))
+        if ((slice_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             slice_buf = EdgeWidths_serializer.read(valueDeserializer)
         }
         const slice_result : EdgeWidths | undefined = slice_buf
         const lattice_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let lattice_buf : drawing.Lattice | undefined
-        if ((RuntimeType.UNDEFINED) != (lattice_buf_runtimeType))
+        if ((lattice_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             lattice_buf = (drawing_Lattice_serializer.read(valueDeserializer) as drawing.Lattice)
         }

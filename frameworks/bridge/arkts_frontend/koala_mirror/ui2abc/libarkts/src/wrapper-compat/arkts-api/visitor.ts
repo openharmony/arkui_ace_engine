@@ -64,7 +64,7 @@ import { Es2pandaAstNodeType } from '../../generated/Es2pandaEnums';
 
 type Visitor = (node: AstNode) => AstNode;
 
-// TODO: rethink (remove as)
+// Improve: rethink (remove as)
 function nodeVisitor<T extends AstNode | undefined>(node: T, visitor: Visitor): T {
     if (node === undefined) {
         return node;
@@ -72,7 +72,7 @@ function nodeVisitor<T extends AstNode | undefined>(node: T, visitor: Visitor): 
     return visitor(node) as T;
 }
 
-// TODO: rethink (remove as)
+// Improve: rethink (remove as)
 function nodesVisitor<T extends AstNode, TIn extends readonly T[] | undefined>(
     nodes: TIn,
     visitor: Visitor
@@ -97,7 +97,7 @@ export function visitEachChild(node: AstNode, visitor: Visitor): AstNode {
     script = visitInnerExpression(script, visitor);
     script = visitTrivialExpression(script, visitor);
     script = visitLiteral(script, visitor);
-    // TODO
+    // Improve:
     return visitWithoutUpdate(script, visitor);
 }
 
@@ -194,7 +194,7 @@ function visitInnerExpression(node: AstNode, visitor: Visitor): AstNode {
         updated = true;
         return factory.updateProperty(node, node.key, nodeVisitor(node.value, visitor));
     }
-    // TODO
+    // Improve:
     return node;
 }
 
@@ -211,7 +211,7 @@ function visitTrivialExpression(node: AstNode, visitor: Visitor): AstNode {
             node.operatorType
         );
     }
-    // TODO
+    // Improve:
     return node;
 }
 
@@ -245,7 +245,7 @@ function visitDeclaration(node: AstNode, visitor: Visitor): AstNode {
             nodeVisitor(node.typeParams, visitor),
             nodeVisitor(node.body, visitor),
             node.isStatic,
-            // TODO: how do I get it?
+            // Improve: how do I get it?
             true
         );
     }
@@ -258,7 +258,7 @@ function visitDeclaration(node: AstNode, visitor: Visitor): AstNode {
             nodesVisitor(node.declarators, visitor)
         );
     }
-    // TODO
+    // Improve:
     return node;
 }
 
@@ -344,7 +344,7 @@ function visitStatement(node: AstNode, visitor: Visitor): AstNode {
             []
         );
     }
-    // TODO
+    // Improve:
     return node;
 }
 
@@ -389,7 +389,7 @@ function visitDefinitionBody(node: AstNode, visitor: Visitor): AstNode {
             node.isComputed
         );
     }
-    // TODO
+    // Improve:
     return node;
 }
 
@@ -409,7 +409,7 @@ function visitLiteral(node: AstNode, visitor: Visitor): AstNode {
     return node;
 }
 
-// TODO: apply this to all nodes that does not require updating
+// Improve: apply this to all nodes that does not require updating
 function visitWithoutUpdate<T extends AstNode>(node: T, visitor: Visitor): T {
     if (updated) {
         return node;

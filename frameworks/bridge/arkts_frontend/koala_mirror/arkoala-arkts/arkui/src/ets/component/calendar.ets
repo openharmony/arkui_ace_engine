@@ -94,7 +94,7 @@ export class ArkCalendarPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -106,7 +106,7 @@ export class ArkCalendarPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -118,7 +118,7 @@ export class ArkCalendarPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -130,7 +130,7 @@ export class ArkCalendarPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -142,7 +142,7 @@ export class ArkCalendarPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -154,7 +154,7 @@ export class ArkCalendarPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as Axis)
             thisSerializer.writeInt32(TypeChecker.Axis_ToNumeric(value_value))
         }
@@ -166,7 +166,7 @@ export class ArkCalendarPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             CurrentDayStyle_serializer.write(thisSerializer, value_value)
         }
@@ -178,7 +178,7 @@ export class ArkCalendarPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             NonCurrentDayStyle_serializer.write(thisSerializer, value_value)
         }
@@ -190,7 +190,7 @@ export class ArkCalendarPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             TodayStyle_serializer.write(thisSerializer, value_value)
         }
@@ -202,7 +202,7 @@ export class ArkCalendarPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             WeekStyle_serializer.write(thisSerializer, value_value)
         }
@@ -214,7 +214,7 @@ export class ArkCalendarPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             WorkStateStyle_serializer.write(thisSerializer, value_value)
         }
@@ -226,7 +226,7 @@ export class ArkCalendarPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -238,7 +238,7 @@ export class ArkCalendarPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -847,8 +847,8 @@ export class MonthData_serializer {
         valueSerializer.writeNumber(value_month)
         const value_data  = value.data
         valueSerializer.writeInt32((value_data.length).toInt())
-        for (let i = 0; i < value_data.length; i++) {
-            const value_data_element : CalendarDay = value_data[i]
+        for (let value_data_counter_i = 0; value_data_counter_i < value_data.length; value_data_counter_i++) {
+            const value_data_element : CalendarDay = value_data[value_data_counter_i]
             CalendarDay_serializer.write(valueSerializer, value_data_element)
         }
     }
@@ -881,7 +881,7 @@ export class CalendarRequestedMonths_serializer {
         let value_controller_type : int32 = RuntimeType.UNDEFINED
         value_controller_type = runtimeType(value_controller)
         valueSerializer.writeInt8((value_controller_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_controller_type)) {
+        if ((value_controller_type) != (RuntimeType.UNDEFINED)) {
             const value_controller_value  = value_controller!
             CalendarController_serializer.write(valueSerializer, value_controller_value)
         }
@@ -894,7 +894,7 @@ export class CalendarRequestedMonths_serializer {
         const nextData_result : MonthData = MonthData_serializer.read(valueDeserializer)
         const controller_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let controller_buf : CalendarController | undefined
-        if ((RuntimeType.UNDEFINED) != (controller_buf_runtimeType))
+        if ((controller_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             controller_buf = (CalendarController_serializer.read(valueDeserializer) as CalendarController)
         }
@@ -910,7 +910,7 @@ export class CurrentDayStyle_serializer {
         let value_dayColor_type : int32 = RuntimeType.UNDEFINED
         value_dayColor_type = runtimeType(value_dayColor)
         valueSerializer.writeInt8((value_dayColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_dayColor_type)) {
+        if ((value_dayColor_type) != (RuntimeType.UNDEFINED)) {
             const value_dayColor_value  = value_dayColor!
             let value_dayColor_value_type : int32 = RuntimeType.UNDEFINED
             value_dayColor_value_type = runtimeType(value_dayColor_value)
@@ -939,7 +939,7 @@ export class CurrentDayStyle_serializer {
         let value_lunarColor_type : int32 = RuntimeType.UNDEFINED
         value_lunarColor_type = runtimeType(value_lunarColor)
         valueSerializer.writeInt8((value_lunarColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_lunarColor_type)) {
+        if ((value_lunarColor_type) != (RuntimeType.UNDEFINED)) {
             const value_lunarColor_value  = value_lunarColor!
             let value_lunarColor_value_type : int32 = RuntimeType.UNDEFINED
             value_lunarColor_value_type = runtimeType(value_lunarColor_value)
@@ -968,7 +968,7 @@ export class CurrentDayStyle_serializer {
         let value_markLunarColor_type : int32 = RuntimeType.UNDEFINED
         value_markLunarColor_type = runtimeType(value_markLunarColor)
         valueSerializer.writeInt8((value_markLunarColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_markLunarColor_type)) {
+        if ((value_markLunarColor_type) != (RuntimeType.UNDEFINED)) {
             const value_markLunarColor_value  = value_markLunarColor!
             let value_markLunarColor_value_type : int32 = RuntimeType.UNDEFINED
             value_markLunarColor_value_type = runtimeType(value_markLunarColor_value)
@@ -997,7 +997,7 @@ export class CurrentDayStyle_serializer {
         let value_dayFontSize_type : int32 = RuntimeType.UNDEFINED
         value_dayFontSize_type = runtimeType(value_dayFontSize)
         valueSerializer.writeInt8((value_dayFontSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_dayFontSize_type)) {
+        if ((value_dayFontSize_type) != (RuntimeType.UNDEFINED)) {
             const value_dayFontSize_value  = value_dayFontSize!
             valueSerializer.writeNumber(value_dayFontSize_value)
         }
@@ -1005,7 +1005,7 @@ export class CurrentDayStyle_serializer {
         let value_lunarDayFontSize_type : int32 = RuntimeType.UNDEFINED
         value_lunarDayFontSize_type = runtimeType(value_lunarDayFontSize)
         valueSerializer.writeInt8((value_lunarDayFontSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_lunarDayFontSize_type)) {
+        if ((value_lunarDayFontSize_type) != (RuntimeType.UNDEFINED)) {
             const value_lunarDayFontSize_value  = value_lunarDayFontSize!
             valueSerializer.writeNumber(value_lunarDayFontSize_value)
         }
@@ -1013,7 +1013,7 @@ export class CurrentDayStyle_serializer {
         let value_dayHeight_type : int32 = RuntimeType.UNDEFINED
         value_dayHeight_type = runtimeType(value_dayHeight)
         valueSerializer.writeInt8((value_dayHeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_dayHeight_type)) {
+        if ((value_dayHeight_type) != (RuntimeType.UNDEFINED)) {
             const value_dayHeight_value  = value_dayHeight!
             valueSerializer.writeNumber(value_dayHeight_value)
         }
@@ -1021,7 +1021,7 @@ export class CurrentDayStyle_serializer {
         let value_dayWidth_type : int32 = RuntimeType.UNDEFINED
         value_dayWidth_type = runtimeType(value_dayWidth)
         valueSerializer.writeInt8((value_dayWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_dayWidth_type)) {
+        if ((value_dayWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_dayWidth_value  = value_dayWidth!
             valueSerializer.writeNumber(value_dayWidth_value)
         }
@@ -1029,7 +1029,7 @@ export class CurrentDayStyle_serializer {
         let value_gregorianCalendarHeight_type : int32 = RuntimeType.UNDEFINED
         value_gregorianCalendarHeight_type = runtimeType(value_gregorianCalendarHeight)
         valueSerializer.writeInt8((value_gregorianCalendarHeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_gregorianCalendarHeight_type)) {
+        if ((value_gregorianCalendarHeight_type) != (RuntimeType.UNDEFINED)) {
             const value_gregorianCalendarHeight_value  = value_gregorianCalendarHeight!
             valueSerializer.writeNumber(value_gregorianCalendarHeight_value)
         }
@@ -1037,7 +1037,7 @@ export class CurrentDayStyle_serializer {
         let value_dayYAxisOffset_type : int32 = RuntimeType.UNDEFINED
         value_dayYAxisOffset_type = runtimeType(value_dayYAxisOffset)
         valueSerializer.writeInt8((value_dayYAxisOffset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_dayYAxisOffset_type)) {
+        if ((value_dayYAxisOffset_type) != (RuntimeType.UNDEFINED)) {
             const value_dayYAxisOffset_value  = value_dayYAxisOffset!
             valueSerializer.writeNumber(value_dayYAxisOffset_value)
         }
@@ -1045,7 +1045,7 @@ export class CurrentDayStyle_serializer {
         let value_lunarDayYAxisOffset_type : int32 = RuntimeType.UNDEFINED
         value_lunarDayYAxisOffset_type = runtimeType(value_lunarDayYAxisOffset)
         valueSerializer.writeInt8((value_lunarDayYAxisOffset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_lunarDayYAxisOffset_type)) {
+        if ((value_lunarDayYAxisOffset_type) != (RuntimeType.UNDEFINED)) {
             const value_lunarDayYAxisOffset_value  = value_lunarDayYAxisOffset!
             valueSerializer.writeNumber(value_lunarDayYAxisOffset_value)
         }
@@ -1053,7 +1053,7 @@ export class CurrentDayStyle_serializer {
         let value_underscoreXAxisOffset_type : int32 = RuntimeType.UNDEFINED
         value_underscoreXAxisOffset_type = runtimeType(value_underscoreXAxisOffset)
         valueSerializer.writeInt8((value_underscoreXAxisOffset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_underscoreXAxisOffset_type)) {
+        if ((value_underscoreXAxisOffset_type) != (RuntimeType.UNDEFINED)) {
             const value_underscoreXAxisOffset_value  = value_underscoreXAxisOffset!
             valueSerializer.writeNumber(value_underscoreXAxisOffset_value)
         }
@@ -1061,7 +1061,7 @@ export class CurrentDayStyle_serializer {
         let value_underscoreYAxisOffset_type : int32 = RuntimeType.UNDEFINED
         value_underscoreYAxisOffset_type = runtimeType(value_underscoreYAxisOffset)
         valueSerializer.writeInt8((value_underscoreYAxisOffset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_underscoreYAxisOffset_type)) {
+        if ((value_underscoreYAxisOffset_type) != (RuntimeType.UNDEFINED)) {
             const value_underscoreYAxisOffset_value  = value_underscoreYAxisOffset!
             valueSerializer.writeNumber(value_underscoreYAxisOffset_value)
         }
@@ -1069,7 +1069,7 @@ export class CurrentDayStyle_serializer {
         let value_scheduleMarkerXAxisOffset_type : int32 = RuntimeType.UNDEFINED
         value_scheduleMarkerXAxisOffset_type = runtimeType(value_scheduleMarkerXAxisOffset)
         valueSerializer.writeInt8((value_scheduleMarkerXAxisOffset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_scheduleMarkerXAxisOffset_type)) {
+        if ((value_scheduleMarkerXAxisOffset_type) != (RuntimeType.UNDEFINED)) {
             const value_scheduleMarkerXAxisOffset_value  = value_scheduleMarkerXAxisOffset!
             valueSerializer.writeNumber(value_scheduleMarkerXAxisOffset_value)
         }
@@ -1077,7 +1077,7 @@ export class CurrentDayStyle_serializer {
         let value_scheduleMarkerYAxisOffset_type : int32 = RuntimeType.UNDEFINED
         value_scheduleMarkerYAxisOffset_type = runtimeType(value_scheduleMarkerYAxisOffset)
         valueSerializer.writeInt8((value_scheduleMarkerYAxisOffset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_scheduleMarkerYAxisOffset_type)) {
+        if ((value_scheduleMarkerYAxisOffset_type) != (RuntimeType.UNDEFINED)) {
             const value_scheduleMarkerYAxisOffset_value  = value_scheduleMarkerYAxisOffset!
             valueSerializer.writeNumber(value_scheduleMarkerYAxisOffset_value)
         }
@@ -1085,7 +1085,7 @@ export class CurrentDayStyle_serializer {
         let value_colSpace_type : int32 = RuntimeType.UNDEFINED
         value_colSpace_type = runtimeType(value_colSpace)
         valueSerializer.writeInt8((value_colSpace_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_colSpace_type)) {
+        if ((value_colSpace_type) != (RuntimeType.UNDEFINED)) {
             const value_colSpace_value  = value_colSpace!
             valueSerializer.writeNumber(value_colSpace_value)
         }
@@ -1093,7 +1093,7 @@ export class CurrentDayStyle_serializer {
         let value_dailyFiveRowSpace_type : int32 = RuntimeType.UNDEFINED
         value_dailyFiveRowSpace_type = runtimeType(value_dailyFiveRowSpace)
         valueSerializer.writeInt8((value_dailyFiveRowSpace_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_dailyFiveRowSpace_type)) {
+        if ((value_dailyFiveRowSpace_type) != (RuntimeType.UNDEFINED)) {
             const value_dailyFiveRowSpace_value  = value_dailyFiveRowSpace!
             valueSerializer.writeNumber(value_dailyFiveRowSpace_value)
         }
@@ -1101,7 +1101,7 @@ export class CurrentDayStyle_serializer {
         let value_dailySixRowSpace_type : int32 = RuntimeType.UNDEFINED
         value_dailySixRowSpace_type = runtimeType(value_dailySixRowSpace)
         valueSerializer.writeInt8((value_dailySixRowSpace_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_dailySixRowSpace_type)) {
+        if ((value_dailySixRowSpace_type) != (RuntimeType.UNDEFINED)) {
             const value_dailySixRowSpace_value  = value_dailySixRowSpace!
             valueSerializer.writeNumber(value_dailySixRowSpace_value)
         }
@@ -1109,7 +1109,7 @@ export class CurrentDayStyle_serializer {
         let value_lunarHeight_type : int32 = RuntimeType.UNDEFINED
         value_lunarHeight_type = runtimeType(value_lunarHeight)
         valueSerializer.writeInt8((value_lunarHeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_lunarHeight_type)) {
+        if ((value_lunarHeight_type) != (RuntimeType.UNDEFINED)) {
             const value_lunarHeight_value  = value_lunarHeight!
             valueSerializer.writeNumber(value_lunarHeight_value)
         }
@@ -1117,7 +1117,7 @@ export class CurrentDayStyle_serializer {
         let value_underscoreWidth_type : int32 = RuntimeType.UNDEFINED
         value_underscoreWidth_type = runtimeType(value_underscoreWidth)
         valueSerializer.writeInt8((value_underscoreWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_underscoreWidth_type)) {
+        if ((value_underscoreWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_underscoreWidth_value  = value_underscoreWidth!
             valueSerializer.writeNumber(value_underscoreWidth_value)
         }
@@ -1125,7 +1125,7 @@ export class CurrentDayStyle_serializer {
         let value_underscoreLength_type : int32 = RuntimeType.UNDEFINED
         value_underscoreLength_type = runtimeType(value_underscoreLength)
         valueSerializer.writeInt8((value_underscoreLength_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_underscoreLength_type)) {
+        if ((value_underscoreLength_type) != (RuntimeType.UNDEFINED)) {
             const value_underscoreLength_value  = value_underscoreLength!
             valueSerializer.writeNumber(value_underscoreLength_value)
         }
@@ -1133,7 +1133,7 @@ export class CurrentDayStyle_serializer {
         let value_scheduleMarkerRadius_type : int32 = RuntimeType.UNDEFINED
         value_scheduleMarkerRadius_type = runtimeType(value_scheduleMarkerRadius)
         valueSerializer.writeInt8((value_scheduleMarkerRadius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_scheduleMarkerRadius_type)) {
+        if ((value_scheduleMarkerRadius_type) != (RuntimeType.UNDEFINED)) {
             const value_scheduleMarkerRadius_value  = value_scheduleMarkerRadius!
             valueSerializer.writeNumber(value_scheduleMarkerRadius_value)
         }
@@ -1141,7 +1141,7 @@ export class CurrentDayStyle_serializer {
         let value_boundaryRowOffset_type : int32 = RuntimeType.UNDEFINED
         value_boundaryRowOffset_type = runtimeType(value_boundaryRowOffset)
         valueSerializer.writeInt8((value_boundaryRowOffset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_boundaryRowOffset_type)) {
+        if ((value_boundaryRowOffset_type) != (RuntimeType.UNDEFINED)) {
             const value_boundaryRowOffset_value  = value_boundaryRowOffset!
             valueSerializer.writeNumber(value_boundaryRowOffset_value)
         }
@@ -1149,7 +1149,7 @@ export class CurrentDayStyle_serializer {
         let value_boundaryColOffset_type : int32 = RuntimeType.UNDEFINED
         value_boundaryColOffset_type = runtimeType(value_boundaryColOffset)
         valueSerializer.writeInt8((value_boundaryColOffset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_boundaryColOffset_type)) {
+        if ((value_boundaryColOffset_type) != (RuntimeType.UNDEFINED)) {
             const value_boundaryColOffset_value  = value_boundaryColOffset!
             valueSerializer.writeNumber(value_boundaryColOffset_value)
         }
@@ -1158,7 +1158,7 @@ export class CurrentDayStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const dayColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dayColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (dayColor_buf_runtimeType))
+        if ((dayColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const dayColor_buf__selector : int32 = valueDeserializer.readInt8()
             let dayColor_buf_ : Color | number | string | Resource | undefined
@@ -1182,7 +1182,7 @@ export class CurrentDayStyle_serializer {
         const dayColor_result : ResourceColor | undefined = dayColor_buf
         const lunarColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let lunarColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (lunarColor_buf_runtimeType))
+        if ((lunarColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const lunarColor_buf__selector : int32 = valueDeserializer.readInt8()
             let lunarColor_buf_ : Color | number | string | Resource | undefined
@@ -1206,7 +1206,7 @@ export class CurrentDayStyle_serializer {
         const lunarColor_result : ResourceColor | undefined = lunarColor_buf
         const markLunarColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let markLunarColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (markLunarColor_buf_runtimeType))
+        if ((markLunarColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const markLunarColor_buf__selector : int32 = valueDeserializer.readInt8()
             let markLunarColor_buf_ : Color | number | string | Resource | undefined
@@ -1230,140 +1230,140 @@ export class CurrentDayStyle_serializer {
         const markLunarColor_result : ResourceColor | undefined = markLunarColor_buf
         const dayFontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dayFontSize_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (dayFontSize_buf_runtimeType))
+        if ((dayFontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             dayFontSize_buf = (valueDeserializer.readNumber() as number)
         }
         const dayFontSize_result : number | undefined = dayFontSize_buf
         const lunarDayFontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let lunarDayFontSize_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (lunarDayFontSize_buf_runtimeType))
+        if ((lunarDayFontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             lunarDayFontSize_buf = (valueDeserializer.readNumber() as number)
         }
         const lunarDayFontSize_result : number | undefined = lunarDayFontSize_buf
         const dayHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dayHeight_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (dayHeight_buf_runtimeType))
+        if ((dayHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             dayHeight_buf = (valueDeserializer.readNumber() as number)
         }
         const dayHeight_result : number | undefined = dayHeight_buf
         const dayWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dayWidth_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (dayWidth_buf_runtimeType))
+        if ((dayWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             dayWidth_buf = (valueDeserializer.readNumber() as number)
         }
         const dayWidth_result : number | undefined = dayWidth_buf
         const gregorianCalendarHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let gregorianCalendarHeight_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (gregorianCalendarHeight_buf_runtimeType))
+        if ((gregorianCalendarHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             gregorianCalendarHeight_buf = (valueDeserializer.readNumber() as number)
         }
         const gregorianCalendarHeight_result : number | undefined = gregorianCalendarHeight_buf
         const dayYAxisOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dayYAxisOffset_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (dayYAxisOffset_buf_runtimeType))
+        if ((dayYAxisOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             dayYAxisOffset_buf = (valueDeserializer.readNumber() as number)
         }
         const dayYAxisOffset_result : number | undefined = dayYAxisOffset_buf
         const lunarDayYAxisOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let lunarDayYAxisOffset_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (lunarDayYAxisOffset_buf_runtimeType))
+        if ((lunarDayYAxisOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             lunarDayYAxisOffset_buf = (valueDeserializer.readNumber() as number)
         }
         const lunarDayYAxisOffset_result : number | undefined = lunarDayYAxisOffset_buf
         const underscoreXAxisOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let underscoreXAxisOffset_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (underscoreXAxisOffset_buf_runtimeType))
+        if ((underscoreXAxisOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             underscoreXAxisOffset_buf = (valueDeserializer.readNumber() as number)
         }
         const underscoreXAxisOffset_result : number | undefined = underscoreXAxisOffset_buf
         const underscoreYAxisOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let underscoreYAxisOffset_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (underscoreYAxisOffset_buf_runtimeType))
+        if ((underscoreYAxisOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             underscoreYAxisOffset_buf = (valueDeserializer.readNumber() as number)
         }
         const underscoreYAxisOffset_result : number | undefined = underscoreYAxisOffset_buf
         const scheduleMarkerXAxisOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let scheduleMarkerXAxisOffset_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (scheduleMarkerXAxisOffset_buf_runtimeType))
+        if ((scheduleMarkerXAxisOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             scheduleMarkerXAxisOffset_buf = (valueDeserializer.readNumber() as number)
         }
         const scheduleMarkerXAxisOffset_result : number | undefined = scheduleMarkerXAxisOffset_buf
         const scheduleMarkerYAxisOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let scheduleMarkerYAxisOffset_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (scheduleMarkerYAxisOffset_buf_runtimeType))
+        if ((scheduleMarkerYAxisOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             scheduleMarkerYAxisOffset_buf = (valueDeserializer.readNumber() as number)
         }
         const scheduleMarkerYAxisOffset_result : number | undefined = scheduleMarkerYAxisOffset_buf
         const colSpace_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let colSpace_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (colSpace_buf_runtimeType))
+        if ((colSpace_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             colSpace_buf = (valueDeserializer.readNumber() as number)
         }
         const colSpace_result : number | undefined = colSpace_buf
         const dailyFiveRowSpace_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dailyFiveRowSpace_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (dailyFiveRowSpace_buf_runtimeType))
+        if ((dailyFiveRowSpace_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             dailyFiveRowSpace_buf = (valueDeserializer.readNumber() as number)
         }
         const dailyFiveRowSpace_result : number | undefined = dailyFiveRowSpace_buf
         const dailySixRowSpace_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dailySixRowSpace_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (dailySixRowSpace_buf_runtimeType))
+        if ((dailySixRowSpace_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             dailySixRowSpace_buf = (valueDeserializer.readNumber() as number)
         }
         const dailySixRowSpace_result : number | undefined = dailySixRowSpace_buf
         const lunarHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let lunarHeight_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (lunarHeight_buf_runtimeType))
+        if ((lunarHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             lunarHeight_buf = (valueDeserializer.readNumber() as number)
         }
         const lunarHeight_result : number | undefined = lunarHeight_buf
         const underscoreWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let underscoreWidth_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (underscoreWidth_buf_runtimeType))
+        if ((underscoreWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             underscoreWidth_buf = (valueDeserializer.readNumber() as number)
         }
         const underscoreWidth_result : number | undefined = underscoreWidth_buf
         const underscoreLength_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let underscoreLength_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (underscoreLength_buf_runtimeType))
+        if ((underscoreLength_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             underscoreLength_buf = (valueDeserializer.readNumber() as number)
         }
         const underscoreLength_result : number | undefined = underscoreLength_buf
         const scheduleMarkerRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let scheduleMarkerRadius_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (scheduleMarkerRadius_buf_runtimeType))
+        if ((scheduleMarkerRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             scheduleMarkerRadius_buf = (valueDeserializer.readNumber() as number)
         }
         const scheduleMarkerRadius_result : number | undefined = scheduleMarkerRadius_buf
         const boundaryRowOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let boundaryRowOffset_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (boundaryRowOffset_buf_runtimeType))
+        if ((boundaryRowOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             boundaryRowOffset_buf = (valueDeserializer.readNumber() as number)
         }
         const boundaryRowOffset_result : number | undefined = boundaryRowOffset_buf
         const boundaryColOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let boundaryColOffset_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (boundaryColOffset_buf_runtimeType))
+        if ((boundaryColOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             boundaryColOffset_buf = (valueDeserializer.readNumber() as number)
         }
@@ -1379,7 +1379,7 @@ export class NonCurrentDayStyle_serializer {
         let value_nonCurrentMonthDayColor_type : int32 = RuntimeType.UNDEFINED
         value_nonCurrentMonthDayColor_type = runtimeType(value_nonCurrentMonthDayColor)
         valueSerializer.writeInt8((value_nonCurrentMonthDayColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_nonCurrentMonthDayColor_type)) {
+        if ((value_nonCurrentMonthDayColor_type) != (RuntimeType.UNDEFINED)) {
             const value_nonCurrentMonthDayColor_value  = value_nonCurrentMonthDayColor!
             let value_nonCurrentMonthDayColor_value_type : int32 = RuntimeType.UNDEFINED
             value_nonCurrentMonthDayColor_value_type = runtimeType(value_nonCurrentMonthDayColor_value)
@@ -1408,7 +1408,7 @@ export class NonCurrentDayStyle_serializer {
         let value_nonCurrentMonthLunarColor_type : int32 = RuntimeType.UNDEFINED
         value_nonCurrentMonthLunarColor_type = runtimeType(value_nonCurrentMonthLunarColor)
         valueSerializer.writeInt8((value_nonCurrentMonthLunarColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_nonCurrentMonthLunarColor_type)) {
+        if ((value_nonCurrentMonthLunarColor_type) != (RuntimeType.UNDEFINED)) {
             const value_nonCurrentMonthLunarColor_value  = value_nonCurrentMonthLunarColor!
             let value_nonCurrentMonthLunarColor_value_type : int32 = RuntimeType.UNDEFINED
             value_nonCurrentMonthLunarColor_value_type = runtimeType(value_nonCurrentMonthLunarColor_value)
@@ -1437,7 +1437,7 @@ export class NonCurrentDayStyle_serializer {
         let value_nonCurrentMonthWorkDayMarkColor_type : int32 = RuntimeType.UNDEFINED
         value_nonCurrentMonthWorkDayMarkColor_type = runtimeType(value_nonCurrentMonthWorkDayMarkColor)
         valueSerializer.writeInt8((value_nonCurrentMonthWorkDayMarkColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_nonCurrentMonthWorkDayMarkColor_type)) {
+        if ((value_nonCurrentMonthWorkDayMarkColor_type) != (RuntimeType.UNDEFINED)) {
             const value_nonCurrentMonthWorkDayMarkColor_value  = value_nonCurrentMonthWorkDayMarkColor!
             let value_nonCurrentMonthWorkDayMarkColor_value_type : int32 = RuntimeType.UNDEFINED
             value_nonCurrentMonthWorkDayMarkColor_value_type = runtimeType(value_nonCurrentMonthWorkDayMarkColor_value)
@@ -1466,7 +1466,7 @@ export class NonCurrentDayStyle_serializer {
         let value_nonCurrentMonthOffDayMarkColor_type : int32 = RuntimeType.UNDEFINED
         value_nonCurrentMonthOffDayMarkColor_type = runtimeType(value_nonCurrentMonthOffDayMarkColor)
         valueSerializer.writeInt8((value_nonCurrentMonthOffDayMarkColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_nonCurrentMonthOffDayMarkColor_type)) {
+        if ((value_nonCurrentMonthOffDayMarkColor_type) != (RuntimeType.UNDEFINED)) {
             const value_nonCurrentMonthOffDayMarkColor_value  = value_nonCurrentMonthOffDayMarkColor!
             let value_nonCurrentMonthOffDayMarkColor_value_type : int32 = RuntimeType.UNDEFINED
             value_nonCurrentMonthOffDayMarkColor_value_type = runtimeType(value_nonCurrentMonthOffDayMarkColor_value)
@@ -1496,7 +1496,7 @@ export class NonCurrentDayStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const nonCurrentMonthDayColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let nonCurrentMonthDayColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (nonCurrentMonthDayColor_buf_runtimeType))
+        if ((nonCurrentMonthDayColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const nonCurrentMonthDayColor_buf__selector : int32 = valueDeserializer.readInt8()
             let nonCurrentMonthDayColor_buf_ : Color | number | string | Resource | undefined
@@ -1520,7 +1520,7 @@ export class NonCurrentDayStyle_serializer {
         const nonCurrentMonthDayColor_result : ResourceColor | undefined = nonCurrentMonthDayColor_buf
         const nonCurrentMonthLunarColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let nonCurrentMonthLunarColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (nonCurrentMonthLunarColor_buf_runtimeType))
+        if ((nonCurrentMonthLunarColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const nonCurrentMonthLunarColor_buf__selector : int32 = valueDeserializer.readInt8()
             let nonCurrentMonthLunarColor_buf_ : Color | number | string | Resource | undefined
@@ -1544,7 +1544,7 @@ export class NonCurrentDayStyle_serializer {
         const nonCurrentMonthLunarColor_result : ResourceColor | undefined = nonCurrentMonthLunarColor_buf
         const nonCurrentMonthWorkDayMarkColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let nonCurrentMonthWorkDayMarkColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (nonCurrentMonthWorkDayMarkColor_buf_runtimeType))
+        if ((nonCurrentMonthWorkDayMarkColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const nonCurrentMonthWorkDayMarkColor_buf__selector : int32 = valueDeserializer.readInt8()
             let nonCurrentMonthWorkDayMarkColor_buf_ : Color | number | string | Resource | undefined
@@ -1568,7 +1568,7 @@ export class NonCurrentDayStyle_serializer {
         const nonCurrentMonthWorkDayMarkColor_result : ResourceColor | undefined = nonCurrentMonthWorkDayMarkColor_buf
         const nonCurrentMonthOffDayMarkColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let nonCurrentMonthOffDayMarkColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (nonCurrentMonthOffDayMarkColor_buf_runtimeType))
+        if ((nonCurrentMonthOffDayMarkColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const nonCurrentMonthOffDayMarkColor_buf__selector : int32 = valueDeserializer.readInt8()
             let nonCurrentMonthOffDayMarkColor_buf_ : Color | number | string | Resource | undefined
@@ -1601,7 +1601,7 @@ export class TodayStyle_serializer {
         let value_focusedDayColor_type : int32 = RuntimeType.UNDEFINED
         value_focusedDayColor_type = runtimeType(value_focusedDayColor)
         valueSerializer.writeInt8((value_focusedDayColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_focusedDayColor_type)) {
+        if ((value_focusedDayColor_type) != (RuntimeType.UNDEFINED)) {
             const value_focusedDayColor_value  = value_focusedDayColor!
             let value_focusedDayColor_value_type : int32 = RuntimeType.UNDEFINED
             value_focusedDayColor_value_type = runtimeType(value_focusedDayColor_value)
@@ -1630,7 +1630,7 @@ export class TodayStyle_serializer {
         let value_focusedLunarColor_type : int32 = RuntimeType.UNDEFINED
         value_focusedLunarColor_type = runtimeType(value_focusedLunarColor)
         valueSerializer.writeInt8((value_focusedLunarColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_focusedLunarColor_type)) {
+        if ((value_focusedLunarColor_type) != (RuntimeType.UNDEFINED)) {
             const value_focusedLunarColor_value  = value_focusedLunarColor!
             let value_focusedLunarColor_value_type : int32 = RuntimeType.UNDEFINED
             value_focusedLunarColor_value_type = runtimeType(value_focusedLunarColor_value)
@@ -1659,7 +1659,7 @@ export class TodayStyle_serializer {
         let value_focusedAreaBackgroundColor_type : int32 = RuntimeType.UNDEFINED
         value_focusedAreaBackgroundColor_type = runtimeType(value_focusedAreaBackgroundColor)
         valueSerializer.writeInt8((value_focusedAreaBackgroundColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_focusedAreaBackgroundColor_type)) {
+        if ((value_focusedAreaBackgroundColor_type) != (RuntimeType.UNDEFINED)) {
             const value_focusedAreaBackgroundColor_value  = value_focusedAreaBackgroundColor!
             let value_focusedAreaBackgroundColor_value_type : int32 = RuntimeType.UNDEFINED
             value_focusedAreaBackgroundColor_value_type = runtimeType(value_focusedAreaBackgroundColor_value)
@@ -1688,7 +1688,7 @@ export class TodayStyle_serializer {
         let value_focusedAreaRadius_type : int32 = RuntimeType.UNDEFINED
         value_focusedAreaRadius_type = runtimeType(value_focusedAreaRadius)
         valueSerializer.writeInt8((value_focusedAreaRadius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_focusedAreaRadius_type)) {
+        if ((value_focusedAreaRadius_type) != (RuntimeType.UNDEFINED)) {
             const value_focusedAreaRadius_value  = value_focusedAreaRadius!
             valueSerializer.writeNumber(value_focusedAreaRadius_value)
         }
@@ -1697,7 +1697,7 @@ export class TodayStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const focusedDayColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let focusedDayColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (focusedDayColor_buf_runtimeType))
+        if ((focusedDayColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const focusedDayColor_buf__selector : int32 = valueDeserializer.readInt8()
             let focusedDayColor_buf_ : Color | number | string | Resource | undefined
@@ -1721,7 +1721,7 @@ export class TodayStyle_serializer {
         const focusedDayColor_result : ResourceColor | undefined = focusedDayColor_buf
         const focusedLunarColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let focusedLunarColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (focusedLunarColor_buf_runtimeType))
+        if ((focusedLunarColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const focusedLunarColor_buf__selector : int32 = valueDeserializer.readInt8()
             let focusedLunarColor_buf_ : Color | number | string | Resource | undefined
@@ -1745,7 +1745,7 @@ export class TodayStyle_serializer {
         const focusedLunarColor_result : ResourceColor | undefined = focusedLunarColor_buf
         const focusedAreaBackgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let focusedAreaBackgroundColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (focusedAreaBackgroundColor_buf_runtimeType))
+        if ((focusedAreaBackgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const focusedAreaBackgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
             let focusedAreaBackgroundColor_buf_ : Color | number | string | Resource | undefined
@@ -1769,7 +1769,7 @@ export class TodayStyle_serializer {
         const focusedAreaBackgroundColor_result : ResourceColor | undefined = focusedAreaBackgroundColor_buf
         const focusedAreaRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let focusedAreaRadius_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (focusedAreaRadius_buf_runtimeType))
+        if ((focusedAreaRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             focusedAreaRadius_buf = (valueDeserializer.readNumber() as number)
         }
@@ -1785,7 +1785,7 @@ export class WeekStyle_serializer {
         let value_weekColor_type : int32 = RuntimeType.UNDEFINED
         value_weekColor_type = runtimeType(value_weekColor)
         valueSerializer.writeInt8((value_weekColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_weekColor_type)) {
+        if ((value_weekColor_type) != (RuntimeType.UNDEFINED)) {
             const value_weekColor_value  = value_weekColor!
             let value_weekColor_value_type : int32 = RuntimeType.UNDEFINED
             value_weekColor_value_type = runtimeType(value_weekColor_value)
@@ -1814,7 +1814,7 @@ export class WeekStyle_serializer {
         let value_weekendDayColor_type : int32 = RuntimeType.UNDEFINED
         value_weekendDayColor_type = runtimeType(value_weekendDayColor)
         valueSerializer.writeInt8((value_weekendDayColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_weekendDayColor_type)) {
+        if ((value_weekendDayColor_type) != (RuntimeType.UNDEFINED)) {
             const value_weekendDayColor_value  = value_weekendDayColor!
             let value_weekendDayColor_value_type : int32 = RuntimeType.UNDEFINED
             value_weekendDayColor_value_type = runtimeType(value_weekendDayColor_value)
@@ -1843,7 +1843,7 @@ export class WeekStyle_serializer {
         let value_weekendLunarColor_type : int32 = RuntimeType.UNDEFINED
         value_weekendLunarColor_type = runtimeType(value_weekendLunarColor)
         valueSerializer.writeInt8((value_weekendLunarColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_weekendLunarColor_type)) {
+        if ((value_weekendLunarColor_type) != (RuntimeType.UNDEFINED)) {
             const value_weekendLunarColor_value  = value_weekendLunarColor!
             let value_weekendLunarColor_value_type : int32 = RuntimeType.UNDEFINED
             value_weekendLunarColor_value_type = runtimeType(value_weekendLunarColor_value)
@@ -1872,7 +1872,7 @@ export class WeekStyle_serializer {
         let value_weekFontSize_type : int32 = RuntimeType.UNDEFINED
         value_weekFontSize_type = runtimeType(value_weekFontSize)
         valueSerializer.writeInt8((value_weekFontSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_weekFontSize_type)) {
+        if ((value_weekFontSize_type) != (RuntimeType.UNDEFINED)) {
             const value_weekFontSize_value  = value_weekFontSize!
             valueSerializer.writeNumber(value_weekFontSize_value)
         }
@@ -1880,7 +1880,7 @@ export class WeekStyle_serializer {
         let value_weekHeight_type : int32 = RuntimeType.UNDEFINED
         value_weekHeight_type = runtimeType(value_weekHeight)
         valueSerializer.writeInt8((value_weekHeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_weekHeight_type)) {
+        if ((value_weekHeight_type) != (RuntimeType.UNDEFINED)) {
             const value_weekHeight_value  = value_weekHeight!
             valueSerializer.writeNumber(value_weekHeight_value)
         }
@@ -1888,7 +1888,7 @@ export class WeekStyle_serializer {
         let value_weekWidth_type : int32 = RuntimeType.UNDEFINED
         value_weekWidth_type = runtimeType(value_weekWidth)
         valueSerializer.writeInt8((value_weekWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_weekWidth_type)) {
+        if ((value_weekWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_weekWidth_value  = value_weekWidth!
             valueSerializer.writeNumber(value_weekWidth_value)
         }
@@ -1896,7 +1896,7 @@ export class WeekStyle_serializer {
         let value_weekAndDayRowSpace_type : int32 = RuntimeType.UNDEFINED
         value_weekAndDayRowSpace_type = runtimeType(value_weekAndDayRowSpace)
         valueSerializer.writeInt8((value_weekAndDayRowSpace_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_weekAndDayRowSpace_type)) {
+        if ((value_weekAndDayRowSpace_type) != (RuntimeType.UNDEFINED)) {
             const value_weekAndDayRowSpace_value  = value_weekAndDayRowSpace!
             valueSerializer.writeNumber(value_weekAndDayRowSpace_value)
         }
@@ -1905,7 +1905,7 @@ export class WeekStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const weekColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let weekColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (weekColor_buf_runtimeType))
+        if ((weekColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const weekColor_buf__selector : int32 = valueDeserializer.readInt8()
             let weekColor_buf_ : Color | number | string | Resource | undefined
@@ -1929,7 +1929,7 @@ export class WeekStyle_serializer {
         const weekColor_result : ResourceColor | undefined = weekColor_buf
         const weekendDayColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let weekendDayColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (weekendDayColor_buf_runtimeType))
+        if ((weekendDayColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const weekendDayColor_buf__selector : int32 = valueDeserializer.readInt8()
             let weekendDayColor_buf_ : Color | number | string | Resource | undefined
@@ -1953,7 +1953,7 @@ export class WeekStyle_serializer {
         const weekendDayColor_result : ResourceColor | undefined = weekendDayColor_buf
         const weekendLunarColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let weekendLunarColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (weekendLunarColor_buf_runtimeType))
+        if ((weekendLunarColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const weekendLunarColor_buf__selector : int32 = valueDeserializer.readInt8()
             let weekendLunarColor_buf_ : Color | number | string | Resource | undefined
@@ -1977,28 +1977,28 @@ export class WeekStyle_serializer {
         const weekendLunarColor_result : ResourceColor | undefined = weekendLunarColor_buf
         const weekFontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let weekFontSize_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (weekFontSize_buf_runtimeType))
+        if ((weekFontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             weekFontSize_buf = (valueDeserializer.readNumber() as number)
         }
         const weekFontSize_result : number | undefined = weekFontSize_buf
         const weekHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let weekHeight_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (weekHeight_buf_runtimeType))
+        if ((weekHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             weekHeight_buf = (valueDeserializer.readNumber() as number)
         }
         const weekHeight_result : number | undefined = weekHeight_buf
         const weekWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let weekWidth_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (weekWidth_buf_runtimeType))
+        if ((weekWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             weekWidth_buf = (valueDeserializer.readNumber() as number)
         }
         const weekWidth_result : number | undefined = weekWidth_buf
         const weekAndDayRowSpace_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let weekAndDayRowSpace_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (weekAndDayRowSpace_buf_runtimeType))
+        if ((weekAndDayRowSpace_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             weekAndDayRowSpace_buf = (valueDeserializer.readNumber() as number)
         }
@@ -2014,7 +2014,7 @@ export class WorkStateStyle_serializer {
         let value_workDayMarkColor_type : int32 = RuntimeType.UNDEFINED
         value_workDayMarkColor_type = runtimeType(value_workDayMarkColor)
         valueSerializer.writeInt8((value_workDayMarkColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_workDayMarkColor_type)) {
+        if ((value_workDayMarkColor_type) != (RuntimeType.UNDEFINED)) {
             const value_workDayMarkColor_value  = value_workDayMarkColor!
             let value_workDayMarkColor_value_type : int32 = RuntimeType.UNDEFINED
             value_workDayMarkColor_value_type = runtimeType(value_workDayMarkColor_value)
@@ -2043,7 +2043,7 @@ export class WorkStateStyle_serializer {
         let value_offDayMarkColor_type : int32 = RuntimeType.UNDEFINED
         value_offDayMarkColor_type = runtimeType(value_offDayMarkColor)
         valueSerializer.writeInt8((value_offDayMarkColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offDayMarkColor_type)) {
+        if ((value_offDayMarkColor_type) != (RuntimeType.UNDEFINED)) {
             const value_offDayMarkColor_value  = value_offDayMarkColor!
             let value_offDayMarkColor_value_type : int32 = RuntimeType.UNDEFINED
             value_offDayMarkColor_value_type = runtimeType(value_offDayMarkColor_value)
@@ -2072,7 +2072,7 @@ export class WorkStateStyle_serializer {
         let value_workDayMarkSize_type : int32 = RuntimeType.UNDEFINED
         value_workDayMarkSize_type = runtimeType(value_workDayMarkSize)
         valueSerializer.writeInt8((value_workDayMarkSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_workDayMarkSize_type)) {
+        if ((value_workDayMarkSize_type) != (RuntimeType.UNDEFINED)) {
             const value_workDayMarkSize_value  = value_workDayMarkSize!
             valueSerializer.writeNumber(value_workDayMarkSize_value)
         }
@@ -2080,7 +2080,7 @@ export class WorkStateStyle_serializer {
         let value_offDayMarkSize_type : int32 = RuntimeType.UNDEFINED
         value_offDayMarkSize_type = runtimeType(value_offDayMarkSize)
         valueSerializer.writeInt8((value_offDayMarkSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offDayMarkSize_type)) {
+        if ((value_offDayMarkSize_type) != (RuntimeType.UNDEFINED)) {
             const value_offDayMarkSize_value  = value_offDayMarkSize!
             valueSerializer.writeNumber(value_offDayMarkSize_value)
         }
@@ -2088,7 +2088,7 @@ export class WorkStateStyle_serializer {
         let value_workStateWidth_type : int32 = RuntimeType.UNDEFINED
         value_workStateWidth_type = runtimeType(value_workStateWidth)
         valueSerializer.writeInt8((value_workStateWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_workStateWidth_type)) {
+        if ((value_workStateWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_workStateWidth_value  = value_workStateWidth!
             valueSerializer.writeNumber(value_workStateWidth_value)
         }
@@ -2096,7 +2096,7 @@ export class WorkStateStyle_serializer {
         let value_workStateHorizontalMovingDistance_type : int32 = RuntimeType.UNDEFINED
         value_workStateHorizontalMovingDistance_type = runtimeType(value_workStateHorizontalMovingDistance)
         valueSerializer.writeInt8((value_workStateHorizontalMovingDistance_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_workStateHorizontalMovingDistance_type)) {
+        if ((value_workStateHorizontalMovingDistance_type) != (RuntimeType.UNDEFINED)) {
             const value_workStateHorizontalMovingDistance_value  = value_workStateHorizontalMovingDistance!
             valueSerializer.writeNumber(value_workStateHorizontalMovingDistance_value)
         }
@@ -2104,7 +2104,7 @@ export class WorkStateStyle_serializer {
         let value_workStateVerticalMovingDistance_type : int32 = RuntimeType.UNDEFINED
         value_workStateVerticalMovingDistance_type = runtimeType(value_workStateVerticalMovingDistance)
         valueSerializer.writeInt8((value_workStateVerticalMovingDistance_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_workStateVerticalMovingDistance_type)) {
+        if ((value_workStateVerticalMovingDistance_type) != (RuntimeType.UNDEFINED)) {
             const value_workStateVerticalMovingDistance_value  = value_workStateVerticalMovingDistance!
             valueSerializer.writeNumber(value_workStateVerticalMovingDistance_value)
         }
@@ -2113,7 +2113,7 @@ export class WorkStateStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const workDayMarkColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let workDayMarkColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (workDayMarkColor_buf_runtimeType))
+        if ((workDayMarkColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const workDayMarkColor_buf__selector : int32 = valueDeserializer.readInt8()
             let workDayMarkColor_buf_ : Color | number | string | Resource | undefined
@@ -2137,7 +2137,7 @@ export class WorkStateStyle_serializer {
         const workDayMarkColor_result : ResourceColor | undefined = workDayMarkColor_buf
         const offDayMarkColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offDayMarkColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (offDayMarkColor_buf_runtimeType))
+        if ((offDayMarkColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const offDayMarkColor_buf__selector : int32 = valueDeserializer.readInt8()
             let offDayMarkColor_buf_ : Color | number | string | Resource | undefined
@@ -2161,35 +2161,35 @@ export class WorkStateStyle_serializer {
         const offDayMarkColor_result : ResourceColor | undefined = offDayMarkColor_buf
         const workDayMarkSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let workDayMarkSize_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (workDayMarkSize_buf_runtimeType))
+        if ((workDayMarkSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             workDayMarkSize_buf = (valueDeserializer.readNumber() as number)
         }
         const workDayMarkSize_result : number | undefined = workDayMarkSize_buf
         const offDayMarkSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offDayMarkSize_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (offDayMarkSize_buf_runtimeType))
+        if ((offDayMarkSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             offDayMarkSize_buf = (valueDeserializer.readNumber() as number)
         }
         const offDayMarkSize_result : number | undefined = offDayMarkSize_buf
         const workStateWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let workStateWidth_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (workStateWidth_buf_runtimeType))
+        if ((workStateWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             workStateWidth_buf = (valueDeserializer.readNumber() as number)
         }
         const workStateWidth_result : number | undefined = workStateWidth_buf
         const workStateHorizontalMovingDistance_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let workStateHorizontalMovingDistance_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (workStateHorizontalMovingDistance_buf_runtimeType))
+        if ((workStateHorizontalMovingDistance_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             workStateHorizontalMovingDistance_buf = (valueDeserializer.readNumber() as number)
         }
         const workStateHorizontalMovingDistance_result : number | undefined = workStateHorizontalMovingDistance_buf
         const workStateVerticalMovingDistance_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let workStateVerticalMovingDistance_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (workStateVerticalMovingDistance_buf_runtimeType))
+        if ((workStateVerticalMovingDistance_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             workStateVerticalMovingDistance_buf = (valueDeserializer.readNumber() as number)
         }

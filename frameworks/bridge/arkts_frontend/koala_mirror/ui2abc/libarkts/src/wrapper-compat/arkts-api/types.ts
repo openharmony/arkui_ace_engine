@@ -81,7 +81,7 @@ export class EtsScript extends AstNode {
         if (!global.configIsInitialized()) {
             global.config = Config.createDefault().peer;
         }
-        global.compilerContext = Context.createFromString(source) as any; // TODO commonize context
+        global.compilerContext = Context.createFromString(source) as any; // Improve: commonize context
         proceedToState(state, global.context);
         return new EtsScript(
             global.es2panda._ProgramAst(global.context, global.es2panda._ContextProgram(global.context))
@@ -145,7 +145,7 @@ export class ExpressionStatement extends AstNode {
     }
 }
 
-// TODO:
+// Improve:
 //  the CallExpression idl Create signature doesn't include the trailing block at all.
 //  Need to clarify with the compiler people if they will provide create signature with a trailing block argument.
 export class CallExpression extends Expression {
@@ -398,13 +398,13 @@ export class FunctionDeclaration extends AstNode {
             global.generatedEs2panda._CreateFunctionDeclaration(
                 global.context,
                 scriptFunction.peer,
-                // TODO: support annotations
+                // Improve: support annotations
                 arrayOfNullptr,
                 0,
                 isAnon
             )
         );
-        // TODO: maybe wrong
+        // Improve: maybe wrong
         res.modifiers = scriptFunction.modifiers;
         if (annotations) {
             res.annotations = annotations;
@@ -423,7 +423,7 @@ export class FunctionDeclaration extends AstNode {
                 global.context,
                 node.peer,
                 scriptFunction.peer,
-                // TODO: support annotations
+                // Improve: support annotations
                 passNodeArray(annotations),
                 0,
                 isAnon
@@ -626,7 +626,7 @@ export class StructDeclaration extends AstNode {
     constructor(peer: KPtr) {
         assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_STRUCT_DECLARATION);
         super(peer);
-        // TODO: is struct definition the same as struct definition?
+        // Improve: is struct definition the same as struct definition?
         this.definition = unpackNonNullableNode(
             global.generatedEs2panda._ClassDeclarationDefinition(global.context, this.peer)
         );
@@ -711,7 +711,7 @@ export class MethodDefinition extends AstNode {
         );
     }
 
-    // TODO: does not work
+    // Improve: does not work
     isConstructor(): boolean {
         return global.generatedEs2panda._MethodDefinitionIsConstructorConst(global.context, this.peer);
     }

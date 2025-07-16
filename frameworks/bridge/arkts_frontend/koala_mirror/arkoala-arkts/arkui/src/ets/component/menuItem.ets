@@ -49,7 +49,7 @@ export class ArkMenuItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -72,7 +72,7 @@ export class ArkMenuItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -84,7 +84,7 @@ export class ArkMenuItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -123,7 +123,7 @@ export class ArkMenuItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -135,7 +135,7 @@ export class ArkMenuItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             Font_serializer.write(thisSerializer, value_value)
         }
@@ -147,7 +147,7 @@ export class ArkMenuItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -180,7 +180,7 @@ export class ArkMenuItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             Font_serializer.write(thisSerializer, value_value)
         }
@@ -192,7 +192,7 @@ export class ArkMenuItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -513,7 +513,7 @@ export class MenuItemOptions_serializer {
         let value_startIcon_type : int32 = RuntimeType.UNDEFINED
         value_startIcon_type = runtimeType(value_startIcon)
         valueSerializer.writeInt8((value_startIcon_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_startIcon_type)) {
+        if ((value_startIcon_type) != (RuntimeType.UNDEFINED)) {
             const value_startIcon_value  = value_startIcon!
             let value_startIcon_value_type : int32 = RuntimeType.UNDEFINED
             value_startIcon_value_type = runtimeType(value_startIcon_value)
@@ -532,7 +532,7 @@ export class MenuItemOptions_serializer {
         let value_symbolStartIcon_type : int32 = RuntimeType.UNDEFINED
         value_symbolStartIcon_type = runtimeType(value_symbolStartIcon)
         valueSerializer.writeInt8((value_symbolStartIcon_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_symbolStartIcon_type)) {
+        if ((value_symbolStartIcon_type) != (RuntimeType.UNDEFINED)) {
             const value_symbolStartIcon_value  = value_symbolStartIcon!
             SymbolGlyphModifier_serializer.write(valueSerializer, value_symbolStartIcon_value)
         }
@@ -540,7 +540,7 @@ export class MenuItemOptions_serializer {
         let value_content_type : int32 = RuntimeType.UNDEFINED
         value_content_type = runtimeType(value_content)
         valueSerializer.writeInt8((value_content_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_content_type)) {
+        if ((value_content_type) != (RuntimeType.UNDEFINED)) {
             const value_content_value  = value_content!
             let value_content_value_type : int32 = RuntimeType.UNDEFINED
             value_content_value_type = runtimeType(value_content_value)
@@ -559,7 +559,7 @@ export class MenuItemOptions_serializer {
         let value_endIcon_type : int32 = RuntimeType.UNDEFINED
         value_endIcon_type = runtimeType(value_endIcon)
         valueSerializer.writeInt8((value_endIcon_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_endIcon_type)) {
+        if ((value_endIcon_type) != (RuntimeType.UNDEFINED)) {
             const value_endIcon_value  = value_endIcon!
             let value_endIcon_value_type : int32 = RuntimeType.UNDEFINED
             value_endIcon_value_type = runtimeType(value_endIcon_value)
@@ -578,7 +578,7 @@ export class MenuItemOptions_serializer {
         let value_symbolEndIcon_type : int32 = RuntimeType.UNDEFINED
         value_symbolEndIcon_type = runtimeType(value_symbolEndIcon)
         valueSerializer.writeInt8((value_symbolEndIcon_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_symbolEndIcon_type)) {
+        if ((value_symbolEndIcon_type) != (RuntimeType.UNDEFINED)) {
             const value_symbolEndIcon_value  = value_symbolEndIcon!
             SymbolGlyphModifier_serializer.write(valueSerializer, value_symbolEndIcon_value)
         }
@@ -586,7 +586,7 @@ export class MenuItemOptions_serializer {
         let value_labelInfo_type : int32 = RuntimeType.UNDEFINED
         value_labelInfo_type = runtimeType(value_labelInfo)
         valueSerializer.writeInt8((value_labelInfo_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_labelInfo_type)) {
+        if ((value_labelInfo_type) != (RuntimeType.UNDEFINED)) {
             const value_labelInfo_value  = value_labelInfo!
             let value_labelInfo_value_type : int32 = RuntimeType.UNDEFINED
             value_labelInfo_value_type = runtimeType(value_labelInfo_value)
@@ -605,7 +605,7 @@ export class MenuItemOptions_serializer {
         let value_builder_type : int32 = RuntimeType.UNDEFINED
         value_builder_type = runtimeType(value_builder)
         valueSerializer.writeInt8((value_builder_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_builder_type)) {
+        if ((value_builder_type) != (RuntimeType.UNDEFINED)) {
             const value_builder_value  = value_builder!
             valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_builder_value))
         }
@@ -614,7 +614,7 @@ export class MenuItemOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const startIcon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let startIcon_buf : ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (startIcon_buf_runtimeType))
+        if ((startIcon_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const startIcon_buf__selector : int32 = valueDeserializer.readInt8()
             let startIcon_buf_ : string | Resource | undefined
@@ -632,14 +632,14 @@ export class MenuItemOptions_serializer {
         const startIcon_result : ResourceStr | undefined = startIcon_buf
         const symbolStartIcon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let symbolStartIcon_buf : SymbolGlyphModifier | undefined
-        if ((RuntimeType.UNDEFINED) != (symbolStartIcon_buf_runtimeType))
+        if ((symbolStartIcon_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             symbolStartIcon_buf = SymbolGlyphModifier_serializer.read(valueDeserializer)
         }
         const symbolStartIcon_result : SymbolGlyphModifier | undefined = symbolStartIcon_buf
         const content_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let content_buf : ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (content_buf_runtimeType))
+        if ((content_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const content_buf__selector : int32 = valueDeserializer.readInt8()
             let content_buf_ : string | Resource | undefined
@@ -657,7 +657,7 @@ export class MenuItemOptions_serializer {
         const content_result : ResourceStr | undefined = content_buf
         const endIcon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let endIcon_buf : ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (endIcon_buf_runtimeType))
+        if ((endIcon_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const endIcon_buf__selector : int32 = valueDeserializer.readInt8()
             let endIcon_buf_ : string | Resource | undefined
@@ -675,14 +675,14 @@ export class MenuItemOptions_serializer {
         const endIcon_result : ResourceStr | undefined = endIcon_buf
         const symbolEndIcon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let symbolEndIcon_buf : SymbolGlyphModifier | undefined
-        if ((RuntimeType.UNDEFINED) != (symbolEndIcon_buf_runtimeType))
+        if ((symbolEndIcon_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             symbolEndIcon_buf = SymbolGlyphModifier_serializer.read(valueDeserializer)
         }
         const symbolEndIcon_result : SymbolGlyphModifier | undefined = symbolEndIcon_buf
         const labelInfo_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let labelInfo_buf : ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (labelInfo_buf_runtimeType))
+        if ((labelInfo_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const labelInfo_buf__selector : int32 = valueDeserializer.readInt8()
             let labelInfo_buf_ : string | Resource | undefined
@@ -700,7 +700,7 @@ export class MenuItemOptions_serializer {
         const labelInfo_result : ResourceStr | undefined = labelInfo_buf
         const builder_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let builder_buf : CustomBuilder | undefined
-        if ((RuntimeType.UNDEFINED) != (builder_buf_runtimeType))
+        if ((builder_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const builder_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const builder_buf__call : KPointer = valueDeserializer.readPointer()

@@ -16,7 +16,7 @@
 #ifndef _INTEROP_UTILS_H_
 #define _INTEROP_UTILS_H_
 
-#include <string.h>
+#include <cstring>
 #include <stdio.h>
 
 #ifdef __STDC_LIB_EXT1__

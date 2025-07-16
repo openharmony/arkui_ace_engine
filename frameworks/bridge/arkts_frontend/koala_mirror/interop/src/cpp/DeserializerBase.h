@@ -143,7 +143,7 @@ inline void parseDimension(const InteropString &string, InteropLength *result)
 template <typename T>
 inline void convertor(T value) = delete;
 
-// TODO: restore full printing!
+// Improve: restore full printing!
 template <typename T>
 inline void WriteToString(std::string *result, T value) = delete;
 
@@ -213,7 +213,7 @@ inline void WriteToString(std::string *result, const InteropMaterialized *value)
   result->append("\"");
 }
 
-// TODO: generate!
+// Improve: generate!
 template<>
 inline void WriteToString(std::string *result, const InteropCallbackResource *value)
 {
@@ -251,7 +251,7 @@ inline void WriteToString(std::string *result, const InteropCustomObject *value)
 {
   if (strcmp(value->kind, "NativeErrorFunction") == 0)
   {
-    result->append("() => {} /* TBD: Function*/");
+    result->append("() => {} /* Improve: Function*/");
     return;
   }
   result->append("{");
@@ -280,7 +280,7 @@ struct CustomDeserializer
   virtual InteropCustomObject deserialize(DeserializerBase *deserializer, const std::string &kind)
   {
     InteropCustomObject result;
-    interop_strcpy(result.kind, 20, "error");
+    interop_strcpy(result.kind, sizeof(result.kind), "error");
     return result;
   }
   CustomDeserializer *next = nullptr;
@@ -385,8 +385,8 @@ public:
     if (tag == INTEROP_TAG_UNDEFINED) LOGE("Undefined interop tag");
     // Skip undefined tag!.
     InteropCustomObject result;
-    interop_strcpy(result.kind, 20, "Error");
-    interop_strcat(result.kind, 20, kind.c_str());
+    interop_strcpy(result.kind, sizeof(result.kind), "Error");
+    interop_strcat(result.kind, sizeof(result.kind), kind.c_str());
     return result;
   }
 
@@ -424,74 +424,74 @@ public:
   }
   InteropInt32 readInt32()
   {
-    check(4);
+    check(sizeof(InteropInt32));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropInt32 value;
-    interop_memcpy(&value, 4, data + position, 4);
+    interop_memcpy(&value, sizeof(InteropInt32), data + position, sizeof(InteropInt32));
 #else
     auto value = *(InteropInt32 *)(data + position);
 #endif
-    position += 4;
+    position += sizeof(InteropInt32);
     return value;
   }
   InteropInt64 readInt64()
   {
-    check(8);
+    check(sizeof(InteropInt64));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropInt64 value;
-    interop_memcpy(&value, 4, data + position, 4);
+    interop_memcpy(&value, sizeof(InteropInt64), data + position, sizeof(InteropInt64));
 #else
     auto value = *(InteropInt64 *)(data + position);
 #endif
-    position += 8;
+    position += sizeof(InteropInt64);
     return value;
   }
   InteropUInt64 readUInt64()
   {
-    check(8);
+    check(sizeof(InteropUInt64));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropInt64 value;
-    interop_memcpy(&value, 4, data + position, 4);
+    interop_memcpy(&value, sizeof(InteropUInt64), data + position, sizeof(InteropUInt64));
 #else
     auto value = *(InteropUInt64 *)(data + position);
 #endif
-    position += 8;
+    position += sizeof(InteropUInt64);
     return value;
   }
   InteropFloat32 readFloat32()
   {
-    check(4);
+    check(sizeof(InteropFloat32));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropFloat32 value;
-      interop_memcpy(&value, 4, data + position, 4);
+    interop_memcpy(&value, sizeof(InteropFloat32), data + position, sizeof(InteropFloat32));
 #else
     auto value = *(InteropFloat32 *)(data + position);
 #endif
-    position += 4;
+    position += sizeof(InteropFloat32);
     return value;
   }
   InteropFloat64 readFloat64()
   {
-    check(8);
+    check(sizeof(InteropFloat64));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropFloat64 value;
-    interop_memcpy(&value, 8, data + position, 8);
+    interop_memcpy(&value, sizeof(InteropFloat64), data + position, sizeof(InteropFloat64));
 #else
     auto value = *(InteropFloat64 *)(data + position);
 #endif
-    position += 8;
+    position += sizeof(InteropFloat64);
     return value;
   }
   InteropNativePointer readPointer()
   {
-    check(8);
+    check(sizeof(InteropInt64));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-    int64_t value = 0;
-    interop_memcpy(&value, 8, data + position, 8);
+    InteropInt64 value = 0;
+    interop_memcpy(&value, sizeof(InteropInt64), data + position, sizeof(InteropInt64));
 #else
-    int64_t value = *(int64_t *)(data + position);
+    InteropInt64 value = *(int64_t *)(data + position);
 #endif
-    position += 8;
+    position += sizeof(InteropInt64);
     return reinterpret_cast<InteropNativePointer>(static_cast<uintptr_t>(value));
   }
   InteropNativePointer readPointerOrDefault(InteropNativePointer defaultValue)
@@ -526,7 +526,7 @@ public:
     return InteropBuffer { resource, (void*)data, length };
   }
 
-  // TODO: produce them with prefix in generator.
+  // Improve: produce them with prefix in generator.
   InteropLength readLength()
   {
     InteropLength result = {};

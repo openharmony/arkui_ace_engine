@@ -86,7 +86,7 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             TextClockOptions_serializer.write(thisSerializer, options_value)
         }
@@ -98,7 +98,7 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -121,7 +121,7 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -133,7 +133,7 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -166,7 +166,7 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -194,7 +194,7 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as FontStyle)
             thisSerializer.writeInt32(TypeChecker.FontStyle_ToNumeric(value_value))
         }
@@ -206,7 +206,7 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -234,7 +234,7 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -257,7 +257,7 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -270,8 +270,8 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toChar())
                 const value_value_1  = value_value as Array<ShadowOptions>
                 thisSerializer.writeInt32((value_value_1.length).toInt())
-                for (let i = 0; i < value_value_1.length; i++) {
-                    const value_value_1_element : ShadowOptions = value_value_1[i]
+                for (let value_value_1_counter_i = 0; value_value_1_counter_i < value_value_1.length; value_value_1_counter_i++) {
+                    const value_value_1_element : ShadowOptions = value_value_1[value_value_1_counter_i]
                     ShadowOptions_serializer.write(thisSerializer, value_value_1_element)
                 }
             }
@@ -284,7 +284,7 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeString(value_value)
         }
@@ -296,7 +296,7 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteObject(value_value)
         }
@@ -308,7 +308,7 @@ export class ArkTextClockPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             intl_DateTimeOptions_serializer.write(thisSerializer, value_value)
         }
@@ -718,7 +718,7 @@ export class TextClockOptions_serializer {
         let value_timeZoneOffset_type : int32 = RuntimeType.UNDEFINED
         value_timeZoneOffset_type = runtimeType(value_timeZoneOffset)
         valueSerializer.writeInt8((value_timeZoneOffset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_timeZoneOffset_type)) {
+        if ((value_timeZoneOffset_type) != (RuntimeType.UNDEFINED)) {
             const value_timeZoneOffset_value  = value_timeZoneOffset!
             valueSerializer.writeNumber(value_timeZoneOffset_value)
         }
@@ -726,7 +726,7 @@ export class TextClockOptions_serializer {
         let value_controller_type : int32 = RuntimeType.UNDEFINED
         value_controller_type = runtimeType(value_controller)
         valueSerializer.writeInt8((value_controller_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_controller_type)) {
+        if ((value_controller_type) != (RuntimeType.UNDEFINED)) {
             const value_controller_value  = value_controller!
             TextClockController_serializer.write(valueSerializer, value_controller_value)
         }
@@ -735,14 +735,14 @@ export class TextClockOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const timeZoneOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let timeZoneOffset_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (timeZoneOffset_buf_runtimeType))
+        if ((timeZoneOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             timeZoneOffset_buf = (valueDeserializer.readNumber() as number)
         }
         const timeZoneOffset_result : number | undefined = timeZoneOffset_buf
         const controller_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let controller_buf : TextClockController | undefined
-        if ((RuntimeType.UNDEFINED) != (controller_buf_runtimeType))
+        if ((controller_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             controller_buf = (TextClockController_serializer.read(valueDeserializer) as TextClockController)
         }
