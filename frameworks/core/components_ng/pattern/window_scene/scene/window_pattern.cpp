@@ -27,9 +27,6 @@
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
-#include "core/components_ng/pattern/window_scene/scene/atomicservice_basic_engine_plugin.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -412,14 +409,9 @@ void WindowPattern::CreateASStartingWindow()
     std::string circleIcon = "";
 
 #ifdef ACE_ENGINE_PLUGIN_PATH
-    std::vector<std::string> atomicServiceIconInfo = AtomicServiceBasicEnginePlugin::GetInstance().
-        getParamsFromAtomicServiceBasicEngine(sessionInfo.bundleName_);
-    if (atomicServiceIconInfo.size() >= ASENGINE_ATTRIBUTIONS_COUNT) {
-        appNameInfo = atomicServiceIconInfo[0];
-        circleIcon = atomicServiceIconInfo[CIRCLE_ICON_INDEX];
-        eyelashRingIcon = atomicServiceIconInfo[EYELASHRING_ICON_INDEX];
-    }
-    AtomicServiceBasicEnginePlugin::GetInstance().releaseData();
+    appNameInfo = sessionInfo.atomicServiceInfo_.appNameInfo;
+    eyelashRingIcon = sessionInfo.atomicServiceInfo_.eyelashRingIcon;
+    circleIcon = sessionInfo.atomicServiceInfo_.circleIcon;
 #endif // ACE_ENGINE_PLUGIN_PATH
 
     startingWindow_ = FrameNode::CreateFrameNode(
