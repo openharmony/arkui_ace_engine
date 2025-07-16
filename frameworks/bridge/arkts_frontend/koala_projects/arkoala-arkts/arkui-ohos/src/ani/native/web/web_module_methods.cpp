@@ -443,8 +443,8 @@ ani_object TransferFileSelectorResultToDynamic(ani_env* env, ani_class aniClass,
         napi_env jsenv {};
         bool success = arkts_napi_scope_open(env, &jsenv);
         CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
-        napi_value dynamic = modifier->getWebAniModifier()->transferFileSelectorResultToDynamic(
-            jsenv, reinterpret_cast<void*>(node));
+        napi_value dynamic =
+            modifier->getWebAniModifier()->transferFileSelectorResultToDynamic(jsenv, reinterpret_cast<void*>(node));
         CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
         success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
         CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
@@ -681,5 +681,4 @@ ani_object TransferSslErrorHandlerToDynamic(ani_env* env, ani_class aniClass, an
     }
     return reinterpret_cast<ani_object>(result);
 }
-
 } // namespace OHOS::Ace::Ani
