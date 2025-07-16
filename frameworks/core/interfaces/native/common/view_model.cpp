@@ -453,6 +453,7 @@ void* createRelativeContainerNode(ArkUI_Int32 nodeId)
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
+
 void* createGridNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = GridModelNG::CreateFrameNode(nodeId);
