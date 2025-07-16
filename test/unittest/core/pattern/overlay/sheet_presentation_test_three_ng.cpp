@@ -1824,6 +1824,10 @@ HWTEST_F(SheetPresentationTestThreeNg, IsNeedChangeScrollHeight002, TestSize.Lev
 
     bool isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);
     ASSERT_TRUE(isNeedChangeScrollHeight);
+    auto keyboardHeight = 500.0f;
+    sheetPattern->SetKeyboardHeight(keyboardHeight);
+    isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);
+    ASSERT_FALSE(isNeedChangeScrollHeight);
 }
 
 /**
@@ -2020,6 +2024,36 @@ HWTEST_F(SheetPresentationTestThreeNg, GetSheetTypeFromSheetManager002, TestSize
     sheeLayoutProperty->UpdateSheetStyle(sheetStyle);
     EXPECT_EQ(pattern->GetSheetTypeFromSheetManager(), SheetType::SHEET_BOTTOM_OFFSET);
     SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleMultiDetentKeyboardAvoid001
+ * @tc.desc: Test HandleMultiDetentKeyboardAvoid function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, HandleMultiDetentKeyboardAvoid001, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_ETS_TAG, 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, V2::TEXT_ETS_TAG, std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    sheetPattern->SetIsScrolling(false);
+    sheetPattern->HandleMultiDetentKeyboardAvoid();
+    EXPECT_FALSE(sheetPattern->GetIsScrolling());
+
+    auto keyboardHeight = 500.0f;
+    sheetPattern->SetKeyboardHeight(keyboardHeight);
+    sheetPattern->HandleMultiDetentKeyboardAvoid();
+    EXPECT_FALSE(sheetPattern->GetIsScrolling());
+
+    sheetPattern->height_ = 200.0f;
+    sheetPattern->preDetentsHeight_ = 0.0f;
+    sheetPattern->SetKeyboardHeight(keyboardHeight);
+    sheetPattern->HandleMultiDetentKeyboardAvoid();
+    EXPECT_TRUE(sheetPattern->GetIsScrolling());
 }
 
 /**
