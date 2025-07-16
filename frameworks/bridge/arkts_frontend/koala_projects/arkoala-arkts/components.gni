@@ -67,6 +67,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/RowModifier.ets",
   "arkui-preprocessed/arkui/RowSplitModifier.ets",
   "arkui-preprocessed/arkui/StackModifier.ets",
+  "arkui-preprocessed/arkui/SymbolGlyphModifier.ets",
   "arkui-preprocessed/arkui/TextModifier.ets",
   "arkui-preprocessed/arkui/UserView.ets",
   "arkui-preprocessed/arkui/ani/arkts/ArkUIAniCustomNodeModule.ets",
