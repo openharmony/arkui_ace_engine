@@ -1484,9 +1484,11 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
         TAG_LOGW(AceLogTag::ACE_ROUTER, "LoadPage OnPageReady Failed");
         return;
     }
-    AccessibilityEventType type = AccessibilityEventType::CHANGE;
-    pageNode->OnAccessibilityEvent(type);
     TAG_LOGI(AceLogTag::ACE_ROUTER, "LoadPage Success");
+    auto pipeline = pageNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAccessibilityCallbackEvent(AccessibilityCallbackEventId::ON_LOAD_PAGE,
+        pageNode->GetAccessibilityId());
 }
 
 RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPageInfo& target)
