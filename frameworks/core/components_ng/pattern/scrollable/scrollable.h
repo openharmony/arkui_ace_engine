@@ -591,6 +591,14 @@ public:
         snapDirection_ = SnapDirection::NONE;
     }
 
+    /**
+     * @brief Checks if the scroll event is caused by a mouse wheel.
+     */
+    static inline bool IsMouseWheelScroll(const GestureEvent& info)
+    {
+        return info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() != SourceTool::TOUCHPAD;
+    }
+
 private:
     void InitPanRecognizerNG();
     void SetOnActionStart();
@@ -625,14 +633,6 @@ private:
     void UpdateCrownVelocity(const TimeStamp& timeStamp, double mainDelta, bool end);
     void StartVibrateFeedback();
 #endif
-
-    /**
-     * @brief Checks if the scroll event is caused by a mouse wheel.
-     *
-     * @param info The GestureEvent containing the scroll event information.
-     * @return true if the scroll event is caused by a mouse wheel, false otherwise.
-     */
-    static inline bool IsMouseWheelScroll(const GestureEvent& info);
 
     ScrollPositionCallback callback_;
     ScrollEventCallback scrollEndCallback_;
