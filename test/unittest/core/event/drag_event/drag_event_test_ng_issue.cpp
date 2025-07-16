@@ -1012,22 +1012,41 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue017, TestSize.Level1)
     const int32_t requestId = 10000;
     DragDropGlobalController::GetInstance().requestId_ = -1;
     DragDropGlobalController::GetInstance().dragResult_ = DragRet::DRAG_FAIL;
-    DragDropGlobalController::GetInstance().isOnOnDropPhase_ = true;
+    DragDropGlobalController::GetInstance().isOnOnDropPhase_ = false;
     auto finalDragResult = DragRet::DRAG_FAIL;
     auto callback = [&finalDragResult](const DragRet& dragResult) {
         finalDragResult = dragResult;
     };
-
     /**
      * @tc.steps: step2. call RequestDragEndCallback.
      */
-    bool result = DragDropGlobalController::GetInstance().RequestDragEndCallback(-1, DragRet::DRAG_SUCCESS, callback);
+    bool result = DragDropGlobalController::GetInstance().RequestDragEndCallback(-1, DragRet::DRAG_SUCCESS, nullptr);
     EXPECT_EQ(result, false);
     EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, -1);
     EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
 
-    result = DragDropGlobalController::GetInstance().RequestDragEndCallback(requestId,
-        DragRet::DRAG_SUCCESS, nullptr);
+    result = DragDropGlobalController::GetInstance().RequestDragEndCallback(requestId, DragRet::DRAG_SUCCESS, nullptr);
+    EXPECT_EQ(result, false);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+
+    result = DragDropGlobalController::GetInstance().RequestDragEndCallback(-1, DragRet::DRAG_SUCCESS, callback);
+    EXPECT_EQ(result, false);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+
+    result = DragDropGlobalController::GetInstance().RequestDragEndCallback(requestId, DragRet::DRAG_SUCCESS, callback);
+    EXPECT_EQ(result, false);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+
+    DragDropGlobalController::GetInstance().isOnOnDropPhase_ = true;
+    result = DragDropGlobalController::GetInstance().RequestDragEndCallback(requestId, DragRet::DRAG_SUCCESS, callback);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, requestId);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_SUCCESS);
+
+    result = DragDropGlobalController::GetInstance().RequestDragEndCallback(-1, DragRet::DRAG_SUCCESS, callback);
     EXPECT_EQ(result, false);
     EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, -1);
     EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
@@ -1037,19 +1056,10 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue017, TestSize.Level1)
     EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, -1);
     EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
 
-    DragDropGlobalController::GetInstance().isOnOnDropPhase_ = false;
-    result = DragDropGlobalController::GetInstance().RequestDragEndCallback(requestId,
-        DragRet::DRAG_SUCCESS, callback);
+    result = DragDropGlobalController::GetInstance().RequestDragEndCallback(requestId, DragRet::DRAG_SUCCESS, nullptr);
     EXPECT_EQ(result, false);
     EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, -1);
     EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
-
-    DragDropGlobalController::GetInstance().isOnOnDropPhase_ = true;
-    result = DragDropGlobalController::GetInstance().RequestDragEndCallback(requestId,
-        DragRet::DRAG_SUCCESS, callback);
-    EXPECT_EQ(result, true);
-    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, requestId);
-    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_SUCCESS);
 }
 
 /**
@@ -1063,6 +1073,7 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue018, TestSize.Level1)
      * @tc.steps: step1. set DragDropGlobalController init status.
      */
     const int32_t requestId = 10000;
+    const int32_t wrongRequestId = -1;
     DragDropGlobalController::GetInstance().requestId_ = -1;
     DragDropGlobalController::GetInstance().dragResult_ = DragRet::DRAG_FAIL;
     DragDropGlobalController::GetInstance().isOnOnDropPhase_ = true;
@@ -1081,11 +1092,20 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue018, TestSize.Level1)
     /**
      * @tc.steps: step3. call NotifyDragEndPendingDone.
      */
+    auto ret = DragDropGlobalController::GetInstance().NotifyDragEndPendingDone(wrongRequestId);
+    EXPECT_EQ(ret, -1);
+    DragDropGlobalController::GetInstance().stopDragCallback_ = callback;
     DragDropGlobalController::GetInstance().dragResult_ = DragRet::DRAG_CANCEL;
     DragDropGlobalController::GetInstance().NotifyDragEndPendingDone(requestId);
     EXPECT_EQ(finalDragResult, DragRet::DRAG_CANCEL);
     EXPECT_EQ(DragDropGlobalController::GetInstance().stopDragCallback_, nullptr);
     EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+
+    DragDropGlobalController::GetInstance().isOnOnDropPhase_ = false;
+    DragDropGlobalController::GetInstance().NotifyDragEndPendingDone(requestId);
+    EXPECT_EQ(ret, -1);
+    DragDropGlobalController::GetInstance().NotifyDragEndPendingDone(wrongRequestId);
+    EXPECT_EQ(ret, -1);
 }
 
 /**

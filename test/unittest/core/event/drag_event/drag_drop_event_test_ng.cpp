@@ -17,6 +17,7 @@
 
 #define private public
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_handler.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #undef private
 #include "core/gestures/drag_event.h"
 
@@ -634,5 +635,64 @@ HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNGIssue021, TestSize.Level1)
             CheckDragDropInitiatingStatus(caseNum, handler->GetDragDropInitiatingStatus(), testCase.expectStatus));
         caseNum++;
     }
+}
+
+/**
+ * @tc.name: DragDropProxyTest001
+ * @tc.desc: Test onDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropProxyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    GestureEvent gestureEvent;
+
+    /**
+     * @tc.steps: step2. call onDragEnd
+     * @tc.expected: step2. drag extraInfo equals.
+     */
+    MockContainer::SetUp();
+    auto pipeline = MockPipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    manager->dragDropState_ = DragDropMgrState::DRAGGING;
+    auto dragDropProxy = dragDropManager->CreateFrameworkDragDropProxy();
+    dragDropProxy->id_ = manager->currentId_;
+    dragDropProxy->OnDragEnd(gestureEvent, false);
+    EXPECT_EQ(manager->dragDropState_, DragDropMgrState::IDLE);
+}
+
+/**
+ * @tc.name: DragDropProxyTest002
+ * @tc.desc: Test onDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropProxyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. call onDragStart
+     * @tc.expected: step2. drag extraInfo equals.
+     */
+    GestureEvent gestureEvent;
+    MockContainer::SetUp();
+    auto pipeline = MockPipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    auto dragDropProxy = dragDropManager->CreateFrameworkDragDropProxy();
+    dragDropProxy->id_ = manager->currentId_;
+    MockContainer::Current()->SetIsUIExtensionWindow(true);
+    dragDropProxy->OnDragStart(gestureEvent, "dragDropProxyTest", frameNode);
+    EXPECT_EQ(manager->extraInfo_, "dragDropProxyTest");
 }
 } // namespace OHOS::Ace::NG
