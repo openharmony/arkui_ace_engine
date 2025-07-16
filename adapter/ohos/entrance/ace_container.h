@@ -852,6 +852,16 @@ public:
         return subFrontend_;
     }
 
+    FrontendType GetFrontendType() const override
+    {
+        return type_;
+    }
+
+    bool IsArkTsFrontEnd() const override
+    {
+        return type_ == FrontendType::ARK_TS;
+    }
+
     FrontendType GetSubFrontendType() const
     {
         CHECK_NE_RETURN(type_ == FrontendType::STATIC_HYBRID_DYNAMIC ||
