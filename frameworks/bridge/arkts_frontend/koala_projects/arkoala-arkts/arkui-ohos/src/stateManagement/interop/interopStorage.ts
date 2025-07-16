@@ -15,6 +15,7 @@
 
 import { DecoratedVariableBase } from '../decoratorImpl/decoratorBase';
 import { LocalStorage } from '../storage/localStorage';
+import { StorageBase } from '../storage/storageBase';
 import { AbstractProperty, IStorageProperties } from '../storage/storageProperty';
 import { StorageProperty } from '../storage/storageBase';
 import { ExtendableComponent } from '../../component/extendableComponent';
@@ -23,11 +24,11 @@ import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageL
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
 /**
- * Interop AppStorage with ArkTS1.1
- * 1) Each AppStorage stores the value in each map by API call;
- * 2) ArkTS1.1 AppStorage will provide getValue, removeValue, clear for ArkTS1.2, in addition will call
+ * Interop Storage with ArkTS1.1
+ * 1) Each Storage stores the value in each map by API call;
+ * 2) ArkTS1.1 Storage will provide getValue, removeValue, clear for ArkTS1.2, in addition will call
  * key(add/remove/clear) function provided by ArkTS1.2 to speed up key search in ArkTS1.2;
- * 3) ArkTS1.2 AppStorage will provide getValue, removeValue, clear, getSize for ArkTS1.1, avoid to slow down
+ * 3) ArkTS1.2 Storage will provide getValue, removeValue, clear, getSize for ArkTS1.1, avoid to slow down
  * the set operation in ArkTS1.2, it will no key speed up for ArkTS1.1
  * 4) getValue function provided by ArkTS1.1 will return ESValue(ArkTS1.1 ObservedPropertyPU), ArkTS1.2 need to create
  * static StorageProperty and storage in interopStorage to speed up.
@@ -39,34 +40,46 @@ import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 class InteropStorageValue {
     value?: DecoratedVariableBase;
 }
-export class InteropAppStorage extends LocalStorage {
-    // the Lazy key/value info of AppStorage in ArkTS1.1
-    private interopStorage_ = new Map<string, InteropStorageValue>();
+export class InteropStorageBase extends StorageBase {
+    // the Lazy key/value info of Storage in ArkTS1.1
+    protected interopStorage_ = new Map<string, InteropStorageValue>();
 
-    private totalKeys_ = new Map<string, string>();
+    protected totalKeys_ = new Map<string, string>();
 
-    // get value from AppStorage in ArkTS1.1
-    private getDynamicValue_: (value: string) => ESValue = (value: string) => {
-        throw new Error('not implement');
-    };
-    private removeDynamicValue_: (value: string) => boolean = (value: string) => {
-        throw new Error('not implement');
-    };
-    private clearDynamicValue_: () => boolean = () => {
-        throw new Error('not implement');
-    };
+    private proxy?: ESValue;
 
-    public constructor(initializingProperties?: Record<string, IStorageProperties>) {
-        super(initializingProperties);
-        this.BindDynamicAppStorage();
+    public getProxy(): ESValue | undefined {
+        if (this.proxy === undefined) {
+            this.BindDynamicStorage();
+        }
+        return this.proxy;
     }
 
-    public BindDynamicAppStorage(): void {
-        // call ArkTS1.1 AppStorage to bind static AppStorage.
+    public setProxy(proxy: ESValue): void {
+        this.proxy = proxy;
+    }
+
+    // get value from Storage in ArkTS1.1
+    protected getDynamicValue_: (value: string) => ESValue = (value: string) => {
+        throw new Error('not implement');
+    };
+    protected removeDynamicValue_: (value: string) => boolean = (value: string) => {
+        throw new Error('not implement');
+    };
+    protected clearDynamicValue_: () => boolean = () => {
+        throw new Error('not implement');
+    };
+
+    public constructor() {
+        super();
+    }
+
+    public BindDynamicStorage(): void {
+        // call ArkTS1.1 Storage to bind static Storage.
         const global = ESValue.getGlobal();
-        const bindFunc = global.getProperty('bindStaticAppStorage');
+        const bindFunc = global.getProperty('bindStaticLocalStorage');
         if (bindFunc.isNull() || bindFunc.isUndefined()) {
-            StateMgmtConsole.log('fail to find bindStaticAppStorage');
+            StateMgmtConsole.log('fail to find bindStaticLocalStorage');
             return;
         }
         // these function will call by ArkTS1.1 to speed up dynamic key search for ArkTS1.2.
@@ -79,20 +92,20 @@ export class InteropAppStorage extends LocalStorage {
         const clearKeyFunc = (): void => {
             this.interopStorage_.clear();
             // need to clear ArkTS1.2 too
-            this.store_.clear();
+            super.clear();
         };
         // used by ArkTS1.1 to interop with static storage map.
         const getValue = (key: string): Any => {
             return this.getStoragePropertyForDynamic(key);
         };
         const removeValue = (key: string): void => {
-            this.store_.delete(key);
+            super.delete(key);
         };
         const getSize = (): number => {
-            return this.store_.size();
+            return super.size();
         };
         const getKeys = (): Set<String> => {
-            const keys: Set<String> = this.store_.keySet;
+            const keys: Set<String> = this.keySet;
             return keys;
         };
         // used by ArkTS1.2 to interop with dynamic storage map.
@@ -105,7 +118,7 @@ export class InteropAppStorage extends LocalStorage {
         const setClearValueFunc = (event: () => boolean): void => {
             this.clearDynamicValue_ = event;
         };
-        bindFunc.invoke(
+        let proxyStorage = bindFunc.invoke(
             ESValue.wrap(getValue),
             ESValue.wrap(removeValue),
             ESValue.wrap(getSize),
@@ -117,11 +130,12 @@ export class InteropAppStorage extends LocalStorage {
             ESValue.wrap(setRemoveValueFunc),
             ESValue.wrap(setClearValueFunc)
         );
+        this.setProxy(proxyStorage);
     }
 
     // return ArkTS1.1 ObservedPropertyPU object.
     public getStoragePropertyForDynamic(value: string): Any {
-        const storage = this.store_.__getStoragePropUnsafe<NullishType>(value);
+        const storage = super.__getStoragePropUnsafe<NullishType>(value);
         if (storage === undefined) {
             return undefined;
         }
@@ -155,7 +169,7 @@ export class InteropAppStorage extends LocalStorage {
     }
 
     public has(key: string): boolean {
-        const value = this.store_.__getStoragePropUnsafe<NullishType>(key);
+        const value = super.__getStoragePropUnsafe<NullishType>(key);
         if (value !== undefined) {
             return true;
         }
@@ -175,7 +189,7 @@ export class InteropAppStorage extends LocalStorage {
         this.interopStorage_.forEach((value: InteropStorageValue, key: string) => {
             this.totalKeys_.set(key, key);
         });
-        this.store_.keySet.forEach((value: string) => {
+        this.keySet.forEach((value: string) => {
             this.totalKeys_.set(value, value);
         });
         return this.totalKeys_.keys();
@@ -190,7 +204,7 @@ export class InteropAppStorage extends LocalStorage {
      * @since 20
      */
     public size(): number {
-        return this.store_.size() + this.interopStorage_.size;
+        return super.size() + this.interopStorage_.size;
     }
 
     /**
@@ -206,11 +220,11 @@ export class InteropAppStorage extends LocalStorage {
      * @since 20
      */
     public get<T>(key: string, ttype: Type): T | undefined {
-        let value = this.store_.get<T>(key, ttype);
+        let value = super.get<T>(key, ttype);
         if (value !== undefined) {
             return value as T;
         }
-        // search ArkTS1.1 AppStorage.
+        // search ArkTS1.1 Storage.
         let interopValue = this.interopStorage_.get(key);
         if (interopValue === undefined) {
             return undefined;
@@ -235,11 +249,11 @@ export class InteropAppStorage extends LocalStorage {
      * @since 20
      */
     public ref<T>(key: string, ttype: Type): AbstractProperty<T> | undefined {
-        let value = this.store_.ref<T>(key, ttype);
+        let value = super.ref<T>(key, ttype);
         if (value !== undefined) {
             return value;
         }
-        // search ArkTS1.1 AppStorage.
+        // search ArkTS1.1 Storage.
         let interopValue = this.interopStorage_.get(key);
         if (interopValue === undefined) {
             return undefined;
@@ -265,7 +279,7 @@ export class InteropAppStorage extends LocalStorage {
      * @since 20
      */
     public set<T>(key: string, newValue: T): boolean {
-        let result = this.store_.update<T>(key, newValue);
+        let result = super.update<T>(key, newValue);
         if (result) {
             return result;
         }
@@ -303,13 +317,13 @@ export class InteropAppStorage extends LocalStorage {
      * @since 20
      */
     public setOrCreate<T>(key: string, newValue: T, ttype: Type): boolean {
-        const expectedTtypeOpt = this.store_.getType(key);
+        const expectedTtypeOpt = super.getType(key);
         if (expectedTtypeOpt === undefined) {
             // Check ArkTS1.1
             let interopValue = this.interopStorage_.get(key);
             if (interopValue === undefined) {
                 // create new entry, remember permissible ttype
-                return this.store_.createAndSet(key, ttype, newValue);
+                return super.createAndSet(key, ttype, newValue);
             }
             if (!interopValue.value) {
                 // initialize interop value by ArkTS1.1
@@ -346,17 +360,17 @@ export class InteropAppStorage extends LocalStorage {
      * @since 20
      */
     public setAndRef<T>(key: string, defaultValue: T, ttype: Type): AbstractProperty<T> | undefined {
-        const ttypeOpt = this.store_.getType(key);
+        const ttypeOpt = super.getType(key);
         if (ttypeOpt === undefined) {
-            // search ArkTS1.1 AppStorage.
+            // search ArkTS1.1 Storage.
             let interopValue = this.interopStorage_.get(key);
             if (interopValue === undefined) {
                 // create new entry, remember permissible ttype, set with defaultValue
-                if (!this.store_.createAndSet<T>(key, ttype, defaultValue)) {
+                if (!super.createAndSet<T>(key, ttype, defaultValue)) {
                     // creation failed
                     return undefined;
                 }
-                const link = this.store_.ref<T>(key, ttype);
+                const link = super.ref<T>(key, ttype);
                 return link;
             }
             if (!interopValue.value) {
@@ -368,7 +382,7 @@ export class InteropAppStorage extends LocalStorage {
             state.registerWatch<T>(reference);
             return reference;
         }
-        const link = this.store_.ref<T>(key, ttype);
+        const link = super.ref<T>(key, ttype);
         // TODO finalization reg link
         return link;
     }
@@ -390,7 +404,7 @@ export class InteropAppStorage extends LocalStorage {
      * @since 20
      */
     delete(key: string): boolean {
-        let result = this.store_.delete(key);
+        let result = super.delete(key);
         if (result) {
             return result;
         }
@@ -416,7 +430,7 @@ export class InteropAppStorage extends LocalStorage {
      * @since 20
      */
     clear(): boolean {
-        let result1 = this.store_.clear();
+        let result1 = super.clear();
         let result2 = this.clearDynamicValue_();
         return result1 && result2;
     }
@@ -442,7 +456,7 @@ export class InteropAppStorage extends LocalStorage {
         let interopValue = this.interopStorage_.get(key);
         if (interopValue === undefined) {
             // Use ArkTS1.2
-            return this.store_.makeStorageLink<T>(owner, key, varName, defaultValue, ttype, watchFunc);
+            return super.makeStorageLink<T>(owner, key, varName, defaultValue, ttype, watchFunc);
         }
         // Use ArkTS1.1
         if (!interopValue.value) {
@@ -463,7 +477,7 @@ export class InteropAppStorage extends LocalStorage {
      * @returns
      */
     public __getStoragePropUnsafe<T>(key: string): StorageProperty<T> | undefined {
-        let value = this.store_.__getStoragePropUnsafe<T>(key);
+        let value = super.__getStoragePropUnsafe<T>(key);
         if (value !== undefined) {
             return value;
         }
@@ -479,3 +493,76 @@ export class InteropAppStorage extends LocalStorage {
         return interopValue.value as StorageProperty<T>;
     }
 }
+
+export class InteropAppStorageBase extends InteropStorageBase {
+    public constructor() {
+        super();
+        this.BindDynamicStorage();
+    }
+
+    public BindDynamicStorage(): void {
+        // call ArkTS1.1 Storage to bind static Storage.
+        const global = ESValue.getGlobal();
+        const bindFunc = global.getProperty('bindStaticAppStorage');
+        if (bindFunc.isNull() || bindFunc.isUndefined()) {
+            StateMgmtConsole.log('fail to find bindStaticAppStorage');
+            return;
+        }
+        // these function will call by ArkTS1.1 to speed up dynamic key search for ArkTS1.2.
+        const addKeyFunc = (key: string) => {
+            this.interopStorage_.set(key, new InteropStorageValue());
+        };
+        const removeKeyFunc = (key: string) => {
+            this.interopStorage_.delete(key);
+        };
+        const clearKeyFunc = () => {
+            this.interopStorage_.clear();
+            // need to clear ArkTS1.2 too
+            super.clear();
+        };
+        // used by ArkTS1.1 to interop with static storage map.
+        const getValue = (key: string) => {
+            return this.getStoragePropertyForDynamic(key);
+        };
+        const removeValue = (key: string) => {
+            super.delete(key);
+        };
+        const getSize = () => {
+            return super.size();
+        };
+        const getKeys = () => {
+            const keys: Set<String> = this.keySet;
+            return keys;
+        };
+        // used by ArkTS1.2 to interop with dynamic storage map.
+        const setGetValueFunc = (event: (value: string) => ESValue) => {
+            this.getDynamicValue_ = event;
+        };
+        const setRemoveValueFunc = (event: (value: string) => boolean) => {
+            this.removeDynamicValue_ = event;
+        };
+        const setClearValueFunc = (event: () => boolean) => {
+            this.clearDynamicValue_ = event;
+        };
+        bindFunc.invoke(
+            ESValue.wrap(getValue),
+            ESValue.wrap(removeValue),
+            ESValue.wrap(getSize),
+            ESValue.wrap(getKeys),
+            ESValue.wrap(addKeyFunc),
+            ESValue.wrap(removeKeyFunc),
+            ESValue.wrap(clearKeyFunc),
+            ESValue.wrap(setGetValueFunc),
+            ESValue.wrap(setRemoveValueFunc),
+            ESValue.wrap(setClearValueFunc)
+        );
+    }
+}
+
+export class InteropAppStorage extends LocalStorage {
+    constructor(){
+        super();
+        this.store_ = new InteropAppStorageBase();
+    }
+}
+
