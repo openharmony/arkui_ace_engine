@@ -15,9 +15,10 @@
 
 import { CommonAttribute, LayoutPolicy } from 'arkui/component/common'
 import { Length } from "arkui/component/units"
-import { ArkCommonMethodPeer, ClickEvent, CommonMethod } from './component/common'
+import { ArkCommonMethodPeer, ClickEvent, CommonMethod, CustomProperty, ArkCommonMethodComponent } from './component/common';
 import { PeerNode } from './PeerNode'
 import { ResourceColor, SizeOptions } from './component/units'
+import {  hookCustomPropertyImpl } from "./handwritten/CommonHandWritten"
 
 export enum AttributeUpdateFlag {
     INITIAL = 0,
@@ -40,6 +41,9 @@ export class CommonMethodModifier implements CommonMethod {
   
    _zIndex_flag: AttributeUpdateFlag = AttributeUpdateFlag.INITIAL
    _zIndex0_value?: number | undefined
+  
+   _customProperty_flag: AttributeUpdateFlag = AttributeUpdateFlag.INITIAL
+   _customPropertyMap?: Map<string, CustomProperty>
   
    public width(value: Length | LayoutPolicy | undefined): this {
      if (this._width_flag === AttributeUpdateFlag.INITIAL || this._width0_value !== value || !Type.of(value).isPrimitive()) {
@@ -87,6 +91,14 @@ export class CommonMethodModifier implements CommonMethod {
      }
      return this
    }
+  public customProperty(name: string, value: CustomProperty): this {
+    if (this._customPropertyMap === undefined) {
+      this._customPropertyMap = new Map<string, CustomProperty>();
+    }
+    this._customPropertyMap!.set(name, value);
+    this._customProperty_flag = AttributeUpdateFlag.UPDATE;
+    return this;
+  }
    applyModifierPatch(node: PeerNode): void {
      const peerNode: ArkCommonMethodPeer = node as ArkCommonMethodPeer
      if (this._width_flag != AttributeUpdateFlag.INITIAL) {
@@ -175,6 +187,29 @@ export class CommonMethodModifier implements CommonMethod {
          }
        }
      }
+     if (this._customProperty_flag !== AttributeUpdateFlag.INITIAL) {
+       switch (this._customProperty_flag) {
+         case AttributeUpdateFlag.UPDATE: {
+           const arkCommonMethodComponent: ArkCommonMethodComponent = new ArkCommonMethodComponent();
+           arkCommonMethodComponent.setPeer(peerNode);
+           if (this._customPropertyMap === undefined) {
+             break;
+           }
+           this._customPropertyMap!.forEach((value, key) => {
+             hookCustomPropertyImpl(arkCommonMethodComponent, key as (string), value as (CustomProperty));
+           });
+           this._customProperty_flag = AttributeUpdateFlag.RESET;
+           break;
+         }
+         case AttributeUpdateFlag.SKIP: {
+           this._customProperty_flag = AttributeUpdateFlag.RESET;
+           break;
+         }
+         default: {
+           this._customProperty_flag = AttributeUpdateFlag.INITIAL;
+         }
+       }
+     }
    }
    mergeModifier(value: CommonMethodModifier): void {
      if (value._width_flag != AttributeUpdateFlag.INITIAL) {
@@ -237,6 +272,22 @@ export class CommonMethodModifier implements CommonMethod {
          }
          default: {
            this.zIndex(undefined)
+         }
+       }
+     }
+     if (value._customProperty_flag !== AttributeUpdateFlag.INITIAL) {
+       switch (value._customProperty_flag) {
+         case AttributeUpdateFlag.UPDATE:
+         case AttributeUpdateFlag.SKIP: {
+           if (this._customPropertyMap === undefined) {
+             break;
+           }
+           this._customPropertyMap!.forEach((value, key) => {
+             this.customProperty(key as (string), value);
+           });
+           break;
+         }
+         default: {
          }
        }
      }

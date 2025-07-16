@@ -21,8 +21,49 @@
 
 #include "base/utils/utils.h"
 #include "pixel_map_taihe_ani.h"
+#include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
+ani_status GetAniEnv(ani_vm* vm, ani_env** env)
+{
+    CHECK_NULL_RETURN(vm, ANI_ERROR);
+    ani_options aniOpt {0, nullptr};
+    auto status = vm->AttachCurrentThread(&aniOpt, ANI_VERSION_1, env);
+    if (status != ANI_OK) {
+        vm->GetEnv(ANI_VERSION_1, env);
+    }
+    return status;
+}
+
+class CommonModuleCallbackAni {
+public:
+    CommonModuleCallbackAni(ani_env* env, ani_ref func)
+    {
+        CHECK_NULL_VOID(env);
+        env->GetVM(&vm_);
+        env->GlobalReference_Create(func, &func_);
+    }
+    ~CommonModuleCallbackAni()
+    {
+        CHECK_NULL_VOID(vm_);
+        CHECK_NULL_VOID(func_);
+        ani_env* env;
+        auto attachCurrentThreadStatus = GetAniEnv(vm_, &env);
+        CHECK_NULL_VOID(env);
+        env->GlobalReference_Delete(func_);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm_->DetachCurrentThread();
+        }
+    }
+    void Call(ani_env* env, ani_size argc, ani_ref* argv, ani_ref* result)
+    {
+        CHECK_NULL_VOID(env);
+        env->FunctionalObject_Call(static_cast<ani_fn_object>(func_), argc, argv, result);
+    }
+private:
+    ani_vm* vm_ = nullptr;
+    ani_ref func_ = nullptr;
+};
 
 ani_object GetHostContext([[maybe_unused]] ani_env* env)
 {
@@ -282,5 +323,94 @@ void SetParallelScoped(ani_env* env, ani_object obj, ani_boolean parallel)
         return;
     }
     modifier->getCommonAniModifier()->setParallelScoped(parallel);
+}
+
+void ConvertRemoveCallbackFun(
+    ani_vm* vm, std::function<void()>& callback, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
+{
+    callback = [vm, callbackAni]() {
+        CHECK_NULL_VOID(vm);
+        CHECK_NULL_VOID(callbackAni);
+        ani_env* env;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
+
+        std::vector<ani_ref> args = {};
+        ani_ref ret = nullptr;
+        callbackAni->Call(env, args.size(), args.data(), &ret);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
+    };
+}
+
+void ConvertGetCallbackFun(ani_vm* vm, std::function<std::string(const std::string&)>& callback,
+    const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
+{
+    callback = [vm, callbackAni](const std::string& key) -> std::string {
+        std::string value;
+        CHECK_NULL_RETURN(vm, value);
+        CHECK_NULL_RETURN(callbackAni, value);
+        ani_env* env;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_RETURN(env, value);
+        auto keyAni = AniUtils::StdStringToANIString(env, key);
+        std::vector<ani_ref> args = { *keyAni };
+        ani_ref ret = nullptr;
+        callbackAni->Call(env, args.size(), args.data(), &ret);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+            ani_string resultRef = static_cast<ani_string>(ret);
+            value = AniUtils::ANIStringToStdString(env, resultRef);
+            return value;
+        } else {
+            return value;
+        }
+    };
+}
+
+void SetCustomPropertyCallBack(
+    ani_env* env, ani_object aniClass, ani_long node, ani_fn_object removeCallback, ani_fn_object getCallback)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    ArkUINodeHandle frameNode = reinterpret_cast<ArkUINodeHandle>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    ani_ref removeCallbackAniRef = static_cast<ani_ref>(removeCallback);
+    ani_ref getCallbackAniRef = static_cast<ani_ref>(getCallback);
+    auto removeCallbackAni = std::make_shared<CommonModuleCallbackAni>(env, removeCallbackAniRef);
+    auto getCallbackAni = std::make_shared<CommonModuleCallbackAni>(env, getCallbackAniRef);
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    std::function<void()> removeCallbackFun = nullptr;
+    std::function<std::string(const std::string&)> getCallbackFun = nullptr;
+    ConvertRemoveCallbackFun(vm, removeCallbackFun, removeCallbackAni);
+    ConvertGetCallbackFun(vm, getCallbackFun, getCallbackAni);
+
+    modifier->getCommonAniModifier()->setCustomPropertyCallBack(
+        env, frameNode, std::move(removeCallbackFun), std::move(getCallbackFun));
+}
+
+ani_string GetCustomProperty(
+    ani_env* env, ani_object aniClass, ani_long node, ani_string aniKey)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    ArkUINodeHandle frameNode = reinterpret_cast<ArkUINodeHandle>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto strKey = AniUtils::ANIStringToStdString(env, aniKey);
+    auto ret = modifier->getCommonAniModifier()->getCustomProperty(env, frameNode, strKey);
+    if (!ret.empty()) {
+        auto retValue = AniUtils::StdStringToANIString(env, ret);
+        if (retValue) {
+            return *retValue;
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::Ani
