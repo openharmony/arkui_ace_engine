@@ -85,8 +85,6 @@ var {_callCallback, _registerCallback, _releaseCallback, _createLocalCallbackSco
     }
 })();
 
-// exports = {_callCallback, _registerCallback, _releaseCallback, _createLocalCallbackScope, _releaseLocalCallbackScope};
-
 var wasmSetup = new Promise(function(resolve, reject) {
     Module['onRuntimeInitialized'] = _ => {
         resolve(Module);

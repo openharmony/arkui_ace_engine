@@ -9775,12 +9775,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
                 this.getPeer()?.onClick0Attribute(value_casted)
                 return this
             }
-            // if (((RuntimeType.FUNCTION == event_type) || (RuntimeType.UNDEFINED == event_type)) && ((RuntimeType.NUMBER == distanceThreshold_type) || (RuntimeType.UNDEFINED == distanceThreshold_type))) {
-            //     const event_casted = event as (((event: ClickEvent) => void) | undefined)
-            //     const distanceThreshold_casted = distanceThreshold as (number | undefined)
-            //     this.getPeer()?.onClick1Attribute(event_casted, distanceThreshold_casted)
-            //     return this
-            // }
             throw new Error("Can not select appropriate overload")
         }
         return this
@@ -11558,21 +11552,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         return this;
     }
     public applyModifierByState<T>(isAttributeUpdater: boolean, modifier: AttributeModifier<T>): void {
-        // let currentState = rememberMutableState<int32>(0);
-        // let peerNode = this.getPeer()
-        // let isInit =  rememberMutableState<boolean>(true);
-        // remember(() => {
-        //     StateStylesOps.onStateStyleChange(peerNode.getPeerPtr(), (state: int32) => {
-        //         currentState.value = state;
-        //         isInit.value = false;
-        //     })
-        // })
-        // if (isAttributeUpdater) {
-        //     applyUIAttributesUpdate(modifier!, peerNode, currentState.value, isInit.value);
-        // } else {
-        //     applyUIAttributes(modifier!, peerNode, currentState.value);
-        // }
-        // this.getAttributeSet().applyModifierPatch(peerNode);
     }
 
     public applyAttributesFinish(): void {
