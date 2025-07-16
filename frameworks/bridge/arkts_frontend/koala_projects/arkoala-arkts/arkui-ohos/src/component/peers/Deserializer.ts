@@ -576,8 +576,8 @@ export class Deserializer extends DeserializerBase {
     }
     readOnFirstContentfulPaintEvent(): OnFirstContentfulPaintEvent {
         let valueDeserializer : Deserializer = this
-        const navigationStartTick_result : int64 = (valueDeserializer.readInt64() as int64)
-        const firstContentfulPaintMs_result : int64 = (valueDeserializer.readInt64() as int64)
+        const navigationStartTick_result : int64 = (valueDeserializer.readInt64().toLong())
+        const firstContentfulPaintMs_result : int64 = (valueDeserializer.readInt64().toLong())
         let value : OnFirstContentfulPaintEvent = ({navigationStartTick: navigationStartTick_result, firstContentfulPaintMs: firstContentfulPaintMs_result} as OnFirstContentfulPaintEvent)
         return value
     }
@@ -8123,14 +8123,14 @@ export class Deserializer extends DeserializerBase {
         let navigationStartTime_buf : int64 | undefined
         if ((RuntimeType.UNDEFINED) != (navigationStartTime_buf_runtimeType))
         {
-            navigationStartTime_buf = (valueDeserializer.readInt64() as int64)
+            navigationStartTime_buf = (valueDeserializer.readInt64().toLong())
         }
         const navigationStartTime_result : int64 | undefined = navigationStartTime_buf
         const firstMeaningfulPaintTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let firstMeaningfulPaintTime_buf : int64 | undefined
         if ((RuntimeType.UNDEFINED) != (firstMeaningfulPaintTime_buf_runtimeType))
         {
-            firstMeaningfulPaintTime_buf = (valueDeserializer.readInt64() as int64)
+            firstMeaningfulPaintTime_buf = (valueDeserializer.readInt64().toLong())
         }
         const firstMeaningfulPaintTime_result : int64 | undefined = firstMeaningfulPaintTime_buf
         let value : FirstMeaningfulPaint = ({navigationStartTime: navigationStartTime_result, firstMeaningfulPaintTime: firstMeaningfulPaintTime_result} as FirstMeaningfulPaint)
@@ -8829,42 +8829,42 @@ export class Deserializer extends DeserializerBase {
         let navigationStartTime_buf : int64 | undefined
         if ((RuntimeType.UNDEFINED) != (navigationStartTime_buf_runtimeType))
         {
-            navigationStartTime_buf = (valueDeserializer.readInt64() as int64)
+            navigationStartTime_buf = (valueDeserializer.readInt64().toLong())
         }
         const navigationStartTime_result : int64 | undefined = navigationStartTime_buf
         const largestImagePaintTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let largestImagePaintTime_buf : int64 | undefined
         if ((RuntimeType.UNDEFINED) != (largestImagePaintTime_buf_runtimeType))
         {
-            largestImagePaintTime_buf = (valueDeserializer.readInt64() as int64)
+            largestImagePaintTime_buf = (valueDeserializer.readInt64().toLong())
         }
         const largestImagePaintTime_result : int64 | undefined = largestImagePaintTime_buf
         const largestTextPaintTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let largestTextPaintTime_buf : int64 | undefined
         if ((RuntimeType.UNDEFINED) != (largestTextPaintTime_buf_runtimeType))
         {
-            largestTextPaintTime_buf = (valueDeserializer.readInt64() as int64)
+            largestTextPaintTime_buf = (valueDeserializer.readInt64().toLong())
         }
         const largestTextPaintTime_result : int64 | undefined = largestTextPaintTime_buf
         const imageBPP_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let imageBPP_buf : double | undefined
         if ((RuntimeType.UNDEFINED) != (imageBPP_buf_runtimeType))
         {
-            imageBPP_buf = (valueDeserializer.readFloat32() as double)
+            imageBPP_buf = (valueDeserializer.readFloat32().toDouble())
         }
         const imageBPP_result : double | undefined = imageBPP_buf
         const largestImageLoadStartTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let largestImageLoadStartTime_buf : int64 | undefined
         if ((RuntimeType.UNDEFINED) != (largestImageLoadStartTime_buf_runtimeType))
         {
-            largestImageLoadStartTime_buf = (valueDeserializer.readInt64() as int64)
+            largestImageLoadStartTime_buf = (valueDeserializer.readInt64().toLong())
         }
         const largestImageLoadStartTime_result : int64 | undefined = largestImageLoadStartTime_buf
         const largestImageLoadEndTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let largestImageLoadEndTime_buf : int64 | undefined
         if ((RuntimeType.UNDEFINED) != (largestImageLoadEndTime_buf_runtimeType))
         {
-            largestImageLoadEndTime_buf = (valueDeserializer.readInt64() as int64)
+            largestImageLoadEndTime_buf = (valueDeserializer.readInt64().toLong())
         }
         const largestImageLoadEndTime_result : int64 | undefined = largestImageLoadEndTime_buf
         let value : LargestContentfulPaint = ({navigationStartTime: navigationStartTime_result, largestImagePaintTime: largestImagePaintTime_result, largestTextPaintTime: largestTextPaintTime_result, imageBPP: imageBPP_result, largestImageLoadStartTime: largestImageLoadStartTime_result, largestImageLoadEndTime: largestImageLoadEndTime_result} as LargestContentfulPaint)
@@ -18129,14 +18129,14 @@ export class Deserializer extends DeserializerBase {
         let width_buf : int32 | undefined
         if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
         {
-            width_buf = (valueDeserializer.readInt32() as int32)
+            width_buf = (valueDeserializer.readInt32().toInt())
         }
         const width_result : int32 | undefined = width_buf
         const height_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let height_buf : int32 | undefined
         if ((RuntimeType.UNDEFINED) != (height_buf_runtimeType))
         {
-            height_buf = (valueDeserializer.readInt32() as int32)
+            height_buf = (valueDeserializer.readInt32().toInt())
         }
         const height_result : int32 | undefined = height_buf
         const url_buf_runtimeType  = (valueDeserializer.readInt8() as int32)

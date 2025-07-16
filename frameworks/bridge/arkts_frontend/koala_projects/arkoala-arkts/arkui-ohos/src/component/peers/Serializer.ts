@@ -3879,7 +3879,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_imageBPP_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_imageBPP_type)) {
             const value_imageBPP_value  = value_imageBPP!
-            valueSerializer.writeFloat32(value_imageBPP_value as float32)
+            valueSerializer.writeFloat32(value_imageBPP_value.toFloat())
         }
         const value_largestImageLoadStartTime  = value.largestImageLoadStartTime
         let value_largestImageLoadStartTime_type : int32 = RuntimeType.UNDEFINED
