@@ -645,6 +645,8 @@ namespace Converter {
     template<> uint32_t Convert(const Ark_LayoutSafeAreaType& src);
     template<> BindSheetDismissReason Convert(const Ark_DismissReason& src);
     template<> OverlayOptions Convert(const Ark_OverlayOptions& src);
+    template<> RotateOptions Convert(const Ark_RotateOptions& src);
+    template<> ScaleOptions Convert(const Ark_ScaleOptions& src);
 
     // SORTED_SECTION: No multiline declarations, please!
     template<> void AssignCast(std::optional<AIImageQuality>& dst, const Ark_ResolutionQuality& src);
@@ -851,6 +853,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<double>& dst, const Opt_LevelOrder& src);
     template<> void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src);
     template<> void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src);
+    template<> void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src);
 
     template<typename From>
     std::optional<decltype(From().value)> GetOpt(const From& src)
