@@ -6231,7 +6231,7 @@ ARKWEB_CREATE_JS_OBJECT(WebFileSelectorParam, JSFileSelectorParam, SetParam, Fil
 ARKWEB_CREATE_JS_OBJECT(ContextMenuResult, JSContextMenuResult, SetResult, ContextMenuEvent(nullptr, value))
 ARKWEB_CREATE_JS_OBJECT(WebContextMenuParam, JSContextMenuParam, SetParam, ContextMenuEvent(value, nullptr))
 
-ARKWEB_CREATE_JS_OBJECT(WebConsole, JSWebConsoleLog, SetMessage, value)
+ARKWEB_CREATE_JS_OBJECT(WebConsoleLog, JSWebConsoleLog, SetMessage, value)
 ARKWEB_CREATE_JS_OBJECT(AuthResult, JSWebHttpAuth, SetResult, value)
 ARKWEB_CREATE_JS_OBJECT(SslErrorResult, JSWebSslError, SetResult, value)
 ARKWEB_CREATE_JS_OBJECT(SslSelectCertResult, JSWebSslSelectCert, SetResult, value)
