@@ -34,6 +34,7 @@ int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
 const std::string ADDRESS = "天安门";
 const std::u16string ADDRESS_U16 = u"天安门";
+const std::string SPAN_PHONE = "12345678900";
 } // namespace
 
 class RichEditorAITestOneNg : public RichEditorCommonTestNg {
@@ -572,5 +573,42 @@ HWTEST_F(RichEditorAITestOneNg, UpdateAIStyle, TestSize.Level1)
     richEditorPattern->SetTextDetectConfig(textDetectConfig);
 
     EXPECT_EQ(spanItem->aiSpanResultCount, 0);
+}
+
+/**
+ * @tc.name: CreateAIEntityMenuTest
+ * @tc.desc: Test CreateAIEntityMenu set preview menu nodes correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, CreateAIEntityMenuTest, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step1. set invalid value
+     */
+    auto menuNode = pattern->CreateAIEntityMenu();
+    EXPECT_EQ(menuNode, nullptr);
+
+    pattern->textSelector_.aiStart = 0;
+    pattern->textSelector_.aiEnd = 5;
+    menuNode = pattern->CreateAIEntityMenu();
+    EXPECT_EQ(menuNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set aiSpanMap
+     */
+    std::map<int32_t, AISpan> aiSpanMap;
+    AISpan aiSpan1;
+    aiSpan1.start = 0;
+    aiSpan1.end = 5;
+    aiSpan1.content = SPAN_PHONE;
+    aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
+    aiSpanMap[0] = aiSpan1;
+    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+    menuNode = pattern->CreateAIEntityMenu();
+    EXPECT_EQ(menuNode, 0);
 }
 }
