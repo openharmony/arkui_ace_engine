@@ -406,9 +406,9 @@ TEST_F(FreeScrollTest, ScrollTo001)
     PanEnd({}, { -VELOCITY_X, -VELOCITY_Y });
     EXPECT_EQ(pattern_->freeScroll_->state_, State::FLING);
 
-    pattern_->freeScroll_->ScrollTo(
-        OffsetF(-DELTA_X, -DELTA_Y), {});
-    EXPECT_EQ(pattern_->freeScroll_->state_, State::IDLE); // destination reached immediately, previous animation is stopped
+    pattern_->freeScroll_->ScrollTo(OffsetF(-DELTA_X, -DELTA_Y), {});
+    // destination reached immediately, previous animation is stopped
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::IDLE);
 }
 
 /**
@@ -1133,7 +1133,7 @@ TEST_F(FreeScrollTest, ScrollBar007)
     EXPECT_EQ(bar.GetOutBoundary(), 0);
 
     MockAnimationManager::GetInstance().SetTicks(2);
-    PanEnd({}, {VELOCITY_X, VELOCITY_Y});
+    PanEnd({}, { VELOCITY_X, VELOCITY_Y });
     EXPECT_EQ(pattern_->freeScroll_->state_, State::FLING);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
