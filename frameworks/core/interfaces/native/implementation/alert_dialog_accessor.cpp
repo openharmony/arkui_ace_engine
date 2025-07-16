@@ -22,6 +22,10 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
+namespace {
+constexpr int32_t PRIMARY_BUTTON_COUNT_MAX = 1;
+};
+
 namespace OHOS::Ace::NG {
 struct DialogPropsForUpdate {
     Opt_DialogAlignment alignment;
@@ -112,6 +116,10 @@ ButtonInfo Convert(const Ark_AlertDialogButtonOptions& src)
         auto gestureEvent = [arkCallback = CallbackHelper(*arkCallbackOpt)](
                                 const GestureEvent& info) -> void { arkCallback.Invoke(); };
         info.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(gestureEvent));
+    }
+    auto primary = Converter::OptConvert<bool>(src.primary);
+    if (primary) {
+        info.isPrimary = primary.value();
     }
     return info;
 }
@@ -459,13 +467,24 @@ void ShowWithButtons(const Ark_AlertDialogParamWithButtons params)
 }
 void UpdateOptionsButtons(DialogProperties& dialogProps, const Ark_AlertDialogParamWithOptions params)
 {
-    dialogProps.buttons.clear();
+    std::vector<ButtonInfo> buttonArray;
     auto buttons = Converter::Convert<std::vector<ButtonInfo>>(params.buttons);
     for (const auto& button : buttons) {
         if (button.IsValid()) {
-            dialogProps.buttons.emplace_back(button);
+            buttonArray.emplace_back(button);
         }
     }
+    std::function<bool(ButtonInfo)> isPrimary = [](ButtonInfo button) {
+        return button.isPrimary;
+    };
+    int32_t primaryButtonCount = std::count_if(buttonArray.begin(), buttonArray.end(), isPrimary);
+    if (primaryButtonCount > PRIMARY_BUTTON_COUNT_MAX) {
+        for (auto& button : buttonArray) {
+            button.isPrimary = false;
+        }
+    }
+    dialogProps.buttons = buttonArray;
+
     auto buttonDirection = Converter::OptConvert<DialogButtonDirection>(params.buttonDirection);
     if (buttonDirection) {
         dialogProps.buttonDirection = buttonDirection.value();
