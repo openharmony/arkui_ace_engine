@@ -167,7 +167,7 @@ public:
         return companionNode->GetVMContext();
     }
 
-    const CallbackType GetCallback()
+    const CallbackType& GetCallback()
     {
         return callback_;
     }
