@@ -6556,11 +6556,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _WebKeyboardController_insertText(ptr: KPointer, text: KStringPtr): void
     @ani.unsafe.Direct
-    native static _WebKeyboardController_deleteForward(ptr: KPointer, length: number): void
+    native static _WebKeyboardController_deleteForward(ptr: KPointer, length: int32): void
     @ani.unsafe.Direct
-    native static _WebKeyboardController_deleteBackward(ptr: KPointer, length: number): void
+    native static _WebKeyboardController_deleteBackward(ptr: KPointer, length: int32): void
     @ani.unsafe.Direct
-    native static _WebKeyboardController_sendFunctionKey(ptr: KPointer, key: number): void
+    native static _WebKeyboardController_sendFunctionKey(ptr: KPointer, key: int32): void
     @ani.unsafe.Direct
     native static _WebKeyboardController_close(ptr: KPointer): void
     @ani.unsafe.Direct

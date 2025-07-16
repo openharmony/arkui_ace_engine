@@ -10653,7 +10653,7 @@ export class Deserializer extends DeserializerBase {
     readRenderProcessNotRespondingData(): RenderProcessNotRespondingData {
         let valueDeserializer : Deserializer = this
         const jsStack_result : string = (valueDeserializer.readString() as string)
-        const pid_result : number = (valueDeserializer.readNumber() as number)
+        const pid_result : int32 = (valueDeserializer.readInt32().toInt())
         const reason_result : RenderProcessNotRespondingReason = TypeChecker.RenderProcessNotRespondingReason_FromNumeric(valueDeserializer.readInt32())
         let value : RenderProcessNotRespondingData = ({jsStack: jsStack_result, pid: pid_result, reason: reason_result} as RenderProcessNotRespondingData)
         return value
@@ -12830,12 +12830,12 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const useSystemKeyboard_result : boolean = valueDeserializer.readBoolean()
         const enterKeyType_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let enterKeyType_buf : number | undefined
+        let enterKeyType_buf : int32 | undefined
         if ((RuntimeType.UNDEFINED) != (enterKeyType_buf_runtimeType))
         {
-            enterKeyType_buf = (valueDeserializer.readNumber() as number)
+            enterKeyType_buf = (valueDeserializer.readInt32().toInt())
         }
-        const enterKeyType_result : number | undefined = enterKeyType_buf
+        const enterKeyType_result : int32 | undefined = enterKeyType_buf
         const customKeyboard_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let customKeyboard_buf : CustomBuilder | undefined
         if ((RuntimeType.UNDEFINED) != (customKeyboard_buf_runtimeType))
