@@ -68,6 +68,8 @@ constexpr float COLUMN_HEIGHT = 200.0f;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float ZERO = 0.0f;
+constexpr float MIN_FONT_SCALE = 0.5f;
+constexpr float MAX_FONT_SCALE = 2.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr int32_t TEXTFIELD_INDEX = 0;
 constexpr int32_t IMAGE_INDEX = 1;
@@ -97,6 +99,8 @@ const std::u16string FILTER_NUM_TEXT_U16 = u"0123456789";
 const Dimension DEFAULT_INDENT_SIZE = Dimension(5, DimensionUnit::VP);
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
 const Dimension TEXT_INDENT = Dimension(5, DimensionUnit::PX);
+const Dimension SEARCH_BUTTON_FONT_SIZE = Dimension(20, DimensionUnit::VP);
+const Dimension CARET_WIDTH = Dimension(2, DimensionUnit::VP);
 
 class SearchBases : public testing::Test {
 public:
