@@ -7566,4 +7566,72 @@ HWTEST_F(NativeNodeTest, NativeNodeScrollZoomTest002, TestSize.Level1)
     nodeAPI->unregisterNodeEvent(scroll, NODE_SCROLL_EVENT_ON_ZOOM_STOP);
     nodeAPI->disposeNode(scroll);
 }
+
+/**
+ * @tc.name: NativeNodeScrollOnWillStopDraggingTest001
+ * @tc.desc: Test Scroll onWillStopDragging event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeScrollOnWillStopDraggingTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_SCROLL);
+
+    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING);
+    nodeAPI->disposeNode(scroll);
+}
+
+/**
+ * @tc.name: NativeNodeScrollOnWillStopDraggingTest002
+ * @tc.desc: Test Grid onWillStopDragging event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeScrollOnWillStopDraggingTest002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto grid = nodeAPI->createNode(ARKUI_NODE_GRID);
+
+    auto ret = nodeAPI->registerNodeEvent(grid, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(grid, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING);
+    nodeAPI->disposeNode(grid);
+}
+
+/**
+ * @tc.name: NativeNodeScrollOnWillStopDraggingTest003
+ * @tc.desc: Test List onWillStopDragging event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeScrollOnWillStopDraggingTest003, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto list = nodeAPI->createNode(ARKUI_NODE_LIST);
+
+    auto ret = nodeAPI->registerNodeEvent(list, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(list, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING);
+    nodeAPI->disposeNode(list);
+}
+
+/**
+ * @tc.name: NativeNodeScrollOnWillStopDraggingTest004
+ * @tc.desc: Test Waterflow onWillStopDragging event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeScrollOnWillStopDraggingTest004, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_WATER_FLOW);
+
+    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING);
+    nodeAPI->disposeNode(scroll);
+}
 } // namespace OHOS::Ace
