@@ -183,4 +183,11 @@ void RichEditorModelStatic::BindSelectionMenu(FrameNode* frameNode, TextSpanType
         pattern->BindSelectionMenu(type, editorType, buildFunc, menuParam);
     }
 }
+void RichEditorModelStatic::SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaxLength(value);
+}
 } // namespace OHOS::Ace::NG
