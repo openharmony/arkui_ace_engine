@@ -1130,7 +1130,7 @@ public:
     void SetEvent(const ReceivedHttpErrorEvent& eventInfo)
     {
         response_ = eventInfo.GetResponse();
-        transferValues_ = std::make_tuple<response_>;
+        transferValues_ = std::make_tuple(response_);
     }
 
     void GetResponseData(const JSCallbackInfo& args)
@@ -1351,31 +1351,31 @@ public:
     void SetErrorEvent(const ReceivedErrorEvent& eventInfo)
     {
         request_ = eventInfo.GetRequest();
-        transferValues_ = std::make_tuple<request_>;
+        transferValues_ = std::make_tuple(request_);
     }
 
     void SetHttpErrorEvent(const ReceivedHttpErrorEvent& eventInfo)
     {
         request_ = eventInfo.GetRequest();
-        transferValues_ = std::make_tuple<request_>;
+        transferValues_ = std::make_tuple(request_);
     }
 
     void SetOnInterceptRequestEvent(const OnInterceptRequestEvent& eventInfo)
     {
         request_ = eventInfo.GetRequest();
-        transferValues_ = std::make_tuple<request_>;
+        transferValues_ = std::make_tuple(request_);
     }
 
     void SetOnOverrideErrorPageEvent(const OnOverrideErrorPageEvent& eventInfo)
     {
         request_ = eventInfo.GetWebResourceRequest();
-        transferValues_ = std::make_tuple<request_>;
+        transferValues_ = std::make_tuple(request_);
     }
 
     void SetLoadInterceptEvent(const LoadInterceptEvent& eventInfo)
     {
         request_ = eventInfo.GetRequest();
-        transferValues_ = std::make_tuple<request_>;
+        transferValues_ = std::make_tuple(request_);
     }
 
     void IsRedirect(const JSCallbackInfo& args)
@@ -1431,7 +1431,7 @@ public:
     void SetLoadOverrideEvent(const LoadOverrideEvent& eventInfo)
     {
         request_ = eventInfo.GetRequest();
-        transferValues_ = std::make_tuple<request_>;
+        transferValues_ = std::make_tuple(request_);
     }
 
 private:
@@ -2175,7 +2175,7 @@ JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& event
     JSRef<JSObject> messageObj = JSClass<JSWebConsoleLog>::NewInstance();
     auto jsWebConsoleLog = Referenced::Claim(messageObj->Unwrap<JSWebConsoleLog>());
     jsWebConsoleLog->SetMessage(eventInfo.GetMessage());
-    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast<messageObj>, static_cast<void *>(jsWebConsoleLog.GetRawPtr()));
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(messageObj), static_cast<void *>(jsWebConsoleLog.GetRawPtr()));
 
     obj->SetPropertyObject("message", messageObj);
 
@@ -2297,7 +2297,7 @@ JSRef<JSVal> LoadInterceptEventToJSValue(const LoadInterceptEvent& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetLoadInterceptEvent(eventInfo);
-    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast<requestObj>, static_cast<void *>(requestEvent.GetRawPtr()));
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     obj->SetPropertyObject("data", requestObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -2362,7 +2362,7 @@ JSRef<JSVal> WebHttpAuthEventToJSValue(const WebHttpAuthEvent& eventInfo)
         return JSRef<JSVal>::Cast(obj);
     }
     jsWebHttpAuth->SetResult(eventInfo.GetResult());
-    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast<resultObj>, static_cast<void *>(jsWebHttpAuth.GetRawPtr()));
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(jsWebHttpAuth.GetRawPtr()));
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("host", eventInfo.GetHost());
     obj->SetProperty("realm", eventInfo.GetRealm());
@@ -2389,7 +2389,7 @@ JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
         return JSRef<JSVal>::Cast(obj);
     }
     jsWebSslError->SetResult(eventInfo.GetResult());
-    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast<resultObj>, static_cast<void *>(jsWebSslError.GetRawPtr()));
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(jsWebSslError.GetRawPtr()));
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("error", eventInfo.GetError());
 
@@ -2506,7 +2506,7 @@ JSRef<JSVal> WebSslSelectCertEventToJSValue(const WebSslSelectCertEvent& eventIn
         return JSRef<JSVal>::Cast(obj);
     }
     jsWebSslSelectCert->SetResult(eventInfo.GetResult());
-    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast<resultObj>, static_cast<void *>(jsWebSslSelectCert.GetRawPtr()));
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(jsWebSslSelectCert.GetRawPtr()));
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("host", eventInfo.GetHost());
     obj->SetProperty("port", eventInfo.GetPort());
@@ -2545,7 +2545,7 @@ JSRef<JSVal> LoadOverrideEventToJSValue(const LoadOverrideEvent& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetLoadOverrideEvent(eventInfo);
-    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast<requestObj>, static_cast<void *>(requestEvent.GetRawPtr()));
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     return JSRef<JSVal>::Cast(requestObj);
 }
 
@@ -3269,7 +3269,7 @@ JSRef<JSVal> ReceivedErrorEventToJSValue(const ReceivedErrorEvent& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetErrorEvent(eventInfo);
-    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast<requestObj>, static_cast<void *>(requestEvent.GetRawPtr()));
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
 
     JSRef<JSObject> errorObj = JSClass<JSWebResourceError>::NewInstance();
     auto errorEvent = Referenced::Claim(errorObj->Unwrap<JSWebResourceError>());
@@ -3310,12 +3310,12 @@ JSRef<JSVal> ReceivedHttpErrorEventToJSValue(const ReceivedHttpErrorEvent& event
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetHttpErrorEvent(eventInfo);
-    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast<requestObj>, static_cast<void *>(requestEvent.GetRawPtr()));
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
 
     JSRef<JSObject> responseObj = JSClass<JSWebResourceResponse>::NewInstance();
     auto responseEvent = Referenced::Claim(responseObj->Unwrap<JSWebResourceResponse>());
     responseEvent->SetEvent(eventInfo);
-    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast<responseObj>, static_cast<void *>(responseEvent.GetRawPtr()));
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(responseObj), static_cast<void *>(responseEvent.GetRawPtr()));
 
     obj->SetPropertyObject("request", requestObj);
     obj->SetPropertyObject("response", responseObj);
@@ -3399,7 +3399,7 @@ JSRef<JSVal> OnInterceptRequestEventToJSValue(const OnInterceptRequestEvent& eve
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetOnInterceptRequestEvent(eventInfo);
-    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast<requestObj>, static_cast<void *>(requestEvent.GetRawPtr()));
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     obj->SetPropertyObject("request", requestObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -4825,7 +4825,7 @@ JSRef<JSVal> DataResubmittedEventToJSValue(const DataResubmittedEvent& eventInfo
         return JSRef<JSVal>::Cast(obj);
     }
     jsDataResubmitted->SetHandler(eventInfo.GetHandler());
-    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast<resultObj>, static_cast<void *>(jsDataResubmitted.GetRawPtr()));
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(jsDataResubmitted.GetRawPtr()));
     obj->SetPropertyObject("handler", resultObj);
     return JSRef<JSVal>::Cast(obj);
 }
