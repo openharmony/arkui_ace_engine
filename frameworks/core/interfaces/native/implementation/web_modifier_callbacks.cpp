@@ -1158,7 +1158,7 @@ void OnRenderProcessNotResponding(const CallbackHelper<OnRenderProcessNotRespond
     CHECK_NULL_VOID(eventInfo);
     Ark_RenderProcessNotRespondingData parameter;
     parameter.jsStack = Converter::ArkValue<Ark_String>(eventInfo->GetJsStack());
-    parameter.pid = Converter::ArkValue<Ark_Int32>(eventInfo->GetPid());
+    parameter.pid = Converter::ArkValue<Ark_Number>(eventInfo->GetPid());
     parameter.reason = Converter::ArkValue<Ark_RenderProcessNotRespondingReason>(
         static_cast<RenderProcessNotRespondingReason>(eventInfo->GetReason()));
     arkCallback.Invoke(parameter);

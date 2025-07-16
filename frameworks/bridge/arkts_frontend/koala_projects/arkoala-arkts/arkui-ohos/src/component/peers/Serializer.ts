@@ -5735,7 +5735,7 @@ export class Serializer extends SerializerBase {
         const value_jsStack  = value.jsStack
         valueSerializer.writeString(value_jsStack)
         const value_pid  = value.pid
-        valueSerializer.writeInt32(value_pid)
+        valueSerializer.writeNumber(value_pid)
         const value_reason  = value.reason
         valueSerializer.writeInt32(TypeChecker.RenderProcessNotRespondingReason_ToNumeric(value_reason))
     }
@@ -8059,7 +8059,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_enterKeyType_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_enterKeyType_type)) {
             const value_enterKeyType_value  = value_enterKeyType!
-            valueSerializer.writeInt32(value_enterKeyType_value)
+            valueSerializer.writeNumber(value_enterKeyType_value)
         }
         const value_customKeyboard  = value.customKeyboard
         let value_customKeyboard_type : int32 = RuntimeType.UNDEFINED

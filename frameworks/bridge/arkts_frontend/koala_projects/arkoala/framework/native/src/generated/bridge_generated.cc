@@ -34096,7 +34096,7 @@ Ark_String impl_FrameNode_getId(Ark_NativePointer thisPtr) {
 KOALA_INTEROP_1(FrameNode_getId, KStringPtr, Ark_NativePointer)
 Ark_Int32 impl_FrameNode_getUniqueId(Ark_NativePointer thisPtr) {
         Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
-        return GetAccessors()->getFrameNodeAccessor()->getUniqueId(self);
+        return GetAccessors()->getFrameNodeAccessor()->getUniqueId(self);  
 }
 KOALA_INTEROP_DIRECT_1(FrameNode_getUniqueId, Ark_Int32, Ark_NativePointer)
 Ark_Boolean impl_FrameNode_isVisible(Ark_NativePointer thisPtr) {
@@ -35304,7 +35304,7 @@ KOALA_INTEROP_DIRECT_0(VisualEffect_getFinalizer, Ark_NativePointer)
 Ark_NativePointer impl_BindSheetOps_registerShowCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         ShowCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ShowCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ShowCallback))))};;
-
+        
         const auto builder_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_CustomNodeBuilder builder_value_buf = {};
         builder_value_buf.tag = builder_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
@@ -35329,7 +35329,7 @@ KOALA_INTEROP_DIRECT_4(BindSheetOps_registerShowCallback, Ark_NativePointer, Ark
 Ark_NativePointer impl_BindSheetOps_registerBindContentCoverCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         ShowCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ShowCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ShowCallback))))};;
-
+        
         const auto builder_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_CustomNodeBuilder builder_value_buf = {};
         builder_value_buf.tag = builder_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
@@ -43141,21 +43141,21 @@ void impl_WebKeyboardController_insertText(Ark_NativePointer thisPtr, const KStr
         GetAccessors()->getWebKeyboardControllerAccessor()->insertText(self, (const Ark_String*) (&text));
 }
 KOALA_INTEROP_V2(WebKeyboardController_insertText, Ark_NativePointer, KStringPtr)
-void impl_WebKeyboardController_deleteForward(Ark_NativePointer thisPtr, Ark_Int32 length) {
+void impl_WebKeyboardController_deleteForward(Ark_NativePointer thisPtr, KInteropNumber length) {
         Ark_WebKeyboardController self = reinterpret_cast<Ark_WebKeyboardController>(thisPtr);
-        GetAccessors()->getWebKeyboardControllerAccessor()->deleteForward(self, (const Ark_Int32*) (&length));
+        GetAccessors()->getWebKeyboardControllerAccessor()->deleteForward(self, (const Ark_Number*) (&length));
 }
-KOALA_INTEROP_DIRECT_V2(WebKeyboardController_deleteForward, Ark_NativePointer, Ark_Int32)
-void impl_WebKeyboardController_deleteBackward(Ark_NativePointer thisPtr, Ark_Int32 length) {
+KOALA_INTEROP_DIRECT_V2(WebKeyboardController_deleteForward, Ark_NativePointer, KInteropNumber)
+void impl_WebKeyboardController_deleteBackward(Ark_NativePointer thisPtr, KInteropNumber length) {
         Ark_WebKeyboardController self = reinterpret_cast<Ark_WebKeyboardController>(thisPtr);
-        GetAccessors()->getWebKeyboardControllerAccessor()->deleteBackward(self, (const Ark_Int32*) (&length));
+        GetAccessors()->getWebKeyboardControllerAccessor()->deleteBackward(self, (const Ark_Number*) (&length));
 }
-KOALA_INTEROP_DIRECT_V2(WebKeyboardController_deleteBackward, Ark_NativePointer, Ark_Int32)
-void impl_WebKeyboardController_sendFunctionKey(Ark_NativePointer thisPtr, Ark_Int32 key) {
+KOALA_INTEROP_DIRECT_V2(WebKeyboardController_deleteBackward, Ark_NativePointer, KInteropNumber)
+void impl_WebKeyboardController_sendFunctionKey(Ark_NativePointer thisPtr, KInteropNumber key) {
         Ark_WebKeyboardController self = reinterpret_cast<Ark_WebKeyboardController>(thisPtr);
-        GetAccessors()->getWebKeyboardControllerAccessor()->sendFunctionKey(self, (const Ark_Int32*) (&key));
+        GetAccessors()->getWebKeyboardControllerAccessor()->sendFunctionKey(self, (const Ark_Number*) (&key));
 }
-KOALA_INTEROP_DIRECT_V2(WebKeyboardController_sendFunctionKey, Ark_NativePointer, Ark_Int32)
+KOALA_INTEROP_DIRECT_V2(WebKeyboardController_sendFunctionKey, Ark_NativePointer, KInteropNumber)
 void impl_WebKeyboardController_close(Ark_NativePointer thisPtr) {
         Ark_WebKeyboardController self = reinterpret_cast<Ark_WebKeyboardController>(thisPtr);
         GetAccessors()->getWebKeyboardControllerAccessor()->close(self);

@@ -66,18 +66,18 @@ export class WebKeyboardController implements MaterializedBase {
         this.insertText_serialize(text_casted)
         return
     }
-    public deleteForward(length: int32): void {
-        const length_casted = length as (int32)
+    public deleteForward(length: number): void {
+        const length_casted = length as (number)
         this.deleteForward_serialize(length_casted)
         return
     }
-    public deleteBackward(length: int32): void {
-        const length_casted = length as (int32)
+    public deleteBackward(length: number): void {
+        const length_casted = length as (number)
         this.deleteBackward_serialize(length_casted)
         return
     }
-    public sendFunctionKey(key: int32): void {
-        const key_casted = key as (int32)
+    public sendFunctionKey(key: number): void {
+        const key_casted = key as (number)
         this.sendFunctionKey_serialize(key_casted)
         return
     }
@@ -88,13 +88,13 @@ export class WebKeyboardController implements MaterializedBase {
     private insertText_serialize(text: string): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_insertText(this.peer!.ptr, text)
     }
-    private deleteForward_serialize(length: int32): void {
+    private deleteForward_serialize(length: number): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_deleteForward(this.peer!.ptr, length)
     }
-    private deleteBackward_serialize(length: int32): void {
+    private deleteBackward_serialize(length: number): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_deleteBackward(this.peer!.ptr, length)
     }
-    private sendFunctionKey_serialize(key: int32): void {
+    private sendFunctionKey_serialize(key: number): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_sendFunctionKey(this.peer!.ptr, key)
     }
     private close_serialize(): void {
@@ -3138,7 +3138,7 @@ export interface AdsBlockedDetails {
 }
 export interface WebKeyboardOptions {
     useSystemKeyboard: boolean;
-    enterKeyType?: int32;
+    enterKeyType?: number;
     customKeyboard?: CustomBuilder;
 }
 export interface WebKeyboardCallbackInfo {
@@ -3432,7 +3432,7 @@ export interface LargestContentfulPaint {
 }
 export interface RenderProcessNotRespondingData {
     jsStack: string;
-    pid: int32;
+    pid: number;
     reason: RenderProcessNotRespondingReason;
 }
 export interface OnPageEndEvent {
