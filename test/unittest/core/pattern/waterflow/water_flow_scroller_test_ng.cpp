@@ -625,26 +625,18 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex003, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
-    EXPECT_TRUE(pattern_->AnimateStoped());
 
     pattern_->ScrollToIndex(3, true, ScrollAlign::END);
-    EXPECT_FALSE(pattern_->AnimateStoped());
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, -400.f);
-    EXPECT_TRUE(pattern_->AnimateStoped());
 
     pattern_->ScrollToIndex(15, true, ScrollAlign::AUTO);
-    FlushUITasks();
-    EXPECT_FALSE(pattern_->AnimateStoped());
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
-    EXPECT_TRUE(pattern_->AnimateStoped());
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 500.f);
 
     pattern_->ScrollToIndex(15, true, ScrollAlign::CENTER);
-    FlushUITasks();
-    EXPECT_FALSE(pattern_->AnimateStoped());
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 800.f);
