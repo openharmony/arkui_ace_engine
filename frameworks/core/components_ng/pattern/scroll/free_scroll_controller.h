@@ -21,6 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class ScrollPattern;
+class AxisAnimator;
 enum class ScrollEdge;
 
 /**
@@ -103,11 +104,15 @@ private:
     void FireOnScrollEnd() const;
     void FireOnScrollEdge(const std::vector<ScrollEdge>& edges) const;
 
+    void AnimateOnMouseScroll(const OffsetF& delta);
+    void HandleAxisAnimationFrame(float newOffset);
+
     ScrollPattern& pattern_;
     RefPtr<NodeAnimatablePropertyOffsetF> offset_;
     OffsetF prevOffset_;
     RefPtr<PanRecognizer> freePanGesture_;
     RefPtr<TouchEventImpl> freeTouch_;
+    RefPtr<AxisAnimator> axisAnimator_; // to smooth out mouse wheel scrolls
 
 public:
     enum class State {
@@ -120,6 +125,7 @@ public:
 private:
     State state_ = State::IDLE;
     bool enableScroll_ = true;
+    bool mouseWheelScrollIsVertical_ = true;
 };
 
 } // namespace OHOS::Ace::NG

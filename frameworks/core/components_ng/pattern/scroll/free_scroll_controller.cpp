@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scroll/free_scroll_controller.h"
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/scrollable/axis/axis_animator.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -188,6 +189,9 @@ void FreeScrollController::HandlePanStart(const GestureEvent& event)
 {
     state_ = State::DRAG;
     FireOnScrollStart();
+    if (axisAnimator_) {
+        axisAnimator_->StopAxisAnimation();
+    }
 }
 
 void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
@@ -211,6 +215,10 @@ void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
     deltaF = FireOnWillScroll(deltaF, ScrollState::SCROLL, ScrollSource::DRAG);
     const auto newOffset = offset_->Get() + deltaF;
     CheckCrashEdge(newOffset, scrollableArea);
+    if (Scrollable::IsMouseWheelScroll(event)) {
+        AnimateOnMouseScroll(deltaF); // use animation to make mouse wheel scroll smoother
+        return;
+    }
     offset_->Set(newOffset);
     pattern_.MarkDirty();
 }
@@ -355,6 +363,33 @@ void FreeScrollController::HandleTouchUpOrCancel()
         // animate if currently out of bounds
         Fling({});
     }
+}
+
+void FreeScrollController::HandleAxisAnimationFrame(float newOffset)
+{
+    if (InAnimation(state_)) { // can't update offset if in animation
+        return;
+    }
+    auto offset = offset_->Get();
+    mouseWheelScrollIsVertical_ ? offset.SetY(newOffset) : offset.SetX(newOffset);
+    offset_->Set(offset);
+}
+
+void FreeScrollController::AnimateOnMouseScroll(const OffsetF& delta)
+{
+    mouseWheelScrollIsVertical_ = NearZero(delta.GetX());
+    Axis axis = mouseWheelScrollIsVertical_ ? Axis::VERTICAL : Axis::HORIZONTAL;
+    if (!axisAnimator_) {
+        axisAnimator_ = MakeRefPtr<AxisAnimator>(
+            [wk = WeakClaim(this)](float newOffset) { // animation frame callback
+                auto self = wk.Upgrade();
+                CHECK_NULL_VOID(self);
+                self->HandleAxisAnimationFrame(newOffset);
+            },
+            nullptr, nullptr);
+        axisAnimator_->Initialize(WeakClaim(pattern_.GetContext()));
+    }
+    axisAnimator_->OnAxis(delta.GetMainOffset(axis), offset_->Get().GetMainOffset(axis));
 }
 
 OffsetF FreeScrollController::GetOffset() const
