@@ -767,6 +767,7 @@ RefPtr<FrameNode> BuildMoreOrBackButton(const std::shared_ptr<SelectOverlayInfo>
         UpdateBackButtonPadding(button, sideWidth, padding, overlayId);
         accessibilityProperty->SetAccessibilityText(textOverlayTheme->GetBackAccessibilityText());
     }
+    accessibilityProperty->SetAccessibilityCustomRole("button");
 
     PrepareMoreOrBackButtonNode(button, overlayId, isMoreButton, textOverlayTheme);
 
