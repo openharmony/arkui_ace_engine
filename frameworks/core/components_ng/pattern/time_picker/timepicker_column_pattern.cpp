@@ -418,7 +418,7 @@ void TimePickerColumnPattern::FlushCurrentOptions(
         int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(selectedIndex);
         int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
-        if ((NotLoopOptions() || !wheelModeEnabled_) && !virtualIndexValidate) {
+        if ((NotLoopOptions() || !GetCanLoopFromLayoutProperty()) && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent(u"");
         } else {
             auto optionValue = timePickerRowPattern->GetOptionsValue(host, optionIndex);
@@ -487,7 +487,7 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 
 bool TimePickerColumnPattern::CanMove(bool isDown) const
 {
-    if (wheelModeEnabled_) {
+    if (GetCanLoopFromLayoutProperty()) {
         CHECK_NULL_RETURN(NotLoopOptions(), true);
     }
     auto host = GetHost();
@@ -510,6 +510,11 @@ bool TimePickerColumnPattern::GetCanLoopFromLayoutProperty() const
     CHECK_NULL_RETURN(stackNode, false);
     auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_RETURN(parentNode, false);
+    auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, false);
+    if (timePickerRowPattern->IsStartEndTimeDefined()) {
+        return false;
+    }
     auto layoutProperty = parentNode->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     return layoutProperty->GetLoopValue(true);
