@@ -50,6 +50,22 @@ class DismissDialogActionInner implements DismissDialogAction {
 export default namespace promptAction {
     static { loadLibrary("promptAction_ani"); }
 
+    export enum CommonState {
+        UNINITIALIZED = 0,
+        INITIALIZED = 1,
+        APPEARING = 2,
+        APPEARED = 3,
+        DISAPPEARING = 4,
+        DISAPPEARED = 5,
+    }
+
+    export class CommonController {
+        static { loadLibrary("promptAction_ani"); }
+        public native constructor();
+        public native close(): void;
+        public native getState(): CommonState;
+    }
+
     export enum ToastShowMode {
         DEFAULT = 0,
         TOP_MOST = 1,
@@ -206,11 +222,6 @@ export default namespace promptAction {
     let destroyRegister = new FinalizationRegistry<Cleaner>(callback)
     let unregisterToken = new object()
 
-    export class CommonController {
-        constructor() {}
-        native close(): void;
-    }
-
     export class DialogController extends CommonController {
         static { loadLibrary("promptAction_ani"); }
 
@@ -289,4 +300,7 @@ export default namespace promptAction {
 
     export native function presentCustomDialog(builder: long, controller?: DialogController, options?: DialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<number>;
+
+    export native function getTopOrder(): number | undefined;
+    export native function getBottomOrder(): number | undefined;
 }

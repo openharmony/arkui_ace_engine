@@ -111,6 +111,10 @@ struct ArkUIAniCommonModifier {
     void (*frameNodeMarkDirtyNode)(ani_env* env, ani_long ptr);
     void (*setOverlayComponent)(ani_long node, ani_long builderPtr, AniOverlayOptions options);
     void (*setParallelScoped)(ani_boolean parallel);
+    void (*setCustomPropertyCallBack)(
+        ani_env* env, ArkUINodeHandle node, std::function<void()>&& func,
+        std::function<std::string(const std::string&)>&& getFunc);
+    std::string (*getCustomProperty)(ani_env* env, ArkUINodeHandle node, std::string& key);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);

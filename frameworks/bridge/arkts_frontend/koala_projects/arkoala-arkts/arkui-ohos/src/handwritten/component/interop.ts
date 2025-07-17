@@ -53,14 +53,23 @@ export interface CompatibleComponentInfo {
 /** @memo */
 export function compatibleComponent(
     init: () => CompatibleComponentInfo,
-    update: (instance: ESValue) => void
+    update: (instance: ESValue) => void,
+    component?: ExtendableComponent,
 ): void {
     NodeAttach<CompatiblePeerNode>((): CompatiblePeerNode => {
         let global = ESValue.getGlobal();
         const ptr = ArkUIAniModule._CreateViewStackProcessor();
         openInterop(global);
+        if (component !== undefined) {
+            bindCompatibleLocalStorageCallback(component!);
+        }
         const result = init();
         const realComponent = result.component;
+        if (component !== undefined && realComponent !== undefined) {
+            bindCompatibleLocalStorageCallback(component!, realComponent!);
+            let resetViewPUInterop = global.getProperty('resetViewPUFindLocalStorageInterop');
+            resetViewPUInterop.invoke();
+        }
         const nodePtr = ArkUIAniModule._PopViewStackProcessor();
         ArkUIAniModule._DeleteViewStackProcessor(ptr);
         return CompatiblePeerNode.create(nodePtr, realComponent);
@@ -115,6 +124,22 @@ export function bindCompatibleProvideCallback(staticComponent: ExtendableCompone
     setCallback.invoke(callback, component);
     return;
 }
+
+export function bindCompatibleLocalStorageCallback(staticComponent: ExtendableComponent,
+    component?: ESValue): void {
+    const callback = (): Object | null => {
+        let storage = staticComponent.localStorage_;
+        if ((storage === null)) {
+            return storage;
+        }
+        return storage.getProxy()!.unwrap()! as Object;
+    }
+    let global = ESValue.getGlobal();
+    let setFindLocalStorageInterop = global.getProperty('setFindLocalStorageInterop');
+    setFindLocalStorageInterop.invoke(callback, component);
+    return;
+}
+
 
 export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>, createState: ESValue): ESValue {
     let source = staticState;

@@ -79,6 +79,21 @@ export class LevelOrder implements MaterializedBase {
 }
 
 declare namespace promptAction {
+    export enum CommonState {
+        UNINITIALIZED = 0,
+        INITIALIZED = 1,
+        APPEARING = 2,
+        APPEARED = 3,
+        DISAPPEARING = 4,
+        DISAPPEARED = 5,
+    }
+
+    export class CommonController {
+        constructor();
+        close(): void;
+        getState(): CommonState;
+    }
+
     export interface ShowToastOptions {
         message: string | Resource;
         duration?: number;
@@ -213,11 +228,6 @@ declare namespace promptAction {
         shadow?: ShadowOptions | ShadowStyle;
     }
 
-    export class CommonController {
-        constructor();
-        close(): void;
-    }
-
     export class DialogController extends CommonController {}
 
     export type DialogOptionsCornerRadius = Dimension | BorderRadiuses;
@@ -272,6 +282,9 @@ declare namespace promptAction {
 
     export function presentCustomDialog(builder: KPointer, controller?: DialogController,
         options?: DialogOptions, optionsInternal?: DialogOptionsInternal): Promise<number>;
+
+    export function getTopOrder(): number | undefined;
+    export function getBottomOrder(): number | undefined;
 }
 
 export default promptAction

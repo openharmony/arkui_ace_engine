@@ -164,7 +164,6 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const Ark_Acti
         dialogProps.offset.SetX(offsetX);
     }
     dialogProps.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
-    dialogProps.sheetsInfo = Converter::Convert<std::vector<ActionSheetInfo>>(options.sheets);
     auto transitionEffect = Converter::OptConvert<RefPtr<NG::ChainedTransitionEffect>>(options.transition);
     if (transitionEffect) {
         dialogProps.transitionEffect = transitionEffect.value();
@@ -188,6 +187,7 @@ void ShowImpl(const Ark_ActionSheetOptions* value)
         .type = DialogType::ACTION_SHEET, .alignment = DialogAlignment::BOTTOM, .offset = DEFAULT_OFFSET
     };
     UpdateDynamicDialogProperties(dialogProps, *value);
+    dialogProps.sheetsInfo = Converter::Convert<std::vector<ActionSheetInfo>>(value->sheets);
     auto backgroundBlurStyle = Converter::OptConvert<BlurStyle>(value->backgroundBlurStyle);
     if (backgroundBlurStyle) {
         dialogProps.backgroundBlurStyle = static_cast<int32_t>(backgroundBlurStyle.value());

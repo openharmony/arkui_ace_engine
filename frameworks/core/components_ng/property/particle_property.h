@@ -72,7 +72,7 @@ public:
         return imageSource_;
     }
 
-    void SetImageSource(std::string& imageSource)
+    void SetImageSource(const std::string& imageSource)
     {
         imageSource_ = imageSource;
     }
@@ -82,7 +82,7 @@ public:
         return size_;
     }
 
-    void SetSize(std::pair<Dimension, Dimension>& size)
+    void SetSize(const std::pair<Dimension, Dimension>& size)
     {
         size_ = size;
     }
@@ -92,7 +92,7 @@ public:
         return imageFit_;
     }
 
-    void SetImageFit(ImageFit& imageFit)
+    void SetImageFit(const ImageFit& imageFit)
     {
         imageFit_ = imageFit;
     }
@@ -252,7 +252,7 @@ public:
         return emitterRate_;
     }
 
-    void SetPosition(std::pair<Dimension, Dimension>& point)
+    void SetPosition(const std::pair<Dimension, Dimension>& point)
     {
         position_ = point;
     }
@@ -262,7 +262,7 @@ public:
         return position_;
     }
 
-    void SetSize(std::pair<Dimension, Dimension>& size)
+    void SetSize(const std::pair<Dimension, Dimension>& size)
     {
         size_ = size;
     }
@@ -272,7 +272,7 @@ public:
         return size_;
     }
 
-    void SetShape(ParticleEmitterShape& shape)
+    void SetShape(const ParticleEmitterShape& shape)
     {
         shape_ = shape;
     }
@@ -670,7 +670,7 @@ public:
     {
         return range_;
     }
-    void SetRange(std::pair<Color, Color>& range)
+    void SetRange(const std::pair<Color, Color>& range)
     {
         range_ = range;
     }
@@ -678,7 +678,7 @@ public:
     {
         return distribution_;
     }
-    void SetDistribution(DistributionType& distribution)
+    void SetDistribution(const DistributionType& distribution)
     {
         distribution_ = distribution;
     }
@@ -686,7 +686,7 @@ public:
     {
         return updater_;
     }
-    void SetUpdater(ParticleColorPropertyUpdater& updater)
+    void SetUpdater(const ParticleColorPropertyUpdater& updater)
     {
         updater_ = updater;
     }

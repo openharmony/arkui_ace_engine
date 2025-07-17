@@ -28,7 +28,7 @@ import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, Con
 import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry, IncrementalNode } from '@koalaui/runtime'
 import { Context, PointerStyle, PixelMap } from "#external"
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
-import { KeyEvent, PopupCommonOptions } from "arkui/component/common"
+import { KeyEvent, PopupCommonOptions, MenuOptions } from "arkui/component/common"
 import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
 import router from '@ohos/router'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
@@ -935,6 +935,28 @@ export class PromptActionImpl extends PromptAction {
         return retval;
     }
 
+    getTopOrder(): LevelOrder {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let orderValue: number | undefined = promptAction.getTopOrder();
+        let order: LevelOrder = LevelOrder.clamp(0);
+        if (orderValue !== undefined) {
+            order = LevelOrder.clamp(orderValue as number);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return order;
+    }
+
+    getBottomOrder(): LevelOrder {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let orderValue: number | undefined = promptAction.getBottomOrder();
+        let order: LevelOrder = LevelOrder.clamp(0);
+        if (orderValue !== undefined) {
+            order = LevelOrder.clamp(orderValue as number);
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return order;
+    }
+
     openPopup(content: ComponentContent, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
         const content_casted = content as (ComponentContent)
         const target_casted = target as (TargetInfo)
@@ -1000,6 +1022,75 @@ export class PromptActionImpl extends PromptAction {
             ptr = content.getNodePtr() as KPointer
         }
         ArkUIGeneratedNativeModule._PromptAction_closePopup(nullptr, ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+
+    openMenu(content: ComponentContent, target: TargetInfo, options?: MenuOptions): Promise<void> {
+        const content_casted = content as (ComponentContent)
+        const target_casted = target as (TargetInfo)
+        const options_casted = options as (MenuOptions | undefined)
+        return this.openMenu_serialize(content_casted, target_casted, options_casted)
+    }
+
+    updateMenu(content: ComponentContent, options: MenuOptions, partialUpdate?: boolean): Promise<void> {
+        const content_casted = content as (ComponentContent)
+        const options_casted = options as (MenuOptions)
+        const partialUpdate_casted = partialUpdate as (Boolean | undefined)
+        return this.updateMenu_serialize(content_casted, options_casted, partialUpdate_casted)
+    }
+
+    closeMenu(content: ComponentContent): Promise<void> {
+        const content_casted = content as (ComponentContent)
+        return this.closeMenu_serialize(content_casted)
+    }
+
+    private openMenu_serialize(content: ComponentContent, target: TargetInfo, options?: MenuOptions): Promise<void> {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeTargetInfo(target)
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8((options_type).toChar())
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeMenuOptions(options_value)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        let ptr: KPointer = 0
+        if (content.getNodePtr() != undefined) {
+            ptr = content.getNodePtr() as KPointer
+        }
+        ArkUIGeneratedNativeModule._PromptAction_openMenu(nullptr, ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    private updateMenu_serialize(content: ComponentContent, options: MenuOptions, partialUpdate?: boolean): Promise<void> {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeMenuOptions(options)
+        let partialUpdate_type : int32 = RuntimeType.UNDEFINED
+        partialUpdate_type = runtimeType(partialUpdate)
+        thisSerializer.writeInt8((partialUpdate_type).toChar())
+        if ((RuntimeType.UNDEFINED) != (partialUpdate_type)) {
+            const partialUpdate_value  = partialUpdate!
+            thisSerializer.writeBoolean(partialUpdate_value)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        let ptr: KPointer = 0
+        if (content.getNodePtr() != undefined) {
+            ptr = content.getNodePtr() as KPointer
+        }
+        ArkUIGeneratedNativeModule._PromptAction_updateMenu(nullptr, ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    private closeMenu_serialize(content: ComponentContent): Promise<void> {
+        const thisSerializer : Serializer = Serializer.hold()
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        let ptr: KPointer = 0
+        if (content.getNodePtr() != undefined) {
+            ptr = content.getNodePtr() as KPointer
+        }
+        ArkUIGeneratedNativeModule._PromptAction_closeMenu(nullptr, ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

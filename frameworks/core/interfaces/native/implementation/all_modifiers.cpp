@@ -256,6 +256,7 @@ const GENERATED_ArkUIShapeMaskAccessor* GetShapeMaskAccessor();
 const GENERATED_ArkUIShapeClipAccessor* GetShapeClipAccessor();
 const GENERATED_ArkUIMatrix4TransitAccessor* GetMatrix4TransitAccessor();
 const GENERATED_ArkUINodeContentAccessor* GetNodeContentAccessor();
+const GENERATED_ArkUIParticleHelperAccessor* GetParticleHelperAccessor();
 const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
 const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor();
 const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* GetGlobalScopeUicontextFontScaleAccessor();
@@ -623,6 +624,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetShapeClipAccessor,
         GetMatrix4TransitAccessor,
         GetNodeContentAccessor,
+        GetParticleHelperAccessor,
         GetPixelMapAccessor,
         GetRenderNodeAccessor,
         GetGlobalScopeUicontextFontScaleAccessor,
@@ -632,7 +634,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetGridItemOpsAccessor,
         GetFilterAccessor,
         GetVisualEffectAccessor,
-		GetDatePickerSelectedOpsAccessor,
+        GetDatePickerSelectedOpsAccessor,
         GetNavigationOpsAccessor,
         GetCheckboxGroupOpsAccessor,
         GetCheckboxOpsAccessor,

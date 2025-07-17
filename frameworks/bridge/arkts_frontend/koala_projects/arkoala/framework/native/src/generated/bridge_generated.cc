@@ -15357,6 +15357,56 @@ void impl_PanelAttribute__onChangeEvent_mode(Ark_NativePointer thisPtr, KSeriali
         GetNodeModifiers()->getPanelModifier()->set_onChangeEvent_mode(self, (const Callback_Opt_PanelMode_Void*)&callback_value);
 }
 KOALA_INTEROP_DIRECT_V3(PanelAttribute__onChangeEvent_mode, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ParticleHelper_SetDisturbanceFields(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto disturbanceFields_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_DisturbanceFieldOptionsInner disturbanceFields_value_buf = {};
+        disturbanceFields_value_buf.tag = disturbanceFields_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (disturbanceFields_value_buf_runtimeType))
+        {
+            const Ark_Int32 disturbanceFields_value_buf__length = thisDeserializer.readInt32();
+            Array_DisturbanceFieldOptionsInner disturbanceFields_value_buf_ = {};
+            thisDeserializer.resizeArray<std::decay<decltype(disturbanceFields_value_buf_)>::type,
+        std::decay<decltype(*disturbanceFields_value_buf_.array)>::type>(&disturbanceFields_value_buf_, disturbanceFields_value_buf__length);
+            for (int disturbanceFields_value_buf__i = 0; disturbanceFields_value_buf__i < disturbanceFields_value_buf__length; disturbanceFields_value_buf__i++) {
+                disturbanceFields_value_buf_.array[disturbanceFields_value_buf__i] = thisDeserializer.readDisturbanceFieldOptionsInner();
+            }
+            disturbanceFields_value_buf.value = disturbanceFields_value_buf_;
+        }
+        Opt_Array_DisturbanceFieldOptionsInner disturbanceFields_value = disturbanceFields_value_buf;;
+        GetAccessors()->getParticleHelperAccessor()->SetDisturbanceFields(node, (const Opt_Array_DisturbanceFieldOptionsInner*)&disturbanceFields_value);
+}
+KOALA_INTEROP_DIRECT_V3(ParticleHelper_SetDisturbanceFields, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ParticleHelper_SetEmitterProperty(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto emitter_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_EmitterPropertyInner emitter_value_buf = {};
+        emitter_value_buf.tag = emitter_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (emitter_value_buf_runtimeType))
+        {
+            const Ark_Int32 emitter_value_buf__length = thisDeserializer.readInt32();
+            Array_EmitterPropertyInner emitter_value_buf_ = {};
+            thisDeserializer.resizeArray<std::decay<decltype(emitter_value_buf_)>::type,
+        std::decay<decltype(*emitter_value_buf_.array)>::type>(&emitter_value_buf_, emitter_value_buf__length);
+            for (int emitter_value_buf__i = 0; emitter_value_buf__i < emitter_value_buf__length; emitter_value_buf__i++) {
+                emitter_value_buf_.array[emitter_value_buf__i] = thisDeserializer.readEmitterPropertyInner();
+            }
+            emitter_value_buf.value = emitter_value_buf_;
+        }
+        Opt_Array_EmitterPropertyInner emitter_value = emitter_value_buf;;
+        GetAccessors()->getParticleHelperAccessor()->SetEmitterProperty(node, (const Opt_Array_EmitterPropertyInner*)&emitter_value);
+}
+KOALA_INTEROP_DIRECT_V3(ParticleHelper_SetEmitterProperty, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_ParticleHelper_ParticleConstruct(Ark_Int32 id, Ark_Int32 flags) {
+        return GetAccessors()->getParticleHelperAccessor()->ParticleConstruct(id, flags);
+}
+KOALA_INTEROP_DIRECT_2(ParticleHelper_ParticleConstruct, Ark_NativePointer, Ark_Int32, Ark_Int32)
+void impl_ParticleHelper_SetParticleOptions(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_ParticlesInner particles_value = thisDeserializer.readParticlesInner();;
+        GetAccessors()->getParticleHelperAccessor()->SetParticleOptions(node, (const Ark_ParticlesInner*)&particles_value);
+}
+KOALA_INTEROP_DIRECT_V3(ParticleHelper_SetParticleOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_PasteButton_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getPasteButtonModifier()->construct(id, flags);
 }
@@ -32805,6 +32855,45 @@ void impl_PromptAction_closePopup(KVMContext vmContext, Ark_NativePointer thisPt
         GetAccessors()->getPromptActionAccessor()->closePopup(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), self, content, (const Callback_Opt_Array_String_Void*)&outputArgumentForReturningPromise_value);
 }
 KOALA_INTEROP_CTX_V4(PromptAction_closePopup, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_PromptAction_openMenu(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_NativePointer content, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_PromptAction self = reinterpret_cast<Ark_PromptAction>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_TargetInfo target_value = thisDeserializer.readTargetInfo();
+        const auto options_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_MenuOptions options_value_buf = {};
+        options_value_buf.tag = options_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (options_value_buf_runtimeType))
+        {
+            options_value_buf.value = thisDeserializer.readMenuOptions();
+        }
+        Opt_MenuOptions options_value = options_value_buf;;
+        Callback_Opt_Array_String_Void outputArgumentForReturningPromise_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_Array_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_Array_String_Void))))};;
+        GetAccessors()->getPromptActionAccessor()->openMenu(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), self, content, (const Ark_TargetInfo*)&target_value, (const Opt_MenuOptions*)&options_value, (const Callback_Opt_Array_String_Void*)&outputArgumentForReturningPromise_value);
+}
+KOALA_INTEROP_CTX_V4(PromptAction_openMenu, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_PromptAction_updateMenu(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_NativePointer content, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_PromptAction self = reinterpret_cast<Ark_PromptAction>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_MenuOptions options_value = thisDeserializer.readMenuOptions();
+        const auto partialUpdate_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean partialUpdate_value_buf = {};
+        partialUpdate_value_buf.tag = partialUpdate_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (partialUpdate_value_buf_runtimeType))
+        {
+            partialUpdate_value_buf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean partialUpdate_value = partialUpdate_value_buf;;
+        Callback_Opt_Array_String_Void outputArgumentForReturningPromise_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_Array_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_Array_String_Void))))};;
+        GetAccessors()->getPromptActionAccessor()->updateMenu(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), self, content, (const Ark_MenuOptions*)&options_value, (const Opt_Boolean*)&partialUpdate_value, (const Callback_Opt_Array_String_Void*)&outputArgumentForReturningPromise_value);
+}
+KOALA_INTEROP_CTX_V4(PromptAction_updateMenu, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_PromptAction_closeMenu(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_NativePointer content, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_PromptAction self = reinterpret_cast<Ark_PromptAction>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_Opt_Array_String_Void outputArgumentForReturningPromise_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_Array_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Array_String error)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_Array_String_Void))))};;
+        GetAccessors()->getPromptActionAccessor()->closeMenu(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), self, content, (const Callback_Opt_Array_String_Void*)&outputArgumentForReturningPromise_value);
+}
+KOALA_INTEROP_CTX_V4(PromptAction_closeMenu, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_UIContext_clearResourceCache(KVMContext vmContext, Ark_NativePointer thisPtr) {
         Ark_UIContext self = reinterpret_cast<Ark_UIContext>(thisPtr);
         GetAccessors()->getUIContextAccessor()->clearResourceCache(reinterpret_cast<Ark_VMContext>(vmContext), self);

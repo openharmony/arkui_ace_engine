@@ -23,6 +23,7 @@ ohos_shared_library("matrix4_ani") {
   external_deps = [
     #"runtime_core:libarkruntime",
     "napi:ace_napi",
+    "runtime_core:ani_helpers",
     "runtime_core:ani",
   ]
   configs = [ "$ace_root:ace_config" ]

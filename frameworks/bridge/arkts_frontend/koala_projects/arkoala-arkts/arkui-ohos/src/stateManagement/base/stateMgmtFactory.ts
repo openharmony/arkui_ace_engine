@@ -25,6 +25,10 @@ import {
     IStoragePropRefDecoratedVariable,
     ILocalStorageLinkDecoratedVariable,
     LinkSourceType,
+    IMonitorPathInfo,
+    IMonitor,
+    IMonitorDecoratedVariable,
+    IComputedDecoratedVariable
 } from '../decorator';
 import { IMutableStateMeta } from '../decorator';
 import { MutableStateMeta } from './mutableStateMeta';
@@ -42,6 +46,8 @@ import { UIUtils } from '../utils';
 import { AppStorage } from '../storage/appStorage';
 import { PropRefDecoratedVariable } from '../decoratorImpl/decoratorPropRef';
 import { StoragePropRefDecoratedVariable } from '../decoratorImpl/decoratorStoragePropRef';
+import { ComputedDecoratedVariable } from '../decoratorImpl/decoratorComputed';
+import { MonitorFunctionDecorator } from '../decoratorImpl/decoratorMonitor';
 
 export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     public makeMutableStateMeta(): IMutableStateMeta {
@@ -501,5 +507,13 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             varName,
             watchFunc
         ) as ILocalStoragePropRefDecoratedVariable<T>;
+    }
+
+    makeComputed<T>(computeFunction: () => T, varName: string): IComputedDecoratedVariable<T> {
+        return new ComputedDecoratedVariable<T>(computeFunction, varName);
+    }
+
+    makeMonitor(pathLambda: Array<IMonitorPathInfo>, monitorFunction: (m: IMonitor) => void): IMonitorDecoratedVariable {
+        return new MonitorFunctionDecorator(pathLambda, monitorFunction);
     }
 }

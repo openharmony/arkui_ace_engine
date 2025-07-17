@@ -76,6 +76,9 @@
             "@ohos/graphics/drawing": [
                 "@ohos.graphics.drawing.ets"
             ],
+            "@ohos/intl": [
+                "@ohos.intl.ets"
+            ],
             "@ohos/arkui/graphics": [
                 "@ohos.arkui.graphics.ets"
             ],

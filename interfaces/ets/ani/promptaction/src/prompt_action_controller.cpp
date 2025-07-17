@@ -114,6 +114,57 @@ ani_status BindDialogController(ani_env* env)
     return ANI_OK;
 }
 
+static void CreateCommonController(ani_env* env, ani_object object)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] CreateCommonController.");
+}
+
+static void CommonControllerClose(ani_env* env, ani_object object)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] CommonControllerClose.");
+}
+
+static ani_enum_item CommonControllerGetState(ani_env* env, ani_object object)
+{
+    ani_enum_item enumItem = nullptr;
+    ani_enum enumType;
+    ani_status status = env->FindEnum("L@ohos/promptAction/promptAction/CommonState;", &enumType);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "CommonState FindEnum fail. status: %{public}d", status);
+        return enumItem;
+    }
+
+    status = env->Enum_GetEnumItemByName(enumType, "UNINITIALIZED", &enumItem);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "Get UNINITIALIZED fail. status: %{public}d", status);
+        return enumItem;
+    }
+    return enumItem;
+}
+
+ani_status BindCommonController(ani_env* env)
+{
+    ani_class commonControllerCls;
+    ani_status status = env->FindClass("L@ohos/promptAction/promptAction/CommonController;", &commonControllerCls);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "CommonController FindClass fail. status: %{public}d", status);
+        return ANI_ERROR;
+    }
+
+    std::array commonControllerMethods = {
+        ani_native_function { "<ctor>", ":V", reinterpret_cast<void*>(CreateCommonController) },
+        ani_native_function { "close", nullptr, reinterpret_cast<void*>(CommonControllerClose) },
+        ani_native_function { "getState", nullptr, reinterpret_cast<void*>(CommonControllerGetState) },
+    };
+    status = env->Class_BindNativeMethods(
+        commonControllerCls, commonControllerMethods.data(), commonControllerMethods.size());
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "CommonController BindMethods fail. status: %{public}d", status);
+        return ANI_ERROR;
+    }
+    return ANI_OK;
+}
+
 bool GetDialogController(ani_env* env, ani_object object,
     std::function<void(RefPtr<NG::FrameNode> dialogNode)>& result)
 {

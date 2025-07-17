@@ -28,7 +28,7 @@ import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { dragController } from "@ohos/arkui/dragController"
 import { focusController } from "@ohos/arkui/focusController"
 import { Frame } from "arkui/Graphics"
-import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions } from "arkui/component/common"
+import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions } from "arkui/component/common"
 import { TextMenuOptions } from "arkui/component/textCommon"
 import { Nullable, WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyProcessingMode } from "arkui/component/focus"
@@ -246,6 +246,11 @@ export interface OverlayManagerOptions {
     enableBackPressedEvent?: boolean;
 }
 
+class OverlayManagerOptionsInner implements OverlayManagerOptions {
+    renderRootOverlay?: boolean = true;
+    enableBackPressedEvent?: boolean = false;
+}
+
 export class ContextMenuController {
     public close(): void {
         throw Error("close not implemented in ContextMenuController!")
@@ -361,6 +366,14 @@ export class PromptAction {
         throw Error("presentCustomDialog not implemented in PromptAction!")
     }
 
+    getTopOrder(): LevelOrder {
+        throw Error("getTopOrder not implemented in PromptAction!")
+    }
+
+    getBottomOrder(): LevelOrder {
+        throw Error("getBottomOrder not implemented in PromptAction!")
+    }
+
     openPopup(content: ComponentContent, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
         throw Error("openPopup not implemented in PromptAction!")
     }
@@ -371,6 +384,18 @@ export class PromptAction {
 
     closePopup(content: ComponentContent): Promise<void> {
         throw Error("closePopup not implemented in PromptAction!")
+    }
+
+    openMenu(content: ComponentContent, target: TargetInfo, options?: MenuOptions): Promise<void> {
+        throw Error("openMenu not implemented in PromptAction!")
+    }
+
+    updateMenu(content: ComponentContent, options: MenuOptions, partialUpdate?: boolean): Promise<void> {
+        throw Error("updateMenu not implemented in PromptAction!")
+    }
+
+    closeMenu(content: ComponentContent): Promise<void> {
+        throw Error("closeMenu not implemented in PromptAction!")
     }
 }
 

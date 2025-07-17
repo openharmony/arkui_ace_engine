@@ -220,7 +220,8 @@ bool GetGrayscale(ani_env* env, ani_object object, std::vector<float>& result)
         ani_object itemObj = static_cast<ani_object>(itemRef);
         double itemValue;
         if (GetDoubleParam(env, itemObj, itemValue)) {
-            floatArray.emplace_back(static_cast<float>(itemValue));
+            uint32_t itemInt32 = static_cast<int32_t>(itemValue);
+            floatArray.emplace_back(static_cast<float>(itemInt32));
         }
     }
     result = floatArray;
@@ -285,7 +286,9 @@ bool GetBackgroundBlurStyleOptions(ani_env* env, ani_object object, std::optiona
     GetDoubleParam(env, resultObj, "scale", blurStyleOption.scale);
     GetBlurOptions(env, resultObj, blurStyleOption.blurOption);
     GetBlurStyleActivePolicy(env, resultObj, blurStyleOption.policy);
-    GetResourceColorParam(env, resultObj, "inactiveColor", blurStyleOption.inactiveColor);
+    if (GetResourceColorParam(env, resultObj, "inactiveColor", blurStyleOption.inactiveColor)) {
+        blurStyleOption.isValidColor = true;
+    }
     result = std::make_optional<OHOS::Ace::BlurStyleOption>(blurStyleOption);
     return true;
 }
@@ -308,7 +311,7 @@ bool GetBackgroundEffectOptions(ani_env* env, ani_object object, std::optional<O
     }
 
     OHOS::Ace::EffectOption effectOption;
-    double radius = 0;
+    double radius = 0.0f;
     ani_double aniRadius;
     status = env->Object_GetPropertyByName_Double(resultObj, "radius", &aniRadius);
     if (status == ANI_OK) {
@@ -317,12 +320,12 @@ bool GetBackgroundEffectOptions(ani_env* env, ani_object object, std::optional<O
     radius = OHOS::Ace::LessNotEqual(radius, 0.0f) ? 0.0f : radius;
     effectOption.radius = OHOS::Ace::CalcDimension(radius, OHOS::Ace::DimensionUnit::VP);
 
-    double saturation = 0;
+    double saturation = 1.0f;
     GetDoubleParam(env, resultObj, "saturation", saturation);
     effectOption.saturation = (OHOS::Ace::GreatNotEqual(saturation, 0.0f) || OHOS::Ace::NearZero(saturation)) ?
         saturation : 1.0f;
 
-    double brightness = 0;
+    double brightness = 1.0f;
     GetDoubleParam(env, resultObj, "brightness", brightness);
     effectOption.brightness = (OHOS::Ace::GreatNotEqual(brightness, 0.0f) || OHOS::Ace::NearZero(brightness)) ?
         brightness : 1.0f;
@@ -331,7 +334,9 @@ bool GetBackgroundEffectOptions(ani_env* env, ani_object object, std::optional<O
     GetAdaptiveColor(env, resultObj, effectOption.adaptiveColor);
     GetBlurOptions(env, resultObj, effectOption.blurOption);
     GetBlurStyleActivePolicy(env, resultObj, effectOption.policy);
-    GetResourceColorParam(env, resultObj, "inactiveColor", effectOption.inactiveColor);
+    if (GetResourceColorParam(env, resultObj, "inactiveColor", effectOption.inactiveColor)) {
+        effectOption.isValidColor = true;
+    }
     result = std::make_optional<OHOS::Ace::EffectOption>(effectOption);
     return true;
 }
@@ -356,6 +361,71 @@ bool GetImmersiveMode(ani_env* env, ani_object object, OHOS::Ace::ImmersiveMode&
     return true;
 }
 
+void UpdateDialogAlignment(OHOS::Ace::DialogAlignment& alignment)
+{
+    bool isRtl = OHOS::Ace::AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (alignment == OHOS::Ace::DialogAlignment::TOP_START) {
+        if (isRtl) {
+            alignment = OHOS::Ace::DialogAlignment::TOP_END;
+        }
+    } else if (alignment == OHOS::Ace::DialogAlignment::TOP_END) {
+        if (isRtl) {
+            alignment = OHOS::Ace::DialogAlignment::TOP_START;
+        }
+    } else if (alignment == OHOS::Ace::DialogAlignment::CENTER_START) {
+        if (isRtl) {
+            alignment = OHOS::Ace::DialogAlignment::CENTER_END;
+        }
+    } else if (alignment == OHOS::Ace::DialogAlignment::CENTER_END) {
+        if (isRtl) {
+            alignment = OHOS::Ace::DialogAlignment::CENTER_START;
+        }
+    } else if (alignment == OHOS::Ace::DialogAlignment::BOTTOM_START) {
+        if (isRtl) {
+            alignment = OHOS::Ace::DialogAlignment::BOTTOM_END;
+        }
+    } else if (alignment == OHOS::Ace::DialogAlignment::BOTTOM_END) {
+        if (isRtl) {
+            alignment = OHOS::Ace::DialogAlignment::BOTTOM_START;
+        }
+    }
+}
+
+bool GetOnLanguageChange(OHOS::Ace::DialogProperties& dialogProps)
+{
+    auto onLanguageChange = [shadow = dialogProps.shadow, alignment = dialogProps.alignment,
+        offset = dialogProps.offset, maskRect = dialogProps.maskRect,
+        updateAlignment = UpdateDialogAlignment](OHOS::Ace::DialogProperties& dialogProps) {
+        bool isRtl = OHOS::Ace::AceApplicationInfo::GetInstance().IsRightToLeft();
+        if (shadow.has_value()) {
+            OHOS::Ace::Shadow newShadow = shadow.value();
+            double offsetX = isRtl ? newShadow.GetOffset().GetX() * (-1) : newShadow.GetOffset().GetX();
+            newShadow.SetOffsetX(offsetX);
+            dialogProps.shadow = newShadow;
+        }
+
+        OHOS::Ace::DialogAlignment newAlignment = alignment;
+        updateAlignment(newAlignment);
+        dialogProps.alignment = newAlignment;
+
+        OHOS::Ace::DimensionOffset newOffset = offset;
+        OHOS::Ace::Dimension offsetX = isRtl ? newOffset.GetX() * (-1) : newOffset.GetX();
+        newOffset.SetX(offsetX);
+        dialogProps.offset = newOffset;
+
+        if (maskRect.has_value()) {
+            OHOS::Ace::DimensionRect newMaskRect = maskRect.value();
+            auto rectOffset = newMaskRect.GetOffset();
+            OHOS::Ace::Dimension offsetX = isRtl ? rectOffset.GetX() * (-1) : rectOffset.GetX();
+            rectOffset.SetX(offsetX);
+            newMaskRect.SetOffset(rectOffset);
+            dialogProps.maskRect = newMaskRect;
+        }
+    };
+    dialogProps.onLanguageChange = onLanguageChange;
+    return true;
+}
+
 bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps)
 {
     if (IsUndefinedObject(env, object)) {
@@ -377,6 +447,7 @@ bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetResourceColorParamOpt(env, object, "backgroundColor", dialogProps.backgroundColor);
     GetBackgroundBlurStyleParamOpt(env, object, dialogProps.backgroundBlurStyle);
     GetBackgroundBlurStyleOptions(env, object, dialogProps.blurStyleOption);
+    GetBackgroundEffectOptions(env, object, dialogProps.effectOption);
     GetShadowParamOpt(env, object, dialogProps.shadow);
     GetBoolParam(env, object, "enableHoverMode", dialogProps.enableHoverMode);
     GetHoverModeAreaParamOpt(env, object, dialogProps.hoverModeArea);
@@ -389,6 +460,7 @@ bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetDoubleParam(env, object, "levelUniqueId", levelUniqueId);
     dialogProps.dialogLevelUniqueId = static_cast<int32_t>(levelUniqueId);
     GetImmersiveMode(env, object, dialogProps.dialogImmersiveMode);
+    GetOnLanguageChange(dialogProps);
     return true;
 }
 
@@ -402,7 +474,9 @@ bool GetShowDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::Di
         return false;
     }
 
-    GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
+    if (!dialogProps.isShowInSubWindow) {
+        GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
+    }
     return true;
 }
 
@@ -466,7 +540,7 @@ std::function<void(int32_t, int32_t)> GetShowDialogCallback(std::shared_ptr<Prom
 
             std::vector<ani_ref> args(CALLBACK_PARAM_LENGTH);
             if (errorCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
-                args[0] = CreateBusinessError(asyncContext->env, 0, "");
+                asyncContext->env->GetNull(&args[0]);
             } else {
                 args[0] = CreateBusinessError(asyncContext->env, errorCode, "cancel");
             }
@@ -676,7 +750,7 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuCallback(
 
             std::vector<ani_ref> args(CALLBACK_PARAM_LENGTH);
             if (errorCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
-                args[0] = CreateBusinessError(asyncContext->env, 0, "");
+                asyncContext->env->GetNull(&args[0]);
             } else {
                 args[0] = CreateBusinessError(asyncContext->env, errorCode, "cancel");
             }
@@ -894,7 +968,9 @@ bool GetDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::Dialog
     GetTransitionEffectParam(env, object, "transition", dialogProps.transitionEffect);
     GetTransitionEffectParam(env, object, "dialogTransition", dialogProps.dialogTransitionEffect);
     GetTransitionEffectParam(env, object, "maskTransition", dialogProps.maskTransitionEffect);
-    GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
+    if (!dialogProps.isShowInSubWindow) {
+        GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
+    }
     return true;
 }
 
