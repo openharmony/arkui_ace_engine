@@ -22,6 +22,7 @@
 #include "core/interfaces/native/implementation/controller_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/file_selector_param_peer_impl.h"
 #include "core/interfaces/native/implementation/file_selector_result_peer_impl.h"
+#include "core/interfaces/native/implementation/js_geolocation_peer_impl.h"
 #include "core/interfaces/native/implementation/js_result_peer_impl.h"
 #include "core/interfaces/native/implementation/screen_capture_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/event_result_peer_impl.h"
@@ -112,6 +113,31 @@ bool TransferJsResultToStatic(void* peer, void* nativePtr)
     return true;
 #else
     return false;
+#endif // WEB_SUPPORTED
+}
+
+bool TransferJsGeolocationToStatic(void* peer, void* nativePtr)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<JsGeolocationPeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, false);
+    auto* transfer = reinterpret_cast<WebTransferBase<RefPtr<WebGeolocation>>*>(nativePtr);
+    CHECK_NULL_RETURN(transfer, false);
+    objectPeer->webGeolocation = transfer->get<0>();
+    return true;
+#else
+    return false;
+#endif // WEB_SUPPORTED
+}
+
+napi_value TransferJsGeolocationToDynamic(napi_env env, void* peer)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<JsGeolocationPeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, nullptr);
+    return OHOS::Ace::Framework::CreateJSWebGeolocationObject(env, objectPeer->webGeolocation);
+#else
+    return nullptr;
 #endif // WEB_SUPPORTED
 }
 
@@ -431,6 +457,7 @@ const ArkUIAniWebModifier* GetWebAniModifier()
     static const ArkUIAniWebModifier impl = {
         .setWebOptions = OHOS::Ace::NG::SetWebOptions,
         .setWebControllerControllerHandler = OHOS::Ace::NG::SetWebControllerControllerHandler,
+        .transferJsGeolocationToStatic = OHOS::Ace::NG::TransferJsGeolocationToStatic,
         .transferJsResultToStatic = OHOS::Ace::NG::TransferJsResultToStatic,
         .transferEventResultToStatic = OHOS::Ace::NG::TransferEventResultToStatic,
         .transferFileSelectorResultToStatic = OHOS::Ace::NG::TransferFileSelectorResultToStatic,
@@ -446,6 +473,7 @@ const ArkUIAniWebModifier* GetWebAniModifier()
         .transferSslErrorHandlerToStatic = OHOS::Ace::NG::TransferSslErrorHandlerToStatic,
         .transferScreenCaptureHandlerToStatic = OHOS::Ace::NG::TransferScreenCaptureHandlerToStatic,
         .transferScreenCaptureHandlerToDynamic = OHOS::Ace::NG::TransferScreenCaptureHandlerToDynamic,
+        .transferJsGeolocationToDynamic = OHOS::Ace::NG::TransferJsGeolocationToDynamic,
         .transferJsResultToDynamic = OHOS::Ace::NG::TransferJsResultToDynamic,
         .transferEventResultToDynamic = OHOS::Ace::NG::TransferEventResultToDynamic,
         .transferFileSelectorResultToDynamic = OHOS::Ace::NG::TransferFileSelectorResultToDynamic,
