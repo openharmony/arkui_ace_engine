@@ -270,7 +270,7 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(windowManager);
     auto mode = windowManager->GetWindowMode();
     auto sizeType = GridContainerUtils::ProcessGridSizeType(layoutProperty->GetBreakPointsValue(),
-        Size(maxSize.Width(), maxSize.Height()), mode, PipelineBase::GetCurrentContext());
+        Size(maxSize.Width(), maxSize.Height()), mode, PipelineBase::GetCurrentContextSafelyWithCheck());
     if (hostLayoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
         OnBreakPointChange(layoutWrapper, sizeType);
     }
