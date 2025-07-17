@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <unordered_map>
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 
 #include "ui/rs_surface_node.h"
@@ -26,6 +27,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t DELAY_TIME = 3000;
+std::unordered_map<uint64_t, int> surfaceNodeCountMap_;
 } // namespace
 
 SystemWindowScene::SystemWindowScene(const sptr<Rosen::Session>& session) : session_(session)
@@ -99,6 +101,7 @@ void SystemWindowScene::OnAttachToFrameNode()
     session_->SetUINodeId(host->GetAccessibilityId());
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
+    InsertSurfaceNodeId(surfaceNode->GetId());
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
@@ -133,6 +136,27 @@ void SystemWindowScene::OnAttachToFrameNode()
     SetWindowScenePosition();
 }
 
+void SystemWindowScene::InsertSurfaceNodeId(uint64_t nodeId)
+{
+    auto iter = surfaceNodeCountMap_.find(nodeId);
+    if (iter == surfaceNodeCountMap_.end()) {
+        surfaceNodeCountMap_[nodeId] = 1;
+    } else {
+        surfaceNodeCountMap_[nodeId] = iter->second + 1;
+        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE,
+            "OnAttachToFrameNode id: %{public}d, duplicate surfaceNodeId:%{public}s, count:%{public}d",
+            session_->GetPersistentId(), std::to_string(nodeId).c_str(), iter->second);
+    }
+}
+
+void SystemWindowScene::ClearSurfaceNodeId(uint64_t nodeId)
+{
+    auto iter = surfaceNodeCountMap_.find(nodeId);
+    if (iter != surfaceNodeCountMap_.end()) {
+        iter->second == 1 ? surfaceNodeCountMap_.erase(nodeId) : surfaceNodeCountMap_[iter->first] = iter->second - 1;
+    }
+}
+
 void SystemWindowScene::SetWindowScenePosition()
 {
     // set window scene position (x, y) and scale data, jsAccessibilityManager will use it
@@ -164,6 +188,10 @@ void SystemWindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(session_);
     CHECK_NULL_VOID(frameNode);
+    auto surfaceNode = session_->GetSurfaceNode();
+    if (surfaceNode) {
+        ClearSurfaceNodeId(surfaceNode->GetId());
+    }
     ACE_SCOPED_TRACE("OnDetachFromFrameNode[id:%d][self:%d][type:%d][name:%s]",
         session_->GetPersistentId(), frameNode->GetId(), session_->GetWindowType(), session_->GetWindowName().c_str());
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
