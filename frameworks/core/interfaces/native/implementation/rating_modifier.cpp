@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "base/utils/string_utils.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -113,7 +113,7 @@ void OnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onChange = [arkCallback = CallbackHelper(*value)](const std::string& value) {
-        Ark_Number convValue = Converter::ArkValue<Ark_Number>(std::stof(value));
+        Ark_Number convValue = Converter::ArkValue<Ark_Number>(StringUtils::StringToFloat(value));
         arkCallback.Invoke(convValue);
     };
     RatingModelNG::SetOnChange(frameNode, onChange);
@@ -134,7 +134,7 @@ void _onChangeEvent_ratingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(callback);
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const std::string& value) {
-        Ark_Number nValue = Converter::ArkValue<Ark_Number>(std::stof(value));
+        Ark_Number nValue = Converter::ArkValue<Ark_Number>(StringUtils::StringToFloat(value));
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(nValue);
     };
