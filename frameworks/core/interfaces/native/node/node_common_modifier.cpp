@@ -1598,7 +1598,7 @@ void SetPositionEdges(ArkUINodeHandle node, const int32_t useEdges, const ArkUIS
         if (vaild) {
             if (SystemProperties::ConfigChangePerform() && rawPtr) {
                 auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
-                ViewAbstract::SetPosition(frameNode, x.value(), y.value(), objs[0], objs[1]);
+                ViewAbstract::SetPosition(frameNode, offset, objs[0], objs[1]);
             } else {
                 ViewAbstract::SetPosition(frameNode, offset);
             }
