@@ -462,6 +462,13 @@ export class Application {
         registerSyncCallbackProcessor()
         return new Application(useNativeLog, moduleName, startUrl, startParams, userView, entryPoint)
     }
+
+    static registerNativeModulePreloader(): void {
+        registerNativeModuleLibraryName("InteropNativeModule", "ArkoalaNative_ark.z")
+        registerNativeModuleLibraryName("ArkUINativeModule", "ArkoalaNative_ark.z")
+        registerNativeModuleLibraryName("ArkUIGeneratedNativeModule", "ArkoalaNative_ark.z")
+        registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark.z")
+    }
 }
 
 function makeClickEvent(x: number, y: number): ClickEvent {
