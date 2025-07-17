@@ -34,9 +34,6 @@ void MockAnimationManager::CancelAnimations()
 std::vector<RefPtr<MockImplicitAnimation>> MockAnimationManager::CloseAnimation()
 {
     inScope_ = false;
-    if (!enabled_) {
-        return {};
-    }
     if (activeProps_.empty()) {
         return {};
     }
@@ -50,7 +47,7 @@ std::vector<RefPtr<MockImplicitAnimation>> MockAnimationManager::CloseAnimation(
     for (const auto& prop : props) {
         auto anim = propToAnimation_[prop].Upgrade();
         if (anim) {
-            if (!anim->Finished()) {
+            if (runningVersion_ > Version::V0 && !anim->Finished()) {
                 anim->End(); // call previous animation's end callback
             }
             // update existing animation instead

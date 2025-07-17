@@ -38,6 +38,23 @@ public:
         return GetInstance().enabled_;
     }
 
+    /**
+     * @brief Controls the animation manager version to maintain backward compatibility in tests when applying bug fixes.
+     *
+     */
+    enum class Version {
+        V0 = 0,
+        V1 = 1, // introduces bugfixes to animation callback triggers
+    };
+    static Version Version()
+    {
+        return GetInstance().runningVersion_;
+    }
+    static void SetVersion(enum Version value)
+    {
+        GetInstance().runningVersion_ = value;
+    }
+
     void OpenAnimation()
     {
         inScope_ = true;
@@ -104,6 +121,7 @@ private:
     std::map<WeakPtr<PropertyBase>, WeakPtr<MockImplicitAnimation>> propToAnimation_;
 
     int32_t ticks_ = 1;
+    enum Version runningVersion_ = Version::V0;
     bool inScope_ = false;
     bool enabled_ = false;
 };
