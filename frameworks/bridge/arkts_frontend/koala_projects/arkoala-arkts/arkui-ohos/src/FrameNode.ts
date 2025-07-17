@@ -122,6 +122,8 @@ export class FrameNode implements MaterializedBase {
     uiContext: UIContextImpl | undefined = undefined
     renderNode_: RenderNode | undefined = undefined
     instanceId_?: number;
+    // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_ani.cpp.
+    nodePtr_: KPointer | undefined;
     public _nodeId: number = -1;
     protected _commonAttribute: CommonAttribute | undefined = undefined;
     protected _gestureEvent: UIGestureEvent | undefined = undefined;
@@ -161,6 +163,7 @@ export class FrameNode implements MaterializedBase {
             if (type === 'ProxyFrameNode') {
                 if (ptr) {
                     this.peer = new Finalizable(ptr, FrameNode.getFinalizer());
+                    this.nodePtr_ = this.peer?.ptr
                 }
                 return;
             }
@@ -175,9 +178,11 @@ export class FrameNode implements MaterializedBase {
                 this.renderNode_ = new RenderNode('CustomFrameNode')
                 const ctorPtr: KPointer = FrameNode.ctor_framenode()
                 this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
+                this.nodePtr_ = this.peer?.ptr
             } else {
                 const retval = ArkUIGeneratedNativeModule._FrameNode_createTypedFrameNode(type as string);
                 this.peer = new Finalizable(retval, FrameNode.getFinalizer());
+                this.nodePtr_ = this.peer?.ptr
             }
             this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
 
@@ -367,6 +372,7 @@ export class FrameNode implements MaterializedBase {
     }
     public dispose(): void {
         this.dispose_serialize();
+        this.nodePtr_ = undefined;
         return
     }
     public getOpacity(): number {
@@ -944,6 +950,7 @@ export class FrameNodeUtils {
             let frameNode = new BuilderRootFrameNode<T>(uiContext, "BuilderRootFrameNode", ptr);
             frameNode._nodeId = nodeId;
             frameNode.peer = new Finalizable(ptr, FrameNode.getFinalizer());
+            frameNode.nodePtr_ = frameNode.peer?.ptr;
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(nodeId, frameNode);
             return frameNode;
         }

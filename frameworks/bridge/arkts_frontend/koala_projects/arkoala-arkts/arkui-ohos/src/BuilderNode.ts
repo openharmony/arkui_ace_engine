@@ -145,6 +145,8 @@ export type TBuilderFunc<T> = /** @memo */ (t: T) => void;
 
 export class BuilderNode<T = undefined> {
     public _JSBuilderNode: JSBuilderNode<T>;
+    // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_ani.cpp.
+    private nodePtr_: KPointer | undefined;
     constructor(uiContext: UIContext, options?: RenderOptions) {
         this._JSBuilderNode = new JSBuilderNode<T>(uiContext, options);
         BuilderNodeFinalizationRegisterProxy.register<T>(this);
@@ -152,14 +154,17 @@ export class BuilderNode<T = undefined> {
     //@ts-ignore
     public build(builder: WrappedBuilder<TBuilderFunc<T>>, params: T, options?: BuildOptions): void {
         this._JSBuilderNode.buildT(builder, params, options);
+        this.nodePtr_ = this._JSBuilderNode.getValidNodePtr();
     }
     //@ts-ignore
     public build(builder: WrappedBuilder<TBuilderFunc<T>>, params: T): void {
         this._JSBuilderNode.buildT(builder, params);
+        this.nodePtr_ = this._JSBuilderNode.getValidNodePtr();
     }
     //@ts-ignore
     public build(builder: WrappedBuilder<voidBuilderFunc>): void {
         this._JSBuilderNode.build0(builder);
+        this.nodePtr_ = this._JSBuilderNode.getValidNodePtr();
     }
     public update(params: T): void {
         this._JSBuilderNode.update(params);
@@ -179,6 +184,7 @@ export class BuilderNode<T = undefined> {
     }
     public dispose(): void {
         this._JSBuilderNode.disposeNode();
+        this.nodePtr_ = undefined;
     }
     public reuse(param?: Record<string, Object>): void {
         this._JSBuilderNode.reuse(param);
