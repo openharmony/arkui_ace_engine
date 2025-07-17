@@ -1396,6 +1396,12 @@ HWTEST_F(TextTestEightNg, GetLayoutCalPolicy, TestSize.Level1)
     EXPECT_EQ(len, 1080.0f);
     len = TextBase::GetConstraintMaxLength(AceType::RawPtr(layoutWrapper), constraint, false);
     EXPECT_EQ(len, 2048.0f);
+    constraint.maxSize = SizeF(1024.0f, 2048.0f);
+    constraint.parentIdealSize.Reset();
+    len = TextBase::GetConstraintMaxLength(AceType::RawPtr(layoutWrapper), constraint, true);
+    EXPECT_EQ(len, 1024.0f);
+    len = TextBase::GetConstraintMaxLength(AceType::RawPtr(layoutWrapper), constraint, false);
+    EXPECT_EQ(len, 2048.0f);
 }
 /**
  * @tc.name: InitAiSelection001

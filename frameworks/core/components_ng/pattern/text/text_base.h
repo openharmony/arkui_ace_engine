@@ -279,6 +279,7 @@ public:
     static LayoutCalPolicy GetLayoutCalPolicy(LayoutWrapper* layoutWrapper, bool isHorizontal);
     static float GetConstraintMaxLength(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& constraint, bool isHorizontal);
+    static std::optional<float> GetCalcLayoutConstraintLength(LayoutWrapper* layoutWrapper, bool isMax, bool isWidth);
     template <typename Callback>
     void ProcessAccessibilityTextChange(const std::string& currentContent,
         Callback&& callback, const AceLogTag& logTag)
