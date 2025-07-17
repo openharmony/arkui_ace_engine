@@ -154,6 +154,9 @@ export class ArkUIAniModule {
     
     // for XComponent
     native static _XComponent_SetSurfaceCallback(ptr: KPointer, callback: XComponentControllerCallbackInternal): void;
+    // for ComponentContent
+    native static _RemoveComponent_FromFrameNode(ptr: KPointer, content: KPointer): void
+    native static _AddComponent_ToFrameNode(ptr: KPointer, content: KPointer): void
 
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean

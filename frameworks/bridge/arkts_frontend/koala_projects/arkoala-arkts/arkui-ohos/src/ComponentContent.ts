@@ -48,6 +48,7 @@ export class ComponentContent<T = undefined> implements Content {
         return this.builderNode_.getFrameNodeWithoutCheck();
     }
     getNodePtr(): KPointer | undefined {
+        // point to struct FrameNodePeer or undefined
         return this.builderNode_.getNodePtr();
     }
     reuse(param?: Record<string, Object>): void {
@@ -74,5 +75,10 @@ export class ComponentContent<T = undefined> implements Content {
         if (parent !== undefined) {
             parent.removeComponentContent(this);
         }
+    }
+
+    public getNodeWithoutProxy(): pointer | undefined {
+        // point to UINode or undefined
+        return this.builderNode_?.getNodeWithoutProxy()
     }
 }

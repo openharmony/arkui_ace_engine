@@ -42,7 +42,7 @@ export interface BuildOptions {
     nestingBuilderSupported?: boolean;
 }
 
-const __uiNode_name_map__: Array<string> = ["ContentSlot", "CustomComponent"]
+const __uiNode_name_map__: Array<string> = ["ContentSlot", "CustomComponent", "LazyForEach", "IfElse"]
 
 class BuilderRootNode extends IncrementalNode {
     public __parent?: ArkBuilderProxyNodePeer;
@@ -143,7 +143,7 @@ export type voidBuilderFunc = /** @memo */ () => void;
 
 export type TBuilderFunc<T> = /** @memo */ (t: T) => void;
 
-export class BuilderNode<T = undefined>{
+export class BuilderNode<T = undefined> {
     public _JSBuilderNode: JSBuilderNode<T>;
     constructor(uiContext: UIContext, options?: RenderOptions) {
         this._JSBuilderNode = new JSBuilderNode<T>(uiContext, options);
@@ -188,6 +188,10 @@ export class BuilderNode<T = undefined>{
     }
     public updateConfiguration(): void {
         this._JSBuilderNode.updateConfiguration();
+    }
+
+    public getNodeWithoutProxy(): pointer | undefined {
+        return this._JSBuilderNode.getNodeWithoutProxy();
     }
 }
 
@@ -242,7 +246,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     }
 
     public buildFunc(): void {
-        let instanceId : int32 = 0;
+        let instanceId: int32 = 0;
         if (this.__uiContext === undefined) {
             instanceId = UIContextUtil.getCurrentInstanceId();
         } else {
@@ -294,6 +298,11 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             this.__frameNode?.setJsBuilderNode(this);
             this.setUpdateConfigurationCallback(this.updateConfiguration);
         }
+    }
+
+    public getNodeWithoutProxy(): pointer | undefined {
+        let pointer = this.__root?.getPeerPtr();
+        return pointer ? pointer : undefined;
     }
 
     public build0(builder: WrappedBuilder<voidBuilderFunc>): void {

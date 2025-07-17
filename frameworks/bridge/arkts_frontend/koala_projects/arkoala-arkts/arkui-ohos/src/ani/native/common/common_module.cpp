@@ -154,6 +154,24 @@ ani_long BuilderProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object ani
     return reinterpret_cast<ani_long>(builderProxyNode);
 }
 
+void RemoveComponentFromFrameNode(ani_env* env, ani_object obj, ani_long node, ani_long content)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getArkUIAniComponentConentModifier() || !env) {
+        return;
+    }
+    modifier->getArkUIAniComponentConentModifier()->removeComponentFromFrameNode(node, content);
+}
+
+void AddComponentToFrameNode(ani_env* env, ani_object obj, ani_long node, ani_long content)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getArkUIAniComponentConentModifier() || !env) {
+        return;
+    }
+    modifier->getArkUIAniComponentConentModifier()->addComponentToFrameNode(node, content);
+}
+
 ani_object GetSharedLocalStorage([[maybe_unused]] ani_env* env)
 {
     const auto* modifier = GetNodeAniModifier();
