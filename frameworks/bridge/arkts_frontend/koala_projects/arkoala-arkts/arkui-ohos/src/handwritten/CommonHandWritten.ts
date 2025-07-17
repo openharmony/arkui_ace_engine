@@ -153,7 +153,8 @@ export function hookCustomPropertyImpl(arkComponent: ArkCommonMethodComponent,
         if (ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
             const customPropertiesGet = ElementIdToCustomProperties._elementIdToCustomProperties.get(nodeId);
             if (customPropertiesGet) {
-                return JSON.stringify(customPropertiesGet.get(name));
+                const propertyValue = customPropertiesGet.get(name);
+                return propertyValue !== undefined ? JSON.stringify(propertyValue) : undefined;
             }
         }
         return undefined;

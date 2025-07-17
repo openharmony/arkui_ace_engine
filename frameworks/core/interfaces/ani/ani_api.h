@@ -114,7 +114,7 @@ struct ArkUIAniCommonModifier {
     void (*setCustomPropertyCallBack)(
         ani_env* env, ArkUINodeHandle node, std::function<void()>&& func,
         std::function<std::string(const std::string&)>&& getFunc);
-    std::string (*getCustomProperty)(ani_env* env, ArkUINodeHandle node, std::string& key);
+    std::optional<std::string> (*getCustomProperty)(ani_env* env, ArkUINodeHandle node, const std::string& key);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);

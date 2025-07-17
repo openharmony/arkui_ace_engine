@@ -257,7 +257,7 @@ static void SetCustomPropertyCallBack(
     frameNode->SetCustomPropertyCallback(std::move(func), std::move(getFunc));
 }
 
-static std::string GetCustomProperty(ani_env* env, ArkUINodeHandle node, std::string& key)
+static std::optional<std::string> GetCustomProperty(ani_env* env, ArkUINodeHandle node, const std::string& key)
 {
     auto id = Container::CurrentIdSafelyWithCheck();
     ContainerScope scope(id);
@@ -266,13 +266,13 @@ static std::string GetCustomProperty(ani_env* env, ArkUINodeHandle node, std::st
         LOGF_ABORT("GetCustomProperty doesn't run on UI thread");
     }
     auto frameNode = reinterpret_cast<NG::FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
 
     std::string capiCustomProperty;
     if (frameNode->GetCapiCustomProperty(key, capiCustomProperty)) {
         return capiCustomProperty;
     } else {
-        return nullptr;
+        return std::nullopt;
     }
 }
 

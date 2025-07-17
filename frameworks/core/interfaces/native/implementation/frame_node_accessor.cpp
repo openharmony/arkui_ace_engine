@@ -205,7 +205,9 @@ Ark_FrameNode GetChildImpl(Ark_FrameNode peer,
     CHECK_NULL_RETURN(peerNode, nullptr);
     CHECK_NULL_RETURN(index, nullptr);
     auto indexInt = Converter::Convert<int32_t>(*index);
-    CHECK_NULL_RETURN(indexInt > -1, nullptr);
+    if (indexInt < 0) {
+        return nullptr;
+    }
     auto expandModeInt = Converter::Convert<int32_t>(*expandMode);
     auto child = GetChildNode(peerNode, indexInt, expandModeInt);
     CHECK_NULL_RETURN(child, nullptr);
@@ -282,7 +284,6 @@ void DisposeImpl(Ark_FrameNode peer)
     CHECK_NULL_VOID(peerNode);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
     CHECK_NULL_VOID(currentUINodeRef);
-    LOGW("FrameNodeAccessor::DisposeImpl - behavior can be wrong. No specification to this API.");
     auto parent = GetParentNode(peerNode);
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(currentUINodeRef);
