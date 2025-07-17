@@ -7227,8 +7227,8 @@ typedef struct Opt_OnDataResubmittedEvent {
     Ark_OnDataResubmittedEvent value;
 } Opt_OnDataResubmittedEvent;
 typedef struct Ark_OnFirstContentfulPaintEvent {
-    Ark_Number navigationStartTick;
-    Ark_Number firstContentfulPaintMs;
+    Ark_Int64 navigationStartTick;
+    Ark_Int64 firstContentfulPaintMs;
 } Ark_OnFirstContentfulPaintEvent;
 typedef struct Opt_OnFirstContentfulPaintEvent {
     Ark_Tag tag;
@@ -12743,8 +12743,8 @@ typedef struct Opt_FingerInfo {
     Ark_FingerInfo value;
 } Opt_FingerInfo;
 typedef struct Ark_FirstMeaningfulPaint {
-    Opt_Number navigationStartTime;
-    Opt_Number firstMeaningfulPaintTime;
+    Opt_Int64 navigationStartTime;
+    Opt_Int64 firstMeaningfulPaintTime;
 } Ark_FirstMeaningfulPaint;
 typedef struct Opt_FirstMeaningfulPaint {
     Ark_Tag tag;
@@ -13123,12 +13123,12 @@ typedef struct Opt_KeyEvent {
     Ark_KeyEvent value;
 } Opt_KeyEvent;
 typedef struct Ark_LargestContentfulPaint {
-    Opt_Number navigationStartTime;
-    Opt_Number largestImagePaintTime;
-    Opt_Number largestTextPaintTime;
-    Opt_Number imageBPP;
-    Opt_Number largestImageLoadStartTime;
-    Opt_Number largestImageLoadEndTime;
+    Opt_Int64 navigationStartTime;
+    Opt_Int64 largestImagePaintTime;
+    Opt_Int64 largestTextPaintTime;
+    Opt_Float32 imageBPP;
+    Opt_Int64 largestImageLoadStartTime;
+    Opt_Int64 largestImageLoadEndTime;
 } Ark_LargestContentfulPaint;
 typedef struct Opt_LargestContentfulPaint {
     Ark_Tag tag;
@@ -17076,8 +17076,8 @@ typedef struct Ark_NativeEmbedInfo {
     Opt_String type;
     Opt_String src;
     Opt_Position position;
-    Opt_Number width;
-    Opt_Number height;
+    Opt_Int32 width;
+    Opt_Int32 height;
     Opt_String url;
     Opt_String tag;
     Opt_Map_String_String params;
@@ -23280,7 +23280,7 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setTextZoomAtio)(Ark_NativePointer node,
                             const Opt_Number* value);
     void (*setTextZoomRatio)(Ark_NativePointer node,
-                             const Opt_Number* value);
+                             const Opt_Int32* value);
     void (*setDatabaseAccess)(Ark_NativePointer node,
                               const Opt_Boolean* value);
     void (*setInitialScale)(Ark_NativePointer node,
@@ -23386,13 +23386,13 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setWebCursiveFont)(Ark_NativePointer node,
                               const Opt_String* value);
     void (*setDefaultFixedFontSize)(Ark_NativePointer node,
-                                    const Opt_Number* value);
+                                    const Opt_Int32* value);
     void (*setDefaultFontSize)(Ark_NativePointer node,
-                               const Opt_Number* value);
+                               const Opt_Int32* value);
     void (*setMinFontSize)(Ark_NativePointer node,
-                           const Opt_Number* value);
+                           const Opt_Int32* value);
     void (*setMinLogicalFontSize)(Ark_NativePointer node,
-                                  const Opt_Number* value);
+                                  const Opt_Int32* value);
     void (*setDefaultTextEncodingFormat)(Ark_NativePointer node,
                                          const Opt_String* value);
     void (*setForceDisplayScrollBar)(Ark_NativePointer node,

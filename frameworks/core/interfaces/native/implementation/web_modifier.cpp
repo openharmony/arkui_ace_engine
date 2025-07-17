@@ -119,8 +119,8 @@ MenuOptionsParam Convert(const Ark_ExpandedMenuItemOptions& src)
 
 void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src)
 {
-    dst.width = Converter::ArkValue<Opt_Number>(src.width);
-    dst.height = Converter::ArkValue<Opt_Number>(src.height);
+    dst.width = Converter::ArkValue<Opt_Int32>(src.width);
+    dst.height = Converter::ArkValue<Opt_Int32>(src.height);
     dst.id = Converter::ArkValue<Opt_String>(src.id);
     dst.src = Converter::ArkValue<Opt_String>(src.src);
     dst.tag = Converter::ArkValue<Opt_String>(src.tag);
@@ -438,7 +438,7 @@ void TextZoomAtioImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void TextZoomRatioImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+                       const Opt_Int32* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1372,7 +1372,7 @@ void WebCursiveFontImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void DefaultFixedFontSizeImpl(Ark_NativePointer node,
-                              const Opt_Number* value)
+                              const Opt_Int32* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1386,7 +1386,7 @@ void DefaultFixedFontSizeImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void DefaultFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1400,7 +1400,7 @@ void DefaultFontSizeImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void MinFontSizeImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Int32* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1414,7 +1414,7 @@ void MinFontSizeImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void MinLogicalFontSizeImpl(Ark_NativePointer node,
-                            const Opt_Number* value)
+                            const Opt_Int32* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);

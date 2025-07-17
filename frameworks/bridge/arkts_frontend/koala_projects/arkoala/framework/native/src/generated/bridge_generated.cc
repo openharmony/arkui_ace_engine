@@ -29264,14 +29264,14 @@ void impl_WebAttribute_textZoomRatio(Ark_NativePointer thisPtr, KSerializerBuffe
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number value_value_buf = {};
+        Opt_Int32 value_value_buf = {};
         value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
         {
-            value_value_buf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            value_value_buf.value = static_cast<Ark_Int32>(thisDeserializer.readInt32());
         }
-        Opt_Number value_value = value_value_buf;;
-        GetNodeModifiers()->getWebModifier()->setTextZoomRatio(self, (const Opt_Number*)&value_value);
+        Opt_Int32 value_value = value_value_buf;;
+        GetNodeModifiers()->getWebModifier()->setTextZoomRatio(self, (const Opt_Int32*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_textZoomRatio, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_databaseAccess(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -30006,56 +30006,56 @@ void impl_WebAttribute_defaultFixedFontSize(Ark_NativePointer thisPtr, KSerializ
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number value_value_buf = {};
+        Opt_Int32 value_value_buf = {};
         value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
         {
-            value_value_buf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            value_value_buf.value = static_cast<Ark_Int32>(thisDeserializer.readInt32());
         }
-        Opt_Number value_value = value_value_buf;;
-        GetNodeModifiers()->getWebModifier()->setDefaultFixedFontSize(self, (const Opt_Number*)&value_value);
+        Opt_Int32 value_value = value_value_buf;;
+        GetNodeModifiers()->getWebModifier()->setDefaultFixedFontSize(self, (const Opt_Int32*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_defaultFixedFontSize, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_defaultFontSize(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number value_value_buf = {};
+        Opt_Int32 value_value_buf = {};
         value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
         {
-            value_value_buf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            value_value_buf.value = static_cast<Ark_Int32>(thisDeserializer.readInt32());
         }
-        Opt_Number value_value = value_value_buf;;
-        GetNodeModifiers()->getWebModifier()->setDefaultFontSize(self, (const Opt_Number*)&value_value);
+        Opt_Int32 value_value = value_value_buf;;
+        GetNodeModifiers()->getWebModifier()->setDefaultFontSize(self, (const Opt_Int32*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_defaultFontSize, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_minFontSize(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number value_value_buf = {};
+        Opt_Int32 value_value_buf = {};
         value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
         {
-            value_value_buf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            value_value_buf.value = static_cast<Ark_Int32>(thisDeserializer.readInt32());
         }
-        Opt_Number value_value = value_value_buf;;
-        GetNodeModifiers()->getWebModifier()->setMinFontSize(self, (const Opt_Number*)&value_value);
+        Opt_Int32 value_value = value_value_buf;;
+        GetNodeModifiers()->getWebModifier()->setMinFontSize(self, (const Opt_Int32*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_minFontSize, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_minLogicalFontSize(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number value_value_buf = {};
+        Opt_Int32 value_value_buf = {};
         value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
         {
-            value_value_buf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            value_value_buf.value = static_cast<Ark_Int32>(thisDeserializer.readInt32());
         }
-        Opt_Number value_value = value_value_buf;;
-        GetNodeModifiers()->getWebModifier()->setMinLogicalFontSize(self, (const Opt_Number*)&value_value);
+        Opt_Int32 value_value = value_value_buf;;
+        GetNodeModifiers()->getWebModifier()->setMinLogicalFontSize(self, (const Opt_Int32*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_minLogicalFontSize, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_defaultTextEncodingFormat(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
