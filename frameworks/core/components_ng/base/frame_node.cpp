@@ -5032,7 +5032,7 @@ void FrameNode::ProcessAccessibilityVirtualNode()
 
 void FrameNode::UpdateAccessibilityNodeRect()
 {
-    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled()) {
         return;
     }
     auto context = GetContextRefPtr();
