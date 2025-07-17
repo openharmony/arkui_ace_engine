@@ -13,6 +13,9 @@ export declare namespace uiObserver {
     export interface UIObserver {
         on(type: string, callback: object): void;
         off(type: string, callback?: object): void;
+        
+        on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
+        off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
     }
     export function createUIObserver(id: number): UIObserver;
 
@@ -59,5 +62,8 @@ export declare namespace uiObserver {
         ON_PAGE_SHOW = 2,
         ON_PAGE_HIDE = 3,
         ON_BACK_PRESS = 4
+    }
+    export interface NavDestinationSwitchObserverOptions {
+        navigationId: ResourceStr;
     }
 }
