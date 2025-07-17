@@ -829,6 +829,7 @@ void GestureEventHub::PrepareDragStartInfo(
     data.relativeContainerNode = relativeContainerNode;
     auto relativeContainerLayoutProperty = relativeContainerNode->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
+    relativeContainerLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
     relativeContainerLayoutProperty->UpdateUserDefinedIdealSize(
         { CalcLength(data.originPreviewRect.Width(), DimensionUnit::PX),
             CalcLength(data.originPreviewRect.Height(), DimensionUnit::PX) });
