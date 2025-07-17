@@ -88,6 +88,7 @@ template("ace_osal_ohos_source_set") {
       "stylus_detector_loader.cpp",
       "stylus_detector_mgr.cpp",
       "system_properties.cpp",
+      "system_properties_multi_thread.cpp",
       "text_share_adapter.cpp",
       "text_share_loader.cpp",
       "text_share_mgr.cpp",

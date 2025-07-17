@@ -842,6 +842,7 @@ template("ace_core_ng_source_set") {
       # pipeline
       "pipeline/base/constants.cpp",
       "pipeline/base/element_register.cpp",
+      "pipeline/base/element_register_multi_thread.cpp",
       "pipeline/base/related_node.cpp",
       "pipeline/container_window_manager.cpp",
       "pipeline/pipeline_base.cpp",

@@ -98,6 +98,7 @@ ohos_source_set("preview_osal_source") {
       "stylus_detector_mgr.cpp",
       "system_bar_style_ohos.cpp",
       "system_properties.cpp",
+      "system_properties_multi_thread.cpp",
       "task/task_runner_adapter_impl.cpp",
       "thread_priority.cpp",
       "time_event_proxy_preview.cpp",

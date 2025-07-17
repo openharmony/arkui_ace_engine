@@ -15,7 +15,9 @@
 
 #include "frameworks/core/pipeline/base/element_register.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components_v2/common/element_proxy.h"
+#include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
@@ -138,6 +140,7 @@ NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
 
 bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
 {
+    FREE_NODE_CHECK(node, ElementRegisterMultiThread::GetInstance()->AddUINode, node);
     if (!node || (node->GetId() == ElementRegister::UndefinedElementId)) {
         return false;
     }

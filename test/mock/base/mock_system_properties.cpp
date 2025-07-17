@@ -96,6 +96,7 @@ bool SystemProperties::softPagetransition_ = false;
 bool SystemProperties::formSkeletonBlurEnabled_ = true;
 bool SystemProperties::syncLoadEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
+bool SystemProperties::debugThreadSafeNodeEnable_ = false;
 
 bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;
