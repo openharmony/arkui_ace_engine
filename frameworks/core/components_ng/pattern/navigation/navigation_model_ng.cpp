@@ -1442,17 +1442,6 @@ void NavigationModelNG::SetOnTitleModeChange(std::function<void(NG::NavigationTi
     eventHub->SetOnTitleModeChange(std::move(eventInfo));
 }
 
-// void NavigationModelNG::SetOnTitleModeChange(FrameNode* frameNode,
-//     std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
-//     std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo)
-// {
-//     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-//     CHECK_NULL_VOID(navigationGroupNode);
-//     auto eventHub = navigationGroupNode->GetEventHub<NavigationEventHub>();
-//     CHECK_NULL_VOID(eventHub);
-//     eventHub->SetOnTitleModeChange(std::move(eventInfo));
-// }
-
 void NavigationModelNG::SetOnNavBarWidthChangeEvent(OnNavBarWidthChangeEvent event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1858,14 +1847,6 @@ void NavigationModelNG::SetOnTitleModeChange(FrameNode* frameNode,
     eventHub->SetOnTitleModeChange(std::move(eventInfo));
 }
 
-// void NavigationModelNG::SetOnNavigationModeChange(FrameNode* frameNode,
-//     std::function<void(NavigationMode)>&& modeChange)
-// {
-//     auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
-//     CHECK_NULL_VOID(navigationEventHub);
-//     navigationEventHub->SetOnNavigationModeChange(std::move(modeChange));
-// }
-
 void NavigationModelNG::SetIsCustomAnimation(FrameNode* frameNode, bool isCustom)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1912,14 +1893,6 @@ void NavigationModelNG::SetToolBarItems(FrameNode* frameNode, std::vector<NG::Ba
     navBarNode->SetPreToolBarNode(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(false);
 }
-
-// void NavigationModelNG::SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange)
-// {
-//     CHECK_NULL_VOID(frameNode);
-//     auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
-//     CHECK_NULL_VOID(navigationEventHub);
-//     navigationEventHub->SetOnNavBarStateChange(std::move(onNavBarStateChange));
-// }
 
 void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated)
 {
@@ -2112,6 +2085,7 @@ void NavigationModelNG::SetMaxNavBarWidth(FrameNode* frameNode, const RefPtr<Res
 
 void NavigationModelNG::SetNavBarWidth(FrameNode* frameNode, const Dimension& value)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarWidth, value, frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);

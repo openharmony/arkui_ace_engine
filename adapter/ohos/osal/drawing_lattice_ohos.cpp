@@ -14,7 +14,6 @@
  */
 
 #include "drawing_lattice_ohos.h"
-
 // #include "lattice_ani/ani_lattice.h"
 #include "lattice_napi/js_lattice.h"
 

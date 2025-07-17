@@ -1288,14 +1288,6 @@ void NavDestinationModelNG::SetOnWillHide(FrameNode* frameNode, std::function<vo
     navDestinationEventHub->SetOnWillHide(willHide);
 }
 
-// void NavDestinationModelNG::SetOnWillHide(FrameNode* frameNode, std::function<void()>&& willHide)
-// {
-//     CHECK_NULL_VOID(frameNode);
-//     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
-//     CHECK_NULL_VOID(navDestinationEventHub);
-//     navDestinationEventHub->SetOnWillHide(willHide);
-// }
-
 void NavDestinationModelNG::SetOnWillShow(std::function<void()>&& willShow)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1314,14 +1306,6 @@ void NavDestinationModelNG::SetOnWillShow(FrameNode* frameNode, std::function<vo
     navDestinationEventHub->SetOnWillShow(willShow);
 }
 
-// void NavDestinationModelNG::SetOnWillShow(FrameNode* frameNode, std::function<void()>&& willShow)
-// {
-//     CHECK_NULL_VOID(frameNode);
-//     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
-//     CHECK_NULL_VOID(navDestinationEventHub);
-//     navDestinationEventHub->SetOnWillShow(willShow);
-// }
-
 void NavDestinationModelNG::SetOnWillDisAppear(std::function<void()>&& willDisAppear)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1339,14 +1323,6 @@ void NavDestinationModelNG::SetOnWillDisAppear(FrameNode* frameNode, std::functi
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
 }
-
-// void NavDestinationModelNG::SetOnWillDisAppear(FrameNode* frameNode, std::function<void()>&& willDisAppear)
-// {
-//     CHECK_NULL_VOID(frameNode);
-//     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
-//     CHECK_NULL_VOID(navDestinationEventHub);
-//     navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
-// }
 
 void NavDestinationModelNG::SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts)
 {

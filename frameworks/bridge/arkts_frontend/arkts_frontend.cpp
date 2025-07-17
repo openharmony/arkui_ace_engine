@@ -53,8 +53,8 @@ struct AppInfo {
 const AppInfo KOALA_APP_INFO = {
     "Larkui/ArkUIEntry/Application;",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;ZLarkui/UserView/UserView;Larkui/UserView/EntryPoint;:Larkui/ArkUIEntry/"
-    "Application;",
+    "Lstd/core/String;Lstd/core/String;ZLstd/core/String;Larkui/UserView/UserView;Larkui/UserView/EntryPoint;"
+    ":Larkui/ArkUIEntry/Application;",
     "start",
     ":J",
     "enter",
@@ -357,7 +357,7 @@ ani_object ArktsFrontend::CallGetUIContextFunc(int32_t instanceId)
     CHECK_NULL_RETURN(env, result);
 
     ani_class uiContextClass;
-    if ((status = env->FindClass("L@ohos/arkui/UIContext/UIContext;", &uiContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("Larkui/handwritten/UIContextUtil/UIContextUtil;", &uiContextClass)) != ANI_OK) {
         LOGE("FindClass UIContext failed, %{public}d", status);
         return result;
     }
