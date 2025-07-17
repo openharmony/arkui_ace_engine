@@ -834,7 +834,7 @@ private:
     RefPtr<WebScreenCaptureRequest> request_;
 };
 
-class JSNativeEmbedGestureRequest : public WebTransferBase<RefPtr<GestureEventResult>>
+class JSNativeEmbedGestureRequest : public WebTransferBase<RefPtr<GestureEventResult>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
