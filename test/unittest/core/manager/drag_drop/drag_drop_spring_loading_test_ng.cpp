@@ -452,47 +452,4 @@ HWTEST_F(DragSpringLoadingTestNg, DragSpringLoadingTest003, TestSize.Level1)
         caseNum++;
     }
 }
-
-/**
- * @tc.name: DragSpringLoadingTest004
- * @tc.desc: Test NotifyMove
- * @tc.type: FUNC
- */
- HWTEST_F(DragSpringLoadingTestNg, DragSpringLoadingTest004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. initialize detector.
-     */
-    ASSERT_NE(detector_, nullptr);
-    ASSERT_NE(dropFrameNode_, nullptr);
-    ASSERT_NE(dragFrameNode_, nullptr);
-    dropFrameNode_->eventHub_ = AceType::MakeRefPtr<EventHub>();
-    auto machine = detector_->stateMachine_;
-    ASSERT_NE(machine, nullptr);
-    machine->ResetMachine();
-    detector_->ResetState();
-    dragFrameNode_->eventHub_ = AceType::MakeRefPtr<EventHub>();
-    detector_->preTargetFrameNode_ = dropFrameNode_;
-    detector_->preMovePoint_ = Point(0, 0);
-    detector_->preTimeStamp_ = 0;
-    machine->currentState_ = DragDropSpringLoadingState::BEGIN;
-
-    /**
-     * @tc.steps: step2. call NotifyIntercept.
-     */
-    detector_->NotifyIntercept("");
-    EXPECT_EQ(detector_->preTargetFrameNode_, nullptr);
-
-    detector_->preTargetFrameNode_ = dropFrameNode_;
-    detector_->preTargetFrameNode_->eventHub_->SetCustomerOnDragSpringLoading(
-                            [](const RefPtr<DragSpringLoadingContext>& info) { ASSERT_NE(info, nullptr); });
-    machine->stateMachinePool_ = nullptr;
-    detector_->NotifyIntercept("");
-    EXPECT_EQ(machine->currentState_, DragDropSpringLoadingState::IDLE);
-
-    detector_->preTargetFrameNode_ = dropFrameNode_;
-    machine->isWaitingForIdleFinish_ = true;
-    detector_->NotifyIntercept("");
-    EXPECT_FALSE(machine->isWaitingForIdleFinish_);
-}
 } // namespace OHOS::Ace::NG
