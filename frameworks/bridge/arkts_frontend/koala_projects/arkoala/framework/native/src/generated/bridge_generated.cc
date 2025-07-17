@@ -43141,21 +43141,21 @@ void impl_WebKeyboardController_insertText(Ark_NativePointer thisPtr, const KStr
         GetAccessors()->getWebKeyboardControllerAccessor()->insertText(self, (const Ark_String*) (&text));
 }
 KOALA_INTEROP_V2(WebKeyboardController_insertText, Ark_NativePointer, KStringPtr)
-void impl_WebKeyboardController_deleteForward(Ark_NativePointer thisPtr, KInteropNumber length) {
+void impl_WebKeyboardController_deleteForward(Ark_NativePointer thisPtr, Ark_Int32 length) {
         Ark_WebKeyboardController self = reinterpret_cast<Ark_WebKeyboardController>(thisPtr);
-        GetAccessors()->getWebKeyboardControllerAccessor()->deleteForward(self, (const Ark_Number*) (&length));
+        GetAccessors()->getWebKeyboardControllerAccessor()->deleteForward(self, (const Ark_Int32*) (&length));
 }
-KOALA_INTEROP_DIRECT_V2(WebKeyboardController_deleteForward, Ark_NativePointer, KInteropNumber)
-void impl_WebKeyboardController_deleteBackward(Ark_NativePointer thisPtr, KInteropNumber length) {
+KOALA_INTEROP_DIRECT_V2(WebKeyboardController_deleteForward, Ark_NativePointer, Ark_Int32)
+void impl_WebKeyboardController_deleteBackward(Ark_NativePointer thisPtr, Ark_Int32 length) {
         Ark_WebKeyboardController self = reinterpret_cast<Ark_WebKeyboardController>(thisPtr);
-        GetAccessors()->getWebKeyboardControllerAccessor()->deleteBackward(self, (const Ark_Number*) (&length));
+        GetAccessors()->getWebKeyboardControllerAccessor()->deleteBackward(self, (const Ark_Int32*) (&length));
 }
-KOALA_INTEROP_DIRECT_V2(WebKeyboardController_deleteBackward, Ark_NativePointer, KInteropNumber)
-void impl_WebKeyboardController_sendFunctionKey(Ark_NativePointer thisPtr, KInteropNumber key) {
+KOALA_INTEROP_DIRECT_V2(WebKeyboardController_deleteBackward, Ark_NativePointer, Ark_Int32)
+void impl_WebKeyboardController_sendFunctionKey(Ark_NativePointer thisPtr, Ark_Int32 key) {
         Ark_WebKeyboardController self = reinterpret_cast<Ark_WebKeyboardController>(thisPtr);
-        GetAccessors()->getWebKeyboardControllerAccessor()->sendFunctionKey(self, (const Ark_Number*) (&key));
+        GetAccessors()->getWebKeyboardControllerAccessor()->sendFunctionKey(self, (const Ark_Int32*) (&key));
 }
-KOALA_INTEROP_DIRECT_V2(WebKeyboardController_sendFunctionKey, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_DIRECT_V2(WebKeyboardController_sendFunctionKey, Ark_NativePointer, Ark_Int32)
 void impl_WebKeyboardController_close(Ark_NativePointer thisPtr) {
         Ark_WebKeyboardController self = reinterpret_cast<Ark_WebKeyboardController>(thisPtr);
         GetAccessors()->getWebKeyboardControllerAccessor()->close(self);
