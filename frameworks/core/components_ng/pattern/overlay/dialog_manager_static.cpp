@@ -280,7 +280,12 @@ void DialogManagerStatic::ShowActionMenuStatic(DialogProperties& dialogProps,
             overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
         }
     };
-    ShowInEmbeddedOverlay(std::move(task), "ArkUIOverlayShowActionMenuInner", dialogProps.dialogLevelUniqueId);
+
+    if (dialogProps.dialogLevelMode == LevelMode::EMBEDDED) {
+        ShowInEmbeddedOverlay(std::move(task), "ArkUIOverlayShowActionMenuInner", dialogProps.dialogLevelUniqueId);
+    } else {
+        MainWindowOverlayStatic(std::move(task), "ArkUIOverlayShowActionMenuInner", nullptr, currentId);
+    }
 }
 
 void DialogManagerStatic::OpenCustomDialogStatic(DialogProperties& dialogProps,
