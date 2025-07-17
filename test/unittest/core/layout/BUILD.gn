@@ -51,9 +51,16 @@ ace_unittest("layout_wrapper_node_test_ng") {
   sources = [ "layout_wrapper_node_test_ng.cpp" ]
 }
 
+ace_unittest("drawing_layout_utils_test_ng") {
+  type = "new"
+  module_output = "layout"
+  sources = [ "drawing_layout_utils_test_ng.cpp" ]
+}
+
 group("core_layout_unittest") {
   testonly = true
   deps = [
+    ":drawing_layout_utils_test_ng",
     ":layout_property_test_ng",
     ":layout_wrapper_build_test_ng",
     ":layout_wrapper_node_test_ng",
