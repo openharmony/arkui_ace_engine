@@ -1809,6 +1809,33 @@ HWTEST_F(TextFieldPatternTestEight, OnAttachToFrameNode001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: OnAttachToFrameNode002
+ * @tc.desc: test OnAttachToFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, OnAttachToFrameNode002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    GetFocus();
+
+    auto frameNode = pattern_->GetHost();
+    auto pipeline = frameNode->GetContext();
+    pipeline->fontManager_ = AceType::MakeRefPtr<MockFontManager>();
+
+    int32_t lastPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+
+    pattern_->OnAttachToFrameNode();
+
+    auto theme = pattern_->GetTheme();
+    EXPECT_NE(theme, nullptr);
+    EXPECT_NE(pattern_->needToRequestKeyboardOnFocus_, pattern_->independentControlKeyboard_);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(lastPlatformVersion);
+}
+
+/**
  * @tc.name: ProcessCancelButton001
  * @tc.desc: test ProcessCancelButton
  * @tc.type: FUNC

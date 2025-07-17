@@ -72,7 +72,6 @@ void TextFieldModelNG::CreateNode(
     pattern->InitSurfaceChangedCallback();
     pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
-    pattern->InitTheme();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto colorMode = pipeline->GetColorMode();
@@ -147,7 +146,6 @@ void TextFieldModelNG::UpdateTextFieldPattern(
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
     pattern->RegisterWindowSizeCallback();
-    pattern->InitTheme();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetHasPreviewTextOption()) {

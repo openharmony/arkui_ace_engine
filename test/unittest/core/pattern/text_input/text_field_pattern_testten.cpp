@@ -929,7 +929,6 @@ HWTEST_F(TextFieldPatternTestten, GetCancelImageText001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
-    textFieldPattern->InitTheme();
     auto result = textFieldPattern->GetCancelImageText();
     EXPECT_EQ(result, "");
 }
