@@ -63,6 +63,25 @@ export class ArkWebTransfer {
         return ArkUIAniModule._TransferJsResultToDynamic(value_casted.peer!.ptr)
     }
 
+    public static transferEventResultStatic(value: Object | undefined | null): Object {
+        registerAllNativeModuleLibraryName()
+        if (value === undefined || value === null) {
+            throw new Error('dynamic object is null or undefined')
+        }
+        let result: EventResult = new EventResult()
+        if (!ArkUIAniModule._TransferEventResultToStatic(result.peer!.ptr, value)) {
+            throw new Error('transfer failed')
+        }
+        return result as Object
+    }
+    public static transferEventResultDynamic(value: Object): Object | undefined | null {
+        if (!TypeChecker.isEventResult(value)) {
+            throw new Error('static object type mismatch')
+        }
+        const value_casted = value as EventResult
+        return ArkUIAniModule._TransferEventResultToDynamic(value_casted.peer!.ptr)
+    }
+
     public static transferFileSelectorResultStatic(value: Object | undefined | null): Object {
         registerAllNativeModuleLibraryName()
         if (value === undefined || value === null) {

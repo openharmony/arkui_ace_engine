@@ -39,6 +39,7 @@ protected:
 
 namespace Framework {
 napi_value CreateJSWebDialogObject(napi_env env, const RefPtr<Result>& value);
+napi_value CreateJSNativeEmbedGestureRequestObject(napi_env env, const RefPtr<GestureEventResult>& value);
 napi_value CreateJSFileSelectorResultObject(napi_env env, const RefPtr<FileSelectorResult>& value);
 napi_value CreateJSFileSelectorParamObject(napi_env env, const RefPtr<WebFileSelectorParam>& value);
 napi_value CreateJSContextMenuResultObject(napi_env env, const RefPtr<ContextMenuResult>& value);

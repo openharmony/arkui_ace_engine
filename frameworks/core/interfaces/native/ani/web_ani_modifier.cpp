@@ -23,6 +23,7 @@
 #include "core/interfaces/native/implementation/file_selector_param_peer_impl.h"
 #include "core/interfaces/native/implementation/file_selector_result_peer_impl.h"
 #include "core/interfaces/native/implementation/js_result_peer_impl.h"
+#include "core/interfaces/native/implementation/event_result_peer_impl.h"
 #include "core/interfaces/native/implementation/web_context_menu_param_peer_impl.h"
 #include "core/interfaces/native/implementation/web_context_menu_result_peer_impl.h"
 
@@ -87,6 +88,31 @@ napi_value TransferJsResultToDynamic(napi_env env, void* peer)
     auto* objectPeer = reinterpret_cast<JsResultPeer *>(peer);
     CHECK_NULL_RETURN(objectPeer, nullptr);
     return OHOS::Ace::Framework::CreateJSWebDialogObject(env, objectPeer->result);
+#else
+    return nullptr;
+#endif // WEB_SUPPORTED
+}
+
+bool TransferEventResultToStatic(void* peer, void* nativePtr)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<EventResultPeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, false);
+    auto* transfer = reinterpret_cast<WebTransferBase<RefPtr<GestureEventResult>>*>(nativePtr);
+    CHECK_NULL_RETURN(transfer, false);
+    objectPeer->handler = transfer->get<0>();
+    return true;
+#else
+    return false;
+#endif // WEB_SUPPORTED
+}
+
+napi_value TransferEventResultToDynamic(napi_env env, void* peer)
+{
+#ifdef WEB_SUPPORTED
+    auto* objectPeer = reinterpret_cast<EventResultPeer *>(peer);
+    CHECK_NULL_RETURN(objectPeer, nullptr);
+    return OHOS::Ace::Framework::CreateJSNativeEmbedGestureRequestObject(env, objectPeer->handler);
 #else
     return nullptr;
 #endif // WEB_SUPPORTED
@@ -198,11 +224,13 @@ const ArkUIAniWebModifier* GetWebAniModifier()
         .setWebOptions = OHOS::Ace::NG::SetWebOptions,
         .setWebControllerControllerHandler = OHOS::Ace::NG::SetWebControllerControllerHandler,
         .transferJsResultToStatic = OHOS::Ace::NG::TransferJsResultToStatic,
+        .transferEventResultToStatic = OHOS::Ace::NG::TransferEventResultToStatic,
         .transferFileSelectorResultToStatic = OHOS::Ace::NG::TransferFileSelectorResultToStatic,
         .transferFileSelectorParamToStatic = OHOS::Ace::NG::TransferFileSelectorParamToStatic,
         .transferWebContextMenuResultToStatic = OHOS::Ace::NG::TransferWebContextMenuResultToStatic,
         .transferWebContextMenuParamToStatic = OHOS::Ace::NG::TransferWebContextMenuParamToStatic,
         .transferJsResultToDynamic = OHOS::Ace::NG::TransferJsResultToDynamic,
+        .transferEventResultToDynamic = OHOS::Ace::NG::TransferEventResultToDynamic,
         .transferFileSelectorResultToDynamic = OHOS::Ace::NG::TransferFileSelectorResultToDynamic,
         .transferFileSelectorParamToDynamic = OHOS::Ace::NG::TransferFileSelectorParamToDynamic,
         .transferWebContextMenuResultToDynamic = OHOS::Ace::NG::TransferWebContextMenuResultToDynamic,
