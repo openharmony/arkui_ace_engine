@@ -64,6 +64,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, IntrinsicSizeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OptimizeParserBudgetEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MixedMode, MixedModeContent);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CacheMode, WebCacheMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DarkMode, WebDarkMode);
@@ -184,6 +186,8 @@ private:
     void OnTextAutosizingUpdate(bool) {}
     void OnSmoothDragResizeEnabledUpdate(bool) {}
     void OnEnabledHapticFeedbackUpdate(bool) {}
+    void OnOptimizeParserBudgetEnabledUpdate(bool) {}
+    void OnEnableFollowSystemFontWeightUpdate(bool) {}
     void OnMixedModeUpdate(MixedModeContent) {}
     void OnCacheModeUpdate(WebCacheMode) {}
     void OnDarkModeUpdate(WebDarkMode) {}
