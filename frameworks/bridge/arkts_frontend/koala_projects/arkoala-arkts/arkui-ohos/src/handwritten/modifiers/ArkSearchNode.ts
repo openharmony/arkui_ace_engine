@@ -16,11 +16,12 @@
 import { InteropNativeModule } from "@koalaui/interop";
 
 import { ArkBaseNode } from "./ArkBaseNode";
-import { SearchAttribute, ResourceColor, IconOptions, SymbolGlyphModifier, KeyboardOptions, CopyOptions,
+import { SearchAttribute, ResourceColor, IconOptions, KeyboardOptions, CopyOptions,
     TextAlign, SearchSubmitCallback, CancelButtonOptions, CancelButtonSymbolOptions, CaretStyle, Dimension, Font,
     EnterKeyType, EditableTextOnChangeCallback, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback,
     TextDecorationOptions, SearchType, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode,
     EditableTextChangeValue, KeyboardAppearance, SearchButtonOptions, ResourceStr, CustomBuilder } from "../../component";
+import { SymbolGlyphModifier } from "../../SymbolGlyphModifier";
 import { ArkSearchPeer, SearchOptions } from "../../component";
 import { Resource } from "global.resource"
 
