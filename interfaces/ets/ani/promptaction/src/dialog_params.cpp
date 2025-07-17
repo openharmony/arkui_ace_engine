@@ -361,6 +361,71 @@ bool GetImmersiveMode(ani_env* env, ani_object object, OHOS::Ace::ImmersiveMode&
     return true;
 }
 
+void UpdateDialogAlignment(OHOS::Ace::DialogAlignment& alignment)
+{
+    bool isRtl = OHOS::Ace::AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (alignment == OHOS::Ace::DialogAlignment::TOP_START) {
+        if (isRtl) {
+            alignment = OHOS::Ace::DialogAlignment::TOP_END;
+        }
+    } else if (alignment == OHOS::Ace::DialogAlignment::TOP_END) {
+        if (isRtl) {
+            alignment = OHOS::Ace::DialogAlignment::TOP_START;
+        }
+    } else if (alignment == OHOS::Ace::DialogAlignment::CENTER_START) {
+        if (isRtl) {
+            alignment = OHOS::Ace::DialogAlignment::CENTER_END;
+        }
+    } else if (alignment == OHOS::Ace::DialogAlignment::CENTER_END) {
+        if (isRtl) {
+            alignment = OHOS::Ace::DialogAlignment::CENTER_START;
+        }
+    } else if (alignment == OHOS::Ace::DialogAlignment::BOTTOM_START) {
+        if (isRtl) {
+            alignment = OHOS::Ace::DialogAlignment::BOTTOM_END;
+        }
+    } else if (alignment == OHOS::Ace::DialogAlignment::BOTTOM_END) {
+        if (isRtl) {
+            alignment = OHOS::Ace::DialogAlignment::BOTTOM_START;
+        }
+    }
+}
+
+bool GetOnLanguageChange(OHOS::Ace::DialogProperties& dialogProps)
+{
+    auto onLanguageChange = [shadow = dialogProps.shadow, alignment = dialogProps.alignment,
+        offset = dialogProps.offset, maskRect = dialogProps.maskRect,
+        updateAlignment = UpdateDialogAlignment](OHOS::Ace::DialogProperties& dialogProps) {
+        bool isRtl = OHOS::Ace::AceApplicationInfo::GetInstance().IsRightToLeft();
+        if (shadow.has_value()) {
+            OHOS::Ace::Shadow newShadow = shadow.value();
+            double offsetX = isRtl ? newShadow.GetOffset().GetX() * (-1) : newShadow.GetOffset().GetX();
+            newShadow.SetOffsetX(offsetX);
+            dialogProps.shadow = newShadow;
+        }
+
+        OHOS::Ace::DialogAlignment newAlignment = alignment;
+        updateAlignment(newAlignment);
+        dialogProps.alignment = newAlignment;
+
+        OHOS::Ace::DimensionOffset newOffset = offset;
+        OHOS::Ace::Dimension offsetX = isRtl ? newOffset.GetX() * (-1) : newOffset.GetX();
+        newOffset.SetX(offsetX);
+        dialogProps.offset = newOffset;
+
+        if (maskRect.has_value()) {
+            OHOS::Ace::DimensionRect newMaskRect = maskRect.value();
+            auto rectOffset = newMaskRect.GetOffset();
+            OHOS::Ace::Dimension offsetX = isRtl ? rectOffset.GetX() * (-1) : rectOffset.GetX();
+            rectOffset.SetX(offsetX);
+            newMaskRect.SetOffset(rectOffset);
+            dialogProps.maskRect = newMaskRect;
+        }
+    };
+    dialogProps.onLanguageChange = onLanguageChange;
+    return true;
+}
+
 bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps)
 {
     if (IsUndefinedObject(env, object)) {
@@ -395,6 +460,7 @@ bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetDoubleParam(env, object, "levelUniqueId", levelUniqueId);
     dialogProps.dialogLevelUniqueId = static_cast<int32_t>(levelUniqueId);
     GetImmersiveMode(env, object, dialogProps.dialogImmersiveMode);
+    GetOnLanguageChange(dialogProps);
     return true;
 }
 
@@ -408,7 +474,9 @@ bool GetShowDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::Di
         return false;
     }
 
-    GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
+    if (!dialogProps.isShowInSubWindow) {
+        GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
+    }
     return true;
 }
 
@@ -900,7 +968,9 @@ bool GetDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::Dialog
     GetTransitionEffectParam(env, object, "transition", dialogProps.transitionEffect);
     GetTransitionEffectParam(env, object, "dialogTransition", dialogProps.dialogTransitionEffect);
     GetTransitionEffectParam(env, object, "maskTransition", dialogProps.maskTransitionEffect);
-    GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
+    if (!dialogProps.isShowInSubWindow) {
+        GetDoubleParamOpt(env, object, "levelOrder", dialogProps.levelOrder);
+    }
     return true;
 }
 

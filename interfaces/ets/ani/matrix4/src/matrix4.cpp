@@ -25,13 +25,9 @@
 #include <string>
 #include <thread>
 
+#include "interop_js/arkts_esvalue.h"
 namespace OHOS::Ace::MatrixAni {
 constexpr int32_t MATRIX_LENGTH = 16;
-class Matrix4_Obj {
-public:
-    explicit Matrix4_Obj(Matrix4 matrix) : matrix4x4(matrix) {}
-    OHOS::Ace::Matrix4 matrix4x4;
-};
 
 static Matrix4_Obj* GetMatrixObj(ani_env* env, ani_object obj)
 {
@@ -57,12 +53,12 @@ static ani_object Matrix4_Identity([[maybe_unused]] ani_env* env, [[maybe_unused
     }
 
     auto matrix4Object = new Matrix4_Obj(OHOS::Ace::Matrix4::CreateIdentity());
-    ani_object matrix4_object = {};
-    if (ANI_OK != env->Object_New(cls, ctor, &matrix4_object, reinterpret_cast<ani_long>(matrix4Object))) {
+    ani_object matrix4ObjectCur = {};
+    if (ANI_OK != env->Object_New(cls, ctor, &matrix4ObjectCur, reinterpret_cast<ani_long>(matrix4Object))) {
         ani_object nullobj = nullptr;
         return nullobj;
     }
-    return matrix4_object;
+    return matrix4ObjectCur;
 }
 
 Matrix4 ConvertToMatrix([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object option)
@@ -115,6 +111,32 @@ Matrix4 ConvertToMatrix([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
     return result;
 }
 
+Matrix4 ConvertToMatrixArray([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object option)
+{
+    Matrix4 result = Matrix4::CreateIdentity();
+    ani_array_double inputArray = static_cast<ani_array_double>(option);
+    ani_size length = 0;
+    if (ANI_OK != env->Array_GetLength(inputArray, &length)) {
+        return result;
+    }
+    int32_t inputSize = static_cast<int32_t>(length);
+    if (inputSize != MATRIX_LENGTH) {
+        return result;
+    }
+    for (int32_t i = 0; i < Matrix4::DIMENSION; i++) {
+        for (int32_t j = 0; j < Matrix4::DIMENSION; j++) {
+            ani_double value;
+            auto index = static_cast<ani_size>(i * Matrix4::DIMENSION + j);
+            if (ANI_OK != env->Array_GetRegion_Double(inputArray, index, static_cast<ani_size>(1), &value)) {
+                return result;
+            }
+            auto ret = static_cast<double>(value);
+            result.Set(j, i, ret);
+        }
+    }
+    return result;
+}
+
 static ani_object Matrix4_Init([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_object option)
 {
@@ -133,12 +155,12 @@ static ani_object Matrix4_Init([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     auto matrix = ConvertToMatrix(env, option);
     auto matrix4Object = new Matrix4_Obj(matrix);
 
-    ani_object matrix4_object;
-    if (ANI_OK != env->Object_New(cls, ctor, &matrix4_object, reinterpret_cast<ani_long>(matrix4Object))) {
+    ani_object matrix4ObjectCur;
+    if (ANI_OK != env->Object_New(cls, ctor, &matrix4ObjectCur, reinterpret_cast<ani_long>(matrix4Object))) {
         ani_object nullobj = nullptr;
         return nullobj;
     }
-    return matrix4_object;
+    return matrix4ObjectCur;
 }
 
 static ani_object Matrix4_Copy([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object)
@@ -159,12 +181,12 @@ static ani_object Matrix4_Copy([[maybe_unused]] ani_env* env, [[maybe_unused]] a
         return nullptr;
     }
     auto matrix4Object = new Matrix4_Obj(matrixObj->matrix4x4);
-    ani_object matrix4_object;
-    if (ANI_OK != env->Object_New(cls, ctor, &matrix4_object, reinterpret_cast<ani_long>(matrix4Object))) {
+    ani_object matrix4ObjectCur;
+    if (ANI_OK != env->Object_New(cls, ctor, &matrix4ObjectCur, reinterpret_cast<ani_long>(matrix4Object))) {
         ani_object nullobj = nullptr;
         return nullobj;
     }
-    return matrix4_object;
+    return matrix4ObjectCur;
 }
 
 bool ParseOption(ani_env* env, ani_object options, double& input, const char* property, const char* className)
@@ -316,6 +338,37 @@ ani_status BindMatrix(ani_env* env)
     return ANI_OK;
 }
 
+static ani_object MatrixTransferStatic(ani_env *env, ani_object obj, ani_object input)
+{
+    if (env == nullptr) {
+        LOGE("[ANI] aniEnv is null");
+        return nullptr;
+    }
+
+    if (input == nullptr) {
+        LOGE("[ANI] MatrixTransferStatic is null");
+        return nullptr;
+    }
+
+    static const char* className = "L@ohos/matrix4/matrix4/Matrix4TransitInner;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        return nullptr;
+    }
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        return nullptr;
+    }
+    auto matrix = ConvertToMatrixArray(env, static_cast<ani_object>(input));
+    auto matrix4Object = new Matrix4_Obj(matrix);
+    ani_object matrix4ObjectCur;
+    if (ANI_OK != env->Object_New(cls, ctor, &matrix4ObjectCur, reinterpret_cast<ani_long>(matrix4Object))) {
+        ani_object nullobj = nullptr;
+        return nullobj;
+    }
+    return matrix4ObjectCur;
+}
+
 ani_status BindMatrixTransit(ani_env* env)
 {
     static const char* className = "L@ohos/matrix4/matrix4/Matrix4TransitInner;";
@@ -331,6 +384,7 @@ ani_status BindMatrixTransit(ani_env* env)
         ani_native_function { "translate", nullptr, reinterpret_cast<void*>(Matrix4_Translate) },
         ani_native_function { "invert", nullptr, reinterpret_cast<void*>(Matrix4_Invert) },
         ani_native_function { "combine", nullptr, reinterpret_cast<void*>(Matrix4_Combine) },
+        ani_native_function { "nativeTransferStatic", nullptr, reinterpret_cast<void*>(MatrixTransferStatic) },
     };
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         return ANI_ERROR;

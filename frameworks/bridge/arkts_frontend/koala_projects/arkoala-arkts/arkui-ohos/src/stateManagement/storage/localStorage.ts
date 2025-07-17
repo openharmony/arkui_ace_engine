@@ -14,6 +14,7 @@
  */
 import { AbstractProperty, SubscribedAbstractProperty, IStorageProperties } from './storageProperty';
 import { StorageBase, StorageProperty } from './storageBase';
+import { InteropStorageBase } from '../interop/interopStorage';
 import { WatchFuncType } from '../decorator';
 import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageLink';
 import { ExtendableComponent } from '../../component/extendableComponent';
@@ -31,7 +32,15 @@ import { ExtendableComponent } from '../../component/extendableComponent';
  * @since 20
  */
 export class LocalStorage {
-    protected store_ = new StorageBase();
+    protected store_ = new InteropStorageBase();
+
+    public getProxy(): ESValue | undefined {
+        return this.store_.getProxy();
+    }
+
+    public setProxy(proxy: ESValue): void {
+        this.store_.setProxy(proxy);
+    }
 
     /**
      * Construct new instance of LocalStorage
@@ -77,7 +86,11 @@ export class LocalStorage {
      */
     public has(key: string, ttype?: Type): boolean {
         const ttypeOpt: Type | undefined = this.store_.getType(key);
-        return ttypeOpt !== undefined && (ttype === undefined || ttype!.equals(ttypeOpt!));
+        let result : boolean = (ttypeOpt !== undefined) && (ttype === undefined || ttype!.equals(ttypeOpt!));
+        if (!result) {
+            result = this.store_.has(key);
+        }
+        return result;
     }
 
     /**
@@ -135,7 +148,7 @@ export class LocalStorage {
      * @since 20
      */
     public set<T>(key: string, newValue: T): boolean {
-        return this.store_.update<T>(key, newValue);
+        return this.store_.set<T>(key, newValue);
     }
 
     /**
@@ -159,12 +172,7 @@ export class LocalStorage {
      * @since 20
      */
     public setOrCreate<T>(key: string, newValue: T, ttype: Type): boolean {
-        const expectedTtypeOpt = this.store_.getType(key);
-        if (expectedTtypeOpt === undefined) {
-            // create new entry, remember permissible ttype
-            return this.store_.createAndSet(key, ttype, newValue);
-        }
-        return this.set<T>(key, newValue);
+        return this.store_.setOrCreate<T>(key, newValue, ttype);
     }
 
     /**
@@ -207,18 +215,7 @@ export class LocalStorage {
      * @since 20
      */
     public setAndRef<T>(key: string, defaultValue: T, ttype: Type): AbstractProperty<T> | undefined {
-        const ttypeOpt = this.store_.getType(key);
-        if (ttypeOpt === undefined) {
-            // create new entry, remember permissible ttype, set with defaultValue
-            if (!this.store_.createAndSet<T>(key, ttype, defaultValue)) {
-                // creation failed
-                return undefined;
-            }
-        }
-        const link = this.store_.ref<T>(key, ttype);
-
-        // TODO finalization reg link
-        return link;
+        return this.store_.setAndRef<T>(key, defaultValue, ttype);
     }
 
     /**

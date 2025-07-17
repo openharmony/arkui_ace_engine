@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import { AttributeModifier, CommonAttribute } from 'arkui/component/common'
+import { AttributeModifier, CommonAttribute } from 'arkui/component/common';
 
-import { CommonMethodModifier } from './CommonMethodModifier'
+import { CommonMethodModifier } from './CommonMethodModifier';
 export class CommonModifier  extends CommonMethodModifier implements CommonAttribute, AttributeModifier<CommonAttribute> {
    applyNormalAttribute(instance: CommonAttribute): void {}
    applyPressedAttribute(instance: CommonAttribute) : void {}

@@ -55,6 +55,7 @@ namespace {
     constexpr int32_t DEFAULT_MULTIPLE = 100;
     constexpr float GRADIENT_MIN_POSITION = 0.0f;
     constexpr float GRADIENT_DEFAULT_MIN_POSITION = 0.0f;
+    constexpr uint16_t UTF16_BOM = 0xFEFF;
     constexpr int32_t DEFAULT_NAVDESTINATION_TRANSITION_DURATION = 1000;
     int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
     {
@@ -669,8 +670,28 @@ SysOptions Convert(const Ark_SystemAdaptiveOptions& src)
 template<>
 std::u16string Convert(const Ark_String& src)
 {
+    if (src.chars == nullptr) return u"";
+    const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
+    if (data[0] == UTF16_BOM) {
+        // Handle utf16 strings
+        ++data;
+        return std::u16string(data, src.length);
+    }
     auto str8 =  Converter::Convert<std::string>(src);
     return UtfUtils::Str8ToStr16(str8);
+}
+
+template<>
+std::string Convert(const Ark_String& src)
+{
+    if (src.chars == nullptr) return "";
+    const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
+    if (data[0] == UTF16_BOM) {
+        // Handle utf16 strings
+        ++data;
+        return UtfUtils::Str16ToStr8(std::u16string(data, src.length));
+    }
+    return std::string(src.chars, src.length);
 }
 
 template<>
@@ -1157,6 +1178,14 @@ std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src)
         offset = Dimension(std::clamp(offset.Value(), NUM_DOUBLE_0, NUM_DOUBLE_1));
     }
     return std::make_pair(color, offset);
+}
+
+template<>
+std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src)
+{
+    auto x = OptConvert<Dimension>(src.x);
+    auto y = OptConvert<Dimension>(src.y);
+    return {x, y};
 }
 
 template<>
@@ -1806,6 +1835,17 @@ RefPtr<Curve> Convert(const Ark_ICurve& src)
     return src ? src->handler : nullptr;
 }
 
+template<>
+void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src)
+{
+    auto curve = Framework::CreateCurve(Converter::Convert<std::string>(src), false);
+    if (curve) {
+        dst = curve;
+    } else {
+        dst = std::nullopt;
+    }
+}
+
 void ParseDragPreviewMode(DragPreviewOption& previewOption, const Ark_DragPreviewOptions &src)
 {
     auto previewModeHandler = [&previewOption](DragPreviewMode mode) -> bool {
@@ -2229,6 +2269,19 @@ BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src)
         dst.inactiveColor = color.value();
         dst.isValidColor = true;
     }
+    return dst;
+}
+
+template<>
+BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)
+{
+    BlurStyleOption dst;
+    dst.colorMode = OptConvert<ThemeColorMode>(src.colorMode).value_or(dst.colorMode);
+    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
+    if (auto scaleOpt = OptConvert<float>(src.scale); scaleOpt) {
+        dst.scale = static_cast<double>(*scaleOpt);
+    }
+    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
     return dst;
 }
 
