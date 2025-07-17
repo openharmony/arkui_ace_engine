@@ -42,6 +42,7 @@ import { ArkDividerNode } from './handwritten/modifiers/ArkDividerNode'
 import { ArkBlankNode } from './handwritten/modifiers/ArkBlankNode'
 import { ArkRelativeContainerNode } from './handwritten/modifiers/ArkRelativeContainerNode'
 import { ArkSearchNode } from './handwritten/modifiers/ArkSearchNode'
+import { ArkSwiperNode } from "./handwritten/modifiers/ArkSwiperNode";
 import { ArkTextAreaNode } from './handwritten/modifiers/ArkTextAreaNode'
 import { ArkTextInputNode } from './handwritten/modifiers/ArkTextInputNode'
 import { ModifierType } from './handwritten/modifiers/ArkCommonModifier'
@@ -56,6 +57,7 @@ import { GridColOptions, GridColAttribute, ArkGridColPeer } from './component/gr
 import { DividerAttribute, ArkDividerPeer } from './component/divider'
 import { BlankAttribute, ArkBlankPeer } from './component/blank'
 import { SearchOptions, SearchAttribute, ArkSearchPeer } from './component/search'
+import { SwiperController, SwiperAttribute, ArkSwiperPeer } from './component/swiper'
 import { TextAreaOptions, TextAreaAttribute, ArkTextAreaPeer } from './component/textArea'
 import { TextInputOptions, TextInputAttribute, ArkTextInputPeer } from './component/textInput'
 import { ArkTextNode } from './handwritten/modifiers/ArkTextNode'
@@ -1120,6 +1122,16 @@ export namespace typeNode {
         }
     }
 
+    class SwiperFrameNode extends TypedFrameNode<ArkSwiperNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSwiperNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(controller?: SwiperController): SwiperAttribute {
+            let arkSwiperNode = this.attribute as ArkSwiperNode;
+            return arkSwiperNode!.initialize(controller);
+        }
+    }
+
     class TextAreaFrameNode extends TypedFrameNode<ArkTextAreaNode> {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextAreaNode) {
             super(uiContext, type, attrCreator);
@@ -1152,7 +1164,7 @@ export namespace typeNode {
 
     overload createNode { createColumnNode, createRowNode, createStackNode, createFlexNode, createGridRowNode,
         createGridColNode, createDividerNode, createBlankNode, createRelativeContainerNode, createListNode,
-        createSearchNode, createTextAreaNode, createTextInputNode, createTextNode }
+        createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createSwiperNode }
 
     // @ts-ignore
     function createColumnNode(context: UIContext, type: string): ColumnFrameNode {
@@ -1307,4 +1319,15 @@ export namespace typeNode {
            return arknode;
        });
    }
+
+   // @ts-ignore
+   function createSwiperNode(context: UIContext, type: string): SwiperFrameNode {
+        return new SwiperFrameNode(context, 'Swiper', (node: FrameNode, type: ModifierType): ArkSwiperNode => {
+            let arknode = new ArkSwiperNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkSwiperPeer(retval, node._nodeId!.toInt(), "Swiper", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
 }

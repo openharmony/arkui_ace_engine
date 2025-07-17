@@ -601,6 +601,7 @@ static GENERATED_Ark_NodeType ParseNodeType(std::string& type)
         { "Divider", GENERATED_ARKUI_DIVIDER },
         { "Blank", GENERATED_ARKUI_BLANK },
         { "Search", GENERATED_ARKUI_SEARCH },
+        { "Swiper", GENERATED_ARKUI_SWIPER },
         { "TextArea", GENERATED_ARKUI_TEXT_AREA },
         { "TextInput", GENERATED_ARKUI_TEXT_INPUT },
         { "Text", GENERATED_ARKUI_TEXT },
