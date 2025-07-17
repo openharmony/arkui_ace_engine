@@ -79,12 +79,26 @@ struct ArkUIAniWebModifier {
     bool (*transferFileSelectorParamToStatic)(void* peer, void* nativePtr);
     bool (*transferWebContextMenuResultToStatic)(void* peer, void* nativePtr);
     bool (*transferWebContextMenuParamToStatic)(void* peer, void* nativePtr);
+    bool (*transferHttpAuthHandlerToStatic)(void* peer, void* nativePtr);
+    bool (*transferWebResourceReponseToStatic)(void* peer, void* nativePtr);
+    bool (*transferWebResourceRequestToStatic)(void* peer, void* nativePtr);
+    bool (*transferConsoleMessageToStatic)(void* peer, void* nativePtr);
+    bool (*transferDataResubmissionHandlerToStatic)(void* peer, void* nativePtr);
+    bool (*transferClientAuthenticationHandlerToStatic)(void* peer, void* nativePtr);
+    bool (*transferSslErrorHandlerToStatic)(void* peer, void* nativePtr);
     napi_value (*transferJsResultToDynamic)(napi_env env, void* peer);
     napi_value (*transferEventResultToDynamic)(napi_env env, void* peer);
     napi_value (*transferFileSelectorResultToDynamic)(napi_env env, void* peer);
     napi_value (*transferFileSelectorParamToDynamic)(napi_env env, void* peer);
     napi_value (*transferWebContextMenuResultToDynamic)(napi_env env, void* peer);
     napi_value (*transferWebContextMenuParamToDynamic)(napi_env env, void* peer);
+    napi_value (*transferHttpAuthHandlerToDynamic)(napi_env env, void* peer);
+    napi_value (*transferWebResourceReponseToDynamic)(napi_env env, void* peer);
+    napi_value (*transferWebResourceRequestToDynamic)(napi_env env, void* peer);
+    napi_value (*transferConsoleMessageToDynamic)(napi_env env, void* peer);
+    napi_value (*transferDataResubmissionHandlerToDynamic)(napi_env env, void* peer);
+    napi_value (*transferClientAuthenticationHandlerToDynamic)(napi_env env, void* peer);
+    napi_value (*transferSslErrorHandlerToDynamic)(napi_env env, void* peer);
 };
 struct ArkUIAniDragModifier {
     void (*setDragData)(ani_ref event, ani_ref data);

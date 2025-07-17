@@ -287,6 +287,144 @@ ani_boolean TransferWebContextMenuParamToStatic(ani_env* env, ani_class aniClass
     return modifier->getWebAniModifier()->transferWebContextMenuParamToStatic(reinterpret_cast<void*>(node), nativePtr);
 }
 
+ani_boolean TransferHttpAuthHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    ani_object esValue = ESValueWrap(env, input);
+    if (!esValue) {
+        HILOGE("TransferHttpAuthHandlerToStatic ESValueWrap failed");
+        return ANI_FALSE;
+    }
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+        HILOGE("TransferHttpAuthHandlerToStatic arkts_esvalue_unwrap failed");
+        return ANI_FALSE;
+    }
+    return modifier->getWebAniModifier()->transferHttpAuthHandlerToStatic(reinterpret_cast<void*>(node), nativePtr);
+}
+
+ani_boolean TransferWebResourceReponseToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    ani_object esValue = ESValueWrap(env, input);
+    if (!esValue) {
+        HILOGE("TransferWebResourceReponseToStatic ESValueWrap failed");
+        return ANI_FALSE;
+    }
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+        HILOGE("TransferWebResourceReponseToStatic arkts_esvalue_unwrap failed");
+        return ANI_FALSE;
+    }
+    return modifier->getWebAniModifier()->transferWebResourceReponseToStatic(reinterpret_cast<void*>(node), nativePtr);
+}
+
+ani_boolean TransferWebResourceRequestToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    ani_object esValue = ESValueWrap(env, input);
+    if (!esValue) {
+        HILOGE("TransferWebResourceRequestToStatic ESValueWrap failed");
+        return ANI_FALSE;
+    }
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+        HILOGE("TransferWebResourceRequestToStatic arkts_esvalue_unwrap failed");
+        return ANI_FALSE;
+    }
+    return modifier->getWebAniModifier()->transferWebResourceRequestToStatic(reinterpret_cast<void*>(node), nativePtr);
+}
+
+ani_boolean TransferConsoleMessageToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    ani_object esValue = ESValueWrap(env, input);
+    if (!esValue) {
+        HILOGE("TransferConsoleMessageToStatic ESValueWrap failed");
+        return ANI_FALSE;
+    }
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+        HILOGE("TransferConsoleMessageToStatic arkts_esvalue_unwrap failed");
+        return ANI_FALSE;
+    }
+    return modifier->getWebAniModifier()->transferConsoleMessageToStatic(reinterpret_cast<void*>(node), nativePtr);
+}
+
+ani_boolean TransferDataResubmissionHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    ani_object esValue = ESValueWrap(env, input);
+    if (!esValue) {
+        HILOGE("TransferDataResubmissionHandlerToStatic ESValueWrap failed");
+        return ANI_FALSE;
+    }
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+        HILOGE("TransferDataResubmissionHandlerToStatic arkts_esvalue_unwrap failed");
+        return ANI_FALSE;
+    }
+    return modifier->getWebAniModifier()->transferDataResubmissionHandlerToStatic(
+        reinterpret_cast<void*>(node), nativePtr);
+}
+
+ani_boolean TransferClientAuthenticationHandlerToStatic(
+    ani_env* env, ani_class aniClass, ani_long node, ani_object input)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    ani_object esValue = ESValueWrap(env, input);
+    if (!esValue) {
+        HILOGE("TransferClientAuthenticationHandlerToStatic ESValueWrap failed");
+        return ANI_FALSE;
+    }
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+        HILOGE("TransferClientAuthenticationHandlerToStatic arkts_esvalue_unwrap failed");
+        return ANI_FALSE;
+    }
+    return modifier->getWebAniModifier()->transferClientAuthenticationHandlerToStatic(
+        reinterpret_cast<void*>(node), nativePtr);
+}
+
+
+ani_boolean TransferSslErrorHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    ani_object esValue = ESValueWrap(env, input);
+    if (!esValue) {
+        HILOGE("TransferSslErrorHandlerToStatic ESValueWrap failed");
+        return ANI_FALSE;
+    }
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+        HILOGE("TransferSslErrorHandlerToStatic arkts_esvalue_unwrap failed");
+        return ANI_FALSE;
+    }
+    return modifier->getWebAniModifier()->transferSslErrorHandlerToStatic(
+        reinterpret_cast<void*>(node), nativePtr);
+}
+
 ani_object TransferJsResultToDynamic(ani_env* env, ani_class aniClass, ani_long node)
 {
     CHECK_NULL_RETURN(env, nullptr);
@@ -416,8 +554,169 @@ ani_object TransferWebContextMenuParamToDynamic(ani_env* env, ani_class aniClass
         napi_env jsenv {};
         bool success = arkts_napi_scope_open(env, &jsenv);
         CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+        napi_value dynamic = modifier->getWebAniModifier()->transferWebContextMenuParamToDynamic(
+            jsenv, reinterpret_cast<void*>(node));
+        CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
+        success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+    }
+    return reinterpret_cast<ani_object>(result);
+}
+
+ani_object TransferHttpAuthHandlerToDynamic(ani_env* env, ani_class aniClass, ani_long node)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref undefinedRef;
+    env->GetUndefined(&undefinedRef);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier()) {
+        return reinterpret_cast<ani_object>(undefinedRef);
+    }
+    ani_ref result = nullptr;
+    {
+        napi_env jsenv {};
+        bool success = arkts_napi_scope_open(env, &jsenv);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
         napi_value dynamic =
-            modifier->getWebAniModifier()->transferWebContextMenuParamToDynamic(jsenv, reinterpret_cast<void*>(node));
+            modifier->getWebAniModifier()->transferHttpAuthHandlerToDynamic(jsenv, reinterpret_cast<void*>(node));
+        CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
+        success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+    }
+    return reinterpret_cast<ani_object>(result);
+}
+
+ani_object TransferWebResourceReponseToDynamic(ani_env* env, ani_class aniClass, ani_long node)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref undefinedRef;
+    env->GetUndefined(&undefinedRef);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier()) {
+        return reinterpret_cast<ani_object>(undefinedRef);
+    }
+    ani_ref result = nullptr;
+    {
+        napi_env jsenv {};
+        bool success = arkts_napi_scope_open(env, &jsenv);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+        napi_value dynamic =
+            modifier->getWebAniModifier()->transferWebResourceReponseToDynamic(jsenv, reinterpret_cast<void*>(node));
+        CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
+        success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+    }
+    return reinterpret_cast<ani_object>(result);
+}
+
+ani_object TransferWebResourceRequestToDynamic(ani_env* env, ani_class aniClass, ani_long node)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref undefinedRef;
+    env->GetUndefined(&undefinedRef);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier()) {
+        return reinterpret_cast<ani_object>(undefinedRef);
+    }
+    ani_ref result = nullptr;
+    {
+        napi_env jsenv {};
+        bool success = arkts_napi_scope_open(env, &jsenv);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+        napi_value dynamic = modifier->getWebAniModifier()->transferWebResourceRequestToDynamic(
+            jsenv, reinterpret_cast<void*>(node));
+        CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
+        success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+    }
+    return reinterpret_cast<ani_object>(result);
+}
+
+ani_object TransferConsoleMessageToDynamic(ani_env* env, ani_class aniClass, ani_long node)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref undefinedRef;
+    env->GetUndefined(&undefinedRef);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier()) {
+        return reinterpret_cast<ani_object>(undefinedRef);
+    }
+    ani_ref result = nullptr;
+    {
+        napi_env jsenv {};
+        bool success = arkts_napi_scope_open(env, &jsenv);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+        napi_value dynamic = modifier->getWebAniModifier()->transferConsoleMessageToDynamic(
+            jsenv, reinterpret_cast<void*>(node));
+        CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
+        success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+    }
+    return reinterpret_cast<ani_object>(result);
+}
+
+ani_object TransferDataResubmissionHandlerToDynamic(ani_env* env, ani_class aniClass, ani_long node)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref undefinedRef;
+    env->GetUndefined(&undefinedRef);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier()) {
+        return reinterpret_cast<ani_object>(undefinedRef);
+    }
+    ani_ref result = nullptr;
+    {
+        napi_env jsenv {};
+        bool success = arkts_napi_scope_open(env, &jsenv);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+        napi_value dynamic = modifier->getWebAniModifier()->transferDataResubmissionHandlerToDynamic(
+            jsenv, reinterpret_cast<void*>(node));
+        CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
+        success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+    }
+    return reinterpret_cast<ani_object>(result);
+}
+
+ani_object TransferClientAuthenticationHandlerToDynamic(ani_env* env, ani_class aniClass, ani_long node)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref undefinedRef;
+    env->GetUndefined(&undefinedRef);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier()) {
+        return reinterpret_cast<ani_object>(undefinedRef);
+    }
+    ani_ref result = nullptr;
+    {
+        napi_env jsenv {};
+        bool success = arkts_napi_scope_open(env, &jsenv);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+        napi_value dynamic = modifier->getWebAniModifier()->transferClientAuthenticationHandlerToDynamic(
+            jsenv, reinterpret_cast<void*>(node));
+        CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
+        success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+    }
+    return reinterpret_cast<ani_object>(result);
+}
+
+ani_object TransferSslErrorHandlerToDynamic(ani_env* env, ani_class aniClass, ani_long node)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref undefinedRef;
+    env->GetUndefined(&undefinedRef);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier()) {
+        return reinterpret_cast<ani_object>(undefinedRef);
+    }
+    ani_ref result = nullptr;
+    {
+        napi_env jsenv {};
+        bool success = arkts_napi_scope_open(env, &jsenv);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+        napi_value dynamic =
+            modifier->getWebAniModifier()->transferSslErrorHandlerToDynamic(jsenv, reinterpret_cast<void*>(node));
         CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
         success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
         CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));

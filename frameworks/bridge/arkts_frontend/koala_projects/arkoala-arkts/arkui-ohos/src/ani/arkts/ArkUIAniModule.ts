@@ -67,6 +67,13 @@ export class ArkUIAniModule {
     native static _TransferFileSelectorParamToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
     native static _TransferWebContextMenuResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
     native static _TransferWebContextMenuParamToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferHttpAuthHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferWebResourceReponseToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferWebResourceRequestToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferConsoleMessageToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferDataResubmissionHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferClientAuthenticationHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferSslErrorHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
 
     native static _TransferJsResultToDynamic(ptr: KPointer) : Object | undefined | null
     native static _TransferEventResultToDynamic(ptr: KPointer) : Object | undefined | null
@@ -74,6 +81,13 @@ export class ArkUIAniModule {
     native static _TransferFileSelectorParamToDynamic(ptr: KPointer) : Object | undefined | null
     native static _TransferWebContextMenuResultToDynamic(ptr: KPointer) : Object | undefined | null
     native static _TransferWebContextMenuParamToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferHttpAuthHandlerToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferWebResourceReponseToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferWebResourceRequestToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferConsoleMessageToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferDataResubmissionHandlerToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferClientAuthenticationHandlerToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferSslErrorHandlerToDynamic(ptr: KPointer) : Object | undefined | null
 
     // for Drag
     native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
