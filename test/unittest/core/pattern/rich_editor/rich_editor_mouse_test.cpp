@@ -1132,6 +1132,29 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMouseLeftButtonRelease005
+ * @tc.desc: test HandleMouseLeftButtonRelease
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_ = true;
+    richEditorPattern->mouseStatus_ = MouseStatus::MOVE;
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->isEditing_ = false;
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    MouseInfo info;
+    richEditorPattern->HandleMouseLeftButtonRelease(info);
+
+    EXPECT_TRUE(richEditorPattern->isEditing_);
+}
+
+/**
  * @tc.name: OnHandleMouseEvent001
  * @tc.desc: test OnHandleMouseEvent
  * @tc.type: FUNC
