@@ -444,6 +444,8 @@ const ArkUIAniWebModifier* GetWebAniModifier()
         .transferDataResubmissionHandlerToStatic = OHOS::Ace::NG::TransferDataResubmissionHandlerToStatic,
         .transferClientAuthenticationHandlerToStatic = OHOS::Ace::NG::TransferDataResubmissionHandlerToStatic,
         .transferSslErrorHandlerToStatic = OHOS::Ace::NG::TransferSslErrorHandlerToStatic,
+        .transferScreenCaptureHandlerToStatic = OHOS::Ace::NG::TransferScreenCaptureHandlerToStatic,
+        .transferScreenCaptureHandlerToDynamic = OHOS::Ace::NG::TransferScreenCaptureHandlerToDynamic,
         .transferJsResultToDynamic = OHOS::Ace::NG::TransferJsResultToDynamic,
         .transferEventResultToDynamic = OHOS::Ace::NG::TransferEventResultToDynamic,
         .transferFileSelectorResultToDynamic = OHOS::Ace::NG::TransferFileSelectorResultToDynamic,
