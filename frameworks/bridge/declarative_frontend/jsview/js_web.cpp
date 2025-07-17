@@ -759,11 +759,11 @@ private:
     RefPtr<WebPermissionRequest> webPermissionRequest_;
 };
 
-class JSScreenCaptureRequest : public Referenced {
+class JSScreenCaptureRequest : public WebTransferBase<RefPtr<WebScreenCaptureRequest>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
-        JSClass<JSScreenCaptureRequest>::Declare("ScreenCaptureRequest");
+        JSClass<JSScreenCaptureRequest>::Declare("ScreenCaptureHandler");
         JSClass<JSScreenCaptureRequest>::CustomMethod("deny", &JSScreenCaptureRequest::Deny);
         JSClass<JSScreenCaptureRequest>::CustomMethod("getOrigin", &JSScreenCaptureRequest::GetOrigin);
         JSClass<JSScreenCaptureRequest>::CustomMethod("grant", &JSScreenCaptureRequest::Grant);
@@ -774,6 +774,7 @@ public:
     void SetEvent(const WebScreenCaptureRequestEvent& eventInfo)
     {
         request_ = eventInfo.GetWebScreenCaptureRequest();
+        transferValues_ = std::make_tuple(request_);
     }
 
     void Deny(const JSCallbackInfo& args)
@@ -4291,6 +4292,7 @@ JSRef<JSVal> ScreenCaptureRequestEventToJSValue(const WebScreenCaptureRequestEve
     JSRef<JSObject> requestObj = JSClass<JSScreenCaptureRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSScreenCaptureRequest>());
     requestEvent->SetEvent(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(requestObj), static_cast<void *>(requestEvent.GetRawPtr()));
     obj->SetPropertyObject("handler", requestObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -6227,6 +6229,7 @@ void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
     WebModel::GetInstance()->SetGestureFocusMode(mode);
 }
 
+ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)
 ARKWEB_CREATE_JS_OBJECT(Result, JSWebDialog, SetResult, value)
 ARKWEB_CREATE_JS_OBJECT(GestureEventResult, JSNativeEmbedGestureRequest, SetResult, value)
 ARKWEB_CREATE_JS_OBJECT(FileSelectorResult, JSFileSelectorResult, SetResult, FileSelectorEvent(nullptr, value))

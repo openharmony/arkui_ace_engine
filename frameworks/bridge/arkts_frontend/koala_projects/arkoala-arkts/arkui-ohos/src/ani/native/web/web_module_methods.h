@@ -22,6 +22,7 @@ namespace OHOS::Ace::Ani {
 void SetWebOptions(ani_env* env, ani_class aniClass, ani_long node, ani_object object);
 void SetWebControllerControllerHandler(ani_env* env, ani_class aniClass, ani_long handler, ani_object object);
 
+ani_boolean TransferScreenCaptureHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 ani_boolean TransferJsResultToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 ani_boolean TransferEventResultToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 ani_boolean TransferFileSelectorResultToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
@@ -37,6 +38,7 @@ ani_boolean TransferClientAuthenticationHandlerToStatic(
     ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 ani_boolean TransferSslErrorHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 
+ani_object TransferScreenCaptureHandlerToDynamic(ani_env* env, ani_class aniClass, ani_long node);
 ani_object TransferJsResultToDynamic(ani_env* env, ani_class aniClass, ani_long node);
 ani_object TransferEventResultToDynamic(ani_env* env, ani_class aniClass, ani_long node);
 ani_object TransferFileSelectorResultToDynamic(ani_env* env, ani_class aniClass, ani_long node);

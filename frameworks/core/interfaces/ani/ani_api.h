@@ -73,6 +73,7 @@ struct ArkUIAniImageModifier {
 struct ArkUIAniWebModifier {
     void (*setWebOptions)(ArkUINodeHandle node, const WebviewControllerInfo& controllerInfo);
     void (*setWebControllerControllerHandler)(void* controllerHandler, const WebviewControllerInfo& controllerInfo);
+    bool (*transferScreenCaptureHandlerToStatic)(void* peer, void* nativePtr);
     bool (*transferJsResultToStatic)(void* peer, void* nativePtr);
     bool (*transferEventResultToStatic)(void* peer, void* nativePtr);
     bool (*transferFileSelectorResultToStatic)(void* peer, void* nativePtr);
@@ -86,6 +87,7 @@ struct ArkUIAniWebModifier {
     bool (*transferDataResubmissionHandlerToStatic)(void* peer, void* nativePtr);
     bool (*transferClientAuthenticationHandlerToStatic)(void* peer, void* nativePtr);
     bool (*transferSslErrorHandlerToStatic)(void* peer, void* nativePtr);
+    napi_value (*transferScreenCaptureHandlerToDynamic)(napi_env env, void* peer);
     napi_value (*transferJsResultToDynamic)(napi_env env, void* peer);
     napi_value (*transferEventResultToDynamic)(napi_env env, void* peer);
     napi_value (*transferFileSelectorResultToDynamic)(napi_env env, void* peer);

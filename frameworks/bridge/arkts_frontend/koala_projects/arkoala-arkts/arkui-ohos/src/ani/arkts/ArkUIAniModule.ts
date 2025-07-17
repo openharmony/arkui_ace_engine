@@ -61,6 +61,7 @@ export class ArkUIAniModule {
     native static _LazyForEachNode_Construct(id: KInt): KPointer
 
     // for web
+    native static _TransferScreenCaptureHandlerToStatic(ptr: KPointer, value: Object | undefined | null): boolean
     native static _TransferJsResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
     native static _TransferEventResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
     native static _TransferFileSelectorResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
@@ -75,6 +76,7 @@ export class ArkUIAniModule {
     native static _TransferClientAuthenticationHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
     native static _TransferSslErrorHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
 
+    native static _TransferScreenCaptureHandlerToDynamic(ptr: KPointer): Object | undefined | null
     native static _TransferJsResultToDynamic(ptr: KPointer) : Object | undefined | null
     native static _TransferEventResultToDynamic(ptr: KPointer) : Object | undefined | null
     native static _TransferFileSelectorResultToDynamic(ptr: KPointer) : Object | undefined | null
