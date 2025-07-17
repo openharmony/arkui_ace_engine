@@ -1729,6 +1729,7 @@ protected:
     bool independentControlKeyboard_ = false;
     RefPtr<AutoFillController> autoFillController_;
     virtual IMEClient GetIMEClientInfo();
+    RefPtr<TextFieldSelectOverlay> selectOverlay_;
 
 private:
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
@@ -2158,7 +2159,6 @@ private:
     bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
     bool showCountBorderStyle_ = false;
-    RefPtr<TextFieldSelectOverlay> selectOverlay_;
     OffsetF movingCaretOffset_;
     std::string autoFillUserName_;
     std::string autoFillNewPassword_;
