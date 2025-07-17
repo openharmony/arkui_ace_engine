@@ -99,6 +99,9 @@
             ],
             "#stateMgmtTool": [
                 "./stateManagement/tools/arkts"
+            ],
+            "@ohos/arkui/Parallelize": [
+                "../ohos.arkui.Parallelize.ts"
             ]
         }
     },
@@ -122,7 +125,8 @@
         "build/unmemoized/@ohos.overlayManager.ts",
         "build/unmemoized/@ohos.promptAction.ts",
         "build/unmemoized/@ohos.arkui.componentSnapshot.ts",
-        "build/unmemoized/@ohos.arkui.dragController.ts"
+        "build/unmemoized/@ohos.arkui.dragController.ts",
+        "build/unmemoized/@ohos.arkui.Parallelize.ts"
     ],
     "exclude": [
         "**/index.ts",

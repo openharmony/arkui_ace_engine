@@ -111,6 +111,9 @@
             ],
             "#stateMgmtTool": [
                 "./arkui/stateManagement/tools/arkts"
+            ],
+            "@ohos/arkui/Parallelize": [
+                "./@ohos.arkui.Parallelize.ets"
             ]
         }
     },
